@@ -1,4 +1,5 @@
 # iter8: Analytics-driven canary releases and A/B testing
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## What is iter8 about?
 
@@ -10,7 +11,7 @@ Iter8's mission is to support automated canary releases and A/B testing, driven 
 
 ## Supported environments
 
-The _iter8-controller_ supports the following Kubernetes-based environments, whose traffic-management capabilities are used:
+The _iter8-controller_ currently supports the following Kubernetes-based environments, whose traffic-management capabilities are used:
 
 * [Istio service mesh](https://istio.io)
 * [Knative](https://knative.dev)
