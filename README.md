@@ -2,7 +2,7 @@
 
 ## What is iter8 about?
 
-Iter8's mission is to support automated canary releases and A/B testing, driven by analytics based on robust statistical techniques for canary releases and A/B testing. The project comprises two components:
+Iter8's mission is to support automated canary releases and A/B testing, driven by analytics based on robust statistical techniques. The project comprises two components:
 
 * _iter8-analytics_: An analytics service that analyzes metrics from different versions of a microservice. The metric analysis takes into account success criteria provided by the user and can assess the health of a canary both absolutely and comparatively to a baseline version.
 
