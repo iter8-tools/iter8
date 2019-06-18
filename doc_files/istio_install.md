@@ -96,3 +96,5 @@ If you want to uninstall all _iter8_ components from your Kubernetes cluster, yo
 ```bash
 helm template install/helm/iter8-controller --name iter8-controller | kubectl delete  -f -
 ```
+
+Note that this command will delete the our CRD and wipe out the `iter8` namespace.
