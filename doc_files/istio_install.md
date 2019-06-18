@@ -91,7 +91,7 @@ iter8-analytics              ClusterIP   172.21.106.44   <none>        80/TCP   
 
 ## Uninstall _iter8_
 
-If you want to uninstall _iter8_ from your Kubernetes cluster, you can run the following command from the top directory of your copy of the **_iter8_controller_** repository:
+If you want to uninstall all _iter8_ components from your Kubernetes cluster, you can run the following command from the top directory of your copy of the **_iter8_controller_** repository:
 
 ```bash
 helm template install/helm/iter8-controller --name iter8-controller | kubectl delete  -f -
