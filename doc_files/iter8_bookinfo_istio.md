@@ -137,5 +137,38 @@ reviews-v3-rollout   False       Candidate deployment is missing   reviews-v2   
 
 As you can see, _iter8_ is reporting that 100% of the traffic is sent to the baseline version (_reviews-v2_) and that the candidate (_reviews-v3_) is missing. As soon as the controller sees the candidate version, it will start the rollout. Next, let us deploy the candidate version to trigger the canary rollout.
 
-### 5. Deploy the canary version of the _reviews_ service
+### 5. Deploy the canary version and start the rollout
 
+As soon as we deploy _reviews-v3_, _iter8-controller_ will start the rollout. To deploy _reviews-v3_, you can run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/reviews-v3.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
+```
+
+Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v3_:
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 COMPLETED   STATUS        BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   False       Progressing   reviews-v2   80           reviews-v3   20
+```
+
+At about every 30s you should see the traffic shift towards _reviews-v3_ by 20 percentage points.
+
+### 6. Check the Grafana dashboard
+
+You can also check a Grafana dashboard specific to the `Experiment` object corresponding to the rollout you are running. The URL to the Grafana dashboard for the experiment is the value of the field `grafanaURL` under the object's `status`. One way to get the Grafana URL that you can paste to your browser is through the following command:
+
+```bash
+kubectl get experiment reviews-v3-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
+```
+
+## Part 2: Canary release resulting in rollback: _reviews-v3_ to _reviews-v4_
+
+At this point, you must have completef the part 1 of the tutorial successfully. You can confirm that as follows, showing that _reviews-v3_ took over from _reviews-v2_.
+
+```bash
+$ kubectl get experiment reviews-v3-rollout  -n bookinfo-iter8
+NAME                 COMPLETED   STATUS   BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                 reviews-v2   0            reviews-v3   100
+```
