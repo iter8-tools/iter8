@@ -1,4 +1,4 @@
-# Canary releases with iter8 on Kubernetes and Istio
+# Automated canary releases with iter8 on Kubernetes and Istio
 
 This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice. In the first part of the tutorial, we will walk you through a case where the canary version performs as expected and, therefore, takes over from the previous version at the end. In the second part, we will deal with a canary version that is not satisfactory, in which case _iter8_ will roll back to the previous version.
 
@@ -65,10 +65,64 @@ To access the application, you need to determine the ingress IP and port for the
 curl -H "Host: bookinfo.sample.dev" -o /dev/null -s -w "%{http_code}\n" "http://${GATEWAY_URL}/productpage"
 ```
 
-If everything is working, the command above should show `200`. Note that the curl sets the host header to match the host we associated the VirtualService with (`bookinfo.sample.dev`). If you want to access the application from your browser, you will need to set this header using the browser plugin of your choice.
+If everything is working, the command above should show `200`. Note that the curl command above sets the host header to match the host we associated the VirtualService with (`bookinfo.sample.dev`). If you want to access the application from your browser, you will need to set this header using a browser's plugin of your choice.
 
-### 3. Perform a canary release of the _reviews_ service
+### 3. Generate load to the application
 
-At this point, Bookinfo is using version 2 of the _reviews_ service (_reviews-v2_). Let us now use _iter8_ to perform a canary rollout of version 3 of this service (_reviews-v3_).
+Let us now generate load to the application, emulating requests coming from users. To do so, we recommend you run the command below on a separate terminal:
 
-First, we need to instruct _iter8_ that we are about to perform this canary rollout.
+```bash
+watch -n 0.1 'curl -H "Host: bookinfo.sample.dev" -Is "$GATEWAY_URL/productpage"'
+```
+
+This command will send 10 requests per second to the application. Note that the environment variable `GATEWAY_URL` must have been set as per step 2 above. Among other things, the command output should show an HTTP code of 200, as below:
+
+```
+HTTP/1.1 200 OK
+content-type: text/html; charset=utf-8
+content-length: 5719
+server: istio-envoy
+(...)
+```
+
+### 4. Configure a canary rollout for the _reviews_ service
+
+At this point, Bookinfo is using version 2 of the _reviews_ service (_reviews-v2_). Let us now use _iter8_ to automate the canary rollout of version 3 of this service (_reviews-v3_).
+
+First, we need to tell _iter8_ that we are about to perform this canary rollout. To that end, we create an `Experiment` configuration specifying the rollout details. In this tutorial, let us use the following `Experiment` configuration:
+
+```yaml
+apiVersion: iter8.io/v1alpha1
+kind: Experiment
+metadata:
+  name: reviews-v3-rollout
+spec:
+  targetService:
+    name: reviews
+    apiVersion: v1
+    baseline: reviews-v2
+    candidate: reviews-v3
+  trafficControl:
+    strategy: check_and_increment
+    interval: 30s
+    trafficStepSize: 20
+    maxIterations: 8
+    maxTrafficPercentage: 80
+  analysis:
+    analyticsService: "http://iter8-analytics.iter8"
+    successCriteria:
+      - metricName: iter8_latency
+        toleranceType: threshold
+        tolerance: 0.2
+        sampleSize: 5
+```
+
+The configuration above specifies the baseline and candidate versions in terms of Kubernetes deployment names. The rollout is configured to last for 8 iterations (`maxIterations`) of `30s` (`interval`). At the end of each iteration, if the candidate version meets the specified success criteria, the traffic sent to it will increase by 20 percentage points (`trafficStepSize`) up to 80% (`maxTrafficPercentage`). At the end of the last iteration, if the success criteria are met, the candidate version will take over from the baseline.
+
+In the example above, we specified only one success criterion. In particular, we stated that the mean latency exhibited by the candidate version should not exceed the threshold of 0.2 seconds. At the end of each iteration, _iter8-controller_ calls _iter8-analytics_, which in turn analyzes the metrics of interest (in this case, only mean latency) against the corresponding criteria. The number of data points analyzed during an experiment is cumulative, that is, it carries over from iteration to iteration.
+
+The next step of this tutorial is to actually create the configuration above. To that end, you can either copy and paste the yaml above to a file and then run `kubectl apply -n bookinfo-iter8 -f` on it, or you can run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v2_to_reviews-v3.yaml?token=AAARON4Y0wEEVD5GMmXr4sddTbik0FgQks5dGj-zwA%3D%3D
+```

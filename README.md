@@ -31,5 +31,5 @@ The following instructions will guide you to install the two iter8 components (_
 
 The following tutorials will help you get started with iter8:
 
-* [Canary releases with iter8 on Kubernetes and Istio](doc_files/iter8_bookinfo_istio.md)
-* Canary releases with iter8 on Knative
+* [Automated canary releases with iter8 on Kubernetes and Istio](doc_files/iter8_bookinfo_istio.md)
+* Automated canary releases with iter8 on Knative
