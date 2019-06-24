@@ -165,10 +165,12 @@ kubectl get experiment reviews-v3-rollout -o jsonpath='{.status.grafanaURL}' -n 
 
 ## Part 2: Canary release resulting in rollback: _reviews-v3_ to _reviews-v4_
 
-At this point, you must have completef the part 1 of the tutorial successfully. You can confirm that as follows, showing that _reviews-v3_ took over from _reviews-v2_.
+At this point, you must have completed the part 1 of the tutorial successfully. You can confirm it as follows:
 
 ```bash
 $ kubectl get experiment reviews-v3-rollout  -n bookinfo-iter8
 NAME                 COMPLETED   STATUS   BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
 reviews-v3-rollout   True                 reviews-v2   0            reviews-v3   100
 ```
+
+The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before.
