@@ -126,3 +126,16 @@ The next step of this tutorial is to actually create the configuration above. To
 ```bash
 kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v2_to_reviews-v3.yaml?token=AAARON4Y0wEEVD5GMmXr4sddTbik0FgQks5dGj-zwA%3D%3D
 ```
+
+You can verify that the `Experiment` object has been created as shown below:
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 COMPLETED   STATUS                            BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   False       Candidate deployment is missing   reviews-v2   100          reviews-v3   0
+```
+
+As you can see, _iter8_ is reporting that 100% of the traffic is sent to the baseline version (_reviews-v2_) and that the candidate (_reviews-v3_) is missing. As soon as the controller sees the candidate version, it will start the rollout. Next, let us deploy the candidate version to trigger the canary rollout.
+
+### 5. Deploy the canary version of the _reviews_ service
+
