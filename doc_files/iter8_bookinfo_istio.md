@@ -253,7 +253,7 @@ reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   revi
 
 ### 3. Check the Grafana dashboard
 
-As before, you can check the Grafana dashboard corresponding to the canary release of _reviews-v4_. To get the dashboard specific to it, run the following command:
+As before, you can check the Grafana dashboard corresponding to the canary release of _reviews-v4_. To get the URL to the dashboard specific to this canary release, run the following command:
 
 ```bash
 kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
