@@ -174,3 +174,87 @@ reviews-v3-rollout   True                 reviews-v2   0            reviews-v3  
 ```
 
 The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before.
+
+### 1. Canary rollout configuration
+
+Now, let us set up a canary rollout for _reviews-v4_, using the following `Experiment` configuration:
+
+```yaml
+apiVersion: iter8.io/v1alpha1
+kind: Experiment
+metadata:
+  name: reviews-v4-rollout
+spec:
+  targetService:
+    name: reviews
+    apiVersion: v1
+    baseline: reviews-v3
+    candidate: reviews-v4
+  trafficControl:
+    strategy: check_and_increment
+    interval: 30s
+    trafficStepSize: 20
+    maxIterations: 6
+    maxTrafficPercentage: 80
+  analysis:
+    analyticsService: "http://iter8-analytics.iter8"
+    successCriteria:
+      - metricName: iter8_latency
+        toleranceType: threshold
+        tolerance: 0.2
+        sampleSize: 5
+```
+
+The configuration above is pretty much the same we used in part 1, except that now the baseline version is _reviews-v3_ and the candidate is _reviews-v4_.
+
+To create the above `Experiment` object, run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4.yaml?token=AAAROAUsVWFUvl92vseaRkbXeiU3JYepks5dGmOqwA%3D%3D
+```
+
+You can list all `Experiment` objects like so:
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 COMPLETED   STATUS                            BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                                          reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   False       Candidate deployment is missing   reviews-v3   100          reviews-v4   0
+```
+
+The output above shows the new object you just created, for which the candidate deployment _reviews-v4_ is missing. Let us deploy _reviews-v4_ next so that the rollout can begin.
+
+### 2. Deploy _reviews-v4_ and start the rollout
+
+As you have already seen, as soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, however, the candidate version (_reviews-v4_) has a performance issue preventing it from satisfying the success criteria in the experiment object. As a result, _iter8_ will roll back to the baseline version.
+
+To deploy _reviews-v4_, run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/reviews-v4.yaml?token=AAARODrB1VkDuV0kHsKIqq8dtzWtzZYTks5dG1onwA%3D%3D
+```
+
+Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v4_.
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 COMPLETED   STATUS        BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                      reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   False       Progressing   reviews-v3   80           reviews-v4   20
+```
+
+However, unlike the previous rollout, traffic will not shift towards the candidate _reviews-v4_ because it does not meet the success criteria due to a performance problem. At the end of the experiment, _iter8_ rolls back to the baseline (_reviews-v3_), as seen below:
+
+```bash
+$ kubectl get experiment reviews-v4-rollout -n bookinfo-iter8
+NAME                 COMPLETED   STATUS                                     BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   reviews-v3   100          reviews-v4   0
+```
+
+### 3. Check the Grafana dashboard
+
+As before, you can check the Grafana dashboard corresponding to the canary release of _reviews-v4_. To get the dashboard specific to it, run the following command:
+
+```bash
+kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
+```
