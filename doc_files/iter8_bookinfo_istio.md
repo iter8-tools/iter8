@@ -163,6 +163,10 @@ You can also check a Grafana dashboard specific to the `Experiment` object corre
 kubectl get experiment reviews-v3-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
 ```
 
+Below is an excerpt of the Grafana dashboard showing the request rate and the mean latency for reviews-v2 and reviews-v3.
+
+![Grafana Dashboard](../img/grafana_reviews-v2-v3.png)
+
 ## Part 2: Canary release resulting in rollback: _reviews-v3_ to _reviews-v4_
 
 At this point, you must have completed the part 1 of the tutorial successfully. You can confirm it as follows:
