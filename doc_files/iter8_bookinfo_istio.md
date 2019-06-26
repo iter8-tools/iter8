@@ -92,7 +92,7 @@ At this point, Bookinfo is using version 2 of the _reviews_ service (_reviews-v2
 First, we need to tell _iter8_ that we are about to perform this canary rollout. To that end, we create an `Experiment` configuration specifying the rollout details. In this tutorial, let us use the following `Experiment` configuration:
 
 ```yaml
-apiVersion: iter8.io/v1alpha1
+apiVersion: iter8.tools/v1alpha1
 kind: Experiment
 metadata:
   name: reviews-v3-rollout
@@ -186,7 +186,7 @@ The command above's output shows that _reviews-v3_ took over from _reviews-v2_ a
 Now, let us set up a canary rollout for _reviews-v4_, using the following `Experiment` configuration:
 
 ```yaml
-apiVersion: iter8.io/v1alpha1
+apiVersion: iter8.tools/v1alpha1
 kind: Experiment
 metadata:
   name: reviews-v4-rollout
