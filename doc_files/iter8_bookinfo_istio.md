@@ -124,7 +124,7 @@ In the example above, we specified only one success criterion. In particular, we
 The next step of this tutorial is to actually create the configuration above. To that end, you can either copy and paste the yaml above to a file and then run `kubectl apply -n bookinfo-iter8 -f` on it, or you can run the following command:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v2_to_reviews-v3.yaml?token=AAARON4Y0wEEVD5GMmXr4sddTbik0FgQks5dGj-zwA%3D%3D
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v2_to_reviews-v3.yaml?token=AAAROAp-9Astj0JUrpThGmqd_t8V-omqks5dHQ0QwA%3D%3D
 ```
 
 You can verify that the `Experiment` object has been created as shown below:
@@ -216,7 +216,7 @@ The configuration above is pretty much the same we used in part 1, except that n
 To create the above `Experiment` object, run the following command:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4.yaml?token=AAAROAUsVWFUvl92vseaRkbXeiU3JYepks5dGmOqwA%3D%3D
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4.yaml?token=AAAROA1kB3wG0Qb_dI_gwzu9MZttTBS-ks5dHQ13wA%3D%3D
 ```
 
 You can list all `Experiment` objects like so:
