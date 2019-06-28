@@ -33,3 +33,4 @@ The following tutorials will help you get started with iter8:
 
 * [Automated canary releases with iter8 on Kubernetes and Istio](doc_files/iter8_bookinfo_istio.md)
 * Automated canary releases with iter8 on Knative
+* [Automated canary release with iter8 on Kubernetes and Istio using Tekton](doc_files/iter8_tekton_task.md)
