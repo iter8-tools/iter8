@@ -45,7 +45,7 @@ You can apply this with the following command:
 
     kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/blob/master/doc_files/tekton/reviews-pipelineresource.yaml?token=AAAROHqyPLzp4h4FWozSZdHNcRkz2sGCks5dE9sMwA%3D%3D
 
-### 3. Import Tekton `Task`
+### 2. Import Tekton `Task`
 
 A Tekton `Task` that initiates a canary rollout using iter8 defines an `Experiment` from a template and applies it to the cluster. Such a task can be defined as follows:
 
@@ -115,7 +115,7 @@ To add to your cluster, apply as follows:
 
     kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/iter8-task.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
 
-### 4. Run the `Task` by defining a `TaskRun`
+### 3. Run the `Task` by defining a `TaskRun`
 
 To run a task, define a `TaskRun` such as:
 
@@ -145,7 +145,7 @@ You can apply this by:
 
     kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/run-iter8-task.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
 
-### 5. Deploy the canary version
+### 4. Deploy the canary version
 
 Follow [step 5](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#5-deploy-the-canary-version-and-start-the-rollout) of the tutorial [Successful canary release](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#part-1-successful-canary-release-reviews-v2-to-reviews-v3).
 You can watch the progress of the canary rollout using:
