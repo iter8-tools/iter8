@@ -27,7 +27,7 @@ It will therefore be necessary to define a `PipelineResource` that identifies th
 ### 1. Create a PipelineResource
 
 We start by defining a `PipelineResource` to the git project for the Bookinfo reviews service. You can reference the project we created from [the Istio source](https://github.com/istio/istio/tree/master/samples/bookinfo/src/reviews) or you can duplicate it to make changes. Im this case, if authorization is necessary, see the Tekton documentation for [Authentication](https://github.com/tektoncd/pipeline/blob/master/docs/auth.md).
-You can reference the project https://github.com/iter8/reviews or duplicate it to make changes.
+You can reference the project https://github.ibm.com/istio-research/reviews or duplicate it to make changes.
 
     apiVersion: tekton.dev/v1alpha1
     kind: PipelineResource
@@ -43,7 +43,7 @@ You can reference the project https://github.com/iter8/reviews or duplicate it t
 
 You can apply this with the following command:
 
-    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/blob/master/doc_files/tekton/reviews-pipelineresource.yaml?token=AAAROHqyPLzp4h4FWozSZdHNcRkz2sGCks5dE9sMwA%3D%3D
+    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/reviews-pipelineresource.yaml?token=AAAROHqyPLzp4h4FWozSZdHNcRkz2sGCks5dE9sMwA%3D%3D
 
 ### 2. Import Tekton `Task`
 
