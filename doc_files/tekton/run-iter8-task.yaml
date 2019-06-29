@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: rollout-reviews-v3
+spec:
+  taskRef:
+    name: run-experiment
+  inputs:
+    resources:
+      - name: source
+        resourceRef:
+          name: reviews-git
+    params:
+      - name: experiment
+        value: 'iter8/experiment.yaml'
+      - name: stable
+        value: 'reviews-v2'
+      - name: candidate
+        value: 'reviews-v3'
+      - name: target-namespace
+        value: 'bookinfo-iter8'

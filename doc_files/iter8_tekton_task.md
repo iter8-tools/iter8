@@ -2,19 +2,21 @@
 
 [Tekton Pipelines](https://github.com/tektoncd/pipeline/tree/master/docs) are an open source implementation of mechanisms to configure and run CI/CD style pipelines for a Kubernetes application. Custom resources are used to define pipelines and their building blocks.
 
-This tutorial provides a sample task that drives a canary release with [iter8](http://iter8.tools). We then show how it might be integrated into a pipeline that (builds a new version), deploys a new version and drives a canary release of that new version.
+This tutorial provides a sample task that drives a canary release with [iter8](https://github.ibm.com/istio-research/iter8). We can see how this task could be integrated into a pipeline that builds a new version, deploys it and drives a canary release of that new version.
+
+This tutorial is similar to steps 1 - 5 of the tutorial [Successful canary release](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#part-1-successful-canary-release-reviews-v2-to-reviews-v3). A Tekton task is used to replace step 4.
 
 ## Part I: Setup
 
-If not already installed, install _iter8_ using [these instructions](https://github.com/tektoncd/pipeline/blob/master/docs/install.md#adding-the-tekton-pipelines).
+If not already installed, install _iter8_ using [these instructions](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/istio_install.md).
 
 ### 1. Install Tekton
 
 Install Tekton using the instructions [here](https://github.com/tektoncd/pipeline/blob/master/docs/install.md).
 
-### 2. Deploy the Bookinfo application
+### 2. Deploy the Bookinfo application and start load
 
-Deploy the Bookinfo application by following [steps 1 and 2 of these instructions](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#1-deploy-the-bookinfo-application).
+Deploy the Bookinfo application by following [steps 1 - 3](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#1-deploy-the-bookinfo-application) of the tutorial [Successful canary release](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#part-1-successful-canary-release-reviews-v2-to-reviews-v3).
 
 ## Part II: Use Tekton to Start Canary Rollout
 
@@ -37,15 +39,15 @@ You can reference the project https://github.com/iter8/reviews or duplicate it t
         - name: revision
         value: master
         - name: url
-        value: https://github.com/iter8/reviews
+        value: https://github.com/kalantar/reviews
 
 You can apply this with the following command:
 
-    kubectl apply -f https://raw.github.ibm.com/iter8/reviews/master/doc/tutorials/src/pipelineresource.yaml
+    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/blob/master/doc_files/tekton/reviews-pipelineresource.yaml?token=AAAROHqyPLzp4h4FWozSZdHNcRkz2sGCks5dE9sMwA%3D%3D
 
-### 3. Import Tekton Task
+### 3. Import Tekton `Task`
 
-A Tekton `Task` that initiates a canary rollout using iter8 must define an `Experiment` from a template and apply it to your cluster. Such a task can be defined as follows:
+A Tekton `Task` that initiates a canary rollout using iter8 defines an `Experiment` from a template and applies it to the cluster. Such a task can be defined as follows:
 
     apiVersion: tekton.dev/v1alpha1
     kind: Task
@@ -54,7 +56,7 @@ A Tekton `Task` that initiates a canary rollout using iter8 must define an `Expe
     spec:
     inputs:
         resources:
-        - name: source-git
+        - name: source
             type: git
         params:
         - name: experiment
@@ -97,7 +99,7 @@ A Tekton `Task` that initiates a canary rollout using iter8 must define an `Expe
 
 This task takes the following inputs:
 
-- _source_git_ - reference to a github project containing the `Experiment` template
+- _source_git_ - reference to a github project containing the `Experiment` template (typically the same repository as the source code)
 - _experiment_ - path to the `Experiment` template relative to the github project
 - _experiment-id_ - a unique identifier for the experiment execution to allow unique naming when executed repeatedly
 - _stable_ - the stable or baseline version of the service
@@ -111,10 +113,41 @@ And has two steps:
 
 To add to your cluster, apply as follows:
 
-    kubectl apply -f FULL PATH
+    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/iter8-task.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
 
 ### 4. Run the `Task` by defining a `TaskRun`
 
-    sed 
+To run a task, define a `TaskRun` such as:
 
-    apply -f tekton/run_experiment.yaml
+    apiVersion: tekton.dev/v1alpha1
+    kind: TaskRun
+    metadata:
+    name: rollout-reviews-v3
+    spec:
+    taskRef:
+        name: run-experiment
+    inputs:
+        resources:
+        - name: source
+            resourceRef:
+            name: reviews-git
+        params:
+        - name: experiment
+            value: 'iter8/experiment.yaml'
+        - name: stable
+            value: 'reviews-v2'
+        - name: candidate
+            value: 'reviews-v3'
+        - name: target-namespace
+            value: 'bookinfo-iter8'
+
+You can apply this by:
+
+    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/run-iter8-task.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
+
+### 5. Deploy the canary version
+
+Follow [step 5](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#5-deploy-the-canary-version-and-start-the-rollout) of the tutorial [Successful canary release](https://github.ibm.com/istio-research/iter8.io/blob/master/doc_files/iter8_bookinfo_istio.md#part-1-successful-canary-release-reviews-v2-to-reviews-v3).
+You can watch the progress of the canary rollout using:
+
+    kubectl get experiments -n bookinfo-iter8
