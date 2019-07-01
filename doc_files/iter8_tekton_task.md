@@ -43,7 +43,7 @@ You can reference the project https://github.ibm.com/istio-research/reviews or d
 
 You can apply this with the following command:
 
-    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/reviews-pipelineresource.yaml?token=AAAROHqyPLzp4h4FWozSZdHNcRkz2sGCks5dE9sMwA%3D%3D
+    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/reviews-pipelineresource.yaml?token=AAAKRxaRtnX3ucO93GzMDjDolx6TtwZ2ks5dIzIewA%3D%3D
 
 ### 2. Import Tekton `Task`
 
@@ -113,7 +113,7 @@ And has two steps:
 
 To add to your cluster, apply as follows:
 
-    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/iter8-task.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
+    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/iter8-task.yaml?token=AAAKR1_z1qthjqu_ZmznG_bJ0bosR_h4ks5dIzJWwA%3D%3D
 
 ### 3. Run the `Task` by defining a `TaskRun`
 
@@ -143,7 +143,7 @@ To run a task, define a `TaskRun` such as:
 
 You can apply this by:
 
-    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/run-iter8-task.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
+    kubectl apply -f https://raw.github.ibm.com/istio-research/iter8.io/master/doc_files/tekton/run-iter8-task.yaml?token=AAAKR1Rdpu51NlRooQbJ55XcDsygHitXks5dIzJywA%3D%3D
 
 ### 4. Deploy the canary version
 
