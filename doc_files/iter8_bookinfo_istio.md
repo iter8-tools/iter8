@@ -264,3 +264,7 @@ As before, you can check the Grafana dashboard corresponding to the canary relea
 ```bash
 kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
 ```
+
+![Grafana Dashboard](../img/grafana_reviews-v3-v4.png)
+
+The dashboard screenshot above shows that the canary version (_reviews-v4_) consistently exhibits a high latency of 5 seconds, way above the threshold of 0.2 seconds specified in our success criterion, and way above the baseline version's latency.
