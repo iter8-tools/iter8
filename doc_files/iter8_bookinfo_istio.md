@@ -1,6 +1,6 @@
 # Automated canary releases with iter8 on Kubernetes and Istio
 
-This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice. In the first part of the tutorial, we will walk you through a case where the canary version performs as expected and, therefore, takes over from the previous version at the end. In the second part, we will deal with a canary version that is not satisfactory, in which case _iter8_ will roll back to the previous version.
+This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice. In the first part of the tutorial, we will walk you through a case where the canary version performs as expected and, therefore, takes over from the previous version at the end. In the second and third parts, we will deal with a canary version that is not satisfactory, in which case _iter8_ will roll back to the previous version.
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) that is distributed with Istio. This application comprises 4 microservices, namely, _productpage_, _details_, _reviews_, and _ratings_, as illustrated [here](https://istio.io/docs/examples/bookinfo/). Please, follow our instructions below to deploy the sample application as part of the tutorial.
 
@@ -169,7 +169,7 @@ Below is a screenshot of a portion of the Grafana dashboard showing the request 
 
 Note how the traffic shifted towards the canary during the experiment. You can also see that the canary's mean latency was way below the configured threshold of 0.2 seconds.
 
-## Part 2: Canary release resulting in rollback: _reviews-v3_ to _reviews-v4_
+## Part 2: High-latency canary release: _reviews-v3_ to _reviews-v4_
 
 At this point, you must have completed the part 1 of the tutorial successfully. You can confirm it as follows:
 
@@ -268,3 +268,58 @@ kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n 
 ![Grafana Dashboard](../img/grafana_reviews-v3-v4.png)
 
 The dashboard screenshot above shows that the canary version (_reviews-v4_) consistently exhibits a high latency of 5 seconds, way above the threshold of 0.2 seconds specified in our success criterion, and way above the baseline version's latency.
+
+## Part 3: Error-producing canary release: _reviews-v3_ to _reviews-v5_
+
+At this point, you must have completed parts 1 and 2 of the tutorial successfully. You can confirm it as follows:
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 COMPLETED   STATUS                                     BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                                                   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   reviews-v3   100          reviews-v4   0
+```
+
+The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before on part 1, and that it continues to be the current version after iter8 considered _reviews-v4_ unsatisfactory.
+
+### 1. Canary rollout configuration
+
+Now, let us set up a canary rollout for _reviews-v5_, using the following `Experiment` configuration:
+
+```yaml
+apiVersion: iter8.tools/v1alpha1
+kind: Experiment
+metadata:
+  name: reviews-v5-rollout
+spec:
+  targetService:
+    name: reviews
+    apiVersion: v1
+    baseline: reviews-v3
+    candidate: reviews-v5
+  trafficControl:
+    strategy: check_and_increment
+    interval: 30s
+    trafficStepSize: 20
+    maxIterations: 6
+    maxTrafficPercentage: 80
+  analysis:
+    analyticsService: "http://iter8-analytics.iter8"
+    successCriteria:
+      - metricName: iter8_latency
+        toleranceType: threshold
+        tolerance: 0.2
+        sampleSize: 5
+      - metricName: iter8_error_rate
+        toleranceType: delta
+        tolerance: 0.02
+        sampleSize: 10
+        stopOnFailure: true
+```
+
+The configuration above differs from the previous ones as follows. We added a second success criterion on the error-rate metric so that the canary version (_reviews-v5_) not only must have a mean latency below 0.2 seconds, but it also needs to have an error rate that cannot exceed the baseline error rate by more than 2%. That comparative analysis on a metric is specified as a `delta` tolerance type. Furthermore, the second success criterion sets the flag `stopOnFailure`, which means iter8 will roll back to the baseline as soon as the error rate criterion is violated subject to the minimum number of 10 data points to be collected (`sampleSize = 10`).
+
+To create the above `Experiment` object, run the following command:
+
+```bash
+```
