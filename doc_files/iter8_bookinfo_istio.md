@@ -269,6 +269,7 @@ kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n 
 
 The dashboard screenshot above shows that the canary version (_reviews-v4_) consistently exhibits a high latency of 5 seconds, way above the threshold of 0.2 seconds specified in our success criterion, and way above the baseline version's latency.
 
+
 ## Part 3: Error-producing canary release: _reviews-v3_ to _reviews-v5_
 
 At this point, you must have completed parts 1 and 2 of the tutorial successfully. You can confirm it as follows:
@@ -280,7 +281,7 @@ reviews-v3-rollout   True                                                   revi
 reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   reviews-v3   100          reviews-v4   0
 ```
 
-The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before on part 1, and that it continues to be the current version after iter8 considered _reviews-v4_ unsatisfactory.
+The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before on part 1, and that it continues to be the current version after iter8 had determined that _reviews-v4_ was unsatisfactory.
 
 ### 1. Canary rollout configuration
 
@@ -317,9 +318,53 @@ spec:
         stopOnFailure: true
 ```
 
-The configuration above differs from the previous ones as follows. We added a second success criterion on the error-rate metric so that the canary version (_reviews-v5_) not only must have a mean latency below 0.2 seconds, but it also needs to have an error rate that cannot exceed the baseline error rate by more than 2%. That comparative analysis on a metric is specified as a `delta` tolerance type. Furthermore, the second success criterion sets the flag `stopOnFailure`, which means iter8 will roll back to the baseline as soon as the error rate criterion is violated subject to the minimum number of 10 data points to be collected (`sampleSize = 10`).
+The configuration above differs from the previous ones as follows. We added a second success criterion on the error-rate metric so that the canary version (_reviews-v5_) not only must have a mean latency below 0.2 seconds, but it also needs to have an error rate that cannot exceed the baseline error rate by more than 2%. That comparative analysis on a metric is specified as a `delta` tolerance type. Furthermore, the second success criterion sets the flag `stopOnFailure`, which means iter8 will roll back to the baseline as soon as the error rate criterion is violated and the minimum number of 10 data points is collected (`sampleSize = 10`).
 
 To create the above `Experiment` object, run the following command:
 
 ```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v5.yaml?token=AAAROFBy-DbovcKb7rYfYtLn1RI_q3UZks5dNbsXwA%3D%3D
 ```
+
+### 2. Deploy _reviews-v5_ and start the rollout
+
+As you already know, as soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, the candidate version (_reviews-v5_) has a bug that causes it to return HTTP errors to its callers. As a result, _iter8_ will roll back to the baseline version based on the success criterion on the error-rate metric defined above.
+
+To deploy _reviews-v5_, run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/reviews-v5.yaml?token=AAAROLUaNMSsx8lrcAmQdOfp1yxr9y2Zks5dNbx5wA%3D%3D
+```
+
+If you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v5_.
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 COMPLETED   STATUS                                     BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                                                   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   False       Progressing                                reviews-v3   80           reviews-v5   20
+```
+
+Because _review-v5_ has an issue causing it to return HTTP errors, as per the success criteria we have specified the traffic will not shift towards it. Furthermore, because the error-rate success criteria indicated the need to stop on failure, without waiting for the entire duration of the experiment, iter8 will rollback to _reviews-v3_ quickly. You should see the following after several seconds:
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 COMPLETED   STATUS                                     BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                                                   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   True        AbortExperiment: Roll Back to Baseline     reviews-v3   100          reviews-v5   0
+```
+
+### 3. Check the Grafana dashboard
+
+As before, you can check the Grafana dashboard corresponding to the canary release of _reviews-v5_. To get the URL to the dashboard specific to this canary release, run the following command:
+
+```bash
+kubectl get experiment reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
+```
+
+![Grafana Dashboard](../img/grafana_reviews-v3-v5-req-rate.png)
+![Grafana Dashboard](../img/grafana_reviews-v3-v5-error-rate.png)
+
+The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is will below the threshold of 0.2 seconds, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which speficied that its error rate must be within 2% of that of the baseline. The baseline error rate was 0.
