@@ -9,7 +9,7 @@ The tutorial is based on the [Bookinfo sample application](https://istio.io/docs
 
 ### 1. Deploy the Bookinfo application
 
-At this point, we assume that you have already followed the [instructions](knative_install.md) to install _iter8_ on your Kubernetes cluster. The next step is to deploy the sample application we will use for the tutorial.
+At this point, we assume that you have already followed the [instructions](iter8_install.md) to install _iter8_ on your Kubernetes cluster. The next step is to deploy the sample application we will use for the tutorial.
 
 First, let us create a `knative-bookinfo-iter8` namespace:
 
@@ -20,14 +20,13 @@ kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/mast
 Next, let us deploy the Bookinfo application:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/bookinfo-tutorial.yaml?token=AAAROPJZY04WTinFDpmJohfu0K28lxPFks5dE-rRwA%3D%3D
+kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/bookinfo-tutorial.yaml?token=AAAROPJZY04WTinFDpmJohfu0K28lxPFks5dE-rRwA%3D%3D
 ```
 
-You should see the following pods in the `kntive-bookinfo-iter8` namespace. Make sure the Knative services readiness is "True".
+You should see the following pods in the `knative-bookinfo-iter8` namespace. Make sure the Knative services readiness is "True".
 
 ```bash
-$ kubectl get ksvc -n bookinfo-iter8
-kubectl get ksvc -n knative-bookinfo-iter8
+$ kubectl get ksvc -n knative-bookinfo-iter8
 NAME          URL                                                                                    LATESTCREATED       LATESTREADY         READY   REASON
 details       http://details-knative-bookinfo-iter8.stable.us-south.containers.appdomain.cloud       details-rrz5c       details-rrz5c       True
 productpage   http://productpage-knative-bookinfo-iter8.stable.us-south.containers.appdomain.cloud   productpage-68hfh   productpage-68hfh   True
@@ -81,6 +80,7 @@ apiVersion: iter8.tools/v1alpha1
 kind: Experiment
 metadata:
   name: reviews-v3-rollout
+  namespace: knative-bookinfo-iter8
 spec:
   targetService:
     apiVersion: serving.knative.dev/v1alpha1
@@ -106,10 +106,10 @@ The configuration above specifies the baseline and candidate versions in terms o
 
 In the example above, we specified only one success criterion. In particular, we stated that the mean latency exhibited by the candidate version should not exceed the threshold of 0.2 seconds. At the end of each iteration, _iter8-controller_ calls _iter8-analytics_, which in turn analyzes the metrics of interest (in this case, only mean latency) against the corresponding criteria. The number of data points analyzed during an experiment is cumulative, that is, it carries over from iteration to iteration.
 
-The next step of this tutorial is to actually create the configuration above. To that end, you can either copy and paste the yaml above to a file and then run `kubectl apply -n bookinfo-iter8 -f ...` on it, or you can run the following command:
+The next step of this tutorial is to actually create the configuration above. To that end, you can either copy and paste the yaml above to a file and then run `kubectl apply -f ...` on it, or you can run the following command:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v2_to_reviews-v3.yaml?token=AAAROAp-9Astj0JUrpThGmqd_t8V-omqks5dHQ0QwA%3D%3D
+kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v2_to_reviews-v3.yaml?token=AAAROAp-9Astj0JUrpThGmqd_t8V-omqks5dHQ0QwA%3D%3D
 ```
 
 You can verify that the `Experiment` object has been created as shown below:
@@ -127,13 +127,13 @@ As you can see, _iter8_ is reporting that 100% of the traffic is sent to the bas
 As soon as we deploy _reviews-v3_, _iter8-controller_ will start the rollout. To deploy _reviews-v3_, you can run the following command:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/reviews-v3.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
+kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/reviews-v3.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
 ```
 
 Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v3_:
 
 ```bash
-$ kubectl get experiments -n knative-bookinfo-iter8
+$ kubectl get experiments.iter8.tools -n knative-bookinfo-iter8
 NAME                 COMPLETED   STATUS        BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
 reviews-v3-rollout   False       Progressing   reviews-v2   80           reviews-v3   20
 ```
@@ -159,7 +159,7 @@ Note how the traffic shifted towards the canary during the experiment. You can a
 At this point, you must have completed the part 1 of the tutorial successfully. You can confirm it as follows:
 
 ```bash
-$ kubectl get experiment reviews-v3-rollout  -n bookinfo-iter8
+$ kubectl get experiment.iter8.tools reviews-v3-rollout  -n knative-bookinfo-iter8
 NAME                 COMPLETED   STATUS   BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
 reviews-v3-rollout   True                 reviews-v2   0            reviews-v3   100
 ```
@@ -175,10 +175,11 @@ apiVersion: iter8.tools/v1alpha1
 kind: Experiment
 metadata:
   name: reviews-v4-rollout
+  namespace: knative-bookinfo-iter8
 spec:
   targetService:
+    apiVersion: serving.knative.dev/v1alpha1
     name: reviews
-    apiVersion: v1
     baseline: reviews-v3
     candidate: reviews-v4
   trafficControl:
@@ -201,16 +202,16 @@ The configuration above is pretty much the same we used in part 1, except that n
 To create the above `Experiment` object, run the following command:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4.yaml?token=AAAROA1kB3wG0Qb_dI_gwzu9MZttTBS-ks5dHQ13wA%3D%3D
+kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v3_to_reviews-v4.yaml?token=AAAROA1kB3wG0Qb_dI_gwzu9MZttTBS-ks5dHQ13wA%3D%3D
 ```
 
 You can list all `Experiment` objects like so:
 
 ```bash
-$ kubectl get experiments -n bookinfo-iter8
+$ kubectl get experiments.iter8.tools -n knative-bookinfo-iter8
 NAME                 COMPLETED   STATUS                            BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
 reviews-v3-rollout   True                                          reviews-v2   0            reviews-v3   100
-reviews-v4-rollout   False       Candidate deployment is missing   reviews-v3   100          reviews-v4   0
+reviews-v4-rollout   False       MissingCandidateRevision   reviews-v3   100          reviews-v4   0
 ```
 
 The output above shows the new object you just created, for which the candidate deployment _reviews-v4_ is missing. Let us deploy _reviews-v4_ next so that the rollout can begin.
@@ -222,13 +223,13 @@ As you have already seen, as soon as we deploy the candidate version, _iter8-con
 To deploy _reviews-v4_, run the following command:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/istio/bookinfo/reviews-v4.yaml?token=AAARODrB1VkDuV0kHsKIqq8dtzWtzZYTks5dG1onwA%3D%3D
+kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorial/knative/bookinfo/reviews-v4.yaml?token=AAARODrB1VkDuV0kHsKIqq8dtzWtzZYTks5dG1onwA%3D%3D
 ```
 
 Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v4_.
 
 ```bash
-$ kubectl get experiments -n bookinfo-iter8
+$ kubectl get experiments.iter8.tools -n knative-bookinfo-iter8
 NAME                 COMPLETED   STATUS        BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
 reviews-v3-rollout   True                      reviews-v2   0            reviews-v3   100
 reviews-v4-rollout   False       Progressing   reviews-v3   80           reviews-v4   20
@@ -237,9 +238,15 @@ reviews-v4-rollout   False       Progressing   reviews-v3   80           reviews
 However, unlike the previous rollout, traffic will not shift towards the candidate _reviews-v4_ because it does not meet the success criteria due to a performance problem. At the end of the experiment, _iter8_ rolls back to the baseline (_reviews-v3_), as seen below:
 
 ```bash
-$ kubectl get experiment reviews-v4-rollout -n bookinfo-iter8
+$ kubectl get experiments.iter8.tools reviews-v4-rollout -n knative-bookinfo-iter8
 NAME                 COMPLETED   STATUS                                     BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   reviews-v3   100          reviews-v4   0
+reviews-v4-rollout   True        ExperimentFailure                          reviews-v3   100          reviews-v4   0
+```
+
+You can also check that the `reviews` Knative service traffic all goes to _reviews-v3_:
+
+```sh
+$ kubectl get ksvc -n knative-bookinfo-iter8 reviews -o custom-columns=NAME:.metadata.name,BASELINE:.spec.traffic[0].revisionName,PERCENT:.spec.traffic[0].percent,CANDIDATE:.spec.traffic[1].revisionName,PERCENT:.spec.traffic[1].percent
 ```
 
 ### 3. Check the Grafana dashboard
@@ -247,5 +254,5 @@ reviews-v4-rollout   True        ExperimentFailure: Roll Back to Baseline   revi
 As before, you can check the Grafana dashboard corresponding to the canary release of _reviews-v4_. To get the URL to the dashboard specific to this canary release, run the following command:
 
 ```bash
-kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
+kubectl get experiments.iter8.tools reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n knative-bookinfo-iter8
 ```
