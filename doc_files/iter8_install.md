@@ -1,11 +1,12 @@
 # Iter8 on Kubernetes and Istio
 
-These instructions show you how to set up iter8 on Kubernetes with Istio.
+These instructions show you how to set up iter8 on Kubernetes with Istio and/or Knative.
 
 ## Prerequisites
 
-* Kubernetes v1.11 or newer; and
-* Istio v1.1.5 and newer (those are the versions of Istio we tested iter8 with).
+* Kubernetes v1.11 or newer; and either
+* Istio v1.1.5 and newer (those are the versions of Istio we tested iter8 with); or
+* [Knative 0.6](https://knative.dev/docs/install/) or newer
 
 Your Istio installation must have at least the **istio-pilot** as well as **telemetry** and **Prometheus** enabled.
 
@@ -23,7 +24,11 @@ git clone git@github.ibm.com:istio-research/iter8.git
 
 #### Step 2. Run _iter8-analytics_ using our Helm chart
 
-One way to set up _iter8-analytics_ is through our Helm chart. For that, make sure you have the Helm client installed on your computer. If not, follow [these instructions](https://helm.sh/docs/using_helm/#installing-the-helm-client) to install it. 
+One way to set up _iter8-analytics_ is through our Helm chart. For that, make sure you have the Helm client installed on your computer. If not, follow [these instructions](https://helm.sh/docs/using_helm/#installing-the-helm-client) to install it.
+
+If you use Kubernetes with Istio, follow the instructions below. Otherwise jump the to [Knative section](#kubernetes-with-knative).
+
+##### Kubernetes with Istio
 
 Assuming you have the Kubernetes CLI `kubectl` pointing at your desired Kubernetes cluster (v1.11 or newer), with Istio installed (as per the prerequisites above), all you need to do to deploy _iter8_analytics_ to your cluster is to run the following command from the top directory of your copy of the iter8-analytics repository:
 
@@ -34,10 +39,19 @@ helm template install/kubernetes/helm/iter8-analytics --name iter8-analytics | k
 **Note on Prometheus:** In order to make assessments on canary releases, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the Helm chart parameters (used in the command above) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090`, which is the default internal Kubernetes URL of Prometheus installed as an Istio addon. If your Istio installation is shipping metrics to a different Prometheus installation, you need to run the following command instead:
 
 ```bash
-helm template install/kubernetes/helm/iter8-analytics --name iter8-analytics --set iter8Config.metricsBackendURL="<Prometheus host:port>"| kubectl apply  -f -
+helm template install/kubernetes/helm/iter8-analytics --name iter8-analytics --set iter8Config.metricsBackendURL="<Prometheus host:port>"| kubectl apply -f -
 ```
 
 Make sure to replace `"<Prometheus host:port>"` with the Prometheus hostname and query port matching your Prometheus installation.
+
+
+##### Kubernetes with Knative
+
+Assuming you have the Kubernetes CLI `kubectl` pointing at your desired Kubernetes cluster (v1.11 or newer), with Knative v0.6+  installed (as per the prerequisites above), all you need to do to deploy _iter8_analytics_ to your cluster is to run the following command from the top directory of your copy of the iter8-analytics repository:
+
+```bash
+helm template install/kubernetes/helm/iter8-analytics --name iter8-analytics --set iter8Config.metricsBackendURL="http://prometheus-system-discovery.knative-monitoring:9090" | kubectl apply -f -
+```
 
 #### Step 3. Verify the installation
 

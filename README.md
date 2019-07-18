@@ -22,10 +22,7 @@ Iter8 is integrated with [Tekton Pipelines](https://tekton.dev) for an end-to-en
 
 ## Installing iter8
 
-The following instructions will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on your desired target environment:
-
-* [iter8 on Kubernetes and Istio](doc_files/istio_install.md)
-* [iter8 on Knative](doc_files/knative_install.md)
+These [instructions](doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio and/or Knative.
 
 ## Tutorials
 
