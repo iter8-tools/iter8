@@ -43,7 +43,7 @@ To access the application, you need to determine the ingress IP and port for the
 export IP_ADDRESS=$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
 ```
 
-You can bow check if you can access the application with the following command:
+You can now check if you can access the application with the following command:
 
 ```bash
 curl -H "Host: productpage.knative-bookinfo-iter8.svc.cluster.local" -o /dev/null -s -w "%{http_code}\n" "http://${IP_ADDRESS}/productpage"
