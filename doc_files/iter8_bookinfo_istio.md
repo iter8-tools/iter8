@@ -8,7 +8,7 @@ The tutorial is based on the [Bookinfo sample application](https://istio.io/docs
 
 ### 1. Deploy the Bookinfo application
 
-At this point, we assume that you have already followed the [instructions](istio_install.md) to install _iter8_ on your Kubernetes cluster. The next step is to deploy the sample application we will use for the tutorial.
+At this point, we assume that you have already followed the [instructions](iter8_install.md) to install _iter8_ on your Kubernetes cluster. The next step is to deploy the sample application we will use for the tutorial.
 
 First, let us create a `bookinfo-iter8` namespace configured to enable auto-injection of the Istio sidecar:
 
