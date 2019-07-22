@@ -14,13 +14,13 @@ At this point, we assume that you have already followed the [instructions](iter8
 First, let us create a `knative-bookinfo-iter8` namespace:
 
 ```bash
-kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/namespace.yaml?token=AAAROHqyPLzp4h4FWozSZdHNcRkz2sGCks5dE9sMwA%3D%3D
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorials/knative/bookinfo/namespace.yaml
 ```
 
 Next, let us deploy the Bookinfo application:
 
 ```bash
-kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/bookinfo-tutorial.yaml?token=AAAROPJZY04WTinFDpmJohfu0K28lxPFks5dE-rRwA%3D%3D
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorials/knative/bookinfo/bookinfo-tutorial.yaml
 ```
 
 You should see the following pods in the `knative-bookinfo-iter8` namespace. Make sure the Knative services readiness is "True".
@@ -109,7 +109,7 @@ In the example above, we specified only one success criterion. In particular, we
 The next step of this tutorial is to actually create the configuration above. To that end, you can either copy and paste the yaml above to a file and then run `kubectl apply -f ...` on it, or you can run the following command:
 
 ```bash
-kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v2_to_reviews-v3.yaml?token=AAAROAp-9Astj0JUrpThGmqd_t8V-omqks5dHQ0QwA%3D%3D
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v2_to_reviews-v3.yaml
 ```
 
 You can verify that the `Experiment` object has been created as shown below:
@@ -127,7 +127,7 @@ As you can see, _iter8_ is reporting that 100% of the traffic is sent to the bas
 As soon as we deploy _reviews-v3_, _iter8-controller_ will start the rollout. To deploy _reviews-v3_, you can run the following command:
 
 ```bash
-kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/reviews-v3.yaml?token=AAAROIqK9-mFXbocObzC8SISv6WLzB9Zks5dGksSwA%3D%3D
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorials/knative/bookinfo/reviews-v3.yaml
 ```
 
 Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v3_:
@@ -150,7 +150,7 @@ kubectl get experiment reviews-v3-rollout -o jsonpath='{.status.grafanaURL}' -n 
 
 Below is a screenshot of a portion of the Grafana dashboard showing the request rate and the mean latency for reviews-v2 and reviews-v3, right after the controller ended the experiment.
 
-![Grafana Dashboard](../img/grafana_reviews-v2-v3.png)
+![Grafana Dashboard](../img/grafana_knative-reviews-v2-v3.png)
 
 Note how the traffic shifted towards the canary during the experiment. You can also see that the canary's mean latency was way below the configured threshold of 0.2 seconds.
 
@@ -159,7 +159,7 @@ Note how the traffic shifted towards the canary during the experiment. You can a
 At this point, you must have completed the part 1 of the tutorial successfully. You can confirm it as follows:
 
 ```bash
-$ kubectl get experiment.iter8.tools reviews-v3-rollout  -n knative-bookinfo-iter8
+$ kubectl get experiment.iter8.tools reviews-v3-rollout -n knative-bookinfo-iter8
 NAME                 COMPLETED   STATUS   BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
 reviews-v3-rollout   True                 reviews-v2   0            reviews-v3   100
 ```
@@ -202,7 +202,7 @@ The configuration above is pretty much the same we used in part 1, except that n
 To create the above `Experiment` object, run the following command:
 
 ```bash
-kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v3_to_reviews-v4.yaml?token=AAAROA1kB3wG0Qb_dI_gwzu9MZttTBS-ks5dHQ13wA%3D%3D
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v3_to_reviews-v4.yaml
 ```
 
 You can list all `Experiment` objects like so:
@@ -223,7 +223,7 @@ As you have already seen, as soon as we deploy the candidate version, _iter8-con
 To deploy _reviews-v4_, run the following command:
 
 ```bash
-kubectl apply -f https://raw.github.ibm.com/istio-research/iter8-controller/master/doc/tutorial/knative/bookinfo/reviews-v4.yaml?token=AAARODrB1VkDuV0kHsKIqq8dtzWtzZYTks5dG1onwA%3D%3D
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorial/knative/bookinfo/reviews-v4.yaml
 ```
 
 Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v4_.
@@ -256,3 +256,109 @@ As before, you can check the Grafana dashboard corresponding to the canary relea
 ```bash
 kubectl get experiments.iter8.tools reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n knative-bookinfo-iter8
 ```
+
+![Grafana Dashboard](../img/grafana_knative-reviews-v3-v4.png)
+
+The dashboard screenshot above shows that the canary version (_reviews-v4_) consistently exhibits a high latency of 5 seconds, way above the threshold of 0.2 seconds specified in our success criterion, and way above the baseline version's latency.
+
+
+## Part 3: Error-producing canary release: _reviews-v3_ to _reviews-v5_
+
+At this point, you must have completed parts 1 and 2 of the tutorial successfully. You can confirm it as follows:
+
+```bash
+$ kubectl get experiments.iter8.tools -n knative-bookinfo-iter8
+NAME                 COMPLETED   STATUS              BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                            reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   True        ExperimentFailure   reviews-v3   100          reviews-v4   0
+```
+
+The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before on part 1, and that it continues to be the current version after iter8 had determined that _reviews-v4_ was unsatisfactory.
+
+
+### 1. Canary rollout configuration
+
+Now, let us set up a canary rollout for _reviews-v5_, using the following `Experiment` configuration:
+
+```yaml
+apiVersion: iter8.tools/v1alpha1
+kind: Experiment
+metadata:
+  name: reviews-v5-rollout
+  namespace: knative-bookinfo-iter8
+spec:
+  targetService:
+    apiVersion: serving.knative.dev/v1alpha1
+    name: reviews
+    baseline: reviews-v3
+    candidate: reviews-v5
+  trafficControl:
+    strategy: check_and_increment
+    interval: 30s
+    trafficStepSize: 20
+    maxIterations: 6
+    maxTrafficPercentage: 80
+  analysis:
+    analyticsService: "http://iter8-analytics.iter8"
+    successCriteria:
+      - metricName: iter8_latency
+        toleranceType: threshold
+        tolerance: 0.2
+        sampleSize: 5
+       - metricName: iter8_error_rate
+        toleranceType: delta
+        tolerance: 0.02
+        sampleSize: 10
+        stopOnFailure: true
+```
+
+The configuration above differs from the previous ones as follows. We added a second success criterion on the error-rate metric so that the canary version (_reviews-v5_) not only must have a mean latency below 0.2 seconds, but it also needs to have an error rate that cannot exceed the baseline error rate by more than 2%. That comparative analysis on a metric is specified as a `delta` tolerance type. Furthermore, the second success criterion sets the flag `stopOnFailure`, which means iter8 will roll back to the baseline as soon as the error rate criterion is violated and the minimum number of 10 data points is collected (`sampleSize = 10`).
+
+To create the above `Experiment` object, run the following command:
+
+```bash
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorials/knative/bookinfo/canary_reviews-v3_to_reviews-v5.yaml
+```
+
+### 2. Deploy _reviews-v5_ and start the rollout
+
+As you already know, as soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, the candidate version (_reviews-v5_) has a bug that causes it to return HTTP errors to its callers. As a result, _iter8_ will roll back to the baseline version based on the success criterion on the error-rate metric defined above.
+
+To deploy _reviews-v5_, run the following command:
+
+```bash
+kubectl apply -f https://raw.github.com/iter8.tools/iter8-controller/master/doc/tutorials/knative/bookinfo/reviews-v5.yaml
+```
+
+If you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v5_.
+
+```bash
+$ kubectl get experiments.iter8.tools -n knative-bookinfo-iter8
+NAME                 COMPLETED   STATUS              BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                            reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   True        ExperimentFailure   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   False       Progressing         reviews-v3   80           reviews-v5   20
+```
+
+Because _review-v5_ has an issue causing it to return HTTP errors, as per the success criteria we have specified the traffic will not shift towards it. Furthermore, because the error-rate success criteria indicated the need to stop on failure, without waiting for the entire duration of the experiment, iter8 will rollback to _reviews-v3_ quickly. You should see the following after several seconds:
+
+```bash
+$ kubectl get experiments.iter8.tools -n bookinfo-iter8
+NAME                 COMPLETED   STATUS              BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   True                            reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   True        ExperimentFailure   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   True        ExperimentFailure   reviews-v3   100          reviews-v5   0
+```
+
+### 3. Check the Grafana dashboard
+
+As before, you can check the Grafana dashboard corresponding to the canary release of _reviews-v5_. To get the URL to the dashboard specific to this canary release, run the following command:
+
+```bash
+kubectl get experiment.iter8.tools reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n knative-bookinfo-iter8
+```
+
+![Grafana Dashboard](../img/grafana_knative-reviews-v3-v5-req-rate.png)
+![Grafana Dashboard](../img/grafana_knative-reviews-v3-v5-error-rate.png)
+
+The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is way below the threshold of 0.2 seconds we defined in the latency success criterion, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which specified that the canary's error rate must be within 2% of that of the baseline (_reviews-v3_) version. According to the dashboard, _reviews-v3_ produced no errors at all.
