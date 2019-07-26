@@ -171,6 +171,12 @@ You can also check a Grafana dashboard specific to the `Experiment` object corre
 kubectl get experiment reviews-v3-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
 ```
 
+By default, the base URL given by iter8 to Grafana is `http://localhost:3000`. In a typical Istio installation, you can port-forward your Grafana from Kubernetes to your localhost's port 3000 with the following command:
+
+```
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
+```
+
 Below is a screenshot of a portion of the Grafana dashboard showing the request rate and the mean latency for reviews-v2 and reviews-v3, right after the controller ended the experiment.
 
 ![Grafana Dashboard](../img/grafana_reviews-v2-v3.png)
