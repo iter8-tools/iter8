@@ -1,14 +1,19 @@
 # Iter8 on Kubernetes and Istio
 
-These instructions show you how to set up iter8 on Kubernetes with Istio and/or Knative.
+These instructions show you how to set up iter8 on Kubernetes with Istio or with Knative.
 
 ## Prerequisites
 
-* Kubernetes v1.11 or newer; and either
-* Istio v1.1.5 and newer (those are the versions of Istio we tested iter8 with); or
-* [Knative 0.6](https://knative.dev/docs/install/) or newer
+* Kubernetes v1.11 or newer.
 
-Your Istio installation must have at least the **istio-pilot** as well as **telemetry** and **Prometheus** enabled.
+If you want to use iter8 with Istio, we require:
+
+* Istio v1.1.5 or newer (those are the versions of Istio we tested iter8 with).
+* Your Istio installation must have at least the **istio-pilot** as well as **telemetry** and **Prometheus** enabled.
+
+If you want to use iter8 with Knative, we require:
+
+* [Knative 0.6](https://knative.dev/docs/install/) or newer.
 
 ## Install _iter8_ on Kubernetes
 
@@ -26,7 +31,7 @@ git clone git@github.ibm.com:istio-research/iter8.git
 
 One way to set up _iter8-analytics_ is through our Helm chart. For that, make sure you have the Helm client installed on your computer. If not, follow [these instructions](https://helm.sh/docs/using_helm/#installing-the-helm-client) to install it.
 
-If you use Kubernetes with Istio, follow the instructions below. Otherwise jump the to [Knative section](#kubernetes-with-knative).
+If you use Kubernetes with Istio, follow the instructions below. Otherwise jump to the [Knative section](#kubernetes-with-knative).
 
 ##### Kubernetes with Istio
 
@@ -101,6 +106,22 @@ $ kubectl get svc -n iter8
 NAME                         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
 controller-manager-service   ClusterIP   172.21.62.217   <none>        443/TCP   20s
 iter8-analytics              ClusterIP   172.21.106.44   <none>        80/TCP    76s
+```
+
+#### Step 4. Import iter8's Grafana dashboard
+
+To enable users to see Prometheus metrics that pertain to their canary releases, iter8 provides a Grafana dashboard template. To take advantage of that, you will need to import this dashboard template from the Grafana UI.
+
+If you are using iter8 with Istio, you must import the following dashboard template file located in the _iter8-controller_ repository:
+
+```
+iter8-controller/config/grafana/istio.json
+```
+
+If you are using iter8 with Knative, the dashboard template file in the _iter8-controller_ repository is the following:
+
+```
+iter8-controller/config/grafana/knative.json
 ```
 
 ## Uninstall _iter8_
