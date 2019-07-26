@@ -5,28 +5,30 @@ This tutorial shows you how _iter8_ can be used to perform canary releases by gr
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) that is distributed with Istio. This application comprises 4 Knative services, namely, _productpage_, _details_, _reviews_, and _ratings_, as illustrated [here](https://istio.io/docs/examples/bookinfo/). Please, follow our instructions below to deploy the sample application as part of the tutorial.
 
+# YAML files used in the tutorial
+
+All Kubernetes YAML files you will need in this tutorial are in the _iter8-controller_ repository [here](https://github.com/iter8-tools/iter8-controller/tree/master/doc/tutorials/knative/bookinfo). Thus, the first thing you need to do is to clone this repository.
+
+```bash
+git clone git@github.com:iter8-tools/iter8-controller.git
+```
+
 ## Part 1: Successful canary release: _reviews-v2_ to _reviews-v3_
 
 ### 1. Deploy the Bookinfo application
 
 At this point, we assume that you have already followed the [instructions](iter8_install.md) to install _iter8_ on your Kubernetes cluster. The next step is to deploy the sample application we will use for the tutorial.
 
-First, let us change the current working directory to the Bookinfo tutorial:
-
-```bash
-cd ./doc/tutorials/knative/bookinfo
-```
-
 Then, let us create a `knative-bookinfo-iter8` namespace:
 
 ```bash
-kubectl apply -f namespace.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/namespace.yaml
 ```
 
 Next, let us deploy the Bookinfo application:
 
 ```bash
-kubectl apply -f bookinfo-tutorial.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/bookinfo-tutorial.yaml
 ```
 
 You should see the following pods in the `knative-bookinfo-iter8` namespace. Make sure the Knative services readiness is "True".
@@ -115,7 +117,7 @@ In the example above, we specified only one success criterion. In particular, we
 The next step of this tutorial is to actually create the configuration above. To that end, you can either copy and paste the yaml above to a file and then run `kubectl apply -f ...` on it, or you can run the following command:
 
 ```bash
-kubectl apply -f canary_reviews-v2_to_reviews-v3.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/canary_reviews-v2_to_reviews-v3.yaml
 ```
 
 You can verify that the `Experiment` object has been created as shown below:
@@ -133,7 +135,7 @@ As you can see, _iter8_ is reporting that 100% of the traffic is sent to the bas
 As soon as we deploy _reviews-v3_, _iter8-controller_ will start the rollout. To deploy _reviews-v3_, you can run the following command:
 
 ```bash
-kubectl apply -f reviews-v3.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/reviews-v3.yaml
 ```
 
 Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v3_:
@@ -208,7 +210,7 @@ The configuration above is pretty much the same we used in part 1, except that n
 To create the above `Experiment` object, run the following command:
 
 ```bash
-kubectl apply -f canary_reviews-v3_to_reviews-v4.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/canary_reviews-v3_to_reviews-v4.yaml
 ```
 
 You can list all `Experiment` objects like so:
@@ -229,7 +231,7 @@ As you have already seen, as soon as we deploy the candidate version, _iter8-con
 To deploy _reviews-v4_, run the following command:
 
 ```bash
-kubectl apply -f reviews-v4.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/reviews-v4.yaml
 ```
 
 Now, if you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v4_.
@@ -323,7 +325,7 @@ The configuration above differs from the previous ones as follows. We added a se
 To create the above `Experiment` object, run the following command:
 
 ```bash
-kubectl apply -f canary_reviews-v3_to_reviews-v5.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/canary_reviews-v3_to_reviews-v5.yaml
 ```
 
 ### 2. Deploy _reviews-v5_ and start the rollout
@@ -333,7 +335,7 @@ As you already know, as soon as we deploy the candidate version, _iter8-controll
 To deploy _reviews-v5_, run the following command:
 
 ```bash
-kubectl apply -f reviews-v5.yaml
+kubectl apply -f iter8-controller/doc/tutorials/knative/bookinfo/reviews-v5.yaml
 ```
 
 If you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v5_.
