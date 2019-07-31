@@ -31,7 +31,7 @@ The YAML files used in this tutorial are in [this repository](https://github.com
 ### 1. Create a PipelineResource
 
 We start by defining a `PipelineResource` to the git project for the Bookinfo reviews service. You can reference the project we created from [the Istio source](https://github.com/istio/istio/tree/master/samples/bookinfo/src/reviews) or you can duplicate it to make changes. In this case, if authorization is necessary, see the Tekton documentation for [Authentication](https://github.com/tektoncd/pipeline/blob/master/docs/auth.md).
-You can reference the project https://github.com/iter8-tools/bookinfoapp-reviews or duplicate it to make changes.
+You can reference the project [bookinfoapp-reviews](https://github.com/iter8-tools/bookinfoapp-reviews) or duplicate it to make changes.
 
     apiVersion: tekton.dev/v1alpha1
     kind: PipelineResource
@@ -117,7 +117,7 @@ And has two steps:
 
 To add to your cluster, apply as follows:
 
-    kubectl apply -f https://docs/doc_files/tekton/iter8-task.yaml
+    kubectl apply -f docs/doc_files/tekton/iter8-task.yaml
 
 ### 3. Run the `Task` by defining a `TaskRun`
 
@@ -147,7 +147,7 @@ To run a task, define a `TaskRun` such as:
 
 You can apply this by:
 
-    kubectl apply -f https://docs/doc_files/tekton/run-iter8-task.yaml
+    kubectl apply -f docs/doc_files/tekton/run-iter8-task.yaml
 
 ### 4. Deploy the canary version
 
