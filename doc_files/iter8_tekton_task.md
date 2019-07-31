@@ -20,13 +20,17 @@ Deploy the Bookinfo application by following [steps 1 - 3](iter8_bookinfo_istio.
 
 ## Part II: Use Tekton to Start Canary Rollout
 
-A Tekton task is a logical step in a pipeline that will be executed repeated as each new version of code is released. While strictly not necessary for demonstration purposes, we will write a task that relies on a git project that contains, in addition to the source code for the service, a template of the iter8 `Experiment` that should be executed when rolling out a new version of the service. 
+A Tekton task is a logical step in a pipeline that will be executed repeated as each new version of code is released. While strictly not necessary for demonstration purposes, we will write a task that relies on a git project that contains, in addition to the source code for the service, a template of the iter8 `Experiment` that should be executed when rolling out a new version of the service.
 
 It will therefore be necessary to define a `PipelineResource` that identifies the git project in addition to a `Task`. Finally, a `TaskRun` can be defined that executes the task.
 
+The YAML files used in this tutorial are in [this repository](https://github.com/iter8-tools/docs). Clone it:
+
+    git clone git@github.com:iter8-tools/docs.git
+
 ### 1. Create a PipelineResource
 
-We start by defining a `PipelineResource` to the git project for the Bookinfo reviews service. You can reference the project we created from [the Istio source](https://github.com/istio/istio/tree/master/samples/bookinfo/src/reviews) or you can duplicate it to make changes. Im this case, if authorization is necessary, see the Tekton documentation for [Authentication](https://github.com/tektoncd/pipeline/blob/master/docs/auth.md).
+We start by defining a `PipelineResource` to the git project for the Bookinfo reviews service. You can reference the project we created from [the Istio source](https://github.com/istio/istio/tree/master/samples/bookinfo/src/reviews) or you can duplicate it to make changes. In this case, if authorization is necessary, see the Tekton documentation for [Authentication](https://github.com/tektoncd/pipeline/blob/master/docs/auth.md).
 You can reference the project https://github.com/iter8-tools/bookinfoapp-reviews or duplicate it to make changes.
 
     apiVersion: tekton.dev/v1alpha1
@@ -39,11 +43,11 @@ You can reference the project https://github.com/iter8-tools/bookinfoapp-reviews
         - name: revision
         value: master
         - name: url
-        value: https://github.com/kalantar/reviews
+        value: https://github.com/iter8-tools/bookinfoapp-reviews
 
 You can apply this with the following command:
 
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/reviews-pipelineresource.yaml
+    kubectl apply -f docs/doc_files/tekton/reviews-pipelineresource.yaml
 
 ### 2. Import Tekton `Task`
 
@@ -113,7 +117,7 @@ And has two steps:
 
 To add to your cluster, apply as follows:
 
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/iter8-task.yaml?token=ABK7G2346ATVRDZWRE63QPS5IG6XC
+    kubectl apply -f https://docs/doc_files/tekton/iter8-task.yaml
 
 ### 3. Run the `Task` by defining a `TaskRun`
 
@@ -143,7 +147,7 @@ To run a task, define a `TaskRun` such as:
 
 You can apply this by:
 
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/run-iter8-task.yaml?token=ABK7G22WW3NKRGQN7E5FVFC5IG6HE
+    kubectl apply -f https://docs/doc_files/tekton/run-iter8-task.yaml
 
 ### 4. Deploy the canary version
 
