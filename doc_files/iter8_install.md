@@ -24,7 +24,7 @@ Below are instructions to run the two _iter8_ components (_iter8_analytics_ and 
 #### Step 1. Clone the GitHub repository
 
 ```bash
-git clone git@github.ibm.com:istio-research/iter8.git
+git clone git@github.com:iter8-tools/iter8-analytics.git
 ```
 
 #### Step 2. Run _iter8-analytics_ using our Helm chart
@@ -79,7 +79,7 @@ iter8-analytics   ClusterIP   172.21.106.44   <none>        80/TCP    9s
 #### Step 1. Clone the GitHub repository
 
 ```bash
-git clone git@github.ibm.com:istio-research/iter8-controller.git
+git clone git@github.com:iter8-tools/iter8-controller.git
 ```
 
 #### Step 2. Run _iter8-controller_ using our Helm chart
