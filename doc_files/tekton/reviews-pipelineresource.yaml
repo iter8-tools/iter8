@@ -8,4 +8,4 @@ spec:
     - name: revision
       value: master
     - name: url
-      value: https://github.com/kalantar/reviews
+      value: https://github.com/iter8-tools/bookinfoapp-reviews

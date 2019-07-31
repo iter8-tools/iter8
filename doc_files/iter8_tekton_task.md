@@ -43,7 +43,7 @@ You can reference the project https://github.com/iter8-tools/bookinfoapp-reviews
         - name: revision
         value: master
         - name: url
-        value: https://github.com/kalantar/reviews
+        value: https://github.com/iter8-tools/bookinfoapp-reviews
 
 You can apply this with the following command:
 
