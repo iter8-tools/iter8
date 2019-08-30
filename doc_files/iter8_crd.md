@@ -70,6 +70,7 @@ spec:
       # Options:
       # check_and_increment: get decision on traffic increament from analytics 
       # increment_without_check: increase traffic each intervalwithout calling analytics
+      # optional; Default is check_and_increment
       strategy: check_and_increment
       # the traffic increment per interval.
       # optional; Default is 2.0
