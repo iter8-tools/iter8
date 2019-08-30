@@ -28,7 +28,7 @@ spec:
     # analysis contains the parameters for configuring the analytics service
     analysis:
       # analyticsService specifies analytics service endpoint
-      # optional; Default is http://iter8analytics:5555
+      # optional; Default is http://iter8-analytics:5555
       analyticsService: http://iter8-analytics.iter8
       # endpoint to Grafana Dashboard
       # optional; Default is http://localhost:3000
