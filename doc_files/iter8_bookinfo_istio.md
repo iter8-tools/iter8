@@ -382,3 +382,167 @@ kubectl get experiment reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n 
 ![Grafana Dashboard](../img/grafana_reviews-v3-v5-error-rate.png)
 
 The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is way below the threshold of 0.2 seconds we defined in the latency success criterion, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which specified that the canary's error rate must be within 2% of that of the baseline (_reviews-v3_) version. According to the dashboard, _reviews-v3_ produced no errors at all.
+
+## Part 4: Canary rollout on an edge service
+
+Up to now, we have demonstrated on doing a canary rollout for an in-cluster service. Iter8 can help you do canary analysis on an edge service on kubernetes as well. 
+
+### Expose a service with Kubernetes Ingress
+If you expose your service with [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/), then you do not take extra actions. Simply providing the internal service and deployment names to iter8 spec as stated above would be sufficient.
+
+### Expose a service with Istio VirtualService and Gateway
+Istio enables service exposure using VirtualService and Gateway. VirtualService defines the mapping from an external hostname to an internal service, and binds that to a specific gateway. The _productpage_ service in the _bookinfo_ example provides a paradigm for such a usage.  
+
+Just give you a reminder that the _bookinfo_ `VirtualService` exposes service _productpage_ outside of a cluster through `Gateway` _bookinfo-gateway_. Here are their definitions:  
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: bookinfo-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "bookinfo.sample.dev"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bookinfo
+spec:
+  hosts:
+  - "bookinfo.sample.dev"
+  gateways:
+  - bookinfo-gateway
+  http:
+  - match:
+    - uri:
+        exact: /productpage
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+        host: productpage
+        port:
+          number: 9080                                   
+```
+
+Let's consider deploying a new version of productpage onto the cluster. Instead of creating new routing rules, Iter8 can digest the existing VirtualService specified in the `RoutingReference` section and reuse it during the experiment. 
+
+```yaml
+apiVersion: iter8.tools/v1alpha1
+kind: Experiment
+metadata:
+  name: productpage-v2-rollout
+spec:
+  routingReference:
+    apiVersion: networking.istio.io/v1alpha3
+    kind: VirtualService
+    name: bookinfo
+  targetService:
+    name: productpage
+    apiVersion: v1
+    baseline: produtpage-v1
+    candidate: productpage-v2
+  trafficControl:
+    strategy: check_and_increment
+    interval: 30s
+    trafficStepSize: 20
+    maxIterations: 6
+    maxTrafficPercentage: 80
+  analysis:
+    analyticsService: "http://iter8-analytics.iter8"
+    successCriteria:
+      - metricName: iter8_latency
+        toleranceType: threshold
+        tolerance: 0.2
+        sampleSize: 5
+      - metricName: iter8_error_rate
+        toleranceType: delta
+        tolerance: 0.02
+        sampleSize: 10
+        stopOnFailure: true
+```
+
+Noted that only a single VirtualService is supported by Iter8 right now. If other routing rules are provided, the controller will fail the experiment.
+
+Deploy this `Experiment` object onto the cluster:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/canary_productpage-v1_to_productpage-v2.yaml
+```
+
+In order to trigger the experiment to start, let's deploy _productpage_v2_.
+```bash
+kubectl apply -n bookinfo-iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/productpage-v2.yaml
+```
+
+Now if you inspect into the VirtualService, you should see something changed in the `route` section like this:
+
+```yaml
+apiVersion: v1
+items:
+- apiVersion: networking.istio.io/v1alpha3
+  kind: VirtualService
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.istio.io/v1alpha3","kind":"VirtualService","metadata":{"annotations":{},"name":"bookinfo","namespace":"bookinfo-iter8"},"spec":{"gateways":["bookinfo-gateway"],"hosts":["bookinfo.sample.dev"],"http":[{"match":[{"uri":{"exact":"/productpage"}},{"uri":{"exact":"/login"}},{"uri":{"exact":"/logout"}},{"uri":{"prefix":"/api/v1/products"}}],"route":[{"destination":{"host":"productpage","port":{"number":9080}}}]}]}}
+    creationTimestamp: "2019-09-10T17:33:52Z"
+    generation: 6
+    labels:
+      iter8-tools/experiment: productpage-v2-rollout
+      iter8-tools/host: productpage
+      iter8-tools/role: progressing
+    name: bookinfo
+    namespace: bookinfo-iter8
+    resourceVersion: "58304434"
+    selfLink: /apis/networking.istio.io/v1alpha3/namespaces/bookinfo-iter8/virtualservices/bookinfo
+    uid: 280d383b-d3f1-11e9-998e-7aed10235bf4
+  spec:
+    gateways:
+    - bookinfo-gateway
+    hosts:
+    - bookinfo.sample.dev
+    http:
+    - match:
+      - uri:
+          exact: /productpage
+      - uri:
+          exact: /login
+      - uri:
+          exact: /logout
+      - uri:
+          prefix: /api/v1/products
+      route:
+      - destination:
+          host: productpage
+          port:
+            number: 9080
+          subset: baseline
+        weight: 40
+      - destination:
+          host: productpage
+          port:
+            number: 9080
+          subset: candidate
+        weight: 60
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+```
+
+Noted that if the `route` list contains multiple sections, the first qualified one will be used.   
+
+After several iterations, you should be able to see traffic shiftied to new version.
