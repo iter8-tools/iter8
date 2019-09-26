@@ -382,3 +382,131 @@ kubectl get experiment reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n 
 ![Grafana Dashboard](../img/grafana_reviews-v3-v5-error-rate.png)
 
 The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is way below the threshold of 0.2 seconds we defined in the latency success criterion, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which specified that the canary's error rate must be within 2% of that of the baseline (_reviews-v3_) version. According to the dashboard, _reviews-v3_ produced no errors at all.
+
+
+## Part 4: Metrics Extended Canary Release: _reviews-v3_ to _reviews-v6_
+
+At this point, you should have completed parts 1, 2 and 3 of the tutorial successfully. You can confirm it as follows:
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 PHASE       STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Failed      NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   Failed      Aborted, Traffic: AllToBaseline.                   reviews-v3   100          reviews-v5   0
+```
+
+The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before in part 1, and that it continued to be the current version of the _reviews_ service after iter8 had determined that _reviews-v4_ was unsatisfactory. Similarly, as we saw in the previous part 3, the experiment to rollout _reviews-v5_ was aborted because of failure to satisfy the success criteria defined by the user.
+
+In this tutorial, we will extend the available metrics using iter8's Metrics Extensibility feature and then perform a rollout experiment.
+
+Iter8, by default comes packaged with a few metrics which you can see if you type:
+```bash
+$ kubectl get configmaps -n iter8 iter8-metrics -oyaml
+```
+
+We are going to add a new metric to this mix called _iter8_90_perc_latency_ which measures the average 90th percentile latency of a service. We will do so by running the following command:
+
+```bash
+$ kubectl apply -n iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/iter8_metrics_extended.yaml
+```
+
+You can once again type the following command to see that the new metric has been added to the configmap:
+```bash
+$ kubectl get configmaps -n iter8 iter8-metrics -oyaml
+```
+
+#### Note:
+> For additional information about how to add a new metric to the existing configuration please see [this documentation](https://github.com/iter8-tools/docs/blob/master/doc_files/iter8_metrics_extensibility.md).
+
+We will now begin an experiment that uses this new metric for the rollout test.
+### 1. Canary rollout configuration
+
+Now, let us set up a canary rollout for _reviews-v6_, using the following `Experiment` configuration:
+
+```yaml
+apiVersion: iter8.tools/v1alpha1
+kind: Experiment
+metadata:
+  name: reviews-v6-rollout
+spec:
+  targetService:
+    name: reviews
+    apiVersion: v1
+    baseline: reviews-v3
+    candidate: reviews-v6
+  trafficControl:
+    strategy: check_and_increment
+    interval: 30s
+    trafficStepSize: 20
+    maxIterations: 6
+    maxTrafficPercentage: 80
+  analysis:
+    analyticsService: "http://iter8-analytics.iter8"
+    successCriteria:
+      - metricName: iter8_90_perc_latency
+        toleranceType: threshold
+        tolerance: 0.2
+        sampleSize: 5
+```
+
+The configuration uses the newly extended metric _iter8_90_perc_latency_. The success criteria asserts that the canary version (_reviews-v6_) must have the 90th percentile latency to be below 0.2 seconds. The comparative analysis on a metric is specified as a `threshold` tolerance type and a minimum of 5 data points must be collected before making a decision in each iteration.
+
+To create the above `Experiment` object, run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v6.yaml
+```
+
+### 2. Deploy _reviews-v6_ and start the rollout
+
+As you already know, as soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, the candidate version (_reviews-v6_) is the same service as the one used in the previous iteration except that a different metric is measured during the rollout test. The service still has a bug that causes it to return HTTP errors to its callers like last time; However, here we are measuring the service's 90th percentile latency which behaves normally. As a result, _iter8_ will roll forward to the candidate version based on the success criterion on the newly extended metric defined above.
+
+To deploy _reviews-v6_, run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/reviews-v6.yaml
+```
+
+If you check the state of the `Experiment` object corresponding to this rollout, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _reviews-v6_.
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 PHASE         STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded     AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Failed        NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   Failed        Aborted, Traffic: AllToBaseline.                   reviews-v3   100          reviews-v5   0
+reviews-v6-rollout   Progressing   Iteration 1 Completed                              reviews-v3   80           reviews-v6   20
+```
+At about every 30s you should see the traffic shift towards _reviews-v6_ by 20 percentage points.
+
+At the end of the experiment, you will see that all traffic has been shifted to the canary version (_reviews-v6_)
+
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 PHASE       STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Failed      NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   Failed      Aborted, Traffic: AllToBaseline.                   reviews-v3   100          reviews-v5   0
+reviews-v6-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v3   0            reviews-v6   100
+```
+
+Note that _reviews-v6_ is the same service as _reviews-v5_ used in part 3 and returns HTTP errors to its callers. In part 3 the success criteria of the candidate version was analyzed by its the error rate and the roll out was not performed when measuring this metric. Here we measure the 90th percentile mean latency of the service- which does not show any undesirable behavior and hence, at the end of the experiment traffic is rolled forward to _reviews-v6_.
+
+### 3. Check the Grafana dashboard
+
+As before, you can check the Grafana dashboard corresponding to the canary release of _reviews-v6_. To get the URL to the dashboard specific to this canary release, run the following command:
+
+```bash
+kubectl get experiment reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
+```
+
+![Grafana Dashboard](../img/grafana_reviews-v3-v6-req-rate.png)
+
+![Grafana Dashboard](../img/grafana_reviews-v3-v6-error-rate.png)
+
+You can also extend the Grafana Dashboard with the new metric by adding a new panel to the dashboard that looks as follows:
+
+Other configurations such as title, legend, etc can be varied as per the user's preference.
+
+![Grafana Dashboard](../img/grafana_reviews-v3-v6-90_perc.png)
