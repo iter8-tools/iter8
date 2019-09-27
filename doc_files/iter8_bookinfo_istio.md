@@ -393,7 +393,7 @@ If you expose your edge service using [Kubernetes Ingress](https://kubernetes.io
 
 ### Edge service exposed using Istio's VirtualService and Gateway
 
-An edge service can also be exposed using Istio's VirtualService and Gateway. To remind you, after we deployed Bookinfo [in Part 1 of the tutorial](#Part-1-Successful-canary-release-_reviews-v2_-to-_reviews-v3_), we exposed the _productpage_ service by creating an Istio Gateway and Virtual Service. The VirtualService defines the mapping from an external hostname to an internal service, and binds that to a specific gateway. 
+An edge service can also be exposed using Istio's VirtualService and Gateway. To remind you, after we deployed Bookinfo [in Part 1 of the tutorial](#part-1-successful-canary-release-reviews-v2-to-reviews-v3), we exposed the _productpage_ service by creating an Istio Gateway and Virtual Service. The VirtualService defines the mapping from an external hostname to an internal service, and binds that to a specific gateway.
 
 We defined _productpage_'s VirtualService and Gateway before using the file `iter8-controller/doc/tutorials/istio/bookinfo/bookinfo-gateway.yaml`, which looks like this:
 
