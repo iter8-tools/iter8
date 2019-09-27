@@ -1,6 +1,12 @@
 # Automated canary releases with iter8 on Kubernetes and Istio
 
-This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice. In the first part of the tutorial, we will walk you through a case where the canary version performs as expected and, therefore, takes over from the previous version at the end. In the second and third parts, we will deal with a canary version that is not satisfactory, in which case _iter8_ will roll back to the previous version.
+This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice.
+
+This tutorial has 4 parts, which are supposed to be tried in order. **Here you will learn:**
+
+- how to perform a canary rollout with _iter8_;
+- how to set different success criteria for _iter8_ to analyze canary releases and determine success or failure; and
+- how _iter8_ can be used for canary releases of both internal and edge services.
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) that is distributed with Istio. This application comprises 4 microservices, namely, _productpage_, _details_, _reviews_, and _ratings_, as illustrated [here](https://istio.io/docs/examples/bookinfo/). Please, follow our instructions below to deploy the sample application as part of the tutorial.
 
