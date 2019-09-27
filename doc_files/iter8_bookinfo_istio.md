@@ -441,7 +441,7 @@ spec:
 
 Above, the VirtualService for _productpage_ is named `bookinfo`.
 
-## 1. Configure a canary rollout for the _productpage_ service
+### 1. Configure a canary rollout for the _productpage_ service
 
 To perform a canary rollout of a service that has been exposed using Istio's VirtualService and Gateway, _iter8_ needs to be pointed to the existing VirtualService object. For rolling out version 2 of the _productpage_ service, we will create an `Experiment` object with the specification below:
 
@@ -491,7 +491,7 @@ NAME                     PHASE   STATUS                       BASELINE         P
 productpage-v2-rollout   Pause   MissingCandidateDeployment   productpage-v1   100          productpage-v2   0
 ```
 
-## 2. Deploy _productpage-v2_ and start the rollout
+### 2. Deploy _productpage-v2_ and start the rollout
 
 To start the rollout let us deploy the candidate version (_productpage-v2_).
 
