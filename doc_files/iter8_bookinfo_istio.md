@@ -383,17 +383,19 @@ kubectl get experiment reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n 
 
 The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is way below the threshold of 0.2 seconds we defined in the latency success criterion, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which specified that the canary's error rate must be within 2% of that of the baseline (_reviews-v3_) version. According to the dashboard, _reviews-v3_ produced no errors at all.
 
-## Part 4: Canary rollout on an edge service
+## Part 4: Canary release for an edge service
 
-Up to now, we have demonstrated on doing a canary rollout for an in-cluster service. Iter8 can help you do canary analysis on an edge service on kubernetes as well. 
+Up to now, we have demonstrated rolling out a new version of an internal service. In this part of the tutorial we will show you how to use _iter8_ to perform a canary analysis for an edge service. By edge service we mean one that is exposed to users and services outside the Kubernetes cluster where it runs. In the case of the Bookinfo sample application we use in the tutorial, the _productpage_ service is the edge service.
 
-### Expose a service with Kubernetes Ingress
-If you expose your service with [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/), then you do not take extra actions. Simply providing the internal service and deployment names to iter8 spec as stated above would be sufficient.
+### Edge service exposed using Kubernetes Ingress
 
-### Expose a service with Istio VirtualService and Gateway
-Istio enables service exposure using VirtualService and Gateway. VirtualService defines the mapping from an external hostname to an internal service, and binds that to a specific gateway. The _productpage_ service in the _bookinfo_ example provides a paradigm for such a usage.  
+If you expose your edge service using [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/), you do not need anything special. The `Experiment` object you will need to create will be similar to the ones you saw in the previous parts of this tutorial.
 
-Just give you a reminder that the _bookinfo_ `VirtualService` exposes service _productpage_ outside of a cluster through `Gateway` _bookinfo-gateway_. Here are their definitions:  
+### Edge service exposed using Istio's VirtualService and Gateway
+
+An edge service can also be exposed using Istio's VirtualService and Gateway. To remind you, after we deployed Bookinfo [in Part 1 of the tutorial](#Part-1-Successful-canary-release-_reviews-v2_-to-_reviews-v3_), we exposed the _productpage_ service by creating an Istio Gateway and Virtual Service. The VirtualService defines the mapping from an external hostname to an internal service, and binds that to a specific gateway. 
+
+We defined _productpage_'s VirtualService and Gateway before using the file `iter8-controller/doc/tutorials/istio/bookinfo/bookinfo-gateway.yaml`, which looks like this:
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -437,7 +439,11 @@ spec:
           number: 9080                                   
 ```
 
-Let's consider deploying a new version of productpage onto the cluster. Instead of creating new routing rules, Iter8 can digest the existing VirtualService specified in the `RoutingReference` section and reuse it during the experiment. 
+Above, the VirtualService for _productpage_ is named `bookinfo`.
+
+## 1. Configure a canary rollout for the _productpage_ service
+
+To perform a canary rollout of a service that has been exposed using Istio's VirtualService and Gateway, _iter8_ needs to be pointed to the existing VirtualService object. For rolling out version 2 of the _productpage_ service, we will create an `Experiment` object with the specification below:
 
 ```yaml
 apiVersion: iter8.tools/v1alpha1
@@ -452,7 +458,7 @@ spec:
   targetService:
     name: productpage
     apiVersion: v1
-    baseline: produtpage-v1
+    baseline: productpage-v1
     candidate: productpage-v2
   trafficControl:
     strategy: check_and_increment
@@ -465,50 +471,51 @@ spec:
     successCriteria:
       - metricName: iter8_latency
         toleranceType: threshold
-        tolerance: 0.2
+        tolerance: 3.0
         sampleSize: 5
-      - metricName: iter8_error_rate
-        toleranceType: delta
-        tolerance: 0.02
-        sampleSize: 10
-        stopOnFailure: true
 ```
 
-Noted that only a single VirtualService is supported by Iter8 right now. If other routing rules are provided, the controller will fail the experiment.
+If you look carefully at the definition above, you will notice a reference to the Istio VirtualService named _bookinfo_. This reference will instruct _iter8_ to manipulate that existing VirtualService for the purposes of traffic management.
 
-Deploy this `Experiment` object onto the cluster:
+Let us now create the `Experiment` object above by running the following command:
 
 ```bash
 kubectl apply -n bookinfo-iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/canary_productpage-v1_to_productpage-v2.yaml
 ```
 
-In order to trigger the experiment to start, let's deploy _productpage_v2_.
+You can verify that the `Experiment` object has been created:
+
+```bash
+$ kubectl get experiment productpage-v2-rollout -n bookinfo-iter8
+NAME                     PHASE   STATUS                       BASELINE         PERCENTAGE   CANDIDATE        PERCENTAGE
+productpage-v2-rollout   Pause   MissingCandidateDeployment   productpage-v1   100          productpage-v2   0
+```
+
+## 2. Deploy _productpage-v2_ and start the rollout
+
+To start the rollout let us deploy the candidate version (_productpage-v2_).
+
 ```bash
 kubectl apply -n bookinfo-iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/productpage-v2.yaml
 ```
 
-Now if you inspect into the VirtualService, you should see something changed in the `route` section like this:
+You can verify that experiment has started:
+
+```bash
+$ kubectl get experiment productpage-v2-rollout -n bookinfo-iter8
+NAME                     PHASE         STATUS                  BASELINE         PERCENTAGE   CANDIDATE        PERCENTAGE
+productpage-v2-rollout   Progressing   Iteration 1 Completed   productpage-v1   80           productpage-v2   20
+```
+
+Now, if you inspect the `bookinfo` VirtualService, you should see a change in the `route` section reflecting the current traffic split.
+
+```bash
+kubectl get vs bookinfo -n bookinfo-iter8 -o yaml
+```
+
+If you look at the spec of that VirtualService, you will see something like this:
 
 ```yaml
-apiVersion: v1
-items:
-- apiVersion: networking.istio.io/v1alpha3
-  kind: VirtualService
-  metadata:
-    annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"networking.istio.io/v1alpha3","kind":"VirtualService","metadata":{"annotations":{},"name":"bookinfo","namespace":"bookinfo-iter8"},"spec":{"gateways":["bookinfo-gateway"],"hosts":["bookinfo.sample.dev"],"http":[{"match":[{"uri":{"exact":"/productpage"}},{"uri":{"exact":"/login"}},{"uri":{"exact":"/logout"}},{"uri":{"prefix":"/api/v1/products"}}],"route":[{"destination":{"host":"productpage","port":{"number":9080}}}]}]}}
-    creationTimestamp: "2019-09-10T17:33:52Z"
-    generation: 6
-    labels:
-      iter8-tools/experiment: productpage-v2-rollout
-      iter8-tools/host: productpage
-      iter8-tools/role: progressing
-    name: bookinfo
-    namespace: bookinfo-iter8
-    resourceVersion: "58304434"
-    selfLink: /apis/networking.istio.io/v1alpha3/namespaces/bookinfo-iter8/virtualservices/bookinfo
-    uid: 280d383b-d3f1-11e9-998e-7aed10235bf4
   spec:
     gateways:
     - bookinfo-gateway
@@ -530,19 +537,15 @@ items:
           port:
             number: 9080
           subset: baseline
-        weight: 40
+        weight: 80
       - destination:
           host: productpage
           port:
             number: 9080
           subset: candidate
-        weight: 60
-kind: List
-metadata:
-  resourceVersion: ""
-  selfLink: ""
+        weight: 20
 ```
 
-Noted that if the `route` list contains multiple sections, the first qualified one will be used.   
+As the canary rollout progresses, you should see the traffic shifting to the candidate version (_productpage-v2_).
 
-After several iterations, you should be able to see traffic shiftied to new version.
+Of course, you can check the Grafana dashboard as before.
