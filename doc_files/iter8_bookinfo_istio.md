@@ -464,9 +464,19 @@ To create the above `Experiment` object, run the following command:
 kubectl apply -n bookinfo-iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v6.yaml
 ```
 
+As usual, iter8 is waiting for the candidate version to be deployed:
+```bash
+$ kubectl get experiments -n bookinfo-iter8
+NAME                 PHASE       STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Failed      NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   Failed      Aborted, Traffic: AllToBaseline.                   reviews-v3   100          reviews-v5   0
+reviews-v6-rollout   Pause       MissingCandidateDeployment                         reviews-v3   100          reviews-v6   0
+```
+
 ### 2. Deploy _reviews-v6_ and start the rollout
 
-As you already know, as soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, the candidate version (_reviews-v6_) is the same service as the one used in the previous iteration except that a different metric is measured during the rollout test. The service still has a bug that causes it to return HTTP errors to its callers like last time; However, here we are measuring the service's 90th percentile latency which behaves normally. As a result, _iter8_ will roll forward to the candidate version based on the success criterion on the newly extended metric defined above.
+As soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, the candidate version (_reviews-v6_) is the similar to the earlier _reviews-v3_ which behaved normally. As a result, _iter8_ will roll forward to the candidate version based on the success criterion on the newly extended metric defined above.
 
 To deploy _reviews-v6_, run the following command:
 
