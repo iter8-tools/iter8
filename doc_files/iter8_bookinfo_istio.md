@@ -476,7 +476,7 @@ reviews-v6-rollout   Pause       MissingCandidateDeployment                     
 
 ### 2. Deploy _reviews-v6_ and start the rollout
 
-As soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, the candidate version (_reviews-v6_) is the similar to the earlier _reviews-v3_ which behaved normally. As a result, _iter8_ will roll forward to the candidate version based on the success criterion on the newly extended metric defined above.
+As soon as we deploy the candidate version, _iter8-controller_ will start the rollout. This time, the candidate version (_reviews-v6_) is similar to the earlier _reviews-v3_ which behaved normally. As a result, _iter8_ will roll forward to the candidate version based on the success criterion on the newly extended metric defined above.
 
 To deploy _reviews-v6_, run the following command:
 
@@ -507,7 +507,7 @@ reviews-v5-rollout   Failed      Aborted, Traffic: AllToBaseline.               
 reviews-v6-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v3   0            reviews-v6   100
 ```
 
-Note that _reviews-v6_ is the same service as _reviews-v5_ used in part 3 and returns HTTP errors to its callers. In part 3 the success criteria of the candidate version was analyzed by its the error rate and the roll out was not performed when measuring this metric. Here we measure the 90th percentile mean latency of the service- which does not show any undesirable behavior and hence, at the end of the experiment traffic is rolled forward to _reviews-v6_.
+Note that _reviews-v6_ is the same service as _reviews-v3_ used earlier. In earlier experiments, the success criteria of the candidate version was analyzed by its average latency and error rate. Here we measure the 90th percentile mean latency of the service- which is the metric we newly added to the configmap- and at the end of the experiment traffic is rolled forward to _reviews-v6_.
 
 ### 3. Check the Grafana dashboard
 
