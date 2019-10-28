@@ -1,96 +1,129 @@
-# Iter8 Experiment API
-Iter8 Experiment CRD includes 3 parts -- Spec, Metrics and Status. 
+# iter8 Experiment CRD
 
-## Spec
-Spec allows user to specify details of the experiment.
+When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment`. Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD 3 sections: `spec`, `metrics`, and `status`.
+
+## Experiment Spec
+
+Following the Kubernetes model, the `spec` section specifies the details of the object and its desired state. The `spec` of an `Experiment` custom resource identifies the target service of a canary release or A/B test, the baseline deployment corresponding to the stable service version, the candidate deployment corresponding to the service version being assessed, etc. In the YAML representation below, we show sample values for the `spec` attributes and comments describing their meaning and whether or not they are optional.
+
 ```yaml
 spec:
     # targetService specifies the reference to experiment targets
     targetService:
-      # apiVersion of the target service
-      # required; options:
-      # v1: target service is a kubernetes service 
-      # serving.knative.dev/v1alpha1: tarfet service is a knative service
+
+      # apiVersion of the target service (required) 
+      # options:
+      #   v1: indicates that the target service is a Kubernetes service 
+      #   serving.knative.dev/v1alpha1: indicates that the target service is a Knative service
       apiVersion: v1
-      # name of target service
+
+      # name of target service (required) 
+      # identifies either a Kubernetes service or a Knative service
       name: reviews
-      # The baseline and candidate for comparison
-      # required; For Kubernetes, these two components refer to names of deployments
-      # For Knative, they are names of revisions
+
+      # the baseline and candidate versions of the target service (required)
+      # for Kubernetes, these two components refer to names of deployments
+      # for Knative, they are names of revisions
       baseline: reviews-v3
       candidate: reviews-v5
-    # RoutingReference provides references to routing rules
-    # optional; now only a single istio virtualservice can be supported
+
+    # routingReference is a reference to an existing Istio VirtualService (optional)
+    # this should be used only if an Istio VirtualService has already been defined for the target Kubernetes service
     routingReference:
       apiversion: networking.istio.io/v1alpha3
       kind: VirtualService
       name: reviews-external
+    
     # analysis contains the parameters for configuring the analytics service
     analysis:
-      # analyticsService specifies analytics service endpoint
-      # optional; Default is http://iter8-analytics:5555
+    
+      # analyticsService specifies analytics service endpoint (optional)
+      # default value is http://iter8-analytics:5555
       analyticsService: http://iter8-analytics.iter8
-      # endpoint to Grafana Dashboard
-      # optional; Default is http://localhost:3000
+
+      # endpoint to Grafana dashboard (optional)
+      # default is http://localhost:3000
       grafanaEndpoint: http://localhost:3000
-      # successCriteria contains the list of criteria for assessing the candidate version
-      # optional; If the list is empty, the controller will progress without contacting the analytics service
+
+      # successCriteria is a list of criteria for assessing the candidate version (optional)
+      # if the list is empty, the controller will not rely on the analytics service
       successCriteria:
-      # metricName: Name of the metric to which the criterion applies.
-      # This refers to the definitions in the Metrics section.
-      # requried; Default options: 
-      # iter8_latency: mean latency of the service 
-      # iter8_error_rate: mean error rate (~5** HTTP Status codes) of the service
-      # iter8_error_count: total error count (~5** HTTP Status codes) of the service
+
+      # metricName: name of the metric to which this criterion applies (required)
+      # the name should match the name of an iter8 metric or that of a user-defined custom metric
+      # names of metrics supported by iter8 out of the box:
+      #   iter8_latency: mean latency of the service 
+      #   iter8_error_rate: mean error rate (~5** HTTP Status codes) of the service
+      #   iter8_error_count: total error count (~5** HTTP Status codes) of the service
       - metricName: iter8_latency
-        # Minimum number of data points required to make a decision based on this criterion; 
-        # optional; Default is 10.
-        sampleSize: 5
-        # The value to check for toleranceType
+
+        # minimum number of data points required to make a decision based on this criterion (optional)
+        # default is 10
+        sampleSize: 100
+
+        # the metric value for the candidate version defining this success criterion (required)
+        # it can be an absolute threshold or one relative to the baseline version, depending on the
+        # attribute toleranceType described next
         tolerance: 0.2
-        # required; Options: 
-        # delta: compares the candidate against the baseline version with respect to the metric;
-        # threshold: checks the candidate with respect to the metric
+
+        # indicates if the tolerance value above should be interpreted as an absolute threshold or
+        # a threshold relative to the baseline (required)
+        # options: 
+        #   threshold: the metric value for the candidate must be below the tolerance value above
+        #   delta: the tolerance value above indicates the percentage within which the candidate metric value can deviate
+        # from the baseline metric value
         toleranceType: threshold
-        # Indicates whether or not the experiment must finish if this criterion is not satisfied; 
-        # optional; Default is false.
+
+        # indicates whether or not the experiment must finish if this criterion is not satisfied (optional)
+        # default is false
         stopOnFailure: false
-    # trafficControl controls the behavior of the controller
+  
+    # trafficControl controls the experiment durarion and how the controller should change the traffic split
     trafficControl:
-      # time before the next increment.
-      # optional; Default is 1mn
+
+      # frequency with which the controller calls the analytics service
+      # it corresponds to the duration of each "iteration" of the experiment
       interval: 30s
-      # Maximum number of iterations for this experiment. 
-      # optional; Default is 100.
+
+      # maximum number of iterations for this experiment (optional)
+      # the duration of an experiment is defined by maxIterations * internal
+      # default is 100
       maxIterations: 6
-      # the maximum traffic ratio to send to the candidate. 
-      # optional; Default is 50
+
+      # the maximum traffic percentage to send to the candidate during an experiment (optional)
+      # default is 50
       maxTrafficPercentage: 80
-      # strategy is the strategy used for experiment. 
-      # Options:
-      # check_and_increment: get decision on traffic increament from analytics 
-      # increment_without_check: increase traffic each intervalwithout calling analytics
-      # optional; Default is check_and_increment
+
+      # strategy used to analyze the candidate and shift the traffic (optional)
+      # except for the strategy increment_without_check, the analytics service is called
+      # at each iteration and responds with the appropriate traffic split which the controller honors
+      # options:
+      #   check_and_increment
+      #   increment_without_check: increase traffic to candidate by trafficStepSize at each iteration without calling analytics
+      # default is check_and_increment
       strategy: check_and_increment
-      # the traffic increment per interval.
-      # optional; Default is 2.0
+
+      # the maximum traffic increment per iteration (optional)
+      # default is 2.0
       trafficStepSize: 20
-      # Determines how the traffic must be split at the end of the experiment; 
-      # optional; options: 
-      # baseline: all traffic goes to the baseline version; 
-      # candidate: all traffic goes to the candidate version;
-      # both: traffic is split across baseline and candidate.
-      # Default to candidate.
+  
+      # determines how the traffic must be split at the end of the experiment (optional)
+      # options: 
+      #   baseline: all traffic goes to the baseline version
+      #   candidate: all traffic goes to the candidate version
+      #   both: traffic is split across baseline and candidate
+      # default is candidate
       onSuccess: candidate
-    # a flag set to terminate experiment externally with action
-    # optional; Default is "".
-    # Options:
-    # override_success: terminate experiment with condition specified in onSuccess
-    # override_failure: terminate experiment with failure condition
+
+    # a flag that allows the user to terminate an ongoing experiment (optional)
+    # options:
+    #   override_success: terminate the experiment indicating that the candidate succeeded
+    #   override_failure: abort the experiment indicating that the candidate failed
+    # default is the empty string
     assessment: ""
 ```
 
-## Metrics 
+## Experiment Metrics 
 Metrics are stored as a map from metric name to metric definition (`query_template`, `sample_size_template`, `type`).   
 They are read from _`iter8_metrics`_ configmap in runtime.  
 Only metrics referenced in `.spec.analysis.successCriteria` will be cached in runtime object.  
@@ -106,7 +139,7 @@ metrics:
       type: Performance
 ```
 
-## Status
+## Experiment Status
 Iter8 status includes the runtime details of an experiment.
 ```yaml
   status:
