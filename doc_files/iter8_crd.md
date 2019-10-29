@@ -1,6 +1,6 @@
 # iter8 Experiment CRD
 
-When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment`. Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD 3 sections: `spec`, `metrics`, and `status`.
+When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment`. Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 3 sections: `spec`, `metrics`, and `status`.
 
 ## Experiment Spec
 
@@ -123,11 +123,12 @@ spec:
     assessment: ""
 ```
 
-## Experiment Metrics 
-Metrics are stored as a map from metric name to metric definition (`query_template`, `sample_size_template`, `type`).   
-They are read from _`iter8_metrics`_ configmap in runtime.  
-Only metrics referenced in `.spec.analysis.successCriteria` will be cached in runtime object.  
-Here shows a example of how a metric is stored in an experiment object.  
+## Experiment Metrics
+
+Information about all Prometheus metrics known to iter8 are stored in a Kubernetes `ConfigMap` named _`iter8_metrics`_. When iter8 is installed, that `ConfigMap` is populated with information on the 3 metrics that iter8 supports out of the box, namely: `iter8_latency`, `iter8_error_rate`, and `iter8_error_count`. Users can add their own custom metrics.
+
+When an `Experiment` custom resource is created, the iter8 controller will store information on the metrics referenced by `.spec.analysis.successCriteria` in the `metrics` section of the resource. The information about a metric allows the iter8 analytics service to query Prometheus to retrieve metric values for the baseline version and the canary version. Below we show an example of how a metric is stored in an `Experiment` object.
+
 ```yaml
 metrics:
   iter8_latency:
