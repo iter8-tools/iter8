@@ -1,8 +1,8 @@
-# iter8 Experiment CRD
+# iter8 `Experiment` CRD
 
 When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment`. Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 3 sections: `spec`, `metrics`, and `status`.
 
-## Experiment spec
+## `Experiment spec`
 
 Following the Kubernetes model, the `spec` section specifies the details of the object and its desired state. The `spec` of an `Experiment` custom resource identifies the target service of a candidate release or A/B test, the baseline deployment corresponding to the stable service version, the candidate deployment corresponding to the service version being assessed, etc. In the YAML representation below, we show sample values for the `spec` attributes and comments describing their meaning and whether or not they are optional.
 
@@ -123,7 +123,7 @@ spec:
     assessment: ""
 ```
 
-## Experiment metrics
+## `Experiment metrics`
 
 Information about all Prometheus metrics known to iter8 are stored in a Kubernetes `ConfigMap` named _`iter8_metrics`_. When iter8 is installed, that `ConfigMap` is populated with information on the 3 metrics that iter8 supports out of the box, namely: `iter8_latency`, `iter8_error_rate`, and `iter8_error_count`. Users can add their own custom metrics.
 
@@ -140,7 +140,7 @@ metrics:
       type: Performance
 ```
 
-## Experiment status
+## `Experiment status`
 
 Following the Kubernetes model, the `status` section contains all relevant runtime details pertaining to the `Experiment` custom resource. In the YAML representation below, we show sample values for the `status` attributes and comments describing their meaning.
 

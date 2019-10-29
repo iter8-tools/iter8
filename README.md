@@ -9,6 +9,10 @@ Iter8 supports cloud-native, automated canary releases and A/B testing, driven b
 
 * _iter8-controller_: A Kubernetes controller that automates canary releases and A/B testing by gradually adjusting the traffic across different versions of a microservice. For instance, in the case of a canary release, the controller will gradually shift the traffic to the canary version if it is performing as expected, until the canary replaces the baseline (previous) version. If the canary is found not to be satisfactory, the controller rolls back by shifting all the traffic to the baseline version. Traffic decisions are made by _iter8-analytics_ and honored by the controller.
 
+## The `Experiment` CRD
+
+When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment` and it is documented [here](doc_files/iter8_crd.md).
+
 ## Supported environments
 
 The _iter8-controller_ currently supports the following Kubernetes-based environments, whose traffic-management capabilities are used:
