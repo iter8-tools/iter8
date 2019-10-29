@@ -2,9 +2,9 @@
 
 When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment`. Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 3 sections: `spec`, `metrics`, and `status`.
 
-## Experiment Spec
+## Experiment spec
 
-Following the Kubernetes model, the `spec` section specifies the details of the object and its desired state. The `spec` of an `Experiment` custom resource identifies the target service of a canary release or A/B test, the baseline deployment corresponding to the stable service version, the candidate deployment corresponding to the service version being assessed, etc. In the YAML representation below, we show sample values for the `spec` attributes and comments describing their meaning and whether or not they are optional.
+Following the Kubernetes model, the `spec` section specifies the details of the object and its desired state. The `spec` of an `Experiment` custom resource identifies the target service of a candidate release or A/B test, the baseline deployment corresponding to the stable service version, the candidate deployment corresponding to the service version being assessed, etc. In the YAML representation below, we show sample values for the `spec` attributes and comments describing their meaning and whether or not they are optional.
 
 ```yaml
 spec:
@@ -123,11 +123,11 @@ spec:
     assessment: ""
 ```
 
-## Experiment Metrics
+## Experiment metrics
 
 Information about all Prometheus metrics known to iter8 are stored in a Kubernetes `ConfigMap` named _`iter8_metrics`_. When iter8 is installed, that `ConfigMap` is populated with information on the 3 metrics that iter8 supports out of the box, namely: `iter8_latency`, `iter8_error_rate`, and `iter8_error_count`. Users can add their own custom metrics.
 
-When an `Experiment` custom resource is created, the iter8 controller will check the metric names referenced by `.spec.analysis.successCriteria`, look them up in the `ConfigMap`, retrieve the information about them from the `ConfigMap`, and store that information in the `metrics` section of the newly created `Experiment` object. The information about a metric allows the iter8 analytics service to query Prometheus to retrieve metric values for the baseline version and the canary version. Below we show an example of how a metric is stored in an `Experiment` object.
+When an `Experiment` custom resource is created, the iter8 controller will check the metric names referenced by `.spec.analysis.successCriteria`, look them up in the `ConfigMap`, retrieve the information about them from the `ConfigMap`, and store that information in the `metrics` section of the newly created `Experiment` object. The information about a metric allows the iter8 analytics service to query Prometheus to retrieve metric values for the baseline version and candidate versions of the service . Below we show an example of how a metric is stored in an `Experiment` object.
 
 ```yaml
 metrics:
@@ -140,64 +140,82 @@ metrics:
       type: Performance
 ```
 
-## Experiment Status
-Iter8 status includes the runtime details of an experiment.
+## Experiment status
+
+Following the Kubernetes model, the `status` section contains all relevant runtime details pertaining to the `Experiment` custom resource. In the YAML representation below, we show sample values for the `status` attributes and comments describing their meaning.
+
 ```yaml
   status:
     # the last analysis state
     analysisState: {}
+
     # assessment returned from the analytics service
     assessment:
       conclusions:
       - Experiment started
-    # A list of boolean conditions describing the status of experiment
-    # For each condition, if the status is "False", the reason field will give detailed explanations
-    # lastTransistionTime records the time when the last condition change is triggered
-    # When a condition is not set, its status will be "Unknown"
+
+    # list of boolean conditions describing the status of the experiment
+    # for each condition, if the status is "False", the reason field will give detailed explanations
+    # lastTransitionTime records the time when the last change happened to the corresponding condition
+    # when a condition is not set, its status will be "Unknown"
     conditions:
-    # AnalyticsServiceNormal is "True" when the controller can get interpretable response from the anaytics server
+
+    # AnalyticsServiceNormal is "True" when the controller can get an interpretable response from the analytics service
     - lastTransitionTime: "2019-08-26T14:13:08Z"
       status: "True"
       type: AnalyticsServiceNormal
+
     # ExperimentCompleted tells whether the experiment is completed or not
     - lastTransitionTime: "2019-08-26T14:13:39Z"
       status: "True"
       type: ExperimentCompleted
-    # ExperimentSucceeded indicates whether the experiment is succeeded or not when it's completed
+
+    # ExperimentSucceeded indicates whether the experiment succeeded or not when it is completed
     - lastTransitionTime: "2019-08-26T14:13:39Z"
       reason: 'Aborted, Traffic: AllToBaseline.'
       status: "False"
       type: ExperimentSucceeded
-    # MetricsSynced states whether the required metrics have been synced from configmap into the Metrics section
+
+    # MetricsSynced states whether the referenced metrics have been retrieved from the ConfigMap and stored in the metrics section
     - lastTransitionTime: "2019-08-26T14:12:53Z"
       status: "True"
       type: MetricsSynced
-    # Ready records the status of any last-updated condition
+
+    # Ready records the status of the latest-updated condition
     - lastTransitionTime: "2019-08-26T14:13:39Z"
       reason: 'Aborted, Traffic: AllToBaseline.'
       status: "False"
       type: Ready
-    # TargetsProvided is "True" when all components in the targetService section are detected by the controller; otherwise, missing elements will be shown in the reason field 
+
+    # TargetsProvided is "True" when both the baseline and the candidate versions of the targetService are detected by the controller; otherwise, missing elements will be shown in the reason field
     - lastTransitionTime: "2019-08-26T14:13:08Z"
       status: "True"
       type: TargetsProvided
-    # the iteration that experiment is 
+
+    # the current experiment's iteration
     currentIteration: 1
-    # Unix timestamp in milliseconds
+
+    # Unix timestamp in milliseconds corresponding to when the experiment started
     startTimestamp: "1566828773475"
+
+    # Unix timestamp in milliseconds corresponding to when the experiment finished
     endTimestamp: "1566828819018"
-    # The url to grafana dashboard
+
+    # The url to he Grafana dashboard pertaining to this experiment
     grafanaURL: http://localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=bookinfo-iter8&var-service=reviews&var-baseline=reviews-v3&var-candidate=reviews-v5&from=1566828773475&to=1566828819018
-    # the time when last iteration is completed
+
+    # the time when the previous iteration was completed
     lastIncrementTime: "2019-08-26T14:13:08Z"
-    # This is the message to be shown in the STATUS of kubectl printer, which shows the abstract of the experiment status
+
+    # this is the message to be shown in the STATUS column for the `kubectl` printer, which summarizes the experiment situation
     message: 'Aborted, Traffic: AllToBaseline.'
-    # the phase of the experiment; 
+
+    # the experiment's current phase 
     # values could be: Initializing, Progressing, Pause, Succeeded, Failed
     phase: Failed
-    # the percentage of traffic to baseline and candidate
+
+    # the current traffic split
     trafficSplitPercentage:
       baseline: 100
       candidate: 0
-
   ```
