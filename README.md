@@ -3,7 +3,7 @@
 
 ## What is iter8 about?
 
-Iter8 supports cloud-native, automated canary releases and A/B testing, driven by analytics based on robust statistical techniques. The project comprises two components:
+Iter8 supports cloud-native, automated canary releases and A/B testing, driven by analytics based on robust statistical techniques. It comprises two components:
 
 * _iter8-analytics_: A service that assesses the behavior of different microservice versions by (1) looking at metrics associated with each version and (2) applying robust statistical techniques to analyze the data online in order to determine which version is the best one with respect to the metrics of interest and which versions pass a set of success criteria. Multiple success criteria can be defined by the users; each criterion can refer to a different metric and specify absolute acceptable thresholds as well as comparative thresholds meant to define how much a candidate version can deviate from a baseline (stable) version. The _iter8_analytics_ service exposes a REST API; each time it is called, the service returns the result of the data analysis along with a recommendation for how the traffic should be split across all microservice versions. The _iter8_analytics_' REST API is used by _iter8_controller_, which is described next.
 
