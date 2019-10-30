@@ -1,6 +1,13 @@
 # iter8 `Experiment` CRD
 
-When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment`. Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 3 sections: `spec`, `metrics`, and `status`.
+When iter8 is installed, a new Kubernetes CRD is added to your cluster. Our CRD kind and current API version are as follows:
+
+```yaml
+apiVersion: iter8.tools/v1alpha1
+kind: Experiment
+```
+
+Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 3 sections: `spec`, `metrics`, and `status`.
 
 ## `Experiment spec`
 
