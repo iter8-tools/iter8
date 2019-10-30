@@ -11,7 +11,7 @@ Iter8 supports cloud-native, automated canary releases and A/B testing, driven b
 
 ## The `Experiment` CRD
 
-When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD is named `Experiment` and it is documented [here](doc_files/iter8_crd.md).
+When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD kind is `Experiment` and it is documented [here](doc_files/iter8_crd.md).
 
 ## Supported environments
 
