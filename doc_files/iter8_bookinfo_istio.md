@@ -145,8 +145,8 @@ You can verify that the `Experiment` object has been created as shown below:
 
 ```bash
 $ kubectl get experiments -n bookinfo-iter8
-NAME                 PHASE   STATUS                       BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Pause   MissingCandidateDeployment   reviews-v2   100          reviews-v3   0
+NAME                 PHASE   STATUS                               BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Pause   TargetsNotFound, Missing Candidate   reviews-v2   100          reviews-v3   0
 ```
 
 As you can see, _iter8_ is reporting that 100% of the traffic is sent to the baseline version (_reviews-v2_) and that the candidate (_reviews-v3_) is missing. As soon as the controller sees the candidate version, it will start the rollout. Next, let us deploy the candidate version to trigger the canary rollout.
@@ -163,8 +163,8 @@ Now, if you check the state of the `Experiment` object corresponding to this rol
 
 ```bash
 $ kubectl get experiments -n bookinfo-iter8
-NAME                 PHASE         STATUS                  BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Progressing   Iteration 1 Completed   reviews-v2   80           reviews-v3   20
+NAME                 PHASE         STATUS                                  BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Progressing   ProgressUpdate, Iteration 1 Completed   reviews-v2   80           reviews-v3   20
 ```
 
 At about every 30s you should see the traffic shift towards _reviews-v3_ by 20 percentage points.
@@ -195,8 +195,8 @@ At this point, you must have completed the part 1 of the tutorial successfully. 
 
 ```bash
 $ kubectl get experiment reviews-v3-rollout -n bookinfo-iter8
-NAME                 PHASE       STATUS                                           BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
+NAME                 PHASE       STATUS                                                                BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded   ExperimentSucceeded, AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
 ```
 
 The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before.
@@ -243,9 +243,9 @@ You can list all `Experiment` objects like so:
 
 ```bash
 $ kubectl get experiments -n bookinfo-iter8
-NAME                 PHASE       STATUS                                           BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
-reviews-v4-rollout   Pause       MissingCandidateDeployment                       reviews-v3   100          reviews-v4   0
+NAME                 PHASE       STATUS                                                                BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded   ExperimentSucceeded, AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Pause       TargetsNotFound, Missing Candidate                                    reviews-v3   100          reviews-v4   0
 ```
 
 The output above shows the new object you just created, for which the candidate deployment _reviews-v4_ is missing. Let us deploy _reviews-v4_ next so that the rollout can begin.
@@ -264,17 +264,17 @@ Now, if you check the state of the `Experiment` object corresponding to this rol
 
 ```bash
 $ kubectl get experiments -n bookinfo-iter8
-NAME                 PHASE         STATUS                                           BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Succeeded     AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
-reviews-v4-rollout   Progressing   Iteration 1 Completed                            reviews-v3   80           reviews-v4   20
+NAME                 PHASE         STATUS                                                                BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded     ExperimentSucceeded, AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Progressing   ProgressUpdate, Iteration 1 Completed                                 reviews-v3   80           reviews-v4   20
 ```
 
 However, unlike the previous rollout, traffic will not shift towards the candidate _reviews-v4_ because it does not meet the success criteria due to a performance problem. At the end of the experiment, _iter8_ rolls back to the baseline (_reviews-v3_), as seen below:
 
 ```bash
 $ kubectl get experiment reviews-v4-rollout -n bookinfo-iter8
-NAME                 PHASE    STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v4-rollout   Failed   NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
+NAME                 PHASE       STATUS                                                                BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v4-rollout   Failed      ExperimentFailed, NotAllSuccessCriteriaMet, Traffic: AllToBaseline    reviews-v3   100          reviews-v4   0
 ```
 
 ### 3. Check the Grafana dashboard
@@ -296,9 +296,9 @@ At this point, you must have completed parts 1 and 2 of the tutorial successfull
 
 ```bash
 $ kubectl get experiments -n bookinfo-iter8
-NAME                 PHASE       STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v2   0            reviews-v3   100
-reviews-v4-rollout   Failed      NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
+NAME                 PHASE       STATUS                                                                BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded   ExperimentSucceeded, AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Failed      ExperimentFailed, NotAllSuccessCriteriaMet, Traffic: AllToBaseline    reviews-v3   100          reviews-v4   0
 ```
 
 The command above's output shows that _reviews-v3_ took over from _reviews-v2_ as part of the canary rollout performed before on part 1, and that it continues to be the current version after iter8 had determined that _reviews-v4_ was unsatisfactory.
@@ -360,20 +360,20 @@ If you check the state of the `Experiment` object corresponding to this rollout,
 
 ```bash
 $ kubectl get experiments -n bookinfo-iter8
-NAME                 PHASE         STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Succeeded     AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v2   0            reviews-v3   100
-reviews-v4-rollout   Failed        NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
-reviews-v5-rollout   Progressing   Iteration 1 Completed                              reviews-v3   80           reviews-v5   20
+NAME                 PHASE         STATUS                                                                BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded     ExperimentSucceeded, AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Failed        ExperimentFailed, NotAllSuccessCriteriaMet, Traffic: AllToBaseline    reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   Progressing   ProgressUpdate, Iteration 1 Completed                                 reviews-v3   80           reviews-v5   20
 ```
 
 Because _review-v5_ has an issue causing it to return HTTP errors, as per the success criteria we have specified the traffic will not shift towards it. Furthermore, because the error-rate success criteria indicated the need to stop on failure, without waiting for the entire duration of the experiment, iter8 will rollback to _reviews-v3_ quickly. You should see the following after several seconds:
 
 ```bash
 $ kubectl get experiments -n bookinfo-iter8
-NAME                 PHASE       STATUS                                             BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
-reviews-v3-rollout   Succeeded   AllSuccessCriteriaMet, Traffic: AllToCandidate     reviews-v2   0            reviews-v3   100
-reviews-v4-rollout   Failed      NotAllSuccessCriteriaMet, Traffic: AllToBaseline   reviews-v3   100          reviews-v4   0
-reviews-v5-rollout   Failed      Aborted, Traffic: AllToBaseline.                   reviews-v3   100          reviews-v5   0
+NAME                 PHASE       STATUS                                                                BASELINE     PERCENTAGE   CANDIDATE    PERCENTAGE
+reviews-v3-rollout   Succeeded   ExperimentSucceeded, AllSuccessCriteriaMet, Traffic: AllToCandidate   reviews-v2   0            reviews-v3   100
+reviews-v4-rollout   Failed      ExperimentFailed, NotAllSuccessCriteriaMet, Traffic: AllToBaseline    reviews-v3   100          reviews-v4   0
+reviews-v5-rollout   Failed      ExperimentFailed, Aborted, Traffic: AllToBaseline.                    reviews-v3   100          reviews-v5   0
 ```
 
 ### 3. Check the Grafana dashboard
@@ -493,8 +493,8 @@ You can verify that the `Experiment` object has been created:
 
 ```bash
 $ kubectl get experiment productpage-v2-rollout -n bookinfo-iter8
-NAME                     PHASE   STATUS                       BASELINE         PERCENTAGE   CANDIDATE        PERCENTAGE
-productpage-v2-rollout   Pause   MissingCandidateDeployment   productpage-v1   100          productpage-v2   0
+NAME                     PHASE   STATUS                               BASELINE         PERCENTAGE   CANDIDATE        PERCENTAGE
+productpage-v2-rollout   Pause   TargetsNotFound, Missing Candidate   productpage-v1   100          productpage-v2   0
 ```
 
 ### 2. Deploy _productpage-v2_ and start the rollout
@@ -509,8 +509,8 @@ You can verify that experiment has started:
 
 ```bash
 $ kubectl get experiment productpage-v2-rollout -n bookinfo-iter8
-NAME                     PHASE         STATUS                  BASELINE         PERCENTAGE   CANDIDATE        PERCENTAGE
-productpage-v2-rollout   Progressing   Iteration 1 Completed   productpage-v1   80           productpage-v2   20
+NAME                     PHASE         STATUS                                  BASELINE         PERCENTAGE   CANDIDATE        PERCENTAGE
+productpage-v2-rollout   Progressing   ProgressUpdate, Iteration 1 Completed   productpage-v1   80           productpage-v2   20
 ```
 
 Now, if you inspect the `bookinfo` VirtualService, you should see a change in the `route` section reflecting the current traffic split.
