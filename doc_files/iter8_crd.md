@@ -128,6 +128,12 @@ spec:
     #   override_failure: abort the experiment indicating that the candidate failed
     # default is the empty string
     assessment: ""
+
+    # indicates whether or not iter8 should perform a clean-up action at the end of the experiment (optional)
+    # if no action is specified, nothing is done to clean up at the end
+    # if used, the currently support actions are:
+    #   delete: at the end of the experiment, the version that ends up with no traffic (if any) is deleted
+    cleanup:
 ```
 
 ## `Experiment metrics`
