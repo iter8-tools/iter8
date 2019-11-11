@@ -3,7 +3,7 @@
 
 ## What is iter8 about?
 
-<img src=img/iter8-overview.png width=50%>
+<img src=img/iter8-overview.png width=65%>
 
 Iter8 supports cloud-native, automated canary releases and A/B testing, driven by analytics based on robust statistical techniques. It comprises two components:
 
