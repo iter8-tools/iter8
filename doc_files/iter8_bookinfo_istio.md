@@ -2,7 +2,7 @@
 
 This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice.
 
-This tutorial has 4 parts, which are supposed to be tried in order. **Here you will learn:**
+This tutorial has 5 parts, which are supposed to be tried in order. **Here you will learn:**
 
 - how to perform a canary rollout with _iter8_;
 - how to set different success criteria for _iter8_ to analyze canary releases and determine success or failure;
