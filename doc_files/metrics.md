@@ -42,7 +42,7 @@ As shown above, the template needs to have a few variables that are used by _ite
 All three variables are required in a query template and the values are calculated by iter8 during the course of an experiment. We also require each Prometheus response to be an [instant vector](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 
 
-### Updating the _iter8-metrics_ _ConfigMap_
+### Updating the _iter8-metrics_ `ConfigMap`
 
 Our sample query template above must be associated with a metric name and added to the _query_templates_ section of the `ConfigMap` as follows:
 
