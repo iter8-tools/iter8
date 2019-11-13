@@ -420,7 +420,7 @@ $ kubectl apply -n iter8 -f iter8-controller/doc/tutorials/istio/bookinfo/iter8_
 ```
 
 #### Note:
-> For additional information about how to add a new metric to the existing configuration please see [this documentation](https://github.com/iter8-tools/docs/blob/master/doc_files/iter8_metrics_extensibility.md).
+> For additional information about how to add a new metric to the existing configuration please see [this documentation](metrics.md).
 
 To verify that the new metric has been added to the configmap, you can check it again:
 
