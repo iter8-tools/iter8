@@ -19,9 +19,12 @@ In particular, the following metrics, based on telemetry data collected by Istio
 When iter8 is installed, a Kubernetes `ConfigMap` named _iter8-metrics_ is populated with a definition for each of the above metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). A few things to note in the definitions:
 
 - Each metric is defined under the `metrics` section.
-- They each refer back to a Prometheus query template defined under the `query_templates` section.
+
+- They each refer back to a Prometheus query template defined under the `query_templates` section. Iter8 uses that template to compute the value of the metric for a service version.
+
 - The metrics have a type, which can be either `Correctness` or `Performance`, depending on what they measure.
-- Finally, each metric is associated with another required parameter called `sample_size_query_template`. Its value refers back to a Prometheus query template defined under `query_templates`, which iter8 uses to compute the total number of requests received by each service in an experiment.
+
+- Finally, each metric is associated with another query template assigned to the attribute `sample_size_query_template`. Iter8 relies on the notion of a sample-size query template to compute the total number of data points used in the computation of the metric values. Each of the iter8-defined metrics is associated with the `iter8_sample_size` query template defined under `query_templates`, which computes the total number of requests received by a service version. For the default iter8 metrics (mean latency, error count, and error rate), the total number of requests is the correct sample size measure.
 
 ## Adding a new metric
 
@@ -61,5 +64,8 @@ Next, we declare the metric and define its type in the _metrics_ section of the 
 In the declaration above, here is how to interpret the metric attributes:
 
   - _name_: Name of the new metric being defined. This value should be same as the associated Prometheus query template.
-  - _metric_type_: Currently, iter8 supports two kinds of metrics- _Performance_ and _Correctness_. _error_count_400s_ is a Correctness metric, since it is a measure of how many errors are produced by the code.
-  - _sample_size_query_template_: This is the query template to be used by iter8 to measure the total number of requests received by the service versions involved in an experiment. Like the three available iter8 metrics, _error_count_400s_ also refers back to the default _iter8_sample_size_ query template defined in the _query_templates_ section of the `ConfigMap`. If needed, a new sample size query template can be defined (with a different name) in the _query_templates_ section and can be referred to in the metric declaration.
+
+  - _metric_type_: Currently, iter8 supports two kinds of metrics- _Performance_ and _Correctness_. _error_count_400s_ is a _Correctness_ metric, since it is a measure of how many errors are produced by the code.
+
+  - _sample_size_query_template_: As explained earlier, this is the query template iter8 uses to compute the total number of data points used in the computation of the metric value. Since the metric we are defining here is supposed to measure the total number of requests that resulted in a 400 HTTP code, the sample size from which that value is computed is represented by the total number of HTTP requests received. Hence, we are relying on the pre-defined sample size query template `iter8_sample_size`, which computes the total umber of HTTP requests. If you are defining a metric that requires the sample size to be computed differently, you can define a new sample-size query template (with a different name) in the _query_templates_ section and reference it in the metric declaration.
+  
