@@ -106,6 +106,7 @@ spec:
       # at each iteration and responds with the appropriate traffic split which the controller honors
       # options:
       #   check_and_increment
+      #   epsilon_greedy
       #   increment_without_check: increase traffic to candidate by trafficStepSize at each iteration without calling analytics
       # default is check_and_increment
       strategy: check_and_increment

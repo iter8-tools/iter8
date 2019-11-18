@@ -38,6 +38,10 @@ The following tutorials will help you get started with iter8:
 * [Automated canary releases with iter8 on Knative](doc_files/iter8_bookinfo_knative.md)
 * [Automated canary release with iter8 on Kubernetes and Istio using Tekton](doc_files/iter8_tekton_task.md)
 
+## Algorithms behind iter8
+
+A key goal of this project is to introduce statistically robust algorithms for decision making during cloud-native canary releases and A/B testing experiments. We currently support [two algorithms](doc_files/algorithms.md) and plan to introduce other sophisticated algorithms based on Bayesian approaches. Stay tuned!
+
 ## Integrations
 
 Iter8 is integrated with [Tekton Pipelines](https://tekton.dev) for an end-to-end CI/CD experience, and with [KUI](https://www.kui.tools), for a richer Kubernetes command-line experience. Initial integrations with these two technologies already exist, but we are actively improving them. Stay tuned!
