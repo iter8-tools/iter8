@@ -18,7 +18,7 @@ onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 
 This algorithm is suitable for the gradual rollout of a candidate ("canary") version. The goal of this strategy is to gradually shift traffic from a baseline (stable) version to a candidate version, as long as the candidate version continues to pass the success criteria defined by the user. 
 
-When the `experiment` begins, the traffic is split as follows: `trafficStepSize`% to the candidate version, and `100 - trafficStepSize`% to the baseline version. At the end of each iteration (whose duration is determined by the `interval` parameter), iter8 checks if there are enough data points to decide whether the candidate version satisfies the success criteria. In case a decision can be made and the candidate version passes all criteria, iter8 increases the traffic to the candidate version by `trafficStepSize`. In case the candidate version does no pass at least one success criterion, the traffic split does not change; furthermore if a failing criterion has been declared by the user as critical, iter8 aborts the experiment and makes sure all traffic goes to the baseline version. This is a rollback situation.
+When the `experiment` begins, the traffic is split as follows: `trafficStepSize`% to the candidate version, and `100 - trafficStepSize`% to the baseline version. At the end of each iteration (whose duration is determined by the `interval` parameter), iter8 checks if there are enough data points to decide whether the candidate version satisfies the success criteria. In case a decision can be made and the candidate version passes all criteria, iter8 increases the traffic to the candidate version by `trafficStepSize`. In case the candidate version does not pass at least one success criterion, the traffic split does not change; furthermore if a failing criterion has been declared by the user as critical, iter8 aborts the experiment and makes sure all traffic goes to the baseline version. This is a rollback situation.
 
 A successful experiment will last for `interval * maxIterations`. In case of a success, the user can specify whether iter8 should: (1) make the candidate receive all traffic; (2) roll back to the baseline despite the success; or (3) keep the traffic to both versions. If the traffic must continue to be divided between the two versions, the final split will be as follows: `maxTrafficPercentage`% to the candidate and `1 - maxTrafficPercentage` to the baseline.
 
@@ -37,7 +37,7 @@ Unlike the previously described check-and-increment strategy, this algorithm aut
 
 In A/B or A/B/n testing, the "optimality" of a version relates to maximizing the reward during the course of an experiment while satisfying the success criteria. In the context of canary releases, an implicit boolean reward is used to indicate whether or not the success criteria are satisfied at each iteration.
 
-## 3. Probabilistic Bayesian Routing (`pbr`)
+## 3. Posterior Bayesian Routing (`pbr`)
 
 One of our novel algorithms. Coming soon to iter8...
 
