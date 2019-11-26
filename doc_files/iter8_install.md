@@ -70,24 +70,28 @@ iter8-analytics              ClusterIP   172.21.106.44   <none>        80/TCP   
 
 To enable users to see Prometheus metrics that pertain to their canary releases, iter8 provides a Grafana dashboard template. To take advantage of Grafana, you will need to import this dashboard template from the Grafana UI.
 
-If you are using iter8 with Istio, you must import the following dashboard template file located in the _iter8-controller_ repository:
-
-```
-iter8-controller/config/grafana/istio.json
-```
-
 In a typical Istio installation, you can port-forward Grafana from Kubernetes to your localhost's port 3000 with the command below:
 
 ```bash
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
 ```
 
-After running that command, you can access Grafana's UI at `http://localhost:3000` to import the dashboard template from your filesystem (`iter8-controller/config/grafana/istio.json`).
+After running that command, you can access Grafana's UI at `http://localhost:3000`.
 
-If you are using iter8 with Knative, the dashboard template file that you need to import in the _iter8-controller_ repository is the following:
+To import the dashboard template for iter8 with Istio, execute:
 
+```bash
+DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/istio.json \
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/docs-issue11/hack/grafana_install_dashboard.sh \
+| /bin/bash -
 ```
-iter8-controller/config/grafana/knative.json
+
+If you are using iter8 with Knative, use this command instead:
+
+```bash
+DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/knative.json \
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/docs-issue11/hack/grafana_install_dashboard.sh \
+| /bin/bash -
 ```
 
 ## Uninstall _iter8_
@@ -99,3 +103,5 @@ kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller
 ```
 
 Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace.
+
+Note that this command does not remove the Grafana dashboard if created.
