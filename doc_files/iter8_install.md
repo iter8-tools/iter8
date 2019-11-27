@@ -8,7 +8,7 @@ These instructions show you how to set up iter8 on Kubernetes with Istio or with
 
 If you want to use iter8 with Istio, we require:
 
-* Istio v1.1.5 and newer up to [v1.3.5](https://archive.istio.io/v1.3/docs/setup/install/kubernetes/). Tthose are the versions of Istio we tested iter8 with. Support for Istio 1.4 is coming soon.
+* Istio v1.1.5 and newer up to [v1.3.5](https://archive.istio.io/v1.3/docs/setup/install/kubernetes/). Those are the versions of Istio we tested iter8 with. Support for Istio 1.4 is coming soon.
 * Your Istio installation must have at least the **istio-pilot** as well as **telemetry** and **Prometheus** enabled.
 
 If you want to use iter8 with Knative, we require:
