@@ -47,7 +47,7 @@ You can reference the project [bookinfoapp-reviews](https://github.com/iter8-too
 
 You can apply this with the following command:
 
-    kubectl apply -f docs/doc_files/tekton/reviews-pipelineresource.yaml
+    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/reviews-pipelineresource.yaml
 
 ### 2. Import Tekton `Task`
 
@@ -117,7 +117,7 @@ And has two steps:
 
 To add to your cluster, apply as follows:
 
-    kubectl apply -f docs/doc_files/tekton/iter8-task.yaml
+    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/iter8-task.yaml
 
 ### 3. Run the `Task` by defining a `TaskRun`
 
@@ -147,7 +147,7 @@ To run a task, define a `TaskRun` such as:
 
 You can apply this by:
 
-    kubectl apply -f docs/doc_files/tekton/run-iter8-task.yaml
+    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/run-iter8-task.yaml
 
 ### 4. Deploy the canary version
 
