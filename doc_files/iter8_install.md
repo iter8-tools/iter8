@@ -96,7 +96,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/docs-issu
 
 ## Uninstall _iter8_
 
-If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then you can delete iter8 by running the following command from the top directory of your copy of the **_iter8_controller_** repository:
+If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then you can delete iter8 by running the following command:
 
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/iter8-controller.yaml
