@@ -102,6 +102,4 @@ If you want to uninstall all _iter8_ components from your Kubernetes cluster, fi
 kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/iter8-controller.yaml
 ```
 
-Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace.
-
-Note that this command does not remove the Grafana dashboard if created.
+Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.
