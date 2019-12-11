@@ -68,9 +68,7 @@ iter8-analytics              ClusterIP   172.21.106.44   <none>        80/TCP   
 
 ### Import iter8's Grafana dashboard
 
-To enable users to see Prometheus metrics that pertain to their canary releases, iter8 provides a Grafana dashboard template. To take advantage of Grafana, you will need to import this dashboard template from the Grafana UI.
-
-In a typical Istio installation, you can port-forward Grafana from Kubernetes to your localhost's port 3000 with the command below:
+To enable users to see Prometheus metrics that pertain to their canary releases, iter8 provides a Grafana dashboard template. To take advantage of Grafana, you will need to import this template. To do so, first make sure you can access Grafana. In a typical Istio installation, you can port-forward Grafana from Kubernetes to your localhost's port 3000 with the command below:
 
 ```bash
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
@@ -78,7 +76,7 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=gr
 
 After running that command, you can access Grafana's UI at `http://localhost:3000`.
 
-To import the dashboard template for iter8 with Istio, execute:
+To import iter8's dashboard template for Istio, execute:
 
 ```bash
 DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/istio.json \
