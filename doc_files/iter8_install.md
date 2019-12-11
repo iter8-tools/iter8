@@ -80,6 +80,7 @@ To import iter8's dashboard template for Istio, execute the following two comman
 
 ```bash
 export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/istio.json
+
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
@@ -88,6 +89,7 @@ If you are using iter8 with Knative, use these two commands instead:
 
 ```bash
 export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/knative.json
+
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
