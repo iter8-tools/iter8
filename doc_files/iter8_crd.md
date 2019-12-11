@@ -45,7 +45,7 @@ spec:
     analysis:
     
       # analyticsService specifies analytics service endpoint (optional)
-      # default value is http://iter8-analytics:5555
+      # default value is http://iter8-analytics.iter8
       analyticsService: http://iter8-analytics.iter8
 
       # endpoint to Grafana dashboard (optional)
