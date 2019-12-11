@@ -76,18 +76,18 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=gr
 
 After running that command, you can access Grafana's UI at `http://localhost:3000`.
 
-To import iter8's dashboard template for Istio, execute:
+To import iter8's dashboard template for Istio, execute the following two commands:
 
 ```bash
-DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/istio.json \
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/istio.json
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
-If you are using iter8 with Knative, use this command instead:
+If you are using iter8 with Knative, use these two commands instead:
 
 ```bash
-DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/knative.json \
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/knative.json
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
