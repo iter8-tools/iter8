@@ -22,7 +22,9 @@ When iter8 is installed, a Kubernetes `ConfigMap` named _iter8-metrics_ is popul
 
 - They each refer back to a Prometheus query template defined under the `query_templates` section. Iter8 uses that template to compute the value of the metric for a service version.
 
-- The metrics have a type, which can be either `Correctness` or `Performance`, depending on what they measure.
+- The metric could either be a [counter metric](https://prometheus.io/docs/concepts/metric_types/) or not denoted by the `is_counter` key
+
+- If the value of the Prometheus query, correspondng to a metric is unavailable, then by default `0` is returned by Prometheus. This can be changed to any other float value or None in the `absent_value` key
 
 - Finally, each metric is associated with another query template assigned to the attribute `sample_size_query_template`. Iter8 relies on the notion of a sample-size query template to compute the total number of data points used in the computation of the metric values. Each of the iter8-defined metrics is associated with the `iter8_sample_size` query template defined under `query_templates`, which computes the total number of requests received by a service version. For the default iter8 metrics (mean latency, error count, and error rate), the total number of requests is the correct sample size measure.
 
@@ -68,4 +70,3 @@ In the declaration above, here is how to interpret the metric attributes:
   - _metric_type_: Currently, iter8 supports two kinds of metrics- _Performance_ and _Correctness_. _error_count_400s_ is a _Correctness_ metric, since it is a measure of how many errors are produced by the code.
 
   - _sample_size_query_template_: As explained earlier, this is the query template iter8 uses to compute the total number of data points used in the computation of the metric value. Since the metric we are defining here is supposed to measure the total number of requests that resulted in a 400 HTTP code, the sample size from which that value is computed is represented by the total number of HTTP requests received. Hence, we are relying on the pre-defined sample-size query template `iter8_sample_size`, which computes the total number of HTTP requests. If you are defining a metric that requires the sample size to be computed differently, you can create a new sample-size query template (with a different name) in the _query_templates_ section and reference it in the metric declaration.
-  
