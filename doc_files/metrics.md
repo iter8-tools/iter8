@@ -1,32 +1,32 @@
 # Metrics
 
-This document describes the metrics made available by iter8 out of the box, the anatomy of a metric definition, and how users can define their own metrics.
+This document describes iter8's out-of-the-box metrics, the anatomy of a metric definition, and how users can define their own metrics.
 
 ## Metrics defined by iter8
 
-By default, iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8-defined metrics can simply reference them in the success criteria of an _experiment_ specification, as shown in the [`Experiment` CRD documentation](iter8_crd.md).
+By default, iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the success criteria of an _experiment_ specification, as shown in the [`Experiment` CRD documentation](iter8_crd.md).
 
-During an `experiment`, every time _iter8-controller_ calls _iter8-analytics_ the latter retrieves from Prometheus the values of the metrics referenced by the corresponding Kubernetes `experiment` resource. _Iter8-analytics_ analyzes the service versions that are part of the experiment with respect to the metric values, assessing the current outcome of the experiment based on the defined success criteria. It then returns that assessment to _iter8-controller_.
+During an `experiment`, for every call made from  _iter8-controller_ to _iter8-analytics_, the latter in turn calls Prometheus to retrieve values of the metrics referenced by the Kubernetes `experiment` resource. _Iter8-analytics_ analyzes the service versions that are part of the experiment and arrives at an assessment based on their metric values. It returns this assessment to _iter8-controller_.
 
-In particular, the following metrics, based on telemetry data collected by Istio, are available to iter8 users:
+In particular, the following metrics are available out-of-the-box from iter8. These metrics are based on the telemetry data collected by Istio. 
 
-1. _iter8_latency_: mean latency, that is, average time that it takes a service version to respond to HTTP requests.
+1. _iter8_latency_: mean latency, that is, average time taken by the service version to respond to HTTP requests.
 
-2. _iter8_error_count_: total error count (~5** HTTP status codes), that is, the cumulative number of HTTP requests that resulted in an error.
+2. _iter8_error_count_: total error count, that is, number of HTTP requests that resulted in error (5xx HTTP status codes).
 
-3. _iter8_error_rate_: error rate, that is, the total error count divided by the total number of HTTP requests.
+3. _iter8_error_rate_: error rate, that is, (total error count / total number of HTTP requests).
 
 When iter8 is installed, a Kubernetes `ConfigMap` named _iter8-metrics_ is populated with a definition for each of the above metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). A few things to note in the definitions:
 
 - Each metric is defined under the `metrics` section.
 
-- They each refer back to a Prometheus query template defined under the `query_templates` section. Iter8 uses that template to compute the value of the metric for a service version.
+- They refer back to a Prometheus query template defined under the `query_templates` section. Iter8 uses that template to query Prometheus and compute the value of the metric for every service version.
 
-- The metric could either be a [counter metric](https://prometheus.io/docs/concepts/metric_types/) or not denoted by the `is_counter` key
+- If this metric is a counter (i.e., its value never decreases over time), then the `is_counter` key corresponding to this metric is set to `true`; otherwise, it is set to `false`.
 
-- If the value of the Prometheus query, correspondng to a metric is unavailable, then by default `0` is returned by Prometheus. This can be changed to any other float value or None in the `absent_value` key
+- If the value a metric is unavailable (for instance, Prometheus returned `NaN` or a null value for the query corresponding to his metric), then, by default, iter8 sets the value of this metric to `0`. This can be changed to any other float value (specified by the user in string format, e.g., `"22.8"`) or to `"None"` using the `absent_value` key.
 
-- Finally, each metric is associated with another query template assigned to the attribute `sample_size_query_template`. Iter8 relies on the notion of a sample-size query template to compute the total number of data points used in the computation of the metric values. Each of the iter8-defined metrics is associated with the `iter8_sample_size` query template defined under `query_templates`, which computes the total number of requests received by a service version. For the default iter8 metrics (mean latency, error count, and error rate), the total number of requests is the correct sample size measure.
+- Finally, each metric is associated with another key `sample_size_query_template` whose value is a Prometheus query template. Iter8 relies on the notion of a sample-size to compute the total number of data points used in the computation of the metric values. Each of the iter8-defined metrics is associated with the `iter8_sample_size` query template defined under `query_templates`, which computes the total number of requests received by a service version. For the default iter8 metrics (mean latency, error count, and error rate), the total number of requests is the correct sample size measure.
 
 ## Adding a new metric
 
