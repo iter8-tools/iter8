@@ -146,12 +146,13 @@ When an `Experiment` custom resource is created, the iter8 controller will check
 ```yaml
 metrics:
   iter8_latency:
-      query_template: (sum(increase(istio_request_duration_seconds_sum{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
-        by ($entity_labels)) / (sum(increase(istio_request_duration_seconds_count{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
-        by ($entity_labels))
-      sample_size_template: sum(increase(istio_requests_total{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
-        by ($entity_labels)
-      type: Performance
+    absent_value: None
+    is_counter: false
+    query_template: (sum(increase(istio_request_duration_seconds_sum{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
+      by ($entity_labels)) / (sum(increase(istio_request_duration_seconds_count{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
+      by ($entity_labels))
+    sample_size_template: sum(increase(istio_requests_total{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
+      by ($entity_labels)
 ```
 
 ## `Experiment status`
@@ -166,7 +167,8 @@ Following the Kubernetes model, the `status` section contains all relevant runti
     # assessment returned from the analytics service
     assessment:
       conclusions:
-      - Experiment started
+      - The experiment needs to be aborted
+      - All success criteria were not met
 
     # list of boolean conditions describing the status of the experiment
     # for each condition, if the status is "False", the reason field will give detailed explanations
@@ -175,58 +177,65 @@ Following the Kubernetes model, the `status` section contains all relevant runti
     conditions:
 
     # AnalyticsServiceNormal is "True" when the controller can get an interpretable response from the analytics service
-    - lastTransitionTime: "2019-08-26T14:13:08Z"
+    - lastTransitionTime: "2019-12-20T05:38:37Z"
       status: "True"
       type: AnalyticsServiceNormal
 
     # ExperimentCompleted tells whether the experiment is completed or not
-    - lastTransitionTime: "2019-08-26T14:13:39Z"
+    - lastTransitionTime: "2019-12-20T05:39:37Z"
       status: "True"
       type: ExperimentCompleted
 
     # ExperimentSucceeded indicates whether the experiment succeeded or not when it is completed
-    - lastTransitionTime: "2019-08-26T14:13:39Z"
-      reason: 'Aborted, Traffic: AllToBaseline.'
+    - lastTransitionTime: "2019-12-20T05:39:37Z"
+      message: Aborted
+      reason: ExperimentFailed
       status: "False"
       type: ExperimentSucceeded
 
     # MetricsSynced states whether the referenced metrics have been retrieved from the ConfigMap and stored in the metrics section
-    - lastTransitionTime: "2019-08-26T14:12:53Z"
+    - lastTransitionTime: "2019-12-20T05:38:22Z"
       status: "True"
       type: MetricsSynced
 
     # Ready records the status of the latest-updated condition
-    - lastTransitionTime: "2019-08-26T14:13:39Z"
-      reason: 'Aborted, Traffic: AllToBaseline.'
+    - lastTransitionTime: "2019-12-20T05:39:37Z"
+      message: Aborted
+      reason: ExperimentFailed
       status: "False"
       type: Ready
 
+    # RoutingRulesReady indicates whether the routing rules are successfully created/updated
+    - lastTransitionTime: "2019-12-20T05:38:22Z"
+      tatus: "True"
+      type: RoutingRulesReady
+
     # TargetsProvided is "True" when both the baseline and the candidate versions of the targetService are detected by the controller; otherwise, missing elements will be shown in the reason field
-    - lastTransitionTime: "2019-08-26T14:13:08Z"
+    - lastTransitionTime: "2019-12-20T05:38:37Z"
       status: "True"
       type: TargetsProvided
 
     # the current experiment's iteration
-    currentIteration: 1
+    currentIteration: 2
 
     # Unix timestamp in milliseconds corresponding to when the experiment started
-    startTimestamp: "1566828773475"
+    startTimestamp: "1576820317351"
 
     # Unix timestamp in milliseconds corresponding to when the experiment finished
-    endTimestamp: "1566828819018"
+    endTimestamp: "1576820377696"
 
     # The url to he Grafana dashboard pertaining to this experiment
-    grafanaURL: http://localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=bookinfo-iter8&var-service=reviews&var-baseline=reviews-v3&var-candidate=reviews-v5&from=1566828773475&to=1566828819018
+    grafanaURL: http://localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=bookinfo-iter8&var-service=reviews&var-baseline=reviews-v3&var-candidate=reviews-v5&from=1576820317351&to=1576820377696
 
     # the time when the previous iteration was completed
-    lastIncrementTime: "2019-08-26T14:13:08Z"
+    lastIncrementTime: "2019-12-20T05:39:07Z"
 
     # this is the message to be shown in the STATUS column for the `kubectl` printer, which summarizes the experiment situation
-    message: 'Aborted, Traffic: AllToBaseline.'
+    message: 'ExperimentFailed: Aborted'
 
     # the experiment's current phase 
-    # values could be: Initializing, Progressing, Pause, Succeeded, Failed
-    phase: Failed
+    # values could be: Initializing, Progressing, Pause, Completed
+    phase: Completed
 
     # the current traffic split
     trafficSplitPercentage:
