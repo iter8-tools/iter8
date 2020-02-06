@@ -219,7 +219,7 @@ Following the Kubernetes model, the `status` section contains all relevant runti
     currentIteration: 2
 
     # Unix timestamp in milliseconds corresponding to when the experiment started
-    startTimestamp: "1566828773475"
+    startTimestamp: "1576820317351"
 
     # Unix timestamp in milliseconds corresponding to when the experiment finished
     endTimestamp: "1576820377696"

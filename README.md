@@ -7,7 +7,7 @@
 
 Iter8 supports cloud-native, automated canary releases and A/B testing, driven by analytics based on robust statistical techniques. It comprises two components:
 
-* _iter8-analytics_: A service that assesses the behavior of different microservice versions by (1) looking at metrics associated with each version and (2) applying robust statistical techniques to analyze the data online in order to determine which version is the best one with respect to the metrics of interest and which versions pass a set of success criteria. Multiple success criteria can be defined by the users; each criterion can refer to a different metric and specify absolute acceptable thresholds as well as comparative thresholds meant to define how much a candidate version can deviate from a baseline (stable) version. The _iter8-analytics_ service exposes a REST API; each time it is called, the service returns the result of the data analysis along with a recommendation for how the traffic should be split across all microservice versions. The _iter8-analytics_' REST API is used by _iter8-controller_, which is described next.
+* _iter8-analytics_: A service that assesses the behavior of different microservice versions by analyzing metrics associated with each version using robust statistical techniques to determine which version is the best one with respect to the metrics of interest and which versions pass a set of success criteria. Multiple success criteria can be defined by users; each criterion refers to a metric and specifies absolute or relative thresholds which define how much a candidate version can deviate from a baseline (stable) version. The _iter8-analytics_ service exposes a REST API; each time it is called, the service returns the result of the data analysis along with a recommendation for how the traffic should be split across all microservice versions. The _iter8-analytics_' REST API is used by _iter8-controller_, which is described next.
 
 * _iter8-controller_: A Kubernetes controller that automates canary releases and A/B testing by adjusting the traffic across different versions of a microservice as recommended by _iter8-analytics_. For instance, what happens in the case of a canary release is that the controller will shift the traffic towards the canary version if it is performing as expected, until the canary replaces the baseline (previous) version. If the canary is found not to be satisfactory, the controller rolls back by shifting all the traffic to the baseline version. Traffic decisions are made by _iter8-analytics_ and honored by _iter8-controller_.
 
@@ -17,7 +17,7 @@ When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD
 
 ## Metrics
 
-To assess the behavior of microservice versions, iter8 supports a few metrics out of the box without requiring users to do any extra work. In addition, users can rely on any metrics they define. Metrics defined by iter8 or user-defined ones can be referenced in the success criteria of an _experiment_. More details about metrics are documented [here](doc_files/metrics.md).
+To assess the behavior of microservice versions, iter8 supports a few metrics out-of-the-box without requiring users to do any extra work. In addition, users can define their own custom metrics. Iter8's out-of-the-box metrics as well as user-defined metrics can be referenced in the success criteria of an _experiment_. More details about metrics are documented [here](doc_files/metrics.md).
 
 ## Supported environments
 
