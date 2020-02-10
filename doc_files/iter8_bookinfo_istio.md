@@ -406,10 +406,10 @@ In this tutorial, we will define a custom metric (one not provided by _iter8_ ou
 By default _iter8_ provides a few metrics which you can see if you type:
 
 ```bash
-$ kubectl get configmap iter8-metrics -n iter8 -oyaml
+$ kubectl get configmap iter8config-metrics -n iter8 -oyaml
 ```
 
-In principle, any metric that can be derived from the data you have in your Prometheus database that might be meaningful to you in assessing the health of a service version can be used by _iter8_. Next, we are going to make _iter8_ aware of a metric that we will call _iter8_90_perc_latency_, which measures the 90th percentile latency of a service. In order to make _iter8_ aware of a new metric we need to add it to the _iter8-metrics_ config map. For the purposes of this tutorial, we will do so by running the following command:
+In principle, any metric that can be derived from the data you have in your Prometheus database that might be meaningful to you in assessing the health of a service version can be used by _iter8_. Next, we are going to make _iter8_ aware of a metric that we will call _iter8_90_perc_latency_, which measures the 90th percentile latency of a service. In order to make _iter8_ aware of a new metric we need to add it to the _iter8config-metrics_ config map. For the purposes of this tutorial, we will do so by running the following command:
 
 ```bash
 $ kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/doc/tutorials/istio/bookinfo/iter8_metrics_extended.yaml
@@ -421,7 +421,7 @@ $ kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-
 To verify that the new metric has been added to the configmap, you can check it again:
 
 ```bash
-$ kubectl get configmap iter8-metrics -n iter8 -oyaml
+$ kubectl get configmap iter8config-metrics -n iter8 -oyaml
 ```
 
 We will now configure an experiment to use this new metric for a canary release.
@@ -506,7 +506,7 @@ NAME                 PHASE       STATUS                                         
 reviews-v3-rollout   Completed   ExperimentSucceeded: All Success Criteria Were Met   reviews-v2   0            reviews-v3   100
 reviews-v4-rollout   Completed   ExperimentFailed: Not All Success Criteria Met       reviews-v3   100          reviews-v4   0
 reviews-v5-rollout   Completed   ExperimentFailed: Aborted                            reviews-v3   100          reviews-v5   0
-reviews-v6-rollout   Completed   ExperimentFailed: Not All Success Criteria Met       reviews-v3   100          reviews-v6   0
+reviews-v6-rollout   Completed   ExperimentSucceeded: All Success Criteria Were Met   reviews-v3   0            reviews-v6   100
 ```
 
 ### 3. Check the Grafana dashboard
