@@ -4,7 +4,7 @@ Iter8 supports sending notifications to external applications. This documentatio
 ## Step 1: Setup External Webhook
 Now only Slack integration is supported.
 ### Setup Slack Webhook
-1. Go to here[https://api.slack.com/apps] to create a new Slack app.  
+1. Go to [here](https://api.slack.com/apps) to create a new Slack app.  
 2. Choose the Slack Workspace you would like to register the app.   
 3. After creating the app, click into `Incoming Webhooks` under the `Add features and functionality` section.  
 4. Toggle the switch on the top right corner to `on` to activate the incoming webhook ability.   
@@ -23,7 +23,7 @@ apiVersion: v1
    namespace: iter8
  data:
   # Name of the channel can be any unique value;
-  # This is used to distinguished this channel setting from others.
+  # This is used to distinguish this channel setting from others.
   name_of_channel: |-
     # The name of the external application.
     # required; Now only slack is supoorted.
