@@ -23,7 +23,7 @@ apiVersion: v1
    namespace: iter8
  data:
   # Name of the channel can be any unique value;
-  # This is used to distinguished this channel setting from others.
+  # This is used to distinguish this channel setting from others.
   name_of_channel: |-
     # The name of the external application.
     # required; Now only slack is supoorted.
