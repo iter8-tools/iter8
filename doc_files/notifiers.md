@@ -31,15 +31,15 @@ apiVersion: v1
     # The Webhook url of the application.
     # required;
     url: https://hooks.slack.com/services/TXXXXX/BXXXXXX/xxxxxxxx
-    # Level of notification frequency.
-    # optional;
+    # Level of notification severity.
     # options are: error, warning, normal, verbose
+    # optional; Default is normal.
     level: normal
     # Only experiments under this namespace can push notifications to this channel
-    # optional; 
+    # optional; If not specified, experiments under all namespaces will be targeted.
     namespace: bookinfo-iter8
     # Only experiments with these labels can push notifications to this channel
-    # optional; 
+    # optional; If not specified, all experiments labeled/unlabeld will be targeted.
     labels:
       foo: bar
 ```
@@ -57,9 +57,9 @@ Sync Metrics Error
 Routing Rules Error  
 Analytics Service Error   
 ------------------------------------- error  
-Progress Failure  
+Iteration Failed  
 ------------------------------------- warning  
-Progress Succeeded  
+Iteration Succeeded  
 ------------------------------------- normal  
 Targets Found  
 Analytics Service Running  
