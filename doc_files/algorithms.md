@@ -16,7 +16,7 @@ maxTrafficPercentage: # 80 (percentage; e.g., 90)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
-This algorithm is suitable for the gradual rollout of a candidate ("canary") version. The goal of this strategy is to gradually shift traffic from a baseline (stable) version to a candidate version, as long as the candidate version continues to pass the success criteria defined by the user. 
+This algorithm is suitable for the gradual rollout of a candidate ("canary") version. The goal of this strategy is to gradually shift traffic from a baseline (stable) version to a candidate version, as long as the candidate version continues to pass the success criteria defined by the user.
 
 When the `experiment` begins, the traffic split is as follows: `trafficStepSize`% to the candidate version, and `100 - trafficStepSize`% to the baseline version. At the end of each iteration (whose duration is determined by the `interval` parameter), iter8 checks if there are enough data points to decide whether the candidate version satisfies the success criteria (i.e, whether enough requests were sent to make a statistically robust assessment). If there is enough data to make a decision, and the candidate version satisfies all criteria, iter8 increases the traffic to the candidate version by `trafficStepSize`. Else, if there is insufficient data, or if the candidate version fails to satisfy one or more success criteria, then the traffic split does not change. Furthermore, if a failing criterion has been declared by the user as critical, iter8 aborts the experiment and makes sure all traffic goes to the baseline version. This is a rollback situation.
 
@@ -39,8 +39,34 @@ In A/B or A/B/n testing, the "optimality" of a version relates to maximizing the
 
 ## 3. Posterior Bayesian Routing (`pbr`)
 
-One of our novel algorithms. Coming soon to iter8...
+```yaml
+interval: # (time; e.g., 30s)
+maxIterations: # (integer; e.g., 1000)
+maxTrafficPercentage: # 80 (percentage; e.g., 90)
+confidence: # (float; e.g 0.95)
+onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
+```
+
+This algorithm like the epsilon-greedy strategy described above, can be applied to canary releases as well as A/B or A/B/n testing scenarios. The goal of this strategy is similar to that of the one above. It is to shift traffic to optimal versions of a micro service not just based on their reward attribute but also based on other attributes which need to satisfy their respective feasibility constraints (i.e. user-defined success criteria).
+
+Here, the reward and feasibility constraints are viewed in the form of beta/normal distributions which are sampled from while calculating traffic split between the different versions.
+
+This algorithm is novel in that, for each iteration the increase in traffic to the version that performs best (i.e satisfies all user-defined success criteria as well as obtains the maximum reward) is dependent on the load already generated to the version. This ensures that the traffic split generated has high confidence.
+
+Another useful point to note is that Bayesian Routing algorithms can make use of historical data to perform analysis of different micro service versions. Through our experiments, we have found that this algorithm converges much quicker than the epsilon-greedy and check-and-increment strategies to the most feasible micro service version.
 
 ## 4. Optimistic Bayesian Routing (`obr`)
 
-One of our novel algorithms. Coming soon to iter8...
+```yaml
+interval: # (time; e.g., 30s)
+maxIterations: # (integer; e.g., 1000)
+maxTrafficPercentage: # 80 (percentage; e.g., 90)
+confidence: # (float; e.g 0.95)
+onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
+```
+
+This algorithm is almost exactly similar to the one above. It can be adopted to A/B or A/B/n scenarios. It aims to shift traffic to a feasible micro service version based on their reward attibute and different user-defined success criteria.
+
+The reward and feasibility constraints are viewed in the form of beta/normal distributions which are sampled from, while calculating traffic split between the different versions. The traffic split, here too is dependent on the load generated to the micro services thereby making its judgement highly confident.
+
+The difference lies in the way values are sampled from the feasibility distributions - this algorithm has a more optimistic approach and has shown the best convergence rate thus far in our experimentation.
