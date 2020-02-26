@@ -24,13 +24,11 @@ A Tekton task is a logical step in a pipeline that will be executed repeated as 
 
 It will therefore be necessary to define a `PipelineResource` that identifies the git project in addition to a `Task`. Finally, a `TaskRun` can be defined that executes the task.
 
-The YAML files used in this tutorial are in [this repository](https://github.com/iter8-tools/docs). Clone it:
-
-    git clone git@github.com:iter8-tools/docs.git
+The YAML files used in this tutorial are [here](https://github.com/iter8-tools/docs/tree/master/doc_files/tekton).
 
 ### 1. Create a PipelineResource
 
-We start by defining a `PipelineResource` to the git project for the Bookinfo reviews service. You can reference the project we created from [the Istio source](https://github.com/istio/istio/tree/master/samples/bookinfo/src/reviews) or you can duplicate it to make changes. In this case, if authorization is necessary, see the Tekton documentation for [Authentication](https://github.com/tektoncd/pipeline/blob/master/docs/auth.md).
+We start by defining a `PipelineResource` that identifies the git project for the Bookinfo reviews service. You can reference the project we created from [the Istio source](https://github.com/istio/istio/tree/master/samples/bookinfo/src/reviews) or you can duplicate it to make changes. In this case, if authorization is necessary, see the Tekton documentation for [Authentication](https://github.com/tektoncd/pipeline/blob/master/docs/auth.md).
 You can reference the project [bookinfoapp-reviews](https://github.com/iter8-tools/bookinfoapp-reviews) or duplicate it to make changes.
 
     apiVersion: tekton.dev/v1alpha1
@@ -38,16 +36,16 @@ You can reference the project [bookinfoapp-reviews](https://github.com/iter8-too
     metadata:
     name: reviews-git
     spec:
-    type: git
-    params:
+      type: git
+      params:
         - name: revision
-        value: master
+          value: master
         - name: url
-        value: https://github.com/iter8-tools/bookinfoapp-reviews
+          value: https://github.com/iter8-tools/bookinfoapp-reviews
 
 You can apply this with the following command:
 
-    kubectl apply -f docs/doc_files/tekton/reviews-pipelineresource.yaml
+    kubectl --namespace bookinfo-iter8 apply --filename https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/reviews-pipelineresource.yaml
 
 ### 2. Import Tekton `Task`
 
@@ -56,54 +54,54 @@ A Tekton `Task` that initiates a canary rollout using iter8 defines an `Experime
     apiVersion: tekton.dev/v1alpha1
     kind: Task
     metadata:
-    name: run-experiment
+      name: run-experiment
     spec:
-    inputs:
+      inputs:
         resources:
-        - name: source
+          - name: source
             type: git
         params:
-        - name: experiment
+          - name: experiment
             description: Path to experiment template (relative to source-git)
             default: experiment
-        - name: experiment-id
+          - name: experiment-id
             description: unique identifier of experiment 
             default: default
-        - name: stable
+          - name: stable
             description: stable (default) version of service being tested
             default: stable
-        - name: candidate
+          - name: candidate
             description: candidate version of service being tested 
             default: candidate
-        - name: target-namespace
+          - name: target-namespace
             description: namespace in which to apply routing config
             default: default
     steps:
         - name: define-experiment
-        image: mikefarah/yq
-        command: [ "/bin/sh" ]
-        args:
+          image: mikefarah/yq
+          command: [ "/bin/sh" ]
+          args:
             - '-c'
             - |
-            TEMPLATE="/workspace/source-git/${inputs.params.experiment}"
+            TEMPLATE="/workspace/source-git/$(inputs.params.experiment)"
             NAME=$(yq read ${TEMPLATE} metadata.name)
-            yq write --inplace ${TEMPLATE} metadata.name ${NAME}-${inputs.params.experiment-id}
-            yq write --inplace ${TEMPLATE} spec.targetService.baseline ${inputs.params.stable}
-            yq write --inplace ${TEMPLATE} spec.targetService.candidate ${inputs.params.candidate}
+            yq write --inplace ${TEMPLATE} metadata.name ${NAME}-$(inputs.params.experiment-id)
+            yq write --inplace ${TEMPLATE} spec.targetService.baseline $(inputs.params.stable)
+            yq write --inplace ${TEMPLATE} spec.targetService.candidate $(inputs.params.candidate)
             cat ${TEMPLATE}
         - name: apply
-        image: lachlanevenson/k8s-kubectl
-        command: [ "kubectl" ]
-        args:
+          image: lachlanevenson/k8s-kubectl
+          command: [ "kubectl" ]
+          args:
             - "--namespace"
-            - "${inputs.params.target-namespace}"
+            - "$(inputs.params.target-namespace)"
             - "apply"
             - "--filename"
-            - "/workspace/source-git/${inputs.params.experiment}"
+            - "/workspace/source-git/$(inputs.params.experiment)"
 
 This task takes the following inputs:
 
-- _source_git_ - reference to a github project containing the `Experiment` template (typically the same repository as the source code)
+- _source_ - reference to a github project containing the `Experiment` template (typically the same repository as the source code)
 - _experiment_ - path to the `Experiment` template relative to the github project
 - _experiment-id_ - a unique identifier for the experiment execution to allow unique naming when executed repeatedly
 - _stable_ - the stable or baseline version of the service
@@ -117,7 +115,7 @@ And has two steps:
 
 To add to your cluster, apply as follows:
 
-    kubectl apply -f docs/doc_files/tekton/iter8-task.yaml
+    kubectl --namespace bookinfo-iter8 apply --filename https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/iter8-task.yaml
 
 ### 3. Run the `Task` by defining a `TaskRun`
 
@@ -133,25 +131,27 @@ To run a task, define a `TaskRun` such as:
     inputs:
         resources:
         - name: source
-            resourceRef:
+          resourceRef:
             name: reviews-git
         params:
         - name: experiment
-            value: 'iter8/experiment.yaml'
+          value: 'iter8/experiment.yaml'
+        - name: experiment-id
+          value: 'rollout-reviews-v3'
         - name: stable
-            value: 'reviews-v2'
+          value: 'reviews-v2'
         - name: candidate
-            value: 'reviews-v3'
+          value: 'reviews-v3'
         - name: target-namespace
-            value: 'bookinfo-iter8'
+          value: 'bookinfo-iter8'
 
 You can apply this by:
 
-    kubectl apply -f docs/doc_files/tekton/run-iter8-task.yaml
+    kubectl --namespace bookinfo-iter8 apply --filename https://raw.githubusercontent.com/iter8-tools/docs/master/doc_files/tekton/run-iter8-task.yaml
 
 ### 4. Deploy the canary version
 
 Follow [step 5](iter8_bookinfo_istio.md#5-deploy-the-canary-version-and-start-the-rollout) of the tutorial [Successful canary release](iter8_bookinfo_istio.md#part-1-successful-canary-release-reviews-v2-to-reviews-v3).
 You can watch the progress of the canary rollout using:
 
-    kubectl get experiments -n bookinfo-iter8
+    kubectl --namespace bookinfo-iter8 get experiments
