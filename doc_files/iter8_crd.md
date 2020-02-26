@@ -107,6 +107,8 @@ spec:
       # options:
       #   check_and_increment
       #   epsilon_greedy
+      #   posterior_bayesian_routing
+      #   optimistic_bayesian_routing
       #   increment_without_check: increase traffic to candidate by trafficStepSize at each iteration without calling analytics
       # default is check_and_increment
       strategy: check_and_increment
