@@ -8,91 +8,49 @@ These instructions show you how to set up iter8 on Kubernetes with Istio or with
 
 If you want to use iter8 with Istio, we require:
 
-* Istio v1.1.5 or newer (those are the versions of Istio we tested iter8 with).
+* Istio v1.1.5 and newer.
 * Your Istio installation must have at least the **istio-pilot** as well as **telemetry** and **Prometheus** enabled.
 
 If you want to use iter8 with Knative, we require:
 
 * [Knative 0.6](https://knative.dev/docs/install/) or newer.
 
-## Install _iter8_ on Kubernetes
+## Install iter8 on Kubernetes
 
-Below are instructions to run the two _iter8_ components (_iter8_analytics_ and _iter8_controller_) on Kubernetes.
+### Quick installation
 
-### Setting up _iter8-analytics_
-
-#### Step 1. Clone the GitHub repository
+iter8 has two components, _iter8_analytics_ and _iter8_controller_. These can be installed for use with Istio as follows:
 
 ```bash
-git clone git@github.ibm.com:istio-research/iter8.git
+kubectl apply \
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/master/install/kubernetes/iter8-analytics.yaml \
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/iter8-controller.yaml 
 ```
 
-#### Step 2. Run _iter8-analytics_ using our Helm chart
-
-One way to set up _iter8-analytics_ is through our Helm chart. For that, make sure you have the Helm client installed on your computer. If not, follow [these instructions](https://helm.sh/docs/using_helm/#installing-the-helm-client) to install it.
-
-If you use Kubernetes with Istio, follow the instructions below. Otherwise jump to the [Knative section](#kubernetes-with-knative).
-
-##### Kubernetes with Istio
-
-Assuming you have the Kubernetes CLI `kubectl` pointing at your desired Kubernetes cluster (v1.11 or newer), with Istio installed (as per the prerequisites above), all you need to do to deploy _iter8_analytics_ to your cluster is to run the following command from the top directory of your copy of the iter8-analytics repository:
+To install for use with knative, modify the first file:
 
 ```bash
-helm template install/kubernetes/helm/iter8-analytics --name iter8-analytics | kubectl apply  -f -
+kubectl apply \
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/master/install/knative/iter8-analytics.yaml \
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/iter8-controller.yaml 
 ```
 
-**Note on Prometheus:** In order to make assessments on canary releases, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the Helm chart parameters (used in the command above) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090`, which is the default internal Kubernetes URL of Prometheus installed as an Istio addon. If your Istio installation is shipping metrics to a different Prometheus installation, you need to run the following command instead:
+### Customized installation
+
+In case you need to change the default configuration options used in the quick installation, use the helm charts directly by cloning the projects:
 
 ```bash
-helm template install/kubernetes/helm/iter8-analytics --name iter8-analytics --set iter8Config.metricsBackendURL="<Prometheus host:port>"| kubectl apply -f -
+git clone git@github.com:iter8-tools/iter8-analytics.git
+git clone git@github.com:iter8-tools/iter8-controller.git
 ```
 
-Make sure to replace `"<Prometheus host:port>"` with the Prometheus hostname and query port matching your Prometheus installation.
+The _iter8-analytics_ helm chart is [here](https://github.com/iter8-tools/iter8-analytics/tree/master/install/kubernetes/helm/iter8-analytics), and the _iter8-controller_ helm chart is [here](https://github.com/iter8-tools/iter8-controller/tree/master/install/helm/iter8-controller).
 
+**Note on Prometheus:** In order to make assessments on canary releases, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090`, which is the default internal Kubernetes URL of Prometheus installed as an Istio addon. If your Istio installation is shipping metrics to a different Prometheus installation, you need to set the _iter8-analytics_ helm chart parameter `iter8Config.metricsBackendURL` to your Prometheus `host:port`.
 
-##### Kubernetes with Knative
+### Verify the installation
 
-Assuming you have the Kubernetes CLI `kubectl` pointing at your desired Kubernetes cluster (v1.11 or newer), with Knative v0.6+  installed (as per the prerequisites above), all you need to do to deploy _iter8_analytics_ to your cluster is to run the following command from the top directory of your copy of the iter8-analytics repository:
-
-```bash
-helm template install/kubernetes/helm/iter8-analytics --name iter8-analytics --set iter8Config.metricsBackendURL="http://prometheus-system-discovery.knative-monitoring:9090" | kubectl apply -f -
-```
-
-#### Step 3. Verify the installation
-
-The command above should have created the `iter8` namespace, where you should see a running pod and a service as below:
-
-```bash
-$ kubectl get pods -n iter8
-NAME                               READY   STATUS    RESTARTS   AGE
-iter8-analytics-5c5758ccf9-p575b   1/1     Running   0          4s
-```
-
-```bash
-$ kubectl get svc -n iter8
-NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
-iter8-analytics   ClusterIP   172.21.106.44   <none>        80/TCP    9s
-```
-
-### Setting up _iter8-controller_
-
-#### Step 1. Clone the GitHub repository
-
-```bash
-git clone git@github.ibm.com:istio-research/iter8-controller.git
-```
-
-#### Step 2. Run _iter8-controller_ using our Helm chart
-
-One way to set up _iter8-controller_ is through our Helm chart. As before, assuming you have the [Helm client](https://helm.sh/docs/using_helm/#installing-the-helm-client) installed on your computer, as well as the Kubernetes CLI `kubectl` pointing at your desired Kubernetes cluster, all you need to do to deploy _iter8_controller_ to your cluster is to run the following command from the top directory of your copy of the iter8-controller repository:
-
-```bash
-helm template install/helm/iter8-controller --name iter8-controller | kubectl apply  -f -
-```
-
-#### Step 3. Verify the installation
-
-The command above should have created in the `iter8` namespace an additional pod and service. If you also installed _iter8-analytics_, you should see the following pods and services:
+After installing _iter8-analytics_ and _iter8-controller_, you should see the following pods and services in the newly created `iter8` namespace:
 
 ```bash
 $ kubectl get pods -n iter8
@@ -108,28 +66,40 @@ controller-manager-service   ClusterIP   172.21.62.217   <none>        443/TCP  
 iter8-analytics              ClusterIP   172.21.106.44   <none>        80/TCP    76s
 ```
 
-#### Step 4. Import iter8's Grafana dashboard
+### Import iter8's Grafana dashboard
 
-To enable users to see Prometheus metrics that pertain to their canary releases, iter8 provides a Grafana dashboard template. To take advantage of that, you will need to import this dashboard template from the Grafana UI.
+To enable users to see Prometheus metrics that pertain to their canary releases, iter8 provides a Grafana dashboard template. To take advantage of Grafana, you will need to import this template. To do so, first make sure you can access Grafana. In a typical Istio installation, you can port-forward Grafana from Kubernetes to your localhost's port 3000 with the command below:
 
-If you are using iter8 with Istio, you must import the following dashboard template file located in the _iter8-controller_ repository:
-
-```
-iter8-controller/config/grafana/istio.json
+```bash
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
 ```
 
-If you are using iter8 with Knative, the dashboard template file in the _iter8-controller_ repository is the following:
+After running that command, you can access Grafana's UI at `http://localhost:3000`.
 
+To import iter8's dashboard template for Istio, execute the following two commands:
+
+```bash
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/istio.json
+
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
+| /bin/bash -
 ```
-iter8-controller/config/grafana/knative.json
+
+If you are using iter8 with Knative, use these two commands instead:
+
+```bash
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/knative.json
+
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
+| /bin/bash -
 ```
 
 ## Uninstall _iter8_
 
-If you want to uninstall all _iter8_ components from your Kubernetes cluster, you can run the following command from the top directory of your copy of the **_iter8_controller_** repository:
+If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then you can delete iter8 by running the following command:
 
 ```bash
-helm template install/helm/iter8-controller --name iter8-controller | kubectl delete  -f -
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/iter8-controller.yaml
 ```
 
-Note that this command will delete our CRD and wipe out the `iter8` namespace.
+Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.
