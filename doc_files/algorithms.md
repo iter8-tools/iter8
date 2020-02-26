@@ -2,7 +2,7 @@
 
 This documentation briefly describes the algorithms supported by iter8 to make decisions during canary releases or A/B testing. These algorithms are part of iter8's analytics service (_iter8-analytics_) and exposed via REST API. Iter8's Kubernetes controller (_iter8-controller_) calls the appropriate REST API based on the `.spec.trafficControl.strategy` set in a custom `Experiment` resource. Iter8's `Experiment` CRD is documented [here](iter8_crd.md).
 
-Iter8's algorithms are statistically robust. Below, we list the algorithms currently available to users.  This list will grow as we introduce other sophisticated algorithms based on Bayesian strategies for decision making.
+Iter8's algorithms are statistically robust. Below, we list the algorithms currently available to users.  This list will grow as we introduce other sophisticated algorithms for decision making.
 
 ## 1. Progressive check-and-increment algorithm (`check_and_increment`)
 
@@ -12,7 +12,7 @@ Iter8's algorithms are statistically robust. Below, we list the algorithms curre
 interval: # (time; e.g., 30s)
 maxIterations: # (integer; e.g., 1000)
 trafficStepSize: # (percentage; e.g., 5)
-maxTrafficPercentage: # 80 (percentage; e.g., 90)
+maxTrafficPercentage: # (percentage; e.g., 90)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
@@ -27,7 +27,7 @@ A successful experiment will last for a duration of length  `interval * maxItera
 ```yaml
 interval: # (time; e.g., 30s)
 maxIterations: # (integer; e.g., 1000)
-maxTrafficPercentage: # 80 (percentage; e.g., 90)
+maxTrafficPercentage: # (percentage; e.g., 90)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
@@ -37,36 +37,34 @@ Unlike the check-and-increment strategy described above, this algorithm automati
 
 In A/B or A/B/n testing, the "optimality" of a version relates to maximizing the reward during the course of an experiment while satisfying the success criteria. In the context of canary releases, an implicit reward metric is used to indicate whether or not the success criteria are satisfied at each iteration.
 
-## 3. Posterior Bayesian Routing (`pbr`)
+## 3. Posterior Bayesian Routing (`posterior_bayesian_routing`)
 
 ```yaml
 interval: # (time; e.g., 30s)
 maxIterations: # (integer; e.g., 1000)
 maxTrafficPercentage: # 80 (percentage; e.g., 90)
-confidence: # (float; e.g 0.95)
+confidence: # (float; e.g, 0.95)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
-This algorithm like the epsilon-greedy strategy described above, can be applied to canary releases as well as A/B or A/B/n testing scenarios. The goal of this strategy is similar to that of the one above. It is to shift traffic to optimal versions of a micro service not just based on their reward attribute but also based on other attributes which need to satisfy their respective feasibility constraints (i.e. user-defined success criteria).
+This algorithm, like the decaying epsilon-greedy strategy described above, can be applied to canary releases as well as A/B or A/B/n testing scenarios. The goal of this strategy is similar to that of the one above: shift traffic to an optimal version based on a reward attribute subject to feasibility constraints corresponding to user-defined success criteria.
 
 Here, the reward and feasibility constraints are viewed in the form of beta/normal distributions which are sampled from while calculating traffic split between the different versions.
 
-This algorithm is novel in that, for each iteration the increase in traffic to the version that performs best (i.e satisfies all user-defined success criteria as well as obtains the maximum reward) is dependent on the load already generated to the version. This ensures that the traffic split generated has high confidence.
+At each iteration the algorithm increases the traffic to the "best" version, that is, the one satisfying all user-defined success criteria while obtaining the maximum reward.
 
-Another useful point to note is that Bayesian Routing algorithms can make use of historical data to perform analysis of different micro service versions. Through our experiments, we have found that this algorithm converges much quicker than the epsilon-greedy and check-and-increment strategies to the most feasible micro service version.
+It worth pointing out that this algorithm tends to converge to the "optimal" version much quicker than does the epsilon-greedy strategy.
 
-## 4. Optimistic Bayesian Routing (`obr`)
+## 4. Optimistic Bayesian Routing (`optimistic_bayesian_routing`)
 
 ```yaml
 interval: # (time; e.g., 30s)
 maxIterations: # (integer; e.g., 1000)
 maxTrafficPercentage: # 80 (percentage; e.g., 90)
-confidence: # (float; e.g 0.95)
+confidence: # (float; e.g, 0.95)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
-This algorithm is almost exactly similar to the one above. It can be adopted to A/B or A/B/n scenarios. It aims to shift traffic to a feasible micro service version based on their reward attibute and different user-defined success criteria.
+This is another Bayesian algorithm we devised. Optimistic Bayesian Routing is a slight variation of the previous algorithm (Probabilistic Bayesian Routing), sharing the same goal of maximizing a reward subject to feasibility constraints (success criteria).
 
-The reward and feasibility constraints are viewed in the form of beta/normal distributions which are sampled from, while calculating traffic split between the different versions. The traffic split, here too is dependent on the load generated to the micro services thereby making its judgement highly confident.
-
-The difference lies in the way values are sampled from the feasibility distributions - this algorithm has a more optimistic approach and has shown the best convergence rate thus far in our experimentation.
+The only difference lies in the way values are sampled from the distributions for reward and feasibility constraints: this algorithm has a more optimistic approach and tends to exhibit a faster convergence rate.
