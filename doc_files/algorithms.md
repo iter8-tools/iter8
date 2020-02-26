@@ -42,7 +42,7 @@ In A/B or A/B/n testing, the "optimality" of a version relates to maximizing the
 ```yaml
 interval: # (time; e.g., 30s)
 maxIterations: # (integer; e.g., 1000)
-maxTrafficPercentage: # 80 (percentage; e.g., 90)
+maxTrafficPercentage: # (percentage; e.g., 90)
 confidence: # (float; e.g, 0.95)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
