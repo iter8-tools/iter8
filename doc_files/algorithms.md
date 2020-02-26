@@ -65,6 +65,6 @@ confidence: # (float; e.g, 0.95)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
-This is another Bayesian algorithm we devised. Optimistic Bayesian Routing is a slight variation of the previous algorithm (Probabilistic Bayesian Routing), sharing the same goal of maximizing a reward subject to feasibility constraints (success criteria).
+This is another Bayesian algorithm we devised. Optimistic Bayesian Routing is a slight variation of the previous algorithm (Posterior Bayesian Routing), sharing the same goal of maximizing a reward subject to feasibility constraints (success criteria).
 
 The only difference lies in the way values are sampled from the distributions for reward and feasibility constraints: this algorithm has a more optimistic approach and tends to exhibit a faster convergence rate.
