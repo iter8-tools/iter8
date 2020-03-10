@@ -13,6 +13,8 @@ spec:
     params:
       - name: experiment
         value: 'iter8/experiment.yaml'
+      - name: experiment-id
+        value: 'rollout-reviews-v3'
       - name: stable
         value: 'reviews-v2'
       - name: candidate

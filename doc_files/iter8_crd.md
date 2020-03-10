@@ -40,10 +40,10 @@ spec:
       apiversion: networking.istio.io/v1alpha3
       kind: VirtualService
       name: reviews-external
-    
+
     # analysis contains the parameters for configuring the analytics service
     analysis:
-    
+
       # analyticsService specifies analytics service endpoint (optional)
       # default value is http://iter8-analytics.iter8
       analyticsService: http://iter8-analytics.iter8
@@ -59,13 +59,15 @@ spec:
       # metricName: name of the metric to which this criterion applies (required)
       # the name should match the name of an iter8 metric or that of a user-defined custom metric
       # names of metrics supported by iter8 out of the box:
-      #   iter8_latency: mean latency of the service 
+      #   iter8_latency: mean latency of the service
       #   iter8_error_rate: mean error rate (~5** HTTP Status codes) of the service
       #   iter8_error_count: total error count (~5** HTTP Status codes) of the service
       - metricName: iter8_latency
 
         # minimum number of data points required to make a decision based on this criterion (optional)
         # default is 10
+        # Used by the check and increment alogorithm.
+        # Ignored by other algorithms.
         sampleSize: 100
 
         # the metric value for the candidate version defining this success criterion (required)
@@ -75,11 +77,21 @@ spec:
 
         # indicates if the tolerance value above should be interpreted as an absolute threshold or
         # a threshold relative to the baseline (required)
-        # options: 
+        # options:
         #   threshold: the metric value for the candidate must be below the tolerance value above
         #   delta: the tolerance value above indicates the percentage within which the candidate metric value can deviate
         # from the baseline metric value
         toleranceType: threshold
+
+        # The range of possible metric values (optional)
+        # Used by bayesian routing algorithms if available.
+        # Ignored by other algorithms.
+        min_max:
+          # The minimum possible value for the metric
+          min: 0.0
+
+          # The maximum possible value for the metric
+          max: 1.0
 
         # indicates whether or not the experiment must finish if this criterion is not satisfied (optional)
         # default is false
@@ -107,6 +119,8 @@ spec:
       # options:
       #   check_and_increment
       #   epsilon_greedy
+      #   posterior_bayesian_routing
+      #   optimistic_bayesian_routing
       #   increment_without_check: increase traffic to candidate by trafficStepSize at each iteration without calling analytics
       # default is check_and_increment
       strategy: check_and_increment
@@ -114,9 +128,15 @@ spec:
       # the maximum traffic increment per iteration (optional)
       # default is 2.0
       trafficStepSize: 20
+
+      # The required confidence in the recommeded traffic split (optional)
+      # default is 0.95
+      # Used by bayesian routing algorithms
+      # Ignored by other algorithms
+      confidence: 0.9
   
       # determines how the traffic must be split at the end of the experiment (optional)
-      # options: 
+      # options:
       #   baseline: all traffic goes to the baseline version
       #   candidate: all traffic goes to the candidate version
       #   both: traffic is split across baseline and candidate

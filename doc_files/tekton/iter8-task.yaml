@@ -30,18 +30,18 @@ spec:
       args:
         - '-c'
         - |
-          TEMPLATE="/workspace/source/${inputs.params.experiment}"
+          TEMPLATE="/workspace/source/$(inputs.params.experiment)"
           NAME=$(yq read ${TEMPLATE} metadata.name)
-          yq write --inplace ${TEMPLATE} metadata.name ${NAME}-${inputs.params.experiment-id}
-          yq write --inplace ${TEMPLATE} spec.targetService.baseline ${inputs.params.stable}
-          yq write --inplace ${TEMPLATE} spec.targetService.candidate ${inputs.params.candidate}
+          yq write --inplace ${TEMPLATE} metadata.name ${NAME}-$(inputs.params.experiment-id)
+          yq write --inplace ${TEMPLATE} spec.targetService.baseline $(inputs.params.stable)
+          yq write --inplace ${TEMPLATE} spec.targetService.candidate $(inputs.params.candidate)
           cat ${TEMPLATE}
     - name: apply
       image: lachlanevenson/k8s-kubectl
       command: [ "kubectl" ]
       args:
         - "--namespace"
-        - "${inputs.params.target-namespace}"
+        - "$(inputs.params.target-namespace)"
         - "apply"
         - "--filename"
-        - "/workspace/source/${inputs.params.experiment}"
+        - "/workspace/source/$(inputs.params.experiment)"
