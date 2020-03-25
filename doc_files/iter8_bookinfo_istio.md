@@ -84,7 +84,7 @@ If everything is working, the command above should show `200`. Note that the cur
 Let us now generate load to the application, emulating requests coming from users. To do so, we recommend you run the command below on a separate terminal:
 
 ```bash
-watch -n 0.1 'curl -H "Host: bookinfo.sample.dev" -Is "http://${GATEWAY_URL}//productpage"'
+watch -n 0.1 'curl -H "Host: bookinfo.sample.dev" -Is "http://${GATEWAY_URL}/productpage"'
 ```
 
 This command will send 10 requests per second to the application. Note that the environment variable `GATEWAY_URL` must have been set as per step 2 above. Among other things, the command output should show an HTTP code of 200, as below:
