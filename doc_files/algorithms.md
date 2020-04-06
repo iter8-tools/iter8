@@ -37,7 +37,7 @@ Unlike the check-and-increment strategy described above, this algorithm automati
 
 In A/B or A/B/n testing, the "optimality" of a version relates to maximizing the reward during the course of an experiment while satisfying the success criteria. In the context of canary releases, an implicit reward metric is used to indicate whether or not the success criteria are satisfied at each iteration.
 
-## 3. Posterior Bayesian Routing (`posterior_bayesian_routing`)
+## 3. Posterior Bayesian Routing (PBR) (`posterior_bayesian_routing`)
 
 ```yaml
 interval: # (time; e.g., 30s)
@@ -47,15 +47,11 @@ confidence: # (float; e.g, 0.95)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
-This algorithm, like the decaying epsilon-greedy strategy described above, can be applied to canary releases as well as A/B or A/B/n testing scenarios. The goal of this strategy is similar to that of the one above: shift traffic to an optimal version based on a reward attribute subject to feasibility constraints corresponding to user-defined success criteria.
+This algorithm provides a robust way of shifting application traffic to the best version using the principles of Bayesian statistics. Like the decaying epsilon-greedy strategy described above, PBR can be applied to canary releases as well as A/B or A/B/n testing scenarios. The goal of this strategy is to shift traffic to the optimal version subject to the user-defined success criteria.
 
-Here, the reward and feasibility constraints are viewed in the form of beta/normal distributions which are sampled from while calculating traffic split between the different versions.
+In this algorithm, the metrics used in success criteria are associated with Bayesian belief distributions, specifically, whose parameters are learnt from metric observations through the course of the experiment. At each iteration, the algorithm computes the probability of the candidate being the "best" version: i.e., satisfying all the success criteria, and the probability of the baseline being the "best" version: i.e, the complementary probability to what is computed above. Traffic is split across these two versions in proportion to their probabilities. At the end of the experiment, if the probability of candidate being the "best" version exceeds the value of ```confidence``` parameter, then, the experiment is declared a success and a roll-forward to candidate occurs.
 
-At each iteration the algorithm increases the traffic to the "best" version, that is, the one satisfying all user-defined success criteria while obtaining the maximum reward.
-
-It worth pointing out that this algorithm tends to converge to the "optimal" version much quicker than does the epsilon-greedy strategy.
-
-## 4. Optimistic Bayesian Routing (`optimistic_bayesian_routing`)
+## 4. Optimistic Bayesian Routing (OBR) (`optimistic_bayesian_routing`)
 
 ```yaml
 interval: # (time; e.g., 30s)
@@ -65,6 +61,4 @@ confidence: # (float; e.g, 0.95)
 onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
 ```
 
-This is another Bayesian algorithm we devised. Optimistic Bayesian Routing is a slight variation of the previous algorithm (Posterior Bayesian Routing), sharing the same goal of maximizing a reward subject to feasibility constraints (success criteria).
-
-The only difference lies in the way values are sampled from the distributions for reward and feasibility constraints: this algorithm has a more optimistic approach and tends to exhibit a faster convergence rate.
+Optimistic Bayesian Routing is a variation of PBR, sharing the same goal of shifting traffic to the optimal version in a statistically robust manner. The main difference between OBR and PBR lies in the way values are sampled from the distributions for reward and feasibility constraints: this algorithm has a more optimistic approach and tends to exhibit a faster convergence rate.
