@@ -66,8 +66,8 @@ spec:
 
         # minimum number of data points required to make a decision based on this criterion (optional)
         # default is 10
-        # Used by the check and increment alogorithm.
-        # Ignored by other algorithms.
+        # Used by the check_and_increment and epsilon_greedy algorithms
+        # Ignored by other algorithms
         sampleSize: 100
 
         # the metric value for the candidate version defining this success criterion (required)
@@ -98,7 +98,7 @@ spec:
         stopOnFailure: false
       
       # reward is an optional field that can be used when an a/b testing is conducted
-      # When both versions satisfy all the success crtiria, the one with higher reward value wins the comparison
+      # When both versions satisfy all the success criteria, the one with higher reward value wins the comparison
       # This is effective when a bayesian routing strategy is specified in trafficControl (posterior_bayesian_routing or optimistic_bayesian_routing)
       reward:
         # the metric whose value is treated as reward (required)
@@ -142,9 +142,11 @@ spec:
 
       # the maximum traffic increment per iteration (optional)
       # default is 2.0
+      # Used by check_and_increment algorithm
+      # Ignored by other algorithms
       trafficStepSize: 20
 
-      # The required confidence in the recommeded traffic split (optional)
+      # The required confidence in the recommended traffic split (optional)
       # default is 0.95
       # Used by bayesian routing algorithms
       # Ignored by other algorithms
