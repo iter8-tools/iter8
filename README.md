@@ -40,7 +40,7 @@ The following tutorials will help you get started with iter8:
 
 ## Algorithms behind iter8
 
-A key goal of this project is to introduce statistically robust algorithms for decision making during cloud-native canary releases and A/B testing experiments. We currently support [two algorithms](doc_files/algorithms.md) and plan to introduce other sophisticated algorithms based on Bayesian approaches. Stay tuned!
+A key goal of this project is to introduce statistically robust algorithms for decision making during cloud-native canary releases and A/B testing experiments. We currently support [four algorithms](doc_files/algorithms.md).
 
 ## Integrations
 
