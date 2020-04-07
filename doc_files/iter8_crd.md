@@ -96,6 +96,21 @@ spec:
         # indicates whether or not the experiment must finish if this criterion is not satisfied (optional)
         # default is false
         stopOnFailure: false
+      
+      # reward is an optional field that can be used when an a/b testing is conducted
+      # When both versions satisfy all the success crtiria, the one with higher reward value wins the comparison
+      # This is effective when a bayesian routing strategy is specified in trafficControl (posterior_bayesian_routing or optimistic_bayesian_routing)
+      reward:
+        # the metric whose value is treated as reward (required)
+        - metricName: iter8_latency
+
+        # The range of possible metric values (optional)
+        min_max:
+          # The minimum possible value for the metric
+          min: 0.0
+
+          # The maximum possible value for the metric
+          max: 1.0
   
     # trafficControl controls the experiment durarion and how the controller should change the traffic split
     trafficControl:
