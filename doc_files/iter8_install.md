@@ -24,7 +24,7 @@ iter8 has two components, _iter8_analytics_ and _iter8_controller_. These can be
 ```bash
 kubectl apply \
     -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/v0.0.1/install/kubernetes/iter8-analytics.yaml \
-    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/install/iter8-controller.yaml 
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/install/iter8-controller.yaml
 ```
 
 To install for use with knative, modify the first file:
@@ -32,7 +32,7 @@ To install for use with knative, modify the first file:
 ```bash
 kubectl apply \
     -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/master/v0.0.1/knative/iter8-analytics.yaml \
-    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/v0.0.1/iter8-controller.yaml 
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/v0.0.1/iter8-controller.yaml
 ```
 
 ### Customized installation
