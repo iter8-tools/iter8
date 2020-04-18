@@ -31,8 +31,8 @@ To install for use with knative, modify the first file:
 
 ```bash
 kubectl apply \
-    -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/master/v0.0.1/knative/iter8-analytics.yaml \
-    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/v0.0.1/iter8-controller.yaml
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/v0.0.1/knative/iter8-analytics.yaml \
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/iter8-controller.yaml
 ```
 
 ### Customized installation
@@ -44,7 +44,7 @@ git clone git@github.com:iter8-tools/iter8-analytics.git
 git clone git@github.com:iter8-tools/iter8-controller.git
 ```
 
-The _iter8-analytics_ helm chart is [here](https://github.com/iter8-tools/iter8-analytics/tree/master/install/kubernetes/helm/iter8-analytics), and the _iter8-controller_ helm chart is [here](https://github.com/iter8-tools/iter8-controller/tree/master/install/helm/iter8-controller).
+The _iter8-analytics_ helm chart is [here](https://github.com/iter8-tools/iter8-analytics/tree/v0.0.1/install/kubernetes/helm/iter8-analytics), and the _iter8-controller_ helm chart is [here](https://github.com/iter8-tools/iter8-controller/tree/v0.0.1/install/helm/iter8-controller).
 
 **Note on Prometheus:** In order to make assessments on canary releases, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090`, which is the default internal Kubernetes URL of Prometheus installed as an Istio addon. If your Istio installation is shipping metrics to a different Prometheus installation, you need to set the _iter8-analytics_ helm chart parameter `iter8Config.metricsBackendURL` to your Prometheus `host:port`.
 
@@ -79,18 +79,18 @@ After running that command, you can access Grafana's UI at `http://localhost:300
 To import iter8's dashboard template for Istio, execute the following two commands:
 
 ```bash
-export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/istio.json
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/config/grafana/istio.json
 
-curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
 If you are using iter8 with Knative, use these two commands instead:
 
 ```bash
-export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/config/grafana/knative.json
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/config/grafana/knative.json
 
-curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -99,7 +99,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/ha
 If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then you can delete iter8 by running the following command:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/iter8-controller.yaml
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/install/iter8-controller.yaml
 ```
 
 Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.
