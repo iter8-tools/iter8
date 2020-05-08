@@ -4,7 +4,7 @@ Different versions of Istio telemetry (`v1` or `v2`) report application-level me
 
 Below are instructions for each of these combinations. Choose only the instructions for the combination that matches your environment.
 
-### Istio telemetry v1 and Kubernetes prior to 1.16:
+### Istio _telemetry v1_ and _Kubernetes prior to 1.16_:
 
 Execute the following two commands:
 
@@ -15,7 +15,7 @@ curl -s https://github.com/iter8-tools/iter8-controller/releases/latest/download
 | /bin/bash -
 ```
 
-### Istio telemetry v2 and Kubernetes prior to 1.16:
+### Istio _telemetry v2_ and _Kubernetes prior to 1.16_:
 
 Execute the following two commands:
 
@@ -26,7 +26,7 @@ curl -s https://github.com/iter8-tools/iter8-controller/releases/latest/download
 | /bin/bash -
 ```
 
-### Istio telemetry v1 and Kubernetes 1.16 and later:
+### Istio _telemetry v1_ and _Kubernetes 1.16 and later_:
 
 Execute the following two commands:
 
@@ -37,7 +37,7 @@ curl -s https://github.com/iter8-tools/iter8-controller/releases/latest/download
 | /bin/bash -
 ```
 
-### Istio telemetry v2 and Kubernetes 1.16 and later:
+### Istio _telemetry v2_ and _Kubernetes 1.16 and later_:
 
 Execute the following two commands:
 
