@@ -35,16 +35,13 @@ kubectl apply \
     -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.0.1/install/iter8-controller.yaml
 ```
 
-### Customized installation
+### Customized installation via Helm charts
 
-In case you need to change the default configuration options used in the quick installation, use the helm charts directly by cloning the projects:
+In case you need to change the default configuration options used in the quick installation, you can use iter8's Helm charts:
 
-```bash
-git clone git@github.com:iter8-tools/iter8-analytics.git
-git clone git@github.com:iter8-tools/iter8-controller.git
-```
+* _iter8-analytics_: [hhttps://github.com/iter8-tools/iter8-analytics/releases/download/v0.0.1/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.0.1/iter8-analytics-helm-chart.tar)
 
-The _iter8-analytics_ helm chart is [here](https://github.com/iter8-tools/iter8-analytics/tree/v0.0.1/install/kubernetes/helm/iter8-analytics), and the _iter8-controller_ helm chart is [here](https://github.com/iter8-tools/iter8-controller/tree/v0.0.1/install/helm/iter8-controller).
+* _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.0.1/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.0.1/iter8-controller-helm-chart.tar)
 
 **Note on Prometheus:** In order to make assessments on canary releases, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090`, which is the default internal Kubernetes URL of Prometheus installed as an Istio addon. If your Istio installation is shipping metrics to a different Prometheus installation, you need to set the _iter8-analytics_ helm chart parameter `iter8Config.metricsBackendURL` to your Prometheus `host:port`.
 
