@@ -121,7 +121,7 @@ spec:
     maxIterations: 8
     maxTrafficPercentage: 80
   analysis:
-    analyticsService: "http://iter8-analytics.iter8"
+    analyticsService: "http://iter8-analytics.iter8:8080"
     successCriteria:
       - metricName: iter8_latency
         toleranceType: threshold
@@ -221,7 +221,7 @@ spec:
     maxIterations: 6
     maxTrafficPercentage: 80
   analysis:
-    analyticsService: "http://iter8-analytics.iter8"
+    analyticsService: "http://iter8-analytics.iter8:8080"
     successCriteria:
       - metricName: iter8_latency
         toleranceType: threshold
@@ -323,7 +323,7 @@ spec:
     maxIterations: 6
     maxTrafficPercentage: 80
   analysis:
-    analyticsService: "http://iter8-analytics.iter8"
+    analyticsService: "http://iter8-analytics.iter8:8080"
     successCriteria:
       - metricName: iter8_latency
         toleranceType: threshold
@@ -448,7 +448,7 @@ spec:
     maxIterations: 6
     maxTrafficPercentage: 80
   analysis:
-    analyticsService: "http://iter8-analytics.iter8"
+    analyticsService: "http://iter8-analytics.iter8:8080"
     successCriteria:
       - metricName: iter8_90_perc_latency
         toleranceType: threshold
@@ -611,7 +611,7 @@ spec:
     maxIterations: 6
     maxTrafficPercentage: 80
   analysis:
-    analyticsService: "http://iter8-analytics.iter8"
+    analyticsService: "http://iter8-analytics.iter8:8080"
     successCriteria:
       - metricName: iter8_latency
         toleranceType: threshold
