@@ -39,7 +39,7 @@ kubectl apply \
 
 In case you need to change the default configuration options used in the quick installation, you can use iter8's Helm charts:
 
-* _iter8-analytics_: [hhttps://github.com/iter8-tools/iter8-analytics/releases/download/v0.0.1/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.0.1/iter8-analytics-helm-chart.tar)
+* _iter8-analytics_: [https://github.com/iter8-tools/iter8-analytics/releases/download/v0.0.1/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.0.1/iter8-analytics-helm-chart.tar)
 
 * _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.0.1/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.0.1/iter8-controller-helm-chart.tar)
 
