@@ -25,7 +25,7 @@ The _iter8-controller_ currently uses the [Istio service mesh](https://istio.io)
 
 ## Installing iter8
 
-These [instructions](doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio and/or Knative.
+These [instructions](doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio.
 
 ## Tutorials
 

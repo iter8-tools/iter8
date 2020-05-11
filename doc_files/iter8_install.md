@@ -32,7 +32,7 @@ In case you need to customize the installation of iter8's latest release, use th
 
 ### Installing an older release
 
-In case you need to install an old iter8 release, please, refer to its corresponding documentation in the link below. In the URL below, you need to replace the string `<release>` with the string corresponding to your desired release. For example, a valid release string would be `v0.0.1`.
+In case you need to install an old iter8 release, please refer to its corresponding documentation in the link below. In the URL below, you need to replace the string `<release>` with the string corresponding to your desired release. For example, a valid release string would be `v0.0.1`.
 
 ```
 https://github.com/iter8-tools/docs/tree/<release>
