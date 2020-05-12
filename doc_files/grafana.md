@@ -11,7 +11,7 @@ Execute the following two commands:
 ```bash
 export DASHBOARD_DEFN=https://github.com/iter8-tools/iter8-controller/releases/latest/download/istio-telemetry-v1.json
 
-curl -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
+curl -L -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -22,7 +22,7 @@ Execute the following two commands:
 ```bash
 export DASHBOARD_DEFN=https://github.com/iter8-tools/iter8-controller/releases/latest/download/istio-telemetry-v2.json
 
-curl -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
+curl -L -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -33,7 +33,7 @@ Execute the following two commands:
 ```bash
 export DASHBOARD_DEFN=https://github.com/iter8-tools/iter8-controller/releases/latest/download/istio-telemetry-v1-k8s-16.json
 
-curl -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
+curl -L -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -44,6 +44,6 @@ Execute the following two commands:
 ```bash
 export DASHBOARD_DEFN=https://github.com/iter8-tools/iter8-controller/releases/latest/download/istio-telemetry-v2-k8s-16.json
 
-curl -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
+curl -L -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
