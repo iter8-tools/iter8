@@ -262,7 +262,7 @@ Following the Kubernetes model, the `status` section contains all relevant runti
     # the current experiment's iteration
     currentIteration: 2
 
-    # # Unix timestamp in nanoseconds when the experiment is created
+    # Unix timestamp in nanoseconds when the experiment is created
     createTimestamp: 1576820317351000
 
     # Unix timestamp in nanoseconds when the experiment started
