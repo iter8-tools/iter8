@@ -262,11 +262,14 @@ Following the Kubernetes model, the `status` section contains all relevant runti
     # the current experiment's iteration
     currentIteration: 2
 
-    # Unix timestamp in milliseconds corresponding to when the experiment started
-    startTimestamp: "1576820317351"
+    # # Unix timestamp in nanoseconds when the experiment is created
+    createTimestamp: 1576820317351000
 
-    # Unix timestamp in milliseconds corresponding to when the experiment finished
-    endTimestamp: "1576820377696"
+    # Unix timestamp in nanoseconds when the experiment started
+    startTimestamp: 1576820317351000
+
+    # Unix timestamp in nanoseconds when the experiment finished
+    endTimestamp: 1576820377696000
 
     # The url to he Grafana dashboard pertaining to this experiment
     grafanaURL: http://localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=bookinfo-iter8&var-service=reviews&var-baseline=reviews-v3&var-candidate=reviews-v5&from=1576820317351&to=1576820377696
@@ -278,7 +281,7 @@ Following the Kubernetes model, the `status` section contains all relevant runti
     message: 'ExperimentFailed: Aborted'
 
     # the experiment's current phase 
-    # values could be: Initializing, Progressing, Pause, Completed
+    # values could be: Progressing, Pause, Completed
     phase: Completed
 
     # the current traffic split
