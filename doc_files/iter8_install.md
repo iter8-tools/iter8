@@ -12,33 +12,23 @@ These instructions show you how to set up iter8 on Kubernetes with Istio.
 
 iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow these instructions.
 
-### Quick installation (latest release)
+### Quick installation
 
-To install the latest iter8 release with the default settings, you can apply the default yaml files for _iter8-analytics_ and _iter8-controller_ by running the following command:
+To install iter8 with the default settings, you can apply the default yaml files for _iter8-analytics_ and _iter8-controller_ by running the following command:
 
 ```bash
 kubectl apply \
-    -f https://github.com/iter8-tools/iter8-analytics/releases/latest/download/iter8-analytics.yaml \
-    -f https://github.com/iter8-tools/iter8-controller/releases/latest/download/iter8-controller.yaml
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/v0.1.0/install/kubernetes/iter8-analytics.yaml \
+    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/install/iter8-controller.yaml
 ```
 
-### Customized installation via Helm charts (latest release)
+### Customized installation via Helm charts
 
-In case you need to customize the installation of iter8's latest release, use the Helm charts listed below:
+In case you need to customize the installation of iter8, use the Helm charts listed below:
 
-* _iter8-analytics_: [https://github.com/iter8-tools/iter8-analytics/releases/latest/download/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/latest/download/iter8-analytics-helm-chart.tar)
+* _iter8-analytics_: [ https://github.com/iter8-tools/iter8-analytics/releases/download/v0.1.0/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.1.0/iter8-analytics-helm-chart.tar)
 
-* _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/latest/download/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/latest/download/iter8-controller-helm-chart.tar)
-
-### Installing an older release
-
-In case you need to install an old iter8 release, please refer to its corresponding documentation in the link below. In the URL below, you need to replace the string `<release>` with the string corresponding to your desired release. For example, a valid release string would be `v0.0.1`.
-
-```
-https://github.com/iter8-tools/docs/tree/<release>
-```
-
-Note that the URL above points to the GitHub branch and tag corresponding to your desired release in the documentation repository.
+* _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.1.0/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.1.0/iter8-controller-helm-chart.tar)
 
 **Note on Prometheus:** In order to make assessments, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying the need for authentication. If your Istio installation is shipping metrics to a different Prometheus installation, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look for the Prometheus-related parameters in the _iter8-analytics_ Helm chart's `values.yaml` file.
 
@@ -74,12 +64,10 @@ Depending on the version of Istio telemetry (`v1` or `v2`) and Kubernetes (prior
 
 ## Uninstall _iter8_
 
-If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command, adjusting the URL based on the release you are uninstalling.
+If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/<release>/install/iter8-controller.yaml
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/install/iter8-controller.yaml
 ```
-
-In the URL above, replace the string `<release>` with the string for your desired release. For example, a valid release string is `v0.0.1`.
 
 Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.
