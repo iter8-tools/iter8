@@ -7,7 +7,7 @@ apiVersion: iter8.tools/v1alpha1
 kind: Experiment
 ```
 
-Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 3 sections: `spec`, `metrics`, and `status`.
+Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 4 sections: `spec`, `action`, `metrics`, and `status`.
 
 ## `Experiment spec`
 
@@ -160,18 +160,25 @@ spec:
       # default is candidate
       onSuccess: candidate
 
-    # a flag that allows the user to terminate an ongoing experiment (optional)
-    # options:
-    #   override_success: terminate the experiment indicating that the candidate succeeded
-    #   override_failure: abort the experiment indicating that the candidate failed
-    # default is the empty string
-    assessment: ""
-
     # indicates whether or not iter8 should perform a clean-up action at the end of the experiment (optional)
     # if no action is specified, nothing is done to clean up at the end
     # if used, the currently supported actions are:
     #   delete: at the end of the experiment, the version that ends up with no traffic (if any) is deleted
     cleanup:
+```
+
+## `Experiment action`: user-provided action
+
+The user can interfere with an ongoing experiment by setting the value of an `action` attribute. Iter8 currently supports 4 user actions: `pause`, `resume`, `override_success`, and `override_failure`. Pause and resume are self-explanatory. The action `override_success` causes the experiment to immediately terminate with a success status, whereas `override_failure` causes the experiment to terminate with a failure status.
+
+```yaml
+# user-provided input (optional)
+# options:
+#   pause: pause the experiment
+#   resume: resume a paused experiment
+#   override_success: terminate the experiment indicating that the candidate succeeded
+#   override_failure: abort the experiment indicating that the candidate failed
+action: ""
 ```
 
 ## `Experiment metrics`
