@@ -21,21 +21,17 @@ To assess the behavior of microservice versions, iter8 supports a few metrics ou
 
 ## Supported environments
 
-The _iter8-controller_ currently supports the following Kubernetes-based environments, whose traffic-management capabilities are used:
-
-* [Istio service mesh](https://istio.io)
-* [Knative](https://knative.dev)
+The _iter8-controller_ currently uses the [Istio service mesh](https://istio.io) traffic management capabilities to automate the user traffic split across multiple microservice versions.
 
 ## Installing iter8
 
-These [instructions](doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio and/or Knative.
+These [instructions](doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio.
 
 ## Tutorials
 
 The following tutorials will help you get started with iter8:
 
 * [Automated canary releases with iter8 on Kubernetes and Istio](doc_files/iter8_bookinfo_istio.md)
-* [Automated canary releases with iter8 on Knative](doc_files/iter8_bookinfo_knative.md)
 * [Automated canary release with iter8 on Kubernetes and Istio using Tekton](doc_files/iter8_tekton_task.md)
 
 ## Algorithms behind iter8
@@ -45,3 +41,4 @@ A key goal of this project is to introduce statistically robust algorithms for d
 ## Integrations
 
 Iter8 is integrated with [Tekton Pipelines](https://tekton.dev) for an end-to-end CI/CD experience, and with [KUI](https://www.kui.tools), for a richer Kubernetes command-line experience. Initial integrations with these two technologies already exist, but we are actively improving them. Stay tuned!
+
