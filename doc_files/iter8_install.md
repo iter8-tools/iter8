@@ -14,12 +14,24 @@ iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install t
 
 ### Quick installation
 
-To install iter8 with the default settings, you can apply the default yaml files for _iter8-analytics_ and _iter8-controller_ by running the following command:
+To install iter8 with the default settings, you can apply the default yaml files for _iter8-analytics_ and _iter8-controller_.
+
+To install _iter8-analytics_, run the following command:
 
 ```bash
-kubectl apply \
-    -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/v0.1.0/install/kubernetes/iter8-analytics.yaml \
-    -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/install/iter8-controller.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/v0.1.0/install/kubernetes/iter8-analytics.yaml
+```
+
+To install _iter8-controller_, you need to choose the iter8 yaml file corresponding to the version of Istio telemetry (`v1` or `v2`) you are using. Before Istio 1.5, only Istio telemetry `v1` existed. If that is your Istio telemetry version, run the command below:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/install/iter8-controller.yaml
+```
+
+Alternatively, if you are using Istio telemetry `v2`, which became available since Istio 1.5 (https://istio.io/docs/reference/config/telemetry/), run the command below:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/install/iter8-controller-telemetry-v2.yaml
 ```
 
 ### Customized installation via Helm charts
@@ -31,6 +43,8 @@ In case you need to customize the installation of iter8, use the Helm charts lis
 * _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.1.0/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.1.0/iter8-controller-helm-chart.tar)
 
 **Note on Prometheus:** In order to make assessments, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying the need for authentication. If your Istio installation is shipping metrics to a different Prometheus installation, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look for the Prometheus-related parameters in the _iter8-analytics_ Helm chart's `values.yaml` file.
+
+**Note on Istio Telemetry:** Make sure to set the parameter `istioTelemetry` in the Helm chart to conform with your environment. Possible values are `v1` or `v2`.
 
 ### Verify the installation
 
