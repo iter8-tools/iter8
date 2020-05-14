@@ -44,7 +44,7 @@ In case you need to customize the installation of iter8, use the Helm charts lis
 
 **Note on Prometheus:** In order to make assessments, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying the need for authentication. If your Istio installation is shipping metrics to a different Prometheus installation, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look for the Prometheus-related parameters in the _iter8-analytics_ Helm chart's `values.yaml` file.
 
-**Note on Istio Telemetry:** Make sure to set the parameter `istioTelemetry` in the Helm chart to conform with your environment.
+**Note on Istio Telemetry:** Make sure to set the parameter `istioTelemetry` in the Helm chart to conform with your environment. Possible values are `v1` or `v2`.
 
 ### Verify the installation
 
