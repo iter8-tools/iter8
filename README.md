@@ -13,11 +13,11 @@ Iter8 supports cloud-native, automated canary releases and A/B testing, driven b
 
 ## The `Experiment` CRD
 
-When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD _kind_ is `Experiment` and it is documented [here](doc_files/iter8_crd.md).
+When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD _kind_ is `Experiment` and it is documented [here](https://github.com/iter8-tools/docs/blob/v0.1.0/doc_files/iter8_crd.md).
 
 ## Metrics
 
-To assess the behavior of microservice versions, iter8 supports a few metrics out-of-the-box without requiring users to do any extra work. In addition, users can define their own custom metrics. Iter8's out-of-the-box metrics as well as user-defined metrics can be referenced in the success criteria of an _experiment_. More details about metrics are documented [here](doc_files/metrics.md).
+To assess the behavior of microservice versions, iter8 supports a few metrics out-of-the-box without requiring users to do any extra work. In addition, users can define their own custom metrics. Iter8's out-of-the-box metrics as well as user-defined metrics can be referenced in the success criteria of an _experiment_. More details about metrics are documented [here](https://github.com/iter8-tools/docs/blob/v0.1.0/doc_files/metrics.md).
 
 ## Supported environments
 
@@ -25,18 +25,18 @@ The _iter8-controller_ currently uses the [Istio service mesh](https://istio.io)
 
 ## Installing iter8
 
-These [instructions](doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio.
+These [instructions](https://github.com/iter8-tools/docs/blob/v0.1.0/doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio.
 
 ## Tutorials
 
 The following tutorials will help you get started with iter8:
 
-* [Automated canary releases with iter8 on Kubernetes and Istio](doc_files/iter8_bookinfo_istio.md)
-* [Automated canary release with iter8 on Kubernetes and Istio using Tekton](doc_files/iter8_tekton_task.md)
+* [Automated canary releases with iter8 on Kubernetes and Istio](https://github.com/iter8-tools/docs/blob/v0.1.0/doc_files/iter8_bookinfo_istio.md)
+* [Automated canary release with iter8 on Kubernetes and Istio using Tekton](https://github.com/iter8-tools/docs/blob/v0.1.0/doc_files/iter8_tekton_task.md)
 
 ## Algorithms behind iter8
 
-A key goal of this project is to introduce statistically robust algorithms for decision making during cloud-native canary releases and A/B testing experiments. We currently support [four algorithms](doc_files/algorithms.md).
+A key goal of this project is to introduce statistically robust algorithms for decision making during cloud-native canary releases and A/B testing experiments. We currently support [four algorithms](https://github.com/iter8-tools/docs/blob/v0.1.0/doc_files/algorithms.md).
 
 ## Integrations
 
