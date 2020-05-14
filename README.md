@@ -43,3 +43,9 @@ A key goal of this project is to introduce statistically robust algorithms for d
 Iter8 is integrated with [Tekton Pipelines](https://tekton.dev) for an end-to-end CI/CD experience, and with [KUI](https://www.kui.tools), for a richer Kubernetes command-line experience. Initial integrations with these two technologies already exist, but we are actively improving them.
 
 **The upcoming iter8 1.0.0 release will feature a deep integration with KUI. Stay tuned!**
+
+## Releases
+
+The current iter8 release is **v0.1.0**. This documentation always points to the current release. Documentation of older releases can be found [here](releases.md).
+
+**Release 1.0.0 is coming soon! Stay tuned!!**
