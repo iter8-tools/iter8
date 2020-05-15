@@ -53,15 +53,15 @@ After installing _iter8-analytics_ and _iter8-controller_, you should see the fo
 ```bash
 $ kubectl get pods -n iter8
 NAME                                  READY   STATUS    RESTARTS   AGE
-controller-manager-5f54bb4b88-drr8s   1/1     Running   0          4s
+iter8-controller-5f54bb4b88-drr8s     1/1     Running   0          4s
 iter8-analytics-5c5758ccf9-p575b      1/1     Running   0          61s
 ```
 
 ```bash
 $ kubectl get svc -n iter8
-NAME                         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
-controller-manager-service   ClusterIP   172.21.62.217   <none>        443/TCP   20s
-iter8-analytics              ClusterIP   172.21.106.44   <none>        80/TCP    76s
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+iter8-controller         ClusterIP   172.21.62.217   <none>        443/TCP   20s
+iter8-analytics          ClusterIP   172.21.106.44   <none>        80/TCP    76s
 ```
 
 ### Import iter8's Grafana dashboard
