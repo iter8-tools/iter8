@@ -70,8 +70,8 @@ For example:
 
    User can create new experiment from the Action pulldown on the right of the listing page. 
 
-   <img src=../img/kiali-experiment-create1.png width=95%>
-   <img src=../img/kiali-experiment-create2.png width=95%>
+   <img src=../img/kiali-experiment-create-1.png width=95%>
+   <img src=../img/kiali-experiment-create-2.png width=95%>
 
 3. Experiment detail page
 
