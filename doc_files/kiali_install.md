@@ -4,15 +4,19 @@ Kiali is an observability console for Istio with service mesh configuration capa
 
 ### Enable Iter8 console in Kiali
 
-Kiali version 1.18.1 (and above) now provides the capabilities to observe Iter8 experiment runtime behavior. To enable Kiali Iter8 extensions, user needs to update the Kiali CR. The Iter8 extension is not enabled by default, to enable Iter8 extensions, the Kiali Operator needs to be installed. Please follow the steps in [Advanced Install](https://kiali.io/documentation/getting-started/#_advanced_install_operator_only).
+#### A. Install Kiali Operator
 
-    For example: 
-    ```
-    bash <(curl -L https://kiali.io/getLatestKialiOperator) --accessible-namespaces '**' -oiv latest -kiv latest --operator-install-kiali true
-    ```
-    will install the latest operator and Kiali from stable master.
+Kiali version 1.18.1 (and above) now provides the capabilities to observe Iter8 experiment runtime behavior. To enable Kiali Iter8 extensions, user needs to update the Kiali CR. The Iter8 extension is not enabled by default, to enable Iter8 extensions, the Kiali Operator needs to be installed. To check if Kiali operator is installed, use `kubectl get pods -n kiali-operator` Please follow the steps in [Advanced Install](https://kiali.io/documentation/getting-started/#_advanced_install_operator_only) to install kiali operator. And make sure the Kiali CR is created by command `kubectl get kialis.kiali.io kiali -n kiali-operator`.
 
-Make sure the Kiali CR is created by command `kubectl get kialis.kiali.io kiali -n kiali-operator`.
+For example: 
+
+```   
+bash <(curl -L https://kiali.io/getLatestKialiOperator) --accessible-namespaces '**' -oiv latest -kiv latest --operator-install-kiali true
+``` 
+
+will install the latest operator and Kiali from stable master.
+
+#### B. Enable iter_8 in Kiali Operator CR
 
 1. Follow the step [Create or Edit the Kiali CR](https://kiali.io/documentation/getting-started/#_create_or_edit_the_kiali_cr) or use ``kubectl edit kialis.kiali.io kiali -n kiali-operator`
 
