@@ -47,6 +47,6 @@ kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/
 
 ## Target Services
 
-The Red Hat OpenShift Service Mes is restricted to the set of namespaces defined in the `ServiceMeshMemberRoll` resource. In particular, if you will be trying the tutorials, add the namespace `bookinfo-iter8` to the `ServiceMeshMemberRoll`.
+The Red Hat OpenShift Service Mesh is restricted to the set of namespaces defined in the `ServiceMeshMemberRoll` resource. In particular, if you will be trying the tutorials, add the namespace `bookinfo-iter8` to the `ServiceMeshMemberRoll`.
 
 Istio relies a sidecar injected into each pod to provide its capabilities. Istio provides serveral ways this sidecar can be [injected](https://istio.io/docs/setup/additional-setup/sidecar-injection/). Red Hat recommends the use of the annotation `sidecar.istio.io/inject: "true"` in the deployment yaml. Examples can be found in the yaml for the tutorial: <https://github.com/iter8-tools/iter8-controller/blob/${RELEASE}/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml>
