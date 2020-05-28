@@ -493,7 +493,7 @@ kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools
 Or, if using a newer version of Istio (1.5 or greater) with telemetry v2:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v2_to_reviews-v3_telemetry-v6.yaml
+kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v6_telemetry-v6.yaml
 ```
 
 As usual, iter8 is waiting for the candidate version to be deployed:
