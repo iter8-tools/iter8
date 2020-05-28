@@ -9,9 +9,9 @@ Below are instructions for each of these combinations. Choose only the instructi
 Execute the following two commands:
 
 ```bash
-export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/config/grafana/istio-telemetry-v1.json
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/config/grafana/istio-telemetry-v1.json
 
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/hack/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -20,9 +20,9 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0
 Execute the following two commands:
 
 ```bash
-export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/config/grafana/istio-telemetry-v2.json
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/config/grafana/istio-telemetry-v2.json
 
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/hack/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -31,9 +31,9 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0
 Execute the following two commands:
 
 ```bash
-export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/config/grafana/istio-telemetry-v1-k8s-16.json
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/config/grafana/istio-telemetry-v1-k8s-16.json
 
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/hack/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -42,8 +42,8 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0
 Execute the following two commands:
 
 ```bash
-export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/config/grafana/istio-telemetry-v2-k8s-16.json
+export DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/config/grafana/istio-telemetry-v2-k8s-16.json
 
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.0/hack/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
