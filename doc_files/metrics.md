@@ -8,7 +8,7 @@ By default, iter8 leverages the metrics collected by Istio telemetry and stored 
 
 During an `experiment`, for every call made from  _iter8-controller_ to _iter8-analytics_, the latter in turn calls Prometheus to retrieve values of the metrics referenced by the Kubernetes `experiment` resource. _Iter8-analytics_ analyzes the service versions that are part of the experiment and arrives at an assessment based on their metric values. It returns this assessment to _iter8-controller_.
 
-In particular, the following metrics are available out-of-the-box from iter8. These metrics are based on the telemetry data collected by Istio. 
+In particular, the following metrics are available out-of-the-box from iter8. These metrics are based on the telemetry data collected by Istio.
 
 1. _iter8_latency_: mean latency, that is, average time taken by the service version to respond to HTTP requests.
 
@@ -51,10 +51,10 @@ As shown above, the query template has three placeholders (i.e., terms beginning
 There are two steps involved in adding a new metric. Step 1: Extend the _query_templates_ section of the `ConfigMap`.
 
 ```yaml
-error_count_400s: "sum(increase(istio_requests_total{source_workload_namespace!='knative-serving',response_code=~'4..',reporter='source'}[$interval]$offset_str)) by ($entity_labels)"
+error_count_400s: "sum(increase(istio_requests_total{job="istio-mesh",response_code=~'4..',reporter='source'}[$interval]$offset_str)) by ($entity_labels)"
 ```
 
-For example, we have added our sample query template under a new key called `error_count_400s` in the _query_templates_ section of the `ConfigMap`.
+For example, we have added our sample query template under a new key called `error_count_400s` in the _query_templates_ section of the `ConfigMap`. This query assumes that we are using Istio telemetry `v1`.
 
 Step 2: We define a new metric in the _metrics_ section of the `ConfigMap` as follows:
 
@@ -68,6 +68,6 @@ The interpretation of the above definition is as follows.
 
   - _name_: Name of the new metric being defined. Its value is the key for the associated query template. In our example, the relevant key is `error_count_400s`.
 
-  - _is_counter_: Set this to True if this metric is a counter metric. In our example, 4xx errors can never decrease over time, and therefore `is_counter` is set to True. 
+  - _is_counter_: Set this to True if this metric is a counter metric. In our example, 4xx errors can never decrease over time, and therefore `is_counter` is set to True.
 
   - _sample_size_query_template_: As explained earlier, this is the sample size query template associated with this metric. The sample over which this value is computed for a version is the set of all HTTP requests received by the version. Hence, we are relying on the pre-defined sample-size query template `iter8_sample_size`, which computes the total number of HTTP requests for a version. If you are defining a metric that requires the sample size to be computed differently, you can create a new sample-size query template (with its own unique name) in the _query_templates_ section and reference it in the metric declaration.
