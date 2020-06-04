@@ -51,7 +51,7 @@ As shown above, the query template has three placeholders (i.e., terms beginning
 There are two steps involved in adding a new metric. Step 1: Extend the _query_templates_ section of the `ConfigMap`.
 
 ```yaml
-error_count_400s: "sum(increase(istio_requests_total{job="istio-mesh",response_code=~'4..',reporter='source'}[$interval]$offset_str)) by ($entity_labels)"
+error_count_400s: "sum(increase(istio_requests_total{job='istio-mesh',response_code=~'4..',reporter='source'}[$interval]$offset_str)) by ($entity_labels)"
 ```
 
 For example, we have added our sample query template under a new key called `error_count_400s` in the _query_templates_ section of the `ConfigMap`. This query assumes that we are using Istio telemetry `v1`.
