@@ -14,7 +14,7 @@ The tutorial is based on the [Bookinfo sample application](https://istio.io/docs
 
 ## YAML files used in the tutorial
 
-All Kubernetes YAML files you will need in this tutorial are in the _iter8-controller_ repository [here](https://github.com/iter8-tools/iter8-controller/tree/v0.1.0/doc/tutorials/istio/bookinfo). 
+All Kubernetes YAML files you will need in this tutorial are in the _iter8-controller_ repository [here](https://github.com/iter8-tools/iter8-controller/tree/v0.1.0/doc/tutorials/istio/bookinfo).
 
 ## Part 1: Successful canary release: _reviews-v2_ to _reviews-v3_
 
