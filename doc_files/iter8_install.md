@@ -71,7 +71,7 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=gr
 After running that command, you can access Grafana's UI at `http://localhost:3000`. Iter8 dashboard can be imported by:
 
 ```bash
-curl -L -s https://github.com/iter8-tools/iter8-controller/releases/latest/download/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
