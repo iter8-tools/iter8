@@ -18,13 +18,13 @@ spec:
     # targetService specifies the reference to experiment targets
     targetService:
 
-      # apiVersion of the target service (required) 
+      # apiVersion of the target service (required)
       # options:
-      #   v1: indicates that the target service is a Kubernetes service 
+      #   v1: indicates that the target service is a Kubernetes service
       #   serving.knative.dev/v1alpha1: indicates that the target service is a Knative service
       apiVersion: v1
 
-      # name of target service (required) 
+      # name of target service (required)
       # identifies either a Kubernetes service or a Knative service
       name: reviews
 
@@ -96,7 +96,7 @@ spec:
         # indicates whether or not the experiment must finish if this criterion is not satisfied (optional)
         # default is false
         stopOnFailure: false
-      
+
       # reward is an optional field that can be used when an a/b testing is conducted
       # When both versions satisfy all the success criteria, the one with higher reward value wins the comparison
       # This is effective when a bayesian routing strategy is specified in trafficControl (posterior_bayesian_routing or optimistic_bayesian_routing)
@@ -111,7 +111,7 @@ spec:
 
           # The maximum possible value for the metric
           max: 1.0
-  
+
     # trafficControl controls the experiment durarion and how the controller should change the traffic split
     trafficControl:
 
@@ -151,7 +151,7 @@ spec:
       # Used by bayesian routing algorithms
       # Ignored by other algorithms
       confidence: 0.9
-  
+
       # determines how the traffic must be split at the end of the experiment (optional)
       # options:
       #   baseline: all traffic goes to the baseline version
@@ -192,10 +192,10 @@ metrics:
   iter8_latency:
     absent_value: None
     is_counter: false
-    query_template: (sum(increase(istio_request_duration_seconds_sum{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
-      by ($entity_labels)) / (sum(increase(istio_request_duration_seconds_count{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
+    query_template: (sum(increase(istio_request_duration_seconds_sum{job='istio-mesh',reporter='source'}[$interval]$offset_str))
+      by ($entity_labels)) / (sum(increase(istio_request_duration_seconds_count{job='istio-mesh',reporter='source'}[$interval]$offset_str))
       by ($entity_labels))
-    sample_size_template: sum(increase(istio_requests_total{source_workload_namespace!='knative-serving',reporter='source'}[$interval]$offset_str))
+    sample_size_template: sum(increase(istio_requests_total{job='istio-mesh',reporter='source'}[$interval]$offset_str))
       by ($entity_labels)
 ```
 
@@ -280,7 +280,7 @@ Following the Kubernetes model, the `status` section contains all relevant runti
     # this is the message to be shown in the STATUS column for the `kubectl` printer, which summarizes the experiment situation
     message: 'ExperimentFailed: Aborted'
 
-    # the experiment's current phase 
+    # the experiment's current phase
     # values could be: Progressing, Pause, Completed
     phase: Completed
 
