@@ -10,28 +10,15 @@ These instructions show you how to set up iter8 on Kubernetes with Istio.
 
 ## Install iter8 on Kubernetes
 
-iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow the instructions below. For additional considerations when installing iter8 on Red Hat OpenShift, check out [these instructions](https://github.com/iter8-tools/docs/blob/v0.1.1/doc_files/platforms/redhat_openshift.md).
+iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow the instructions below. For additional considerations when installing iter8 on Red Hat OpenShift, check out [these instructions](https://github.com/iter8-tools/docs/blob/v0.2/doc_files/platforms/redhat_openshift.md).
 
 ### Quick installation
 
-To install iter8 with the default settings, you can apply the default yaml files for _iter8-analytics_ and _iter8-controller_.
-
-To install _iter8-analytics_, run the following command:
+To install iter8 with the default settings, you can run the following install script:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-analytics/v0.1.1/install/kubernetes/iter8-analytics.yaml
-```
-
-To install _iter8-controller_, you need to choose the iter8 yaml file corresponding to the version of Istio telemetry (`v1` or `v2`) you are using. Before Istio 1.5, only Istio telemetry `v1` existed. If that is your Istio telemetry version, run the command below:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/install/iter8-controller.yaml
-```
-
-Alternatively, if you are using Istio telemetry `v2`, which became available since Istio 1.5 (https://istio.io/docs/reference/config/telemetry/), run the command below:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/install/iter8-controller-telemetry-v2.yaml
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/install/install.sh \
+| /bin/bash -
 ```
 
 ### Customized installation via Helm charts
@@ -81,7 +68,7 @@ Depending on the version of Istio telemetry (`v1` or `v2`) and Kubernetes (prior
 If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/install/iter8-controller.yaml
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/install/iter8-controller.yaml
 ```
 
 Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.
