@@ -14,12 +14,11 @@ iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install t
 
 ### Quick installation (latest release)
 
-To install the latest iter8 release with the default settings, you can apply the default yaml files for _iter8-analytics_ and _iter8-controller_ by running the following command:
+To install the latest iter8 release with the default settings, you can run the following command:
 
 ```bash
-kubectl apply \
-    -f https://github.com/iter8-tools/iter8-analytics/releases/latest/download/iter8-analytics.yaml \
-    -f https://github.com/iter8-tools/iter8-controller/releases/latest/download/iter8-controller.yaml
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/install/install.sh \
+| /bin/bash -
 ```
 
 ### Customized installation via Helm charts (latest release)
