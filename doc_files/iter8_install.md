@@ -67,9 +67,12 @@ To enable users to see Prometheus metrics that pertain to their canary releases 
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
 ```
 
-After running that command, you can access Grafana's UI at `http://localhost:3000`.
+After running that command, you can access Grafana's UI at `http://localhost:3000`. Iter8 dashboard can be imported by:
 
-Depending on the version of Istio telemetry (`v1` or `v2`) and Kubernetes (prior to 1.16 and 1.16+) you are using, you will need to import a different Grafana dashboard. Follow [these instructions](grafana.md) to import the appropriate dashboard template.
+```bash
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/hack/grafana_install_dashboard.sh \
+| /bin/bash -
+```
 
 ## Uninstall _iter8_
 
