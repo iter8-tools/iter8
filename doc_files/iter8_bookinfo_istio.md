@@ -131,7 +131,7 @@ spec:
 
 The configuration above specifies the baseline and candidate versions in terms of Kubernetes deployment names. The rollout is configured to last for 8 iterations (`maxIterations`) of `30s` (`interval`). At the end of each iteration, if the candidate version meets the specified success criteria, the traffic sent to it will increase by 20 percentage points (`trafficStepSize`) up to 80% (`maxTrafficPercentage`). At the end of the last iteration, if the success criteria are met, the candidate version will take over from the baseline.
 
-In the example above, we specified only one success criterion. In particular, we stated that the mean latency exhibited by the candidate version should not exceed the threshold of 0.2 seconds. At the end of each iteration, _iter8-controller_ calls _iter8-analytics_, which in turn analyzes the metrics of interest (in this case, only mean latency) against the corresponding criteria. The number of data points analyzed during an experiment is cumulative, that is, it carries over from iteration to iteration.
+In the example above, we specified only one success criterion. In particular, we stated that the mean latency exhibited by the candidate version should not exceed the threshold of 200 milliseconds. At the end of each iteration, _iter8-controller_ calls _iter8-analytics_, which in turn analyzes the metrics of interest (in this case, only mean latency) against the corresponding criteria. The number of data points analyzed during an experiment is cumulative, that is, it carries over from iteration to iteration.
 
 The next step of this tutorial is to actually create the configuration above. To that end, you can either copy and paste the yaml above to a file and then run `kubectl apply -n bookinfo-iter8 -f` on it, or you can run the following command:
 
@@ -185,7 +185,7 @@ Below is a screenshot of a portion of the Grafana dashboard showing the request 
 
 ![Grafana Dashboard](../img/grafana_reviews-v2-v3.png)
 
-Note how the traffic shifted towards the canary during the experiment. You can also see that the canary's mean latency was way below the configured threshold of 0.2 seconds.
+Note how the traffic shifted towards the canary during the experiment. You can also see that the canary's mean latency was way below the configured threshold of 200 milliseconds.
 
 ## Part 2: High-latency canary release: _reviews-v3_ to _reviews-v4_
 
@@ -285,7 +285,7 @@ kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n 
 
 ![Grafana Dashboard](../img/grafana_reviews-v3-v4.png)
 
-The dashboard screenshot above shows that the canary version (_reviews-v4_) consistently exhibits a high latency of 5 seconds, way above the threshold of 0.2 seconds specified in our success criterion, and way above the baseline version's latency.
+The dashboard screenshot above shows that the canary version (_reviews-v4_) consistently exhibits a high latency of 5 seconds, way above the threshold of 200 milliseconds specified in our success criterion, and way above the baseline version's latency.
 
 
 ## Part 3: Error-producing canary release: _reviews-v3_ to _reviews-v5_
@@ -336,7 +336,7 @@ spec:
         stopOnFailure: true
 ```
 
-The configuration above differs from the previous ones as follows. We added a second success criterion on the error-rate metric so that the canary version (_reviews-v5_) not only must have a mean latency below 0.2 seconds, but it also needs to have an error rate that cannot exceed the baseline error rate by more than 2%. That comparative analysis on a metric is specified as a `delta` tolerance type. Furthermore, the second success criterion sets the flag `stopOnFailure`, which means iter8 will roll back to the baseline as soon as the error rate criterion is violated and the minimum number of 10 data points is collected (`sampleSize = 10`).
+The configuration above differs from the previous ones as follows. We added a second success criterion on the error-rate metric so that the canary version (_reviews-v5_) not only must have a mean latency below 200 milliseconds, but it also needs to have an error rate that cannot exceed the baseline error rate by more than 2%. That comparative analysis on a metric is specified as a `delta` tolerance type. Furthermore, the second success criterion sets the flag `stopOnFailure`, which means iter8 will roll back to the baseline as soon as the error rate criterion is violated and the minimum number of 10 data points is collected (`sampleSize = 10`).
 
 To create the above `Experiment` object, run the following command:
 
@@ -385,7 +385,7 @@ kubectl get experiment reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n 
 ![Grafana Dashboard](../img/grafana_reviews-v3-v5-req-rate.png)
 ![Grafana Dashboard](../img/grafana_reviews-v3-v5-error-rate.png)
 
-The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is way below the threshold of 0.2 seconds we defined in the latency success criterion, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which specified that the canary's error rate must be within 2% of that of the baseline (_reviews-v3_) version. According to the dashboard, _reviews-v3_ produced no errors at all.
+The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is way below the threshold of 200 milliseconds we defined in the latency success criterion, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which specified that the canary's error rate must be within 2% of that of the baseline (_reviews-v3_) version. According to the dashboard, _reviews-v3_ produced no errors at all.
 
 ## Part 4: Using a custom metric
 
@@ -462,7 +462,7 @@ spec:
         sampleSize: 5
 ```
 
-The configuration uses the newly extended metric _iter8_90_perc_latency_. The success criteria asserts that the canary version (_reviews-v6_) must have the 90th percentile latency below 0.2 seconds.
+The configuration uses the newly extended metric _iter8_90_perc_latency_. The success criteria asserts that the canary version (_reviews-v6_) must have the 90th percentile latency below 200 milliseconds.
 
 To create the above `Experiment` object, run the following command:
 
