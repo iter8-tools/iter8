@@ -26,7 +26,7 @@ spec:
       # it's required when baseline/candidate are specified as deployments
       name: reviews
 
-      # hosts specfies how the baseline/candidate can be accessed outside of cluster
+      # hosts specfies how the baseline/candidate can be accessed from outside of the cluster
       # Each entry contains name of host and the gateway(istio) associated with it.
       hosts:
       - name: reviews.com
