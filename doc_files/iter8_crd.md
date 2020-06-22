@@ -17,29 +17,29 @@ Following the Kubernetes model, the `spec` section specifies the details of the 
 spec:
     # targetService specifies the reference to experiment targets
     targetService:
+      # kind of baseline/candidate
+      # options: Service, Deployment
+      # default is Deployment
+      kind: Deployment
 
-      # apiVersion of the target service (required)
-      # options:
-      #   v1: indicates that the target service is a Kubernetes service
-      #   serving.knative.dev/v1alpha1: indicates that the target service is a Knative service
-      apiVersion: v1
-
-      # name of target service (required)
-      # identifies either a Kubernetes service or a Knative service
+      # name of a kubernetes service which receives actual traffic to the application
+      # it's required when baseline/candidate are specified as deployments
       name: reviews
 
-      # the baseline and candidate versions of the target service (required)
-      # for Kubernetes, these two components refer to names of deployments
-      # for Knative, they are names of revisions
+      # hosts specfies how the baseline/candidate can be accessed outside of cluster
+      # Each entry contains name of host and the gateway(istio) associated with it.
+      hosts:
+      - name: reviews.com
+        gateway: bookinfo-gateway
+
+      # Name of the baseline and candidate versions (required)
       baseline: reviews-v3
       candidate: reviews-v5
 
-    # routingReference is a reference to an existing Istio VirtualService (optional)
-    # this should be used only if an Istio VirtualService has already been defined for the target Kubernetes service
-    routingReference:
-      apiversion: networking.istio.io/v1alpha3
-      kind: VirtualService
-      name: reviews-external
+      # port of the kubernetes service(.spec.targetService.name) that receives traffic
+      # When there is only one port listening on the service, this is optional.
+      # If baseline/candidate are services, they should share the same port number
+      port: 9080
 
     # analysis contains the parameters for configuring the analytics service
     analysis:
