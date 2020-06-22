@@ -34,7 +34,7 @@ spec:
 
       # Name of the baseline and candidate versions (required)
       # If kind (above) is Deployment, baseline and candidate are references to K8s deployments
-      # If kind (above) is Service, baseline and candidate are references K8s services
+      # If kind (above) is Service, baseline and candidate are references to K8s services
       baseline: reviews-v3
       candidate: reviews-v5
 
