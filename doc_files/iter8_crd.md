@@ -26,8 +26,9 @@ spec:
       # it's required when baseline/candidate are specified as deployments
       name: reviews
 
-      # hosts specfies how the baseline/candidate can be accessed from outside of the cluster
-      # Each entry contains name of host and the gateway(istio) associated with it.
+      # hosts specifies how baseline/candidate can be accessed from outside the cluster
+      # Each entry contains the name of a host and the gateway(istio) associated with it
+      # This is optional and only applies to services directly accessible from outside the K8s cluster
       hosts:
       - name: reviews.com
         gateway: bookinfo-gateway
@@ -39,7 +40,7 @@ spec:
       candidate: reviews-v5
 
       # port of the kubernetes service(.spec.targetService.name) that receives traffic
-      # When there is only one port listening on the service, this is optional.
+      # When there is only one port listening on the service, this is optional
       # If baseline/candidate are services, they should share the same port number
       port: 9080
 
