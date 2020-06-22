@@ -32,7 +32,7 @@ These [instructions](doc_files/iter8_install.md) will guide you to install the t
 The following tutorials will help you get started with iter8:
 
 * [Automated canary releases with iter8 when specifying versions by Kubernetes deployment names](doc_files/iter8_bookinfo_istio.md)
-* [Automated canary release with iter8 when specifying versions by Kubernetes service names](doc_files/iter8_tekton_task.md)
+* [Automated canary release with iter8 when specifying versions by Kubernetes service names](doc_files/service_tutorial.md)
 
 ## Algorithms behind iter8
 
