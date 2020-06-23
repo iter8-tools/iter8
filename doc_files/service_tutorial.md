@@ -21,13 +21,13 @@ kubectl label ns $NAMESPACE istio-injection=enabled
 Deploy the bookinfo application to a new namespace. In particular, we create the service _productpage-v1_ to access the _productpage_ application.
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
 ```
 
 Create an Istio gateway for the external host `productpage.example.com`:
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
 ```
 
 ******
@@ -52,7 +52,7 @@ It identifies the type of the baseline and candidate as services using `kind: Se
 You can create the `Experiment` using:
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
 ```
 
 You can verify that the `Experiment` has been created:
@@ -78,7 +78,7 @@ watch -x -n 0.1 curl -Is -H 'Host: productpage.example.com' "http://${GATEWAY_UR
 To start the rollout of the new version of the product page application, deploy the new version:
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
 ```
 
 You can verify the experiment has started:
