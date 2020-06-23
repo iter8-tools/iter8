@@ -31,7 +31,7 @@ In case you need to customize the installation of iter8, use the Helm charts lis
 
 **Note on Prometheus:** In order to make assessments, _iter8-analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8-analytics_ to the Prometheus server at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying any need for authentication. If your Istio installation is shipping metrics to a different Prometheus service, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look in the section `metricsBackend` of the Helm chart's `values.yaml` file for details.
 
-**Note on Istio Telemetry:** When deploying _iter8-controller_ using helm, make sure to set the parameter `istioTelemetry` is set to conform with your environment. Possible values are `v1` or `v2`. Use `v1` if the Istio mixer is not disabled. You can determine whether or not the mixer is disabled using this command:
+**Note on Istio Telemetry:** When deploying _iter8-controller_ using helm, make sure to set the parameter `istioTelemetry` to conform with your environment. Possible values are `v1` or `v2`. Use `v1` if the Istio mixer is not disabled. You can determine whether or not the mixer is disabled using this command:
 
 ```bash
 kubectl -n $ISTIO_NAMESPACE get cm istio -o json | jq .data.mesh | grep -o 'disableMixerHttpReports: [A-Za-z]\+' | cut -d ' ' -f2
