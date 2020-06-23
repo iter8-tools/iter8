@@ -12,7 +12,7 @@ By default, iter8 uses the Prometheus service installed as part of the Red Hat O
 
 ### Install the iter8 analytics service
 
-Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.1.1/iter8-analytics-helm-char.tar) for the iter8-analytics service. The following options can be used to generate the needed yaml:
+Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.0/iter8-analytics-helm-char.tar) for the iter8-analytics service. The following options can be used to generate the needed yaml:
 
 ```bash
 REPO=iter8/iter8-analytics
@@ -22,7 +22,7 @@ PROMETHEUS_PASSWORD=<FILL IN>
 helm template install/kubernetes/helm/iter8-analytics \
     --name iter8-analytics \
     --set image.repository=${REPO} \
-    --set image.tag=v0.1.1 \
+    --set image.tag=v0.2.0 \
     --set iter8Config.authentication.type=basic \
     --set iter8Config.authentication.username=${PROMETHEUS_USERNAME} \
     --set iter8Config.authentication.password=${PROMETHEUS_PASSWORD} \
@@ -39,14 +39,14 @@ PROMETHEUS_PASSWORD=$(kubectl -n istio-system get secret htpasswd -o jsonpath='{
 
 ### Install the iter8 controller
 
-The [quick install instructions](https://github.com/iter8-tools/docs/blob/v0.1.1/doc_files/iter8_install.md#quick-installation) can be used to install the iter8 controller. The Service Mesh currently uses Istio telemetry version `v1`:
+The [quick install instructions](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/iter8_install.md#quick-installation) can be used to install the iter8 controller. The Service Mesh currently uses Istio telemetry version `v1`:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.1.1/install/iter8-controller.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/install/iter8-controller.yaml
 ```
 
 ## Target Services
 
 The Red Hat OpenShift Service Mesh is restricted to the set of namespaces defined in the `ServiceMeshMemberRoll` resource. In particular, if you will be trying the tutorials, add the namespace `bookinfo-iter8` to the `ServiceMeshMemberRoll`.
 
-Istio relies a sidecar injected into each pod to provide its capabilities. Istio provides several ways this sidecar can be [injected](https://istio.io/docs/setup/additional-setup/sidecar-injection/). Red Hat recommends the use of the annotation `sidecar.istio.io/inject: "true"` in the deployment yaml. Examples can be found in the yaml for the tutorial: <https://github.com/iter8-tools/iter8-controller/blob/v0.1.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml>
+Istio relies a sidecar injected into each pod to provide its capabilities. Istio provides several ways this sidecar can be [injected](https://istio.io/docs/setup/additional-setup/sidecar-injection/). Red Hat recommends the use of the annotation `sidecar.istio.io/inject: "true"` in the deployment yaml. Examples can be found in the yaml for the tutorial: <https://github.com/iter8-tools/iter8-controller/blob/v0.2.0/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml>

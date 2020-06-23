@@ -10,14 +10,14 @@ These instructions show you how to set up iter8 on Kubernetes with Istio.
 
 ## Install iter8 on Kubernetes
 
-iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow the instructions below. For additional considerations when installing iter8 on Red Hat OpenShift, check out [these instructions](https://github.com/iter8-tools/docs/blob/v0.2/doc_files/platforms/redhat_openshift.md).
+iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow the instructions below. For additional considerations when installing iter8 on Red Hat OpenShift, check out [these instructions](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/platforms/redhat_openshift.md).
 
 ### Quick installation
 
 To install iter8 with the default settings, you can run the following install script:
 
 ```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/install/install.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/install/install.sh \
 | /bin/bash -
 ```
 
@@ -25,13 +25,17 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/i
 
 In case you need to customize the installation of iter8, use the Helm charts listed below:
 
-* _iter8-analytics_: [ https://github.com/iter8-tools/iter8-analytics/releases/download/v0.1.1/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.1.1/iter8-analytics-helm-chart.tar)
+* _iter8-analytics_: [ https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.0/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.0/iter8-analytics-helm-chart.tar)
 
-* _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.1.1/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.1.1/iter8-controller-helm-chart.tar)
+* _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.2.0/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.2.0/iter8-controller-helm-chart.tar)
 
-**Note on Prometheus:** In order to make assessments, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying the need for authentication. If your Istio installation is shipping metrics to a different Prometheus installation, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look for the Prometheus-related parameters in the _iter8-analytics_ Helm chart's `values.yaml` file.
+**Note on Prometheus:** In order to make assessments, _iter8-analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8-analytics_ to the Prometheus server at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying any need for authentication. If your Istio installation is shipping metrics to a different Prometheus service, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look in the section `metricsBackend` of the Helm chart's `values.yaml` file for details.
 
-**Note on Istio Telemetry:** Make sure to set the parameter `istioTelemetry` in the Helm chart to conform with your environment. Possible values are `v1` or `v2`.
+**Note on Istio Telemetry:** When deploying _iter8-controller_ using helm, make sure to set the parameter `istioTelemetry` is set to conform with your environment. Possible values are `v1` or `v2`. Use `v1` if the Istio mixer is not disabled. You can determine whether or not the mixer is disabled using this command:
+
+```bash
+kubectl -n $ISTIO_NAMESPACE get cm istio -o json | jq .data.mesh | grep -o 'disableMixerHttpReports: [A-Za-z]\+' | cut -d ' ' -f2
+```
 
 ### Verify the installation
 
@@ -62,7 +66,7 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=gr
 After running that command, you can access Grafana's UI at `http://localhost:3000`.Iter8 dashboard can be imported by:
 
 ```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/hack/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -71,7 +75,7 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/h
 If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/install/iter8-controller.yaml
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/install/iter8-controller.yaml
 ```
 
 Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.
