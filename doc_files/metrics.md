@@ -16,7 +16,7 @@ In particular, the following metrics are available out-of-the-box from iter8. Th
 
 3. _iter8_error_rate_: error rate, that is, (total error count / total number of HTTP requests).
 
-When iter8 is installed, a Kubernetes `ConfigMap` named _iter8config-metrics_ is populated with a definition for each of the above metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). A few things to note in the definitions:
+When iter8 is installed, a Kubernetes `ConfigMap` named _iter8config-metrics_ is populated with a definition for each of the above metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). A few things to note in the definitions:
 
 - Each metric is defined under the `metrics` section.
 
