@@ -2,85 +2,61 @@
 
 ## Prerequisites
 
-- The user creating the release must have push access to repository (so they can update files and create a release tag)
+- The user creating the release must have push access to repository (so they can create a release tag).
 - Verify that all pull requests to be included in the release have been approved and merged.
+- Verify that latest release branch builds were successful.
 
 ## Checkout Release Branches
 
 Define the following environment variables identifying the release (values here are illustrative):
 
 ```bash
-export RELEASE_BRANCH=v0.1
-export RELEASE=v0.1.1
+export RELEASE_BRANCH=v0.2
+export RELEASE=v0.2.0
 ```
 
-In each project checkout and update the release branch:
+## Retag Image and push to Docker Hub
+
+We do this first so that tests triggered by next step will succeed.
+
+### iter8-analytics
 
 ```bash
-git checkout ${RELEASE_BRANCH}
-git pull
+docker pull iter8/iter8-controller:${RELEASE_BRANCH}
+docker tag iter8/iter8-controller:${RELEASE_BRANCH} iter8/iter8-controller:${RELEASE}
+docker push iter8/iter8-controller:${RELEASE}
 ```
 
-## Test the release
-
-Run the tutorial using the release branch. Clean up before hand. It may be necessary to build the images.
-
-### Cleanup Any Existing Deployment(s)
-
-- Delete any `Experiment` objects
-- Delete the application namespace, `bookinfo-iter8`
-- Delete the `iter8` namespace
-- Delete the `experiments.iter8.tools` CRD
-- Delete the iter8 dashboard in grafana
-
-### Build Images and Deploy
-
-**Note**: If not already merged, [pull request 153](https://github.com/iter8-tools/iter8-controller/pull/153) updates the Makefile to support the `TELEMETRY` option used below.
+### iter8-controller
 
 ```bash
-export RELEASE_VERSION=v0.1.1
-export RELEASE_CANDIDATE=cr1
-export TELEMETRY_VERSION=v2
-
-CONTROLLER_IMG=iter8/iter8-comtroller:${RELEASE}
-CANDIDATE_CONTROLLER_IMG=${CONTROLLER_IMG}-${RELEASE_CANDIDATE}
-
-ANALYTICS_IMG=iter8/iter8-analytics:${RELEASE}
-CANDIDATE_ANALYTICS_IMG=${ANALYTICS_IMG}-${RELEASE_CANDIDATE}
-
-pushd iter8-analytics
-IMG=${CANDIDATE_ANALYTICS_IMG} make docker-build
-IMG=${CANDIDATE_ANALYTICS_IMG} make docker-push
-IMG=${CANDIDATE_ANALYTICS_IMG} make deploy
-popd
-
-pushd iter8-controller
-IMG=${CANDIDATE_CONTROLLER_IMG} make docker-build
-IMG=${CANDIDATE_CONTROLLER_IMG} make docker-push
-IMG=${CANDIDATE_CONTROLLER_IMG} TELEMETRY=${TELEMETRY_VERSION} make deploy
-popd
+docker pull iter8/iter8-controller:${RELEASE_BRANCH}
+docker tag iter8/iter8-controller:${RELEASE_BRANCH} iter8/iter8-controller:${RELEASE}
+docker push iter8/iter8-controller:${RELEASE}
 ```
-
-### Run Tutorials
-
-When running the tutorials use the files in the release branch directly instead of those in the (still unupdated) documentation. These files are in `iter8-controller/docs/tutorials/istio/bookinfo`.
-
-**Note**: should verify latest Istio version, grafana config, probably with kiali, on Redhat, etc.
 
 ## Update source to reflect release version
 
 ### `iter8-analytics`
 
-Check out the release branch:
+On a fork of the iter8-analytics project, check out and update the release branch:
 
 ```bash
+git fetch upstream
 git checkout ${RELEASE_BRANCH}
+git merge upstream/${RELEASE_BRANCH}
+```
+
+Create a branch on which to make updates:
+
+```bash
+git checkout -b prepareRelease-${RELEASE}
 ```
 
 Update the following files:
 
-- `install/kubernetes/helm/iter8-analytics/Chart.yaml` to set `version` to the release version
-- `install/kubernetes/helm/iter8-analytics/values.yaml` to set `image.tag` to the release version
+- `install/kubernetes/helm/iter8-analytics/Chart.yaml` to set `version` to $RELEASE
+- `install/kubernetes/helm/iter8-analytics/values.yaml` to set `image.tag` to $RELEASE
 
 Update the default install yaml:
 
@@ -88,59 +64,73 @@ Update the default install yaml:
 make build-default
 ```
 
-Push changes to the release branch:
+Push changes:
 
 ```bash
 git add install/kubernetes/helm/iter8-analytics/Chart.yaml \
         install/kubernetes/helm/iter8-analytics/values.yaml \
         install/kubernetes/iter8-analytics.yaml
 git commit -m "update version for release ${RELEASE}"
-git push origin ${RELEASE_BRANCH}
+git push origin prepareRelease-${RELEASE}
 ```
+
+Create a pull request against ${RELEASE_BRANCH} on the upstream project.
+After tests complete and approval, merge pull request.
 
 ### `iter-controller`
 
-Check out the release branch:
+On a fork of the iter8-analytics project, check out and update the release branch:
 
 ```bash
+git fetch upstream
 git checkout ${RELEASE_BRANCH}
+git merge upstream/${RELEASE_BRANCH}
+```
+
+Create a branch on which to make updates:
+
+```bash
+git checkout -b prepareRelease-${RELEASE}
 ```
 
 Update the following files:
 
-- `install/helm/iter8-controller/Chart.yaml` to set `version` to the release version
-- `install/helm/iter8-controller/values.yaml` to set `image.tag` to the release version
+- `install/helm/iter8-controller/Chart.yaml` to set `version` to $RELEASE
+- `install/helm/iter8-controller/values.yaml` to set `image.tag` to $RELEASE
+- `install/install.sh` to change all instances of $RELEASE_BRANCH to $RELEASE
+
+Update the default install yaml files:
 
 ```bash
 make build-default
 ```
 
-Push changes to the release branch:
+Push changes:
 
 ```bash
 git add install/helm/iter8-controller/Chart.yaml \
         install/helm/iter8-controller/values.yaml \
         install/iter8-controller.yaml \
-        install/iter8-controller-telemetry-v2.yaml
+        install/iter8-controller-telemetry-v2.yaml \
+        install/install.sh
 git commit -m "update version for release ${RELEASE}"
-git push origin ${RELEASE_BRANCH}
+git push origin prepareRelease-${RELEASE}
 ```
+
+Create a pull request against ${RELEASE_BRANCH} on the upstream project.
+After tests complete and approval, merge pull request.
 
 ## Create git releases
 
 ### `iter8-tools/iter8-analytics`
 
-#### Retag Image and push to Docker Hub
-
-```bash
-docker pull $CANDIDATE_ANALYTICS_IMG
-docker tag $CANDIDATE_ANALYTICS_IMG $ANALYTICS_IMG
-docker push $ANALYTICS_IMG
-```
-
 #### Create tag
 
+On the upstream project on release branch:
+
 ```bash
+git checkout $RELEASE_BRANCH
+git pull
 git tag $RELEASE
 git push origin --tags
 ```
@@ -152,30 +142,27 @@ Go to the list of project [releases](https://github.com/iter8-tools/iter8-analyt
 Use "_Draft new release_" to create a new release:
 
 - Select the tag  (`$RELEASE`) created in the previous step
+- It may be necessary to pick the Target as $RELEASE_BRANCH
 - Use tag (`$RELEASE`) as the release name
 - Add release notes describing the changes
 - Use "_Attach binaries by dropping them here or selecting them_" to add assets to the release
   - use the list of assets from the previous release as a guide
-  - manually build the helm chart archive `tar tf iter8-analytics-helm-chart.tar iter8-analytics`
+  - manually build the helm chart archive `tar cf iter8-analytics-helm-chart.tar iter8-analytics`
 - publish the release
 
-**Note** that you can save a draft release at any time and continue to work on it later.
+**Note**: You can save a draft release at any time and continue to work on it later.
 
-**Note** that if you forget an asset, you can edit the release later to add or replace it.
+**Note**: If you forget an asset, you can edit the release later to add or replace it.
 
 ### `iter8-tools/iter8-controller`
 
-#### Retag Image and push to Docker Hub
-
-```bash
-docker pull $CANDIDATE_CONTROLLER_IMG
-docker tag $CANDIDATE_CONTROLLER_IMG $CONTROLLER_IMG
-docker push $CONTROLLER_IMG
-```
-
 #### Create tag
 
+On the upstream project on release branch:
+
 ```bash
+git checkout $RELEASE_BRANCH
+git pull
 git tag $RELEASE
 git push origin --tags
 ```
@@ -184,37 +171,86 @@ git push origin --tags
 
 Go to the list of project [releases](https://github.com/iter8-tools/iter8-controller/releases)
 
-Create similar to how done for analytics engine.
+Go to the list of project [releases](https://github.com/iter8-tools/iter8-analytics/releases)
+
+Use "_Draft new release_" to create a new release:
+
+- Select the tag  (`$RELEASE`) created in the previous step
+- It may be necessary to pick the Target as $RELEASE_BRANCH
+- Use tag (`$RELEASE`) as the release name
+- Add release notes describing the changes
+- Use "_Attach binaries by dropping them here or selecting them_" to add assets to the release
+  - use the list of assets from the previous release as a guide
+  - manually build the helm chart archive `tar cf iter8-controller-helm-chart.tar iter8-controller`
+- publish the release
 
 ### `iter8-tools/docs`
 
 #### Update release branch
 
-Checkout the release branch:
+On a fork of the `docs` project, check out and update the release branch:
 
 ```bash
+git fetch upstream
 git checkout ${RELEASE_BRANCH}
+git merge upstream/${RELEASE_BRANCH}
 ```
 
-- Update all references to the release
+Create a branch on which to make updates:
+
+```bash
+git checkout -b prepareRelease-${RELEASE}
+```
+
+- Update all references to the release ($RELEASE_BRANCH --> $RELEASE)
 - `git add` all updated files
-- commit and push the release branch
+- commit and push the changes, submit a pull request against ${RELEASE_BRANCH} on the upstream project
+- get approval and merge pull request
+
+### Update master branch
+
+On a fork of the `docs` project, checkout and update the master branch:
+
+```bash
+git checkout master
+git merge upstream/master
+```
+
+Create a branch on which to make updates:
+
+```bash
+git checkout -b prepareRelease-${RELEASE}-master
+```
+
+- Update all references in `README.md` to the release (last release --> $RELEASE)
+- add entry to `releases.md` for previous release
+- commit and push changes, submit a pull request against master on the upstream project
+- get approval and merge pull request
 
 #### Create tag and release
 
-As above for the other projects. Combine the notes from the releases created above.
+#### Create tag
 
-#### Update master branch
+On the upstream project on release branch:
 
-Checkout master branch and update all references to the release in _README.md_.
+```bash
+git checkout $RELEASE_BRANCH
+git pull
+git tag $RELEASE
+git push origin --tags
+```
 
-Update _releases.md_ with the new release.
+#### Create release
 
-Commit and push the changes
+As in previous projects; combine notes about changes.
 
-sanity check links including in commands
+## Undo changes
 
-**Note**: If you make a mistake (miss something) that needs to be added to the release, it is necessary to delete the release and the tag. To delete a tag:
+Submit PRs to all projects changing references to $RELEASE back to $RELEASE_BRANCH on the release branches of each project.
+
+## Rectifying Mistakes
+
+If you make a mistake (miss something) that needs to be added to the release, it is necessary to delete the release and the tag. To delete a tag:
 
 ```bash
 git tag -d ${RELEASE}
