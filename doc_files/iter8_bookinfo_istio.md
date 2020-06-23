@@ -2,13 +2,12 @@
 
 This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice.
 
-This tutorial has 5 parts, which are supposed to be tried in order. **Here you will learn:**
+This tutorial has 4 parts, which are supposed to be tried in order. **Here you will learn:**
 
 - how to perform a canary rollout with _iter8_;
 - how to set different success criteria for _iter8_ to analyze canary releases and determine success or failure;
-- how to have _iter8_ immediately stop an experiment as soon as a criterion is not met;
-- how to use your own custom metrics in success criteria for canary analyses; and
-- how _iter8_ can be used for canary releases of both internal and user-facing services.
+- how to have _iter8_ immediately stop an experiment as soon as a criterion is not met; and
+- how to use your own custom metrics in success criteria for canary analyses.
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) that is distributed with Istio. This application comprises 4 microservices, namely, _productpage_, _details_, _reviews_, and _ratings_, as illustrated [here](https://istio.io/docs/examples/bookinfo/). Please, follow our instructions below to deploy the sample application as part of the tutorial.
 
