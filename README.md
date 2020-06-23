@@ -32,7 +32,7 @@ These [instructions](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/i
 The following tutorials will help you get started with iter8:
 
 * [Automated canary releases with iter8 when specifying versions by Kubernetes deployment names](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/iter8_bookinfo_istio.md)
-* [Automated canary releases with iter8 on Kubernetes and Automated canary release with iter8 when specifying versions by Kubernetes service names](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/service_tutorial.md)
+* [Automated canary releases with iter8 when specifying versions by Kubernetes service names](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/service_tutorial.md)
 
 ## Algorithms behind iter8
 
