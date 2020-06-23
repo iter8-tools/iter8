@@ -418,7 +418,7 @@ kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-co
 Or, if using a newer version of Istio (1.5 or greater) with telemetry v2:
 
 ```bash
-kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/doc/tutorials/istio/bookinfo/iter8_metrics_extended_telemetry-v2.yaml
+kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/iter8_metrics_extended_telemetry-v2.yaml
 ```
 
 #### Note:
