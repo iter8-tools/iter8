@@ -538,13 +538,13 @@ Other configurations such as title, legend, etc can be varied as per the user's 
 
 ### 1. Traffic configuration
 
-Consider the case now you want to rollout a new version of productpage deployment _productpage-v2_ and expose the service outside of the cluster to users through host `productpage.example.com`. You need to setup a Gateway to allow such a host be accessible:
+Consider the case now you want to rollout a new version of productpage deployment _productpage-v2_ and expose the service outside of the cluster to users through host `productpage.deployment.com`. You need to setup a Gateway to allow such a host be accessible:
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: productpage-service
+  name: productpage-gateway
 spec:
   selector:
     istio: ingressgateway # use istio default controller
@@ -554,22 +554,22 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "productpage.example.com"
+    - "productpage.deployment.com"
 ```
 
 Run the following command to create the Gateway:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
+kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/productpage-gateway.yaml
 ```
 
 Then emulate traffic flowing from outside of the cluster:
 ```bash
-watch -x -n 0.1 curl -Is -H 'Host: productpage.example.com' "http://${GATEWAY_URL}/productpage"
+watch -x -n 0.1 curl -Is -H 'Host: productpage.deployment.com' "http://${GATEWAY_URL}/productpage"
 ```
 
 ### 2. Canary rollout configuration
-As specified in the `targetService` section of the following `Experiment` configuration, we have kubernetes service `productpage` directing traffic to deployments `productpge-v1` and `productpage-v2`. The entry in `hosts` tells the controller that traffic will come through `"productpage.example.com"` configured in gateway(istio) `paroductpage-service`:
+As specified in the `targetService` section of the following `Experiment` configuration, we have kubernetes service `productpage` directing traffic to deployments `productpge-v1` and `productpage-v2`. The entry in `hosts` tells the controller that traffic will come through `"productpage.deployment.com"` configured in gateway(istio) `paroductpage-gateway`:
 
 ```yaml
 apiVersion: iter8.tools/v1alpha1
@@ -581,9 +581,10 @@ spec:
     name: productpage
     baseline: productpage-v1
     candidate: productpage-v2
+    port: 9080
     hosts:
-    - name: "productpage.example.com"
-      gateway: paroductpage-service
+    - name: "productpage.deployment.com"
+      gateway: paroductpage-gateway
   trafficControl:
     strategy: check_and_increment
     interval: 30s
@@ -603,7 +604,7 @@ spec:
 To create the above object, run the following command:
 
 ```bash
-kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v5.yaml
+kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/canary_productpage-v1_to_productpage-v2.yaml
 ```
 
 ### 2. Deploy _productpage-v2_ and start the rollout
