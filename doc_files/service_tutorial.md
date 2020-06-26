@@ -21,7 +21,7 @@ kubectl label ns $NAMESPACE istio-injection=enabled
 Deploy the bookinfo application to a new namespace. In particular, we create the service _productpage-v1_ to access the _productpage_ application.
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
 ```
 
 ## Step 2: Configure Traffic to the Application
@@ -29,7 +29,7 @@ kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/ite
 Create an Istio gateway for the external host `productpage.example.com`:
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
 ```
 
 At this point, the application is not actually accessible to users because no `VirtualService` has been defined. Rather than manually define it, this tutorial shows how iter8 can be used to create it for us. To do so, define an iter8 canary experiment from the current version of the application to itself. Clearly, this will succeed, and, as a side effect, a `VirtualService` will be created.
@@ -53,7 +53,7 @@ To optimize the bootstrapping process, we can eliminate all of the `successCrite
 You can apply an optimized `Experiment` using:
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/bootstrap-productpage.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/bootstrap-productpage.yaml
 ```
 
 You can verify that the `Experiment` has been created and finishes quickly:
@@ -79,7 +79,7 @@ This approach may seem unintuitive. However, we illustrate it here because this 
 We can now create a canary `Experiment` from version `productpage-v1` to `productpage-v2`. The following command will create the `Experiment`:
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
 ```
 
 You can verify that the `Experiment` has been created:
@@ -105,7 +105,7 @@ watch -x -n 0.1 curl -Is -H 'Host: productpage.example.com' "http://${GATEWAY_UR
 To start the rollout of the new version of the productpage application, deploy the new version:
 
 ```bash
-kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.0/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
+kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
 ```
 
 You can verify the experiment has started:
