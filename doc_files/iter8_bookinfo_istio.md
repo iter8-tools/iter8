@@ -531,3 +531,93 @@ You can also extend the Grafana Dashboard with the new metric by adding a new pa
 Other configurations such as title, legend, etc can be varied as per the user's preference.
 
 ![Grafana Dashboard](../img/grafana_reviews-v3-v6-90_perc.png)
+
+
+## Part 5: User-facing Canary release: _productpage-v1_ to _productpage-v2_
+
+### 1. Traffic configuration
+
+Consider the case now you want to rollout a new version of productpage deployment _productpage-v2_ and expose the service outside of the cluster to users through host `productpage.deployment.com`. You need to setup a Gateway to allow such a host be accessible:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: productpage-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "productpage.deployment.com"
+```
+
+Run the following command to create the Gateway:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/productpage-gateway.yaml
+```
+
+Then emulate traffic flowing from outside of the cluster:
+```bash
+watch -x -n 0.1 curl -Is -H 'Host: productpage.deployment.com' "http://${GATEWAY_URL}/productpage"
+```
+
+### 2. Canary rollout configuration
+As specified in the `targetService` section of the following `Experiment` configuration, we have kubernetes service `productpage` directing traffic to deployments `productpge-v1` and `productpage-v2`. The entry in `hosts` tells the controller that traffic will come through `"productpage.deployment.com"` configured in gateway(istio) `paroductpage-gateway`:
+
+```yaml
+apiVersion: iter8.tools/v1alpha1
+kind: Experiment
+metadata:
+  name: productpage-v2-rollout
+spec:
+  targetService:
+    name: productpage
+    baseline: productpage-v1
+    candidate: productpage-v2
+    port: 9080
+    hosts:
+    - name: "productpage.deployment.com"
+      gateway: paroductpage-gateway
+  trafficControl:
+    strategy: check_and_increment
+    interval: 30s
+    trafficStepSize: 20
+    maxIterations: 6
+    maxTrafficPercentage: 80
+  analysis:
+    analyticsService: "http://iter8-analytics:8080"
+    successCriteria:
+      - metricName: iter8_latency
+        toleranceType: threshold
+        tolerance: 3.0
+        sampleSize: 5
+```
+
+
+To create the above object, run the following command:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2/doc/tutorials/istio/bookinfo/canary_productpage-v1_to_productpage-v2.yaml
+```
+
+### 2. Deploy _productpage-v2_ and start the rollout
+
+To deploy _productpage-v2_:
+
+```bash
+kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/master/doc/tutorials/istio/bookinfo/productpage-v2.yaml
+```
+
+Now check the state of theis `Experiment` object, you should see that the rollout is in progress, and that 20% of the traffic is now being sent to _productpage-v2_.
+
+```bash
+$ kubectl get experiment productpage-v2-rollout -n bookinfo-iter8
+NAME                     PHASE         STATUS                                 BASELINE         PERCENTAGE   CANDIDATE        PERCENTAGE
+productpage-v2-rollout   Progressing   IterationUpdate: Iteration 1 Started   productpage-v1   80           productpage-v2   20
+```
