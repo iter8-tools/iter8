@@ -13,11 +13,11 @@ Iter8 supports cloud-native, automated canary releases and A/B testing, driven b
 
 ## The `Experiment` CRD
 
-When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD _kind_ is `Experiment` and it is documented [here](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/iter8_crd.md).
+When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD _kind_ is `Experiment` and it is documented [here](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_crd.md).
 
 ## Metrics
 
-To assess the behavior of microservice versions, iter8 supports a few metrics out-of-the-box without requiring users to do any extra work. In addition, users can define their own custom metrics. Iter8's out-of-the-box metrics as well as user-defined metrics can be referenced in the success criteria of an _experiment_. More details about metrics are documented [here](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/metrics.md).
+To assess the behavior of microservice versions, iter8 supports a few metrics out-of-the-box without requiring users to do any extra work. In addition, users can define their own custom metrics. Iter8's out-of-the-box metrics as well as user-defined metrics can be referenced in the success criteria of an _experiment_. More details about metrics are documented [here](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/metrics.md).
 
 ## Supported environments
 
@@ -25,14 +25,14 @@ The _iter8-controller_ currently uses the [Istio service mesh](https://istio.io)
 
 ## Installing iter8
 
-These [instructions](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio.
+These [instructions](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio.
 
 ## Tutorials
 
 The following tutorials will help you get started with iter8:
 
-* [Automated canary releases with iter8 when specifying versions by Kubernetes deployment names](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/iter8_bookinfo_istio.md)
-* [Automated canary releases with iter8 when specifying versions by Kubernetes service names](https://github.com/iter8-tools/docs/blob/v0.2.0/doc_files/service_tutorial.md)
+* [Automated canary releases with iter8 when specifying versions by Kubernetes deployment names](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_bookinfo_istio.md)
+* [Automated canary releases with iter8 when specifying versions by Kubernetes service names](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/service_tutorial.md)
 
 ## Algorithms behind iter8
 
@@ -46,6 +46,6 @@ Iter8 can be integrated with [Tekton Pipelines](https://tekton.dev) for an end-t
 
 ## Releases
 
-The current iter8 release is **v0.2.0**. This documentation always points to the current release. Documentation of older releases can be found [here](releases.md).
+The current iter8 release is **v0.2.1**. This documentation always points to the current release. Documentation of older releases can be found [here](releases.md).
 
 **Release 1.0.0 is coming soon! Stay tuned!!**
