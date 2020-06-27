@@ -12,7 +12,7 @@ Define the following environment variables identifying the release (values here 
 
 ```bash
 export RELEASE_BRANCH=v0.2
-export RELEASE=v0.2.0
+export RELEASE=v0.2.1
 ```
 
 ## Retag Image and push to Docker Hub
@@ -22,9 +22,9 @@ We do this first so that tests triggered by next step will succeed.
 ### iter8-analytics
 
 ```bash
-docker pull iter8/iter8-controller:${RELEASE_BRANCH}
-docker tag iter8/iter8-controller:${RELEASE_BRANCH} iter8/iter8-controller:${RELEASE}
-docker push iter8/iter8-controller:${RELEASE}
+docker pull iter8/iter8-analytics:${RELEASE_BRANCH}
+docker tag iter8/iter8-analytics:${RELEASE_BRANCH} iter8/iter8-analytics:${RELEASE}
+docker push iter8/iter8-analytics:${RELEASE}
 ```
 
 ### iter8-controller
@@ -44,7 +44,8 @@ On a fork of the iter8-analytics project, check out and update the release branc
 ```bash
 git fetch upstream
 git checkout ${RELEASE_BRANCH}
-git merge upstream/${RELEASE_BRANCH}
+git rebase upstream/${RELEASE_BRANCH}
+git push origin ${RELEASE_BRANCH}
 ```
 
 Create a branch on which to make updates:
@@ -71,7 +72,7 @@ git add install/kubernetes/helm/iter8-analytics/Chart.yaml \
         install/kubernetes/helm/iter8-analytics/values.yaml \
         install/kubernetes/iter8-analytics.yaml
 git commit -m "update version for release ${RELEASE}"
-git push origin prepareRelease-${RELEASE}
+git push -u origin prepareRelease-${RELEASE}
 ```
 
 Create a pull request against ${RELEASE_BRANCH} on the upstream project.
@@ -84,7 +85,8 @@ On a fork of the iter8-analytics project, check out and update the release branc
 ```bash
 git fetch upstream
 git checkout ${RELEASE_BRANCH}
-git merge upstream/${RELEASE_BRANCH}
+git rebase upstream/${RELEASE_BRANCH}
+git push origin ${RELEASE_BRANCH}
 ```
 
 Create a branch on which to make updates:
@@ -114,7 +116,7 @@ git add install/helm/iter8-controller/Chart.yaml \
         install/iter8-controller-telemetry-v2.yaml \
         install/install.sh
 git commit -m "update version for release ${RELEASE}"
-git push origin prepareRelease-${RELEASE}
+git push -u origin prepareRelease-${RELEASE}
 ```
 
 Create a pull request against ${RELEASE_BRANCH} on the upstream project.
@@ -193,7 +195,8 @@ On a fork of the `docs` project, check out and update the release branch:
 ```bash
 git fetch upstream
 git checkout ${RELEASE_BRANCH}
-git merge upstream/${RELEASE_BRANCH}
+git rebase upstream/${RELEASE_BRANCH}
+git push origin ${RELEASE_BRANCH}
 ```
 
 Create a branch on which to make updates:
