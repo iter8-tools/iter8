@@ -10,7 +10,7 @@ These instructions show you how to set up iter8 on Kubernetes with Istio.
 
 ## Install iter8 on Kubernetes
 
-iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow these instructions.
+iter8 has two components, _iter8-analytics_ and _iter8-controller_. To install them, follow these instructions.
 
 ### Quick installation (latest release)
 
@@ -29,7 +29,7 @@ In case you need to customize the installation of iter8's latest release, use th
 
 * _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/latest/download/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/latest/download/iter8-controller-helm-chart.tar)
 
-**Note on Prometheus:** In order to make assessments, _iter8_analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8_analytics_ to Prometheus at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying the need for authentication. If your Istio installation is shipping metrics to a different Prometheus installation, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look for the Prometheus-related parameters in the _iter8-analytics_ Helm chart's `values.yaml` file.
+**Note on Prometheus:** In order to make assessments, _iter8-analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8-analytics_ to Prometheus at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying the need for authentication. If your Istio installation is shipping metrics to a different Prometheus installation, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look for the Prometheus-related parameters in the _iter8-analytics_ Helm chart's `values.yaml` file.
 
 ### Installing an older release
 
