@@ -14,7 +14,7 @@ By default, iter8 uses the Prometheus service installed as part of the Red Hat O
 
 ### Install the iter8 analytics service
 
-Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar) for the iter8-analytics service. The following options can be used to generate the needed yaml. Note that a password is needed to access Prometheus. In the case of the default install, this password is in the secret `htpasswd` in the namespace where Istio is installed.
+Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar) for the iter8-analytics service. The following options can be used to generate the needed YAML. Note that a password is needed to access Prometheus. In the case of the default install, this password is in the secret `htpasswd` in the namespace where Istio is installed.
 
 ```bash
 REPO=iter8/iter8-analytics
@@ -46,4 +46,4 @@ kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/
 
 The Red Hat OpenShift Service Mesh is restricted to the set of namespaces defined in the `ServiceMeshMemberRoll` resource. In particular, if you will be trying the tutorials, add the namespace `bookinfo-iter8` to the `ServiceMeshMemberRoll`.
 
-Istio relies on a sidecar injected into each pod to provide its capabilities. Istio provides several ways this sidecar can be [injected](https://istio.io/docs/setup/additional-setup/sidecar-injection/). Red Hat recommends the use of the annotation `sidecar.istio.io/inject: "true"` in the deployment yaml. Examples can be found in the yaml for the tutorial: <https://github.com/iter8-tools/iter8-controller/blob/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml>
+Istio relies on a sidecar injected into each pod to provide its capabilities. Istio provides serveral ways this sidecar can be [injected](https://istio.io/docs/setup/additional-setup/sidecar-injection/). Red Hat recommends the use of the annotation `sidecar.istio.io/inject: "true"` in the deployment YAML. Examples can be found in the YAML for the tutorial: <https://github.com/iter8-tools/iter8-controller/blob/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml>
