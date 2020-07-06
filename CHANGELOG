@@ -1,0 +1,7 @@
+v0.2.1
+- Support for canary where baseline and candidate are the same
+===============================
+v0.2.0
+- Support specification of baseline and candidate versions using Kubernetes services
+- Support referencing existing Istio gateways instead of virtual services
+===============================
