@@ -23,11 +23,11 @@ helm template install/kubernetes/helm/iter8-analytics \
     --name iter8-analytics \
     --set image.repository=${REPO} \
     --set image.tag=v0.2.1 \
-    --set iter8Config.authentication.type=basic \
-    --set iter8Config.authentication.username=${PROMETHEUS_USERNAME} \
-    --set iter8Config.authentication.password=${PROMETHEUS_PASSWORD} \
-    --set iter8Config.authentication.insecure_skip_verify=true \
-    --set iter8Config.metricsBackendURL=${PROMETHEUS_SERVICE} \
+    --set metricsBackend.authentication.type=basic \
+    --set metricsBackend.authentication.username=${PROMETHEUS_USERNAME} \
+    --set metricsBackend.authentication.password=${PROMETHEUS_PASSWORD} \
+    --set metricsBackend.authentication.insecure_skip_verify=true \
+    --set metricsBackend.url=${PROMETHEUS_SERVICE} \
 | kubectl -n iter8 apply -f -
 ```
 
