@@ -7,7 +7,7 @@ apiVersion: iter8.tools/v1alpha1
 kind: Experiment
 ```
 
-Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's 4 sections: `spec`, `action`, `metrics`, and `status`.
+Below we document iter8's Experiment CRD. For clarity, we break the documentation down into the CRD's four sections: `spec`, `action`, `metrics`, and `status`.
 
 ## `Experiment spec`
 
@@ -172,7 +172,7 @@ spec:
 
 ## `Experiment action`: user-provided action
 
-The user can interfere with an ongoing experiment by setting the value of an `action` attribute. Iter8 currently supports 4 user actions: `pause`, `resume`, `override_success`, and `override_failure`. Pause and resume are self-explanatory. The action `override_success` causes the experiment to immediately terminate with a success status, whereas `override_failure` causes the experiment to terminate with a failure status.
+The user can interfere with an ongoing experiment by setting the value of an `action` attribute. Iter8 currently supports four user actions: `pause`, `resume`, `override_success`, and `override_failure`. `Pause` and `resume` are self-explanatory. The action `override_success` causes the experiment to immediately terminate with a success status, whereas `override_failure` causes the experiment to terminate with a failure status.
 
 ```yaml
 # user-provided input (optional)
@@ -186,9 +186,9 @@ action: ""
 
 ## `Experiment metrics`
 
-Information about all Prometheus metrics known to iter8 are stored in a Kubernetes `ConfigMap` named _`iter8config-metrics`_. When iter8 is installed, that `ConfigMap` is populated with information on the 3 metrics that iter8 supports out of the box, namely: `iter8_latency`, `iter8_error_rate`, and `iter8_error_count`. Users can add their own custom metrics.
+Information about all Prometheus metrics known to iter8 are stored in a Kubernetes `ConfigMap` named _`iter8config-metrics`_. When iter8 is installed, that `ConfigMap` is populated with information on the three metrics that iter8 supports out of the box, namely: `iter8_latency`, `iter8_error_rate`, and `iter8_error_count`. Users can add their own custom metrics.
 
-When an `Experiment` custom resource is created, the iter8 controller will check the metric names referenced by `.spec.analysis.successCriteria`, look them up in the `ConfigMap`, retrieve the information about them from the `ConfigMap`, and store that information in the `metrics` section of the newly created `Experiment` object. The information about a metric allows the iter8 analytics service to query Prometheus to retrieve metric values for the baseline version and candidate versions of the service . Below we show an example of how a metric is stored in an `Experiment` object.
+When an `Experiment` custom resource is created, the iter8 controller will check the metric names referenced by `.spec.analysis.successCriteria`, look them up in the `ConfigMap`, retrieve the information about them from the `ConfigMap`, and store that information in the `metrics` section of the newly created `Experiment` object. The information about a metric allows the iter8 analytics service to query Prometheus to retrieve metric values for the baseline version and candidate versions of the service. Below we show an example of how a metric is stored in an `Experiment` object.
 
 ```yaml
 metrics:
@@ -207,88 +207,88 @@ metrics:
 Following the Kubernetes model, the `status` section contains all relevant runtime details pertaining to the `Experiment` custom resource. In the YAML representation below, we show sample values for the `status` attributes and comments describing their meaning.
 
 ```yaml
-  status:
-    # the last analysis state
-    analysisState: {}
+status:
+  # the last analysis state
+  analysisState: {}
 
-    # assessment returned from the analytics service
-    assessment:
-      conclusions:
-      - The experiment needs to be aborted
-      - All success criteria were not met
+  # assessment returned from the analytics service
+  assessment:
+    conclusions:
+    - The experiment needs to be aborted
+    - All success criteria were not met
 
-    # list of boolean conditions describing the status of the experiment
-    # for each condition, if the status is "False", the reason field will give detailed explanations
-    # lastTransitionTime records the time when the last change happened to the corresponding condition
-    # when a condition is not set, its status will be "Unknown"
-    conditions:
+  # list of boolean conditions describing the status of the experiment
+  # for each condition, if the status is "False", the reason field will give detailed explanations
+  # lastTransitionTime records the time when the last change happened to the corresponding condition
+  # when a condition is not set, its status will be "Unknown"
+  conditions:
 
-    # AnalyticsServiceNormal is "True" when the controller can get an interpretable response from the analytics service
-    - lastTransitionTime: "2019-12-20T05:38:37Z"
-      status: "True"
-      type: AnalyticsServiceNormal
+  # AnalyticsServiceNormal is "True" when the controller can get an interpretable response from the analytics service
+  - lastTransitionTime: "2019-12-20T05:38:37Z"
+    status: "True"
+    type: AnalyticsServiceNormal
 
-    # ExperimentCompleted tells whether the experiment is completed or not
-    - lastTransitionTime: "2019-12-20T05:39:37Z"
-      status: "True"
-      type: ExperimentCompleted
+  # ExperimentCompleted tells whether the experiment is completed or not
+  - lastTransitionTime: "2019-12-20T05:39:37Z"
+    status: "True"
+    type: ExperimentCompleted
 
-    # ExperimentSucceeded indicates whether the experiment succeeded or not when it is completed
-    - lastTransitionTime: "2019-12-20T05:39:37Z"
-      message: Aborted
-      reason: ExperimentFailed
-      status: "False"
-      type: ExperimentSucceeded
+  # ExperimentSucceeded indicates whether the experiment succeeded or not when it is completed
+  - lastTransitionTime: "2019-12-20T05:39:37Z"
+    message: Aborted
+    reason: ExperimentFailed
+    status: "False"
+    type: ExperimentSucceeded
 
-    # MetricsSynced states whether the referenced metrics have been retrieved from the ConfigMap and stored in the metrics section
-    - lastTransitionTime: "2019-12-20T05:38:22Z"
-      status: "True"
-      type: MetricsSynced
+  # MetricsSynced states whether the referenced metrics have been retrieved from the ConfigMap and stored in the metrics section
+  - lastTransitionTime: "2019-12-20T05:38:22Z"
+    status: "True"
+    type: MetricsSynced
 
-    # Ready records the status of the latest-updated condition
-    - lastTransitionTime: "2019-12-20T05:39:37Z"
-      message: Aborted
-      reason: ExperimentFailed
-      status: "False"
-      type: Ready
+  # Ready records the status of the latest-updated condition
+  - lastTransitionTime: "2019-12-20T05:39:37Z"
+    message: Aborted
+    reason: ExperimentFailed
+    status: "False"
+    type: Ready
 
-    # RoutingRulesReady indicates whether the routing rules are successfully created/updated
-    - lastTransitionTime: "2019-12-20T05:38:22Z"
-      tatus: "True"
-      type: RoutingRulesReady
+  # RoutingRulesReady indicates whether the routing rules are successfully created/updated
+  - lastTransitionTime: "2019-12-20T05:38:22Z"
+    tatus: "True"
+    type: RoutingRulesReady
 
-    # TargetsProvided is "True" when both the baseline and the candidate versions of the targetService are detected by the controller; otherwise, missing elements will be shown in the reason field
-    - lastTransitionTime: "2019-12-20T05:38:37Z"
-      status: "True"
-      type: TargetsProvided
+  # TargetsProvided is "True" when both the baseline and the candidate versions of the targetService are detected by the controller; otherwise, missing elements will be shown in the reason field
+  - lastTransitionTime: "2019-12-20T05:38:37Z"
+    status: "True"
+    type: TargetsProvided
 
-    # the current experiment's iteration
-    currentIteration: 2
+  # the current experiment's iteration
+  currentIteration: 2
 
-    # Unix timestamp in nanoseconds when the experiment is created
-    createTimestamp: 1576820317351000
+  # Unix timestamp in nanoseconds when the experiment is created
+  createTimestamp: 1576820317351000
 
-    # Unix timestamp in nanoseconds when the experiment started
-    startTimestamp: 1576820317351000
+  # Unix timestamp in nanoseconds when the experiment started
+  startTimestamp: 1576820317351000
 
-    # Unix timestamp in nanoseconds when the experiment finished
-    endTimestamp: 1576820377696000
+  # Unix timestamp in nanoseconds when the experiment finished
+  endTimestamp: 1576820377696000
 
-    # The url to he Grafana dashboard pertaining to this experiment
-    grafanaURL: http://localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=bookinfo-iter8&var-service=reviews&var-baseline=reviews-v3&var-candidate=reviews-v5&from=1576820317351&to=1576820377696
+  # The url to he Grafana dashboard pertaining to this experiment
+  grafanaURL: http://localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=bookinfo-iter8&var-service=reviews&var-baseline=reviews-v3&var-candidate=reviews-v5&from=1576820317351&to=1576820377696
 
-    # the time when the previous iteration was completed
-    lastIncrementTime: "2019-12-20T05:39:07Z"
+  # the time when the previous iteration was completed
+  lastIncrementTime: "2019-12-20T05:39:07Z"
 
-    # this is the message to be shown in the STATUS column for the `kubectl` printer, which summarizes the experiment situation
-    message: 'ExperimentFailed: Aborted'
+  # this is the message to be shown in the STATUS column for the `kubectl` printer, which summarizes the experiment situation
+  message: 'ExperimentFailed: Aborted'
 
-    # the experiment's current phase
-    # values could be: Progressing, Pause, Completed
-    phase: Completed
+  # the experiment's current phase
+  # values could be: Progressing, Pause, Completed
+  phase: Completed
 
-    # the current traffic split
-    trafficSplitPercentage:
-      baseline: 100
-      candidate: 0
+  # the current traffic split
+  trafficSplitPercentage:
+    baseline: 100
+    candidate: 0
   ```

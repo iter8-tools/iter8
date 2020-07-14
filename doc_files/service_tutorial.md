@@ -10,7 +10,7 @@ In this example, the application _productpage.example.com_ can be routed, via an
 
 ## Step 1: Deploy the bookinfo Application
 
-Create a new namespace: $NAMESPACE. We use the name `bookinfo-serivce`.
+Create a new namespace: $NAMESPACE. We use the name `bookinfo-service`.
 
 ```bash
 export NAMESPACE=bookinfo-service

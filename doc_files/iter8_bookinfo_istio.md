@@ -2,15 +2,15 @@
 
 This tutorial shows you how _iter8_ can be used to perform canary releases by gradually shifting traffic to a canary version of a microservice.
 
-This tutorial has 5 parts, which are supposed to be tried in order. **Here you will learn:**
+This tutorial has five parts, which are supposed to be tried in order. **Here you will learn:**
 
-- how to perform a canary rollout with _iter8_;
-- how to set different success criteria for _iter8_ to analyze canary releases and determine success or failure;
-- how to have _iter8_ immediately stop an experiment as soon as a criterion is not met;
-- how to use your own custom metrics in success criteria for canary analyses; and
-- how _iter8_ can be used for canary releases of both internal and user-facing services.
+- How to perform a canary rollout with _iter8_
+- How to set different success criteria for _iter8_ to analyze canary releases and determine success or failure
+- How to have _iter8_ immediately stop an experiment as soon as a criterion is not met
+- How to use your own custom metrics in success criteria for canary analyses
+- How _iter8_ can be used for canary releases of both internal and user-facing services
 
-The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) that is distributed with Istio. This application comprises 4 microservices, namely, _productpage_, _details_, _reviews_, and _ratings_, as illustrated [here](https://istio.io/docs/examples/bookinfo/). Please, follow our instructions below to deploy the sample application as part of the tutorial.
+The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) that is distributed with Istio. This application comprises four microservices, namely, _productpage_, _details_, _reviews_, and _ratings_, as illustrated [here](https://istio.io/docs/examples/bookinfo/). Please, follow our instructions below to deploy the sample application as part of the tutorial.
 
 ## YAML files used in the tutorial
 
@@ -34,7 +34,7 @@ Next, let us deploy the Bookinfo application:
 kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml
 ```
 
-You should see the following pods in the `bookinfo-iter8` namespace. Make sure the pods' status is "Running." Also, note that there should be 2 containers in each pod, since the Istio sidecar was injected.
+You should see the following pods in the `bookinfo-iter8` namespace. Make sure the pods' status is "Running." Also, note that there should be two containers in each pod, since the Istio sidecar was injected.
 
 ```bash
 $ kubectl get pods -n bookinfo-iter8
@@ -424,7 +424,7 @@ kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-co
 #### Note:
 > For additional information about how to add a new metric to the existing configuration please see [this documentation](metrics.md).
 
-To verify that the new metric has been added to the configmap, you can check it again:
+To verify that the new metric has been added to the ConfigMap, you can check it again:
 
 ```bash
 kubectl get configmap iter8config-metrics -n iter8 -oyaml
@@ -529,15 +529,15 @@ kubectl get experiment reviews-v6-rollout -o jsonpath='{.status.grafanaURL}' -n 
 
 You can also extend the Grafana Dashboard with the new metric by adding a new panel to the dashboard that looks as follows:
 
-Other configurations such as title, legend, etc can be varied as per the user's preference.
+Other configurations such as title, legend, etc. can be varied as per the user's preference.
 
 ![Grafana Dashboard](../img/grafana_reviews-v3-v6-90_perc.png)
 
-## Part 5: User-facing Canary release: _productpage-v1_ to _productpage-v2_
+## Part 5: User-facing canary release: _productpage-v1_ to _productpage-v2_
 
-### 1. Traffic configuration
+### Step 1. Traffic configuration
 
-Consider the case now you want to rollout a new version of productpage deployment _productpage-v2_ and expose the service outside of the cluster to users through the host `productpage.deployment.com`. You will need to setup an Istio `Gateway`:
+Consider the case now you want to rollout a new version of productpage deployment `productpage-v2` and expose the service outside of the cluster to users through the host `productpage.deployment.com`. You will need to setup an Istio `Gateway`:
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -568,9 +568,9 @@ Then emulate traffic flowing from outside of the cluster:
 watch -x -n 0.1 curl -Is -H 'Host: productpage.deployment.com' "http://${GATEWAY_URL}/productpage"
 ```
 
-### 2. Canary rollout configuration
+### Step 2. Canary rollout configuration
 
-As specified in the `targetService` section of the following `Experiment` configuration, we have kubernetes service `productpage` directing traffic to deployments `productpge-v1` and `productpage-v2`. The entry in `hosts` tells the controller that traffic will come through `"productpage.deployment.com"` configured in gateway(istio) `paroductpage-gateway`:
+As specified in the `targetService` section of the following `Experiment` configuration, we have kubernetes service `productpage` directing traffic to deployments `productpage-v1` and `productpage-v2`. The entry in `hosts` tells the controller that traffic will come through `"productpage.deployment.com"` configured in gateway (istio) `paroductpage-gateway`:
 
 ```yaml
 apiVersion: iter8.tools/v1alpha1
@@ -607,7 +607,7 @@ To create this `Experiment` object, run the following command:
 kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/canary_productpage-v1_to_productpage-v2.yaml
 ```
 
-### 3. Deploy _productpage-v2_ and start the rollout
+### Step 3. Deploy _productpage-v2_ and start the rollout
 
 To deploy the candidate version, _productpage-v2_, run the command:
 

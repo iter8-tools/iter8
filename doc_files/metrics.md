@@ -12,7 +12,7 @@ In particular, the following metrics are available out-of-the-box from iter8. Th
 
 1. _iter8_latency_: mean latency, that is, average time taken by the service version to respond to HTTP requests.
 
-2. _iter8_error_count_: total error count, that is, number of HTTP requests that resulted in error (5xx HTTP status codes).
+2. _iter8_error_count_: total error count, that is, number of HTTP requests that resulted in error (`5XX` HTTP status codes).
 
 3. _iter8_error_rate_: error rate, that is, (total error count / total number of HTTP requests).
 
@@ -32,7 +32,7 @@ When iter8 is installed, a Kubernetes `ConfigMap` named _iter8config-metrics_ is
 
 Next, we describe how iter8 can be extended with new metrics through the _iter8-metrics_ `ConfigMap`. Any metric you define in the `ConfigMap` can then be referenced in the success criteria of experiments.
 
-As an example, we will define a new metric called `error_count_400s` which computes the total count of HTTP requests that resulted in a 400 HTTP status code.
+As an example, we will define a new metric called `error_count_400s` which computes the total count of HTTP requests that resulted in a `400` HTTP status code.
 Adding a new metric involves creating a Prometheus query template and associating this template with the metric definition.  We now describe the structure of a Prometheus query template.
 
 ### Prometheus query template
@@ -43,7 +43,13 @@ A sample query template is shown below:
 sum(increase(istio_requests_total{response_code=~'4..',reporter='source'}[$interval]$offset_str)) by ($entity_labels)
 ```
 
-As shown above, the query template has three placeholders (i.e., terms beginning with $). These placeholders are substituted with actual values by _iter8-analytics_ in order to construct a Prometheus query. 1) The query template has a `group by` clause (specified using the _by_ keyword) with the placeholder `$entity_labels` as the group key. Each group in a Prometheus response corresponds to a distinct entity. _Iter8-analytics_ maps service versions to Prometheus entities using this placeholder. 2) The time period of aggregation is captured by the placeholder `$interval`. 3) The placeholder `$offset_str` is used by _iter8-analytics_ to deal with historical data when available. All three placeholders are required in the query template. When a template is instantiated (i.e., placeholders are substituted with values), it results in a Prometheus query expression; when we query Prometheus using this expression, the response from Prometheus needs  to be an [instant vector](https://prometheus.io/docs/prometheus/latest/querying/basics/).
+As shown above, the query template has three placeholders (i.e., terms beginning with `$`). These placeholders are substituted with actual values by _iter8-analytics_ in order to construct a Prometheus query. 
+
+1. The query template has a `group by` clause (specified using the _by_ keyword) with the placeholder `$entity_labels` as the group key. Each group in a Prometheus response corresponds to a distinct entity. _Iter8-analytics_ maps service versions to Prometheus entities using this placeholder. 
+2. The time period of aggregation is captured by the placeholder `$interval`. 
+3. The placeholder `$offset_str` is used by _iter8-analytics_ to deal with historical data when available. 
+
+All three placeholders are required in the query template. When a template is instantiated (i.e., placeholders are substituted with values), it results in a Prometheus query expression; when we query Prometheus using this expression, the response from Prometheus needs  to be an [instant vector](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 
 
 ### Updating the _iter8-metrics_ `ConfigMap`
@@ -68,6 +74,6 @@ The interpretation of the above definition is as follows.
 
   - _name_: Name of the new metric being defined. Its value is the key for the associated query template. In our example, the relevant key is `error_count_400s`.
 
-  - _is_counter_: Set this to True if this metric is a counter metric. In our example, 4xx errors can never decrease over time, and therefore `is_counter` is set to True.
+  - _is_counter_: Set this to True if this metric is a counter metric. In our example, `4XX` errors can never decrease over time, and therefore `is_counter` is set to True.
 
   - _sample_size_query_template_: As explained earlier, this is the sample size query template associated with this metric. The sample over which this value is computed for a version is the set of all HTTP requests received by the version. Hence, we are relying on the pre-defined sample-size query template `iter8_sample_size`, which computes the total number of HTTP requests for a version. If you are defining a metric that requires the sample size to be computed differently, you can create a new sample-size query template (with its own unique name) in the _query_templates_ section and reference it in the metric declaration.
