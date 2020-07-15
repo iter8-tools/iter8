@@ -1,0 +1,47 @@
+/*------------------------------------
+  Button
+------------------------------------*/
+
+// Circle
+.btn-circle {
+  border-radius: $btn-circle-radius;
+  padding: $btn-circle-padding-y $btn-circle-padding-x;
+  width: $btn-circle-width;
+  height: $btn-circle-height;
+
+  &.btn-sm {
+    width: $btn-circle-width-sm;
+    height: $btn-circle-height-sm;
+  }
+
+  &.btn-lg {
+    width: $btn-circle-width-lg;
+    height: $btn-circle-height-lg;
+  }
+}
+
+// Piled
+.btn-pill {
+  border-radius: $border-radius-pill;
+  padding-left: $btn-pill-padding-x;
+  padding-right: $btn-pill-padding-x;
+
+  &.btn-sm {
+    padding-left: $btn-pill-padding-x-sm;
+    padding-right: $btn-pill-padding-x-sm;
+  }
+
+  &.btn-lg {
+    padding-left: $btn-pill-padding-x-lg;
+    padding-right: $btn-pill-padding-x-lg;
+  }
+}
+
+// Btn With Spinners
+.btn {
+  .spinner-border,
+  .spinner-grow {
+    position: relative;
+    top: $btn-spinners;
+  }
+}

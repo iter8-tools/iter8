@@ -1,0 +1,14 @@
+/*------------------------------------
+  Tabs
+------------------------------------*/
+.nav-bordered {
+  .nav-link {
+    color: inherit;
+  }
+
+  .nav-link.active,
+  .show > .nav-link {
+    color: $primary;
+    border-bottom: solid 3px $primary;
+  }
+}
