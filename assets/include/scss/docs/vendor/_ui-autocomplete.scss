@@ -1,0 +1,106 @@
+/*------------------------------------
+  UI Autocomplete
+------------------------------------*/
+.ui-autocomplete {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 1px;
+  z-index: 91199;
+
+  .ui-autocomplete-wrapper--dark &::-webkit-scrollbar {
+    width: 1rem;
+  }
+
+  .ui-autocomplete-wrapper--dark &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba($black, .3);
+    background-color: $black-soft;
+  }
+
+  .ui-autocomplete-wrapper--dark &::-webkit-scrollbar-thumb {
+    background-color: $black;
+    border-radius: $border-radius;
+    outline: 1px solid $black;
+  }
+
+  .left {
+    float: left;
+  }
+  .right {
+    float: right;
+  }
+
+  .ui-menu-item {
+    padding: .25rem;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid $border-color;
+
+      .ui-autocomplete-wrapper--dark & {
+        border-color: rgba($white, .1);
+      }
+    }
+  }
+
+  .ui-menu-item-wrapper {
+    display: block;
+    color: inherit;
+    background-color: transparent;
+    border-color: transparent;
+    padding: 7px 15px;
+
+    &.ui-state-active,
+    &:hover {
+      background-color: rgba($primary, .1);
+      text-decoration: none;
+
+      .ui-autocomplete-wrapper--dark & {
+        background-color: rgba($white, .1);
+      }
+    }
+    .ui-menu-item:hover & {
+      background-color: rgba($primary, .1);
+      border-color: transparent;
+      border-radius: .125rem;
+
+      .ui-autocomplete-wrapper--dark & {
+        background-color: rgba($white, .1);
+      }
+    }
+  }
+  &-category {
+    padding: 5px 15px;
+    margin: 0;
+    font-weight: bold;
+  }
+}
+
+.ui-widget.ui-widget-content {
+  border: thin solid $border-color;
+  border-radius: .125rem;
+  box-shadow: 0 2px 16px 8px rgba(140, 152, 164, 0.135);
+
+  .ui-autocomplete-wrapper--dark & {
+    border: none;
+    background: $dark;
+    box-shadow: 0 20px 25px -12px rgba($black, .5);
+  }
+}
+
+.duik-search__label {
+  display: block;
+  color: $primary;
+
+  .ui-autocomplete-wrapper--dark & {
+    color: $white;
+  }
+}
+
+.duik-search__category {
+  font-size: $small-font-size;
+  opacity: .4;
+
+  .ui-autocomplete-wrapper--dark & {
+    color: rgba($white, 1);
+  }
+}

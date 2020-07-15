@@ -1,0 +1,23 @@
+/*------------------------------------
+  Breadcrumb
+------------------------------------*/
+
+.breadcrumb {
+  &-light {
+    background-color: transparent;
+    color: rgba($white, .7);
+    padding: 0;
+
+    .breadcrumb-item + .breadcrumb-item::before {
+      color: rgba($white, .7);
+    }
+
+    .active {
+      color: $white;
+    }
+
+    a {
+      color: rgba($white, .7);
+    }
+  }
+}

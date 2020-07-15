@@ -1,0 +1,33 @@
+/*------------------------------------
+  Sizing
+------------------------------------*/
+
+.h-100vh {
+  height: 100vh;
+}
+
+.h-85vh {
+  height: 85vh;
+}
+
+.mh-25rem {
+  min-height: 25rem;
+}
+
+.mh-30rem {
+  min-height: 30rem;
+}
+
+.mh-35rem {
+  min-height: 35rem;
+}
+
+@each $breakpoint in sm, md, lg, xl {
+  @include media-breakpoint-up($breakpoint) {
+    @each $prop, $abbrev in (width: w, height: h) {
+      @each $size, $length in $sizes {
+        .#{$abbrev}-#{$breakpoint}-#{$size} { #{$prop}: $length !important; }
+      }
+    }
+  }
+}

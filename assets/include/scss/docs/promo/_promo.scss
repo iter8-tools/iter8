@@ -1,0 +1,9 @@
+.duik-promo {
+  position: relative;
+  color: $white;
+
+  &-container {
+    position: relative;
+    z-index: 2;
+  }
+}

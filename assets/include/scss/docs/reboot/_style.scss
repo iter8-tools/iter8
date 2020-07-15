@@ -1,0 +1,59 @@
+/*------------------------------------
+  Default Styles
+------------------------------------*/
+code {
+  font-size: 100%;
+}
+
+a, button {
+  outline: none !important;
+}
+
+p {
+  line-height: $paragraph-line-height;
+}
+
+h4, h5, h6,
+.h4, .h5, .h6 {
+  font-weight: $font-weight-medium;
+}
+
+figure {
+  margin-bottom: 0;
+}
+
+strong {
+  font-weight: $font-weight-bold;
+}
+
+table th {
+  font-weight: $font-weight-bold;
+}
+
+.fa, .fas {
+  font-weight: 600;
+}
+
+/*------------------------------------
+  Highlight Color
+------------------------------------*/
+
+::-moz-selection {
+  color: $white;
+  background-color: $primary;
+}
+
+::selection {
+  color: $white;
+  background-color: $primary;
+}
+
+.bg-primary :not(.form-control) ::-moz-selection {
+  color: $primary;
+  background-color: $white;
+}
+
+.bg-primary :not(.form-control) ::selection {
+  color: $primary;
+  background-color: $white;
+}

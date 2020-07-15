@@ -1,0 +1,159 @@
+/*------------------------------------
+  Layout
+------------------------------------*/
+
+/* Header */
+.duik-header {
+  font-size: 1rem;
+
+  .navbar-brand img {
+    margin-top: -.22rem;
+  }
+
+  &__nav {
+    .nav-link {
+      line-height: 1.9;
+    }
+  }
+}
+
+/* Sidebar */
+.duik-sidebar-sticky {
+  position: relative;
+  top: 0;
+  width: 100%;
+  height: 15rem;
+  padding: .5rem 0;
+  overflow: hidden;
+
+  @media (max-height: 500px) {
+    min-height: 15rem;
+  }
+
+  @include media-breakpoint-up(md) {
+    height: calc(100vh - #{$header-height});
+
+    &--mini {
+      height: calc(100vh - #{$header-height*4.4});
+    }
+  }
+
+  @supports ((position: -webkit-sticky) or (position: sticky)) {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+.duik-sidebar {
+  z-index: 100;
+  padding: $header-height 0 0;
+
+  @media (max-height: 500px) {
+    overflow: auto;
+  }
+
+  &--dark {
+    color: $white;
+
+    hr {
+      border-color: rgba($white, .1);
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  &__heading {
+    font-size: .84rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: {
+      left: calc(.7rem + 4px);
+      right: 1rem;
+    }
+  }
+
+  &__nav {
+    list-style: none;
+    margin-bottom: 2rem;
+    padding-left: 0;
+  }
+
+  &__item {
+    font-size: $small-font-size;
+  }
+
+  &__link {
+    color: $gray-700;
+    display: inline-block;
+    border-left: 4px solid transparent;
+    padding: .3rem  1rem .5rem .7rem;
+
+    &.active {
+      color: $primary;
+      border-color: $primary;
+      padding-top: .5rem;
+    }
+
+    &:hover {
+      color: $dark;
+      text-decoration: none;
+    }
+  }
+
+  .duik-sidebar--dark &__link {
+    color: rgba($white, .6);
+
+    &.active {
+      color: $white;
+      border-color: $white;
+    }
+
+    &:hover {
+      color: $white;
+    }
+  }
+}
+
+/* Page Nav */
+.duik-content-nav {
+  position: fixed;
+  top: 6.5rem;
+  border-left: 1px solid $border-color;
+  padding-left: 1.5rem;
+  overflow-y: auto;
+  list-style: none;
+
+  ul {
+    padding-left: 1rem;
+    list-style: none;
+  }
+  &__item {
+    font-size: $small-font-size;
+
+    & > a {
+      display: block;
+      color: $gray-700;
+      padding-top: .15rem;
+      padding-bottom: .15rem;
+    }
+    &.active > a,
+    & > a:hover {
+      color: $primary;
+      text-decoration: none;
+    }
+  }
+}
+
+/* Content */
+.duik-content {
+  min-height: calc(100vh - #{$header-height} - #{$footer-height});
+}
+.duik-content-2 {
+  min-height: calc(100vh - #{$footer-height} - 1.5rem);
+}

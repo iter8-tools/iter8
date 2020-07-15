@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Title -->
+  <title>iter8 Documentation</title>
+
+  <!-- Required Meta Tags Always Come First -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="../../../favicon.png">
+
+  <!--  Meta tags -->
+  <meta name="keywords"
+    content="Iter8, A/B testing, microservices, Kubernetes, software, cloud, analytics, canary release">
+  <meta name="description"
+    content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
+
+  <!-- Schema.org -->
+  <meta itemprop="name" content="Deliver Better Software with Iter8">
+  <meta itemprop="description"
+    content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
+  <meta itemprop="image" content="assets/img-temp/iter8-promo-resized-open-graph.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="product">
+  <meta name="twitter:site" content="@Iter8_app">
+  <meta name="twitter:title" content="Deliver Better Software with Iter8">
+  <meta name="twitter:description"
+    content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
+  <meta name="twitter:creator" content="@Iter8_app">
+  <meta name="twitter:image" content="assets/img-temp/iter8-promo-resized-open-graph.png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Deliver Better Software with Iter8">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://iter8.tools/">
+  <meta property="og:image" content="assets/img-temp/iter8-promo-resized-open-graph.png">
+  <meta property="og:description"
+    content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
+  <meta property="og:site_name" content="Htmlstream">
+
+  <!-- Google Fonts -->
+  <link href="//fonts.googleapis.com/css?family=Poppins:300,400,500,600" rel="stylesheet">
+
+  <!-- CSS Implementing Plugins -->
+  <link rel="stylesheet" href="../../vendor/font-awesome/css/fontawesome-all.min.css">
+  <link rel="stylesheet" href="../../vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.css">
+  <link rel="stylesheet" href="../../vendor/jquery-ui/themes/base/jquery-ui.min.css">
+  <link rel="stylesheet" href="../../vendor/prism/prism.css">
+
+  <!-- CSS Template -->
+  <link rel="stylesheet" href="../../css/theme.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="../../css/demo.css">
+</head>
+
+<body class="bg-white">
+  <!-- Header -->
+  <header class="duik-header">
+    <nav class="navbar navbar-expand-md fixed-top bg-white border-bottom text-dark py-2">
+      <a class="link-dark mr-lg-7 mr-0 mr-md-5" href="../../../index.html.html" target="_self">
+        <a class="navbar-brand" href="../../../index.html"><img src="../../img/logo-dark-cropped.png" alt="Iter8"
+            style="width: 150px;"></a>
+        <span class="ml-3">
+          <a href="../more/releases.html"><span class="badge badge-pill badge-dark px-2">v0.2.1</span></a>
+        </span>
+      </a>
+    </nav>
+  </header>
+  <!-- End Header -->
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <nav class="col-md-3 col-lg-2 duik-sidebar border-md-right navbar-expand-md">
+        <div class="d-flex justify-content-between mb-3">
+          <!-- Sidebar Search -->
+          <form class="col form-inline input-group-sm pt-2">
+            <input class="js-search form-control form-control-sm w-100" type="text" placeholder="Search..."
+              data-url="../../include/json/autocomplete-data-for-documentation-search.json">
+          </form>
+          <!-- End Sidebar Search -->
+
+          <!-- Responsive Toggle Button -->
+          <button class="btn btn-link pl-0 d-md-none" type="button" data-toggle="collapse" data-target="#sidebar-nav"
+            aria-controls="sidebar-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 30 30" width="30" height="30" focusable="false">
+              <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10"
+                d="M4 7h22M4 15h22M4 23h22" />
+            </svg>
+          </button>
+          <!-- End Responsive Toggle Button -->
+        </div>
+
+        <!-- Sidebar Nav -->
+        <div class="collapse navbar-collapse border-bottom border-md-0" id="sidebar-nav">
+          <div class="js-scrollbar duik-sidebar-sticky">
+            <h5 class="duik-sidebar__heading">Introduction</h5>
+            <ul class="duik-sidebar__nav">
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/about.html">About</a>
+              </li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
+                  href="../introduction/install.html">Installation</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link active"
+                  href="../introduction/experiment.html">Experiment</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
+                  href="../introduction/metrics.html">Metrics</a></li>
+            </ul>
+
+            <h5 class="duik-sidebar__heading">Tutorials</h5>
+            <ul class="duik-sidebar__nav">
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
+                  href="../tutorials/tutorial-automated.html">Automated canary releases</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
+                  href="../tutorials/tutorial-automated-services.html">Automated canary rollouts</a></li>
+            </ul>
+
+            <h5 class="duik-sidebar__heading">Integrations</h5>
+            <ul class="duik-sidebar__nav">
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
+                  href="../integrations/grafana.html">Grafana</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/kiali.html">Kiali</a>
+              </li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
+                  href="../integrations/iter8-trend.html">iter8-trend</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
+                  href="../integrations/iter8-kui.html">iter8-KUI</a></li>
+            </ul>
+
+            <h5 class="duik-sidebar__heading">More</h5>
+            <ul class="duik-sidebar__nav">
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../more/algorithm.html">Algorithms</a>
+              </li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../more/blogs.html">Blogs</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../more/releases.html">Releases</a></li>
+            </ul>
+          </div>
+        </div>
+        <!-- End Sidebar Nav -->
+      </nav>
+      <!-- End Sidebar -->
+
+      <main class="ml-sm-auto col-md-9 col-lg-10 px-4 pr-10 pt-0 pt-md-11">
+        <!-- Content -->
+        <div class="col-xl-12 order-xl-1 duik-content border-bottom">
+
+          <!-- Iter8 experiment -->
+          <div id="experiment" class="mb-7">
+            <h2>Iter8 <code>Experiment</code><a class="js-anchor-link duik-anchorjs-link"
+                href="#experiment" aria-label="Anchor" data-anchorjs-icon="#"></a></h2>
+
+            <p>Coming soon!</p>
+          </div>
+          <!-- End iter8 experiment -->
+
+          <hr class="mt-7 mb-4">
+
+          <!-- Experiment CRD -->
+          <div id="experimentcrd" class="mb-7">
+            <h2><code>Experiment</code> CRD<a class="js-anchor-link duik-anchorjs-link" href="#experimentcrd"
+                aria-label="Anchor" data-anchorjs-icon="#"></a></h2>
+
+            <!-- Introduction -->
+            <div id="introduction" class="mb-7">
+              <p>
+                When iter8 is installed, a new Kubernetes CRD is added to your cluster. Our CRD kind and current API
+                version are as follows:
+              </p>
+
+              <pre class="language-shell">
+apiVersion: iter8.tools/v1alpha1
+kind: Experiment</pre>
+
+              <p>
+                Below we document iter8's <code>Experiment</code> CRD. For clarity, we break the documentation down into the CRD's
+                four sections: <code>spec</code>, <code>action</code>, <code>metrics</code>, and <code>status</code>.
+              </p>
+            </div>
+            <!-- End introduction -->
+
+            <!-- Experiment spec -->
+            <div id="experiment-spec" class="mb-7">
+              <h5><code>Experiment</code> spec<a class="js-anchor-link duik-anchorjs-link" href="#experiment-spec"
+                  aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <p>
+                Following the Kubernetes model, the <code>spec</code> section specifies the details of the object and
+                its desired state. The <code>spec</code> of an <code>Experiment</code> custom resource identifies the
+                target service of a candidate release or A/B test, the baseline deployment corresponding to the stable
+                service version, the candidate deployment corresponding to the service version being assessed, etc. In
+                the YAML representation below, we show sample values for the <code>spec</code> attributes and comments
+                describing their meaning and whether or not they are optional.
+              </p>
+
+              <!-- NOTE: Why does this end with cleanup? Is there any way to shorten this? -->
+              <pre class="language-yaml">
+spec:
+# targetService specifies the reference to experiment targets
+targetService:
+  # kind of baseline/candidate
+  # options: Service, Deployment
+  # default is Deployment
+  kind: Deployment
+
+  # name of a kubernetes service which receives actual traffic to the application
+  # it's required when baseline/candidate are specified as deployments
+  name: reviews
+
+  # hosts specifies how baseline/candidate can be accessed from outside the cluster
+  # Each entry contains the name of a host and the gateway(istio) associated with it
+  # This is optional and only applies to services directly accessible from outside the K8s cluster
+  hosts:
+  - name: reviews.com
+    gateway: bookinfo-gateway
+
+  # Name of the baseline and candidate versions (required)
+  # If kind (above) is Deployment, baseline and candidate are references to K8s deployments
+  # If kind (above) is Service, baseline and candidate are references to K8s services
+  baseline: reviews-v3
+  candidate: reviews-v5
+
+  # port of the kubernetes service(.spec.targetService.name) that receives traffic
+  # When there is only one port listening on the service, this is optional
+  # If baseline/candidate are services, they should share the same port number
+  port: 9080
+
+# analysis contains the parameters for configuring the analytics service
+analysis:
+
+  # analyticsService specifies analytics service endpoint (optional)
+  # default value is http://iter8-analytics.iter8:8080
+  analyticsService: http://iter8-analytics.iter8:8080
+
+  # endpoint to Grafana dashboard (optional)
+  # default is http://localhost:3000
+  grafanaEndpoint: http://localhost:3000
+
+  # successCriteria is a list of criteria for assessing the candidate version (optional)
+  # if the list is empty, the controller will not rely on the analytics service
+  successCriteria:
+
+  # metricName: name of the metric to which this criterion applies (required)
+  # the name should match the name of an iter8 metric or that of a user-defined custom metric
+  # names of metrics supported by iter8 out of the box:
+  #   iter8_latency: mean latency of the service
+  #   iter8_error_rate: mean error rate (~5** HTTP Status codes) of the service
+  #   iter8_error_count: total error count (~5** HTTP Status codes) of the service
+  - metricName: iter8_latency
+
+    # minimum number of data points required to make a decision based on this criterion (optional)
+    # default is 10
+    # Used by the check_and_increment and epsilon_greedy algorithms
+    # Ignored by other algorithms
+    sampleSize: 100
+
+    # the metric value for the candidate version defining this success criterion (required)
+    # it can be an absolute threshold or one relative to the baseline version, depending on the
+    # attribute toleranceType described next
+    tolerance: 0.2
+
+    # indicates if the tolerance value above should be interpreted as an absolute threshold or
+    # a threshold relative to the baseline (required)
+    # options:
+    #   threshold: the metric value for the candidate must be below the tolerance value above
+    #   delta: the tolerance value above indicates the percentage within which the candidate metric value can deviate
+    # from the baseline metric value
+    toleranceType: threshold
+
+    # The range of possible metric values (optional)
+    # Used by bayesian routing algorithms if available.
+    # Ignored by other algorithms.
+    min_max:
+      # The minimum possible value for the metric
+      min: 0.0
+
+      # The maximum possible value for the metric
+      max: 1.0
+
+    # indicates whether or not the experiment must finish if this criterion is not satisfied (optional)
+    # default is false
+    stopOnFailure: false
+
+  # reward is an optional field that can be used when an a/b testing is conducted
+  # When both versions satisfy all the success criteria, the one with higher reward value wins the comparison
+  # This is effective when a bayesian routing strategy is specified in trafficControl (posterior_bayesian_routing or optimistic_bayesian_routing)
+  reward:
+    # the metric whose value is treated as reward (required)
+    - metricName: iter8_latency
+
+    # The range of possible metric values (optional)
+    min_max:
+      # The minimum possible value for the metric
+      min: 0.0
+
+      # The maximum possible value for the metric
+      max: 1.0
+
+# trafficControl controls the experiment durarion and how the controller should change the traffic split
+trafficControl:
+
+  # frequency with which the controller calls the analytics service
+  # it corresponds to the duration of each "iteration" of the experiment
+  interval: 30s
+
+  # maximum number of iterations for this experiment (optional)
+  # the duration of an experiment is defined by maxIterations * internal
+  # default is 100
+  maxIterations: 6
+
+  # the maximum traffic percentage to send to the candidate during an experiment (optional)
+  # default is 50
+  maxTrafficPercentage: 80
+
+  # strategy used to analyze the candidate and shift the traffic (optional)
+  # except for the strategy increment_without_check, the analytics service is called
+  # at each iteration and responds with the appropriate traffic split which the controller honors
+  # options:
+  #   check_and_increment
+  #   epsilon_greedy
+  #   posterior_bayesian_routing
+  #   optimistic_bayesian_routing
+  #   increment_without_check: increase traffic to candidate by trafficStepSize at each iteration without calling analytics
+  # default is check_and_increment
+  strategy: check_and_increment
+
+  # the maximum traffic increment per iteration (optional)
+  # default is 2.0
+  # Used by check_and_increment algorithm
+  # Ignored by other algorithms
+  trafficStepSize: 20
+
+  # The required confidence in the recommended traffic split (optional)
+  # default is 0.95
+  # Used by bayesian routing algorithms
+  # Ignored by other algorithms
+  confidence: 0.9
+
+  # determines how the traffic must be split at the end of the experiment (optional)
+  # options:
+  #   baseline: all traffic goes to the baseline version
+  #   candidate: all traffic goes to the candidate version
+  #   both: traffic is split across baseline and candidate
+  # default is candidate
+  onSuccess: candidate
+
+# indicates whether or not iter8 should perform a clean-up action at the end of the experiment (optional)
+# if no action is specified, nothing is done to clean up at the end
+# if used, the currently supported actions are:
+#   delete: at the end of the experiment, the version that ends up with no traffic (if any) is deleted
+cleanup:</pre>
+            </div>
+            <!-- End experiment spec -->
+
+            <!-- Experiment action -->
+            <div id="experiment-action" class="mb-7">
+              <h5><code>Experiment</code> action<a class="js-anchor-link duik-anchorjs-link" href="#experiment-action"
+                  aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <p>
+                The user can interfere with an ongoing experiment by setting the value of an action attribute. Iter8
+                currently supports four user actions: <code>pause</code>, <code>resume</code>,
+                <code>override_success</code>, and <code>override_failure</code>. <code>Pause</code> and
+                <code>resume</code> are self-explanatory. The action <code>override_success</code> causes the experiment
+                to immediately terminate with a success status, whereas <code>override_failure</code> causes the
+                experiment to terminate with a failure status.
+              </p>
+
+              <pre class="language-yaml">
+# user-provided input (optional)
+# options:
+#   pause: pause the experiment
+#   resume: resume a paused experiment
+#   override_success: terminate the experiment indicating that the candidate succeeded
+#   override_failure: abort the experiment indicating that the candidate failed
+action: ""</pre>
+            </div>
+            <!-- End experiment action -->
+
+            <!-- Experiment metrics -->
+            <div id="experiment-metrics" class="mb-7">
+              <h5><code>Experiment</code> metrics<a class="js-anchor-link duik-anchorjs-link" href="#experiment-metrics"
+                  aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <p>
+                Information about all Prometheus metrics known to iter8 are stored in a Kubernetes
+                <code>ConfigMap</code> named <code>iter8config-metrics</code>. When iter8 is installed, that
+                <code>ConfigMap</code> is populated with information on the three metrics that iter8 supports out of the
+                box, namely: <code>iter8_latency</code>, <code>iter8_error_rate</code>, and
+                <code>iter8_error_count</code>. Users can add their own custom metrics.
+              </p>
+
+              <p>
+                When an <code>Experiment</code> custom resource is created, the iter8 controller will check the metric
+                names referenced by <code>.spec.analysis.successCriteria</code>, look them up in the
+                <code>ConfigMap</code>, retrieve the information about them from the <code>ConfigMap</code>, and store
+                that information in the <code>metrics</code> section of the newly created <code>Experiment</code>
+                object. The information about a metric allows the iter8 analytics service to query Prometheus to
+                retrieve metric values for the baseline version and candidate versions of the service. Below we show an
+                example of how a metric is stored in an <code>Experiment</code> object.
+              </p>
+
+              <pre class="language-yaml">
+metrics:
+  iter8_latency:
+    absent_value: None
+    is_counter: false
+    query_template: (sum(increase(istio_request_duration_seconds_sum{job='istio-mesh',reporter='source'}[$interval]$offset_str))
+      by ($entity_labels)) / (sum(increase(istio_request_duration_seconds_count{job='istio-mesh',reporter='source'}[$interval]$offset_str))
+      by ($entity_labels))
+    sample_size_template: sum(increase(istio_requests_total{job='istio-mesh',reporter='source'}[$interval]$offset_str))
+      by ($entity_labels)</pre>
+            </div>
+            <!-- End experiment metrics -->
+
+            <!-- Experiment status -->
+            <div id="experiment-status" class="mb-7">
+              <h5><code>Experiment</code> status<a class="js-anchor-link duik-anchorjs-link" href="#experiment-status"
+                  aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <p>
+                Following the Kubernetes model, the <code>status</code> section contains all relevant runtime details
+                pertaining to the <code>Experiment</code> custom resource. In the YAML representation below, we show
+                sample values for the <code>status</code> attributes and comments describing their meaning.
+              </p>
+
+              <pre class="language-yaml">
+status:
+  # the last analysis state
+  analysisState: {}
+
+  # assessment returned from the analytics service
+  assessment:
+    conclusions:
+    - The experiment needs to be aborted
+    - All success criteria were not met
+
+  # list of boolean conditions describing the status of the experiment
+  # for each condition, if the status is "False", the reason field will give detailed explanations
+  # lastTransitionTime records the time when the last change happened to the corresponding condition
+  # when a condition is not set, its status will be "Unknown"
+  conditions:
+
+  # AnalyticsServiceNormal is "True" when the controller can get an interpretable response from the analytics service
+  - lastTransitionTime: "2019-12-20T05:38:37Z"
+    status: "True"
+    type: AnalyticsServiceNormal
+
+  # ExperimentCompleted tells whether the experiment is completed or not
+  - lastTransitionTime: "2019-12-20T05:39:37Z"
+    status: "True"
+    type: ExperimentCompleted
+
+  # ExperimentSucceeded indicates whether the experiment succeeded or not when it is completed
+  - lastTransitionTime: "2019-12-20T05:39:37Z"
+    message: Aborted
+    reason: ExperimentFailed
+    status: "False"
+    type: ExperimentSucceeded
+
+  # MetricsSynced states whether the referenced metrics have been retrieved from the ConfigMap and stored in the metrics section
+  - lastTransitionTime: "2019-12-20T05:38:22Z"
+    status: "True"
+    type: MetricsSynced
+
+  # Ready records the status of the latest-updated condition
+  - lastTransitionTime: "2019-12-20T05:39:37Z"
+    message: Aborted
+    reason: ExperimentFailed
+    status: "False"
+    type: Ready
+
+  # RoutingRulesReady indicates whether the routing rules are successfully created/updated
+  - lastTransitionTime: "2019-12-20T05:38:22Z"
+    tatus: "True"
+    type: RoutingRulesReady
+
+  # TargetsProvided is "True" when both the baseline and the candidate versions of the targetService are detected by the controller; otherwise, missing elements will be shown in the reason field
+  - lastTransitionTime: "2019-12-20T05:38:37Z"
+    status: "True"
+    type: TargetsProvided
+
+  # the current experiment's iteration
+  currentIteration: 2
+
+  # Unix timestamp in nanoseconds when the experiment is created
+  createTimestamp: 1576820317351000
+
+  # Unix timestamp in nanoseconds when the experiment started
+  startTimestamp: 1576820317351000
+
+  # Unix timestamp in nanoseconds when the experiment finished
+  endTimestamp: 1576820377696000
+
+  # The url to he Grafana dashboard pertaining to this experiment
+  grafanaURL: http://localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=bookinfo-iter8&var-service=reviews&var-baseline=reviews-v3&var-candidate=reviews-v5&from=1576820317351&to=1576820377696
+
+  # the time when the previous iteration was completed
+  lastIncrementTime: "2019-12-20T05:39:07Z"
+
+  # this is the message to be shown in the STATUS column for the `kubectl` printer, which summarizes the experiment situation
+  message: 'ExperimentFailed: Aborted'
+
+  # the experiment's current phase
+  # values could be: Progressing, Pause, Completed
+  phase: Completed
+
+  # the current traffic split
+  trafficSplitPercentage:
+    baseline: 100
+    candidate: 0</pre>
+            </div>
+            <!-- End experiment status -->
+          </div>
+          <!-- End experiment CRD -->
+        </div>      </main>
+    </div>
+  </div>
+
+  <!-- Go to Top -->
+  <a class="js-go-to duik-go-to" href="javascript:;">
+    <span class="fa fa-arrow-up duik-go-to__inner"></span>
+  </a>
+  <!-- End Go to Top -->
+
+  <!-- JS Global Compulsory -->
+  <script src="../../vendor/jquery/dist/jquery.min.js"></script>
+  <script src="../../vendor/jquery-migrate/dist/jquery-migrate.min.js"></script>
+  <script src="../../vendor/popper.js/dist/umd/popper.min.js"></script>
+  <script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+
+  <!-- JS Implementing Plugins -->
+  <script src="../../vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
+  <script src="../../vendor/jquery-ui/jquery-ui.core.min.js"></script>
+  <script src="../../vendor/jquery-ui/ui/widgets/menu.js"></script>
+  <script src="../../vendor/jquery-ui/ui/widgets/mouse.js"></script>
+  <script src="../../vendor/jquery-ui/ui/widgets/autocomplete.js"></script>
+  <script src="../../vendor/prism/prism.js"></script>
+
+  <!-- JS -->
+  <script src="../../js/main.js"></script>
+  <script src="../../js/autocomplete.js"></script>
+  <script src="../../js/custom-scrollbar.js"></script>
+</body>
+
+</html>
