@@ -1,0 +1,26 @@
+/*------------------------------------
+  Backgrounds
+------------------------------------*/
+
+.bg-primary-darker {
+  background-color: $primary-darker;
+}
+@include media-breakpoint-up(md) {
+  .bg-md-primary-darker {
+    background-color: $primary-darker;
+  }
+}
+
+.bg-white-11 {
+  background-color: rgba($white, .11) !important;
+}
+
+a.bg-hover {
+  &-light:hover {
+    background-color: $light !important;
+  }
+
+  &-white:hover {
+    background-color: $white !important;
+  }
+}

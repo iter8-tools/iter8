@@ -1,0 +1,39 @@
+/*------------------------------------
+  Borders
+------------------------------------*/
+
+@each $breakpoint in sm, md, lg, xl {
+  @include media-breakpoint-up($breakpoint) {
+    .border-#{$breakpoint} {
+      border: $border-width solid $border-color;
+    }
+    .border-#{$breakpoint}-top {
+      border-top: $border-width solid $border-color;
+    }
+    .border-#{$breakpoint}-right {
+      border-right: $border-width solid $border-color;
+    }
+    .border-#{$breakpoint}-bottom {
+      border-bottom: $border-width solid $border-color;
+    }
+    .border-#{$breakpoint}-left {
+      border-left: $border-width solid $border-color;
+    }
+
+    .border-#{$breakpoint}-0 {
+      border: 0 !important;
+    }
+    .border-#{$breakpoint}-top-0 {
+      border-top: 0 !important;
+    }
+    .border-#{$breakpoint}-right-0 {
+      border-right: 0 !important;
+    }
+    .border-#{$breakpoint}-bottom-0 {
+      border-bottom: 0 !important;
+    }
+    .border-#{$breakpoint}-left-0 {
+      border-left: 0 !important;
+    }
+  }
+}
