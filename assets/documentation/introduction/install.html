@@ -333,7 +333,12 @@
                     Installing the Service Mesh involves installing the Elasticsearch, Jaeger, Kiali and Red Hat
                     OpenShift Service Mesh Operators, creating and managing a <code>ServiceMeshControlPlane</code>
                     resource to deploy the control plane, and creating a <code>ServiceMeshMemberRoll</code> resource to
-                    specify the namespaces associated with the Red Hat OpenShift Service Mesh.
+                    specify the namespaces associated with the Red Hat OpenShift Service Mesh. It is not necessary to 
+                    create a <code>ServiceMeshMember</code>.
+                  </p>
+
+                  <p>
+                    The default configuration for a <code>ServiceMeshControlPlane</code> suffices.
                   </p>
                 </div>
                 <!-- End prerequisites -->
@@ -346,7 +351,7 @@
                     By default, iter8 uses the Prometheus service installed as part of the Red Hat OpenShift Service 
                     Mesh for the metrics used to assess the quality of different versions of a service. The Red Hat 
                     OpenShift Service Mesh configures the Prometheus service to require authentication. To configure 
-                    iter8 to authenticate with Prometheus, some additional steps are needed
+                    iter8 to authenticate with Prometheus, some additional steps are needed.
                   </p>
 
                   <!-- Analytics installation -->
@@ -365,8 +370,9 @@
                         REPO=iter8/iter8-analytics
                         PROMETHEUS_SERVICE='https://prometheus.istio-system:9090'
                         PROMETHEUS_USERNAME='internal'
+                        PROMETHEUS_PASSWORD=$(kubectl -n istio-system get secret htpasswd -o jsonpath='{.data.rawPassword}' | base64 --decode)
                         PROMETHEUS_PASSWORD=<FILL IN>
-                        helm template install/kubernetes/helm/iter8-analytics \
+                        helm template iter8-analytics \
                             --name iter8-analytics \
                             --set image.repository=${REPO} \
                             --set image.tag=v0.2.1 \
