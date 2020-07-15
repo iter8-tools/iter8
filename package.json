@@ -1,9 +1,9 @@
 {
-  "name": "Htmlstream",
-  "version": "1.0.0",
-  "description": "Docs UI Kit",
+  "name": "iter8 documentation",
+  "version": "0.2.1",
+  "description": "Documentation for the iter8 tool",
   "main": "gulpfile.js",
-  "author": "htmlstream",
+  "author": "iter8",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
