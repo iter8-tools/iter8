@@ -1,5 +1,5 @@
 {
-  "name": "iter8 documentation",
+  "name": "iter8-documentation",
   "version": "0.2.1",
   "description": "Documentation for the iter8 tool",
   "main": "gulpfile.js",
