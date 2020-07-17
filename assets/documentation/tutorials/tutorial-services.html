@@ -97,40 +97,29 @@
           <div class="js-scrollbar duik-sidebar-sticky">
             <h5 class="duik-sidebar__heading">Introduction</h5>
             <ul class="duik-sidebar__nav">
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/about.html">About</a>
-              </li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
-                  href="../introduction/install.html">Installation</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
-                  href="../introduction/experiment.html">Experiment</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
-                  href="../introduction/metrics.html">Metrics</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/about.html">About</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/install.html">Installation</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/experiment.html">Experiment</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/metrics.html">Metrics</a></li>
             </ul>
 
             <h5 class="duik-sidebar__heading">Tutorials</h5>
             <ul class="duik-sidebar__nav">
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
-                  href="../tutorials/tutorial-automated.html">Automated canary releases</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link active"
-                  href="../tutorials/tutorial-automated-services.html">Automated canary rollouts</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../tutorials/tutorial-deployments.html">Canary with deployments</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link active" href="../tutorials/tutorial-services.html">Canary with services</a></li>
             </ul>
 
             <h5 class="duik-sidebar__heading">Integrations</h5>
             <ul class="duik-sidebar__nav">
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
-                  href="../integrations/grafana.html">Grafana</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/kiali.html">Kiali</a>
-              </li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
-                  href="../integrations/iter8-trend.html">iter8-trend</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link"
-                  href="../integrations/iter8-kui.html">iter8-KUI</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/grafana.html">Grafana</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/kiali.html">Kiali</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/iter8-trend.html">iter8-trend</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/iter8-kui.html">iter8-KUI</a></li>
             </ul>
 
             <h5 class="duik-sidebar__heading">More</h5>
             <ul class="duik-sidebar__nav">
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../more/algorithm.html">Algorithms</a>
-              </li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../more/algorithm.html">Algorithms</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../more/blogs.html">Blogs</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../more/releases.html">Releases</a></li>
             </ul>
@@ -145,16 +134,16 @@
         <div class="col-xl-12 order-xl-1 duik-content border-bottom">
 
           <!-- Automated services tutorial -->
-          <div id="tutorial-automated-services" class="mb-7">
+          <div id="tutorial-deployments-services" class="mb-7">
             <h2>Automated Canary Rollout Using Services<a class="js-anchor-link duik-anchorjs-link"
-                href="#tutorial-automated-services" aria-label="Anchor"
+                href="#tutorial-deployments-services" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h2>
 
             <!-- Introducion -->
-            <div id="tutorial-automated-services-intro" class="mb-7">
+            <div id="tutorial-deployments-services-intro" class="mb-7">
               <p>
                 In iter8 the versions of a service being compared can be specified using deployment names or using service
-                names. Other <a href="tutorial-automated.html">tutorials</a> showed how to specify different versions
+                names. Other <a href="tutorial-deployments.html">tutorials</a> showed how to specify different versions
                 using Kubernetes deployment names. In this tutorial, we learn how to do a canary rollout of an application
                 when different versions are indicated by different Kubernetes service names.
               </p>
@@ -174,9 +163,9 @@
             <!-- End introducion -->
            
             <!-- Step 1 -->
-            <div id="tutorial-automated-services-step1" class="mb-7">
+            <div id="tutorial-deployments-services-step1" class="mb-7">
               <h6>Step 1: Deploy the Bookinfo application<a class="js-anchor-link duik-anchorjs-link"
-                href="#tutorial-automated-services-step1" aria-label="Anchor"
+                href="#tutorial-deployments-services-step1" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h6>
 
               <p>
@@ -205,9 +194,9 @@
             <!-- End step 1 -->
 
             <!-- Step 2 -->
-            <div id="tutorial-automated-services-step2" class="mb-7">
+            <div id="tutorial-deployments-services-step2" class="mb-7">
               <h6>Step 2: Configure Traffic to the Application<a class="js-anchor-link duik-anchorjs-link"
-                href="#tutorial-automated-services-step2" aria-label="Anchor"
+                href="#tutorial-deployments-services-step2" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h6>
 
               <p>
@@ -300,9 +289,9 @@ productpage.example.com.iter8-experiment   [productpage-service]   [productpage.
             <!-- End step 2 -->
 
             <!-- Step 3 -->
-            <div id="tutorial-automated-services-step3" class="mb-7">
+            <div id="tutorial-deployments-services-step3" class="mb-7">
               <h6>Step 3: Create an iter8 Canary Experiment<a class="js-anchor-link duik-anchorjs-link"
-                href="#tutorial-automated-services-step3" aria-label="Anchor"
+                href="#tutorial-deployments-services-step3" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h6>
 
               <p>We can now create a canary <code>Experiment</code> from version <code>productpage-v1</code> to
@@ -333,9 +322,9 @@ productpage-v2-rollout   Pause   TargetsNotFound: Missing Candidate   productpag
             <!-- End step 3 -->
 
             <!-- Step 4 -->
-            <div id="tutorial-automated-services-step4" class="mb-7">
+            <div id="tutorial-deployments-services-step4" class="mb-7">
               <h6>Step 4: Generate load<a class="js-anchor-link duik-anchorjs-link"
-                href="#tutorial-automated-services-step4" aria-label="Anchor"
+                href="#tutorial-deployments-services-step4" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h6>
 
               <p>As in earlier tutorials, emulate requests coming from users using <code>curl</code>:</p>
@@ -349,9 +338,9 @@ productpage-v2-rollout   Pause   TargetsNotFound: Missing Candidate   productpag
             <!-- End step 4 -->
 
             <!-- Step 5 -->
-            <div id="tutorial-automated-services-step5" class="mb-7">
+            <div id="tutorial-deployments-services-step5" class="mb-7">
               <h6>Step 5: Deploy the candidate version <code>productpage-v2</code><a class="js-anchor-link duik-anchorjs-link"
-                href="#tutorial-automated-services-step5" aria-label="Anchor"
+                href="#tutorial-deployments-services-step5" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h6>
 
               <p>
@@ -402,9 +391,9 @@ productpage-v2-rollout   Pause   TargetsNotFound: Missing Candidate   productpag
             <!-- End step 5 -->
 
             <!-- Clean up -->
-            <div id="tutorial-automated-services-cleanup" class="mb-7">
+            <div id="tutorial-deployments-services-cleanup" class="mb-7">
               <h6>Cleanup<a class="js-anchor-link duik-anchorjs-link"
-                href="#tutorial-automated-services-cleanup" aria-label="Anchor"
+                href="#tutorial-deployments-services-cleanup" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h6>
 
               <p>

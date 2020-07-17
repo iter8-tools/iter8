@@ -1,4 +1,4 @@
-// Used in assets/documentation/introduction/tutorial-automated.html to control tabs
+// Used in assets/documentation/introduction/tutorial-deployments.html to control tabs
 
 (function ($) {
   'use strict';
