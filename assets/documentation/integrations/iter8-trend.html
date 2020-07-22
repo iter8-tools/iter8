@@ -25,10 +25,8 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="product">
-  <meta name="twitter:site" content="@Iter8_app">
   <meta name="twitter:title" content="Deliver Better Software with Iter8">
   <meta name="twitter:description" content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
-  <meta name="twitter:creator" content="@Iter8_app">
   <meta name="twitter:image" content="https://iter8.tools/docs/assets/img-temp/iter8-promo-resized-open-graph.png">
 
   <!-- Open Graph -->
@@ -111,9 +109,9 @@
             <h5 class="duik-sidebar__heading">Integrations</h5>
             <ul class="duik-sidebar__nav">
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/grafana.html">Grafana</a></li>
-              <!-- <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/kiali.html">Kiali</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/kiali.html">Kiali</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link active" href="../integrations/iter8-trend.html">iter8-trend</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/iter8-kui.html">iter8-KUI</a></li> -->
+              <!-- <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/iter8-kui.html">iter8-KUI</a></li> -->
             </ul>
 
             <h5 class="duik-sidebar__heading">More</h5>
@@ -131,8 +129,130 @@
       <main class="ml-sm-auto col-md-9 col-lg-10 px-4 pr-10 pt-0 pt-md-11">
         <!-- Content -->
         <div class="col-xl-12 order-xl-1 duik-content border-bottom">
-          <p>Coming soon!</p>
-        </div>      </main>
+          <h2>Iter8-trend<a class="js-anchor-link duik-anchorjs-link"
+            href="getting-started" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+          <!-- Introduction -->
+          <div id="introduction" class="mb-7">
+            <p>
+              Iter8-trend collects metrics of past experiments and summarizes them to show
+              trends that could expose performance problems creeping up over time, which might
+              not be obvious if one only compares consecutive versions during canary testing.
+              This is invaluable to developers when tracking down a performance problem and
+              pin-pointing it to a particular version that was deployed in the past.
+            </p>
+            
+            <!-- <p>
+              This is an optional component to [Iter8](http://github.com/iter8-tools) and
+              cannot run standalone. It should be installed either as part of Iter8
+              installation process or separately after Iter8 is installed.
+            </p> -->
+          </div>
+          <!-- End introduction -->
+
+          <!-- Getting started -->
+          <div id="getting-started" class="mb-7">
+            <h5>Getting started<a class="js-anchor-link duik-anchorjs-link"
+              href="getting-started" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+            <!-- Introduction -->
+            <div id="getting-started-introduction" class="mb-7">
+              <p>Watch the following short video to get started:</p>
+
+              <iframe width="840" height="630" src="https://www.youtube.com/embed/FOtyqJPMj14"></iframe>
+            </div>
+            <!-- End introduction -->
+
+            <!-- Install -->
+            <div id="getting-started-install" class="mb-7">
+              <h6>Install<a class="js-anchor-link duik-anchorjs-link"
+                href="getting-started-install" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <pre>
+                <code class="language-shell">
+                  kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/install/kubernetes/iter8-trend.yaml
+                </code>
+              </pre>
+            </div>
+            <!-- End install -->
+
+            <!-- Visualization -->
+            <div id="getting-started-install" class="mb-7">
+              <h6>Visualization<a class="js-anchor-link duik-anchorjs-link"
+                href="getting-started-install" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <p>
+                Iter8-trend implements a Prometheus scrape target, so summarized metric data can
+                be collected by Prometheus and visualized in Grafana. To enable Prometheus to
+                scrape Iter8-trend, you need to add a new scrape target to Prometheus
+                configuration, e.g., in Istio, you do the following:
+              </p>
+
+              <pre>
+                <code class="language-shell">
+                  kubectl -n istio-system edit configmap prometheus
+                </code>
+              </pre>
+
+              <p>
+                In the list of jobs, copy and paste the following at the bottom of the job list:
+              </p>
+
+              <pre class="language-yaml">
+- job_name: 'iter8_trend'
+  static_configs:
+  - targets: ['iter8-trend.iter8:8888']</pre>
+
+              <p>
+                and then restart the Prometheus pod for the change to take effect:
+              </p>
+
+              <pre>
+                <code class="language-shell">
+                  kubectl -n istio-system delete pod prometheus-xxx-yyy
+                </code>
+              </pre>
+
+              <p>
+                Then, we use `port-forward` to make Grafana available on `localhost:3000`:
+              </p>
+
+              <pre>
+                <code class="language-shell">
+                  kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
+                </code>
+              </pre>
+
+              <p>
+                Finally, we import Iter8-trend dashboard in Grafana.
+              </p>
+
+              <pre>
+                <code class="language-shell">
+                  curl -Ls https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/grafana/install.sh \
+                  | DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/grafana/iter8-trend.json /bin/bash -
+                </code>
+              </pre>
+            </div>
+            <!-- End visualization -->
+
+            <!-- Uninstall -->
+            <div id="getting-started-uninstall" class="mb-7">
+              <h6>Uninstall<a class="js-anchor-link duik-anchorjs-link"
+                href="getting-started-uninstall" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <pre>
+                <code class="language-shell">
+                  kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/install/kubernetes/iter8-trend.yaml
+                </code>
+              </pre>
+            </div>
+            <!-- End uninstall -->
+          </div>
+          <!-- End getting started -->
+        </div>
+        <!-- End content -->
+      </main>
     </div>
   </div>
 
