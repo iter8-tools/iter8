@@ -111,9 +111,9 @@
             <h5 class="duik-sidebar__heading">Integrations</h5>
             <ul class="duik-sidebar__nav">
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/grafana.html">Grafana</a></li>
-              <!-- <li class="duik-sidebar__item"><a class="duik-sidebar__link active" href="../integrations/kiali.html">Kiali</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link active" href="../integrations/kiali.html">Kiali</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/iter8-trend.html">iter8-trend</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/iter8-kui.html">iter8-KUI</a></li> -->
+              <!-- <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../integrations/iter8-kui.html">iter8-KUI</a></li> -->
             </ul>
 
             <h5 class="duik-sidebar__heading">More</h5>
@@ -131,8 +131,252 @@
       <main class="ml-sm-auto col-md-9 col-lg-10 px-4 pr-10 pt-0 pt-md-11">
         <!-- Content -->
         <div class="col-xl-12 order-xl-1 duik-content border-bottom">
-          <p>Coming soon!</p>
-        </div>      </main>
+          <!-- Introduction -->
+          <div id="introduction" class="mb-7">
+            <h2>Kiali<a class="js-anchor-link duik-anchorjs-link"
+              href="introduction" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+            <p>
+              Kiali is an observability console for Istio with service mesh configuration capabilities. 
+              It helps you to understand the structure of your service mesh by inferring the topology, 
+              and also provides the health of your mesh. Kiali provides detailed metrics, and a basic 
+              Grafana integration is available for advanced queries. Distributed tracing is provided by 
+              integrating Jaeger.
+            </p>
+
+            <p>
+              For detailed installation and information about Kiali in general, 
+              please reference <a href="https://kiali.io">Kiali.io</a>.
+            </p>
+          </div>
+          <!-- End introduction -->
+
+          <!-- Enable Iter8 console in Kiali -->
+          <div id="enable-console" class="mb-7">
+            <h5>Enable Iter8 console in Kiali<a class="js-anchor-link duik-anchorjs-link"
+              href="enable-console" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+            <!-- Install Kiali Operator -->
+            <div id="enable-console-install" class="mb-7">
+              <h6>Install Kiali Operator<a class="js-anchor-link duik-anchorjs-link"
+                href="enable-console-install" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+              <p>
+                Kiali version 1.18.1 (and above) now provides the capabilities to observe Iter8 experiment 
+                runtime behavior. To enable Kiali Iter8 extensions, user needs to update the Kiali CR. The 
+                Iter8 extension is not enabled by default, to enable Iter8 extensions, the Kiali Operator 
+                needs to be installed. To check if Kiali operator is installed, use 
+                <code>kubectl get pods -n kiali-operator</code>. To install Kiali Operator, please follow the steps 
+                in <a href="https://kiali.io/documentation/latest/installation-guide/#_advanced_install_operator_only">Advanced Install</a>. 
+                And make sure the Kiali CR is created by using command 
+                <code>kubectl get kialis.kiali.io kiali -n kiali-operator</code>.
+              </p>
+
+              <p>
+                During the Installation, if this is the new installation, you will be asked to choose 
+                authentication strategies (login, anonymous, ldap, openshift, token and openid). Depending 
+                on the chosen strategy, the installation may prompt for additional information. Please 
+                reference <a href="https://kiali.io/documentation/latest/installation-guide/#_login_options">Kiali Login Option</a> 
+                for authentication strategies.
+              </p>
+            </div>
+            <!-- End install Kiali Operator -->
+
+            <!-- Enable iter_8 in Kiali Operator CR -->
+            <div id="enable-console-enable-iter8" class="mb-7">
+              <h6>Enable iter_8 in Kiali Operator CR<a class="js-anchor-link duik-anchorjs-link"
+                href="enable-console-enable-iter8" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+              
+              <ol>
+                <li>
+                  <div id="enable-console-enable-iter8-step1" class="mb-7">
+                    Follow the step <a href="https://kiali.io/documentation/latest/installation-guide/#_create_or_edit_the_kiali_cr">Create or Edit the Kiali CR</a> or use:
+
+                    <pre>
+                      <code class="language-shell">
+                        kubectl edit kialis.kiali.io kiali -n kiali-operator
+                      </code>
+                    </pre>
+                  </div>
+                </li>
+                <li>
+                  <div id="enable-console-enable-iter8-step2" class="mb-7">
+                    <p>
+                      Enable <code>iter_8</code> extensions under Spec.
+                    </p>
+
+                    <pre class="language-yaml">
+# Kiali enabled integration with Iter8 project.
+# If this extension is enabled, Kiali will communicate with Iter8 controller allowing to manage Experiments and review results.
+# Additional documentation https://iter8.tools/
+#    ---
+#    iter_8:
+#
+# Flag to indicate if iter8 extension is enabled in Kiali
+#      ---
+#      enabled: false
+#
+extensions:
+  iter_8:
+    enabled: true</pre>
+                  </div>
+                </li>
+                <li>
+                  <div id="enable-console-enable-iter8-step3" class="mb-7">
+                    <p>
+                      Make sure Kiali is restarted. Use the following command to check if Kiali pod is restarting.
+                    </p>
+
+                    <pre>
+                      <code class="language-shell">
+                        kubectl get pods -n istio-system
+                      </code>
+                    </pre>
+                  </div>
+                </li>
+                <li>
+                  <div id="enable-console-enable-iter8-step4" class="mb-7">
+                    <p>
+                      Install <a href="../introduction/install.html">Iter8</a>
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <div id="enable-console-enable-iter8-step5" class="mb-7">
+                    <p>
+                      Start Kiali
+                    </p>
+
+                    <pre>
+                      <code class="language-shell">
+                        istioctl dashboard kiali
+                      </code>
+                    </pre>
+                  </div>
+                </li>
+              </ol>
+            </div>
+            <!-- End enable iter_8 in Kiali Operator CR -->
+          </div>
+          <!-- End enable Iter8 console in Kiali -->
+
+          <!-- Troubleshooting -->
+          <div id="troubleshooting" class="mb-7">
+            <h5>Troubleshooting<a class="js-anchor-link duik-anchorjs-link"
+              href="troubleshooting" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+            <ul>
+              <li>
+                <div id="troubleshooting-problem1" class="mb-7">
+                  <h6>Cannot find kiali cr in namespace kiali-operator<a class="js-anchor-link duik-anchorjs-link"
+              href="troubleshooting-problem1" aria-label="Anchor" data-anchorjs-icon="#"></a></h6>
+
+                  <p>Try using the following command to install and start operator:</p>
+
+                  <pre>
+                    <code class="language-shell">
+                      bash <(curl -L https://kiali.io/getLatestKialiOperator) --accessible-namespaces '**' -oiv latest -kiv latest --operator-install-kiali true
+                    </code>
+                  </pre>
+                </div>
+              </li>
+              <li>
+                <div id="troubleshooting-problem2" class="mb-7">
+                  <h6>Iter8 did not show up in Kiali<a class="js-anchor-link duik-anchorjs-link"
+              href="troubleshooting-problem2" aria-label="Anchor" data-anchorjs-icon="#"></a></h6>
+                  
+                  <p>Check the configmap using this following command:</p>
+                  
+                  <pre>
+                    <code class="language-shell">
+                      kubectl edit configmap kiali -n istio-system
+                    </code>
+                  </pre>
+                  
+                  <p>
+                    And make the iter_8 has <code>enabled: true</code>. In order for the configmap to take effect, 
+                    please delete the kiali pod in namespace istio-system.  Kiali operator will restart the kiali 
+                    pod automatically.
+                  </p>
+                </div>
+              </li>
+              <li>
+                <div id="troubleshooting-problem3" class="mb-7">
+                  <h6>Error message <code>Kiali has Iter8 extension enabled but it is not detected in the cluster</code><a class="js-anchor-link duik-anchorjs-link"
+              href="troubleshooting-problem3" aria-label="Anchor" data-anchorjs-icon="#"></a></h6>
+          
+                  <p>
+                    Make sure Iter8 is installed, Use kubectl pods -n iter8` to check if both controller and anlytics 
+                    services are running
+                  </p>
+                </div>
+              </li>
+              <li>
+                <div id="troubleshooting-problem4" class="mb-7">
+                  <h6>Experiment(s) are missing in the Iter8 main page<a class="js-anchor-link duik-anchorjs-link"
+              href="troubleshooting-problem4" aria-label="Anchor" data-anchorjs-icon="#"></a></h6>
+
+                  <p>
+                    Make sure the namespace that contains the experiment is included in the Kiali accessible  namespace 
+                    <code>accessible_namespaces:</code> definitions in the CR.
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- End troubleshooting -->
+
+          <!-- Iter8 features -->
+          <div id="iter8-features" class="mb-7">
+            <h5>Iter8 features<a class="js-anchor-link duik-anchorjs-link"
+              href="iter8-features" aria-label="Anchor" data-anchorjs-icon="#"></a></h5>
+
+            <ul>
+              <li>
+                <div id="iter8-features-feature1">
+                  <h6>Iter8 experiments page<a class="js-anchor-link duik-anchorjs-link"
+              href="iter8-features-feature1" aria-label="Anchor" data-anchorjs-icon="#"></a></h6>
+
+                  <p>
+                    Iter8 main page lists all the experiments in available namespace(s).
+                  </p>
+
+                  <!-- TODO: extract styling from the following images and add it to the CSS file -->
+                  <img src="../../img/kiali-iter8-listing.png" width=95% style="border:1px solid #000000">
+                </div>
+              </li>
+              <li>
+                <div id="iter8-features-feature2">
+                  <h6>Experiment create page<a class="js-anchor-link duik-anchorjs-link"
+              href="iter8-features-feature2" aria-label="Anchor" data-anchorjs-icon="#"></a></h6>
+
+                  <p>
+                    User can create new experiment from the Action pulldown on the right of the listing page.
+                  </p>
+
+                  <!-- TODO: add space between these images -->
+                  <img src="../../img/kiali-experiment-create-1.png" width=95% style="border:1px solid #000000">
+                  <img src="../../img/kiali-experiment-create-2.png" width=95% style="border:1px solid #000000">
+                </div>
+              </li>
+              <li>
+                <div id="iter8-features-feature3">
+                  <h6>Experiment detail page<a class="js-anchor-link duik-anchorjs-link"
+              href="iter8-features-feature3" aria-label="Anchor" data-anchorjs-icon="#"></a></h6>
+
+                  <p>
+                    Click on the name of the experiment from the listing page will show the experiment detail page. 
+                    In the detail page, user can <code>pause</code>, <code>resume</code>, <code>terminate with success</code> and <code>terminate with failure</code> 
+                    from the action pulldown. User can also <code>delete</code> experiment.
+                  </p>
+
+                  <img src="../../img/kiali-experiment-detail.png" width=95% style="border:1px solid #000000">
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- End iter8 features -->
+        </div>
+        <!-- End content -->
+      </main>
     </div>
   </div>
 
