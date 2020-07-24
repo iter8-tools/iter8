@@ -167,7 +167,7 @@
 
               <p>All Kubernetes YAML files you will need in this tutorial are in the <code>iter8-controller</code>
                 repository <a
-                  href="https://github.com/iter8-tools/iter8-controller/tree/master/doc/tutorials/istio/bookinfo">here</a>.
+                  href="https://github.com/iter8-tools/iter8/tree/master/doc/tutorials/istio/bookinfo">here</a>.
               </p>
             </div>
             <!-- End introduction -->
@@ -220,14 +220,14 @@
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/namespace.yaml                      </code>
+                        kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/namespace.yaml                      </code>
                     </pre>
 
                     <p>Next, let us deploy the Bookinfo application:</p>
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml                      </code>
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml                      </code>
                     </pre>
 
                     <p>
@@ -261,7 +261,7 @@ reviews-v2-df64b6df9-ffb42        2/2     Running   0          63s</pre>
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-gateway.yaml                      </code>
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-gateway.yaml                      </code>
                     </pre>
 
                     <p>
@@ -425,7 +425,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v2_to_reviews-v3.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v2_to_reviews-v3.yaml
                       </code>
                     </pre>
 
@@ -464,7 +464,7 @@ reviews-v3-rollout   Pause   TargetsNotFound: Missing Candidate   reviews-v2   1
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v3.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v3.yaml
                       </code>
                     </pre>
 
@@ -615,7 +615,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4.yaml
                       </code>
                     </pre>
 
@@ -623,7 +623,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4_telemetry-v2.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v4_telemetry-v2.yaml
                       </code>
                     </pre>
 
@@ -663,7 +663,7 @@ reviews-v4-rollout   Pause       TargetsNotFound: Missing Candidate             
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v4.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v4.yaml
                       </code>
                     </pre>
 
@@ -821,7 +821,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v5.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v5.yaml
                       </code>
                     </pre>
                   </div>
@@ -845,7 +845,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v5.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v5.yaml
                       </code>
                     </pre>
 
@@ -987,7 +987,7 @@ reviews-v5-rollout   Completed   ExperimentFailed: Aborted                      
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/iter8_metrics_extended.yaml
+                        kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/iter8_metrics_extended.yaml
                       </code>
                     </pre>
 
@@ -995,7 +995,7 @@ reviews-v5-rollout   Completed   ExperimentFailed: Aborted                      
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/iter8_metrics_extended_telemetry-v2.yaml
+                        kubectl apply -n iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/iter8_metrics_extended_telemetry-v2.yaml
                       </code>
                     </pre>
 
@@ -1072,7 +1072,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v6.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/canary_reviews-v3_to_reviews-v6.yaml
                       </code>
                     </pre>
 
@@ -1108,7 +1108,7 @@ reviews-v6-rollout   Pause       TargetsNotFound: Missing Candidate             
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v6.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/reviews-v6.yaml
                       </code>
                     </pre>
 
@@ -1235,7 +1235,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/productpage-gateway.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/productpage-gateway.yaml
                       </code>
                     </pre>
 
@@ -1300,7 +1300,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/canary_productpage-v1_to_productpage-v2.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/canary_productpage-v1_to_productpage-v2.yaml
                       </code>
                     </pre>
                   </div>
@@ -1318,7 +1318,7 @@ spec:
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/productpage-v2.yaml
+                        kubectl apply -n bookinfo-iter8 -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/productpage-v2.yaml
                       </code>
                     </pre>
 

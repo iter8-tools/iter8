@@ -183,7 +183,7 @@
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
                 </code>
               </pre>
             </div>
@@ -201,7 +201,7 @@
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
                 </code>
               </pre>
 
@@ -245,7 +245,7 @@ targetService:
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/bootstrap-productpage.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/bootstrap-productpage.yaml
                 </code>
               </pre>
 
@@ -295,7 +295,7 @@ productpage.example.com.iter8-experiment   [productpage-service]   [productpage.
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
                 </code>
               </pre>
 
@@ -345,7 +345,7 @@ productpage-v2-rollout   Pause   TargetsNotFound: Missing Candidate   productpag
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
                 </code>
               </pre>
 
