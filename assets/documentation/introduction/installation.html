@@ -3,7 +3,7 @@
 
 <head>
   <!-- Title -->
-  <title>iter8 Documentation</title>
+  <title>iter8 Documentation - Installation</title>
 
   <!-- Required Meta Tags Always Come First -->
   <meta charset="utf-8">
@@ -13,17 +13,14 @@
   <link rel="shortcut icon" href="../../../favicon.png">
 
   <!--  Meta tags -->
-  <meta name="keywords"
-    content="Iter8, A/B testing, microservices, Kubernetes, software, cloud, analytics, canary release">
-  <meta name="description"
-    content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
+  <meta name="keywords" content="Iter8, A/B testing, microservices, Kubernetes, software, cloud, analytics, canary release">
+  <meta name="description" content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
 
   <!-- Schema.org -->
   <meta itemprop="name" content="Deliver Better Software with Iter8">
-  <meta itemprop="description"
-    content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
+  <meta itemprop="description" content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
   <meta itemprop="image" content="https://iter8.tools/docs/assets/img-temp/iter8-promo-resized-open-graph.png">
-
+ 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="product">
   <meta name="twitter:title" content="Deliver Better Software with Iter8">
@@ -35,8 +32,7 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://iter8.tools/">
   <meta property="og:image" content="https://iter8.tools/docs/assets/img-temp/iter8-promo-resized-open-graph.png">
-  <meta property="og:description"
-    content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
+  <meta property="og:description" content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
   <meta property="og:site_name" content="iter8 Documentation">
 
   <!-- Google Fonts -->
@@ -98,7 +94,7 @@
             <h5 class="duik-sidebar__heading">Introduction</h5>
             <ul class="duik-sidebar__nav">
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/about.html">About</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link active" href="../introduction/install.html">Installation</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link active" href="../introduction/installation.html">Installation</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/experiment.html">Experiment</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/metrics.html">Metrics</a></li>
             </ul>
@@ -154,7 +150,7 @@
 
           <!-- Install iter8 -->
           <div id="install" class="mb-7">
-            <h2>Install iter8<a class="js-anchor-link duik-anchorjs-link" href="install.html" aria-label="Anchor"
+            <h2>Install iter8<a class="js-anchor-link duik-anchorjs-link" href="installation.html" aria-label="Anchor"
                 data-anchorjs-icon="#"></a></h2>
 
             <ul class="nav nav-bordered pb-5" id="myTab" role="tablist">
@@ -205,7 +201,7 @@
 
                   <pre>
                     <code class="language-shell">
-                      curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/install/install.sh \
+                      curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/install/install.sh \
 | /bin/bash -
                     </code>
                   </pre>
@@ -257,7 +253,7 @@
 
                     <li>
                       <a
-                        href="https://github.com/iter8-tools/iter8-controller/releases/download/v0.2.1/iter8-controller-helm-chart.tar">
+                        href="https://github.com/iter8-tools/iter8/releases/download/v0.2.1/iter8-controller-helm-chart.tar">
                         iter8-controller
                       </a>
                     </li>
@@ -384,7 +380,7 @@
 
                     <pre>
                       <code class="language-shell">
-                        kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/install/iter8-controller.yaml                    
+                        kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/install/iter8-controller.yaml                    
                       </code>  
                     </pre>
                   </div>
@@ -409,7 +405,7 @@
                   <!-- NOTE: link points to external -->
                   <p>Examples can be found in the YAML of this
                     <a
-                      href="https://github.com/iter8-tools/iter8-controller/blob/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml">tutorial</a>.
+                      href="https://github.com/iter8-tools/iter8/blob/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml">tutorial</a>.
                   </p>
                 </div>
                 <!-- End target services -->
@@ -471,7 +467,7 @@ iter8-analytics          ClusterIP   172.21.106.44   &lt;none&gt;        80/TCP 
 
             <pre>
               <code class="language-shell">
-                kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/install/iter8-controller.yaml
+                kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/install/iter8-controller.yaml
               </code>
             </pre>
 

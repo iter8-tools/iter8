@@ -3,7 +3,7 @@
 
 <head>
   <!-- Title -->
-  <title>iter8 Documentation</title>
+  <title>iter8 Documentation - Canary Tutorial with Services</title>
 
   <!-- Required Meta Tags Always Come First -->
   <meta charset="utf-8">
@@ -13,10 +13,8 @@
   <link rel="shortcut icon" href="../../../favicon.png">
 
   <!--  Meta tags -->
-  <meta name="keywords"
-    content="documentation template, help desk, open source, free template, freebies, bootstrap 4, bootstrap4">
-  <meta name="description"
-    content="Docs UI Kit is beautiful Open Source Bootstrap 4 UI Kit under MIT license. The UI Kit comes with 10 beautiful complete and functional pages including lots of reusable and customizable UI Blocks. Every component crafted with love to speed up your workflow.">
+  <meta name="keywords" content="Iter8, A/B testing, microservices, Kubernetes, software, cloud, analytics, canary release">
+  <meta name="description" content="Iter8 supports cloud-native, automated canary releases and A/B testing of microservices on Kubernetes. Under the hood, iter8 uses robust statistical algorithms to determine the best version of your service, progressively shift traffic towards this version, and eventually rollout this version, where the notion of best is determined by the criteria you specify in your iter8 experiment.">
 
   <!-- Schema.org -->
   <meta itemprop="name" content="Deliver Better Software with Iter8">
@@ -96,7 +94,7 @@
             <h5 class="duik-sidebar__heading">Introduction</h5>
             <ul class="duik-sidebar__nav">
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/about.html">About</a></li>
-              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/install.html">Installation</a></li>
+              <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/installation.html">Installation</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/experiment.html">Experiment</a></li>
               <li class="duik-sidebar__item"><a class="duik-sidebar__link" href="../introduction/metrics.html">Metrics</a></li>
             </ul>
@@ -185,7 +183,7 @@
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v1.yaml
                 </code>
               </pre>
             </div>
@@ -203,7 +201,7 @@
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/bookinfo-gateway.yaml
                 </code>
               </pre>
 
@@ -247,7 +245,7 @@ targetService:
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/bootstrap-productpage.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/bootstrap-productpage.yaml
                 </code>
               </pre>
 
@@ -297,7 +295,7 @@ productpage.example.com.iter8-experiment   [productpage-service]   [productpage.
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/canary_productpage-v1_to_productpage-v2.yaml
                 </code>
               </pre>
 
@@ -347,7 +345,7 @@ productpage-v2-rollout   Pause   TargetsNotFound: Missing Candidate   productpag
 
               <pre>
                 <code class="language-shell">
-                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
+                  kubectl -n $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/productpage-v2.yaml -f https://raw.githubusercontent.com/iter8-tools/iter8/v0.2.1/doc/tutorials/istio/bookinfo/service/productpage-v2.yaml
                 </code>
               </pre>
 
