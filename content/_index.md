@@ -36,4 +36,4 @@ Analyze how key metrics for your service have evolved over multiple releases usi
 
 ***
 
-[Explore iter8](introduction/)
+[Explore iter8]({{< resource url="/about/" >}})
