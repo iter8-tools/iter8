@@ -1,5 +1,5 @@
 baseURL = https://iter8.tools/docs/
-archiveVersionNumber= v0.2.1
+archiveVersionNumber = v1.0.0
 
 run-docs: ## Run in development mode
 	hugo serve -D
