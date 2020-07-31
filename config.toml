@@ -40,7 +40,7 @@ defaultContentLanguageInSubdir= true
   # iter8 specific
 
   # version number
-  versionNumber = "v1.0.0"
+  versionNumber = "v0.2.1"
 
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
