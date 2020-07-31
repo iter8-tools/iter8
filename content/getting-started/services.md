@@ -2,7 +2,7 @@
 date: 2016-04-09T16:50:16+02:00
 menuTitle: Services
 title: Automated Canary Rollout Using Services
-weight: 20
+weight: 30
 summary: Perform a canary rollout when different versions have different service names
 ---
 

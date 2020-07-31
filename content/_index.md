@@ -26,18 +26,18 @@ Use advanced statistical algorithms to assess key metrics for your service and p
 
 ### Launch experiments rapidly
 
-With iter8's Kiali UI, you can create and launch canary release experiments for your service in seconds, and observe and control these experiments in real-time.
-
 ![Launch experiments rapidly]({{< resource url="/images/kiali.png" >}})
+
+With iter8's Kiali UI, you can create and launch canary release experiments for your service in seconds, and observe and control these experiments in real-time.
 
 ***
 
 ### Analyze long-term trends
 
-Analyze how key metrics for your service have evolved over multiple releases using iter8-trend and Grafana.
-
 ![Analyze long-term trends]({{< resource url="/images/iter8-trend.png" >}})
+
+Analyze how key metrics for your service have evolved over multiple releases using iter8-trend and Grafana.
 
 ***
 
-[Explore iter8](/introduction/about/)
+[Explore iter8]({{< resource url="/about/" >}})
