@@ -1,4 +1,4 @@
-baseURL = https://iter8.tools/
+baseURL = https://iter8.tools/docs/
 archiveVersionNumber= v0.2.1
 
 run-docs: ## Run in development mode
