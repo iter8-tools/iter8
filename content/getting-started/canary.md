@@ -2,7 +2,7 @@
 date: 2016-04-09T16:50:16+02:00
 menuTitle: Canary testing
 title: Getting started with canary testing
-weight: 10
+weight: 20
 summary: Learn how to perform a canary release
 ---
 
