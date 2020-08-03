@@ -14,7 +14,7 @@ Use iter8's analytics-driven continuous experimentation for reliable and frequen
 
 ### Automate canary releases
 
-![Automate canary releases]({{< resource url="images/iter8-overview.png" >}})
+![Automate canary releases]({{< ref "images/iter8-overview.png" >}})
 
 Use advanced statistical algorithms to assess key metrics for your service and progressively shift traffic to the winning release.
 
@@ -22,7 +22,7 @@ Use advanced statistical algorithms to assess key metrics for your service and p
 
 ### Launch experiments rapidly
 
-![Launch experiments rapidly]({{< resource url="images/kiali.png" >}})
+![Launch experiments rapidly]({{< ref "images/kiali.png" >}})
 
 With iter8's Kiali UI, you can create and launch canary release experiments for your service in seconds, and observe and control these experiments in real-time.
 
@@ -30,10 +30,10 @@ With iter8's Kiali UI, you can create and launch canary release experiments for 
 
 ### Analyze long-term trends
 
-![Analyze long-term trends]({{< resource url="images/iter8-trend.png" >}})
+![Analyze long-term trends]({{< ref "images/iter8-trend.png" >}})
 
 Analyze how key metrics for your service have evolved over multiple releases using iter8-trend and Grafana.
 
 ***
 
-[Explore iter8]({{< resource url="about/" >}})
+[Explore iter8]({{< relref "about/" >}})
