@@ -23,16 +23,16 @@ By default, Hugo will use [localhost:1313](localhost:1313).
 
 # File structure
 
-* [content/](./content/): Contains all the Markdown files, which will be used to generate the documentation
-* [data/](./data/): Contains all the JSON, YAML, or TOML, which contains configuration files and data for dynamically generated content
-* [static/](./static/): Other assets used in the documentation, such as images
-* [archetypes](./archetypes): Stores templates for [front matter](https://gohugo.io/content-management/front-matter/)
-* [layouts/](./layouts): Store templates for converting the Markdown files into HTML
-* [themes/](./themes): Contains the [Hugo theme](https://themes.gohugo.io/) which does the bulk of generation
-* [resources/](./resources): Caches files to speed up generation
-* [public/](./public/): Outputted HTML and CSS files
+* [content/](content/): Contains all the Markdown files, which will be used to generate the documentation
+* [data/](data/): Contains all the JSON, YAML, or TOML, which contains configuration files and data for dynamically generated content
+* [static/](static/): Other assets used in the documentation, such as images
+* [archetypes](archetypes): Stores templates for [front matter](https://gohugo.io/content-management/front-matter/)
+* [layouts/](layouts): Store templates for converting the Markdown files into HTML
+* [themes/](themes): Contains the [Hugo theme](https://themes.gohugo.io/) which does the bulk of generation
+* [resources/](resources): Caches files to speed up generation
+* [public/](public/): Outputted HTML and CSS files
 
-Content creators will mostly be working with the [content/](./content/), [data/](./data/), and [static/](./static/) directories.
+Content creators will mostly be working with the [content/](content/), [data/](data/), and [static/](static/) directories.
 
 For more information about these files, see [here](https://gohugo.io/getting-started/directory-structure/).
 
@@ -86,7 +86,7 @@ Below the front matter, directly add Markdown.
 
 ***
 
-Image files should be stored in [static/images/](.static/images/).
+Image files should be stored in [static/images/](static/images/).
 
 Images can be displayed using the following syntax:
 
@@ -99,7 +99,7 @@ Images can be displayed using the following syntax:
 For example:
 
 ```md
-![iter8pic](/images/iter8pic.png)
+![iter8pic](images/iter8pic.png)
 ```
 
 **Note**: the preceding `/` in the `url` component is important! Otherwise the image will not display.

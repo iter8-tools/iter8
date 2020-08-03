@@ -17,4 +17,4 @@ Iter8's expressive model of cloud experimentation supports a variety of CI/CD sc
 
 Under the hood, iter8 uses advanced Bayesian learning techniques coupled with multi-armed bandit approaches to compute a variety of statistical assessments for your microservice versions, and uses them to make robust traffic control and rollout decisions.
 
-![iter8pic]({{< resource url="/images/iter8pic.png" >}})
+![iter8pic]({{< resourceAbsUrl path="/images/iter8pic.png" >}})
