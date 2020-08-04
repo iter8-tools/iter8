@@ -27,7 +27,7 @@ To deploy the Bookinfo application, create a namespace configured to enable auto
 
 ```bash
 export NAMESPACE=bookinfo-iter8
-curl -s https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutorials/namespace.yaml \
+curl -s {{< resourceAbsUrl path="tutorials/namespace.yaml" >}} \
   | sed "s#bookinfo-iter8#$NAMESPACE#" \
   | kubectl apply -f -
 ```
@@ -35,7 +35,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutoria
 Next, deploy the application:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutorials/bookinfo-tutorial.yaml
+kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
 ```
 
 You should see pods for each of the four microservices:
@@ -52,7 +52,7 @@ Each pod should have two containers, since the Istio sidecar was injected into e
 Expose the Bookinfo application by defining an Istio `Gateway` and `VirtualService`:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutorials/bookinfo-gateway.yaml
+kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}
 ```
 
 You can inspect the created resources:
@@ -132,7 +132,7 @@ The additional parameters control how long the experiment should run and how muc
 The experiment can be created using the command:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutorials/canary_reviews-v2_to_reviews-v3.yaml
+kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/canary_reviews-v2_to_reviews-v3.yaml">}}
 ```
 
 Inspection of the new experiment shows that it is paused because the specified candidate version cannot be found in the cluster:
@@ -151,7 +151,7 @@ Once the candidate version is deployed, the experiment will start automatically.
 To deploy version *v3* of the *reviews* microservice, execute:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutorials/reviews-v3.yaml
+kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/reviews-v3.yaml" >}}
 ```
 
 Once its corresponding pods have started, the `Experiment` will show that it is progressing:
@@ -218,8 +218,8 @@ If you try this version as a candidate, you should see the canary experiment rej
 
 For your reference:
 
-- A YAML for the deployment `reviews-v4` is: <https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutorials/reviews-v4.yaml>
-- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: <https://raw.githubusercontent.com/iter8-tools/docs/master/static/tutorials/canary_reviews-v3_to_reviews-v4.yaml>
+- A YAML for the deployment `reviews-v4` is: <{{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}}>
+- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: <{{< resourceAbsUrl path="tutorials/canary_reviews-v3_to_reviews-v4.yaml" >}}>
 
 ### Try a version which returns errors
 

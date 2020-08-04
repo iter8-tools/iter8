@@ -16,14 +16,14 @@ These instructions show you how to set up iter8 on Kubernetes with Istio.
 
 ## Install iter8 on Kubernetes
 
-iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow the instructions below. For additional considerations when installing iter8 on Red Hat OpenShift, check out [these instructions](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/platforms/redhat_openshift.md).
+iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow the instructions below. For additional considerations when installing iter8 on Red Hat OpenShift, check out [these instructions](red-hat.md).
 
 ### Quick installation
 
 To install iter8 with the default settings, you can run the following install script:
 
 ```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/install/install.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0/install/install.sh \
 | /bin/bash -
 ```
 
@@ -31,7 +31,7 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1
 
 In case you need to customize the installation of iter8, use the Helm charts listed below:
 
-* _iter8-analytics_: [ https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar)
+* _iter8-analytics_: [https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar)
 
 * _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.2.1/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.2.1/iter8-controller-helm-chart.tar)
 
@@ -72,7 +72,7 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=gr
 After running that command, you can access Grafana's UI at `http://localhost:3000`.Iter8 dashboard can be imported by:
 
 ```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/hack/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -81,7 +81,7 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1
 If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/install/iter8-controller.yaml
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0/install/iter8-controller.yaml
 ```
 
 Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.

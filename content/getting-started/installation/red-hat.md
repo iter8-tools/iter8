@@ -47,14 +47,14 @@ PROMETHEUS_PASSWORD=$(kubectl -n istio-system get secret htpasswd -o jsonpath='{
 
 ### Install the iter8 controller
 
-The [quick install instructions](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_install.md#quick-installation) can be used to install the iter8 controller. The Service Mesh currently uses Istio telemetry version `v1`:
+The [quick install instructions](kubernetes.md#quick-installation) can be used to install the iter8 controller. The Service Mesh currently uses Istio telemetry version `v1`:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v0.2.1/install/iter8-controller.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0/install/iter8-controller.yaml
 ```
 
 ## Target Services
 
 The Red Hat OpenShift Service Mesh is restricted to the set of namespaces defined in the `ServiceMeshMemberRoll` resource. In particular, if you will be trying the tutorials, add the namespace `bookinfo-iter8` to the `ServiceMeshMemberRoll`.
 
-Istio relies a sidecar injected into each pod to provide its capabilities. Istio provides several ways this sidecar can be [injected](https://istio.io/docs/setup/additional-setup/sidecar-injection/). Red Hat recommends the use of the annotation `sidecar.istio.io/inject: "true"` in the deployment yaml. Examples can be found in the yaml for the tutorial: <https://github.com/iter8-tools/iter8-controller/blob/v0.2.1/doc/tutorials/istio/bookinfo/bookinfo-tutorial.yaml>
+Istio relies a sidecar injected into each pod to provide its capabilities. Istio provides several ways this sidecar can be [injected](https://istio.io/docs/setup/additional-setup/sidecar-injection/). Red Hat recommends the use of the annotation `sidecar.istio.io/inject: "true"` in the deployment yaml. Examples can be found in the yaml for the tutorial: <{{< resourceAbsUrl path="tutorial/bookinfo-tutorial.yaml" >}}>

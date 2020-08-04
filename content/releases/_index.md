@@ -4,7 +4,7 @@ title: Older releases
 weight: 40
 ---
 
-* [v1.0.0](https://iter8.tools/docs/archive/v1.0.0)
+* [v1.0.0 - preview](https://iter8.tools/docs/archive/v1.0.0)
 * [v0.2.1](https://iter8.tools/docs/)
 * [v0.2.0](https://github.com/iter8-tools/docs/tree/v0.2.0)
 * [v0.1.1](https://github.com/iter8-tools/docs/tree/v0.1.1)
