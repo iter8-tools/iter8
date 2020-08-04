@@ -19,7 +19,7 @@ The tutorial is based on the [Bookinfo sample application](https://istio.io/docs
 This application comprises 4 microservies: _productpage_, _details_, _reviews_, and _ratings_.
 Of these, _productpage_ is a user-facing service while the others are backend services.
 
-This tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here](INSALL.md).
+This tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here](../installation/kubernetes/).
 
 ## Deploy the Bookinfo application
 
