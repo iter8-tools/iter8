@@ -7,7 +7,7 @@ chapter: true
 ---
 
 {{% notice tip %}}
-Check out the [v1.0.0 preview!](https://iter8.tools/docs/archive/v1.0.0)
+Check out the [v1.0.0 preview!](https://iter8.tools/docs/archive/v1.0.0-preview)
 {{% /notice %}}
 
 # Deliver better software in the cloud
