@@ -31,9 +31,9 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0
 
 In case you need to customize the installation of iter8, use the Helm charts listed below:
 
-* _iter8-analytics_: [https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar](https://github.com/iter8-tools/iter8-analytics/releases/download/v0.2.1/iter8-analytics-helm-chart.tar)
+* _iter8-analytics_: [https://github.com/iter8-tools/iter8-analytics/releases/download/v1.0.0-preview/iter8-analytics.tgz](https://github.com/iter8-tools/iter8-analytics/releases/download/v1.0.0-preview/iter8-analytics.tgz)
 
-* _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v0.2.1/iter8-controller-helm-chart.tar](https://github.com/iter8-tools/iter8-controller/releases/download/v0.2.1/iter8-controller-helm-chart.tar)
+* _iter8-controller_: [https://github.com/iter8-tools/iter8-controller/releases/download/v1.0.0-preview/iter8-controller.tgz](https://github.com/iter8-tools/iter8-controller/releases/download/v1.0.0-preview/iter8-controller.tgz)
 
 **Note on Prometheus:** In order to make assessments, _iter8-analytics_ needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point _iter8-analytics_ to the Prometheus server at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying any need for authentication. If your Istio installation is shipping metrics to a different Prometheus service, or if you need to configure authentication to access Prometheus, you need to set appropriate _iter8-analytics_ Helm chart parameters. Look in the section `metricsBackend` of the Helm chart's `values.yaml` file for details.
 
