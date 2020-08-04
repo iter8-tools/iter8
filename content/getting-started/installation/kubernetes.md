@@ -23,7 +23,7 @@ iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install t
 To install iter8 with the default settings, you can run the following install script:
 
 ```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0/install/install.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0-preview/install/install.sh \
 | /bin/bash -
 ```
 
@@ -72,7 +72,7 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=gr
 After running that command, you can access Grafana's UI at `http://localhost:3000`.Iter8 dashboard can be imported by:
 
 ```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0/hack/grafana_install_dashboard.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0-preview/hack/grafana_install_dashboard.sh \
 | /bin/bash -
 ```
 
@@ -81,7 +81,7 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0
 If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0/install/iter8-controller.yaml
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0-preview/install/iter8-controller.yaml
 ```
 
 Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.
