@@ -50,5 +50,10 @@ We have implemented the following commands that can be used once the KUI termina
 
 2. `iter8 create experiment`: This command also opens a KUI sidecar and is used to create Human-In-The-Loop experiments with iter8. This command opens a sidecar with two tabs- one for creating the experiment and one for viewing the decision and metrics for the experiment from _iter8-analytics_. The sidecar options are interactive and can be experimented with by the user.
 
+  To run this command, iter8 requires you to export a URl to acccess the _iter8_analytics_ service as an environment variable. To do this, you may have to expose your analytics service to a nodePort first:
+  ```
+  kubectl expose svc iter8-analytics -n iter8 --name=iter8-analytics-np --type=NodePort
+  export ITER8_ANALYTICS_URL='<insert-iter8-analytics-url>'
+  ```
 
 3. `iter8 about`: _Coming soon_
