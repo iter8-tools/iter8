@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iter8config-metrics
+  namespace: iter8
+data:
+  # by convention, metrics with names beginning with iter8_ are defined by iter8
+  # a counter metric is monotonically increasing or decreasing
+  counter_metrics.yaml: |-
+    - name: iter8_request_count
+      query_template: sum(increase(istio_requests_total{reporter='source',job='envoy-stats'}[$interval])) by ($version_labels)
+    - name: iter8_total_latency
+      query_template: sum(increase(istio_request_duration_milliseconds_sum{reporter='source',job='envoy-stats'}[$interval])) by ($version_labels)
+      units: msec # optional
+    - name: iter8_error_count
+      query_template: sum(increase(istio_requests_total{response_code=~'5..',reporter='source',job='envoy-stats'}[$interval])) by ($version_labels)
+      preferred_direction: lower
+    - name: books_purchased_total
+      query_template: sum(increase(number_of_books_purchased_total{}[$interval])) by ($version_labels)
+    - name: le_500_ms_latency_request_count
+      query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='500',job='envoy-stats',reporter='source'}[$interval])) by ($version_labels))
+    - name: le_inf_latency_request_count
+      query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='envoy-stats',reporter='source'}[$interval])) by ($version_labels))
+  # the value of a ratio metric equals value of numerator divided by denominator
+  ratio_metrics.yaml: |-
+    - name: iter8_mean_latency
+      numerator: iter8_total_latency
+      denominator: iter8_request_count
+      preferred_direction: lower
+    - name: iter8_error_rate
+      numerator: iter8_error_count
+      denominator: iter8_request_count
+      preferred_direction: lower
+      zero_to_one: true
+    - name: mean_books_purchased
+      numerator: books_purchased_total
+      denominator: iter8_request_count
+      preferred_direction: higher
+    - name: le_500_ms_latency_percentile
+      numerator: le_500_ms_latency_request_count
+      denominator: le_inf_latency_request_count
+      preferred_direction: higher
+      zero_to_one: true
