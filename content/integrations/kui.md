@@ -2,9 +2,9 @@
 ---
 date: 2020-08-06T12:00:00+00:00
 menuTitle: Kui
-title: Integrating Iter8 with Kui
+title: Integrating Iter8 with KUI
 weight: 10
-summary: Describes iter8's integrations with Kui
+summary: Describes iter8's integrations with KUI
 ---
 
 [Kui](https://kui.tools) combines the power of familiar CLIs with visualizations in high-impact areas. Kui enables you to manipulate complex JSON and YAML data models, integrate disparate tooling, and provides quick access to aggregate views of operational data.
@@ -21,7 +21,7 @@ cd kui/
 npm ci
 ```
 
-To run the Kui Terminal, use:
+To run the KUI Terminal, use:
 
 ```sh
 npm start
@@ -46,7 +46,7 @@ To edit any of the currently available metrics, you can click on the _edit_ icon
 
 2. `iter8 create experiment`: This command also opens a KUI sidecar and is used to create Human-In-The-Loop experiments with iter8. This command opens a sidecar with two tabs- one for creating the experiment and one for viewing the decision and metrics for the experiment from _iter8-analytics_. The sidecar options are interactive and can be experimented with according to your preferences.
 
-To run this command, iter8 requires you to export a URL to acccess the _iter8_analytics_ service, as an environment variable. To do this, you may have to expose the iter8 analytics service to a NodePort first:
+To run this command, iter8 requires you to export a URL to access the _iter8_analytics_ service, as an environment variable. To do this, you may have to expose the iter8 analytics service to a NodePort first:
 
 ```sh
 $ kubectl expose svc iter8-analytics -n iter8 --name=iter8-analytics-np --type=NodePort
