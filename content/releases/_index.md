@@ -1,7 +1,7 @@
 ---
 date: 2016-04-09T16:50:16+02:00
 title: Releases
-weight: 40
+weight: 50
 ---
 
 * [v1.0.0 - preview](https://iter8.tools/docs/archive/v1.0.0-preview)
