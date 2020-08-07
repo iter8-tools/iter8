@@ -1,0 +1,35 @@
+apiVersion: iter8.tools/v1alpha2
+kind: Experiment
+metadata:
+  name: productpage-abn-test
+spec:
+  service:
+    name: productpage
+    baseline: productpage-v1
+    candidates:
+      - productpage-v2
+      - productpage-v3
+    hosts:
+      - name: bookinfo.example.com
+        gateway: bookinfo-gateway
+  criteria:
+    - metric: iter8_mean_latency
+      threshold:
+        type: relative
+        value: 1.6
+    - metric: iter8_error_rate
+      threshold:
+        type: absolute
+        value: 0.05
+    - metric: le_500_ms_latency_percentile
+      threshold:
+        type: absolute
+        value: 0.95
+    - metric: mean_books_purchased
+      isReward: true
+  duration:
+    interval: 20s
+    maxIterations: 20
+  trafficControl:
+    strategy: progressive
+    maxIncrement: 10

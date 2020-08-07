@@ -16,12 +16,17 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
+  labels:
+    iter8-tools/host: productpage
+    iter8-tools/role: stable
   name: bookinfo
 spec:
-  hosts:
-  - "bookinfo.example.com"
   gateways:
+  - mesh
   - bookinfo-gateway
+  hosts:
+  - productpage
+  - bookinfo.example.com
   http:
   - match:
     - uri:
@@ -39,3 +44,20 @@ spec:
         host: productpage
         port:
           number: 9080
+        subset: iter8-stable
+      weight: 100
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  labels:
+    iter8-tools/host: productpage
+    iter8-tools/role: stable
+  name: bookinfo
+spec:
+  host: productpage
+  subsets:
+  - labels:
+      app: productpage
+      version: v1
+    name: iter8-stable

@@ -9,7 +9,7 @@ summary: Learn how to perform a canary release
 This tutorial shows how _iter8_ can be used to perform a canary release by gradually shifting traffic from one version of a microservice to another while evaluating the behavior of the new version.
 Traffic is fully shifted only if the behavior the candidate version meets specified acceptance criteria.
 
-This tutorial has seven steps, which are meant to be tried in order.
+This tutorial has six steps, which are meant to be tried in order.
 You will learn:
 
 - how to perform a canary rollout with iter8; and
@@ -93,7 +93,7 @@ The color varies between versions giving us a visual way to distinguish between 
 ## Create a canary `Experiment`
 
 We will now define a canary experiment to rollout version *v3* of the *reviews* application.
-These versions are identical except for the color of the stars that appear on the page.
+These versions are visually identical except for the color of the stars that appear on the page.
 In version *v3* they are *red*.
 This can be seen in the inspected in the output of the above `watch` command.
 As version *v3* is rolled out, you should see the color change.
@@ -124,7 +124,7 @@ spec:
 ```
 
 In this example, the target of the experiment is the service `reviews`.
-The baseline and candidate versions are specified using their `Deployment` names, `reviews_v2` and `reviews_v3`, respectively.
+The baseline and candidate versions are specified using their `Deployment` names, `reviews-v2` and `reviews-v3`, respectively.
 A single evaluation criteria is specified.
 It requires that the measurements of the metric `iter8_mean_latency` should all return values less than `200` milliseconds.
 The additional parameters control how long the experiment should run and how much traffic can be shifted to the new version in each interval. Details regarding these parameters are [here](#alter-the-duration-of-the-experiment).
@@ -132,7 +132,7 @@ The additional parameters control how long the experiment should run and how muc
 The experiment can be created using the command:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/canary_reviews-v2_to_reviews-v3.yaml">}}
+kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v2_to_reviews-v3.yaml">}}
 ```
 
 Inspection of the new experiment shows that it is paused because the specified candidate version cannot be found in the cluster:
@@ -164,7 +164,7 @@ reviews-v3-rollout   Canary   [reviews]   Progressing   false          reviews-v
 ```
 
 At approximately 15 second intervals, you should see the interation number change. Traffic will gradually be shifted (in 20% increments) from version *v2* to version *v3*.
-iter8 will quickly identify that the best version is the candidate, `reviews-v3` and that it is confident that this choice will be the final choice (by indicating that a *winner* has been found:
+iter8 will quickly identify that the best version is the candidate, `reviews-v3` and that it is confident that this choice will be the final choice (by indicating that a *winner* has been found):
 
 ```bash
 kubectl --namespace $NAMESPACE get experiment
@@ -219,7 +219,7 @@ If you try this version as a candidate, you should see the canary experiment rej
 For your reference:
 
 - A YAML for the deployment `reviews-v4` is: <{{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}}>
-- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: <{{< resourceAbsUrl path="tutorials/canary_reviews-v3_to_reviews-v4.yaml" >}}>
+- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: <{{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v3_to_reviews-v4.yaml" >}}>
 
 ### Try a version which returns errors
 
