@@ -10,6 +10,8 @@ chapter: true
 Check out the [v1.0.0 preview!](https://iter8.tools/docs/archive/v1.0.0-preview)
 {{% /notice %}}
 
+Netlify test
+
 # Deliver better software in the cloud
 
 Use iter8's analytics-driven continuous experimentation for reliable and frequent releases of high-quality microservices on Kubernetes.
