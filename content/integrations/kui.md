@@ -7,13 +7,13 @@ weight: 10
 summary: Describes iter8's integrations with KUI
 ---
 
-[Kui](https://kui.tools) combines the power of familiar CLIs with visualizations in high-impact areas. Kui enables you to manipulate complex JSON and YAML data models, integrate disparate tooling, and provides quick access to aggregate views of operational data.
+[Kui](https://kui.tools) combines the power of familiar CLIs with visualizations by manipulating complex JSON and YAML data models and providing quick access to aggregate views of operational data.
 
-The iter8-KUI integration enables user-intuitive and interactive options to use iter8. Using KUI, you can run Human-In-The-Loop iter8 experiments and easily modifiable and customizable metrics as you will see below.
+The iter8-KUI integration aims to leverage these features for iter8. Using the iter8 plugin on KUI, you can run Human-In-The-Loop iter8 experiments and easily modify and customize experiment metrics. Soon, you will be able to do a lot more!
 
 ## Installation
 
-The following steps builds the iter8-kui plugin directly from our repository:
+Follow these steps to build the iter8-KUI plugin:
 
 ```sh
 git clone https://github.com/iter8-tools/iter8-kui.git
