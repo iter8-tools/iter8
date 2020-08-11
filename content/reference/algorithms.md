@@ -6,7 +6,7 @@ weight: 30
 summary: The algorithms used to make decisions during canary releases or A/B testing
 ---
 
-This documentation briefly describes the algorithms supported by iter8 to make decisions during canary releases or A/B testing. These algorithms are part of iter8's analytics service (_iter8-analytics_) and exposed via REST API. Iter8's Kubernetes controller (_iter8-controller_) calls the appropriate REST API based on the `.spec.trafficControl.strategy` set in a custom `Experiment` resource. Iter8's `Experiment` CRD is documented [here](iter8_crd.md).
+This documentation briefly describes the algorithms supported by iter8 to make decisions during canary releases or A/B testing. These algorithms are part of iter8's analytics service (_iter8-analytics_) and exposed via REST API. Iter8's Kubernetes controller (_iter8-controller_) calls the appropriate REST API based on the `.spec.trafficControl.strategy` set in a custom `Experiment` resource. Iter8's `Experiment` CRD is documented [here](../experiment/).
 
 Iter8's algorithms are statistically robust. Below, we list the algorithms currently available to users.  This list will grow as we introduce other sophisticated algorithms for decision making.
 

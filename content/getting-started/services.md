@@ -6,7 +6,7 @@ weight: 30
 summary: Perform a canary rollout when different versions have different service names
 ---
 
-In iter8 the versions of a service being compared can be specified using deployment names or using service names. Other [tutorials](iter8_bookinfo_istio.md) showed how to specify different versions using Kubernetes deployment names. In this tutorial, we learn how to do a canary rollout of an application when different versions are indicated by different Kubernetes service names.
+In iter8 the versions of a service being compared can be specified using deployment names or using service names. Other [tutorials](../deployments/) showed how to specify different versions using Kubernetes deployment names. In this tutorial, we learn how to do a canary rollout of an application when different versions are indicated by different Kubernetes service names.
 
 In this tutorial, we again consider the user facing service _productpage_ of the bookinfo application and we learn how to create an iter8 `Experiment` that specifies the baseline and candidate versions using Kubernetes services. The scenario we consider is here:
 
