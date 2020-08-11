@@ -35,7 +35,7 @@ The source code for these changes is available [here](https://github.com/iter8-t
 ## Define New Metrics
 
 Out of the box, iter8 comes with a set of predefined metrics.
-For details of metrics definitions provided in iter8, see the [metrics reference](../reference/metrics).
+For details of metrics definitions provided in iter8, see the [metrics reference](../../reference/metrics).
 
 You can augment the default set of metrics by replacing `ConfigMap` *iter8config-metrics* (defined in the *iter8* namespace) with a new `ConfigMap`.
 
