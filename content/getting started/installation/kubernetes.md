@@ -61,21 +61,6 @@ iter8-controller         ClusterIP   172.21.62.217   <none>        443/TCP   20s
 iter8-analytics          ClusterIP   172.21.106.44   <none>        80/TCP    76s
 ```
 
-### Import iter8's Grafana dashboard
-
-To enable users to see Prometheus metrics that pertain to their canary releases or A/B tests, iter8 provides a Grafana dashboard template. To take advantage of Grafana, you will need to import this template. To do so, first make sure you can access Grafana. In a typical Istio installation, you can port-forward Grafana from Kubernetes to your localhost's port 3000 with the command below:
-
-```bash
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000
-```
-
-After running that command, you can access Grafana's UI at `http://localhost:3000`.Iter8 dashboard can be imported by:
-
-```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0-preview/hack/grafana_install_dashboard.sh \
-| /bin/bash -
-```
-
 ## Uninstall _iter8_
 
 If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
@@ -83,5 +68,3 @@ If you want to uninstall all _iter8_ components from your Kubernetes cluster, fi
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0-preview/install/iter8-controller.yaml
 ```
-
-Note that this command will delete the `Experiment` CRD and wipe out the `iter8` namespace, but it will not remove the iter8 Grafana dashboard if created.

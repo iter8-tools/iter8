@@ -194,7 +194,7 @@ kubectl delete namespace $NAMESPACE
 
 ### Inspect progress using Grafana
 
-Coming soon
+You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here](../integrations/grafana/).
 
 ### Inspect progress using Kiali
 
