@@ -110,7 +110,8 @@ spec:
   service:
     name: reviews
     baseline: reviews-v2
-    candidates: [ "reviews-v3" ]
+    candidates:
+      - reviews-v3
   criteria:
     - metric: iter8_mean_latency
       threshold:
@@ -194,7 +195,7 @@ kubectl delete namespace $NAMESPACE
 
 ### Inspect progress using Grafana
 
-You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here](../integrations/grafana/).
+You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here](../../integrations/grafana/).
 
 ### Inspect progress using Kiali
 

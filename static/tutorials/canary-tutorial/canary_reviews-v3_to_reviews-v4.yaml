@@ -6,7 +6,8 @@ spec:
   service:
     name: reviews
     baseline: reviews-v3
-    candidates: [ "reviews-v4" ]
+    candidates:
+      - reviews-v4
   criteria:
     - metric: iter8_mean_latency
       threshold:
