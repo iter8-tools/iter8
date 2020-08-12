@@ -16,18 +16,16 @@ This is an optional component to [iter8](http://github.com/iter8-tools) and
 cannot run standalone. It should be installed either as part of iter8
 installation process or separately after iter8 is installed.
 
-## Getting started
-
-Watch the following short video to get started:
+The following short video introduces iter8-trend:
 
 [![Short Video](https://img.youtube.com/vi/FOtyqJPMj14/hqdefault.jpg)](https://youtu.be/FOtyqJPMj14)
 
-### Install
+## Installation
 ```
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/install/kubernetes/iter8-trend.yaml
 ```
 
-### Visualization
+## Visualization
 iter8-trend implements a Prometheus scrape target, so summarized metric data can
 be collected by Prometheus and visualized in Grafana. To enable Prometheus to
 scrape iter8-trend, you need to add a new scrape target to Prometheus
@@ -61,7 +59,7 @@ curl -Ls https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/grafan
 | DASHBOARD_DEFN=https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/grafana/iter8-trend.json /bin/bash -
 ```
 
-### Uninstall
+## Uninstall
 ```
 kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-trend/master/install/kubernetes/iter8-trend.yaml
 ```
