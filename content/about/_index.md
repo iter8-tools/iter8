@@ -13,15 +13,15 @@ Enter `iter8`.
 
 <!-- Software engineers use a variety of continuous experimentation strategies to achieve desirable outcomes for their businesses. The desired outcome could be safely releasing a new version in production while ensuring it meets various service level objectives (SLOs), or finding the `best` version among multiple competing versions of a microservice using live application traffic, or performance testing a version in a dev/test/staging environment before releasing in production.  -->
 
-Iter8 is an open source toolkit for continuous experimentation on Kubernetes, which makes it easy for you to deliver high-impact code changes within your microservices applications in an agile manner while eliminating the risk. Using iter8's machine learning (ML)-driven experimentation capabilities, you can safely and rapidly orchestrate various types of live experiments, gain key insights into the behavior of your microservices, and rollout the best versions of your microservices in an automated, principled, and statistically robust manner.
+Iter8 is an open source toolkit for `continuous experimentation` on Kubernetes. Iter8 enables you to deliver high-impact code changes within your microservices applications in an agile manner while eliminating the risk. Using iter8's machine learning (ML)-driven experimentation capabilities, you can safely and rapidly orchestrate various types of live experiments, gain key insights into the behavior of your microservices, and rollout the best versions of your microservices in an automated, principled, and statistically robust manner.
 
 ## What is an iter8 experiment?
-Use an `iter8 experiment` to safely expose competing versions of a service to application traffic, gather in-depth assessments about key performance and business metrics for your microservice versions, and intelligently rollout the best version of your service. Iter8's expressive model of experimentation supports a diverse variety of experiments. The four main kinds of experiments in iter8 are as follows.
+Use an `iter8 experiment` to safely expose alternative versions of a service to application traffic and intelligently rollout the best version of your service. Iter8's expressive model of experimentation supports a diverse variety of experiments. The four main kinds of experiments in iter8 are as follows.
 
-1. Run a **performance test** with a single version of a microservice. `iter8` will verify if the version meets the criteria you specify in the experiment.
-2. Perform a **canary release** with two versions, a baseline and a candidate. Iter8 will shift application traffic in a safe and progressive manner to the candidate, if the candidate meets the criteria you specify in the experiment.
-3. Perform an **A/B rollout** with two versions -- a baseline and a candidate. Iter8 will identify and shift application traffic safely and gradually to the `winner`, where the winning version is defined by the criteria you specify in the experiment.
-4. Perform an **A/B/n rollout** with multiple versions -- a baseline and multiple candidates. Iter8 will identify and shift application traffic safely and gradually to the `winner`.
+1. Perform a **canary release** with two versions, a baseline and a candidate. Iter8 will shift application traffic in a safe and progressive manner to the candidate, if the candidate meets the criteria you specify in the experiment.
+2. Perform an **A/B/n rollout** with multiple versions -- a baseline and multiple candidates. Iter8 will identify and shift application traffic safely and gradually to the `winner`.
+3. Perform an **A/B rollout** -- this is a special case of the A/B/n rollout described above with a baseline and a single candidate.
+4. Run a **performance test** with a single version of a microservice. `iter8` will verify if the version meets the criteria you specify in the experiment.
 
 <!-- ## What knobs are available to control an iter8 experiment?
 Included above is a) Bayesian assessments b) relative criteria, c) comparing more than two versions, d) roll forward, roll back, or split traffic, e) ability to extent iter8 your own custom metrics, and f) ability to specify versions as distinct services or distinct deployments of the same service in k8s

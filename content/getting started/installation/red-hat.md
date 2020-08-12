@@ -3,7 +3,7 @@ date: 2016-04-09T16:50:16+02:00
 menuTitle: Red Hat OpenShift
 title: Iter8 on Red Hat OpenShift
 weight: 20
-summary: Learn how to install iter8 on Red Hat OpenShift
+summary: Install iter8 on Red Hat OpenShift
 ---
 
 These instructions show you how to set up iter8 on Red Hat OpenShift.

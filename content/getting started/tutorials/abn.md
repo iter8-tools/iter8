@@ -1,12 +1,12 @@
 ---
 date: 2020-08-05T12:00:00+00:00
-menuTitle: A/B/N testing
-title: Getting started with A/B/N testing
+menuTitle: A/B/n rollout
+title: Getting started with A/B/n rollout
 weight: 20
-summary: Learn how to perform an A/B/N test
+summary: Learn how to perform an A/B/N rollout
 ---
 
-This tutorial shows how _iter8_ can be used to perform A/B/N testing on several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
+This tutorial shows how _iter8_ can be used to perform A/B/n rollout on several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
 
 This tutorial has eight steps, which are meant to be tried in order.
 You will learn:
@@ -332,9 +332,9 @@ Coming soon
 
 The progress of an experiment can be impacted by `duration` and `trafficControl` parameters:
 
-- `duration.interval` defines how long each test interval should be (*default: 30 seconds*)
-- `duration.maxIterations` identifies what the maximum number of iterations there should be (*default: 100*)
+- `duration.maxIterations` defines the number of iterations in the experiment (*default: 100*)
+- `duration.interval` defines the duration of each iteration (*default: 30 seconds*)
 - `trafficControl.maxIncrement` identifies the largest change (increment) that will be made in the percentage of traffic sent to a candidate (*default: 2 percent*)
 
 The impact of the first two parameters on the duration of the experiment are clear.
-Restricting the size of traffic shifts limits how quickly an experiment can come to a decision about a candidate.
+Restricting the size of traffic increment also influences how quickly an experiment can come to a decision about a candidate.
