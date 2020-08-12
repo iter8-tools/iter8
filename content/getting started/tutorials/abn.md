@@ -39,7 +39,7 @@ For details of metrics definitions provided in iter8, see the [metrics reference
 
 You can augment the default set of metrics by replacing `ConfigMap` *iter8config-metrics* (defined in the *iter8* namespace) with a new `ConfigMap`.
 
-For demonstration purposes, we add two new metrics: a  *ratio* metric which measures how many requests take more than 500ms to process and an application specific *counter* metric that captures the number of books sold by our service.
+For demonstration purposes, we add two new metrics: a *ratio* metric which measures how many requests take more than 500ms to process and an application specific *counter* metric that captures the number of books sold by our service.
 We will use the latter metric as our reward metric -- our experiment will select the version that maximize the number of books sold subject to satisfying all other criteria.
 
 To define the ratio metric, add the following to the `counter_metrics.yaml` field of the map:

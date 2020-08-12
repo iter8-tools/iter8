@@ -1,3 +1,13 @@
+| Site | Status
+|------|-------
+| [iter8.tools](https://iter8.tools) (v0.2.1) | [![Netlify Status](https://api.netlify.com/api/v1/badges/5e3faba2-d2ae-4252-b829-b9cb639bc5df/deploy-status)](https://app.netlify.com/sites/iter8/deploys)
+| [preliminary.iter8.tools](https://preliminary.iter8.tools) (v1.0.0 preview) | [![Netlify Status](https://api.netlify.com/api/v1/badges/8e53cd9b-0cf4-4b3b-8db6-dee596b99bf1/deploy-status)](https://app.netlify.com/sites/preliminary-iter8/deploys)
+
+# iter8.tools
+
+This repository contains the source code for [iter8.tools](https://iter8.tools) and
+[preliminary.iter8.tools](https://preliminary.iter8.tools).
+
 # Usage
 
 Install Hugo
@@ -6,7 +16,7 @@ Install Hugo
 brew install hugo
 ```
 
-Clone repository and submodules (Hugo theme)
+Clone repository and submodules
 
 ```bash
 git clone --recurse-submodules https://github.com/iter8-tools/docs.git
@@ -15,7 +25,7 @@ git clone --recurse-submodules https://github.com/iter8-tools/docs.git
 Host locally
 
 ```bash
-cd hugo-iter8-docs
+cd docs
 hugo serve
 ```
 
@@ -64,7 +74,17 @@ This markdown file will have some code at the top of the page, known as [front m
 
 Front matter contains some meta data which is used for generation.
 
-Additional front matter fields may be added.
+The following describes a number of useful front matter properties.
+
+| Front matter property | Type | Description
+|-----------------------|------|------------
+| menuTitle | string | The name that will appear in the sidebar tab
+| title | string | The name that will appear at the top of a page
+| chapter | boolean | Change the way the page is rendered
+| weight | integer | Used to order the page in the sidebar
+| hidden | boolean | Whether the page should appear in the sidebar
+
+For learn about other front matter properties, see [here](https://themes.gohugo.io//theme/hugo-theme-learn/en/cont/pages/#front-matter-configuration).
 
 ***
 
@@ -78,28 +98,34 @@ weight: 3
 ---
 ```
 
-In this example using the [hugo-theme-learn](https://themes.gohugo.io/hugo-theme-learn/) theme, the `date` is self-explanatory, the `title` is used to name the sidebar tab as well as the title of page, and the `weight` is used to order to different pages in the sidebar. 
-
 ### Add content
 
-Below the front matter, directly add Markdown.
+##### Text
 
-***
+Below the front matter, directly add Markdown.
+                                               
+##### Images
 
 Image files should be stored in [static/images/](static/images/).
 
 Images can be displayed using the following syntax:
 
+```md
+![alt text]({{< resourceAbsUrl path="[image path]" >}})
 ```
-![Alt Text](url)
-```
+
+**Notes**: the [static/](static/) folder will form the base of the built files. Therefore, the image path, provided that the files are stored in in [static/images/](static/images/), will begin with "images/".
 
 ***
 
 For example:
 
 ```md
-![iter8pic](images/iter8pic.png)
+![iter8 logo]({{< resourceAbsUrl path="images/logo.png" >}})
 ```
 
-**Note**: the preceding `/` in the `url` component is important! Otherwise the image will not display.
+##### Files
+
+Files should also be stored under the [static/](static/) folder.
+
+Currently, files related to tutorials are stored under [static/tutorials](static/tutorials).
