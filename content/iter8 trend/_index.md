@@ -3,7 +3,6 @@ date: 2020-08-11T12:00:00+00:00
 menuTitle: iter8-trend
 title: Getting Started with iter8-trend
 weight: 25
-summary: Describes how to install and use iter8-trend
 ---
 
 iter8-trend collects metrics of past experiments and summarizes them to show
@@ -18,7 +17,7 @@ installation process or separately after iter8 is installed.
 
 The following short video introduces iter8-trend:
 
-[![Short Video](https://img.youtube.com/vi/FOtyqJPMj14/hqdefault.jpg)](https://youtu.be/FOtyqJPMj14)
+{{< youtube FOtyqJPMj14 >}}
 
 ## Installation
 ```
