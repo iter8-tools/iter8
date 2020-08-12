@@ -5,6 +5,6 @@ weight: 20
 chapter: true
 ---
 
-# Tutorials
+## Getting started
 
 {{% children description="true" depth="999" sort="Weight"%}}
