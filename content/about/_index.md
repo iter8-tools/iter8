@@ -19,7 +19,7 @@ Iter8 is an open source toolkit for `continuous experimentation` on Kubernetes. 
 Use an `iter8 experiment` to safely expose alternative versions of a service to application traffic and intelligently rollout the best version of your service. Iter8's expressive model of experimentation supports a diverse variety of experiments. The four main kinds of experiments in iter8 are as follows.
 
 1. Perform a **canary release** with two versions, a baseline and a candidate. Iter8 will shift application traffic in a safe and progressive manner to the candidate, if the candidate meets the criteria you specify in the experiment.
-2. Perform an **A/B/n rollout** with multiple versions -- a baseline and multiple candidates. Iter8 will identify and shift application traffic safely and gradually to the `winner`.
+2. Perform an **A/B/n rollout** with multiple versions -- a baseline and multiple candidates. Iter8 will identify and shift application traffic safely and gradually to the `winner`, where the winning version is defined by the criteria you specify in your experiments.
 3. Perform an **A/B rollout** -- this is a special case of the A/B/n rollout described above with a baseline and a single candidate.
 4. Run a **performance test** with a single version of a microservice. `iter8` will verify if the version meets the criteria you specify in the experiment.
 
