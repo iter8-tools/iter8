@@ -72,15 +72,15 @@ If this is the new installation, you will be asked to choose an authentication s
 
 1. Iter8 experiments page
 
-     {{< figure src="kiali-iter8-listing.png" title="iter8 main page" caption="iter8 main page lists all the experiments in available namespace(s).">}}
+     {{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="iter8 main page lists all the experiments in available namespace(s).">}}
 
 2. Experiment create page
 
    You can create new experiment from the Action pulldown on the right of the listing page.
 
-    {{< figure src="kiali-experiment-create-1.png" title="Experiment create page" caption="">}}
+    {{< figure src="/images/kiali-experiment-create-1.png" title="Experiment create page" caption="">}}
 
-    {{< figure src="kiali-experiment-create-2.png" title="Experiment create page" caption="">}}
+    {{< figure src="/images/kiali-experiment-create-2.png" title="Experiment create page" caption="">}}
 
 3. Experiment detail page
 
