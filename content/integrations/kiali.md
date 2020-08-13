@@ -12,7 +12,11 @@ Kiali is an observability console for Istio with service mesh configuration capa
 
 ### A. Install Kiali Using Operator
 
-Kiali version 1.18.1 (and above) now provides the capabilities to observe iter8 experiment runtime behavior. To enable the Kiali iter8 extensions, which are disabled by default, you must update the Kiali CRusing the Kiali Operator. To check if Kiali operator is installed, use:
+Kiali version 1.18.1 (and above) now provides the capabilities to observe iter8 experiment runtime behavior. To enable the Kiali iter8 extensions, which are disabled by default, you must update the Kiali CR using the Kiali Operator.
+
+**Note**: Currently the iter8 extension for Kiali works only for [iter8 v0.2.1](https://www.iter8.tools), not the current version. To install this version of iter8, see [here](https://iter8.tools/getting-started/installation/kubernetes/).
+
+To check if Kiali operator is installed, use:
 
 ```bash
 kubectl get pods -n kiali-operator
