@@ -6,7 +6,7 @@ weight: 10
 summary: Describes iter8's integrations with KUI
 ---
 
-[Kui](https://kui.tools) combines the power of familiar CLIs with interactive visualizations to provide an elegant and intuitive experience for users of kubernetes.
+[Kui](https://kui.tools) combines the power of familiar CLIs with interactive visualizations to provide an elegant and intuitive experience for users of Kubernetes.
 
 The iter8-KUI integration aims to leverage these features for iter8. Using the iter8 plugin on KUI, you can run Human-In-The-Loop iter8 experiments and easily modify and customize experiment metrics.
 

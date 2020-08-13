@@ -29,7 +29,7 @@ spec:
       # default is Deployment
       kind: Deployment
 
-      # name of a kubernetes service which receives actual traffic to the application
+      # name of a Kubernetes service which receives actual traffic to the application
       # it's required when baseline/candidate are specified as deployments
       name: reviews
 
@@ -46,7 +46,7 @@ spec:
       baseline: reviews-v3
       candidate: reviews-v5
 
-      # port of the kubernetes service(.spec.targetService.name) that receives traffic
+      # port of the Kubernetes service(.spec.targetService.name) that receives traffic
       # When there is only one port listening on the service, this is optional
       # If baseline/candidate are services, they should share the same port number
       port: 9080
