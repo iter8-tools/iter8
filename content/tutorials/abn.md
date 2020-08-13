@@ -3,10 +3,10 @@ menuTitle: A/B/n rollout
 title: Getting started with A/B/n rollout
 weight: 21
 summary: Learn how to perform an A/B/N rollout
----
+---ß
 
 This tutorial shows how _iter8_ can be used to perform A/B/n rollout on several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
-
+ß
 This tutorial has eight steps, which are meant to be tried in order.
 You will learn:
 
@@ -29,12 +29,12 @@ The version of the bookinfo _productpage_ service used in this tutorial has been
 These changes enable us to visually distinguish between versions when using a browser and to configure the behavior with respect to metrics.
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
-**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here](../installation/kubernetes/).
+**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here](../../installation/kubernetes/).
 
 ## Define New Metrics
 
 Out of the box, iter8 comes with a set of predefined metrics.
-For details of metrics definitions provided in iter8, see the [metrics reference](../../reference/metrics).
+For details of metrics definitions provided in iter8, see the [metrics reference](../../../reference/metrics).
 
 You can augment the default set of metrics by replacing `ConfigMap` *iter8config-metrics* (defined in the *iter8* namespace) with a new `ConfigMap`.
 
