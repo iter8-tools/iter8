@@ -25,13 +25,13 @@ To run the KUI Terminal, use:
 ```sh
 npm start
 ```
-To install iter8, refer to the [iter8 installation guidelines](https://preliminary.iter8.tools/installation/).
+To install iter8, refer to the [iter8 installation guidelines](../../installation/kubernetes/).
 
 ## Currently available commands
 
 You can use the following commands once the KUI terminal is up and iter8 has been installed:
 
-#### iter8 metrics
+#### `iter8 metrics`
 
 This command opens a KUI sidecar where the you can perform CRUD operations on the iter8 metric configmap. Specifically, you can add, edit, delete and restore metrics on the KUI sidecar that is opened. A sample image of the output is as follows:
 
@@ -47,7 +47,7 @@ To edit any of the currently available metrics, you can click on the _edit_ icon
 
 ![Iter8 Kui edit metric]({{< resourceAbsUrl path="images/iter8-kui-edit-metric.png" >}})
 
-#### iter8 create experiment
+#### `iter8 create experiment`
 
 This command also opens a KUI sidecar and is used to create Human-In-The-Loop experiments with iter8. It opens two tabs- one for creating the experiment and one for viewing the decision and metrics for the experiment from _iter8-analytics_. The sidecar options are interactive and can be experimented with according to your preferences.
 
@@ -60,5 +60,5 @@ $ kubectl expose svc iter8-analytics -n iter8 --name=iter8-analytics-np --type=N
 $ export ITER8_ANALYTICS_URL='<insert-iter8-analytics-url>'
 ```
 
-#### iter8 about
+#### `iter8 about`
 _Coming soon_
