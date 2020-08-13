@@ -1,6 +1,6 @@
 ---
 title: Releases
-weight: 50
+weight: 70
 hidden: true
 ---
 
