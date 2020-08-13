@@ -10,98 +10,108 @@ Kiali is an observability console for Istio with service mesh configuration capa
 
 ## Enabling the iter8 Console in Kiali
 
-### A. Install Kiali Using Operator
+Currently the iter8 extension for Kiali works only for [iter8 v0.2.1](https://www.iter8.tools), not the current version. To install this version of iter8, see [here](https://iter8.tools/getting-started/installation/kubernetes/).
 
-Kiali version 1.18.1 (and above) now provides the capabilities to observe iter8 experiment runtime behavior. To enable the Kiali iter8 extensions, which are disabled by default, you must update the Kiali CR using the Kiali Operator.
+### Install Kiali Using Operator
 
-**Note**: Currently the iter8 extension for Kiali works only for [iter8 v0.2.1](https://www.iter8.tools), not the current version. To install this version of iter8, see [here](https://iter8.tools/getting-started/installation/kubernetes/).
+Kiali version 1.18.1 (and above) provides the capability to observe iter8 experiment runtime behavior. To enable the iter8 extensions for Kiali, which are disabled by default, you must update the Kiali CR using the Kiali operator.
 
 To check if Kiali operator is installed, use:
 
 ```bash
-kubectl get pods -n kiali-operator
+kubectl --namespace kiali-operator get pods
 ```
 
-To install the Kiali Operator, please follow the steps in [Advanced Install](https://kiali.io/documentation/latest/installation-guide/#_advanced_install_operator_only). And make sure the Kiali CR is created by using command:
+To install the Kiali operator, follow the steps in [Advanced Install](https://kiali.io/documentation/latest/installation-guide/#_advanced_install_operator_only). You can verify that the Kiali CR is created by using command:
 
 ```bash
-kubectl get kialis.kiali.io kiali -n kiali-operator
+kubectl  --namespace kiali-operator get kialis.kiali.io kiali
 ```
 
-If this is the new installation, you will be asked to choose an authentication strategy (login, anonymous, ldap, openshift, token and openid). Depending on the chosen strategy, the installation may prompt for additional information. Please reference [Kiali Login Options](https://kiali.io/documentation/latest/installation-guide/#_login_options) for details about authentication strategies.
+If this is the new installation, you will be asked to choose an authentication strategy (login, anonymous, ldap, openshift, token or openid). Depending on the chosen strategy, the installation process may prompt for additional information. Please see [Kiali Login Options](https://kiali.io/documentation/latest/installation-guide/#_login_options) for details about authentication strategies.
 
-### B. Enable iter8 in the Kiali Operator CR
+### Enable iter8 in the Kiali Operator CR
 
-1. Follow the step [Create or Edit the Kiali CR](https://kiali.io/documentation/latest/installation-guide/#_create_or_edit_the_kiali_cr) or use:
+Follow the step [Create or Edit the Kiali CR](https://kiali.io/documentation/latest/installation-guide/#_create_or_edit_the_kiali_cr) or use:
 
-    ```bash
-    kubectl edit kialis.kiali.io kiali -n kiali-operator
-    ```
+```bash
+kubectl --namespace kiali-operator edit kialis.kiali.io kiali
+```
 
-2. Enable `iter_8` extensions under `Spec`.
+Find the `iter_8` key under `spec.extensions` and set `enabled` to `true`. The relevant portion of the CR is:
 
-    ```
-    # Kiali enabled integration with Iter8 project.
-    # If this extension is enabled, Kiali will communicate with Iter8 controller allowing to manage Experiments and review results.
-    # Additional documentation https://iter8.tools/
-    #    ---
-    #    iter_8:
-    #
-    # Flag to indicate if iter8 extension is enabled in Kiali
-    #      ---
-    #      enabled: false
-    #
-    extensions:
-      iter_8:
-        enabled: true
-    ```
+```
+# Kiali enabled integration with Iter8 project.
+# If this extension is enabled, Kiali will communicate with Iter8 controller allowing to manage Experiments and review results.
+# Additional documentation https://iter8.tools/
+#    ---
+#    iter_8:
+#
+# Flag to indicate if iter8 extension is enabled in Kiali
+#      ---
+#      enabled: false
+#
+extensions:
+  iter_8:
+    enabled: true
+```
 
-3. Restart the Kiali pods:
+Restart the Kiali pods:
 
-    ```bash
-    kubectl -n istio-system delete pod $(kubectl -n istio-system get pod --selector='app=kiali' -o jsonpath='{.items[0].metadata.name}')
-    ```
+```bash
+kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system get pod --selector='app=kiali' -o jsonpath='{.items[0].metadata.name}')
+```
 
-    You can inspect the pods using `kubectl get pods -n istio-system` to check if Kiali pod has restarted.
+You can check if the pod has successfully restarted by inspectikng the pods:
 
-4. Install [iter8 v0.2.1](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_install.md)
+```bash
+kubectl --namespace istio-system get pods
+```
 
-5. Start kiali - `istioctl dashboard kiali`
+Install iter8 v0.2.1. See [install instructions](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_install.md)
 
-## iter8 Extension Features
+Start kiali using: `istioctl dashboard kiali`
 
-1. Iter8 experiments page
+## Features of the iter8 Extension for Kiali
 
-     {{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="iter8 main page lists all the experiments in available namespace(s).">}}
+### Experiments Overview
 
-2. Experiment create page
+{{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="iter8 main page lists all the experiments in available namespace(s).">}}
 
-   You can create new experiment from the Action pulldown on the right of the listing page.
+### Create Experiment
 
-    {{< figure src="/images/kiali-experiment-create-1.png" title="Experiment create page" caption="">}}
+You can create new experiment from the Action pulldown on the right of the listing page.
 
-    {{< figure src="/images/kiali-experiment-create-2.png" title="Experiment create page" caption="">}}
+{{< figure src="/images/kiali-experiment-create-1.png" title="Experiment creation">}}
 
-3. Experiment detail page
+{{< figure src="/images/kiali-experiment-create-2.png" title="Experiment creation -- additional configuration options">}}
 
-    {{< figure src="/images/kiali-experiment-detail.png" title="Experiment detail page" caption="Click on the name of the experiment from the listing page will show the experiment detail page. In the detail page, user can `pause`, `resume`, `terminate with success` and `terminate with failure` from the action pulldown. User can also `delete` experiment.">}}
+### Experiment Detail
 
-## Troubleshooting
+{{< figure src="/images/kiali-experiment-detail.png" title="Experiment detail page" caption="Click on the name of the experiment from the listing page will show the experiment detail page. In the detail page, user can `pause`, `resume`, `terminate with success` and `terminate with failure` from the action pulldown. User can also `delete` experiment.">}}
 
-1. Cannot find kiali cr in namespace kiali-operator.
+## Troubleshooting Guide
 
-    Try using this command to install and start operator
+**Issue**: Cannot find the kiali CR in namespace `kiali-operator`.
 
-    ```bash
-    bash <(curl -L https://kiali.io/getLatestKialiOperator) --accessible-namespaces '**' -oiv latest -kiv latest --operator-install-kiali true
-    ```
+Try using this command to install and start operator
 
-2. If iter8 did not show up in Kiali, check the configmap using this command `kubectl edit configmap kiali -n istio-system`. And make the iter_8 has `enabled: true`. In order for the configmap to take effect, please delete the kiali pod in namespace istio-system.  Kiali operator will restart the kiali pod automatically.
+```bash
+bash <(curl -L https://kiali.io/getLatestKialiOperator) --accessible-namespaces '**' -oiv latest -kiv latest --operator-install-kiali true
+```
 
-3. Error message `Kiali has iter8 extension enabled but it is not detected in the cluster`
+**Issue**: The iter8 extension is not visible in Kiali
 
-    Make sure iter8 is installed, Use `kubectl -n iter8 get pods` to check if both controller and analytics services are running.
+Check the configmap `kiali` using this command `kubectl  --namespace istio-systemedit configmap kiali`. Ensure that `spec.extensions.iter_8.enabled` is set to `true`. To ensure that this configuration has taken effect, restart the kiali pod:
 
-4. Experiment(s) are missing in the iter8 main page.
+```bash
+kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system get pod --selector='app=kiali' -o jsonpath='{.items[0].metadata.name}')
+```
 
-    Make sure the namespace that contains the experiment is included in the Kiali accessible  namespace `accessible_namespaces:` definitions in the CR.
+**Issue**: Error message `Kiali has iter8 extension enabled but it is not detected in the cluster`
+
+Make sure iter8 is installed, Use `kubectl --namespace iter8 get pods` to check that both iter80-controller and iter8-analytics are functioning.
+
+**Issue**: Experiment(s) are missing in the iter8 main page
+
+Make sure the namespace that contains the experiment is included in the Kiali accessible  namespace `accessible_namespaces:` definitions in the CR.
