@@ -1,5 +1,4 @@
 ---
-date: 2020-08-11T12:00:00+00:00
 menuTitle: iter8-trend
 title: Getting Started with iter8-trend
 weight: 25

@@ -8,6 +8,8 @@
 This repository contains the source code for [iter8.tools](https://iter8.tools) and
 [preliminary.iter8.tools](https://preliminary.iter8.tools).
 
+The main iter8 repository can be found [here](https://github.com/iter8-tools/iter8).
+
 # Usage
 
 Install Hugo
@@ -92,7 +94,6 @@ For example:
 
 ```md
 ---
-date: 2016-04-09T16:50:16+02:00
 title: Algorithms
 weight: 3
 ---

@@ -1,5 +1,4 @@
 ---
-date: 2016-04-09T16:50:16+02:00
 menuTitle: Algorithms
 title: Iter8's algorithms
 weight: 30

@@ -1,13 +1,12 @@
 ---
-date: 2020-08-05T12:00:00+00:00
 menuTitle: A/B/n rollout
 title: Getting started with A/B/n rollout
 weight: 20
 summary: Learn how to perform an A/B/N rollout
----
+---ß
 
 This tutorial shows how _iter8_ can be used to perform A/B/n rollout on several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
-
+ß
 This tutorial has eight steps, which are meant to be tried in order.
 You will learn:
 

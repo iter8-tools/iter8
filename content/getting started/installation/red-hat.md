@@ -1,5 +1,4 @@
 ---
-date: 2016-04-09T16:50:16+02:00
 menuTitle: Red Hat OpenShift
 title: Iter8 on Red Hat OpenShift
 weight: 20

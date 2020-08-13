@@ -1,5 +1,4 @@
 ---
-date: 2020-08-11T12:00:00+00:00
 menuTitle: Grafana
 title: Integrating Iter8 with Grafana
 weight: 20
