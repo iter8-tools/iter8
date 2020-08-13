@@ -25,22 +25,19 @@ This tutorial assumes you have already installed _iter8_ (including Istio). If n
 To deploy the Bookinfo application, create a namespace configured to enable auto-injection of the Istio sidecar. You can use whatever namespace name you wish. By default, the namespace `bookinfo-iter8` is created.
 
 ```bash
-export NAMESPACE=bookinfo-iter8
-curl -s {{< resourceAbsUrl path="tutorials/namespace.yaml" >}} \
-  | sed "s#bookinfo-iter8#$NAMESPACE#" \
-  | kubectl apply -f -
+kubectl apply -f {{< resourceAbsUrl path="tutorials/namespace.yaml" >}}
 ```
 
 Next, deploy the application:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
 ```
 
 You should see pods for each of the four microservices:
 
 ```bash
-kubectl --namespace $NAMESPACE get pods
+kubectl --namespace bookinfo-iter8 get pods
 ```
 
 Note that we deployed version *v2* of the *reviews* microsevice; that is, *reviews-v2*.
@@ -51,13 +48,13 @@ Each pod should have two containers, since the Istio sidecar was injected into e
 Expose the Bookinfo application by defining an Istio `Gateway` and `VirtualService`:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}
 ```
 
 You can inspect the created resources:
 
 ```bash
-kubectl --namespace $NAMESPACE get gateway,virtualservice
+kubectl --namespace bookinfo-iter8 get gateway,virtualservice
 ```
 
 Note that the service has been associated with a fake host, `bookinfo.example.com` for demonstration purposes.
@@ -132,13 +129,13 @@ The additional parameters control how long the experiment should run and how muc
 The experiment can be created using the command:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v2_to_reviews-v3.yaml">}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v2_to_reviews-v3.yaml">}}
 ```
 
 Inspection of the new experiment shows that it is paused because the specified candidate version cannot be found in the cluster:
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                 TYPE     HOSTS       PHASE   WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Pause                                 TargetsError: Missing Candidate
@@ -151,13 +148,13 @@ Once the candidate version is deployed, the experiment will start automatically.
 To deploy version *v3* of the *reviews* microservice, execute:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/reviews-v3.yaml" >}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/reviews-v3.yaml" >}}
 ```
 
 Once its corresponding pods have started, the `Experiment` will show that it is progressing:
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                 TYPE     HOSTS       PHASE         WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Progressing   false          reviews-v3     IterationUpdate: Iteration 0/8 completed
@@ -167,7 +164,7 @@ At approximately 15 second intervals, you should see the interation number chang
 iter8 will quickly identify that the best version is the candidate, `reviews-v3` and that it is confident that this choice will be the final choice (by indicating that a *winner* has been found):
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                 TYPE     HOSTS       PHASE         WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Progressing   true           reviews-v2     IterationUpdate: Iteration 3/8 completed
@@ -176,7 +173,7 @@ reviews-v3-rollout   Canary   [reviews]   Progressing   true           reviews-v
 When the experiment is finished (about 2 minutes), you will see that all traffic has been shifted to the winner, *reviews-v3*:
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                 TYPE     HOSTS       PHASE       WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Completed   true           reviews-v3     ExperimentCompleted: Traffic To Winner
@@ -187,7 +184,7 @@ reviews-v3-rollout   Canary   [reviews]   Completed   true           reviews-v3 
 To clean up, delete the namespace:
 
 ```bash
-kubectl delete namespace $NAMESPACE
+kubectl delete namespace bookinfo-iter8
 ```
 
 ## Other things to try (before cleanup)
@@ -218,8 +215,8 @@ If you try this version as a candidate, you should see the canary experiment rej
 
 For your reference:
 
-- A YAML for the deployment `reviews-v4` is: <{{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}}>
-- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: <{{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v3_to_reviews-v4.yaml" >}}>
+- A YAML for the deployment `reviews-v4` is: {{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}}
+- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: {{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v3_to_reviews-v4.yaml" >}}
 
 ### Try a version which returns errors
 
