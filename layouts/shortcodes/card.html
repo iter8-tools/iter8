@@ -1,0 +1,23 @@
+{{/*
+  Purpose: create image cards for the home page
+
+  Usage:
+    {{< card src="[image path]" title="[title]" text="[description]">}}
+    {{< card "[image path]" "[title]" "[description]">}}
+*/}}
+
+<div class="card">
+  {{ if .IsNamedParams }}
+    <img src="{{.Get "src" }}" alt="">
+    <div class="container">
+      <h4><b>{{.Get "title" }}</b></h4>
+      <p>{{.Get "text" }}</p>
+    </div>
+  {{ else }}
+    <img src="{{.Get 0}}" alt="">
+    <div class="container">
+      <h4><b>{{.Get 1}}</b></h4>
+      <p>{{.Get 2}}</p>
+    </div>
+  {{ end }}
+</div>

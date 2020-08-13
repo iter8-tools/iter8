@@ -37,6 +37,9 @@ defaultContentLanguageInSubdir= true
   # Change default color scheme with a variant one. Can be "red", "blue", "green".
   themeVariant = "mine"
 
+  # Provide a list of custom css files to load relative from the `static/` folder in the site root.
+  custom_css = ["css/card.css"]
+
   # iter8 specific
 
   # version number
