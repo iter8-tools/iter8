@@ -1,5 +1,4 @@
 ---
-date: 2016-04-09T16:50:16+02:00
 menuTitle: Kubernetes
 title: Iter8 on Kubernetes and Istio
 weight: 10

@@ -1,6 +1,5 @@
 
 ---
-date: 2020-08-06T12:00:00+00:00
 menuTitle: Kui
 title: Integrating Iter8 with KUI
 weight: 10

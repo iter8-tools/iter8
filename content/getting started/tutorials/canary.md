@@ -1,5 +1,4 @@
 ---
-date: 2016-04-09T16:50:16+02:00
 menuTitle: Canary testing
 title: Getting started with canary testing
 weight: 20
