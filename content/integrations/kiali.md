@@ -1,7 +1,7 @@
 
 ---
 menuTitle: Kiali
-title: Integrating Iter8 with Kiali
+title: Integrating with Kiali
 weight: 15
 summary: Describes iter8's integrations with Kiali
 ---
@@ -84,7 +84,7 @@ If this is the new installation, you will be asked to choose an authentication s
 
 3. Experiment detail page
 
-    {{< figure src="kiali-experiment-detail.png" title="Experiment detail page" caption="Click on the name of the experiment from the listing page will show the experiment detail page. In the detail page, user can `pause`, `resume`, `terminate with success` and `terminate with failure` from the action pulldown. User can also `delete` experiment.">}}
+    {{< figure src="/images/kiali-experiment-detail.png" title="Experiment detail page" caption="Click on the name of the experiment from the listing page will show the experiment detail page. In the detail page, user can `pause`, `resume`, `terminate with success` and `terminate with failure` from the action pulldown. User can also `delete` experiment.">}}
 
 ## Troubleshooting
 
