@@ -1,5 +1,4 @@
 ---
-date: 2016-04-09T16:50:16+02:00
 menuTitle: About
 title: Iter8 enables statistically robust continuous experimentation of microservices in your CI/CD pipelines
 weight: 10

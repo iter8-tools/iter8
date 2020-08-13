@@ -1,6 +1,5 @@
 
 ---
-date: 2016-04-09T16:50:16+02:00
 title: Homepage
 weight: 10
 chapter: true
