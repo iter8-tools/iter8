@@ -8,6 +8,8 @@
 This repository contains the source code for [iter8.tools](https://iter8.tools) and
 [preliminary.iter8.tools](https://preliminary.iter8.tools).
 
+The main iter8 repository can be found [here](https://github.com/iter8-tools/iter8).
+
 # Usage
 
 Install Hugo
