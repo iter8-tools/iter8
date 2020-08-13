@@ -9,30 +9,34 @@ This document describes iter8's out-of-the-box metrics and how to extend iter8's
 
 ## Iter8's out-of-the-box metrics
 
-Iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the criteria section of an _experiment_ specification, as illustrated in [this tutorial](thistutorial.md) and documented in the [`Experiment` CRD documentation](iter8_crd.md). Iter8's out-of-the-box metrics are as follows.
+Iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the criteria section of an _experiment_ specification, as illustrated in [this tutorial](thistutorial.md) and documented in the [`Experiment` CRD documentation](../experiment). Iter8's out-of-the-box metrics are as follows.
 
 Metric name        | Description 
 -------------------|------------------------
-_iter8_request_count_    | total number of HTTP requests to a service version
-_iter8_latency_    | average time in milli seconds taken by a service version to respond to HTTP requests
-_iter8_error_count_| number of HTTP requests that resulted in error (5xx HTTP status codes)
-_iter8_error_rate_ | fraction of HTTP requests that resulted in errors, i.e., _iter8_error_count_ / _iter8_request_count_
+*iter8_request_count*    | total number of HTTP requests to a service version
+*iter8_latency*    | average time in milli seconds taken by a service version to respond to HTTP requests
+*iter8_error_count*| number of HTTP requests that resulted in error (5xx HTTP status codes)
+*iter8_error_rate* | fraction of HTTP requests that resulted in errors, i.e., *iter8_error_count / iter8_request_count*
 
 ## Extending iter8's metrics
 
-<!-- When iter8 is installed, a Kubernetes `ConfigMap` named _iter8config-metrics_ is populated with a definition for each of the above out-of-the-box metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8/f302de20acf0f026a63453657fe88ff0674bee65/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). You can extend iter8's metrics by extending this configmap. -->
+When iter8 is installed, a Kubernetes `ConfigMap` named _iter8config-metrics_ is populated with a definition for each of the above out-of-the-box metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8/f302de20acf0f026a63453657fe88ff0674bee65/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). You can extend iter8's metrics by extending this configmap. Below, we describe the two types of metrics supported by iter8, namely, `counter` and `ratio` metrics and how to extend the configmap in order to add new counter and ratio metrics.
 
-### Counter and ratio metrics
+### Counter metrics
 
-<!-- Counter metrics and ratio metrics... 
+A counter metric is a metric whose initial value is zero and which can only increase over time. An example of a counter metric that is available out-of-the-box in iter8 is *iter8_request_count*, which is the total number of HTTP requests that were received by a service version. Iter8 counter metrics have the following fields.
 
-Counter metric fields
+Field | Type | Description | Required
+------|-------|--------|--------------
+*name*    | *string* | Name of the metric | yes
+*query_template*    | *string* | Prometheus query template used to fetch this metric (see [below](#query-template)) | yes
+*units*    | *string* | Unit of measurement for this metric. For example, *iter8_latency* is a metric available out-of-the-box in iter8 and is measured in milli seconds. This field is used by iter8's KUI and Kiali integrations to format display. | no
+*preferred_direction*    | *higher* or *lower* | This field indicates if higher values of the metric or preferred or lower values are preferred. It is of type enum with two possible values, *higher* or *lower*. For example, the *iter8_error_count* metric has a preferred direction which is *lower*. Preferred direction needs to be specified if you intend to use this as a reward metric or a metric with thresholds within experiment criteria (see [`Experiment` CRD documentation](../experiment)) | no
+*description*    | *string* | A description of this metric. This field is used by iter8's KUI and Kiali integrations to format display. | yes
 
-Ratio metric fields
+#### Prometheus query template {#query-template}
 
-**Note:** Telemetry v1 and v2.  -->
-
-#### Prometheus query template
+### Ratio metrics
 
 <!-- A sample query template is shown below:
 
