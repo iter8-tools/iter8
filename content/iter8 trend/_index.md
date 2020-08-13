@@ -1,7 +1,7 @@
 ---
 menuTitle: iter8-trend
 title: Getting Started with iter8-trend
-weight: 25
+weight: 40
 ---
 
 iter8-trend collects metrics of past experiments and summarizes them to show

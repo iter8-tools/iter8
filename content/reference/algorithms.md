@@ -1,7 +1,7 @@
 ---
 menuTitle: Algorithms
 title: Iter8's algorithms
-weight: 30
+weight: 63
 summary: Coming soon!
 ---
 

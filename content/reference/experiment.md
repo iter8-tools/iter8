@@ -1,7 +1,7 @@
 ---
 menuTitle: Experiment
 title: Iter8's experiment CRD
-weight: 20
+weight: 61
 summary: Coming soon!
 ---
 
