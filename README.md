@@ -1,47 +1,132 @@
-# iter8: Analytics-driven canary releases and A/B testing
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+| Site | Status
+|------|-------
+| [iter8.tools](https://iter8.tools) (v0.2.1) | [![Netlify Status](https://api.netlify.com/api/v1/badges/5e3faba2-d2ae-4252-b829-b9cb639bc5df/deploy-status)](https://app.netlify.com/sites/iter8/deploys)
+| [preliminary.iter8.tools](https://preliminary.iter8.tools) (v1.0.0 preview) | [![Netlify Status](https://api.netlify.com/api/v1/badges/8e53cd9b-0cf4-4b3b-8db6-dee596b99bf1/deploy-status)](https://app.netlify.com/sites/preliminary-iter8/deploys)
 
-## What is iter8 about?
+# iter8.tools
 
-<img src=img/iter8-overview.png width=65%>
+This repository contains the source code for [iter8.tools](https://iter8.tools) and
+[preliminary.iter8.tools](https://preliminary.iter8.tools).
 
-Iter8 supports cloud-native, automated canary releases and A/B testing, driven by analytics based on robust statistical techniques. It comprises two components:
+The main iter8 repository can be found [here](https://github.com/iter8-tools/iter8).
 
-* _iter8-analytics_: A service that assesses the behavior of different microservice versions by analyzing metrics associated with each version using robust statistical techniques to determine which version is the best one with respect to the metrics of interest and which versions pass a set of success criteria. Multiple success criteria can be defined by users; each criterion refers to a metric and specifies absolute or relative thresholds which define how much a candidate version can deviate from a baseline (stable) version. The _iter8-analytics_ service exposes a REST API; each time it is called, the service returns the result of the data analysis along with a recommendation for how the traffic should be split across all microservice versions. The _iter8-analytics_' REST API is used by _iter8-controller_, which is described next.
+# Usage
 
-* _iter8-controller_: A Kubernetes controller that automates canary releases and A/B testing by adjusting the traffic across different versions of a microservice as recommended by _iter8-analytics_. For instance, what happens in the case of a canary release is that the controller will shift the traffic towards the canary version if it is performing as expected, until the canary replaces the baseline (previous) version. If the canary is found not to be satisfactory, the controller rolls back by shifting all the traffic to the baseline version. Traffic decisions are made by _iter8-analytics_ and honored by _iter8-controller_.
+Install Hugo
 
-## The `Experiment` CRD
+```bash
+brew install hugo
+```
 
-When iter8 is installed, a new Kubernetes CRD is added to your cluster. This CRD _kind_ is `Experiment` and it is documented [here](doc_files/iter8_crd.md).
+Clone repository and submodules
 
-## Metrics
+```bash
+git clone --recurse-submodules https://github.com/iter8-tools/docs.git
+```
 
-To assess the behavior of microservice versions, iter8 supports a few metrics out-of-the-box without requiring users to do any extra work. In addition, users can define their own custom metrics. Iter8's out-of-the-box metrics as well as user-defined metrics can be referenced in the success criteria of an _experiment_. More details about metrics are documented [here](doc_files/metrics.md).
+Host locally
 
-## Supported environments
+```bash
+cd docs
+hugo serve
+```
 
-The _iter8-controller_ currently supports the following Kubernetes-based environments, whose traffic-management capabilities are used:
+By default, Hugo will use [localhost:1313](localhost:1313).
 
-* [Istio service mesh](https://istio.io)
-* [Knative](https://knative.dev)
+# File structure
 
-## Installing iter8
+* [content/](content/): Contains all the Markdown files, which will be used to generate the documentation
+* [data/](data/): Contains all the JSON, YAML, or TOML, which contains configuration files and data for dynamically generated content
+* [static/](static/): Other assets used in the documentation, such as images
+* [archetypes](archetypes): Stores templates for [front matter](https://gohugo.io/content-management/front-matter/)
+* [layouts/](layouts): Store templates for converting the Markdown files into HTML
+* [themes/](themes): Contains the [Hugo theme](https://themes.gohugo.io/) which does the bulk of generation
+* [resources/](resources): Caches files to speed up generation
+* [public/](public/): Outputted HTML and CSS files
 
-These [instructions](doc_files/iter8_install.md) will guide you to install the two iter8 components (_iter8-analytics_ and _iter8-controller_) on Kubernetes with Istio and/or Knative.
+Content creators will mostly be working with the [content/](content/), [data/](data/), and [static/](static/) directories.
 
-## Tutorials
+For more information about these files, see [here](https://gohugo.io/getting-started/directory-structure/).
 
-The following tutorials will help you get started with iter8:
+# Creating content
 
-* [Automated canary releases with iter8 on Kubernetes and Istio](doc_files/iter8_bookinfo_istio.md)
-* [Automated canary releases with iter8 on Knative](doc_files/iter8_bookinfo_knative.md)
-* [Automated canary release with iter8 on Kubernetes and Istio using Tekton](doc_files/iter8_tekton_task.md)
+### New page
 
-## Algorithms behind iter8
+Create a new page by using the [hugo new](https://gohugo.io/commands/hugo_new/) command.
 
-A key goal of this project is to introduce statistically robust algorithms for decision making during cloud-native canary releases and A/B testing experiments. We currently support [two algorithms](doc_files/algorithms.md) and plan to introduce other sophisticated algorithms based on Bayesian approaches. Stay tuned!
+```bash
+hugo new [path]
+```
 
-## Integrations
+**Note**: You can also create a new page without using the command but the front matter, described below, will need to be manually inserted.
 
-Iter8 is integrated with [Tekton Pipelines](https://tekton.dev) for an end-to-end CI/CD experience, and with [KUI](https://www.kui.tools), for a richer Kubernetes command-line experience. Initial integrations with these two technologies already exist, but we are actively improving them. Stay tuned!
+***
+
+For example:
+
+```bash
+hugo new content/introduction/about.md
+```
+
+...would create a new _about_ page in the _introduction_ section.
+
+### Front matter
+
+This markdown file will have some code at the top of the page, known as [front matter](https://gohugo.io/content-management/front-matter/).
+
+Front matter contains some meta data which is used for generation.
+
+The following describes a number of useful front matter properties.
+
+| Front matter property | Type | Description
+|-----------------------|------|------------
+| menuTitle | string | The name that will appear in the sidebar tab
+| title | string | The name that will appear at the top of a page
+| chapter | boolean | Change the way the page is rendered
+| weight | integer | Used to order the page in the sidebar
+| hidden | boolean | Whether the page should appear in the sidebar
+
+For learn about other front matter properties, see [here](https://themes.gohugo.io//theme/hugo-theme-learn/en/cont/pages/#front-matter-configuration).
+
+***
+
+For example:
+
+```md
+---
+title: Algorithms
+weight: 3
+---
+```
+
+### Add content
+
+##### Text
+
+Below the front matter, directly add Markdown.
+                                               
+##### Images
+
+Image files should be stored in [static/images/](static/images/).
+
+Images can be displayed using the following syntax:
+
+```md
+![alt text]({{< resourceAbsUrl path="[image path]" >}})
+```
+
+**Notes**: the [static/](static/) folder will form the base of the built files. Therefore, the image path, provided that the files are stored in in [static/images/](static/images/), will begin with "images/".
+
+***
+
+For example:
+
+```md
+![iter8 logo]({{< resourceAbsUrl path="images/logo.png" >}})
+```
+
+##### Files
+
+Files should also be stored under the [static/](static/) folder.
+
+Currently, files related to tutorials are stored under [static/tutorials](static/tutorials).

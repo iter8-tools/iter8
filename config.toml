@@ -1,0 +1,67 @@
+baseURL = "/"
+languageCode = "en-US"
+defaultContentLanguage = "en"
+
+title = "iter8 Documentation"
+theme = "hugo-theme-learn"
+metaDataFormat = "yaml"
+defaultContentLanguageInSubdir= true
+
+[params]
+  # hugo-theme-learn specific
+  # See more parameters here: https://learn.netlify.app/en/basics/configuration/
+
+  # Prefix URL to edit current page. Will display an "Edit this page" button on top right hand corner of every page.
+  # Useful to give opportunity to people to create merge request for your doc.
+  # See the config.toml file from this documentation site to have an example.
+  editURL = "https://github.com/iter8-tools/docs/edit/master/content/"
+
+  # Author of the site, will be used in meta information
+  author = "Alan Cha"
+
+  # Description of the site, will be used in meta information
+  description = "Robust analytics and control to unleash cloud-native continuous experimentation."
+
+  # Shows a checkmark for visited pages on the menu
+  showVisitedLinks = false
+
+  # Set this to true to disable copy-to-clipboard button for inline code.
+  disableInlineCopyToClipBoard = true
+
+  # Hide breadcrumbs in the header and only show the current page title
+  disableBreadcrumb = false
+
+  # Hide Next and Previous page buttons normally displayed full height beside content
+  disableNextPrev = true
+
+  # Change default color scheme with a variant one. Can be "red", "blue", "green".
+  themeVariant = "mine"
+
+  # Provide a list of custom css files to load relative from the `static/` folder in the site root.
+  custom_css = ["css/card.css"]
+
+  # iter8 specific
+
+  # version number
+  versionNumber = "v1.0.0 - preview"
+
+[outputs]
+home = [ "HTML", "RSS", "JSON"]
+
+[Languages]
+[Languages.en]
+title = "iter8 Documentation"
+weight = 1
+languageName = "English"
+
+[[Languages.en.menu.shortcuts]]
+name = "<i class='fab fa-fw fa-github'></i> GitHub repo"
+identifier = "github"
+url = "https://github.com/iter8-tools/iter8"
+weight = 10
+
+[[Languages.en.menu.shortcuts]]
+name = "<i class='fab fa-fw fa-slack'></i> Slack workspace"
+identifier = "slack"
+url = "https://join.slack.com/t/iter8-tools/shared_invite/enQtODU0NTczMTQ5NDU4LTJmNGE1OTBhOWI4NzllZGE0ZjdhM2M3MzJlMjcxYjliMTJlM2YxMzQ4OWQ5NGViYTM2MTU4MWRkZTgxNzZiMzg"
+weight = 20

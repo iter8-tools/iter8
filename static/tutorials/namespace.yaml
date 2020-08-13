@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bookinfo-iter8
+  labels:
+    istio-injection: enabled
