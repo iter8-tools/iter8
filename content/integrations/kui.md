@@ -1,7 +1,7 @@
 
 ---
 menuTitle: Kui
-title: Integrating Iter8 with KUI
+title: Integrating with KUI
 weight: 10
 summary: Describes iter8's integrations with KUI
 ---
