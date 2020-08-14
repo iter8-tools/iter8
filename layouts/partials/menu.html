@@ -29,7 +29,9 @@
         {{end}} 
 
         <!-- Custom releases menu entry -->
-        <li data-nav-id="/releases-custom/" title="Releases" class="dd-item">
+        <li data-nav-id="/releases-custom/" title="Releases" class="dd-item
+          {{if eq .File.Dir `releases/`}}active{{end}}
+          ">
           <a href="https://www.iter8.tools/releases/">Releases</a>
         </li>
       </ul>

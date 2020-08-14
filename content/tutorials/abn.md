@@ -29,12 +29,12 @@ The version of the bookinfo _productpage_ service used in this tutorial has been
 These changes enable us to visually distinguish between versions when using a browser and to configure the behavior with respect to metrics.
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
-**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here](../../installation/kubernetes/).
+**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
 
 ## Define New Metrics
 
 Out of the box, iter8 comes with a set of predefined metrics.
-For details of metrics definitions provided in iter8, see the [metrics reference](../../../reference/metrics).
+For details of metrics definitions provided in iter8, see the [metrics reference]({{< ref "metrics" >}}).
 
 You can augment the default set of metrics by replacing `ConfigMap` *iter8config-metrics* (defined in the *iter8* namespace) with a new `ConfigMap`.
 
@@ -318,7 +318,7 @@ kubectl delete namespace bookinfo-iter8
 
 ### Inspect progress using Grafana
 
-You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here](../../integrations/grafana/).
+You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here]({{< ref "grafana" >}}).
 
 ### Inspect progress using Kiali
 
