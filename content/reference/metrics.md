@@ -9,7 +9,7 @@ This document describes iter8's out-of-the-box metrics, the anatomy of a metric 
 
 ## Metrics defined by iter8
 
-By default, iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the success criteria of an _experiment_ specification, as shown in the [`Experiment` CRD documentation](../experiment/).
+By default, iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the success criteria of an _experiment_ specification, as shown in the [`Experiment` CRD documentation]({{< ref "experiment" >}}).
 
 During an `experiment`, for every call made from  _iter8-controller_ to _iter8-analytics_, the latter in turn calls Prometheus to retrieve values of the metrics referenced by the Kubernetes `experiment` resource. _Iter8-analytics_ analyzes the service versions that are part of the experiment and arrives at an assessment based on their metric values. It returns this assessment to _iter8-controller_.
 

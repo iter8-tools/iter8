@@ -104,6 +104,18 @@ weight: 3
 ##### Text
 
 Below the front matter, directly add Markdown.
+
+##### Links to other pages
+
+Use the `ref` or `relref` shortcodes to link to other pages.
+
+```md
+[alt text]({{< rel "[page name]" >}})
+```
+
+The `ref` and `relref` shortcodes will automatically search for pages based on their logical names or their relative paths. The advantage of using these short codes is that Hugo will check the validity of these links on build, allowing for greater maintainability.
+
+For more information, see [here](https://gohugo.io/content-management/shortcodes/#ref-and-relref).
                                                
 ##### Images
 
