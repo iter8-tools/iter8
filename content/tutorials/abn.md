@@ -12,7 +12,7 @@ You will learn:
 
 - how to define application specific metrics;
 - how to specify a reward metric; and
-- how to execute an A/B/N experiment with iter8;
+- how to execute an A/B/n experiment with iter8;
 
 The content of this tutorial is captured in this video (COMING SOON).
 
@@ -29,12 +29,12 @@ The version of the bookinfo _productpage_ service used in this tutorial has been
 These changes enable us to visually distinguish between versions when using a browser and to configure the behavior with respect to metrics.
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
-**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here](../installation/kubernetes/).
+**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
 
 ## Define New Metrics
 
 Out of the box, iter8 comes with a set of predefined metrics.
-For details of metrics definitions provided in iter8, see the [metrics reference](../../reference/metrics).
+For details of metrics definitions provided in iter8, see the [metrics reference]({{< ref "metrics" >}}).
 
 You can augment the default set of metrics by replacing `ConfigMap` *iter8config-metrics* (defined in the *iter8* namespace) with a new `ConfigMap`.
 
@@ -124,22 +124,19 @@ You should only have to do this once.
 To deploy the Bookinfo application, create a namespace configured to enable auto-injection of the Istio sidecar. You can use whatever namespace name you wish. By default, the namespace `bookinfo-iter8` is created.
 
 ```bash
-export NAMESPACE=bookinfo-iter8
-curl -s {{< resourceAbsUrl path="tutorials/namespace.yaml" >}} \
-  | sed "s#bookinfo-iter8#$NAMESPACE#" \
-  | kubectl apply -f -
+kubectl apply -f {{< resourceAbsUrl path="tutorials/namespace.yaml" >}}
 ```
 
 Next, deploy the application:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
 ```
 
 You should see pods for each of the four microservices:
 
 ```bash
-kubectl --namespace $NAMESPACE get pods
+kubectl --namespace bookinfo-iter8 get pods
 ```
 
 Note that we deployed version *v1* of the *productpage* microsevice; that is, *productpage-v1*.
@@ -150,13 +147,13 @@ Each pod should have two containers, since the Istio sidecar was injected into e
 Expose the Bookinfo application by defining an Istio `Gateway`, `VirtualService` and `DestinationRule`:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}
 ```
 
 You can inspect the created resources:
 
 ```bash
-kubectl --namespace $NAMESPACE get gateway,virtualservice,destinationrule
+kubectl --namespace bookinfo-iter8 get gateway,virtualservice,destinationrule
 ```
 
 Note that the service has been associated with a fake host, `bookinfo.example.com` for demonstration purposes.
@@ -189,16 +186,16 @@ We filter the response to see the color being used to display the text "*William
 The color varies between versions giving us a visual way to distinguish between them.
 Initially it should be *red*.
 
-## Create an A/B/N `Experiment`
+## Create an A/B/n `Experiment`
 
-We will now define an A/B/N experiment to compare versions *v2* and *v3* of the *productpage* application to the existing version, *v1*.
+We will now define an A/B/n experiment to compare versions *v2* and *v3* of the *productpage* application to the existing version, *v1*.
 These versions are visually identical except for the color of the text "*William Shakespeare's*" that appears in the page *Summary*.
 In version *v2* they are *gold* and in version *v3* they are *green*.
 
 In addition to the visual difference, the *v2* version has a high number of books sold (it is greatest of the three versions) but it has a long response time.
 The *v3* version has an intermediate number of books sold (compared to the other versions) and a response time comparable to the *v1* version.
 
-To describe a A/B/N experiment, create an iter8 `Experiment` that identifies the original, or *baseline* version and the new, or *candidate* versions and some evaluation criteria including the identification of a *reward* metric.
+To describe a A/B/n experiment, create an iter8 `Experiment` that identifies the original, or *baseline* version and the new, or *candidate* versions and some evaluation criteria including the identification of a *reward* metric.
 For example:
 
 ```yaml
@@ -254,13 +251,13 @@ The additional parameters control how long the experiment should run and how muc
 The experiment can be created using the command:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}}
 ```
 
 Inspection of the new experiment shows that it is paused because the specified candidate versions cannot be found in the cluster:
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                   TYPE    HOSTS                                PHASE   WINNER FOUND   CURRENT BEST   STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Pause                                 TargetsError: Missing Candidate
@@ -273,13 +270,13 @@ Once the candidate versions are deployed, the experiment will start automaticall
 To deploy the *v2* and *v3* versions of the *productpage* microservice, execute:
 
 ```bash
-kubectl --namespace $NAMESPACE apply -f {{< resourceAbsUrl path="tutorials/productpage-v2.yaml" >}} -f {{< resourceAbsUrl path="tutorials/productpage-v3.yaml" >}}
+kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/productpage-v2.yaml" >}} -f {{< resourceAbsUrl path="tutorials/productpage-v3.yaml" >}}
 ```
 
 Once its corresponding pods have started, the `Experiment` will show that it is progressing:
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                   TYPE    HOSTS                                PHASE         WINNER FOUND   CURRENT BEST     STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   false          productpage-v3   IterationUpdate: Iteration 3/20 completed
@@ -292,7 +289,7 @@ Based on intermediate evaluations, traffic will be adjusted between the versions
 iter8 will eventually identify that the best version is the candidate, `productpage-v3` and that it is confident that this choice will be the final choice (by indicating that a *winner* has been found:
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                   TYPE    HOSTS                                PHASE         WINNER FOUND   CURRENT BEST     STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   true           productpage-v3   IterationUpdate: Iteration 7/20 completed
@@ -303,7 +300,7 @@ If iter8 is unable to determine a winner with confidence, the experiment will fa
 When the experiment is finished (about 5 minutes), you will see that all traffic has been shifted to the winner, *productpage-v3*:
 
 ```bash
-kubectl --namespace $NAMESPACE get experiment
+kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                   TYPE    HOSTS                                PHASE       WINNER FOUND   CURRENT BEST     STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Completed   true           productpage-v3   ExperimentCompleted: Traffic To Winner
@@ -314,14 +311,14 @@ productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Completed   
 To clean up, delete the namespace:
 
 ```bash
-kubectl delete namespace $NAMESPACE
+kubectl delete namespace bookinfo-iter8
 ```
 
 ## Other things to try (before cleanup)
 
 ### Inspect progress using Grafana
 
-Coming soon
+You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here]({{< ref "grafana" >}}).
 
 ### Inspect progress using Kiali
 

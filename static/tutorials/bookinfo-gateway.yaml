@@ -17,7 +17,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   labels:
-    iter8-tools/host: productpage
+    iter8-tools/router: productpage.bookinfo-iter8.svc.cluster.local
     iter8-tools/role: stable
   name: bookinfo
 spec:
@@ -51,7 +51,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   labels:
-    iter8-tools/host: productpage
+    iter8-tools/router: productpage.bookinfo-iter8.svc.cluster.local
     iter8-tools/role: stable
   name: bookinfo
 spec:

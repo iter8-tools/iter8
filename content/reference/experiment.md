@@ -7,8 +7,12 @@ summary: Introduction to iter8 experiment
 
 The *Experiment* CRD(Custom Resource Definition) contains 2 sections: _spec_ and _stauts_. _spec_ provides you the schema to configure your test while _status_ reflects runtime assesment details about the experiment. You can find the crd yaml here[link].
 
-Let's go through a sample Experiment CR:
 
+Let's go through a sample Experiment CR to understand fields in each section:
+
+
+## apiVersion/Kind/Metadata
+Current version is v1alpha2.
 ```yaml
 apiVersion: iter8.tools/v1alpha2
 kind: Experiment
@@ -17,132 +21,182 @@ metadata:
   # each experiment can only 
   name: reviews-experiment
   namespace: test
+```
+
+## Spec
+```yaml
 spec:
+
   # service section contains infomation on the target service that experiment will test on
   # required
   service:
+
     # the kind of versions
     # optional; options: {Deployment, Service}; default is Deployment
     kind: Service
+
     # name of internal service that directs traffic to experiment versions
     # optional when version kind is Service
     # required when version kind is Deployment
     name: reviews
+
     # name of baseline version
     # required
     baseline: reviews-v1
+
     # list of names of candidate versions
     # required
     candidates:
     - reviews-v2
     - reviews-v3
+
   # this section gives instructions on traffic management for this experiment
   trafficControl:
+
     # this id refers to the id of router used to handle traffic for the experiment
-	  # optional; default is the first entry of effictive host
+    # optional; default is the first entry of effictive host
     routerID: reviews-router
+
     # the strategy used to shift traffic
-	  # optional; options are {progressive, top_2, uniform}: default is progressive
+    # optional; options: {progressive, top_2, uniform}: default is progressive
     strategy: progressive
+
     # determines traffic split status at the end of experiment
-    # 
-    onTermination: 
+    # optional; options: {to_winner,to_baseline,keep_last}; default is to_winner
+    onTermination: to_winner
 
+    # istio matching clauses used to restrict traffic to service
     match: 
+      http:
+       - uri:
+           prefix: "/wpcatalog"
 
-    maxIncrement: 
-  # 
-  analyticsEndpoint: http://127.0.0.1:57105
+    # upperlimit of traffic increment for a version in one iteration
+    # optional; default is 100
+    maxIncrement: 20
+
+  # endpoint of analytics service
+  # optional; default is http://iter8-analytics.iter8:8080
+  analyticsEndpoint: http://iter8-analytics.iter8:8080
+
+  # the list of criteria that defines success of versions
+  # optio
   criteria:
   - metric: iter8_latency
     threshold:
       type: relative
       value: 3000
+
+  # length and number of intervals to re-evaluate the assessment
   duration:
-    interval: 1s
+    interval: 20s
     maxIterations: 1
-  metrics:
-    counter_metrics:
-    - name: iter8_request_count
-      query_template: sum(increase(istio_requests_total{reporter='source',job='envoy-stats'}[$interval]))
-        by ($version_labels)
-    - name: iter8_total_latency
-      query_template: sum(increase(istio_request_duration_milliseconds_sum{reporter='source',job='envoy-stats'}[$interval]))
-        by ($version_labels)
-    - name: iter8_error_count
-      preferred_direction: lower
-      query_template: sum(increase(istio_requests_total{response_code=~'5..',reporter='source',job='envoy-stats'}[$interval]))
-        by ($version_labels)
-    ratio_metrics:
-    - denominator: iter8_request_count
-      name: iter8_mean_latency
-      numerator: iter8_total_latency
-      preferred_direction: lower
-    - denominator: iter8_request_count
-      name: iter8_error_rate
-      numerator: iter8_error_count
-      preferred_direction: lower
-      zero_to_one: true
+```
+
+## Status
+```yaml
 status:
-  analysisState: {}
+  # assessment from analytics on testing versions
   assessment:
+
+    # assessment details for baseline version
     baseline:
+
+      # generated uuid for the version in this experiment
       id: baseline
+
+      # name of version
       name: reviews-v1
+
+      # total requests that have been received by the version
       request_count: 10
+
+      # recommended traffic weight to this version
       weight: 0
+
+      # probability of being the best version
       win_probability: 0
+
+    # list of candidate assessments
     candidates:
-    - id: candidate-0
-      name: reviews-v2
-      request_count: 10
-      weight: 0
-      win_probability: 0
-    - id: candidate-1
-      name: reviews-v3
-      request_count: 10
-      weight: 100
-      win_probability: 100
+    # same format as baseline assessment
+    - ...
+
+    # assessment for winner version
     winner:
+
+      # id of current best version
       current_best_version: candidate-1
+
+      # name of the current best version
       name: reviews-v3
+
+      # indicates whether the current best version is winner or not
       winning_version_found: true
+
+  # A list of conditions reflecting status of the experiment from the controller
   conditions:
+
+    # the last time when this condition is updated
   - lastTransitionTime: "2020-08-13T17:26:37Z"
+
+    # a human-readable message explaining the status of this condition
     message: ""
+
+    # the reason of updating this condition
     reason: SyncMetricsSucceeded
+
+    # status of the condition; value can be "True", "False" or "Unknown"
     status: "True"
+
+    # type of condition
+    # MetricsSynced indicates whether metrics referenced in the criteria has been read in experiment or not
     type: MetricsSynced
-  - lastTransitionTime: "2020-08-13T17:26:37Z"
-    message: ""
-    reason: TargetsFound
-    status: "True"
+  - ...
+    # TargetsProvided indicates existence of all target objects in the cluster
     type: TargetsProvided
-  - lastTransitionTime: "2020-08-13T17:26:38Z"
-    message: Traffic To Winner
-    reason: ExperimentCompleted
-    status: "True"
+  - ...
+    # indicate completeness of experiment
     type: ExperimentCompleted
-  - lastTransitionTime: "2020-08-13T17:26:38Z"
-    message: ""
-    reason: AnalyticsServiceRunning
-    status: "True"
+  - ...
+    # condition on the analytics server
     type: AnalyticsServiceNormal
-  - lastTransitionTime: "2020-08-13T17:26:37Z"
-    message: ""
-    reason: RoutingRulesReady
-    status: "True"
+  - ...
+    # condition on routing rules readiness
     type: RoutingRulesReady
+
+  # the current iteration experiment is going
   currentIteration: 1
+
+  # list of hosts that will direct traffic to service
   effectiveHosts:
   - reviews
-  endTimestamp: "2020-08-13T17:26:38Z"
+
+  # type of this experiment
+  # Canary: Canary rollout(only one candidate with no reward criteria)
+  # A/B: A/B testing(with one candidate with reward criteria)
+  # A/B/N: A/B/N testing(with more than one candidate)
   experimentType: A/B/N
+
+  # url to access grafana dashboard showing metrics about this experiment
   grafanaURL: localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=test&var-service=reviews&var-baseline=reviews-v1&var-candidate=reviews-v2,reviews-v3&from=1597339597000&to=1597339598992
+
+  # timestamp when experiment is initialized
   initTimestamp: "2020-08-13T17:26:37Z"
+
+  # the timestamp when last iteration updates
   lastUpdateTime: "2020-08-13T17:26:38Z"
+
+  # the latest message on condition of the experiment
   message: 'ExperimentCompleted: Traffic To Winner'
+
+  # the phase of 
   phase: Completed
+
+  # the timestamp when experiment starts
+  # detection of baseline version kicks off the experiment
   startTimestamp: "2020-08-13T17:26:37Z"
 
+  # timestamp when experiment ends
+  endTimestamp: "2020-08-13T17:26:38Z"
 ```
