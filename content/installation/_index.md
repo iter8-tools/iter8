@@ -1,9 +1,9 @@
 ---
 title: Installation
 weight: 20
-chapter: true
+summary: Installing iter8
 ---
 
-# Installation
+These [instructions](kubernetes/) will guide you to install the two iter8 components (iter8-analytics and iter8-controller) on Kubernetes with Istio.
 
-{{% children description="true" depth="999" sort="Weight"%}}
+If [installing on RedHat OpenShift](red-hat/) there are additional considerations to take into account.
