@@ -9,7 +9,9 @@ This document describes iter8's out-of-the-box metrics and how to extend iter8's
 
 ## Iter8's out-of-the-box metrics
 
-Iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the criteria section of an _experiment_ specification, as illustrated in [this tutorial](thistutorial.md) and documented in the [`Experiment` CRD documentation](../experiment). Iter8's out-of-the-box metrics are as follows.
+<!-- TODO: What is thistutorial.md? -->
+
+Iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the criteria section of an _experiment_ specification, as illustrated in [this tutorial](thistutorial.md) and documented in the [`Experiment` CRD documentation]({{< ref "experiment" >}}). Iter8's out-of-the-box metrics are as follows.
 
 Metric name        | Description 
 -------------------|------------------------
@@ -30,7 +32,7 @@ Field | Type | Description | Required
 ------|-------|--------|--------------
 *name*    | *string* | Name of the metric | yes
 *query_template*    | *string* | Prometheus query template used to fetch this metric (see [below](#query-template)) | yes
-*preferred_direction*    | *higher* or *lower* | This field indicates if higher values of the metric or preferred or lower values are preferred. It is of type enum with two possible values, *higher* or *lower*. For example, the *iter8_error_count* metric has a preferred direction which is *lower*. Preferred direction needs to be specified if you intend to use this as a reward metric or a metric with thresholds within experiment criteria (see [`Experiment` CRD documentation](../experiment)) | no
+*preferred_direction*    | *higher* or *lower* | This field indicates if higher values of the metric or preferred or lower values are preferred. It is of type enum with two possible values, *higher* or *lower*. For example, the *iter8_error_count* metric has a preferred direction which is *lower*. Preferred direction needs to be specified if you intend to use this as a reward metric or a metric with thresholds within experiment criteria (see [`Experiment` CRD documentation]({{< ref "experiment" >}})) | no
 *units*    | *string* | Unit of measurement for this metric. For example, *iter8_latency* is a metric available out-of-the-box in iter8 and is measured in milli seconds. This field is used by iter8's KUI and Kiali integrations to format display. | no
 *description*    | *string* | A description of this metric. This field is used by iter8's KUI and Kiali integrations to format display. | no
 
@@ -63,14 +65,14 @@ Field | Type | Description | Required
 *name*    | *string* | Name of the metric | yes
 *numerator*    | *string* | The counter metric in the numerator of the ratio | yes
 *denominator*    | *string* | The counter metric in the denominator of the ratio | yes
-*preferred_direction*    | *higher* or *lower* | This field indicates if higher values of the metric or preferred or lower values are preferred. It is of type enum with two possible values, *higher* or *lower*. For example, the *iter8_latency* metric has a preferred direction which is *lower*. Preferred direction needs to be specified if you intend to use this as a reward metric or a metric with thresholds within experiment criteria (see [`Experiment` CRD documentation](../experiment)) | no
+*preferred_direction*    | *higher* or *lower* | This field indicates if higher values of the metric or preferred or lower values are preferred. It is of type enum with two possible values, *higher* or *lower*. For example, the *iter8_latency* metric has a preferred direction which is *lower*. Preferred direction needs to be specified if you intend to use this as a reward metric or a metric with thresholds within experiment criteria (see [`Experiment` CRD documentation]({{< ref "experiment" >}})) | no
 *zero_to_one*    | *boolean* | This field indicates if the ratio metric always takes value in the range [0, 1]. For example, the *iter8_error_rate* metric has zero_to_one set to true. This field is optional and false by default. However, setting this field to true for metrics which possess this property helps iter8 provide better assessments. | no
 *units*    | *string* | Unit of measurement for this metric. For example, *iter8_latency* has milli seconds as its units. This field is used by iter8's KUI and Kiali integrations to format display. | no
 *description*    | *string* | A description of this metric. This field is used by iter8's KUI and Kiali integrations to format display. | no
 
 ### Adding new metrics in iter8
 
-You can add new counter metrics in iter8 by extending the `counter_metrics.yaml` section of the configmap and new ratio metrics in iter8 by extending the `ratio_metrics.yaml` section of the configmap. For example, in the [A/B/n rollout tutorial](../../tutorials/abn), during the step where you defined new metrics, you added the three new counter metrics and two new ratio metrics and extended the configmap as shown below.
+You can add new counter metrics in iter8 by extending the `counter_metrics.yaml` section of the configmap and new ratio metrics in iter8 by extending the `ratio_metrics.yaml` section of the configmap. For example, in the [A/B/n rollout tutorial]({{< ref "abn" >}}), during the step where you defined new metrics, you added the three new counter metrics and two new ratio metrics and extended the configmap as shown below.
 
 ```yaml
 apiVersion: v1

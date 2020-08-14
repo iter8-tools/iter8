@@ -46,7 +46,7 @@ PROMETHEUS_PASSWORD=$(kubectl -n istio-system get secret htpasswd -o jsonpath='{
 
 ### Install the iter8 controller
 
-The [quick install instructions](../kubernetes/#quick-installation) can be used to install the iter8 controller. The Service Mesh currently uses Istio telemetry version `v1`:
+The [quick install instructions]({{< ref "kubernetes/#quick-installation" >}}) can be used to install the iter8 controller. The Service Mesh currently uses Istio telemetry version `v1`:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0-preview/install/iter8-controller.yaml
