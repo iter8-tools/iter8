@@ -108,6 +108,21 @@ spec:
   duration:
     interval: 20s
     maxIterations: 1
+
+  # user actions to override the current status of the experiment
+  manualOverride:
+
+    # options: {pause, resume, terminate}
+    # required
+    action:
+
+    # Traffic split status specification
+    # Applied to action terminate only
+    # example:
+    #   reviews-v2:80
+    #   reviews-v3:20
+    # optional
+    trafficSplit:
 ```
 
 ## Status
