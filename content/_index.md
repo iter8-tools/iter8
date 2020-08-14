@@ -23,4 +23,4 @@ Use iter8's analytics-driven continuous experimentation for reliable and frequen
 
 ***
 
-[Explore iter8](about/)
+[Explore iter8]({{< ref "about" >}})
