@@ -43,7 +43,7 @@ body {
     color: #777;
 }
 body #chapter h1 {
-    font-size: 3.5rem;
+    font-size: 3.25rem;
 }
 @media only all and (min-width: 48em) and (max-width: 59.938em) {
     body #chapter h1 {
