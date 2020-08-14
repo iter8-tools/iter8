@@ -5,7 +5,7 @@ weight: 21
 summary: Learn how to perform an A/B/n rollout
 ---
 
-This tutorial shows how _iter8_ can be used to perform A/B/n rollout on several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
+This tutorial shows how iter8 can be used to perform A/B/n rollout on several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
 
 This tutorial has eight steps, which are meant to be tried in order.
 You will learn:
@@ -17,10 +17,10 @@ You will learn:
 The content of this tutorial is captured in this video (COMING SOON).
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) distributed with [Istio](https://istio.io).
-This application comprises 4 microservies: _productpage_, _details_, _reviews_, and _ratings_.
-Of these, _productpage_ is a user-facing service while the others are backend services.
+This application comprises 4 microservies: *productpage*, *details*, *reviews*, and *ratings*.
+Of these, *productpage* is a user-facing service while the others are backend services.
 
-The version of the bookinfo _productpage_ service used in this tutorial has been modified from the original to allow the following behaviors (all configurable via environment variables when deploying):
+The version of the bookinfo *productpage* service used in this tutorial has been modified from the original to allow the following behaviors (all configurable via environment variables when deploying):
 
 - change the *color* of a phrase "*William Shakespeare's*" in the *Summary* line of the returned page;
 - configurable delays in query response time (*delay_seconds* with probability *delay_probabilities*); and
@@ -29,12 +29,12 @@ The version of the bookinfo _productpage_ service used in this tutorial has been
 These changes enable us to visually distinguish between versions when using a browser and to configure the behavior with respect to metrics.
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
-**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here](../../installation/kubernetes/).
+**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
 
 ## Define New Metrics
 
 Out of the box, iter8 comes with a set of predefined metrics.
-For details of metrics definitions provided in iter8, see the [metrics reference](../../../reference/metrics).
+For details of metrics definitions provided in iter8, see the [metrics reference]({{< ref "metrics" >}}).
 
 You can augment the default set of metrics by replacing `ConfigMap` *iter8config-metrics* (defined in the *iter8* namespace) with a new `ConfigMap`.
 
@@ -50,7 +50,7 @@ To define the ratio metric, add the following to the `counter_metrics.yaml` fiel
   query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='envoy-stats',reporter='source'}[$interval])
 ```
 
-and the following to the ratio_metrics.yaml` value:
+and the following to the `ratio_metrics.yaml` value:
 
 ```yaml
 - name: le_500_ms_latency_percentile
@@ -60,7 +60,7 @@ and the following to the ratio_metrics.yaml` value:
   zero_to_one: true
 ```
 
-To define the reward metric, ``, add the following to the `counter_metrics.yaml` field:
+To define the reward metric, `books_purchased_total`, add the following to the `counter_metrics.yaml` field:
 
 ```yaml
 - name: books_purchased_total

@@ -11,13 +11,13 @@ These instructions show you how to set up iter8 on Kubernetes with Istio.
 
 * Kubernetes v1.11 or newer.
 * Istio v1.1.5 and newer.
-* Your Istio installation must have at least the **istio-pilot** as well as **telemetry** and **Prometheus** enabled.
+* Your Istio installation must have at least the **istio-pilot**, **telemetry** and **Prometheus** enabled.
 
-## Install iter8 on Kubernetes
+## Install iter8 on Kubernetes and Istio
 
-iter8 has two components, _iter8_analytics_ and _iter8_controller_. To install them, follow the instructions below. For additional considerations when installing iter8 on Red Hat OpenShift, check out [these instructions]({{< ref "red-hat" >}}).
+iter8 has two components, `iter8_analytics` and `iter8_controller`. To install them, follow the instructions below. When installing iter8 on Red Hat OpenShift, use [these instructions]({{< ref "red-hat" >}}) instead.
 
-### Quick installation
+### Quick Installation
 
 To install iter8 with the default settings, you can run the following install script:
 
@@ -60,7 +60,7 @@ iter8-controller         ClusterIP   172.21.62.217   <none>        443/TCP   20s
 iter8-analytics          ClusterIP   172.21.106.44   <none>        80/TCP    76s
 ```
 
-## Uninstall _iter8_
+## Uninstalling iter8
 
 If you want to uninstall all _iter8_ components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
