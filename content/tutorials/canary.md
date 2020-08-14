@@ -5,7 +5,7 @@ weight: 20
 summary: Learn how to perform a canary release
 ---
 
-This tutorial shows how _iter8_ can be used to perform a canary release by gradually shifting traffic from one version of a microservice to another while evaluating the behavior of the new version.
+This tutorial shows how iter8 can be used to perform a canary release by gradually shifting traffic from one version of a microservice to another while evaluating the behavior of the new version.
 Traffic is fully shifted only if the behavior the candidate version meets specified acceptance criteria.
 
 This tutorial has six steps, which are meant to be tried in order.
