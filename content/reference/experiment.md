@@ -23,9 +23,10 @@ metadata:
   namespace: test
 ```
 
-##Spec
+## Spec
 ```yaml
 spec:
+
   # service section contains infomation on the target service that experiment will test on
   # required
   service:
@@ -53,11 +54,11 @@ spec:
   trafficControl:
 
     # this id refers to the id of router used to handle traffic for the experiment
-	  # optional; default is the first entry of effictive host
+    # optional; default is the first entry of effictive host
     routerID: reviews-router
 
     # the strategy used to shift traffic
-	  # optional; options: {progressive, top_2, uniform}: default is progressive
+    # optional; options: {progressive, top_2, uniform}: default is progressive
     strategy: progressive
 
     # determines traffic split status at the end of experiment
@@ -75,7 +76,7 @@ spec:
     maxIncrement: 20
 
   # endpoint of analytics service
-	# optional; default is http://iter8-analytics.iter8:8080
+  # optional; default is http://iter8-analytics.iter8:8080
   analyticsEndpoint: http://iter8-analytics.iter8:8080
 
   # the list of criteria that defines success of versions
@@ -92,7 +93,7 @@ spec:
     maxIterations: 1
 ```
 
-##Status
+## Status
 ```yaml
 status:
   # assessment from analytics on testing versions
