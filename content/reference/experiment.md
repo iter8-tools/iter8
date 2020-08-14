@@ -117,11 +117,11 @@ spec:
     action:
 
     # Traffic split status specification
-	  # Applied to action terminate only
-	  # example:
-	  #   reviews-v2:80
-	  #   reviews-v3:20
-	  # optional
+    # Applied to action terminate only
+    # example:
+    #   reviews-v2:80
+    #   reviews-v3:20
+    # optional
     trafficSplit:
 ```
 
