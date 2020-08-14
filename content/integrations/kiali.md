@@ -1,7 +1,7 @@
 
 ---
 menuTitle: Kiali
-title: Integrating with Kiali
+title: Kiali
 weight: 15
 summary: Describes iter8's integrations with Kiali
 ---

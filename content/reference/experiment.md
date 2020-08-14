@@ -1,6 +1,6 @@
 ---
 menuTitle: Experiment
-title: Iter8's experiment CRD
+title: Experiment CRD
 weight: 20
 summary: Introduction to iter8 experiment
 ---

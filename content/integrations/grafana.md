@@ -1,6 +1,6 @@
 ---
 menuTitle: Grafana
-title: Integrating with Grafana
+title: Grafana
 weight: 20
 summary: Describes how to use Grafana with iter8
 ---

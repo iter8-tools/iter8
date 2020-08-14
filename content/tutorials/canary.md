@@ -1,6 +1,6 @@
 ---
-menuTitle: Canary testing
-title: Getting started with canary testing
+menuTitle: Canary Testing
+title: Canary Testing
 weight: 20
 summary: Learn how to perform a canary release
 ---

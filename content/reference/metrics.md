@@ -1,6 +1,6 @@
 ---
 menuTitle: Metrics
-title: Iter8 metrics
+title: Metrics
 weight: 62
 summary: Iter8 metrics and customization
 ---
