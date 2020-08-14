@@ -5,7 +5,7 @@ weight: 20
 summary: Introduction to iter8 experiment
 ---
 
-The *Experiment* CRD(Custom Resource Definition) contains 2 sections: _spec_ and _stauts_. _spec_ provides you the schema to configure your test while _status_ reflects runtime assesment details about the experiment. You can find the crd yaml here[link].
+The *Experiment* CRD(Custom Resource Definition) contains 2 sections: _spec_ and _stauts_. _spec_ provides you the schema to configure your test while _status_ reflects runtime assesment details about the experiment. You can find the CRD yaml [here](https://github.com/iter8-tools/iter8/blob/master/install/helm/iter8-controller/templates/crds/v1alpha2/iter8.tools_experiments.yaml).
 
 
 Let's go through a sample Experiment CR to understand fields in each section:
@@ -18,7 +18,6 @@ apiVersion: iter8.tools/v1alpha2
 kind: Experiment
 metadata:
   # name of experiment
-  # each experiment can only 
   name: reviews-experiment
   namespace: test
 ```
@@ -40,6 +39,10 @@ spec:
     # required when version kind is Deployment
     name: reviews
 
+    # namespace of the service
+    # optional; default is the same as experiment namespace
+    namespace: test
+
     # name of baseline version
     # required
     baseline: reviews-v1
@@ -49,6 +52,16 @@ spec:
     candidates:
     - reviews-v2
     - reviews-v3
+
+    # port number of service listening on
+    # optional; 
+    port: 9080
+
+    # list of external hosts and gateways associated(defined in istio Gateway)
+    # optional;
+    hosts:
+    - name: "reviews.com"
+      gateway: reviews-service
 
   # this section gives instructions on traffic management for this experiment
   trafficControl:
@@ -74,6 +87,10 @@ spec:
     # upperlimit of traffic increment for a version in one iteration
     # optional; default is 100
     maxIncrement: 20
+
+  # Whether routing rules should be deleted at the end of experiment
+  # optional; default is false
+  cleanup: false
 
   # endpoint of analytics service
   # optional; default is http://iter8-analytics.iter8:8080
