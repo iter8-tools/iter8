@@ -29,7 +29,9 @@ The version of the bookinfo *productpage* service used in this tutorial has been
 These changes enable us to visually distinguish between versions when using a browser and to configure the behavior with respect to metrics.
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
-**Note** This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
+{{% notice info %}}
+This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
+{{% /notice %}}
 
 ## Define New Metrics
 
@@ -73,7 +75,9 @@ We can do all of the above as follows:
 kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}
 ```
 
-**Note** The above command assumes that you are using a new version of Istio (version 1.5 or greater) and not using it's "mixer" component. If the mixer is being used, use this [file]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}} ) instead.
+{{% notice tip %}}
+The above command assumes that you are using a new version of Istio (version 1.5 or greater) and not using it's "mixer" component. If the mixer is being used, use this [file]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) instead.
+{{% /notice %}}
 
 ## Configure Prometheus
 
@@ -170,7 +174,9 @@ curl --header 'Host: bookinfo.example.com' -o /dev/null -s -w "%{http_code}\n" "
 If everything is working, the command above should return `200`.
 Note that the curl command above sets the `Host` header to match the host we associated the VirtualService with (`bookinfo.example.com`).
 
-**Note**: If you want to access the application from your browser, you will need to set this header using a browser plugin.
+{{% notice tip %}}
+If you want to access the application from your browser, you will need to set this header using a browser plugin.
+{{% /notice %}}
 
 ## Generate load
 

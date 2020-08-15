@@ -18,7 +18,9 @@ The tutorial is based on the [Bookinfo sample application](https://istio.io/docs
 This application comprises 4 microservies: _productpage_, _details_, _reviews_, and _ratings_.
 Of these, _productpage_ is a user-facing service while the others are backend services.
 
-This tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
+{{% notice info %}}
+This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
+{{% /notice %}}
 
 ## Deploy the Bookinfo application
 
@@ -71,7 +73,9 @@ curl --header 'Host: bookinfo.example.com' -o /dev/null -s -w "%{http_code}\n" "
 If everything is working, the command above should return `200`.
 Note that the curl command above sets the `Host` header to match the host we associated the VirtualService with (`bookinfo.example.com`).
 
-**Note**: If you want to access the application from your browser, you will need to set this header using a browser plugin.
+{{% notice tip %}}
+If you want to access the application from your browser, you will need to set this header using a browser plugin.
+{{% /notice %}}
 
 ## Generate load
 
