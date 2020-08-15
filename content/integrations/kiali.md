@@ -62,7 +62,7 @@ Restart the Kiali pods:
 kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system get pod --selector='app=kiali' -o jsonpath='{.items[0].metadata.name}')
 ```
 
-You can check if the pod has successfully restarted by inspectikng the pods:
+You can check if the pod has successfully restarted by inspecting the pods:
 
 ```bash
 kubectl --namespace istio-system get pods
@@ -70,7 +70,11 @@ kubectl --namespace istio-system get pods
 
 Install iter8 v0.2.1. See [install instructions](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_install.md)
 
-Start kiali using: `istioctl dashboard kiali`
+Start kiali using: 
+
+```bash
+istioctl dashboard kiali
+```
 
 ## Features of the iter8 Extension for Kiali
 
@@ -100,17 +104,33 @@ Try using this command to install and start operator
 bash <(curl -L https://kiali.io/getLatestKialiOperator) --accessible-namespaces '**' -oiv latest -kiv latest --operator-install-kiali true
 ```
 
+---
+
 **Issue**: The iter8 extension is not visible in Kiali
 
-Check the configmap `kiali` using this command `kubectl  --namespace istio-systemedit configmap kiali`. Ensure that `spec.extensions.iter_8.enabled` is set to `true`. To ensure that this configuration has taken effect, restart the kiali pod:
+Check the configmap `kiali` using this command:
+
+ ```bash
+ kubectl  --namespace istio-systemedit configmap kiali
+ ```
+
+Ensure that `spec.extensions.iter_8.enabled` is set to `true`. To ensure that this configuration has taken effect, restart the kiali pod:
 
 ```bash
 kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system get pod --selector='app=kiali' -o jsonpath='{.items[0].metadata.name}')
 ```
 
+---
+
 **Issue**: Error message `Kiali has iter8 extension enabled but it is not detected in the cluster`
 
-Make sure iter8 is installed, Use `kubectl --namespace iter8 get pods` to check that both iter80-controller and iter8-analytics are functioning.
+Make sure iter8 is installed, check that both iter80-controller and iter8-analytics are functioning:
+
+```bash
+kubectl --namespace iter8 get pods
+```
+
+---
 
 **Issue**: Experiment(s) are missing in the iter8 main page
 
