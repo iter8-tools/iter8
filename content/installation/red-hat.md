@@ -19,7 +19,7 @@ By default, iter8 uses the Prometheus service installed as part of the Red Hat O
 
 ### Install the iter8 analytics service
 
-Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/v1.0.0-preview/iter8-analytics.tgz) for the iter8-analytics service. The following options can be used to generate the needed yaml:
+Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/v1.0.0-preview/iter8-analytics.tgz) for the iter8-analytics service. The following options can be used to generate the needed YAML:
 
 ```bash
 REPO=iter8/iter8-analytics

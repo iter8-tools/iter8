@@ -5,14 +5,14 @@ weight: 20
 summary: Introduction to iter8 experiment
 ---
 
-The *Experiment* CRD(Custom Resource Definition) contains 2 sections: _spec_ and _stauts_. _spec_ provides you the schema to configure your test while _status_ reflects runtime assesment details about the experiment. You can find the CRD yaml [here](https://github.com/iter8-tools/iter8/blob/master/install/helm/iter8-controller/templates/crds/v1alpha2/iter8.tools_experiments.yaml).
-
+The *Experiment* CRD(Custom Resource Definition) contains 2 sections: `spec` and `stauts`. `spec` provides you the schema to configure your test while `status` reflects runtime assesment details about the experiment. You can find the CRD yaml [here](https://github.com/iter8-tools/iter8/blob/master/install/helm/iter8-controller/templates/crds/v1alpha2/iter8.tools_experiments.yaml).
 
 Let's go through a sample Experiment CR to understand fields in each section:
 
-
 ## apiVersion/Kind/Metadata
+
 Current version is v1alpha2.
+
 ```yaml
 apiVersion: iter8.tools/v1alpha2
 kind: Experiment
@@ -23,6 +23,7 @@ metadata:
 ```
 
 ## Spec
+
 ```yaml
 spec:
 
@@ -54,10 +55,10 @@ spec:
     - reviews-v3
 
     # port number of service listening on
-    # optional; 
+    # optional;
     port: 9080
 
-    # list of external hosts and gateways associated(defined in istio Gateway)
+    # list of external hosts and gateways associated (defined in Istio Gateway)
     # optional;
     hosts:
     - name: "reviews.com"
@@ -78,8 +79,8 @@ spec:
     # optional; options: {to_winner,to_baseline,keep_last}; default is to_winner
     onTermination: to_winner
 
-    # istio matching clauses used to restrict traffic to service
-    match: 
+    # Istio matching clauses used to restrict traffic to service
+    match:
       http:
        - uri:
            prefix: "/wpcatalog"
@@ -126,6 +127,7 @@ spec:
 ```
 
 ## Status
+
 ```yaml
 status:
   # assessment from analytics on testing versions
@@ -222,7 +224,7 @@ status:
   # the latest message on condition of the experiment
   message: 'ExperimentCompleted: Traffic To Winner'
 
-  # the phase of 
+  # the phase of
   phase: Completed
 
   # the timestamp when experiment starts
