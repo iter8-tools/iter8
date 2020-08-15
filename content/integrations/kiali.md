@@ -41,8 +41,8 @@ kubectl --namespace kiali-operator edit kialis.kiali.io kiali
 Find the `iter_8` key under `spec.extensions` and set `enabled` to `true`. The relevant portion of the CR is:
 
 ```
-# Kiali enabled integration with Iter8 project.
-# If this extension is enabled, Kiali will communicate with Iter8 controller allowing to manage Experiments and review results.
+# Kiali enabled integration with iter8 project.
+# If this extension is enabled, Kiali will communicate with iter8 controller allowing to manage Experiments and review results.
 # Additional documentation https://iter8.tools/
 #    ---
 #    iter_8:
@@ -70,7 +70,7 @@ kubectl --namespace istio-system get pods
 
 Install iter8 v0.2.1. See [install instructions](https://github.com/iter8-tools/docs/blob/v0.2.1/doc_files/iter8_install.md)
 
-Start kiali using: 
+Start Kiali using:
 
 ```bash
 istioctl dashboard kiali
@@ -96,7 +96,7 @@ You can create new experiment from the Action pulldown on the right of the listi
 
 ## Troubleshooting Guide
 
-**Issue**: Cannot find the kiali CR in namespace `kiali-operator`.
+**Issue**: Cannot find the Kiali CR in namespace `kiali-operator`.
 
 Try using this command to install and start operator
 
@@ -114,7 +114,7 @@ Check the configmap `kiali` using this command:
  kubectl  --namespace istio-systemedit configmap kiali
  ```
 
-Ensure that `spec.extensions.iter_8.enabled` is set to `true`. To ensure that this configuration has taken effect, restart the kiali pod:
+Ensure that `spec.extensions.iter_8.enabled` is set to `true`. To ensure that this configuration has taken effect, restart the Kiali pod:
 
 ```bash
 kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system get pod --selector='app=kiali' -o jsonpath='{.items[0].metadata.name}')

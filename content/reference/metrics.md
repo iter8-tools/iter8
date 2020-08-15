@@ -2,7 +2,7 @@
 menuTitle: Metrics
 title: Metrics
 weight: 62
-summary: Iter8 metrics and customization
+summary: iter8 metrics and customization
 ---
 
 This document describes iter8's out-of-the-box metrics and how to extend iter8's metrics.
@@ -11,9 +11,9 @@ This document describes iter8's out-of-the-box metrics and how to extend iter8's
 
 <!-- TODO: What is thistutorial.md? -->
 
-Iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the criteria section of an _experiment_ specification, as illustrated in [this tutorial](thistutorial.md) and documented in the [`Experiment` CRD documentation]({{< ref "experiment" >}}). Iter8's out-of-the-box metrics are as follows.
+Iter8 leverages the metrics collected by Istio telemetry and stored in Prometheus. Users relying on iter8's out-of-the-box metrics can simply reference them in the criteria section of an `Experiment` specification, as illustrated in [this tutorial]({{< ref "abn" >}}) and documented in the [`Experiment` CRD documentation]({{< ref "experiment" >}}). Iter8's out-of-the-box metrics are as follows.
 
-Metric name        | Description 
+Metric name        | Description
 -------------------|------------------------
 *iter8_request_count*    | total number of HTTP requests to a service version
 *iter8_latency*    | average time in milli seconds taken by a service version to respond to HTTP requests
@@ -22,7 +22,7 @@ Metric name        | Description
 
 ## Extending iter8's metrics
 
-When iter8 is installed, a Kubernetes `ConfigMap` named _iter8config-metrics_ is populated with a definition for each of the above out-of-the-box metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8/f302de20acf0f026a63453657fe88ff0674bee65/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). You can extend iter8's metrics by extending this configmap. Below, we describe the two types of metrics supported by iter8, namely, `counter` and `ratio` metrics and how to extend the configmap in order to add new counter and ratio metrics.
+When iter8 is installed, a Kubernetes `ConfigMap` named `iter8config-metrics` is populated with a definition for each of the above out-of-the-box metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8/f302de20acf0f026a63453657fe88ff0674bee65/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). You can extend iter8's metrics by extending this configmap. Below, we describe the two types of metrics supported by iter8, namely, `counter` and `ratio` metrics and how to extend the configmap in order to add new counter and ratio metrics.
 
 ### Counter metrics
 
@@ -33,10 +33,11 @@ Field | Type | Description | Required
 *name*    | *string* | Name of the metric | yes
 *query_template*    | *string* | Prometheus query template used to fetch this metric (see [below](#query-template)) | yes
 *preferred_direction*    | *higher* or *lower* | This field indicates if higher values of the metric or preferred or lower values are preferred. It is of type enum with two possible values, *higher* or *lower*. For example, the *iter8_error_count* metric has a preferred direction which is *lower*. Preferred direction needs to be specified if you intend to use this as a reward metric or a metric with thresholds within experiment criteria (see [`Experiment` CRD documentation]({{< ref "experiment" >}})) | no
-*units*    | *string* | Unit of measurement for this metric. For example, *iter8_latency* is a metric available out-of-the-box in iter8 and is measured in milli seconds. This field is used by iter8's KUI and Kiali integrations to format display. | no
-*description*    | *string* | A description of this metric. This field is used by iter8's KUI and Kiali integrations to format display. | no
+*units*    | *string* | Unit of measurement for this metric. For example, *iter8_latency* is a metric available out-of-the-box in iter8 and is measured in milli seconds. This field is used by iter8's Kui and Kiali integrations to format display. | no
+*description*    | *string* | A description of this metric. This field is used by iter8's Kui and Kiali integrations to format display. | no
 
 #### Prometheus query template for a counter metric {#query-template}
+
 The Prometheus query template for the counter metric *iter8_error_count* is shown below.
 
 ```
@@ -47,9 +48,9 @@ The query template has two placeholders (i.e., terms beginning with $). These pl
 
 1. The query template has a `group by` clause (specified using the _by_ keyword) with the placeholder `$version_labels` as the group key, which ensures that each item in the Prometheus response vector corresponds to a distinct version. *Iter8* internally maps service versions to Prometheus entities using this placeholder.
 
-2. The length of the recent time window over which this metric is computed is captured by the placeholder `$interval`. 
+2. The length of the recent time window over which this metric is computed is captured by the placeholder `$interval`.
 
-Both these placeholders are required in the query template. When a template is instantiated (i.e., placeholders are substituted with values), it results in a Prometheus query expression. An example of a query instantiated from the above template is shown below. In this example, since distinct versions correspond to distinct deployments of a service, iter8 has substituted `$version_labels` with the prometheus labels `destination_workload, destination_workload_namespace`. Each combination of these prometheus labels corresponds to a distinct version. 
+Both these placeholders are required in the query template. When a template is instantiated (i.e., placeholders are substituted with values), it results in a Prometheus query expression. An example of a query instantiated from the above template is shown below. In this example, since distinct versions correspond to distinct deployments of a service, iter8 has substituted `$version_labels` with the prometheus labels `destination_workload, destination_workload_namespace`. Each combination of these prometheus labels corresponds to a distinct version.
 
 ```
 sum(increase(istio_requests_total{response_code=~'5..',reporter='source',job='envoy-stats'}[300s])) by (destination_workload, destination_workload_namespace)
@@ -67,8 +68,8 @@ Field | Type | Description | Required
 *denominator*    | *string* | The counter metric in the denominator of the ratio | yes
 *preferred_direction*    | *higher* or *lower* | This field indicates if higher values of the metric or preferred or lower values are preferred. It is of type enum with two possible values, *higher* or *lower*. For example, the *iter8_latency* metric has a preferred direction which is *lower*. Preferred direction needs to be specified if you intend to use this as a reward metric or a metric with thresholds within experiment criteria (see [`Experiment` CRD documentation]({{< ref "experiment" >}})) | no
 *zero_to_one*    | *boolean* | This field indicates if the ratio metric always takes value in the range [0, 1]. For example, the *iter8_error_rate* metric has zero_to_one set to true. This field is optional and false by default. However, setting this field to true for metrics which possess this property helps iter8 provide better assessments. | no
-*units*    | *string* | Unit of measurement for this metric. For example, *iter8_latency* has milli seconds as its units. This field is used by iter8's KUI and Kiali integrations to format display. | no
-*description*    | *string* | A description of this metric. This field is used by iter8's KUI and Kiali integrations to format display. | no
+*units*    | *string* | Unit of measurement for this metric. For example, *iter8_latency* has milli seconds as its units. This field is used by iter8's Kui and Kiali integrations to format display. | no
+*description*    | *string* | A description of this metric. This field is used by iter8's Kui and Kiali integrations to format display. | no
 
 ### Adding new metrics in iter8
 
