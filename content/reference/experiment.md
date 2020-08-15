@@ -5,7 +5,7 @@ weight: 20
 summary: Introduction to iter8 experiment
 ---
 
-The *Experiment* CRD(Custom Resource Definition) contains 2 sections: `spec` and `stauts`. `spec` provides you the schema to configure your test while `status` reflects runtime assesment details about the experiment. You can find the CRD yaml [here](https://github.com/iter8-tools/iter8/blob/master/install/helm/iter8-controller/templates/crds/v1alpha2/iter8.tools_experiments.yaml).
+The *Experiment* CRD(Custom Resource Definition) contains 2 sections: `spec` and `stauts`. `spec` provides you the schema to configure your test while `status` reflects runtime assesment details about the experiment. You can find the CRD YAML [here](https://github.com/iter8-tools/iter8/blob/master/install/helm/iter8-controller/templates/crds/v1alpha2/iter8.tools_experiments.yaml).
 
 Let's go through a sample Experiment CR to understand fields in each section:
 
