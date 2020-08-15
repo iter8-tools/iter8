@@ -62,7 +62,7 @@ iter8-analytics          ClusterIP   172.21.106.44   <none>        80/TCP    76s
 
 ## Uninstalling iter8
 
-If you want to uninstall all *iter8* components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
+If you want to uninstall all of iter8 components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller/v1.0.0-preview/install/iter8-controller.yaml
