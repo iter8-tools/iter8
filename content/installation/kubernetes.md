@@ -5,8 +5,6 @@ weight: 10
 summary: Install on Kubernetes and Istio
 ---
 
-These instructions show you how to set up iter8 on Kubernetes with Istio.
-
 ## Prerequisites
 
 * Kubernetes v1.11 or newer.
