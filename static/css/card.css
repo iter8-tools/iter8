@@ -1,32 +1,12 @@
-/* Produce image cards for the home page */
-
-.card {
-  display: inline-block;
-  vertical-align: top;
-  width: 30%;
-  margin: 1%;
-  /* Add shadows to create the "card" effect */
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
+.card-img-top {
+  margin: 0 auto !important;
 }
 
-/* Add some padding inside the card container */
-.container {
-  width: auto;
-  padding: 2px 16px;
-}
-
-.container h4 {
+.card-title {
+  font-size: 1.5rem;
   text-align: center;
 }
 
-.container p {
-  text-align: left;
-}
-
-.cardGroup {
-  width: 100%;
-  text-align: center;
-  /* display: flex; */
-  justify-content: space-between;
+.card-text {
+  text-align: left !important;
 }
