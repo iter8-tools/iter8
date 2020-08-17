@@ -2,7 +2,7 @@
 menuTitle: Kubernetes
 title: Install on Kubernetes 
 weight: 10
-summary: Learn how to install iter8 on Kubernetes and Istio
+summary: Install on Kubernetes and Istio
 ---
 
 ## Prerequisites
