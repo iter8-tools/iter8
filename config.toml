@@ -67,3 +67,9 @@ name = "<i class='fab fa-fw fa-slack'></i> Slack workspace"
 identifier = "slack"
 url = "https://join.slack.com/t/iter8-tools/shared_invite/enQtODU0NTczMTQ5NDU4LTJmNGE1OTBhOWI4NzllZGE0ZjdhM2M3MzJlMjcxYjliMTJlM2YxMzQ4OWQ5NGViYTM2MTU4MWRkZTgxNzZiMzg"
 weight = 20
+
+[[Languages.en.menu.shortcuts]]
+name = "<i class='fas fa-fw fa-pen-nib'></i> Blog"
+identifier = "medium"
+url = "https://medium.com/iter8-tools"
+weight = 30
