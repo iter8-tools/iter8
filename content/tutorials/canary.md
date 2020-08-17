@@ -219,8 +219,8 @@ If you try this version as a candidate, you should see the canary experiment rej
 
 For your reference:
 
-- A YAML for the deployment `reviews-v4` is: {{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}}
-- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: {{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v3_to_reviews-v4.yaml" >}}
+- A YAML for the deployment `reviews-v4` is: [{{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}}]({{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}})
+- A YAML for an canary experiment from _reviews-v3_ to _reviews-v4_ is: [{{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v3_to_reviews-v4.yaml" >}}]({{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v3_to_reviews-v4.yaml" >}})
 
 ### Try a version which returns errors
 
