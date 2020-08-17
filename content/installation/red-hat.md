@@ -5,8 +5,6 @@ weight: 20
 summary: Install on Red Hat OpenShift and Red Hat OpenShift Mesh
 ---
 
-These instructions show you how to set up iter8 on Red Hat OpenShift.
-
 ## Prerequisites
 
 We recommend using the _Red Hat OpenShift Service Mesh_. This can be installed using the Red Hat OpenShift Service Mesh Operator. For details, see: <https://docs.openshift.com/container-platform/4.3/service_mesh/service_mesh_install/installing-ossm.html>.
