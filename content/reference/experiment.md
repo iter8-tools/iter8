@@ -401,9 +401,6 @@ status:
   # A/B/N: A/B/N testing(with more than one candidate)
   experimentType: A/B/N
 
-  # url to access grafana dashboard showing metrics about this experiment
-  grafanaURL: localhost:3000/d/eXPEaNnZz/iter8-application-metrics?var-namespace=test&var-service=reviews&var-baseline=reviews-v1&var-candidate=reviews-v2,reviews-v3&from=1597339597000&to=1597339598992
-
   # timestamp when experiment is initialized
   initTimestamp: "2020-08-13T17:26:37Z"
 
