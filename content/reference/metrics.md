@@ -1,6 +1,6 @@
 ---
 menuTitle: Metrics
-title: Iter8's metrics
+title: Iter8 metrics
 weight: 10
 summary: Iter8's out-of-the-box metrics and how users can define their own metrics
 ---

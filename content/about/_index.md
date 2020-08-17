@@ -1,9 +1,10 @@
 ---
-menuTitle: About
-title: Iter8 enables statistically robust continuous experimentation of microservices in your CI/CD pipelines
+title: About
 weight: 10
 summary: Learn more about iter8
 ---
+
+### Iter8 enables statistically robust continuous experimentation of microservices in your CI/CD pipelines
 
 Use an `iter8 experiment` to safely expose competing versions of a service to application traffic, gather in-depth insights about key performance and business metrics for your microservice versions, and intelligently rollout the best version of your service.
 
