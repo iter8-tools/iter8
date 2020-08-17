@@ -171,7 +171,7 @@ iter8 will quickly identify that the best version is the candidate, `reviews-v3`
 kubectl --namespace bookinfo-iter8 get experiment
 
 NAME                 TYPE     HOSTS       PHASE         WINNER FOUND   CURRENT BEST   STATUS
-reviews-v3-rollout   Canary   [reviews]   Progressing   true           reviews-v2     IterationUpdate: Iteration 3/8 completed
+reviews-v3-rollout   Canary   [reviews]   Progressing   true           reviews-v3     IterationUpdate: Iteration 3/8 completed
 ```
 
 When the experiment is finished (about 2 minutes), you will see that all traffic has been shifted to the winner, *reviews-v3*:
