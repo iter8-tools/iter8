@@ -65,3 +65,16 @@ If you want to uninstall all of iter8 components from your Kubernetes cluster, f
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8/v1.0.0-preview/install/iter8-controller.yaml
 ```
+
+### Uninstall is stuck?
+
+Iter8 uses K8s finalizer to ensure things are cleaned up properly. However, if
+one removes *iter8-controller*, e.g., by running the above uninstall command
+before the workload namespace is cleaned up, removing the workload namespace
+afterward could get stuck. To unstuck, one would need to manually edit (with `kubectl edit`) the
+Experiment CRs and remove their finalizer, i.e., the following 2 lines:
+
+```bash
+  finalizers:
+  - finalizer.iter8-tools
+```
