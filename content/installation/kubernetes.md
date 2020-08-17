@@ -71,7 +71,7 @@ kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8-controller
 Iter8 uses K8s finalizer to ensure things are cleaned up properly. However, if
 one removes *iter8-controller*, e.g., by running the above uninstall command
 before the workload namespace is cleaned up, removing the workload namespace
-afterward could get stuck. To unstuck, one would need to manually edit the
+afterward could get stuck. To unstuck, one would need to manually edit (with `kubectl edit`) the
 Experiment CRs and remove their finalizer, i.e., the following 2 lines:
 
 ```bash
