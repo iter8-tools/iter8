@@ -7,6 +7,8 @@ theme = "hugo-theme-learn"
 metaDataFormat = "yaml"
 defaultContentLanguageInSubdir= true
 
+googleAnalytics = "UA-152813895-1"
+
 [params]
   # hugo-theme-learn specific
   # See more parameters here: https://learn.netlify.app/en/basics/configuration/
