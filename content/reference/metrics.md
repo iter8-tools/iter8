@@ -5,7 +5,7 @@ weight: 62
 summary: iter8 metrics and customization
 ---
 
-This document describes iter8's out-of-the-box metrics and how to extend iter8's metrics.
+Iter8's out-of-the-box metrics and how to extend iter8's metrics.
 
 ## Iter8's out-of-the-box metrics
 
