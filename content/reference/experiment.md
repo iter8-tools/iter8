@@ -166,17 +166,16 @@ Configuration affecting the duration of the experiment.
 
 Field | Type | Description | Required
 ------|------|-------------|---------
-*value* | float | Threshold value.  | yes
-*type* | Enum: {*absolute*, *relative*} | When the threshold type is `absolute`, the threshold value indicates an absolute limit on the value of the metric. When the threshold type is `relative`, the threshold value indicates a multiplier relative to the baseline. For example, if the metric is *iter8_latency*, and if threshold is `absolute` and value is 250, a candidate is said to satisfy this threshold if its mean latency is within 250 milli seconds; otherwise, if threshold is `relative` and value is 1.6, a candidate is said to satisfy this threshold if its mean latency is within 1.6 times that of the baseline version's mean latency.  | yes
+*interval* | string | Length of an iteration in the experiment. Values for this field should be valid [go duration strings](https://golang.org/pkg/time/#ParseDuration) (e.g., 30s, 1m, 1h, 1h10m10s). Default value: 30s  | no
+*maxIterations* | integer | Number of iterations in an experiment. Default value: 100  | no
 
 An example of the `duration` subsection of an experiment object is as follows.
 
 ```yaml
 duration:
   interval: 20s
-  maxIterations: 1
+  maxIterations: 10
 ```
-
 
 ***
 
