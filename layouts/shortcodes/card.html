@@ -6,18 +6,12 @@
     {{< card "[image path]" "[title]" "[description]">}}
 */}}
 
-<div class="card">
-  {{ if .IsNamedParams }}
-    <img src="{{.Get "src" }}" alt="">
-    <div class="container">
-      <h4><b>{{.Get "title" }}</b></h4>
-      <p>{{.Get "text" }}</p>
+<div class="col-xl-6 mt-1 mb-1">
+  <img class="card-img-top" src="{{.Get `src` }}">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{.Get "title" }}</h5>
+      <p class="card-text">{{.Get "text" }}</p>
     </div>
-  {{ else }}
-    <img src="{{.Get 0}}" alt="">
-    <div class="container">
-      <h4><b>{{.Get 1}}</b></h4>
-      <p>{{.Get 2}}</p>
-    </div>
-  {{ end }}
+  </div>
 </div>
