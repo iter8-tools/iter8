@@ -1,4 +1,3 @@
-
 ---
 title: Homepage
 weight: 10
