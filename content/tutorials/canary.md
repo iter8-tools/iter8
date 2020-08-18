@@ -6,7 +6,11 @@ summary: Learn how to perform a canary release
 ---
 
 This tutorial shows how iter8 can be used to perform a canary release by gradually shifting traffic from one version of a microservice to another while evaluating the behavior of the new version.
-Traffic is fully shifted only if the behavior the candidate version meets specified acceptance criteria.
+Traffic is fully shifted only if the behavior of the candidate version meets specified acceptance criteria.
+
+{{% notice info %}}
+This tutorial has been specialized for Red Hat OpenShift [here]({{< ref "canary-openshift" >}}).
+{{% /notice %}}
 
 This tutorial has six steps, which are meant to be tried in order.
 You will learn:
@@ -140,7 +144,9 @@ Inspection of the new experiment shows that it is paused because the specified c
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                 TYPE     HOSTS       PHASE   WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Pause                                 TargetsError: Missing Candidate
 ```
@@ -159,7 +165,9 @@ Once its corresponding pods have started, the `Experiment` will show that it is 
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                 TYPE     HOSTS       PHASE         WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Progressing   false          reviews-v3     IterationUpdate: Iteration 0/8 completed
 ```
@@ -169,7 +177,9 @@ iter8 will quickly identify that the best version is the candidate, `reviews-v3`
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                 TYPE     HOSTS       PHASE         WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Progressing   true           reviews-v3     IterationUpdate: Iteration 3/8 completed
 ```
@@ -178,7 +188,9 @@ When the experiment is finished (about 2 minutes), you will see that all traffic
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                 TYPE     HOSTS       PHASE       WINNER FOUND   CURRENT BEST   STATUS
 reviews-v3-rollout   Canary   [reviews]   Completed   true           reviews-v3     ExperimentCompleted: Traffic To Winner
 ```
