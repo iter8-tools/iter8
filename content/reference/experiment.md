@@ -15,12 +15,12 @@ Configuration of an iter8 experiment.
 Field | Type | Description | Required
 ------|------|-------------|---------
 *service* | Service | Configuration that identifies the microservice and its versions that are involved in this experiment | yes
-*trafficControl* | TrafficControl | Configuration that affect how application traffic is split across different versions of the service during and after the experiment | no
-*cleanup* | boolean | Boolean field indicating if routing rules set up by iter8 during the experiment should be deleted after the experiment. Default value: `false`  | no
-*analyticsEndoint* | HTTP URL | URL of the *iter8-analytics* service. Default value: http://iter8-analytics.iter8:8080 | no
 *criteria* | Criterion[] | A list of criteria which defines the winner in this experiment | no
 *duration* | Duration | Fields that affect how long the iter8 experiment will last  | no
+*trafficControl* | TrafficControl | Configuration that affect how application traffic is split across different versions of the service during and after the experiment | no
 *manualOverride* | ManualOverride | User actions that override the current status of an experiment  | no
+*cleanup* | boolean | Boolean field indicating if routing rules set up by iter8 during the experiment should be deleted after the experiment. Default value: `false`  | no
+*analyticsEndoint* | HTTP URL | URL of the *iter8-analytics* service. Default value: http://iter8-analytics.iter8:8080 | no
 
 An example of experiment spec is as follows. This experiment spec rolls out a new version of *reviews* (*reviews-v2* candidate deployment), if it has a mean latency of at most *250* milli seconds. Otherwise, it rolls back to the baseline version (*reviews-v1* deployment).
 
@@ -56,16 +56,16 @@ Configuration that identifies the microservice and its versions that are involve
 Field | Type | Description | Required
 ------|------|-------------|---------
 *kind* | Enum: {*Deployment, Service*} | Enum which identifies whether service versions are implemented as `Deployment`s or as `Service`s. Default value: `Deployment`. | yes
-*name* | string | Name of the service whose versions are being compared in the experiment | yes
-*namespace* | string | Namespace to which the service, whose versions are being compared in the experiment, belongs to. | no
+*name* | string | Name of the service whose versions are being compared in the experiment. | yes
+*namespace* | string | Namespace of the service whose versions are being compared in the experiment. | no
 *baseline* | string | Name of the baseline version. If `kind == Deployment`, then this is the name of a deployment. Else, if `kind == Service`, then this is the name of a service. | yes
 *candidates* | string[] | A list of names of candidate versions. If `kind == Deployment`, then these are names of candidate deployments. Else, if `kind == Service`, these are names of candidate services. | no
 *port* | integer | Port number where the service listens. | no
-*hosts* | Host[] | List of external hosts and gateways associated with this service and defined in Istio Gateway. | no
+*hosts* | Host[] | List of hosts and gateways associated with this service as defined in Istio-Gateway. | no
 
 #### Host
 
-External host and gateway that is associated with a service within iter8 experiment. Refer to host and gateway [documentation for Istio virtual services](https://istio.io/latest/docs/reference/config/networking/virtual-service/).
+Host and gateway associated with the service in an experiment. Refer to host and gateway documentation for [Istio virtual services](https://istio.io/latest/docs/reference/config/networking/virtual-service/).
 
 Field | Type | Description | Required
 ------|------|-------------|---------
@@ -98,9 +98,9 @@ Configuration that affect how application traffic is split across different vers
 Field | Type | Description | Required
 ------|------|-------------|---------
 *strategy* | Enum: {*progressive, top_2, uniform*} | Enum which identifies the algorithm used for shifting traffic during an experiment (refer to [Algorithms](../algorithms) for in-depth descriptions of iter8's algorithms). Default value: `progressive`. | no
-*onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues even after the experiment has terminated. Default value: `to_winner`. | no
-*match* | [HTTPMatchRequest clause of Istio virtual service](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest) | Specifies the portion of traffic which can be routed to candidates during the experiment. Traffic that does not match this clause will be sent to baseline and never to a candidate during an experiment. By default, if this field is left unspecified, all traffic is used for an experiment (i.e., match all). | no
 *maxIncrement* | integer | Specifies the maximum percentage by which traffic routed to a candidate can increase during a single iteration of the experiment. Default value: 2 (percent) | no
+*match* | [HTTPMatchRequest clause of Istio virtual service](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest) | Specifies the portion of traffic which can be routed to candidates during the experiment. Traffic that does not match this clause will be sent to baseline and never to a candidate during an experiment. By default, if this field is left unspecified, all traffic is used for an experiment (i.e., match all). | no
+*onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues even after the experiment has terminated. Default value: `to_winner`. | no
 *routerID* | string | Refers to the id of router used to handle traffic for the experiment. Default value: first entry of effective host. | no
 
 An example of the `trafficControl` subsection of an experiment object is as follows.
@@ -108,12 +108,12 @@ An example of the `trafficControl` subsection of an experiment object is as foll
 ```yaml
 trafficControl:
   strategy: progressive
-  onTermination: to_winner
+  maxIncrement: 20
   match:
     http:
      - uri:
          prefix: "/wpcatalog"
-  maxIncrement: 20
+  onTermination: to_winner
   routerID: reviews-router
 ```
 
@@ -318,33 +318,33 @@ Iter8 records a variety of status information such as assessments about the vari
 
 ```yaml
 status:
-  # assessment from analytics on testing versions
+  # assessment from analytics for versions of the service
   assessment:
 
-    # assessment details for baseline version
-    baseline:
+    # assessment for baseline version
+    baseline: # the term version within this subsection refers to baseline
 
-      # generated uuid for the version in this experiment
+      # the unique id of the version (generated by iter8) in this experiment
       id: baseline
 
-      # name of version
+      # name of the version
       name: reviews-v1
 
       # total requests that have been received by the version
       request_count: 10
 
-      # recommended traffic weight to this version
+      # recommended traffic percentage to this version
       weight: 0
 
-      # probability of being the best version
+      # probability of this version being the best version among all versions in this experiment
       win_probability: 0
 
     # list of candidate assessments
     candidates:
-    # same format as baseline assessment
+    # same format as baseline assessment, 
     - ...
 
-    # assessment for winner version
+    # assessment for winning version
     winner:
 
       # id of current best version
@@ -353,7 +353,7 @@ status:
       # name of the current best version
       name: reviews-v3
 
-      # indicates whether the current best version is winner or not
+      # the current best version will be declared as the winner only if iter8 has sufficiently high confidence in this version (i.e., high posterior probability of winning)
       winning_version_found: true
 
   # A list of conditions reflecting status of the experiment from the controller
@@ -365,7 +365,7 @@ status:
     # a human-readable message explaining the status of this condition
     message: ""
 
-    # the reason of updating this condition
+    # the reason for updating this condition
     reason: SyncMetricsSucceeded
 
     # status of the condition; value can be "True", "False" or "Unknown"
@@ -387,7 +387,7 @@ status:
     # condition on routing rules readiness
     type: RoutingRulesReady
 
-  # the current iteration experiment is going
+  # the index of the current iteration of the experiment
   currentIteration: 1
 
   # list of hosts that will direct traffic to service
@@ -395,27 +395,27 @@ status:
   - reviews
 
   # type of this experiment
-  # Canary: Canary rollout(only one candidate with no reward criteria)
-  # A/B: A/B testing(with one candidate with reward criteria)
-  # A/B/N: A/B/N testing(with more than one candidate)
+  # Canary: Canary release (single candidate; no reward metric within criteria)
+  # A/B: A/B rollout (single candidate; one of the criteria has a metric marked as reward)
+  # A/B/N: A/B/N rollout (two or more candidates; one of the criteria has a metric marked as reward)
   experimentType: A/B/N
 
-  # timestamp when experiment is initialized
+  # time when experiment was initialized
   initTimestamp: "2020-08-13T17:26:37Z"
 
-  # the timestamp when last iteration updates
+  # time when last iteration completed
   lastUpdateTime: "2020-08-13T17:26:38Z"
 
-  # the latest message on condition of the experiment
+  # latest message on condition of the experiment
   message: 'ExperimentCompleted: Traffic To Winner'
 
-  # the phase of
+  # current phase of the experiment
   phase: Completed
 
-  # the timestamp when experiment starts
+  # time when experiment started
   # detection of baseline version kicks off the experiment
   startTimestamp: "2020-08-13T17:26:37Z"
 
-  # timestamp when experiment ends
+  # time when experiment ended
   endTimestamp: "2020-08-13T17:26:38Z"
 ```
