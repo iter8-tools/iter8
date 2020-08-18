@@ -1,15 +1,15 @@
 ---
-menuTitle: Canary Testing
+menuTitle: Canary Testing - OpenShift
 title: Canary Testing
-weight: 20
-summary: Learn how to perform a canary release
+weight: 21
+summary: Learn how to perform a canary release on Red Hat OpenShift
 ---
 
 This tutorial shows how iter8 can be used to perform a canary release by gradually shifting traffic from one version of a microservice to another while evaluating the behavior of the new version.
 Traffic is fully shifted only if the behavior of the candidate version meets specified acceptance criteria.
 
 {{% notice info %}}
-This tutorial has been specialized for Red Hat OpenShift [here]({{< ref "canary-openshift" >}}).
+This tutorial is for use with Red Hat OpenShift. The corresponding tutorial for plain Kubernetes is [here]({{< ref "canary" >}}).
 {{% /notice %}}
 
 This tutorial has six steps, which are meant to be tried in order.
@@ -23,7 +23,7 @@ This application comprises 4 microservies: _productpage_, _details_, _reviews_, 
 Of these, _productpage_ is a user-facing service while the others are backend services.
 
 {{% notice info %}}
-This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
+This rest of this tutorial assumes you have already installed _iter8_ (including Red Hat OpenShift Service Mesh). If not, do so using the instructions [here]({{< ref "red-hat" >}}).
 {{% /notice %}}
 
 ## Deploy the Bookinfo application
@@ -31,19 +31,19 @@ This rest of this tutorial assumes you have already installed _iter8_ (including
 To deploy the Bookinfo application, create a namespace configured to enable auto-injection of the Istio sidecar. You can use whatever namespace name you wish. By default, the namespace `bookinfo-iter8` is created.
 
 ```bash
-kubectl apply -f {{< resourceAbsUrl path="tutorials/namespace.yaml" >}}
+oc apply -f {{< resourceAbsUrl path="tutorials/namespace.yaml" >}}
 ```
 
 Next, deploy the application:
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
+oc --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
 ```
 
 You should see pods for each of the four microservices:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get pods
+oc --namespace bookinfo-iter8 get pods
 ```
 
 Note that we deployed version *v2* of the *reviews* microsevice; that is, *reviews-v2*.
@@ -51,42 +51,40 @@ Each pod should have two containers, since the Istio sidecar was injected into e
 
 ## Expose the Bookinfo application
 
-Expose the Bookinfo application by defining an Istio `Gateway` and `VirtualService`:
+Expose the Bookinfo application by defining an Istio `Gateway` and `VirtualService`. These will use the `route` defined for the istio ingress gateway:
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+```
+
+```bash
+cat {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}} \
+| sed "s#bookinfo.example.com#${GATEWAY_URL}#" \
+| oc --namespace bookinfo-iter8 apply -f -
 ```
 
 You can inspect the created resources:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get gateway,virtualservice
+oc --namespace bookinfo-iter8 get gateway,virtualservice
 ```
-
-Note that the service has been associated with a fake host, `bookinfo.example.com` for demonstration purposes.
 
 ## Verify access to Bookinfo
 
-To access the application, determine the ingress IP and port for the application.
-You can do so by following steps 3 and 4 of the Istio instructions [here](https://istio.io/latest/docs/examples/bookinfo/#determine-the-ingress-ip-and-port) to set the environment variables `GATEWAY_URL`. You can then check if you can access the application with the following `curl` command:
+You can then check if you can access the application with the following `curl` command:
 
 ```bash
-curl --header 'Host: bookinfo.example.com' -o /dev/null -s -w "%{http_code}\n" "http://${GATEWAY_URL}/productpage"
+curl -o /dev/null -s -w "%{http_code}\n" "http://${GATEWAY_URL}/productpage"
 ```
 
 If everything is working, the command above should return `200`.
-Note that the curl command above sets the `Host` header to match the host we associated the VirtualService with (`bookinfo.example.com`).
-
-{{% notice tip %}}
-If you want to access the application from your browser, you will need to set this header using a browser plugin.
-{{% /notice %}}
 
 ## Generate load
 
 To simulate user requests, use a command such as the following:
 
 ```bash
-watch -n 0.1 'curl --header "Host: bookinfo.example.com" -s "http://${GATEWAY_URL}/productpage" | grep -i "color=\""'
+watch -n 0.1 'curl -s "http://${GATEWAY_URL}/productpage" | grep -i "color=\""'
 ```
 
 This command requests the `productpage` microservice 10 times per second.
@@ -137,13 +135,13 @@ The additional parameters control how long the experiment should run and how muc
 The experiment can be created using the command:
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v2_to_reviews-v3.yaml">}}
+oc --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/canary-tutorial/canary_reviews-v2_to_reviews-v3.yaml">}}
 ```
 
 Inspection of the new experiment shows that it is paused because the specified candidate version cannot be found in the cluster:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -158,13 +156,13 @@ Once the candidate version is deployed, the experiment will start automatically.
 To deploy version *v3* of the *reviews* microservice, execute:
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/reviews-v3.yaml" >}}
+oc --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/reviews-v3.yaml" >}}
 ```
 
 Once its corresponding pods have started, the `Experiment` will show that it is progressing:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -176,7 +174,7 @@ At approximately 15 second intervals, you should see the interation number chang
 iter8 will quickly identify that the best version is the candidate, `reviews-v3` and that it is confident that this choice will be the final choice (by indicating that a *winner* has been found):
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -187,7 +185,7 @@ reviews-v3-rollout   Canary   [reviews]   Progressing   true           reviews-v
 When the experiment is finished (about 2 minutes), you will see that all traffic has been shifted to the winner, *reviews-v3*:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -200,7 +198,7 @@ reviews-v3-rollout   Canary   [reviews]   Completed   true           reviews-v3 
 To clean up, delete the namespace:
 
 ```bash
-kubectl delete namespace bookinfo-iter8
+oc delete namespace bookinfo-iter8
 ```
 
 ## Other things to try (before cleanup)

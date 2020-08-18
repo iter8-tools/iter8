@@ -26,7 +26,7 @@ spec:
   - bookinfo-gateway
   hosts:
   - productpage
-  - bookinfo.example.com
+  - "bookinfo.example.com"
   http:
   - match:
     - uri:

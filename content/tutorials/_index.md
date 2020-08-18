@@ -8,5 +8,7 @@ The following tutorials explain some of the basic concepts in iter8 and provide 
 
 [Getting Started with Canary Testing]({{< ref "canary" >}}) shows how iter8 can be used to safely rollout a new version of a service. If the new version has errors or performs badly, the original version is restored.
 
+[Getting Started with Canary Testing on Red Hat OpenShift]({{< ref "canary-openshift" >}}) shows how iter8 can be used to safely rollout a new version of a service on Red Hat OpenShift. If the new version has errors or performs badly, the original version is restored.
+
 [Getting Started with A/B/n Rollout]({{< ref "abn" >}}) shows how iter8 can be used to experiment with several versions of a service to find the one that returns the highest reward and satisfies any functional and performance requirements. Once the experiment succeeds, iter8 will automatically shift all traffic to the winning version.
 

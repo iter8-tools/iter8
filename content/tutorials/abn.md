@@ -1,7 +1,7 @@
 ---
 menuTitle: A/B/n Rollout
 title: A/B/n Rollout
-weight: 21
+weight: 25
 summary: Learn how to perform an A/B/n rollout
 ---
 
