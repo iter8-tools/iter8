@@ -58,7 +58,7 @@ Field | Type | Description | Required
 *kind* | Enum: {*Deployment, Service*} | Enum which identifies whether service versions are implemented as `Deployment`s or as `Service`s. Default value: `Deployment`. | yes
 *name* | string | Name of the service whose versions are being compared in the experiment | yes
 *namespace* | string | Namespace to which the service, whose versions are being compared in the experiment, belongs to. | no
-*baseline* | string | Name of the baseline version. If `kind == Deployment`, then this is the name of a deployment. Else, if `kind == Deployment`, then this is the name of a service. | yes
+*baseline* | string | Name of the baseline version. If `kind == Deployment`, then this is the name of a deployment. Else, if `kind == Service`, then this is the name of a service. | yes
 *candidates* | string[] | A list of names of candidate versions. If `kind == Deployment`, then these are names of candidate deployments. Else, if `kind == Service`, these are names of candidate services. | no
 *port* | integer | Port number where the service listens. | no
 *hosts* | Host[] | List of external hosts and gateways associated with this service and defined in Istio Gateway. | no
@@ -69,10 +69,10 @@ External host and gateway that is associated with a service within iter8 experim
 
 Field | Type | Description | Required
 ------|------|-------------|---------
-*name* | string | The destination hosts to which traffic is being sent. Could be a DNS name with wildcard prefix or an IP address. | yes
-*gateway* | string | The name of gateway to which this host is attached | yes
+*name* | string | The destination host to which traffic is being sent. This could be a DNS name with wildcard prefix or an IP address. | yes
+*gateway* | string | The name of gateway to which this host is attached. | yes
 
-An example of the `service` subsection of an experiment object is as follows. Observe that service versions correspond to other services in this example.
+An example of the `service` subsection of an experiment object is as follows. Observe that versions correspond to services and not deployments in this example.
 
 ```yaml
 service:
@@ -98,7 +98,7 @@ Configuration that affect how application traffic is split across different vers
 Field | Type | Description | Required
 ------|------|-------------|---------
 *strategy* | Enum: {*progressive, top_2, uniform*} | Enum which identifies the algorithm used for shifting traffic during an experiment (refer to [Algorithms](../algorithms) for in-depth descriptions of iter8's algorithms). Default value: `progressive`. | no
-*onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues to be applied even after the experiment has terminated. Default value: `to_winner`. | no
+*onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues even after the experiment has terminated. Default value: `to_winner`. | no
 *match* | [HTTPMatchRequest clause of Istio virtual service](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest) | Specifies the portion of traffic which can be routed to candidates during the experiment. Traffic that does not match this clause will be sent to baseline and never to a candidate during an experiment. By default, if this field is left unspecified, all traffic is used for an experiment (i.e., match all). | no
 *maxIncrement* | integer | Specifies the maximum percentage by which traffic routed to a candidate can increase during a single iteration of the experiment. Default value: 2 (percent) | no
 *routerID* | string | Refers to the id of router used to handle traffic for the experiment. Default value: first entry of effective host. | no
@@ -126,7 +126,7 @@ Field | Type | Description | Required
 ------|------|-------------|---------
 *metric* | string | The metric used in this criterion. Metrics can be iter8's out-of-the-box metrics or custom metrics. See [metrics documentation](../metrics) for more details. Iter8 computes and reports a variety of assessments that describe how each version is performing with respect to this metric. | yes
 *threshold* | Threshold | An optional threshold for this metric. Iter8 computes and reports a variety of assessments that describe how each version is performing with respect to this threshold.  | no
-*is_reward* | boolean | This field indicates if the metric used in this criterion is a reward metric. When a metric is marked as reward metric, the winning version in an experiment is one which optimizes the reward while satisfying all thresholds at the same time. Only ratio metrics can be designated as a reward. Default value: `false` | no
+*isReward* | boolean | This field indicates if the metric used in this criterion is a reward metric. When a metric is marked as reward metric, the winning version in an experiment is one which optimizes the reward while satisfying all thresholds at the same time. Only ratio metrics can be designated as a reward. Default value: `false` | no
 
 #### Threshold
 
@@ -135,7 +135,7 @@ Threshold specified for a metric within a criterion.
 Field | Type | Description | Required
 ------|------|-------------|---------
 *value* | float | Threshold value.  | yes
-*type* | Enum: {*absolute*, *relative*} | When the threshold type is `absolute`, the threshold value indicates an absolute limit on the value of the metric. When the threshold type is `relative`, the threshold value indicates a multiplier relative to the baseline. For example, if the metric is *iter8_latency*, and if threshold is `absolute` and value is 250, a candidate is said to satisfy this threshold if its mean latency is within 250 milli seconds; otherwise, if threshold is `relative` and value is 1.6, a candidate is said to satisfy this threshold if its mean latency is within 1.6 times that of the baseline version's mean latency.  | yes
+*type* | Enum: {*absolute*, *relative*} | When the threshold type is `absolute`, the threshold value indicates an absolute limit on the value of the metric. When the threshold type is `relative`, the threshold value indicates a multiplier relative to the baseline. For example, if the metric is *iter8_latency*, and if threshold is `absolute` and value is 250, a candidate is said to satisfy this threshold if its mean latency is within 250 milli seconds; otherwise, if threshold is `relative` and value is 1.6, a candidate is said to satisfy this threshold if its mean latency is within 1.6 times that of the baseline version's mean latency. Relative thresholds can only be used with [ratio metrics](../metrics/#ratio-metrics). The interpretation of threshold depends on the [preferred direction](../metrics/#extending-iter8s-metrics) of the metric. If the preferred direction is `lower`, then the threshold value represents a desired upper limit. If the preferred direction is `higher`, then the threshold value represents a desired lower limit. | yes
 
 An example of the `criteria` subsection of an experiment object is as follows.
 
@@ -181,11 +181,11 @@ duration:
 
 ### Manual Override
 
-User actions to override the current execution of the experiment.
+Manual / out-of-band actions that override the current execution of the experiment.
 
 Field | Type | Description | Required
 ------|------|-------------|---------
-*action* | Enum: {*pause, resume, terminate*} | This field enables manual / out-of-band intervention during the course of an experiment. Execution of the experiment will be paused, or resumed from a previously paused state, or terminated depending upon the three possible values set in this field. | yes
+*action* | Enum: {*pause, resume, terminate*} | This field enables manual / out-of-band intervention during the course of an experiment. Execution of the experiment will be paused, or resumed from a previously paused state, or terminated respectively depending upon whether the value of this field is `pause`, `resume` or `terminate`. | yes
 *trafficSplit* | Object | Traffic split between different versions of the experiment which will take effect if `action == terminate`. | no
 
 An example of the `manualOverride` subsection of an experiment object is as follows.
