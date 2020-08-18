@@ -1,7 +1,7 @@
 ---
-menuTitle: Canary Testing
+menuTitle: Canary Testing - OpenShift
 title: Canary Testing
-weight: 20
+weight: 21
 summary: Learn how to perform a canary release on Red Hat OpenShift
 ---
 
