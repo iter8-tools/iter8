@@ -20,7 +20,7 @@ Field | Type | Description | Required
 *trafficControl* | TrafficControl | Configuration that affect how application traffic is split across different versions of the service during and after the experiment | no
 *manualOverride* | ManualOverride | User actions that override the current status of an experiment  | no
 *cleanup* | boolean | Boolean field indicating if routing rules set up by iter8 during the experiment should be deleted after the experiment. Default value: `false`  | no
-*analyticsEndoint* | HTTP URL | URL of the *iter8-analytics* service. Default value: http://iter8-analytics.iter8:8080 | no
+*analyticsEndoint* | HTTP URL | URL of the *iter8-analytics* service. Default value: [http://iter8-analytics.iter8:8080](http://iter8-analytics.iter8:8080) | no
 
 An example of experiment spec is as follows. This experiment spec rolls out a new version of *reviews* (*reviews-v2* candidate deployment), if it has a mean latency of at most *250* milli seconds. Otherwise, it rolls back to the baseline version (*reviews-v1* deployment).
 
@@ -45,7 +45,6 @@ spec:
 ```
 
 For other examples of experiment spec objects, refer to the [canary release](../../tutorials/canary/#create-a-canary-experiment) and [A/B/n rollout](../../tutorials/abn/#create-an-abn-experiment) tutorials.
-
 
 ***
 
@@ -91,35 +90,8 @@ service:
 
 ***
 
-### Traffic Control
-
-Configuration that affect how application traffic is split across different versions of the service during and after the experiment.
-
-Field | Type | Description | Required
-------|------|-------------|---------
-*strategy* | Enum: {*progressive, top_2, uniform*} | Enum which identifies the algorithm used for shifting traffic during an experiment (refer to [Algorithms](../algorithms) for in-depth descriptions of iter8's algorithms). Default value: `progressive`. | no
-*maxIncrement* | integer | Specifies the maximum percentage by which traffic routed to a candidate can increase during a single iteration of the experiment. Default value: 2 (percent) | no
-*match* | [HTTPMatchRequest clause of Istio virtual service](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest) | Specifies the portion of traffic which can be routed to candidates during the experiment. Traffic that does not match this clause will be sent to baseline and never to a candidate during an experiment. By default, if this field is left unspecified, all traffic is used for an experiment (i.e., match all). | no
-*onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues even after the experiment has terminated. Default value: `to_winner`. | no
-*routerID* | string | Refers to the id of router used to handle traffic for the experiment. Default value: first entry of effective host. | no
-
-An example of the `trafficControl` subsection of an experiment object is as follows.
-
-```yaml
-trafficControl:
-  strategy: progressive
-  maxIncrement: 20
-  match:
-    http:
-     - uri:
-         prefix: "/wpcatalog"
-  onTermination: to_winner
-  routerID: reviews-router
-```
-
-***
-
 ### Criterion
+
 When the `criteria` field is non-empty in an experiment (this is the usual case), each version featured in an experiment is evaluated with respect to one or more criteria. This section describes the anatomy of a single criterion.
 
 Field | Type | Description | Required
@@ -157,8 +129,7 @@ criteria:
       isReward: true
 ```
 
-
-*** 
+***
 
 ### Duration
 
@@ -175,6 +146,34 @@ An example of the `duration` subsection of an experiment object is as follows.
 duration:
   interval: 20s
   maxIterations: 10
+```
+
+***
+
+### Traffic Control
+
+Configuration that affect how application traffic is split across different versions of the service during and after the experiment.
+
+Field | Type | Description | Required
+------|------|-------------|---------
+*strategy* | Enum: {*progressive, top_2, uniform*} | Enum which identifies the algorithm used for shifting traffic during an experiment (refer to [Algorithms](../algorithms) for in-depth descriptions of iter8's algorithms). Default value: `progressive`. | no
+*maxIncrement* | integer | Specifies the maximum percentage by which traffic routed to a candidate can increase during a single iteration of the experiment. Default value: 2 (percent) | no
+*match* | [HTTPMatchRequest clause of Istio virtual service](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest) | Specifies the portion of traffic which can be routed to candidates during the experiment. Traffic that does not match this clause will be sent to baseline and never to a candidate during an experiment. By default, if this field is left unspecified, all traffic is used for an experiment (i.e., match all). | no
+*onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues even after the experiment has terminated. Default value: `to_winner`. | no
+*routerID* | string | Refers to the id of router used to handle traffic for the experiment. Default value: first entry of effective host. | no
+
+An example of the `trafficControl` subsection of an experiment object is as follows.
+
+```yaml
+trafficControl:
+  strategy: progressive
+  maxIncrement: 20
+  match:
+    http:
+     - uri:
+         prefix: "/wpcatalog"
+  onTermination: to_winner
+  routerID: reviews-router
 ```
 
 ***
@@ -274,7 +273,6 @@ spec:
     # optional; default is the first entry of effictive host
     routerID: reviews-router
 
-
   # Whether routing rules should be deleted at the end of experiment
   # optional; default is false
   cleanup: false
@@ -341,7 +339,7 @@ status:
 
     # list of candidate assessments
     candidates:
-    # same format as baseline assessment, 
+    # same format as baseline assessment,
     - ...
 
     # assessment for winning version
