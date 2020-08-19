@@ -58,7 +58,7 @@ export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpa
 ```
 
 ```bash
-cat {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}} \
+curl -s {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}} \
 | sed "s#bookinfo.example.com#${GATEWAY_URL}#" \
 | oc --namespace bookinfo-iter8 apply -f -
 ```
