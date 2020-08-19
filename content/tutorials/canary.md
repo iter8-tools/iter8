@@ -9,7 +9,7 @@ This tutorial shows how iter8 can be used to perform a canary release by gradual
 Traffic is fully shifted only if the behavior of the candidate version meets specified acceptance criteria.
 
 {{% notice info %}}
-This tutorial has been specialized for Red Hat OpenShift [here]({{< ref "canary-openshift" >}}).
+A version of this tutorial specialized for Red Hat OpenShift is [here]({{< ref "canary-openshift" >}}).
 {{% /notice %}}
 
 This tutorial has six steps, which are meant to be tried in order.
