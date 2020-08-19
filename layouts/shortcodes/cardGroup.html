@@ -1,15 +1,17 @@
-{{/*
+<!-- {{/*
   Purpose: create a grouping of image cards for the home page
 
   Usage:
-  {{< cardGroup >}}
-    {{< card ... >}}
-    {{< card ... >}}
-    {{< card ... >}}
-    ...
-  {{< \cardGroup >}}
-*/}}
+    {{< cardGroup >}}
+      {{< card ... >}}
+      {{< card ... >}}
+      {{< card ... >}}
+      ...
+    {{< \cardGroup >}}
+*/}} -->
 
-<div class="cardGroup">
-  {{.Inner}}
+<div class="container-fluid">
+  <div class="row">
+    {{.Inner}}
+  </div>
 </div>
