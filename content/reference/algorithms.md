@@ -5,7 +5,24 @@ weight: 63
 summary: Coming soon!
 ---
 
-Coming soon!
+Iter8 approaches continuous experimentation tasks (canary release, A/B and A/B/n rollouts) as an online iterative decision making problem. At the start of every iteration of an experiment, iter8 computes assessments for each version based on all currently available observations, uses these assessments to rank the versions, and decides how best to control the split of traffic between them. Iter8 provides three distinct traffic control strategies, namely, `progressive`, `top_2`, and `uniform`, with `progressive` being the default and recommended strategy for common scenarios. All three strategies are built on a statistically robust machine learning (ML) foundation that employs Bayesian estimation for assessing versions and a multi-armed bandit algorithm for deciding traffic splits. We now describe the three strategies along with their ML foundations.
+
+## Traffic Control Strategies in iter8
+
+(Coming soon)
+
+## ML Foundations of iter8
+
+(Coming soon)
+
+### Bayesian Estimation
+
+(Coming soon)
+
+### Multi-armed Bandit
+
+(Coming soon)
+
 
 <!-- This documentation briefly describes the algorithms supported by iter8 to make decisions during canary releases or A/B testing. These algorithms are part of iter8's analytics service (*iter8-analytics*) and exposed via REST API. Iter8's Kubernetes controller (*iter8-controller*) calls the appropriate REST API based on the `.spec.trafficControl.strategy` set in a custom `Experiment` resource. Iter8's `Experiment` CRD is documented [here]({{< ref "experiment" >}}).
 
