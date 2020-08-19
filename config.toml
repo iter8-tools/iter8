@@ -16,7 +16,7 @@ googleAnalytics = "UA-152813895-1"
   # Prefix URL to edit current page. Will display an "Edit this page" button on top right hand corner of every page.
   # Useful to give opportunity to people to create merge request for your doc.
   # See the config.toml file from this documentation site to have an example.
-  editURL = "https://github.com/iter8-tools/docs/edit/master/content/"
+  editURL = "https://github.com/iter8-tools/docs/edit/release-1.0.0/content/"
 
   # Author of the site, will be used in meta information
   author = "Alan Cha"
@@ -45,7 +45,7 @@ googleAnalytics = "UA-152813895-1"
   # iter8 specific
 
   # version number
-  versionNumber = "v1.0.0 - preview"
+  versionNumber = "v1.0.0-rc1"
 
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
