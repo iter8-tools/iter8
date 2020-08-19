@@ -4,10 +4,6 @@ weight: 10
 chapter: true
 ---
 
-{{% notice tip %}}
-Check out the [v1.0.0 preview!](https://preliminary.iter8.tools)
-{{% /notice %}}
-
 # Deliver better software in the cloud
 
 Use iter8's analytics-driven continuous experimentation for reliable and frequent releases of high-quality microservices on Kubernetes.
