@@ -264,7 +264,9 @@ Inspection of the new experiment shows that it is paused because the specified c
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                   TYPE    HOSTS                                PHASE   WINNER FOUND   CURRENT BEST   STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Pause                                 TargetsError: Missing Candidate
 ```
@@ -283,7 +285,9 @@ Once its corresponding pods have started, the `Experiment` will show that it is 
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                   TYPE    HOSTS                                PHASE         WINNER FOUND   CURRENT BEST     STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   false          productpage-v3   IterationUpdate: Iteration 3/20 completed
 ```
@@ -296,7 +300,9 @@ iter8 will eventually identify that the best version is the candidate, `productp
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                   TYPE    HOSTS                                PHASE         WINNER FOUND   CURRENT BEST     STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   true           productpage-v3   IterationUpdate: Iteration 7/20 completed
 ```
@@ -307,7 +313,9 @@ When the experiment is finished (about 5 minutes), you will see that all traffic
 
 ```bash
 kubectl --namespace bookinfo-iter8 get experiment
+```
 
+```bash
 NAME                   TYPE    HOSTS                                PHASE       WINNER FOUND   CURRENT BEST     STATUS
 productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Completed   true           productpage-v3   ExperimentCompleted: Traffic To Winner
 ```
