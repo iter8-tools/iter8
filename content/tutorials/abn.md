@@ -76,7 +76,7 @@ kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutori
 ```
 
 {{% notice tip %}}
-The above command assumes that you are using a version of Istio with the *mixer* component disabled (typically Istio 1.5 or greater). If you are using the mixer, use [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) instead.
+The above discussion and command assumes that you are using a version of Istio with the *mixer* component disabled (typically Istio 1.5 or greater). If you are using the mixer, use [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) instead.
 {{% /notice %}}
 
 ## Configure Prometheus
@@ -97,7 +97,9 @@ To avoid this, reconfigure Prometheus:
 kubectl --namespace istio-system edit configmap/prometheus
 ```
 
-Comment out six lines as follows:
+Find the `scrape_configs` entry with `job_name: 'kubernetes-pods`.
+Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_prometheus_io_scrape` if one exists.
+In this example, the last three lines have been commented out:
 
 ```yaml
 - job_name: 'kubernetes-pods'
@@ -110,9 +112,6 @@ Comment out six lines as follows:
   #- source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status]
   #  action: drop
   #  regex: (.+)
-  #- source_labels: [__meta_kubernetes_pod_annotation_istio_mtls]
-  #  action: drop
-  #  regex: (true)
 ```
 
 Then restart the prometheus pod:
@@ -289,7 +288,7 @@ kubectl --namespace bookinfo-iter8 get experiment
 
 ```bash
 NAME                   TYPE    HOSTS                                PHASE         WINNER FOUND   CURRENT BEST     STATUS
-productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   false          productpage-v3   IterationUpdate: Iteration 3/20 completed
+productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   false                           IterationUpdate: Iteration 3/20 completed
 ```
 
 At approximately 20 second intervals, you should see the interation number change.
