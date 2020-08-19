@@ -1,11 +1,15 @@
 ---
-menuTitle: A/B/n Rollout - OpenShioft
+menuTitle: A/B/n Rollout - OpenShift
 title: A/B/n Rollout
 weight: 26
 summary: Learn how to perform an A/B/n rollout on Red Hat OpenShift
 ---
 
 This tutorial shows how iter8 can be used to perform A/B/n rollout of several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
+
+{{% notice info %}}
+This tutorial is for use with Red Hat OpenShift. A corresponding tutorial for plain Kubernetes is [here]({{< ref "abn" >}}).
+{{% /notice %}}
 
 This tutorial has eight steps, which are meant to be tried in order.
 You will learn:
@@ -47,9 +51,9 @@ To define the ratio metric, add the following to the `counter_metrics.yaml` fiel
 
 ```yaml
 - name: le_500_ms_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='500',job='envoy-stats',reporter='source'}[$interval])) by ($version_labels))
+  query_template: (sum(increase(istio_request_duration_seconds_bucket{le='0.5',reporter='source',job='istio-mesh'}[$interval])) by ($version_labels))
 - name: le_inf_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='envoy-stats',reporter='source'}[$interval])
+  query_template: (sum(increase(istio_request_duration_seconds_bucket{le='+Inf',reporter='source',job='istio-mesh'}[$interval])) by ($version_labels))
 ```
 
 and the following to the `ratio_metrics.yaml` value:
@@ -76,7 +80,7 @@ kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutori
 ```
 
 {{% notice tip %}}
-The above command assumes that you are using a version of the Service Mesh that does not have the Istio *mixer* component disabled. If the mixer is disabled, use [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}) instead.
+The above discussion and command assumes that you are using a version of the Service Mesh that does not have the Istio *mixer* component disabled. If the mixer is disabled, use [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}) instead.
 {{% /notice %}}
 
 ## Configure Prometheus
@@ -90,14 +94,16 @@ prometheus.io/path: /metrics
 prometheus.io/port: "9080"
 ```
 
-Unfortunately, the Prometheus server installed with Istio expects communication with the pod to be implemented using mTLS.
+Unfortunately, the Prometheus server installed with the Red Hat OpenShift Service Mesh expects communication with the pod to be implemented using mTLS.
 To avoid this, reconfigure Prometheus:
 
 ```bash
 oc --namespace istio-system edit configmap/prometheus
 ```
 
-Comment out six lines as follows:
+Find the `scrape_configs` entry with `job_name: 'kubernetes-pods`.
+Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_prometheus_io_scrape` if one exists.
+In this example, the last three lines have been commented out:
 
 ```yaml
 - job_name: 'kubernetes-pods'
@@ -107,12 +113,10 @@ Comment out six lines as follows:
   - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
     action: keep
     regex: true
-  #- source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status]
-  #  action: drop
-  #  regex: (.+)
-  #- source_labels: [__meta_kubernetes_pod_annotation_istio_mtls]
-  #  action: drop
-  #  regex: (true)
+  # Keep target if there's no sidecar or if prometheus.io/scheme is explicitly set to "http"
+  #- source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status, __meta_kubernetes_pod_annotation_prometheus_io_scheme]
+  #  action: keep
+  #  regex: ((;.*)|(.*;http))
 ```
 
 Then restart the prometheus pod:
@@ -291,7 +295,7 @@ oc --namespace bookinfo-iter8 get experiment
 
 ```bash
 NAME                   TYPE    HOSTS                                PHASE         WINNER FOUND   CURRENT BEST     STATUS
-productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   false          productpage-v3   IterationUpdate: Iteration 3/20 completed
+productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Progressing   false                           IterationUpdate: Iteration 3/20 completed
 ```
 
 At approximately 20 second intervals, you should see the interation number change.
