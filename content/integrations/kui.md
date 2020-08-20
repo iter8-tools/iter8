@@ -11,7 +11,7 @@ The iter8-Kui integration aims to leverage these features for iter8. Using the i
 
 ## Installation
 
-Follow these steps to build the iter8-Kui plugin:
+Follow these steps to build the run Kui:
 
 ```sh
 git clone https://github.com/IBM/kui
