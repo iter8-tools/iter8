@@ -16,14 +16,14 @@ This tutorial has six steps, which are meant to be tried in order.
 You will learn:
 
 - how to perform a canary rollout with iter8; and
-- how to define different success criteria for iter8 to analyze canary releases and determine success or failure;
+- how to define different success criteria for iter8 to analyze canary releases and determine success or failure.
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) distributed with [Istio](https://istio.io).
 This application comprises 4 microservies: _productpage_, _details_, _reviews_, and _ratings_.
 Of these, _productpage_ is a user-facing service while the others are backend services.
 
 {{% notice info %}}
-This rest of this tutorial assumes you have already installed _iter8_ (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
+This rest of this tutorial assumes you have already installed iter8 (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
 {{% /notice %}}
 
 ## Deploy the Bookinfo application

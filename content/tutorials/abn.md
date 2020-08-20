@@ -12,7 +12,7 @@ You will learn:
 
 - how to define application specific metrics;
 - how to specify a reward metric; and
-- how to execute an A/B/n experiment with iter8;
+- how to execute an A/B/n experiment with iter8.
 
 The content of this tutorial is captured in this video (COMING SOON).
 
@@ -114,7 +114,7 @@ In this example, the last three lines have been commented out:
   #  regex: (.+)
 ```
 
-Then restart the prometheus pod:
+Then restart the prometheus pod if any changes were made:
 
 ```bash
 kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system get pod --selector='app=prometheus' -o jsonpath='{.items[0].metadata.name}')
