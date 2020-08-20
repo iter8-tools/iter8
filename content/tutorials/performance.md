@@ -1,5 +1,5 @@
 ---
-menuTitle: Performancer Validation
+menuTitle: Performance Validation
 title: Performance Validation
 weight: 30
 summary: Learn how to validate performance of a service
@@ -183,25 +183,6 @@ kubectl delete namespace bookinfo-iter8
 
 ## Other things to try (before cleanup)
 
-### Inspect progress using Grafana
-
-You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here]({{< ref "grafana" >}}).
-
-### Inspect progress using Kiali
-
-Coming soon
-
-### Alter the duration of the experiment
-
-The progress of an experiment can be impacted by `duration` and `trafficControl` parameters:
-
-- `duration.interval` defines how long each test interval should be (*default: 30 seconds*)
-- `duration.maxIterations` identifies what the maximum number of iterations there should be (*default: 100*)
-- `trafficControl.maxIncrement` identifies the largest change (increment) that will be made in the percentage of traffic sent to a candidate (*default: 2 percent*)
-
-The impact of the first two parameters on the duration of the experiment are clear.
-Restricting the size of traffic shifts limits how quickly an experiment can come to a decision about a candidate.
-
 ### Try a version that fails the criteria
 
 Version *v4* of the *reviews* service is a modification that returns after a 5 second delay.
@@ -211,11 +192,3 @@ For your reference:
 
 - A YAML for the deployment `reviews-v4` is: [{{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}}]({{< resourceAbsUrl path="tutorials/reviews-v4.yaml" >}})
 - A YAML for performance experiment is: [{{< resourceAbsUrl path="tutorials/performance-tutorial/performance-validation_reviews-v4.yaml" >}}]({{< resourceAbsUrl path="tutorials/performance-tutorial/performance-validation_reviews-v4.yaml" >}})
-
-### Try a version which returns errors
-
-Coming soon
-
-### Try with a user-facing service
-
-Coming soon
