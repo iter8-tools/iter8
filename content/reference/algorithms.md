@@ -5,84 +5,19 @@ weight: 63
 summary: Coming soon!
 ---
 
-Iter8 approaches continuous experimentation tasks (canary release, A/B and A/B/n rollouts) as an online iterative decision making problem. At the start of every iteration of an experiment, iter8 computes assessments for each version based on all currently available observations, uses these assessments to rank the versions, and decides how best to control the split of traffic between them. Iter8 provides three distinct traffic control strategies, namely, `progressive`, `top_2`, and `uniform`, with `progressive` being the default and recommended strategy for common scenarios. All three strategies are built on a statistically robust machine learning (ML) foundation that employs Bayesian estimation for assessing versions and a multi-armed bandit algorithm for deciding traffic splits. We now describe the three strategies along with their ML foundations.
+Iter8 approaches continuous experimentation (canary release, A/B and A/B/n rollouts) as an online iterative decision making problem. At the start of every iteration of an experiment, iter8 computes assessments for each version based on all currently available observations, uses these assessments to rank the versions, and decides how best to control the split of traffic between them using its traffic control strategy.
 
-## Traffic Control Strategies in iter8
+An in-depth description of the ML foundations of iter8's algorithms is available in [this USENIX HotCloud'20 paper](https://www.usenix.org/conference/hotcloud20/presentation/toslali). Below, we present the essentials of iter8's version assessments and traffic control strategies.
 
-(Coming soon)
+## Version Assessments
+Iter8 uses an online Bayesian learning approach for continually assessing how each version is performing with respect to each metric and relative to each other, based on the all data observed until the current point in time. Iter8 surfaces a variety of useful insights based on this Bayesian assessment during the course of the experiment and after its termination. They include probability of a version being the winner, the probability of a version improving over the baseline with respect to a given metric, the probability of a version being the best version with respect to a given metric, the range of values that a version is likely to take on for a given metric (credible interval).
 
-## ML Foundations of iter8
+## Traffic Control Strategies
 
-(Coming soon)
+Iter8 provides three distinct traffic control strategies, namely, `progressive`, `top_2`, and `uniform`, with `progressive` being the default and recommended strategy for common scenarios. All three strategies are built on a statistically robust machine learning (ML) foundation that employs Bayesian estimation for assessing versions and a multi-armed bandit algorithm for deciding traffic splits. The three strategies are described in the following table.
 
-### Bayesian Estimation
-
-(Coming soon)
-
-### Multi-armed Bandit
-
-(Coming soon)
-
-
-<!-- This documentation briefly describes the algorithms supported by iter8 to make decisions during canary releases or A/B testing. These algorithms are part of iter8's analytics service (*iter8-analytics*) and exposed via REST API. Iter8's Kubernetes controller (*iter8-controller*) calls the appropriate REST API based on the `.spec.trafficControl.strategy` set in a custom `Experiment` resource. Iter8's `Experiment` CRD is documented [here]({{< ref "experiment" >}}).
-
-Iter8's algorithms are statistically robust. Below, we list the algorithms currently available to users.  This list will grow as we introduce other sophisticated algorithms for decision making.
-
-## 1. Progressive check-and-increment algorithm (`check_and_increment`)
-
-#### Input parameters
-
-```yaml
-interval: # (time; e.g., 30s)
-maxIterations: # (integer; e.g., 1000)
-trafficStepSize: # (percentage; e.g., 5)
-maxTrafficPercentage: # (percentage; e.g., 90)
-onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
-```
-
-This algorithm is suitable for the gradual rollout of a candidate ("canary") version. The goal of this strategy is to gradually shift traffic from a baseline (stable) version to a candidate version, as long as the candidate version continues to pass the success criteria defined by the user.
-
-When the `experiment` begins, the traffic split is as follows: `trafficStepSize`% to the candidate version, and `100 - trafficStepSize`% to the baseline version. At the end of each iteration (whose duration is determined by the `interval` parameter), iter8 checks if there are enough data points to decide whether the candidate version satisfies the success criteria (i.e, whether enough requests were sent to make a statistically robust assessment). If there is enough data to make a decision, and the candidate version satisfies all criteria, iter8 increases the traffic to the candidate version by `trafficStepSize`. Else, if there is insufficient data, or if the candidate version fails to satisfy one or more success criteria, then the traffic split does not change. Furthermore, if a failing criterion has been declared by the user as critical, iter8 aborts the experiment and makes sure all traffic goes to the baseline version. This is a rollback situation.
-
-A successful experiment will last for a duration of length  `interval * maxIterations`. In case of success, the user can specify whether iter8 should: (1) send all traffic to the candidate; (2) roll back to the baseline despite success; or (3) split traffic across both versions. If the traffic is to be split across both versions, then the final split will be as follows: `maxTrafficPercentage`% to the candidate and `1 - maxTrafficPercentage` to the baseline.
-
-## 2. Decaying epsilon-greedy algorithm (`epsilon_greedy`)
-
-```yaml
-interval: # (time; e.g., 30s)
-maxIterations: # (integer; e.g., 1000)
-maxTrafficPercentage: # (percentage; e.g., 90)
-onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
-```
-
-This algorithm can be applied to canary releases as well as A/B or A/B/n testing. The goal of this strategy is to explore two or more competing versions, aiming to maximize a reward (which is typically associated with business-oriented metrics) while making sure that the defined success criteria (typically associated with performance-oriented and/or correctness-oriented metrics) are satisfied.
-
-Unlike the check-and-increment strategy described above, this algorithm automatically decides what the proper traffic split should be at the end of each iteration and does not require the user to supply a value for the traffic increment per iteration. It converges relatively quickly to the "optimal" version as more iterations occur over time.
-
-In A/B or A/B/n testing, the "optimality" of a version relates to maximizing the reward during the course of an experiment while satisfying the success criteria. In the context of canary releases, an implicit reward metric is used to indicate whether or not the success criteria are satisfied at each iteration.
-
-## 3. Posterior Bayesian Routing (PBR) (`posterior_bayesian_routing`)
-
-```yaml
-interval: # (time; e.g., 30s)
-maxIterations: # (integer; e.g., 1000)
-maxTrafficPercentage: # (percentage; e.g., 90)
-confidence: # (float; e.g, 0.95)
-onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
-```
-
-This algorithm provides a robust way of shifting application traffic to the best version using the principles of Bayesian statistics. Like the decaying epsilon-greedy strategy described above, PBR can be applied to canary releases as well as A/B or A/B/n testing scenarios. The goal of this strategy is to shift traffic to the optimal version subject to the user-defined success criteria.
-
-In this algorithm, the metrics used in success criteria are associated with Bayesian belief distributions, specifically, whose parameters are learnt from metric observations through the course of the experiment. At each iteration, the algorithm computes the probability of the candidate being the "best" version (i.e., satisfying all the success criteria) and the probability of the baseline being the "best" version (i.e, the complementary probability to what is computed above). Traffic is split across these two versions in proportion to their probabilities. At the end of the experiment, if the probability of candidate being the "best" version exceeds the value of ```confidence``` parameter, then, the experiment is declared a success and a roll-forward to candidate occurs.
-
-## 4. Optimistic Bayesian Routing (OBR) (`optimistic_bayesian_routing`)
-
-```yaml
-interval: # (time; e.g., 30s)
-maxIterations: # (integer; e.g., 1000)
-maxTrafficPercentage: # 80 (percentage; e.g., 90)
-confidence: # (float; e.g, 0.95)
-onSuccess: # (string enum; possible values are: "candidate", "baseline", "both")
-```
-
-Optimistic Bayesian Routing is a variation of PBR, sharing the same goal of shifting traffic to the optimal version in a statistically robust manner. The main difference between OBR and PBR lies in the way values are sampled from the distributions for reward and feasibility constraints: this algorithm has a more optimistic approach and tends to exhibit a faster convergence rate. -->
+Strategy | Description | When to use
+---------|-------------|-------------
+*progressive* | Progressively shift all traffic to the winner. | This is the default strategy. Use this when you doing canary releases or A/B or A/B/n rollouts and your goal is safely and reliably shift all traffic to the winning version. 
+*top_2* | Converge towards a 50-50 traffic split between the best two versions | This strategy helps find the winning version in fewer iterations compared to `progressive`. Use this if your goal is not progressive traffic shifting but quick winner identification.
+*uniform* | Converge towards a uniform traffic split across all versions. | Use this strategy when your goal is to maximize what you learn about each version in the experiment. In particular, this strategy is useful if you want sharper credible intervals for each metric for each version of the experiment.
