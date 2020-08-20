@@ -102,7 +102,7 @@ oc --namespace istio-system edit configmap/prometheus
 ```
 
 Find the `scrape_configs` entry with `job_name: 'kubernetes-pods`.
-Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_prometheus_io_scrape` if one exists.
+Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_sidecar_istio_io_status` if one exists.
 In this example, the last three lines have been commented out:
 
 ```yaml
@@ -258,7 +258,7 @@ Additionally, the reward metric is `mean_books_purchased`.
 
 The additional parameters control how long the experiment should run and how much traffic can be shifted to the new version in each interval. Details regarding these parameters are [here](#alter-the-duration-of-the-experiment).
 
-The experiment can be created using the command:
+The experiment can be created using the command. We modify the dummy host to match the existing route.
 
 ```bash
 curl -s {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}} \

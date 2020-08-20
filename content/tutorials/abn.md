@@ -98,7 +98,7 @@ kubectl --namespace istio-system edit configmap/prometheus
 ```
 
 Find the `scrape_configs` entry with `job_name: 'kubernetes-pods`.
-Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_prometheus_io_scrape` if one exists.
+Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_sidecar_istio_io_status` if one exists.
 In this example, the last three lines have been commented out:
 
 ```yaml
