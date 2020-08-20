@@ -9,21 +9,21 @@ This tutorial shows how iter8 can be used to perform a canary release by gradual
 Traffic is fully shifted only if the behavior of the candidate version meets specified acceptance criteria.
 
 {{% notice info %}}
-This tutorial is for use with Red Hat OpenShift. The corresponding tutorial for plain Kubernetes is [here]({{< ref "canary" >}}).
+This tutorial is for use with Red Hat OpenShift. A corresponding tutorial for plain Kubernetes is [here]({{< ref "canary" >}}).
 {{% /notice %}}
 
 This tutorial has six steps, which are meant to be tried in order.
 You will learn:
 
 - how to perform a canary rollout with iter8; and
-- how to define different success criteria for iter8 to analyze canary releases and determine success or failure;
+- how to define different success criteria for iter8 to analyze canary releases and determine success or failure.
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) distributed with [Istio](https://istio.io).
 This application comprises 4 microservies: _productpage_, _details_, _reviews_, and _ratings_.
 Of these, _productpage_ is a user-facing service while the others are backend services.
 
 {{% notice info %}}
-This rest of this tutorial assumes you have already installed _iter8_ (including Red Hat OpenShift Service Mesh). If not, do so using the instructions [here]({{< ref "red-hat" >}}).
+This rest of this tutorial assumes you have already installed iter8 (including Red Hat OpenShift Service Mesh). If not, do so using the instructions [here]({{< ref "red-hat" >}}).
 {{% /notice %}}
 
 ## Deploy the Bookinfo application
@@ -51,7 +51,8 @@ Each pod should have two containers, since the Istio sidecar was injected into e
 
 ## Expose the Bookinfo application
 
-Expose the Bookinfo application by defining an Istio `Gateway` and `VirtualService`. These will use the `route` defined for the istio ingress gateway:
+Expose the Bookinfo application by defining a `Gateway` and `VirtualService`.
+These will use the `route` defined for the Istio ingress gateway:
 
 ```bash
 export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
@@ -71,7 +72,7 @@ oc --namespace bookinfo-iter8 get gateway,virtualservice
 
 ## Verify access to Bookinfo
 
-You can then check if you can access the application with the following `curl` command:
+You can then check access to the application with the following `curl` command:
 
 ```bash
 curl -o /dev/null -s -w "%{http_code}\n" "http://${GATEWAY_URL}/productpage"
