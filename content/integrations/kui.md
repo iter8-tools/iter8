@@ -64,8 +64,8 @@ export ITER8_ANALYTICS_URL='<insert-iter8-analytics-url>'
 
 This command gives you an overview of the components of iter8, a list of commands available and also directs you to the documentation website, Github repository and Slack channel.
 
+![iter8 Kui about]({{< resourceAbsUrl path="images/iter8-kui-about.png" >}})
+
 #### `iter8 config verify`
 
-This command verifies if _iter8-analytics_ and _iter8-controller_ service is currently installed in the user's environment
-
-![iter8 Kui about]({{< resourceAbsUrl path="images/iter8-kui-about.png" >}})
+This command verifies if _iter8-analytics_ and _iter8-controller_ service is currently installed in the user's environment. it returns a _true_ or _false_ accordingly.
