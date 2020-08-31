@@ -60,7 +60,7 @@ export ITER8_ANALYTICS_URL='<insert-iter8-analytics-url>'
 
 An example of an experiment is shown in this video:
 
-{{ youtube uqC927b8ZKE }}
+{{< youtube uqC927b8ZKE >}}
 
 #### `iter8 about`
 
