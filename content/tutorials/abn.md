@@ -14,7 +14,9 @@ You will learn:
 - how to specify a reward metric; and
 - how to execute an A/B/n experiment with iter8.
 
-The content of this tutorial is captured in this video (COMING SOON).
+The content of this tutorial is captured in this video:
+
+{{< youtube ZAp0Fp5fPhc >}}
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) distributed with [Istio](https://istio.io).
 This application comprises 4 microservies: *productpage*, *details*, *reviews*, and *ratings*.
