@@ -51,14 +51,16 @@ To edit any of the currently available metrics, you can click on the _edit_ icon
 
 This command also opens a Kui sidecar and is used to create Human-In-The-Loop experiments with iter8. It opens two tabs- one for creating the experiment and one for viewing the decision and metrics for the experiment from *iter8-analytics*. The sidecar options are interactive and can be experimented with according to your preferences.
 
-_Video coming soon._
-
 To run this command, iter8 requires you to export a URL to access the *iter8-analytics* service, as an environment variable. To do this, you may have to expose the iter8 analytics service to a `NodePort` first:
 
 ```sh
 kubectl expose svc iter8-analytics -n iter8 --name=iter8-analytics-np --type=NodePort
 export ITER8_ANALYTICS_URL='<insert-iter8-analytics-url>'
 ```
+
+An example of an experiment is shown in this video:
+
+{{ youtube uqC927b8ZKE }}
 
 #### `iter8 about`
 
