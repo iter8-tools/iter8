@@ -1,7 +1,7 @@
 ---
 menuTitle: Trend
 title: Getting Started with Trend
-weight: 40
+weight: 19
 ---
 
 Trend collects metrics of past experiments and summarizes them to show
