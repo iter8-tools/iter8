@@ -12,4 +12,7 @@ Using the iter8 plugin on Kui, you can run Human-In-The-Loop iter8 experiments a
 - [Kiali]({{< ref "kiali" >}}) - Kiali is an observability console for Istio with service mesh configuration capabilities.
 The iter8 extension for Kiali allows Kiali users to see start and monitor experiment progress.
 
+- [Trend]({{< ref "trend" >}}) - Trend collects metrics of past experiments and summarizes them to show performance and resource usage trends that could expose problems creeping up over time.
+
 - [Grafana]({{< ref "grafana" >}}) - Grafana dashboards provide visibility into the runtime behavior of systems. A sample iter8 Metrics Dashboard is provided to show the default metrics iter8 provides.
+
