@@ -7,9 +7,9 @@
         {{ partial "logo.html" . }}
       </div>
 
-      <!-- Version number -->
-      <a href="{{ `releases/` | relURL }}">{{ .Site.Params.versionNumber }}</a>
-      <!-- End version number -->
+      <!-- Version name -->
+      <a href="{{ `releases/` | relURL }}">{{ .Site.Params.versionName }}</a>
+      <!-- End version name -->
 
       {{if not .Site.Params.disableSearch}}
           {{ partial "search.html" . }}

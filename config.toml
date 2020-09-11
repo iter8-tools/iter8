@@ -44,8 +44,11 @@ googleAnalytics = "UA-152813895-1"
 
   # iter8 specific
 
-  # version number
-  versionNumber = "v1.0.0 - preview"
+# used to generate URLs
+versionNumber = "master"
+
+# name displayed on the web site
+versionName = "v1.0.0 - preview"
 
 [outputs]
 home = [ "HTML", "RSS", "JSON"]

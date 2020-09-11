@@ -17,7 +17,7 @@ By default, iter8 uses the Prometheus service installed as part of the Red Hat O
 
 ### Install the iter8 analytics service
 
-Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/v1.0.0-preview/iter8-analytics.tgz) for the iter8-analytics service. The following options can be used to generate the needed YAML:
+Download and untar the [helm chart](https://github.com/iter8-tools/iter8-analytics/releases/download/{{< versionNumber >}}/iter8-analytics.tgz) for the iter8-analytics service. The following options can be used to generate the needed YAML:
 
 ```bash
 REPO=iter8/iter8-analytics
@@ -27,7 +27,7 @@ PROMETHEUS_PASSWORD=$(kubectl -n istio-system get secret htpasswd -o jsonpath='{
 helm template install/kubernetes/helm/iter8-analytics \
     --name iter8-analytics \
     --set image.repository=${REPO} \
-    --set image.tag=v1.0.0-preview \
+    --set image.tag={{< versionNumber >}} \
     --set metricsBackend.authentication.type=basic \
     --set metricsBackend.authentication.username=${PROMETHEUS_USERNAME} \
     --set metricsBackend.authentication.password=${PROMETHEUS_PASSWORD} \
@@ -41,7 +41,7 @@ helm template install/kubernetes/helm/iter8-analytics \
 The default YAML file can be used to install the iter8 controller. The Service Mesh currently uses Istio telemetry version `v1`:
 
 ```bash
-oc --namespace iter8 apply -f https://raw.githubusercontent.com/iter8-tools/iter8/v1.0.0-preview/install/iter8-controller.yaml
+oc --namespace iter8 apply -f https://raw.githubusercontent.com/iter8-tools/iter8/{{< versionNumber >}}/install/iter8-controller.yaml
 ```
 
 ## Target Services
@@ -55,5 +55,5 @@ Istio relies a sidecar injected into each pod to provide its capabilities. Istio
 If you want to uninstall all of iter8 components from your OpenShift cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
-oc delete -f https://raw.githubusercontent.com/iter8-tools/iter8/v1.0.0-preview/install/iter8-controller.yaml
+oc delete -f https://raw.githubusercontent.com/iter8-tools/iter8/{{< versionNumber >}}/install/iter8-controller.yaml
 ```
