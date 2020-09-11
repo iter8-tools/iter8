@@ -8,6 +8,7 @@ hidden: true
 * [v1.0.0 - preview](https://preliminary.iter8.tools)
 
 ### Stable
+* [v1.0.0-rc2](https://iter8.tools)
 * [v0.2.1](https://www.iter8.tools)
 
 ### Deprecated

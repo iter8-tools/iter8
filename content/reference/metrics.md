@@ -22,7 +22,7 @@ Metric name        | Description
 
 ## Extending iter8's metrics
 
-When iter8 is installed, a Kubernetes `ConfigMap` named `iter8config-metrics` is populated with a definition for each of the above out-of-the-box metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8/v1.0.0-preview/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). You can extend iter8's metrics by extending this configmap. Below, we describe the two types of metrics supported by iter8, namely, `counter` and `ratio` metrics and how to extend the configmap in order to add new counter and ratio metrics.
+When iter8 is installed, a Kubernetes `ConfigMap` named `iter8config-metrics` is populated with a definition for each of the above out-of-the-box metrics. You can see the metric definitions in [this file](https://raw.githubusercontent.com/iter8-tools/iter8/{{< versionNumber >}}/install/helm/iter8-controller/templates/metrics/iter8_metrics.yaml). You can extend iter8's metrics by extending this configmap. Below, we describe the two types of metrics supported by iter8, namely, `counter` and `ratio` metrics and how to extend the configmap in order to add new counter and ratio metrics.
 
 ### Counter metrics
 

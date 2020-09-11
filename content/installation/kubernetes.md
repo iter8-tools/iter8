@@ -20,7 +20,7 @@ iter8 has two components, `iter8_analytics` and `iter8_controller`. To install t
 To install iter8 with the default settings, you can run the following install script:
 
 ```bash
-curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8/v1.0.0-preview/install/install.sh \
+curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8/{{< versionNumber >}}/install/install.sh \
 | /bin/bash -
 ```
 
@@ -28,9 +28,9 @@ curl -L -s https://raw.githubusercontent.com/iter8-tools/iter8/v1.0.0-preview/in
 
 In case you need to customize the installation of iter8, use the Helm charts listed below:
 
-* *iter8-analytics*: [https://github.com/iter8-tools/iter8-analytics/releases/download/v1.0.0-preview/iter8-analytics.tgz](https://github.com/iter8-tools/iter8-analytics/releases/download/v1.0.0-preview/iter8-analytics.tgz)
+* *iter8-analytics*: [https://github.com/iter8-tools/iter8-analytics/releases/download/{{< versionNumber >}}/iter8-analytics.tgz](https://github.com/iter8-tools/iter8-analytics/releases/download/{{< versionNumber >}}/iter8-analytics.tgz)
 
-* *iter8-controller*: [https://github.com/iter8-tools/iter8/releases/download/v1.0.0-preview/iter8-controller.tgz](https://github.com/iter8-tools/iter8/releases/download/v1.0.0-preview/iter8-controller.tgz)
+* *iter8-controller*: [https://github.com/iter8-tools/iter8/releases/download/{{< versionNumber >}}/iter8-controller.tgz](https://github.com/iter8-tools/iter8/releases/download/{{< versionNumber >}}/iter8-controller.tgz)
 
 **Note on Prometheus:** In order to make assessments, *iter8-analytics* needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point *iter8-analytics* to the Prometheus server at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying any need for authentication. If your Istio installation is shipping metrics to a different Prometheus service, or if you need to configure authentication to access Prometheus, you need to set appropriate *iter8-analytics* Helm chart parameters. Look in the section `metricsBackend` of the Helm chart's `values.yaml` file for details.
 
@@ -63,7 +63,7 @@ iter8-analytics          ClusterIP   172.21.106.44   <none>        80/TCP    76s
 If you want to uninstall all of iter8 components from your Kubernetes cluster, first delete all instances of `Experiment` from all namespaces. Then, you can delete iter8 by running the following command:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8/v1.0.0-preview/install/iter8-controller.yaml
+kubectl delete -f https://raw.githubusercontent.com/iter8-tools/iter8/{{< versionNumber >}}/install/iter8-controller.yaml
 ```
 
 ### Uninstall is stuck?
