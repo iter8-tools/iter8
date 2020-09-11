@@ -11,10 +11,10 @@ The iter8-Kui integration aims to leverage these features for iter8. Using the i
 
 ## Installation
 
-Follow these steps to build the iter8-Kui plugin:
+Follow these steps to build and run Kui:
 
 ```sh
-git clone https://github.com/iter8-tools/iter8-kui.git
+git clone https://github.com/IBM/kui
 cd kui/
 npm ci
 ```
@@ -67,3 +67,7 @@ An example of an experiment is shown in this video:
 This command gives you an overview of the components of iter8, a list of commands available and also directs you to the documentation website, Github repository and Slack channel.
 
 ![iter8 Kui about]({{< resourceAbsUrl path="images/iter8-kui-about.png" >}})
+
+#### `iter8 config verify`
+
+This command verifies if _iter8-analytics_ and _iter8-controller_ service is currently installed in the user's environment. it returns a _true_ or _false_ accordingly.
