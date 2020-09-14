@@ -217,6 +217,7 @@ spec:
     candidates:
       - productpage-v2
       - productpage-v3
+  networking:
     hosts:
       - name: bookinfo.example.com
         gateway: bookinfo-gateway
@@ -237,7 +238,7 @@ spec:
       isReward: true
   duration:
     interval: 20s
-    maxIterations: 20
+    maxIterations: 10
   trafficControl:
     strategy: progressive
     maxIncrement: 10
@@ -256,7 +257,7 @@ Additionally, the reward metric is `mean_books_purchased`.
 
 The additional parameters control how long the experiment should run and how much traffic can be shifted to the new version in each interval. Details regarding these parameters are [here](#alter-the-duration-of-the-experiment).
 
-The experiment can be created using the command. We modify the dummy host to match the existing route.
+The experiment can be created using the command. We modify the dummy host to match the existing rcfoute.
 
 ```bash
 curl -s {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}} \

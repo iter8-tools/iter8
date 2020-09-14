@@ -209,15 +209,16 @@ For example:
 apiVersion: iter8.tools/v1alpha2
 kind: Experiment
 metadata:
-  name: productpage-v2v3v4-abn
+  name: productpage-abn-test
 spec:
   service:
     name: productpage-v1
     candidates:
       - productpage-v2
       - productpage-v3
+  networking:
     hosts:
-      - name: bookinfo-kubecon.example.com
+      - name: bookinfo.example.com
         gateway: bookinfo-gateway
   criteria:
     - metric: iter8_mean_latency
@@ -236,7 +237,7 @@ spec:
       isReward: true
   duration:
     interval: 20s
-    maxIterations: 20
+    maxIterations: 10
   trafficControl:
     strategy: progressive
     maxIncrement: 10
