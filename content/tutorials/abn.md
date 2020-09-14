@@ -216,6 +216,7 @@ spec:
     candidates:
       - productpage-v2
       - productpage-v3
+  networking:
     hosts:
       - name: bookinfo-kubecon.example.com
         gateway: bookinfo-gateway
