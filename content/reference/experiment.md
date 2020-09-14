@@ -101,7 +101,7 @@ An example of the `networking` subsection of an experiment object is as follows:
     hosts:
       - name: bookinfo.example.com
         gateway: bookinfo-gateway
-  id: bookinfo
+    id: bookinfo
 ```
 
 ***
