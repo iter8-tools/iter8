@@ -37,13 +37,11 @@ By default, Hugo will use [localhost:1313](localhost:1313).
 # File structure
 
 * [content/](content/): Contains all the Markdown files, which will be used to generate the documentation
-* [data/](data/): Contains all the JSON, YAML, or TOML, which contains configuration files and data for dynamically generated content
-* [static/](static/): Other assets used in the documentation, such as images
+* [static/](static/): Assets used in the documentation, including all the YAML files used by the tutorials.
 * [archetypes](archetypes): Stores templates for [front matter](https://gohugo.io/content-management/front-matter/)
 * [layouts/](layouts): Store templates for converting the Markdown files into HTML
 * [themes/](themes): Contains the [Hugo theme](https://themes.gohugo.io/) which does the bulk of generation
 * [resources/](resources): Caches files to speed up generation
-* [public/](public/): Outputted HTML and CSS files
 
 Content creators will mostly be working with the [content/](content/), [data/](data/), and [static/](static/) directories.
 
