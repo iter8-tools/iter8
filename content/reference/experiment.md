@@ -15,6 +15,7 @@ Configuration of an iter8 experiment.
 Field | Type | Description | Required
 ------|------|-------------|---------
 *service* | Service | Configuration that identifies the microservice and its versions that are involved in this experiment | yes
+*networking* | Networking | Describes elements of the network that should be configured for the experiment | no
 *criteria* | Criterion[] | A list of criteria which defines the winner in this experiment | no
 *duration* | Duration | Fields that affect how long the iter8 experiment will last  | no
 *trafficControl* | TrafficControl | Configuration that affect how application traffic is split across different versions of the service during and after the experiment | no
@@ -26,7 +27,7 @@ An example of experiment spec is as follows. This experiment spec rolls out a ne
 
 ```yaml
 # current version of iter8 experiment CRD is v1alpha2
-apiVersion: iter8.tools/v1alpha2 
+apiVersion: iter8.tools/v1alpha2
 kind: Experiment
 metadata:
   name: reviews-experiment
@@ -60,16 +61,6 @@ Field | Type | Description | Required
 *baseline* | string | Name of the baseline version. If `kind == Deployment`, then this is the name of a deployment. Else, if `kind == Service`, then this is the name of a service. | yes
 *candidates* | string[] | A list of names of candidate versions. If `kind == Deployment`, then these are names of candidate deployments. Else, if `kind == Service`, these are names of candidate services. | no
 *port* | integer | Port number where the service listens. | no
-*hosts* | Host[] | List of hosts and gateways associated with this service as defined in Istio-Gateway. | no
-
-#### Host
-
-Host and gateway associated with the service in an experiment. Refer to host and gateway documentation for [Istio virtual services](https://istio.io/latest/docs/reference/config/networking/virtual-service/).
-
-Field | Type | Description | Required
-------|------|-------------|---------
-*name* | string | The destination host to which traffic is being sent. This could be a DNS name with wildcard prefix or an IP address. | yes
-*gateway* | string | The name of gateway to which this host is attached. | yes
 
 An example of the `service` subsection of an experiment object is as follows. Observe that versions correspond to services and not deployments in this example.
 
@@ -83,9 +74,34 @@ service:
   - reviews-v2
   - reviews-v3
   port: 9080
-  hosts:
-  - name: "reviews.com"
-    gateway: reviews-service
+```
+
+### Networking
+
+Describes elements of the network that should be configured to route traffic for the experiment.
+
+Field | Type | Description | Required
+------|------|-------------|---------
+*hosts* | Host[] | List of hosts and gateways associated with this service as defined in Istio-Gateway. | no
+*id* | string | Refers to the id of router used to handle traffic for the experiment. Default value: first entry of effective host. | no
+
+#### Host
+
+Host and gateway associated with the service in an experiment. Refer to host and gateway documentation for [Istio virtual services](https://istio.io/latest/docs/reference/config/networking/virtual-service/).
+
+Field | Type | Description | Required
+------|------|-------------|---------
+*name* | string | The destination host to which traffic is being sent. This could be a DNS name with wildcard prefix or an IP address. | yes
+*gateway* | string | The name of gateway to which this host is attached. | yes
+
+An example of the `networking` subsection of an experiment object is as follows:
+
+```yaml
+  networking:
+    hosts:
+      - name: bookinfo.example.com
+        gateway: bookinfo-gateway
+  id: bookinfo
 ```
 
 ***
@@ -160,7 +176,6 @@ Field | Type | Description | Required
 *maxIncrement* | integer | Specifies the maximum percentage by which traffic routed to a candidate can increase during a single iteration of the experiment. Default value: 2 (percent) | no
 *match* | [HTTPMatchRequest clause of Istio virtual service](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest) | Specifies the portion of traffic which can be routed to candidates during the experiment. Traffic that does not match this clause will be sent to baseline and never to a candidate during an experiment. By default, if this field is left unspecified, all traffic is used for an experiment (i.e., match all). | no
 *onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues even after the experiment has terminated. Default value: `to_winner`. | no
-*routerID* | string | Refers to the id of router used to handle traffic for the experiment. Default value: first entry of effective host. | no
 
 An example of the `trafficControl` subsection of an experiment object is as follows.
 
@@ -173,7 +188,6 @@ trafficControl:
      - uri:
          prefix: "/wpcatalog"
   onTermination: to_winner
-  routerID: reviews-router
 ```
 
 ***
