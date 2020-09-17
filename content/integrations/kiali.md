@@ -10,7 +10,7 @@ Kiali is an observability console for Istio with service mesh configuration capa
 
 ## Enabling the iter8 Console in Kiali
 
-Currently the iter8 extension for Kiali works only for [iter8 v0.2.1](https://v0-2-1.iter8.tools), not the current version. To install this version of iter8, see [here](https://v0-2-1.iter8.tools/installation/kubernetes/).
+Currently the iter8 extension for Kiali works only for [iter8 v0.2.1](https://v0-2-1.iter8.tools). To install this version of iter8, see [here](https://v0-2-1.iter8.tools/installation/kubernetes/).
 
 ### Install Kiali Using Operator
 
