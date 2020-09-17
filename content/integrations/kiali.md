@@ -22,13 +22,13 @@ To check if Kiali operator is installed, use:
 kubectl --namespace kiali-operator get pods
 ```
 
-To install the Kiali operator, follow the steps in [Install Kiali]( https://kiali.io/documentation/latest/installation-guide/#_install_kiali_latest). You can verify that the Kiali CR is created by using command:
+To install the Kiali operator, follow the steps in [Install Kiali]( https://kiali.io/documentation/latest/installation-guide/#_install_kiali_latest). You can verify that the Kiali CR is created by using the command:
 
 ```bash
 kubectl  --namespace kiali-operator get kialis.kiali.io kiali
 ```
 
-If this is the new installation, you will be asked to choose an authentication strategy (login, anonymous, ldap, openshift, token or openid). Depending on the chosen strategy, the installation process may prompt for additional information. Please see [Kiali Login Options](https://kiali.io/documentation/latest/installation-guide/#_login_options) for details about authentication strategies.
+If this is the new installation, you will be asked to choose an authentication strategy (`login`, `anonymous`, `ldap`, `openshift`, `token` or `openid`). Depending on the chosen strategy, the installation process may prompt for additional information. Please see [Kiali Login Options](https://kiali.io/documentation/latest/installation-guide/#_login_options) for details about authentication strategies.
 
 ### Enable iter8 in the Kiali Operator CR
 
@@ -80,7 +80,7 @@ istioctl dashboard kiali
 
 ### Experiments Overview
 
-{{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="iter8 main page lists all the experiments in available namespace(s).">}}
+{{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="Iter8 main page lists all the experiments in available namespace(s).">}}
 
 ### Create Experiment
 
