@@ -22,7 +22,7 @@ To check if Kiali operator is installed, use:
 kubectl --namespace kiali-operator get pods
 ```
 
-To install the Kiali operator, follow the steps in [Install Kiali]( https://kiali.io/documentation/latest/installation-guide/#_install_kiali_latest). You can verify that the Kiali CR is created by using command:
+To install the Kiali operator, follow the steps in [Install Kiali Latest]( https://kiali.io/documentation/latest/installation-guide/#_install_kiali_latest). You can verify that the Kiali CR is created by using command:
 
 ```bash
 kubectl  --namespace kiali-operator get kialis.kiali.io kiali
