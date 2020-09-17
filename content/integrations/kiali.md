@@ -6,7 +6,7 @@ weight: 15
 summary: Describes iter8's integrations with Kiali
 ---
 
-Kiali is an observability console for Istio with service mesh configuration capabilities. It helps you to understand the structure of your service mesh by inferring the topology, and also provides the health of your mesh. Kiali provides detailed metrics, and a basic Grafana integration is available for advanced queries. Distributed tracing is provided by integrating Jaeger. For Detail Installation and Information about Kiali in general, please reference [Kiali.io](https://kiali.io)
+Kiali is an observability console for Istio with service mesh configuration capabilities. It helps you to understand the structure of your service mesh by inferring the topology, and also provides the health of your mesh. Kiali provides detailed metrics, and a basic Grafana integration is available for advanced queries. Distributed tracing is provided by integrating Jaeger. For detailed installation and information about Kiali in general, please reference [Kiali.io](https://kiali.io).
 
 ## Enabling the iter8 Console in Kiali
 
