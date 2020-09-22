@@ -45,10 +45,10 @@ googleAnalytics = "UA-152813895-1"
   # iter8 specific
 
   # used to generate URLs
-  versionNumber = "v1.0.0-rc2"
+  versionNumber = "v1.0.0-rc3"
 
   # name displayed on the web site
-  versionName = "v1.0.0-rc2"
+  versionName = "v1.0.0-rc3"
 
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
