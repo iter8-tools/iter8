@@ -92,7 +92,7 @@ prometheus.io/path: /metrics
 prometheus.io/port: "9080"
 ```
 
-Unfortunately, the Prometheus server installed with some versions of Istio expect communication with the pod to be implemented using mTLS. To learn how to configure the Prometheus service to get around this, see [here]({{< ref "tasks/prometheus-config.md" >}}).
+Unfortunately, the Prometheus server installed with some versions of Istio expect communication with the pod to be implemented using mTLS. To learn how to configure the Prometheus service to get around this, see [here]({{< ref "prometheus-config" >}}).
 
 ## Deploy the Bookinfo application
 
