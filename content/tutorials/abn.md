@@ -53,9 +53,9 @@ The examples below were tested using Istio version 1.7.0 installed using the dem
 
 ```yaml
 - name: le_500_ms_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='500',job='kuberneted-pods',reporter='source'}[$interval])) by ($version_labels))
+  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='500',job='kubernetes-pods',reporter='source'}[$interval])) by ($version_labels))
 - name: le_inf_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='kuberneted-pods',reporter='source'}[$interval])
+  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='kubernetes-pods',reporter='source'}[$interval])
 ```
 
 and the following to the `ratio_metrics.yaml` value:
