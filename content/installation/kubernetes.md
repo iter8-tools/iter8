@@ -34,10 +34,27 @@ In case you need to customize the installation of iter8, use the Helm charts lis
 
 **Note on Prometheus:** In order to make assessments, *iter8-analytics* needs to query metrics collected by Istio and stored on Prometheus. The default values for the helm chart parameters (used in the quick installation) point *iter8-analytics* to the Prometheus server at `http://prometheus.istio-system:9090` (the default internal Kubernetes URL of Prometheus installed as an Istio addon) without specifying any need for authentication. If your Istio installation is shipping metrics to a different Prometheus service, or if you need to configure authentication to access Prometheus, you need to set appropriate *iter8-analytics* Helm chart parameters. Look in the section `metricsBackend` of the Helm chart's `values.yaml` file for details.
 
-**Note on Istio Telemetry:** When deploying *iter8-controller* using helm, make sure to set the parameter `istioTelemetry` to conform with your environment. Possible values are `v1` or `v2`. Use `v1` if the Istio mixer is *not* disabled. You can determine if the mixer is *not* disabled using this command:
+**Note on Istio Telemetry:** When deploying *iter8-controller* using helm, make sure to set the parameters `istioTelemetry` and `prometheusJobLabel` to conform with your environment. 
+
+Possible values for `istioTelemetry` are `v1` or `v2`. Use `v1` if the Istio mixer is *not* disabled. You can use this code snippet to determine how to set the value:
 
 ```bash
-kubectl -n $ISTIO_NAMESPACE get cm istio -o json | jq .data.mesh | grep -o 'disableMixerHttpReports: [A-Za-z]\+' | cut -d ' ' -f2
+MIXER_DISABLED=$(kubectl -n $ISTIO_NAMESPACE get cm istio -o json | jq .data.mesh | grep -o 'disableMixerHttpReports: [A-Za-z]\+' | cut -d ' ' -f2)
+if [ "${MIXER_DISABLED}" = "false" ]; then echo "v1"; else echo "v2"; fi
+```
+
+The parameter `prometheusJobLabel` is the label that should be used by the job filter in Prometheus queries. The value needed varies with both the version of Istio telemetry and the version of Istio. You can use this code snippet to determine the value to use:
+
+```bash
+MIXER_DISABLED=$(kubectl --namespace ${ISTIO_NAMESPACE} get configmap istio -o json | jq .data.mesh | grep -o 'disableMixerHttpReports: [A-Za-z]\+' | cut -d ' ' -f2)
+ISTIO_VERSION=$(kubectl --namespace ${ISTIO_NAMESPACE} get pod --selector=istio=pilot -o jsonpath='{.items[0].spec.containers[0].image}' | cut -d: -f2)
+
+curl -s -o /tmp/semver.sh https://raw.githubusercontent.com/iter8-tools/iter8/{{< versionNumber >}}/hack/semver.sh
+chmod +x /tmp/semver.sh
+if [ "${MIXER_DISABLED}" = "false" ]; then echo "istio-mesh"
+elif [ "-1" = $(/tmp/semver.sh ${ISTIO_VERSION} 1.7.0) ]; then echo "envoy-stats"
+else echo "prometheus-pods"
+fi
 ```
 
 ### Verify the installation

@@ -47,11 +47,15 @@ We will use the latter metric as our reward metric -- our experiment will select
 
 To define the ratio metric, add the following to the `counter_metrics.yaml` field of the map:
 
+{{% notice warning %}}
+The examples below were tested using Istio version 1.7.0 installed using the demo profile with Prometheus enabled. If you are a different version of Istio, the metrics definitions may differ. For Istio using the mixer, see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) and for versions of Istio not using the mixer but less than 1.7.0 see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry.yaml" >}}).
+{{% /notice %}}
+
 ```yaml
 - name: le_500_ms_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='500',job='envoy-stats',reporter='source'}[$interval])) by ($version_labels))
+  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='500',job='kuberneted-pods',reporter='source'}[$interval])) by ($version_labels))
 - name: le_inf_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='envoy-stats',reporter='source'}[$interval])
+  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='kuberneted-pods',reporter='source'}[$interval])
 ```
 
 and the following to the `ratio_metrics.yaml` value:
@@ -74,17 +78,13 @@ To define the reward metric, `books_purchased_total`, add the following to the `
 We can do all of the above as follows:
 
 ```bash
-kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}
+kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-17.yaml" >}}
 ```
 
-{{% notice tip %}}
-The above discussion and command assumes that you are using a version of Istio with the *mixer* component disabled (typically Istio 1.5 or greater). If you are using the mixer, use [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) instead.
-{{% /notice %}}
-
-## Configure Prometheus
+## Configure Application for Prometheus Scraping
 
 The *productpage* `Deployment` definition includes annotations that direct Prometheus to scrape the pods for metrics; in particular, the reward metric we defined.
-The annotation is:
+The annotations are:
 
 ```yaml
 prometheus.io/scrape: "true"
@@ -92,37 +92,7 @@ prometheus.io/path: /metrics
 prometheus.io/port: "9080"
 ```
 
-Unfortunately, the Prometheus server installed with Istio expects communication with the pod to be implemented using mTLS.
-To avoid this, reconfigure Prometheus:
-
-```bash
-kubectl --namespace istio-system edit configmap/prometheus
-```
-
-Find the `scrape_configs` entry with `job_name: 'kubernetes-pods`.
-Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_sidecar_istio_io_status` if one exists.
-In this example, the last three lines have been commented out:
-
-```yaml
-- job_name: 'kubernetes-pods'
-  kubernetes_sd_configs:
-  - role: pod
-  relabel_configs:  # If first two labels are present, pod should be scraped  by the istio-secure job.
-  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-    action: keep
-    regex: true
-  #- source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status]
-  #  action: drop
-  #  regex: (.+)
-```
-
-Then restart the prometheus pod if any changes were made:
-
-```bash
-kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system get pod --selector='app=prometheus' -o jsonpath='{.items[0].metadata.name}')
-```
-
-You should only have to do this once.
+Unfortunately, the Prometheus server installed with some versions of Istio expect communication with the pod to be implemented using mTLS. To learn how to configure the Prometheus service to get around this, see [here]({{< ref "tasks/prometheus-config.md" >}}).
 
 ## Deploy the Bookinfo application
 
