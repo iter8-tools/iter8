@@ -6,11 +6,11 @@ weight: 15
 summary: Describes iter8's integrations with Kiali
 ---
 
-Kiali is an observability console for Istio with service mesh configuration capabilities. It helps you to understand the structure of your service mesh by inferring the topology, and also provides the health of your mesh. Kiali provides detailed metrics, and a basic Grafana integration is available for advanced queries. Distributed tracing is provided by integrating Jaeger. For Detail Installation and Information about Kiali in general, please reference [Kiali.io](https://kiali.io)
+Kiali is an observability console for Istio with service mesh configuration capabilities. It helps you to understand the structure of your service mesh by inferring the topology, and also provides the health of your mesh. Kiali provides detailed metrics, and a basic Grafana integration is available for advanced queries. Distributed tracing is provided by integrating Jaeger. For detailed installation and information about Kiali in general, please reference [Kiali.io](https://kiali.io)
 
 ## Enabling the iter8 Console in Kiali
 
-Currently the iter8 extension for Kiali works only for [iter8 v0.2.1](https://www.iter8.tools), not the current version. To install this version of iter8, see [here]({{< ref "kubernetes" >}}).
+Currently the iter8 extension for Kiali works only for [iter8 v0.2.1](https://v0-2-1.iter8.tools). To install this version of iter8, see [here](https://v0-2-1.iter8.tools/installation/kubernetes/).
 
 ### Install Kiali Using Operator
 
@@ -22,13 +22,13 @@ To check if Kiali operator is installed, use:
 kubectl --namespace kiali-operator get pods
 ```
 
-To install the Kiali operator, follow the steps in [Install Kiali]( https://kiali.io/documentation/latest/installation-guide/#_install_kiali_latest). You can verify that the Kiali CR is created by using command:
+To install the Kiali operator, follow the steps in [Install Kiali Latest]( https://kiali.io/documentation/latest/installation-guide/#_install_kiali_latest). You can verify that the Kiali CR is created by using the command:
 
 ```bash
 kubectl  --namespace kiali-operator get kialis.kiali.io kiali
 ```
 
-If this is the new installation, you will be asked to choose an authentication strategy (login, anonymous, ldap, openshift, token or openid). Depending on the chosen strategy, the installation process may prompt for additional information. Please see [Kiali Login Options](https://kiali.io/documentation/latest/installation-guide/#_login_options) for details about authentication strategies.
+If this is the new installation, you will be asked to choose an authentication strategy (`login`, `anonymous`, `ldap`, `openshift`, `token` or `openid`). Depending on the chosen strategy, the installation process may prompt for additional information. Please see [Kiali Login Options](https://kiali.io/documentation/latest/installation-guide/#_login_options) for details about authentication strategies.
 
 ### Enable iter8 in the Kiali Operator CR
 
@@ -80,7 +80,7 @@ istioctl dashboard kiali
 
 ### Experiments Overview
 
-{{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="iter8 main page lists all the experiments in available namespace(s).">}}
+{{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="Iter8 main page lists all the experiments in available namespace(s).">}}
 
 ### Create Experiment
 
