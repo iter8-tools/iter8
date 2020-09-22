@@ -81,10 +81,10 @@ kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutori
 The above discussion and command assumes that you are using a version of the Service Mesh that does not have the Istio *mixer* component disabled. If the mixer is disabled, use [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}) instead.
 {{% /notice %}}
 
-## Configure Prometheus
+## Configure Application for Prometheus Scraping
 
 The *productpage* `Deployment` definition includes annotations that direct Prometheus to scrape the pods for metrics; in particular, the reward metric we defined.
-The annotation is:
+The annotations are:
 
 ```yaml
 prometheus.io/scrape: "true"
