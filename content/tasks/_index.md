@@ -1,7 +1,7 @@
 ---
 title: Tasks
 weight: 35
-summary: How to do common tasks
+summary: Learn how to do common tasks
 ---
 
 ### Learn How To ...
