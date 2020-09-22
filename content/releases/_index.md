@@ -5,7 +5,7 @@ hidden: true
 ---
 
 ### Stable
-* [v1.0.0-rc2](https://iter8.tools)
+* [v1.0.0-rc3](https://iter8.tools)
 * [v0.2.1](https://v0-2-1.iter8.tools)
 
 ### Deprecated
