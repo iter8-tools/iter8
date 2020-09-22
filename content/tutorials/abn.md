@@ -48,7 +48,7 @@ We will use the latter metric as our reward metric -- our experiment will select
 To define the ratio metric, add the following to the `counter_metrics.yaml` field of the map:
 
 {{% notice warning %}}
-The examples below were tested using Istio version 1.7.0 installed using the demo profile with Prometheus enabled. If you are a different version of Istio, the metrics definitions may differ. For Istio using the mixer, see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) and for versions of Istio not using the mixer but less than 1.7.0 see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry.yaml" >}}).
+The examples below were tested using Istio version 1.7.0 installed using the demo profile with Prometheus enabled. If you are a different version of Istio, the metrics definitions may differ. For Istio using the mixer, see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) and for versions of Istio not using the mixer but less than 1.7.0 see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}).
 {{% /notice %}}
 
 ```yaml

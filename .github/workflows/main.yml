@@ -47,7 +47,7 @@ jobs:
         uses: peter-evans/link-checker@v1.2.2
         with:
           # Liche arguments
-          args: -v -r public/ -d public/ -x http://iter8-analytics.iter8:8080|.*releases/download/master/.*|.*/docs/edit/.*
+          args: -v -r public/ -d public/ -x http://iter8-analytics.iter8:8080|.*/releases/download/master/.*|.*/docs/edit/.*
       # - name: Create issue from failed links
       #   uses: peter-evans/create-issue-from-file@v2
       #   with:
