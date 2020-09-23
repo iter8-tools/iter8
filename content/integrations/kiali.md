@@ -69,7 +69,7 @@ You can check if the pod has successfully restarted by inspecting the pods:
 kubectl --namespace istio-system get pods
 ```
 
-Install iter8 v1.0.0-rc2. See [install instructions](https://iter8.tools/installation/)
+Install iter8 v1.0.0-rc3. See [install instructions](https://iter8.tools/installation/)
 
 Start Kiali using:
 
