@@ -81,7 +81,7 @@ istioctl dashboard kiali
 
 ### Experiments Overview
 
-{{< figure src="/images/kiali-iter8-listing.png" title="iter8 main page" caption="Iter8 main page lists all the experiments in available namespace(s).">}}
+{{< figure src="/images/kiali-list-experiments.png" title="iter8 main page" caption="Iter8 main page lists all the experiments in available namespace(s).">}}
 
 ### Create Experiment (Form Style)
 
