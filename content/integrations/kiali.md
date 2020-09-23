@@ -56,7 +56,7 @@ extensions:
     enabled: true
 ```
 
-Changing the Kialis.kiali.io CR will trigger Kiali to re-configured. You can also force the kiali pod to restart.
+Changing the Kialis.kiali.io CR will trigger Kiali to re-configured. You can also force the Kiali pod to restart.
 Restart the Kiali pods:
 
 ```bash
@@ -97,7 +97,7 @@ You can create new experiment from the Action pulldown on the right of the listi
 
 ### Create Experiment from File
 
-You can create experiment from exiting local file, import for Github or manual enter the YAML in the yaml editor.
+You can create experiment from exiting local file, import for Github or manual enter the YAML in the YAML editor.
 {{< figure src="/images/kiali-experiment-create-from-file.png" title="Experiment creation from file">}}
 
 ### Experiment Detail
@@ -140,16 +140,16 @@ kubectl --namespace istio-system delete pod $(kubectl --namespace istio-system g
 
 **Issue**: Error message `Kiali has iter8 extension enabled but it is not detected in the cluster`
 
-Make sure iter8 is installed, check that both iter80-controller and iter8-analytics are functioning:
+Make sure iter8 is installed, check that both iter8-controller and iter8-analytics are functioning:
 
 ```bash
 kubectl --namespace iter8 get pods
 ```
 
-if you started kiali before you installed iter8, please restart kiali in namespace istio-system to re-detect iter8 installation
+If you started Kiali before you installed iter8, please restart Kiali in the `istio-system` namespace to re-detect the iter8 installation.
 
 ---
 
 **Issue**: Experiment(s) are missing in the iter8 main page
 
-Make sure the namespace that contains the experiment is included in the Kiali accessible  namespace `accessible_namespaces:` definitions in the CR.
+Make sure the namespace that contains the experiment is included in the Kiali accessible namespace `accessible_namespaces:` definitions in the CR.
