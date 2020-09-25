@@ -25,7 +25,7 @@ kubectl --namespace kiali-operator get pods
 To install the Kiali operator, follow the steps in [Install Kiali Latest]( https://kiali.io/documentation/latest/installation-guide/#_install_kiali_latest). You can verify that the Kiali CR is created by using the command:
 
 ```bash
-kubectl  --namespace istio-system get kialis.kiali.io kiali
+kubectl --namespace istio-system get kialis.kiali.io kiali
 ```
 
 If this is the new installation, you will be asked to choose an authentication strategy (`login`, `anonymous`, `ldap`, `openshift`, `token` or `openid`). Depending on the chosen strategy, the installation process may prompt for additional information. Please see [Kiali Login Options](https://kiali.io/documentation/latest/installation-guide/#_login_options) for details about authentication strategies.
