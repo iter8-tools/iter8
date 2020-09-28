@@ -71,5 +71,5 @@ weight = 20
 [[Languages.en.menu.shortcuts]]
 name = "<i class='fas fa-fw fa-pen-nib'></i> Blog"
 identifier = "medium"
-url = "https://medium.com/iter8-tools"
+url = "https://blog.iter8.tools"
 weight = 30
