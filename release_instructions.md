@@ -274,21 +274,15 @@ Pick the `iter8-tools` organization and the `docs` repository
 
 Pick an appropriate branch to deploy
 
-Set up a build command. If, in the Hugo [configuration file](https://gohugo.io/getting-started/configuration) (i.e. `config.toml`), the [baseURL](https://gohugo.io/getting-started/configuration#all-configuration-settings) is not set (i.e. it is `"\"` or `""`), then use the `-b` or `--baseURL` [option](https://gohugo.io/getting-started/usage/) to assign a base URL to the `hugo` build command.
+Set up a build command. The [baseURL](https://gohugo.io/getting-started/configuration#all-configuration-settings) should be set (i.e. it is `"\"` or `""`) via the `-b` or `--baseURL` [option](https://gohugo.io/getting-started/usage/).
 
 For example:
 
 ```bash
-hugo -b iter8.tools
-```
-
-```bash
-hugo -b preliminary.iter8.tools
-```
-
-```bash
 hugo -b v0-2-1.iter8.tools
 ```
+
+This `baseURL` is used to generate URLs and it should point to the archival domain.
 
 ***
 
@@ -313,22 +307,28 @@ Since `v0.2.1`, we have begun using the [iter8.tools](iter8.tools) site. Previou
 ***
 
 When a new version is created, then the following changes must be made:
-the old latest site (originally [iter8.tools](iter8.tools)) must point to a new archival site (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)); the new version must have its own dedicated branch; and the new latest site (originally [preliminary.iter8.tools](preliminary.iter8.tools)) must point to [iter8.tools](iter8.tools).
+the old latest site (originally [iter8.tools](iter8.tools)) must point to a new archival domain (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)); the new version must have its own dedicated branch; and the new latest site (originally [preliminary.iter8.tools](preliminary.iter8.tools)) must point to [iter8.tools](iter8.tools) domain.
 
 To make these changes, follow these steps:
 
 Changes for the old latest site:
 
-1. Go to `Domain management` of [iter8.tools](iter8.tools). Remove the `iter8.tools` and `www.iter8.tools` domains. Add a custom archival domain (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) with the appropriate version number.
-2. Go to `Build & deploy`. Change the Hugo build command to use the the new domain via the `-b` or `--baseURL` option (e.g. `hugo -b v0-2-1.iter8.tools
-`).
+1. Go to `Domain management` of [iter8.tools](iter8.tools). Remove the `iter8.tools` and `www.iter8.tools` domains. 
+2. A custom archival domain (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) should already exist. However, there is also a [`_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that Netlify uses to redirect the archival site to [iter8.tool](iter8.tool). Now that the old latest site shoud no longer exist on the [iter8.tool](iter8.tool) domain, the `_redirect` file should also be removed.
 
 Changes for the new latest site:
 
 1. Go to the `master` branch and edit the configuration (i.e. `config.toml`). Change the `versionNumber`, `versionName`, and `editURL` appropriately. The `versionNumber` is used in conjunction with the `{{< versionNumber >}}` shortcode to generate URLs, pointing to resources released in other repositories under the [iter8-tools](https://github.com/iter8-tools) organization. The `versionName` is a human-readable version of the `versionNumber` which is displayed in the sidebar. The `editURL` is required for a feature on each page that allows you to easily change a file and create a pull request.
 2. Change the [content/releases/_index.md](https://github.com/iter8-tools/docs/blob/master/content/releases/_index.md) to include the new version as well as update the `preview`, `stable`, and `deprecated` version categories.
 3. Create a new branch using the format `release-<release version>`. For example: `release-0.2.1` or `release-1.0.0`.
-4. Follow the [Create a new site](#create-a-new-site) instructions and create a new site with an archival domain name (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) with the appropriate version number, using the new branch. Ensure that the build command also uses the Hugo `-b` or `--baseURL`, or else some links will not be generated correctly.
+4. Follow the [Create a new site](#create-a-new-site) instructions and use the new branch to create a new site with the [iter8.tool](iter8.tool) and archival (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) domains. Ensure that the build command uses the Hugo `-b` or `--baseURL` to point to the archival domain.
+5. Create a [`_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that will redirect from the archival site to [iter8.tool](iter8.tool).
+
+For example: 
+
+```
+v1-0-0.iter8.tools/* iter8.tools/:splat 301!
+```
 
 Changes for the preview site:
 
