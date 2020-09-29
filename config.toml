@@ -72,7 +72,13 @@ url = "https://join.slack.com/t/iter8-tools/shared_invite/enQtODU0NTczMTQ5NDU4LT
 weight = 20
 
 [[Languages.en.menu.shortcuts]]
+name = "<i class='fab fa-fw fa-youtube'></i> YouTube channel"
+identifier = "youtube"
+url = "https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg"
+weight = 30
+
+[[Languages.en.menu.shortcuts]]
 name = "<i class='fas fa-fw fa-pen-nib'></i> Blog"
 identifier = "medium"
 url = "https://blog.iter8.tools"
-weight = 30
+weight = 40
