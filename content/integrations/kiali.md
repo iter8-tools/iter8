@@ -10,7 +10,7 @@ Kiali is an observability console for Istio with service mesh configuration capa
 
 ## Enabling the iter8 Console in Kiali
 
-Currently the iter8 extension for Kiali (v1.24) works only for [iter8 v1.0.0-rc3](https://iter8.tools/) and above. To install on either Kubernetes or OpenShip, please see [here](https://iter8.tools/installation/).
+Currently the iter8 extension for Kiali (v1.24) works only for [iter8 v1.0.0-rc3](https://v1-0-0.iter8.tools/) and above. To install on either Kubernetes or OpenShip, please see [here](https://v1-0-0.iter8.tools/installation/).
 
 ### Install Kiali Using Operator
 
@@ -43,7 +43,7 @@ Find the `iter_8` key under `spec.extensions` and set `enabled` to `true`. The r
 ```
 # Kiali enabled integration with iter8 project.
 # If this extension is enabled, Kiali will communicate with iter8 controller allowing to manage Experiments and review results.
-# Additional documentation https://iter8.tools/
+# Additional documentation https://v1-0-0.iter8.tools/
 #    ---
 #    iter_8:
 #
@@ -69,7 +69,7 @@ You can check if the pod has successfully restarted by inspecting the pods:
 kubectl --namespace istio-system get pods
 ```
 
-Install iter8 v1.0.0-rc3. See [install instructions](https://iter8.tools/installation/)
+Install iter8 v1.0.0-rc3. See [install instructions](https://v1-0-0.iter8.tools/installation)
 
 Start Kiali using:
 
