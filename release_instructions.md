@@ -314,7 +314,7 @@ To make these changes, follow these steps:
 Changes for the old latest site:
 
 1. Go to `Domain management` of [iter8.tools](iter8.tools). Remove the `iter8.tools` and `www.iter8.tools` domains. 
-2. A custom archival domain (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) should already exist. However, there is also a [`_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that Netlify uses to redirect the archival site to [iter8.tool](iter8.tool). Now that the old latest site shoud no longer exist on the [iter8.tool](iter8.tool) domain, the `_redirect` file should also be removed.
+2. A custom archival domain (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) should already exist. However, there is also a [`static/_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that Netlify uses to redirect the archival site to [iter8.tool](iter8.tool). Now that the old latest site shoud no longer exist on the [iter8.tool](iter8.tool) domain, the `static/_redirect` file should also be removed.
 
 Changes for the new latest site:
 
@@ -322,7 +322,7 @@ Changes for the new latest site:
 2. Change the [content/releases/_index.md](https://github.com/iter8-tools/docs/blob/master/content/releases/_index.md) to include the new version as well as update the `preview`, `stable`, and `deprecated` version categories.
 3. Create a new branch using the format `release-<release version>`. For example: `release-0.2.1` or `release-1.0.0`.
 4. Follow the [Create a new site](#create-a-new-site) instructions and use the new branch to create a new site with the [iter8.tool](iter8.tool) and archival (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) domains. Ensure that the build command uses the Hugo `-b` or `--baseURL` to point to the archival domain.
-5. Create a [`_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that will redirect from the archival site to [iter8.tool](iter8.tool).
+5. Create a [`static/_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that will redirect from the archival site to [iter8.tool](iter8.tool).
 
 For example: 
 
