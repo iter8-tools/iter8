@@ -78,6 +78,6 @@ googleAnalytics = "UA-152813895-1"
 
 [[Languages.en.menu.shortcuts]]
   name = "<i class='fas fa-fw fa-pen-nib'></i> Blog"
-  identifier = "medium"
+  identifier = "blog"
   url = "https://blog.iter8.tools"
   weight = 40
