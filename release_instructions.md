@@ -327,7 +327,7 @@ Changes for the new latest site:
 For example: 
 
 ```
-v1-0-0.iter8.tools/* iter8.tools/:splat 301!
+https://v1-0-0.iter8.tools/* https://iter8.tools/:splat 301!
 ```
 
 Changes for the preview site:
