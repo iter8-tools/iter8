@@ -44,35 +44,40 @@ googleAnalytics = "UA-152813895-1"
 
   # iter8 specific
 
-# used to generate URLs
-versionNumber = "master"
+  # used to generate URLs
+  versionNumber = "master"
 
-# name displayed on the web site
-versionName = "v1.0.0 - preview"
+  # name displayed on the web site
+  versionName = "v1.0.0 - preview"
 
 [outputs]
-home = [ "HTML", "RSS", "JSON"]
+  home = [ "HTML", "RSS", "JSON"]
 
-[Languages]
 [Languages.en]
-title = "iter8 Documentation"
-weight = 1
-languageName = "English"
+  title = "iter8 Documentation"
+  weight = 1
+  languageName = "English"
 
 [[Languages.en.menu.shortcuts]]
-name = "<i class='fab fa-fw fa-github'></i> GitHub repo"
-identifier = "github"
-url = "https://github.com/iter8-tools/iter8"
-weight = 10
+  name = "<i class='fab fa-fw fa-github'></i> GitHub repo"
+  identifier = "github"
+  url = "https://github.com/iter8-tools/iter8"
+  weight = 10
 
 [[Languages.en.menu.shortcuts]]
-name = "<i class='fab fa-fw fa-slack'></i> Slack workspace"
-identifier = "slack"
-url = "https://join.slack.com/t/iter8-tools/shared_invite/enQtODU0NTczMTQ5NDU4LTJmNGE1OTBhOWI4NzllZGE0ZjdhM2M3MzJlMjcxYjliMTJlM2YxMzQ4OWQ5NGViYTM2MTU4MWRkZTgxNzZiMzg"
-weight = 20
+  name = "<i class='fab fa-fw fa-slack'></i> Slack workspace"
+  identifier = "slack"
+  url = "https://join.slack.com/t/iter8-tools/shared_invite/enQtODU0NTczMTQ5NDU4LTJmNGE1OTBhOWI4NzllZGE0ZjdhM2M3MzJlMjcxYjliMTJlM2YxMzQ4OWQ5NGViYTM2MTU4MWRkZTgxNzZiMzg"
+  weight = 20
 
 [[Languages.en.menu.shortcuts]]
-name = "<i class='fas fa-fw fa-pen-nib'></i> Blog"
-identifier = "medium"
-url = "https://blog.iter8.tools"
-weight = 30
+  name = "<i class='fab fa-fw fa-youtube'></i> YouTube channel"
+  identifier = "youtube"
+  url = "https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg"
+  weight = 30
+
+[[Languages.en.menu.shortcuts]]
+  name = "<i class='fas fa-fw fa-pen-nib'></i> Blog"
+  identifier = "medium"
+  url = "https://blog.iter8.tools"
+  weight = 40
