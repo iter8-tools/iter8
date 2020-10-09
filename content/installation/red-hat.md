@@ -7,7 +7,7 @@ summary: Install on Red Hat OpenShift and Red Hat OpenShift Mesh
 
 ## Prerequisites
 
-We recommend using the _Red Hat OpenShift Service Mesh_. This can be installed using the Red Hat OpenShift Service Mesh Operator. For details, see: <https://docs.openshift.com/container-platform/4.3/service_mesh/service_mesh_install/installing-ossm.html>.
+We recommend using the _Red Hat OpenShift Service Mesh_. This can be installed using the Red Hat OpenShift Service Mesh Operator. For details, see: <https://docs.openshift.com/container-platform/4.4/service_mesh/v1x/installing-ossm.html>.
 
 Installing the Service Mesh involves installing the Elasticsearch, Jaeger, Kiali and Red Hat OpenShift Service Mesh Operators, creating and managing a `ServiceMeshControlPlane` resource to deploy the control plane, and creating a `ServiceMeshMemberRoll` resource to specify the namespaces associated with the Red Hat OpenShift Service Mesh.  It is not necessary to create a `ServiceMeshMember`.
 
