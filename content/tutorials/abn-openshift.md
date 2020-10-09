@@ -158,7 +158,7 @@ export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpa
 ```
 
 ```bash
-curl -s {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}} \
+curl -L -s {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}} \
 | sed "s#bookinfo.example.com#${GATEWAY_URL}#" \
 | oc --namespace bookinfo-iter8 apply -f -
 ```
@@ -260,7 +260,7 @@ The additional parameters control how long the experiment should run and how muc
 The experiment can be created using the command. We modify the dummy host to match the existing rcfoute.
 
 ```bash
-curl -s {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}} \
+curl -L -s {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}} \
 | sed sed "s#bookinfo.example.com#${GATEWAY_URL}#" \
 | oc --namespace bookinfo-iter8 apply -f -
 ```
