@@ -119,22 +119,14 @@ For more information, see [here](https://gohugo.io/content-management/shortcodes
                                                
 ##### Images
 
-Image files should be stored in [static/images/](static/images/).
-
-Images can be displayed using the following syntax:
-
-```md
-![alt text]({{< resourceAbsUrl path="[image path]" >}})
-```
-
-**Notes**: the [static/](static/) folder will form the base of the built files. Therefore, the image path, provided that the files are stored in in [static/images/](static/images/), will begin with "images/".
+Image files should be stored in [static/images/](static/images/). The [static/](static/) folder will form the base of the built files. Therefore, the image path, provided that the files are stored in in [static/images/](static/images/), will begin with `/images/`.
 
 ***
 
 For example:
 
 ```md
-![iter8 logo]({{< resourceAbsUrl path="images/logo.png" >}})
+![iter8 logo](/images/logo.png)
 ```
 
 ##### Files
@@ -142,3 +134,33 @@ For example:
 Files should also be stored under the [static/](static/) folder.
 
 Currently, files related to tutorials are stored under [static/tutorials](static/tutorials).
+
+Files can be referenced using the `resourceAbsUrl` shortcode, which will construct a URL using the Hugo [baseURL](https://gohugo.io/getting-started/configuration/#all-configuration-settings).
+
+For example:
+
+```md
+{{< resourceAbsUrl path="/images/logo.png" >}}
+```
+
+The `resourceAbsUrl` shortcode can also be used in the following ways to create links:
+
+```md
+[Click here to see see the file]({{< resourceAbsUrl path="/images/logo.png" >}})
+```
+
+or
+
+```md
+[{{< resourceAbsUrl path="/images/logo.png" >}}]({{< resourceAbsUrl path="/images/logo.png" >}})
+```
+
+# Link checking
+
+We use the [Link Checker](https://github.com/marketplace/actions/link-checker) GitHub Action in order to verify that the links in our documentation are still valid.
+
+If there is a link that is broken, then the workflow will fail. You will need to go to the logs and go to the `Link checker` step in order to see the report.
+
+***
+
+**Note**: The workflow can be configured to ignore certain links using the `-x` or `--exclude` [Liche](https://github.com/raviqqe/liche) option. See [here](https://github.com/marketplace/actions/link-checker#usage) and [here](https://github.com/raviqqe/liche#usage) for more information.
