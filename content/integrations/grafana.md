@@ -37,7 +37,7 @@ You can select the target namespace and service.
 You can then select a baseline version and one or more candidate versions.
 This input will be used as filters to display the graphs. Here is an example for a canary experiment:
 
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v2-v3.png" >}})
+![Grafana Dashboard](/images/grafana_reviews-v2-v3.png)
 
 In this example, the request rate diagram shows traffic shifting from one version to another over the course of the experiment.
 
