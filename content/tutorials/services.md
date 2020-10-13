@@ -9,7 +9,7 @@ In iter8 the versions of a service being compared can be specified using deploym
 
 In this tutorial, we again consider the user facing service _productpage_ of the bookinfo application and we learn how to create an iter8 `Experiment` that specifies the baseline and candidate versions using Kubernetes services. The scenario we consider is here:
 
-![Example Application Deployment Using Services]({{< resourceAbsUrl path="images/service_deployment.png" >}})
+![Example Application Deployment Using Services](/images/service_deployment.png)
 
 In this example, the application _productpage.example.com_ can be routed, via an Istio `Gateway` and `VirtualService`, to the Kubernetes services. Iter8 can be used to automate the rollout including the creation of the Istio `VirtualService`.
 
