@@ -188,7 +188,7 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=gr
 
 Below is a screenshot of a portion of the Grafana dashboard showing the request rate and the mean latency for reviews-v2 and reviews-v3, right after the controller ended the experiment.
 
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v2-v3.png" >}})
+![Grafana Dashboard](/images/grafana_reviews-v2-v3.png)
 
 Note how the traffic shifted towards the canary during the experiment. You can also see that the canary's mean latency was way below the configured threshold of 200 milliseconds.
 
@@ -288,7 +288,7 @@ As before, you can check the Grafana dashboard corresponding to the canary relea
 kubectl get experiment reviews-v4-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
 ```
 
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v3-v4.png" >}})
+![Grafana Dashboard](/images/grafana_reviews-v3-v4.png)
 
 The dashboard screenshot above shows that the canary version (_reviews-v4_) consistently exhibits a high latency of 5 seconds, way above the threshold of 200 milliseconds specified in our success criterion, and way above the baseline version's latency.
 
@@ -387,8 +387,8 @@ As before, you can check the Grafana dashboard corresponding to the canary relea
 kubectl get experiment reviews-v5-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
 ```
 
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v3-v5-req-rate.png" >}})
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v3-v5-error-rate.png" >}})
+![Grafana Dashboard](/images/grafana_reviews-v3-v5-req-rate.png)
+![Grafana Dashboard](/images/grafana_reviews-v3-v5-error-rate.png)
 
 The dashboard screenshots above show that traffic to the canary version (_reviews-v5_) is quickly interrupted. Also, while the _reviews-v5_ latency is way below the threshold of 200 milliseconds we defined in the latency success criterion, its error rate is 100%, i.e., it generates errors for every single request it processes. That does not meet the error-rate success criterion we defined, which specified that the canary's error rate must be within 2% of that of the baseline (_reviews-v3_) version. According to the dashboard, _reviews-v3_ produced no errors at all.
 
@@ -528,15 +528,15 @@ As before, you can check the Grafana dashboard corresponding to the canary relea
 kubectl get experiment reviews-v6-rollout -o jsonpath='{.status.grafanaURL}' -n bookinfo-iter8
 ```
 
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v3-v6-req-rate.png" >}})
+![Grafana Dashboard](/images/grafana_reviews-v3-v6-req-rate.png)
 
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v3-v6-error-rate.png" >}})
+![Grafana Dashboard](/images/grafana_reviews-v3-v6-error-rate.png)
 
 You can also extend the Grafana Dashboard with the new metric by adding a new panel to the dashboard that looks as follows:
 
 Other configurations such as title, legend, etc can be varied as per the user's preference.
 
-![Grafana Dashboard]({{< resourceAbsUrl path="images/grafana_reviews-v3-v6-90_perc.png" >}})
+![Grafana Dashboard](/images/grafana_reviews-v3-v6-90_perc.png)
 
 ## Part 5: User-facing Canary release: _productpage-v1_ to _productpage-v2_
 
