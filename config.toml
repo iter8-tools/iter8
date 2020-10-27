@@ -18,9 +18,6 @@ googleAnalytics = "UA-152813895-1"
   # See the config.toml file from this documentation site to have an example.
   editURL = "https://github.com/iter8-tools/docs/edit/master/content/"
 
-  # Author of the site, will be used in meta information
-  author = "Alan Cha"
-
   # Description of the site, will be used in meta information
   description = "Robust analytics and control to unleash cloud-native continuous experimentation."
 
@@ -40,7 +37,7 @@ googleAnalytics = "UA-152813895-1"
   themeVariant = "mine"
 
   # Provide a list of custom css files to load relative from the `static/` folder in the site root.
-  custom_css = ["css/card.css"]
+  custom_css = ["css/iter8.css"]
 
   # iter8 specific
 
