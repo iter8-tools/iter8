@@ -33,19 +33,13 @@ You can use the following commands once the Kui terminal is up and iter8 has bee
 
 #### `iter8 metrics`
 
-This command opens a Kui sidecar where the you can perform CRUD operations on the iter8 metric configmap. Specifically, you can add, edit, delete and restore metrics on the Kui sidecar that is opened. A sample image of the output is as follows:
+This command opens a Kui sidecar where the you can perform CRUD operations on the iter8 metric configmap. Specifically, you can add, edit, delete and restore metrics on the Kui sidecar that is opened.
 
-![iter8 Kui metrics](/images/iter8-kui-metric.png)
-
-Delete and restore operations can be performed on the same page using the _trashcan_ icon. You can add a Counter or a Ratio Metric by clicking on the _+_ icon adjacent to the metric titles. This opens up a form as follows:
-
-![iter8 Kui add metric](/images/iter8-kui-add-metric.png)
-
-Once the form is filled, you can create the new metric and see it listed in the original page.
+Delete and restore operations can be performed on the same page using the _trashcan_ icon. You can add a Counter or a Ratio Metric by clicking on the _+_ icon adjacent to the metric titles. This opens up a form. Once the form is filled, you can create the new metric and see it listed in the original page.
 
 To edit any of the currently available metrics, you can click on the _edit_ icon for that metric. This also opens a form that is pre-filled with the values currently held by that metric as in the following image. Note that standard iter8 metrics such as *iter8_mean_latency*, *iter8_error_count*, etc cannot be edited as they come out-of-the-box with iter8.
 
-![iter8 Kui edit metric](/images/iter8-kui-edit-metric.png)
+![iter8 Kui metric](/gifs/iter8-kui-metric.gif)
 
 #### `iter8 create experiment`
 
@@ -66,7 +60,7 @@ An example of an experiment is shown in this video:
 
 This command gives you an overview of the components of iter8, a list of commands available and also directs you to the documentation website, Github repository and Slack channel.
 
-![iter8 Kui about](/images/iter8-kui-about.png)
+![iter8 Kui about](/gifs/iter8-kui-about.gif)
 
 #### `iter8 config verify`
 

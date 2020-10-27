@@ -1,22 +1,32 @@
 ---
-title: Homepage
+title: Iter8 documentation
 weight: 10
 chapter: true
 ---
 
-# Deliver better software in the cloud
+# Metrics-driven Automated Rollouts
 
-Use iter8's analytics-driven continuous experimentation for reliable and frequent releases of high-quality microservices on Kubernetes.
+### May the best version win
 
----
+***
 
 {{< cardGroup >}}
-  {{< card src="images/iter8pic.png" title="Continuous experimentation" text="Use advanced statistical algorithms to assess key metrics for your service and progressively shift traffic to the winning release." >}}
-  {{< card src="images/iter8-kui-metric.png" title="Get started quickly with Kui" text="Kui combines the power of familiar CLIs with interactive visualizations to provide an elegant and intuitive experience for users of Kubernetes." >}}
-  {{< card src="images/kiali-list-experiments.png" title="Launch experiments rapidly" text="With iter8's Kiali UI, you can create and launch canary release experiments for your service in seconds, and observe and control these experiments in real-time." >}}
-  {{< card src="images/iter8-trend.png" title="Analyze long-term trends" text="Analyze how key metrics for your service have evolved over multiple releases using iter8-trend and Grafana." >}}
+  {{< card fa-icon="fa-flask" title="Experiment" text="Launch live experiments that compare multiple versions with metrics of your choice." >}}
+  {{< card fa-icon="fa-robot" title="Automate" text="Watch traffic automatically shift to the best version. Embed iter8 in CI/CD pipelines." >}}
+  {{< card fa-icon="fa-search" title="Observe" text="Gain real-time insights into how different versions perform." >}}
 {{< /cardGroup>}}
 
----
+***
+
+### Why iter8?
+
+* Expressive model of experimentation enables **seven** distinct live experiment strategies including *automated canary rollout*, *A/B rollout*, and *A/B/n rollout*
+* **OpenShift Pipelines** and **Tekton** samples
+* Model selection with **TFServing** and **TensorFlow**
+* **ML-driven analytics engine** enables *statistically robust* analysis and decision making for assessing versions, identifying the winning version, and shifting traffic to the winner
+* **Kiali** integration enables interactive experiment configuration, real-time visibility into experiment progress, and insights into how metrics evolve across versions
+* **KUI** integration enables *human-in-the-loop* experimentation
+
+***
 
 [Explore iter8]({{< ref "concepts" >}})
