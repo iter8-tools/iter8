@@ -2,16 +2,14 @@
   Purpose: create image cards for the home page
 
   Usage:
-    {{< card src="[image path]" title="[title]" text="[description]">}}
-    {{< card "[image path]" "[title]" "[description]">}}
+    {{< card fa-icon="[Font Awesome icon code]" title="[title]" text="[description]">}}
+    {{< card "[Font Awesome icon code]" "[title]" "[description]">}}
 */}}
 
-<div class="col-xl-6 mt-1 mb-1">
-  <img class="card-img-top" src="{{.Get `src` }}">
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">{{.Get "title" }}</h5>
-      <p class="card-text">{{.Get "text" }}</p>
-    </div>
-  </div>
+<div class="col-xl-4 mt-1 mb-1 feature-item">
+  <h5 class="card-title">
+    <i class="fas {{.Get `fa-icon` }}"></i>
+    {{.Get "title" }}
+  </h5>
+  <p class="card-text">{{.Get "text" }}</p>
 </div>

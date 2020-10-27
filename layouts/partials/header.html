@@ -25,6 +25,8 @@
     {{ range .Site.Params.custom_css -}}
     <link href="{{(printf "%s" .) | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
     {{- end }}
+    <!-- Add iter8 theme -->
+    <link href="{{"css/iter8.css" | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
 
     <!-- JS, Popper.js, and jQuery -->
     <script src="{{"js/jquery-3.3.1.min.js"| relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}"></script>
