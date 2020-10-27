@@ -1,5 +1,5 @@
 ---
-title: Homepage
+title: Iter8 documentation
 weight: 10
 chapter: true
 ---
