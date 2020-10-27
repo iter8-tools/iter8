@@ -16,10 +16,7 @@ googleAnalytics = "UA-152813895-1"
   # Prefix URL to edit current page. Will display an "Edit this page" button on top right hand corner of every page.
   # Useful to give opportunity to people to create merge request for your doc.
   # See the config.toml file from this documentation site to have an example.
-  editURL = "https://github.com/iter8-tools/docs/edit/release-1.0.0/content/"
-
-  # Author of the site, will be used in meta information
-  author = "Alan Cha"
+  editURL = "https://github.com/iter8-tools/docs/edit/master/content/"
 
   # Description of the site, will be used in meta information
   description = "Robust analytics and control to unleash cloud-native continuous experimentation."
@@ -40,15 +37,15 @@ googleAnalytics = "UA-152813895-1"
   themeVariant = "mine"
 
   # Provide a list of custom css files to load relative from the `static/` folder in the site root.
-  custom_css = ["css/card.css"]
+  custom_css = ["css/iter8.css"]
 
   # iter8 specific
 
   # used to generate URLs
-  versionNumber = "v1.0.0-rc3"
+  versionNumber = "v1-0-0"
 
   # name displayed on the web site
-  versionName = "v1.0.0-rc3"
+  versionName = "v1.0.0"
 
 [outputs]
   home = [ "HTML", "RSS", "JSON"]
@@ -78,6 +75,6 @@ googleAnalytics = "UA-152813895-1"
 
 [[Languages.en.menu.shortcuts]]
   name = "<i class='fas fa-fw fa-pen-nib'></i> Blog"
-  identifier = "medium"
+  identifier = "blog"
   url = "https://blog.iter8.tools"
   weight = 40
