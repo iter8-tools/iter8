@@ -174,7 +174,7 @@ Field | Type | Description | Required
 ------|------|-------------|---------
 *strategy* | Enum: {*progressive, top_2, uniform*} | Enum which identifies the algorithm used for shifting traffic during an experiment (refer to [Algorithms](../algorithms) for in-depth descriptions of iter8's algorithms). Default value: `progressive`. | no
 *maxIncrement* | integer | Specifies the maximum percentage by which traffic routed to a candidate can increase during a single iteration of the experiment. Default value: 2 (percent) | no
-*match* | Match | Match rules used to filter out incoming traffic. With protocol name as a key, its value is an array of Istio matching clauses. Currently, only `http` is supported ([Istio HTTP match rules](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest)). | no
+*match* | Match | Match rules used to filter out incoming traffic. | no
 *onTermination* | Enum: {to_winner,to_baseline,keep_last} | Enum which determines the traffic split behavior after the termination of the experiment. Setting `to_winner` ensures that, if a winning version is found at the end of the experiment, all traffic will flow to this version after the experiment terminates. Setting `to_baseline` will ensure that all traffic will flow to the baseline version, after the experiment terminates. Setting `keep_last` will ensure that the traffic split used during the final iteration of the experiment continues even after the experiment has terminated. Default value: `to_winner`. | no
 
 An example of the `trafficControl` subsection of an experiment object is as follows.
@@ -192,6 +192,25 @@ trafficControl:
 
 ***
 
+### Match
+
+Match rules used to filter out incoming traffic.
+
+Field | Type | Description | Required
+------|------|-------------|---------
+*http* | [Istio HTTP match rules](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest) | HTTP traffic meets matching rules will be passed to service versions. | no
+
+An example of the `match` subsection of `trafficControl` is as follows, where only http requests of uri prefix "/wpcatalog" can be received by experimental versions.
+
+```yaml
+match:
+  http:
+  - uri:
+    prefix: "/wpcatalog"
+```
+
+***
+
 ### Manual Override
 
 Manual / out-of-band actions that override the current execution of the experiment.
@@ -199,7 +218,7 @@ Manual / out-of-band actions that override the current execution of the experime
 Field | Type | Description | Required
 ------|------|-------------|---------
 *action* | Enum: {*pause, resume, terminate*} | This field enables manual / out-of-band intervention during the course of an experiment. Execution of the experiment will be paused, or resumed from a previously paused state, or terminated respectively depending upon whether the value of this field is `pause`, `resume` or `terminate`. | yes
-*trafficSplit* | Object | Traffic split between different versions of the experiment which will take effect if `action == terminate`. | no
+*trafficSplit* | map[string]int | Traffic split between different versions of the experiment which will take effect if `action == terminate`. | no
 
 An example of the `manualOverride` subsection of an experiment object is as follows.
 
