@@ -45,7 +45,7 @@ googleAnalytics = "UA-152813895-1"
   versionNumber = "master"
 
   # name displayed on the web site
-  versionName = "v1.0.0 - preview"
+  versionName = "Preview"
 
 [outputs]
   home = [ "HTML", "RSS", "JSON"]
