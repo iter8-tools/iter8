@@ -1,9 +1,19 @@
 {{/*
-  Purpose: add a Font Awesome icon given an icon code
+  Purpose: add a Font Awesome icon given an icon code and an optional style prefix
+
+  To learn more about style prefixes, see: https://fontawesome.com/how-to-use/on-the-web/referencing-icons/basic-use
+
+  Note:
+    fa-style prefix defaults to fas: solid style
 
   Usage:
-    {{< fontAwesomeIcon fa-icon="[Font Awesome icon code]" >}}
-    {{< fontAwesomeIcon "[Font Awesome icon code]" >}}
+    {{< fontAwesomeIcon fa-style="[Font Awesome style prefix]" fa-icon="[Font Awesome icon code]" >}}
+    {{< fontAwesomeIcon "[Font Awesome style prefix]" "[Font Awesome icon code]" >}}
 */}}
 
-<i class="fab {{.Get `fa-icon` }}"></i>
+
+{{ if .Get `fa-style`}}
+  <i class="{{.Get `fa-style` }} {{.Get `fa-icon` }}"></i>
+{{ else }}
+  <i class="fas {{.Get `fa-icon` }}"></i>
+{{ end }}

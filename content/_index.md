@@ -24,7 +24,7 @@ chapter: true
 
 ***
 
-### {{< fontAwesomeIcon fa-icon="fa-github" >}} Open source
+### {{< fontAwesomeIcon fa-style="fab" fa-icon="fa-github" >}} Open source
 
 Iter8 is 100% open source and community-driven. All components are available under the [Apache 2 License](https://www.apache.org/licenses/LICENSE-2.0) on [GitHub](https://github.com/iter8-tools).
 
