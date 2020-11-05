@@ -131,3 +131,8 @@ ul.navbar-nav.ml-auto {
   /* Originally 1 rem */
   margin-top: 0rem;
 }
+
+/* Custom button inherits animated highlighting; this removes it */
+#body .custom-link.highlight::after {
+  height: 0px;
+}

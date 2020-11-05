@@ -32,4 +32,4 @@ Iter8 is 100% open source and community-driven. All components are available und
 
 ***
 
-[Explore iter8]({{< ref "concepts" >}})
+{{< button text="Explore iter8">}}{{< ref "concepts" >}}{{< /button >}}

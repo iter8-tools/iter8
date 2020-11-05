@@ -1,0 +1,20 @@
+{{/*
+  Purpose: Create a bootstrap button
+
+  Note:
+    .Inner should contain the link
+    Uses this workaround: https://github.com/gohugoio/hugo/issues/5429#issuecomment-438376849
+
+  Usage:
+    {{< card text="[button text]">}}[button destination]{{< /card >}}
+    {{< card "[button text]">}}[button destination]{{< /card >}}
+
+  Example:
+    {{< button text="Explore iter8">}}{{< ref "concepts" >}}{{< /button >}}
+*/}}
+
+<center>
+  <a class="custom-link" {{ printf "href=%q" .Inner | safeHTMLAttr }}>
+    <button type="button" class="btn btn-primary btn-lg custom-btn">{{.Get `text` }}</button>
+  </a>
+</center>
