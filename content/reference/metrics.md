@@ -2,7 +2,7 @@
 menuTitle: Metrics
 title: Metrics
 weight: 62
-summary: iter8 metrics and customization
+summary: Iter8 metrics and customization
 ---
 
 Iter8's out-of-the-box metrics and how to extend iter8's metrics.

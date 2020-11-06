@@ -2,7 +2,6 @@
 menuTitle: Algorithms
 title: Algorithms
 weight: 63
-summary: Coming soon!
 ---
 
 Iter8 approaches continuous experimentation (canary release, A/B and A/B/n rollouts) as an online iterative decision making problem. At the start of every iteration of an experiment, iter8 computes assessments for each version based on all currently available observations, uses these assessments to rank the versions, and decides how best to control the split of traffic between them using its traffic control strategy.
