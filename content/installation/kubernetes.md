@@ -13,7 +13,7 @@ summary: Install on Kubernetes and Istio
 
 ## Install iter8 on Kubernetes and Istio
 
-iter8 has two components, `iter8_analytics` and `iter8_controller`. To install them, follow the instructions below. When installing iter8 on Red Hat OpenShift, use [these instructions]({{< ref "red-hat" >}}) instead.
+Iter8 has two components, `iter8_analytics` and `iter8_controller`. To install them, follow the instructions below. When installing iter8 on Red Hat OpenShift, use [these instructions]({{< ref "red-hat" >}}) instead.
 
 ### Quick Installation
 
