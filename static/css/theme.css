@@ -255,7 +255,9 @@ textarea:focus, input[type="email"]:focus, input[type="number"]:focus, input[typ
     display: block;
 }
 #sidebar ul.topics ul {
-    display: none;
+    /* Does not allow sidebar dropdowns to open correctly */
+    /* display: none; */
+    
     padding-bottom: 1rem;
 }
 #sidebar ul.topics ul ul {

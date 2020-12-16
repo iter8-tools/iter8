@@ -253,3 +253,8 @@ figcaption h4 {
 .is-sticky #top-bar {
   box-shadow: -1px 2px 5px 1px rgba(0, 0, 0, 0.1); 
 }
+
+/* Header is not vertically centered because of margin-top applied to ul */
+ul.navbar-nav.ml-auto {
+  margin-top: 0rem;
+}

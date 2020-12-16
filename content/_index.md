@@ -1,14 +1,9 @@
 ---
-title: Iter8 documentation
+title: Metrics-driven Automated Rollouts
+description: May the best version win
 weight: 10
 chapter: true
 ---
-
-# Metrics-driven Automated Rollouts
-
-### May the best version win
-
-***
 
 {{< cardGroup >}}
   {{< card fa-icon="fa-flask" title="Experiment" text="Launch live experiments that compare multiple versions with metrics of your choice." >}}

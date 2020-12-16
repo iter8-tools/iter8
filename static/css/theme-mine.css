@@ -7,7 +7,7 @@
   --MAIN-LINK-HOVER-color:#6c9494; /* Color of hovered links */
   --MAIN-ANCHOR-color: #1abda9; /* color of anchors on titles */
 
-  --MENU-HEADER-BG-color:#000000; /* Background color of menu header */
+  --MENU-HEADER-BG-color:#060606; /* Background color of menu header */
   --MENU-HEADER-BORDER-color:#777; /*Color of menu header border */ 
 
   --MENU-SEARCH-BG-color:#252c31; /* Search field background color (by default borders + icons) */
@@ -36,7 +36,7 @@ textarea:focus, input[type="email"]:focus, input[type="number"]:focus, input[typ
 }
 
 h2, h3, h4, h5 {
-  color: var(--MAIN-TITLES-TEXT-color) !important;
+  color: var(--MAIN-TITLES-TEXT-color);
 }
 
 a {

@@ -35,7 +35,7 @@ defaultContentLanguageInSubdir= true
   themeVariant = "mine"
 
   # Provide a list of custom css files to load relative from the `static/` folder in the site root.
-  custom_css = ["css/iter8.css"]
+  custom_css = ["css/app.4fc0b62e4b82c997bb0041217cd6b979.css", "css/iter8.css"]
 
   # iter8 specific
 

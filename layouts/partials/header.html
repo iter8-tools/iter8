@@ -21,14 +21,12 @@
     <link href="{{"css/atom-one-dark-reasonable.css" | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
     <link href="{{"css/theme.css" | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
     <link href="{{"css/hugo-theme.css" | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
-    {{with .Site.Params.themeVariant}}
+    {{ with .Site.Params.themeVariant }}
     <link href="{{(printf "css/theme-%s.css" .) | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
-    {{end}}
+    {{ end }}
     {{ range .Site.Params.custom_css -}}
     <link href="{{(printf "%s" .) | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
     {{- end }}
-    <!-- Add iter8 theme -->
-    <link href="{{"css/iter8.css" | relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}" rel="stylesheet">
 
     <!-- JS, Popper.js, and jQuery -->
     <script src="{{"js/jquery-3.3.1.min.js"| relURL}}{{ if $assetBusting }}?{{ now.Unix }}{{ end }}"></script>
@@ -38,84 +36,153 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
 
     <style>
-      :root #header + #content > #left > #rlblock_left{
-          display:none !important;
+      :root #header + #content > #left > #rlblock_left {
+        display: none !important;
       }
       {{ if .Site.Params.disableInlineCopyToClipBoard }}
-        :not(pre) > code + span.copy-to-clipboard {
-            display: none;
-        }
+      :not(pre) > code + span.copy-to-clipboard {
+        display: none;
+      }
       {{ end }}
     </style>
+
     {{ partial "custom-header.html" . }}
   </head>
-  <body class="" data-url="{{ .RelPermalink }}">
+
+  {{ if eq .Kind "home" }}
+  <header class="cover bg-top {{ if eq .Kind `home` }}home{{ end }}" style="background-image: url('/images/iter8-promo.png'); background-color: #171717;">
+    
+    <!-- Background color determined from the Ananke Hugo theme -->
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: rgba(0, 0, 0, .6);">
+      <a class="navbar-brand" href="/">
+        <img src="/images/logo.png" width="200rem" alt="">
+      </a>
+      
+      <!-- Header links -->
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link f4 f3-l" href="/concepts">Documentation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link f4 f3-l" href="https://blog.iter8.tools">Blog</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main title -->
+    <div class="{{ .Site.Params.cover_dimming_class | default "bg-black-60" }}">
+      <!-- Changed pv6-l to pb6-l -->
+      <div class="tc-l pv4 pb6-l ph3 ph4-ns">
+        <h1 class="f2 f-subheadline-l fw2 white-90 mb0 lh-title">
+          {{ .Title | default .Site.Title }}
+        </h1>
+        {{ with .Params.description }}
+        <h2 class="fw1 f4 f2-l white-80 measure-wide-l center mt3" style="text-align: center;">
+          {{ . }}
+        </h2>
+        {{ end }}
+      </div>
+    </div>
+  </header>
+
+  {{ else }}
+  <header class="cover bg-top">
+    
+    <!-- Background color determined from the Ananke Hugo theme -->
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #060606;">
+      <a class="navbar-brand" href="/">
+        <img src="/images/logo.png" width="200rem" alt="">
+      </a>
+      
+      <!-- Header links -->
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link f4 f3-l" href="/concepts">Documentation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link f4 f3-l" href="https://blog.iter8.tools">Blog</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <header>
     {{ partial "menu.html" . }}
-        <section id="body">
-        <div id="overlay"></div>
-        <div class="padding highlightable">
-              {{if not .IsHome}}
-              <div>
-                <div id="top-bar">
-                {{ if and (or .IsPage .IsSection) .Site.Params.editURL }}
-                  {{ $File := .File }}
-                  {{ $Site := .Site }}
-                  {{with $File.Path }}
-                  <div id="top-github-link">
-                    <a class="github-link" title='{{T "Edit-this-page"}}' href="{{ $Site.Params.editURL }}{{ replace $File.Dir "\\" "/" }}{{ $File.LogicalName }}" target="blank">
-                      <i class="fas fa-code-branch"></i>
-                      <span id="top-github-link-text">{{T "Edit-this-page"}}</span>
-                    </a>
-                  </div>
-                  {{ end }}
-                {{ end }}
-                {{$toc := (and (not .Params.disableToc) (not .Params.chapter))}}
-                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
-                    <span id="sidebar-toggle-span">
-                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
-                          <i class="fas fa-bars"></i>
-                        </a>
-                    </span>
-                  {{ if $toc }}
-                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
-                  {{ end }}
-                  <span class="links">
-                 {{$showBreadcrumb := (and (not .Params.disableBreadcrumb) (not .Site.Params.disableBreadcrumb))}}
-                 {{if $showBreadcrumb}}
-                    {{ template "breadcrumb" dict "page" . "value" .Title }}
-                 {{ else }}
-                   {{ .Title }}
-                 {{ end }}
-                  </span>
-                </div>
-                {{ if $toc }}
-                    {{ partial "toc.html" . }}
-                {{ end }}
-              </div>
-            </div>
+  </header>
+
+  {{ end }}
+
+  <body class="" data-url="{{ .RelPermalink }}">
+    <section id="body" class="{{ if eq .Kind `home` }}nosidebarmargin{{ end }}">
+
+      <!-- The overlay is a semi transparent block that show up when you -->
+      <!-- toggle the sidebar -->
+      <!-- See id="sidebar-toggle" -->
+      <div id="overlay"></div>
+      
+      <div class="padding {{ if ne .Kind `home` }}highlightable{{ end }}">
+        {{ if not .IsHome }}
+        <div id="top-bar">
+          {{ if and (or .IsPage .IsSection) .Site.Params.editURL }}
+          {{ $File := .File }}
+          {{ $Site := .Site }}
+          {{with $File.Path }}
+          <div id="top-github-link">
+            <a class="github-link" title='{{T "Edit-this-page"}}' href="{{ $Site.Params.editURL }}{{ replace $File.Dir "\\" "/" }}{{ $File.LogicalName }}" target="blank">
+              <i class="fas fa-code-branch"></i>
+              <span id="top-github-link-text">{{T "Edit-this-page"}}</span>
+            </a>
+          </div>
+          {{ end }}
+          {{ end }}
+          {{$toc := (and (not .Params.disableToc) (not .Params.chapter))}}
+          <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+            <span id="sidebar-toggle-span">
+              <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                <i class="fas fa-bars"></i>
+              </a>
+            </span>
+
+            {{ if $toc }}
+            <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
             {{ end }}
+            
+            <span class="links">
+              {{$showBreadcrumb := (and (not .Params.disableBreadcrumb) (not .Site.Params.disableBreadcrumb))}}
+              {{if $showBreadcrumb}}
+                {{ template "breadcrumb" dict "page" . "value" .Title }}
+              {{ else }}
+                {{ .Title }}
+              {{ end }}
+            </span>
+          </div>
+          {{ if $toc }}
+            {{ partial "toc.html" . }}
+          {{ end }}
+        </div>
+        {{ end }}
         <div id="head-tags">
-        {{ partial "tags.html" . }}
+          {{ partial "tags.html" . }}
         </div>
         {{ if .Params.chapter }}
-          <div id="chapter">
+        <div id="chapter">
         {{ end }}
         <div id="body-inner">
-          {{if and (not .IsHome) (not .Params.chapter) }}
-            <h1>
-              {{ if eq .Kind "taxonomy" }}
-                {{.Kind}} ::
-              {{ end }}
-              {{.Title}}
-            </h1>
+          {{ if and (not .IsHome) (not .Params.chapter) }}
+          <h1>
+            {{ if eq .Kind "taxonomy" }}
+              {{ .Kind }} ::
+            {{ end }}
+            {{.Title }}
+          </h1>
           {{end}}
 
-        {{define "breadcrumb"}}
-          {{$parent := .page.Parent }}
-          {{ if $parent }}
-            {{ $value := (printf "<a href='%s'>%s</a> > %s" $parent.RelPermalink $parent.Title .value) }}
-            {{ template "breadcrumb" dict "page" $parent "value" $value }}
-          {{else}}
-            {{.value|safeHTML}}
-          {{end}}
-        {{end}}
+{{ define "breadcrumb" }}
+  {{ $parent := .page.Parent }}
+  {{ if $parent }}
+    {{ $value := (printf "<a href='%s'>%s</a> > %s" $parent.RelPermalink $parent.Title .value) }}
+    {{ template "breadcrumb" dict "page" $parent "value" $value }}
+  {{ else }}
+    {{ .value|safeHTML }}
+  {{ end }}
+{{ end }}
