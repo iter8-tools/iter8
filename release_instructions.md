@@ -367,11 +367,11 @@ Changes for the preview site:
 
 1. Change the site table and the top of the [README.md](https://github.com/iter8-tools/docs/blob/master/README.md) so that it states the correct preview and stable sites and uses the correct Netlify badges.
 
-### Update Documenation Release
+### Update Documentation Release
 
 Copy all files from `master` branch to release branch. 
 
-Download zip from GitHub.
+Download zip file from GitHub.
 Extract files: `tar -xzf docs-master.zip`.
 
 Copy to branch
