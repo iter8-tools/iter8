@@ -92,6 +92,7 @@ git push -u origin prepare-${RELEASE}
 Create a pull request against ${RELEASE_BRANCH} on the upstream project.
 After tests complete and approval, merge pull request.
 
+<!--
 ### Manual testing
 
 After merging, can test as follows:
@@ -114,14 +115,15 @@ istio-${ISTIO_VERSION}/bin/istioctl manifest install \
 # run local tests
 kubectl create ns test-ns
 make generate fmt vet load
-go run ./cmd/manager/main.go 
+go run ./cmd/manager/main.go
 go test -run TestExperiment -v -p 1 ./test/e2e/ -args -namespace test-ns
-kubectl delete ns test-ns 
+kubectl delete ns test-ns
 
 # install iter8
 # modify and then run
 install/install.sh
 ```
+-->
 
 ## `iter8-analytics`
 
@@ -285,7 +287,7 @@ As in previous projects; combine notes about changes.
 
 ### Netlify set up
 
-Create a [Netlify](https://app.netlify.com/) account 
+Create a [Netlify](https://app.netlify.com/) account
 
 ### Create a new site
 
@@ -355,7 +357,7 @@ Changes for the new latest site:
 4. Follow the [Create a new site](#create-a-new-site) instructions and use the new branch to create a new site with the [iter8.tool](iter8.tool) and archival (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) domains. Ensure that the build command uses the Hugo `-b` or `--baseURL` to point to the archival domain.
 5. Create a [`static/_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that will redirect from the archival site to [iter8.tool](iter8.tool).
 
-For example: 
+For example:
 
 ```
 https://v1-0-0.iter8.tools/* https://iter8.tools/:splat 301!
@@ -366,11 +368,6 @@ Changes for the preview site:
 1. Change the site table and the top of the [README.md](https://github.com/iter8-tools/docs/blob/master/README.md) so that it states the correct preview and stable sites and uses the correct Netlify badges.
 
 ### Update Documenation Release
-
-Create branch from $RELEASE_BRANCH:
-
-```bash
-
 
 Copy all files from `master` branch to release branch. 
 
