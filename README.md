@@ -1,6 +1,6 @@
 | Site | Status
 |------|-------
-| [iter8.tools](https://iter8.tools) (v1.0.0) | [![Netlify Status](https://api.netlify.com/api/v1/badges/3351aece-eb1e-4078-aab5-da6108a53ba7/deploy-status)](https://app.netlify.com/sites/iter8-v1-0-0/deploys)
+| [iter8.tools](https://iter8.tools) (v1.0.1) | [![Netlify Status](https://api.netlify.com/api/v1/badges/1422bdf8-5e0f-4e57-ae6a-f69ae41a7697/deploy-status)](https://app.netlify.com/sites/iter8-v1-0-1/deploys)
 | [v0-2-1.iter8.tools](https://v0-2-1.iter8.tools) (v0.2.1) | [![Netlify Status](https://api.netlify.com/api/v1/badges/c2832f30-9130-4c9b-8183-c110c890426e/deploy-status)](https://app.netlify.com/sites/iter8-v0-2-1/deploys)
 | [preliminary.iter8.tools](https://preliminary.iter8.tools) | [![Netlify Status](https://api.netlify.com/api/v1/badges/b800a77c-9df7-49f0-9f55-010a0dbcdc70/deploy-status)](https://app.netlify.com/sites/preliminary-iter8-tools/deploys)
 
