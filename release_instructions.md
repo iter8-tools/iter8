@@ -10,13 +10,13 @@ Define the following environment variables identifying the release:
 
 ```bash
 export RELEASE_BRANCH=v1.0
-export RELEASE=v1.0.0-rc2
-export PREVIOUS_RELEASE=v1.0.0-rc1
+export RELEASE=v1.0.1
+export PREVIOUS_RELEASE=v1.0.0
 ```
 
 ## Create Release Branch **If Necessary**
 
-If necessary, create a release branch. This should be an unusual step.
+**If necessary**, create a release branch. This should be an unusual step.
 
 ```bash
 git checkout master
@@ -63,7 +63,7 @@ You might try the following strategies:
 Using a script to change all instances of $PREVIOUS_RELEASE to $RELEASE:
 
 ```bash
-for f in $(grep -R --exclude-dir vendor --exclude Gopkg.lock --exclude CHANGELOG $PREVIOUS_RELEASE * | cut -f1 -d:  | uniq); do sed -i.old "s#$PREVIOUS_RELEASE#$RELEASE#g" $f ; done
+for f in $(grep -R --exclude-dir vendor --exclude Gopkg.lock --exclude go.mod --exclude go.sum --exclude hack/semver.sh --exclude CHANGELOG $PREVIOUS_RELEASE * | cut -f1 -d:  | uniq); do sed -i.old "s#$PREVIOUS_RELEASE#$RELEASE#g" $f ; done
 for f in $(find . -name "*.old" ! -path "vendor/*" -print); do rm $f; done
 ```
 
@@ -92,7 +92,38 @@ git push -u origin prepare-${RELEASE}
 Create a pull request against ${RELEASE_BRANCH} on the upstream project.
 After tests complete and approval, merge pull request.
 
-### `iter8-analytics`
+### Manual testing
+
+After merging, can test as follows:
+
+```bash
+KUBERNETES_VERSION=v1.18.3
+ISTIO_-_VERSI0N=1.7.6
+
+# start minikube
+minikube start --cpus 4 --memory 8192 --kubernetes-version=${KUBERNETES_VERSION} --driver=docker
+
+# install istio
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${ISTIO_VERSION} sh -
+istio-${ISTIO_VERSION}/bin/istioctl manifest install \
+    --set profile=demo \
+    --set values.kiali.enabled=false \
+    --set values.grafana.enabled=false \
+    --set values.prometheus.enabled=true
+
+# run local tests
+kubectl create ns test-ns
+make generate fmt vet load
+go run ./cmd/manager/main.go 
+go test -run TestExperiment -v -p 1 ./test/e2e/ -args -namespace test-ns
+kubectl delete ns test-ns 
+
+# install iter8
+# modify and then run
+install/install.sh
+```
+
+## `iter8-analytics`
 
 Checkout out local release branch and make sure it matches upstram release branch:
 
@@ -132,7 +163,7 @@ for f in $(find . -name "*.old" ! -path "vendor/*" -print); do rm $f; done
 ```
 
 - `install/kubernetes/helm/iter8-analytics/values.yaml` to set `image.tag` to $RELEASE
-- `tests/e2e/install-iter8`
+- `iter8_analytics/tests/e2e/install-iter8`
 
 By hand:
 
@@ -314,7 +345,6 @@ To make these changes, follow these steps:
 Changes for the old latest site:
 
 1. Go to `Domain management` of [iter8.tools](iter8.tools). Remove the `iter8.tools` and `www.iter8.tools` domains. 
-
 2. A custom archival domain (e.g. [v0-2-1.iter8.tools](v0-2-1.iter8.tools)) should already exist. However, there is also a [`static/_redirect` file](https://docs.netlify.com/routing/redirects/redirect-options/#http-status-codes) that Netlify uses to redirect the archival site to [iter8.tool](iter8.tool). Now that the old latest site shoud no longer exist on the [iter8.tool](iter8.tool) domain, the `static/_redirect` file should also be removed.
 
 Changes for the new latest site:
@@ -334,3 +364,33 @@ https://v1-0-0.iter8.tools/* https://iter8.tools/:splat 301!
 Changes for the preview site:
 
 1. Change the site table and the top of the [README.md](https://github.com/iter8-tools/docs/blob/master/README.md) so that it states the correct preview and stable sites and uses the correct Netlify badges.
+
+### Update Documenation Release
+
+Create branch from $RELEASE_BRANCH:
+
+```bash
+
+
+Copy all files from `master` branch to release branch. 
+
+Download zip from github.
+Extract files: `tar -xzf docs-master.zip`.
+
+Copy to branch
+
+Then go back and update the following files if necessary.
+
+- `README.md` // look at badges, version
+- `config.toml` // versionNumber, versionName
+- `static/_redirects`
+- `content/releases/_index.md`
+
+Search for $PREVIOUS_RELEASE, `master`, `preview` and `prelim` to ensure got everything.
+
+```bash
+git commit -m "copy changes from master to $RELEASE_BRANCH for release $RELEASE"
+git push origin $RELEASE_BRANCH
+```
+
+Create pull request, have it approved and merge it.
