@@ -10,6 +10,7 @@ hidden: true
 
 ### Stable
 
+* [v1.0.1](https://v1-0-1.iter8.tools)
 * [v1.0.0](https://v1-0-0.iter8.tools)
 
 ### Deprecated
