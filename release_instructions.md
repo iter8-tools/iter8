@@ -371,7 +371,7 @@ Changes for the preview site:
 
 Copy all files from `master` branch to release branch. 
 
-Download zip from github.
+Download zip from GitHub.
 Extract files: `tar -xzf docs-master.zip`.
 
 Copy to branch
