@@ -29,28 +29,9 @@
       </ul>
     {{ end }}
 
-    <h3>Topics</h3>
-    <ul class="topics list-unstyled components">
-      {{ if eq .Site.Params.ordersectionsby "title" }}  
-        {{ range .Site.Home.Sections.ByTitle }}
-        {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
-        {{ end }}
-      {{ else }}
-        {{ range .Site.Home.Sections.ByWeight }}
-        {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
-        {{ end }}
-      {{ end }} 
-
-      <!-- Custom releases menu entry -->
-      <li data-nav-id="/releases-custom/" title="Releases" class="dd-item {{ if eq .File.Dir `releases/` }}active{{ end }}">
-        <a href="https://www.iter8.tools/releases/">Releases</a>
-      </li>
-    </ul>
-
     {{ $disableShortcutsTitle := .Site.Params.DisableShortcutsTitle }}
     {{ with .Site.Menus.shortcuts }}
       <section id="shortcuts">
-        <h3>Community</h3>
         <ul>
           {{ range sort . "Weight" }}
             <li> 
