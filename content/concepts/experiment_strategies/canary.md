@@ -22,9 +22,9 @@ The tutorial is based on the [Bookinfo sample application](https://istio.io/docs
 This application comprises 4 microservies: _productpage_, _details_, _reviews_, and _ratings_.
 Of these, _productpage_ is a user-facing service while the others are backend services.
 
-{{% notice info %}}
-This rest of this tutorial assumes you have already installed iter8 (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
-{{% /notice %}}
+<!-- TODO: Reintroduce "{{% notice info %}}
+This rest of this tutorial assumes you have already installed iter8 (including Istio). If not, do so using the instructions [here](Kubernetes).
+{{% /notice %}}" -->
 
 ## Deploy the Bookinfo application
 
@@ -207,7 +207,9 @@ kubectl delete namespace bookinfo-iter8
 
 ### Inspect progress using Grafana
 
-You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here]({{< ref "grafana" >}}).
+You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. 
+
+<!-- TODO: Reintroduce "To install this dashboard, see [here](Grafana link)."-->
 
 ### Inspect progress using Kiali
 

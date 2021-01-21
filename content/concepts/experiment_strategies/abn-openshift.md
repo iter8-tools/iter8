@@ -32,7 +32,9 @@ These changes enable us to visually distinguish between versions when using a br
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
 {{% notice info %}}
-This rest of this tutorial assumes you have already installed iter8 (including the Red Hat OpenShift Service Mesh). If not, do so using the instructions [here]({{< ref "red-hat" >}}).
+This rest of this tutorial assumes you have already installed iter8 (including the Red Hat OpenShift Service Mesh). 
+
+<!-- TODO: Reintroduce "If not, do so using the instructions [here](Red Hat link)." -->
 {{% /notice %}}
 
 ## Define New Metrics
@@ -337,7 +339,9 @@ oc delete namespace bookinfo-iter8
 
 ### Inspect progress using Grafana
 
-You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here]({{< ref "grafana" >}}).
+You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard.
+
+<!-- TODO: Reintroduce "To install this dashboard, see [here](Grafana link)."-->
 
 ### Inspect progress using Kiali
 

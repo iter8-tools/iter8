@@ -31,9 +31,9 @@ The version of the bookinfo *productpage* service used in this tutorial has been
 These changes enable us to visually distinguish between versions when using a browser and to configure the behavior with respect to metrics.
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
-<!-- {{% notice info %}}
-This rest of this tutorial assumes you have already installed iter8 (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
-{{% /notice %}} -->
+<!-- TODO: Reintroduce "{{% notice info %}}
+This rest of this tutorial assumes you have already installed iter8 (including Istio). If not, do so using the instructions [here](Kubernetes).
+{{% /notice %}}" -->
 
 ## Define New Metrics
 
@@ -92,7 +92,9 @@ prometheus.io/path: /metrics
 prometheus.io/port: "9080"
 ```
 
-Unfortunately, the Prometheus server installed with some versions of Istio expect communication with the pod to be implemented using mTLS. To learn how to configure the Prometheus service to get around this, see [here]({{< ref "prometheus-config" >}}).
+Unfortunately, the Prometheus server installed with some versions of Istio expect communication with the pod to be implemented using mTLS.
+
+<!-- TODO: Reintroduce "To learn how to configure the Prometheus service to get around this, see [here](Prometheus config)." -->
 
 ## Deploy the Bookinfo application
 
@@ -304,7 +306,9 @@ kubectl delete namespace bookinfo-iter8
 
 ### Inspect progress using Grafana
 
-You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. To install this dashboard, see [here]({{< ref "grafana" >}}).
+You can inspect the progress of your experiment using the sample *iter8 Metrics* dashboard. 
+
+<!-- TODO: Reintroduce "To install this dashboard, see [here](Grafana link)". -->
 
 ### Inspect progress using Kiali
 
