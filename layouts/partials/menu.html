@@ -7,20 +7,37 @@
 
   <div class="highlightable">
     <div style="padding: 1rem 1rem; align-items: center;">
-      {{if not .Site.Params.disableSearch}}
+      {{ if not .Site.Params.disableSearch }}
         {{ partial "search.html" . }}
       {{ end }}
     </div>
+
+    {{ range .Site.Sections }}
+    <a href="{{.RelPermalink}}">
+      <h3 class="{{ if eq .File.UniqueID $.File.UniqueID }}active{{ end }}">{{ .Title }}</h3>
+    </a>
+    <ul class="topics list-unstyled components">
+        {{ if eq .Site.Params.ordersectionsby "title" }}  
+          {{ range .Pages.ByTitle }}
+          {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
+          {{ end }}
+        {{ else }}
+          {{ range .Pages.ByWeight }}
+          {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
+          {{ end }}
+        {{ end }} 
+      </ul>
+    {{ end }}
 
     <h3>Topics</h3>
     <ul class="topics list-unstyled components">
       {{ if eq .Site.Params.ordersectionsby "title" }}  
         {{ range .Site.Home.Sections.ByTitle }}
-        {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks }}
+        {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
         {{ end }}
       {{ else }}
         {{ range .Site.Home.Sections.ByWeight }}
-        {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks }}
+        {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
         {{ end }}
       {{ end }} 
 
@@ -37,7 +54,7 @@
         <ul>
           {{ range sort . "Weight" }}
             <li> 
-              {{ .Pre }}<a class="padding" href="{{.URL | absLangURL }}">{{ safeHTML .Name }}</a>{{ .Post }}
+              {{ .Pre }}<a class="padding" href="{{ .URL | absLangURL }}">{{ safeHTML .Name }}</a>{{ .Post }}
             </li>
           {{ end }}
         </ul>
@@ -61,7 +78,7 @@
                   {{ range $siteLanguages }}
                     {{ if eq $translation.Lang .Lang }}
                       {{ $selected := false }}
-                      {{ if eq $pageLang .Lang}}
+                      {{ if eq $pageLang .Lang }}
                         <option id="{{ $translation.Language }}" value="{{ $translation.Permalink }}" selected>{{ .LanguageName }}</option>
                       {{ else }}
                         <option id="{{ $translation.Language }}" value="{{ $translation.Permalink }}">{{ .LanguageName }}</option>
@@ -100,6 +117,7 @@
 <!-- templates -->
 {{ define "section-tree-nav" }}
 {{ $showvisitedlinks := .showvisitedlinks }}
+{{ $global := .global}}
 {{ $currentNode := .currentnode }}
 {{ $currentFileUniqueID := "" }}
 {{ with $currentNode.File }}{{ $currentFileUniqueID = .UniqueID }}{{ end }}
@@ -109,6 +127,7 @@
 
     <li>
       {{ $numberOfPages := (add (len .Pages) (len .Sections)) }}
+      <!-- Create tab in sidebar menu with no subsections or pages -->
       {{ if eq $numberOfPages 0 }}
         <a href="{{.RelPermalink}}">
           {{ safeHTML .Params.Pre }}{{ or .Params.menuTitle .LinkTitle .Title }}{{ safeHTML .Params.Post }}
@@ -117,15 +136,20 @@
           {{ end }}
         </a>
 
+      <!-- Create tab in sidebar menu with additional content -->
       {{ else }}
-        <a href="#{{lower .LinkTitle}}" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+        {{ $isDropdownOpen := in $currentFileUniqueID .File.UniqueID }}
+        <a href="#{{urlize (lower .LinkTitle)}}" 
+          data-toggle="collapse"
+          aria-expanded="{{ $isDropdownOpen }}" 
+          class="dropdown-toggle">
           {{ safeHTML .Params.Pre }}{{ or .Params.menuTitle .LinkTitle .Title }}{{ safeHTML .Params.Post }}
           {{ if $showvisitedlinks }}
             <i class="fas fa-check read-icon"></i>
           {{ end }}
         </a>
 
-        <ul class="collapse list-unstyled" id="{{lower .LinkTitle}}">
+        <ul class="collapse list-unstyled {{ if in $global.File.Dir .File.Dir }}show{{ end }}" id="{{urlize (lower .LinkTitle)}}">
           {{ $currentNode.Scratch.Set "pages" .Pages }}
           {{ if .Sections }}
             {{ $currentNode.Scratch.Set "pages" (.Pages | union .Sections) }}
@@ -136,14 +160,14 @@
             {{ range $pages.ByTitle }}
               {{ if and .Params.hidden (not $.showhidden) }} 
               {{ else }}
-              {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks }}
+              {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
               {{ end }}
             {{ end }}
           {{ else }}
             {{ range $pages.ByWeight }}
               {{ if and .Params.hidden (not $.showhidden) }} 
               {{ else }}
-              {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks }}
+              {{ template "section-tree-nav" dict "sect" . "currentnode" $currentNode "showvisitedlinks" $showvisitedlinks "global" $}}
               {{ end }}
             {{ end }}
           {{ end }}
@@ -152,10 +176,11 @@
     </li>
   {{ else }}
     {{ if not .Params.Hidden }}
-      <li data-nav-id="{{.RelPermalink}}" title="{{.Title}}" class="dd-item 
-        {{ if eq .File.UniqueID $currentFileUniqueID}}active{{ end }}"
+      <li data-nav-id="{{.RelPermalink}}" 
+        title="{{.Title}}" 
+        class="dd-item {{ if eq .File.UniqueID $currentFileUniqueID }}active{{ end }}"
       >
-        <a href="{{ .RelPermalink}}">
+        <a href="{{ .RelPermalink }}">
           {{ safeHTML .Params.Pre }}{{ or .Params.menuTitle .LinkTitle .Title }}{{ safeHTML .Params.Post }}
           {{ if $showvisitedlinks }}
             <i class="fas fa-check read-icon"></i>
