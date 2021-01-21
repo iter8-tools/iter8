@@ -7,7 +7,7 @@ summary: Learn how to resuse an existing VirtualService
 To route a percentage of traffic between the baseline and candidate versions of a service, iter8 creates and modifies an Istio `VirtualService` and a set of `DestinationRules` (one for each of the baseline and canidate versions).
 In some cases, a `VirtualService` may already exist.
 Edge services will typically require a `VirtualService` to exists to route traffic to the service.
-For example, when the bookinfo application (used in the [Canary]({{< ref "tutorials/canary.md" >}}) and [A/B/n]({{< ref "tutorials/abn.md" >}}) tutorials) is deployed, a `VirtualService` is created to route traffic to the *productpage* microservice.
+For example, when the bookinfo application (used in the [Canary]({{< ref "canary.md" >}}) and [A/B/n]({{< ref "abn.md" >}}) tutorials) is deployed, a `VirtualService` is created to route traffic to the *productpage* microservice.
 
 Iter8 can reuse an existing `VirtualService` if it can identify the apporopriate one to use.
 In general, iter8 cannot do so without assistance; to identify it to iter8, add the following labels to the `VirtualService`:
@@ -25,4 +25,4 @@ If it is not, add it to the `Experiment`:
     id: IDENTIFIER
 ```
 
-For an example, see the [`VirtualService`]({{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}) and [`Experiment`]({{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}}) used in the [A/B/n]({{< ref "tutorials/abn.md" >}}) tutorial.
+For an example, see the [`VirtualService`]({{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}) and [`Experiment`]({{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}}) used in the [A/B/n]({{< ref "abn.md" >}}) tutorial.

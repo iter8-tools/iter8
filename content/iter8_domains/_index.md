@@ -1,6 +1,7 @@
 ---
-title: Integrations
-weight: 40
+title: Iter8 Domains
+menuTitle: Iter8 Domains
+weight: 20
 summary: Using other tools with iter8
 ---
 

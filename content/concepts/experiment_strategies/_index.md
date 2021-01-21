@@ -1,6 +1,7 @@
 ---
-title: Tutorials
-weight: 30
+menuTitle: Experiment Strategies
+title: Experiment Strategies
+weight: 20
 summary: Get started with tutorials
 ---
 

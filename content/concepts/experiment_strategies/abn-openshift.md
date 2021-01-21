@@ -1,11 +1,15 @@
 ---
-menuTitle: A/B/n Rollout
+menuTitle: A/B/n Rollout - OpenShift
 title: A/B/n Rollout
-weight: 25
-summary: Learn how to perform an A/B/n rollout
+weight: 40
+summary: Learn how to perform an A/B/n rollout on Red Hat OpenShift
 ---
 
 This tutorial shows how iter8 can be used to perform A/B/n rollout of several versions of a service to select the one that maximizes a reward metric while also satisfiying any other requirements.
+
+{{% notice info %}}
+This tutorial is for use with Red Hat OpenShift. A corresponding tutorial for plain Kubernetes is [here]({{< ref "abn" >}}).
+{{% /notice %}}
 
 This tutorial has eight steps, which are meant to be tried in order.
 You will learn:
@@ -13,10 +17,6 @@ You will learn:
 - how to define application specific metrics;
 - how to specify a reward metric; and
 - how to execute an A/B/n experiment with iter8.
-
-The content of this tutorial is captured in this video:
-
-{{< youtube ZAp0Fp5fPhc >}}
 
 The tutorial is based on the [Bookinfo sample application](https://istio.io/docs/examples/bookinfo/) distributed with [Istio](https://istio.io).
 This application comprises 4 microservies: *productpage*, *details*, *reviews*, and *ratings*.
@@ -32,7 +32,7 @@ These changes enable us to visually distinguish between versions when using a br
 The source code for these changes is available [here](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward).
 
 {{% notice info %}}
-This rest of this tutorial assumes you have already installed iter8 (including Istio). If not, do so using the instructions [here]({{< ref "kubernetes" >}}).
+This rest of this tutorial assumes you have already installed iter8 (including the Red Hat OpenShift Service Mesh). If not, do so using the instructions [here]({{< ref "red-hat" >}}).
 {{% /notice %}}
 
 ## Define New Metrics
@@ -47,15 +47,11 @@ We will use the latter metric as our reward metric -- our experiment will select
 
 To define the ratio metric, add the following to the `counter_metrics.yaml` field of the map:
 
-{{% notice warning %}}
-The examples below were tested using Istio version 1.7.0 installed using the demo profile with Prometheus enabled. If you are a different version of Istio, the metrics definitions may differ. For Istio using the mixer, see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}) and for versions of Istio not using the mixer but less than 1.7.0 see [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}).
-{{% /notice %}}
-
 ```yaml
 - name: le_500_ms_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='500',job='kubernetes-pods',reporter='source'}[$interval])) by ($version_labels))
+  query_template: (sum(increase(istio_request_duration_seconds_bucket{le='0.5',reporter='source',job='istio-mesh'}[$interval])) by ($version_labels))
 - name: le_inf_latency_request_count
-  query_template: (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',job='kubernetes-pods',reporter='source'}[$interval])
+  query_template: (sum(increase(istio_request_duration_seconds_bucket{le='+Inf',reporter='source',job='istio-mesh'}[$interval])) by ($version_labels))
 ```
 
 and the following to the `ratio_metrics.yaml` value:
@@ -78,8 +74,12 @@ To define the reward metric, `books_purchased_total`, add the following to the `
 We can do all of the above as follows:
 
 ```bash
-kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-17.yaml" >}}
+kubectl --namespace iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics-telemetry-v1.yaml" >}}
 ```
+
+{{% notice tip %}}
+The above discussion and command assumes that you are using a version of the Service Mesh that does not have the Istio *mixer* component disabled. If the mixer is disabled, use [{{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}]({{< resourceAbsUrl path="tutorials/abn-tutorial/productpage-metrics.yaml" >}}) instead.
+{{% /notice %}}
 
 ## Configure Application for Prometheus Scraping
 
@@ -92,26 +92,57 @@ prometheus.io/path: /metrics
 prometheus.io/port: "9080"
 ```
 
-Unfortunately, the Prometheus server installed with some versions of Istio expect communication with the pod to be implemented using mTLS. To learn how to configure the Prometheus service to get around this, see [here]({{< ref "prometheus-config" >}}).
+Unfortunately, the Prometheus server installed with the Red Hat OpenShift Service Mesh expects communication with the pod to be implemented using mTLS.
+To avoid this, reconfigure Prometheus:
+
+```bash
+oc --namespace istio-system edit configmap/prometheus
+```
+
+Find the `scrape_configs` entry with `job_name: 'kubernetes-pods`.
+Comment out the entry with a `source_label` of `__meta_kubernetes_pod_annotation_sidecar_istio_io_status` if one exists.
+In this example, the last three lines have been commented out:
+
+```yaml
+- job_name: 'kubernetes-pods'
+  kubernetes_sd_configs:
+  - role: pod
+  relabel_configs:  # If first two labels are present, pod should be scraped  by the istio-secure job.
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+  # Keep target if there's no sidecar or if prometheus.io/scheme is explicitly set to "http"
+  #- source_labels: [__meta_kubernetes_pod_annotation_sidecar_istio_io_status, __meta_kubernetes_pod_annotation_prometheus_io_scheme]
+  #  action: keep
+  #  regex: ((;.*)|(.*;http))
+```
+
+Then restart the prometheus pod if any changes were made:
+
+```bash
+oc --namespace istio-system delete pod $(oc --namespace istio-system get pod --selector='app=prometheus' -o jsonpath='{.items[0].metadata.name}')
+```
+
+You should only have to do this once.
 
 ## Deploy the Bookinfo application
 
 To deploy the Bookinfo application, create a namespace configured to enable auto-injection of the Istio sidecar. You can use whatever namespace name you wish. By default, the namespace `bookinfo-iter8` is created.
 
 ```bash
-kubectl apply -f {{< resourceAbsUrl path="tutorials/namespace.yaml" >}}
+oc apply -f {{< resourceAbsUrl path="tutorials/namespace.yaml" >}}
 ```
 
 Next, deploy the application:
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
+oc --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-tutorial.yaml" >}}
 ```
 
 You should see pods for each of the four microservices:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get pods
+oc --namespace bookinfo-iter8 get pods
 ```
 
 Note that we deployed version *v1* of the *productpage* microsevice; that is, *productpage-v1*.
@@ -119,42 +150,41 @@ Each pod should have two containers, since the Istio sidecar was injected into e
 
 ## Expose the Bookinfo application
 
-Expose the Bookinfo application by defining an Istio `Gateway`, `VirtualService` and `DestinationRule`:
+Expose the Bookinfo application by defining a `Gateway`, `VirtualService` and `DestinationRule`.
+These will use the `Route` defined for the Istio ingress gateway:
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}}
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+```
+
+```bash
+curl -L -s {{< resourceAbsUrl path="tutorials/bookinfo-gateway.yaml" >}} \
+| sed "s#bookinfo.example.com#${GATEWAY_URL}#" \
+| oc --namespace bookinfo-iter8 apply -f -
 ```
 
 You can inspect the created resources:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get gateway,virtualservice,destinationrule
+oc --namespace bookinfo-iter8 get gateway,virtualservice,destinationrule
 ```
-
-Note that the service has been associated with a fake host, `bookinfo.example.com` for demonstration purposes.
 
 ## Verify access to Bookinfo
 
-To access the application, determine the ingress IP and port for the application.
-You can do so by following steps 3 and 4 of the Istio instructions [here](https://istio.io/latest/docs/examples/bookinfo/#determine-the-ingress-ip-and-port) to set the environment variables `GATEWAY_URL`. You can then check if you can access the application with the following `curl` command:
+You can check access to the application with the following `curl` command:
 
 ```bash
-curl --header 'Host: bookinfo.example.com' -o /dev/null -s -w "%{http_code}\n" "http://${GATEWAY_URL}/productpage"
+curl -o /dev/null -s -w "%{http_code}\n" "http://${GATEWAY_URL}/productpage"
 ```
 
 If everything is working, the command above should return `200`.
-Note that the curl command above sets the `Host` header to match the host we associated the VirtualService with (`bookinfo.example.com`).
-
-{{% notice tip %}}
-If you want to access the application from your browser, you will need to set this header using a browser plugin.
-{{% /notice %}}
 
 ## Generate load
 
 To simulate user requests, use a command such as the following:
 
 ```bash
-watch -n 0.1 'curl --header "Host: bookinfo.example.com" -s "http://${GATEWAY_URL}/productpage" | grep -i "color:"'
+watch -n 0.1 'curl -s "http://${GATEWAY_URL}/productpage" | grep -i "color:"'
 ```
 
 This command requests the `productpage` microservice 10 times per second.
@@ -182,7 +212,8 @@ metadata:
   name: productpage-abn-test
 spec:
   service:
-    name: productpage-v1
+    name: productpage
+    baseline: productpage-v1
     candidates:
       - productpage-v2
       - productpage-v3
@@ -226,16 +257,18 @@ Additionally, the reward metric is `mean_books_purchased`.
 
 The additional parameters control how long the experiment should run and how much traffic can be shifted to the new version in each interval. Details regarding these parameters are [here](#alter-the-duration-of-the-experiment).
 
-The experiment can be created using the command:
+The experiment can be created using the command. We modify the dummy host to match the existing rcfoute.
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}}
+curl -L -s {{< resourceAbsUrl path="tutorials/abn-tutorial/abn_productpage_v1v2v3.yaml" >}} \
+| sed sed "s#bookinfo.example.com#${GATEWAY_URL}#" \
+| oc --namespace bookinfo-iter8 apply -f -
 ```
 
 Inspection of the new experiment shows that it is paused because the specified candidate versions cannot be found in the cluster:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -250,13 +283,13 @@ Once the candidate versions are deployed, the experiment will start automaticall
 To deploy the *v2* and *v3* versions of the *productpage* microservice, execute:
 
 ```bash
-kubectl --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/productpage-v2.yaml" >}} -f {{< resourceAbsUrl path="tutorials/productpage-v3.yaml" >}}
+oc --namespace bookinfo-iter8 apply -f {{< resourceAbsUrl path="tutorials/productpage-v2.yaml" >}} -f {{< resourceAbsUrl path="tutorials/productpage-v3.yaml" >}}
 ```
 
 Once its corresponding pods have started, the `Experiment` will show that it is progressing:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -271,7 +304,7 @@ Based on intermediate evaluations, traffic will be adjusted between the versions
 iter8 will eventually identify that the best version is the candidate, `productpage-v3` and that it is confident that this choice will be the final choice (by indicating that a *winner* has been found:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -284,7 +317,7 @@ If iter8 is unable to determine a winner with confidence, the experiment will fa
 When the experiment is finished (about 5 minutes), you will see that all traffic has been shifted to the winner, *productpage-v3*:
 
 ```bash
-kubectl --namespace bookinfo-iter8 get experiment
+oc --namespace bookinfo-iter8 get experiment
 ```
 
 ```bash
@@ -297,7 +330,7 @@ productpage-abn-test   A/B/N   [productpage bookinfo.example.com]   Completed   
 To clean up, delete the namespace:
 
 ```bash
-kubectl delete namespace bookinfo-iter8
+oc delete namespace bookinfo-iter8
 ```
 
 ## Other things to try (before cleanup)

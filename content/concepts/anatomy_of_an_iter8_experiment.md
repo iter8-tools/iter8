@@ -1,7 +1,7 @@
 ---
-menuTitle: Experiment
-title: Experiment CRD
-weight: 20
+menuTitle: Anatomy of an iter8 Experiment
+title: Anatomy of an iter8 Experiment
+weight: 10
 summary: Introduction to iter8 experiment
 ---
 
