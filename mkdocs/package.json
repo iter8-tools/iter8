@@ -1,27 +1,33 @@
 {
-  "name": "mkdocs-material",
-  "version": "6.2.6",
-  "description": "A Material Design theme for MkDocs",
+  "name": "iter8",
+  "version": "0.2.5",
+  "description": "AI-driven rollouts for Kubernetes applications",
   "keywords": [
-    "mkdocs",
-    "documentation",
-    "theme"
+    "iter8",
+    "rollout",
+    "progressive",
+    "metrics",
+    "canary",
+    "A/B",
+    "A/B/N",
+    "Conformance",
+    "experiment"
   ],
-  "homepage": "https://squidfunk.github.io/mkdocs-material/",
+  "homepage": "https://iter8.tools/",
   "bugs": {
-    "url": "https://github.com/squidfunk/mkdocs-material/issues",
-    "email": "martin.donath@squidfunk.com"
+    "url": "https://github.com/iter8-tools/iter8/issues",
+    "email": "iter8tools@gmail.com"
   },
-  "license": "MIT",
+  "license": "Apache v2.0",
   "private": true,
   "author": {
-    "name": "Martin Donath",
-    "email": "martin.donath@squidfunk.com"
+    "name": "Srinivasan Parthasarathy",
+    "email": "iter8tools@gmail.com"
   },
   "contributors": [],
   "repository": {
     "type": "git",
-    "url": "https://github.com/squidfunk/mkdocs-material.git"
+    "url": "https://github.com/iter8-tools/iter8.git"
   },
   "scripts": {
     "build": "npm run clean && npx webpack --mode production",
