@@ -60,6 +60,6 @@ jobs:
 
       - name: Build project
         run: |
-          cd iter8mkdocs
+          cd mkdocs
           npm run build
           git diff --name-only
