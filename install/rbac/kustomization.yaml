@@ -1,0 +1,4 @@
+namePrefix: iter8-
+resources:
+ - clusterroles.yaml
+ - rolebindings.yaml

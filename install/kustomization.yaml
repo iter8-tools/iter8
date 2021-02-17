@@ -1,0 +1,5 @@
+namespace: iter8-system
+resources:
+  - rbac/
+  - iter8-analytics/
+  - iter8-controller/

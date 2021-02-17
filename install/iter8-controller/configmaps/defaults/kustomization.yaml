@@ -1,0 +1,6 @@
+configMapGenerator:
+- name: defaults
+  files:
+  - defaults.yaml
+generatorOptions:
+  disableNameSuffixHash: true

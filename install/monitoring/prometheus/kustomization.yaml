@@ -1,0 +1,10 @@
+namePrefix: iter8-
+namespace: iter8-monitoring
+commonLabels:
+  creator: iter8
+resources:
+- clusterrole.yaml
+- clusterrolebinding.yaml
+- prometheus.yaml
+- serviceaccount.yaml
+- knative-service-monitor.yaml
