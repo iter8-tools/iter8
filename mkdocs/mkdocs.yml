@@ -2,7 +2,7 @@ site_name: iter8
 site_url: https://focused-kepler-1dd051.netlify.app/
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  AI-driven rollouts for Kubernetes applications. Use iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.
+  Use iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.
 
 # Repository
 repo_name: sriumcp/docs
