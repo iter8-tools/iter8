@@ -2,9 +2,10 @@
 base = "mkdocs/"
 publish = "material/"
 command = """
-restore_home_cache ".cache" "pip cache" &&
-restore_cwd_cache '.venv' 'python3 virtualenv' &&
-pip3 install -r requirements.txt && mkdocs build
+python3 -m venv .venv &&
+source .venv/bin/activate &&
+pip3 install -r requirements.txt && 
+mkdocs build
 """
 
 [build.environment]
