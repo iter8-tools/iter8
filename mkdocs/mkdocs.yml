@@ -94,9 +94,9 @@ nav:
   - Home: index.md
   - Getting started:
     - Quick start: 
-      - iter8 for Knative: getting-started/quick-start/iter8-knative.md
-      - iter8 for KFServing: getting-started/quick-start/iter8-kfserving.md
-      - iter8 for Istio: getting-started/quick-start/iter8-istio.md
+      - with Knative: getting-started/quick-start/with-knative.md
+      - with KFServing: getting-started/quick-start/with-kfserving.md
+      - with Istio: getting-started/quick-start/with-istio.md
     - Install: getting-started/install.md
     - Features at a glance: getting-started/features.md
     - Getting help: getting-started/help.md

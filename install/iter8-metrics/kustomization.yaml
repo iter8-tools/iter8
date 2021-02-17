@@ -1,0 +1,5 @@
+namespace: iter8-system
+commonLabels:
+  creator: iter8
+resources:
+ - revision-metrics.yaml
