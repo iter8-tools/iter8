@@ -23,7 +23,7 @@ name: build and push documentation
 on:
   push:
     branches:
-      - main # Publish `main` as latest.
+      - master # Publish `main` as latest.
     tags:
       - v* # Publish `v1.2.3` tags as releases.
 
