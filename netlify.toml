@@ -2,5 +2,10 @@
 base = "mkdocs/"
 publish = "material/"
 command = """
+restore_home_cache ".cache" "pip cache" &&
+restore_cwd_cache '.venv' 'python3 virtualenv' &&
 pip3 install -r requirements.txt && mkdocs build
 """
+
+[build.environment]
+PYTHON_VERSION = 3.9
