@@ -1,6 +1,7 @@
 site_name: iter8
 site_url: https://iter8.tools
 site_author: Srinivasan Parthasarathy
+site_description: "AI-driven rollouts for Kubernetes applications"
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -137,5 +138,5 @@ nav:
 
 # Google Analytics
 google_analytics:
-  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  - UA-152813895-1
   - auto
