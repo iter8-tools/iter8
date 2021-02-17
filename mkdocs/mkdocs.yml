@@ -1,12 +1,12 @@
 site_name: iter8
-site_url: https://iter8.tools
+site_url: https://focused-kepler-1dd051.netlify.app
 site_author: Srinivasan Parthasarathy
 site_description: "AI-driven rollouts for Kubernetes applications"
 
 # Repository
-repo_name: iter8-tools/iter8
-repo_url: https://github.com/iter8-tools/iter8
-# edit_uri: ""
+repo_name: sriumcp/docs
+repo_url: https://github.com/sriumcp/docs
+edit_uri: mkdocs/docs
 
 # Configuration
 theme:
