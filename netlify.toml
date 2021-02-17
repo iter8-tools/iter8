@@ -1,12 +1,12 @@
 [build]
 base = "mkdocs/"
-publish = "material/"
+publish = "site/"
 command = """
-python3 -m venv .venv &&
-source .venv/bin/activate &&
+npm install && 
+npm run build &&
 pip3 install -r requirements.txt && 
 mkdocs build
 """
 
 [build.environment]
-PYTHON_VERSION = "3.9"
+PYTHON_VERSION = "3.7"

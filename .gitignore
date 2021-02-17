@@ -103,8 +103,11 @@ dist
 # TernJS port file
 .tern-port
 
-# Python virtual env
-.venv
+# Python
+*.py[ocd]
+*__pycache__/
+*venv*
+*.venv*
 
 # material (built from npm)
 material
