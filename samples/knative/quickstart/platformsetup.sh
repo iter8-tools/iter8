@@ -2,6 +2,14 @@
 
 set -e 
 
+## Ensure ITER8 environment variable is set.
+if [[ -z ${ITER8} ]]; then
+    echo "ITER8 environment variable needs to be set to the root folder of iter8"
+    exit 1
+else
+    echo "ITER8 is set to " $ITER8
+fi
+
 ## Ensure Kubernetes cluster is available.
 KUBERNETES_STATUS=$(kubectl version | awk '/^Server Version:/' -)
 if [[ -z ${KUBERNETES_STATUS} ]]; then
@@ -45,8 +53,9 @@ echo "Installing Knative core components"
 kubectl apply --filename https://github.com/knative/serving/releases/download/v0.20.0/serving-core.yaml
 
 
-# Step 2: Monitor the Knative components until all of the components show a `STATUS` of `Running` or `Completed`:
-echo "Waiting for all pods to be running"
+# Step 2: Monitor the Knative components until all of the components are `Running` or `Completed`:
+echo "Waiting for all Knative-serving pods to be running..."
+sleep 10 # allowing enough time for resource creation
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 
 
@@ -76,7 +85,7 @@ elif [[ "contour" == ${1} ]]; then
     # Install the Knative Contour controller:
     kubectl apply --filename https://github.com/knative/net-contour/releases/download/v0.20.0/net-contour.yaml
 
-    # To configure Knative Serving to use Contour by default:
+    # Configure Knative Serving to use Contour by default:
     kubectl patch configmap/config-network \
     --namespace knative-serving \
     --type merge \
@@ -99,7 +108,7 @@ elif [[ "kourier" == ${1} ]]; then
     # Install the Knative Kourier controller:
     kubectl apply --filename https://github.com/knative/net-kourier/releases/download/v0.20.0/kourier.yaml
 
-    # To configure Knative Serving to use Kourier by default:
+    # Configure Knative Serving to use Kourier by default:
     kubectl patch configmap/config-network \
     --namespace knative-serving \
     --type merge \
@@ -108,25 +117,21 @@ elif [[ "kourier" == ${1} ]]; then
 fi
 
 
-# Step 4: Install out-of-the-box iter8 metrics
+# Step 4: Install Prometheus using Prometheus Operator
 echo "Installing Prometheus"
-# Edit line
-kustomize build install/monitoring/prometheus-operator | kubectl apply -f -
+kustomize build $ITER8/install/monitoring/prometheus-operator | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-# Edit line
-kustomize build install/monitoring/prometheus | kubectl apply -f - 
+kustomize build $ITER8/install/monitoring/prometheus | kubectl apply -f - 
 
 
-# Step 5: Install iter8-knative and out-of-the-box metrics
-echo "Installing iter8-knative"
-TAG=main
-# Edit line
-kustomize build install | kubectl apply -f -
+# Step 5: Install iter8 for Knative
+echo "Installing iter8 for Knative"
+kustomize build $ITER8/install | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build install/iter8-metrics | kubectl apply -f -
+kustomize build $ITER8/install/iter8-metrics | kubectl apply -f -
 
 
-# Step 6: Verify your installation
+# Step 6: Verify iter8 installation
 echo "Verifying installation"
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
