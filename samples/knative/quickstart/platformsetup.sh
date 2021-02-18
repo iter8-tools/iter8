@@ -2,6 +2,14 @@
 
 set -e 
 
+## Ensure ITER8 environment variable is set.
+if [[ -z ${ITER8} ]]; then
+    echo "ITER8 environment variable needs to be set to the root folder of iter8"
+    exit 1
+else
+    echo "ITER8 is set to " $ITER8
+fi
+
 ## Ensure Kubernetes cluster is available.
 KUBERNETES_STATUS=$(kubectl version | awk '/^Server Version:/' -)
 if [[ -z ${KUBERNETES_STATUS} ]]; then
