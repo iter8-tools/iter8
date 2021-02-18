@@ -24,7 +24,7 @@ spec:
     objectives: 
     - metric: mean-latency
       upperLimit: 100
-    - metric: very-mean-latency
+    - metric: 95th-percentile-tail-latency
       upperLimit: "0.00001"
     - metric: error-rate
       upperLimit: "0.01"

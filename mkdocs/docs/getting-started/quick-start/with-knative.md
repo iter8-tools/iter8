@@ -160,9 +160,13 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
               cmd: kubectl
               args: ["apply", "-f", "https://github.com/sriumcp/docs/samples/knative/quickstart/{{ .promote }}.yaml"]
       criteria:
-        objectives:
-        # mean latency should be under 100 milliseconds; error rate should be under 1%    
+        # mean latency of version should be under 50 milliseconds
+        # 95th percentile latency should be under 100 milliseconds
+        # error rate should be under 1%
+        objectives: 
         - metric: mean-latency
+          upperLimit: 50
+        - metric: 95th-percentile-tail-latency
           upperLimit: 100
         - metric: error-rate
           upperLimit: "0.01"
@@ -216,7 +220,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
 
     ****** Progress Summary ******
     Experiment stage: Running
-    Number of completed iterations: 7
+    Number of completed iterations: 3
 
     ****** Winner Assessment ******
     App versions in this experiment: [current candidate]
@@ -224,24 +228,30 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     Recommended baseline: candidate
 
     ****** Objective Assessment ******
-    +-------------------------+---------+-----------+
-    |        OBJECTIVE        | CURRENT | CANDIDATE |
-    +-------------------------+---------+-----------+
-    | mean-latency <= 100.000 | true    | true      |
-    +-------------------------+---------+-----------+
-    | error-rate <= 0.010     | true    | true      |
-    +-------------------------+---------+-----------+
+    +--------------------------------+---------+-----------+
+    |           OBJECTIVE            | CURRENT | CANDIDATE |
+    +--------------------------------+---------+-----------+
+    | mean-latency <= 50.000         | true    | true      |
+    +--------------------------------+---------+-----------+
+    | 95th-percentile-tail-latency   | true    | true      |
+    | <= 100.000                     |         |           |
+    +--------------------------------+---------+-----------+
+    | error-rate <= 0.010            | true    | true      |
+    +--------------------------------+---------+-----------+
 
     ****** Metrics Assessment ******
-    +-----------------------------+---------+-----------+
-    |           METRIC            | CURRENT | CANDIDATE |
-    +-----------------------------+---------+-----------+
-    | request-count               | 984.528 |   401.720 |
-    +-----------------------------+---------+-----------+
-    | mean-latency (milliseconds) |   1.187 |     1.208 |
-    +-----------------------------+---------+-----------+
-    | error-rate                  |   0.000 |     0.000 |
-    +-----------------------------+---------+-----------+
+    +--------------------------------+---------+-----------+
+    |             METRIC             | CURRENT | CANDIDATE |
+    +--------------------------------+---------+-----------+
+    | request-count                  | 429.334 |    16.841 |
+    +--------------------------------+---------+-----------+
+    | mean-latency (milliseconds)    |   0.522 |     0.712 |
+    +--------------------------------+---------+-----------+
+    | 95th-percentile-tail-latency   |   4.835 |     4.750 |
+    | (milliseconds)                 |         |           |
+    +--------------------------------+---------+-----------+
+    | error-rate                     |   0.000 |     0.000 |
+    +--------------------------------+---------+-----------+
     ```    
 
 === "kubectl get experiment"
@@ -308,5 +318,5 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ??? info "Understanding what happened"
     1. In Step 4, you created a Knative service which manages two revisions, `sample-app-v1` (`baseline`) and `sample-app-v2` (`candidate`).
     2. In Step 5, you created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
-    3. In step 6, you created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency` and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate.
+    3. In step 6, you created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate.
     4. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (rollforward) by applying `candidate.yaml` as part of its `finish` action. Had the candidate failed, iter8 would have decided to promote the baseline (rollback) by applying `baseline.yaml`.
