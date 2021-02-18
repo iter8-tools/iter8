@@ -53,8 +53,9 @@ echo "Installing Knative core components"
 kubectl apply --filename https://github.com/knative/serving/releases/download/v0.20.0/serving-core.yaml
 
 
-# Step 2: Monitor the Knative components until all of the components show a `STATUS` of `Running` or `Completed`:
-echo "Waiting for all pods to be running"
+# Step 2: Monitor the Knative components until all of the components are `Running` or `Completed`:
+echo "Waiting for all Knative-serving pods to be running..."
+sleep 3 # allowing enough time for namespace creation
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 
 

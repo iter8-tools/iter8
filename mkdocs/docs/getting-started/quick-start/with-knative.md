@@ -16,14 +16,14 @@ Perform **zero-downtime progressive canary release of a Knative app**. You will 
     2. [Kustomize v3](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
     3. [Go 1.13+](https://golang.org/doc/install)
 
-## 1. Create a Kubernetes cluster
+## 1. Create Kubernetes cluster
 
 Create a local Kubernetes cluster using Minikube or Kind. You can also use a managed Kubernetes service from your cloud provider.
 
 === "Minikube"
 
     ```shell
-    minikube start --cpus 5 --memory 10240
+    minikube start --cpus 4 --memory 8096
     ```
 
 === "Kind"
@@ -33,11 +33,11 @@ Create a local Kubernetes cluster using Minikube or Kind. You can also use a man
     ```
     Ensure that the cluster has sufficient resources (for example, 5 cpus and 10GB of memory).
 
-## 2. Clone this repository
+## 2. Clone repo
 ```shell
 git clone https://github.com/iter8-tools/iter8.git
 cd iter8
-ITER8=$(pwd)
+export ITER8=$(pwd)
 ```
 
 ## 3. Install Knative and iter8
@@ -125,7 +125,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
         percent: 0
     ```
 
-## 5. Send requests to app
+## 5. Send requests
 Verify Knative service is ready and send requests to app.
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
@@ -187,9 +187,9 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
           value: candidate 
     ```
 
-## 7. Observe experiment in realtime
+## 7. Observe experiment
 
-You can observe the experiment in realtime as it progresses. Open three *new* terminals and follow instructions in the three tabs below.
+You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
 
 === "iter8ctl"
     Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing GOBIN below.
