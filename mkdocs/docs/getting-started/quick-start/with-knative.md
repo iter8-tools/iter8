@@ -159,7 +159,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
             task: exec # promote the winning version
             with:
               cmd: kubectl
-              args: ["apply", "-f", "https://github.com/sriumcp/docs/samples/knative/quickstart/{{ .promote }}.yaml"]
+              args: ["apply", "-f", "https://github.com/iter8-tools/iter8/samples/knative/quickstart/{{ .promote }}.yaml"]
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds

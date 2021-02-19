@@ -18,7 +18,7 @@ spec:
         task: exec # promote the winning version
         with:
           cmd: kubectl
-          args: ["apply", "-f", "https://raw.githubusercontent.com/sriumcp/docs/master/samples/knative/quickstart/{{ .promote }}.yaml"]
+          args: ["apply", "-f", "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"]
   criteria:
     # mean latency of version should be under 500 milli seconds; error rate under 1%    
     objectives: 
