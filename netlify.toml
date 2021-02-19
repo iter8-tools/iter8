@@ -1,0 +1,12 @@
+[build]
+base = "mkdocs/"
+publish = "site/"
+command = """
+npm install && 
+npm run build &&
+pip3 install -r requirements.txt && 
+mkdocs build
+"""
+
+[build.environment]
+PYTHON_VERSION = "3.7"

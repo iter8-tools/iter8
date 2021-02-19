@@ -1,0 +1,53 @@
+name: build and push documentation
+
+on:
+  # push:
+  #   branches:
+  #     - master # Publish `main` as latest.
+  #   tags:
+  #     - v* # Publish `v1.2.3` tags as releases.
+  pull_request: # Build on any PRs.
+
+env:
+  NODE_VERSION: 12.x
+  PYTHON_VERSION: 3.x
+
+jobs:
+  document:
+    name: Push documentation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js runtime
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Set up Node.js dependencies
+        run: | 
+          cd mkdocs
+          npm install
+
+      - name: Build project
+        run: |
+          cd mkdocs
+          npm run build
+
+      - name: Set up Python runtime
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          cd mkdocs
+          pip install -r requirements.txt
+
+      - name: Build
+        run: |
+          cd mkdocs
+          mkdocs build
