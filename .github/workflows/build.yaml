@@ -53,7 +53,7 @@ jobs:
       uses: peter-evans/link-checker@v1.2.2
       with:
         # Liche arguments
-        args: -r site/ -d site/
+        args: -r mkdocs/site/ -d mkdocs/site/
 
     # - name: Create issue from failed links
     #   uses: peter-evans/create-issue-from-file@v2
