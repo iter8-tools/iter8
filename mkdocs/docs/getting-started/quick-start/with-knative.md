@@ -24,7 +24,7 @@ Create a local Kubernetes cluster using Minikube or Kind. You can also use a man
 === "Minikube"
 
     ```shell
-    minikube start --cpus 4 --memory 8096
+    minikube start --cpus 2 --memory 4096
     ```
 
 === "Kind"
