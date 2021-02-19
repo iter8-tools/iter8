@@ -102,10 +102,11 @@ nav:
     - Getting help: getting-started/help.md
   - Concepts:
     - Experiment overview: concepts/experimentoverview.md
-    - Experiment setup in-depth:
+    - Experiment spec in-depth:
       - spec.target: concepts/aspects/target.md
-      - spec.strategy.testingPattern: concepts/aspects/testing.md
+      - spec.versionInfo: concepts/aspects/versioninfo.md
       - spec.criteria: concepts/aspects/criteria.md
+      - spec.strategy.testingPattern: concepts/aspects/testing.md
       - spec.strategy.deploymentPattern: concepts/aspects/deployment.md
       - spec.strategy.actions: concepts/aspects/actions.md
       - spec.duration: concepts/aspects/duration.md
@@ -133,7 +134,7 @@ nav:
       - Custom metrics: code-samples/all-domains/custommetrics.md
   - Reference: reference.md
   - Extending iter8: extending.md
-  - Roadmap: roadmap/roadmap.md
+  - Roadmap: roadmap.md
   - Blog:
     - Blog link: https://blog.iter8.tools
 
