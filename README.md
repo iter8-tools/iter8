@@ -1,4 +1,6 @@
-| Site | Status
+# Coming Soon
+
+<!-- | Site | Status
 |------|-------
 | [iter8.tools](https://iter8.tools) (v1.0.1) | [![Netlify Status](https://api.netlify.com/api/v1/badges/1422bdf8-5e0f-4e57-ae6a-f69ae41a7697/deploy-status)](https://app.netlify.com/sites/iter8-v1-0-1/deploys)
 | [v0-2-1.iter8.tools](https://v0-2-1.iter8.tools) (v0.2.1) | [![Netlify Status](https://api.netlify.com/api/v1/badges/c2832f30-9130-4c9b-8183-c110c890426e/deploy-status)](https://app.netlify.com/sites/iter8-v0-2-1/deploys)
@@ -162,4 +164,4 @@ If there is a link that is broken, then the workflow will fail. You will need to
 
 ***
 
-**Note**: The workflow can be configured to ignore certain links using the `-x` or `--exclude` [Liche](https://github.com/raviqqe/liche) option. See [here](https://github.com/marketplace/actions/link-checker#usage) and [here](https://github.com/raviqqe/liche#usage) for more information.
+**Note**: The workflow can be configured to ignore certain links using the `-x` or `--exclude` [Liche](https://github.com/raviqqe/liche) option. See [here](https://github.com/marketplace/actions/link-checker#usage) and [here](https://github.com/raviqqe/liche#usage) for more information. -->

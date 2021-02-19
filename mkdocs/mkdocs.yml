@@ -5,8 +5,8 @@ site_description: >-
   Use iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.
 
 # Repository
-repo_name: sriumcp/docs
-repo_url: https://github.com/sriumcp/docs
+repo_name: iter8-tools/iter8
+repo_url: https://github.com/iter8-tools/iter8
 edit_uri: edit/master/mkdocs/docs
 
 # Configuration

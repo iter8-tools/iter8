@@ -64,8 +64,8 @@ template: overrides/main.html
           # run tasks under the `finish` action at the end of an experiment   
           finish:
           # promote an app version
-          # `https://raw.githubusercontent.com/sriumcp/docs/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
-          # `https://raw.githubusercontent.com/sriumcp/docs/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
+          # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
+          # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
           - library: common
             task: exec # promote the winning version
             with:
@@ -73,7 +73,7 @@ template: overrides/main.html
               args:
               - "apply"
               - "-f"
-              - "https://raw.githubusercontent.com/sriumcp/docs/master/samples/knative/quickstart/{{ .promote }}.yaml"
+              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
       duration: # 12 iterations, 20 seconds each
         intervalSeconds: 20
         iterationsPerLoop: 12
