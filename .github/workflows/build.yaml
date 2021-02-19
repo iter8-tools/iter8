@@ -1,12 +1,8 @@
 name: build and push documentation
 
 on:
-  # push:
-  #   branches:
-  #     - master # Publish `main` as latest.
-  #   tags:
-  #     - v* # Publish `v1.2.3` tags as releases.
-  pull_request: # Build on any PRs.
+- push
+- pull_request
 
 env:
   NODE_VERSION: 12.x
@@ -16,38 +12,55 @@ jobs:
   document:
     name: Push documentation
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Set up Node.js runtime
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
 
-      - name: Set up Node.js runtime
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+    - name: Set up Node.js dependencies
+      run: | 
+        cd mkdocs
+        npm install
 
-      - name: Set up Node.js dependencies
-        run: | 
-          cd mkdocs
-          npm install
+    - name: Build project
+      run: |
+        cd mkdocs
+        npm run build
 
-      - name: Build project
-        run: |
-          cd mkdocs
-          npm run build
+    - name: Set up Python runtime
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Set up Python runtime
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+    - name: Install Python dependencies
+      run: |
+        cd mkdocs
+        pip install -r requirements.txt
 
-      - name: Install Python dependencies
-        run: |
-          cd mkdocs
-          pip install -r requirements.txt
+    - name: Build
+      run: |
+        cd mkdocs
+        mkdocs build
 
-      - name: Build
-        run: |
-          cd mkdocs
-          mkdocs build
+    - name: Link checker
+      id: lc
+      # You may pin to the exact commit or the version.
+      # uses: peter-evans/link-checker@41c97244bb50a4a1b273d60abf5b5862b09f0c2d
+      uses: peter-evans/link-checker@v1.2.2
+      with:
+        # Liche arguments
+        args: -r site/ -d site/
+
+    # - name: Create issue from failed links
+    #   uses: peter-evans/create-issue-from-file@v2
+    #   with:
+    #     title: Link checker report
+    #     content-filepath: ./link-checker/out.md
+    #     labels: report, automated issue
+
+    - name: Fail if there were link errors
+      run: exit ${{ steps.lc.outputs.exit_code }}
