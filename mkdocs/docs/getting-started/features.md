@@ -4,11 +4,11 @@ template: overrides/main.html
 
 # Features at a Glance
 
-- **Kubernetes stacks:** Use iter8 with Knative, KFServing[^1] and Istio[^2]
+- **Kubernetes stacks:** use iter8 with Knative, KFServing[^1] and Istio[^2]
 - **Testing patterns:** canary and conformance testing
 - **Deployment patterns:** progressive traffic shifting and fixing traffic split during experiments
-- **Advanced traffic shaping:** shadow deployments, request routing, user stickiness and other traffic shaping features available through Istio VirtualService
-- **Experiment termination:** rollforward or rollback based on the outcome of the experiment
+- **Advanced traffic shaping:** shadow deployments, request routing, and user stickiness
+- **Version promotion:** automatically roll-forward to the winning version or rollback to the baseline based on the outcome of the experiment
 - **App config tools:** YAML/JSON app manifests, Helm, Kustomize
 - **Metrics backend:** Prometheus
 

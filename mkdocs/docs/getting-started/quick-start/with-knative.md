@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Quick start
+# Quick start with Knative
 
 Perform **zero-downtime progressive canary release of a Knative app**. You will create:
 
@@ -12,9 +12,10 @@ Perform **zero-downtime progressive canary release of a Knative app**. You will 
 
 !!! example "Before you begin, you will need:"
 
-    1. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-    2. [Kustomize v3](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
-    3. [Go 1.13+](https://golang.org/doc/install)
+    1. Kubernetes cluster. You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
+    2. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+    3. [Kustomize v3](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
+    4. [Go 1.13+](https://golang.org/doc/install)
 
 ## 1. Create Kubernetes cluster
 
@@ -23,7 +24,7 @@ Create a local Kubernetes cluster using Minikube or Kind. You can also use a man
 === "Minikube"
 
     ```shell
-    minikube start --cpus 4 --memory 8096
+    minikube start --cpus 2 --memory 4096
     ```
 
 === "Kind"

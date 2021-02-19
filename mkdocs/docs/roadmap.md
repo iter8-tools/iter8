@@ -22,7 +22,7 @@ template: overrides/main.html
 5. **Metrics**
     * Support for NewRelic, DataDog, Elastic, and other RESTful metric databases
 6. **Git triggered workflows and CI/CD**
-    * Integration with GitHub Actions, Tekton, and other pipeline providers
+    * Integration with GitHub Actions and other pipeline providers
 7. **Notifications**
     * Integration with Slack, GitHub, and other RESTful services
 8. **Helm tests**
