@@ -106,6 +106,7 @@ nav:
     - Realtime observability: concepts/observability.md
     - Traffic shaping: concepts/trafficshaping.md
   - Usage:
+    - Using iter8: usage/usingiter8.md
     - Experiment spec in-depth:
       - spec.target: usage/experiment/target.md
       - spec.versionInfo: usage/experiment/versioninfo.md

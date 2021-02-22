@@ -2,11 +2,11 @@
 template: overrides/main.html
 ---
 
-# spec.versionInfo
+# Information about App Versions
 
 > `spec.versionInfo` describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
 
-??? example "Sample experiment"
+??? example "Sample experiment in which versions are Knative revisions"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
@@ -97,7 +97,7 @@ versionInfo:
 
 ## Schema of versionDetail
 
-A `versionDetail` object that describes a `baseline` version is exemplified below; `versionDetail` object for candidate versions share the same schema.
+An example of a `versionDetail` object that describes a `baseline` version is given below; `versionDetail` object for candidate versions share the same schema.
 
 ``` yaml
 baseline:
