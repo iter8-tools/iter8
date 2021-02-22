@@ -40,14 +40,32 @@ jobs:
         #Check if experiment has completed
         completed="Completed"
         if [$(kubectl get experiment quickstart-exp -ojson | jq .status.stage)!=$completed]; then
+          echo "Experiment status must be Completed"
           exit
         fi
 
         #Check if no errors are found in fortio
 
-        #Check if recommended baseline is right
-        # [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline) -eq "canary" ]] || { echo >&2 "Recmmended Baseline must be canary"; exit 1; }
+        #Check if recommended baseline is canary
+        canary="candidate"
+        if [$(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)!=$canary]; then
+          echo "recommendedBaseline must be canary"
+          exit
+        fi
 
-        #check if canary traffic percent is right
+        #check if latest revision is true
+        latestRevision=true
+        if [$(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')!=$latestRevision]; then
+          echo "latestRevision must be true"
+          exit
+        fi
+
+        #check if traffic percent is 100
+        percent=true
+        if [$(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')!=$percent]; then
+          echo "percent must be 100"
+          exit
+        fi
+
 
 
