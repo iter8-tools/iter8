@@ -46,6 +46,9 @@ jobs:
         cd mkdocs
         mkdocs build
 
+    # - uses: gaurav-nelson/github-action-markdown-link-check@v1
+    #   with:
+    #     folder-path: 'mkdocs/docs'
     # - name: Link Checker
     #   uses: lycheeverse/lychee-action@v1.0.4  
     #   args: --verbose --no-progress *.md     
