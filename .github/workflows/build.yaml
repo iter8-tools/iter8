@@ -53,7 +53,7 @@ jobs:
       with:
         # Required:
         url: 'http://localhost:8000'
-        recursiveLinks: false # Check all URLs on all reachable pages (could take a while)
+        recursiveLinks: true # Check all URLs on all reachable pages (could take a while)
 
     - name: Get the result
       run: echo "${{steps.link-report.outputs.result}}"
