@@ -33,7 +33,18 @@ jobs:
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
     - name: Sleep for experiment duration + 30 seconds
-      run: sleep 300.0 # 300
+      run: sleep 300.0 # 12 iterations and 20 second interval
     
     - name: Check if experiment is complete and successful
       run: |
+      #Check if experiment has completed
+      [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.stage) -eq "Completed" ]] || { echo >&2 "Experiment status must be Completed"; exit 1; }
+
+      #Check if no errors are found in fortio
+
+      #Check if recommended baseline is right
+      [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline) -eq "canary" ]] || { echo >&2 "Recmmended Baseline must be canary"; exit 1; }
+
+      #check if canary traffic percent is right
+
+
