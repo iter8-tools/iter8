@@ -61,11 +61,10 @@ jobs:
         fi
 
         #check if traffic percent is 100
-        percent=true
+        percent=100
         if [$(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')!=$percent]; then
           echo "percent must be 100"
           exit
         fi
-
 
 
