@@ -101,24 +101,26 @@ nav:
     - Features at a glance: getting-started/features.md
     - Getting help: getting-started/help.md
   - Concepts:
-    - Experiment overview: concepts/experimentoverview.md
-    - Experiment spec in-depth:
-      - spec.target: concepts/aspects/target.md
-      - spec.versionInfo: concepts/aspects/versioninfo.md
-      - spec.criteria: concepts/aspects/criteria.md
-      - spec.strategy.testingPattern: concepts/aspects/testing.md
-      - spec.strategy.deploymentPattern: concepts/aspects/deployment.md
-      - spec.strategy.actions: concepts/aspects/actions.md
-      - spec.duration: concepts/aspects/duration.md
-    - Metrics overview: concepts/metricsoverview.md
-    - Metrics in-depth:
-      - Counter and gauge metrics: concepts/metrics/types.md
-      - Using metrics in experiments: concepts/metrics/using-metrics.md
-      - Out-of-the-box metrics: concepts/metrics/out-of-the-box-metrics.md
-      - Custom metrics: concepts/metrics/custom-metrics.md
-      - Metric databases: concepts/metrics/metric-databases.md
-    - Traffic shaping: concepts/trafficshaping.md
+    - Experiment: concepts/experimentoverview.md
+    - Metrics: concepts/metricsoverview.md
     - Realtime observability: concepts/observability.md
+    - Traffic shaping: concepts/trafficshaping.md
+  - Usage:
+    - Experiment spec in-depth:
+      - spec.target: usage/experiment/target.md
+      - spec.versionInfo: usage/experiment/versioninfo.md
+      - spec.criteria: usage/experiment/criteria.md
+      - spec.strategy.testingPattern: usage/experiment/testing.md
+      - spec.strategy.deploymentPattern: usage/experiment/deployment.md
+      - spec.strategy.actions: usage/experiment/actions.md
+      - spec.duration: usage/experiment/duration.md
+    - Metrics in-depth:
+      - Metric spec in-depth: usage/metrics/metric-spec-in-depth.md
+      - Counter and gauge metrics: usage/metrics/counter-and-gauge-metrics.md
+      - Using metrics in experiments: usage/metrics/using-metrics.md
+      - Out-of-the-box metrics: usage/metrics/out-of-the-box-metrics.md
+      - Custom metrics: usage/metrics/custom-metrics.md
+      - Metric databases: usage/metrics/metric-databases.md
   - Code samples:
     - iter8-Knative:
       - Canary: code-samples/iter8-knative/canary/canary.md

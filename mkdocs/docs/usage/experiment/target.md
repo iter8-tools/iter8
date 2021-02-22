@@ -4,7 +4,7 @@ template: overrides/main.html
 
 # spec.target
 
-> `spec.target` is a string that identifies the app under experimentation and determines which experiments can run concurrently.
+> `spec.target` identifies the app under experimentation and determines which experiments can run concurrently.
 
 ??? example "Sample experiment"
     ```yaml
@@ -79,6 +79,10 @@ template: overrides/main.html
         iterationsPerLoop: 12
     ```
 
-In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is the fully qualified name (namespace/name) of the Knative service which is `default/sample-app`. This is the convention when experimenting with a Knative service.
+## Target naming convention
+=== "Knative"
+    When experimenting with a Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`. 
 
-Experiments that have the same target value will **not** be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments with different target values can be scheduled by iter8 concurrently.
+
+## Concurrent experiments
+Experiments that have the same target value will **not** be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by iter8 concurrently.

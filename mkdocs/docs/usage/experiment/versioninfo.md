@@ -2,9 +2,9 @@
 template: overrides/main.html
 ---
 
-# Experiment overview
+# spec.versionInfo
 
-> **iter8** defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
+> `spec.versionInfo` describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
 
 ??? example "Sample experiment"
     ```yaml
@@ -79,44 +79,61 @@ template: overrides/main.html
         iterationsPerLoop: 12
     ```
 
-## How iter8 runs an experiment
-1. iter8 determines if it is safe to start an experiment using its *target acquisition* algorithm.
+## Schema of versionInfo
+The schema of the `versionInfo` object is as follows:
 
-2. When the experiment starts, iter8 runs tasks specified under `spec.actions.start` such as setting up or updating resources needed for the experiment.
+``` yaml
+versionInfo:
+  # details of baseline version; required
+  baseline: <versionDetail> 
+  # details of one or more candidate versions; optional
+  candidates: 
+  - <versionDetail>
+  - ...
+```
 
-3. During each iteration, iter8 evaluates app versions based on `spec.criteria`, determines the `winner`, and optionally shifts traffic towards the `winner`.
+### Number of versions
+[`Conformance`](testing.md) experiments involve only a single version (baseline). Hence, in `Conformance` experiments, the `candidates` stanza of `versionInfo` must be omitted. A [`Canary`](testing.md) experiment involves two versions, baseline and a candidate. Hence, in `Canary` experiments, the `candidates` stanza must be a list of length one and must contain a single `versionDetail` object.[^1]
 
-4. When the experiment finishes, iter8 runs tasks specified under `spec.actions.finish` such as version promotion.
+## Schema of versionDetail
 
-## Experiment spec in-brief
-A brief explanation of the key stanzas in an experiment spec is given below.
+A `versionDetail` object that describes a `baseline` version is exemplified below; `versionDetail` object for candidate versions share the same schema.
 
-### spec.target
+``` yaml
+baseline:
+  # name of the version; must be unique; required
+  name: current
+  # a list of variables associated with this version; optional
+  # each variable is a name-value pair    
+  variables:
+  - name: revision 
+    value: sample-app-v1 
+  - name: promote
+    value: baseline
+  # iter8 uses weightObjRef to get and set weight (traffic percentage); optional
+  weightObjRef:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    name: sample-app
+    namespace: default
+    fieldPath: /spec/traffic/0/percent  
+```
 
-`spec.target` is a string that identifies the app under experimentation and determines which experiments can run concurrently.
+### name
+Each version has a unique name.
 
-### spec.versionInfo
+### variables
+`variables` are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. iter8 uses `variables` to interpolate these strings.
 
-`spec.versionInfo` is an object that describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
+### weightObjRef
+weightObjRef contains a reference to a Kubernetes resource and a field-path within the resource. iter8 uses weightObjRef to get or set weight (traffic percentage) for the version.
 
-### spec.criteria
+## Auto-creation of versionInfo
 
-`spec.criteria` is an object that specifies the metrics used for evaluating versions along with acceptable limits for their values.
+iter8 ships with helper tasks that can inspect an experiment resource with no or partially specified `spec.versionInfo`, automatically generate the remaining portion of `spec.versionInfo` and update the experiment with this information. See the [`init-experiment` task in the `knative` task library](actions.md) for an example.
 
-### spec.strategy.testingPattern
+[^1]: `A/B/n` experiments involve more than one candidate. Their description is coming soon.
 
-`spec.strategy.testingPattern` is a string enum that determines the logic used to evaluate the app versions and determine the `winner` of the experiment. iter8 supports two testing patterns, namely, `Canary` and `Conformance`.
 
-### spec.strategy.deploymentPattern
 
-`spec.strategy.deploymentPattern` is a string enum that determines if and how traffic is shifted during an experiment[^1]. iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
 
-### spec.strategy.actions
-
-An action is a sequence of tasks executed during an experiment. `spec.strategy.actions` is an object that can be used to specify `start` and `finish` actions that will be executed at the start and end of an experiment respectively.
-
-### spec.duration
-
-`spec.duration` is an object with two integer fields, namely, `iterationsPerLoop` and `intervalSeconds`. The former specifies the number of iterations in the experiment. The latter specifies the time interval in seconds between successive iterations.
-
-[^1]: Traffic shifting is relevant only when an experiment involves two or more versions. `Conformance` testing experiments involve a single version. Hence, `spec.strategy.deploymentPattern` is ignored in these experiments.
