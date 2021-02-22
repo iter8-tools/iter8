@@ -16,7 +16,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh istio
+        $ITER8/samples/knative/quickstart/platformsetup.sh contour
 
     - name: create knative service and readiness check
       run: |
