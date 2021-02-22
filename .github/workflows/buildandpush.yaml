@@ -39,7 +39,7 @@ jobs:
       run: |
         #Check if experiment has completed
         completed="Completed"
-        if [$(kubectl get experiment quickstart-exp -ojson | jq .status.stage)!=$completed] then
+        if [$(kubectl get experiment quickstart-exp -ojson | jq .status.stage)!=$completed]; then
           exit
         fi
 
