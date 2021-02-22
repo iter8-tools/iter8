@@ -20,12 +20,14 @@ jobs:
 
     - name: create knative service and readiness check
       run: |
+        export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
         kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
         kubectl wait --for=condition=Ready ksvc/sample-app
 
     - name: create fortio job and create experiment
       run: |
+        export ITER8=$(pwd)
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
