@@ -33,7 +33,7 @@ jobs:
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
     - name: Sleep for experiment duration + 30 seconds
-      run: sleep 300.0 # 12 iterations and 20 second interval
+      run: sleep 350.0 # 12 iterations and 20 second interval
     
     - name: Check if experiment is complete and successful
       run: |
