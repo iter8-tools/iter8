@@ -2,11 +2,11 @@
 template: overrides/main.html
 ---
 
-# spec.criteria
+# Experiment Criteria
 
 > `spec.criteria` specifies the metrics used for evaluating versions along with acceptable limits for their values.
 
-??? example "Sample experiment"
+??? example "Sample experiment with criteria"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
@@ -49,6 +49,11 @@ template: overrides/main.html
         # error rate should be under 1%
         - metric: error-rate
           upperLimit: "0.01"
+      indicators:
+      # report values for the following metrics in addition those in spec.criteria.objectives
+      - 99th-percentile-tail-latency
+      - 90th-percentile-tail-latency
+      - 75th-percentile-tail-latency
       strategy:
         # canary testing => candidate `wins` if it satisfies objectives
         testingPattern: Canary
@@ -78,3 +83,11 @@ template: overrides/main.html
         intervalSeconds: 20
         iterationsPerLoop: 12
     ```
+
+## spec.criteria.objectives
+
+Use the `spec.criteria.objectives` stanza to provide a list of metrics along with acceptable upper limits, lower limits, or both upper and lower limits for them. iter8 will verify if your app versions satisfy these objectives.
+
+## spec.criteria.indicators
+
+Use the `spec.criteria.indicators` stanza to provide an additional list of metrics not referenced in the `spec.criteria.objectives` section. iter8 will collect and report the values of these additional metrics.
