@@ -2,11 +2,11 @@
 template: overrides/main.html
 ---
 
-# spec.target
+# Target of the Experiment
 
 > `spec.target` identifies the app under experimentation and determines which experiments can run concurrently.
 
-??? example "Sample experiment"
+??? example "Sample experiment targeting a Knative service"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
@@ -79,7 +79,7 @@ template: overrides/main.html
         iterationsPerLoop: 12
     ```
 
-## Target naming convention
+## Target naming conventions
 === "Knative"
     When experimenting with a Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`. 
 
