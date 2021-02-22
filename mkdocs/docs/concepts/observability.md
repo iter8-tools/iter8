@@ -51,4 +51,4 @@ template: overrides/main.html
     +--------------------------------+---------+-----------+
     ```    
 
-See [here](../../getting-started/install/#step-4-install-iter8ctl) for instructions on installing iter8ctl. See [here](../../getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using iter8ctl to observe an experiment in realtime.
+See [here](/getting-started/install/#step-4-install-iter8ctl) for instructions on installing iter8ctl. See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using iter8ctl to observe an experiment in realtime.
