@@ -1,0 +1,34 @@
+name: build and push documentation
+on:
+- push
+- pull_request
+
+jobs:
+  knative-quickstart:
+    name: e2e test knative quickstart experiment
+    runs-on: ubuntu-latest
+    if: true # if there is a change is install folder or there is a change in samples/knative/quickstart folder -- then run this job
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - uses: engineerd/setup-kind@v0.5.0
+    - name: platform setup
+      run: |
+        echo "ITER8=$(pwd)" >> $GITHUB_ENV      
+        $ITER8/samples/knative/quickstart/platformsetup.sh istio
+
+    - name: create knative service and readiness check
+      run: |
+        kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
+        kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+        kubectl wait --for=condition=Ready ksvc/sample-app
+
+    - name: create fortio job and create experiment
+      run: |
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+        kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+
+    - name: Sleep for experiment duration + 30 seconds
+      run: sleep 300.0 # 300
