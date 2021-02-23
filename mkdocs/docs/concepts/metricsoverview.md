@@ -146,7 +146,7 @@ An iter8 metric can be of type `counter` or `gauge`. The value of a `counter` me
     provider: prometheus
     ```
 
-Metric types are described in-depth [here](/usage/metrics/counter-and-gauge-metrics).
+Creation of custom counter and gauge metrics is described in-depth [here](/usage/metrics/custom-metrics).
 
 ### spec.provider
 `spec.provider` denotes the type of the metric database that provides this metric. Currently, `prometheus` is the only supported value for this field. Support for other providers are planned as part of the [roadmap](/roadmap). Details about the Prometheus database URL used for metric queries are [here](/usage/metrics/metric-databases).
@@ -155,7 +155,7 @@ Metric types are described in-depth [here](/usage/metrics/counter-and-gauge-metr
 `spec.units` denotes the unit of measurement for the metric. Some metrics such as `request_count` in the above sample may not have units.
 
 ### spec.sampleSize
-`spec.sampleSize` denotes the number of data points over which the metric is computed. This field applies only to `gauge` metrics. This field is described in-depth here [here](/usage/metrics/counter-and-gauge-metrics).
+`spec.sampleSize` denotes the number of data points over which the metric is computed. This field applies only to `gauge` metrics. This field is described in-depth here [here](/usage/metrics/custom-metrics).
 
 ## Custom metrics
 Custom metric creation is described [here](/usage/metrics/custom-metrics).

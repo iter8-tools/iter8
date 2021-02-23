@@ -3,3 +3,115 @@ template: overrides/main.html
 ---
 
 # Custom Metrics
+
+> Define custom iter8 metrics using Prometheus metrics and use them in iter8 experiments.
+
+We illustrate custom metric creation using three examples. The first two examples illustrate `counter` metrics while the third illustrates `gauge` metrics. Users are encouraged to read documentation on [how metrics are used in experiments](/usage/metrics/using-metrics) and [how iter8 queries metrics](/usage/metrics/how-iter8-queries-metrics) before creating custom metrics.
+
+### Example 1: counter metric
+
+#### Defining an iter8 counter metric named `correct-predictions`
+Suppose your app versions correspond to machine learning models. Suppose you have a Prometheus counter metric named `correct_predictions`, which records the number of correct predictions made by each model version until now.
+```shell
+# Prometheus query to get the number of correct predictions for a model version in the past 30 seconds.
+sum(increase(correct_predictions{revision_name='my-model-predictor-default-dlgm8'}[30s]))
+```
+```shell
+# Prometheus query to get the number of correct predictions for another model version in the past 30 seconds.
+sum(increase(correct_predictions{revision_name='my-model-predictor-default-h4bvl'}[30s]))
+```
+
+!!! note "Note"
+    This example is motivated by iter8-KFServing experiments. KFServing creates distinct Knative revisions for different model versions. Hence, as seen in the above examples, the `revision_name` label provides a convenient way to filter and select a specific model version.
+
+You can turn this Prometheus metric into an iter8 counter metric using the following yaml manifest.
+```yaml
+#correctpredictions.yaml
+apiVersion: iter8.tools/v2alpha1
+kind: Metric
+metadata:
+  name: correct-predictions
+spec:
+  params:
+  - name: query
+    value: sum(increase(correct_predictions{revision_name='$revision'}[$interval])) or on() vector(0)
+  description: Number of correct predictions
+  type: counter
+  provider: prometheus
+```
+
+!!! note "Note"
+    Values may be unavailable for a metric in Prometheus, in which case, Prometheus may return a `nodata` response. For example, values may be unavailable for the `correct_predictions` metric for a model version if no requests have been sent to that model version until now, or if Prometheus has a large scrape interval and is yet to collect data. In such cases, the `on() or vector(0)` clause replaces the `nodata` response with a zero value. This is the recommended approach for creating iter8 counter metrics.
+
+
+Using the above YAML file, you can create an iter8 metric in your Kubernetes cluster as follows.
+```shell
+kubectl apply -f correctpredictions.yaml -n your-metrics-namespace
+```
+
+You can now list this metric using `kubectl`.
+```shell
+kubectl get metrics.iter8.tools correct-predictions -n your-metrics-namespace
+NAMESPACE                NAME                           TYPE      DESCRIPTION
+your-metrics-namespace   correct-predictions            counter   Number of correct predictions
+```
+
+### Example 2: counter metric
+
+#### `request-count` metric
+The `request-count` metric is typically installed *out-of-the-box* as part of iter8. Although not a custom metric, this example serves to further illustrate the concepts introduced in Example 1. There are no real differences between custom and out-of-the-box metrics other than the fact the latter are created as part of iter8 installation.
+```yaml
+apiVersion: iter8.tools/v2alpha1
+kind: Metric
+metadata:
+  name: request-count
+spec:
+  params:
+  - name: query
+    value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0)
+  description: Number of requests
+  type: counter
+  provider: prometheus
+```
+
+### Example 3: gauge metric
+
+#### Defining an iter8 gauge metric named `accuracy`
+We will build on Examples 1 and 2 to define a new iter8 gauge metric called `accuracy`. This metric is intended to capture the ratio of correct predictions over request count.
+```yaml
+#accuracy.yaml
+apiVersion: iter8.tools/v2alpha1
+kind: Metric
+metadata:
+  name: accuracy
+spec:
+  description: Accuracy of the model version
+  params:
+  - name: query
+    value: (sum(increase(correct_predictions{revision_name='$revision'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0))
+  type: gauge
+  sampleSize: 
+    name: iter8-kfserving-monitoring/request-count
+  provider: prometheus
+```
+
+`spec.sampleSize` represents the number of data points over which the gauge metric value is computed. In this case, since `accuracy` is computed over all the requests received by a specific model version, the sampleSize metric is `request-count`.
+
+## Prometheus response
+The following is a sample response returned by Prometheus to iter8 for a metric query.
+```json
+{
+    "status": "success",
+    "data": {
+      "resultType": "vector",
+      "result": [
+        {
+          "value": [1556823494.744, "21.7639"]
+        }
+      ]
+    }
+}
+```
+Whenever iter8 queries Prometheus for a metric, it issues `n` queries, where `n` is the number of app versions involved in the experiment.[^1] For each query, iter8 expects the schema of the Prometheus response to match the schema of the above sample. Specifically, `status` should equal `success`, `resultType` should equal `vector` (i.e., Prometheus should return an instant-vector), with a single `result` within it.
+
+[^1]: `n=1` in `Conformance` experiments, and `n=2` in `Canary` experiments.
