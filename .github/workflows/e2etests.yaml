@@ -44,7 +44,7 @@ jobs:
 
         # Wait for fortio job to complete pinging the application
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl wait --for=condition=Ready pods/"$pod_name"
+        kubectl wait --for=condition=NotReady pods/"$pod_name"
     
     - name: Check if experiment is complete and successful
       run: |
