@@ -13,12 +13,12 @@ template: overrides/main.html
     metadata:
     name: request-count
     spec:
-    params:
-    - name: query
-      value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0)
-    description: Number of requests
-    type: counter
-    provider: prometheus
+      params:
+      - name: query
+        value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0)
+      description: Number of requests
+      type: counter
+      provider: prometheus
     ```
 
 Metrics are referenced within the `spec.criteria` stanza of the experiment. Metrics usage within experiments is covered in-depth [here](/usage/metrics/using-metrics).
@@ -105,7 +105,7 @@ Metrics are referenced within the `spec.criteria` stanza of the experiment. Metr
 A brief explanation of the key stanzas in a metric spec is given below.
 
 ### spec.params
-`spec.params` is a list of name-value pairs containing the HTTP params iter8 needs to use when it issues a REST query to the metrics database for this metric. The value string can be templated; iter8 will substitute the placeholders in the value string using version variables. This process is described in-depth [here](/usage/metrics/params).
+`spec.params` is a list of name-value pairs containing the HTTP params iter8 needs to use when it issues a REST query to the metrics database for this metric. The value string can be templated; iter8 will substitute the placeholders in the value string using version variables. This process is described in-depth [here](/usage/metrics/how-iter8-queries-metrics).
 
 ### spec.description
 `spec.description` is a human-readable description of the metric.
