@@ -116,12 +116,10 @@ nav:
       - spec.strategy.actions: usage/experiment/actions.md
       - spec.duration: usage/experiment/duration.md
     - Metrics in-depth:
-      - Metric spec in-depth: usage/metrics/metric-spec-in-depth.md
-      - Counter and gauge metrics: usage/metrics/counter-and-gauge-metrics.md
       - Using metrics in experiments: usage/metrics/using-metrics.md
-      - Out-of-the-box metrics: usage/metrics/out-of-the-box-metrics.md
+      - How iter8 queries metrics: usage/metrics/how-iter8-queries-metrics.md
+      - Counter and gauge metrics: usage/metrics/counter-and-gauge-metrics.md
       - Custom metrics: usage/metrics/custom-metrics.md
-      - Metric databases: usage/metrics/metric-databases.md
   - Code samples:
     - iter8-Knative:
       - Canary: code-samples/iter8-knative/canary/canary.md
