@@ -119,7 +119,6 @@ nav:
       - Using metrics in experiments: usage/metrics/using-metrics.md
       - How iter8 queries metrics: usage/metrics/how-iter8-queries-metrics.md
       - Counter and gauge metrics: usage/metrics/counter-and-gauge-metrics.md
-      - Metric database URL: usage/metrics/metric-database-url.md
       - Custom metrics: usage/metrics/custom-metrics.md
   - Code samples:
     - iter8-Knative:

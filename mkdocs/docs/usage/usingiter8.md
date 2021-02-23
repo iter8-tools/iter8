@@ -18,6 +18,5 @@ This section provides in-depth information about crafting experiments and using/
     - [Using metrics in experiments](/usage/metrics/using-metrics)
     - [How iter8 queries metrics](/usage/metrics/how-iter8-queries-metrics)
     - [Counter and gauge metrics](/usage/metrics/counter-and-gauge-metrics)
-    - [Metric database URL](/usage/metrics/metric-database-url)
     - [Custom metrics](/usage/metrics/custom-metrics)
 
