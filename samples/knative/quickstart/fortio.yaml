@@ -20,7 +20,7 @@ spec:
           mountPath: /shared         
       - name: busybox
         image: busybox:1.28
-        command: ['sh', '-c', 'echo busybox is running! && sleep 3600']          
+        command: ['sh', '-c', 'echo busybox is running! && sleep 500']          
         volumeMounts:
         - name: shared
           mountPath: /shared       
