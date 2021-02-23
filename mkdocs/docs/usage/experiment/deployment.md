@@ -2,11 +2,11 @@
 template: overrides/main.html
 ---
 
-# spec.target
+# Deployment Pattern
 
-> `spec.target` is a string that identifies the app under experimentation and determines which experiments can run concurrently.
+> `spec.strategy.deploymentPattern` determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
 
-??? example "Sample experiment"
+??? example "Sample experiment with canary testing and progressive deployment patterns"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
@@ -49,6 +49,11 @@ template: overrides/main.html
         # error rate should be under 1%
         - metric: error-rate
           upperLimit: "0.01"
+      indicators:
+      # report values for the following metrics in addition those in spec.criteria.objectives
+      - 99th-percentile-tail-latency
+      - 90th-percentile-tail-latency
+      - 75th-percentile-tail-latency
       strategy:
         # canary testing => candidate `wins` if it satisfies objectives
         testingPattern: Canary
@@ -79,6 +84,9 @@ template: overrides/main.html
         iterationsPerLoop: 12
     ```
 
-In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is the fully qualified name (namespace/name) of the Knative service which is `default/sample-app`. This is the convention when experimenting with a Knative service.
 
-Experiments that have the same target value will **not** be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments with different target values can be scheduled by iter8 concurrently.
+## Progressive deployment
+Progressively shift traffic towards the winner during each iteration of the experiment. This is the default deployment pattern in `Canary` experiments.
+
+## FixedSplit deployment
+The traffic split found at the start of the experiment is left unchanged during iterations.

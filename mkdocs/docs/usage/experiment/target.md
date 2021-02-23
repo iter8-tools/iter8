@@ -2,11 +2,11 @@
 template: overrides/main.html
 ---
 
-# Experiment overview
+# Target of the Experiment
 
-> **iter8** defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
+> `spec.target` identifies the app under experimentation and determines which experiments can run concurrently.
 
-??? example "Sample experiment"
+??? example "Sample experiment targeting a Knative service"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
@@ -79,44 +79,10 @@ template: overrides/main.html
         iterationsPerLoop: 12
     ```
 
-## How iter8 runs an experiment
-1. iter8 determines if it is safe to start an experiment using its *target acquisition* algorithm.
+## Target naming conventions
+=== "Knative"
+    When experimenting with a Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`. 
 
-2. When the experiment starts, iter8 runs tasks specified under `spec.actions.start` such as setting up or updating resources needed for the experiment.
 
-3. During each iteration, iter8 evaluates app versions based on `spec.criteria`, determines the `winner`, and optionally shifts traffic towards the `winner`.
-
-4. When the experiment finishes, iter8 runs tasks specified under `spec.actions.finish` such as version promotion.
-
-## Experiment spec in-brief
-A brief explanation of the key stanzas in an experiment spec is given below.
-
-### spec.target
-
-`spec.target` is a string that identifies the app under experimentation and determines which experiments can run concurrently.
-
-### spec.versionInfo
-
-`spec.versionInfo` is an object that describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
-
-### spec.criteria
-
-`spec.criteria` is an object that specifies the metrics used for evaluating versions along with acceptable limits for their values.
-
-### spec.strategy.testingPattern
-
-`spec.strategy.testingPattern` is a string enum that determines the logic used to evaluate the app versions and determine the `winner` of the experiment. iter8 supports two testing patterns, namely, `Canary` and `Conformance`.
-
-### spec.strategy.deploymentPattern
-
-`spec.strategy.deploymentPattern` is a string enum that determines if and how traffic is shifted during an experiment[^1]. iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
-
-### spec.strategy.actions
-
-An action is a sequence of tasks executed during an experiment. `spec.strategy.actions` is an object that can be used to specify `start` and `finish` actions that will be executed at the start and end of an experiment respectively.
-
-### spec.duration
-
-`spec.duration` is an object with two integer fields, namely, `iterationsPerLoop` and `intervalSeconds`. The former specifies the number of iterations in the experiment. The latter specifies the time interval in seconds between successive iterations.
-
-[^1]: Traffic shifting is relevant only when an experiment involves two or more versions. `Conformance` testing experiments involve a single version. Hence, `spec.strategy.deploymentPattern` is ignored in these experiments.
+## Concurrent experiments
+Experiments that have the same target value will **not** be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by iter8 concurrently.

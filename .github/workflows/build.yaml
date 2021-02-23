@@ -41,19 +41,32 @@ jobs:
         cd mkdocs
         pip install -r requirements.txt
 
-    - name: Build
+    - name: Build and serve
       run: |
         cd mkdocs
         mkdocs build
+        mkdocs serve &
 
-    - name: Link checker
-      id: lc
-      # You may pin to the exact commit or the version.
-      # uses: peter-evans/link-checker@41c97244bb50a4a1b273d60abf5b5862b09f0c2d
-      uses: peter-evans/link-checker@v1.2.2
+    - name: Check for broken links
+      id: link-report
+      uses: celinekurpershoek/link-checker@v1.0.1
       with:
-        # Liche arguments
-        args: -r mkdocs/site/ -d mkdocs/site/
+        # Required:
+        url: 'http://localhost:8000'
+        recursiveLinks: true # Check all URLs on all reachable pages (could take a while)
+
+    - name: Get the result
+      run: echo "${{steps.link-report.outputs.result}}"
+
+
+    # - name: Link checker
+    #   id: lc
+    #   # You may pin to the exact commit or the version.
+    #   # uses: peter-evans/link-checker@41c97244bb50a4a1b273d60abf5b5862b09f0c2d
+    #   uses: peter-evans/link-checker@v1.2.2
+    #   with:
+    #     # Liche arguments
+    #     args: -r mkdocs/site/ -d mkdocs/site/
 
     # - name: Create issue from failed links
     #   uses: peter-evans/create-issue-from-file@v2
@@ -62,5 +75,9 @@ jobs:
     #     content-filepath: ./link-checker/out.md
     #     labels: report, automated issue
 
-    - name: Fail if there were link errors
-      run: exit ${{ steps.lc.outputs.exit_code }}
+    # - name: Fail if there were link errors
+    #   run: exit ${{ steps.lc.outputs.exit_code }}
+
+    # - uses: gaurav-nelson/github-action-markdown-link-check@v1
+    #   with:
+    #     folder-path: 'mkdocs/docs'
