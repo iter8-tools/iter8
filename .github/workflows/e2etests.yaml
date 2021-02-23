@@ -59,29 +59,37 @@ jobs:
 
         REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
         REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ $REQUESTSTOTAL!=$REQUESTS200 ]]; then
-          echo "Packets must not be lost"
+        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
+          echo "Packets were not lost"
+        else
+          echo "Packets were lost"
           exit 1
         fi
 
-
         #Check if recommended baseline is candidate
         candidate="candidate"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)!=$candidate ]]; then
+        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
+          echo "recommendedBaseline is candidate"
+        else
           echo "recommendedBaseline must be candidate"
           exit 1
         fi
 
+
         #check if latest revision is true
         latestRevision=true
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')!=$latestRevision ]]; then
+        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
+          echo "latestRevision is true"
+        else
           echo "latestRevision must be true"
           exit 1
         fi
 
         #check if traffic percent is 100
         percent=100
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')!=$percent ]]; then
+        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')=="$percent" ]]; then
+          echo "percent is 100"
+        else
           echo "percent must be 100"
           exit 1
         fi
