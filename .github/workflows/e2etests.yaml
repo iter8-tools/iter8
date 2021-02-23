@@ -38,13 +38,9 @@ jobs:
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
-    - name: Sleep for some duration
+    - name: Sleep till end of experiment
       run: |
-        sleep 350.0
-
-        # Wait for fortio job to complete pinging the application
-        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl wait --for=condition=NotReady pods/"$pod_name"
+        sleep 360.0
     
     - name: Check if experiment is complete and successful
       run: |
@@ -56,7 +52,7 @@ jobs:
           exit 1
         fi
 
-        #Check if no packets are lost by fortio
+        #Check if no packets have been lost by fortio
         
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
         kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
