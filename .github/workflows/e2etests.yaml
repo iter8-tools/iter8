@@ -30,10 +30,21 @@ jobs:
         export ITER8=$(pwd)
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+        
+        # Wait for fortio to be ready
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl wait --for=condition=Ready pods/"$pod_name"
+
+        # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
-    - name: Sleep for experiment duration + 30 seconds
-      run: sleep 370.0 # 12 iterations and 20 second interval
+    - name: Sleep for some duration
+      run: |
+        sleep 350.0
+
+        # Wait for fortio job to complete pinging the application
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl wait --for=condition=Ready pods/"$pod_name"
     
     - name: Check if experiment is complete and successful
       run: |
@@ -41,10 +52,11 @@ jobs:
         completed="Completed"
         if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)!=$completed ]]; then
           echo "Experiment status must be Completed"
-          exit
+          echo "It is $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)"
+          exit 1
         fi
 
-        #Check if no errors are found in fortio
+        #Check if no packets are lost by fortio
         
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
         kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
@@ -57,10 +69,10 @@ jobs:
         fi
 
 
-        #Check if recommended baseline is canary
-        canary="candidate"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)!=$canary ]]; then
-          echo "recommendedBaseline must be canary"
+        #Check if recommended baseline is candidate
+        candidate="candidate"
+        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)!=$candidate ]]; then
+          echo "recommendedBaseline must be candidate"
           exit 1
         fi
 
