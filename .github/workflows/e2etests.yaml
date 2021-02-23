@@ -33,7 +33,7 @@ jobs:
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
     - name: Sleep for experiment duration + 30 seconds
-      run: sleep 350.0 # 12 iterations and 20 second interval
+      run: sleep 370.0 # 12 iterations and 20 second interval
     
     - name: Check if experiment is complete and successful
       run: |
@@ -45,26 +45,38 @@ jobs:
         fi
 
         #Check if no errors are found in fortio
+        
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
+
+        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
+        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
+        
+        if [$REQUESTSTOTAL!=$REQUESTS200]; then
+          echo "Packets must not be lost"
+          exit 1
+        fi
+
 
         #Check if recommended baseline is canary
         canary="candidate"
         if [$(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)!=$canary]; then
           echo "recommendedBaseline must be canary"
-          exit
+          exit 1
         fi
 
         #check if latest revision is true
         latestRevision=true
         if [$(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')!=$latestRevision]; then
           echo "latestRevision must be true"
-          exit
+          exit 1
         fi
 
         #check if traffic percent is 100
         percent=100
         if [$(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')!=$percent]; then
           echo "percent must be 100"
-          exit
+          exit 1
         fi
 
 
