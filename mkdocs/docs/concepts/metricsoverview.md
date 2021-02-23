@@ -21,7 +21,7 @@ template: overrides/main.html
       provider: prometheus
     ```
 
-Metrics are referenced within the `spec.criteria` stanza of the experiment. Metrics usage within experiments is covered in-depth [here](/usage/metrics/using-metrics).
+Metrics are referenced within the `spec.criteria` stanza of the experiment. Metrics usage within experiments is described [here](/usage/metrics/using-metrics).
 
 ??? example "Sample experiment illustrating metrics usage"
     ```yaml
@@ -105,7 +105,7 @@ Metrics are referenced within the `spec.criteria` stanza of the experiment. Metr
 A brief explanation of the key stanzas in a metric spec is given below.
 
 ### spec.params
-`spec.params` is a list of name-value pairs containing the HTTP params iter8 needs to use when it issues a REST query to the metrics database for this metric. The value string can be templated; iter8 will substitute the placeholders in the value string using version variables. This process is described in-depth [here](/usage/metrics/how-iter8-queries-metrics).
+`spec.params` is a list of name-value pairs containing the HTTP params iter8 needs to use when it issues a REST query to the metrics database for this metric. The value string can be templated; iter8 will substitute the placeholders in the value string using version variables. This process is described [here](/usage/metrics/how-iter8-queries-metrics).
 
 ### spec.description
 `spec.description` is a human-readable description of the metric.
@@ -146,8 +146,6 @@ An iter8 metric can be of type `counter` or `gauge`. The value of a `counter` me
     provider: prometheus
     ```
 
-Metric types are described in-depth [here](/usage/metrics/counter-and-gauge-metrics).
-
 ### spec.provider
 `spec.provider` denotes the type of the metric database that provides this metric. Currently, `prometheus` is the only supported value for this field. Support for other providers are planned as part of the [roadmap](/roadmap). Details about the Prometheus database URL used for metric queries are [here](/usage/metrics/metric-databases).
 
@@ -155,7 +153,7 @@ Metric types are described in-depth [here](/usage/metrics/counter-and-gauge-metr
 `spec.units` denotes the unit of measurement for the metric. Some metrics such as `request_count` in the above sample may not have units.
 
 ### spec.sampleSize
-`spec.sampleSize` denotes the number of data points over which the metric is computed. This field applies only to `gauge` metrics. This field is described in-depth here [here](/usage/metrics/counter-and-gauge-metrics).
+`spec.sampleSize` denotes the number of data points over which the metric is computed. This field applies only to `gauge` metrics. This field is described here [here](/usage/metrics/custom-metrics).
 
 ## Custom metrics
-Custom metric creation is described [here](/usage/metrics/custom-metrics).
+Creation of custom counter and gauge metric is described [here](/usage/metrics/custom-metrics).
