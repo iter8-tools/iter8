@@ -1,0 +1,10 @@
+name: "sample-app-v2"
+image: "gcr.io/knative-samples/knative-route-demo:green"
+tVersion: "green"
+traffic:
+- tag: current
+  revisionName: sample-app-v1
+  percent: 100
+- tag: candidate
+  latestRevision: true
+  percent: 0

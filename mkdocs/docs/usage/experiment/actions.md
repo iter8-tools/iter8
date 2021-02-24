@@ -4,7 +4,8 @@ template: overrides/main.html
 
 # Actions
 
-> An action is a sequence of tasks that can be executed by iter8. `spec.strategy.actions` can be used to specify `start` and `finish` actions that will be run at the start and end of an experiment respectively.
+!!! abstract "Actions"
+    An action is a sequence of tasks that can be executed by iter8. `spec.strategy.actions` can be used to specify `start` and `finish` actions that will be run at the start and end of an experiment respectively.
 
 ??? example "Sample experiment with start and finish actions"
     ```yaml

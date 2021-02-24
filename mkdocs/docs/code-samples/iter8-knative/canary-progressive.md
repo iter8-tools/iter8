@@ -2,144 +2,67 @@
 template: overrides/main.html
 ---
 
-# Quick start with Knative
+# Progressive Canary Deployment using Helm
 
-Perform **zero-downtime progressive canary release of a Knative app**. You will create:
+Perform **zero-downtime progressive canary release of a Knative app**. This tutorial is similar to the [iter8 quick start tutorial for Knative](/getting-started/quick-start/with-knative/). You will create:
 
 1. A Knative service with two versions of your app, namely, `baseline` and `candidate`
 2. A traffic generator which sends HTTP GET requests to the Knative service.
 3. An **iter8 experiment** that automates the following: 
     - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
     - iteratively shifts traffic from `baseline` to `candidate`, and 
-    - replaces `baseline` with `candidate` in the end using a `kubectl apply` command
+    - replaces `baseline` with `candidate` in the end using a `helm install` command
 
-!!! warning "Before you begin, you will need:"
+!!! warning "Before you begin"
+    **Kubernetes cluster:** Do not have a Kubernetes cluster with iter8 and Knative installed? Follow Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/) to create a cluster with iter8 and Knative.
 
-    1. Kubernetes cluster. You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
-    2. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-    3. [Kustomize v3](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
-    4. [Go 1.13+](https://golang.org/doc/install)
+    **Cleanup from previous experiment:** Tried an iter8 tutorial earlier but forgot to cleanup? Run the cleanup step from your tutorial now. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) performs cleanup for the iter8-Knative quick start tutorial.
 
-## 1. Create Kubernetes cluster
+    **ITER8 environment variable:** ITER8 environment variable is not exported in your terminal? Do so now. For example, this is the [last command in Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo).
 
-Create a local Kubernetes cluster using Minikube or Kind. You can also use a managed Kubernetes service from your cloud provider.
+    **Helm v3:** [Helm v3](https://helm.sh/) is not installed locally? Do so now. This sample uses Helm.
 
-=== "Minikube"
-
-    ```shell
-    minikube start --cpus 2 --memory 4096
-    ```
-
-=== "Kind"
-
-    ```shell
-    kind create cluster
-    ```
-    Ensure that the cluster has sufficient resources (for example, 5 cpus and 10GB of memory).
-
-## 2. Clone repo
+## 1. Create Knative app with canary
 ```shell
-git clone https://github.com/iter8-tools/iter8.git
-cd iter8
-export ITER8=$(pwd)
+helm upgrade --install sample-app $ITER8/samples/knative/canaryprogressive/sample-app --values=$ITER8/samples/knative/canaryprogressive/sample-app/values.yaml 
+kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
+helm upgrade --install sample-app $ITER8/samples/knative/canaryprogressive/sample-app --values=$ITER8/samples/knative/canaryprogressive/sample-app/experimental-values.yaml 
 ```
 
-## 3. Install Knative and iter8
-Choose a networking layer for Knative. Install Knative and iter8.
-
-=== "Istio"
-
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh istio
-    ```
-
-=== "Contour"
-
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh contour
-    ```
-
-=== "Kourier"
-
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh kourier
-    ```
-
-=== "Gloo"
-    This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh gloo
-    ```
-
-## 4. Create Knative app with canary
-```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
-kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-```
-
-??? info "Look inside baseline.yaml"
+??? info "Look inside values.yaml"
     ```yaml
-    # apply this yaml at the start of the experiment to create the baseline revision
-    # iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
-    apiVersion: serving.knative.dev/v1
-    kind: Service
-    metadata:
-      name: sample-app # The name of the app
-      namespace: default # The namespace the app will use
-    spec:
-      template:
-        metadata:
-          name: sample-app-v1
-        spec:
-          containers:
-          # The URL to the sample app docker image
-          - image: gcr.io/knative-samples/knative-route-demo:blue 
-            env:
-            - name: T_VERSION
-              value: "blue"
+    # values file used for installing sample-app Helm chart with baseline version
+    name: "sample-app-v1"
+    image: "gcr.io/knative-samples/knative-route-demo:blue"
+    tVersion: "blue"
     ```
 
-??? info "Look inside experimentalservice.yaml"
+??? info "Look inside experimental-values.yaml"
     ```yaml
-    # This Knative service will be used for the iter8 experiment with traffic split between baseline and candidate revision
-    # To begin with, candidate revision receives zero traffic
-    # Apply this after applying baseline.yaml in order to create the second revision
-    apiVersion: serving.knative.dev/v1
-    kind: Service
-    metadata:
-      name: sample-app # name of the app
-      namespace: default # namespace of the app
-    spec:
-      template:
-        metadata:
-          name: sample-app-v2
-        spec:
-          containers:
-          # Docker image used by second revision
-          - image: gcr.io/knative-samples/knative-route-demo:green 
-            env:
-            - name: T_VERSION
-              value: "green"
-      traffic: # initially all traffic goes to sample-app-v1 and none to sample-app-v2
-      - tag: current
-        revisionName: sample-app-v1
-        percent: 100
-      - tag: candidate
-        latestRevision: true
-        percent: 0
+    # values file used for upgrading sample-app Helm chart for use in iter8 experiment
+    name: "sample-app-v2"
+    image: "gcr.io/knative-samples/knative-route-demo:green"
+    tVersion: "green"
+    traffic:
+    - tag: current
+      revisionName: sample-app-v1
+      percent: 100
+    - tag: candidate
+      latestRevision: true
+      percent: 0
     ```
 
-## 5. Send requests
+## 2. Send requests
 Verify Knative service is ready and send requests to app.
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
-sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml | kubectl apply -f -
 ```
 
-## 6. Create iter8 experiment
+## 3. Create iter8 experiment
 ```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 ```
 ??? info "Look inside experiment.yaml"
     ```yaml
@@ -195,7 +118,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
           value: candidate 
     ```
 
-## 7. Observe experiment
+## 4. Observe experiment
 
 You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
 
@@ -312,7 +235,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
 
 When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.
 
-## 8. Cleanup
+## 5. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml

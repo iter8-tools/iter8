@@ -4,7 +4,8 @@ template: overrides/main.html
 
 # Experiment Criteria
 
-> `spec.criteria` specifies the metrics used for evaluating versions along with acceptable limits for their values.
+!!! abstract "Criteria"
+    `spec.criteria` specifies the metrics used for evaluating versions along with acceptable limits for their values.
 
 ??? example "Sample experiment with criteria"
     ```yaml
