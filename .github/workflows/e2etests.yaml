@@ -1,7 +1,16 @@
 name: e2e test
+
 on:
-- push
-- pull_request
+  push:
+    paths:
+    - 'install/**'
+    - 'samples/knative/quickstart/**'
+    - '.github/**'
+  pull_request:
+    paths:
+    - 'install/**'
+    - 'samples/knative/quickstart/**'
+    - '.github/**'
 
 jobs:
   knative-quickstart:
