@@ -4,7 +4,8 @@ template: overrides/main.html
 
 # Metrics Overview
 
-> **iter8** defines a Kubernetes CRD called **metric**. A metric resource encapsulates the REST query that is used for retrieving a metric value from the metrics backend.
+!!! abstract "iter8 metric"
+    **iter8** defines a Kubernetes CRD called **metric**. A metric resource encapsulates the REST query that is used for retrieving a metric value from the metrics backend.
 
 ??? example "Sample metric"
     ```yaml

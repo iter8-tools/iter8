@@ -4,7 +4,8 @@ template: overrides/main.html
 
 # Information about App Versions
 
-> `spec.versionInfo` describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
+!!! abstract "Version information"
+    `spec.versionInfo` describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
 
 ??? example "Sample experiment in which versions are Knative revisions"
     ```yaml

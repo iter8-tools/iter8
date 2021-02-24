@@ -4,7 +4,8 @@ template: overrides/main.html
 
 # How iter8 queries metrics
 
-> During an experiment, in each iteration, for each metric, and for each app-version, iter8 uses an HTTP query to retrieve the current metric value. The params of this HTTP query are constructed by interpolating the `spec.params` stanza of the metric. 
+!!! abstract "Params interpolation"
+    During an experiment, in each iteration, for each metric, and for each app-version, iter8 uses an HTTP query to retrieve the current metric value. The params of this HTTP query are constructed by interpolating the `spec.params` stanza of the metric. 
 
 ## How iter8 interpolates params
 
@@ -15,7 +16,7 @@ template: overrides/main.html
 
 ## An example
 
-We will illustrate the end-to-end process of retrieving metric values in iter8 experiments using the following samples.
+This example illustrates the end-to-end process of retrieving metric values in iter8 experiments using the following samples.
 
 ??? example "A sample metric for illustrating param interpolation"
     ```yaml

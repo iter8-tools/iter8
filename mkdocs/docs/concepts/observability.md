@@ -4,7 +4,9 @@ template: overrides/main.html
 
 # Realtime Observability
 
-> **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the `winner`.
+!!! abstract "iter8ctl"
+    **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the `winner`.
+
 
 ??? example "Sample output from iter8ctl"
     ```shell
