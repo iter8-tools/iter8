@@ -82,10 +82,10 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
             task: init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
           - library: common
-            task: exec # promote the winning version
+            task: exec # promote the winning version using helm
             with:
-              cmd: kubectl
-              args: ["apply", "-f", "https://github.com/iter8-tools/iter8/samples/knative/quickstart/{{ .promote }}.yaml"]
+              cmd: helm
+              args: ["upgrade", "--install", "sample-app", "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app", "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app/{{ .promote }}.yaml"]            
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
@@ -108,14 +108,14 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         - name: revision
           value: sample-app-v1 
         - name: promote
-          value: baseline
+          value: values
       candidates:
       - name: candidate
         variables:
         - name: revision
           value: sample-app-v2
         - name: promote
-          value: candidate 
+          value: candidate-values 
     ```
 
 ## 4. Observe experiment

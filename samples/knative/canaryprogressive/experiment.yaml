@@ -1,7 +1,7 @@
 apiVersion: iter8.tools/v2alpha1
 kind: Experiment
 metadata:
-  name: quickstart-exp
+  name: canary-progressive
 spec:
   # target identifies the knative service under experimentation using its fully qualified name
   target: default/sample-app
