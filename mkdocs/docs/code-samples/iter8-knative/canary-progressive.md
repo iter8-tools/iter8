@@ -20,7 +20,7 @@ Perform **zero-downtime progressive canary release of a Knative app**. This tuto
 
     **ITER8 environment variable:** ITER8 environment variable is not exported in your terminal? Do so now. For example, this is the [last command in Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo).
 
-    **Helm v3:** [Helm v3](https://helm.sh/) is not installed locally? Do so now. This sample uses Helm.
+    **Helm v3 and iter8ctl:** [Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl) are not installed locally? Do so now.
 
 ## 1. Create Knative app with canary
 ```shell
@@ -69,7 +69,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
     metadata:
-      name: quickstart-exp
+      name: canary-progressive
     spec:
       # target identifies the knative service under experimentation using its fully qualified name
       target: default/sample-app
@@ -85,7 +85,12 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
             task: exec # promote the winning version using helm
             with:
               cmd: helm
-              args: ["upgrade", "--install", "sample-app", "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app", "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app/{{ .promote }}.yaml"]            
+              args:
+              - "upgrade"
+              - "--install"
+              - "sample-app"
+              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app"
+              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app/{{ .promote }}.yaml"
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
@@ -123,15 +128,10 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
 
 === "iter8ctl"
-    Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing GOBIN below.
-    ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0-pre
-    ```
-
     Periodically describe the experiment.
     ```shell
     while clear; do
-    kubectl get experiment quickstart-exp -o yaml | iter8ctl describe -f -
+    kubectl get experiment canary-progressive -o yaml | iter8ctl describe -f -
     sleep 15
     done
     ```
@@ -184,7 +184,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
 === "kubectl get experiment"
 
     ```shell
-    kubectl get experiment quickstart-exp --watch
+    kubectl get experiment canary-progressive --watch
     ```
 
     You should see output similar to the following.
