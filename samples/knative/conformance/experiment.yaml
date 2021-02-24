@@ -33,5 +33,3 @@ spec:
       variables:
       - name: revision
         value: sample-app-v1 
-      - name: promote
-        value: baseline

@@ -28,8 +28,7 @@ kubectl apply -f $ITER8/samples/knative/conformance/baseline.yaml
 ??? info "Look inside baseline.yaml"
 
     ```yaml
-    # apply this yaml at the start of the experiment to create the baseline revision
-    # iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
+    # apply this yaml at the start of the experiment to create the revision to be tested
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
@@ -97,8 +96,6 @@ kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
         variables:
         - name: revision
             value: sample-app-v1 
-        - name: promote
-            value: baseline
     ```
 
 ## 4. Observe experiment
@@ -196,7 +193,7 @@ kubectl delete -f $ITER8/samples/knative/conformance/experiment.yaml
 ```
 
 ??? info "Understanding what happened"
-    1. In Step 1, you created a Knative service with a single revision, `sample-app-v1` (`baseline`).
+    1. In Step 1, you created a Knative service with a single revision, `sample-app-v1`.
     2. In Step 2, you created a load generator that sends requests to the Knative service.
-    3. In step 3, you created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus).It ensured that the baseline satisfied all objectives specified in `experiment.yaml`.
+    3. In step 3, you created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus).It ensured that the deployed revision satisfied all objectives specified in `experiment.yaml`.
     4. At the end of the experiment, iter8 did not identify a `winner` since there is no winner in conformance experiment.
