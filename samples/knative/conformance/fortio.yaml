@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fortio
+spec:
+  template:
+    spec:
+      containers:
+      - name: fortio
+        image: fortio/fortio
+        command: ["fortio", "load", "-t", "10m", $(URL)]
+        env:
+        - name: URL
+          value: URL_VALUE
+      restartPolicy: Never
