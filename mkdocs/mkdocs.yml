@@ -1,5 +1,5 @@
 site_name: iter8
-site_url: https://focused-kepler-1dd051.netlify.app/
+site_url: https://iter8.tools
 site_author: Srinivasan Parthasarathy
 site_description: >-
   Use iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.
@@ -121,7 +121,8 @@ nav:
       - Custom metrics: usage/metrics/custom-metrics.md
   - Code samples:
     - iter8-Knative:
-      - Canary: code-samples/iter8-knative/canary/canary.md
+      - Canary - Progressive: code-samples/iter8-knative/canary-progressive.md
+      - Canary - FixedSplit: code-samples/iter8-knative/canary-fixedsplit.md
       - Conformance: code-samples/iter8-knative/conformance.md
       - Frontend/backend: code-samples/iter8-knative/frontend-and-backend.md
       - Shadow deployments: code-samples/iter8-knative/mirroring.md

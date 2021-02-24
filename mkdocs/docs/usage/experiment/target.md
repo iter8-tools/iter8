@@ -4,7 +4,8 @@ template: overrides/main.html
 
 # Target of the Experiment
 
-> `spec.target` identifies the app under experimentation and determines which experiments can run concurrently.
+!!! abstract "Target"
+    `spec.target` identifies the app under experimentation and determines which experiments can run concurrently.
 
 ??? example "Sample experiment targeting a Knative service"
     ```yaml
