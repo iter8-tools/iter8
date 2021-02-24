@@ -11,7 +11,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-      
+    
+    - name: Run Kubernetes tools
+      uses: stefanprodan/kube-tools@v1
+      with:
+        kubectl: 1.18.2
+        kustomize: 3.5.5
+        
     - uses: engineerd/setup-kind@v0.5.0
     - name: platform setup
       run: |
