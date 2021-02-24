@@ -1,6 +1,6 @@
 namePrefix: iter8-
 resources:
- - knativeservice.yaml
+ - ksvc-reader-writer.yaml
  - secret-reader.yaml
- - knativeservicecrb.yaml
- - secret-reader-rb.yaml
+ - ksvc-crb.yaml
+ - secret-rb.yaml
