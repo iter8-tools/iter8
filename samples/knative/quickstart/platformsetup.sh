@@ -22,7 +22,7 @@ fi
 
 ## Ensure Kustomize v3 is available
 KUSTOMIZE_VERSION=$(kustomize version | cut -f 1 | cut -d/ -f 2 | cut -d. -f 1)
-if [[ $KUSTOMIZE_VERSION == "v3" ]]; then
+if [[ $KUSTOMIZE_VERSION == "v4" ]]; then
     echo "Kustomize v3 is available"
 else
     echo "Kustomize Version found: $KUSTOMIZE_VERSION"
