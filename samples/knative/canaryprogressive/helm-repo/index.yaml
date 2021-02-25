@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  sample-app:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2021-02-24T23:11:37.412493-05:00"
+    description: A Helm chart for a Knative service
+    digest: f280f1de9f6a3e82593073d2e7f85a3b08ca1586cb763093dc2d781a26d25747
+    name: sample-app
+    type: application
+    urls:
+    - sample-app-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-02-24T23:11:37.412015-05:00"
