@@ -56,8 +56,8 @@ helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter
       percent: 0
     ```
 
-## 2. Send requests
-Verify Knative service is ready and send requests to app.
+## 2. Generate requests
+Verify Knative service is ready and generate requests to app using fortio.
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
