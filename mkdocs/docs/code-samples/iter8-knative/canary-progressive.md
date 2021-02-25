@@ -25,9 +25,9 @@ Perform **zero-downtime progressive canary release of a Knative app**. This tuto
 
 ## 1. Create Knative app with canary
 ```shell
-helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app 
+helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=iter8-system
 kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
-helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml 
+helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=iter8-system
 ```
 
 ??? info "Look inside values.yaml"
@@ -133,8 +133,8 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         - metric: error-rate
           upperLimit: "0.01"
       duration:
-        intervalSeconds: 20
-        iterationsPerLoop: 12
+        intervalSeconds: 12
+        iterationsPerLoop: 5
       versionInfo:
         # information about app versions used in this experiment
       baseline:
@@ -162,7 +162,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     ```shell
     while clear; do
     kubectl get experiment canary-progressive -o yaml | iter8ctl describe -f -
-    sleep 15
+    sleep 10
     done
     ```
 
@@ -271,12 +271,12 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/helm-secret.yaml
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml
-helm uninstall sample-app
+helm uninstall sample-app --namespace=iter8-system
 ```
 
 ??? info "Understanding what happened"
     1. You created a Knative service using `helm install` subcommand and upgraded the service to have both `baseline` and `candidate` versions (revisions) using `helm upgrade --install` subcommand.
     2. You created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
     3. You provided RBAC authorization that enables iter8 to perform an experiment with a Helm-task.
-    4. You created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. The traffic shifting behavior is fine-tuned based on the `spec.strategy.weights` stanza.
+    4. You created an iter8 experiment with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. The traffic shifting behavior is fine-tuned based on the `spec.strategy.weights` stanza.
     5. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (roll forward) by using a `helm upgrade --install` command. Had the candidate failed to satisfy objectives, iter8 would have promoted the baseline (rolled back) instead.

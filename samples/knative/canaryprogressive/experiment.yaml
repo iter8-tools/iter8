@@ -29,10 +29,11 @@ spec:
           - "--repo"
           - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
           - "sample-app" # release name
-          - "-n default" # release namespace
+          - "--namespace=iter8-system" # release namespace
           - "sample-app" # chart name
           - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
-          - "--force" # force upgrade if necessary by overwriting annotations
+          # - "--reset-values" # seems necessary to avoid ownership annotation metadata errors
+          # - "--force" # seems necessary to avoid ownership annotation metadata errors
   criteria:
     # mean latency of version should be under 50 milliseconds
     # 95th percentile latency should be under 100 milliseconds
@@ -45,8 +46,8 @@ spec:
     - metric: error-rate
       upperLimit: "0.01"
   duration:
-    intervalSeconds: 20
-    iterationsPerLoop: 12
+    intervalSeconds: 10
+    iterationsPerLoop: 7
   versionInfo:
     # information about app versions used in this experiment
     baseline:
