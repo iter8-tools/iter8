@@ -1,0 +1,5 @@
+# git ignore sample-app folder
+sample-app
+
+# do not ignore the tgz file packaged using `helm package` subcommand
+!sample-app-*.tgz
