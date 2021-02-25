@@ -55,6 +55,11 @@ template: overrides/main.html
         testingPattern: Canary
         # progressively shift traffic to candidate, assuming it satisfies objectives
         deploymentPattern: Progressive
+        weights: # fine-tune traffic increments to candidate
+          # candidate weight will not exceed 75 in any iteration
+          maxCandidateWeight: 75
+          # candidate weight will not increase by more than 20 in a single iteration
+          maxCandidateWeightIncrement: 20
         actions:
           # run tasks under the `start` action at the start of an experiment   
           start:
@@ -111,6 +116,10 @@ A brief explanation of the key stanzas in an experiment spec is given below.
 ### spec.strategy.deploymentPattern
 
 `spec.strategy.deploymentPattern` is a string enum that determines if and how traffic is shifted during an experiment[^1]. iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
+
+### spec.strategy.weights
+
+`spec.strategy.weights` is an object with  two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This stanza is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
 
 ### spec.strategy.actions
 

@@ -9,6 +9,11 @@ spec:
     # this experiment will perform a canary test
     testingPattern: Canary
     deploymentPattern: Progressive
+    weights: # fine-tune traffic increments to candidate
+      # candidate weight will not exceed 75 in any iteration
+      maxCandidateWeight: 75
+      # candidate weight will not increase by more than 20 in a single iteration
+      maxCandidateWeightIncrement: 20
     actions:
       start: # run the following sequence of tasks at the start of the experiment
       - library: knative
@@ -21,9 +26,14 @@ spec:
           args:
           - "upgrade"
           - "--install"
-          - "sample-app"
-          - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app"
-          - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app/{{ .promote }}.yaml"
+          - "--repo"
+          - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
+          - "sample-app" # release name
+          - "--namespace=iter8-system" # release namespace
+          - "sample-app" # chart name
+          - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
+          # - "--reset-values" # seems necessary to avoid ownership annotation metadata errors
+          # - "--force" # seems necessary to avoid ownership annotation metadata errors
   criteria:
     # mean latency of version should be under 50 milliseconds
     # 95th percentile latency should be under 100 milliseconds
@@ -36,8 +46,8 @@ spec:
     - metric: error-rate
       upperLimit: "0.01"
   duration:
-    intervalSeconds: 20
-    iterationsPerLoop: 12
+    intervalSeconds: 10
+    iterationsPerLoop: 7
   versionInfo:
     # information about app versions used in this experiment
     baseline:
@@ -46,11 +56,11 @@ spec:
       - name: revision
         value: sample-app-v1 
       - name: promote
-        value: values
+        value: baseline
     candidates:
     - name: candidate
       variables:
       - name: revision
         value: sample-app-v2
       - name: promote
-        value: candidate-values 
+        value: candidate 
