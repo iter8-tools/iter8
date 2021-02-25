@@ -2,4 +2,4 @@
 template: overrides/main.html
 ---
 
-# Coming Soon
+# Metric Resource Object
