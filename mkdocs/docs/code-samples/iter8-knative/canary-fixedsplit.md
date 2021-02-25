@@ -155,7 +155,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     ```shell
     while clear; do
     kubectl get experiment canary-fixedsplit -o yaml | iter8ctl describe -f -
-    sleep 15
+    sleep 2
     done
     ```
 
