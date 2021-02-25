@@ -3,3 +3,4 @@ resources:
  - ksvc-reader-writer.yaml
  - secret-reader-writer.yaml
  - ksvc.yaml
+ - helm-secret.yaml

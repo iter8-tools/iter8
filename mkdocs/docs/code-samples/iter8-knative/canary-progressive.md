@@ -64,33 +64,7 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml | kubectl apply -f -
 ```
 
-## 3. Provide RBAC authorization
-At the end of the experiment, iter8 will perform a `helm upgrade`. Provide the RBAC authorization required by this step as follows.
-```shell
-kubectl apply -f $ITER8/samples/knative/canaryprogressive/helm-secret.yaml
-```
-
-??? info "Look inside helm-secret.yaml"
-    ```yaml
-    # Helm v3 uses secrets to manage releases
-    # this rolebinding authorizes iter8 to read and write secrets in the `default` namespace
-    # if your Helm-based experiment occurs in a different namespace, modify the namespace field in this rolebinding appropriately
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    metadata:
-      name: iter8-helm-secrets
-      namespace: default
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: iter8-secret-reader-writer
-    subjects:
-    - kind: ServiceAccount
-      name: iter8-handlers
-      namespace: iter8-system
-    ```
-
-## 4. Create iter8 experiment
+## 3. Create iter8 experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 ```
@@ -106,21 +80,32 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
       strategy:
         # this experiment will perform a canary test
         testingPattern: Canary
+        deploymentPattern: Progressive
+        weights: # fine-tune traffic increments to candidate
+          # candidate weight will not exceed 75 in any iteration
+          maxCandidateWeight: 75
+          # candidate weight will not increase by more than 20 in a single iteration
+          maxCandidateWeightIncrement: 20
         actions:
-          start: # run a sequence of tasks at the start of the experiment
+          start: # run the following sequence of tasks at the start of the experiment
           - library: knative
             task: init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
           - library: common
-            task: exec # promote the winning version using helm
+            task: exec # promote the winning version using Helm upgrade
             with:
               cmd: helm
               args:
               - "upgrade"
               - "--install"
-              - "sample-app"
-              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app"
-              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/sample-app/{{ .promote }}.yaml"
+              - "--repo"
+              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
+              - "sample-app" # release name
+              - "--namespace=iter8-system" # release namespace
+              - "sample-app" # chart name
+              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
+              # - "--reset-values" # seems necessary to avoid ownership annotation metadata errors
+              # - "--force" # seems necessary to avoid ownership annotation metadata errors
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
@@ -133,27 +118,27 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         - metric: error-rate
           upperLimit: "0.01"
       duration:
-        intervalSeconds: 12
-        iterationsPerLoop: 5
+        intervalSeconds: 10
+        iterationsPerLoop: 7
       versionInfo:
         # information about app versions used in this experiment
-      baseline:
-        name: current
-        variables:
-        - name: revision
-          value: sample-app-v1 
-        - name: promote
-          value: values
-      candidates:
-      - name: candidate
-        variables:
-        - name: revision
-          value: sample-app-v2
-        - name: promote
-          value: candidate-values 
+        baseline:
+          name: current
+          variables:
+          - name: revision
+            value: sample-app-v1 
+          - name: promote
+            value: baseline
+        candidates:
+        - name: candidate
+          variables:
+          - name: revision
+            value: sample-app-v2
+          - name: promote
+            value: candidate  
     ```
 
-## 5. Observe experiment
+## 4. Observe experiment
 
 You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
 
@@ -166,7 +151,8 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     done
     ```
 
-    ??? info "iter8ctl output will be similar to the following"
+    ??? info "iter8ctl output"
+        iter8ctl output will be similar to the following.
         ```shell
         ****** Overview ******
         Experiment name: canary-progressive
@@ -176,8 +162,8 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         Deployment pattern: Progressive
 
         ****** Progress Summary ******
-        Experiment stage: Running
-        Number of completed iterations: 4
+        Experiment stage: Completed
+        Number of completed iterations: 7
 
         ****** Winner Assessment ******
         App versions in this experiment: [current candidate]
@@ -200,17 +186,17 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         +--------------------------------+---------+-----------+
         |             METRIC             | CURRENT | CANDIDATE |
         +--------------------------------+---------+-----------+
-        | request-count                  | 609.167 |    75.680 |
+        | mean-latency (milliseconds)    |   1.201 |     1.322 |
         +--------------------------------+---------+-----------+
-        | mean-latency (milliseconds)    |   1.273 |     1.349 |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   |   4.784 |     4.750 |
+        | 95th-percentile-tail-latency   |   4.776 |     4.750 |
         | (milliseconds)                 |         |           |
         +--------------------------------+---------+-----------+
         | error-rate                     |   0.000 |     0.000 |
-        +--------------------------------+---------+-----------+ 
+        +--------------------------------+---------+-----------+
+        | request-count                  | 448.800 |    89.352 |
+        +--------------------------------+---------+-----------+
         ```
-        When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
    
 
 === "kubectl get experiment"
@@ -219,26 +205,20 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     kubectl get experiment canary-progressive --watch
     ```
 
-    ??? info "kubectl output will be similar to the following"
+    ??? info "kubectl get experiment output"
+        kubectl output will be similar to the following.
         ```shell
-        NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-        quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-        quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-        quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-        quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-        quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-        quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-        quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-        quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-        quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-        quickstart-exp   Canary   default/sample-app   Running   10                     IterationUpdate: Completed Iteration 10
-        quickstart-exp   Canary   default/sample-app   Running   11                     IterationUpdate: Completed Iteration 11
-        quickstart-exp   Canary   default/sample-app   Finishing   12                     TerminalHandlerLaunched: Finish handler 'finish' launched
-        quickstart-exp   Canary   default/sample-app   Completed   12                     ExperimentCompleted: Experiment completed successfully
+        NAME                 TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
+        canary-progressive   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
+        canary-progressive   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
+        canary-progressive   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
+        canary-progressive   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
+        canary-progressive   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
+        canary-progressive   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
+        canary-progressive   Canary   default/sample-app   Finishing   7                      TerminalHandlerLaunched: Finish handler 'finish' launched
+        canary-progressive   Canary   default/sample-app   Completed   7                      ExperimentCompleted: Experiment completed successfully
         ```
-        When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.
-
-    
+        When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
 === "kubectl get ksvc"
 
@@ -246,19 +226,20 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    ??? info "kubectl output will be similar to the following"
+    ??? info "kubectl get ksvc output"
+        kubectl output will be similar to the following.
         ```shell
         [
           {
             "latestRevision": false,
-            "percent": 45,
+            "percent": 25,
             "revisionName": "sample-app-v1",
             "tag": "current",
             "url": "http://current-sample-app.default.example.com"
           },
           {
             "latestRevision": true,
-            "percent": 55,
+            "percent": 75,
             "revisionName": "sample-app-v2",
             "tag": "candidate",
             "url": "http://candidate-sample-app.default.example.com"
@@ -269,14 +250,12 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
 ## 5. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/canaryprogressive/helm-secret.yaml
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml
 helm uninstall sample-app --namespace=iter8-system
 ```
 
 ??? info "Understanding what happened"
-    1. You created a Knative service using `helm install` subcommand and upgraded the service to have both `baseline` and `candidate` versions (revisions) using `helm upgrade --install` subcommand.
+    1. You created a Knative service using `helm install` subcommand and upgraded the service to have both `baseline` and `candidate` versions (revisions) using `helm upgrade --install` subcommand. The ksvc is created in the `default` namespace. Helm release information is located in the `iter8-system` namespace specified by the `--namespace=iter8-system` flag.
     2. You created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
-    3. You provided RBAC authorization that enables iter8 to perform an experiment with a Helm-task.
-    4. You created an iter8 experiment with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. The traffic shifting behavior is fine-tuned based on the `spec.strategy.weights` stanza.
-    5. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (roll forward) by using a `helm upgrade --install` command. Had the candidate failed to satisfy objectives, iter8 would have promoted the baseline (rolled back) instead.
+    3. You created an iter8 experiment with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. You restricted the maximum weight (traffic percentage) of candidate during iterations at 75% and maximum increment allowed during a single iteration to 20% using the `spec.strategy.weights` stanza.
+    4. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (roll forward) by using a `helm upgrade --install` command. Had the candidate failed to satisfy objectives, iter8 would have promoted the baseline (rolled back) instead.
