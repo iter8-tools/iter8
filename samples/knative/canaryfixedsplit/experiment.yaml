@@ -19,7 +19,7 @@ spec:
         with:
           cmd: eval
           args:
-          - "kustomize build github.com/iter8-tools/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=master | kubectl apply -f -"
+          - "kustomize build github.com/kalantar/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=fixedsplit | kubectl apply -f -"
   criteria:
     # mean latency of version should be under 50 milliseconds
     # 95th percentile latency should be under 100 milliseconds

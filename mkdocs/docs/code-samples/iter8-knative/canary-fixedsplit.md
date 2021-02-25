@@ -117,7 +117,7 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
             with:
               cmd: eval
               args:
-              - "kustomize build github.com/kalantar/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=master | kubectl apply -f -"
+              - "kustomize build github.com/iter8-tools/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=master | kubectl apply -f -"
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
@@ -170,44 +170,44 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
 
     ****** Progress Summary ******
     Experiment stage: Running
-    Number of completed iterations: 3
+    Number of completed iterations: 5
 
     ****** Winner Assessment ******
-    App versions in this experiment: [current candidate]
+    App versions in this experiment: [baseline candidate]
     Winning version: candidate
     Recommended baseline: candidate
 
     ****** Objective Assessment ******
-    +--------------------------------+---------+-----------+
-    |           OBJECTIVE            | CURRENT | CANDIDATE |
-    +--------------------------------+---------+-----------+
-    | mean-latency <= 50.000         | true    | true      |
-    +--------------------------------+---------+-----------+
-    | 95th-percentile-tail-latency   | true    | true      |
-    | <= 100.000                     |         |           |
-    +--------------------------------+---------+-----------+
-    | error-rate <= 0.010            | true    | true      |
-    +--------------------------------+---------+-----------+
+    +--------------------------------+----------+-----------+
+    |           OBJECTIVE            | BASELINE | CANDIDATE |
+    +--------------------------------+----------+-----------+
+    | mean-latency <= 50.000         | true     | true      |
+    +--------------------------------+----------+-----------+
+    | 95th-percentile-tail-latency   | true     | true      |
+    | <= 100.000                     |          |           |
+    +--------------------------------+----------+-----------+
+    | error-rate <= 0.010            | true     | true      |
+    +--------------------------------+----------+-----------+
 
     ****** Metrics Assessment ******
-    +--------------------------------+---------+-----------+
-    |             METRIC             | CURRENT | CANDIDATE |
-    +--------------------------------+---------+-----------+
-    | request-count                  | 429.334 |    16.841 |
-    +--------------------------------+---------+-----------+
-    | mean-latency (milliseconds)    |   0.522 |     0.712 |
-    +--------------------------------+---------+-----------+
-    | 95th-percentile-tail-latency   |   4.835 |     4.750 |
-    | (milliseconds)                 |         |           |
-    +--------------------------------+---------+-----------+
-    | error-rate                     |   0.000 |     0.000 |
-    +--------------------------------+---------+-----------+
+    +--------------------------------+----------+-----------+
+    |             METRIC             | BASELINE | CANDIDATE |
+    +--------------------------------+----------+-----------+
+    | 95th-percentile-tail-latency   |    4.798 |     4.825 |
+    | (milliseconds)                 |          |           |
+    +--------------------------------+----------+-----------+
+    | error-rate                     |    0.000 |     0.000 |
+    +--------------------------------+----------+-----------+
+    | request-count                  |  652.800 |   240.178 |
+    +--------------------------------+----------+-----------+
+    | mean-latency (milliseconds)    |    1.270 |     1.254 |
+    +--------------------------------+----------+-----------+
     ```    
 
 === "kubectl get experiment"
 
     ```shell
-    kubectl get experiment canary-progressive --watch
+    kubectl get experiment canary-fixedsplit --watch
     ```
 
     You should see output similar to the following.
@@ -259,9 +259,9 @@ When the experiment completes (in ~ 4 mins), you will see the experiment stage c
 ## 5. Cleanup
 
 ```shell
-kubectl delete -f $ITER8/samples/knative/canary-fixedsplit/fortio.yaml
-kubectl delete -f $ITER8/samples/knative/canary-fixedsplit/experiment.yaml
-kustomize build $ITER8/samples/knative/canary-fixedsplit/experimentalservice | kubectl apply -f -
+kubectl delete -f $ITER8/samples/knative/canaryfixedsplit/fortio.yaml
+kubectl delete -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
+kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl delete -f -
 ```
 
 ??? info "Understanding what happened"
