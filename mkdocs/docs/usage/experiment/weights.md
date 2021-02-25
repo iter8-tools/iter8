@@ -2,12 +2,12 @@
 template: overrides/main.html
 ---
 
-# Deployment Pattern
+# Traffic Shifting in `Progressive` experiments
 
-!!! abstract "Deployment pattern"
-    `spec.strategy.deploymentPattern` determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
+!!! abstract "Weights"
+    `spec.strategy.weights` is an object with two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This stanza is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
 
-??? example "Sample experiment `Progressive` deployment pattern"
+??? example "Sample experiment with `spec.strategy.weights`"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
@@ -50,16 +50,16 @@ template: overrides/main.html
         # error rate should be under 1%
         - metric: error-rate
           upperLimit: "0.01"
-      indicators:
-      # report values for the following metrics in addition those in spec.criteria.objectives
-      - 99th-percentile-tail-latency
-      - 90th-percentile-tail-latency
-      - 75th-percentile-tail-latency
       strategy:
         # canary testing => candidate `wins` if it satisfies objectives
         testingPattern: Canary
         # progressively shift traffic to candidate, assuming it satisfies objectives
         deploymentPattern: Progressive
+        weights: # fine-tune traffic increments to candidate
+          # candidate weight will not exceed 75 in any iteration
+          maxCandidateWeight: 75
+          # candidate weight will not increase by more than 20 in a single iteration
+          maxCandidateWeightIncrement: 20
         actions:
           # run tasks under the `start` action at the start of an experiment   
           start:
@@ -84,10 +84,3 @@ template: overrides/main.html
         intervalSeconds: 20
         iterationsPerLoop: 12
     ```
-
-
-## Progressive deployment
-Progressively shift traffic towards the winner during each iteration of the experiment. This is the default deployment pattern in `Canary` experiments.
-
-## FixedSplit deployment
-The traffic split found at the start of the experiment is left unchanged during iterations.

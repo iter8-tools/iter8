@@ -12,6 +12,7 @@ This section provides information about crafting experiments and using/crafting 
     - [spec.criteria](/usage/experiment/criteria)
     - [spec.strategy.testingPattern](/usage/experiment/testing)
     - [spec.strategy.deploymentPattern](/usage/experiment/deployment)
+    - [spec.strategy.weights](/usage/experiment/weights)
     - [spec.strategy.actions](/usage/experiment/actions)
     - [spec.duration](/usage/experiment/duration)
 * Metrics in-depth

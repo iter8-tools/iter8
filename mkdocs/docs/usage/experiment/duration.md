@@ -7,7 +7,7 @@ template: overrides/main.html
 !!! abstract "Duration"
     `spec.duration` has two integer fields, namely, `iterationsPerLoop` and `intervalSeconds`. The former specifies the number of iterations in the experiment. The latter specifies the time interval in seconds between successive iterations.
 
-??? example "Sample experiment with 12 iterations and an interval of 20 seconds"
+??? example "Sample experiment with 12 iterations and 20 seconds interval"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment

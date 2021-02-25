@@ -34,8 +34,9 @@ Create a local Kubernetes cluster using Minikube or Kind. You can also use a man
 
     ```shell
     kind create cluster
+    kubectl cluster-info --context kind-kind
     ```
-    Ensure that the cluster has sufficient resources (for example, 5 cpus and 10GB of memory).
+    Ensure that the cluster has sufficient resources, for example, 2 cpus and 4GB of memory.
 
 ## 2. Clone repo
 ```shell
@@ -212,7 +213,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     ```shell
     while clear; do
     kubectl get experiment quickstart-exp -o yaml | iter8ctl describe -f -
-    sleep 15
+    sleep 10
     done
     ```
 
