@@ -137,11 +137,13 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 
-    - name: Sleep wait till end of experiment
+    - name: wait till experiment completes. sleep till fortio load generation completes.
       run: | 
         sleep 10.0
         kubectl wait experiment/canary-progressive --for=condition=Completed --timeout=120s
-        kubectl wait job/fortio --for=condition=Complete --timeout=150s
+        sleep 120.0
+        # kubectl wait job/fortio --for=condition=Complete --timeout=150s
+        # above would have been nice -- but busybox gets in the way
 
     - name: Check if experiment is complete and successful
       run: |
