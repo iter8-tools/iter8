@@ -162,7 +162,6 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     done
     ```
 
-
     ??? info "iter8ctl output"
         iter8ctl output will be similar to the following:
         ```shell
