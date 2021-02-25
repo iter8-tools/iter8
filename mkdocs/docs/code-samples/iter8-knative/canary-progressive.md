@@ -139,7 +139,6 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
     ```
 
 ## 4. Observe experiment
-
 You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
 
 === "iter8ctl"
@@ -196,11 +195,9 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         | request-count                  | 448.800 |    89.352 |
         +--------------------------------+---------+-----------+
         ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
-   
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
 
 === "kubectl get experiment"
-
     ```shell
     kubectl get experiment canary-progressive --watch
     ```
@@ -221,7 +218,6 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
 === "kubectl get ksvc"
-
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
@@ -246,7 +242,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
           }
         ]
         ```
-
+        
 ## 5. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml

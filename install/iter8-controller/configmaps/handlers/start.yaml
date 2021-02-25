@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: start
+spec:
+  template:
+    spec:
+      serviceAccountName: iter8-handlers
+      containers:
+      - name: iter8-start
+        image: iter8/handler:0.1.6-pre
+        command: ["handler", "run", "-a", "start"]
+        env:
+        - name: EXPERIMENT_NAMESPACE
+          value: EXPERIMENT_NAMESPACE_VALUE
+        - name: EXPERIMENT_NAME
+          value: EXPERIMENT_NAME_VALUE
+      restartPolicy: Never
+  backoffLimit: 4
+  activeDeadlineSeconds: 300
