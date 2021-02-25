@@ -14,7 +14,7 @@ on:
 
 jobs:
   knative-quickstart:
-    name: e2e test knative quickstart experiment
+    name: knative quickstart experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -103,9 +103,8 @@ jobs:
         fi
 
   knative-canary-progressive-helm:
-    name: e2e test knative quickstart experiment
+    name: knative progressive canary experiment using helm
     runs-on: ubuntu-latest
-    if: true # if there is a change is install folder or there is a change in samples/knative/quickstart folder -- then run this job
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -138,17 +137,20 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 
-    - name: Sleep till end of experiment
-      run: sleep 160.0
-    
+    - name: Sleep wait till end of experiment
+      run: | 
+        sleep 10.0
+        kubectl wait experiment/canary-progressive --for=condition=Completed --timeout=120s
+        kubectl wait job/fortio --for=condition=Complete --timeout=150s
+
     - name: Check if experiment is complete and successful
       run: |
         #Check if experiment has completed
         completed="Completed"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)=="$completed" ]]; then
+        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.stage)=="$completed" ]]; then
           echo "Experiment has Completed"
         else
-          echo "Experiment must be Completed. It is $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)"
+          echo "Experiment must be Completed. It is $(kubectl get experiment canary-progressive -ojson | jq .status.stage)"
           exit 1
         fi
 
@@ -168,7 +170,7 @@ jobs:
 
         #Check if recommended baseline is candidate
         candidate="candidate"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
+        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
           echo "recommendedBaseline is candidate"
         else
           echo "recommendedBaseline must be candidate"
