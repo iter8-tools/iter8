@@ -133,7 +133,6 @@ nav:
       - Helm chart: code-samples/all-domains/helm.md
       - Kustomize overlay: code-samples/all-domains/kustomize.md
       - YAML/JSON app manifests: code-samples/all-domains/kubectl.md
-      - Custom metrics: code-samples/all-domains/custommetrics.md
   - Reference: 
     - Experiment: reference/experiment.md
     - Metric: reference/metric.md
