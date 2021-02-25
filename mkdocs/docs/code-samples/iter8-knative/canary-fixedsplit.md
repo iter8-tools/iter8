@@ -141,7 +141,7 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
           name: baseline
           variables:
           - name: revision
-            value: sample-app-v1 
+            value: sample-app-v1
         candidates:
         - name: candidate
           variables:
