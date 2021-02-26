@@ -4,7 +4,7 @@ template: overrides/main.html
 
 # Experiment Resource Object
 
-Fields in an iter8 experiment resource object `spec` are documented here. Unsupported fields are not documented here. For complete documentation, see the iter8 Experiment API [here](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.13-pre/api/v2alpha1).
+Fields in an iter8 experiment resource object are documented here. Unsupported fields, or those reserved for future, are not documented here. For complete documentation, see the iter8 Experiment API [here](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.13-pre/api/v2alpha1).
 
 ## ExperimentSpec
 
@@ -82,5 +82,118 @@ The duration of an experiment expressed as two integer fields: the number of ite
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | name | string | Name of the version. | Yes |
-| variables | []Variable | A list of name/value pairs that can passed to action tasks and used to specify metrics queries | No |
+| variables | [][Variable0(#variable) | A list of name/value pairs that can passed to action tasks and used to specify metrics queries | No |
 | weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | A reference to the field in a Kubernetes object that specfies the traffic sent to this version. | No |
+
+## Variable
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| name | string | name of a variable | No |
+| value | string | value that should be substituted or name | No |
+
+## ExperimentStatus
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| conditions | [][ExperimentCondition](#experimentcondition) | A set of conditions that express progress through an experiment. | No |
+| initTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time the experiment is created. | No |
+| startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when an experiment begins running (after any start actions have completed)  | No |
+| endTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when an experiment has completed. | No |
+| lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
+| stage | string | Indicator of progress of an experiment. The stage is `Waiting` before an experiment executes its start actions, `Initializing` while running the start actions, `Running` while the experiment is progressing, `Finishing` while any finish actions are running and `Completed` when the experiment terminates. | No |
+| currentWeightDistribution | [][WeightData](#weightdata) | Currently observed distribution of requests. | No |
+| analysis | Analysis | Result of latest query to the iter8 analytics service.  | No |
+| recommendedBaseline | string | The version recommended as the version that should replace the baseline version when the experiment completes. | No |
+| message | string | User readable message. | No |
+
+## ExperimentCondition
+
+Conditions express aspects of the progress of an experiment. The `Completed` condition indicates whether or not an experiment has completed or not. The `Failed` condition indicates whether or not an experiment completed successfully or in failure. Finally, the `TargetAcquired` condition indicates that an experiment can proceed without interference from other experiments. iter8 ensures that only one experiment has `TargetAcquired` set to `True` while `Completed` is set to `False`.
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| type | string | Type of condition. Valid types are `TargetAcquired`, `Completed` and `Failed`. | Yes |
+| status | [corev1.ConditionStatus](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ConditionStatus) | status of condition, one of `True`, `False`, or `Unknown`. | Yes |
+| lastTransitionTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The last time any field in the condition was changed. | No |
+| reason | string | A reason for the change in value. Reasons come from a set of reason | No |
+| message | string | A user readable decription. | No |
+
+## WeightData
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| name | string | Version name | Yes |
+| value | int32 | Percentage of traffic being sent to the version.  | Yes |
+
+## Analysis
+
+Result of latest query to the iter8 analytics service.
+Queries may, but are not required to, return results along 4 dimensions.
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| aggregatedMetrics | [AggregatedMetricsAnalysis](#aggregatedmetricsanalysis) | Latest metrics for each required criteria. | No |
+| winnerAssessment | WinnerAssessmentAnalysis(#winnerassessmentanalysis) | If identified, the recommended winning version. | No |
+| versionAssessments | VersionAssessmentAnalysis(#versionassessmentanalysis) | For each version, a summary analysis identifying whether or no the version is satisfying the experiment criteria. | No |
+| weights | WeightsAnalysis(#weightanalysis) | Recommended weight distributuion for next iteration of the experiment. | No |
+
+## AggregatedMetricsAnalysis
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data, usually a URL. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
+| message | string | User readable message. | No |
+| data | map[string][AggregatedMetricsData](#aggregatedmetricsdata) | Map from metric name to most recent data (from all versions) for the metric. | Yes |
+
+## WinnerAssessmentAnalysis
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data, usually a URL. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
+| message | string | User readable message. | No |
+| data | [WinnerAssessmentData](#winnerassessmentdata) | Details on whether or not a winner has been identified and which version if so. | No |
+
+## VersionAssessmentAnalysis
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data, usually a URL. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
+| message | string | User readable message. | No |
+| data | map[string][]bool | map of version name to a list of boolean values, one for each objective specified in the experiment criteria, indicating whether not not the objective is satisified for not. | No |
+
+## WeightAnalysis
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data, usually a URL. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
+| message | string | User readable message. | No |
+| data | [][WeightData](#weightdata) | List of version name/value pairs representing a recommended weight for each version | No |
+
+## WinnerAssessmentData
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| winnerFound | bool | Whether or not a winner has been identified. | Yes |
+| winner | string | The name of the identified winner, if one has been found. | No |
+
+## AggregatedMetricsData
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| max | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The maximum value observed for this metric accross all versions. | Yes |
+| min | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The minimum value observed for this metric accross all versions. | Yes |
+| data | map[string][AggregatedMetricsVersionData](#aggregatedmetricsversiondata) | A map from version name to the most recent aggregated metrics data for that version. | No |
+
+## AggregatedMetricsVersionData
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| max | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The maximum value observed for this metric for this version over all observations. | No |
+| min | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The minimum value observed for this metric for this version over all observations. | No |
+| value | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The value. | No |
+| sampleSize | int32 | The number of requests observed by this version. | No |
