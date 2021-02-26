@@ -15,6 +15,60 @@ kubectl wait --for=condition=Ready ksvc/sample-app-v2
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/routing.yaml
 ```
+<!-- 
+# 2.1 Use minikube set up with Istio for this test
+
+# 2.2 Inject sleep deployment so you can curl
+
+TEMP_DIR=$(mktemp -d)
+cd $TEMP_DIR
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.1 sh -
+cat <<EOF | istio-1.8.1/bin/istioctl kube-inject -f - | kubectl create -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sleep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sleep
+  template:
+    metadata:
+      labels:
+        app: sleep
+    spec:
+      containers:
+      - name: sleep
+        image: tutum/curl
+        command: ["/bin/sleep","infinity"]
+        imagePullPolicy: IfNotPresent
+EOF
+cd $ITER8
+
+# 2.3 Send some traffic
+export SLEEP_POD=$(kubectl get pod -l app=sleep -o jsonpath={.items..metadata.name})
+kubectl exec "${SLEEP_POD}" -c sleep -- curl -sS example.com
+# repeat the above a few times!
+
+# 2.4 Minikube tunnel
+minikube tunnel --cleanup # in a separate terminal
+
+# 2.5 Get GATEWAY_IP
+INGRESSGATEWAY=istio-ingressgateway
+
+export GATEWAY_IP=`kubectl get svc $INGRESSGATEWAY --namespace istio-system \
+    --output jsonpath="{.status.loadBalancer.ingress[*]['ip']}"`
+
+# 2.6 curl
+curl http://${GATEWAY_IP} --header "Host: example.com"
+
+# 2.7 Quit Minikube tunnel
+
+# 2.8 Cleanup sleep pod
+kubectl delete deploy/sleep
+ -->
+
 
 ## 3. Generate traffic with fortio
 ```shell

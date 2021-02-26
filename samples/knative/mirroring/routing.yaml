@@ -4,21 +4,21 @@ metadata:
   name: multiple-ksvc
 spec:
   gateways:
-  - knative-local-gateway.knative-serving.svc.cluster.local
+  - knative-serving/knative-ingress-gateway
+  - knative-serving/knative-local-gateway
+  - mesh
   hosts:
-  - example.com
+  - multiksvc.com
   http:
   - rewrite:
-      # Rewrite the original host header to the host header of sample-app-v1
-      # in order to redirect requests to sample-app-v1.
-      authority: sample-app-v1.default.svc.cluster.local  
-  route:
+      authority: sample-app-v1.default
+    route:
     - destination:
-        host: sample-app-v1.default.svc.cluster.local
+        host: sample-app-v1.default
       weight: 100
-#     mirror:
-#       host: sample-app-v2.default.svc.cluster.local
-#     mirrorPercent: 100
+    mirror:
+      host: sample-app-v2.default
+    mirrorPercent: 100
 
 # apiVersion: networking.istio.io/v1alpha3
 # kind: VirtualService
