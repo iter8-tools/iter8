@@ -14,7 +14,7 @@ Fields in an iter8 metric resource object `spec` are documented here.
 | description | string | Human-readable description of the metric. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
-| sampleSize | string | Reference to a metric object in the `namespace/name` format or in the `name` format. The value of the sampleSize metric represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. | No |
+| sampleSize | [MetricReference](#metricreference) | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. | No |
 | provider | string | Type of the metrics database. Currently, `prometheus` is the only valid value. | No |
 
 ## Param
@@ -23,3 +23,12 @@ Fields in an iter8 metric resource object `spec` are documented here.
 | ----- | ------------ | ----------- | -------- |
 | name | string | Name of parameter. | Yes |
 | value | string | Value that should be substitute for the parameter. | Yes |
+
+## MetricReference
+
+A reference to another metric in the cluster. Used to refer to the metric that is used to count the number of data points over which a gauge metric is computed.
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| namespace | string | Namespace containing another metric. Defaults to the namespace of the referring object. | No |
+| name | string | Name of another metric. | Yes |
