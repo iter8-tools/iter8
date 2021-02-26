@@ -82,5 +82,12 @@ The duration of an experiment expressed as two integer fields: the number of ite
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | name | string | Name of the version. | Yes |
-| variables | []Variable | A list of name/value pairs that can passed to action tasks and used to specify metrics queries | No |
+| variables | [][Variable0(#variable) | A list of name/value pairs that can passed to action tasks and used to specify metrics queries | No |
 | weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | A reference to the field in a Kubernetes object that specfies the traffic sent to this version. | No |
+
+## Variable
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| name | string | name of a variable | No |
+| value | string | value that should be substituted or name | No |
