@@ -1,0 +1,31 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: sample-app-v1
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: sample-app-v1-blue
+    spec:
+      containers:
+        - image: gcr.io/knative-samples/knative-route-demo:blue 
+          env:
+            - name: T_VERSION
+              value: "blue"
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: sample-app-v2
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: sample-app-v2-green
+    spec:
+      containers:
+        - image: gcr.io/knative-samples/knative-route-demo:green 
+          env:
+            - name: T_VERSION
+              value: "green"
