@@ -13,7 +13,7 @@ Perform **zero-downtime fixed-split canary release of a Knative app**. You will 
     - traffic split between `baseline` and `candidate` will be remain unchanged during experiment iterations
     - replaces `baseline` with `candidate` in the end using a `kustomize` command
 
-!!! warning "Before you begin"
+??? warning "Before you begin"
     **Kubernetes cluster:** Do not have a Kubernetes cluster with iter8 and Knative installed? Follow Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/) to create a cluster with iter8 and Knative.
 
     **Cleanup from previous experiment:** Tried an iter8 tutorial earlier but forgot to cleanup? Run the cleanup step from your tutorial now. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) performs cleanup for the iter8-Knative quick start tutorial.
@@ -113,11 +113,14 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
             task: init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
           - library: common
-            task: exec # promote the winning version using Helm upgrade
+            task: exec # promote the winning version using kustomize
             with:
-              cmd: eval
+              cmd: /bin/sh
               args:
-              - "kustomize build github.com/iter8-tools/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=master | kubectl apply -f -"
+              - "-c"
+              - |
+              kustomize build github.com/iter8-tools/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=master \
+                | kubectl apply -f -
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
@@ -138,7 +141,7 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
           name: baseline
           variables:
           - name: revision
-            value: sample-app-v1
+            value: sample-app-v1 
         candidates:
         - name: candidate
           variables:
@@ -159,50 +162,52 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     done
     ```
 
-    You should see output similar to the following.
-    ```shell
-    ****** Overview ******
-    Experiment name: canary-fixedsplit
-    Experiment namespace: default
-    Target: default/sample-app
-    Testing pattern: Canary
-    Deployment pattern: FixedSplit
 
-    ****** Progress Summary ******
-    Experiment stage: Running
-    Number of completed iterations: 5
+    ??? info "iter8ctl output"
+        iter8ctl output will be similar to the following:
+        ```shell
+        ****** Overview ******
+        Experiment name: canary-fixedsplit
+        Experiment namespace: default
+        Target: default/sample-app
+        Testing pattern: Canary
+        Deployment pattern: FixedSplit
 
-    ****** Winner Assessment ******
-    App versions in this experiment: [baseline candidate]
-    Winning version: candidate
-    Recommended baseline: candidate
+        ****** Progress Summary ******
+        Experiment stage: Running
+        Number of completed iterations: 5
 
-    ****** Objective Assessment ******
-    +--------------------------------+----------+-----------+
-    |           OBJECTIVE            | BASELINE | CANDIDATE |
-    +--------------------------------+----------+-----------+
-    | mean-latency <= 50.000         | true     | true      |
-    +--------------------------------+----------+-----------+
-    | 95th-percentile-tail-latency   | true     | true      |
-    | <= 100.000                     |          |           |
-    +--------------------------------+----------+-----------+
-    | error-rate <= 0.010            | true     | true      |
-    +--------------------------------+----------+-----------+
+        ****** Winner Assessment ******
+        App versions in this experiment: [baseline candidate]
+        Winning version: candidate
+        Recommended baseline: candidate
 
-    ****** Metrics Assessment ******
-    +--------------------------------+----------+-----------+
-    |             METRIC             | BASELINE | CANDIDATE |
-    +--------------------------------+----------+-----------+
-    | 95th-percentile-tail-latency   |    4.798 |     4.825 |
-    | (milliseconds)                 |          |           |
-    +--------------------------------+----------+-----------+
-    | error-rate                     |    0.000 |     0.000 |
-    +--------------------------------+----------+-----------+
-    | request-count                  |  652.800 |   240.178 |
-    +--------------------------------+----------+-----------+
-    | mean-latency (milliseconds)    |    1.270 |     1.254 |
-    +--------------------------------+----------+-----------+
-    ```    
+        ****** Objective Assessment ******
+        +--------------------------------+----------+-----------+
+        |           OBJECTIVE            | BASELINE | CANDIDATE |
+        +--------------------------------+----------+-----------+
+        | mean-latency <= 50.000         | true     | true      |
+        +--------------------------------+----------+-----------+
+        | 95th-percentile-tail-latency   | true     | true      |
+        | <= 100.000                     |          |           |
+        +--------------------------------+----------+-----------+
+        | error-rate <= 0.010            | true     | true      |
+        +--------------------------------+----------+-----------+
+
+        ****** Metrics Assessment ******
+        +--------------------------------+----------+-----------+
+        |             METRIC             | BASELINE | CANDIDATE |
+        +--------------------------------+----------+-----------+
+        | 95th-percentile-tail-latency   |    4.798 |     4.825 |
+        | (milliseconds)                 |          |           |
+        +--------------------------------+----------+-----------+
+        | error-rate                     |    0.000 |     0.000 |
+        +--------------------------------+----------+-----------+
+        | request-count                  |  652.800 |   240.178 |
+        +--------------------------------+----------+-----------+
+        | mean-latency (milliseconds)    |    1.270 |     1.254 |
+        +--------------------------------+----------+-----------+
+        ```    
 
 === "kubectl get experiment"
 
@@ -210,23 +215,24 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     kubectl get experiment canary-fixedsplit --watch
     ```
 
-    You should see output similar to the following.
-    ```shell
-    NAME               TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-    canary-fixesplit   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-    canary-fixesplit   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-    canary-fixesplit   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-    canary-fixesplit   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-    canary-fixesplit   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-    canary-fixesplit   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-    canary-fixesplit   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-    canary-fixesplit   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-    canary-fixesplit   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-    canary-fixesplit   Canary   default/sample-app   Running   10                     IterationUpdate: Completed Iteration 10
-    canary-fixesplit   Canary   default/sample-app   Running   11                     IterationUpdate: Completed Iteration 11
-    canary-fixesplit   Canary   default/sample-app   Finishing   12                     TerminalHandlerLaunched: Finish handler 'finish' launched
-    canary-fixesplit   Canary   default/sample-app   Completed   12                     ExperimentCompleted: Experiment completed successfully
-    ```
+    ??? info "kubectl get experiment output"
+        kubectl otuput will be similar to the following.
+        ```shell
+        NAME               TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
+        canary-fixesplit   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
+        canary-fixesplit   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
+        canary-fixesplit   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
+        canary-fixesplit   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
+        canary-fixesplit   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
+        canary-fixesplit   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
+        canary-fixesplit   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
+        canary-fixesplit   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
+        canary-fixesplit   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
+        canary-fixesplit   Canary   default/sample-app   Running   10                     IterationUpdate: Completed Iteration 10
+        canary-fixesplit   Canary   default/sample-app   Running   11                     IterationUpdate: Completed Iteration 11
+        canary-fixesplit   Canary   default/sample-app   Finishing   12                     TerminalHandlerLaunched: Finish handler 'finish' launched
+        canary-fixesplit   Canary   default/sample-app   Completed   12                     ExperimentCompleted: Experiment completed successfully
+        ```
 
 === "kubectl get ksvc"
 
@@ -234,25 +240,26 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    You should see output similar to the following. The traffic percentage should remain the same during the experiment.
-    ```shell
-    [
-      {
-        "latestRevision": false,
-        "percent": 75,
-        "revisionName": "sample-app-v1",
-        "tag": "current",
-        "url": "http://current-sample-app.default.example.com"
-      },
-      {
-        "latestRevision": true,
-        "percent": 25,
-        "revisionName": "sample-app-v2",
-        "tag": "candidate",
-        "url": "http://candidate-sample-app.default.example.com"
-      }
-    ]
-    ```
+    ??? info "kubectl get ksvc output"
+        kubectl output will be similar to the following. The traffic percentage should remain the same during the experiment.
+        ```shell
+        [
+          {
+            "latestRevision": false,
+            "percent": 75,
+            "revisionName": "sample-app-v1",
+            "tag": "current",
+            "url": "http://current-sample-app.default.example.com"
+          },
+          {
+            "latestRevision": true,
+            "percent": 25,
+            "revisionName": "sample-app-v2",
+            "tag": "candidate",
+            "url": "http://candidate-sample-app.default.example.com"
+          }
+        ]
+        ```
 
 When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.
 
