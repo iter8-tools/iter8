@@ -5,8 +5,6 @@ metadata:
   namespace: default
 spec:
   template:
-    metadata:
-      name: sample-app-v1-blue
     spec:
       containers:
         - image: gcr.io/knative-samples/knative-route-demo:blue 
@@ -21,8 +19,6 @@ metadata:
   namespace: default
 spec:
   template:
-    metadata:
-      name: sample-app-v2-green
     spec:
       containers:
         - image: gcr.io/knative-samples/knative-route-demo:green 

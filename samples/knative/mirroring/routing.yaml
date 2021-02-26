@@ -1,17 +1,68 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: example-com
+  name: multiple-ksvc
 spec:
   gateways:
-  - mesh
+  - knative-local-gateway.knative-serving.svc.cluster.local
   hosts:
   - example.com
   http:
-  - route:
+  - rewrite:
+      # Rewrite the original host header to the host header of sample-app-v1
+      # in order to redirect requests to sample-app-v1.
+      authority: sample-app-v1.default.svc.cluster.local  
+  route:
     - destination:
-        host: sample-app-v1.default
+        host: sample-app-v1.default.svc.cluster.local
       weight: 100
-    mirror:
-      host: sample-app-v2.default
-    mirrorPercent: 100
+#     mirror:
+#       host: sample-app-v2.default.svc.cluster.local
+#     mirrorPercent: 100
+
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: entry-route
+#   namespace: default
+# spec:
+#   # This is the gateway shared in knative service mesh.
+#   gateways:
+#   - knative-ingress-gateway.knative-serving.svc.cluster.local
+#   # Set host to the domain name that you own.
+#   hosts:
+#   - example.com
+#   http:
+#   - match:
+#     - uri:
+#         prefix: "/search"
+#     rewrite:
+#       # Rewrite the original host header to the host header of Search service
+#       # in order to redirect requests to Search service.
+#       authority: search-service.default.example.com
+#     route:
+#       # Basically here we redirect the request to the cluster entry again with
+#       # updated header "search-service.default.example.com" so the request will
+#       # eventually be directed to Search service.
+#       - destination:
+#           host: istio-ingressgateway.istio-system.svc.cluster.local
+#           port:
+#             number: 80
+#         weight: 100
+#   - match:
+#     - uri:
+#         prefix: "/login"
+#     rewrite:
+#       # Rewrite the original host header to the host header of Search service
+#       # in order to redirect requests to Search service.
+#       authority: login-service.default.example.com
+#     route:
+#       # Basically here we redirect the request to the cluster entry again with
+#       # updated header "login-service.default.example.com" so the request will
+#       # eventually be directed to LOgin service.
+#       - destination:
+#           host: istio-ingressgateway.istio-system.svc.cluster.local
+#           port:
+#             number: 80
+#         weight: 100
+
