@@ -4,7 +4,7 @@ metadata:
   name: header-match-lcd
 spec:
   gateways:
-  - knative-serving/knative-ingress-gateway
+  - knative-serving/knative-local-gateway
   hosts:
   - "*"
   http:

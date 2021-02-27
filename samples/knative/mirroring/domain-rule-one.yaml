@@ -5,11 +5,14 @@ metadata:
 spec:
   gateways:
   - mesh
+  - knative-serving/knative-cluster-gateway
   hosts:
   - customdomain.com
   http:
-  - route:
+  - rewrite:
+      authority: customdomain.com
+    route:
     - destination:
-        host: istio-ingressgateway.istio-system.svc.cluster.local
+        host: knative-local-gateway.istio-system.svc.cluster.local
     mirror:
-      host: istio-ingressgateway.istio-system.svc.cluster.local
+      host: knative-local-gateway.istio-system.svc.cluster.local
