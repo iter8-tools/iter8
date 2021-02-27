@@ -3,13 +3,11 @@ kind: Experiment
 metadata:
   name: mirroring
 spec:
-  # target identifies the knative service under experimentation using its fully qualified name
-  target: default/sample-app-v2
+  target: default/sample-app
   strategy:
-    # this experiment will perform a conformance test
     testingPattern: Conformance
     actions:
-      start: # run the following sequence of tasks at the start of the experiment
+      start:
       - library: knative
         task: init-experiment
   criteria:
@@ -27,9 +25,9 @@ spec:
     intervalSeconds: 10
     iterationsPerLoop: 7
   versionInfo:
-    # information about app versions used in this experiment
+    # information about app version used in this experiment
     baseline:
       name: current
       variables:
       - name: revision
-        value: sample-app-v2-green
+        value: sample-app-v2

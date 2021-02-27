@@ -5,7 +5,7 @@ metadata:
 spec:
   gateways:
   - mesh
-  # - knative-serving/knative-ingress-gateway
+  - knative-serving/knative-ingress-gateway
   hosts:
   - customdomain.com
   http:
@@ -30,16 +30,26 @@ spec:
   - match:
     - authority:
         prefix: customdomain.com-shadow
-    rewrite:
-      authority: staging-sample-app.default
     route:
     - destination:
-        host: staging-sample-app.default.svc.cluster.local
+        host: sample-app-v2.default.svc.cluster.local
+        port:
+          number: 80
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v2
   - match:
     - authority:
         prefix: customdomain.com
-    rewrite:
-      authority: prod-sample-app.default
     route:
     - destination:
-        host: prod-sample-app.default.svc.cluster.local
+        host: sample-app-v1.default.svc.cluster.local
+        port:
+          number: 80
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v1

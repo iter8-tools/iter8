@@ -8,7 +8,7 @@ template: overrides/main.html
     `spec.target` identifies the app under experimentation and determines which experiments can run concurrently.
 
 ??? example "Sample experiment targeting a Knative service"
-    ```yaml
+    ```yaml linenums="1" hl_lines="7"
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
     metadata:

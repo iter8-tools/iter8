@@ -8,7 +8,7 @@ template: overrides/main.html
     **iter8** defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
 ??? example "Sample experiment"
-    ```yaml
+    ```yaml linenums="1"
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
     metadata:

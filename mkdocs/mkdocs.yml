@@ -126,9 +126,9 @@ nav:
       - Canary - FixedSplit: code-samples/iter8-knative/canary-fixedsplit.md
       - Conformance: code-samples/iter8-knative/conformance.md
       - Cluster-local (backend): code-samples/iter8-knative/cluster-local-backend.md
-      - Mirroring: code-samples/iter8-knative/mirroring.md
+      - Traffic mirroring: code-samples/iter8-knative/mirroring.md
       - Request routing: code-samples/iter8-knative/match.md
-      - User stickiness: code-samples/iter8-knative/user-stickiness.md
+      - Sticky sessions: code-samples/iter8-knative/sticky.md
     - All iter8 domains:
       - Helm chart: code-samples/all-domains/helm.md
       - Kustomize overlay: code-samples/all-domains/kustomize.md
