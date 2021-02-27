@@ -6,14 +6,13 @@ template: overrides/main.html
 
 ## 1. Create live and mirrored Knative services
 ```shell
-kubectl apply -f $ITER8/samples/knative/mirroring/services.yaml
-kubectl wait --for=condition=Ready ksvc/sample-app-v1
-kubectl wait --for=condition=Ready ksvc/sample-app-v2
+kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
+kubectl wait --for=condition=Ready ksvc/sample-app
 ```
 
 ## 2. Create Istio virtual service
 ```shell
-kubectl apply -f $ITER8/samples/knative/mirroring/routing.yaml
+kubectl apply -f $ITER8/samples/knative/mirroring/mirroring.yaml
 ```
 <!-- 
 # 2.1 Use minikube set up with Istio for this test
@@ -48,7 +47,7 @@ cd $ITER8
 
 # 2.3 Send some traffic
 export SLEEP_POD=$(kubectl get pod -l app=sleep -o jsonpath={.items..metadata.name})
-kubectl exec "${SLEEP_POD}" -c sleep -- curl -sS example.com
+kubectl exec "${SLEEP_POD}" -c sleep -- curl -sS multiksvc.com
 # repeat the above a few times!
 
 # 2.4 Minikube tunnel
@@ -167,7 +166,7 @@ You can observe the experiment in realtime. Open two terminals and follow instru
 ```shell
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml
-kubectl delete -f $ITER8/samples/knative/mirroring/routing.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/mesh-routing.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/services.yaml
 ```
 

@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: header-match-lcd
+spec:
+  gateways:
+  - knative-serving/knative-ingress-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - authority:
+        prefix: customdomain.com-shadow
+    rewrite:
+      authority: staging-sample-app.default
+    route:
+    - destination:
+        host: staging-sample-app.default.svc.cluster.local
+  - match:
+    - authority:
+        prefix: customdomain.com
+    rewrite:
+      authority: sample-app.default
+    route:
+    - destination:
+        host: prod-sample-app.default.svc.cluster.local

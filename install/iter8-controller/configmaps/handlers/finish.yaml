@@ -16,5 +16,5 @@ spec:
         - name: EXPERIMENT_NAME
           value: EXPERIMENT_NAME_VALUE
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: 1
   activeDeadlineSeconds: 300
