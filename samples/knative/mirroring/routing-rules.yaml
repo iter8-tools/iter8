@@ -1,7 +1,26 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: header-match-lcd
+  name: customdomain-mirroring
+spec:
+  gateways:
+  - mesh
+  # - knative-serving/knative-ingress-gateway
+  hosts:
+  - customdomain.com
+  http:
+  - rewrite:
+      authority: customdomain.com
+    route:
+    - destination:
+        host: knative-local-gateway.istio-system.svc.cluster.local
+    mirror:
+      host: knative-local-gateway.istio-system.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: customdomain-routing
 spec:
   gateways:
   - knative-serving/knative-local-gateway
@@ -20,7 +39,7 @@ spec:
     - authority:
         prefix: customdomain.com
     rewrite:
-      authority: sample-app.default
+      authority: prod-sample-app.default
     route:
     - destination:
         host: prod-sample-app.default.svc.cluster.local

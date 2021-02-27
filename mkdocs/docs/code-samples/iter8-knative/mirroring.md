@@ -12,7 +12,7 @@ kubectl wait --for=condition=Ready ksvc/sample-app
 
 ## 2. Create Istio virtual service
 ```shell
-kubectl apply -f $ITER8/samples/knative/mirroring/mirroring.yaml
+kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
 ```
 <!-- 
 # 2.1 Use minikube set up with Istio for this test
@@ -47,7 +47,7 @@ cd $ITER8
 
 # 2.3 Send some traffic
 export SLEEP_POD=$(kubectl get pod -l app=sleep -o jsonpath={.items..metadata.name})
-kubectl exec "${SLEEP_POD}" -c sleep -- curl -sS multiksvc.com
+kubectl exec "${SLEEP_POD}" -c sleep -- curl -sS customdomain.com
 # repeat the above a few times!
 
 # 2.4 Minikube tunnel
