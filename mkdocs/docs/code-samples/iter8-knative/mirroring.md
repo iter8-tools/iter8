@@ -2,21 +2,25 @@
 template: overrides/main.html
 ---
 
-# Traffic Mirroring
+# Mirroring / Shadowing / Dark Launch
 
-!!! abstract "iter8 experiment"
-    **iter8** defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
+> Traffic mirroring, also called shadowing, enables dark-launch of app versions, and performing experiments with dark versions with zero-impact on production. Mirrored traffic is a replica of the real (production) traffic sent to dark versions. Metrics are collected and evaluated for the dark versions, but their responses are ignored.
+
+Perform a `conformance` experiment on a dark version with mirrored traffic using the following.
+
+1. A **Knative sample app** with production and dark versions.
+2. **Istio virtual services** which send all requests to the production version, mirrors 40% of requests, and sends the mirrored requests to the dark version.
+3. A **curl-based traffic generator** which simulates user requests.
+4. An **iter8 `conformance` experiment** which verifies that the dark version satisfies mean latency, 95th percentile tail latency, and error rate objectives.
     
 ??? warning "Before you begin"
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+    **Kubernetes cluster with iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with iter8 and Knative installed, and ensure that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
 
-    **Cleanup:** If you ran an iter8 tutorial earlier, run the associated cleanup step. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) is the cleanup step for the iter8-Knative quick start tutorial.
+    **Cleanup:** If you ran an iter8 tutorial earlier, run the cleanup (last) step associated with it.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Set the `ITER8` environment variable in your terminal to the root directory of your git-cloned iter8 repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
-    **[Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and iter8ctl. Install if needed.
-
-## 1. Create live and mirrored Knative revisions
+## 1. Create production and dark versions of your app
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
 ```
@@ -86,6 +90,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
             host: knative-local-gateway.istio-system.svc.cluster.local
         mirror:
           host: knative-local-gateway.istio-system.svc.cluster.local
+        mirrorPercent: 40
     ---
     apiVersion: networking.istio.io/v1alpha3
     kind: VirtualService

@@ -16,6 +16,7 @@ spec:
         host: knative-local-gateway.istio-system.svc.cluster.local
     mirror:
       host: knative-local-gateway.istio-system.svc.cluster.local
+    mirrorPercent: 40
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
