@@ -1,12 +1,12 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: sample-app
+  name: sample-app-v1
   namespace: default
 spec:
   template:
     metadata:
-      name: sample-app-v1
+      name: sample-app-v1-blue
       annotations:
         autoscaling.knative.dev/scaleToZeroPodRetentionPeriod: "10m"
     spec:
@@ -19,12 +19,12 @@ spec:
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: sample-app
+  name: sample-app-v2
   namespace: default
 spec:
   template:
     metadata:
-      name: sample-app-v2
+      name: sample-app-v2-green
       annotations:
         autoscaling.knative.dev/scaleToZeroPodRetentionPeriod: "10m"
     spec:
@@ -33,9 +33,3 @@ spec:
         env:
         - name: T_VERSION
           value: "green"
-  traffic:
-  - revisionName: sample-app-v1
-    percent: 100
-  - latestRevision: true
-    percent: 0
-  

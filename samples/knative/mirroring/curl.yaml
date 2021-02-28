@@ -1,17 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: curl
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: curl
   template:
-    metadata:
-      labels:
-        app: curl
     spec:
+      activeDeadlineSeconds: 600
       containers:
       - name: curl
         image: tutum/curl
@@ -23,5 +17,5 @@ spec:
           while true; do
           curl -sS customdomain.com
           sleep 0.5
-          done          
-        imagePullPolicy: IfNotPresent
+          done
+      restartPolicy: Never
