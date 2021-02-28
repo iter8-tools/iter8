@@ -69,7 +69,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio
 kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 ```
 ??? info "Look inside experiment.yaml"
-    ```yaml
+    ```yaml linenums="1"
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
     metadata:

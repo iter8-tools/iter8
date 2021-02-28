@@ -22,12 +22,12 @@ Perform **zero-downtime progressive canary release of a Knative app**. You will 
 
 ## 1. Create Kubernetes cluster
 
-Create a local Kubernetes cluster using Minikube or Kind. You can also use a managed Kubernetes service from your cloud provider.
+Create a local Kubernetes cluster or use a managed Kubernetes service from your cloud provider. Ensure that the cluster has sufficient resources, for example, 2 cpus and 4GB of memory.
 
 === "Minikube"
 
     ```shell
-    minikube start --cpus 2 --memory 4096
+    minikube start
     ```
 
 === "Kind"
@@ -36,7 +36,7 @@ Create a local Kubernetes cluster using Minikube or Kind. You can also use a man
     kind create cluster
     kubectl cluster-info --context kind-kind
     ```
-    Ensure that the cluster has sufficient resources, for example, 2 cpus and 4GB of memory.
+    
 
 ## 2. Clone repo
 ```shell

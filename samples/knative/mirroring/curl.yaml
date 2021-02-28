@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: curl
+  template:
+    metadata:
+      labels:
+        app: curl
+    spec:
+      containers:
+      - name: curl
+        image: tutum/curl
+        command: 
+        - /bin/sh
+        - -c
+        - |
+          sleep 10.0
+          while true; do
+          curl -sS customdomain.com
+          sleep 0.5
+          done          
+        imagePullPolicy: IfNotPresent

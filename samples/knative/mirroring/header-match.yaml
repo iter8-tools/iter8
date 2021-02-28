@@ -1,0 +1,34 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: header-match
+spec:
+  gateways:
+  - mesh
+  hosts:
+  - mydomain.com
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: sample-app-v2.default.svc.cluster.local
+        port:
+          number: 80
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v2
+  - route:
+    - destination:
+        host: sample-app-v1.default.svc.cluster.local
+        port:
+          number: 80
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v1

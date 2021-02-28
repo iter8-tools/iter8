@@ -1,0 +1,56 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: customdomain-mirroring
+spec:
+  gateways:
+  - mesh
+  - knative-serving/knative-ingress-gateway
+  hosts:
+  - customdomain.com
+  http:
+  - rewrite:
+      authority: customdomain.com
+    route:
+    - destination:
+        host: knative-local-gateway.istio-system.svc.cluster.local
+    mirror:
+      host: knative-local-gateway.istio-system.svc.cluster.local
+    mirrorPercent: 40
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: customdomain-routing
+spec:
+  gateways:
+  - knative-serving/knative-local-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - authority:
+        prefix: customdomain.com-shadow
+    route:
+    - destination:
+        host: sample-app-v2.default.svc.cluster.local
+        port:
+          number: 80
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v2
+  - match:
+    - authority:
+        prefix: customdomain.com
+    route:
+    - destination:
+        host: sample-app-v1.default.svc.cluster.local
+        port:
+          number: 80
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v1
