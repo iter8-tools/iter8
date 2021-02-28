@@ -127,11 +127,10 @@ nav:
       - Conformance: code-samples/iter8-knative/conformance.md
       - Mirroring / dark launch: code-samples/iter8-knative/mirroring.md
       - Request routing: code-samples/iter8-knative/requestrouting.md
-      - Sticky sessions: code-samples/iter8-knative/sticky.md
-      - Knative annotations:
-        - Cluster-local (backend): code-samples/iter8-knative/annotations/cluster-local-backend.md
-        - Min scale: code-samples/iter8-knative/annotations/minscale.md
-        - Pod retention period: code-samples/iter8-knative/annotations/podretention.md
+      - Enhancements:
+        - Cluster-local (backend): code-samples/iter8-knative/enhancements/cluster-local-backend.md
+        - Min scale: code-samples/iter8-knative/enhancements/minscale.md
+        - Pod retention period: code-samples/iter8-knative/enhancements/podretention.md
     - All iter8 domains:
       - Helm chart: code-samples/all-domains/helm.md
       - Kustomize overlay: code-samples/all-domains/kustomize.md
