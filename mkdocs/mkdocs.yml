@@ -127,14 +127,13 @@ nav:
       - Conformance: code-samples/iter8-knative/conformance.md
       - Mirroring / dark launch: code-samples/iter8-knative/mirroring.md
       - Request routing: code-samples/iter8-knative/requestrouting.md
-      - Enhancements:
-        - Cluster-local (backend): code-samples/iter8-knative/enhancements/cluster-local-backend.md
-        - Min scale: code-samples/iter8-knative/enhancements/minscale.md
-        - Pod retention period: code-samples/iter8-knative/enhancements/podretention.md
-    - All iter8 domains:
-      - Helm chart: code-samples/all-domains/helm.md
-      - Kustomize overlay: code-samples/all-domains/kustomize.md
-      - YAML/JSON app manifests: code-samples/all-domains/kubectl.md
+      - Helm/Kustomize/YAML/JSON: code-samples/iter8-knative/appmanifest.md
+      - Knative annotations:
+        - Cluster-local (backend): code-samples/iter8-knative/annotations/cluster-local-backend.md
+        - Min scale: code-samples/iter8-knative/annotations/minscale.md
+        - Pod retention period: code-samples/iter8-knative/annotations/podretention.md
+      - Tutorial enhancements:
+        - Generating external traffic: code-samples/iter8-knative/enhancements/traffic.md
   - Reference: 
     - Experiment: reference/experiment.md
     - Metric: reference/metric.md

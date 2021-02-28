@@ -8,10 +8,10 @@ template: overrides/main.html
 
 Perform a `Progressive Canary` experiment with request routing using the following:
 
-1. A **Knative app** with baseline and candidate versions.
-2. An  **Istio virtual service** which routes requests based on its "country" of origin. Requests originating from `wakanda` may be routed to the baseline or candidate. Other requests are routed to the baseline. Country of origin is identified from a request header named `country`.
-3. A **curl-based traffic generator** which simulates user requests from two "countries": `wakanda` and `gondor`.
-4. An **iter8 experiment** which verifies that the candidate satisfies mean latency, 95th percentile tail latency, and error rate objectives, and progressively increases the proportion of traffic from `wakanda` that is routed to the candidate.
+1. An app with baseline and candidate versions implemented as **Knative services**.
+2. An  **Istio virtual service** which routes requests based an HTTP header called `country`. All requests are routed to the baseline, except those with their `country` header field set to `wakanda`; these may be routed to the baseline or candidate.
+3. A **curl-based traffic generator** which simulates user requests, with `country` header field set to `wakanda` or `gondor`.
+4. An **iter8 experiment** which verifies that the candidate satisfies mean latency, 95th percentile tail latency, and error rate objectives, and progressively increases the proportion of traffic with `country: wakanda` header that is routed to the candidate.
 
 ??? warning "Before you begin"
     **Kubernetes cluster with iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with iter8 and Knative installed, and ensure that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
@@ -361,15 +361,15 @@ kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
 
     2. You used `customdomain.com` as the HTTP host in this tutorial. In your production cluster, use domain(s) that you own in the setup of the virtual services.
 
-    3. You set up an Istio virtual service, `routing-rule.yaml`, which mapped the Knative services to this custom domain. This virtual service determines how to route requests based on the `country` HTTP header. Before the experiment started, requests from `wakanda` as well as requests not from `wakanda` were routed to the baseline.
+    3. You set up an Istio virtual service, `routing-rule.yaml`, which mapped the Knative services to this custom domain. This virtual service determines how to route requests based on the `country` HTTP header. Before the experiment started, requests with their `country` header field set to `wakanda` as well as other requests were routed to the baseline.
 
-    4. You generated traffic for `customdomain.com` using a `curl`-job. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. The `curl`-job simulates requests from two "countries": `wakanda` and `gondor`.
+    4. You generated traffic for `customdomain.com` using a `curl`-job. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. The `curl`-job simulates user requests and sets the `country` header field to one of two values: `wakanda` or `gondor`.
 
     5. You used Istio version 1.8.1 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
     
     6. You can also curl the Knative services from outside the cluster. See [here](https://knative.dev/docs/serving/samples/knative-routing-go/#access-the-services) for a related example where the Knative service and Istio virtual service setup is similar to this tutorial.
 
-    7. You created an iter8 `Canary` experiment with `Progressive` deployment pattern to evaluate the candidate version. In each iteration, iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the candidate version satisfied all the objectives specified in `experiment.yaml`. It progressively increased the proportion of traffic from `wakanda` that is routed to the candidate.
+    7. You created an iter8 `Canary` experiment with `Progressive` deployment pattern to evaluate the candidate version. In each iteration, iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the candidate version satisfied all the objectives specified in `experiment.yaml`. It progressively increased the proportion of traffic with `country: wakanda` header that is routed to the candidate.
 
     8. You can add finish tasks to this experiment to accomplish version promotion. See examples [here](/getting-started/quick-start/with-knative/), [here](/code-samples/iter8-knative/canary-progressive/) and [here](/code-samples/iter8-knative/canary-fixedsplit/).
 
