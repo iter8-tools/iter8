@@ -18,7 +18,7 @@ Perform a `conformance` experiment on a dark version with mirrored traffic using
 
     **Cleanup:** If you ran an iter8 tutorial earlier, run the cleanup (last) step associated with it.
 
-    **ITER8:** Ensure that you have cloned the iter8 GitHub repo and set the `ITER8` environment variable in your terminal to the root of the cloned repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that you have cloned the iter8 GitHub repo, and set the `ITER8` environment variable in your terminal to the root of the cloned repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
 ## 1. Create live and dark versions
 ```shell
@@ -143,20 +143,14 @@ cd $ITER8
 
 ??? info "Look inside curl.yaml"
     ```yaml linenums="1"
-    apiVersion: apps/v1
-    kind: Deployment
+    apiVersion: batch/v1
+    kind: Job
     metadata:
       name: curl
     spec:
-      replicas: 1
-      selector:
-        matchLabels:
-          app: curl
       template:
-        metadata:
-          labels:
-            app: curl
         spec:
+          activeDeadlineSeconds: 600
           containers:
           - name: curl
             image: tutum/curl
@@ -168,8 +162,8 @@ cd $ITER8
               while true; do
               curl -sS customdomain.com
               sleep 0.5
-              done          
-            imagePullPolicy: IfNotPresent
+              done
+          restartPolicy: Never
     ```
 
 ## 4. Create experiment
@@ -276,13 +270,11 @@ You can observe the experiment in realtime. Open two terminals and follow instru
         When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
 
 === "kubectl get experiment"
-
     ```shell
     kubectl get experiment mirroring --watch
     ```
 
     ??? info "kubectl get experiment output"
-
         kubectl output will be similar to the following.
 
         ```shell
@@ -312,7 +304,7 @@ kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
 
     3. You set up Istio virtual services which mapped the Knative revisions to this custom domain. The virtual services specified the following routing rules: all HTTP requests with their `Host` header or `:authority` pseudo-header set to `customdomain.com` would be be sent to `sample-app-v1`. 40% of these requests would be mirrored and sent to `sample-app-v2` and responses from `sample-app-v2` would be ignored.
 
-    4. You generated traffic for `customdomain.com` using a `curl`-based deployment. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. 
+    4. You generated traffic for `customdomain.com` using a `curl`-based job. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. 
 
     5. You used Istio version 1.8.1 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
     
