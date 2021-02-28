@@ -18,7 +18,7 @@ Perform a `conformance` experiment on a dark version with mirrored traffic using
 
     **Cleanup:** If you ran an iter8 tutorial earlier, run the cleanup (last) step associated with it.
 
-    **ITER8:** Set the `ITER8` environment variable in your terminal to the root directory of your git-cloned iter8 repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that you have cloned the iter8 GitHub repo and set the `ITER8` environment variable in your terminal to the root of the cloned repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
 ## 1. Create production and dark versions of your app
 ```shell
@@ -307,12 +307,10 @@ kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
 ```
 
 ??? info "Understanding what happened"
-    1. You created a Knative service using `helm install` subcommand and upgraded the service to have both `baseline` and `candidate` versions (revisions) using `helm upgrade --install` subcommand. The ksvc is created in the `default` namespace. Helm release information is located in the `iter8-system` namespace specified by the `--namespace=iter8-system` flag.
+    1. You configured a Knative service with two versions of your app. In the `service.yaml` manifest, you specified that the production version, `sample-app-v1`, should receive 100% of the production traffic and the dark version, `sample-app-v2`, should receive 0% of the production traffic.
 
-    2. You created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
+    2. You set up Istio virtual services with the following rules: all HTTP traffic with `Host` header or `:authority` pseudo-header set to `customdomain.com` will be sent to `sample-app-v1`. 40% of this traffic will be mirrored and sent to `sample-app-v2` and responses from `sample-app-v2` will be ignored.
 
-    3. You created an iter8 experiment with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. You restricted the maximum weight (traffic percentage) of candidate during iterations at 75% and maximum increment allowed during a single iteration to 20% using the `spec.strategy.weights` stanza.
+    3. We used `customdomain.com` in this tutorial for demonstration purposes. In your production cluster, use domain(s) that you own to set up the virtual services.
 
-    4. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (roll forward) by using a `helm upgrade --install` command. Had the candidate failed to satisfy objectives, iter8 would have promoted the baseline (rolled back) instead.
-
-
+    4. You created an iter8 `conformance` experiment to evaluate the dark version. In each iteration, iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the dark version satisfied all the objectives specified in `experiment.yaml`.
