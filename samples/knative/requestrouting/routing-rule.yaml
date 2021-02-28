@@ -1,0 +1,44 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: routing-for-wakanda
+spec:
+  gateways:
+  - mesh
+  - knative-serving/knative-ingress-gateway
+  - knative-serving/knative-local-gateway
+  hosts:
+  - customdomain.com
+  http:
+  - match:
+    - headers:
+        country:
+          exact: wakanda
+    route:
+    - destination:
+        host: sample-app-v1.default.svc.cluster.local
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v1-blue
+            Host: sample-app-v1.default
+      weight: 100
+    - destination:
+        host: sample-app-v2.default.svc.cluster.local
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v2-green
+            Host: sample-app-v2.default
+      weight: 0
+  - route:
+    - destination:
+        host: sample-app-v1.default.svc.cluster.local
+      headers:
+        request:
+          set:
+            Knative-Serving-Namespace: default
+            Knative-Serving-Revision: sample-app-v1-blue
+            Host: sample-app-v1.default

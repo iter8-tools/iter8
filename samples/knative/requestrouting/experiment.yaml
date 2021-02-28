@@ -1,0 +1,49 @@
+apiVersion: iter8.tools/v2alpha1
+kind: Experiment
+metadata:
+  name: request-routing
+spec:
+  # this experiment uses the fully-qualified name of the Istio virtual service as the target
+  target: default/routing-for-wakanda
+  strategy:
+    # this experiment will perform a canary test
+    testingPattern: Canary
+    deploymentPattern: Progressive
+  criteria:
+    # mean latency of version should be under 50 milliseconds
+    # 95th percentile latency should be under 100 milliseconds
+    # error rate should be under 1%
+    objectives: 
+    - metric: mean-latency
+      upperLimit: 50
+    - metric: 95th-percentile-tail-latency
+      upperLimit: 100
+    - metric: error-rate
+      upperLimit: "0.01"
+  duration:
+    intervalSeconds: 10
+    iterationsPerLoop: 10
+  versionInfo:
+    # information about app versions used in this experiment
+    baseline:
+      name: current
+      variables:
+      - name: revision
+        value: sample-app-v1-blue
+      weightObjRef:
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        name: routing-for-wakanda
+        namespace: default
+        fieldPath: /spec/http/0/route/0/weight
+    candidates:
+    - name: candidate
+      variables:
+      - name: revision
+        value: sample-app-v2-green
+      weightObjRef:
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        name: routing-for-wakanda
+        namespace: default
+        fieldPath: /spec/http/0/route/1/weight
