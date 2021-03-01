@@ -215,7 +215,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         canary-progressive   Canary   default/sample-app   Finishing   7                      TerminalHandlerLaunched: Finish handler 'finish' launched
         canary-progressive   Canary   default/sample-app   Completed   7                      ExperimentCompleted: Experiment completed successfully
         ```
-        When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.    
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
 === "kubectl get ksvc"
     ```shell
