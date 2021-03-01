@@ -118,4 +118,4 @@ material
 site
 
 # package-lock.json
-mkdocs/package-lock.json
+package-lock.json
