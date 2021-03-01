@@ -206,7 +206,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
 === "iter8ctl"
     Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing GOBIN below.
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0-pre
+    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
     ```
 
     Periodically describe the experiment.

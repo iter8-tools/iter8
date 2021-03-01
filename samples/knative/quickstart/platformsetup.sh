@@ -117,22 +117,22 @@ elif [[ "kourier" == ${1} ]]; then
     echo "Kourier installed successfully"
 fi
 
+# Step 4: Export correct tag for install artifacts
+export TAG=v0.2.5
 
-# Step 4: Install Prometheus using Prometheus Operator
-echo "Installing Prometheus"
-kustomize build $ITER8/install/monitoring/prometheus-operator | kubectl apply -f -
+# Step 5: Install iter8-monitoring
+echo "Installing iter8-monitoring"
+kustomize build github.com/iter8-tools/iter8/install/monitoring/prometheus-operator/?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build $ITER8/install/monitoring/prometheus | kubectl apply -f - 
+kustomize build github.com/iter8-tools/iter8/install/monitoring/prometheus/?ref=${TAG} | kubectl apply -f - 
 
-
-# Step 5: Install iter8 for Knative
+# Step 6: Install iter8 for Knative
 echo "Installing iter8 for Knative"
-kustomize build $ITER8/install | kubectl apply -f -
+kustomize build github.com/iter8-tools/iter8/install/?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build $ITER8/install/iter8-metrics | kubectl apply -f -
+kustomize build github.com/iter8-tools/iter8/install/iter8-metrics/?ref=${TAG} | kubectl apply -f -
 
-
-# Step 6: Verify iter8 installation
+# Step 7: Verify iter8 installation
 echo "Verifying installation"
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system

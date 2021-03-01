@@ -13,30 +13,28 @@ title: Install iter8
         3. [Kustomize v3](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
         4. [Go 1.13+](https://golang.org/doc/install)
 
-    ## Step 1: Clone repo
+    ## Step 1: Export TAG
     ```shell
-    git clone https://github.com/iter8-tools/iter8.git
-    cd iter8
-    export ITER8=$(pwd)
+    export TAG=v0.2.5
     ```
 
     ## Step 2: Install iter8-monitoring
     ```shell
-    kustomize build $ITER8/install/monitoring/prometheus-operator | kubectl apply -f -
+    kustomize build github.com/iter8-tools/iter8/install/monitoring/prometheus-operator/?ref=${TAG} | kubectl apply -f -
     kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-    kustomize build $ITER8/install/monitoring/prometheus | kubectl apply -f - 
+    kustomize build github.com/iter8-tools/iter8/install/monitoring/prometheus/?ref=${TAG} | kubectl apply -f - 
     ```
 
     ## Step 3: Install iter8
     ```shell
-    kustomize build $ITER8/install | kubectl apply -f -
+    kustomize build github.com/iter8-tools/iter8/install/?ref=${TAG} | kubectl apply -f -
     kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-    kustomize build $ITER8/install/iter8-metrics | kubectl apply -f -
+    kustomize build github.com/iter8-tools/iter8/install/iter8-metrics/?ref=${TAG} | kubectl apply -f -
     ```
 
     ## Step 4: Install iter8ctl
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0-pre
+    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
     ```
 
 === "iter8 for KFServing"
