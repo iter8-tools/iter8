@@ -136,7 +136,7 @@ nav:
   - Reference: 
     - Experiment: reference/experiment.md
     - Metric: reference/metric.md
-  - Extending iter8: extending.md
+  - Contributing: contributing.md
   - Roadmap: roadmap.md
   - Blog:
     - Blog link: https://blog.iter8.tools
