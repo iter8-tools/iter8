@@ -11,13 +11,14 @@ Please discuss the change you wish to make using [issues](https://github.com/ite
 ## Locally building Iter8 docs
 Iter8 documentation is built using [mkdocs for material](https://squidfunk.github.io/mkdocs-material/). Follow the instructions below to build Iter8 docs locally.
 
-**Pre-requisite:** [Node.js 12+](https://nodejs.org/en/)
+**Pre-requisite:**[Node.js 15+](https://nodejs.org/en/)
 
 **Note:** Fork the Iter8 repo, clone your fork, and `npm run build`. This step is usually required only for the first time you work with Iter8 docs locally.
 
 ```shell
 git clone git@github.com:<your-github-account>/iter8.git
 cd iter8/mkdocs
+git update-index --assume-unchanged package-lock.json
 npm run build
 ```
 

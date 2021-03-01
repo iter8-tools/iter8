@@ -3,14 +3,14 @@ template: overrides/main.html
 ---
 
 # Quick start with Knative
-
+ 
 Perform **zero-downtime progressive canary release of a Knative app**. You will create:
 
 1. A Knative service with two versions of your app, namely, `baseline` and `candidate`
 2. A traffic generator which sends HTTP GET requests to the Knative service.
 3. An **Iter8 experiment** that automates the following: 
     - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
-    - iteratively shifts traffic from `baseline` to `candidate`, and 
+    - iteratively shifts traffic from `baseline` to `candidate`, and
     - replaces `baseline` with `candidate` in the end using a `kubectl apply` command
 
 !!! warning "Before you begin, you will need:"
@@ -130,8 +130,8 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
         percent: 0
     ```
 
-## 5. Send requests
-Verify Knative service is ready and send requests to app.
+## 5. Generate requests
+Verify Knative service is ready and generate requests to app using fortio.
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
@@ -179,8 +179,8 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
         - metric: error-rate
           upperLimit: "0.01"
       duration:
-        intervalSeconds: 20
-        iterationsPerLoop: 12
+        intervalSeconds: 10
+        iterationsPerLoop: 10
       versionInfo:
         # information about app versions used in this experiment
       baseline:
@@ -216,51 +216,52 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     sleep 10
     done
     ```
+    ??? info "iter8ctl output"
+        iter8ctl output will be similar to the following.
+        ```shell
+        ****** Overview ******
+        Experiment name: quickstart-exp
+        Experiment namespace: default
+        Target: default/sample-app
+        Testing pattern: Canary
+        Deployment pattern: Progressive
 
-    You should see output similar to the following.
-    ```shell
-    ****** Overview ******
-    Experiment name: quickstart-exp
-    Experiment namespace: default
-    Target: default/sample-app
-    Testing pattern: Canary
-    Deployment pattern: Progressive
+        ****** Progress Summary ******
+        Experiment stage: Running
+        Number of completed iterations: 3
 
-    ****** Progress Summary ******
-    Experiment stage: Running
-    Number of completed iterations: 3
+        ****** Winner Assessment ******
+        App versions in this experiment: [current candidate]
+        Winning version: candidate
+        Recommended baseline: candidate
 
-    ****** Winner Assessment ******
-    App versions in this experiment: [current candidate]
-    Winning version: candidate
-    Recommended baseline: candidate
+        ****** Objective Assessment ******
+        +--------------------------------+---------+-----------+
+        |           OBJECTIVE            | CURRENT | CANDIDATE |
+        +--------------------------------+---------+-----------+
+        | mean-latency <= 50.000         | true    | true      |
+        +--------------------------------+---------+-----------+
+        | 95th-percentile-tail-latency   | true    | true      |
+        | <= 100.000                     |         |           |
+        +--------------------------------+---------+-----------+
+        | error-rate <= 0.010            | true    | true      |
+        +--------------------------------+---------+-----------+
 
-    ****** Objective Assessment ******
-    +--------------------------------+---------+-----------+
-    |           OBJECTIVE            | CURRENT | CANDIDATE |
-    +--------------------------------+---------+-----------+
-    | mean-latency <= 50.000         | true    | true      |
-    +--------------------------------+---------+-----------+
-    | 95th-percentile-tail-latency   | true    | true      |
-    | <= 100.000                     |         |           |
-    +--------------------------------+---------+-----------+
-    | error-rate <= 0.010            | true    | true      |
-    +--------------------------------+---------+-----------+
-
-    ****** Metrics Assessment ******
-    +--------------------------------+---------+-----------+
-    |             METRIC             | CURRENT | CANDIDATE |
-    +--------------------------------+---------+-----------+
-    | request-count                  | 429.334 |    16.841 |
-    +--------------------------------+---------+-----------+
-    | mean-latency (milliseconds)    |   0.522 |     0.712 |
-    +--------------------------------+---------+-----------+
-    | 95th-percentile-tail-latency   |   4.835 |     4.750 |
-    | (milliseconds)                 |         |           |
-    +--------------------------------+---------+-----------+
-    | error-rate                     |   0.000 |     0.000 |
-    +--------------------------------+---------+-----------+
-    ```    
+        ****** Metrics Assessment ******
+        +--------------------------------+---------+-----------+
+        |             METRIC             | CURRENT | CANDIDATE |
+        +--------------------------------+---------+-----------+
+        | request-count                  | 429.334 |    16.841 |
+        +--------------------------------+---------+-----------+
+        | mean-latency (milliseconds)    |   0.522 |     0.712 |
+        +--------------------------------+---------+-----------+
+        | 95th-percentile-tail-latency   |   4.835 |     4.750 |
+        | (milliseconds)                 |         |           |
+        +--------------------------------+---------+-----------+
+        | error-rate                     |   0.000 |     0.000 |
+        +--------------------------------+---------+-----------+
+        ``` 
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
 
 === "kubectl get experiment"
 
@@ -268,23 +269,21 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     kubectl get experiment quickstart-exp --watch
     ```
 
-    You should see output similar to the following.
-    ```shell
-    NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-    quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-    quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-    quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-    quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-    quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-    quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-    quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-    quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-    quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-    quickstart-exp   Canary   default/sample-app   Running   10                     IterationUpdate: Completed Iteration 10
-    quickstart-exp   Canary   default/sample-app   Running   11                     IterationUpdate: Completed Iteration 11
-    quickstart-exp   Canary   default/sample-app   Finishing   12                     TerminalHandlerLaunched: Finish handler 'finish' launched
-    quickstart-exp   Canary   default/sample-app   Completed   12                     ExperimentCompleted: Experiment completed successfully
-    ```
+    ??? info "kubectl get experiment output"
+        kubectl output will be similar to the following.
+        ```shell
+        NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
+        quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
+        quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
+        quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
+        quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
+        quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
+        quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
+        quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
+        quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
+        quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
+        ```
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
     
 
@@ -294,27 +293,26 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    You should see output similar to the following.
-    ```shell
-    [
-      {
-        "latestRevision": false,
-        "percent": 45,
-        "revisionName": "sample-app-v1",
-        "tag": "current",
-        "url": "http://current-sample-app.default.example.com"
-      },
-      {
-        "latestRevision": true,
-        "percent": 55,
-        "revisionName": "sample-app-v2",
-        "tag": "candidate",
-        "url": "http://candidate-sample-app.default.example.com"
-      }
-    ]
-    ```
-
-When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.
+    ??? info "kubectl get ksvc output"
+        kubectl output will be similar to the following.
+        ```shell
+        [
+          {
+            "latestRevision": false,
+            "percent": 45,
+            "revisionName": "sample-app-v1",
+            "tag": "current",
+            "url": "http://current-sample-app.default.example.com"
+          },
+          {
+            "latestRevision": true,
+            "percent": 55,
+            "revisionName": "sample-app-v2",
+            "tag": "candidate",
+            "url": "http://candidate-sample-app.default.example.com"
+          }
+        ]
+        ```
 
 ## 8. Cleanup
 ```shell
@@ -326,5 +324,5 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ??? info "Understanding what happened"
     1. In Step 4, you created a Knative service which manages two revisions, `sample-app-v1` (`baseline`) and `sample-app-v2` (`candidate`).
     2. In Step 5, you created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
-    3. In step 6, you created an Iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate.
+    3. In step 6, you created an Iter8 experiment with 10 iterations with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate.
     4. At the end of the experiment, Iter8 identified the candidate as the `winner` since it passed all objectives. Iter8 decided to promote the candidate (rollforward) by applying `candidate.yaml` as part of its `finish` action. Had the candidate failed, Iter8 would have decided to promote the baseline (rollback) by applying `baseline.yaml`.
