@@ -15,7 +15,6 @@ title: Install iter8
 
     ## Step 1: Export TAG
     ```shell
-    # Install the latest stable release of iter8 using the following TAG
     export TAG=v0.2.5
     ```
 
