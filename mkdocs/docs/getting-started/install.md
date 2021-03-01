@@ -1,10 +1,10 @@
 ---
 template: overrides/main.html
-title: Install iter8
+title: Install Iter8
 ---
 
-=== "iter8 for Knative"
-    Follow these steps to install iter8 for KNative. 
+=== "Iter8 for Knative"
+    Follow these steps to install Iter8 for KNative. 
 
 
     !!! example "Prerequisites"
@@ -25,7 +25,7 @@ title: Install iter8
     kustomize build github.com/iter8-tools/iter8/install/monitoring/prometheus/?ref=${TAG} | kubectl apply -f - 
     ```
 
-    ## Step 3: Install iter8
+    ## Step 3: Install Iter8
     ```shell
     kustomize build github.com/iter8-tools/iter8/install/?ref=${TAG} | kubectl apply -f -
     kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
@@ -37,8 +37,8 @@ title: Install iter8
     GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
     ```
 
-=== "iter8 for KFServing"
-    An initial version of iter8 for KFServing is available [here](https://github.com/iter8-tools/iter8-kfserving) along with installation instructions. An updated version is coming soon and will be documented here.
+=== "Iter8 for KFServing"
+    An initial version of Iter8 for KFServing is available [here](https://github.com/iter8-tools/iter8-kfserving) along with installation instructions. An updated version is coming soon and will be documented here.
 
-=== "iter8 for Istio"
-    An earlier version of iter8 for Istio is available [here](https://github.com/iter8-tools/iter8) along with installation instructions. An updated version is coming soon and will be documented here.
+=== "Iter8 for Istio"
+    An earlier version of Iter8 for Istio is available [here](https://github.com/iter8-tools/iter8) along with installation instructions. An updated version is coming soon and will be documented here.

@@ -106,4 +106,4 @@ References to metrics in the `spec.criteria` stanza of an experiment must be in 
 
 ## Observing metric values
 
-During an experiment, iter8 reports the metric values observed for each version. [Use `iter8ctl`](http://localhost:8000/concepts/observability/) to observe these metric values in realtime.
+During an experiment, Iter8 reports the metric values observed for each version. [Use `iter8ctl`](http://localhost:8000/concepts/observability/) to observe these metric values in realtime.

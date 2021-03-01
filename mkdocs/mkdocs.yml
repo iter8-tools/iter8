@@ -1,8 +1,8 @@
-site_name: iter8
+site_name: Iter8
 site_url: https://iter8.tools
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Use iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.
+  Use Iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -105,7 +105,7 @@ nav:
     - Metrics: concepts/metricsoverview.md
     - Realtime observability: concepts/observability.md
   - Usage:
-    - Using iter8: usage/usingiter8.md
+    - Using Iter8: usage/usingiter8.md
     - Experiment spec in-depth:
       - spec.target: usage/experiment/target.md
       - spec.versionInfo: usage/experiment/versioninfo.md
@@ -117,10 +117,10 @@ nav:
       - spec.duration: usage/experiment/duration.md
     - Metrics in-depth:
       - Using metrics in experiments: usage/metrics/using-metrics.md
-      - How iter8 queries metrics: usage/metrics/how-iter8-queries-metrics.md
+      - How Iter8 queries metrics: usage/metrics/how-iter8-queries-metrics.md
       - Custom metrics: usage/metrics/custom-metrics.md
   - Code samples:
-    - iter8-Knative:
+    - Iter8-Knative:
       - Canary - Progressive: code-samples/iter8-knative/canary-progressive.md
       - Canary - FixedSplit: code-samples/iter8-knative/canary-fixedsplit.md
       - Conformance: code-samples/iter8-knative/conformance.md

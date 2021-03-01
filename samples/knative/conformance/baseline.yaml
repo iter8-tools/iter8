@@ -1,5 +1,5 @@
 # apply this yaml at the start of the experiment to create the baseline revision
-# iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
+# Iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:

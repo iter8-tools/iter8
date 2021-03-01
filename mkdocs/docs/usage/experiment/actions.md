@@ -5,7 +5,7 @@ template: overrides/main.html
 # Actions
 
 !!! abstract "Actions"
-    An action is a sequence of tasks that can be executed by iter8. `spec.strategy.actions` can be used to specify `start` and `finish` actions that will be run at the start and end of an experiment respectively.
+    An action is a sequence of tasks that can be executed by Iter8. `spec.strategy.actions` can be used to specify `start` and `finish` actions that will be run at the start and end of an experiment respectively.
 
 ??? example "Sample experiment with start and finish actions"
     ```yaml
@@ -85,7 +85,7 @@ template: overrides/main.html
         iterationsPerLoop: 12
     ```
 
-iter8 currently implements two tasks that help in setting up and finishing up experiments. These tasks are organized into the `knative` and `common` task libraries.
+Iter8 currently implements two tasks that help in setting up and finishing up experiments. These tasks are organized into the `knative` and `common` task libraries.
 
 ## Tasks
 
@@ -185,11 +185,11 @@ The `common` task library provides the `exec` task. Use this task to execute she
 
 ## Interpolation of task inputs
 
-Inputs to tasks can container placeholders, or template variables which will be dynamically substituted when the task is executed by iter8. Variable interpolation works as follows.
+Inputs to tasks can container placeholders, or template variables which will be dynamically substituted when the task is executed by Iter8. Variable interpolation works as follows.
 
-1. iter8 will find the version recommended for promotion. This information is stored in the `status.recommendedBaseline` stanza of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` stanza of the experiment.
+1. Iter8 will find the version recommended for promotion. This information is stored in the `status.recommendedBaseline` stanza of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` stanza of the experiment.
 
-2. If the placeholder is `{{ .name }}`, iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, iter8 will substitute it with the value of this corresponding variable for the version recommended for promotion. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may be executed by iter8 as part of the experiment.
+2. If the placeholder is `{{ .name }}`, Iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, Iter8 will substitute it with the value of this corresponding variable for the version recommended for promotion. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may be executed by Iter8 as part of the experiment.
 
 ??? example "Interpolation Example 1"
 

@@ -85,5 +85,5 @@ template: overrides/main.html
     When experimenting with a Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`. 
 
 
-## Concurrent experiments
-Experiments that have the same target value will **not** be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by iter8 concurrently.
+## Concurrency policy
+Experiments that have the same target value will **not** be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently.

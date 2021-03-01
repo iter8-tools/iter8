@@ -4,7 +4,7 @@ set -e
 
 ## Ensure ITER8 environment variable is set.
 if [[ -z ${ITER8} ]]; then
-    echo "ITER8 environment variable needs to be set to the root folder of iter8"
+    echo "ITER8 environment variable needs to be set to the root folder of Iter8"
     exit 1
 else
     echo "ITER8 is set to " $ITER8
@@ -126,13 +126,13 @@ kustomize build github.com/iter8-tools/iter8/install/monitoring/prometheus-opera
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build github.com/iter8-tools/iter8/install/monitoring/prometheus/?ref=${TAG} | kubectl apply -f - 
 
-# Step 6: Install iter8 for Knative
-echo "Installing iter8 for Knative"
+# Step 6: Install Iter8 for Knative
+echo "Installing Iter8 for Knative"
 kustomize build github.com/iter8-tools/iter8/install/?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build github.com/iter8-tools/iter8/install/iter8-metrics/?ref=${TAG} | kubectl apply -f -
 
-# Step 7: Verify iter8 installation
+# Step 7: Verify Iter8 installation
 echo "Verifying installation"
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system

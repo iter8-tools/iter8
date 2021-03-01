@@ -5,7 +5,7 @@ template: overrides/main.html
 # Traffic Shifting in `Progressive` experiments
 
 !!! abstract "Weights"
-    `spec.strategy.weights` is an object with two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This stanza is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
+    `spec.strategy.weights` is an object with two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This stanza is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by Iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
 
 ??? example "Sample experiment with `spec.strategy.weights`"
     ```yaml

@@ -4,7 +4,7 @@ template: overrides/main.html
 
 # Experiment Resource Object
 
-Fields in an iter8 experiment resource object are documented here. Unsupported fields, or those reserved for future, are not documented here. For complete documentation, see the iter8 Experiment API [here](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.13-pre/api/v2alpha1).
+Fields in an Iter8 experiment resource object are documented here. Unsupported fields, or those reserved for future, are not documented here. For complete documentation, see the Iter8 Experiment API [here](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.13-pre/api/v2alpha1).
 
 ## ExperimentSpec
 
@@ -22,7 +22,7 @@ Defines the behavior of an experiment.
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| testingPattern | string | Type of iter8 experiment. Currently, `Canary` and `Conformance` tests are supported. | Yes |
+| testingPattern | string | Type of Iter8 experiment. Currently, `Canary` and `Conformance` tests are supported. | Yes |
 | deploymentPattern | string | The method by which traffic is shifted between versions in an experiment. Currently, these are `Progressive` (default) and `FixedSplit`. A Progressive pattern shifts traffic between versions while a FixedSplit pattern leaves traffic as it is. | No |
 | actions | map[string][][TaskSpec](#taskspec) | Sequence of tasks to be called before an experiment begins or after an experiment completes. | No |
 | handlers | [Handlers](#handlers) | (Deprecated) External methods that should be called before and after an experiment. `actions` are the preferred mechanism for this. | No |
@@ -43,13 +43,13 @@ Do we want to document this?
 
 ## Criteria
 
-> Note: References to metric resource objects within experiment criteria can be in the `namespace/name` format or in the `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then iter8 first searches for the metric in the namespace of the experiment resource object followed by the `iter8-system` namespace. If iter8 cannot find the metric in either of these namespaces, then the reference is considered in valid and the will terminate in a failure.
+> Note: References to metric resource objects within experiment criteria can be in the `namespace/name` format or in the `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then Iter8 first searches for the metric in the namespace of the experiment resource object followed by the `iter8-system` namespace. If Iter8 cannot find the metric in either of these namespaces, then the reference is considered in valid and the will terminate in a failure.
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| requestCount | string | The name of the metric to be used count the number of requests seen by a version. May be defaulted by the configuration of iter8. | no |
+| requestCount | string | The name of the metric to be used count the number of requests seen by a version. May be defaulted by the configuration of Iter8. | no |
 | objectives | [Objective](#objective)[] | A list of objectives. Satisfying all objectives in an experiment is a necessary condition for a version to be declared a `winner`. | No |
-| indicators | string[] | A list of metrics that, during the experiment, for each version, metric values are recorded by iter8 in the experiment status section. | No |
+| indicators | string[] | A list of metrics that, during the experiment, for each version, metric values are recorded by Iter8 in the experiment status section. | No |
 
 ## Objective
 
@@ -103,13 +103,13 @@ The duration of an experiment expressed as two integer fields: the number of ite
 | lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
 | stage | string | Indicator of progress of an experiment. The stage is `Waiting` before an experiment executes its start actions, `Initializing` while running the start actions, `Running` while the experiment is progressing, `Finishing` while any finish actions are running and `Completed` when the experiment terminates. | No |
 | currentWeightDistribution | [][WeightData](#weightdata) | Currently observed distribution of requests. | No |
-| analysis | Analysis | Result of latest query to the iter8 analytics service.  | No |
+| analysis | Analysis | Result of latest query to the Iter8 analytics service.  | No |
 | recommendedBaseline | string | The version recommended as the version that should replace the baseline version when the experiment completes. | No |
 | message | string | User readable message. | No |
 
 ## ExperimentCondition
 
-Conditions express aspects of the progress of an experiment. The `Completed` condition indicates whether or not an experiment has completed or not. The `Failed` condition indicates whether or not an experiment completed successfully or in failure. Finally, the `TargetAcquired` condition indicates that an experiment can proceed without interference from other experiments. iter8 ensures that only one experiment has `TargetAcquired` set to `True` while `Completed` is set to `False`.
+Conditions express aspects of the progress of an experiment. The `Completed` condition indicates whether or not an experiment has completed or not. The `Failed` condition indicates whether or not an experiment completed successfully or in failure. Finally, the `TargetAcquired` condition indicates that an experiment can proceed without interference from other experiments. Iter8 ensures that only one experiment has `TargetAcquired` set to `True` while `Completed` is set to `False`.
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
@@ -128,7 +128,7 @@ Conditions express aspects of the progress of an experiment. The `Completed` con
 
 ## Analysis
 
-Result of latest query to the iter8 analytics service.
+Result of latest query to the Iter8 analytics service.
 Queries may, but are not required to, return results along 4 dimensions.
 
 | Field | Type         | Description | Required |

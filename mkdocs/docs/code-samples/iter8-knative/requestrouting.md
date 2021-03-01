@@ -11,14 +11,14 @@ Perform a `Progressive Canary` experiment with request routing using the followi
 1. An app with baseline and candidate versions implemented as **Knative services**.
 2. An  **Istio virtual service** which routes requests based an HTTP header called `country`. All requests are routed to the baseline, except those with their `country` header field set to `wakanda`; these may be routed to the baseline or candidate.
 3. A **curl-based traffic generator** which simulates user requests, with `country` header field set to `wakanda` or `gondor`.
-4. An **iter8 experiment** which verifies that the candidate satisfies mean latency, 95th percentile tail latency, and error rate objectives, and progressively increases the proportion of traffic with `country: wakanda` header that is routed to the candidate.
+4. An **Iter8 experiment** which verifies that the candidate satisfies mean latency, 95th percentile tail latency, and error rate objectives, and progressively increases the proportion of traffic with `country: wakanda` header that is routed to the candidate.
 
 ??? warning "Before you begin"
-    **Kubernetes cluster with iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with iter8 and Knative installed, and ensure that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
+    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and ensure that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
 
-    **Cleanup:** If you ran an iter8 tutorial earlier, run the cleanup (last) step associated with it.
+    **Cleanup:** If you ran an Iter8 tutorial earlier, run the cleanup (last) step associated with it.
 
-    **ITER8:** Ensure that you have cloned the iter8 GitHub repo, and set the `ITER8` environment variable in your terminal to the root of the cloned repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that you have cloned the Iter8 GitHub repo, and set the `ITER8` environment variable in your terminal to the root of the cloned repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
 
 ## 1. Create app versions
@@ -369,7 +369,7 @@ kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
     
     6. You can also curl the Knative services from outside the cluster. See [here](https://knative.dev/docs/serving/samples/knative-routing-go/#access-the-services) for a related example where the Knative service and Istio virtual service setup is similar to this tutorial.
 
-    7. You created an iter8 `Canary` experiment with `Progressive` deployment pattern to evaluate the candidate version. In each iteration, iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the candidate version satisfied all the objectives specified in `experiment.yaml`. It progressively increased the proportion of traffic with `country: wakanda` header that is routed to the candidate.
+    7. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern to evaluate the candidate version. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the candidate version satisfied all the objectives specified in `experiment.yaml`. It progressively increased the proportion of traffic with `country: wakanda` header that is routed to the candidate.
 
     8. You can add finish tasks to this experiment to accomplish version promotion. See examples [here](/getting-started/quick-start/with-knative/), [here](/code-samples/iter8-knative/canary-progressive/) and [here](/code-samples/iter8-knative/canary-fixedsplit/).
 

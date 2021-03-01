@@ -1,4 +1,4 @@
-# This Knative service will be used for the iter8 experiment with traffic split between baseline and candidate revision
+# This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
 # To begin with, candidate revision receives zero traffic
 # Apply this after applying baseline.yaml in order to create the second revision
 apiVersion: serving.knative.dev/v1

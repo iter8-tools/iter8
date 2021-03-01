@@ -8,15 +8,15 @@ Perform **zero-downtime fixed-split canary release of a Knative app**. You will 
 
 1. A Knative service with two versions of your app, namely, `baseline` and `candidate` using `kustomize`.
 2. A traffic generator which sends HTTP GET requests to the Knative service.
-3. An **iter8 experiment** that automates the following:
+3. An **Iter8 experiment** that automates the following:
     - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
     - traffic split between `baseline` and `candidate` will be remain unchanged during experiment iterations
     - replaces `baseline` with `candidate` in the end using a `kustomize` command
 
 ??? warning "Before you begin"
-    **Kubernetes cluster:** Do not have a Kubernetes cluster with iter8 and Knative installed? Follow Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/) to create a cluster with iter8 and Knative.
+    **Kubernetes cluster:** Do not have a Kubernetes cluster with Iter8 and Knative installed? Follow Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/) to create a cluster with Iter8 and Knative.
 
-    **Cleanup from previous experiment:** Tried an iter8 tutorial earlier but forgot to cleanup? Run the cleanup step from your tutorial now. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) performs cleanup for the iter8-Knative quick start tutorial.
+    **Cleanup from previous experiment:** Tried an Iter8 tutorial earlier but forgot to cleanup? Run the cleanup step from your tutorial now. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) performs cleanup for the Iter8-Knative quick start tutorial.
 
     **ITER8 environment variable:** ITER8 environment variable is not exported in your terminal? Do so now. For example, this is the [last command in Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo).
 
@@ -51,7 +51,7 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
 
 ??? info "Look inside experimentalservice/app.yaml"
     ```yaml
-    # This Knative service will be used for the iter8 experiment with traffic split between baseline and candidate revision
+    # This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
     # Traffic is split 75/25 between the baseline and candidate
     # Apply this after applying baseline.yaml in order to create the second revision
     apiVersion: serving.knative.dev/v1
@@ -88,7 +88,7 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml | kubectl apply -f -
 ```
 
-## 3. Create iter8 experiment
+## 3. Create Iter8 experiment
 
 ```shell
 kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
@@ -273,5 +273,5 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
 ??? info "Understanding what happened"
     1. In Step 1, you created a Knative service which manages two revisions, `sample-app-v1` (`baseline`) and `sample-app-v2` (`candidate`).
     2. In Step 2, you created a load generator that sends requests to the Knative service. 75% of requests are sent to the baseline and 25% to the candidate. This distribution remains fixed throughout the experiment.
-    3. In step 3, you created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus).
-    4. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (rollforward) using kustomize as part of its `finish` action. Had the candidate failed, iter8 would have decided to promote the baseline (rollback) instead.
+    3. In step 3, you created an Iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus).
+    4. At the end of the experiment, Iter8 identified the candidate as the `winner` since it passed all objectives. Iter8 decided to promote the candidate (rollforward) using kustomize as part of its `finish` action. Had the candidate failed, Iter8 would have decided to promote the baseline (rollback) instead.

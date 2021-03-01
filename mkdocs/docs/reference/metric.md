@@ -10,7 +10,7 @@ Fields in an iter8 metric resource object `spec` are documented here.
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| params | [][Param](#param) | List of name/value pairs. Each name represents a parameter name; the corresponding value is a template, which will be instantiated by iter8 while querying the metrics backend. For examples and more details, see [here](/usage/metrics/how-iter8-queries-metrics/).| No |
+| params | [][Param](#param) | List of name/value pairs. Each name represents a parameter name; the corresponding value is a template, which will be instantiated by Iter8 while querying the metrics backend. For examples and more details, see [here](/usage/metrics/how-iter8-queries-metrics/).| No |
 | description | string | Human-readable description of the metric. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |

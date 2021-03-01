@@ -10,7 +10,7 @@ template: overrides/main.html
     * Support for Ambassador and Kong networking layers for KNative
     * Support for experimenting with configuration and routes for Knative
 2. **Improved installation**
-    * Multi-stack installation, iter8 Helm chart, iter8 Operator
+    * Multi-stack installation, Iter8 Helm chart, Iter8 Operator
 3. **GitOps**
     * Integration with ArgoCD, Flux and other GitOps operators
 4. **MLOps**

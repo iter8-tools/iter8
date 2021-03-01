@@ -1,7 +1,7 @@
 ---
 name: Feature request
-about: Suggest an idea for iter8
-title: '[Feature]'
+about: Suggest an idea for Iter8
+title: '[Feature Request]'
 labels: 'enhancement'
 assignees: ''
 

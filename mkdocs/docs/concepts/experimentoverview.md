@@ -4,8 +4,7 @@ template: overrides/main.html
 
 # Experiment overview
 
-!!! abstract "iter8 experiment"
-    **iter8** defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
+> Iter8 defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
 ??? example "Sample experiment"
     ```yaml linenums="1"
@@ -85,14 +84,14 @@ template: overrides/main.html
         iterationsPerLoop: 12
     ```
 
-## How iter8 runs an experiment
-1. iter8 determines if it is safe to start an experiment using its *target acquisition* algorithm.
+## How Iter8 runs an experiment
+1. Iter8 determines if it is safe to start an experiment using its [concurrency policy](http://localhost:8000/usage/experiment/target/#concurrent-experiments).
 
-2. When the experiment starts, iter8 runs tasks specified under `spec.actions.start` such as setting up or updating resources needed for the experiment.
+2. When the experiment starts, Iter8 runs the tasks specified under `spec.actions.start` such as setting up or updating resources needed for the experiment.
 
-3. During each iteration, iter8 evaluates app versions based on `spec.criteria`, determines the `winner`, and optionally shifts traffic towards the `winner`.
+3. During each iteration, Iter8 evaluates app versions based on `spec.criteria`, determines the `winner`, and optionally shifts traffic towards the `winner`.
 
-4. When the experiment finishes, iter8 runs tasks specified under `spec.actions.finish` such as version promotion.
+4. When the experiment finishes, Iter8 runs tasks specified under `spec.actions.finish` such as version promotion.
 
 ## Experiment spec in-brief
 A brief explanation of the key stanzas in an experiment spec is given below.
@@ -111,15 +110,15 @@ A brief explanation of the key stanzas in an experiment spec is given below.
 
 ### spec.strategy.testingPattern
 
-`spec.strategy.testingPattern` is a string enum that determines the logic used to evaluate the app versions and determine the `winner` of the experiment. iter8 supports two testing patterns, namely, `Canary` and `Conformance`.
+`spec.strategy.testingPattern` is a string enum that determines the logic used to evaluate the app versions and determine the `winner` of the experiment. Iter8 supports two testing patterns, namely, `Canary` and `Conformance`.
 
 ### spec.strategy.deploymentPattern
 
-`spec.strategy.deploymentPattern` is a string enum that determines if and how traffic is shifted during an experiment[^1]. iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
+`spec.strategy.deploymentPattern` is a string enum that determines if and how traffic is shifted during an experiment[^1]. Iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
 
 ### spec.strategy.weights
 
-`spec.strategy.weights` is an object with  two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This stanza is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
+`spec.strategy.weights` is an object with  two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This stanza is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by Iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
 
 ### spec.strategy.actions
 
