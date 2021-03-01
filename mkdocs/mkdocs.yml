@@ -104,7 +104,6 @@ nav:
     - Experiment: concepts/experimentoverview.md
     - Metrics: concepts/metricsoverview.md
     - Realtime observability: concepts/observability.md
-    - Traffic shaping: concepts/trafficshaping.md
   - Usage:
     - Using iter8: usage/usingiter8.md
     - Experiment spec in-depth:
