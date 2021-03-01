@@ -1,13 +1,10 @@
 namePrefix: iter8-
-# To use a tagged release, for example v1.1.0-rc, change ref=master to ref=v1.1.0-rc
 resources:
-- github.com/iter8-tools/iter8-analytics/install/kubernetes/kustomize/?ref=v1.2.0-pre
+- github.com/iter8-tools/iter8-analytics/install/kubernetes/kustomize/?ref=v1.2.0
 
 images:
 - name: iter8/iter8-analytics
-  newTag: 1.2.0-pre
-  # To use a tagged release, for example v1.1.0-rc, change master to 1.1.0-rc
-  # Note the lack of 'v' in the image tag
+  newTag: 1.2.0
 
 configMapGenerator:
 - name: analytics
