@@ -9,13 +9,13 @@ You will create:
 
 1. A Knative service with a single version.
 2. A traffic genereator which sends HTTP GET requests to the Knative service.
-3. An **iter8 experiment** that verifies that latency and error-rate metrics for the service satisfy the given objectives.
+3. An **Iter8 experiment** that verifies that latency and error-rate metrics for the service satisfy the given objectives.
 
 !!! warning "Before you begin"
 
-    ** Kubernetes cluster:** Do not have a Kubernetes cluster with iter8 and Knative installed? Follow Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/) to create a cluster with iter8 and Knative.
+    ** Kubernetes cluster:** Do not have a Kubernetes cluster with Iter8 and Knative installed? Follow Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/) to create a cluster with Iter8 and Knative.
 
-    **Cleanup from previous experiment:** Tried an iter8 tutorial earlier but forgot to cleanup? Run the cleanup step from your tutorial now. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) performs cleanup for the iter8-Knative quick start tutorial.
+    **Cleanup from previous experiment:** Tried an Iter8 tutorial earlier but forgot to cleanup? Run the cleanup step from your tutorial now. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) performs cleanup for the Iter8-Knative quick start tutorial.
 
     **ITER8 environment variable:** ITER8 environment variable is not exported in your terminal? Do so now. For example, this is the [last command in Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo).
 
@@ -55,7 +55,7 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -
 ```
 
-## 3. Create iter8 experiment
+## 3. Create Iter8 experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
 ```
@@ -195,5 +195,5 @@ kubectl delete -f $ITER8/samples/knative/conformance/experiment.yaml
 ??? info "Understanding what happened"
     1. In Step 1, you created a Knative service with a single revision, `sample-app-v1`.
     2. In Step 2, you created a load generator that sends requests to the Knative service.
-    3. In step 3, you created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus).It ensured that the deployed revision satisfied all objectives specified in `experiment.yaml`.
-    4. At the end of the experiment, iter8 did not identify a `winner` since there is no winner in conformance experiment.
+    3. In step 3, you created an Iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus).It ensured that the deployed revision satisfied all objectives specified in `experiment.yaml`.
+    4. At the end of the experiment, Iter8 did not identify a `winner` since there is no winner in conformance experiment.

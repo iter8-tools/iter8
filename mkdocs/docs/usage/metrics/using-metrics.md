@@ -5,7 +5,7 @@ template: overrides/main.html
 # Using Metrics in Experiments
 
 !!! abstract "Finding and using metrics"
-    Find metrics available in your cluster using the `kubectl get metrics.iter8.tools` command. Use metrics in experiments by referencing them in `spec.criteria` stanza.
+    Find metrics available in your cluster using the `kubectl get metrics.Iter8.tools` command. Use metrics in experiments by referencing them in `spec.criteria` stanza.
 
 ## Listing metrics
 iter8 metrics are Kubernetes resources which means you can list them using `kubectl get`.
@@ -106,4 +106,4 @@ References to metrics in the `spec.criteria` stanza of an experiment must be in 
 
 ## Observing metric values
 
-During an experiment, iter8 reports the metric values observed for each version. [Use `iter8ctl`](http://localhost:8000/concepts/observability/) to observe these metric values in realtime.
+During an experiment, Iter8 reports the metric values observed for each version. [Use `iter8ctl`](http://localhost:8000/concepts/observability/) to observe these metric values in realtime.

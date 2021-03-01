@@ -87,8 +87,8 @@ template: overrides/main.html
 
 ## spec.criteria.objectives
 
-Use the `spec.criteria.objectives` stanza to provide a list of metrics along with acceptable upper limits, lower limits, or both upper and lower limits for them. iter8 will verify if your app versions satisfy these objectives.
+Use the `spec.criteria.objectives` stanza to provide a list of metrics along with acceptable upper limits, lower limits, or both upper and lower limits for them. Iter8 will verify if your app versions satisfy these objectives.
 
 ## spec.criteria.indicators
 
-Use the `spec.criteria.indicators` stanza to provide an additional list of metrics not referenced in the `spec.criteria.objectives` section. iter8 will collect and report the values of these additional metrics.
+Use the `spec.criteria.indicators` stanza to provide an additional list of metrics not referenced in the `spec.criteria.objectives` section. Iter8 will collect and report the values of these additional metrics.

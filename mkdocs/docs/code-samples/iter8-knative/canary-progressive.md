@@ -4,22 +4,22 @@ template: overrides/main.html
 
 # Progressive Canary Deployment using Helm
 
-Perform **zero-downtime progressive canary release of a Knative app**. This tutorial is similar to the [iter8 quick start tutorial for Knative](/getting-started/quick-start/with-knative/). You will create:
+Perform **zero-downtime progressive canary release of a Knative app**. This tutorial is similar to the [Iter8 quick start tutorial for Knative](/getting-started/quick-start/with-knative/). You will create:
 
 1. A Knative service with two versions of your app, namely, `baseline` and `candidate`
 2. A traffic generator which sends HTTP GET requests to the Knative service.
-3. An **iter8 experiment** that automates the following: 
+3. An **Iter8 experiment** that automates the following: 
     - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
     - iteratively shifts traffic from `baseline` to `candidate`,
     - fine-tunes traffic shifting behavior during iterations using `spec.strategy.weights`, and
     - replaces `baseline` with `candidate` in the end using a `helm install` command
 
 ??? warning "Before you begin"
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
 
-    **Cleanup:** If you ran an iter8 tutorial earlier, run the associated cleanup step. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) is the cleanup step for the iter8-Knative quick start tutorial.
+    **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) is the cleanup step for the Iter8-Knative quick start tutorial.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
     **[Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and iter8ctl. Install if needed.
 
@@ -41,7 +41,7 @@ helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter
 
 ??? info "Look inside experimental-values.yaml"
     ```yaml
-    # values file used for upgrading sample-app Helm chart for use in iter8 experiment
+    # values file used for upgrading sample-app Helm chart for use in Iter8 experiment
     # using these values will create a candidate version (revision)
     # baseline still gets 100% of the traffic
     name: "sample-app-v2"
@@ -64,7 +64,7 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml | kubectl apply -f -
 ```
 
-## 3. Create iter8 experiment
+## 3. Create Iter8 experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 ```
@@ -253,5 +253,5 @@ helm uninstall sample-app --namespace=iter8-system
 ??? info "Understanding what happened"
     1. You created a Knative service using `helm install` subcommand and upgraded the service to have both `baseline` and `candidate` versions (revisions) using `helm upgrade --install` subcommand. The ksvc is created in the `default` namespace. Helm release information is located in the `iter8-system` namespace specified by the `--namespace=iter8-system` flag.
     2. You created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
-    3. You created an iter8 experiment with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. You restricted the maximum weight (traffic percentage) of candidate during iterations at 75% and maximum increment allowed during a single iteration to 20% using the `spec.strategy.weights` stanza.
-    4. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (roll forward) by using a `helm upgrade --install` command. Had the candidate failed to satisfy objectives, iter8 would have promoted the baseline (rolled back) instead.
+    3. You created an Iter8 experiment with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. You restricted the maximum weight (traffic percentage) of candidate during iterations at 75% and maximum increment allowed during a single iteration to 20% using the `spec.strategy.weights` stanza.
+    4. At the end of the experiment, Iter8 identified the candidate as the `winner` since it passed all objectives. Iter8 decided to promote the candidate (roll forward) by using a `helm upgrade --install` command. Had the candidate failed to satisfy objectives, Iter8 would have promoted the baseline (rolled back) instead.

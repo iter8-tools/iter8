@@ -111,7 +111,7 @@ baseline:
     value: sample-app-v1 
   - name: promote
     value: baseline
-  # iter8 uses weightObjRef to get and set weight (traffic percentage); optional
+  # Iter8 uses weightObjRef to get and set weight (traffic percentage); optional
   weightObjRef:
     apiVersion: serving.knative.dev/v1
     kind: Service
@@ -124,14 +124,14 @@ baseline:
 Each version has a unique name.
 
 ### variables
-`variables` are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. iter8 uses `variables` to interpolate these strings.
+`variables` are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses `variables` to interpolate these strings.
 
 ### weightObjRef
-weightObjRef contains a reference to a Kubernetes resource and a field-path within the resource. iter8 uses weightObjRef to get or set weight (traffic percentage) for the version.
+weightObjRef contains a reference to a Kubernetes resource and a field-path within the resource. Iter8 uses weightObjRef to get or set weight (traffic percentage) for the version.
 
 ## Auto-creation of versionInfo
 
-iter8 ships with helper tasks that can inspect an experiment resource with no or partially specified `spec.versionInfo`, automatically generate the remaining portion of `spec.versionInfo` and update the experiment with this information. See the [`init-experiment` task in the `knative` task library](actions.md) for an example.
+Iter8 ships with helper tasks that can inspect an experiment resource with no or partially specified `spec.versionInfo`, automatically generate the remaining portion of `spec.versionInfo` and update the experiment with this information. See the [`init-experiment` task in the `knative` task library](actions.md) for an example.
 
 [^1]: `A/B/n` experiments involve more than one candidate. Their description is coming soon.
 

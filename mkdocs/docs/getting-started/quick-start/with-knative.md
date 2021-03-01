@@ -8,7 +8,7 @@ Perform **zero-downtime progressive canary release of a Knative app**. You will 
 
 1. A Knative service with two versions of your app, namely, `baseline` and `candidate`
 2. A traffic generator which sends HTTP GET requests to the Knative service.
-3. An **iter8 experiment** that automates the following: 
+3. An **Iter8 experiment** that automates the following: 
     - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
     - iteratively shifts traffic from `baseline` to `candidate`, and 
     - replaces `baseline` with `candidate` in the end using a `kubectl apply` command
@@ -45,8 +45,8 @@ cd iter8
 export ITER8=$(pwd)
 ```
 
-## 3. Install Knative and iter8
-Choose a networking layer for Knative. Install Knative and iter8.
+## 3. Install Knative and Iter8
+Choose a networking layer for Knative. Install Knative and Iter8.
 
 === "Istio"
 
@@ -81,7 +81,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ??? info "Look inside baseline.yaml"
     ```yaml
     # apply this yaml at the start of the experiment to create the baseline revision
-    # iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
+    # Iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
@@ -102,7 +102,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 
 ??? info "Look inside experimentalservice.yaml"
     ```yaml
-    # This Knative service will be used for the iter8 experiment with traffic split between baseline and candidate revision
+    # This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
     # To begin with, candidate revision receives zero traffic
     # Apply this after applying baseline.yaml in order to create the second revision
     apiVersion: serving.knative.dev/v1
@@ -138,7 +138,7 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
 ```
 
-## 6. Create iter8 experiment
+## 6. Create Iter8 experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 ```
@@ -326,5 +326,5 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ??? info "Understanding what happened"
     1. In Step 4, you created a Knative service which manages two revisions, `sample-app-v1` (`baseline`) and `sample-app-v2` (`candidate`).
     2. In Step 5, you created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
-    3. In step 6, you created an iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate.
-    4. At the end of the experiment, iter8 identified the candidate as the `winner` since it passed all objectives. iter8 decided to promote the candidate (rollforward) by applying `candidate.yaml` as part of its `finish` action. Had the candidate failed, iter8 would have decided to promote the baseline (rollback) by applying `baseline.yaml`.
+    3. In step 6, you created an Iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate.
+    4. At the end of the experiment, Iter8 identified the candidate as the `winner` since it passed all objectives. Iter8 decided to promote the candidate (rollforward) by applying `candidate.yaml` as part of its `finish` action. Had the candidate failed, Iter8 would have decided to promote the baseline (rollback) by applying `baseline.yaml`.
