@@ -5,9 +5,10 @@ template: overrides/main.html
 # Roadmap
 
 1. **Integration with more Kubernetes and OpenShift stacks**
-    * Support for OpenShift Serverless
     * Enhanced support for KFServing and Istio
+    * Support for OpenShift Serverless
     * Support for Ambassador and Kong networking layers for KNative
+    * Support for experimenting with configuration and routes for Knative
 2. **Improved installation**
     * Multi-stack installation, iter8 Helm chart, iter8 Operator
 3. **GitOps**

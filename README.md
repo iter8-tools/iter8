@@ -1,13 +1,12 @@
 # iter8
-
 iter8 documentation is available at https://iter8.tools.
 
-## Contributing to iter8 docs
-We are delighted that you are contributing to iter8 docs!
+## Contributing to iter8
+We are delighted that you are contributing to iter8!
 
 Please discuss the change you wish to make using [issues](https://github.com/iter8-tools/iter8/issues), [discussions](https://github.com/iter8-tools/iter8/discussions), or in the [iter8 slack workspace](https://iter8-tools.slack.com) before submitting your PR.
 
-### Locally build iter8 docs
+### Locally building iter8 docs
 iter8 documentation is built using [mkdocs for material](https://squidfunk.github.io/mkdocs-material/). Follow the instructions below to serve iter8 docs locally.
 
 **Pre-requisite:** [Node.js 12+](https://nodejs.org/en/)
@@ -20,7 +19,7 @@ cd iter8/mkdocs
 npm run build
 ```
 
-### Locally serve iter8 docs
+### Locally serving iter8 docs
 
 **Pre-requisite:** Python 3+. You may find it useful to setup and activate a Python 3+ virtual environment as follows. The `.venv` folder contains the virtual environment.
 
@@ -41,15 +40,15 @@ mkdocs serve
 
 Browse http://localhost:8000 to view your local iter8 docs.
 
-### Make and view changes to iter8 docs locally
+### Process for updating code artifacts
+YAMLs, scripts and other code artifacts that are part of code-samples are located under the `iter8/samples` folder. Changes to code artifacts are followed by a tagged release, so that versioned artifacts are available.
 
-1. YAMLs, scripts and other code artifacts that are part of code-samples are located under the `iter8/samples` folder.
+### Process for updating iter8 docs and viewing live changes
 
-2. The overall structure of the documentation, as reflected in the nav tabs of https://iter8.tools, is located in the `iter8/mkdocs/mkdocs.yml` file. Do not alter this file unless you really need to.
+1. While referring to code artifacts in docs (for example, a remote `kustomize` resource referenced in an experiment), use versioned artifacts.
+
+2. The overall structure of the documentation, as reflected in the nav tabs of https://iter8.tools, is located in the `iter8/mkdocs/mkdocs.yml` file.
 
 3. The markdown files for iter8 docs are located under the `iter8/mkdocs/docs` folder.
 
 You should see live updates in http://localhost:8000 as you change 3 (or 2) above.
-
-### Create PR
-Once you are satisfied with your changes, push changes to your fork and create a PR for the iter8 repo.
