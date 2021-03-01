@@ -116,6 +116,3 @@ material
 
 # site (built from mkdocs)
 site
-
-# package-lock.json
-package-lock.json
