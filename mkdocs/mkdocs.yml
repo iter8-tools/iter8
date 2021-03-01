@@ -104,7 +104,6 @@ nav:
     - Experiment: concepts/experimentoverview.md
     - Metrics: concepts/metricsoverview.md
     - Realtime observability: concepts/observability.md
-    - Traffic shaping: concepts/trafficshaping.md
   - Usage:
     - Using iter8: usage/usingiter8.md
     - Experiment spec in-depth:
@@ -137,7 +136,7 @@ nav:
   - Reference: 
     - Experiment: reference/experiment.md
     - Metric: reference/metric.md
-  - Extending iter8: extending.md
+  - Contributing: contributing.md
   - Roadmap: roadmap.md
   - Blog:
     - Blog link: https://blog.iter8.tools
