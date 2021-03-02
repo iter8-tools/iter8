@@ -5,7 +5,7 @@ template: overrides/main.html
 # Testing Pattern
 
 !!! abstract "Testing pattern"
-    `spec.strategy.testingPattern` determines the logic used to evaluate the app versions and determine the `winner` of the experiment. iter8 supports two testing patterns, namely, `canary` and `conformance`.
+    `spec.strategy.testingPattern` determines the logic used to evaluate the app versions and determine the `winner` of the experiment. Iter8 supports two testing patterns, namely, `canary` and `conformance`.
 
 ??? example "Sample experiment with `Canary` testing pattern"
     ```yaml

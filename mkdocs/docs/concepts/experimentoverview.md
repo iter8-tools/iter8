@@ -2,9 +2,8 @@
 template: overrides/main.html
 ---
 
-# Experiment overview
-
-> Iter8 defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
+!!! abstract ""
+    Iter8 defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
 ??? example "Sample experiment"
     ```yaml linenums="1"
@@ -94,7 +93,7 @@ template: overrides/main.html
 4. When the experiment finishes, Iter8 runs tasks specified under `spec.actions.finish` such as version promotion.
 
 ## Experiment spec in-brief
-A brief explanation of the key stanzas in an experiment spec is given below.
+A brief explanation of the key fields in an experiment spec is given below.
 
 ### spec.target
 
@@ -118,7 +117,7 @@ A brief explanation of the key stanzas in an experiment spec is given below.
 
 ### spec.strategy.weights
 
-`spec.strategy.weights` is an object with  two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This stanza is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by Iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
+`spec.strategy.weights` is an object with  two integer fields, namely, `maxCandidateWeight` and `maxCandidateWeightIncrement`, that can be used to fine-tune traffic increments to the candidate. This field is applicable only for `Progressive` experiments. `maxCandidateWeight` specifies the maximum candidate weight that can be set by Iter8 during an iteration. `maxCandidateWeightIncrement` specifies the maximum increase in candidate weight during a single iteration.
 
 ### spec.strategy.actions
 

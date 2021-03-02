@@ -1,5 +1,7 @@
 ---
 template: overrides/main.html
+hide:
+- toc
 ---
 
 # Features at a Glance

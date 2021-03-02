@@ -97,11 +97,11 @@ The `knative` task library provides the `init-experiment` task. Use this task as
 
 2. Verify that the target Knative service resource meets three conditions: `Ready`, `ConfigurationsReady` and `RoutesReady`.[^2]
 
-3. Verify that `revision` information supplied for app versions in the experiment can be found in the Knative service. For example, the sample experiment above refers to two revisions, namely, `sample-app-v1` and `sample-app-v2`. The `init-experiment` task will inspect the `status.traffic` stanza of the target Knative service to verify that the revisions are found.
+3. Verify that `revision` information supplied for app versions in the experiment can be found in the Knative service. For example, the sample experiment above refers to two revisions, namely, `sample-app-v1` and `sample-app-v2`. The `init-experiment` task will inspect the `status.traffic` field of the target Knative service to verify that the revisions are found.
 
-4. Add the `namespace` variable to the `spec.versionInfo` stanza in the experiment. The value of this variable is the namespace of the target Knative service.
+4. Add the `namespace` variable to the `spec.versionInfo` field in the experiment. The value of this variable is the namespace of the target Knative service.
 
-5. Add `weightObjRef` clause within the `spec.versionInfo` stanza in the experiment.
+5. Add `weightObjRef` clause within the `spec.versionInfo` field in the experiment.
 
 ??? info "`spec.versionInfo` before and after `init-experiment` is executed"
     === "Before"
@@ -187,7 +187,7 @@ The `common` task library provides the `exec` task. Use this task to execute she
 
 Inputs to tasks can container placeholders, or template variables which will be dynamically substituted when the task is executed by Iter8. Variable interpolation works as follows.
 
-1. Iter8 will find the version recommended for promotion. This information is stored in the `status.recommendedBaseline` stanza of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` stanza of the experiment.
+1. Iter8 will find the version recommended for promotion. This information is stored in the `status.recommendedBaseline` field of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` field of the experiment.
 
 2. If the placeholder is `{{ .name }}`, Iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, Iter8 will substitute it with the value of this corresponding variable for the version recommended for promotion. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may be executed by Iter8 as part of the experiment.
 

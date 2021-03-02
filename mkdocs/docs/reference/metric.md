@@ -4,13 +4,18 @@ template: overrides/main.html
 
 # Metric Resource Object
 
+!!! abstract ""
+    Iter8 defines a Kubernetes custom resource kind called `Metric` to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps. This document describes Metric version `v2alpha1`. Metric CRD is defined by Iter8's `etc3` controller repo. For documentation on etc3 and the Go client for `Metric` API, see [here](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.14/).
+
+
 ## MetricSpec
 
-Fields in an iter8 metric resource object `spec` are documented here.
+!!! abstract ""
+    Fields in the `spec` stanza of a Metric resource object.
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| params | [][Param](#param) | List of name/value pairs. Each name represents a parameter name; the corresponding value is a template, which will be instantiated by Iter8 while querying the metrics backend. For examples and more details, see [here](/usage/metrics/how-iter8-queries-metrics/).| No |
+| params | [][Param](#param) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a template, which will be instantiated by Iter8 at query time. For examples and more details, see [here](/usage/metrics/how-iter8-queries-metrics/).| No |
 | description | string | Human-readable description of the metric. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
@@ -21,14 +26,15 @@ Fields in an iter8 metric resource object `spec` are documented here.
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| name | string | Name of parameter. | Yes |
-| value | string | Value that should be substitute for the parameter. | Yes |
+| name | string | Name of the HTTP query parameter. | Yes |
+| value | string | Value of the HTTP query parameter. See [here](/usage/metrics/how-iter8-queries-metrics/) for documentation on how Iter8 interpolates params. | Yes |
 
 ## MetricReference
 
-A reference to another metric in the cluster. Used to refer to the metric that is used to count the number of data points over which a gauge metric is computed.
+!!! abstract ""
+    A reference to a metric in the cluster.
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| namespace | string | Namespace containing another metric. Defaults to the namespace of the referring object. | No |
-| name | string | Name of another metric. | Yes |
+| namespace | string | Namespace containing the referred metric. Defaults to the namespace of the referring metric. | No |
+| name | string | Name of the referred metric. | Yes |

@@ -94,7 +94,7 @@ versionInfo:
 ```
 
 ### Number of versions
-[`Conformance`](testing.md) experiments involve only a single version (baseline). Hence, in `Conformance` experiments, the `candidates` stanza of `versionInfo` must be omitted. A [`Canary`](testing.md) experiment involves two versions, baseline and a candidate. Hence, in `Canary` experiments, the `candidates` stanza must be a list of length one and must contain a single `versionDetail` object.[^1]
+[`Conformance`](testing.md) experiments involve only a single version (baseline). Hence, in `Conformance` experiments, the `candidates` field of `versionInfo` must be omitted. A [`Canary`](testing.md) experiment involves two versions, baseline and a candidate. Hence, in `Canary` experiments, the `candidates` field must be a list of length one and must contain a single `versionDetail` object.[^1]
 
 ## Schema of versionDetail
 

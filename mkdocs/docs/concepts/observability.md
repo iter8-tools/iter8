@@ -1,11 +1,13 @@
 ---
 template: overrides/main.html
+hide:
+- toc
 ---
 
 # Realtime Observability
 
-!!! abstract "iter8ctl"
-    **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the `winner`.
+!!! abstract ""
+    The  **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the `winner`.
 
 
 ??? example "Sample output from iter8ctl"

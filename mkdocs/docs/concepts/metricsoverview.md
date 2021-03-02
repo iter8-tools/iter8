@@ -2,9 +2,9 @@
 template: overrides/main.html
 ---
 
-# Metrics Overview
+# Metrics
 
-!!! abstract "iter8 metric"
+!!! abstract ""
     **iter8** defines a Kubernetes CRD called **metric**. A metric resource encapsulates the REST query that is used for retrieving a metric value from the metrics backend.
 
 ??? example "Sample metric"
@@ -22,7 +22,7 @@ template: overrides/main.html
       provider: prometheus
     ```
 
-Metrics are referenced within the `spec.criteria` stanza of the experiment. Metrics usage within experiments is described [here](/usage/metrics/using-metrics).
+Metrics are referenced within the `spec.criteria` field of the experiment. Metrics usage within experiments is described [here](/usage/metrics/using-metrics).
 
 ??? example "Sample experiment illustrating metrics usage"
     ```yaml
@@ -103,7 +103,7 @@ Metrics are referenced within the `spec.criteria` stanza of the experiment. Metr
     ```
 
 ## Metric spec in-brief
-A brief explanation of the key stanzas in a metric spec is given below.
+A brief explanation of the key fields in a metric spec is given below.
 
 ### spec.params
 `spec.params` is a list of name-value pairs containing the HTTP params Iter8 needs to use when it issues a REST query to the metrics database for this metric. The value string can be templated; Iter8 will substitute the placeholders in the value string using version variables. This process is described [here](/usage/metrics/how-iter8-queries-metrics).
