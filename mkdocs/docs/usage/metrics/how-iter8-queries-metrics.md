@@ -5,11 +5,11 @@ template: overrides/main.html
 # How Iter8 queries metrics
 
 !!! abstract "Params interpolation"
-    During an experiment, in each iteration, for each metric, and for each app-version, Iter8 uses an HTTP query to retrieve the current metric value. The params of this HTTP query are constructed by interpolating the `spec.params` stanza of the metric. 
+    During an experiment, in each iteration, for each metric, and for each app-version, Iter8 uses an HTTP query to retrieve the current metric value. The params of this HTTP query are constructed by interpolating the `spec.params` field of the metric. 
 
 ## How Iter8 interpolates params
 
-* For each object in the `spec.params` stanza of a metric, Iter8 interpolates its `value` string.
+* For each object in the `spec.params` field of a metric, Iter8 interpolates its `value` string.
     - `$interval` is replaced by the total time elapsed since the start of the experiment.
     - `$name` is replaced by the name of the app-version.
     - Any other placeholder (i.e., string beginning with `$`) is replaced by the value of the corresponding variable associated with the app version.[^1]
@@ -77,7 +77,7 @@ This example illustrates the end-to-end process of retrieving metric values in I
     ```
 
 1. Iter8 retrieves the [URL of the prometheus database](/getting-started/install/prometheus-url), for instance, http://prometheus-operated.iter8-knative-monitoring:9090.
-2. Consider a specific iteration of the experiment. Consider `my-metric` which is referenced in the `spec.criteria` stanza of the experiment. Consider the app version named `sample-app-v2`.
+2. Consider a specific iteration of the experiment. Consider `my-metric` which is referenced in the `spec.criteria` field of the experiment. Consider the app version named `sample-app-v2`.
     - suppose the time elapsed since the start of the experiment (i.e, since `status.initTime`) equals 285 seconds. Iter8 substitutes `$interval` with `285s`.
     - Iter8 substitutes `$name` with `sample-app-v2`, the version name.
     - Iter8 substitutes `$namespace` with `iter8-knative-monitoring` which is the value of the `namespace` variable for `sample-app-v2`.

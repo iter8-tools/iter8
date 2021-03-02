@@ -4,93 +4,92 @@ template: overrides/main.html
 
 # Experiment Resource Object
 
-Fields in an Iter8 experiment resource object are documented here. Unsupported fields, or those reserved for future, are not documented here. For complete documentation, see the Iter8 Experiment API [here](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.13-pre/api/v2alpha1).
+!!! abstract ""
+    Iter8 defines a Kubernetes custom resource kind called `Experiment` to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps. This document describes Experiment version `v2alpha1`. Experiment resource objects  are reconciled by Iter8's `etc3` controller. For documentation on etc3 and the Go client for `Experiment` API, see [here](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.14/).
 
 ## ExperimentSpec
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| target | string | Identifies the resources involved in an experiment. The meaning depends on the domain but typically identifies the resources participating in the experiment. Two experiments with the same target cannot run concurrently; those with different targets can | Yes |
-| strategy | [Strategy](#strategy) | Strategy used for experimentation. | Yes |
-| criteria | [Criteria](#criteria) | Criteria used to evaluate versions. | No |
+| target | string | Identifies the app under experimentation and determines which experiments can run concurrently. Experiments that have the same target value will not be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently. | Yes |
+| strategy | [Strategy](#strategy) | The experimentation strategy which specifies how app versions are tested, how traffic is shifted during experiment, and what tasks are executed at the start and end of the experiment. | Yes |
+| criteria | [Criteria](#criteria) | Metrics used for evaluating versions along with acceptable limits for their values. | No |
 | duration | [Duration](#duration) | Duration of the experiment. | No |
-| versionInfo | [VersionInfo](#versioninfo) | Details about the application versions participating in the experiment. | No |
+| versionInfo | [VersionInfo](#versioninfo) | App versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`. | No |
 
-## Strategy
-
-Defines the behavior of an experiment.
+### Strategy
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| testingPattern | string | Type of Iter8 experiment. Currently, `Canary` and `Conformance` tests are supported. | Yes |
-| deploymentPattern | string | The method by which traffic is shifted between versions in an experiment. Currently, these are `Progressive` (default) and `FixedSplit`. A Progressive pattern shifts traffic between versions while a FixedSplit pattern leaves traffic as it is. | No |
-| actions | map[string][][TaskSpec](#taskspec) | Sequence of tasks to be called before an experiment begins or after an experiment completes. | No |
-| handlers | [Handlers](#handlers) | (Deprecated) External methods that should be called before and after an experiment. `actions` are the preferred mechanism for this. | No |
+| testingPattern | string | Determines the logic used to evaluate the app versions and determine the winner of the experiment. Iter8 supports two testing patterns, namely, `Canary` and `Conformance`. | Yes |
+| deploymentPattern | string | Determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. Iter8 supports two deployment patterns, namely, Progressive and FixedSplit. | No |
+| actions | map[string][][TaskSpec](#taskspec) | An action is a sequence of tasks that can be executed by Iter8. spec.strategy.actions can be used to specify start and finish actions that will be run at the start and end of an experiment respectively. | No |
 
-## TaskSpec
+#### TaskSpec
 
-Identifies the implementation of a task to be run by reference to a library implemented in [https://github.com/iter8-tools/handler](https://github.com/iter8-tools/handler), documented [here](https://pkg.go.dev/github.com/iter8-tools/handler).
+!!! abstract ""
+    Specification of a task that will be executed as part of experiment actions. Tasks are organized into libraries as documented [here](http://localhost:8000/usage/experiment/actions/#tasks). Tasks and task libraries are implemented by Iter8's [handler repo](https://github.com/iter8-tools/handler) which is documented [here](https://pkg.go.dev/github.com/iter8-tools/handler).
 
  Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| library | string | Name of library containing the implementation of the task to be run. | Yes |
-| task | string | Name of task to run | Yes |
+| library | string | Name of library to which this task belongs. | Yes |
+| task | string | Name of the task. Task names are unique within a library. | Yes |
 | with | map[string][apiextensionsv1.JSON](https://pkg.go.dev/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1#JSON) | Inputs to the task. | No |
 
-## Handlers
-
-Do we want to document this?
-
-## Criteria
-
-> Note: References to metric resource objects within experiment criteria can be in the `namespace/name` format or in the `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then Iter8 first searches for the metric in the namespace of the experiment resource object followed by the `iter8-system` namespace. If Iter8 cannot find the metric in either of these namespaces, then the reference is considered in valid and the will terminate in a failure.
+### Criteria
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| requestCount | string | The name of the metric to be used count the number of requests seen by a version. May be defaulted by the configuration of Iter8. | no |
-| objectives | [Objective](#objective)[] | A list of objectives. Satisfying all objectives in an experiment is a necessary condition for a version to be declared a `winner`. | No |
-| indicators | string[] | A list of metrics that, during the experiment, for each version, metric values are recorded by Iter8 in the experiment status section. | No |
+| requestCount | string | Reference to the metric used to count the number of requests sent to app versions. | No |
+| objectives | [Objective](#objective)[] | A list of metrics along with acceptable upper limits, lower limits, or both upper and lower limits for them. Iter8 will verify if app versions satisfy these objectives. | No |
+| indicators | string[] | A list of metric references. Iter8 will collect and report the values of these metrics in addition to those referenced in the `objectives` section. | No |
 
-## Objective
+!!! warning "" 
+    **Note:** References to metric resource objects within experiment criteria should be in the `namespace/name` format or in the `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then Iter8 searches for the metric in the namespace of the experiment resource. If Iter8 cannot find the metric, then the reference is considered invalid and the experiment will terminate in a failure.
 
-An objective identifies the range of acceptable values for a metric. A version with values in the specified range are considered to be passing.
+#### Objective
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| metric | string | Reference to a metric resource object in the `namespace/name` format or in the `name` format.  | Yes |
+| metric | string | Reference to a metric resource. Also see [note on metric references](#criteria). | Yes |
 | upperLimit | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | Upper limit on the metric value. If specified, for a version to satisfy this objective, its metric value needs to be below the limit. | No |
-| lowerLimit | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | Lower limit on the metric value. If specified, for a version to satisfy this objective, its metric value needs to be above the limit. | No |
+| lowerLimit | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | Lower limit on the metric value. If specified, for a version to satisfy this objective, its metric value needs to be above the limit. | No |    
 
-## Duration
+### Duration
 
-The duration of an experiment expressed as two integer fields: the number of iterations in the experiment and the time interval in seconds between successive iterations.
+!!! abstract ""
+    The duration of the experiment.
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | intervalSeconds | int32 | Duration of a single iteration of the experiment in seconds. Default value = 20 seconds. | No |
 | maxIterations | int32 | Maximum number of iterations in the experiment. In case of failure, the experiment may be terminated earlier. Default value = 15. | No |
 
-## VersionInfo
+### VersionInfo
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | baseline | [VersionDetail](#versiondetail) | Details of the current or baseline version. | Yes |
 | candidates | [][VersionDetail](#versiondetail) | Details of the candidate version or versions, if any. | No |
 
-## VersionDetail
+!!! note ""
+    `Conformance` experiments involve only a single version (baseline). Hence, in `Conformance` experiments, the `candidates` field of versionInfo must be omitted. A `Canary` experiment involves two versions, `baseline` and `candidate`. Hence, in `Canary` experiments, the `candidates` field must be a list of length one and must contain a single versionDetail object.
+
+#### VersionDetail
 
 | Field | Type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | name | string | Name of the version. | Yes |
-| variables | [][Variable0(#variable) | A list of name/value pairs that can passed to action tasks and used to specify metrics queries | No |
-| weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | A reference to the field in a Kubernetes object that specfies the traffic sent to this version. | No |
+| variables | [][Variable](#variable) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to interpolate these strings. | No |
+| weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | Reference to a Kubernetes resource and a field-path within the resource. Iter8 uses `weightObjRef` to get or set weight (traffic percentage) for the version. | No |
 
-## Variable
+##### Variable
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| name | string | name of a variable | No |
-| value | string | value that should be substituted or name | No |
+| name | string | name of the variable | Yes |
+| value | string | value of the variable | Yes |
+
 
 ## ExperimentStatus
 
@@ -98,18 +97,19 @@ The duration of an experiment expressed as two integer fields: the number of ite
 | ----- | ------------ | ----------- | -------- |
 | conditions | [][ExperimentCondition](#experimentcondition) | A set of conditions that express progress through an experiment. | No |
 | initTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time the experiment is created. | No |
-| startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when an experiment begins running (after any start actions have completed)  | No |
+| startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the first iteration of experiment begins  | No |
 | endTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when an experiment has completed. | No |
 | lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
-| stage | string | Indicator of progress of an experiment. The stage is `Waiting` before an experiment executes its start actions, `Initializing` while running the start actions, `Running` while the experiment is progressing, `Finishing` while any finish actions are running and `Completed` when the experiment terminates. | No |
-| currentWeightDistribution | [][WeightData](#weightdata) | Currently observed distribution of requests. | No |
+| stage | string | Indicator of progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running and `Completed` when the experiment terminates. | No |
+| currentWeightDistribution | [][WeightData](#weightdata) | Currently observed distribution of requests between app versions. | No |
 | analysis | Analysis | Result of latest query to the Iter8 analytics service.  | No |
-| recommendedBaseline | string | The version recommended as the version that should replace the baseline version when the experiment completes. | No |
+| recommendedBaseline | string | The version recommended for promotion. Although this field is populated by Iter8 even before the completion of the experiment, this field is intended to be used only on completion by the finish action. | No |
 | message | string | User readable message. | No |
 
-## ExperimentCondition
+### ExperimentCondition
 
-Conditions express aspects of the progress of an experiment. The `Completed` condition indicates whether or not an experiment has completed or not. The `Failed` condition indicates whether or not an experiment completed successfully or in failure. Finally, the `TargetAcquired` condition indicates that an experiment can proceed without interference from other experiments. Iter8 ensures that only one experiment has `TargetAcquired` set to `True` while `Completed` is set to `False`.
+!!! abstract ""
+    Conditions express aspects of the progress of an experiment. The `Completed` condition indicates whether or not an experiment has completed or not. The `Failed` condition indicates whether or not an experiment completed successfully or in failure. Finally, the `TargetAcquired` condition indicates that an experiment can proceed without interference from other experiments. Iter8 ensures that only one experiment has `TargetAcquired` set to `True` while `Completed` is set to `False`.
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
@@ -119,69 +119,38 @@ Conditions express aspects of the progress of an experiment. The `Completed` con
 | reason | string | A reason for the change in value. Reasons come from a set of reason | No |
 | message | string | A user readable decription. | No |
 
-## WeightData
+### Analysis
+
+!!! abstract ""
+    Result of latest query to the Iter8 analytics service.
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| name | string | Version name | Yes |
-| value | int32 | Percentage of traffic being sent to the version.  | Yes |
+| aggregatedMetrics | [AggregatedMetricsAnalysis](#aggregatedmetricsanalysis) | Most recently observed metric values for all metrics referenced in the experiment criteria. | No |
+| winnerAssessment | [WinnerAssessmentAnalysis](#winnerassessmentanalysis) | Information about the `winner` of the experiment. | No |
+| versionAssessments | [VersionAssessmentAnalysis](#versionassessmentanalysis) | For each version, a summary analysis identifying whether or not the version is satisfying the experiment criteria. | No |
+| weights | [WeightsAnalysis](#weightanalysis) | Recommended weight distribution to be applied before the next iteration of the experiment. | No |
 
-## Analysis
-
-Result of latest query to the Iter8 analytics service.
-Queries may, but are not required to, return results along 4 dimensions.
-
-| Field | Type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| aggregatedMetrics | [AggregatedMetricsAnalysis](#aggregatedmetricsanalysis) | Latest metrics for each required criteria. | No |
-| winnerAssessment | WinnerAssessmentAnalysis(#winnerassessmentanalysis) | If identified, the recommended winning version. | No |
-| versionAssessments | VersionAssessmentAnalysis(#versionassessmentanalysis) | For each version, a summary analysis identifying whether or no the version is satisfying the experiment criteria. | No |
-| weights | WeightsAnalysis(#weightanalysis) | Recommended weight distributuion for next iteration of the experiment. | No |
-
-## AggregatedMetricsAnalysis
+##### VersionAssessmentAnalysis
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| provenance | string | Source of the data, usually a URL. | Yes |
+| provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
+| message | string | User readable message. | No |
+| data | map[string][]bool | map of version name to a list of boolean values, one for each objective specified in the experiment criteria, indicating whether not the objective is satisified. | No |
+
+
+#### AggregatedMetricsAnalysis
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
 | timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
 | message | string | User readable message. | No |
 | data | map[string][AggregatedMetricsData](#aggregatedmetricsdata) | Map from metric name to most recent data (from all versions) for the metric. | Yes |
 
-## WinnerAssessmentAnalysis
-
-| Field | Type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| provenance | string | Source of the data, usually a URL. | Yes |
-| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
-| message | string | User readable message. | No |
-| data | [WinnerAssessmentData](#winnerassessmentdata) | Details on whether or not a winner has been identified and which version if so. | No |
-
-## VersionAssessmentAnalysis
-
-| Field | Type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| provenance | string | Source of the data, usually a URL. | Yes |
-| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
-| message | string | User readable message. | No |
-| data | map[string][]bool | map of version name to a list of boolean values, one for each objective specified in the experiment criteria, indicating whether not not the objective is satisified for not. | No |
-
-## WeightAnalysis
-
-| Field | Type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| provenance | string | Source of the data, usually a URL. | Yes |
-| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
-| message | string | User readable message. | No |
-| data | [][WeightData](#weightdata) | List of version name/value pairs representing a recommended weight for each version | No |
-
-## WinnerAssessmentData
-
-| Field | Type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| winnerFound | bool | Whether or not a winner has been identified. | Yes |
-| winner | string | The name of the identified winner, if one has been found. | No |
-
-## AggregatedMetricsData
+##### AggregatedMetricsData
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
@@ -189,7 +158,7 @@ Queries may, but are not required to, return results along 4 dimensions.
 | min | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The minimum value observed for this metric accross all versions. | Yes |
 | data | map[string][AggregatedMetricsVersionData](#aggregatedmetricsversiondata) | A map from version name to the most recent aggregated metrics data for that version. | No |
 
-## AggregatedMetricsVersionData
+###### AggregatedMetricsVersionData
 
 | Field | Type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
@@ -197,3 +166,37 @@ Queries may, but are not required to, return results along 4 dimensions.
 | min | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The minimum value observed for this metric for this version over all observations. | No |
 | value | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | The value. | No |
 | sampleSize | int32 | The number of requests observed by this version. | No |
+
+
+#### WinnerAssessmentAnalysis
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
+| message | string | User readable message. | No |
+| data | [WinnerAssessmentData](#winnerassessmentdata) | Details on whether or not a winner has been identified and which version if so. | No |
+
+##### WinnerAssessmentData
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| winnerFound | bool | Whether or not a winner has been identified. | Yes |
+| winner | string | The name of the identified winner, if one has been found. | No |
+
+#### WeightAnalysis
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
+| message | string | User readable message. | No |
+| data | [][WeightData](#weightdata) | List of version name/value pairs representing a recommended weight for each version | No |
+
+##### WeightData
+
+| Field | Type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| name | string | Version name | Yes |
+| value | int32 | Percentage of traffic being sent to the version.  | Yes |
+

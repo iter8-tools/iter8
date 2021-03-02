@@ -43,7 +43,7 @@ plugins:
   - search
   - minify:
       minify_html: true
-
+        
 # Customization
 extra:
   social:
@@ -92,6 +92,11 @@ markdown_extensions:
 # Page tree
 nav:
   - Home: index.md
+  - Concepts:
+    # - What is Iter8: concepts/whatisiter8.md
+    - Experiment: concepts/experimentoverview.md
+    - Metrics: concepts/metricsoverview.md
+    - Realtime observability: concepts/observability.md
   - Getting started:
     - Quick start: 
       - with Knative: getting-started/quick-start/with-knative.md
@@ -100,10 +105,6 @@ nav:
     - Install: getting-started/install.md
     - Features at a glance: getting-started/features.md
     - Getting help: getting-started/help.md
-  - Concepts:
-    - Experiment: concepts/experimentoverview.md
-    - Metrics: concepts/metricsoverview.md
-    - Realtime observability: concepts/observability.md
   - Usage:
     - Using Iter8: usage/usingiter8.md
     - Experiment spec in-depth:
@@ -121,18 +122,14 @@ nav:
       - Custom metrics: usage/metrics/custom-metrics.md
   - Code samples:
     - Iter8-Knative:
-      - Canary - Progressive: code-samples/iter8-knative/canary-progressive.md
-      - Canary - FixedSplit: code-samples/iter8-knative/canary-fixedsplit.md
+      - Canary / Progressive / Helm: code-samples/iter8-knative/canary-progressive.md
+      - Canary / FixedSplit / Kustomize: code-samples/iter8-knative/canary-fixedsplit.md
       - Conformance: code-samples/iter8-knative/conformance.md
       - Mirroring / dark launch: code-samples/iter8-knative/mirroring.md
       - Request routing: code-samples/iter8-knative/requestrouting.md
-      - Helm/Kustomize/YAML/JSON: code-samples/iter8-knative/appmanifest.md
-      - Knative annotations:
-        - Cluster-local (backend): code-samples/iter8-knative/annotations/cluster-local-backend.md
-        - Min scale: code-samples/iter8-knative/annotations/minscale.md
-        - Pod retention period: code-samples/iter8-knative/annotations/podretention.md
-      - Tutorial enhancements:
-        - Generating external traffic: code-samples/iter8-knative/enhancements/traffic.md
+      - Knative annotations: code-samples/iter8-knative/annotations.md
+    - Winner promotion: code-samples/promotion.md
+    - Generating requests externally: code-samples/traffic.md
   - Reference: 
     - Experiment: reference/experiment.md
     - Metric: reference/metric.md

@@ -5,7 +5,7 @@ template: overrides/main.html
 # Deployment Pattern
 
 !!! abstract "Deployment pattern"
-    `spec.strategy.deploymentPattern` determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
+    `spec.strategy.deploymentPattern` determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. Iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`.
 
 ??? example "Sample experiment `Progressive` deployment pattern"
     ```yaml

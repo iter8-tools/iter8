@@ -3,17 +3,18 @@ template: overrides/main.html
 ---
 
 # Quick start with Knative
- 
-Perform **zero-downtime progressive canary release of a Knative app**. You will create:
+
+Perform a `progressive canary` experiment using the following resources.
 
 1. A Knative service with two versions of your app, namely, `baseline` and `candidate`
 2. A traffic generator which sends HTTP GET requests to the Knative service.
 3. An **Iter8 experiment** that automates the following: 
     - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
-    - iteratively shifts traffic from `baseline` to `candidate`, and
+    - progressively shifts traffic from `baseline` to `candidate`, and
     - replaces `baseline` with `candidate` in the end using a `kubectl apply` command
+ 
 
-!!! warning "Before you begin, you will need:"
+??? warning "Before you begin"
 
     1. Kubernetes cluster. You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
     2. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
@@ -38,7 +39,7 @@ Create a local Kubernetes cluster or use a managed Kubernetes service from your 
     ```
     
 
-## 2. Clone repo
+## 2. Clone Iter8 repo
 ```shell
 git clone https://github.com/iter8-tools/iter8.git
 cd iter8
@@ -72,7 +73,7 @@ Choose a networking layer for Knative. Install Knative and Iter8.
     $ITER8/samples/knative/quickstart/platformsetup.sh gloo
     ```
 
-## 4. Create Knative app with canary
+## 4. Create app versions
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
 kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
@@ -80,20 +81,17 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 
 ??? info "Look inside baseline.yaml"
     ```yaml
-    # apply this yaml at the start of the experiment to create the baseline revision
-    # Iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
-      name: sample-app # The name of the app
-      namespace: default # The namespace the app will use
+      name: sample-app
+      namespace: default
     spec:
       template:
         metadata:
           name: sample-app-v1
         spec:
           containers:
-          # The URL to the sample app docker image
           - image: gcr.io/knative-samples/knative-route-demo:blue 
             env:
             - name: T_VERSION
@@ -102,9 +100,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 
 ??? info "Look inside experimentalservice.yaml"
     ```yaml
-    # This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
-    # To begin with, candidate revision receives zero traffic
-    # Apply this after applying baseline.yaml in order to create the second revision
+    # This Knative service will be used by the Iter8 experiment for splitting traffic between baseline (sample-app-v1) and candidate (sample-app-v2).
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
@@ -116,7 +112,6 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
           name: sample-app-v2
         spec:
           containers:
-          # Docker image used by second revision
           - image: gcr.io/knative-samples/knative-route-demo:green 
             env:
             - name: T_VERSION
@@ -131,14 +126,13 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
     ```
 
 ## 5. Generate requests
-Verify Knative service is ready and generate requests to app using fortio.
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
 ```
 
-## 6. Create Iter8 experiment
+## 6. Create experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 ```
@@ -200,8 +194,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
     ```
 
 ## 7. Observe experiment
-
-You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
+Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "iter8ctl"
     Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing GOBIN below.
@@ -284,8 +277,6 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
         ```
         When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
-
-    
 
 === "kubectl get ksvc"
 

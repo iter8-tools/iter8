@@ -1,5 +1,7 @@
 ---
 template: overrides/main.html
+hide:
+- toc
 ---
 
 # Experiment duration
