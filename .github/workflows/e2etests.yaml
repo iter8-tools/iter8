@@ -284,4 +284,65 @@ jobs:
           exit 1
         fi        
 
+  knative-conformance:
+    name: knative conformance
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+
+    - name: create Knative app
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f $ITER8/samples/knative/conformance/baseline.yaml        
+
+    - name: Generate requests
+      run: |
+        export ITER8=$(pwd)
+        kubectl wait --for=condition=Ready ksvc/sample-app
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -        
+        
+    - name: Create Iter8 experiment
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
+
+    - name: Sleep
+      run: |
+        sleep 150.0
+
+    - name: Check if experiment is complete and successful
+      run: |
+        #Check if experiment has completed
+        completed="Completed"
+        if [[ $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)=="$completed" ]]; then
+          echo "Experiment has Completed"
+        else
+          echo "Experiment must be Completed. It is $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)"
+          exit 1
+        fi
+
+        #Check if no requests have been lost during the experiment
+        
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
+
+        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
+        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
+        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
+          echo "Packets were not lost"
+        else
+          echo "Packets were lost"
+          exit 1
+        fi
+
+
 
