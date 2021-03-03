@@ -4,18 +4,21 @@ template: overrides/main.html
 
 # What is Iter8?
 
-You are developing a distributed microservices-based application on Kubernetes and have created alternative versions of a service. You want to identify the `winning version` of your service using a live experiment and rollout this version in a safe and reliable manner.
+You are developing a distributed microservices-based app on Kubernetes and have created alternative versions of the service. You want to identify the `winning version` of your service using a live experiment and rollout this version in a safe and reliable manner.
 
 !!! tip ""
     Enter **Iter8**.
 
-Iter8 is an open source toolkit for progressive delivery, automated rollouts, and metrics and AI-driven experiments on Kubernetes. Iter8 enables delivery of high-impact code changes within your microservices applications in an agile manner while eliminating the risk. Using Iter8's AI-driven experimentation capabilities, you can safely and rapidly orchestrate various types of live experiments, gain key insights into the behavior of your microservices, and rollout the best versions of your microservices in an automated, principled, and statistically robust manner.
+Iter8 is an open source toolkit for progressive delivery, automated rollouts, and metrics and AI-driven experiments on Kubernetes. Using Iter8's AI-driven experimentation capabilities, you can safely and rapidly orchestrate various types of live experiments, gain key insights into the behavior of your microservices, and rollout the `winning version` of your microservice app or ML model in a principled, automated, and statistically robust manner.
+<!-- Iter8 enables delivery of high-impact code changes within your microservices applications in an agile manner while eliminating the risk.  -->
+
 
 ## What is an Iter8 experiment?
 
 !!! tip ""
     Iter8 defines a Kubernetes resource kind called **Experiment** to automate metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
+### Features at a glance
 Iter8's expressive model of experimentation is designed to support the following.
 
 - Diverse Kubernetes and OpenShift application stacks; currently supported stacks are **Knative**, **KFServing**[^1] and **Istio**[^2],
@@ -28,7 +31,7 @@ Iter8 experiments featuring a few combinations of the above capabilities are ill
 
 ## How does Iter8 work?
 
-Iter8 is composed of a Kubernetes controller, an analytics service and a task runner framework which are jointly responsible for orchestrating an experiment, and making iterative decisions about how to setup the experiment, how to shift application traffic during the experiment, how to identify a `winner`, when to terminate the experiment, and how to promote the `winner`. 
+Iter8 consists of a Kubernetes controller, an analytics service, and a task runner which are jointly responsible for orchestrating an experiment. An Iter8 experiment can automate several key functions such as initializing a partially specified experiment, iteratively deciding how to split traffic between app versions, identifying a `winner`, deciding when to terminate the experiment, and promoting the `winner`.
 
 Under the hood, Iter8 uses advanced Bayesian learning techniques coupled with multi-armed bandit approaches for statistical assessments and decision making.
 
