@@ -24,9 +24,9 @@ A basic Iter8 experiment that automates `Canary` testing and `Progressive` deplo
 
 ![Canary / Progressive / kubectl](/assets/images/canary-progressive-kubectl.png)
 
-
-
 ## Features at a glance
+
+Iter8 provides a powerful and expressive framework for experimentation. Combine the following features within experiments in a rapid and flexible manner.
 
 - Experimentation on **any** Kubernetes and OpenShift stack; stacks that are currently supported with documented code-samples are **Knative**, **KFServing**[^1] and **Istio**[^2].
 - Testing patterns such as **Conformance**, **Canary**, **A/B**, **A/B/n** and **Pareto**[^3].
@@ -34,16 +34,7 @@ A basic Iter8 experiment that automates `Canary` testing and `Progressive` deplo
 - Traffic shaping methods like **mirroring**, **dark launch**, **request routing**, and **sticky sessions**[^5].
 - App config tools such as **Helm**, **Kustomize**, and plain **YAML/JSON** app manifests.
 - Statistically robust assessment of app versions, traffic shifting, and version promotion. Iter8's analytics engine implements **Bayesian learning** and **multi-armed bandit algorithms** for principled decision making during experiments.
-- The **iter8ctl** CLI for observing experiments in realtime as they unfold.
-
-Iter8 experiments can flexibly combine these features. A few combinations are illustrated below.
-
-=== "Canary / Progressive / kubectl"
-    An Iter8 experiment that automates `Canary` testing, `Progressive` deployment (traffic shifting), and promotion of the `winner` using the `kubectl` CLI.
-    ![Canary / Progressive / kubectl](/assets/images/canary-progressive-kubectl.png)
-
-    !!! tip ""
-        Try this experiment in under 5 mins using [this tutorial](/getting-started/quick-start/with-knative/).
+- The **iter8ctl** CLI for observing experiments in realtime.
 
 ## How does Iter8 work?
 
