@@ -93,7 +93,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Concepts:
-    # - What is Iter8: concepts/whatisiter8.md
+    - What is Iter8: concepts/whatisiter8.md
     - Experiment: concepts/experimentoverview.md
     - Metrics: concepts/metricsoverview.md
     - Realtime observability: concepts/observability.md

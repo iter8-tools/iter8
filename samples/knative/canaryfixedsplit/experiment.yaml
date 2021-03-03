@@ -35,8 +35,8 @@ spec:
     - metric: error-rate
       upperLimit: "0.01"
   duration:
-    intervalSeconds: 20
-    iterationsPerLoop: 12
+    intervalSeconds: 10
+    iterationsPerLoop: 10
   versionInfo:
     # information about app versions used in this experiment
     baseline:

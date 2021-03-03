@@ -8,7 +8,7 @@ spec:
       containers:
       - name: fortio
         image: fortio/fortio
-        command: ["fortio", "load", "-t", "10m", $(URL)]
+        command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
         env:
         - name: URL
           value: URL_VALUE
