@@ -93,17 +93,14 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Concepts:
-    - What is Iter8: concepts/whatisiter8.md
-    - Experiment: concepts/experimentoverview.md
-    - Metrics: concepts/metricsoverview.md
-    - Realtime observability: concepts/observability.md
+    - What is Iter8?: concepts/whatisiter8.md
+    - Experimentation Strategies: concepts/experimentationstrategies.md
   - Getting started:
     - Quick start: 
       - with Knative: getting-started/quick-start/with-knative.md
       - with KFServing: getting-started/quick-start/with-kfserving.md
       - with Istio: getting-started/quick-start/with-istio.md
     - Install: getting-started/install.md
-    - Features at a glance: getting-started/features.md
     - Getting help: getting-started/help.md
   - Usage:
     - Using Iter8: usage/usingiter8.md
@@ -117,6 +114,7 @@ nav:
       - spec.strategy.actions: usage/experiment/actions.md
       - spec.duration: usage/experiment/duration.md
     - Metrics in-depth:
+      - Metrics: usage/metrics/metricsoverview.md
       - Using metrics in experiments: usage/metrics/using-metrics.md
       - How Iter8 queries metrics: usage/metrics/how-iter8-queries-metrics.md
       - Custom metrics: usage/metrics/custom-metrics.md

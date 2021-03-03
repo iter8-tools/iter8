@@ -116,3 +116,6 @@ material
 
 # site (built from mkdocs)
 site
+
+# backup pptx
+~$iter8++images.pptx

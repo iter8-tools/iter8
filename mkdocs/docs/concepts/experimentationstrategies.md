@@ -103,6 +103,14 @@ A brief explanation of the key fields in an experiment spec is given below.
 
 `spec.versionInfo` is an object that describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
 
+=== "Canary / Progressive / kubectl"
+    An Iter8 experiment that automates `Canary` testing, `Progressive` deployment (traffic shifting), and promotion of the `winner` using the `kubectl` CLI.
+    ![Canary / Progressive / kubectl](/assets/images/canary-progressive-kubectl.png)
+
+    !!! tip ""
+        Try this experiment in 5 mins using [this tutorial](/getting-started/quick-start/with-knative/).
+
+
 ### spec.criteria
 
 `spec.criteria` is an object that specifies the metrics used for evaluating versions along with acceptable limits for their values.
@@ -128,3 +136,57 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
 `spec.duration` is an object with two integer fields, namely, `iterationsPerLoop` and `intervalSeconds`. The former specifies the number of iterations in the experiment. The latter specifies the time interval in seconds between successive iterations.
 
 [^1]: Traffic shifting is relevant only when an experiment involves two or more versions. `Conformance` testing experiments involve a single version. Hence, `spec.strategy.deploymentPattern` is ignored in these experiments.
+
+
+## Realtime Observability
+
+!!! abstract ""
+    The  **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the `winner`.
+
+
+??? example "Sample output from iter8ctl"
+    ```shell
+    ****** Overview ******
+    Experiment name: quickstart-exp
+    Experiment namespace: default
+    Target: default/sample-app
+    Testing pattern: Canary
+    Deployment pattern: Progressive
+
+    ****** Progress Summary ******
+    Experiment stage: Running
+    Number of completed iterations: 3
+
+    ****** Winner Assessment ******
+    App versions in this experiment: [current candidate]
+    Winning version: candidate
+    Recommended baseline: candidate
+
+    ****** Objective Assessment ******
+    +--------------------------------+---------+-----------+
+    |           OBJECTIVE            | CURRENT | CANDIDATE |
+    +--------------------------------+---------+-----------+
+    | mean-latency <= 50.000         | true    | true      |
+    +--------------------------------+---------+-----------+
+    | 95th-percentile-tail-latency   | true    | true      |
+    | <= 100.000                     |         |           |
+    +--------------------------------+---------+-----------+
+    | error-rate <= 0.010            | true    | true      |
+    +--------------------------------+---------+-----------+
+
+    ****** Metrics Assessment ******
+    +--------------------------------+---------+-----------+
+    |             METRIC             | CURRENT | CANDIDATE |
+    +--------------------------------+---------+-----------+
+    | request-count                  | 429.334 |    16.841 |
+    +--------------------------------+---------+-----------+
+    | mean-latency (milliseconds)    |   0.522 |     0.712 |
+    +--------------------------------+---------+-----------+
+    | 95th-percentile-tail-latency   |   4.835 |     4.750 |
+    | (milliseconds)                 |         |           |
+    +--------------------------------+---------+-----------+
+    | error-rate                     |   0.000 |     0.000 |
+    +--------------------------------+---------+-----------+
+    ```    
+
+See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using iter8ctl to observe an experiment in realtime.
