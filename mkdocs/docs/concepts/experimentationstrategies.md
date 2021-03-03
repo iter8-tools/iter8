@@ -103,6 +103,14 @@ A brief explanation of the key fields in an experiment spec is given below.
 
 `spec.versionInfo` is an object that describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
 
+=== "Canary / Progressive / kubectl"
+    An Iter8 experiment that automates `Canary` testing, `Progressive` deployment (traffic shifting), and promotion of the `winner` using the `kubectl` CLI.
+    ![Canary / Progressive / kubectl](/assets/images/canary-progressive-kubectl.png)
+
+    !!! tip ""
+        Try this experiment in 5 mins using [this tutorial](/getting-started/quick-start/with-knative/).
+
+
 ### spec.criteria
 
 `spec.criteria` is an object that specifies the metrics used for evaluating versions along with acceptable limits for their values.
