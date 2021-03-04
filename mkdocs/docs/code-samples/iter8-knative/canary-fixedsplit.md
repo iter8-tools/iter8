@@ -2,25 +2,30 @@
 template: overrides/main.html
 ---
 
-# Canary with FixedSplit Deployment
+# Canary / FixedSplit / Kustomize Tutorial
 
-Perform **zero-downtime fixed-split canary release of a Knative app**. You will create:
+!!! tip ""
+    Perform an Iter8-Knative experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`FixedSplit`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`Kustomize` based version promotion](/concepts/experimentationstrategies/#version-promotion).
+    
+    ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
-1. A Knative service with two versions of your app, namely, `baseline` and `candidate` using `kustomize`.
-2. A traffic generator which sends HTTP GET requests to the Knative service.
-3. An **Iter8 experiment** that automates the following:
-    - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
-    - traffic split between `baseline` and `candidate` will be remain unchanged during experiment iterations
-    - replaces `baseline` with `candidate` in the end using a `kustomize` command
+You will create the following resources in this tutorial.
 
-??? warning "Before you begin"
-    **Kubernetes cluster:** Do not have a Kubernetes cluster with Iter8 and Knative installed? Follow Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/) to create a cluster with Iter8 and Knative.
+1. A **Knative app (service)** with two versions (revisions).
+2. A **fortio-based traffic generator** that simulates user requests.
+3. An **Iter8 experiment** that: 
+    - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
+    - maintains a 75-25 split of traffic between `baseline` and `candidate` throughout the experiment
+    - eventually replaces `baseline` with `candidate` using `Kustomize`
 
-    **Cleanup from previous experiment:** Tried an Iter8 tutorial earlier but forgot to cleanup? Run the cleanup step from your tutorial now. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) performs cleanup for the Iter8-Knative quick start tutorial.
+??? warning "Before you begin, you will need ... "
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
 
-    **ITER8 environment variable:** ITER8 environment variable is not exported in your terminal? Do so now. For example, this is the [last command in Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo).
+    **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **Kustomize and iter8ctl:** [Kustomize](https://kustomize.io/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl) are not installed locally? Do so now.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+
+    **[Kustomize v3+](https://kustomize.io/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Kustomize v3+ and iter8ctl.
 
 ## 1. Create Knative app with canary
 

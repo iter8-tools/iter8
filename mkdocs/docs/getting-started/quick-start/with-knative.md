@@ -12,7 +12,7 @@ template: overrides/main.html
 You will create the following resources in this tutorial.
 
 1. A **Knative app (service)** with two versions (revisions).
-2. A **fortio-based traffic generator** which simulates user requests.
+2. A **fortio-based traffic generator** that simulates user requests.
 3. An **Iter8 experiment** that: 
     - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
     - progressively shifts traffic from `baseline` to `candidate`
