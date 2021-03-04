@@ -179,7 +179,7 @@ Iter8 can optionally `promote` a version at the end of an experiment. The versio
 
 2. When the experiment starts, Iter8 runs the tasks specified under `spec.actions.start` such as setting up or updating resources needed for the experiment.
 
-3. During each iteration, Iter8 evaluates app versions based on `spec.criteria`, determines the `winner`, and optionally shifts traffic towards the `winner`.
+3. During each iteration, Iter8 evaluates app versions based on `spec.criteria`, determines the winner, and optionally shifts traffic towards the winner.
 
 4. When the experiment finishes, Iter8 runs tasks specified under `spec.actions.finish` such as version promotion.
 
@@ -200,7 +200,7 @@ A brief explanation of the key fields in an experiment spec is given below.
 
 ### spec.strategy.testingPattern
 
-`spec.strategy.testingPattern` is a string enum that determines the logic used to evaluate the app versions and determine the `winner` of the experiment. Iter8 supports two testing patterns, namely, `Canary` and `Conformance`.
+`spec.strategy.testingPattern` is a string enum that determines the logic used to evaluate the app versions and determine the winner of the experiment. Iter8 supports two testing patterns, namely, `Canary` and `Conformance`.
 
 ### spec.strategy.deploymentPattern
 
@@ -224,7 +224,7 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
 ## Realtime Observability
 
 !!! abstract ""
-    The  **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the `winner`.
+    The  **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the winner.
 
 
 ??? example "Sample output from iter8ctl"

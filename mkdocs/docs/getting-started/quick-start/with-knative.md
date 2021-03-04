@@ -2,24 +2,25 @@
 template: overrides/main.html
 ---
 
-# Quick start with Knative
+# Quick Start with Knative
 
-Perform a `progressive canary` experiment using the following resources.
+!!! tip ""
+    Perform a [`canary`](/concepts/experimentationstrategies/#testing-pattern) release of a Knative app with [`progressive`](/concepts/experimentationstrategies/#deployment-pattern) rollout as illustrated in the following picture.
+    
+    ![Canary](/assets/images/canary-progressive-kubectl.png)
 
-1. A Knative service with two versions of your app, namely, `baseline` and `candidate`
-2. A traffic generator which sends HTTP GET requests to the Knative service.
-3. An **Iter8 experiment** that automates the following: 
-    - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
-    - progressively shifts traffic from `baseline` to `candidate`, and
-    - replaces `baseline` with `candidate` in the end using a `kubectl apply` command
+You will create the following resources in this tutorial.
+
+1. A **Knative app (service)** with two versions (revisions).
+2. A **fortio-based traffic generator** which simulates user requests.
+3. An **Iter8 experiment** that verifies that `candidate` satisfies the mean latency, 95th percentile tail latency, and error rate objectives, progressively shifts traffic from `baseline` to `candidate`, and eventually replaces `baseline` with `candidate` using `kubectl`.
  
+??? warning "Before you begin, you will need ... "
 
-??? warning "Before you begin"
-
-    1. Kubernetes cluster. You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
-    2. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-    3. [Kustomize v3](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
-    4. [Go 1.13+](https://golang.org/doc/install)
+    1. **Kubernetes cluster.** You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
+    2. [**kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+    3. [**Kustomize v3**](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
+    4. [**Go 1.13+**](https://golang.org/doc/install)
 
 ## 1. Create Kubernetes cluster
 
@@ -47,7 +48,7 @@ export ITER8=$(pwd)
 ```
 
 ## 3. Install Knative and Iter8
-Choose a networking layer for Knative. Install Knative and Iter8.
+Choose a networking layer for Knative.
 
 === "Istio"
 
@@ -80,7 +81,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ```
 
 ??? info "Look inside baseline.yaml"
-    ```yaml
+    ```yaml linenums="1"
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
@@ -99,8 +100,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
     ```
 
 ??? info "Look inside experimentalservice.yaml"
-    ```yaml
-    # This Knative service will be used by the Iter8 experiment for splitting traffic between baseline (sample-app-v1) and candidate (sample-app-v2).
+    ```yaml linenums="1"
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
@@ -116,7 +116,8 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
             env:
             - name: T_VERSION
               value: "green"
-      traffic: # initially all traffic goes to sample-app-v1 and none to sample-app-v2
+      traffic:
+      # initially all traffic goes to sample-app-v1 and none to sample-app-v2
       - tag: current
         revisionName: sample-app-v1
         percent: 100
@@ -137,7 +138,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml |
 kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 ```
 ??? info "Look inside experiment.yaml"
-    ```yaml
+    ```yaml linenums="1"
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
     metadata:
@@ -180,6 +181,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
       baseline:
         name: current
         variables:
+        # variables are used when querying metrics and when interpolating task inputs
         - name: revision
           value: sample-app-v1 
         - name: promote
@@ -187,6 +189,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
       candidates:
       - name: candidate
         variables:
+        # variables are used when querying metrics and when interpolating task inputs
         - name: revision
           value: sample-app-v2
         - name: promote
@@ -313,7 +316,6 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ```
 
 ??? info "Understanding what happened"
-    1. In Step 4, you created a Knative service which manages two revisions, `sample-app-v1` (`baseline`) and `sample-app-v2` (`candidate`).
-    2. In Step 5, you created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
-    3. In step 6, you created an Iter8 experiment with 10 iterations with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate.
-    4. At the end of the experiment, Iter8 identified the candidate as the `winner` since it passed all objectives. Iter8 decided to promote the candidate (rollforward) by applying `candidate.yaml` as part of its `finish` action. Had the candidate failed, Iter8 would have decided to promote the baseline (rollback) by applying `baseline.yaml`.
+    1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`).
+    2. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 100% of the requests are sent to `baseline` and 0% to `candidate`.
+    3. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the `objectives` specified in the experiment, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `kubectl`.
