@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Canary / Progressive / Helm Tutorial
+# Canary + Progressive + Helm Tutorial
 
 !!! tip ""
     Perform an Iter8-Knative experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`Helm` based version promotion](/concepts/experimentationstrategies/#version-promotion).

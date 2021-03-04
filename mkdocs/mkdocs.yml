@@ -104,13 +104,12 @@ nav:
     - Getting help: getting-started/help.md
   - Use Cases + Code:
     - Iter8-Knative:
-      - Canary / Progressive / Helm: code-samples/iter8-knative/canary-progressive.md
-      - Canary / FixedSplit / Kustomize: code-samples/iter8-knative/canary-fixedsplit.md
+      - Canary + Progressive + Helm: code-samples/iter8-knative/canary-progressive.md
+      - Canary + FixedSplit + Kustomize: code-samples/iter8-knative/canary-fixedsplit.md
       - Conformance: code-samples/iter8-knative/conformance.md
       - Traffic mirroring / shadowing: code-samples/iter8-knative/mirroring.md
       - Request routing: code-samples/iter8-knative/request-routing.md
-      - Knative annotations: code-samples/iter8-knative/annotations.md
-    - Winner promotion: code-samples/promotion.md
+      - Useful Knative annotations: code-samples/iter8-knative/annotations.md
     - Generating requests externally: code-samples/traffic.md
   - User Guide:
     - Using Iter8: usage/usingiter8.md

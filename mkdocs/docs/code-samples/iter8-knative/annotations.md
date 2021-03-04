@@ -2,9 +2,9 @@
 template: overrides/main.html
 ---
 
-# Useful Knative Annotations in Experiments
+# Useful Knative Annotations
 
-This document discusses a few annotations that tune the behavior of Knative. The first annotation below enables experimentation with cluster-local services, while the last two annotations improve robustness of experiments.
+This document discusses a few annotations that tune the behavior of Knative, and are useful to incorporate in Knative service participating in Iter8 experiments. The first of these enables experimentation with cluster-local services, while the last two avoid cold start issues.
 
 ## Cluster-local (backend) services
 Cluster local or backend services are private services which are only available inside the cluster. Iter8 experiments with cluster-local Knative services are similar to any other Iter8 experiments. The following example from [Knative documentation on cluster-local services](https://knative.dev/docs/serving/cluster-local-route/) shows how you can label a Knative service as cluster-local.

@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Canary / FixedSplit / Kustomize Tutorial
+# Canary + FixedSplit + Kustomize Tutorial
 
 !!! tip ""
     Perform an Iter8-Knative experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`FixedSplit`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`Kustomize` based version promotion](/concepts/experimentationstrategies/#version-promotion).
