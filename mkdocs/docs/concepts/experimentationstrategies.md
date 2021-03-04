@@ -2,9 +2,100 @@
 template: overrides/main.html
 ---
 
-!!! abstract ""
-    Iter8 defines a Kubernetes CRD called **experiment** to automate metrics-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
+!!! abstract ""
+    Iter8's model of experimentation is powerful and expressive. Flexibly combine a variety of testing & deployment patterns, and traffic shaping & version promotion features in experiments.
+
+## Testing pattern
+
+Testing pattern defines the number of app versions evaluated in the experiment and the logic used to determine the `winner`. Iter8 supports `Canary` and `Conformance` testing patterns.
+
+=== "Canary"
+    `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if versions satisfy the objectives[^1] specified in the experiment. If `candidate` satisfies objectives, then `candidate` is the `winner`; else, if `baseline` satisfies the objectives, then `baseline` is the `winner`; else, there is no `winner`.
+
+    ![Canary](/assets/images/canary-progressive-kubectl.png)
+
+    !!! tip ""
+        Try a [`Canary` experiment](/getting-started/quick-start/with-knative/).
+
+=== "Conformance"
+    `Conformance` testing involves a single version, a `baseline`. Iter8 assesses if the `baseline` satisfies the objectives specified in the experiment. If it does, then `baseline` is the `winner`; else, there is no `winner`.
+
+    ![Conformance](/assets/images/conformance.png)
+
+    !!! tip ""
+        Try a [`Conformance` experiment](/code-samples/iter8-knative/conformance/).
+
+## Deployment pattern
+
+Deployment pattern determines how traffic is split between versions. Iter8 supports `Progressive` and `FixedSplit` deployment patterns.
+
+=== "Progressive"
+    `Progressive` deployment incrementally shift traffic towards the `winner` over multiple iterations.
+
+    ![Canary](/assets/images/canary-progressive-helm.png)
+
+    !!! tip ""
+        Try a [`Progressive` experiment](/code-samples/iter8-knative/canary-progressive/).
+
+=== "FixedSplit"
+    `FixedSplit` deployment does not shift traffic between versions during iterations.
+
+    ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
+
+    !!! tip ""
+        Try a [`FixedSplit` experiment](/code-samples/iter8-knative/canary-fixedsplit/).
+
+## Traffic shaping
+
+Traffic shaping refers to features such as `Traffic mirroring / shadowing` and `Request routing` that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology or networking layer present in your Kubernetes or OpenShift stack.
+
+=== "Traffic mirroring / shadowing"
+    Traffic mirroring or shadowing enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^2] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
+
+    ![Canary](/assets/images/mirroring.png)
+
+    !!! tip ""
+        Try a [traffic mirroring experiment](/code-samples/iter8-knative/mirroring/).
+
+=== "Request routing"
+    Request routing is the ability to route requests dynamically to different versions of the app based on attributes such as user identity, URI, or request origin. Use request routing in experiments to specify the segment of the traffic that will participate in the experiment. For example, in a `Canary` experiment, requests within the specified segment may be routed to `baseline` or `candidate`; requests not in this segment will be routed only to the `baseline`.
+
+    ![Canary](/assets/images/request-routing.png)
+
+    !!! tip ""
+        Try a [request routing experiment](/code-samples/iter8-knative/request-routing/).
+
+
+## Version promotion
+
+Iter8 can optionally `promote` a version at the end of an experiment. The version recommended for promotion is the `winner` if a `winner` has been found. If not, the version recommended for promotion is the `baseline`. As part of version promotion, Iter8 can configure Kubernetes resources by installing or upgrading `Helm` charts, building and applying `Kustomize` resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
+
+=== "Helm"
+    An experiment that uses `helm upgrade` for version promotion is illustrated below.
+
+    ![Canary](/assets/images/canary-progressive-helm.png)
+
+    !!! tip ""
+        Try an [experiment that uses `Helm`](/code-samples/iter8-knative/canary-progressive/).
+
+=== "Kustomize"
+    An experiment that uses `kustomize build` for version promotion is illusted below.
+
+    ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
+
+    !!! tip ""
+        Try an [experiment that uses `Kustomize`](/code-samples/iter8-knative/canary-fixedsplit/).
+
+=== "kubectl with YAML/JSON manifests"
+    An experiment that uses `kubectl apply` for version promotion is illustated below.
+
+    ![Canary](/assets/images/canary-progressive-kubectl.png)
+
+    !!! tip ""
+        Try an [experiment that uses `kubectl`](/getting-started/quick-start/with-knative/).
+
+<!-- 
 ??? example "Sample experiment"
     ```yaml linenums="1"
     apiVersion: iter8.tools/v2alpha1
@@ -103,14 +194,6 @@ A brief explanation of the key fields in an experiment spec is given below.
 
 `spec.versionInfo` is an object that describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
 
-=== "Canary / Progressive / kubectl"
-    An Iter8 experiment that automates `Canary` testing, `Progressive` deployment (traffic shifting), and promotion of the `winner` using the `kubectl` CLI.
-    ![Canary / Progressive / kubectl](/assets/images/canary-progressive-kubectl.png)
-
-    !!! tip ""
-        Try this experiment in 5 mins using [this tutorial](/getting-started/quick-start/with-knative/).
-
-
 ### spec.criteria
 
 `spec.criteria` is an object that specifies the metrics used for evaluating versions along with acceptable limits for their values.
@@ -189,4 +272,8 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
     +--------------------------------+---------+-----------+
     ```    
 
-See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using iter8ctl to observe an experiment in realtime.
+See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using iter8ctl to observe an experiment in realtime. -->
+
+[^1]: Objectives correspond to service level objectives or SLOs. In Iter8 experiments, objectives are specified in the form of metrics along with acceptable limits on their values.
+
+[^2]: It is possible to mirror only a certain percentage of the requests instead of all requests.
