@@ -8,10 +8,10 @@ template: overrides/main.html
 
 ## Testing pattern
 
-Testing pattern defines the number of app versions evaluated in the experiment and the logic used to determine the winner. Iter8 supports `Canary` and `Conformance` testing patterns.
+Testing pattern defines the number of app versions evaluated in the experiment and the logic used to determine the `winner`. Iter8 supports `Canary` and `Conformance` testing patterns.
 
 === "Canary"
-    `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if versions satisfy the objectives[^1] specified in the experiment. If `candidate` satisfies objectives, then `candidate` is the winner; else, if `baseline` satisfies the objectives, then `baseline` is the winner; else, there is no winner.
+    `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if versions satisfy the objectives[^1] specified in the experiment. If `candidate` satisfies objectives, then `candidate` is the `winner`; else, if `baseline` satisfies the objectives, then `baseline` is the `winner`; else, there is no `winner`.
 
     ![Canary](/assets/images/canary-progressive-kubectl.png)
 
@@ -19,7 +19,7 @@ Testing pattern defines the number of app versions evaluated in the experiment a
         Try a [`Canary` experiment](/getting-started/quick-start/with-knative/).
 
 === "Conformance"
-    `Conformance` testing involves a single version, a `baseline`. Iter8 assesses if the `baseline` satisfies the objectives specified in the experiment. If it does, then `baseline` is the winner; else, there is no winner.
+    `Conformance` testing involves a single version, a `baseline`. Iter8 assesses if the `baseline` satisfies the objectives specified in the experiment. If it does, then `baseline` is the `winner`; else, there is no `winner`.
 
     ![Conformance](/assets/images/conformance.png)
 
@@ -31,7 +31,7 @@ Testing pattern defines the number of app versions evaluated in the experiment a
 Deployment pattern determines how traffic is split between versions. Iter8 supports `Progressive` and `FixedSplit` deployment patterns.
 
 === "Progressive"
-    `Progressive` deployment incrementally shift traffic towards the winner over multiple iterations.
+    `Progressive` deployment incrementally shift traffic towards the `winner` over multiple iterations.
 
     ![Canary](/assets/images/canary-progressive-helm.png)
 
@@ -69,7 +69,7 @@ Traffic shaping refers to features such as `Traffic mirroring / shadowing` and `
 
 ## Version promotion
 
-Iter8 can optionally `promote` a version at the end of an experiment. The version recommended for promotion is the winner if a winner has been found. If not, the version recommended for promotion is the `baseline`. As part of version promotion, Iter8 can configure Kubernetes resources by installing or upgrading `Helm` charts, building and applying `Kustomize` resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
+Iter8 can optionally `promote` a version at the end of an experiment. The version recommended for promotion is the `winner` if a `winner` has been found. If not, the version recommended for promotion is the `baseline`. As part of version promotion, Iter8 can configure Kubernetes resources by installing or upgrading `Helm` charts, building and applying `Kustomize` resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
 
 === "Helm"
     An experiment that uses `helm upgrade` for version promotion is illustrated below.
