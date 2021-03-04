@@ -2,10 +2,10 @@
 template: overrides/main.html
 ---
 
-# Quick Start with Knative
+# Quick Start with Knative Tutorial
 
 !!! tip ""
-    Perform a [`canary`](/concepts/experimentationstrategies/#testing-pattern) release of a Knative app with [`progressive`](/concepts/experimentationstrategies/#deployment-pattern) rollout as illustrated in the following picture.
+    Perform an Iter8-Knative experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`kubectl` based version promotion](/concepts/experimentationstrategies/#version-promotion).
     
     ![Canary](/assets/images/canary-progressive-kubectl.png)
 
@@ -13,8 +13,10 @@ You will create the following resources in this tutorial.
 
 1. A **Knative app (service)** with two versions (revisions).
 2. A **fortio-based traffic generator** which simulates user requests.
-3. An **Iter8 experiment** that verifies that `candidate` satisfies the mean latency, 95th percentile tail latency, and error rate objectives, progressively shifts traffic from `baseline` to `candidate`, and eventually replaces `baseline` with `candidate` using `kubectl`.
- 
+3. An **Iter8 experiment** that: 
+    - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
+    - progressively shifts traffic from `baseline` to `candidate`
+    - eventually replaces `baseline` with `candidate` using `kubectl`
 ??? warning "Before you begin, you will need ... "
 
     1. **Kubernetes cluster.** You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
@@ -318,4 +320,5 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ??? info "Understanding what happened"
     1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`).
     2. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 100% of the requests are sent to `baseline` and 0% to `candidate`.
-    3. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the `objectives` specified in the experiment, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `kubectl`.
+    3. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the `objectives` specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `kubectl`.
+        - **Note:** Had the `candidate` failed to satisfy `objectives`, then the `baseline` would have been promoted.

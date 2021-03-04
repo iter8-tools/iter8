@@ -2,26 +2,30 @@
 template: overrides/main.html
 ---
 
-# Progressive Canary Deployment using Helm
+# Canary / Progressive / Helm Tutorial
 
-Perform **zero-downtime progressive canary release of a Knative app**. This tutorial is similar to the [Iter8 quick start tutorial for Knative](/getting-started/quick-start/with-knative/). You will create:
+!!! tip ""
+    Perform an Iter8-Knative experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`Helm` based version promotion](/concepts/experimentationstrategies/#version-promotion).
+    
+    ![Canary](/assets/images/canary-progressive-helm.png)
 
-1. A Knative service with two versions of your app, namely, `baseline` and `candidate`
-2. A traffic generator which sends HTTP GET requests to the Knative service.
-3. An **Iter8 experiment** that automates the following: 
-    - verifies that latency and error-rate metrics for the `candidate` satisfy the given objectives
-    - iteratively shifts traffic from `baseline` to `candidate`,
-    - fine-tunes traffic shifting behavior during iterations using `spec.strategy.weights`, and
-    - replaces `baseline` with `candidate` in the end using a `helm install` command
+You will create the following resources in this tutorial.
 
-??? warning "Before you begin"
+1. A **Knative app (service)** with two versions (revisions).
+2. A **fortio-based traffic generator** which simulates user requests.
+3. An **Iter8 experiment** that: 
+    - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
+    - progressively shifts traffic from `baseline` to `candidate`, subject to the limits placed by the experiment's `spec.strategy.weights` field
+    - eventually replaces `baseline` with `candidate` using `Helm`
+
+??? warning "Before you begin, you will need ... "
     **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
 
-    **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step. For example, [Step 8](/getting-started/quick-start/with-knative/#8-cleanup) is the cleanup step for the Iter8-Knative quick start tutorial.
+    **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
     **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
-    **[Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and iter8ctl. Install if needed.
+    **[Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and iter8ctl.
 
 ## 1. Create Knative app with canary
 ```shell
