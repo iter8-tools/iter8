@@ -94,7 +94,7 @@ nav:
   - Home: index.md
   - Concepts:
     - What is Iter8?: concepts/whatisiter8.md
-    - Experimentation Strategies: concepts/experimentationstrategies.md
+    - Experimentation strategies: concepts/experimentationstrategies.md
   - Getting started:
     - Quick start: 
       - with Knative: getting-started/quick-start/with-knative.md
@@ -102,7 +102,17 @@ nav:
       - with Istio: getting-started/quick-start/with-istio.md
     - Install: getting-started/install.md
     - Getting help: getting-started/help.md
-  - Usage:
+  - Use Cases + Code:
+    - Iter8-Knative:
+      - Canary / Progressive / Helm: code-samples/iter8-knative/canary-progressive.md
+      - Canary / FixedSplit / Kustomize: code-samples/iter8-knative/canary-fixedsplit.md
+      - Conformance: code-samples/iter8-knative/conformance.md
+      - Traffic mirroring / shadowing: code-samples/iter8-knative/mirroring.md
+      - Request routing: code-samples/iter8-knative/request-routing.md
+      - Knative annotations: code-samples/iter8-knative/annotations.md
+    - Winner promotion: code-samples/promotion.md
+    - Generating requests externally: code-samples/traffic.md
+  - User Guide:
     - Using Iter8: usage/usingiter8.md
     - Experiment spec in-depth:
       - spec.target: usage/experiment/target.md
@@ -118,19 +128,9 @@ nav:
       - Using metrics in experiments: usage/metrics/using-metrics.md
       - How Iter8 queries metrics: usage/metrics/how-iter8-queries-metrics.md
       - Custom metrics: usage/metrics/custom-metrics.md
-  - Code samples:
-    - Iter8-Knative:
-      - Canary / Progressive / Helm: code-samples/iter8-knative/canary-progressive.md
-      - Canary / FixedSplit / Kustomize: code-samples/iter8-knative/canary-fixedsplit.md
-      - Conformance: code-samples/iter8-knative/conformance.md
-      - Mirroring / dark launch: code-samples/iter8-knative/mirroring.md
-      - Request routing: code-samples/iter8-knative/requestrouting.md
-      - Knative annotations: code-samples/iter8-knative/annotations.md
-    - Winner promotion: code-samples/promotion.md
-    - Generating requests externally: code-samples/traffic.md
-  - Reference: 
-    - Experiment: reference/experiment.md
-    - Metric: reference/metric.md
+    - Reference:
+      - Experiment CRD: usage/reference/experiment.md
+      - Metric CRD: usage/reference/metric.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md
   - Blog:

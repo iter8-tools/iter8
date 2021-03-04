@@ -4,7 +4,7 @@ template: overrides/main.html
 
 # What is Iter8?
 
-You have developed multiple versions of a microservice app or an ML model. You want to identify the **winning version** and rollout this version reliably in production.
+You have developed multiple versions of a microservice app or an ML model. You want to identify the **winning version** and rollout the `winner` in a reliable manner.
 
 !!! tip ""
     Enter **Iter8**.
@@ -26,14 +26,12 @@ A basic Iter8 experiment that automates `Canary` testing and `Progressive` deplo
 
 ## Features at a glance
 
-Iter8 provides a powerful and expressive framework for experimentation. Combine the following features within experiments in a rapid and flexible manner.
-
 - Experimentation on **any** Kubernetes and OpenShift stack; stacks that are currently supported with documented code-samples are **Knative**, **KFServing**[^1] and **Istio**[^2].
 - Testing patterns such as **Conformance**, **Canary**, **A/B**, **A/B/n** and **Pareto**[^3].
-- Deployment patterns such as **Progressive**, **FixedSplit** and **BlueGreen**[^4].
-- Traffic shaping methods like **mirroring**, **dark launch**, **request routing**, and **sticky sessions**[^5].
+- Deployment patterns such as **Progressive**, **FixedSplit**, **DarkLaunch**, and **BlueGreen**[^4].
+- Traffic shaping methods like **mirroring**, **request routing**, and **sticky sessions**[^5].
 - App config tools such as **Helm**, **Kustomize**, and plain **YAML/JSON** app manifests.
-- Statistically robust assessment of app versions, traffic shifting, and version promotion. Iter8's analytics engine implements **Bayesian learning** and **multi-armed bandit algorithms** for principled decision making during experiments.
+- Statistically robust and principled assessment of app versions, traffic shifting, and version promotion using **Bayesian learning** and **multi-armed bandit algorithms**.
 - The **iter8ctl** CLI for observing experiments in realtime.
 
 ## How does Iter8 work?
