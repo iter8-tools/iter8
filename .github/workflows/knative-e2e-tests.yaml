@@ -4,13 +4,13 @@ on:
   push:
     paths:
     - 'install/**'
-    - 'samples/knative/quickstart/**'
-    - '.github/**'
+    - 'samples/knative/**'
+    - '.github/workflows/knative-e2e-tests.yaml'
   pull_request:
     paths:
     - 'install/**'
-    - 'samples/knative/quickstart/**'
-    - '.github/**'
+    - 'samples/knative/**'
+    - '.github/workflows/knative-e2e-tests.yaml'
 
 jobs:
   knative-quickstart:
