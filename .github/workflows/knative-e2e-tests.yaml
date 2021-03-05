@@ -354,7 +354,7 @@ jobs:
     - name: Run Kubernetes tools
       uses: stefanprodan/kube-tools@v1
       with:
-        kubectl: 1.18.2
+        kubectl: 1.17.11
         kustomize: 3.5.5
     - name: Setup Minikube
       uses: manusa/actions-setup-minikube@v2.3.0
