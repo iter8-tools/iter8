@@ -163,24 +163,27 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get experiment conformance-sample --watch
     ```
 
-    You should see output similar to the following.
-    ```shell
-    conformance-sample   Conformance   default/sample-app   Running        0                      StartHandlerLaunched: Start handler 'start' launched
-    conformance-sample   Conformance   default/sample-app   Running        1                      IterationUpdate: Completed Iteration 1
-    conformance-sample   Conformance   default/sample-app   Running        2                      IterationUpdate: Completed Iteration 2
-    conformance-sample   Conformance   default/sample-app   Running        3                      IterationUpdate: Completed Iteration 3
-    conformance-sample   Conformance   default/sample-app   Running        4                      IterationUpdate: Completed Iteration 4
-    conformance-sample   Conformance   default/sample-app   Running        5                      IterationUpdate: Completed Iteration 5
-    conformance-sample   Conformance   default/sample-app   Running        6                      IterationUpdate: Completed Iteration 6
-    conformance-sample   Conformance   default/sample-app   Running        7                      IterationUpdate: Completed Iteration 7
-    ```
-    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
+    ??? info "kubectl get experiment output"
+        kubectl output will be similar to the following.
+        ```shell
+        NAME                 TYPE          TARGET               STAGE          COMPLETED ITERATIONS   MESSAGE    
+        conformance-sample   Conformance   default/sample-app   Running        0                      StartHandlerLaunched: Start handler 'start' launched
+        conformance-sample   Conformance   default/sample-app   Running        1                      IterationUpdate: Completed Iteration 1
+        conformance-sample   Conformance   default/sample-app   Running        2                      IterationUpdate: Completed Iteration 2
+        conformance-sample   Conformance   default/sample-app   Running        3                      IterationUpdate: Completed Iteration 3
+        conformance-sample   Conformance   default/sample-app   Running        4                      IterationUpdate: Completed Iteration 4
+        conformance-sample   Conformance   default/sample-app   Running        5                      IterationUpdate: Completed Iteration 5
+        conformance-sample   Conformance   default/sample-app   Running        6                      IterationUpdate: Completed Iteration 6
+        conformance-sample   Conformance   default/sample-app   Running        7                      IterationUpdate: Completed Iteration 7
+        ```
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 ## 5. Cleanup
 
 ```shell
 kubectl delete -f $ITER8/samples/knative/conformance/fortio.yaml
 kubectl delete -f $ITER8/samples/knative/conformance/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/conformance/baseline.yaml
 ```
 
 ??? info "Understanding what happened"

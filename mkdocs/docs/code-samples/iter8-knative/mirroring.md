@@ -4,23 +4,26 @@ template: overrides/main.html
 
 # Conformance + Traffic Mirroring
 
-> Traffic mirroring, also called shadowing, enables experimenting in a production (or near-production) environment with zero-impact on end users. Mirrored traffic is a replica of the real (production) traffic sent to candidate version(s). Metrics are collected and evaluated for candidate version(s), but responses from candidate(s) are ignored.
-
-Perform a `conformance` experiment on a candidate version with mirrored traffic using the following.
-
-1. A **Knative sample app** with live and candidate versions.
-2. **Istio virtual services** which send all requests to the live version, mirrors 40% of requests, and sends the mirrored requests to the candidate version.
-3. A **curl-based traffic generator** which simulates user requests.
-4. An **Iter8 `conformance` experiment** which verifies that the candidate version satisfies mean latency, 95th percentile tail latency, and error rate objectives.
+!!! tip ""
+    Perform an Iter8-Knative experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing and [traffic mirroring](/concepts/experimentationstrategies/#traffic-shaping).
     
-??? warning "Before you begin"
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and ensure that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
+    ![Canary](/assets/images/mirroring.png)
 
-    **Cleanup:** If you ran an Iter8 tutorial earlier, run the cleanup (last) step associated with it.
+You will create the following resources in this tutorial.
 
-    **ITER8:** Ensure that you have cloned the Iter8 GitHub repo, and set the `ITER8` environment variable in your terminal to the root of the cloned repo. See [Step 2 of the quick start tutorial](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+1. A **Knative sample app** with live and dark launched versions.
+2. **Istio virtual services** which send all requests to the live version, mirror 40% of the requests and send the mirrored traffic to the dark version; responses from the dark version are ignored since it only receives mirrored requests.
+3. A **curl-based traffic generator** which simulates user requests.
+4. An **Iter8 experiment** that verifies that the dark version satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
-## 1. Create live and candidate versions
+??? warning "Before you begin, you will need ... "
+    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
+
+    **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
+
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+
+## 1. Create app with live and dark versions
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
 ```
@@ -131,7 +134,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
     ```
 
 
-## 3. Generate traffic
+## 3. Generate requests
 
 ```shell
 TEMP_DIR=$(mktemp -d)
@@ -166,7 +169,7 @@ cd $ITER8
           restartPolicy: Never
     ```
 
-## 4. Create experiment
+## 4. Create Iter8 experiment
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl wait --for=condition=Available deploy/curl
@@ -211,7 +214,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
     ```
 
 ## 5. Observe experiment
-You can observe the experiment in realtime. Open two terminals and follow instructions in the two tabs below.
+Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "iter8ctl"
     ```shell
@@ -291,23 +294,21 @@ You can observe the experiment in realtime. Open two terminals and follow instru
 ## 6. Cleanup
 
 ```shell
-kubectl delete -f $ITER8/samples/knative/mirroring/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/curl.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/routing-rules.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
 ```
 
 ??? info "Understanding what happened"
-    1. You configured a Knative service with two versions of your app. In the `service.yaml` manifest, you specified that the live version, `sample-app-v1`, should receive 100% of the production traffic and the candidate version, `sample-app-v2`, should receive 0% of the production traffic.
+    1. You configured a Knative service with two versions of your app. In the `service.yaml` manifest, you specified that the live version, `sample-app-v1`, should receive 100% of the production traffic and the dark version, `sample-app-v2`, should receive 0% of the production traffic.
 
-    2. You used `customdomain.com` as the HTTP host in this tutorial. In your production cluster, use domain(s) that you own in the setup of the virtual services.
+    2. You used `customdomain.com` as the HTTP host in this tutorial.
+        - **Note:** In your production cluster, use domain(s) that you own in the setup of the virtual services.
 
-    3. You set up Istio virtual services which mapped the Knative revisions to this custom domain. The virtual services specified the following routing rules: all HTTP requests with their `Host` header or `:authority` pseudo-header set to `customdomain.com` would be be sent to `sample-app-v1`. 40% of these requests would be mirrored and sent to `sample-app-v2` and responses from `sample-app-v2` would be ignored.
+    3. You set up Istio virtual services which mapped the Knative revisions to the custom domain. The virtual services specified the following routing rules: all HTTP requests with their `Host` header or `:authority` pseudo-header set to `customdomain.com` would be sent to `sample-app-v1`. 40% of these requests would be mirrored and sent to `sample-app-v2` and responses from `sample-app-v2` would be ignored.
 
     4. You generated traffic for `customdomain.com` using a `curl`-based job. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. 
-
-    5. You used Istio version 1.8.1 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
+        - **Note:** You used Istio version 1.8.1 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
     
-    6. You can also curl the Knative service from outside the cluster. See [here](https://knative.dev/docs/serving/samples/knative-routing-go/#access-the-services) for a related example where the Knative service and Istio virtual service setup is similar to this tutorial.
-
-    7. You created an Iter8 `conformance` experiment to evaluate the candidate version. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the candidate version collected by Prometheus, and verified that the candidate version satisfied all the objectives specified in `experiment.yaml`.
+    5. You created an Iter8 `Conformance` experiment to evaluate the dark version. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the dark version satisfied all the objectives specified in `experiment.yaml`.
