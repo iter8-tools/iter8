@@ -122,7 +122,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
-        iterationsPerLoop: 7
+        iterationsPerLoop: 10
       versionInfo:
         # information about app versions used in this experiment
         baseline:
@@ -138,7 +138,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
           - name: revision
             value: sample-app-v2
           - name: promote
-            value: candidate  
+            value: candidate   
     ```
 
 ## 4. Observe experiment
@@ -215,8 +215,6 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         canary-progressive   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
         canary-progressive   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
         canary-progressive   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-        canary-progressive   Canary   default/sample-app   Finishing   7                      TerminalHandlerLaunched: Finish handler 'finish' launched
-        canary-progressive   Canary   default/sample-app   Completed   7                      ExperimentCompleted: Experiment completed successfully
         ```
         When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
