@@ -114,7 +114,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+        $ITER8/samples/knative/quickstart/platformsetup.sh kourier
 
     - uses: azure/setup-helm@v1
 
@@ -206,7 +206,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+        $ITER8/samples/knative/quickstart/platformsetup.sh gloo
 
     - name: create Knative app with canary
       run: |
