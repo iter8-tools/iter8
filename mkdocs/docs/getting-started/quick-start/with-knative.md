@@ -211,7 +211,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```shell
     while clear; do
     kubectl get experiment quickstart-exp -o yaml | iter8ctl describe -f -
-    sleep 10
+    sleep 4
     done
     ```
     ??? info "iter8ctl output"
@@ -321,4 +321,4 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
     1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`).
     2. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 100% of the requests are sent to `baseline` and 0% to `candidate`.
     3. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the `objectives` specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `kubectl`.
-        - **Note:** Had the `candidate` failed to satisfy `objectives`, then the `baseline` would have been promoted.
+        - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.

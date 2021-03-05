@@ -27,7 +27,7 @@ You will create the following resources in this tutorial.
 
     **[Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and iter8ctl.
 
-## 1. Create Knative app with canary
+## 1. Create app versions
 ```shell
 helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=iter8-system
 kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
@@ -35,7 +35,7 @@ helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter
 ```
 
 ??? info "Look inside values.yaml"
-    ```yaml
+    ```yaml linenums="1"
     # default values used for installing sample-app Helm chart
     # using these values will create a baseline version (revision) that gets 100% of the traffic
     name: "sample-app-v1"
@@ -44,7 +44,7 @@ helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter
     ```
 
 ??? info "Look inside experimental-values.yaml"
-    ```yaml
+    ```yaml linenums="1"
     # values file used for upgrading sample-app Helm chart for use in Iter8 experiment
     # using these values will create a candidate version (revision)
     # baseline still gets 100% of the traffic
@@ -61,7 +61,6 @@ helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter
     ```
 
 ## 2. Generate requests
-Verify Knative service is ready and generate requests to app using fortio.
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
@@ -143,14 +142,14 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
     ```
 
 ## 4. Observe experiment
-You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
+Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "iter8ctl"
     Periodically describe the experiment.
     ```shell
     while clear; do
     kubectl get experiment canary-progressive -o yaml | iter8ctl describe -f -
-    sleep 10
+    sleep 4
     done
     ```
 
@@ -255,7 +254,9 @@ helm uninstall sample-app --namespace=iter8-system
 ```
 
 ??? info "Understanding what happened"
-    1. You created a Knative service using `helm install` subcommand and upgraded the service to have both `baseline` and `candidate` versions (revisions) using `helm upgrade --install` subcommand. The ksvc is created in the `default` namespace. Helm release information is located in the `iter8-system` namespace specified by the `--namespace=iter8-system` flag.
-    2. You created a load generator that sends requests to the Knative service. At this point, 100% of requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus), ensured that the candidate satisfied all objectives specified in `experiment.yaml`, and progressively shifted traffic from baseline to candidate. You restricted the maximum weight (traffic percentage) of candidate during iterations at 75% and maximum increment allowed during a single iteration to 20% using the `spec.strategy.weights` field.
-    4. At the end of the experiment, Iter8 identified the candidate as the `winner` since it passed all objectives. Iter8 decided to promote the candidate (roll forward) by using a `helm upgrade --install` command. Had the candidate failed to satisfy objectives, Iter8 would have promoted the baseline (rolled back) instead.
+    1. You created a Knative service using `helm install` subcommand and upgraded the service to have two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `helm upgrade --install` subcommand. 
+    2. The ksvc is created in the `default` namespace. Helm release information is located in the `iter8-system` namespace as specified by the `--namespace=iter8-system` flag.
+    3. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 100% of the requests are sent to baseline and 0% to candidate.
+    4. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `helm upgrade --install` subcommand.
+        - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
+        - **Note:** You limited the maximum weight (traffic %) of `candidate` during iterations at 75% and maximum increment allowed during a single iteration to 20% using the field `spec.strategy.weights`. Traffic shifts during the experiment obeyed these limits.

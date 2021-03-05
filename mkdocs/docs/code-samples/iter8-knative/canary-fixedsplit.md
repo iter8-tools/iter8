@@ -27,7 +27,7 @@ You will create the following resources in this tutorial.
 
     **[Kustomize v3+](https://kustomize.io/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Kustomize v3+ and iter8ctl.
 
-## 1. Create Knative app with canary
+## 1. Create app versions
 
 ```shell
 kustomize build $ITER8/samples/knative/canaryfixedsplit/baseline | kubectl apply -f -
@@ -35,27 +35,26 @@ kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
 kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl apply -f -
 ```
 
-??? info "Look inside baseline/app.yaml"
-    ```yaml
+??? info "Look inside output of `kustomize build $ITER8/.../baseline`"
+    ```yaml linenums="1"
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
-      name: sample-app # The name of the app
-      namespace: default # The namespace the app will use
+      name: sample-app
+      namespace: default
     spec:
       template:
         metadata:
           name: sample-app-v1
         spec:
           containers:
-            # The URL to the sample app docker image
             - image: gcr.io/knative-samples/knative-route-demo:blue 
               env:
                 - name: T_VERSION
-      ```
+    ```
 
-??? info "Look inside experimentalservice/app.yaml"
-    ```yaml
+??? info "Look inside output of `kustomize build $ITER8/.../experimentalservice`"
+    ```yaml linenums="1"
     # This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
     # Traffic is split 75/25 between the baseline and candidate
     # Apply this after applying baseline.yaml in order to create the second revision
@@ -84,9 +83,7 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
         percent: 25
     ```
 
-## 2. Send requests
-
-Verify Knative service is ready and send requests to app.
+## 2. Generate requests
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
@@ -100,7 +97,7 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 ```
 
 ??? info "Look inside experiment.yaml"
-    ```yaml
+    ```yaml linenums="1"
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
     metadata:
@@ -138,15 +135,15 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
         - metric: error-rate
           upperLimit: "0.01"
       duration:
-        intervalSeconds: 20
-        iterationsPerLoop: 12
+        intervalSeconds: 10
+        iterationsPerLoop: 10
       versionInfo:
         # information about app versions used in this experiment
         baseline:
           name: baseline
           variables:
           - name: revision
-            value: sample-app-v1
+            value: sample-app-v1 
         candidates:
         - name: candidate
           variables:
@@ -155,15 +152,14 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
     ```
 
 ## 4. Observe experiment
-
-You can observe the experiment in realtime. Open three *new* terminals and follow instructions in the three tabs below.
+Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "iter8ctl"
     Periodically describe the experiment.
     ```shell
     while clear; do
     kubectl get experiment canary-fixedsplit -o yaml | iter8ctl describe -f -
-    sleep 2
+    sleep 4
     done
     ```
 
@@ -212,6 +208,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         | mean-latency (milliseconds)    |    1.270 |     1.254 |
         +--------------------------------+----------+-----------+
         ```    
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
 
 === "kubectl get experiment"
 
@@ -237,6 +234,7 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         canary-fixesplit   Canary   default/sample-app   Finishing   12                     TerminalHandlerLaunched: Finish handler 'finish' launched
         canary-fixesplit   Canary   default/sample-app   Completed   12                     ExperimentCompleted: Experiment completed successfully
         ```
+        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
 
 === "kubectl get ksvc"
 
@@ -265,8 +263,6 @@ You can observe the experiment in realtime. Open three *new* terminals and follo
         ]
         ```
 
-When the experiment completes (in ~ 4 mins), you will see the experiment stage change from `Running` to `Completed`.
-
 ## 5. Cleanup
 
 ```shell
@@ -276,7 +272,8 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
 ```
 
 ??? info "Understanding what happened"
-    1. In Step 1, you created a Knative service which manages two revisions, `sample-app-v1` (`baseline`) and `sample-app-v2` (`candidate`).
-    2. In Step 2, you created a load generator that sends requests to the Knative service. 75% of requests are sent to the baseline and 25% to the candidate. This distribution remains fixed throughout the experiment.
-    3. In step 3, you created an Iter8 experiment with 12 iterations with the above Knative service as the `target` of the experiment. In each iteration, Iter8 observed the `mean-latency`, `95th-percentile-tail-latency`, and `error-rate` metrics for the revisions (collected by Prometheus).
-    4. At the end of the experiment, Iter8 identified the candidate as the `winner` since it passed all objectives. Iter8 decided to promote the candidate (rollforward) using kustomize as part of its `finish` action. Had the candidate failed, Iter8 would have decided to promote the baseline (rollback) instead.
+    1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `Kustomize`.
+    2. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
+    4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `helm upgrade --install` subcommand.
+        - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
+        - **Note:** There was no traffic shifting during this experiment since this used a `FixedSplit` deployment pattern.
