@@ -111,12 +111,12 @@ nav:
       - Canary + Request routing: code-samples/iter8-knative/request-routing.md
       - Useful Knative annotations: code-samples/iter8-knative/annotations.md
     - Generating requests externally: code-samples/traffic.md
-  - User Guide:
-    - Iter8 API reference: user-guide/apispec.md
+  - Reference:
     - Creating and using metrics:
-      - Using metrics in experiments: user-guide/metrics/using-metrics.md
-      - How Iter8 queries metrics: user-guide/metrics/how-iter8-queries-metrics.md
-      - Custom metrics: user-guide/metrics/custom-metrics.md
+      - Using metrics in experiments: reference/metrics/using-metrics.md
+      - How Iter8 queries metrics: reference/metrics/how-iter8-queries-metrics.md
+      - Custom metrics: reference/metrics/custom-metrics.md
+    - Iter8 API specification: reference/apispec.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md
   - Blog:
