@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Iter8 API Reference
+# Iter8 API Specification
 
 !!! abstract "Abstract"
     The Iter8 API provides two [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to automate metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
