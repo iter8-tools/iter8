@@ -123,8 +123,8 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
 ```shell
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
-curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.1 sh -
-istio-1.8.1/bin/istioctl kube-inject -f $ITER8/samples/knative/requestrouting/curl.yaml | kubectl create -f -
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
+istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/requestrouting/curl.yaml | kubectl create -f -
 cd $ITER8
 ```
 
@@ -365,7 +365,7 @@ kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
 
     4. You generated traffic for `customdomain.com` using a `curl`-job. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. The `curl`-job simulates user requests and sets the `country` header field to one of two values: `wakanda` or `gondor`.
 
-    5. You used Istio version 1.8.1 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
+    5. You used Istio version 1.8.2 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
     
     6. You can also curl the Knative services from outside the cluster. See [here](https://knative.dev/docs/serving/samples/knative-routing-go/#access-the-services) for a related example where the Knative service and Istio virtual service setup is similar to this tutorial.
 
