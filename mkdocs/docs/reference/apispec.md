@@ -48,7 +48,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 ### Metric
 
-Metrics are referenced within the `spec.criteria` field of the experiment. Metrics usage within experiments is described [here](/user-guide/metrics/using-metrics).
+Metrics are referenced within the `spec.criteria` field of the experiment. Metrics usage within experiments is described [here](/reference/metrics/using-metrics).
 
 ??? example "Sample metric"
     ```yaml
@@ -280,7 +280,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
 | name | string | Name of the HTTP query parameter. | Yes |
-| value | string | Value of the HTTP query parameter. See [here](/user-guide/metrics/how-iter8-queries-metrics/) for documentation on how Iter8 interpolates params. | Yes |
+| value | string | Value of the HTTP query parameter. See [here](/reference/metrics/how-iter8-queries-metrics/) for documentation on how Iter8 interpolates params. | Yes |
 
 ## Tasks
 
