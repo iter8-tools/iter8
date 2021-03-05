@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Conformance + Traffic Mirroring
+# Conformance + Traffic Mirroring Tutorial
 
 !!! tip ""
     Perform an Iter8-Knative experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing and [traffic mirroring](/concepts/experimentationstrategies/#traffic-shaping).

@@ -363,6 +363,11 @@ jobs:
   #       export ITER8=$(pwd)
   #       kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml        
 
+  #   - name: create Istio virtual services
+  #     run: |
+  #       export ITER8=$(pwd)
+  #       kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml        
+
   #   - name: Generate requests
   #     run: |      
   #       export ITER8=$(pwd)
@@ -395,7 +400,7 @@ jobs:
   #       fi
 
   # canary-request-routing:
-  #   name: conformance + traffic mirroring experiment
+  #   name: canary + request routing experiment
   #   runs-on: ubuntu-latest
   #   steps:
   #   - name: Checkout repository
@@ -408,10 +413,15 @@ jobs:
   #       export ITER8=$(pwd)
   #       $ITER8/samples/knative/quickstart/platformsetup.sh istio
 
-  #   - name: create app with live and dark versions
+  #   - name: create app versions
   #     run: |
   #       export ITER8=$(pwd)
-  #       kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml        
+  #       kubectl apply -f $ITER8/samples/knative/requestrouting/services.yaml
+
+  #   - name: create istio virtual service
+  #     run: |
+  #       export ITER8=$(pwd)
+  #       kubectl apply -f $ITER8/samples/knative/requestrouting/routing-rule.yaml 
 
   #   - name: Generate requests
   #     run: |      
@@ -419,15 +429,15 @@ jobs:
   #       TEMP_DIR=$(mktemp -d)
   #       cd $TEMP_DIR
   #       curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
-  #       istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/mirroring/curl.yaml | kubectl create -f -
+  #       istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/requestrouting/curl.yaml | kubectl create -f -
   #       cd $ITER8
         
   #   - name: Create Iter8 experiment
   #     run: |
   #       export ITER8=$(pwd)
-  #       kubectl wait --for=condition=Ready ksvc/sample-app
-  #       kubectl wait --for=condition=Available deploy/curl
-  #       kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
+  #       kubectl wait --for=condition=Ready ksvc/sample-app-v1
+  #       kubectl wait --for=condition=Ready ksvc/sample-app-v2
+  #       kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml        
 
   #   - name: Sleep
   #     run: |
@@ -437,10 +447,19 @@ jobs:
   #     run: |
   #       #Check if experiment has completed
   #       completed="Completed"
-  #       if [[ $(kubectl get experiment mirroring -ojson | jq .status.stage)=="$completed" ]]; then
+  #       if [[ $(kubectl get experiment request-routing -ojson | jq .status.stage)=="$completed" ]]; then
   #         echo "Experiment has Completed"
   #       else
-  #         echo "Experiment must be Completed. It is $(kubectl get experiment mirroring -ojson | jq .status.stage)"
+  #         echo "Experiment must be Completed. It is $(kubectl get experiment request-routing -ojson | jq .status.stage)"
+  #         exit 1
+  #       fi
+
+  #       #Check if recommended baseline is candidate
+  #       candidate="candidate"
+  #       if [[ $(kubectl get experiment request-routing -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
+  #         echo "recommendedBaseline is candidate"
+  #       else
+  #         echo "recommendedBaseline must be candidate"
   #         exit 1
   #       fi
 
