@@ -172,7 +172,6 @@ cd $ITER8
 ## 4. Create Iter8 experiment
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
-kubectl wait --for=condition=Available deploy/curl
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 ```
 
