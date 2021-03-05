@@ -108,7 +108,7 @@ nav:
       - Canary + FixedSplit + Kustomize: code-samples/iter8-knative/canary-fixedsplit.md
       - Conformance: code-samples/iter8-knative/conformance.md
       - Conformance + Traffic mirroring: code-samples/iter8-knative/mirroring.md
-      - Request routing: code-samples/iter8-knative/request-routing.md
+      - Canary + Request routing: code-samples/iter8-knative/request-routing.md
       - Useful Knative annotations: code-samples/iter8-knative/annotations.md
     - Generating requests externally: code-samples/traffic.md
   - User Guide:
