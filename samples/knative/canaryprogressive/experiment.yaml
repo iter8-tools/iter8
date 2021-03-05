@@ -47,7 +47,7 @@ spec:
       upperLimit: "0.01"
   duration:
     intervalSeconds: 10
-    iterationsPerLoop: 7
+    iterationsPerLoop: 10
   versionInfo:
     # information about app versions used in this experiment
     baseline:

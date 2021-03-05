@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Mirroring / Shadowing / Dark Launch
+# Conformance + Traffic Mirroring
 
 > Traffic mirroring, also called shadowing, enables experimenting in a production (or near-production) environment with zero-impact on end users. Mirrored traffic is a replica of the real (production) traffic sent to candidate version(s). Metrics are collected and evaluated for candidate version(s), but responses from candidate(s) are ignored.
 
