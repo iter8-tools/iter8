@@ -344,55 +344,55 @@ jobs:
           exit 1
         fi
 
-  # conformance-traffic-mirroring:
-  #   name: conformance + traffic mirroring experiment
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout repository
-  #     uses: actions/checkout@v2
+  conformance-traffic-mirroring:
+    name: conformance + traffic mirroring experiment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
     
-  #   - uses: engineerd/setup-kind@v0.5.0
+    - uses: engineerd/setup-kind@v0.5.0
 
-  #   - name: platform setup
-  #     run: |
-  #       export ITER8=$(pwd)
-  #       $ITER8/samples/knative/quickstart/platformsetup.sh istio
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/knative/quickstart/platformsetup.sh istio
 
-  #   - name: create app with live and dark versions
-  #     run: |
-  #       export ITER8=$(pwd)
-  #       kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml        
+    - name: create app with live and dark versions
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml        
 
-  #   - name: Generate requests
-  #     run: |      
-  #       export ITER8=$(pwd)
-  #       TEMP_DIR=$(mktemp -d)
-  #       cd $TEMP_DIR
-  #       curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.1 sh -
-  #       istio-1.8.1/bin/istioctl kube-inject -f $ITER8/samples/knative/mirroring/curl.yaml | kubectl create -f -
-  #       cd $ITER8
+    - name: Generate requests
+      run: |      
+        export ITER8=$(pwd)
+        TEMP_DIR=$(mktemp -d)
+        cd $TEMP_DIR
+        curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
+        istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/mirroring/curl.yaml | kubectl create -f -
+        cd $ITER8
         
-  #   - name: Create Iter8 experiment
-  #     run: |
-  #       export ITER8=$(pwd)
-  #       kubectl wait --for=condition=Ready ksvc/sample-app
-  #       kubectl wait --for=condition=Available deploy/curl
-  #       kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
+    - name: Create Iter8 experiment
+      run: |
+        export ITER8=$(pwd)
+        kubectl wait --for=condition=Ready ksvc/sample-app
+        kubectl wait --for=condition=Available deploy/curl
+        kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 
-  #   - name: Sleep
-  #     run: |
-  #       sleep 150.0
+    - name: Sleep
+      run: |
+        sleep 150.0
 
-  #   - name: Check if experiment is complete and successful
-  #     run: |
-  #       #Check if experiment has completed
-  #       completed="Completed"
-  #       if [[ $(kubectl get experiment mirroring -ojson | jq .status.stage)=="$completed" ]]; then
-  #         echo "Experiment has Completed"
-  #       else
-  #         echo "Experiment must be Completed. It is $(kubectl get experiment mirroring -ojson | jq .status.stage)"
-  #         exit 1
-  #       fi
+    - name: Check if experiment is complete and successful
+      run: |
+        #Check if experiment has completed
+        completed="Completed"
+        if [[ $(kubectl get experiment mirroring -ojson | jq .status.stage)=="$completed" ]]; then
+          echo "Experiment has Completed"
+        else
+          echo "Experiment must be Completed. It is $(kubectl get experiment mirroring -ojson | jq .status.stage)"
+          exit 1
+        fi
 
   # canary-request-routing:
   #   name: conformance + traffic mirroring experiment
@@ -418,8 +418,8 @@ jobs:
   #       export ITER8=$(pwd)
   #       TEMP_DIR=$(mktemp -d)
   #       cd $TEMP_DIR
-  #       curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.1 sh -
-  #       istio-1.8.1/bin/istioctl kube-inject -f $ITER8/samples/knative/mirroring/curl.yaml | kubectl create -f -
+  #       curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
+  #       istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/mirroring/curl.yaml | kubectl create -f -
   #       cd $ITER8
         
   #   - name: Create Iter8 experiment

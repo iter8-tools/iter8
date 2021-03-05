@@ -67,8 +67,8 @@ if [[ "istio" == ${1} ]]; then
     WORK_DIR=$(pwd)
     TEMP_DIR=$(mktemp -d)
     cd $TEMP_DIR
-    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.1 sh -
-    cd istio-1.8.1
+    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
+    cd istio-1.8.2
     export PATH=$PWD/bin:$PATH
     cd $WORK_DIR
     curl -L https://raw.githubusercontent.com/iter8-tools/iter8-knative/main/quickstart/istio-minimal-operator.yaml | istioctl install -y -f -
