@@ -135,9 +135,5 @@ kustomize build github.com/iter8-tools/iter8/install/iter8-metrics/?ref=${TAG} |
 # Step 7: Verify Iter8 installation
 echo "Verifying installation"
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
-sleep 30
-kubectl get pods -n iter8-system
-POD_NAME=$(kubectl get pods --selector=control-plane=controller-manager -n iter8-system -o jsonpath='{.items[*].metadata.name}')
-kubectl describe pods -n iter8-system $(POD_NAME)
-kubectl wait --for condition=ready --timeout=400s pods --all -n iter8-system
+kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-monitoring
