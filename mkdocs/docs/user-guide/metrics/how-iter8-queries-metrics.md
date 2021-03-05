@@ -4,7 +4,7 @@ template: overrides/main.html
 
 # How Iter8 queries metrics
 
-!!! abstract "Params interpolation"
+!!! abstract ""
     During an experiment, in each iteration, for each metric, and for each app-version, Iter8 uses an HTTP query to retrieve the current metric value. The params of this HTTP query are constructed by interpolating the `spec.params` field of the metric. 
 
 ## How Iter8 interpolates params

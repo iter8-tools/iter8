@@ -107,8 +107,6 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
               - "--namespace=iter8-system" # release namespace
               - "sample-app" # chart name
               - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
-              # - "--reset-values" # seems necessary to avoid ownership annotation metadata errors
-              # - "--force" # seems necessary to avoid ownership annotation metadata errors
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds

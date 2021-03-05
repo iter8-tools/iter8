@@ -4,8 +4,8 @@ template: overrides/main.html
 
 # Custom Metrics
 
-!!! abstract "Defining custom metrics"
-    Define custom Iter8 metrics using Prometheus metrics and use them in Iter8 experiments.
+!!! abstract ""
+    Define custom Iter8 metrics using Prometheus metrics, and use in Iter8 experiments.
 
 This document illustrates custom metric creation using three examples. The first two examples illustrate `counter` metrics while the third illustrates `gauge` metrics. Users are encouraged to read documentation on [how metrics are used in experiments](/usage/metrics/using-metrics) and [how Iter8 queries metrics](/usage/metrics/how-iter8-queries-metrics) before creating custom metrics.
 
