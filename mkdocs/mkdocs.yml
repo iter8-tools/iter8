@@ -95,7 +95,7 @@ nav:
   - Concepts:
     - What is Iter8?: concepts/whatisiter8.md
     - Experimentation strategies: concepts/experimentationstrategies.md
-  - Getting started:
+  - Getting Started:
     - Quick start: 
       - with Knative: getting-started/quick-start/with-knative.md
       - with KFServing: getting-started/quick-start/with-kfserving.md
@@ -112,24 +112,24 @@ nav:
       - Useful Knative annotations: code-samples/iter8-knative/annotations.md
     - Generating requests externally: code-samples/traffic.md
   - User Guide:
-    - Using Iter8: usage/usingiter8.md
-    - Experiment spec in-depth:
-      - spec.target: usage/experiment/target.md
-      - spec.versionInfo: usage/experiment/versioninfo.md
-      - spec.criteria: usage/experiment/criteria.md
-      - spec.strategy.testingPattern: usage/experiment/testing.md
-      - spec.strategy.deploymentPattern: usage/experiment/deployment.md
-      - spec.strategy.weights: usage/experiment/weights.md
-      - spec.strategy.actions: usage/experiment/actions.md
-      - spec.duration: usage/experiment/duration.md
-    - Metrics in-depth:
-      - Metrics: usage/metrics/metricsoverview.md
-      - Using metrics in experiments: usage/metrics/using-metrics.md
-      - How Iter8 queries metrics: usage/metrics/how-iter8-queries-metrics.md
-      - Custom metrics: usage/metrics/custom-metrics.md
+    - Iter8 API specification: user-guide/apispec.md
+    - Creating Iter8 experiments:
+      - spec.target: user-guide/experiment/target.md
+      - spec.versionInfo: user-guide/experiment/versioninfo.md
+      - spec.criteria: user-guide/experiment/criteria.md
+      - spec.strategy.testingPattern: user-guide/experiment/testing.md
+      - spec.strategy.deploymentPattern: user-guide/experiment/deployment.md
+      - spec.strategy.weights: user-guide/experiment/weights.md
+      - spec.strategy.actions: user-guide/experiment/actions.md
+      - spec.duration: user-guide/experiment/duration.md
+    - Creating and using Iter8 metrics:
+      - Metrics: user-guide/metrics/metricsoverview.md
+      - Using metrics in experiments: user-guide/metrics/using-metrics.md
+      - How Iter8 queries metrics: user-guide/metrics/how-iter8-queries-metrics.md
+      - Custom metrics: user-guide/metrics/custom-metrics.md
     - Reference:
-      - Experiment CRD: usage/reference/experiment.md
-      - Metric CRD: usage/reference/metric.md
+      - Experiment CRD: user-guide/reference/experiment.md
+      - Metric CRD: user-guide/reference/metric.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md
   - Blog:
