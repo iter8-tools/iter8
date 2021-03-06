@@ -18,6 +18,65 @@ template: overrides/main.html
 
 ### Experiment
 
+??? info "Sample experiment"
+    ```yaml linenums="1"
+    apiVersion: iter8.tools/v2alpha1
+    kind: Experiment
+    metadata:
+      name: quickstart-exp
+    spec:
+      # target identifies the knative service under experimentation using its fully qualified name
+      target: default/sample-app
+      strategy:
+        # this experiment will perform a canary test
+        testingPattern: Canary
+        actions:
+          start: # run a sequence of tasks at the start of the experiment
+          - library: knative
+            task: init-experiment
+          finish: # run the following sequence of tasks at the end of the experiment
+          - library: common
+            task: exec # promote the winning version
+            with:
+              cmd: kubectl
+              args: 
+              - "apply"
+              - "-f"
+              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
+      criteria:
+        # mean latency of version should be under 50 milliseconds
+        # 95th percentile latency should be under 100 milliseconds
+        # error rate should be under 1%
+        objectives: 
+        - metric: mean-latency
+          upperLimit: 50
+        - metric: 95th-percentile-tail-latency
+          upperLimit: 100
+        - metric: error-rate
+          upperLimit: "0.01"
+      duration:
+        intervalSeconds: 10
+        iterationsPerLoop: 10
+      versionInfo:
+        # information about app versions used in this experiment
+      baseline:
+        name: current
+        variables:
+        # variables are used when querying metrics and when interpolating task inputs
+        - name: revision
+          value: sample-app-v1 
+        - name: promote
+          value: baseline
+      candidates:
+      - name: candidate
+        variables:
+        # variables are used when querying metrics and when interpolating task inputs
+        - name: revision
+          value: sample-app-v2
+        - name: promote
+          value: candidate 
+    ```
+
 #### Metadata
 Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta) resource.
 
@@ -35,7 +94,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| conditions | [][ExperimentCondition](#experimentcondition) | A set of conditions that express progress through an experiment. | No |
+| conditions | [][ExperimentCondition](#experimentcondition) | A set of conditions that express progress of an experiment. | No |
 | initTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time the experiment is created. | No |
 | startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the first iteration of experiment begins  | No |
 | endTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when an experiment has completed. | No |
@@ -51,7 +110,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 Metrics are referenced within the `spec.criteria` field of the experiment. Metrics usage within experiments is described [here](/reference/metrics/using-metrics).
 
 ??? example "Sample metric"
-    ```yaml
+    ```yaml linenums="1"
     apiVersion: iter8.tools/v2alpha1
     kind: Metric
     metadata:

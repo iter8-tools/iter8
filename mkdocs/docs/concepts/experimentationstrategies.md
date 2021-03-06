@@ -8,7 +8,7 @@ template: overrides/main.html
 
 ## Testing pattern
 
-Testing pattern defines the number of app versions evaluated in the experiment and the logic used to determine the `winner`. Iter8 supports `Canary` and `Conformance` testing patterns.
+Testing pattern defines the number of versions evaluated in the experiment and the logic used to determine the `winner`. Iter8 supports `Canary` and `Conformance` testing patterns.
 
 === "Canary"
     `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if versions satisfy the objectives[^1] specified in the experiment. If `candidate` satisfies objectives, then `candidate` is the `winner`; else, if `baseline` satisfies the objectives, then `baseline` is the `winner`; else, there is no `winner`.
@@ -105,7 +105,7 @@ Iter8 can optionally `promote` a version at the end of an experiment. The versio
     spec:
       # `sample-app` Knative service in `default` namespace is the target of this experiment
       target: default/sample-app
-      # information about app versions participating in this experiment
+      # information about versions participating in this experiment
       versionInfo:         
         # every experiment has a baseline version
         # we will name it `current`
@@ -153,7 +153,7 @@ Iter8 can optionally `promote` a version at the end of an experiment. The versio
           # run tasks under the `start` action at the start of an experiment   
           start:
           # the following task verifies that the `sample-app` Knative service in the `default` namespace is available and ready
-          # it then updates the experiment resource with information needed to shift traffic between app versions
+          # it then updates the experiment resource with information needed to shift traffic between versions
           - library: knative
             task: init-experiment
           # run tasks under the `finish` action at the end of an experiment   

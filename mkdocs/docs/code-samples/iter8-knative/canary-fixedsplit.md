@@ -138,7 +138,7 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
         intervalSeconds: 10
         iterationsPerLoop: 10
       versionInfo:
-        # information about app versions used in this experiment
+        # information about versions used in this experiment
         baseline:
           name: baseline
           variables:
