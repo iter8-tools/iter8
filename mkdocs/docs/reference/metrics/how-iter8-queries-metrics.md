@@ -87,4 +87,4 @@ sum(increase(revision_app_request_latencies_count{name='sample-app-v2', namespac
 ```
 Iter8 sends an HTTP GET request to `http://prometheus-operated.iter8-knative-monitoring:9090` with the `query` parameter. The response from Prometheus contains the current value of `my-metric` for `sample-app-v2`. 
 
-[^1]: Recall that each app version in the experiment is associated with [variables](http://localhost:8000/usage/experiment/versioninfo/#variables).
+[^1]: Recall that each app version in the experiment is associated with [variables](http://localhost:8000/reference/experiment/versioninfo/#variables).
