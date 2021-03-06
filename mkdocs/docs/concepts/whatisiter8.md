@@ -26,10 +26,10 @@ A basic Iter8 experiment that automates `Canary` testing and `Progressive` deplo
 
 ## Features at a glance
 
-- Experimentation on any Kubernetes and OpenShift stack; stacks that are currently supported with documented code-samples are **Knative**, **KFServing**[^1] and **Istio**[^2].
-- Testing patterns such as **Conformance**, **Canary**, **A/B**, **A/B/n** and **Pareto**[^3].
-- Deployment patterns such as **Progressive**, **FixedSplit**, **DarkLaunch**, and **BlueGreen**[^4].
-- Traffic shaping methods such as **mirroring**, **request routing**, and **sticky sessions**[^5].
+- Experimentation on any Kubernetes and OpenShift stack; stacks that are currently supported with documented code-samples are **Knative**,[^1] **KFServing**[^2] and **Istio**[^3].
+- Testing patterns such as **Conformance**, **Canary**, **A/B**, **A/B/n** and **Pareto**[^4].
+- Deployment patterns such as **Progressive**, **FixedSplit**, **DarkLaunch**, and **BlueGreen**[^5].
+- Traffic shaping methods such as **mirroring**, **request routing**, and **sticky sessions**[^6].
 - App config tools such as **Helm**, **Kustomize**, and plain **YAML/JSON** app manifests.
 - **Metrics-based criteria** in experiments for evaluating app/model versions.
 - Support for **Prometheus** metrics backend.
@@ -44,8 +44,9 @@ Iter8 consists of a [Kubernetes controller](https://github.com/iter8-tools/etc3)
 ??? info "Interactions between Iter8 components during an experiment"
     ![Under the hood](/assets/images/under-the-hood.png)
 
-[^1]: An initial version of Iter8 for KFServing is available [here](https://github.com/iter8-tools/iter8-kfserving). An updated version is coming soon.
-[^2]: An earlier version of Iter8 for Istio is available [here](https://github.com/iter8-tools/iter8). An updated version is coming soon.
-[^3]: **A/B**, **A/B/n** and **Pareto** are works-under-progress. [Iter8 for Istio](https://github.com/iter8-tools/iter8) supports **A/B** and **A/B/n** testing patterns.
-[^4]: **BlueGreen** deployment is work-under-progress.
-[^5]: **Sticky sessions** traffic shaping feature is work-under-progress.
+[^1]: Iter8 for Knative is supported on *Istio*, *Contour*, *Kourier*, and *Gloo* networking layers.
+[^2]: An initial version of Iter8 for KFServing is available [here](https://github.com/iter8-tools/iter8-kfserving). An updated version is coming soon.
+[^3]: An earlier version of Iter8 for Istio is available [here](https://github.com/iter8-tools/iter8). An updated version is coming soon.
+[^4]: **A/B**, **A/B/n** and **Pareto** are works-under-progress. [Iter8 for Istio](https://github.com/iter8-tools/iter8) supports **A/B** and **A/B/n** testing patterns.
+[^5]: **BlueGreen** deployment is work-under-progress.
+[^6]: **Sticky sessions** traffic shaping feature is work-under-progress.

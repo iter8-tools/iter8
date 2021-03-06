@@ -13,7 +13,7 @@ Please discuss the change you wish to make using [issues](https://github.com/ite
 ## Locally building Iter8 docs
 Iter8 documentation is built using [mkdocs for material](https://squidfunk.github.io/mkdocs-material/). Follow the instructions below to build Iter8 docs locally.
 
-**Pre-requisite:**[Node.js 15+](https://nodejs.org/en/)
+**Pre-requisite:** [Node.js 15+](https://nodejs.org/en/)
 
 **Note:** Fork the Iter8 repo, clone your fork, and `npm run build`. This step is usually required only for the first time you work with Iter8 docs locally.
 
@@ -59,9 +59,7 @@ YAMLs, scripts and other code artifacts that are part of code-samples are locate
 You will see live updates to http://localhost:8000 as you update markdown files in the `iter8/mkdocs` folder.
 
 ## Contributing an Iter8 tutorial
-1. When contributing a tutorial under the `Code samples` nav tab (like [this one](https://iter8-tools/http://localhost:8000/code-samples/iter8-knative/canary-progressive/), please include any relevant e2e tests.
-
-2. In Iter8 tutorials, an artifact such as `experiment.yaml` could depend on another artifact such as a YAML app-manifest that is `kubectl` applied as part of the experiment's finish task. In such cases, split your contribution into two (or more) PRs. The first PR pushes artifacts that are dependencies. The second pushes the dependent artifacts, markdown files and tests.
+All iter8 tutorials include e2e tests, either as [part of GitHub Actions workflows](https://github.com/iter8-tools/iter8/blob/master/.github/workflows/knative-e2e-tests.yaml) or as a [standalone test script](https://github.com/iter8-tools/iter8/blob/master/samples/knative/mirroring/manuale2etest.sh) if they require more resources than what is available in GitHub Actions workflows. When contributing a tutorial, please include relevant e2e tests.
 
 ## Extending Iter8 in other ways
 Documentation for contributing other Iter8 extensions such as new handler tasks, analytics capabilities, and observability features is coming soon.

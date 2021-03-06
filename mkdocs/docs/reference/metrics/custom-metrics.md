@@ -5,14 +5,14 @@ template: overrides/main.html
 # Custom Metrics
 
 !!! abstract ""
-    Define custom Iter8 metrics using Prometheus metrics, and use in Iter8 experiments.
+    Define custom Iter8 metrics based on Prometheus metrics, and use them in experiments.
 
-This document illustrates custom metric creation using three examples. The first two examples illustrate `counter` metrics while the third illustrates `gauge` metrics. Users are encouraged to read documentation on [how metrics are used in experiments](/usage/metrics/using-metrics) and [how Iter8 queries metrics](/usage/metrics/how-iter8-queries-metrics) before creating custom metrics.
+This document illustrates custom metric creation using three examples. The first two examples illustrate `counter` metrics while the third illustrates `gauge` metrics. You may find it helpful to read documentation on [using metrics in experiments](/reference/metrics/using-metrics) and [how Iter8 queries metrics](/reference/metrics/how-iter8-queries-metrics) before creating custom metrics.
 
 ### Example 1: counter metric
 
 #### Defining an Iter8 counter metric named `correct-predictions`
-Suppose your app versions correspond to machine learning models. Suppose you have a Prometheus counter metric named `correct_predictions`, which records the number of correct predictions made by each model version until now.
+Suppose you are experimenting with ML models and you have a Prometheus counter metric named `correct_predictions`, which records the number of correct predictions made by each model version until now.
 ```shell
 # Prometheus query to get the number of correct predictions for a model version in the past 30 seconds.
 sum(increase(correct_predictions{revision_name='my-model-predictor-default-dlgm8'}[30s]))
@@ -42,7 +42,7 @@ spec:
 ```
 
 !!! tip "Dealing with `nodata`"
-    Values may be unavailable for a metric in Prometheus, in which case, Prometheus may return a `nodata` response. For example, values may be unavailable for the `correct_predictions` metric for a model version if no requests have been sent to that model version until now, or if Prometheus has a large scrape interval and is yet to collect data. In such cases, the `on() or vector(0)` clause replaces the `nodata` response with a zero value. This is the recommended approach for creating Iter8 counter metrics.
+    Values may be unavailable for a metric in Prometheus, in which case, Prometheus may return a `nodata` response. For example, values may be unavailable for the `correct_predictions` metric for a model version if no requests have been sent to that model version until now, or if Prometheus has a large scrape interval and is yet to collect data. In such cases, the `on() or vector(0)` clause replaces the `nodata` response with a zero value. This is the recommended approach for defining Iter8 counter metrics.
 
 
 Using the above YAML file, you can create an Iter8 metric in your Kubernetes cluster as follows.
