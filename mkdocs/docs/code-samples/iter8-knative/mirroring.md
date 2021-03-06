@@ -204,7 +204,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
         intervalSeconds: 10
         iterationsPerLoop: 7
       versionInfo:
-        # information about app version used in this experiment
+        # information about version used in this experiment
         baseline:
           name: current
           variables:

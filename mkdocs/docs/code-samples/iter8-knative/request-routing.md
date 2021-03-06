@@ -24,7 +24,7 @@ You will create the following resources in this tutorial.
     **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
 
-## 1. Create app versions
+## 1. Create versions
 ```shell
 kubectl apply -f $ITER8/samples/knative/requestrouting/services.yaml
 ```
@@ -200,7 +200,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
         intervalSeconds: 10
         iterationsPerLoop: 10
       versionInfo:
-        # information about app versions used in this experiment
+        # information about versions used in this experiment
         baseline:
           name: current
           variables:
@@ -252,7 +252,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         Number of completed iterations: 10
 
         ****** Winner Assessment ******
-        App versions in this experiment: [current candidate]
+        versions in this experiment: [current candidate]
         Winning version: candidate
         Recommended baseline: candidate
 

@@ -27,7 +27,7 @@ You will create the following resources in this tutorial.
 
     **[Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and iter8ctl.
 
-## 1. Create app versions
+## 1. Create versions
 ```shell
 helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=iter8-system
 kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
@@ -122,7 +122,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         intervalSeconds: 10
         iterationsPerLoop: 10
       versionInfo:
-        # information about app versions used in this experiment
+        # information about versions used in this experiment
         baseline:
           name: current
           variables:

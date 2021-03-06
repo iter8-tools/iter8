@@ -90,7 +90,7 @@ kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
         intervalSeconds: 10
         iterationsPerLoop: 10
       versionInfo:
-        # information about app versions used in this experiment
+        # information about versions used in this experiment
         baseline:
           name: current
           variables:

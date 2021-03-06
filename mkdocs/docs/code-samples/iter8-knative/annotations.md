@@ -14,7 +14,7 @@ kubectl label kservice ${KSVC_NAME} networking.knative.dev/visibility=cluster-lo
 ```
 
 ## Scale boundaries
-You can configure upper and lower bounds to control Knative's autoscaling behavior. The lower bound can be used to ensure that at least one replica is available for every app version (Knative revision), and cold start issues do not interfere with version assessments during an experiment. The following example from [Knative documentation on configuring scale boundaries](https://knative.dev/docs/serving/autoscaling/scale-bounds/#lower-bound) shows how you can control the minimum number of replicas each revision should have.
+You can configure upper and lower bounds to control Knative's autoscaling behavior. The lower bound can be used to ensure that at least one replica is available for every version (Knative revision), and cold start issues do not interfere with version assessments during an experiment. The following example from [Knative documentation on configuring scale boundaries](https://knative.dev/docs/serving/autoscaling/scale-bounds/#lower-bound) shows how you can control the minimum number of replicas each revision should have.
 
 ``` yaml linenums="1" hl_lines="10"
 apiVersion: serving.knative.dev/v1

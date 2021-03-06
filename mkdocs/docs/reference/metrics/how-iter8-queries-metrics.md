@@ -5,18 +5,14 @@ template: overrides/main.html
 # How Iter8 queries metrics
 
 !!! abstract ""
-    During an experiment, in each iteration, for each metric, and for each app-version, Iter8 uses an HTTP query to retrieve the current metric value. The params of this HTTP query are constructed by interpolating the `spec.params` field of the metric. 
-
-## URL of the Prometheus metrics backend
-
-The Prometheus metrics backend URL is [configurable as part of Iter8 install](/getting-started/install/#prometheus-url).
+    During an Iter8 experiment, in each iteration, for each version involved in the experiment, and for each metric referenced in the experiment, Iter8 uses an HTTP query to retrieve the current metric value. Iter8 constructs the parameters of this HTTP query by interpolating the `spec.params` field of the metric using variables associated with the version.
 
 ## How Iter8 interpolates `params`
 
-* Each HTTP query parameter in the [`spec.params` field](/reference/apispec/#spec_1) of the metric is represented as a name-value pair. The value string is treated as a [`Python` string template](https://docs.python.org/3/library/string.html#string.Template). Specifically it may contain placeholders which are special strings beginning with the symbol `$`. This template is `interpolated`, i.e., its placeholders are substituted with actual values during query time as follows.
-    - The `$interval` placeholder is substituted with the total time elapsed since the start of the experiment. All metrics are expected to use `$interval`.
-    - The `$name` placeholder is substituted with the name of the app version.
-    - Any other placeholder is substituted with the value of the corresponding [variable associated with the app version](/reference/apispec/#variable). If no such variable is associated with the app version, then no substitution occurs.
+* Each element of the [`spec.params` list](/reference/apispec/#spec_1) in the metric is a name-value pair. The value string is treated by Iter8 as a [`Python` string template](https://docs.python.org/3/library/string.html#string.Template). Specifically, the value string may contain placeholders which are substrings that begin with the symbol `$`. This template is `interpolated`, i.e., its placeholders are substituted with actual values during query time as follows.
+    - The `$interval` placeholder is substituted with the total time elapsed since the start of the experiment. All metrics are expected to use `$interval`; this is the length of the time window ending now, over which the metric value is computed.
+    - The `$name` placeholder is substituted with the name of the version.
+    - Any other placeholder is substituted with the value of the corresponding [variable associated with the version](/reference/apispec/#variable). If no such variable is associated with the version, then no substitution occurs.
 
 ## An end-to-end Iter8 metric query example
 
@@ -82,7 +78,8 @@ This example illustrates the end-to-end process of retrieving metric values in I
       ...
     ```
 
-1. Iter8 determines the [URL of the Prometheus metrics backend](#url-of-the-prometheus-metrics-backend).
+1. Iter8 retrieves the URL of the Prometheus metrics backend which is [configured as part of Iter8 install](/getting-started/install/#prometheus-url).
+
 
 2. Suppose Iter8 is performing iteration 10 of the experiment. `iter8-knative-monitoring/my-metric` is referenced in the `spec.criteria` field of the experiment. When querying the value of this metric for the app version named `sample-app-v2`, Iter8 does the following.
     - Iter8 computes the time elapsed since the start of the experiment (i.e, `time.Now() - status.initTime`). Suppose this value equals 285 seconds; Iter8 substitutes `$interval` with `285s`.
