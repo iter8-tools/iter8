@@ -24,10 +24,10 @@ iter8-system   request-count                  counter   Number of requests
 
 ## Referencing metrics
 
-References to metrics in the `spec.criteria` field of an experiment must be in the `namespace/name` format.
+Use metrics in experiments by referencing them in `spec.criteria` field using the `namespace/name` or `name` [format](/reference/apispec/#criteria).
 
 ??? example "Sample experiment illustrating the use of metrics"
-    ```yaml
+    ```yaml linenums="1" hl_lines="34 37 40 44 45 46"
     apiVersion: iter8.tools/v2alpha1
     kind: Experiment
     metadata:
@@ -106,4 +106,4 @@ References to metrics in the `spec.criteria` field of an experiment must be in t
 
 ## Observing metric values
 
-During an experiment, Iter8 reports the metric values observed for each version. [Use `iter8ctl`](http://localhost:8000/concepts/observability/) to observe these metric values in realtime.
+During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example.
