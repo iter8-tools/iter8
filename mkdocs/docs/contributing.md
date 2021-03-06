@@ -40,7 +40,7 @@ pip install -r requirements.txt
 ```
 
 ```shell
-mkdocs serve
+mkdocs serve -s
 ```
 
 Browse http://localhost:8000 to view your local Iter8 docs.

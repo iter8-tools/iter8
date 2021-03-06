@@ -6,14 +6,10 @@ template: overrides/main.html
 
 You have developed multiple versions of a microservice app or an ML model. You want to identify the **winning version** and rollout the `winner` in a reliable manner.
 
-!!! tip ""
-    Enter **Iter8**.
+!!! tip "Enter **Iter8**"
+    **Iter8** helps you to unlock business value in your k8s apps and ML models rapidly by bringing together the best of AI, release engineering, and observability. 
 
-Iter8 is an open source toolkit for **progressive delivery**, **automated rollouts**, and **metrics and AI-driven experiments** on Kubernetes and OpenShift. 
-
-Use Iter8's AI-driven experimentation capabilities to safely automate experiments with new versions of your app / model, gain key insights into their behavior, progressively shift traffic and rollout the `winner` in a principled and statistically robust manner.
-<!-- Iter8 enables delivery of high-impact code changes within your microservices applications in an agile manner while eliminating the risk.  -->
-
+Use Iter8's AI-driven experimentation capabilities to safely experiment with new versions of your apps and ML models on Kubernetes and OpenShift, gain key insights into their behavior with user requests, progressively shift traffic, and rollout the `winner` in a principled and robust manner.
 
 ## What is an Iter8 experiment?
 
@@ -41,7 +37,7 @@ A basic Iter8 experiment that automates `Canary` testing and `Progressive` deplo
 
 Iter8 consists of a [Kubernetes controller](https://github.com/iter8-tools/etc3), an [analytics service](https://github.com/iter8-tools/iter8-analytics), and an [action/task handler](https://github.com/iter8-tools/handler) which jointly orchestrate experiments. These components automate several functions including executing start up tasks that initialize a partially specified experiment, verifying that conditions needed for the experiment are satisfied, iteratively deciding how to split traffic between app versions, identifying a `winner`, error handling, deciding when to terminate the experiment, promoting the `winner`, and executing clean up tasks.
 
-??? info "Interactions between Iter8 components during an experiment"
+??? info "Deeper look into Iter8's component interactions"
     ![Under the hood](/assets/images/under-the-hood.png)
 
 [^1]: Iter8 for Knative is supported on *Istio*, *Contour*, *Kourier*, and *Gloo* networking layers.
