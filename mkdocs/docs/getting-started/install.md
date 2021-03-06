@@ -4,7 +4,7 @@ title: Install Iter8
 ---
 
 === "Iter8 for Knative"
-    Follow these steps to install Iter8 for KNative. 
+    Follow these steps to install Iter8 for Knative. 
 
 
     !!! example "Prerequisites"
