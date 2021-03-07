@@ -11,13 +11,13 @@ template: overrides/main.html
 
 You will create the following resources in this tutorial.
 
-1. A **Knative sample app** with live and dark launched versions.
-2. **Istio virtual services** which send all requests to the live version, mirror 40% of the requests and send the mirrored traffic to the dark version; responses from the dark version are ignored since it only receives mirrored requests.
+1. A **Knative sample app** with live and dark versions.
+2. **Istio virtual services** which send all requests to the live version, mirror 40% of the requests and send the mirrored traffic to the dark version; responses from the dark version are ignored since it receives only mirrored requests.
 3. A **curl-based traffic generator** which simulates user requests.
 4. An **Iter8 experiment** that verifies that the dark version satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
 ??? warning "Before you begin, you will need ... "
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
+    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do so by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -202,7 +202,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
-        iterationsPerLoop: 7
+        iterationsPerLoop: 10
       versionInfo:
         # information about version used in this experiment
         baseline:
@@ -236,7 +236,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
         ****** Progress Summary ******
         Experiment stage: Completed
-        Number of completed iterations: 7
+        Number of completed iterations: 10
 
         ****** Winner Assessment ******
         Winning version: not found

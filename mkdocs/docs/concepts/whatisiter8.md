@@ -9,7 +9,7 @@ You have developed multiple versions of a microservice app or an ML model. You w
 !!! tip "Enter **Iter8**"
     **Iter8** helps you to unlock business value in your k8s apps and ML models rapidly by bringing together the best of AI, release engineering, and observability. 
 
-Use Iter8's AI-driven experimentation capabilities to safely experiment with new versions of your apps and ML models on Kubernetes and OpenShift, gain key insights into their behavior with user requests, progressively shift traffic, and rollout the `winner` in a principled and robust manner.
+Use Iter8's AI-driven experimentation capabilities to safely experiment with new versions of your apps and ML models on Kubernetes and OpenShift clusters, gain key insights into their behavior with real user requests in production or staging environments, progressively shift traffic, and rollout the `winner` in a statistically robust manner.
 
 ## What is an Iter8 experiment?
 

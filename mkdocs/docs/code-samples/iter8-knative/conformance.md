@@ -189,4 +189,4 @@ kubectl delete -f $ITER8/samples/knative/conformance/baseline.yaml
 ??? info "Understanding what happened"
     1. You created a Knative service with a single revision, sample-app-v1. 
     2. You generated requests for the Knative service using a fortio-job.
-    3. You created an Iter8 `Conformance` experiment. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that `baseline` satisfied all the objectives specified in the experiment.
+    3. You created an Iter8 `Conformance` experiment. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that `baseline` satisfied all the `objectives` specified in the experiment.

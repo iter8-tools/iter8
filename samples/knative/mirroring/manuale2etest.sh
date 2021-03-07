@@ -32,8 +32,8 @@ kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 
 # Sleep
-echo "Sleep for 150s"
-sleep 150.0
+echo "Sleep for 125s"
+sleep 125.0
 
 # Check if experiment is complete and successful
 echo "Checking if experiment is completed and successful"
@@ -44,3 +44,9 @@ else
     echo "Experiment must be Completed. It is $(kubectl get experiment mirroring -ojson | jq .status.stage)"
     exit 1
 fi
+
+# Cleanup
+kubectl delete -f $ITER8/samples/knative/mirroring/curl.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/routing-rules.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
