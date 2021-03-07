@@ -89,6 +89,37 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml | kubectl apply -f -
 ```
 
+??? info "Look inside fortio.yaml"
+    ```yaml linenums="1"
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: fortio
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: shared
+            emptyDir: {}    
+          containers:
+          - name: fortio
+            image: fortio/fortio
+            command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
+            env:
+            - name: URL
+              value: URL_VALUE
+            volumeMounts:
+            - name: shared
+              mountPath: /shared         
+          - name: busybox
+            image: busybox:1.28
+            command: ['sh', '-c', 'echo busybox is running! && sleep 600']          
+            volumeMounts:
+            - name: shared
+              mountPath: /shared       
+          restartPolicy: Never    
+    ```
+
 ## 3. Create Iter8 experiment
 
 ```shell
