@@ -55,10 +55,42 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -
 ```
 
+??? info "Look inside experiment.yaml"
+    ```yaml
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: fortio
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: shared
+            emptyDir: {}    
+          containers:
+          - name: fortio
+            image: fortio/fortio
+            command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
+            env:
+            - name: URL
+              value: URL_VALUE
+            volumeMounts:
+            - name: shared
+              mountPath: /shared         
+          - name: busybox
+            image: busybox:1.28
+            command: ['sh', '-c', 'echo busybox is running! && sleep 600']          
+            volumeMounts:
+            - name: shared
+              mountPath: /shared       
+          restartPolicy: Never
+    ```
+
 ## 3. Create Iter8 experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
 ```
+
 ??? info "Look inside experiment.yaml"
     ```yaml
     apiVersion: iter8.tools/v2alpha1
@@ -189,4 +221,4 @@ kubectl delete -f $ITER8/samples/knative/conformance/baseline.yaml
 ??? info "Understanding what happened"
     1. You created a Knative service with a single revision, sample-app-v1. 
     2. You generated requests for the Knative service using a fortio-job.
-    3. You created an Iter8 `Conformance` experiment. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that `baseline` satisfied all the objectives specified in the experiment.
+    3. You created an Iter8 `Conformance` experiment. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that `baseline` satisfied all the `objectives` specified in the experiment.

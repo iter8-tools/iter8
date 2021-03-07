@@ -57,7 +57,6 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
     ```yaml linenums="1"
     # This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
     # Traffic is split 75/25 between the baseline and candidate
-    # Apply this after applying baseline.yaml in order to create the second revision
     apiVersion: serving.knative.dev/v1
     kind: Service
     metadata:
@@ -89,6 +88,37 @@ kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml | kubectl apply -f -
 ```
+
+??? info "Look inside fortio.yaml"
+    ```yaml linenums="1"
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: fortio
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: shared
+            emptyDir: {}    
+          containers:
+          - name: fortio
+            image: fortio/fortio
+            command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
+            env:
+            - name: URL
+              value: URL_VALUE
+            volumeMounts:
+            - name: shared
+              mountPath: /shared         
+          - name: busybox
+            image: busybox:1.28
+            command: ['sh', '-c', 'echo busybox is running! && sleep 600']          
+            volumeMounts:
+            - name: shared
+              mountPath: /shared       
+          restartPolicy: Never    
+    ```
 
 ## 3. Create Iter8 experiment
 
@@ -274,6 +304,6 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
 ??? info "Understanding what happened"
     1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `Kustomize`.
     2. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
-    4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `helm upgrade --install` subcommand.
+    4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `kustomize build ... | kubectl apply -f -` commands.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
         - **Note:** There was no traffic shifting during experiment iterations since this used a `FixedSplit` deployment pattern.

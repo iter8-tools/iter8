@@ -33,8 +33,8 @@ kubectl wait --for=condition=Ready ksvc/sample-app-v2
 kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml        
 
 # Sleep
-echo "Sleep for 150s"
-sleep 150.0
+echo "Sleep for 125s"
+sleep 125.0
 
 # Check if experiment is complete and successful
 echo "Checking if experiment is completed and successful"
@@ -46,7 +46,7 @@ else
     exit 1
 fi
 
-#Check if recommended baseline is candidate
+# Check if recommended baseline is candidate
 echo "Checking if recommendedBaseline is candidate"
 candidate="candidate"
 if [[ $(kubectl get experiment request-routing -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
@@ -55,3 +55,9 @@ else
     echo "recommendedBaseline must be candidate"
     exit 1
 fi
+
+# Cleanup
+kubectl delete -f $ITER8/samples/knative/requestrouting/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/requestrouting/curl.yaml
+kubectl delete -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
+kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
