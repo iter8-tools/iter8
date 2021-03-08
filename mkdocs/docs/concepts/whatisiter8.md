@@ -7,7 +7,7 @@ template: overrides/main.html
 You have developed multiple versions of a microservice app or an ML model. You want to identify the **winning version** and rollout the `winner` in a reliable manner.
 
 !!! tip "Enter **Iter8**"
-    **Iter8** helps you to unlock business value in your k8s apps and ML models rapidly by bringing together the best of AI, release engineering, and observability. 
+    **Iter8** enables you to unlock business value in your k8s apps and ML models rapidly and robustly by combining the best of AI, release engineering, and observability.
 
 Use Iter8's AI-driven experimentation capabilities to safely experiment with new versions of your apps and ML models on Kubernetes and OpenShift clusters, gain key insights into their behavior with real user requests in production or staging environments, progressively shift traffic, and rollout the `winner` in a statistically robust manner.
 
@@ -23,13 +23,13 @@ A basic Iter8 experiment that automates `Canary` testing and `Progressive` deplo
 ## Features at a glance
 
 - Experimentation on any Kubernetes and OpenShift stack; stacks that are currently supported with documented code-samples are **Knative**,[^1] **KFServing**[^2] and **Istio**[^3].
-- Testing patterns such as **Conformance**, **Canary**, **A/B**, **A/B/n** and **Pareto**[^4].
-- Deployment patterns such as **Progressive**, **FixedSplit**, **DarkLaunch**, and **BlueGreen**[^5].
+- **Conformance**, **Canary**, **A/B**, **A/B/n** and **Pareto**[^4] testing patterns.
+- **Progressive**, **FixedSplit**, **DarkLaunch**, and **BlueGreen**[^5] deployment patterns.
 - Traffic shaping methods such as **mirroring**, **request routing**, and **sticky sessions**[^6].
-- App config tools such as **Helm**, **Kustomize**, and plain **YAML/JSON** app manifests.
+- Integration with app config tools such as **Helm**, **Kustomize**, and **kubectl**.
 - **Metrics-based criteria** in experiments for evaluating app/model versions.
 - Support for **Prometheus** metrics backend.
-- Support for **custom metrics** based on any metric available in the backend.
+- Support for **custom metrics** based on any metric available in **Prometheus**.
 - Statistically robust and principled assessment of app versions, traffic shifting, and version promotion using **Bayesian learning** and **multi-armed bandit algorithms**.
 - The **iter8ctl** CLI for observing experiments in realtime.
 
