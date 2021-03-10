@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  AI-driven rollouts for Kubernetes apps. Unlock business value in your k8s apps and ML models rapidly and robustly by combining the best of AI, release engineering, and observability. Use Iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.
+  AI-driven rollout automation for Kubernetes apps
 
 # Repository
 repo_name: iter8-tools/iter8
