@@ -28,7 +28,7 @@ Use metrics in experiments by referencing them in `spec.criteria` field using th
 
 ??? example "Sample experiment illustrating the use of metrics"
     ```yaml linenums="1" hl_lines="34 37 40 44 45 46"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: quickstart-exp
@@ -84,15 +84,13 @@ Use metrics in experiments by referencing them in `spec.criteria` field using th
           start:
           # the following task verifies that the `sample-app` Knative service in the `default` namespace is available and ready
           # it then updates the experiment resource with information needed to shift traffic between app versions
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           # run tasks under the `finish` action at the end of an experiment   
           finish:
           # promote an app version
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
               args:

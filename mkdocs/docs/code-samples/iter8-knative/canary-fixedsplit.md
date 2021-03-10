@@ -128,7 +128,7 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: canary-fixedsplit
@@ -141,11 +141,9 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
         deploymentPattern: FixedSplit
         actions:
           start: # run the following sequence of tasks at the start of the experiment
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
-          - library: common
-            task: exec # promote the winning version using kustomize
+          - task: common/exec # promote the winning version using kustomize
             with:
               cmd: /bin/sh
               args:
@@ -210,7 +208,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ****** Winner Assessment ******
         App versions in this experiment: [baseline candidate]
         Winning version: candidate
-        Recommended baseline: candidate
+        Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
         +--------------------------------+----------+-----------+

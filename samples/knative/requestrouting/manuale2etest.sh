@@ -46,13 +46,13 @@ else
     exit 1
 fi
 
-# Check if recommended baseline is candidate
-echo "Checking if recommendedBaseline is candidate"
+# Check if Version recommended for promotion is candidate
+echo "Checking if versionRecommendedForPromotion is candidate"
 candidate="candidate"
-if [[ $(kubectl get experiment request-routing -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
-    echo "recommendedBaseline is candidate"
+if [[ $(kubectl get experiment request-routing -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
+    echo "versionRecommendedForPromotion is candidate"
 else
-    echo "recommendedBaseline must be candidate"
+    echo "versionRecommendedForPromotion must be candidate"
     exit 1
 fi
 

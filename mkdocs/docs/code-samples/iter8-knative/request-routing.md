@@ -174,7 +174,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
 
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: request-routing
@@ -254,7 +254,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ****** Winner Assessment ******
         versions in this experiment: [current candidate]
         Winning version: candidate
-        Recommended baseline: candidate
+        Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
         +--------------------------------+---------+-----------+

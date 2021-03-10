@@ -20,7 +20,7 @@ This example illustrates the end-to-end process of retrieving metric values in I
 
 ??? example "Sample metric for illustrating param interpolation"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Metric
     metadata:
       name: my-metric

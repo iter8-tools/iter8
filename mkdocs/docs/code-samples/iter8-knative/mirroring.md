@@ -177,7 +177,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: mirroring
@@ -187,8 +187,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
         testingPattern: Conformance
         actions:
           start:
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
@@ -240,7 +239,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
         ****** Winner Assessment ******
         Winning version: not found
-        Recommended baseline: current
+        Version recommended for promotion: current
 
         ****** Objective Assessment ******
         +--------------------------------+---------+

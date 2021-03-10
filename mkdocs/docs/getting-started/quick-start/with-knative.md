@@ -173,7 +173,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 ```
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: quickstart-exp
@@ -185,14 +185,12 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
         testingPattern: Canary
         actions:
           start: # run a sequence of tasks at the start of the experiment
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
-              args: 
+              args:
               - "apply"
               - "-f"
               - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
@@ -263,7 +261,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ****** Winner Assessment ******
         App versions in this experiment: [current candidate]
         Winning version: candidate
-        Recommended baseline: candidate
+        Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
         +--------------------------------+---------+-----------+
