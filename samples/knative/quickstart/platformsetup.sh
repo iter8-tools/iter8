@@ -118,7 +118,8 @@ elif [[ "kourier" == ${1} ]]; then
 fi
 
 # Step 4: Export correct tag for install artifacts
-export TAG=v0.2.5
+export TAG="${TAG:-v0.2.5}"
+echo "TAG is $TAG"
 
 # Step 5: Install iter8-monitoring
 echo "Installing iter8-monitoring"
