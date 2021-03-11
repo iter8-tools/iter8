@@ -46,11 +46,11 @@ template: overrides/main.html
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-system/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-system/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-system/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -377,13 +377,13 @@ Iter8 currently implements two tasks that help in setting up and finishing up ex
       criteria:
         objectives: 
         # mean latency should be under 50 milliseconds
-        - metric: mean-latency
+        - metric: iter8-system/mean-latency
           upperLimit: 50
         # 95th percentile latency should be under 100 milliseconds
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-system/95th-percentile-tail-latency
           upperLimit: 100
         # error rate should be under 1%
-        - metric: error-rate
+        - metric: iter8-system/error-rate
           upperLimit: "0.01"
       indicators:
       # report values for the following metrics in addition those in spec.criteria.objectives

@@ -20,11 +20,11 @@ spec:
   criteria:
     # mean latency of version should be under 500 milli seconds; error rate under 1%    
     objectives: 
-    - metric: mean-latency
+    - metric: iter8-system/mean-latency
       upperLimit: 100
-    - metric: 95th-percentile-tail-latency
+    - metric: iter8-system/95th-percentile-tail-latency
       upperLimit: "0.00001"
-    - metric: error-rate
+    - metric: iter8-system/error-rate
       upperLimit: "0.01"
   duration:
     intervalSeconds: 20

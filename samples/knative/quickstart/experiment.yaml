@@ -25,11 +25,11 @@ spec:
     # 95th percentile latency should be under 100 milliseconds
     # error rate should be under 1%
     objectives: 
-    - metric: mean-latency
+    - metric: iter8-system/mean-latency
       upperLimit: 50
-    - metric: 95th-percentile-tail-latency
+    - metric: iter8-system/95th-percentile-tail-latency
       upperLimit: 100
-    - metric: error-rate
+    - metric: iter8-system/error-rate
       upperLimit: "0.01"
   duration:
     intervalSeconds: 10
