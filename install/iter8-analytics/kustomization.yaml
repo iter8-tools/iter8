@@ -1,14 +1,14 @@
 namePrefix: iter8-
 resources:
-- github.com/iter8-tools/iter8-analytics/install/kubernetes/kustomize/?ref=v1.2.0
+- github.com/iter8-tools/iter8-analytics/install/kubernetes/kustomize/?ref=v2.0.0-pre
 
 images:
 - name: iter8/iter8-analytics
-  newTag: 1.2.0
+  newTag: 2.0.0-pre
 
 configMapGenerator:
 - name: analytics
   files:
-  - config.yaml
+  - unmarshal.yaml
 generatorOptions:
   disableNameSuffixHash: true
