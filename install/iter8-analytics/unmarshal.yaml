@@ -1,0 +1,5 @@
+# this file provides jq expressions to unmarshal metric value 
+# from the JSON response returned by metric backends 
+# for metric HTTP queries
+prometheus: ".data.result[0].value[1] | tonumber"
+newrelic: ".results[0] | .[] | tonumber"
