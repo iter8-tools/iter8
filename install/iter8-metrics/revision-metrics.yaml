@@ -1,4 +1,4 @@
-apiVersion: iter8.tools/v2alpha2
+apiVersion: iter8.tools/v2alpha1
 kind: Metric
 metadata:
   name: request-count
@@ -9,9 +9,8 @@ spec:
   description: Number of requests
   type: counter
   provider: prometheus
-  urlTemplate: http://prometheus-operated.iter8-monitoring:9090
 ---
-apiVersion: iter8.tools/v2alpha2
+apiVersion: iter8.tools/v2alpha1
 kind: Metric
 metadata:
   name: mean-latency
@@ -22,11 +21,11 @@ spec:
   - name: query
     value: (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[$interval]))or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0))
   type: gauge
-  sampleSize: request-count
+  sampleSize: 
+    name: request-count
   provider: prometheus
-  urlTemplate: http://prometheus-operated.iter8-monitoring:9090
 ---
-apiVersion: iter8.tools/v2alpha2
+apiVersion: iter8.tools/v2alpha1
 kind: Metric
 metadata:
   name: 95th-percentile-tail-latency
@@ -38,11 +37,11 @@ spec:
     value: histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[$interval]))
       by (le))
   type: gauge
-  sampleSize: request-count
+  sampleSize: 
+    name: request-count
   provider: prometheus
-  urlTemplate: http://prometheus-operated.iter8-monitoring:9090
 ---
-apiVersion: iter8.tools/v2alpha2
+apiVersion: iter8.tools/v2alpha1
 kind: Metric
 metadata:
   name: error-count
@@ -53,9 +52,8 @@ spec:
     value: sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[$interval])) or on() vector(0)
   type: counter
   provider: prometheus
-  urlTemplate: http://prometheus-operated.iter8-monitoring:9090
 ---
-apiVersion: iter8.tools/v2alpha2
+apiVersion: iter8.tools/v2alpha1
 kind: Metric
 metadata:
   name: error-rate
@@ -65,7 +63,7 @@ spec:
   - name: query
     value: (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0))
   type: gauge
-  sampleSize: request-count
+  sampleSize: 
+    name: request-count
   provider: prometheus
-  urlTemplate: http://prometheus-operated.iter8-monitoring:9090
     
