@@ -9,7 +9,7 @@ Use Iter8's AI-driven experimentation capabilities to safely experiment with new
 
 ## What is an Iter8 experiment?
 
-> Iter8 defines a Kubernetes resource kind called Experiment that automates metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps / ML models.
+> Iter8 defines a Kubernetes resource kind called Experiment that automates metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps/ML models.
 
 An Iter8 experiment is illustrated below. This experiment automates progressive delivery of a Knative application and uses Knative + Istio networking, and the request routing feature of Istio to perform the experiment for only a specific traffic segment.
 

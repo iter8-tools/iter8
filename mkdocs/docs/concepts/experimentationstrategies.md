@@ -48,9 +48,9 @@ Deployment pattern determines how traffic is split between versions. Iter8 suppo
 
 ## Traffic shaping
 
-Traffic shaping refers to features such as `Traffic mirroring / shadowing` and `Request routing` that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology or networking layer present in your Kubernetes or OpenShift stack.
+Traffic shaping refers to features such as `Traffic mirroring/shadowing` and `Request routing` that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology or networking layer present in your Kubernetes or OpenShift stack.
 
-=== "Traffic mirroring / shadowing"
+=== "Traffic mirroring/shadowing"
     Traffic mirroring or shadowing enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^2] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
 
     ![Canary](/assets/images/mirroring.png)

@@ -14,11 +14,11 @@ Use Iter8's AI-driven experimentation capabilities to safely experiment with new
 ## What is an Iter8 experiment?
 
 !!! tip ""
-    Iter8 defines a Kubernetes resource kind called **Experiment** that automates metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps / ML models.
+    Iter8 defines a Kubernetes resource kind called **Experiment** that automates metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps/ML models.
 
 A basic Iter8 experiment that automates `Canary` testing and `Progressive` deployment (traffic shifting) is illustrated below.
 
-![Canary / Progressive / kubectl](/assets/images/canary-progressive-kubectl.png)
+![Canary/Progressive/kubectl](/assets/images/canary-progressive-kubectl.png)
 
 ## Features at a glance
 
