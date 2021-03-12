@@ -48,10 +48,10 @@ Deployment pattern is how Iter8 splits traffic between versions. Iter8 supports 
 
 ## Traffic shaping
 
-Traffic shaping refers to features such as `Traffic mirroring/shadowing` and `Request routing` that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology, or networking layer present in your Kubernetes or OpenShift stack.
+Traffic shaping refers to features such as **traffic mirroring** and **request routing** that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology, or networking layer present in your Kubernetes or OpenShift stack.
 
 === "Traffic mirroring/shadowing"
-    Traffic mirroring or shadowing enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^2] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
+    **Traffic mirroring** or **shadowing** enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^2] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
 
     ![Canary](/assets/images/mirroring.png)
 
@@ -59,7 +59,7 @@ Traffic shaping refers to features such as `Traffic mirroring/shadowing` and `Re
         Try a [traffic mirroring experiment](/code-samples/iter8-knative/mirroring/).
 
 === "Request routing"
-    Request routing is the ability to route requests dynamically to different versions of the app based on attributes such as user identity, URI, or request origin. Use request routing in experiments to specify the segment of the traffic that will participate in the experiment. For example, in a `Canary` experiment, requests within the specified segment may be routed to `baseline` or `candidate`; requests not in this segment will be routed only to the `baseline`.
+    **Request routing** is the ability to route requests dynamically to different versions of the app based on attributes such as user identity, URI, or request origin. Use request routing in experiments to specify the segment of the traffic that will participate in the experiment. For example, in a `Canary` experiment, requests within the specified segment may be routed to `baseline` or `candidate`; requests not in this segment will be routed only to the `baseline`.
 
     ![Canary](/assets/images/request-routing.png)
 
