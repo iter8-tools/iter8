@@ -1,6 +1,6 @@
 ## For this test to succeed, do the following before launching the test.
-# minikube start --cpus 6 --memory 12288 --kubernetes-version=v1.17.11 --driver=docker
-## Also install Kustomize v4: https://kustomize.io/
+## minikube start --cpus 6 --memory 12288
+## Also install Kustomize v3 or v4: https://kustomize.io/
 
 #!/bin/bash
 
