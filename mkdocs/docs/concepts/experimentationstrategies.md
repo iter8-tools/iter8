@@ -8,10 +8,10 @@ template: overrides/main.html
 
 ## Testing pattern
 
-Testing pattern defines the number of versions evaluated in the experiment and the logic used to determine the `winner`. Iter8 supports `Canary` and `Conformance` testing patterns.
+Testing pattern is the logic that Iter8 uses to determine a `winner` among a number of versions during an experiment. Iter8 supports `Canary` and `Conformance` testing patterns.
 
 === "Canary"
-    `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if versions satisfy the objectives[^1] specified in the experiment. If `candidate` satisfies objectives, then `candidate` is the `winner`; else, if `baseline` satisfies the objectives, then `baseline` is the `winner`; else, there is no `winner`.
+    `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if the versions satisfy the objectives[^1] specified in the experiment. If the `candidate` satisfies the objectives, then the `candidate` is the `winner`; else, if the `baseline` satisfies the objectives, then the `baseline` is the `winner`; else, there is no `winner`.
 
     ![Canary](/assets/images/canary-progressive-kubectl.png)
 
@@ -19,7 +19,7 @@ Testing pattern defines the number of versions evaluated in the experiment and t
         Try a [`Canary` experiment](/getting-started/quick-start/with-knative/).
 
 === "Conformance"
-    `Conformance` testing involves a single version, a `baseline`. Iter8 assesses if the `baseline` satisfies the objectives specified in the experiment. If it does, then `baseline` is the `winner`; else, there is no `winner`.
+    `Conformance` testing involves a single version, a `baseline`. Iter8 assesses if the `baseline` satisfies the objectives specified in the experiment. If it does, then the `baseline` is the `winner`; else, there is no `winner`.
 
     ![Conformance](/assets/images/conformance.png)
 
@@ -28,10 +28,10 @@ Testing pattern defines the number of versions evaluated in the experiment and t
 
 ## Deployment pattern
 
-Deployment pattern determines how traffic is split between versions. Iter8 supports `Progressive` and `FixedSplit` deployment patterns.
+Deployment pattern is how Iter8 splits traffic between versions. Iter8 supports `Progressive` and `FixedSplit` deployment patterns.
 
 === "Progressive"
-    `Progressive` deployment incrementally shift traffic towards the `winner` over multiple iterations.
+    `Progressive` deployment incrementally shifts traffic towards the `winner` over multiple iterations.
 
     ![Canary](/assets/images/canary-progressive-helm.png)
 
@@ -39,7 +39,7 @@ Deployment pattern determines how traffic is split between versions. Iter8 suppo
         Try a [`Progressive` experiment](/code-samples/iter8-knative/canary-progressive/).
 
 === "FixedSplit"
-    `FixedSplit` deployment does not shift traffic between versions during iterations.
+    `FixedSplit` deployment does not shift traffic between versions.
 
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
@@ -48,10 +48,10 @@ Deployment pattern determines how traffic is split between versions. Iter8 suppo
 
 ## Traffic shaping
 
-Traffic shaping refers to features such as `Traffic mirroring / shadowing` and `Request routing` that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology or networking layer present in your Kubernetes or OpenShift stack.
+Traffic shaping refers to features such as **traffic mirroring** and **request routing** that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology, or networking layer present in your Kubernetes or OpenShift stack.
 
-=== "Traffic mirroring / shadowing"
-    Traffic mirroring or shadowing enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^2] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
+=== "Traffic mirroring/shadowing"
+    **Traffic mirroring** or **shadowing** enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^2] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
 
     ![Canary](/assets/images/mirroring.png)
 
@@ -59,7 +59,7 @@ Traffic shaping refers to features such as `Traffic mirroring / shadowing` and `
         Try a [traffic mirroring experiment](/code-samples/iter8-knative/mirroring/).
 
 === "Request routing"
-    Request routing is the ability to route requests dynamically to different versions of the app based on attributes such as user identity, URI, or request origin. Use request routing in experiments to specify the segment of the traffic that will participate in the experiment. For example, in a `Canary` experiment, requests within the specified segment may be routed to `baseline` or `candidate`; requests not in this segment will be routed only to the `baseline`.
+    **Request routing** is the ability to route requests dynamically to different versions of the app based on attributes such as user identity, URI, or request origin. Use request routing in experiments to specify the segment of the traffic that will participate in the experiment. For example, in a `Canary` experiment, requests within the specified segment may be routed to `baseline` or `candidate`; requests not in this segment will be routed only to the `baseline`.
 
     ![Canary](/assets/images/request-routing.png)
 
@@ -69,7 +69,7 @@ Traffic shaping refers to features such as `Traffic mirroring / shadowing` and `
 
 ## Version promotion
 
-Iter8 can optionally `promote` a version at the end of an experiment. The version recommended for promotion is the `winner` if a `winner` has been found. If not, the version recommended for promotion is the `baseline`. As part of version promotion, Iter8 can configure Kubernetes resources by installing or upgrading `Helm` charts, building and applying `Kustomize` resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
+Iter8 can optionally `promote` a version at the end of an experiment. The version recommended for promotion is the `winner` if a `winner` has been found. If not, the version recommended for promotion is the `baseline`. As part of version promotion, Iter8 can configure Kubernetes resources by installing or upgrading Helm charts, building and applying Kustomize resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
 
 === "Helm"
     An experiment that uses `helm upgrade` for version promotion is illustrated below.
@@ -80,7 +80,7 @@ Iter8 can optionally `promote` a version at the end of an experiment. The versio
         Try an [experiment that uses `Helm`](/code-samples/iter8-knative/canary-progressive/).
 
 === "Kustomize"
-    An experiment that uses `kustomize build` for version promotion is illusted below.
+    An experiment that uses `kustomize build` for version promotion is illustrated below.
 
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
