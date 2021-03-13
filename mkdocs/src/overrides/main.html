@@ -26,7 +26,7 @@
 {% block extrahead %}
 
   <!-- Determine title -->
-  {% set title = config.site_name %}
+  {% set title = config.extra.title %}
   {% if page and page.title and not page.is_homepage %}
     {% set title = config.site_name ~ " - " ~ page.title | striptags %}
   {% endif %}

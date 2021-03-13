@@ -46,6 +46,7 @@ plugins:
         
 # Customization
 extra:
+  title: "AIOps platform for cloud native release automation - iter8.tools"
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/iter8-tools/iter8
