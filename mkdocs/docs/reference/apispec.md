@@ -469,7 +469,7 @@ The `knative` task library provides the `init-experiment` task. Use this task as
               kind: Service
               name: sample-app
               namespace: default
-              fieldPath: /spec/traffic/0/percent  
+              fieldPath: .spec.traffic[0].percent  
           candidates: 
           - name: candidate
             variables:
@@ -484,7 +484,7 @@ The `knative` task library provides the `init-experiment` task. Use this task as
               kind: Service
               name: sample-app
               namespace: default
-              fieldPath: /spec/traffic/1/percent  
+              fieldPath: .spec.traffic[1].percent  
         ```
 
 #### `common/exec`

@@ -211,7 +211,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
             kind: VirtualService
             name: routing-for-wakanda
             namespace: default
-            fieldPath: /spec/http/0/route/0/weight
+            fieldPath: .spec.http[0].route[0].weight
         candidates:
         - name: candidate
           variables:
@@ -222,7 +222,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
             kind: VirtualService
             name: routing-for-wakanda
             namespace: default
-            fieldPath: /spec/http/0/route/1/weight
+            fieldPath: .spec.http[0].route[1].weight
     ```
 
 ## 5. Observe experiment
