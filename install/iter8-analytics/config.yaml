@@ -1,3 +1,0 @@
-port: 8080
-metricsBackend:
-  url: http://prometheus-operated.iter8-monitoring:9090

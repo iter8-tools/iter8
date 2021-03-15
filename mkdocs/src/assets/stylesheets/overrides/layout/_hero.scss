@@ -78,7 +78,7 @@
 
     // Adjust spacing and set dimensions
     &__content {
-      max-width: px2rem(380px);
+      max-width: px2rem(500px);
       margin-top: px2rem(50px);
       padding-bottom: 20vw;
     }
@@ -86,7 +86,7 @@
     // Hero image
     &__image {
       order: 1;
-      width: px2rem(760px);
+      width: px2rem(650px);
       margin-top: px2rem(50px);
       transform: translateX(#{px2rem(80px)});
     }

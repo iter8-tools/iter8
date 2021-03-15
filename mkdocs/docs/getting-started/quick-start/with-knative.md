@@ -26,12 +26,12 @@ You will create the following resources in this tutorial.
 
 ## 1. Create Kubernetes cluster
 
-Create a local Kubernetes cluster or use a managed Kubernetes service from your cloud provider. Ensure that the cluster has sufficient resources, for example, 2 cpus and 4GB of memory.
+Create a local Kubernetes cluster or use a managed Kubernetes service from your cloud provider. Ensure that the cluster has sufficient resources, for example, 6 cpus and 12GB of memory.
 
 === "Minikube"
 
     ```shell
-    minikube start
+    minikube start --cpus 6 --memory 12288
     ```
 
 === "Kind"
@@ -52,12 +52,6 @@ export ITER8=$(pwd)
 ## 3. Install Knative and Iter8
 Choose a networking layer for Knative.
 
-=== "Istio"
-
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh istio
-    ```
-
 === "Contour"
 
     ```shell
@@ -74,6 +68,12 @@ Choose a networking layer for Knative.
     This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
     ```shell
     $ITER8/samples/knative/quickstart/platformsetup.sh gloo
+    ```
+
+=== "Istio"
+
+    ```shell
+    $ITER8/samples/knative/quickstart/platformsetup.sh istio
     ```
 
 ## 4. Create app versions

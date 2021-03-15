@@ -7,18 +7,18 @@ template: overrides/main.html
 You have developed multiple versions of a microservice app or an ML model. You want to identify the **winning version** and rollout the `winner` in a reliable manner.
 
 !!! tip "Enter **Iter8**"
-    **Iter8** enables you to unlock business value in your k8s apps and ML models rapidly and robustly by combining the best of AI, release engineering, and observability.
+    **Iter8** enables you to unlock business value in your K8s apps and ML models rapidly and robustly by combining the best of AI, release engineering, and observability.
 
 Use Iter8's AI-driven experimentation capabilities to safely experiment with new versions of your apps and ML models on Kubernetes and OpenShift clusters, gain key insights into their behavior with real user requests in production or staging environments, progressively shift traffic, and rollout the `winner` in a statistically robust manner.
 
 ## What is an Iter8 experiment?
 
 !!! tip ""
-    Iter8 defines a Kubernetes resource kind called **Experiment** that automates metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps / ML models.
+    Iter8 defines a Kubernetes resource kind called **Experiment** that automates metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps/ML models.
 
 A basic Iter8 experiment that automates `Canary` testing and `Progressive` deployment (traffic shifting) is illustrated below.
 
-![Canary / Progressive / kubectl](/assets/images/canary-progressive-kubectl.png)
+![Canary/Progressive/kubectl](/assets/images/canary-progressive-kubectl.png)
 
 ## Features at a glance
 
