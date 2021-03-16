@@ -4,25 +4,13 @@ template: overrides/main.html
 
 # What is Iter8?
 
-You have developed multiple versions of a microservice app or an ML model. You want to identify the **winning version** and rollout the `winner` in a reliable manner.
+**Iter8** is an AI-powered platform for cloud native release automation and experimentation. Iter8 makes it easy to unlock business value and guarantee SLOs by identifying the top versions of your apps/ML models and rolling them out safely.
 
-!!! tip "Enter **Iter8**"
-    **Iter8** enables you to unlock business value in your K8s apps and ML models rapidly and robustly by combining the best of AI, release engineering, and observability.
-
-Use Iter8's AI-driven experimentation capabilities to safely experiment with new versions of your apps and ML models on Kubernetes and OpenShift clusters, gain key insights into their behavior with real user requests in production or staging environments, progressively shift traffic, and rollout the `winner` in a statistically robust manner.
-
-## What is an Iter8 experiment?
-
-!!! tip ""
-    Iter8 defines a Kubernetes resource kind called **Experiment** that automates metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps/ML models.
-
-A basic Iter8 experiment that automates `Canary` testing and `Progressive` deployment (traffic shifting) is illustrated below.
-
-![Canary/Progressive/kubectl](/assets/images/canary-progressive-kubectl.png)
+Use Iter8 to automate metrics-driven experiments, progressive delivery, validation, and promotion/rollback of new versions, and maximize release velocity with confidence while protecting end-user experience.
 
 ## Features at a glance
 
-- Experimentation on any Kubernetes and OpenShift stack; stacks that are currently supported with documented code-samples are **Knative**,[^1] **KFServing**[^2] and **Istio**[^3].
+- Experimentation on any cloud stack; stacks that are currently supported with documented code-samples are **Knative**,[^1] **KFServing**[^2] and **Istio**[^3].
 - **Conformance**, **Canary**, **A/B**, **A/B/n** and **Pareto**[^4] testing patterns.
 - **Progressive**, **FixedSplit**, **DarkLaunch**, and **BlueGreen**[^5] deployment patterns.
 - Traffic shaping methods such as **mirroring**, **request routing**, and **sticky sessions**[^6].
@@ -37,8 +25,8 @@ A basic Iter8 experiment that automates `Canary` testing and `Progressive` deplo
 
 Iter8 consists of a [Kubernetes controller](https://github.com/iter8-tools/etc3), an [analytics service](https://github.com/iter8-tools/iter8-analytics), and an [action/task handler](https://github.com/iter8-tools/handler) which jointly orchestrate experiments. These components automate several functions including executing start up tasks that initialize a partially specified experiment, verifying that conditions needed for the experiment are satisfied, iteratively deciding how to split traffic between app versions, identifying a `winner`, error handling, deciding when to terminate the experiment, promoting the `winner`, and executing clean up tasks.
 
-??? info "Deeper look into Iter8's component interactions"
-    ![Under the hood](/assets/images/under-the-hood.png)
+<!-- ??? info "Deeper look into Iter8's component interactions"
+    ![Under the hood](/assets/images/under-the-hood.png) -->
 
 [^1]: Iter8 for Knative is supported on *Istio*, *Contour*, *Kourier*, and *Gloo* networking layers.
 [^2]: An initial version of Iter8 for KFServing is available [here](https://github.com/iter8-tools/iter8-kfserving). An updated version is coming soon.

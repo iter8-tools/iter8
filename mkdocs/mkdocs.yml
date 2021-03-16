@@ -95,7 +95,7 @@ nav:
   - Home: index.md
   - Concepts:
     - What is Iter8?: concepts/whatisiter8.md
-    - Experimentation strategies: concepts/experimentationstrategies.md
+    - Release/experiment strategies: concepts/experimentationstrategies.md
   - Getting Started:
     - Quick start: 
       - with Knative: getting-started/quick-start/with-knative.md
@@ -103,7 +103,7 @@ nav:
       - with Istio: getting-started/quick-start/with-istio.md
     - Install: getting-started/install.md
     - Getting help: getting-started/help.md
-  - Use Cases + Code:
+  - Release/Experiment Strategies + Code:
     - Iter8-Knative:
       - Canary + Progressive + Helm: code-samples/iter8-knative/canary-progressive.md
       - Canary + FixedSplit + Kustomize: code-samples/iter8-knative/canary-fixedsplit.md

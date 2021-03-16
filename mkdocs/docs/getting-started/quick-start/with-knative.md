@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Quick Start with Knative Tutorial
+# Quick Start with Knative
 
 !!! tip ""
     Perform an Iter8-Knative experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`kubectl` based version promotion](/concepts/experimentationstrategies/#version-promotion).

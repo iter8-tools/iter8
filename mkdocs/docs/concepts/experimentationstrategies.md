@@ -3,10 +3,18 @@ template: overrides/main.html
 ---
 
 
-!!! abstract ""
-    Iter8's model of experimentation is powerful and expressive. Flexibly combine a variety of testing & deployment patterns, and traffic shaping & version promotion features in experiments.
+## What is an Iter8 experiment?
 
-## Testing pattern
+!!! tip ""
+    Iter8 defines a Kubernetes resource kind called **Experiment** that enables automated releases and experiments, progressive delivery, and rollout of apps/ML models.
+
+A basic Iter8 experiment that automates `Canary` testing and `Progressive` deployment (traffic shifting) is illustrated below.
+
+![Canary/Progressive/kubectl](/assets/images/canary-progressive-kubectl.png)
+
+Iter8's model of experimentation is extensible, powerful and expressive. You can flexibly combine a variety of testing and deployment patterns, traffic shaping featuers, and version promotion features within experiments.
+
+### Testing pattern
 
 Testing pattern is the logic that Iter8 uses to determine a `winner` among a number of versions during an experiment. Iter8 supports `Canary` and `Conformance` testing patterns.
 
@@ -26,7 +34,7 @@ Testing pattern is the logic that Iter8 uses to determine a `winner` among a num
     !!! tip ""
         Try a [`Conformance` experiment](/code-samples/iter8-knative/conformance/).
 
-## Deployment pattern
+### Deployment pattern
 
 Deployment pattern is how Iter8 splits traffic between versions. Iter8 supports `Progressive` and `FixedSplit` deployment patterns.
 
@@ -46,7 +54,7 @@ Deployment pattern is how Iter8 splits traffic between versions. Iter8 supports 
     !!! tip ""
         Try a [`FixedSplit` experiment](/code-samples/iter8-knative/canary-fixedsplit/).
 
-## Traffic shaping
+### Traffic shaping
 
 Traffic shaping refers to features such as **traffic mirroring** and **request routing** that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology, or networking layer present in your Kubernetes or OpenShift stack.
 
@@ -67,7 +75,7 @@ Traffic shaping refers to features such as **traffic mirroring** and **request r
         Try a [request routing experiment](/code-samples/iter8-knative/request-routing/).
 
 
-## Version promotion
+### Version promotion
 
 Iter8 can optionally `promote` a version at the end of an experiment. The version recommended for promotion is the `winner` if a `winner` has been found. If not, the version recommended for promotion is the `baseline`. As part of version promotion, Iter8 can configure Kubernetes resources by installing or upgrading Helm charts, building and applying Kustomize resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
 
