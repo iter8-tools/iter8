@@ -5,7 +5,7 @@ template: overrides/main.html
 # Conformance Tutorial
 
 !!! tip ""
-    Perform an Iter8-Knative experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing.
+    An experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing.
     
     ![Canary](/assets/images/conformance.png)
 
