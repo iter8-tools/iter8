@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Canary + Progressive + Helm Tutorial
+# Progressive Canary Release
 
 !!! tip ""
     An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`Helm` based version promotion](/concepts/experimentationstrategies/#version-promotion).

@@ -2,10 +2,10 @@
 template: overrides/main.html
 ---
 
-# Canary + Request Routing Tutorial
+# Canary Release with Traffic Segmentation
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment and [request routing](/concepts/experimentationstrategies/#traffic-shaping).
+    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment and [traffic segmentation](/concepts/experimentationstrategies/#traffic-shaping).
     
     ![Canary](/assets/images/request-routing.png)
 

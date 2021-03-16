@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Conformance Tutorial
+# Conformance Testing
 
 !!! tip ""
     An experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing.

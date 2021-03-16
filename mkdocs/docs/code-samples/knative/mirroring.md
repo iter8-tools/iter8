@@ -2,7 +2,7 @@
 template: overrides/main.html
 ---
 
-# Conformance + Traffic Mirroring Tutorial
+# Conformance Testing with Traffic Mirroring
 
 !!! tip ""
     An experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing and [traffic mirroring](/concepts/experimentationstrategies/#traffic-shaping).
