@@ -1,5 +1,5 @@
 # Iter8
-![Iter8 illustration](mkdocs/src/assets/images/banner.png)
+![Iter8 illustration](mkdocs/src/assets/images/ghbanner.png)
 
 ## What is Iter8?
 
