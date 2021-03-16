@@ -1,7 +1,0 @@
-configMapGenerator:
-- name: handlers
-  files:
-  - start.yaml
-  - finish.yaml
-generatorOptions:
-  disableNameSuffixHash: true 

@@ -1,5 +1,0 @@
-namePrefix: iter8-
-namespace: iter8-system
-resources:
-  - defaults
-  - handlers
