@@ -133,6 +133,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
 | sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. | No |
 | provider | string | Type of the metrics database. Currently, `prometheus` is the only valid value. | No |
+| jqExpression | string | A [jq](https://stedolan.github.io/jq/) expression that extracts the metrics value from the result of a query to the backend metrics server. | Yes |
 | secretRef | string | description | No |
 | headerTemplates | [][NamedValue](#namedvalue) | List of description | No |
 | urlTemplate | string | description | Yes |

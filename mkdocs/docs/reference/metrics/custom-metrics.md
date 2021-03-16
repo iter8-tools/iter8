@@ -73,6 +73,7 @@ spec:
   description: Number of requests
   type: counter
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
 ```
 
 ### Example 3: gauge metric
@@ -94,6 +95,7 @@ spec:
   sampleSize: 
     name: iter8-kfserving-monitoring/request-count
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
 ```
 
 `spec.sampleSize` represents the number of data points over which the gauge metric value is computed. In this case, since `accuracy` is computed over all the requests received by a specific model version, the sampleSize metric is `request-count`.
