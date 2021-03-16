@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 is an AIOps platform for cloud native release automation. Iter8 helps you to maximize business value and guarantee SLOs by automating metrics-driven experiments, progressively delivery, validation, and promotion/rollback of new versions of apps and ML models. Release confidently with Iter8 while protecting end-user experience. Quick start in 5 mins.
+  Iter8 makes it easy to maximize business value and guarantee SLOs by identifying the top versions of your apps/ML models and rolling them out safely. Automate metrics-driven experiments, progressively delivery, validation, and promotion/rollback of new versions. Maximize release velocity with confidence while protecting end-user experience. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -46,7 +46,7 @@ plugins:
         
 # Customization
 extra:
-  title: "AIOps platform for cloud native release automation - iter8.tools"
+  title: "Cloud native release automation and experimentation"
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/iter8-tools/iter8
