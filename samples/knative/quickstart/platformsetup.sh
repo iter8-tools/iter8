@@ -42,9 +42,7 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
 fi
 
 # Step 1: Export correct tags for install artifacts
-# export TAG=v0.2.5
-export ITER8_TAG=refs/pull/527/head  # remove this
-export TAG=refs/pull/9/head          # restore this
+export TAG=v0.2.5
 export KNATIVE_TAG=v0.21.0
 
 # Step 2: Install Knative (https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-serving-component)
