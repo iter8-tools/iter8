@@ -234,7 +234,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 === "iter8ctl"
     Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing GOBIN below.
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
+    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2-pre
     ```
 
     Periodically describe the experiment.
