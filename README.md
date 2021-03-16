@@ -12,7 +12,7 @@ Iter8 is an AI-powered cloud native release automation and experimentation platf
 - **Maximize** release velocity with confidence.
 - **Protect** end-user experience.
 
-![Iter8 illustration](mkdocs/src/assets/images/illustration.png)
+![Iter8 illustration](mkdocs/src/assets/images/banner.png)
 
 ## [Quick Start in 5 mins](https://iter8.tools/getting-started/quick-start/with-knative/)
 
