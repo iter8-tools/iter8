@@ -1,5 +1,5 @@
 # Iter8
-For complete documentation, please visit https://iter8.tools.
+![Iter8 illustration](mkdocs/src/assets/images/banner.png)
 
 ## What is Iter8?
 
@@ -12,7 +12,7 @@ Iter8 is an AI-powered cloud native release automation and experimentation platf
 - **Maximize** release velocity with confidence.
 - **Protect** end-user experience.
 
-![Iter8 illustration](mkdocs/src/assets/images/banner.png)
+For complete documentation, please visit https://iter8.tools.
 
 ## [Quick Start in 5 mins](https://iter8.tools/getting-started/quick-start/with-knative/)
 
