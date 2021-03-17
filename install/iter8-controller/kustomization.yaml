@@ -1,9 +1,0 @@
-# To use a tagged release of etc3, for example v0.1.100, change values of ref and newTag
-resources:
-- configmaps
-- github.com/iter8-tools/etc3/config/install/?ref=v0.1.16-pre
-
-images:
-- name: iter8/etc3:latest
-  newTag: 0.1.16-pre
-  
