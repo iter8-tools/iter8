@@ -35,7 +35,7 @@ kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
 kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl apply -f -
 ```
 
-??? info "Look inside the output of the `baseline`"
+??? info "Look inside output of `kustomize build $ITER8/.../baseline`"
     ```yaml linenums="1"
     apiVersion: serving.knative.dev/v1
     kind: Service
@@ -53,7 +53,7 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
                 - name: T_VERSION
     ```
 
-??? info "Look inside the output of the `candidate`"
+??? info "Look inside output of `kustomize build $ITER8/.../experimentalservice`"
     ```yaml linenums="1"
     # This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
     # Traffic is split 75/25 between the baseline and candidate
