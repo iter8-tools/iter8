@@ -11,13 +11,13 @@ template: overrides/main.html
 
 You will create the following resources in this tutorial.
 
-1. A **Knative app (service)** with two versions (revisions).
-2. A **fortio-based traffic generator** that simulates user requests.
+1. A **Knative app** (service) with two versions (revisions).
+2. A **Fortio-based traffic generator** that simulates user requests.
 3. An **Iter8 experiment** that: 
     - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
     - progressively shifts traffic from `baseline` to `candidate`
     - eventually replaces `baseline` with `candidate` using `kubectl`
-??? warning "Before you begin, you will need ... "
+???+ warning "Before you begin, you will need... "
 
     1. **Kubernetes cluster.** You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
     2. [**kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
@@ -26,7 +26,7 @@ You will create the following resources in this tutorial.
 
 ## 1. Create Kubernetes cluster
 
-Create a local Kubernetes cluster or use a managed Kubernetes service from your cloud provider. Ensure that the cluster has sufficient resources, for example, 6 cpus and 12GB of memory.
+Create a local Kubernetes cluster or use a managed Kubernetes service from your cloud provider. Ensure that the cluster has sufficient resources, for example, 6 CPUs and 12GB of memory.
 
 === "Minikube"
 
@@ -234,7 +234,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "iter8ctl"
-    Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing GOBIN below.
+    Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing `GOBIN` below.
     ```shell
     GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
     ```
@@ -349,8 +349,8 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ```
 
-??? info "Understanding what happened"
+???+ info "Understanding what happened"
     1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`).
-    2. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 100% of the requests are sent to `baseline` and 0% to `candidate`.
+    2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to `baseline` and 0% to `candidate`.
     3. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the `objectives` specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `kubectl`.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.

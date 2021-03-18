@@ -43,7 +43,7 @@ pip install -r requirements.txt
 mkdocs serve -s
 ```
 
-Browse http://localhost:8000 to view your local Iter8 docs.
+Browse [http://localhost:8000](http://localhost:8000) to view your local Iter8 docs.
 
 <!-- ### Process for updating code artifacts
 YAMLs, scripts and other code artifacts that are part of code-samples are located under the `iter8/samples` folder. Changes to code artifacts are followed by a tagged release, so that versioned artifacts are available. -->
@@ -56,7 +56,7 @@ YAMLs, scripts and other code artifacts that are part of code-samples are locate
 
 2. The markdown files for Iter8 docs are located under the `iter8/mkdocs/docs` folder.
 
-You will see live updates to http://localhost:8000 as you update markdown files in the `iter8/mkdocs` folder.
+You will see live updates to [http://localhost:8000](http://localhost:8000) as you update markdown files in the `iter8/mkdocs` folder.
 
 ## Contributing an Iter8 tutorial
 All iter8 tutorials include e2e tests, either as [part of GitHub Actions workflows](https://github.com/iter8-tools/iter8/blob/master/.github/workflows/knative-e2e-tests.yaml) or as a [standalone test script](https://github.com/iter8-tools/iter8/blob/master/samples/knative/mirroring/manuale2etest.sh) if they require more resources than what is available in GitHub Actions workflows. When contributing a tutorial, please include relevant e2e tests.

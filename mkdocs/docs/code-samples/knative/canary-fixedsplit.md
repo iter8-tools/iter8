@@ -11,15 +11,15 @@ template: overrides/main.html
 
 You will create the following resources in this tutorial.
 
-1. A **Knative app (service)** with two versions (revisions).
-2. A **fortio-based traffic generator** that simulates user requests.
+1. A **Knative app** (service) with two versions (revisions).
+2. A **Fortio-based traffic generator** that simulates user requests.
 3. An **Iter8 experiment** that: 
     - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
     - maintains a 75-25 split of traffic between `baseline` and `candidate` throughout the experiment
     - eventually replaces `baseline` with `candidate` using `Kustomize`
 
-??? warning "Before you begin, you will need ... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+???+ warning "Before you begin, you will need... "
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -301,9 +301,9 @@ kubectl delete -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl delete -f -
 ```
 
-??? info "Understanding what happened"
+???+ info "Understanding what happened"
     1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `Kustomize`.
-    2. You generated requests for the Knative service using a fortio-job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
+    2. You generated requests for the Knative service using a Fortio-job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
     4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `kustomize build ... | kubectl apply -f -` commands.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
         - **Note:** There was no traffic shifting during experiment iterations since this used a `FixedSplit` deployment pattern.

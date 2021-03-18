@@ -11,12 +11,12 @@ template: overrides/main.html
 
 You will create the following resources in this tutorial.
 
-1. A **Knative app (service)** with a single version (revision).
-2. A **fortio-based traffic generator** that simulates user requests.
+1. A **Knative app** (service) with a single version (revision).
+2. A **Fortio-based traffic generator** that simulates user requests.
 3. An **Iter8 experiment** that verifies that `baseline` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
-??? warning "Before you begin, you will need ... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+???+ warning "Before you begin, you will need... "
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -218,7 +218,7 @@ kubectl delete -f $ITER8/samples/knative/conformance/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/conformance/baseline.yaml
 ```
 
-??? info "Understanding what happened"
+???+ info "Understanding what happened"
     1. You created a Knative service with a single revision, sample-app-v1. 
-    2. You generated requests for the Knative service using a fortio-job.
+    2. You generated requests for the Knative service using a Fortio job.
     3. You created an Iter8 `Conformance` experiment. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that `baseline` satisfied all the `objectives` specified in the experiment.
