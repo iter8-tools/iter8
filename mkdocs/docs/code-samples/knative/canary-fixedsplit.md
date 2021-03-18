@@ -303,7 +303,7 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
 
 ???+ info "Understanding what happened"
     1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using Kustomize.
-    2. You generated requests for the Knative service using a Fortio-job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
+    2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
     4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `kustomize build ... | kubectl apply -f -` commands.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
         - **Note:** There was no traffic shifting during experiment iterations since this used a `FixedSplit` deployment pattern.
