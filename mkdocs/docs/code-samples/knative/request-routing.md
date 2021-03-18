@@ -12,12 +12,12 @@ template: overrides/main.html
 You will create the following resources in this tutorial.
 
 1. **Knative services** implementing an app with `baseline` and `candidate` versions.
-2. An  **Istio virtual service** which routes requests based an HTTP header called `country`. All requests are routed to the `baseline`, except those with their `country` header field set to `wakanda`; these may be routed to the `baseline` or `candidate`.
+2. An  **Istio virtual service** which routes requests based on an HTTP header called `country`. All requests are routed to the `baseline`, except those with their `country` header field set to `wakanda`; these may be routed to the `baseline` or `candidate`.
 3. Two **curl-based traffic generators** which simulate user requests; one of them sets the `country` HTTP header field in its requests to `wakanda`, and the other sets it to `gondor`.
 4. An **Iter8 experiment** which verifies that the `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`, and progressively increases the proportion of traffic with `country: wakanda` header that is routed to the `candidate`.
 
-??? warning "Before you begin, you will need ... "
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
+???+ warning "Before you begin, you will need... "
+    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -237,7 +237,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following.
+        The `iter8ctl` output will be similar to the following.
 
         ```shell
         ****** Overview ******
@@ -291,7 +291,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
 
         ```shell
         NAME              TYPE     TARGET                        STAGE     COMPLETED ITERATIONS   MESSAGE
@@ -314,7 +314,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
 
         ```json
         [
@@ -359,7 +359,7 @@ kubectl delete -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
 kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
 ```
 
-??? info "Understanding what happened"
+???+ info "Understanding what happened"
     1. You configured two Knative services corresponding to two versions of your app in `services.yaml`.
 
     2. You used `customdomain.com` as the HTTP host in this tutorial.

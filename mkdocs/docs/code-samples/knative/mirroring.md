@@ -16,8 +16,8 @@ You will create the following resources in this tutorial.
 3. A **curl-based traffic generator** which simulates user requests.
 4. An **Iter8 experiment** that verifies that the dark version satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
-??? warning "Before you begin, you will need ... "
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do so by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting `Istio` during Step 3.
+???+ warning "Before you begin, you will need... "
+    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do so by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -224,7 +224,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following.
+        The `iter8ctl` output will be similar to the following.
 
         ```shell
         ****** Overview ******
@@ -277,7 +277,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
 
         ```shell
         NAME        TYPE          TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
@@ -299,7 +299,7 @@ kubectl delete -f $ITER8/samples/knative/mirroring/routing-rules.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
 ```
 
-??? info "Understanding what happened"
+???+ info "Understanding what happened"
     1. You configured a Knative service with two versions of your app. In the `service.yaml` manifest, you specified that the live version, `sample-app-v1`, should receive 100% of the production traffic and the dark version, `sample-app-v2`, should receive 0% of the production traffic.
 
     2. You used `customdomain.com` as the HTTP host in this tutorial.

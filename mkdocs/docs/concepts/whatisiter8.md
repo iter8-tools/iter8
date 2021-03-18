@@ -23,10 +23,10 @@ Iter8 consists of a [Kubernetes controller](https://github.com/iter8-tools/etc3)
 - **Conformance** and **Canary** testing.
 - **Progressive**, **FixedSplit**, and **DarkLaunch** deployments.
 - Traffic shaping methods such as **mirroring** and **traffic segmentation**.
-- Integration with app config tools such as **Helm**, **Kustomize**, and **kubectl**.
+- Integration with app config tools such as **Helm**, **Kustomize**, and `kubectl`.
 - Out-of-the-box metrics shipped with Iter8 and custom metrics that can be defined using metrics in **Prometheus**.
 - Statistically robust version assessments and decision making during experiments using **Bayesian learning** and **multi-armed bandit** algorithms.
-- The **iter8ctl** CLI for observing experiments in realtime.
+- The `iter8ctl` CLI for observing experiments in realtime.
 
 
 <!-- orchestrate experiments. These components automate several functions including executing start up tasks that initialize a partially specified experiment, verifying that conditions needed for the experiment are satisfied, iteratively deciding how to split traffic between app versions, identifying a `winner`, error handling, deciding when to terminate the experiment, promoting the `winner`, and executing clean up tasks. -->
