@@ -20,7 +20,7 @@ You will create the following resources in this tutorial.
 ???+ warning "Before you begin, you will need... "
 
     1. **Kubernetes cluster.** You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
-    2. [**kubectl**](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+    2. [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
     3. [**Kustomize v3**](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
     4. [**Go 1.13+**](https://golang.org/doc/install)
 
@@ -234,7 +234,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "iter8ctl"
-    Install **iter8ctl**. You can change the directory where iter8ctl binary is installed by changing `GOBIN` below.
+    Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
     ```shell
     GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
     ```
@@ -247,7 +247,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following.
+        The `iter8ctl` output will be similar to the following.
         ```shell
         ****** Overview ******
         Experiment name: quickstart-exp
@@ -300,7 +300,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
         ```shell
         NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
         quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
@@ -322,7 +322,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get ksvc output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
         ```shell
         [
           {

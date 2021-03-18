@@ -22,7 +22,7 @@ You will create the following resources in this tutorial.
 
     **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
-    **[iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses iter8ctl.
+    **[`iter8ctl`](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses `iter8ctl`.
 
 ## 1. Create app
 ```shell
@@ -144,7 +144,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ```
 
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following.
+        The `iter8ctl` output will be similar to the following.
         ```shell
         ****** Overview ******
         Experiment name: conformance-sample
@@ -196,7 +196,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
         ```shell
         NAME                 TYPE          TARGET               STAGE          COMPLETED ITERATIONS   MESSAGE    
         conformance-sample   Conformance   default/sample-app   Running        0                      StartHandlerLaunched: Start handler 'start' launched

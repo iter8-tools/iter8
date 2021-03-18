@@ -224,7 +224,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following.
+        The `iter8ctl` output will be similar to the following.
 
         ```shell
         ****** Overview ******
@@ -277,7 +277,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
 
         ```shell
         NAME        TYPE          TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE

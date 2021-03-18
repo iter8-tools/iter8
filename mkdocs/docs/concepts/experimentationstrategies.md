@@ -115,7 +115,7 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
     ![Canary](/assets/images/canary-progressive-helm.png)
 
     !!! tip ""
-        Try an [experiment that uses `Helm`](/code-samples/knative/canary-progressive/).
+        Try an [experiment that uses Helm](/code-samples/knative/canary-progressive/).
 
 === "Kustomize"
     An experiment that uses `kustomize build` for version promotion is illustrated below.
@@ -123,7 +123,7 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
     !!! tip ""
-        Try an [experiment that uses `Kustomize`](/code-samples/knative/canary-fixedsplit/).
+        Try an [experiment that uses Kustomize](/code-samples/knative/canary-fixedsplit/).
 
 === "kubectl with YAML/JSON manifests"
     An experiment that uses `kubectl apply` for version promotion is illustated below.
@@ -262,7 +262,7 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
 ## Realtime Observability
 
 !!! abstract ""
-    The  **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the winner.
+    The  `iter8ctl` CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the winner.
 
 
 ??? example "Sample output from iter8ctl"
@@ -310,6 +310,6 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
     +--------------------------------+---------+-----------+
     ```    
 
-See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using iter8ctl to observe an experiment in realtime. -->
+See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using `iter8ctl` to observe an experiment in realtime. -->
 
 [^1]: It is possible to mirror only a certain percentage of the requests instead of all requests.

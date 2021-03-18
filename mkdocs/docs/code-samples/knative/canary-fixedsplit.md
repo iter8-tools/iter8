@@ -5,7 +5,7 @@ template: overrides/main.html
 # Fixed Split Canary Release
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`FixedSplit`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`Kustomize` based version promotion](/concepts/experimentationstrategies/#version-promotion).
+    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`FixedSplit`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [Kustomize based version promotion](/concepts/experimentationstrategies/#version-promotion).
     
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
@@ -16,7 +16,7 @@ You will create the following resources in this tutorial.
 3. An **Iter8 experiment** that: 
     - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
     - maintains a 75-25 split of traffic between `baseline` and `candidate` throughout the experiment
-    - eventually replaces `baseline` with `candidate` using `Kustomize`
+    - eventually replaces `baseline` with `candidate` using Kustomize
 
 ???+ warning "Before you begin, you will need... "
     **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
@@ -25,7 +25,7 @@ You will create the following resources in this tutorial.
 
     **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
-    **[Kustomize v3+](https://kustomize.io/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Kustomize v3+ and iter8ctl.
+    **[Kustomize v3+](https://kustomize.io/) and [`iter8ctl`](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Kustomize v3+ and `iter8ctl`.
 
 ## 1. Create app versions
 
@@ -194,7 +194,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following:
+        The `iter8ctl` output will be similar to the following:
         ```shell
         ****** Overview ******
         Experiment name: canary-fixedsplit
@@ -247,7 +247,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl otuput will be similar to the following.
+        The `kubectl` output will be similar to the following.
         ```shell
         NAME               TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
         canary-fixesplit   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
@@ -273,7 +273,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get ksvc output"
-        kubectl output will be similar to the following. The traffic percentage should remain the same during the experiment.
+        The `kubectl` output will be similar to the following. The traffic percentage should remain the same during the experiment.
         ```shell
         [
           {
@@ -302,7 +302,7 @@ kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | ku
 ```
 
 ???+ info "Understanding what happened"
-    1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `Kustomize`.
+    1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using Kustomize.
     2. You generated requests for the Knative service using a Fortio-job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
     4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `kustomize build ... | kubectl apply -f -` commands.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.

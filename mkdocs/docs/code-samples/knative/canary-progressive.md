@@ -16,7 +16,7 @@ You will create the following resources in this tutorial.
 3. An **Iter8 experiment** that: 
     - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
     - progressively shifts traffic from `baseline` to `candidate`, subject to the limits placed by the experiment's `spec.strategy.weights` field
-    - eventually replaces `baseline` with `candidate` using `Helm`
+    - eventually replaces `baseline` with `candidate` using Helm
 
 ???+ warning "Before you begin, you will need... "
     **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
@@ -25,7 +25,7 @@ You will create the following resources in this tutorial.
 
     **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
-    **[Helm v3](https://helm.sh/) and [iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and iter8ctl.
+    **[Helm v3](https://helm.sh/) and [`iter8ctl`](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and `iter8ctl`.
 
 ## 1. Create versions
 ```shell
@@ -184,7 +184,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following.
+        The `iter8ctl` output will be similar to the following.
         ```shell
         ****** Overview ******
         Experiment name: canary-progressive
@@ -236,7 +236,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
         ```shell
         NAME                 TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
         canary-progressive   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
@@ -254,7 +254,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get ksvc output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
         ```shell
         [
           {
