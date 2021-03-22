@@ -118,7 +118,7 @@ Metrics are referenced within the `spec.criteria` field of the experiment. Metri
     spec:
       params:
       - name: query
-        value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0)
+        value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$elapsedTime])) or on() vector(0)
       description: Number of requests
       type: counter
       provider: prometheus

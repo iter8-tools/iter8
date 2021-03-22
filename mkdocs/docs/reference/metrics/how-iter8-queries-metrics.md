@@ -10,7 +10,7 @@ template: overrides/main.html
 ## How Iter8 interpolates `params`
 
 * Each element of the [`spec.params` list](/reference/apispec/#spec_1) in the metric is a name-value pair. The value string is treated by Iter8 as a [`Python` string template](https://docs.python.org/3/library/string.html#string.Template). Specifically, the value string may contain placeholders which are substrings that begin with the symbol `$`. This template is `interpolated`, i.e., its placeholders are substituted with actual values during query time as follows.
-    - The `$interval` placeholder is substituted with the total time elapsed since the start of the experiment. All metrics are expected to use `$interval`; this is the length of the time window ending now, over which the metric value is computed.
+    - The `$elapsedTime` placeholder is substituted with the total time elapsed since the start of the experiment. All metrics are expected to use `$elapsedTime`; this is the length of the time window ending now, over which the metric value is computed.
     - The `$name` placeholder is substituted with the name of the version.
     - Any other placeholder is substituted with the value of the corresponding [variable associated with the version](/reference/apispec/#variable). If no such variable is associated with the version, then no substitution occurs.
 
@@ -28,7 +28,7 @@ This example illustrates the end-to-end process of retrieving metric values in I
     spec:
       params:
       - name: query
-        value: sum(increase(revision_app_request_latencies_count{name='$name', namespace='$namespace'}[$interval])) or on() vector(0)
+        value: sum(increase(revision_app_request_latencies_count{name='$name', namespace='$namespace'}[$elapsedTime])) or on() vector(0)
       description: my special metric
       type: counter
       provider: prometheus
@@ -82,7 +82,7 @@ This example illustrates the end-to-end process of retrieving metric values in I
 
 
 2. Suppose Iter8 is performing iteration 10 of the experiment. `iter8-knative-monitoring/my-metric` is referenced in the `spec.criteria` field of the experiment. When querying the value of this metric for the app version named `sample-app-v2`, Iter8 does the following.
-    - Iter8 computes the time elapsed since the start of the experiment (i.e, `time.Now() - status.initTime`). Suppose this value equals 285 seconds; Iter8 substitutes `$interval` with `285s`.
+    - Iter8 computes the time elapsed since the start of the experiment (i.e, `time.Now() - status.initTime`). Suppose this value equals 285 seconds; Iter8 substitutes `$elapsedTime` with `285s`.
     - Iter8 substitutes `$name` with `sample-app-v2`, the name associated with this version.
     - Iter8 substitutes `$namespace` with `iter8-knative-monitoring` which is the value of the `namespace` variable associated with the version named `sample-app-v2`. 
     - **Note:** The `name` and `namespace` values associated with versions are highlighted in the experiment snippet above.
