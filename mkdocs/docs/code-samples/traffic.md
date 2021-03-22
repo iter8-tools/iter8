@@ -6,7 +6,7 @@ hide:
 
 # Generating Requests Externally
 
-All Iter8 tutorials use [`fortio`](https://github.com/fortio/fortio) or `curl` based Kubernetes jobs that run inside the cluster to simulate user requests during experiments. You can try other variations of these tutorials where requests are generated outside the cluster.
+All Iter8 tutorials use [`Fortio`](https://github.com/fortio/fortio) or `curl`-based Kubernetes jobs that run inside the cluster to simulate user requests during experiments. You can try other variations of these tutorials where requests are generated outside the cluster.
 
 - The Knative service setup of [quick start](/getting-started/quick-start/with-knative/), [Canary + Progressive + Helm](/code-samples/knative/canary-progressive/), [Canary + FixedSplit + Kustomize](/code-samples/knative/canary-fixedsplit/), and [Conformance](/code-samples/knative/conformance/) tutorials is similar to that of this [Knative tutorial](https://knative.dev/docs/serving/samples/traffic-splitting/index.html#traffic-splitting).
 

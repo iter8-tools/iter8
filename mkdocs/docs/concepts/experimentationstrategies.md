@@ -2,42 +2,52 @@
 template: overrides/main.html
 ---
 
-## Validation
+# Building Blocks of an Experiment
 
-**Validation** is the logic used to determine if the new version of an app/ML model performs well. The main questions during validation are the following.
+Iter8 provides an expressive model of experimentation that can automate a rich variety of [validation and release strategies](/code-samples/knative/canary-progressive/). In this document, we introduce the main building blocks that can be flexibly composed together to create Iter8 experiments.
 
-* Does the new version satisfy SLOs (for example, a tail latency SLO)?
-* Does it improve business/app-specific metrics (for example, user-engagement)?
+## Terms
 
-## Release
+### Validation
 
-**Release** is the process by which a new version of an app/ML model becomes responsible for serving production traffic. The main question during release is the following.
+**Validation** is the process used to determine if a version of an app/ML model performs well. A version is considered to be validated if it satisfies the given set of service-level objectives or SLOs (for example, a tail latency SLO).
 
-* How should the release of a new version be staged so that end-user experience is protected?
+### Release
 
-## Experiment
+**Release** is the process by which a new version of an app/ML model becomes responsible for serving production traffic. Iter8 views release as a multi-stage process during which app versions are validated and exposed to end-users incrementally to ensure that end-user experience is always protected - before, during, and after the release.
 
-!!! tip ""
-    Iter8 defines a new kind of Kubernetes resource called **Experiment** that enables automated validation and release of new versions.
+### Experiment
 
-An Iter8 experiment automating a `Canary` release is illustrated below. In this experiment, Iter8 validates that the candidate version satisfies the SLOs (`objectives`), progressively shifts traffic from the baseline version to the candidate, and promotes the candidate version in the end.
-
-![Canary/Progressive/kubectl](/assets/images/canary-progressive-kubectl.png)
-
-Iter8 experiments are designed to take advantage of all the features available from the underlying service mesh/ingress technology, and use metrics from any REST API. 
-
-A few key aspects of an Iter8 experiment are described below.
+Iter8 defines a new Kubernetes resource called **Experiment** that automates validation and release of new versions.
 
 ### Winner
 
-An Iter8 experiment seeks to find a `winner` or the best version among all the versions involved in an experiment. The testing pattern and the `objectives` specified in the experiment are used to determine the `winner` of the experiment.
+The **winner** is the best version among all the versions involved in an experiment. The [testing pattern](#testing-pattern) and [objectives](#objectives) specified in the experiment are used to determine the winner.
+
+### Baseline
+
+**Baseline** is the version of the app that serves production traffic at the start of the experiment.
+
+### Version recommended for promotion
+
+When two or more versions participate in an experiment, Iter8 **recommends a version for promotion**; if the experiment yielded a winner, then the version recommended for promotion is the winner; otherwise, the version recommended for promotion is the baseline.
+
+## Building blocks
+
+### Metrics
+
+Metric backends like Prometheus, New Relic, Sysdig and Elastic can collect metrics associated  with app/ML model versions and serve them through REST APIs. Iter8 defines a new Kubernetes resource called **Metric** that makes it easy to use per-version metrics served by any REST API within experiments.
+
+### Objectives
+
+**Objectives** correspond to SLOs. In Iter8 experiments, objectives are specified as metrics along with acceptable limits on their values.
 
 ### Testing pattern
 
-Testing pattern is the logic uses to determine a `winner` among a number of versions during an experiment. Iter8 supports `Canary` and `Conformance` testing patterns.
+**Testing pattern** defines the number of versions involved in the experiment (1, 2, or more), and determines how the winner is identified. Iter8 supports `Canary` and `Conformance` testing patterns.
 
 === "Canary"
-    `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if the versions satisfy the objectives[^1] specified in the experiment. If the `candidate` satisfies the objectives, then the `candidate` is the `winner`; else, if the `baseline` satisfies the objectives, then the `baseline` is the `winner`; else, there is no `winner`.
+    `Canary` testing involves two versions, a `baseline` and a `candidate`. In a `Canary` experiment, Iter8 assesses if the versions satisfy objectives. If the candidate satisfies objectives, then `candidate` is the winner; else, if `baseline` satisfies objectives, then `baseline` is the winner; else, there is no winner.
 
     ![Canary](/assets/images/canary-progressive-kubectl.png)
 
@@ -45,7 +55,7 @@ Testing pattern is the logic uses to determine a `winner` among a number of vers
         Try a [`Canary` experiment](/getting-started/quick-start/with-knative/).
 
 === "Conformance"
-    `Conformance` testing involves a single version, a `baseline`. Iter8 assesses if the `baseline` satisfies the objectives specified in the experiment. If it does, then the `baseline` is the `winner`; else, there is no `winner`.
+    `Conformance` testing involves a single version, a `baseline`. Iter8 assesses if `baseline` satisfies objectives. If it does, then `baseline` is the winner; else, there is no winner.
 
     ![Conformance](/assets/images/conformance.png)
 
@@ -54,10 +64,10 @@ Testing pattern is the logic uses to determine a `winner` among a number of vers
 
 ### Deployment pattern
 
-Deployment pattern determines how traffic split between versions. Iter8 supports `Progressive` and `FixedSplit` deployment patterns.
+**Deployment pattern** determines how traffic is split between versions. Iter8 supports `Progressive` and `FixedSplit` deployment patterns.
 
 === "Progressive"
-    `Progressive` deployment incrementally shifts traffic towards the `winner` over multiple iterations.
+    `Progressive` deployment incrementally shifts traffic towards the winner over multiple iterations.
 
     ![Canary](/assets/images/canary-progressive-helm.png)
 
@@ -74,28 +84,30 @@ Deployment pattern determines how traffic split between versions. Iter8 supports
 
 ### Traffic shaping
 
-Traffic shaping refers to features such as **traffic mirroring** and **traffic segmentation** that provide advanced controls over how traffic is routed to and from app versions. Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology, or networking layer present in your Kubernetes stack.
+**Traffic shaping** refers to features such as **traffic mirroring/shadowing** and **traffic segmentation** that provide advanced controls over how traffic is routed to and from app versions. 
+
+Iter8 enables you to take total advantage of all the traffic shaping features available in the service mesh, ingress technology, or networking layer present in your Kubernetes stack.
 
 === "Traffic mirroring/shadowing"
-    **Traffic mirroring** or **shadowing** enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^2] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
+    **Traffic mirroring** or **shadowing** enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^1] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
 
     ![Canary](/assets/images/mirroring.png)
 
     !!! tip ""
-        Try a [traffic mirroring experiment](/code-samples/knative/mirroring/).
+        Try an experiment with [traffic mirroring/shadowing](/code-samples/knative/mirroring/).
 
-=== "Request routing"
-    **Request routing** is the ability to route requests dynamically to different versions of the app based on attributes such as user identity, URI, or request origin. Use request routing in experiments to specify the segment of the traffic that will participate in the experiment. For example, in a `Canary` experiment, requests within the specified segment may be routed to `baseline` or `candidate`; requests not in this segment will be routed only to the `baseline`.
+=== "Traffic segmentation"
+    **Traffic segmentation** is the ability to carve out a specific segment of the traffic to be used in an experiment, leaving the rest of the traffic unaffected by the experiment. Service meshes and ingress controllers often  provide the ability to route requests dynamically to different versions of the app based on attributes such as user identity, URI, or request origin. Iter8 can leverage this *request routing* functionality in experiments to control the segment of the traffic that will participate in the experiment. For example, in the `Canary` experiment depicted below, requests from the country `Wakanda` may be routed to `baseline` or `candidate`; requests that are not from `Wakanda` will not participate in the experiment and are routed only to the `baseline`.
 
     ![Canary](/assets/images/request-routing.png)
 
     !!! tip ""
-        Try a [request routing experiment](/code-samples/knative/request-routing/).
+        Try an experiment with [traffic segmentation](/code-samples/knative/request-routing/).
 
 
 ### Version promotion
 
-Iter8 can optionally `promote` a version at the end of an experiment. The version recommended for promotion is the `winner` if a `winner` has been found. If not, the version recommended for promotion is the `baseline`. As part of version promotion, Iter8 can configure Kubernetes resources by installing or upgrading Helm charts, building and applying Kustomize resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
+Iter8 can optionally **promote a version** at the end of an experiment, based on the [version recommended for promotion](#version-recommended-for-promotion). As part of the version promotion task, Iter8 can configure Kubernetes resources by installing or upgrading Helm charts, building and applying Kustomize resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
 
 === "Helm"
     An experiment that uses `helm upgrade` for version promotion is illustrated below.
@@ -103,7 +115,7 @@ Iter8 can optionally `promote` a version at the end of an experiment. The versio
     ![Canary](/assets/images/canary-progressive-helm.png)
 
     !!! tip ""
-        Try an [experiment that uses `Helm`](/code-samples/knative/canary-progressive/).
+        Try an [experiment that uses Helm](/code-samples/knative/canary-progressive/).
 
 === "Kustomize"
     An experiment that uses `kustomize build` for version promotion is illustrated below.
@@ -111,7 +123,7 @@ Iter8 can optionally `promote` a version at the end of an experiment. The versio
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
     !!! tip ""
-        Try an [experiment that uses `Kustomize`](/code-samples/knative/canary-fixedsplit/).
+        Try an [experiment that uses Kustomize](/code-samples/knative/canary-fixedsplit/).
 
 === "kubectl with YAML/JSON manifests"
     An experiment that uses `kubectl apply` for version promotion is illustated below.
@@ -248,7 +260,7 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
 ## Realtime Observability
 
 !!! abstract ""
-    The  **iter8ctl** CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the winner.
+    The  `iter8ctl` CLI enables you to observe an experiment in realtime. Use iter8ctl to observe metric values for each version, whether or not versions satisfy objectives, and the winner.
 
 
 ??? example "Sample output from iter8ctl"
@@ -296,8 +308,6 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
     +--------------------------------+---------+-----------+
     ```    
 
-See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using iter8ctl to observe an experiment in realtime. -->
+See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example of using `iter8ctl` to observe an experiment in realtime. -->
 
-[^1]: Objectives correspond to service level objectives or SLOs. In Iter8 experiments, objectives are specified in the form of metrics along with acceptable limits on their values.
-
-[^2]: It is possible to mirror only a certain percentage of the requests instead of all requests.
+[^1]: It is possible to mirror only a certain percentage of the requests instead of all requests.

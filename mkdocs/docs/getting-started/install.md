@@ -9,7 +9,7 @@ title: Install Iter8
 
     !!! example "Prerequisites"
         1. Kubernetes cluster with [Knative Serving](https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-serving-component)
-        2. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+        2. [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
         3. [Kustomize v3](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
         4. [Go 1.13+](https://golang.org/doc/install)
 
@@ -40,7 +40,7 @@ title: Install Iter8
     ## Optional: Customizing Iter8 install
 
     ### Prometheus URL
-    The URL of the Prometheus metrics backend is supplied as part of [this configmap](https://github.com/iter8-tools/iter8/blob/v0.2.5/install/iter8-analytics/config.yaml) during the install process. This URL is intended to match the location of the [iter8-monitoring install](#step-2-install-iter8-monitoring) above. To use your own Prometheus backend, replace the value of the metrics backend URL in the configmap during the install process with the URL of your Prometheus backend. You can use `Kustomize` or `sed` or any tool of your choice for this customization.
+    The URL of the Prometheus metrics backend is supplied as part of [this configmap](https://github.com/iter8-tools/iter8/blob/v0.2.5/install/iter8-analytics/config.yaml) during the install process. This URL is intended to match the location of the [iter8-monitoring install](#step-2-install-iter8-monitoring) above. To use your own Prometheus backend, replace the value of the metrics backend URL in the configmap during the install process with the URL of your Prometheus backend. You can use Kustomize or `sed` or any tool of your choice for this customization.
     
 === "Iter8 for KFServing"
     An initial version of Iter8 for KFServing is available [here](https://github.com/iter8-tools/iter8-kfserving) along with installation instructions. An updated version is coming soon and will be documented here.

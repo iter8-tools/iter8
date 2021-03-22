@@ -11,18 +11,18 @@ template: overrides/main.html
 
 You will create the following resources in this tutorial.
 
-1. A **Knative app (service)** with a single version (revision).
-2. A **fortio-based traffic generator** that simulates user requests.
+1. A **Knative app** (service) with a single version (revision).
+2. A **Fortio-based traffic generator** that simulates user requests.
 3. An **Iter8 experiment** that verifies that `baseline` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
-??? warning "Before you begin, you will need ... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of [the quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+???+ warning "Before you begin, you will need... "
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
     **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
 
-    **[iter8ctl](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses iter8ctl.
+    **[`iter8ctl`](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses `iter8ctl`.
 
 ## 1. Create app
 ```shell
@@ -143,7 +143,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ```
 
     ??? info "iter8ctl output"
-        iter8ctl output will be similar to the following.
+        The `iter8ctl` output will be similar to the following.
         ```shell
         ****** Overview ******
         Experiment name: conformance-sample
@@ -195,7 +195,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```
 
     ??? info "kubectl get experiment output"
-        kubectl output will be similar to the following.
+        The `kubectl` output will be similar to the following.
         ```shell
         NAME                 TYPE          TARGET               STAGE          COMPLETED ITERATIONS   MESSAGE    
         conformance-sample   Conformance   default/sample-app   Running        0                      StartHandlerLaunched: Start handler 'start' launched
@@ -217,7 +217,7 @@ kubectl delete -f $ITER8/samples/knative/conformance/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/conformance/baseline.yaml
 ```
 
-??? info "Understanding what happened"
+???+ info "Understanding what happened"
     1. You created a Knative service with a single revision, sample-app-v1. 
-    2. You generated requests for the Knative service using a fortio-job.
+    2. You generated requests for the Knative service using a Fortio job.
     3. You created an Iter8 `Conformance` experiment. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that `baseline` satisfied all the `objectives` specified in the experiment.
