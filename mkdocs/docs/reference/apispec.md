@@ -134,7 +134,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. | No |
 | provider | string | Type of the metrics database. Currently, `prometheus` is the only valid value. | No |
 | jqExpression | string | A [jq](https://stedolan.github.io/jq/) expression that extracts the metrics value from the result of a query to the backend metrics server. | Yes |
-| secretRef | string | description | No |
+| secret | string | description | No |
 | headerTemplates | [][NamedValue](#namedvalue) | List of description | No |
 | urlTemplate | string | description | Yes |
 
@@ -222,15 +222,8 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | name | string | Name of the version. | Yes |
-| variables | [][Variable](#variable) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to interpolate these strings. | No |
+| variables | [][NamedValue](#namedvalue) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to interpolate these strings. | No |
 | weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | Reference to a Kubernetes resource and a field-path within the resource. Iter8 uses `weightObjRef` to get or set weight (traffic percentage) for the version. | No |
-
-### Variable
-
-| Field name | Field type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| name | string | name of the variable | Yes |
-| value | string | value of the variable | Yes |
 
 ### ExperimentCondition
 
