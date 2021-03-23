@@ -124,20 +124,20 @@ elif [[ "kourier" == ${1} ]]; then
     echo "Kourier installed successfully"
 fi
 
+# Step 5: Install Iter8
+echo "Installing Iter8"
+kustomize build github.com/iter8-tools/iter8-install/core/?ref=${TAG} | kubectl apply -f -
+kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+kustomize build github.com/iter8-tools/iter8-install/metrics/?ref=${TAG} | kubectl apply -f -
+
 # Step 5: Install iter8-monitoring
 echo "Installing iter8-monitoring"
-kustomize build github.com/iter8-tools/iter8-install/monitoring/prometheus-operator/?ref=${TAG} | kubectl apply -f -
+kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/prometheus-operator?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build github.com/iter8-tools/iter8-install/monitoring/prometheus/?ref=${TAG} | kubectl apply -f - 
-
-# Step 6: Install Iter8 for Knative
-echo "Installing Iter8 for Knative"
-kustomize build github.com/iter8-tools/iter8-install/?ref=${TAG} | kubectl apply -f -
-kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build github.com/iter8-tools/iter8-install/iter8-metrics/?ref=${TAG} | kubectl apply -f -
+kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/prometheus/?ref=${TAG} | kubectl apply -f - 
+kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/service-monitors/?ref=${TAG} | kubectl apply -f - 
 
 # Step 7: Verify Iter8 installation
 echo "Verifying installation"
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-monitoring

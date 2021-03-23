@@ -169,13 +169,13 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
       criteria:
         objectives: 
         # mean latency should be under 50 milliseconds
-        - metric: iter8-system/mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
         # 95th percentile latency should be under 100 milliseconds
-        - metric: iter8-system/95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
         # error rate should be under 1%
-        - metric: iter8-system/error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       strategy:
         # canary testing => candidate `wins` if it satisfies objectives

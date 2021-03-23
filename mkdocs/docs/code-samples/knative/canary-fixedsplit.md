@@ -156,11 +156,11 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: iter8-system/mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: iter8-system/95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: iter8-system/error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
