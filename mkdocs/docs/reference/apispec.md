@@ -134,9 +134,9 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. | No |
 | provider | string | Type of the metrics database. Currently, `prometheus` is the only valid value. | No |
 | jqExpression | string | A [jq](https://stedolan.github.io/jq/) expression that extracts the metrics value from the result of a query to the backend metrics server. | Yes |
-| secret | string | description | No |
-| headerTemplates | [][NamedValue](#namedvalue) | List of description | No |
-| urlTemplate | string | description | Yes |
+| secret | string | Reference to a secret (of the form `namespace/name` containing information to be used primarily for authentication with the metrics service. The values are used to resolve into header and URL templates. | No |
+| headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtimme with the value from the `name` entry defined in the secret. | No |
+| urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. | Yes |
 
 ## Experiment field types
 
