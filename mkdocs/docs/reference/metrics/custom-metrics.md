@@ -35,7 +35,7 @@ metadata:
 spec:
   params:
   - name: query
-    value: sum(increase(correct_predictions{revision_name='$revision'}[$interval])) or on() vector(0)
+    value: sum(increase(correct_predictions{revision_name='$revision'}[$elapsedTime])) or on() vector(0)
   description: Number of correct predictions
   type: counter
   provider: prometheus
@@ -69,7 +69,7 @@ metadata:
 spec:
   params:
   - name: query
-    value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0)
+    value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$elapsedTime])) or on() vector(0)
   description: Number of requests
   type: counter
   provider: prometheus
@@ -90,7 +90,7 @@ spec:
   description: Accuracy of the model version
   params:
   - name: query
-    value: (sum(increase(correct_predictions{revision_name='$revision'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$interval])) or on() vector(0))
+    value: (sum(increase(correct_predictions{revision_name='$revision'}[$elapsedTime])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$elapsedTime])) or on() vector(0))
   type: gauge
   sampleSize: 
     name: iter8-kfserving-monitoring/request-count
