@@ -174,7 +174,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
 
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: request-routing
@@ -190,11 +190,11 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -211,7 +211,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
             kind: VirtualService
             name: routing-for-wakanda
             namespace: default
-            fieldPath: /spec/http/0/route/0/weight
+            fieldPath: .spec.http[0].route[0].weight
         candidates:
         - name: candidate
           variables:
@@ -222,7 +222,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
             kind: VirtualService
             name: routing-for-wakanda
             namespace: default
-            fieldPath: /spec/http/0/route/1/weight
+            fieldPath: .spec.http[0].route[1].weight
     ```
 
 ## 5. Observe experiment
@@ -254,7 +254,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ****** Winner Assessment ******
         versions in this experiment: [current candidate]
         Winning version: candidate
-        Recommended baseline: candidate
+        Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
         +--------------------------------+---------+-----------+

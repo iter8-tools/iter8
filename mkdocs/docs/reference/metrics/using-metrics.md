@@ -28,7 +28,7 @@ Use metrics in experiments by referencing them in `spec.criteria` field using th
 
 ??? example "Sample experiment illustrating the use of metrics"
     ```yaml linenums="1" hl_lines="34 37 40 44 45 46"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: quickstart-exp
@@ -61,19 +61,19 @@ Use metrics in experiments by referencing them in `spec.criteria` field using th
       criteria:
         objectives: 
         # mean latency should be under 50 milliseconds
-        - metric: iter8-system/mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
         # 95th percentile latency should be under 100 milliseconds
-        - metric: iter8-system/95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
         # error rate should be under 1%
-        - metric: iter8-system/error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       indicators:
       # report values for the following metrics in addition those in spec.criteria.objectives
-      - iter8-system/99th-percentile-tail-latency
-      - iter8-system/90th-percentile-tail-latency
-      - iter8-system/75th-percentile-tail-latency
+      - iter8-knative/99th-percentile-tail-latency
+      - iter8-knative/90th-percentile-tail-latency
+      - iter8-knative/75th-percentile-tail-latency
       strategy:
         # canary testing => candidate `wins` if it satisfies objectives
         testingPattern: Canary
@@ -84,15 +84,13 @@ Use metrics in experiments by referencing them in `spec.criteria` field using th
           start:
           # the following task verifies that the `sample-app` Knative service in the `default` namespace is available and ready
           # it then updates the experiment resource with information needed to shift traffic between app versions
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           # run tasks under the `finish` action at the end of an experiment   
           finish:
           # promote an app version
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
               args:

@@ -136,7 +136,7 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
 <!-- 
 ??? example "Sample experiment"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: quickstart-exp
@@ -169,13 +169,13 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
       criteria:
         objectives: 
         # mean latency should be under 50 milliseconds
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
         # 95th percentile latency should be under 100 milliseconds
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
         # error rate should be under 1%
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       strategy:
         # canary testing => candidate `wins` if it satisfies objectives
@@ -192,15 +192,13 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
           start:
           # the following task verifies that the `sample-app` Knative service in the `default` namespace is available and ready
           # it then updates the experiment resource with information needed to shift traffic between versions
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           # run tasks under the `finish` action at the end of an experiment   
           finish:
           # promote an app version
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
               args:
@@ -281,7 +279,7 @@ An action is a sequence of tasks executed during an experiment. `spec.strategy.a
     ****** Winner Assessment ******
     App versions in this experiment: [current candidate]
     Winning version: candidate
-    Recommended baseline: candidate
+    Version recommended for promotion: candidate
 
     ****** Objective Assessment ******
     +--------------------------------+---------+-----------+

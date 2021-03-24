@@ -34,7 +34,7 @@ title: Install Iter8
 
     ## Step 4: Install iter8ctl
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
+    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2-pre
     ```
 
     ## Optional: Customizing Iter8 install

@@ -173,7 +173,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 ```
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: quickstart-exp
@@ -185,14 +185,12 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
         testingPattern: Canary
         actions:
           start: # run a sequence of tasks at the start of the experiment
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
-              args: 
+              args:
               - "apply"
               - "-f"
               - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
@@ -201,11 +199,11 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -236,7 +234,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 === "iter8ctl"
     Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.0
+    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2-pre
     ```
 
     Periodically describe the experiment.
@@ -263,7 +261,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ****** Winner Assessment ******
         App versions in this experiment: [current candidate]
         Winning version: candidate
-        Recommended baseline: candidate
+        Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
         +--------------------------------+---------+-----------+
