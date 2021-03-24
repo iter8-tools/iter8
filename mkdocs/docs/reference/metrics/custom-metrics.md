@@ -28,7 +28,7 @@ sum(increase(correct_predictions{revision_name='my-model-predictor-default-h4bvl
 You can turn this Prometheus metric into an Iter8 counter metric using the following yaml manifest.
 ```yaml
 #correctpredictions.yaml
-apiVersion: iter8.tools/v2alpha1
+apiVersion: iter8.tools/v2alpha2
 kind: Metric
 metadata:
   name: correct-predictions
@@ -62,7 +62,7 @@ your-metrics-namespace   correct-predictions            counter   Number of corr
 #### `request-count` metric
 The `request-count` metric is typically installed *out-of-the-box* as part of Iter8. Although not a custom metric, this example serves to further illustrate the concepts introduced in Example 1. There are no real differences between custom and out-of-the-box metrics other than the fact the latter are created as part of Iter8 installation.
 ```yaml
-apiVersion: iter8.tools/v2alpha1
+apiVersion: iter8.tools/v2alpha2
 kind: Metric
 metadata:
   name: request-count
@@ -73,6 +73,7 @@ spec:
   description: Number of requests
   type: counter
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
 ```
 
 ### Example 3: gauge metric
@@ -81,7 +82,7 @@ spec:
 This example builds on Examples 1 and 2 to define a new Iter8 gauge metric called `accuracy`. This metric is intended to capture the ratio of correct predictions over request count.
 ```yaml
 #accuracy.yaml
-apiVersion: iter8.tools/v2alpha1
+apiVersion: iter8.tools/v2alpha2
 kind: Metric
 metadata:
   name: accuracy
@@ -94,6 +95,7 @@ spec:
   sampleSize: 
     name: iter8-kfserving-monitoring/request-count
   provider: prometheus
+  jqExpression: ".data.result[0].value[1] | tonumber"
 ```
 
 `spec.sampleSize` represents the number of data points over which the gauge metric value is computed. In this case, since `accuracy` is computed over all the requests received by a specific model version, the sampleSize metric is `request-count`.

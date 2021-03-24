@@ -76,10 +76,10 @@ jobs:
 
         # Check if recommended baseline is candidate
         candidate="candidate"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
-          echo "recommendedBaseline is candidate"
+        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
+          echo "versionRecommendedForPromotion is candidate"
         else
-          echo "recommendedBaseline must be candidate"
+          echo "versionRecommendedForPromotion must be candidate"
           exit 1
         fi
 
@@ -168,10 +168,10 @@ jobs:
 
         # Check if recommended baseline is candidate
         candidate="candidate"
-        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
-          echo "recommendedBaseline is candidate"
+        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
+          echo "versionRecommendedForPromotion is candidate"
         else
-          echo "recommendedBaseline must be candidate"
+          echo "versionRecommendedForPromotion must be candidate"
           exit 1
         fi
 
@@ -258,10 +258,10 @@ jobs:
 
         # Check if recommended baseline is candidate
         candidate="candidate"
-        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
-          echo "recommendedBaseline is candidate"
+        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
+          echo "versionRecommendedForPromotion is candidate"
         else
-          echo "recommendedBaseline must be candidate"
+          echo "versionRecommendedForPromotion must be candidate"
           exit 1
         fi
 

@@ -105,7 +105,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: canary-progressive
@@ -123,11 +123,9 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
           maxCandidateWeightIncrement: 20
         actions:
           start: # run the following sequence of tasks at the start of the experiment
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
-          - library: common
-            task: exec # promote the winning version using Helm upgrade
+          - task: common/exec # promote the winning version using Helm upgrade
             with:
               cmd: helm
               args:
@@ -144,11 +142,11 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -200,7 +198,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ****** Winner Assessment ******
         App versions in this experiment: [current candidate]
         Winning version: candidate
-        Recommended baseline: candidate
+        Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
         +--------------------------------+---------+-----------+

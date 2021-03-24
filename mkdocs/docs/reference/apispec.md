@@ -12,7 +12,7 @@ template: overrides/main.html
 
 
 !!! note "API Version"    
-    This document describes version `v2alpha1` of the Iter8 API.
+    This document describes version `v2alpha2` of the Iter8 API.
 
 ## Resources
 
@@ -20,7 +20,7 @@ template: overrides/main.html
 
 ??? info "Sample experiment"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: quickstart-exp
@@ -32,14 +32,12 @@ template: overrides/main.html
         testingPattern: Canary
         actions:
           start: # run a sequence of tasks at the start of the experiment
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
-              args: 
+              args:
               - "apply"
               - "-f"
               - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
@@ -48,11 +46,11 @@ template: overrides/main.html
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -97,12 +95,11 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | conditions | [][ExperimentCondition](#experimentcondition) | A set of conditions that express progress of an experiment. | No |
 | initTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time the experiment is created. | No |
 | startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the first iteration of experiment begins  | No |
-| endTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when an experiment has completed. | No |
 | lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
 | stage | string | Indicator of progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running and `Completed` when the experiment terminates. | No |
 | currentWeightDistribution | [][WeightData](#weightdata) | Currently observed distribution of requests between app versions. | No |
 | analysis | Analysis | Result of latest query to the Iter8 analytics service.  | No |
-| recommendedBaseline | string | The version recommended for promotion. Although this field is populated by Iter8 even before the completion of the experiment, this field is intended to be used only on completion by the finish action. | No |
+| versionRecommendedForPromotion | string | The version recommended for promotion. Although this field is populated by Iter8 even before the completion of the experiment, this field is intended to be used only on completion by the finish action. | No |
 | message | string | User readable message. | No |
 
 ### Metric
@@ -111,7 +108,7 @@ Metrics are referenced within the `spec.criteria` field of the experiment. Metri
 
 ??? example "Sample metric"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Metric
     metadata:
     name: request-count
@@ -130,12 +127,16 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 #### Spec
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| params | [][Param](#param) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a template, which will be instantiated by Iter8 at query time. For examples and more details, see [here](/reference/metrics/how-iter8-queries-metrics/).| No |
+| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a template, which will be instantiated by Iter8 at query time. For examples and more details, see [here](/reference/metrics/how-iter8-queries-metrics/).| No |
 | description | string | Human-readable description of the metric. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
-| sampleSize | [MetricReference](#metricreference) | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. | No |
+| sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. | No |
 | provider | string | Type of the metrics database. Currently, `prometheus` is the only valid value. | No |
+| jqExpression | string | A [jq](https://stedolan.github.io/jq/) expression that extracts the metrics value from the result of a query to the backend metrics server. | Yes |
+| secret | string | Reference to a secret (of the form `namespace/name` containing information to be used primarily for authentication with the metrics service. The values are used to resolve into header and URL templates. | No |
+| headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtimme with the value from the `name` entry defined in the secret. | No |
+| urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. | Yes |
 
 ## Experiment field types
 
@@ -166,8 +167,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| library | string | Name of library to which this task belongs. | Yes |
-| task | string | Name of the task. Task names are unique within a library. | Yes |
+| task | string | Name of the task. Task names express both the library and the task within the library in the format 'library/task' . | Yes |
 | with | map[string][apiextensionsv1.JSON](https://pkg.go.dev/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1#JSON) | Inputs to the task. | No |
 
 ### Criteria
@@ -177,6 +177,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | requestCount | string | Reference to the metric used to count the number of requests sent to app versions. | No |
 | objectives | [Objective](#objective)[] | A list of metrics along with acceptable upper limits, lower limits, or both upper and lower limits for them. Iter8 will verify if app versions satisfy these objectives. | No |
 | indicators | string[] | A list of metric references. Iter8 will collect and report the values of these metrics in addition to those referenced in the `objectives` section. | No |
+| support | [apiextensionsv1.JSON](https://pkg.go.dev/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1#JSON) | Describes the required degree of support the analytics provides before the analytics engine asserts success for an objective. | No |
 
 !!! warning "" 
     **Note:** References to metric resource objects within experiment criteria should be in the `namespace/name` format or in the `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then Iter8 searches for the metric in the namespace of the experiment resource. If Iter8 cannot find the metric, then the reference is considered invalid and the experiment will terminate in a failure.
@@ -221,15 +222,8 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | name | string | Name of the version. | Yes |
-| variables | [][Variable](#variable) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to interpolate these strings. | No |
+| variables | [][NamedValue](#namedvalue) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to interpolate these strings. | No |
 | weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | Reference to a Kubernetes resource and a field-path within the resource. Iter8 uses `weightObjRef` to get or set weight (traffic percentage) for the version. | No |
-
-### Variable
-
-| Field name | Field type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| name | string | name of the variable | Yes |
-| value | string | value of the variable | Yes |
 
 ### ExperimentCondition
 
@@ -327,14 +321,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 ## Metric field types
 
-### MetricReference
-
-| Field name | Field Type         | Description | Required |
-| ----- | ------------ | ----------- | -------- |
-| namespace | string | Namespace containing the referred metric. Defaults to the namespace of the referring metric. | No |
-| name | string | Name of the referred metric. | Yes |
-
-### Param
+### NamedValue
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
@@ -351,7 +338,7 @@ Iter8 currently implements two tasks that help in setting up and finishing up ex
 
 ??? example "Sample experiment with start and finish actions with tasks"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: quickstart-exp
@@ -384,13 +371,13 @@ Iter8 currently implements two tasks that help in setting up and finishing up ex
       criteria:
         objectives: 
         # mean latency should be under 50 milliseconds
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
         # 95th percentile latency should be under 100 milliseconds
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
         # error rate should be under 1%
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       indicators:
       # report values for the following metrics in addition those in spec.criteria.objectives
@@ -407,15 +394,13 @@ Iter8 currently implements two tasks that help in setting up and finishing up ex
           start:
           # the following task verifies that the `sample-app` Knative service in the `default` namespace is available and ready
           # it then updates the experiment resource with information needed to shift traffic between app versions
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           # run tasks under the `finish` action at the end of an experiment   
           finish:
           # promote an app version
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
           # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
               args:
@@ -478,7 +463,7 @@ The `knative` task library provides the `init-experiment` task. Use this task as
               kind: Service
               name: sample-app
               namespace: default
-              fieldPath: /spec/traffic/0/percent  
+              fieldPath: .spec.traffic[0].percent  
           candidates: 
           - name: candidate
             variables:
@@ -493,7 +478,7 @@ The `knative` task library provides the `init-experiment` task. Use this task as
               kind: Service
               name: sample-app
               namespace: default
-              fieldPath: /spec/traffic/1/percent  
+              fieldPath: .spec.traffic[1].percent  
         ```
 
 #### `common/exec`
@@ -506,8 +491,7 @@ The `common` task library provides the `exec` task. Use this task to execute she
       strategy:
         actions:
           finish:
-          - library: common
-            task: exec # promote the winning version
+          - task: common/exec # promote the winning version
             with:
               cmd: kubectl
               args:
@@ -522,8 +506,7 @@ The `common` task library provides the `exec` task. Use this task to execute she
       strategy:
         actions:
           finish:
-          - library: common
-            task: exec
+          - task: common/exec
             with:
               cmd: helm
               args:
@@ -543,8 +526,7 @@ The `common` task library provides the `exec` task. Use this task to execute she
       strategy:
         actions:
           finish: # run the following sequence of tasks at the end of the experiment
-          - library: common
-            task: exec # promote the winning version using kustomize
+          - task: common/exec # promote the winning version using kustomize
             with:
               cmd: /bin/sh
               args:
@@ -557,7 +539,7 @@ The `common` task library provides the `exec` task. Use this task to execute she
 
 Inputs to tasks can container placeholders, or template variables which will be dynamically substituted when the task is executed by Iter8. Variable interpolation works as follows.
 
-1. Iter8 will find the version recommended for promotion. This information is stored in the `status.recommendedBaseline` field of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` field of the experiment.
+1. Iter8 will find the version recommended for promotion. This information is stored in the `status.versionRecommendedForPromotion` field of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` field of the experiment.
 
 2. If the placeholder is `{{ .name }}`, Iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, Iter8 will substitute it with the value of this corresponding variable for the version recommended for promotion. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may be executed by Iter8 as part of the experiment.
 
