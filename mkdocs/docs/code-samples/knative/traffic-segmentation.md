@@ -5,7 +5,7 @@ template: overrides/main.html
 # Progressive Canary Release with Traffic Segmentation
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment and [traffic segmentation](/concepts/experimentationstrategies/#traffic-shaping).
+    An experiment with [`Canary`](/concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](/concepts/buildingblocks/#deployment-pattern) deployment and [traffic segmentation](/concepts/buildingblocks/#traffic-shaping).
     
     ![Canary](/assets/images/request-routing.png)
 

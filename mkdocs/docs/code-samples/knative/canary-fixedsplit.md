@@ -5,7 +5,7 @@ template: overrides/main.html
 # Fixed Split Canary Release
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`FixedSplit`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [Kustomize based version promotion](/concepts/experimentationstrategies/#version-promotion).
+    An experiment with [`Canary`](/concepts/buildingblocks/#testing-pattern) testing, [`FixedSplit`](/concepts/buildingblocks/#deployment-pattern) deployment, and [Kustomize based version promotion](/concepts/buildingblocks/#version-promotion).
     
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
