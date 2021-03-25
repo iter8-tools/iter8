@@ -6,16 +6,15 @@ hide:
 
 # Iter8 Features at a Glance
 
-Iter8 enables app/ML model developers, service operators, SREs, ML engineers, and data scientists to achieve the following goals.
+Iter8 makes it easy to achieve the following goals.
 
-- Automate validation/releases over **any** cloud stack; tutorials are documented for **Knative**, **KFServing**[^1] and **Istio**[^2].
-- Declaratively specify validation/release goals using an **experiment** - Kubernetes custom resource defined by Iter8.
+- Automate releases, validation, and experiments over **any** cloud stack; tutorials available for **Knative**, **KFServing**[^1] and **Istio**[^2].
+- Declaratively specify testing and deployment patterns, and metrics-based objectives (SLOs) and indicators (SLIs) for evaluating app/ML model versions using an **experiment** - the Kubernetes custom resource defined by Iter8.
 - **Conformance** and **Canary** testing.
-- **Progressive**, **fixed-split**, and **dark-launched** deployments.
-- Specify SLOs and SLIs.
-- **Traffic mirroring** and **traffic segmentation**.
-- Use Helm, Kustomize, and plain YAML/JSON manifests.
-- Use Out-of-the-box metrics custom metrics that can be defined using metrics in **Prometheus**.
+- **Progressive** traffic shifting.
+- **Dark launches**, **traffic mirroring** and **traffic segmentation**.
+- Use Helm, Kustomize, and plain YAML/JSON for defining your app manifests.
+- Use out-of-the-box metrics or define custom metrics based on data in **Prometheus**.
 - Statistically rigorous evaluation of versions, traffic splitting, and promotion/rollback decisions using **Bayesian learning** and **multi-armed bandit** algorithms.
 - Observe experiments in realtime.
 

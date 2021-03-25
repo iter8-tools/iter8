@@ -96,7 +96,7 @@ nav:
   - Concepts:
     - What is Iter8?: concepts/whatisiter8.md
     - Features: concepts/features.md
-    - Building blocks of an experiment: concepts/experimentationstrategies.md
+    - Conceptual building blocks: concepts/buildingblocks.md
   - Getting Started:
     - Quick start: 
       - with Knative: getting-started/quick-start/with-knative.md
