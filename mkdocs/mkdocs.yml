@@ -95,6 +95,7 @@ nav:
   - Home: index.md
   - Concepts:
     - What is Iter8?: concepts/whatisiter8.md
+    - Features: concepts/features.md
     - Building blocks of an experiment: concepts/experimentationstrategies.md
   - Getting Started:
     - Quick start: 
@@ -103,13 +104,13 @@ nav:
       - with Istio: getting-started/quick-start/with-istio.md
     - Install: getting-started/install.md
     - Getting help: getting-started/help.md
-  - Validation and Release Strategies + Code:
+  - Tutorials:
     - Knative:
       - Progressive canary release: code-samples/knative/canary-progressive.md
       - Fixed split canary release: code-samples/knative/canary-fixedsplit.md
       - Conformance testing: code-samples/knative/conformance.md
       - Conformance testing with traffic mirroring: code-samples/knative/mirroring.md
-      - Progressive canary release with traffic segmentation: code-samples/knative/request-routing.md
+      - Progressive canary release with traffic segmentation: code-samples/knative/traffic-segmentation.md
       - Useful Knative annotations: code-samples/knative/annotations.md
     - Generating requests externally: code-samples/traffic.md
   - Reference:
