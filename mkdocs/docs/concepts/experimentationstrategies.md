@@ -102,7 +102,7 @@ Iter8 enables you to take total advantage of all the traffic shaping features av
     ![Canary](/assets/images/request-routing.png)
 
     !!! tip ""
-        Try an experiment with [traffic segmentation](/code-samples/knative/request-routing/).
+        Try an experiment with [traffic segmentation](/code-samples/knative/traffic-segmentation/).
 
 
 ### Version promotion
