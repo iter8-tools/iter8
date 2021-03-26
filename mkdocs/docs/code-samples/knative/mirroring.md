@@ -5,7 +5,7 @@ template: overrides/main.html
 # Conformance Testing with Traffic Mirroring
 
 !!! tip ""
-    An experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing and [traffic mirroring](/concepts/experimentationstrategies/#traffic-shaping).
+    An experiment with [`Conformance`](/concepts/buildingblocks/#testing-pattern) testing and [traffic mirroring](/concepts/buildingblocks/#traffic-shaping).
     
     ![Canary](/assets/images/mirroring.png)
 
