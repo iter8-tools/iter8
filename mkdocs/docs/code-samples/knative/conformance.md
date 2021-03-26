@@ -5,7 +5,7 @@ template: overrides/main.html
 # Conformance Testing
 
 !!! tip ""
-    An experiment with [`Conformance`](/concepts/experimentationstrategies/#testing-pattern) testing.
+    An experiment with [`Conformance`](/concepts/buildingblocks/#testing-pattern) testing.
     
     ![Canary](/assets/images/conformance.png)
 

@@ -5,7 +5,7 @@ template: overrides/main.html
 # Quick Start with Knative
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`kubectl` based version promotion](/concepts/experimentationstrategies/#version-promotion).
+    An experiment with [`Canary`](/concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](/concepts/buildingblocks/#deployment-pattern) deployment, and [`kubectl` based version promotion](/concepts/buildingblocks/#version-promotion).
     
     ![Canary](/assets/images/canary-progressive-kubectl.png)
 

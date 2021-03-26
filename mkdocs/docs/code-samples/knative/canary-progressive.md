@@ -5,7 +5,7 @@ template: overrides/main.html
 # Progressive Canary Release
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/experimentationstrategies/#testing-pattern) testing, [`Progressive`](/concepts/experimentationstrategies/#deployment-pattern) deployment, and [`Helm` based version promotion](/concepts/experimentationstrategies/#version-promotion).
+    An experiment with [`Canary`](/concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](/concepts/buildingblocks/#deployment-pattern) deployment, and [`Helm` based version promotion](/concepts/buildingblocks/#version-promotion).
     
     ![Canary](/assets/images/canary-progressive-helm.png)
 
