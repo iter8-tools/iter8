@@ -15,7 +15,7 @@ title: Install Iter8
 
     ## Step 1: Export TAG
     ```shell
-    export TAG=v0.2.5
+    export TAG=v0.3.0-pre.4
     ```
 
     ## Step 2: Install iter8-monitoring

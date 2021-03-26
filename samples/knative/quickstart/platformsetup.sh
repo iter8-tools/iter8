@@ -42,8 +42,7 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
 fi
 
 # Step 1: Export correct tags for install artifacts
-#export TAG=v0.2.5
-export TAG="${TAG:-v0.3.0-pre.3}"
+export TAG="${TAG:-v0.3.0-pre.4}"
 export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
 echo "TAG = $TAG"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
