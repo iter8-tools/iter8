@@ -452,11 +452,10 @@ jobs:
       uses: actions/checkout@v2
 
     - uses: docker-practice/actions-setup-docker@master    
-    
+
     - name: Brew install tools
       run: |
         brew install kind
-        brew install kubectl
 
     - name: start cluster
       run: |
