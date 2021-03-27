@@ -453,7 +453,7 @@ jobs:
     
     - name: Brew install tools
       run: |
-        brew install go
+        # brew install go
         brew install kind
         brew install kubectl
 
