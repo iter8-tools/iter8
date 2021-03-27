@@ -454,7 +454,7 @@ jobs:
     - name: Brew install docker 
       run: |
         brew install --cask docker 
-        open /Applications/Docker.app
+        open -a docker
 
     - name: Brew install kind
       run: |
