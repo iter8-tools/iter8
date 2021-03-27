@@ -345,7 +345,7 @@ jobs:
         fi
 
   quickstart-minikube-docker:
-    name: quickstart experiment
+    name: quickstart experiment with minikube and docker driver
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
