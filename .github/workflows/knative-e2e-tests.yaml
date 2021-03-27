@@ -453,10 +453,11 @@ jobs:
 
     - name: Brew install docker 
       run: |
-        brew install --cask docker 
+        brew install --cask docker
+        brew install docker docker-machine
 
-    - name: start docker
-      run: open -a Docker
+    # - name: start docker
+    #   run: open --background -a Docker
 
     - name: Brew install kind
       run: |
