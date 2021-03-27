@@ -451,9 +451,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - uses: docker-practice/actions-setup-docker@master    
+    - name: Brew install docker 
+      run: |
+        brew install --cask docker 
+        open /Applications/Docker.app
 
-    - name: Brew install tools
+    - name: Brew install kind
       run: |
         brew install kind
 
