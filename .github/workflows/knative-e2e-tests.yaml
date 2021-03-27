@@ -343,3 +343,103 @@ jobs:
           echo "Packets were lost"
           exit 1
         fi
+
+  quickstart-minikube-docker:
+    name: quickstart experiment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Run Kubernetes tools
+      uses: stefanprodan/kube-tools@v1
+      with:
+        kubectl: 1.20.0
+        
+    - name: Setup Minikube
+      uses: manusa/actions-setup-minikube@v2.3.1
+      with:
+        minikube version: 'v1.16.0'
+        kubernetes version: 'v1.20.0'
+        driver: docker
+            
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+
+    - name: create Knative service and readiness check
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
+        kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+        kubectl wait --for=condition=Ready ksvc/sample-app
+
+    - name: create Fortio job and create experiment
+      run: |
+        export ITER8=$(pwd)
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+        
+        # Wait for Fortio to be ready
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl wait --for=condition=Ready pods/"$pod_name"
+
+        # Starting the experiment
+        kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+
+    - name: Sleep until end of experiment
+      run: sleep 120.0
+    
+    - name: Check if experiment is complete and successful
+      run: |
+        # Check if experiment has completed
+        completed="Completed"
+        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)=="$completed" ]]; then
+          echo "Experiment has Completed"
+        else
+          echo "Experiment must be Completed. It is $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)"
+          exit 1
+        fi
+
+        # Check if no packets have been lost by Fortio
+        
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
+
+        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
+        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
+        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
+          echo "Packets were not lost"
+        else
+          echo "Packets were lost"
+          exit 1
+        fi
+
+        # Check if recommended baseline is candidate
+        candidate="candidate"
+        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
+          echo "versionRecommendedForPromotion is candidate"
+        else
+          echo "versionRecommendedForPromotion must be candidate"
+          exit 1
+        fi
+
+
+        # Check if latest revision is true
+        latestRevision=true
+        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
+          echo "latestRevision is true"
+        else
+          echo "latestRevision must be true"
+          exit 1
+        fi
+
+        #check if traffic percent is 100
+        percent=100
+        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')=="$percent" ]]; then
+          echo "percent is 100"
+        else
+          echo "percent must be 100"
+          exit 1
+        fi
