@@ -546,7 +546,7 @@ jobs:
           exit 1
         fi
 
-  quickstart-macos-kind:
+  quickstart-macos-minikube:
     name: quickstart experiment with macos and minikube
     runs-on: macos-latest
     steps:
