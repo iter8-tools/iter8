@@ -453,7 +453,7 @@ jobs:
     
     - name: Brew install tools
       run: |
-        brew cask install docker
+        brew install docker
         brew install kind
         brew install kubectl
 
