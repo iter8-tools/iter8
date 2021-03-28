@@ -453,9 +453,10 @@ jobs:
 
     - uses: docker-practice/actions-setup-docker@master
 
-    - name: Brew install kind
+    - name: Brew install kind and kustomize
       run: |
         brew install kind
+        brew install kustomize
 
     - name: start cluster
       run: |
