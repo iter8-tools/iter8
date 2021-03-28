@@ -560,6 +560,8 @@ jobs:
       run: |
         kubectl delete rolebinding iter8-jobs -n iter8-system
         kubectl get clusterrolebinding
+        kubectl get clusterrolebinding -o yaml | grep admin
+        kubectl get clusterrolebinding -o yaml
 
     - name: create Knative service and readiness check
       run: |
