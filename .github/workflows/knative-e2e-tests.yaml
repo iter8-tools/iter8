@@ -31,7 +31,7 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
         kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=120s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=180s
 
     - name: create Fortio job and create experiment
       run: |
@@ -41,7 +41,7 @@ jobs:
         
         # Wait for Fortio to be ready
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=120s
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=180s
 
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
@@ -122,13 +122,13 @@ jobs:
       run: |
         export ITER8=$(pwd)
         helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=iter8-system
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
+        kubectl wait ksvc/sample-app --for condition=Ready --timeout=180s
         helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=iter8-system
 
     - name: Generate requests
       run: |
         export ITER8=$(pwd)
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=120s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=180s
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml | kubectl apply -f -
 
@@ -212,13 +212,13 @@ jobs:
       run: |
         export ITER8=$(pwd)
         kustomize build $ITER8/samples/knative/canaryfixedsplit/baseline | kubectl apply -f -
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
+        kubectl wait ksvc/sample-app --for condition=Ready --timeout=180s
         kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl apply -f -        
 
     - name: Generate requests
       run: |
         export ITER8=$(pwd)
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=120s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=180s
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml | kubectl apply -f -        
         
@@ -306,7 +306,7 @@ jobs:
     - name: Generate requests
       run: |
         export ITER8=$(pwd)
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=120s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=180s
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -        
         
@@ -373,7 +373,7 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
         kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=120s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=180s
 
     - name: create Fortio job and create experiment
       run: |
@@ -383,7 +383,7 @@ jobs:
         
         # Wait for Fortio to be ready
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=120s
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=180s
 
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
@@ -451,13 +451,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Brew install docker 
-      run: |
-        brew install --cask docker
-        brew install docker docker-machine
-
-    # - name: start docker
-    #   run: open --background -a Docker
+    - uses: docker-practice/actions-setup-docker@master
 
     - name: Brew install kind
       run: |
@@ -478,7 +472,7 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
         kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=120s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=180s
 
     - name: create Fortio job and create experiment
       run: |
@@ -488,7 +482,7 @@ jobs:
         
         # Wait for Fortio to be ready
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=120s
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=180s
 
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
@@ -576,7 +570,7 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
         kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=120s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=180s
 
     - name: create Fortio job and create experiment
       run: |
@@ -586,7 +580,7 @@ jobs:
         
         # Wait for Fortio to be ready
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=120s
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=180s
 
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
