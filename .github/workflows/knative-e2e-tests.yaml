@@ -641,9 +641,7 @@ jobs:
 
   quickstart-microk8s-no-role-binding:
     name: quickstart experiment on microkis without jobs role-binding
-
     runs-on: ubuntu-latest
-    name: A job to install MicroK8s
     steps:
     - uses: balchua/microk8s-actions@v0.2.1
       with:
