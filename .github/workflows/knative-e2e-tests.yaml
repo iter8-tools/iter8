@@ -425,7 +425,6 @@ jobs:
           exit 1
         fi
 
-
         # Check if latest revision is true
         latestRevision=true
         if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
