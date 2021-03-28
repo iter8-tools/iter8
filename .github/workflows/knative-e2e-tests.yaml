@@ -2,6 +2,8 @@ name: e2e tests
 
 on:
   push:
+    branches:
+    - master
     paths:
     - 'install/**'
     - 'samples/knative/**'
@@ -555,7 +557,9 @@ jobs:
         $ITER8/samples/knative/quickstart/platformsetup.sh contour
 
     - name: delete iter-jobs rolebinding
-      run: kubectl delete rolebinding iter8-jobs -n iter8-system
+      run: |
+        kubectl delete rolebinding iter8-jobs -n iter8-system
+        kubectl get clusterrolebinding
 
     - name: create Knative service and readiness check
       run: |
