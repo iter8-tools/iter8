@@ -33,28 +33,11 @@ kubectl wait --for=condition=Ready ksvc/sample-app-v2
 kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml        
 
 # Sleep
-echo "Sleep for 125s"
-sleep 125.0
+echo "Sleep for 120s"
+sleep 120.0
 
-# Check if experiment is complete and successful
-echo "Checking if experiment is completed and successful"
-completed="Completed"
-if [[ $(kubectl get experiment request-routing -ojson | jq .status.stage)=="$completed" ]]; then
-    echo "Experiment has Completed"
-else
-    echo "Experiment must be Completed. It is $(kubectl get experiment request-routing -ojson | jq .status.stage)"
-    exit 1
-fi
-
-# Check if Version recommended for promotion is candidate
-echo "Checking if versionRecommendedForPromotion is candidate"
-candidate="candidate"
-if [[ $(kubectl get experiment request-routing -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
-    echo "versionRecommendedForPromotion is candidate"
-else
-    echo "versionRecommendedForPromotion must be candidate"
-    exit 1
-fi
+# Check
+source  $ITER8/samples/knative/requestrouting/check.sh
 
 # Cleanup
 kubectl delete -f $ITER8/samples/knative/requestrouting/experiment.yaml
