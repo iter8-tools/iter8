@@ -11,7 +11,7 @@ else
 fi
 
 # Check if experiment has completed
-completed="Completed"
+completed=Completed
 stage=$(kubectl get experiment quickstart-exp -o json | jq .status.stage)
 if [[ $stage == $completed ]]; then
     echo "Experiment has Completed"
@@ -36,8 +36,8 @@ else
 fi
 
 # Check if recommended baseline is candidate
-candidate="candidate"
-vrfp="$(kubectl get experiment quickstart-exp -ojson | jq .status.versionRecommendedForPromotion)"
+candidate=candidate
+vrfp=$(kubectl get experiment quickstart-exp -ojson | jq .status.versionRecommendedForPromotion)
 if [[ $vrfp == $candidate ]]; then
     echo "versionRecommendedForPromotion is candidate"
 else
