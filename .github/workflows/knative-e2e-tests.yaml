@@ -50,7 +50,7 @@ jobs:
 
     - name: Sleep until end of experiment
       run: |
-        sleep 120.0
+        sleep 150.0
         kubectl get experiment quickstart-exp -o yaml
     
     - name: Check if experiment is complete and successful
@@ -95,7 +95,7 @@ jobs:
 
     - name: Sleep until end of experiment
       run: |
-        sleep 120.0
+        sleep 150.0
         kubectl get experiment canary-progressive -o yaml
     
     - name: Check if experiment is complete and successful
@@ -138,7 +138,7 @@ jobs:
 
     - name: Sleep until end of experiment
       run: |
-        sleep 120.0
+        sleep 150.0
         kubectl get experiment canary-fixedsplit -o yaml
     
     - name: Check if experiment is complete and successful
@@ -179,7 +179,7 @@ jobs:
 
     - name: Sleep until end of experiment
       run: |
-        sleep 120.0
+        sleep 150.0
         kubectl get experiment conformance-sample -o yaml
     
     - name: Check if experiment is complete and successful

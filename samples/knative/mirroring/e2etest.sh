@@ -32,8 +32,8 @@ kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 
 # Sleep
-echo "Sleep for 120s"
-sleep 120.0
+echo "Sleep for 150s"
+sleep 150.0
 
 # check experiment
 source $ITER8/samples/knative/mirroring/check.sh
