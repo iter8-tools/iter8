@@ -11,6 +11,7 @@ else
 fi
 
 # Check if experiment has completed
+kubectl get experiment mirroring -o yaml
 completed="Completed"
 stage=$(kubectl get experiment mirroring -o json | jq -r .status.stage)
 if [[ $stage = $completed ]]; then
