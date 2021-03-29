@@ -65,3 +65,7 @@ else
     echo "percent must be 100; is" $percent
     exit 1
 fi
+
+set +ex
+
+return 0

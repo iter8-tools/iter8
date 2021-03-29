@@ -37,3 +37,7 @@ else
 fi
 
 # Check if winner is baseline?
+
+set +ex
+
+return 0

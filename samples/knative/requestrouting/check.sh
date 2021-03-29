@@ -30,3 +30,7 @@ else
     echo "versionRecommendedForPromotion must be candidate; is" $vrfp
     exit 1
 fi
+
+set +ex
+
+return 0

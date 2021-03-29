@@ -22,3 +22,7 @@ else
 fi
 
 # check for winner?
+
+set +ex
+
+return 0
