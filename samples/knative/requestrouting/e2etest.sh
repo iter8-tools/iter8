@@ -1,10 +1,10 @@
-## For this test to succeed, do the following before launching the test.
-## minikube start --cpus 6 --memory 12288
-## Also install Kustomize v3 or v4: https://kustomize.io/
-
 #!/bin/bash
 
-set -e 
+set -e
+
+# create kind cluster
+kind create cluster
+kubectl cluster-info --context kind-kind
 
 # platform setup
 echo "Setting up platform"
@@ -39,8 +39,13 @@ sleep 150.0
 # Check
 source  $ITER8/samples/knative/requestrouting/check.sh
 
-# Cleanup
+# Cleanup .. not needed since cluster is getting deleted; just forming a good habit!
 kubectl delete -f $ITER8/samples/knative/requestrouting/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/requestrouting/curl.yaml
 kubectl delete -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
 kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
+
+# delete kind cluster
+kind delete cluster
+
+set +e

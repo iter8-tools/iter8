@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 # Ensure ITER8 environment variable is set
 if [[ -z ${ITER8} ]]; then
@@ -66,6 +66,6 @@ else
     exit 1
 fi
 
-set +ex
+set +e
 
 return 0

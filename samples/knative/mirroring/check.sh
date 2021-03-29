@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 # Ensure ITER8 environment variable is set
 if [[ -z ${ITER8} ]]; then
@@ -23,6 +23,6 @@ fi
 
 # check for winner?
 
-set +ex
+set +e
 
 return 0
