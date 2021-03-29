@@ -691,10 +691,10 @@ jobs:
       run: |
         # Check if experiment has completed
         completed="Completed"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)=="$completed" ]]; then
+        if [ $(kubectl get experiment quickstart-exp -o json | jq .status.stage) = "$completed" ]; then
           echo "Experiment has Completed"
         else
-          echo "Experiment must be Completed. It is $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)"
+          echo "Experiment must be Completed. It is $(kubectl get experiment quickstart-exp -o json | jq .status.stage)"
           exit 1
         fi
 
@@ -705,7 +705,7 @@ jobs:
 
         REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
         REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
+        if [ "REQUESTSTOTAL" -eq "$REQUESTS200" ]; then
           echo "Packets were not lost"
         else
           echo "Packets were lost"
@@ -714,7 +714,7 @@ jobs:
 
         # Check if recommended baseline is candidate
         candidate="candidate"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
+        if [ $(kubectl get experiment quickstart-exp -o json | jq .status.versionRecommendedForPromotion) = "$candidate" ]; then
           echo "versionRecommendedForPromotion is candidate"
         else
           echo "versionRecommendedForPromotion must be candidate"
@@ -724,7 +724,7 @@ jobs:
 
         # Check if latest revision is true
         latestRevision=true
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
+        if [ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision') = "$latestRevision" ]; then
           echo "latestRevision is true"
         else
           echo "latestRevision must be true"
@@ -733,7 +733,7 @@ jobs:
 
         #check if traffic percent is 100
         percent=100
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')=="$percent" ]]; then
+        if [ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent') -eq "$percent" ]; then
           echo "percent is 100"
         else
           echo "percent must be 100"
