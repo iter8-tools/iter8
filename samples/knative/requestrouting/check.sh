@@ -36,7 +36,7 @@ else
     exit 1
 fi
 
-# Check if versionRecommendedForPromotion is candidate
+# Check if recommended baseline is candidate
 candidate="candidate"
 vrfp=$(kubectl get experiment quickstart-exp -o json | jq -r .status.versionRecommendedForPromotion)
 if [[ $vrfp = $candidate ]]; then

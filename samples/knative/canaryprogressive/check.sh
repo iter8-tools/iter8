@@ -12,7 +12,7 @@ fi
 
 # Check if experiment has completed
 completed="Completed"
-stage=$(kubectl get experiment quickstart-exp -o json | jq -r .status.stage)
+stage=$(kubectl get experiment canary-progressive -o json | jq -r .status.stage)
 if [[ $stage = $completed ]]; then
     echo "Experiment has Completed"
 else
@@ -38,7 +38,7 @@ fi
 
 # Check if versionRecommendedForPromotion is candidate
 candidate="candidate"
-vrfp=$(kubectl get experiment quickstart-exp -o json | jq -r .status.versionRecommendedForPromotion)
+vrfp=$(kubectl get experiment canary-progressive -o json | jq -r .status.versionRecommendedForPromotion)
 if [[ $vrfp = $candidate ]]; then
     echo "versionRecommendedForPromotion is $vrfp"
 else
