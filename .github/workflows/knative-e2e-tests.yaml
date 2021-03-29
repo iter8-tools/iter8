@@ -50,7 +50,7 @@ jobs:
 
     - name: Sleep until end of experiment
       run: |
-        sleep 150.0
+        sleep 120.0
         kubectl get experiment quickstart-exp -o yaml
     
     - name: Check if experiment is complete and successful
@@ -95,7 +95,7 @@ jobs:
 
     - name: Sleep until end of experiment
       run: |
-        sleep 150.0
+        sleep 120.0
         kubectl get experiment canary-progressive -o yaml
     
     - name: Check if experiment is complete and successful
@@ -136,62 +136,15 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 
-    - name: Sleep
+    - name: Sleep until end of experiment
       run: |
-        sleep 150.0
-
+        sleep 120.0
+        kubectl get experiment canary-fixedsplit -o yaml
+    
     - name: Check if experiment is complete and successful
       run: |
-        # Check if experiment has completed
-        completed="Completed"
-        if [[ $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)=="$completed" ]]; then
-          echo "Experiment has Completed"
-        else
-          echo "Experiment must be Completed. It is $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)"
-          exit 1
-        fi
-
-        # Check if no requests have been lost during the experiment
-        
-        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
-        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
-          echo "Packets were not lost"
-        else
-          echo "Packets were lost"
-          exit 1
-        fi
-
-        # Check if recommended baseline is candidate
-        candidate="candidate"
-        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.versionRecommendedForPromotion)=="$candidate" ]]; then
-          echo "versionRecommendedForPromotion is candidate"
-        else
-          echo "versionRecommendedForPromotion must be candidate"
-          exit 1
-        fi
-
-
-        # Check if latest revision is true
-        latestRevision=true
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
-          echo "latestRevision is true"
-        else
-          echo "latestRevision must be true"
-          exit 1
-        fi
-
-        # Check if traffic percent is 100
-        percent=100
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')=="$percent" ]]; then
-          echo "percent is 100"
-        else
-          echo "percent must be 100"
-          exit 1
-        fi        
+        export ITER8=$(pwd)
+        source $ITER8/samples/knative/canaryfixedsplit/check.sh
 
   conformance:
     name: conformance
@@ -224,31 +177,12 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
 
-    - name: Sleep
+    - name: Sleep until end of experiment
       run: |
-        sleep 150.0
-
+        sleep 120.0
+        kubectl get experiment conformance-sample -o yaml
+    
     - name: Check if experiment is complete and successful
       run: |
-        # Check if experiment has completed
-        completed="Completed"
-        if [[ $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)=="$completed" ]]; then
-          echo "Experiment has Completed"
-        else
-          echo "Experiment must be Completed. It is $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)"
-          exit 1
-        fi
-
-        # Check if no requests have been lost during the experiment
-        
-        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
-        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
-          echo "Packets were not lost"
-        else
-          echo "Packets were lost"
-          exit 1
-        fi
+        export ITER8=$(pwd)
+        source $ITER8/samples/knative/conformance/check.sh
