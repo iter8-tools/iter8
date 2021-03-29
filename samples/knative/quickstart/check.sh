@@ -16,7 +16,8 @@ stage=$(kubectl get experiment quickstart-exp -o json | jq .status.stage)
 if [[ $stage == $completed ]]; then
     echo "Experiment has Completed"
 else
-    echo "Experiment must be Completed; is" $stage
+    echo "Experiment must be $completed;" 
+    echo "Experiment is $stage;"
     exit 1
 fi
 
