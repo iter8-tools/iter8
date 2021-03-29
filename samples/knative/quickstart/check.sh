@@ -13,7 +13,7 @@ fi
 # Check if experiment has completed
 completed="Completed"
 stage=$(kubectl get experiment quickstart-exp -o json | jq .status.stage)
-if [[ $stage == $completed ]]; then
+if [[ $stage = $completed ]]; then
     echo "Experiment has Completed"
 else
     echo "Experiment must be $completed;" 
@@ -39,7 +39,7 @@ fi
 # Check if recommended baseline is candidate
 candidate="candidate"
 vrfp=$(kubectl get experiment quickstart-exp -o json | jq .status.versionRecommendedForPromotion)
-if [[ $vrfp == $candidate ]]; then
+if [[ $vrfp = $candidate ]]; then
     echo "versionRecommendedForPromotion is candidate"
 else
     echo "versionRecommendedForPromotion must be candidate; is" $vrfp
@@ -49,7 +49,7 @@ fi
 # Check if latest revision is true
 latestRevision=true
 lrStatus=$(kubectl get ksvc sample-app -o json | jq '.spec.traffic[0].latestRevision')
-if [[ $lrStatus == $latestRevision ]]; then
+if [[ $lrStatus = $latestRevision ]]; then
     echo "latestRevision is true"
 else
     echo "latestRevision must be true; is" $lrStatus
