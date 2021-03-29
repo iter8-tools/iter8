@@ -4,29 +4,27 @@ template: overrides/main.html
 
 # Quick Start with Knative
 
-!!! tip ""
-    An experiment with [`Canary`](/concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](/concepts/buildingblocks/#deployment-pattern) deployment, and [`kubectl` based version promotion](/concepts/buildingblocks/#version-promotion).
+!!! tip "Scenario: Canary testing and progressive deployment"
+    [Canary testing](/concepts/buildingblocks/#testing-pattern) enables you to reduce risk during a [release](/concepts/buildingblocks/#release) by [validating](/concepts/buildingblocks/#validation) your new version with a small fraction of users before exposing it to all users. In this tutorial, you will:
+
+    1. Perform canary testing.
+    2. Specify service-level objectives or SLOs used by Iter8 to automatically validate your versions.
+    3. Use metrics from Prometheus.
+    4. Combine canary testing with [progressive deployment](/concepts/buildingblocks/#deployment-pattern) in an Iter8 experiment.
     
+    Assuming the new version is validated, Iter8 will progressively increase the traffic percentage for the new version and promote it at the end as depicted below.
+
     ![Canary](/assets/images/canary-progressive-kubectl.png)
 
-You will create the following resources in this tutorial.
-
-1. A **Knative app** (service) with two versions (revisions).
-2. A **Fortio-based traffic generator** that simulates user requests.
-3. An **Iter8 experiment** that: 
-    - verifies that `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`
-    - progressively shifts traffic from `baseline` to `candidate`
-    - eventually replaces `baseline` with `candidate` using `kubectl`
 ???+ warning "Before you begin, you will need... "
-
-    1. **Kubernetes cluster.** You can setup a local cluster using [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/)
-    2. [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-    3. [**Kustomize v3**](https://kubectl.docs.kubernetes.io/installation/kustomize/), and 
-    4. [**Go 1.13+**](https://golang.org/doc/install)
+    1. **Kubernetes cluster.** You can also install [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
+    2. The **kubectl** CLI. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+    3. **Kustomize v3+**. Install [Kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/).
+    4. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install [Go](https://golang.org/doc/install). 
 
 ## 1. Create Kubernetes cluster
 
-Create a local Kubernetes cluster or use a managed Kubernetes service from your cloud provider. Ensure that the cluster has sufficient resources, for example, 6 CPUs and 12GB of memory.
+Create a local Kubernetes cluster using Minikube or Kind, or use a managed Kubernetes service. Ensure that the cluster has sufficient resources, for example, 6 CPUs and 12GB of memory.
 
 === "Minikube"
 
@@ -40,6 +38,13 @@ Create a local Kubernetes cluster or use a managed Kubernetes service from your 
     kind create cluster
     kubectl cluster-info --context kind-kind
     ```
+
+    ???+ info "Ensure your Kind cluster has sufficient resources"
+        Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
+
+        ![Resources](/assets/images/ddresourcepreferences.png)
+
+
     
 
 ## 2. Clone Iter8 repo
@@ -50,7 +55,7 @@ export ITER8=$(pwd)
 ```
 
 ## 3. Install Knative and Iter8
-Choose a networking layer for Knative.
+Knative can work with multiple networking layers, and so can Iter8's Knative extension. Choose a networking layer for Knative.
 
 === "Contour"
 
@@ -77,6 +82,7 @@ Choose a networking layer for Knative.
     ```
 
 ## 4. Create app versions
+Create baseline and candidate versions of your app. The candidate version is also referred to as the *new* or *canary* version.
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
 kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
@@ -129,6 +135,8 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
     ```
 
 ## 5. Generate requests
+A real application in a production cluster would receive requests from real users. For the purposes of this tutorial, we will simulate user requests for our application using a [Fortio application](https://github.com/fortio/fortio).
+
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
@@ -167,10 +175,13 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml |
           restartPolicy: Never
     ```
 
-## 6. Create Iter8 experiment
+## 6. Launch Iter8 experiment
+Launch the Iter8 experiment which will orchestrate the canary release of the new version with SLO validation and progressive deployment.
+
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 ```
+
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
     apiVersion: iter8.tools/v2alpha2
@@ -227,6 +238,10 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
         - name: promote
           value: candidate 
     ```
+
+The process automated by Iter8 during this experiment is depicted below.
+
+![Iter8 automation](/assets/images/canary-progressive-kubectl-iter8.png)
 
 ## 7. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
@@ -289,7 +304,6 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         | error-rate                     |   0.000 |     0.000 |
         +--------------------------------+---------+-----------+
         ``` 
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
 
 === "kubectl get experiment"
 
@@ -311,7 +325,6 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
         quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
         ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get ksvc"
 
@@ -348,7 +361,7 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ```
 
 ???+ info "Understanding what happened"
-    1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`).
-    2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to `baseline` and 0% to `candidate`.
-    3. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the `objectives` specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `kubectl`.
-        - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
+    1. You created a Knative service with two revisions, sample-app-v1 (baseline) and sample-app-v2 (candidate).
+    2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
+    3. You created an Iter8 experiment with canary testing and progressive deployment patterns. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that the candidate satisfied all objectives, identified the candidate as the winner, progressively shifted traffic from the baseline to the candidate, and eventually promoted the candidate using the `kubectl apply` command.
+    4. Had the candidate failed to satisfy objectives, then the baseline would have been promoted.
