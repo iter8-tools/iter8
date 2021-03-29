@@ -42,8 +42,7 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
 fi
 
 # Step 1: Export correct tags for install artifacts
-#export TAG=v0.2.5
-export TAG=main
+export TAG="${TAG:-v0.3.0-pre.4}"
 export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
 echo "TAG = $TAG"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
@@ -78,7 +77,7 @@ if [[ "istio" == ${1} ]]; then
     cd istio-1.8.2
     export PATH=$PWD/bin:$PATH
     cd $WORK_DIR
-    curl -L https://raw.githubusercontent.com/sriumcp/iter8/master/samples/knative/quickstart/istio-minimal-operator.yaml | istioctl install -y -f -
+    curl -L https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/istio-minimal-operator.yaml | istioctl install -y -f -
 
     kubectl apply --filename https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/release.yaml
     echo "Istio installed successfully"
@@ -126,16 +125,16 @@ fi
 
 # Step 5: Install Iter8
 echo "Installing Iter8"
-kustomize build github.com/sriumcp/iter8-install/core/?ref=${TAG} | kubectl apply -f -
+kustomize build github.com/iter8-tools/iter8-install/core/?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build github.com/sriumcp/iter8-install/metrics/?ref=${TAG} | kubectl apply -f -
+kustomize build github.com/iter8-tools/iter8-install/metrics/?ref=${TAG} | kubectl apply -f -
 
 # Step 5: Install iter8-monitoring
 echo "Installing iter8-monitoring"
-kustomize build github.com/sriumcp/iter8-install/prometheus-add-on/prometheus-operator?ref=${TAG} | kubectl apply -f -
+kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/prometheus-operator?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build github.com/sriumcp/iter8-install/prometheus-add-on/prometheus/?ref=${TAG} | kubectl apply -f - 
-kustomize build github.com/sriumcp/iter8-install/prometheus-add-on/service-monitors/?ref=${TAG} | kubectl apply -f - 
+kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/prometheus/?ref=${TAG} | kubectl apply -f - 
+kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/service-monitors/?ref=${TAG} | kubectl apply -f - 
 
 # Step 7: Verify Iter8 installation
 echo "Verifying installation"
