@@ -15,7 +15,7 @@ title: Installation
 Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
-export TAG=v0.3.0-pre.4
+export TAG=v0.3.0-pre.5
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 ```
 
@@ -26,7 +26,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install
     set -e
 
     # Step 0: Export TAG
-    export TAG="${TAG:-v0.3.0-pre.4}"
+    export TAG="${TAG:-v0.3.0-pre.5}"
 
     # Step 1: Install Iter8
     echo "Installing Iter8"
@@ -45,7 +45,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install
 Install Iter8's Prometheus add-on in your cluster as follows.
 
 ```shell
-export TAG=v0.3.0-pre.4
+export TAG=v0.3.0-pre.5
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh | bash
 ```
 
@@ -56,7 +56,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install
     set -e
 
     # Step 0: Export TAG
-    export TAG="${TAG:-v0.3.0-pre.4}"
+    export TAG="${TAG:-v0.3.0-pre.5}"
 
     # Step 1: Install Prometheus add-on
     # This step assumes you have installed Iter8 using install.sh
