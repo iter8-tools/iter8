@@ -96,7 +96,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | initTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time the experiment is created. | No |
 | startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the first iteration of experiment begins  | No |
 | lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
-| stage | string | Indicator of progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running and `Completed` when the experiment terminates. | No |
+| stage | string | Indicator of the progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running and `Completed` when the experiment terminates. | No |
 | currentWeightDistribution | [][WeightData](#weightdata) | Currently observed distribution of requests between app versions. | No |
 | analysis | Analysis | Result of latest query to the Iter8 analytics service.  | No |
 | versionRecommendedForPromotion | string | The version recommended for promotion. Although this field is populated by Iter8 even before the completion of the experiment, this field is intended to be used only on completion by the finish action. | No |
@@ -111,14 +111,17 @@ Metrics are referenced within the `spec.criteria` field of the experiment. Metri
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
     metadata:
-    name: request-count
+      name: request-count
     spec:
       params:
       - name: query
-        value: sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$elapsedTime])) or on() vector(0)
+        value: |
+          sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[$elapsedTime])) or on() vector(0)
       description: Number of requests
       type: counter
       provider: prometheus
+      jqExpression: ".data.result[0].value[1] | tonumber"
+      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query      
     ```
 
 #### Metadata
@@ -131,12 +134,12 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | description | string | Human-readable description of the metric. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
-| sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. | No |
-| provider | string | Type of the metrics database. Currently, `prometheus` is the only valid value. | No |
+| sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace of the referring metric. | No |
+| provider | string | Type of the metrics database. Provider is used only for display purposes. | No |
 | jqExpression | string | A [jq](https://stedolan.github.io/jq/) expression that extracts the metrics value from the result of a query to the backend metrics server. | Yes |
-| secret | string | Reference to a secret (of the form `namespace/name` containing information to be used primarily for authentication with the metrics service. The values are used to resolve into header and URL templates. | No |
-| headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtimme with the value from the `name` entry defined in the secret. | No |
-| urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. | Yes |
+| secret | string | Reference to a secret (of the form `name` or `namespace/name`) containing information to be used primarily for authentication with the metrics service. The values are used to resolve into header and URL templates. | No |
+| headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtime with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | No |
+| urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | Yes |
 
 ## Experiment field types
 
@@ -157,8 +160,8 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | testingPattern | string | Determines the logic used to evaluate the app versions and determine the winner of the experiment. Iter8 supports two testing patterns, namely, `Canary` and `Conformance`. | Yes |
-| deploymentPattern | string | Determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. Iter8 supports two deployment patterns, namely, Progressive and FixedSplit. | No |
-| actions | map[string][][TaskSpec](#taskspec) | An action is a sequence of tasks that can be executed by Iter8. spec.strategy.actions can be used to specify start and finish actions that will be run at the start and end of an experiment respectively. | No |
+| deploymentPattern | string | Determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. Iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`. | No |
+| actions | map[string][][TaskSpec](#taskspec) | An action is a sequence of tasks that can be executed by Iter8. `spec.strategy.actions` can be used to specify start and finish actions that will be run at the start and end of an experiment respectively. | No |
 
 ### TaskSpec
 
