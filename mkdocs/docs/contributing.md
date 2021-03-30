@@ -14,7 +14,7 @@ Iter8 documentation is built using [mkdocs for material](https://squidfunk.githu
 
 **Pre-requisite:** [Node.js 15+](https://nodejs.org/en/)
 
-**Note:** Fork the Iter8 repo, clone your fork, and `npm run build`. This step is required every time static assets (like images) change.
+**Note:** Fork Iter8 repo, clone your fork, and run the commands below. This step is required to build Iter8 docs for the first time. This step is required after you change static assets like images. This step is *not* required if you only change .md files or `mkdocs.yml`.
 
 ```shell
 cd iter8/mkdocs
@@ -23,20 +23,12 @@ npm run build
 ```
 
 ## Locally serving Iter8 docs
-**Pre-requisite:** Python 3+. You may find it useful to setup and activate a Python 3+ virtual environment as follows. The `.venv` folder contains the virtual environment.
+**Pre-requisite:** Python 3+. Setup, activate, and use a Python 3+ virtual environment as follows.
 
 ```shell
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-**Note:** the pip install below is usually required only for the first time you serve Iter8 docs locally.
-
-```shell
 pip install -r requirements.txt
-```
-
-```shell
 mkdocs serve -s
 ```
 

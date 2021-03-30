@@ -21,19 +21,7 @@ else
     echo "Kubernetes cluster is available"
 fi
 
-
-## 0(c). Ensure Kustomize v3 or v4 is available
-KUSTOMIZE_VERSION=$(kustomize version | cut -f 1 | cut -d/ -f 2 | cut -d. -f 1)
-if [[ $KUSTOMIZE_VERSION == "v3" || $KUSTOMIZE_VERSION == "v4" ]]; then
-    echo "Kustomize ${KUSTOMIZE_VERSION} is available"
-else
-    echo "Kustomize Version found: $KUSTOMIZE_VERSION"
-    echo "Kustomize v3 or v4 is not available"
-    echo "Get Kustomize v4 from https://kubectl.docs.kubernetes.io/installation/kustomize/"
-    exit 1
-fi
-
-## 0(d). Ensure network layer is supported
+## 0(c). Ensure network layer is supported
 NETWORK_LAYERS="istio contour gloo kourier"
 if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
     echo "Network Layer ${1} unsupported"
@@ -61,7 +49,7 @@ echo "Installing Knative core components"
 kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_TAG}/serving-core.yaml
 
 
-# Step 3: Monitor the Knative components until all of the components are `Running` or `Completed`:
+# Step 3: Ensure readiness of Knative-serving pods
 echo "Waiting for all Knative-serving pods to be running..."
 sleep 10 # allowing enough time for resource creation
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
@@ -123,18 +111,15 @@ elif [[ "kourier" == ${1} ]]; then
     echo "Kourier installed successfully"
 fi
 
+### Note: the preceding steps perform domain install; following steps perform Iter8 install
+
 # Step 5: Install Iter8
 echo "Installing Iter8"
-kustomize build github.com/iter8-tools/iter8-install/core/?ref=${TAG} | kubectl apply -f -
-kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build github.com/iter8-tools/iter8-install/metrics/?ref=${TAG} | kubectl apply -f -
+source <(curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh)
 
-# Step 5: Install iter8-monitoring
-echo "Installing iter8-monitoring"
-kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/prometheus-operator?ref=${TAG} | kubectl apply -f -
-kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/prometheus/?ref=${TAG} | kubectl apply -f - 
-kustomize build github.com/iter8-tools/iter8-install/prometheus-add-on/service-monitors/?ref=${TAG} | kubectl apply -f - 
+# Step 6: Install Iter8's Prometheus add-on
+echo "Installing Iter8's Prometheus add-on"
+source <(curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh)
 
 # Step 7: Verify Iter8 installation
 echo "Verifying installation"
