@@ -38,8 +38,6 @@ source <(curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/mai
     kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
 
     set +e
-
-    return 0
     ```        
 
 ## (Optional) Prometheus add-on
@@ -72,8 +70,6 @@ source <(curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/mai
     kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
 
     set +e
-
-    return 0
     ```
 
 ??? note "Running Iter8 tutorials without this add-on"

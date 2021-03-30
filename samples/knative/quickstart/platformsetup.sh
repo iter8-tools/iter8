@@ -115,11 +115,11 @@ fi
 
 # Step 5: Install Iter8
 echo "Installing Iter8"
-source <(curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh)
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 
 # Step 6: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
-source <(curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh)
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh | bash
 
 # Step 7: Verify Iter8 installation
 echo "Verifying installation"

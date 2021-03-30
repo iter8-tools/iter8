@@ -39,5 +39,3 @@ fi
 # Check if winner is baseline?
 
 set +e
-
-return 0
