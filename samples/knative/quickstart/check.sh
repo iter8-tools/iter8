@@ -67,5 +67,3 @@ else
 fi
 
 set +e
-
-return 0

@@ -5,7 +5,6 @@ hide:
 ---
 
 # Contributing
-
 We are delighted that you are considering a contribution to Iter8!
 
 Please discuss the change you wish to make using [issues](https://github.com/iter8-tools/iter8/issues), [discussions](https://github.com/iter8-tools/iter8/discussions), or the [Iter8 slack workspace](https://iter8-tools.slack.com) before submitting your PR.
@@ -15,43 +14,27 @@ Iter8 documentation is built using [mkdocs for material](https://squidfunk.githu
 
 **Pre-requisite:** [Node.js 15+](https://nodejs.org/en/)
 
-**Note:** Fork the Iter8 repo, clone your fork, and `npm run build`. This step is usually required only for the first time you work with Iter8 docs locally.
+**Note:** Fork Iter8 repo, clone your fork, and run the commands below. This step is required to build Iter8 docs for the first time. This step is required after you change static assets like images. This step is *not* required if you only change .md files or `mkdocs.yml`.
 
 ```shell
-git clone git@github.com:<your-github-account>/iter8.git
 cd iter8/mkdocs
 git update-index --assume-unchanged package-lock.json
 npm run build
 ```
 
 ## Locally serving Iter8 docs
-
-**Pre-requisite:** Python 3+. You may find it useful to setup and activate a Python 3+ virtual environment as follows. The `.venv` folder contains the virtual environment.
+**Pre-requisite:** Python 3+. Setup, activate, and use a Python 3+ virtual environment as follows.
 
 ```shell
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-**Note:** the pip install below is usually required only for the first time you serve Iter8 docs locally.
-
-```shell
 pip install -r requirements.txt
-```
-
-```shell
 mkdocs serve -s
 ```
 
 Browse [http://localhost:8000](http://localhost:8000) to view your local Iter8 docs.
 
-<!-- ### Process for updating code artifacts
-YAMLs, scripts and other code artifacts that are part of code-samples are located under the `iter8/samples` folder. Changes to code artifacts are followed by a tagged release, so that versioned artifacts are available. -->
-
 ## Locally viewing live changes to Iter8 docs
-
-<!-- 1. While referring to code artifacts in docs (for example, a remote `kustomize` resource referenced in an experiment), use versioned artifacts. -->
-
 1. The overall structure of the documentation, as reflected in the nav tabs of https://iter8.tools, is located in the `iter8/mkdocs/mkdocs.yml` file.
 
 2. The markdown files for Iter8 docs are located under the `iter8/mkdocs/docs` folder.
@@ -63,4 +46,3 @@ All iter8 tutorials include e2e tests, either as [part of GitHub Actions workflo
 
 ## Extending Iter8 in other ways
 Documentation for contributing other Iter8 extensions such as new handler tasks, analytics capabilities, and observability features is coming soon.
-

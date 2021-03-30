@@ -19,8 +19,7 @@ template: overrides/main.html
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also install [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
     2. The **kubectl** CLI. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    3. **Kustomize v3+**. Install [Kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-    4. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install [Go](https://golang.org/doc/install). 
+    3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install [Go](https://golang.org/doc/install).
 
 ## 1. Create Kubernetes cluster
 

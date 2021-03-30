@@ -25,5 +25,3 @@ fi
 # check for winner?
 
 set +e
-
-return 0
