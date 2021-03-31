@@ -181,96 +181,21 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    ??? info "iter8ctl output"
-        The `iter8ctl` output will be similar to the following.
-        ```shell
-        ****** Overview ******
-        Experiment name: canary-progressive
-        Experiment namespace: default
-        Target: default/sample-app
-        Testing pattern: Canary
-        Deployment pattern: Progressive
-
-        ****** Progress Summary ******
-        Experiment stage: Completed
-        Number of completed iterations: 7
-
-        ****** Winner Assessment ******
-        App versions in this experiment: [current candidate]
-        Winning version: candidate
-        Version recommended for promotion: candidate
-
-        ****** Objective Assessment ******
-        +--------------------------------+---------+-----------+
-        |           OBJECTIVE            | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | mean-latency <= 50.000         | true    | true      |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   | true    | true      |
-        | <= 100.000                     |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate <= 0.010            | true    | true      |
-        +--------------------------------+---------+-----------+
-
-        ****** Metrics Assessment ******
-        +--------------------------------+---------+-----------+
-        |             METRIC             | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | mean-latency (milliseconds)    |   1.201 |     1.322 |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   |   4.776 |     4.750 |
-        | (milliseconds)                 |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate                     |   0.000 |     0.000 |
-        +--------------------------------+---------+-----------+
-        | request-count                  | 448.800 |    89.352 |
-        +--------------------------------+---------+-----------+
-        ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
     ```shell
     kubectl get experiment canary-progressive --watch
     ```
 
-    ??? info "kubectl get experiment output"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        NAME                 TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-        canary-progressive   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-        canary-progressive   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-        canary-progressive   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-        canary-progressive   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-        canary-progressive   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-        canary-progressive   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-        ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
 === "kubectl get ksvc"
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    ??? info "kubectl get ksvc output"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        [
-          {
-            "latestRevision": false,
-            "percent": 25,
-            "revisionName": "sample-app-v1",
-            "tag": "current",
-            "url": "http://current-sample-app.default.example.com"
-          },
-          {
-            "latestRevision": true,
-            "percent": 75,
-            "revisionName": "sample-app-v2",
-            "tag": "candidate",
-            "url": "http://candidate-sample-app.default.example.com"
-          }
-        ]
-        ```
+    As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will all be sent to the winner, `sample-app-v2`.
         
 ## 5. Cleanup
 ```shell

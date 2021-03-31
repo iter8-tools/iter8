@@ -274,35 +274,45 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         Number of completed iterations: 3
 
         ****** Winner Assessment ******
+        > If the candidate version satisfies the experiment objectives, then it is the winner.
+        > Otherwise, if the baseline version satisfies the experiment objectives, it is the winner.
+        > Otherwise, there is no winner.
         App versions in this experiment: [current candidate]
         Winning version: candidate
         Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
-        +--------------------------------+---------+-----------+
-        |           OBJECTIVE            | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | mean-latency <= 50.000         | true    | true      |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   | true    | true      |
-        | <= 100.000                     |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate <= 0.010            | true    | true      |
-        +--------------------------------+---------+-----------+
+        > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
+        +--------------------------------------------+---------+-----------+
+        |                 OBJECTIVE                  | CURRENT | CANDIDATE |
+        +--------------------------------------------+---------+-----------+
+        | iter8-knative/mean-latency <=              | true    | true      |
+        |                                     50.000 |         |           |
+        +--------------------------------------------+---------+-----------+
+        | iter8-knative/95th-percentile-tail-latency | true    | true      |
+        | <= 100.000                                 |         |           |
+        +--------------------------------------------+---------+-----------+
+        | iter8-knative/error-rate <=                | true    | true      |
+        |                                      0.010 |         |           |
+        +--------------------------------------------+---------+-----------+
 
         ****** Metrics Assessment ******
-        +--------------------------------+---------+-----------+
-        |             METRIC             | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | request-count                  | 429.334 |    16.841 |
-        +--------------------------------+---------+-----------+
-        | mean-latency (milliseconds)    |   0.522 |     0.712 |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   |   4.835 |     4.750 |
-        | (milliseconds)                 |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate                     |   0.000 |     0.000 |
-        +--------------------------------+---------+-----------+
+        > Most recently read values of experiment metrics for each version.
+        +--------------------------------------------+---------+-----------+
+        |                   METRIC                   | CURRENT | CANDIDATE |
+        +--------------------------------------------+---------+-----------+
+        | iter8-knative/request-count                | 454.523 |    27.412 |
+        +--------------------------------------------+---------+-----------+
+        | iter8-knative/mean-latency                 |   1.265 |     1.415 |
+        | (milliseconds)                             |         |           |
+        +--------------------------------------------+---------+-----------+
+        | request-count                              | 454.523 |    27.619 |
+        +--------------------------------------------+---------+-----------+
+        | iter8-knative/95th-percentile-tail-latency |   4.798 |     4.928 |
+        | (milliseconds)                             |         |           |
+        +--------------------------------------------+---------+-----------+
+        | iter8-knative/error-rate                   |   0.000 |     0.000 |
+        +--------------------------------------------+---------+-----------+
         ``` 
 
 === "kubectl get experiment"
