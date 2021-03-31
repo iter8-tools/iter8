@@ -92,4 +92,4 @@ This example illustrates the end-to-end process of retrieving metric values in I
 ``` shell
 sum(increase(revision_app_request_latencies_count{name='sample-app-v2', namespace='iter8-knative-monitoring'}[285s])) or on() vector(0)
 ```
-Iter8 sends an HTTP GET request to the Prometheus metrics backend (for example, `http://prometheus-operated.iter8-knative-monitoring:9090`) with an HTTP query parameter named `query`. The [response from Prometheus](/reference/metrics/custom-metrics/#prometheus-response) contains the current value of `my-metric` for `sample-app-v2`.
+Iter8 sends an HTTP GET request to the Prometheus metrics backend (for example, `http://prometheus-operated.iter8-knative-monitoring:9090`) with an HTTP query parameter named `query`. The [response from Prometheus](/metrics/custom-metrics/#prometheus-response) contains the current value of `my-metric` for `sample-app-v2`.
