@@ -192,7 +192,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
     The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get ksvc"
     ```shell
