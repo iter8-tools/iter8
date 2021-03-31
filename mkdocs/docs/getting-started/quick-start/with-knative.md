@@ -17,13 +17,13 @@ template: overrides/main.html
     ![Canary](/assets/images/canary-progressive-kubectl.png)
 
 ???+ warning "Before you begin, you will need... "
-    1. **Kubernetes cluster.** You can also install [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
+    1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
     2. The **kubectl** CLI. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
     3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install [Go](https://golang.org/doc/install).
 
 ## 1. Create Kubernetes cluster
 
-Create a local Kubernetes cluster using Minikube or Kind, or use a managed Kubernetes service. Ensure that the cluster has sufficient resources, for example, 6 CPUs and 12GB of memory.
+Create a local cluster using Minikube or Kind as follows, or use a managed Kubernetes service. Ensure that the cluster has sufficient resources, for example, 6 CPUs and 12GB of memory.
 
 === "Minikube"
 
@@ -38,7 +38,7 @@ Create a local Kubernetes cluster using Minikube or Kind, or use a managed Kuber
     kubectl cluster-info --context kind-kind
     ```
 
-    ???+ info "Ensure your Kind cluster has sufficient resources"
+    ??? info "Ensuring your Kind cluster has sufficient resources"
         Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
 
         ![Resources](/assets/images/ddresourcepreferences.png)
@@ -54,7 +54,7 @@ export ITER8=$(pwd)
 ```
 
 ## 3. Install Knative and Iter8
-Knative can work with multiple networking layers, and so can Iter8's Knative extension. Choose a networking layer for Knative.
+Knative can work with multiple networking layers. So can Iter8's Knative extension. Choose a networking layer for Knative.
 
 === "Contour"
 
@@ -134,10 +134,11 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
     ```
 
 ## 5. Generate requests
-A real application in a production cluster would receive requests from real users. For the purposes of this tutorial, we will simulate user requests for our application using a [Fortio application](https://github.com/fortio/fortio).
+In a production environment, your application would receive requests from end-users. For the purposes of this tutorial, simulate user requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
+# URL_VALUE is the URL where your Knative application serves requests
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
 ```
@@ -175,7 +176,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml |
     ```
 
 ## 6. Launch Iter8 experiment
-Launch the Iter8 experiment which will orchestrate the canary release of the new version with SLO validation and progressive deployment.
+Launch the Iter8 experiment. Iter8 will orchestrate the canary release of the new version with SLO validation and progressive deployment as specified in the experiment.
 
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
@@ -248,7 +249,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 === "iter8ctl"
     Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2-pre.1
+    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2-pre.2
     ```
 
     Periodically describe the experiment.
@@ -362,5 +363,5 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ???+ info "Understanding what happened"
     1. You created a Knative service with two revisions, sample-app-v1 (baseline) and sample-app-v2 (candidate).
     2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with canary testing and progressive deployment patterns. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that the candidate satisfied all objectives, identified the candidate as the winner, progressively shifted traffic from the baseline to the candidate, and eventually promoted the candidate using the `kubectl apply` command.
+    3. You created an Iter8 experiment with canary testing and progressive deployment patterns. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that the candidate satisfied all objectives, identified the candidate as the winner, progressively shifted traffic from the baseline to the candidate, and eventually promoted the candidate using the `kubectl apply` command embedded within its finish action.
     4. Had the candidate failed to satisfy objectives, then the baseline would have been promoted.
