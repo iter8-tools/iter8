@@ -315,6 +315,8 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         +--------------------------------------------+---------+-----------+
         ``` 
 
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
+
 === "kubectl get experiment"
 
     ```shell
@@ -335,6 +337,8 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
         quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
         ```
+
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
 === "kubectl get ksvc"
 
@@ -362,6 +366,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
           }
         ]
         ```
+    As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
 
 ## 8. Cleanup
 ```shell

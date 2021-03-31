@@ -181,12 +181,16 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
+    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
     ```shell
     kubectl get experiment canary-progressive --watch
     ```
+
+    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
@@ -195,7 +199,9 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will all be sent to the winner, `sample-app-v2`.
+    The output will look similar to the [kubectl get ksvc output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+
+    As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
         
 ## 5. Cleanup
 ```shell
