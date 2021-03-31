@@ -7,12 +7,12 @@ template: overrides/main.html
 !!! abstract "Abstract"
     The Iter8 API provides two [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to automate metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
-    1. The `Experiment` object provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic shaping, and version promotion functions](/concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](/code-samples/knative/canary-progressive/).
-    2. The `Metric` object encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics backend. Metrics are referenced in experiments.
+    1. The **Experiment** resource provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic shaping, and version promotion functions](/concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](/code-samples/knative/canary-progressive/).
+    2. The **Metric** resource encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics backend. Metrics are referenced in experiments.
 
 
 !!! note "API Version"    
-    This document describes version `v2alpha2` of the Iter8 API.
+    This document describes version **v2alpha2** of the Iter8 API.
 
 ## Resources
 
@@ -82,11 +82,11 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| target | string | Identifies the app under experimentation and determines which experiments can run concurrently. Experiments that have the same target value will not be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently. | Yes |
+| target | string | Identifies the app under experimentation and determines which experiments can run concurrently. Experiments that have the same target value will not be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently. It is good practice to follow [target naming conventions](#target-naming-conventions). | Yes |
 | strategy | [Strategy](#strategy) | The experimentation strategy which specifies how app versions are tested, how traffic is shifted during experiment, and what tasks are executed at the start and end of the experiment. | Yes |
-| criteria | [Criteria](#criteria) | Metrics used for evaluating versions along with acceptable limits for their values. | No |
+| criteria | [Criteria](#criteria) | Criteria used for evaluating versions. This section includes service-level objectives (SLOs) and indicators (SLIs). | No |
 | duration | [Duration](#duration) | Duration of the experiment. | No |
-| versionInfo | [VersionInfo](#versioninfo) | App versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`. | No |
+| versionInfo | [VersionInfo](#versioninfo) | Versions involved in the experiment. Every experiment involves a baseline version, and may involve zero or more candidates. | No |
 
 #### Status
 
@@ -97,14 +97,16 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the first iteration of experiment begins  | No |
 | lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
 | stage | string | Indicator of the progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running and `Completed` when the experiment terminates. | No |
-| currentWeightDistribution | [][WeightData](#weightdata) | Currently observed distribution of requests between app versions. | No |
+| completedIterations | int32 | Number of completed iterations of the experiment. This is undefined until the experiment reaches the `Running` stage. | No |
+| currentWeightDistribution | [][WeightData](#weightdata) | Currently observed split of traffic between versions. Expressed as percentage. | No |
 | analysis | Analysis | Result of latest query to the Iter8 analytics service.  | No |
-| versionRecommendedForPromotion | string | The version recommended for promotion. Although this field is populated by Iter8 even before the completion of the experiment, this field is intended to be used only on completion by the finish action. | No |
-| message | string | User readable message. | No |
+| versionRecommendedForPromotion | string | The version recommended for promotion. This field is initially populated by Iter8 as the baseline version and continuously updated during the course of the experiment to match the winner. The value of this field is typically used by finish actions to promote a version at the end of an experiment. | No |
+| metrics | [][MetricInfo](#metricinfo) | A list of metrics referenced in the criteria section of this experiment. | No |
+| message | string | Human readable message. | No |
 
 ### Metric
 
-Metrics are referenced within the `spec.criteria` field of the experiment. Metrics usage within experiments is described [here](/reference/metrics/using-metrics).
+Metrics are referenced within the criteria field of the experiment spec. Metrics usage within experiments is described [here](/metrics/using-metrics).
 
 ??? example "Sample metric"
     ```yaml linenums="1"
@@ -130,30 +132,18 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 #### Spec
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a template, which will be instantiated by Iter8 at query time. For examples and more details, see [here](/reference/metrics/how-iter8-queries-metrics/).| No |
-| description | string | Human-readable description of the metric. | No |
+| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a string template with placeholders, which will be interpolated by Iter8 at query time. For examples and more details, see [here](/metrics/how-iter8-queries-metrics/).| No |
+| description | string | Human readable description. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
 | sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace of the referring metric. | No |
 | provider | string | Type of the metrics database. Provider is used only for display purposes. | No |
-| jqExpression | string | A [jq](https://stedolan.github.io/jq/) expression that extracts the metrics value from the result of a query to the backend metrics server. | Yes |
-| secret | string | Reference to a secret (of the form `name` or `namespace/name`) containing information to be used primarily for authentication with the metrics service. The values are used to resolve into header and URL templates. | No |
+| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response of the metrics backend to a metrics query. | Yes |
+| secret | string | Reference to a secret that contains information used for authenticating with the metrics database. In particular, Iter8 uses data in this secret to interpolate the HTTP headers and URL while querying the database. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace where Iter8 is installed (which is `iter8-system` by default). | No |
 | headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtime with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | No |
 | urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | Yes |
 
 ## Experiment field types
-
-### Target
-
-!!! abstract ""
-    `spec.target` identifies the app under experimentation and determines which experiments can run concurrently.
-
-!!! note "Target naming conventions"
-    === "Knative"
-        When experimenting with a single Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`. 
-
-!!! note "Concurrency policy"
-    Experiments that have the same target value will **not** be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently.
 
 ### Strategy
 
@@ -180,7 +170,6 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | requestCount | string | Reference to the metric used to count the number of requests sent to app versions. | No |
 | objectives | [Objective](#objective)[] | A list of metrics along with acceptable upper limits, lower limits, or both upper and lower limits for them. Iter8 will verify if app versions satisfy these objectives. | No |
 | indicators | string[] | A list of metric references. Iter8 will collect and report the values of these metrics in addition to those referenced in the `objectives` section. | No |
-| support | [apiextensionsv1.JSON](https://pkg.go.dev/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1#JSON) | Describes the required degree of support the analytics provides before the analytics engine asserts success for an objective. | No |
 
 !!! warning "" 
     **Note:** References to metric resource objects within experiment criteria should be in the `namespace/name` format or in the `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then Iter8 searches for the metric in the namespace of the experiment resource. If Iter8 cannot find the metric, then the reference is considered invalid and the experiment will terminate in a failure.
@@ -228,23 +217,28 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | variables | [][NamedValue](#namedvalue) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to interpolate these strings. | No |
 | weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | Reference to a Kubernetes resource and a field-path within the resource. Iter8 uses `weightObjRef` to get or set weight (traffic percentage) for the version. | No |
 
+
+### MetricInfo
+
+| Field name | Field type | Description | Required |
+| ----- | ---- | ----------- | -------- |
+| name | string | Identifies an Iter8 metric using the [`namespace/name` or `name` format](#criteria). | Yes |
+| metric | [][Metric](#metric) | Iter8 metric object referenced by name. | No |
+
 ### ExperimentCondition
 
 !!! abstract ""
-    Conditions express aspects of the progress of an experiment. The `Completed` condition indicates whether or not an experiment has completed or not. The `Failed` condition indicates whether or not an experiment completed successfully or in failure. Finally, the `TargetAcquired` condition indicates that an experiment can proceed without interference from other experiments. Iter8 ensures that only one experiment has `TargetAcquired` set to `True` while `Completed` is set to `False`.
+    Conditions express aspects of the progress of an experiment. The `Completed` condition indicates whether or not an experiment has completed. The `Failed` condition indicates whether or not an experiment completed successfully or in failure. The `TargetAcquired` condition indicates that an experiment has acquired the target and is now scheduled to run. At any point in time, for any given target, Iter8 ensures that at most one experiment has the conditions `TargetAcquired` set to `True` and `Completed` set to `False`.
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
 | type | string | Type of condition. Valid types are `TargetAcquired`, `Completed` and `Failed`. | Yes |
 | status | [corev1.ConditionStatus](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ConditionStatus) | status of condition, one of `True`, `False`, or `Unknown`. | Yes |
 | lastTransitionTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The last time any field in the condition was changed. | No |
-| reason | string | A reason for the change in value. Reasons come from a set of reason | No |
-| message | string | A user readable decription. | No |
+| reason | string | A reason for the change in value. | No |
+| message | string | Human readable decription. | No |
 
 ### Analysis
-
-!!! abstract ""
-    Result of latest query to the Iter8 analytics service.
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
@@ -259,7 +253,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ------------ | ----------- | -------- |
 | provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
 | timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
-| message | string | User readable message. | No |
+| message | string | Human readable message. | No |
 | data | map[string][]bool | map of version name to a list of boolean values, one for each objective specified in the experiment criteria, indicating whether not the objective is satisified. | No |
 
 
@@ -269,7 +263,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ------------ | ----------- | -------- |
 | provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
 | timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
-| message | string | User readable message. | No |
+| message | string | Human readable message. | No |
 | data | map[string][AggregatedMetricsData](#aggregatedmetricsdata) | Map from metric name to most recent data (from all versions) for the metric. | Yes |
 
 ### AggregatedMetricsData
@@ -296,7 +290,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ------------ | ----------- | -------- |
 | provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
 | timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
-| message | string | User readable message. | No |
+| message | string | Human readable message. | No |
 | data | [WinnerAssessmentData](#winnerassessmentdata) | Details on whether or not a winner has been identified and which version if so. | No |
 
 ### WinnerAssessmentData
@@ -312,7 +306,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ------------ | ----------- | -------- |
 | provenance | string | Source of the data. Currently, Iter8 analytics service URL is the only value for this field. | Yes |
 | timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the analysis took place. | Yes |
-| message | string | User readable message. | No |
+| message | string | Human readable message. | No |
 | data | [][WeightData](#weightdata) | List of version name/value pairs representing a recommended weight for each version | No |
 
 ### WeightData
@@ -322,14 +316,14 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | name | string | Version name | Yes |
 | value | int32 | Percentage of traffic being sent to the version.  | Yes |
 
-## Metric field types
+## Common field types
 
 ### NamedValue
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| name | string | Name of the HTTP query parameter. | Yes |
-| value | string | Value of the HTTP query parameter. See [here](/reference/metrics/how-iter8-queries-metrics/) for documentation on how Iter8 interpolates params. | Yes |
+| name | string | Name of a variable. | Yes |
+| value | string | Value of a variable. | Yes |
 
 ## Tasks
 
@@ -575,6 +569,11 @@ Inputs to tasks can container placeholders, or template variables which will be 
 
 ### Task error handling
 When a task exits with an error, it will result in the failure of the experiment to which it belongs.
+
+## Target naming conventions
+
+=== "Knative"
+    When experimenting with a single Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`.
 
 [^1]: `A/B/n` experiments involve more than one candidate. Their description is coming soon.
 

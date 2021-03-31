@@ -5,7 +5,7 @@ title: Installation
 
 # Installation
 
-## Iter8
+## Step 1: Iter8
 
 !!! example "Prerequisites"
 
@@ -15,7 +15,7 @@ title: Installation
 Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
-export TAG=v0.3.0-pre.5
+export TAG=v0.3.0
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 ```
 
@@ -26,7 +26,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install
     set -e
 
     # Step 0: Export TAG
-    export TAG="${TAG:-v0.3.0-pre.5}"
+    export TAG="${TAG:-v0.3.0}"
 
     # Step 1: Install Iter8
     echo "Installing Iter8"
@@ -40,12 +40,12 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install
     set +e
     ```        
 
-## (Optional) Prometheus add-on
+## (Optional) Step 2: Prometheus add-on
 
-Install Iter8's Prometheus add-on in your cluster as follows.
+Install Iter8's Prometheus add-on in your cluster as follows. This step assumes you have installed Iter8 following Step 1 above.
 
 ```shell
-export TAG=v0.3.0-pre.5
+export TAG=v0.3.0
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh | bash
 ```
 
@@ -56,7 +56,7 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install
     set -e
 
     # Step 0: Export TAG
-    export TAG="${TAG:-v0.3.0-pre.5}"
+    export TAG="${TAG:-v0.3.0}"
 
     # Step 1: Install Prometheus add-on
     # This step assumes you have installed Iter8 using install.sh
@@ -72,14 +72,14 @@ curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install
     set +e
     ```
 
-??? note "Running Iter8 tutorials without this add-on"
+??? note "Running Iter8 tutorials without Iter8's Prometheus add-on"
     When you installed Iter8 in the first step above, you also installed several *out-of-the-box* Iter8 metric resources. They are required for running the tutorials documented on this site. 
     
     The out-of-the-box metric resources have a urlTemplate field. This field is configured as the URL of the Prometheus instance created in this step. 
     
-    You can skip this step and still run Iter8 tutorials using your own Prometheus instance. To do so, ensure that your Prometheus instance scrapes the end-points that would have been scraped by the Prometheus instance created in this step, and configure the urlTemplate fields of Iter8 metric resources to the URL of your Prometheus instance.
+    You can skip this step and still run Iter8 tutorials using your own Prometheus instance. To do so, ensure that your Prometheus instance scrapes the end-points that would have been scraped by the Prometheus instance created in this step, and configure the urlTemplate fields of Iter8 metric resources to match the URL of your Prometheus instance.
 
-## (Optional) iter8ctl
+## (Optional) Step 3: iter8ctl
 The iter8ctl CLI enables real-time observability of Iter8 experiments. 
 
 !!! example "Prerequisites"
