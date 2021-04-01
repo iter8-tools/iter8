@@ -67,7 +67,7 @@ Metric backends like Prometheus, New Relic, Sysdig and Elastic collect metrics f
     ![Conformance](/assets/images/conformance.png)
 
     !!! tip ""
-        Try a [conformance experiment](/code-samples/knative/conformance/).
+        Try a [conformance experiment](/tutorials/knative/conformance/).
 
 ## Deployment pattern
 
@@ -79,7 +79,7 @@ Metric backends like Prometheus, New Relic, Sysdig and Elastic collect metrics f
     ![Canary](/assets/images/canary-progressive-helm.png)
 
     !!! tip ""
-        Try a [progressive deployment experiment](/code-samples/knative/canary-progressive/).
+        Try a [progressive deployment experiment](/tutorials/knative/canary-progressive/).
 
 === "Fixed-split"
     Fixed-split deployment does not shift traffic between versions.
@@ -87,7 +87,7 @@ Metric backends like Prometheus, New Relic, Sysdig and Elastic collect metrics f
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
     !!! tip ""
-        Try a [fixed-split deployment experiment](/code-samples/knative/canary-fixedsplit/).
+        Try a [fixed-split deployment experiment](/tutorials/knative/canary-fixedsplit/).
 
 ## Traffic shaping
 
@@ -101,7 +101,7 @@ Iter8 enables you to take total advantage of all the traffic shaping features av
     ![Canary](/assets/images/mirroring.png)
 
     !!! tip ""
-        Try an experiment with [traffic mirroring/shadowing](/code-samples/knative/mirroring/).
+        Try an experiment with [traffic mirroring/shadowing](/tutorials/knative/mirroring/).
 
 === "Traffic segmentation"
     **Traffic segmentation** is the ability to carve out a specific segment of the traffic to be used in an experiment, leaving the rest of the traffic unaffected by the experiment. Service meshes and ingress controllers often provide the ability to route requests dynamically to different versions based on request attributes such as user identity, URI, IP address prefixes, or origin. Iter8 can leverage this functionality in experiments to control the segment of the traffic that will participate in the experiment. For example, in the canary experiment depicted below, requests from the country `Wakanda` may be routed to baseline or candidate; requests that are not from `Wakanda` will not participate in the experiment and are routed only to the baseline.
@@ -109,7 +109,7 @@ Iter8 enables you to take total advantage of all the traffic shaping features av
     ![Canary](/assets/images/request-routing.png)
 
     !!! tip ""
-        Try an experiment with [traffic segmentation](/code-samples/knative/traffic-segmentation/).
+        Try an experiment with [traffic segmentation](/tutorials/knative/traffic-segmentation/).
 
 
 ## Version promotion
@@ -122,7 +122,7 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
     ![Canary](/assets/images/canary-progressive-helm.png)
 
     !!! tip ""
-        Try an [experiment that uses Helm charts](/code-samples/knative/canary-progressive/).
+        Try an [experiment that uses Helm charts](/tutorials/knative/canary-progressive/).
 
 === "Kustomize resources"
     An experiment that uses `kustomize` for version promotion is illustrated below.
@@ -130,7 +130,7 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
     ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
 
     !!! tip ""
-        Try an [experiment that uses Kustomize resources](/code-samples/knative/canary-fixedsplit/).
+        Try an [experiment that uses Kustomize resources](/tutorials/knative/canary-fixedsplit/).
 
 === "Plain YAML/JSON manifests"
     An experiment that uses plain YAML/JSON manifests and the `kubectl` CLI for version promotion is illustrated below.

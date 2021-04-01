@@ -33,7 +33,7 @@ spec:
 ```
 
 ## Pod retention period
-The `scale-to-zero-pod-retention-period` annotation can be used to specify the minimum amount of time that the last pod will remain active after the Knative Autoscaler decides to scale pods to zero. Like the `minScale` annotation, this annotation is also useful for avoiding cold start issues during an experiment. For more information, see the [Knative documentation on configuring scale to zero](https://knative.dev/docs/serving/autoscaling/scale-to-zero/). The following example from the [Iter8 request routing tutorial](/code-samples/knative/requestrouting/) shows how you can use this annotation in a service.
+The `scale-to-zero-pod-retention-period` annotation can be used to specify the minimum amount of time that the last pod will remain active after the Knative Autoscaler decides to scale pods to zero. Like the `minScale` annotation, this annotation is also useful for avoiding cold start issues during an experiment. For more information, see the [Knative documentation on configuring scale to zero](https://knative.dev/docs/serving/autoscaling/scale-to-zero/). The following example from the [Iter8 request routing tutorial](/tutorials/knative/traffic-segmentation/) shows how you can use this annotation in a service.
 
 ``` yaml linenums="1" hl_lines="11"
 apiVersion: serving.knative.dev/v1
