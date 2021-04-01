@@ -21,12 +21,12 @@ You will create the following resources in this tutorial.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
 
 ## 1. Create versions
 ```shell
-kubectl apply -f $ITER8/samples/knative/requestrouting/services.yaml
+kubectl apply -f $ITER8/samples/knative/traffic-segmentation/services.yaml
 ```
 
 ??? info "Look inside services.yaml"
@@ -71,7 +71,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/services.yaml
 
 ## 2. Create Istio virtual service
 ```shell
-kubectl apply -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
+kubectl apply -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
 ```
 
 ??? info "Look inside routing-rule.yaml"
@@ -127,7 +127,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
 curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
-istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/requestrouting/curl.yaml | kubectl create -f -
+istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/traffic-segmentation/curl.yaml | kubectl create -f -
 cd $ITER8
 ```
 
@@ -169,7 +169,7 @@ cd $ITER8
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
-kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
+kubectl apply -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
 ```
 
 ??? info "Look inside experiment.yaml"
@@ -260,10 +260,10 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
 ## 6. Cleanup
 ```shell
-kubectl delete -f $ITER8/samples/knative/requestrouting/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/requestrouting/curl.yaml
-kubectl delete -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
-kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/curl.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/services.yaml
 ```
 
 ???+ info "Understanding what happened"

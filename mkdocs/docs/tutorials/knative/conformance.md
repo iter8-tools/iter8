@@ -20,9 +20,9 @@ You will create the following resources in this tutorial.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[`iter8ctl`](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses `iter8ctl`.
+    **[`iter8ctl`](/getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses `iter8ctl`.
 
 ## 1. Create app
 ```shell
