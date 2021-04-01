@@ -9,7 +9,7 @@ on:
     - 'mkdocs/**'
 
 env:
-  NODE_VERSION: 12.x
+  NODE_VERSION: 15.x
   PYTHON_VERSION: 3.x
 
 jobs:

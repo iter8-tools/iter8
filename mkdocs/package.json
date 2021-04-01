@@ -1,6 +1,6 @@
 {
   "name": "iter8",
-  "version": "0.2.5",
+  "version": "0.3",
   "description": "AI-driven rollouts for Kubernetes apps. Iter8 enables you to unlock business value in your K8s apps and ML models rapidly by bringing together the best of analytics, release engineering, and observability. Use Iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.",
   "keywords": [
     "Iter8",
@@ -84,7 +84,7 @@
     "sass": "^1.32.5",
     "sass-loader": "^10.1.1",
     "stylelint": "^13.9.0",
-    "stylelint-config-rational-order": "^0.1.2",
+    "stylelint-config-rational-order": "^0.0.4",
     "stylelint-config-standard": "^20.0.0",
     "stylelint-order": "^4.1.0",
     "stylelint-scss": "^3.18.0",
