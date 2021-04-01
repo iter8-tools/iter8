@@ -1,4 +1,4 @@
-apiVersion: iter8.tools/v2alpha1
+apiVersion: iter8.tools/v2alpha2
 kind: Experiment
 metadata:
   name: quickstart-exp
@@ -11,11 +11,9 @@ spec:
     deploymentPattern: Progressive
     actions:
       start: # run the following sequence of tasks at the start of the experiment
-      - library: knative
-        task: init-experiment
+      - task: knative/init-experiment
       finish: # run the following sequence of tasks at the end of the experiment
-      - library: common
-        task: exec # promote the winning version
+      - task: common/exec # promote the winning version
         with:
           cmd: kubectl
           args: 
@@ -23,15 +21,16 @@ spec:
           - "-f"
           - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
   criteria:
+    requestCount: iter8-knative/request-count
     # mean latency of version should be under 50 milliseconds
     # 95th percentile latency should be under 100 milliseconds
     # error rate should be under 1%
     objectives: 
-    - metric: mean-latency
+    - metric: iter8-knative/mean-latency
       upperLimit: 50
-    - metric: 95th-percentile-tail-latency
+    - metric: iter8-knative/95th-percentile-tail-latency
       upperLimit: 100
-    - metric: error-rate
+    - metric: iter8-knative/error-rate
       upperLimit: "0.01"
   duration:
     intervalSeconds: 10

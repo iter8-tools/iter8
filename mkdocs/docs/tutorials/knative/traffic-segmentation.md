@@ -21,12 +21,12 @@ You will create the following resources in this tutorial.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
 
 ## 1. Create versions
 ```shell
-kubectl apply -f $ITER8/samples/knative/requestrouting/services.yaml
+kubectl apply -f $ITER8/samples/knative/traffic-segmentation/services.yaml
 ```
 
 ??? info "Look inside services.yaml"
@@ -71,7 +71,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/services.yaml
 
 ## 2. Create Istio virtual service
 ```shell
-kubectl apply -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
+kubectl apply -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
 ```
 
 ??? info "Look inside routing-rule.yaml"
@@ -127,7 +127,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
 curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
-istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/requestrouting/curl.yaml | kubectl create -f -
+istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/traffic-segmentation/curl.yaml | kubectl create -f -
 cd $ITER8
 ```
 
@@ -169,12 +169,12 @@ cd $ITER8
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
-kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
+kubectl apply -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
 ```
 
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: request-routing
@@ -190,11 +190,11 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -211,7 +211,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
             kind: VirtualService
             name: routing-for-wakanda
             namespace: default
-            fieldPath: /spec/http/0/route/0/weight
+            fieldPath: .spec.http[0].route[0].weight
         candidates:
         - name: candidate
           variables:
@@ -222,7 +222,7 @@ kubectl apply -f $ITER8/samples/knative/requestrouting/experiment.yaml
             kind: VirtualService
             name: routing-for-wakanda
             namespace: default
-            fieldPath: /spec/http/0/route/1/weight
+            fieldPath: .spec.http[0].route[1].weight
     ```
 
 ## 5. Observe experiment
@@ -236,127 +236,34 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    ??? info "iter8ctl output"
-        The `iter8ctl` output will be similar to the following.
+    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-        ```shell
-        ****** Overview ******
-        Experiment name: request-routing
-        Experiment namespace: default
-        Target: default/routing-for-wakanda
-        Testing pattern: Canary
-        Deployment pattern: Progressive
-
-        ****** Progress Summary ******
-        Experiment stage: Completed
-        Number of completed iterations: 10
-
-        ****** Winner Assessment ******
-        versions in this experiment: [current candidate]
-        Winning version: candidate
-        Recommended baseline: candidate
-
-        ****** Objective Assessment ******
-        +--------------------------------+---------+-----------+
-        |           OBJECTIVE            | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | mean-latency <= 50.000         | true    | true      |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   | true    | true      |
-        | <= 100.000                     |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate <= 0.010            | true    | true      |
-        +--------------------------------+---------+-----------+
-
-        ****** Metrics Assessment ******
-        +--------------------------------+---------+-----------+
-        |             METRIC             | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | request-count                  | 374.500 |   137.107 |
-        +--------------------------------+---------+-----------+
-        | mean-latency (milliseconds)    |   0.752 |     0.741 |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   |   4.792 |     4.750 |
-        | (milliseconds)                 |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate                     |   0.000 |     0.000 |
-        +--------------------------------+---------+-----------+
-        ```   
-
-        When the experiment completes (in ~ 2 mins), you will see the stage change from `Running` to `Completed`.
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
     ```shell
     kubectl get experiment request-routing --watch
     ```
 
-    ??? info "kubectl get experiment output"
-        The `kubectl` output will be similar to the following.
+    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-        ```shell
-        NAME              TYPE     TARGET                        STAGE     COMPLETED ITERATIONS   MESSAGE
-        request-routing   Canary   default/routing-for-wakanda   Running   1                      IterationUpdate: Completed Iteration 1
-        request-routing   Canary   default/routing-for-wakanda   Running   2                      IterationUpdate: Completed Iteration 2
-        request-routing   Canary   default/routing-for-wakanda   Running   3                      IterationUpdate: Completed Iteration 3
-        request-routing   Canary   default/routing-for-wakanda   Running   4                      IterationUpdate: Completed Iteration 4
-        request-routing   Canary   default/routing-for-wakanda   Running   5                      IterationUpdate: Completed Iteration 5
-        request-routing   Canary   default/routing-for-wakanda   Running   6                      IterationUpdate: Completed Iteration 6
-        request-routing   Canary   default/routing-for-wakanda   Running   7                      IterationUpdate: Completed Iteration 7
-        request-routing   Canary   default/routing-for-wakanda   Running   8                      IterationUpdate: Completed Iteration 8
-        request-routing   Canary   default/routing-for-wakanda   Running   9                      IterationUpdate: Completed Iteration 9
-        ```
-
-        When the experiment completes (in ~ 2 mins), you will see the stage change from `Running` to `Completed`.
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get vs"
     ```shell
-    kubectl get vs routing-for-wakanda -o json | jq .spec.http[0].route
+    kubectl get vs routing-for-wakanda -o json --watch | jq .spec.http[0].route
     ```
 
-    ??? info "kubectl output"
-        The `kubectl` output will be similar to the following.
+    The output shows the traffic split for the wakanda as defined in the `VirtualService` resource.
 
-        ```json
-        [
-          {
-            "destination": {
-              "host": "sample-app-v1.default.svc.cluster.local"
-            },
-            "headers": {
-              "request": {
-                "set": {
-                  "Host": "sample-app-v1.default",
-                  "Knative-Serving-Namespace": "default",
-                  "Knative-Serving-Revision": "sample-app-v1-blue"
-                }
-              }
-            },
-            "weight": 15
-          },
-          {
-            "destination": {
-              "host": "sample-app-v2.default.svc.cluster.local"
-            },
-            "headers": {
-              "request": {
-                "set": {
-                  "Host": "sample-app-v2.default",
-                  "Knative-Serving-Namespace": "default",
-                  "Knative-Serving-Revision": "sample-app-v2-green"
-                }
-              }
-            },
-            "weight": 85
-          }
-        ]
-        ```
+    As the experiment progresses, you should see traffic progressively shift from host `sample-app-v1.default.svc.cluster.local` to host `sample-app-v2.default.svc.cluster.local`. When the experiment completes, the traffic remains split; this experiment has no _finish_ action to promote the winning version.
 
 ## 6. Cleanup
 ```shell
-kubectl delete -f $ITER8/samples/knative/requestrouting/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/requestrouting/curl.yaml
-kubectl delete -f $ITER8/samples/knative/requestrouting/routing-rule.yaml
-kubectl delete -f $ITER8/samples/knative/requestrouting/services.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/curl.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/services.yaml
 ```
 
 ???+ info "Understanding what happened"

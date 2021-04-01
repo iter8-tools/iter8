@@ -20,9 +20,9 @@ You will create the following resources in this tutorial.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[`iter8ctl`](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses `iter8ctl`.
+    **[`iter8ctl`](/getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses `iter8ctl`.
 
 ## 1. Create app
 ```shell
@@ -93,7 +93,7 @@ kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
 
 ??? info "Look inside experiment.yaml"
     ```yaml
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: conformance-sample
@@ -105,18 +105,17 @@ kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
         testingPattern: Conformance
         actions:
           start: # run the following sequence of tasks at the start of the experiment
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -143,51 +142,9 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         done
         ```
 
-    ??? info "iter8ctl output"
-        The `iter8ctl` output will be similar to the following.
-        ```shell
-        ****** Overview ******
-        Experiment name: conformance-sample
-        Experiment namespace: default
-        Target: default/sample-app
-        Testing pattern: Conformance
-        Deployment pattern: Progressive
+    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-        ****** Progress Summary ******
-        Experiment stage: Running
-        Number of completed iterations: 3
-
-        ****** Winner Assessment ******
-        Winning version: not found
-        Recommended baseline: current
-
-        ****** Objective Assessment ******
-        +--------------------------------+---------+
-        |           OBJECTIVE            | CURRENT |
-        +--------------------------------+---------+
-        | mean-latency <= 50.000         | true    |
-        +--------------------------------+---------+
-        | 95th-percentile-tail-latency   | true    |
-        | <= 100.000                     |         |
-        +--------------------------------+---------+
-        | error-rate <= 0.010            | true    |
-        +--------------------------------+---------+
-
-        ****** Metrics Assessment ******
-        +--------------------------------+---------+
-        |             METRIC             | CURRENT |
-        +--------------------------------+---------+
-        | request-count                  | 448.000 |
-        +--------------------------------+---------+
-        | mean-latency (milliseconds)    |   1.338 |
-        +--------------------------------+---------+
-        | 95th-percentile-tail-latency   |   4.770 |
-        | (milliseconds)                 |         |
-        +--------------------------------+---------+
-        | error-rate                     |   0.000 |
-        +--------------------------------+---------+
-        ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by the version being tested. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
 
@@ -195,20 +152,9 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get experiment conformance-sample --watch
     ```
 
-    ??? info "kubectl get experiment output"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        NAME                 TYPE          TARGET               STAGE          COMPLETED ITERATIONS   MESSAGE    
-        conformance-sample   Conformance   default/sample-app   Running        0                      StartHandlerLaunched: Start handler 'start' launched
-        conformance-sample   Conformance   default/sample-app   Running        1                      IterationUpdate: Completed Iteration 1
-        conformance-sample   Conformance   default/sample-app   Running        2                      IterationUpdate: Completed Iteration 2
-        conformance-sample   Conformance   default/sample-app   Running        3                      IterationUpdate: Completed Iteration 3
-        conformance-sample   Conformance   default/sample-app   Running        4                      IterationUpdate: Completed Iteration 4
-        conformance-sample   Conformance   default/sample-app   Running        5                      IterationUpdate: Completed Iteration 5
-        conformance-sample   Conformance   default/sample-app   Running        6                      IterationUpdate: Completed Iteration 6
-        conformance-sample   Conformance   default/sample-app   Running        7                      IterationUpdate: Completed Iteration 7
-        ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
+    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 ## 5. Cleanup
 

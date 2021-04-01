@@ -23,9 +23,9 @@ You will create the following resources in this tutorial.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[Helm v3](https://helm.sh/) and [`iter8ctl`](/getting-started/install/#step-4-install-iter8ctl):** This tutorial uses Helm v3 and `iter8ctl`.
+    **[Helm v3](https://helm.sh/) and [`iter8ctl`](/getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Helm v3 and `iter8ctl`.
 
 ## 1. Create versions
 ```shell
@@ -105,7 +105,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 
 ??? info "Look inside experiment.yaml"
     ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha1
+    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
       name: canary-progressive
@@ -123,11 +123,9 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
           maxCandidateWeightIncrement: 20
         actions:
           start: # run the following sequence of tasks at the start of the experiment
-          - library: knative
-            task: init-experiment
+          - task: knative/init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
-          - library: common
-            task: exec # promote the winning version using Helm upgrade
+          - task: common/exec # promote the winning version using Helm upgrade
             with:
               cmd: helm
               args:
@@ -144,11 +142,11 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: mean-latency
+        - metric: iter8-knative/mean-latency
           upperLimit: 50
-        - metric: 95th-percentile-tail-latency
+        - metric: iter8-knative/95th-percentile-tail-latency
           upperLimit: 100
-        - metric: error-rate
+        - metric: iter8-knative/error-rate
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
@@ -183,96 +181,27 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    ??? info "iter8ctl output"
-        The `iter8ctl` output will be similar to the following.
-        ```shell
-        ****** Overview ******
-        Experiment name: canary-progressive
-        Experiment namespace: default
-        Target: default/sample-app
-        Testing pattern: Canary
-        Deployment pattern: Progressive
+    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-        ****** Progress Summary ******
-        Experiment stage: Completed
-        Number of completed iterations: 7
-
-        ****** Winner Assessment ******
-        App versions in this experiment: [current candidate]
-        Winning version: candidate
-        Recommended baseline: candidate
-
-        ****** Objective Assessment ******
-        +--------------------------------+---------+-----------+
-        |           OBJECTIVE            | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | mean-latency <= 50.000         | true    | true      |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   | true    | true      |
-        | <= 100.000                     |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate <= 0.010            | true    | true      |
-        +--------------------------------+---------+-----------+
-
-        ****** Metrics Assessment ******
-        +--------------------------------+---------+-----------+
-        |             METRIC             | CURRENT | CANDIDATE |
-        +--------------------------------+---------+-----------+
-        | mean-latency (milliseconds)    |   1.201 |     1.322 |
-        +--------------------------------+---------+-----------+
-        | 95th-percentile-tail-latency   |   4.776 |     4.750 |
-        | (milliseconds)                 |         |           |
-        +--------------------------------+---------+-----------+
-        | error-rate                     |   0.000 |     0.000 |
-        +--------------------------------+---------+-----------+
-        | request-count                  | 448.800 |    89.352 |
-        +--------------------------------+---------+-----------+
-        ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
     ```shell
     kubectl get experiment canary-progressive --watch
     ```
 
-    ??? info "kubectl get experiment output"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        NAME                 TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-        canary-progressive   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-        canary-progressive   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-        canary-progressive   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-        canary-progressive   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-        canary-progressive   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-        canary-progressive   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-        ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
+    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get ksvc"
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    ??? info "kubectl get ksvc output"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        [
-          {
-            "latestRevision": false,
-            "percent": 25,
-            "revisionName": "sample-app-v1",
-            "tag": "current",
-            "url": "http://current-sample-app.default.example.com"
-          },
-          {
-            "latestRevision": true,
-            "percent": 75,
-            "revisionName": "sample-app-v2",
-            "tag": "candidate",
-            "url": "http://candidate-sample-app.default.example.com"
-          }
-        ]
-        ```
+    The output will look similar to the [kubectl get ksvc output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+
+    As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
         
 ## 5. Cleanup
 ```shell

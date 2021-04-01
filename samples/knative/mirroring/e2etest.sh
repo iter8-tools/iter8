@@ -4,7 +4,11 @@
 
 #!/bin/bash
 
-set -e 
+set -e
+
+# create kind cluster
+kind create cluster
+kubectl cluster-info --context kind-kind
 
 # platform setup
 echo "Setting up platform"
@@ -32,21 +36,19 @@ kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 
 # Sleep
-echo "Sleep for 125s"
-sleep 125.0
+echo "Sleep for 150s"
+sleep 150.0
 
-# Check if experiment is complete and successful
-echo "Checking if experiment is completed and successful"
-completed="Completed"
-if [[ $(kubectl get experiment mirroring -ojson | jq .status.stage)=="$completed" ]]; then
-    echo "Experiment has Completed and successful"
-else
-    echo "Experiment must be Completed. It is $(kubectl get experiment mirroring -ojson | jq .status.stage)"
-    exit 1
-fi
+# check experiment
+source $ITER8/samples/knative/mirroring/check.sh
 
-# Cleanup
+# Cleanup .. not needed since cluster is getting deleted; just forming a good habit!
 kubectl delete -f $ITER8/samples/knative/mirroring/curl.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/routing-rules.yaml
 kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
+
+# delete kind cluster
+kind delete cluster
+
+set +e

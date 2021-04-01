@@ -2,6 +2,8 @@ name: e2e tests
 
 on:
   push:
+    branches:
+    - master
     paths:
     - 'install/**'
     - 'samples/knative/**'
@@ -31,7 +33,7 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
         kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
 
     - name: create Fortio job and create experiment
       run: |
@@ -41,66 +43,20 @@ jobs:
         
         # Wait for Fortio to be ready
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl wait --for=condition=Ready pods/"$pod_name"
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=240s
 
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
     - name: Sleep until end of experiment
-      run: sleep 120.0
+      run: |
+        sleep 150.0
+        kubectl get experiment quickstart-exp -o yaml
     
     - name: Check if experiment is complete and successful
       run: |
-        # Check if experiment has completed
-        completed="Completed"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)=="$completed" ]]; then
-          echo "Experiment has Completed"
-        else
-          echo "Experiment must be Completed. It is $(kubectl get experiment quickstart-exp -ojson | jq .status.stage)"
-          exit 1
-        fi
-
-        # Check if no packets have been lost by Fortio
-        
-        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
-        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
-          echo "Packets were not lost"
-        else
-          echo "Packets were lost"
-          exit 1
-        fi
-
-        # Check if recommended baseline is candidate
-        candidate="candidate"
-        if [[ $(kubectl get experiment quickstart-exp -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
-          echo "recommendedBaseline is candidate"
-        else
-          echo "recommendedBaseline must be candidate"
-          exit 1
-        fi
-
-
-        # Check if latest revision is true
-        latestRevision=true
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
-          echo "latestRevision is true"
-        else
-          echo "latestRevision must be true"
-          exit 1
-        fi
-
-        #check if traffic percent is 100
-        percent=100
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')=="$percent" ]]; then
-          echo "percent is 100"
-        else
-          echo "percent must be 100"
-          exit 1
-        fi
+        export ITER8=$(pwd)
+        source $ITER8/samples/knative/quickstart/check.sh
 
   canary-progressive-helm:
     name: progressive canary experiment using helm
@@ -122,13 +78,13 @@ jobs:
       run: |
         export ITER8=$(pwd)
         helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=iter8-system
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
+        kubectl wait ksvc/sample-app --for condition=Ready --timeout=240s
         helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=iter8-system
 
     - name: Generate requests
       run: |
         export ITER8=$(pwd)
-        kubectl wait --for=condition=Ready ksvc/sample-app
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml | kubectl apply -f -
 
@@ -137,62 +93,15 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 
-    - name: Sleep
+    - name: Sleep until end of experiment
       run: |
         sleep 150.0
-
+        kubectl get experiment canary-progressive -o yaml
+    
     - name: Check if experiment is complete and successful
       run: |
-        # Check if experiment has completed
-        completed="Completed"
-        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.stage)=="$completed" ]]; then
-          echo "Experiment has Completed"
-        else
-          echo "Experiment must be Completed. It is $(kubectl get experiment canary-progressive -ojson | jq .status.stage)"
-          exit 1
-        fi
-
-        # Check if no requests have been lost during the experiment
-        
-        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
-        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
-          echo "Packets were not lost"
-        else
-          echo "Packets were lost"
-          exit 1
-        fi
-
-        # Check if recommended baseline is candidate
-        candidate="candidate"
-        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
-          echo "recommendedBaseline is candidate"
-        else
-          echo "recommendedBaseline must be candidate"
-          exit 1
-        fi
-
-
-        # Check if latest revision is true
-        latestRevision=true
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
-          echo "latestRevision is true"
-        else
-          echo "latestRevision must be true"
-          exit 1
-        fi
-
-        # Check if traffic percent is 100
-        percent=100
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')=="$percent" ]]; then
-          echo "percent is 100"
-        else
-          echo "percent must be 100"
-          exit 1
-        fi        
+        export ITER8=$(pwd)
+        source $ITER8/samples/knative/canaryprogressive/check.sh
 
   canary-fixedsplit-kustomize:
     name: fixedsplit canary experiment with kustomize
@@ -212,13 +121,13 @@ jobs:
       run: |
         export ITER8=$(pwd)
         kustomize build $ITER8/samples/knative/canaryfixedsplit/baseline | kubectl apply -f -
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
+        kubectl wait ksvc/sample-app --for condition=Ready --timeout=240s
         kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl apply -f -        
 
     - name: Generate requests
       run: |
         export ITER8=$(pwd)
-        kubectl wait --for=condition=Ready ksvc/sample-app
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml | kubectl apply -f -        
         
@@ -227,62 +136,15 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 
-    - name: Sleep
+    - name: Sleep until end of experiment
       run: |
         sleep 150.0
-
+        kubectl get experiment canary-fixedsplit -o yaml
+    
     - name: Check if experiment is complete and successful
       run: |
-        # Check if experiment has completed
-        completed="Completed"
-        if [[ $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)=="$completed" ]]; then
-          echo "Experiment has Completed"
-        else
-          echo "Experiment must be Completed. It is $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)"
-          exit 1
-        fi
-
-        # Check if no requests have been lost during the experiment
-        
-        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
-        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
-          echo "Packets were not lost"
-        else
-          echo "Packets were lost"
-          exit 1
-        fi
-
-        # Check if recommended baseline is candidate
-        candidate="candidate"
-        if [[ $(kubectl get experiment canary-progressive -ojson | jq .status.recommendedBaseline)=="$candidate" ]]; then
-          echo "recommendedBaseline is candidate"
-        else
-          echo "recommendedBaseline must be candidate"
-          exit 1
-        fi
-
-
-        # Check if latest revision is true
-        latestRevision=true
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].latestRevision')=="$latestRevision" ]]; then
-          echo "latestRevision is true"
-        else
-          echo "latestRevision must be true"
-          exit 1
-        fi
-
-        # Check if traffic percent is 100
-        percent=100
-        if [[ $(kubectl get ksvc sample-app -ojson | jq '.spec.traffic[0].percent')=="$percent" ]]; then
-          echo "percent is 100"
-        else
-          echo "percent must be 100"
-          exit 1
-        fi        
+        export ITER8=$(pwd)
+        source $ITER8/samples/knative/canaryfixedsplit/check.sh
 
   conformance:
     name: conformance
@@ -306,7 +168,7 @@ jobs:
     - name: Generate requests
       run: |
         export ITER8=$(pwd)
-        kubectl wait --for=condition=Ready ksvc/sample-app
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -        
         
@@ -315,31 +177,12 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
 
-    - name: Sleep
+    - name: Sleep until end of experiment
       run: |
         sleep 150.0
-
+        kubectl get experiment conformance-sample -o yaml
+    
     - name: Check if experiment is complete and successful
       run: |
-        # Check if experiment has completed
-        completed="Completed"
-        if [[ $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)=="$completed" ]]; then
-          echo "Experiment has Completed"
-        else
-          echo "Experiment must be Completed. It is $(kubectl get experiment canary-fixedsplit -ojson | jq .status.stage)"
-          exit 1
-        fi
-
-        # Check if no requests have been lost during the experiment
-        
-        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-        kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-        REQUESTSTOTAL=$(jq .DurationHistogram.Count /tmp/fortiooutput.json)
-        REQUESTS200=$(jq '.RetCodes."200"' /tmp/fortiooutput.json)
-        if [[ "REQUESTSTOTAL"=="$REQUESTS200" ]]; then
-          echo "Packets were not lost"
-        else
-          echo "Packets were lost"
-          exit 1
-        fi
+        export ITER8=$(pwd)
+        source $ITER8/samples/knative/conformance/check.sh
