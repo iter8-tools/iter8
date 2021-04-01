@@ -115,8 +115,6 @@ nav:
     - Generating requests externally: code-samples/traffic.md
   - Metrics:
     - Using metrics in experiments: metrics/using-metrics.md
-    - How Iter8 queries metrics: metrics/how-iter8-queries-metrics.md
-    - Custom metrics: metrics/custom-metrics.md
   - Reference:
     - Iter8 API specification: reference/apispec.md
   - Contributing: contributing.md
