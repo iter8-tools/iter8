@@ -191,52 +191,9 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    ??? info "iter8ctl output"
-        The `iter8ctl` output will be similar to the following:
-        ```shell
-        ****** Overview ******
-        Experiment name: canary-fixedsplit
-        Experiment namespace: default
-        Target: default/sample-app
-        Testing pattern: Canary
-        Deployment pattern: FixedSplit
+    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-        ****** Progress Summary ******
-        Experiment stage: Running
-        Number of completed iterations: 5
-
-        ****** Winner Assessment ******
-        App versions in this experiment: [baseline candidate]
-        Winning version: candidate
-        Version recommended for promotion: candidate
-
-        ****** Objective Assessment ******
-        +--------------------------------+----------+-----------+
-        |           OBJECTIVE            | BASELINE | CANDIDATE |
-        +--------------------------------+----------+-----------+
-        | mean-latency <= 50.000         | true     | true      |
-        +--------------------------------+----------+-----------+
-        | 95th-percentile-tail-latency   | true     | true      |
-        | <= 100.000                     |          |           |
-        +--------------------------------+----------+-----------+
-        | error-rate <= 0.010            | true     | true      |
-        +--------------------------------+----------+-----------+
-
-        ****** Metrics Assessment ******
-        +--------------------------------+----------+-----------+
-        |             METRIC             | BASELINE | CANDIDATE |
-        +--------------------------------+----------+-----------+
-        | 95th-percentile-tail-latency   |    4.798 |     4.825 |
-        | (milliseconds)                 |          |           |
-        +--------------------------------+----------+-----------+
-        | error-rate                     |    0.000 |     0.000 |
-        +--------------------------------+----------+-----------+
-        | request-count                  |  652.800 |   240.178 |
-        +--------------------------------+----------+-----------+
-        | mean-latency (milliseconds)    |    1.270 |     1.254 |
-        +--------------------------------+----------+-----------+
-        ```    
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
 
@@ -244,52 +201,18 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get experiment canary-fixedsplit --watch
     ```
 
-    ??? info "kubectl get experiment output"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        NAME               TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-        canary-fixesplit   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-        canary-fixesplit   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-        canary-fixesplit   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-        canary-fixesplit   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-        canary-fixesplit   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-        canary-fixesplit   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-        canary-fixesplit   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-        canary-fixesplit   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-        canary-fixesplit   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-        canary-fixesplit   Canary   default/sample-app   Running   10                     IterationUpdate: Completed Iteration 10
-        canary-fixesplit   Canary   default/sample-app   Running   11                     IterationUpdate: Completed Iteration 11
-        canary-fixesplit   Canary   default/sample-app   Finishing   12                     TerminalHandlerLaunched: Finish handler 'finish' launched
-        canary-fixesplit   Canary   default/sample-app   Completed   12                     ExperimentCompleted: Experiment completed successfully
-        ```
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
+    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
 === "kubectl get ksvc"
 
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
+    The output will look similar to the [kubectl get ksvc output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-    ??? info "kubectl get ksvc output"
-        The `kubectl` output will be similar to the following. The traffic percentage should remain the same during the experiment.
-        ```shell
-        [
-          {
-            "latestRevision": false,
-            "percent": 75,
-            "revisionName": "sample-app-v1",
-            "tag": "current",
-            "url": "http://current-sample-app.default.example.com"
-          },
-          {
-            "latestRevision": true,
-            "percent": 25,
-            "revisionName": "sample-app-v2",
-            "tag": "candidate",
-            "url": "http://candidate-sample-app.default.example.com"
-          }
-        ]
-        ```
+    As the experiment progresses, you should see traffic remain unchanged. When the experiment completes, and the candidate, `sample-app-v2`, is identified as the winner, all of the traffic will all be sent to it.
 
 ## 5. Cleanup
 

@@ -87,5 +87,5 @@ The iter8ctl CLI enables real-time observability of Iter8 experiments.
     Go 1.13+
 
 ```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2-pre.1
+GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2
 ```
