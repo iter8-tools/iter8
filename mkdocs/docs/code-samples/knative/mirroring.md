@@ -222,72 +222,18 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    ??? info "iter8ctl output"
-        The `iter8ctl` output will be similar to the following.
+    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-        ```shell
-        ****** Overview ******
-        Experiment name: mirroring
-        Experiment namespace: default
-        Target: default/sample-app
-        Testing pattern: Conformance
-        Deployment pattern: Progressive
-
-        ****** Progress Summary ******
-        Experiment stage: Completed
-        Number of completed iterations: 10
-
-        ****** Winner Assessment ******
-        Winning version: not found
-        Version recommended for promotion: current
-
-        ****** Objective Assessment ******
-        +--------------------------------+---------+
-        |           OBJECTIVE            | CURRENT |
-        +--------------------------------+---------+
-        | mean-latency <= 50.000         | true    |
-        +--------------------------------+---------+
-        | 95th-percentile-tail-latency   | true    |
-        | <= 100.000                     |         |
-        +--------------------------------+---------+
-        | error-rate <= 0.010            | true    |
-        +--------------------------------+---------+
-
-        ****** Metrics Assessment ******
-        +--------------------------------+---------+
-        |             METRIC             | CURRENT |
-        +--------------------------------+---------+
-        | request-count                  | 136.084 |
-        +--------------------------------+---------+
-        | mean-latency (milliseconds)    |   0.879 |
-        +--------------------------------+---------+
-        | 95th-percentile-tail-latency   |   4.835 |
-        | (milliseconds)                 |         |
-        +--------------------------------+---------+
-        | error-rate                     |   0.000 |
-        +--------------------------------+---------+
-        ```
-
-        When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.   
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by the version being tested. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
     ```shell
     kubectl get experiment mirroring --watch
     ```
 
-    ??? info "kubectl get experiment output"
-        The `kubectl` output will be similar to the following.
+    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
-        ```shell
-        NAME        TYPE          TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-        mirroring   Conformance   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-        mirroring   Conformance   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-        mirroring   Conformance   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-        mirroring   Conformance   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-        mirroring   Conformance   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-        ```
-
-        When the experiment completes (in ~ 2 mins), you will see the stage change from `Running` to `Completed`.
+    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 ## 6. Cleanup
 
