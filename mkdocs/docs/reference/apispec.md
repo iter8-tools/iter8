@@ -534,38 +534,44 @@ The `common` task library provides the `exec` task. Use this task to execute she
 
 ### Interpolation of task inputs
 
-Inputs to tasks can container placeholders, or template variables which will be dynamically substituted when the task is executed by Iter8. Variable interpolation works as follows.
+Inputs to tasks can contain placeholders, or template variables, which will be dynamically substituted when the task is executed by Iter8. For example, in the sample experiment above, one input is:
+
+```bash 
+"https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
+```
+
+In this case, the placeholder is `{{ .promote }}`. Variable interpolation works as follows.
 
 1. Iter8 will find the version recommended for promotion. This information is stored in the `status.versionRecommendedForPromotion` field of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` field of the experiment.
 
-2. If the placeholder is `{{ .name }}`, Iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, Iter8 will substitute it with the value of this corresponding variable for the version recommended for promotion. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may be executed by Iter8 as part of the experiment.
+2. If the placeholder is `{{ .name }}`, Iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, Iter8 will substitute it with the value of the corresponding variable for the version recommended for promotion. Variable values are specified in the `variables` field of the version detail. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may already have been executed by Iter8 as part of the experiment.
 
 ??? example "Interpolation Example 1"
 
     Consider the sample experiment above. Suppose the `winner` of this experiment was `candidate`. Then:
     
     1. The version recommended for promotion is `candidate`.
-    2. The placeholder in the `exec` task in the `finish` action is `{{ .promote }}`.
+    2. The placeholder in the argument to the `exec` task of the `finish` action is `{{ .promote }}`.
     3. The value of the placeholder for the version recommended for promotion is `candid`.
-    4. The command executed by the `exec` task is `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candid.yaml`.
+    4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candid.yaml`.
     
 ??? example "Interpolation Example 2"
 
     Consider the sample experiment above. Suppose the `winner` of this experiment was `current`. Then:
     
     1. The version recommended for promotion is `current`.
-    2. The placeholder in the `exec` task in the `finish` action is `{{ .promote }}`.
+    2. The placeholder in the argument of the `exec` task of the `finish` action is `{{ .promote }}`.
     3. The value of the placeholder for the version recommended for promotion is `base`.
-    4. The command executed by the `exec` task is `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
+    4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
 
 ??? example "Interpolation Example 3"
 
     Consider the sample experiment above. Suppose the experiment did not yield a `winner`. Then:
     
     1. The version recommended for promotion is `current`.
-    2. The placeholder in the `exec` task in the `finish` action is `{{ .promote }}`.
+    2. The placeholder in the argument of the `exec` task of the `finish` action is `{{ .promote }}`.
     3. The value of the placeholder for the version recommended for promotion is `base`.
-    4. The command executed by the `exec` task is `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
+    4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
 
 ### Task error handling
 When a task exits with an error, it will result in the failure of the experiment to which it belongs.
