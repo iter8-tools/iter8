@@ -18,8 +18,8 @@ template: overrides/main.html
 
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
-    2. The **kubectl** CLI. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install [Go](https://golang.org/doc/install).
+    2. The `kubectl` CLI. Install `kubectl` [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+    3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install Go [here](https://golang.org/doc/install).
 
 ## 1. Create Kubernetes cluster
 
@@ -81,7 +81,7 @@ Knative can work with multiple networking layers. So can Iter8's Knative extensi
     ```
 
 ## 4. Create app versions
-Create baseline and candidate versions of your app. The candidate version is also referred to as the *new* or *canary* version.
+Create baseline and candidate versions of your app, `sample-app-v1` and `sample-app-v2` respectively. The candidate version is also referred to as the *new* or *canary* version.
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
 kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
@@ -315,7 +315,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         +--------------------------------------------+---------+-----------+
         ``` 
 
-    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
 === "kubectl get experiment"
 
@@ -376,7 +376,7 @@ kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ```
 
 ???+ info "Understanding what happened"
-    1. You created a Knative service with two revisions, sample-app-v1 (baseline) and sample-app-v2 (candidate).
+    1. You created a Knative service with two revisions, `sample-app-v1` (baseline) and `sample-app-v2` (candidate).
     2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
     3. You created an Iter8 experiment with canary testing and progressive deployment patterns. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that the candidate satisfied all objectives, identified the candidate as the winner, progressively shifted traffic from the baseline to the candidate, and eventually promoted the candidate using the `kubectl apply` command embedded within its finish action.
     4. Had the candidate failed to satisfy objectives, then the baseline would have been promoted.

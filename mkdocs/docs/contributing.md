@@ -7,7 +7,7 @@ hide:
 # Contributing
 We are delighted that you are considering a contribution to Iter8!
 
-Please discuss the change you wish to make using [issues](https://github.com/iter8-tools/iter8/issues), [discussions](https://github.com/iter8-tools/iter8/discussions), or the [Iter8 slack workspace](https://iter8-tools.slack.com) before submitting your PR.
+Please discuss the change you wish to make using [issues](https://github.com/iter8-tools/iter8/issues), [discussions](https://github.com/iter8-tools/iter8/discussions), or the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) before submitting your PR.
 
 ## Locally building Iter8 docs
 Iter8 documentation is built using [mkdocs for material](https://squidfunk.github.io/mkdocs-material/). Follow the instructions below to build Iter8 docs locally.
