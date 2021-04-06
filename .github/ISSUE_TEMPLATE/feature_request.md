@@ -22,10 +22,10 @@ A clear and concise description of any alternative solutions or features you've 
 **Does this issue require a design doc/discussion? If there is a link to the design document/discussions, please provide it below.**
 You can use this issue thread, or a discussion thread in this repo, for design discussions. If you do so, please provide a link to the specific issue/discussion comment(s) that describes the design.
 
-**What tests will you create for this feature?**
+**How will this feature be tested?**
 [ ] A checklist of behaviors that will be tested as part of this feature implementation.
 
-**What documentation will you create for this feature?**
+**How will this feature be documented?**
 [ ] A checklist of new (or modifications to existing) code-samples, references, or other forms of documentation that will be added to https://iter8.tools as part of this feature implementation. Developer documentation must always accompany `iter8-analytics`, `etc3`, `handler`, and `iter8ctl` functionality and does not need to be included in this checklist.
 
 **Additional context**
