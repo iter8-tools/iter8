@@ -26,7 +26,7 @@ You can use this issue thread, or a discussion thread in this repo, for design d
 [ ] A checklist of behaviors that will be tested as part of this feature implementation.
 
 **How will this feature be documented?**
-[ ] A checklist of new (or modifications to existing) code-samples, references, or other forms of documentation that will be added to https://iter8.tools as part of this feature implementation. Developer documentation must always accompany `iter8-analytics`, `etc3`, `handler`, and `iter8ctl` functionality and does not need to be included in this checklist.
+[ ] A checklist which maybe a combination of user and developer documentation. This includes new (or modifications to existing) code-samples, references, or other forms of user documentation that will be added to https://iter8.tools as part of this feature implementation. Also includes developer documentation, that must always accompany code in the `iter8-analytics`, `etc3`, `handler`, and `iter8ctl` repos.
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
