@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Is your feature request related to a problem? Please describe.**
-A clear and concise description of what problem will be solved by this feature.
+A clear and concise description of the problem that will be solved by this feature.
 
 **Why is the feature useful for Iter8 users?**
 How will this feature add value to Iter8 users and improve Iter8 experiments.
@@ -20,7 +20,7 @@ A clear and concise description of what you want to happen.
 A clear and concise description of any alternative solutions or features you've considered.
 
 **Does this issue require a design doc/discussion? If there is a link to the design document/discussions, please provide it below.**
-You can use this issue thread, or a discussion thread in this repo, for design discussions. If you do so, please provide a link to specific issue/discussion comment that describes the design.
+You can use this issue thread, or a discussion thread in this repo, for design discussions. If you do so, please provide a link to the specific issue/discussion comment(s) that describes the design.
 
 **What tests will you create for this feature?**
 [ ] A checklist of behaviors that will be tested as part of this feature implementation.
