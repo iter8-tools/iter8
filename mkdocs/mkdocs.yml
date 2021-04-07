@@ -47,9 +47,8 @@ plugins:
 # Customization
 extra:
   title: "Cloud native release automation and experimentation"
-  extra:
-    version:
-      provider: mike  
+  version:
+    provider: mike  
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/iter8-tools/iter8
