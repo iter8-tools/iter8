@@ -376,11 +376,11 @@ Iter8 currently implements two tasks that help in setting up and finishing up ex
         # error rate should be under 1%
         - metric: iter8-knative/error-rate
           upperLimit: "0.01"
-      indicators:
-      # report values for the following metrics in addition those in spec.criteria.objectives
-      - 99th-percentile-tail-latency
-      - 90th-percentile-tail-latency
-      - 75th-percentile-tail-latency
+        indicators:
+        # report values for the following metrics in addition those in spec.criteria.objectives
+        - 99th-percentile-tail-latency
+        - 90th-percentile-tail-latency
+        - 75th-percentile-tail-latency
       strategy:
         # canary testing => candidate `wins` if it satisfies objectives
         testingPattern: Canary
@@ -487,6 +487,16 @@ The `common` task library provides the `exec` task. Use this task to execute she
     spec:
       strategy:
         actions:
+          start:
+          # when using common/exec in a start action, always set disableInterpolation to true
+          - task: common/exec # create a K8s resource
+            with:
+              cmd: /bin/sh
+              args:
+              - "-c"
+              - |
+                kubectl apply -f https://raw.githubusercontent.com/my/favourite/resource.yaml
+              disableInterpolation: true              
           finish:
           - task: common/exec # promote the winning version
             with:
@@ -502,6 +512,16 @@ The `common` task library provides the `exec` task. Use this task to execute she
     spec:
       strategy:
         actions:
+          start:
+          # when using common/exec in a start action, always set disableInterpolation to true
+          - task: common/exec # install a helm chart
+            with:
+              cmd: /bin/sh
+              args:
+              - "-c"
+              - |
+                helm upgrade --install --repo https://raw.githubusercontent.com/my/favorite/helm-repo app --namespace=iter8-system app
+              disableInterpolation: true
           finish:
           - task: common/exec
             with:
@@ -522,6 +542,16 @@ The `common` task library provides the `exec` task. Use this task to execute she
     spec:
       strategy:
         actions:
+          start:
+          # when using common/exec in a start action, always set disableInterpolation to true
+          - task: common/exec # create kubernetes resources
+            with:
+              cmd: /bin/sh
+              args:
+              - "-c"
+              - |
+                kustomize build github.com/my/favorite/kustomize/folder?ref=master | kubectl apply -f -
+              disableInterpolation: true        
           finish: # run the following sequence of tasks at the end of the experiment
           - task: common/exec # promote the winning version using kustomize
             with:
@@ -573,7 +603,10 @@ In this case, the placeholder is `{{ .promote }}`. Variable interpolation works 
     3. The value of the placeholder for the version recommended for promotion is `base`.
     4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
 
-### Task error handling
+### Disable Interpolation (always do this in a `start` action)
+By default, the `common/exec` task will attempt to find the version recommended for promotion, and use its values to interpolate the inputs to the task. However, this behavior will lead to task failure since version recommended for promotion will be generally undefined at this stage of the experiment. To use the `common/exec` task as part of an experiment `start` action, set `disableInterpolation` to `true` as illustrated in the `kubectl/Helm/Kustomize` samples above.
+
+### Error handling in tasks
 When a task exits with an error, it will result in the failure of the experiment to which it belongs.
 
 ## Target naming conventions

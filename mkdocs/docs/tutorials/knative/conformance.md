@@ -55,7 +55,7 @@ URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -
 ```
 
-??? info "Look inside experiment.yaml"
+??? info "Look inside fortio.yaml"
     ```yaml
     apiVersion: batch/v1
     kind: Job
