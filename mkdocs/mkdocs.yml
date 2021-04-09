@@ -57,6 +57,8 @@ plugins:
 # Customization
 extra:
   title: "Kubernetes experimentation platform"
+  version:
+    provider: mike  
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/iter8-tools/iter8
