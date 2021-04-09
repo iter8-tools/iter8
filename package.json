@@ -1,0 +1,96 @@
+{
+  "name": "iter8",
+  "version": "0.3",
+  "description": "AI-driven rollouts for Kubernetes apps. Iter8 enables you to unlock business value in your K8s apps and ML models rapidly by bringing together the best of analytics, release engineering, and observability. Use Iter8 with Knative, KFServing, or Istio for progressive delivery, automated rollouts, and metrics and AI-driven experiments. Quick start in 5 mins.",
+  "keywords": [
+    "Iter8",
+    "rollout",
+    "progressive",
+    "metrics",
+    "canary",
+    "A/B",
+    "A/B/N",
+    "Conformance",
+    "experiment"
+  ],
+  "homepage": "https://iter8.tools/",
+  "bugs": {
+    "url": "https://github.com/iter8-tools/iter8/issues",
+    "email": "iter8tools@gmail.com"
+  },
+  "license": "Apache v2.0",
+  "private": true,
+  "author": {
+    "name": "Srinivasan Parthasarathy",
+    "email": "iter8tools@gmail.com"
+  },
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iter8-tools/iter8.git"
+  },
+  "scripts": {
+    "build": "rimraf material && ts-node -T tools/build --optimize",
+    "build:dirty": "ts-node -T tools/build --dirty",
+    "clean": "rimraf material",
+    "lint": "npm run lint:scss && npm run lint:ts",
+    "lint:scss": "stylelint \"src/assets/**/*.scss\"",
+    "lint:ts": "eslint --cache \"src/**/*.ts\"",
+    "start": "ts-node -T tools/build --verbose --dirty --watch"
+  },
+  "dependencies": {
+    "clipboard": "^2.0.8",
+    "escape-html": "^1.0.3",
+    "focus-visible": "^5.2.0",
+    "fuzzaldrin-plus": "^0.6.0",
+    "lunr": "^2.3.9",
+    "lunr-languages": "^1.4.0",
+    "rxjs": "^7.0.0-beta.15"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.3",
+    "@mdi/svg": "^5.9.55",
+    "@primer/octicons": "^12.1.0",
+    "@types/clipboard": "^2.0.1",
+    "@types/escape-html": "1.0.0",
+    "@types/fuzzaldrin-plus": "^0.6.1",
+    "@types/html-minifier": "^4.0.0",
+    "@types/lunr": "^2.3.3",
+    "@types/node": "^14.14.37",
+    "@types/resize-observer-browser": "^0.1.5",
+    "@types/sass": "^1.16.0",
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0",
+    "autoprefixer": "^10.2.5",
+    "chokidar": "^3.5.1",
+    "cssnano": "^4.1.10",
+    "esbuild": "^0.11.5",
+    "eslint": "^7.23.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsdoc": "^32.3.0",
+    "eslint-plugin-no-null": "^1.0.2",
+    "github-types": "^1.0.0",
+    "gitlab": "^14.2.2",
+    "html-minifier": "^4.0.0",
+    "material-design-color": "^2.3.2",
+    "material-shadows": "^3.0.1",
+    "postcss": "^8.2.9",
+    "postcss-inline-svg": "^5.0.0",
+    "preact": "^10.5.13",
+    "rimraf": "^3.0.2",
+    "sass": "^1.32.8",
+    "stylelint": "^13.12.0",
+    "stylelint-config-rational-order": "^0.0.4",
+    "stylelint-config-recommended": "^4.0.0",
+    "stylelint-config-standard": "^21.0.0",
+    "stylelint-scss": "^3.19.0",
+    "svgo": "^2.3.0",
+    "tiny-glob": "^0.2.8",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
+  },
+  "engines": {
+    "node": ">= 14"
+  }
+}
