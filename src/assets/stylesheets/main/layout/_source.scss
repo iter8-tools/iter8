@@ -69,7 +69,7 @@
 // Repository information
 .md-source {
   display: block;
-  font-size: px2rem(13px);
+  font-size: px2rem(16px);
   line-height: 1.2;
   white-space: nowrap;
   // Hack: promote to own layer to reduce jitter
@@ -130,7 +130,7 @@
     margin: px2rem(2px) 0 0;
     padding: 0;
     overflow: hidden;
-    font-size: px2rem(14px);
+    font-size: px2rem(12px);
     list-style-type: none;
     opacity: 0.75;
 
