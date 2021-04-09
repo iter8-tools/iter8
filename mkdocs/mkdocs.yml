@@ -65,7 +65,7 @@ extra:
     - icon: fontawesome/brands/slack
       link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
     - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/r/iter8-tools
+      link: https://hub.docker.com/r/iter8
 
 # Extensions
 markdown_extensions:
