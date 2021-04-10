@@ -11,7 +11,7 @@ Iter8 is designed for **developers, SREs, service operators, data scientists, an
 ## What is an Iter8 experiment?
 Iter8 defines a Kubernetes resource called **Experiment** that automates the process of validating service-level objectives (SLOs), identifying the best version of your app/ML model version based on business and performance metrics, progressive traffic shifting, and promotion/rollback.[^1]
 
-![Process automated by an Iter8 experiment](/assets/images/whatisiter8.png)
+![Process automated by an Iter8 experiment](../images/whatisiter8.png)
 
 ## How does Iter8 work?
 
