@@ -7,7 +7,7 @@ template: overrides/main.html
 !!! abstract "Abstract"
     The Iter8 API provides two [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to automate metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
-    1. The **Experiment** resource provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic shaping, and version promotion functions](/concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](/tutorials/knative/canary-progressive/).
+    1. The **Experiment** resource provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic shaping, and version promotion functions](../../../concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](../../../tutorials/knative/canary-progressive/).
     2. The **Metric** resource encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics backend. Metrics are referenced in experiments.
 
 
@@ -106,7 +106,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 ### Metric
 
-Metrics are referenced within the criteria field of the experiment spec. Metrics usage within experiments is described [here](/metrics/using-metrics).
+Metrics are referenced within the criteria field of the experiment spec. Metrics usage within experiments is described [here](../../../metrics/using-metrics).
 
 ??? example "Sample metric"
     ```yaml linenums="1"
@@ -132,7 +132,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 #### Spec
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a string template with placeholders, which will be interpolated by Iter8 at query time. For examples and more details, see [here](/metrics/how-iter8-queries-metrics/).| No |
+| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a string template with placeholders, which will be interpolated by Iter8 at query time. | No |
 | description | string | Human readable description. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
