@@ -27,7 +27,7 @@ iter8-knative   request-count                  counter   Number of requests
 
 ## Referencing metrics
 
-Use metrics in experiments by referencing them in criteria section. Reference metrics using the `namespace/name` or `name` [format](/reference/apispec/#criteria).
+Use metrics in experiments by referencing them in criteria section. Reference metrics using the `namespace/name` or `name` [format](../../../reference/apispec/#criteria).
 
 ??? example "Sample experiment illustrating the use of metrics"
     ```yaml
@@ -88,4 +88,4 @@ Use metrics in experiments by referencing them in criteria section. Reference me
 
 ## Observing metric values
 
-During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](/getting-started/quick-start/with-knative/#7-observe-experiment) for an example.
+During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../../../getting-started/quick-start/with-knative/#7-observe-experiment) for an example.
