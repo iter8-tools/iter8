@@ -5,9 +5,9 @@ template: overrides/main.html
 # Fixed Split Canary Release
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/buildingblocks/#testing-pattern) testing, [`FixedSplit`](/concepts/buildingblocks/#deployment-pattern) deployment, and [Kustomize based version promotion](/concepts/buildingblocks/#version-promotion).
+    An experiment with [`Canary`](../../../concepts/buildingblocks/#testing-pattern) testing, [`FixedSplit`](../../../concepts/buildingblocks/#deployment-pattern) deployment, and [Kustomize based version promotion](../../../concepts/buildingblocks/#version-promotion).
     
-    ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
+    ![Canary](../../images/canary-fixedsplit-kustomize.png)
 
 You will create the following resources in this tutorial.
 
@@ -19,13 +19,13 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Kustomize
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[Kustomize v3+](https://kustomize.io/) and [`iter8ctl`](/getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Kustomize v3+ and `iter8ctl`.
+    **[Kustomize v3+](https://kustomize.io/) and [`iter8ctl`](../../../getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Kustomize v3+ and `iter8ctl`.
 
 ## 1. Create app versions
 
@@ -191,7 +191,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
@@ -201,7 +201,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get experiment canary-fixedsplit --watch
     ```
 
-    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
@@ -210,7 +210,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
-    The output will look similar to the [kubectl get ksvc output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get ksvc output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should see traffic remain unchanged. When the experiment completes, and the candidate, `sample-app-v2`, is identified as the winner, all of the traffic will all be sent to it.
 

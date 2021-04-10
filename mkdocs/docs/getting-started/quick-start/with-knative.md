@@ -5,16 +5,16 @@ template: overrides/main.html
 # Quick Start with Knative
 
 !!! tip "Scenario: Canary testing and progressive deployment"
-    [Canary testing](/concepts/buildingblocks/#testing-pattern) enables you to reduce risk during a [release](/concepts/buildingblocks/#release) by [validating](/concepts/buildingblocks/#validation) your new version with a small fraction of users before exposing it to all users. In this tutorial, you will:
+    [Canary testing](../../../concepts/buildingblocks/#testing-pattern) enables you to reduce risk during a [release](../../../concepts/buildingblocks/#release) by [validating](../../../concepts/buildingblocks/#validation) your new version with a small fraction of users before exposing it to all users. In this tutorial, you will:
 
     1. Perform canary testing.
     2. Specify service-level objectives or SLOs used by Iter8 to automatically validate your versions.
     3. Use metrics from Prometheus.
-    4. Combine canary testing with [progressive deployment](/concepts/buildingblocks/#deployment-pattern) in an Iter8 experiment.
+    4. Combine canary testing with [progressive deployment](../../../concepts/buildingblocks/#deployment-pattern) in an Iter8 experiment.
     
     Assuming the new version is validated, Iter8 will progressively increase the traffic percentage for the new version and promote it at the end as depicted below.
 
-    ![Canary](/assets/images/canary-progressive-kubectl.png)
+    ![Canary](../../images/canary-progressive-kubectl.png)
 
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
@@ -41,7 +41,7 @@ Create a local cluster using Minikube or Kind as follows, or use a managed Kuber
     ??? info "Ensuring your Kind cluster has sufficient resources"
         Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
 
-        ![Resources](/assets/images/ddresourcepreferences.png)
+        ![Resources](../../images/ddresourcepreferences.png)
 
 
     
@@ -241,7 +241,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
 The process automated by Iter8 during this experiment is depicted below.
 
-![Iter8 automation](/assets/images/canary-progressive-kubectl-iter8.png)
+![Iter8 automation](../../images/canary-progressive-kubectl-iter8.png)
 
 ## 7. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.

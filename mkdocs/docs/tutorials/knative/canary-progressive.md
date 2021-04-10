@@ -5,9 +5,9 @@ template: overrides/main.html
 # Progressive Canary Release
 
 !!! tip ""
-    An experiment with [`Canary`](/concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](/concepts/buildingblocks/#deployment-pattern) deployment, and [`Helm` based version promotion](/concepts/buildingblocks/#version-promotion).
+    An experiment with [`Canary`](../../../concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](../../../concepts/buildingblocks/#deployment-pattern) deployment, and [`Helm` based version promotion](../../../concepts/buildingblocks/#version-promotion).
     
-    ![Canary](/assets/images/canary-progressive-helm.png)
+    ![Canary](../../images/canary-progressive-helm.png)
 
 You will create the following resources in this tutorial.
 
@@ -19,13 +19,13 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Helm
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[Helm v3](https://helm.sh/) and [`iter8ctl`](/getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Helm v3 and `iter8ctl`.
+    **[Helm v3](https://helm.sh/) and [`iter8ctl`](../../../getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Helm v3 and `iter8ctl`.
 
 ## 1. Create versions
 ```shell
@@ -181,7 +181,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
@@ -190,7 +190,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get experiment canary-progressive --watch
     ```
 
-    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
@@ -199,7 +199,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    The output will look similar to the [kubectl get ksvc output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get ksvc output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
         
