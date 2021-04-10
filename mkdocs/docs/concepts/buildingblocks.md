@@ -56,18 +56,18 @@ Metric backends like Prometheus, New Relic, Sysdig and Elastic collect metrics f
 === "Canary"
     Canary testing involves two versions, the baseline and a candidate. If the candidate is validated (i.e., it satisfies objectives specified in the experiment), then candidate is the winner; else, if baseline satisfies objectives, then baseline is the winner; else, there is no winner.
 
-    ![Canary](/assets/images/canary-progressive-kubectl.png)
+    ![Canary](../images/canary-progressive-kubectl.png)
 
     !!! tip ""
-        Try a [canary experiment](/getting-started/quick-start/with-knative/).
+        Try a [canary experiment](../../getting-started/quick-start/with-knative/).
 
 === "Conformance"
     Conformance testing involves a single version, a baseline. If it is validated (i.e., it satisfies objectives) then baseline is the winner; else, there is no winner.
 
-    ![Conformance](/assets/images/conformance.png)
+    ![Conformance](../images/conformance.png)
 
     !!! tip ""
-        Try a [conformance experiment](/tutorials/knative/conformance/).
+        Try a [conformance experiment](../../tutorials/knative/conformance/).
 
 ## Deployment pattern
 
@@ -76,18 +76,18 @@ Metric backends like Prometheus, New Relic, Sysdig and Elastic collect metrics f
 === "Progressive"
     Progressive deployment incrementally shifts traffic towards the winner over multiple iterations.
 
-    ![Canary](/assets/images/canary-progressive-helm.png)
+    ![Canary](../images/canary-progressive-helm.png)
 
     !!! tip ""
-        Try a [progressive deployment experiment](/tutorials/knative/canary-progressive/).
+        Try a [progressive deployment experiment](../../tutorials/knative/canary-progressive/).
 
 === "Fixed-split"
     Fixed-split deployment does not shift traffic between versions.
 
-    ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
+    ![Canary](../images/canary-fixedsplit-kustomize.png)
 
     !!! tip ""
-        Try a [fixed-split deployment experiment](/tutorials/knative/canary-fixedsplit/).
+        Try a [fixed-split deployment experiment](../../tutorials/knative/canary-fixedsplit/).
 
 ## Traffic shaping
 
@@ -98,18 +98,18 @@ Iter8 enables you to take total advantage of all the traffic shaping features av
 === "Traffic mirroring/shadowing"
     **Traffic mirroring** or **shadowing** enables experimenting with a *dark* launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests[^1] that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
 
-    ![Canary](/assets/images/mirroring.png)
+    ![Canary](../images/mirroring.png)
 
     !!! tip ""
-        Try an experiment with [traffic mirroring/shadowing](/tutorials/knative/mirroring/).
+        Try an experiment with [traffic mirroring/shadowing](../../tutorials/knative/mirroring/).
 
 === "Traffic segmentation"
     **Traffic segmentation** is the ability to carve out a specific segment of the traffic to be used in an experiment, leaving the rest of the traffic unaffected by the experiment. Service meshes and ingress controllers often provide the ability to route requests dynamically to different versions based on request attributes such as user identity, URI, IP address prefixes, or origin. Iter8 can leverage this functionality in experiments to control the segment of the traffic that will participate in the experiment. For example, in the canary experiment depicted below, requests from the country `Wakanda` may be routed to baseline or candidate; requests that are not from `Wakanda` will not participate in the experiment and are routed only to the baseline.
 
-    ![Canary](/assets/images/request-routing.png)
+    ![Canary](../images/request-routing.png)
 
     !!! tip ""
-        Try an experiment with [traffic segmentation](/tutorials/knative/traffic-segmentation/).
+        Try an experiment with [traffic segmentation](../../tutorials/knative/traffic-segmentation/).
 
 
 ## Version promotion
@@ -119,25 +119,25 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
 === "Helm charts"
     An experiment that uses `helm` for version promotion is illustrated below.
 
-    ![Canary](/assets/images/canary-progressive-helm.png)
+    ![Canary](../images/canary-progressive-helm.png)
 
     !!! tip ""
-        Try an [experiment that uses Helm charts](/tutorials/knative/canary-progressive/).
+        Try an [experiment that uses Helm charts](../../tutorials/knative/canary-progressive/).
 
 === "Kustomize resources"
     An experiment that uses `kustomize` for version promotion is illustrated below.
 
-    ![Canary](/assets/images/canary-fixedsplit-kustomize.png)
+    ![Canary](../images/canary-fixedsplit-kustomize.png)
 
     !!! tip ""
-        Try an [experiment that uses Kustomize resources](/tutorials/knative/canary-fixedsplit/).
+        Try an [experiment that uses Kustomize resources](../../tutorials/knative/canary-fixedsplit/).
 
 === "Plain YAML/JSON manifests"
     An experiment that uses plain YAML/JSON manifests and the `kubectl` CLI for version promotion is illustrated below.
 
-    ![Canary](/assets/images/canary-progressive-kubectl.png)
+    ![Canary](../images/canary-progressive-kubectl.png)
 
     !!! tip ""
-        Try an [experiment that uses plain YAML/JSON manifests](/getting-started/quick-start/with-knative/).
+        Try an [experiment that uses plain YAML/JSON manifests](../../getting-started/quick-start/with-knative/).
 
 [^1]: It is possible to mirror only a certain percentage of the requests instead of all requests.
