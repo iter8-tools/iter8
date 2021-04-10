@@ -25,15 +25,9 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: Set up Node.js dependencies
+    - name: Set up Node.js dependencies and build material theme
       run: | 
-        cd mkdocs
-        npm install
-
-    - name: Build project
-      run: |
-        cd mkdocs
-        npm run build
+        npm install && npm run build
 
     - name: Set up Python runtime
       uses: actions/setup-python@v1

@@ -5,9 +5,9 @@ template: overrides/main.html
 # Conformance Testing
 
 !!! tip ""
-    An experiment with [`Conformance`](/concepts/buildingblocks/#testing-pattern) testing.
+    An experiment with [`Conformance`](../../../concepts/buildingblocks/#testing-pattern) testing.
     
-    ![Canary](/assets/images/conformance.png)
+    ![Canary](../../images/conformance.png)
 
 You will create the following resources in this tutorial.
 
@@ -16,13 +16,13 @@ You will create the following resources in this tutorial.
 3. An **Iter8 experiment** that verifies that `baseline` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](/getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](/getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[`iter8ctl`](/getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses `iter8ctl`.
+    **[`iter8ctl`](../../../getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses `iter8ctl`.
 
 ## 1. Create app
 ```shell
@@ -142,7 +142,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         done
         ```
 
-    The output will look similar to the [iter8ctl output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by the version being tested. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
@@ -152,7 +152,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get experiment conformance-sample --watch
     ```
 
-    The output will look similar to the [kubectl get experiment output](/getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
