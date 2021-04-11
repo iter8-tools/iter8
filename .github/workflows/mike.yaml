@@ -1,0 +1,44 @@
+name: Mike versioning
+
+on: 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'    
+        required: true
+      title:
+        description: 'Title'
+        required: true
+
+env:
+  NODE_VERSION: 15.x
+  PYTHON_VERSION: 3.9
+
+jobs:
+  push-doc-version:
+    name: Push doc version
+    runs-on: ubuntu-latest
+    steps:
+    # setup pre-reqs
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # fetch all commits/branches      
+    - name: Set up Node.js runtime
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    # create
+    - name: Create new version
+      run: |
+        git config --global user.name "Srinivasan Parthasarathy"
+        git config --global user.email 5309125+sriumcp@users.noreply.github.com   
+        npm install && npm run build
+        cd mkdocs
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        mike deploy ${{ github.event.inputs.version }} latest -t ${{ github.event.inputs.title }} -p -u
