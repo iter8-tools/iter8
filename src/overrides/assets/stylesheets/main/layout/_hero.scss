@@ -71,6 +71,11 @@
     padding-bottom: px2rem(120px);
   }
 
+  // Hero image
+  &__image {
+    padding-bottom: px2rem(50px);
+  }
+
   // [tablet landscape +]: Columnar display
   @include break-from-device(tablet landscape) {
     display: flex;
@@ -78,15 +83,16 @@
 
     // Adjust spacing and set dimensions
     &__content {
-      max-width: px2rem(480px);
-      margin-top: px2rem(70px);
+      max-width: px2rem(460px);
+      margin-top: px2rem(40px);
       padding-bottom: 14vw;
     }
 
     // Hero image
     &__image {
       order: 1;
-      width: px2rem(660px);
+      width: px2rem(680px);
+      margin-top: px2rem(40px);
       transform: translateX(#{px2rem(40px)});
     }
   }
