@@ -67,28 +67,29 @@
         <!-- Hero image -->
         <div class="mdx-hero__image">
           <img
-            src="assets/images/illustration.png"
+            src="{{ base_url }}/assets/images/illustration.png"
             alt=""
-            width="800"
-            height="728"
+            width="1075"
+            height="606"
             draggable="false"
           >
         </div>
 
         <!-- Hero content -->
         <div class="mdx-hero__content">
-          <h1><strong>Live experimentation for Kubernetes apps/ML models</strong></h1>
+          <h1><strong>The AI-driven Kubernetes experimentation platform</strong></h1>
 
-          <h2><strong>Optimize</strong> business metrics. <strong>Validate</strong> SLOs.</h2>
+          <h3><strong>Automate</strong> A/B, A/B/n, canary, and conformance experiments.</h3> 
+          
+          <h3><strong>Progressively shift</strong> traffic towards <strong>winning version</strong>.</h3>
 
-          <h2><strong>Automate</strong> progressive delivery and promotion/rollback of apps/ML models.</h2>
+          <h3><strong>Protect end-user experience</strong> with traffic mirroring, user segmentation, dark launch, and sticky sessions.</h3>
 
-          <h2><strong>Maximize</strong> release velocity with confidence. <strong>Protect</strong> end-user experience.</h2>
-            
+          <h3><strong>Utilize</strong> metrics from any REST API. <strong>Optimize</strong> business rewards. <strong>Validate</strong> SLOs.</h3>
 
           <a
-            href="{{ page.next_page.url | url }}"
-            title="{{ page.next_page.title | e }}"
+            href="{{ base_url }}/getting-started/quick-start/with-knative"
+            title="Quick start in 5 mins"
             class="md-button md-button--primary"
           >
             Quick start in 5 mins
