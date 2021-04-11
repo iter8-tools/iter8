@@ -36,13 +36,14 @@
 
   <!-- Open graph meta tags -->
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Iter8"/>
   <meta property="og:title" content="{{ title }}" />
   <meta property="og:description" content="{{ config.site_description }}" />
   <meta property="og:url" content="{{ page.canonical_url }}" />
   <meta property="og:image" content="https://iter8.tools/assets/images/banner.png" />
-  <meta property="og:image:type" content="image/png" />
-  <meta property="og:image:width" content="1516" />
-  <meta property="og:image:height" content="1410" />
+  <!-- <meta property="og:image:type" content="image/png" /> -->
+  <!-- <meta property="og:image:width" content="1516" />
+  <meta property="og:image:height" content="1410" /> -->
 
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -50,7 +51,11 @@
   <meta name="twitter:creator" content="{{ config.site_author }}" />
   <meta name="twitter:title" content="{{ title }}" />
   <meta name="twitter:description" content="{{ config.site_description }}" />
-  <meta name="twitter:image" content="https://iter8.tools/assets/images/banner.png" />  
+  <meta name="twitter:image" content="https://iter8.tools/assets/images/banner.png" />
+  <meta name="twitter:label1" value="Experiments" />
+  <meta name="twitter:data1" value="A/B, A/B/n, Canary, Conformance" />
+  <meta name="twitter:label2" value="K8s stacks" />
+  <meta name="twitter:data2" value="Knative, KFServing, Istio" />
 
   <!-- Extra stylesheets -->
   <link
