@@ -1,4 +1,4 @@
-name: build local and serve local docs
+name: build and serve local docs
 
 on:
   pull_request:
