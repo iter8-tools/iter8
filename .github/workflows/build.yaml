@@ -1,9 +1,6 @@
-name: build and push documentation
+name: build local and serve local docs
 
 on:
-  push:
-    paths:
-    - 'mkdocs/**'
   pull_request:
     paths:
     - 'mkdocs/**'
@@ -14,7 +11,7 @@ env:
 
 jobs:
   document:
-    name: Push documentation
+    name: Build and serve local docs
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -37,6 +34,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         cd mkdocs
+        pip install --upgrade pip
         pip install -r requirements.txt
 
     - name: Build and serve
