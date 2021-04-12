@@ -3,6 +3,7 @@ name: build local and serve local docs
 on:
   pull_request:
     paths:
+    - '.github/workflows/**'
     - 'mkdocs/**'
     - 'src/**'
     - 'package-lock.json'
