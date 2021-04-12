@@ -120,6 +120,7 @@ nav:
       - with KFServing: getting-started/quick-start/with-kfserving.md
       - with Istio: getting-started/quick-start/with-istio.md
     - Install: getting-started/install.md
+    - Changelog: getting-started/changelog.md
     - Getting help: getting-started/help.md
   - Tutorials:
     - Knative:

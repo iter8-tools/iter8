@@ -6,9 +6,6 @@ on:
       version:
         description: 'Version'    
         required: true
-      title:
-        description: 'Title'
-        required: true
 
 env:
   NODE_VERSION: 15.x
@@ -41,4 +38,4 @@ jobs:
         cd mkdocs
         pip install --upgrade pip
         pip install -r requirements.txt
-        mike deploy ${{ github.event.inputs.version }} latest -t ${{ github.event.inputs.title }} -p -u
+        mike deploy ${{ github.event.inputs.version }} latest -p -u
