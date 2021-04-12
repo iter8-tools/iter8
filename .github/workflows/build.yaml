@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
     - 'mkdocs/**'
+    - 'src/**'
+    - 'package-lock.json'
+    - 'package.json'
 
 env:
   NODE_VERSION: 15.x
