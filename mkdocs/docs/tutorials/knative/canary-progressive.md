@@ -19,7 +19,7 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Helm
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative and the sample metrics for Knative (which assume Prometheus) installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Iter8 sample metrics for Knative, and Prometheus installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -29,7 +29,7 @@ You will create the following resources in this tutorial.
 
 ## 1. Give Permission to Iter8 to Call `helm upgrade`
 
-The final step of the experiment is to promote the winning version. In this sample experiment, this is done using `helm upgrade`. Helm uses secrets to record information about an installation. Iter8 must have permission to these resources.
+Helm uses secrets to record information about releases. This tutorial uses an experiment that invokes Helm. Enable this experiment using the following RBAC.
 
 ```shell
 kubectl apply -f ${ITER8}/samples/knative/canaryprogressive/helm-rbac.yaml
