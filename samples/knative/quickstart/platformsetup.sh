@@ -117,7 +117,7 @@ fi
 echo "Installing Iter8 with Knative support"
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 
-# Step 6: Install Iter8's Prometheus add-on
+# Step 6: Install sample metrics for Knative and Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh | bash
 
