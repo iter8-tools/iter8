@@ -30,7 +30,7 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
 fi
 
 # Step 1: Export correct tags for install artifacts
-export GIT_ACCOUNT="${GIT_ACCOUNT:iter8-tools}"
+export GIT_ACCOUNT="${GIT_ACCOUNT:-iter8-tools}"
 export TAG="${TAG:-v0.3.0}"
 export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
 echo "TAG = $TAG"

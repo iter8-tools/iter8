@@ -19,7 +19,7 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Kustomize
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative and the sample metrics for Knative (which assume Prometheus) installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Iter8 sample metrics for Knative, and Prometheus installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
