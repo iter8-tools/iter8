@@ -17,7 +17,7 @@ You will create the following resources in this tutorial.
 4. An **Iter8 experiment** which verifies that the `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`, and progressively increases the proportion of traffic with `country: wakanda` header that is routed to the `candidate`.
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
+    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed, and that Knative uses the Istio networking layer. Further, ensure that the sample metrics for Knative are installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 

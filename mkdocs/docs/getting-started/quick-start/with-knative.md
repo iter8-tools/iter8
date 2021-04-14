@@ -56,6 +56,8 @@ export ITER8=$(pwd)
 ## 3. Install Knative and Iter8
 Knative can work with multiple networking layers. So can Iter8's Knative extension. Choose a networking layer for Knative.
 
+This also installs sample metrics for Knative and Iter8's Prometheus add-on. These optional components are used by the sample experiment below.
+
 === "Contour"
 
     ```shell
