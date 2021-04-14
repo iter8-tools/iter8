@@ -117,7 +117,7 @@ fi
 echo "Installing Iter8 with Knative support"
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
 
-# Step 6: Install Iter8's Prometheus add-on
+# Step 6: Install sample metrics for Knative and Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
 
