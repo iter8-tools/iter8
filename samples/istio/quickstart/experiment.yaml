@@ -16,13 +16,12 @@ spec:
           cmd: /bin/bash
           args: 
           - "-c"
-          - |
-            kubectl -n {{ .namespace }} apply -f {{ .promote }}
+          - kubectl -n {{ .namespace }} apply -f {{ .promote }}
 
   criteria:
     objectives: 
     - metric: iter8-istio/mean-latency
-      upperLimit: 75
+      upperLimit: 100
     - metric: iter8-istio/error-rate
       upperLimit: "0.01"
   duration:

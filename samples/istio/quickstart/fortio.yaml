@@ -15,7 +15,7 @@ spec:
           - fortio
           - load
           - -t
-          - 600s
+          - 6000s
           - -qps
           - "16"
           - -json

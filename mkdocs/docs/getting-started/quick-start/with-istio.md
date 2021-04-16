@@ -203,10 +203,9 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           - task: common/exec
             with:
               cmd: /bin/bash
-              args: 
+              args:
               - "-c"
-              - |
-                kubectl -n {{ .namespace }} apply -f {{ .promote }}
+              - kubectl -n {{ .namespace }} apply -f {{ .promote }}
 
       criteria:
         objectives: 
@@ -277,54 +276,46 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         ****** Overview ******
         Experiment name: istio-quickstart
         Experiment namespace: default
-        Target: default/sample-app
+        Target: bookinfo-iter8/productpage
         Testing pattern: Canary
         Deployment pattern: Progressive
 
         ****** Progress Summary ******
         Experiment stage: Running
-        Number of completed iterations: 3
+        Number of completed iterations: 7
 
         ****** Winner Assessment ******
         > If the candidate version satisfies the experiment objectives, then it is the winner.
         > Otherwise, if the baseline version satisfies the experiment objectives, it is the winner.
         > Otherwise, there is no winner.
-        App versions in this experiment: [current candidate]
+        App versions in this experiment: [baseline candidate]
         Winning version: candidate
         Version recommended for promotion: candidate
 
         ****** Objective Assessment ******
         > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-        +--------------------------------------------+---------+-----------+
-        |                 OBJECTIVE                  | CURRENT | CANDIDATE |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/mean-latency <=              | true    | true      |
-        |                                     50.000 |         |           |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/95th-percentile-tail-latency | true    | true      |
-        | <= 100.000                                 |         |           |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/error-rate <=                | true    | true      |
-        |                                      0.010 |         |           |
-        +--------------------------------------------+---------+-----------+
+        +--------------------------------+----------+-----------+
+        |           OBJECTIVE            | BASELINE | CANDIDATE |
+        +--------------------------------+----------+-----------+
+        | iter8-istio/mean-latency <=    | false    | true      |
+        |                        100.000 |          |           |
+        +--------------------------------+----------+-----------+
+        | iter8-istio/error-rate <=      | true     | true      |
+        |                          0.010 |          |           |
+        +--------------------------------+----------+-----------+
 
         ****** Metrics Assessment ******
         > Most recently read values of experiment metrics for each version.
-        +--------------------------------------------+---------+-----------+
-        |                   METRIC                   | CURRENT | CANDIDATE |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/request-count                | 454.523 |    27.412 |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/mean-latency                 |   1.265 |     1.415 |
-        | (milliseconds)                             |         |           |
-        +--------------------------------------------+---------+-----------+
-        | request-count                              | 454.523 |    27.619 |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/95th-percentile-tail-latency |   4.798 |     4.928 |
-        | (milliseconds)                             |         |           |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/error-rate                   |   0.000 |     0.000 |
-        +--------------------------------------------+---------+-----------+
+        +--------------------------------+----------+-----------+
+        |             METRIC             | BASELINE | CANDIDATE |
+        +--------------------------------+----------+-----------+
+        | iter8-istio/mean-latency       |  106.228 |    44.644 |
+        | (milliseconds)                 |          |           |
+        +--------------------------------+----------+-----------+
+        | request-count                  | 1094.074 |   158.126 |
+        +--------------------------------+----------+-----------+
+        | iter8-istio/error-rate         |    0.000 |     0.000 |
+        +--------------------------------+----------+-----------+
         ``` 
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~2 mins), you will see the experiment stage change from `Running` to `Completed`.
@@ -386,6 +377,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     As the experiment progresses, you should see traffic progressively shift from `productpage-v1` to `productpage-v3`. When the experiment completes, all of the traffic will be sent to the winner, `productpage-v3`.
 
 ## 8. Cleanup
+
 ```shell
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
