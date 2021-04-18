@@ -36,7 +36,7 @@ theme:
         icon: material/toggle-switch-off-outline
         name: Switch to dark mode
     - scheme: slate
-      primary: red
+      primary: pink
       accent: red
       toggle:
         icon: material/toggle-switch
