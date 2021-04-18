@@ -11,12 +11,12 @@ edit_uri: edit/master/mkdocs/docs
 
 # Configuration
 theme:
-  name: null
-  custom_dir: ../material
+  name: material
+  custom_dir: overrides
 
   # 404 page
-  static_templates:
-  - 404.html
+  # static_templates:
+  # - 404.html
 
   # Don't include MkDocs' JavaScript
   include_search_page: false
@@ -29,24 +29,23 @@ theme:
   - navigation.sections
   - navigation.tabs
   palette:
-  - scheme: default
-    primary: black
-    accent: indigo
-    toggle:
-      icon: material/toggle-switch-off-outline
-      name: Switch to dark mode
-  - scheme: slate
-    primary: pink
-    accent: red
-    toggle:
-      icon: material/toggle-switch
-      name: Switch to light mode
+    - scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
   font:
     text: Roboto
     code: Roboto Mono
-  favicon: assets/images/favicon.png
-  icon:
-    logo: logo
+  favicon: images/favicon.png
+  logo: images/logo.svg
 
 # Plugins
 plugins:
