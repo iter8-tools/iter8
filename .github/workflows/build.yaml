@@ -5,12 +5,8 @@ on:
     paths:
     - '.github/workflows/**'
     - 'mkdocs/**'
-    - 'src/**'
-    - 'package-lock.json'
-    - 'package.json'
 
 env:
-  NODE_VERSION: 15.x
   PYTHON_VERSION: 3.x
 
 jobs:
@@ -20,15 +16,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
-    - name: Set up Node.js runtime
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-
-    - name: Set up Node.js dependencies and build material theme
-      run: | 
-        npm install && npm run build
 
     - name: Set up Python runtime
       uses: actions/setup-python@v1
