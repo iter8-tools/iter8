@@ -9,23 +9,8 @@ We are delighted that you are considering a contribution to Iter8!
 
 Please discuss the change you wish to make using [issues](https://github.com/iter8-tools/iter8/issues), [discussions](https://github.com/iter8-tools/iter8/discussions), or the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) before submitting your PR.
 
-## Locally building the material theme
-Iter8 documentation is built by extending the Material theme provided by [Matarial for MkDocs](https://squidfunk.github.io/mkdocs-material/). Follow the instructions below to build the material theme locally.
-
-**Pre-requisite:** [Node.js 15+](https://nodejs.org/en/)
-
-**Note:** Fork Iter8 repo, clone your fork, and run the commands below. This step is required to build Iter8 docs locally for the first time. This step is also required after you locally change static assets like images. Assuming neither of the above conditions are true, if you are making changes to the markdown files only, you may skip this step.
-
-```shell
-cd iter8
-git update-index --assume-unchanged package-lock.json
-npm install && npm run build
-```
-
 ## Locally serving Iter8 docs
 **Pre-requisite:** Python 3+. 
-
-Build the material theme locally following [these instructions](#locally-building-the-material-theme).
 
 Use a Python  3 virtual environment to locally serve Iter8 docs as follows.
 
