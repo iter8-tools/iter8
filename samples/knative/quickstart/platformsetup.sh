@@ -30,8 +30,7 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
 fi
 
 # Step 1: Export correct tags for install artifacts
-export GIT_ACCOUNT="${GIT_ACCOUNT:-iter8-tools}"
-export TAG="${TAG:-v0.3.0}"
+export TAG="${TAG:-v0.3.2}"
 export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
 echo "TAG = $TAG"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
@@ -116,13 +115,11 @@ fi
 
 # Step 5: Install Iter8
 echo "Installing Iter8 with Knative support"
-curl -s https://raw.githubusercontent.com/${GIT_ACCOUNT}/iter8-install/${TAG}/install.sh | bash
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 
-# Step 6: Install sample metrics for Knative and Iter8's Prometheus add-on
-echo "Installing sample metrics"
-kubectl apply -f https://raw.githubusercontent.com/${GIT_ACCOUNT}/iter8-install/${TAG}/metrics/build.yaml
+# Step 6: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
-curl -s https://raw.githubusercontent.com/${GIT_ACCOUNT}/iter8-install/${TAG}/install-prom-add-on.sh | bash
+curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh | bash
 
 # Step 7: Verify Iter8 installation
 echo "Verifying installation"
