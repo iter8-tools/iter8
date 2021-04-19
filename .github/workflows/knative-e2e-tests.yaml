@@ -74,6 +74,11 @@ jobs:
 
     - uses: azure/setup-helm@v1
 
+    - name: RBAC rules for helm
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f ${ITER8}/samples/knative/canaryprogressive/helm-rbac.yaml
+
     - name: create Knative app with canary
       run: |
         export ITER8=$(pwd)
