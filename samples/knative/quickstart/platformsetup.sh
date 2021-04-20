@@ -30,7 +30,7 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
 fi
 
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.3.0}"
+export TAG="${TAG:-v0.3.2}"
 export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
 echo "TAG = $TAG"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
@@ -114,7 +114,7 @@ fi
 ### Note: the preceding steps perform domain install; following steps perform Iter8 install
 
 # Step 5: Install Iter8
-echo "Installing Iter8"
+echo "Installing Iter8 with Knative support"
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 
 # Step 6: Install Iter8's Prometheus add-on

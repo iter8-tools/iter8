@@ -56,6 +56,8 @@ export ITER8=$(pwd)
 ## 3. Install Knative and Iter8
 Knative can work with multiple networking layers. So can Iter8's Knative extension. Choose a networking layer for Knative.
 
+This also installs sample metrics for Knative and Iter8's Prometheus add-on. These optional components are used by the sample experiment below.
+
 === "Contour"
 
     ```shell
@@ -194,8 +196,9 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
       strategy:
         # this experiment will perform a canary test
         testingPattern: Canary
+        deploymentPattern: Progressive
         actions:
-          start: # run a sequence of tasks at the start of the experiment
+          start: # run the following sequence of tasks at the start of the experiment
           - task: knative/init-experiment
           finish: # run the following sequence of tasks at the end of the experiment
           - task: common/exec # promote the winning version
@@ -206,6 +209,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
               - "-f"
               - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
       criteria:
+        requestCount: iter8-knative/request-count
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
@@ -221,22 +225,20 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
         iterationsPerLoop: 10
       versionInfo:
         # information about app versions used in this experiment
-      baseline:
-        name: current
-        variables:
-        # variables are used when querying metrics and when interpolating task inputs
-        - name: revision
-          value: sample-app-v1 
-        - name: promote
-          value: baseline
-      candidates:
-      - name: candidate
-        variables:
-        # variables are used when querying metrics and when interpolating task inputs
-        - name: revision
-          value: sample-app-v2
-        - name: promote
-          value: candidate 
+        baseline:
+          name: current
+          variables:
+          - name: revision
+            value: sample-app-v1
+          - name: promote
+            value: baseline
+        candidates:
+        - name: candidate
+          variables:
+          - name: revision
+            value: sample-app-v2
+          - name: promote
+            value: candidate
     ```
 
 The process automated by Iter8 during this experiment is depicted below.

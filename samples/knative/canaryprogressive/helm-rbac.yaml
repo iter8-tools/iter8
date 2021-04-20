@@ -1,0 +1,53 @@
+# This role enables writing secrets; 
+# Iter8 handler uses this role during Helm release tasks
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: iter8-secret-writer
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs: ["create", "update", "patch", "delete"]
+---
+# Helm v3 uses secrets to store Helm release information.
+# 
+# By default, when Helm is used within Iter8 experiments, secrets 
+# will be located in the default namespace.
+#
+# This role binding enables Iter8 handler to read 
+# secrets in the default namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-reader-handler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: iter8-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: iter8-handlers
+  namespace: iter8-system
+---
+# Helm v3 uses secrets to store Helm release information.
+# 
+# By default, when Helm is used within Iter8 experiments, secrets 
+# will be located in the default namespace.
+#
+# This role binding enables Iter8 handler to write 
+# secrets in the default namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-writer-handler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: iter8-secret-writer
+subjects:
+- kind: ServiceAccount
+  name: iter8-handlers
+  namespace: iter8-system
+---

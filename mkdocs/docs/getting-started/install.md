@@ -15,62 +15,18 @@ title: Installation
 Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
-export TAG=v0.3.0
+export TAG=v0.3.2
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 ```
-
-??? info "Look inside install.sh"
-    ```shell
-    #!/bin/bash
-
-    set -e
-
-    # Step 0: Export TAG
-    export TAG="${TAG:-v0.3.0}"
-
-    # Step 1: Install Iter8
-    echo "Installing Iter8"
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
-    kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/metrics/build.yaml
-
-    echo "Verifying Iter8 installation"
-    kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-
-    set +e
-    ```        
 
 ## (Optional) Step 2: Prometheus add-on
 
 Install Iter8's Prometheus add-on in your cluster as follows. This step assumes you have installed Iter8 following Step 1 above.
 
 ```shell
-export TAG=v0.3.0
+export TAG=v0.3.2
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh | bash
 ```
-
-??? info "Look inside install-prom-add-on.sh"
-    ```shell
-    #!/bin/bash
-
-    set -e
-
-    # Step 0: Export TAG
-    export TAG="${TAG:-v0.3.0}"
-
-    # Step 1: Install Prometheus add-on
-    # This step assumes you have installed Iter8 using install.sh
-    echo "Installing Prometheus add-on"
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
-    kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
-    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
-
-    echo "Verifying Prometheus-addon installation"
-    kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-
-    set +e
-    ```
 
 ??? note "Running Iter8 tutorials without Iter8's Prometheus add-on"
     When you installed Iter8 in the first step above, you also installed several *out-of-the-box* Iter8 metric resources. They are required for running the tutorials documented on this site. 

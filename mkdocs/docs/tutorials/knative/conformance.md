@@ -16,7 +16,7 @@ You will create the following resources in this tutorial.
 3. An **Iter8 experiment** that verifies that `baseline` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Iter8 sample metrics for Knative, and Prometheus installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 

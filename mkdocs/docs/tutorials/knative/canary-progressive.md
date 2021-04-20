@@ -19,7 +19,7 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Helm
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have Kubernetes cluster with Iter8 and Knative installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Iter8 sample metrics for Knative, and Prometheus installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -27,11 +27,19 @@ You will create the following resources in this tutorial.
 
     **[Helm v3](https://helm.sh/) and [`iter8ctl`](../../../getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Helm v3 and `iter8ctl`.
 
-## 1. Create versions
+## 1. Give Permission to Iter8 to Call `helm upgrade`
+
+Helm uses secrets to record information about releases. This tutorial uses an experiment that invokes Helm. Enable this experiment using the following RBAC.
+
 ```shell
-helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=iter8-system
+kubectl apply -f ${ITER8}/samples/knative/canaryprogressive/helm-rbac.yaml
+```
+
+## 2. Create versions
+```shell
+helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=default
 kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
-helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=iter8-system
+helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=default
 ```
 
 ??? info "Look inside values.yaml"
@@ -60,7 +68,7 @@ helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter
       percent: 0
     ```
 
-## 2. Generate requests
+## 3. Generate requests
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
@@ -98,7 +106,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio
           restartPolicy: Never    
     ```
 
-## 3. Create Iter8 experiment
+## 4. Create Iter8 experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 ```
@@ -134,7 +142,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
               - "--repo"
               - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
               - "sample-app" # release name
-              - "--namespace=iter8-system" # release namespace
+              - "--namespace=default" # release namespace
               - "sample-app" # chart name
               - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
       criteria:
@@ -152,7 +160,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         intervalSeconds: 10
         iterationsPerLoop: 10
       versionInfo:
-        # information about versions used in this experiment
+        # information about app versions used in this experiment
         baseline:
           name: current
           variables:
@@ -166,10 +174,10 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
           - name: revision
             value: sample-app-v2
           - name: promote
-            value: candidate   
+            value: candidate
     ```
 
-## 4. Observe experiment
+## 5. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "iter8ctl"
@@ -203,16 +211,16 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
     As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
         
-## 5. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml
-helm uninstall sample-app --namespace=iter8-system
+helm uninstall sample-app --namespace=default
 ```
 
 ???+ info "Understanding what happened"
     1. You created a Knative service using `helm install` subcommand and upgraded the service to have two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `helm upgrade --install` subcommand. 
-    2. The ksvc is created in the `default` namespace. Helm release information is located in the `iter8-system` namespace as specified by the `--namespace=iter8-system` flag.
+    2. The ksvc is created in the `default` namespace. Likewise, the Helm release information is located in the `default` namespace as specified by the `--namespace=default` flag.
     3. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to baseline and 0% to candidate.
     4. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `helm upgrade --install` subcommand.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
