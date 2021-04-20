@@ -132,6 +132,7 @@ nav:
     - Generating requests externally: tutorials/traffic.md
   - Metrics:
     - Using metrics in experiments: metrics/using-metrics.md
+    - Creating new Iter8 metrics: metrics/creating-new-iter8-metrics.md
   - Reference:
     - Iter8 API specification: reference/apispec.md
   - Contributing: contributing.md
