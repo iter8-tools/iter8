@@ -27,7 +27,7 @@ spec:
           - "--repo"
           - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
           - "sample-app" # release name
-          - "--namespace=iter8-system" # release namespace
+          - "--namespace=default" # release namespace
           - "sample-app" # chart name
           - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
   criteria:

@@ -37,9 +37,9 @@ kubectl apply -f ${ITER8}/samples/knative/canaryprogressive/helm-rbac.yaml
 
 ## 2. Create versions
 ```shell
-helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=iter8-system
+helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=default
 kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
-helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=iter8-system
+helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=default
 ```
 
 ??? info "Look inside values.yaml"
@@ -215,7 +215,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 ```shell
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml
-helm uninstall sample-app --namespace=iter8-system
+helm uninstall sample-app --namespace=default
 ```
 
 ???+ info "Understanding what happened"

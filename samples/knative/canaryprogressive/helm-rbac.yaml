@@ -25,10 +25,10 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: secret-reader
+  name: iter8-secret-reader
 subjects:
 - kind: ServiceAccount
-  name: handlers
+  name: iter8-handlers
   namespace: iter8-system
 ---
 # Helm v3 uses secrets to store Helm release information.
@@ -45,9 +45,9 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: secret-writer
+  name: iter8-secret-writer
 subjects:
 - kind: ServiceAccount
-  name: handlers
+  name: iter8-handlers
   namespace: iter8-system
 ---
