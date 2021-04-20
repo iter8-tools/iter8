@@ -14,10 +14,10 @@ rules:
 # Helm v3 uses secrets to store Helm release information.
 # 
 # By default, when Helm is used within Iter8 experiments, secrets 
-# will be located in the Iter8 namespace.
+# will be located in the default namespace.
 #
 # This role binding enables Iter8 handler to read 
-# secrets in the namespace where Iter8 is installed
+# secrets in the default namespace.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -34,10 +34,10 @@ subjects:
 # Helm v3 uses secrets to store Helm release information.
 # 
 # By default, when Helm is used within Iter8 experiments, secrets 
-# will be located in the Iter8 namespace.
+# will be located in the default namespace.
 #
 # This role binding enables Iter8 handler to write 
-# secrets in the namespace where Iter8 is installed
+# secrets in the default namespace.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
