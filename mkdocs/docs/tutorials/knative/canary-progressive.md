@@ -142,7 +142,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
               - "--repo"
               - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
               - "sample-app" # release name
-              - "--namespace=iter8-system" # release namespace
+              - "--namespace=default" # release namespace
               - "sample-app" # chart name
               - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
       criteria:
@@ -160,7 +160,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
         intervalSeconds: 10
         iterationsPerLoop: 10
       versionInfo:
-        # information about versions used in this experiment
+        # information about app versions used in this experiment
         baseline:
           name: current
           variables:
@@ -174,7 +174,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
           - name: revision
             value: sample-app-v2
           - name: promote
-            value: candidate   
+            value: candidate
     ```
 
 ## 5. Observe experiment
@@ -220,7 +220,7 @@ helm uninstall sample-app --namespace=default
 
 ???+ info "Understanding what happened"
     1. You created a Knative service using `helm install` subcommand and upgraded the service to have two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `helm upgrade --install` subcommand. 
-    2. The ksvc is created in the `default` namespace. Helm release information is located in the `iter8-system` namespace as specified by the `--namespace=iter8-system` flag.
+    2. The ksvc is created in the `default` namespace. Likewise, the Helm release information is located in the `default` namespace as specified by the `--namespace=default` flag.
     3. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to baseline and 0% to candidate.
     4. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `helm upgrade --install` subcommand.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
