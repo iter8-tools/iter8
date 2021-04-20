@@ -14,7 +14,7 @@ Iter8 makes it easy to achieve the following goals.
 - **Progressive** traffic shifting.
 - **Dark launches**, **traffic mirroring** and **traffic segmentation**.
 - Use Helm, Kustomize, and plain YAML/JSON for defining your app manifests.
-- Use out-of-the-box metrics or define custom metrics based on data in **Prometheus**.
+- Use metrics from any RESTful provider such as Prometheus, NewRelic, Sysdig, and Elastic.
 - Statistically rigorous evaluation of versions, traffic splitting, and promotion/rollback decisions using **Bayesian learning** and **multi-armed bandit** algorithms.
 - Observe experiments in realtime.
 

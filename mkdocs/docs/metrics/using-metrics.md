@@ -5,7 +5,7 @@ template: main.html
 # Using Metrics in Experiments
 
 !!! tip "Iter8 metrics API"    
-    Iter8 defines a new Kubernetes resource called Metric that makes it easy to use metrics in experiments from RESTful metric backends like Prometheus, New Relic, Sysdig and Elastic.
+    Iter8 defines a new Kubernetes resource called Metric that makes it easy to use metrics in experiments from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic.
 
     List metrics available in your cluster using the `kubectl get metrics.iter8.tools` command. Use metrics in experiments by referencing them in experiment criteria.
 

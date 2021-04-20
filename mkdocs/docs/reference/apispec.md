@@ -8,7 +8,7 @@ template: main.html
     The Iter8 API provides two [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to automate metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
     1. The **Experiment** resource provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic shaping, and version promotion functions](../../../concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](../../../tutorials/knative/canary-progressive/).
-    2. The **Metric** resource encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics backend. Metrics are referenced in experiments.
+    2. The **Metric** resource encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics provider. Metrics are referenced in experiments.
 
 
 !!! note "API Version"    
@@ -132,14 +132,14 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 #### Spec
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a string template with placeholders, which will be interpolated by Iter8 at query time. | No |
+| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics provider. Each name represents a parameter name; the corresponding value is a string template with placeholders, which will be interpolated by Iter8 at query time. | No |
 | description | string | Human readable description. | No |
 | units | string | Units of measurement. Units are used only for display purposes. | No |
 | type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
 | sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace of the referring metric. | No |
-| provider | string | Type of the metrics database. Provider is used only for display purposes. | No |
-| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response of the metrics backend to a metrics query. | Yes |
-| secret | string | Reference to a secret that contains information used for authenticating with the metrics database. In particular, Iter8 uses data in this secret to interpolate the HTTP headers and URL while querying the database. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace where Iter8 is installed (which is `iter8-system` by default). | No |
+| provider | string | Type of the metrics provider. Provider is used only for display purposes. | No |
+| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response of the metrics provider to a metrics query. | Yes |
+| secret | string | Reference to a secret that contains information used for authenticating with the metrics provider. In particular, Iter8 uses data in this secret to interpolate the HTTP headers and URL while querying the provider. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace where Iter8 is installed (which is `iter8-system` by default). | No |
 | headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtime with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | No |
 | urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | Yes |
 
