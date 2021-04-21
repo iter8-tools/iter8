@@ -19,7 +19,7 @@ hide:
     
     Assuming the new version is validated, Iter8 will progressively increase the traffic percentage for the new version and promote it at the end as depicted below.
 
-    ![Canary](../../images/istio-canary-progressive-kubectl.png)
+    ![Canary](../../images/istio-canary-progressive-kubectl-iter8.png)
 
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
@@ -150,7 +150,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
               mountPath: /shared
           - name: busybox
             image: busybox:1.28
-            command: ['sh', '-c', 'echo busybox is running! && sleep 600']
+            command: ['sh', '-c', 'echo busybox is running! && sleep 6000']
             volumeMounts:
             - name: shared
               mountPath: /shared
