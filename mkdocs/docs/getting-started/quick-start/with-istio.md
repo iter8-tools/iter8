@@ -19,7 +19,7 @@ hide:
     
     Assuming the new version is validated, Iter8 will progressively increase the traffic percentage for the new version and promote it at the end as depicted below.
 
-    ![Canary](../../images/canary-progressive-kubectl.png)
+    ![Canary](../../images/istio-canary-progressive-kubectl.png)
 
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
@@ -65,7 +65,7 @@ Prometheus add-on and the (Prometheus-based) sample metrics for Istio.
 
 ```shell
 export GIT_ACCOUNT=kalantar
-export TAG=istio
+export TAG=istio-stack
 $ITER8/samples/istio/quickstart/platformsetup.sh
 ```
 
@@ -252,7 +252,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
 
 The process automated by Iter8 during this experiment is depicted below.
 
-![Iter8 automation](../../images/canary-progressive-kubectl-iter8.png)
+![Iter8 automation](../../images/istio-canary-progressive-kubectl-iter8.png)
 
 ## 7. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
