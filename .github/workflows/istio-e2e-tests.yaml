@@ -28,7 +28,7 @@ jobs:
         export ITER8=$(pwd)
         export GIT_ACCOUNT=kalantar
         export TAG=istio-stack
-        $ITER8/samples/istio/quickstart/platformsetup.sh contour
+        $ITER8/samples/istio/quickstart/platformsetup.sh
 
     - name: create bookinfo namespace, application, and microservice versions; readiness check
       run: |
