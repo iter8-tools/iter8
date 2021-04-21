@@ -12,7 +12,7 @@ This document describes how an end-user can define new Iter8 metrics and supply 
 * Format of the JSON response returned by the provider
 * The `jq` expression used by Iter8 to extract the metric value from the JSON response
 
-## Defining metrics and supplying authentication information
+## Defining metrics and authentication information
 
 Metrics are defined by end-users, and referenced within experiment specifications. Authentication info (optional) is also supplied by end-users.
 
