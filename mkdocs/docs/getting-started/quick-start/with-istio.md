@@ -80,50 +80,29 @@ kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
 ```
 
-??? info "Look inside baseline.yaml"
+??? info "Look inside `productpage-v1` configuration"
+    The environment variables used to configure the service define the text color.
     ```yaml linenums="1"
-    apiVersion: serving.knative.dev/v1
-    kind: Service
-    metadata:
-      name: sample-app
-      namespace: default
-    spec:
-      template:
-        metadata:
-          name: sample-app-v1
-        spec:
-          containers:
-          - image: gcr.io/knative-samples/knative-route-demo:blue 
-            env:
-            - name: T_VERSION
-              value: "blue"
+    env:
+    - name: color
+      value: "red"
+    - name: reward_min
+      value: "0"
+    - name: reward_max
+      value: "5"
     ```
 
-??? info "Look inside experimentalservice.yaml"
+??? info "Look inside `productpage-v3` configuration"
     ```yaml linenums="1"
-    apiVersion: serving.knative.dev/v1
-    kind: Service
-    metadata:
-      name: sample-app # name of the app
-      namespace: default # namespace of the app
-    spec:
-      template:
-        metadata:
-          name: sample-app-v2
-        spec:
-          containers:
-          - image: gcr.io/knative-samples/knative-route-demo:green 
-            env:
-            - name: T_VERSION
-              value: "green"
-      traffic:
-      # initially all traffic goes to sample-app-v1 and none to sample-app-v2
-      - tag: current
-        revisionName: sample-app-v1
-        percent: 100
-      - tag: candidate
-        latestRevision: true
-        percent: 0
+    The environment variables used to configure the service define the text color.
+    ```yaml linenums="1"
+    env:
+    - name: color
+      value: "green"
+    - name: reward_min
+      value: "10"
+    - name: reward_max
+      value: "20"
     ```
 
 ## 5. Generate requests
@@ -155,7 +134,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
               - fortio
               - load
               - -t
-              - 600s
+              - 6000s
               - -qps
               - "16"
               - -json
@@ -176,7 +155,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
             - name: shared
               mountPath: /shared
           restartPolicy: Never
-          ```
+    ```
 
 ## 6. Launch Iter8 experiment
 Launch the Iter8 experiment. Iter8 will orchestrate the canary release of the new version with SLO validation and progressive deployment as specified in the experiment.
@@ -344,7 +323,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 === "kubectl get virtualservice"
 
     ```shell
-    kubectl --namespace bookinfo-iter8 get virtualservice bookinfo -o json \
+    kubectl --namespace bookinfo-iter8 get virtualservice bookinfo -o json --watch \
       | jq .spec.http[0].route
     ```
 
