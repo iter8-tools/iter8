@@ -37,7 +37,7 @@ jobs:
         kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
         kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v3.yaml
         kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
-        kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods
+        kubectl -n bookinfo-iter8 wait --for=condition=Ready pods --all --timeout=240s
 
     - name: create Fortio job and create experiment
       run: |

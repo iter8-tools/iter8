@@ -109,7 +109,7 @@ kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gate
 In a production environment, your application would receive requests from end-users. For the purposes of this tutorial, simulate user requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
 ```shell
-kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods
+kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods --all
 # URL_VALUE is the URL where your Knative application serves requests
 URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o jsonpath='{.spec.clusterIP}'):80/productpage"
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | kubectl apply -f -
