@@ -18,11 +18,11 @@ kubectl get metrics.iter8.tools --all-namespaces
 
 ```shell
 NAMESPACE       NAME                           TYPE      DESCRIPTION
-iter8-knative   95th-percentile-tail-latency   gauge     95th percentile tail latency
-iter8-knative   error-count                    counter   Number of error responses
-iter8-knative   error-rate                     gauge     Fraction of requests with error responses
-iter8-knative   mean-latency                   gauge     Mean latency
-iter8-knative   request-count                  counter   Number of requests
+iter8-knative   95th-percentile-tail-latency   Gauge     95th percentile tail latency
+iter8-knative   error-count                    Counter   Number of error responses
+iter8-knative   error-rate                     Gauge     Fraction of requests with error responses
+iter8-knative   mean-latency                   Gauge     Mean latency
+iter8-knative   request-count                  Counter   Number of requests
 ```
 
 ## Referencing metrics

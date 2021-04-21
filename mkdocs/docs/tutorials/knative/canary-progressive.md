@@ -144,7 +144,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
               - "sample-app" # release name
               - "--namespace=default" # release namespace
               - "sample-app" # chart name
-              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
+              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # placeholder 'promote' is dynamically substituted
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
