@@ -22,7 +22,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.3.2}"
+export TAG="${TAG:-v0.3.3}"
 export ISTIO_VERSION="${ISTIO_VERSION:-1.9.3}"
 echo "TAG = $TAG"
 echo "ISTIO_TAG = $ISTIO_VERSION"
