@@ -304,7 +304,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
                     ]
                   }
                 },
-                "items-to-sell": {
+                "items_to_sell": {
                   "filter": { "term": { "version": "${revision}" } },
                   "aggs": {
                     "avg_sales": { "avg": { "field": "sale_price" } }
@@ -319,15 +319,15 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
           headerTemplates:
           - name: Content-Type
             value: application/json
-          jqExpression: ".data[0].d[0] | tonumber"
+          jqExpression: ".aggregations.items_to_sell.avg_sales.value | tonumber"
           urlTemplate: https://secure.elastic.com/my/sales
       ```
 
-  ???+ hint "Brief explanation of the `average sales` metric"
-      1. Elastic enables metric queries using GET or POST requests. In the elastic example, The method field of the Iter8 metric is set to POST.
-      2. Iter8 will query Elastic during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
-      3. The HTTP query used by Iter8 contains a JSON body as [required by Elastic](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html). This JSON body is derived by [substituting the placeholders](#placeholder-substitution) in body template.
-      4. The `urlTemplate` field provides the URL of the Elastic service.
+    ???+ hint "Brief explanation of the `average sales` metric"
+        1. Elastic enables metric queries using GET or POST requests. In the elastic example, The method field of the Iter8 metric is set to POST.
+        2. Iter8 will query Elastic during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
+        3. The HTTP query used by Iter8 contains a JSON body as [required by Elastic](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html). This JSON body is derived by [substituting the placeholders](#placeholder-substitution) in body template.
+        4. The `urlTemplate` field provides the URL of the Elastic service.
 
 ## Placeholder substitution
 
@@ -425,7 +425,7 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
             ]
           }
         },
-        "items-to-sell": {
+        "items_to_sell": {
           "filter": { "term": { "version": "sample-app-v1" } },
           "aggs": {
             "avg_sales": { "avg": { "field": "sale_price" } }
@@ -437,7 +437,7 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
 
 The placeholder `$elapsedTime` has been substituted with 600, which is the time elapsed since the start of the experiment. The other placeholders have been substituted based on information associated with the baseline version in the experiment. Iter8 builds and sends an HTTP request in a similar manner for the candidate version as well.
 
-## JSON response format
+## JSON response
 
 > **Note:** This step is handled by the **metrics provider**.
 
@@ -522,7 +522,7 @@ The metrics provider is expected to respond to Iter8's HTTP request with a JSON 
     ```json linenums="1"
     {
       "aggregations": {
-        "items-to-sell": {
+        "items_to_sell": {
           "doc_count": 3,
           "avg_sales": { "value": 128.33333333333334 }
         }
@@ -537,7 +537,7 @@ The metrics provider is expected to respond to Iter8's HTTP request with a JSON 
 Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from the JSON response of the provider. The `jqExpression` used by Iter8 is supplied as part of the metric definition. When the `jqExpression` is applied to the JSON response, it is expected to yield a number.
 
 === "Prometheus"
-    Consider the `jqExpression` defined in the [sample Prometheus metric](#defining-metrics). Let us apply it to the [sample JSON response from Prometheus](#json-response-format).
+    Consider the `jqExpression` defined in the [sample Prometheus metric](#defining-metrics). Let us apply it to the [sample JSON response from Prometheus](#json-response).
     ```shell
     echo '{
       "status": "success",
@@ -554,7 +554,7 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `21.7639`, a number, as required by Iter8. 
     
 === "New Relic"
-    Consider the `jqExpression` defined in the [sample New Relic metric](#defining-metrics). Let us apply it to the [sample JSON response from New Relic](#json-response-format).
+    Consider the `jqExpression` defined in the [sample New Relic metric](#defining-metrics). Let us apply it to the [sample JSON response from New Relic](#json-response).
     ```shell
     echo '{
       "results": [
@@ -596,7 +596,7 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `80275388`, a number, as required by Iter8. 
     
 === "Sysdig"
-    Consider the `jqExpression` defined in the [sample Prometheus metric](#defining-metrics). Let us apply it to the [sample JSON response from Prometheus](#json-response-format).
+    Consider the `jqExpression` defined in the [sample Prometheus metric](#defining-metrics). Let us apply it to the [sample JSON response from Prometheus](#json-response).
     ```shell
     echo '{
         "data": [
@@ -614,16 +614,16 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `6.481`, a number, as required by Iter8. 
 
 === "Elastic"
-    Consider the `jqExpression` defined in the [sample Elastic metric](#defining-metrics). Let us apply it to the [sample JSON response from Elastic](#json-response-format).
+    Consider the `jqExpression` defined in the [sample Elastic metric](#defining-metrics). Let us apply it to the [sample JSON response from Elastic](#json-response).
     ```shell
     echo '{
       "aggregations": {
-        "items-to-sell": {
+        "items_to_sell": {
           "doc_count": 3,
           "avg_sales": { "value": 128.33333333333334 }
         }
       }
-    }' | jq ".aggregations.items-to-sell.avg_sales.value | tonumber"
+    }' | jq ".aggregations.items_to_sell.avg_sales.value | tonumber"
     ```
     Executing the above command results yields `128.33333333333334`, a number, as required by Iter8. 
 
