@@ -2,19 +2,22 @@
 template: main.html
 ---
 
-# Creating New Iter8 Metrics
+# Defining Iter8 Metrics
 
-This document describes how an end-user can define new Iter8 metrics and (optionally) supply authentication information that may be required for querying the metrics provider. The samples provided in this document differ in the following aspects.
+This document describes how you can create Iter8 metrics and (optionally) supply authentication information that may be required by the metrics provider.
 
-* Providers[^1]: Prometheus, NewRelic, Sysdig, or Elastic
+Metric providers differ in the following aspects.
+
 * HTTP request authentication method: no authentication, basic auth, API keys, or bearer token
 * HTTP request method: GET or POST
 * Format of the JSON response returned by the provider
 * The `jq` expression used by Iter8 to extract the metric value from the JSON response
 
+The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic. However, the principles illustrated here will enable you to use metrics from any provider in experiments.
+
 ## Defining metrics
 
-> **Note:** Metrics are defined by the **end-user**.
+> **Note:** Metrics are defined by you, the **Iter8 end-user**.
 
 === "Prometheus"
 
@@ -29,13 +32,13 @@ This document describes how an end-user can define new Iter8 metrics and (option
         metadata:
           name: request-count
         spec:
+          description: A Prometheus example
+          provider: prometheus
           params:
           - name: query
             value: >-
               sum(increase(revision_app_request_latencies_count{service_name='${name}',${userfilter}}[${elapsedTime}s])) or on() vector(0)
-          description: A Prometheus example
           type: Counter
-          provider: prometheus
           jqExpression: ".data.result[0].value[1] | tonumber"
           urlTemplate: http://myprometheusservice.com/api/v1
         ```
@@ -50,7 +53,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
 
         You can then enable Iter8 to query this Prometheus instance as follows.
 
-        1. **Create secret:** Create a Kubernetes secret containing the authentication information. In particular, this secret needs to have `username` and `password` keys in the `data` section.
+        1. **Create secret:** Create a Kubernetes secret that contains the authentication information. In particular, this secret needs to have the `username` and `password` fields in the `data` section with correct values.
         ```shell
         kubectl create secret generic promcredentials -n myns --from-literal=username=produser --from-literal=password=t0p-secret
         ```
@@ -61,21 +64,22 @@ This document describes how an end-user can define new Iter8 metrics and (option
         ```
 
         3. **Define metric:** When defining the metric, ensure that the `authType` field is set to `Basic` and the appropriate `secret` is referenced.
+
         ```yaml linenums="1"
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
         metadata:
           name: request-count
         spec:
+          description: A Prometheus example
+          provider: prometheus
           params:
           - name: query
             value: >-
               sum(increase(revision_app_request_latencies_count{service_name='${name}',${userfilter}}[${elapsedTime}s])) or on() vector(0)
-          description: A Prometheus example
           type: Counter
           authType: Basic
           secret: myns/promcredentials
-          provider: prometheus
           jqExpression: ".data.result[0].value[1] | tonumber"
           urlTemplate: https://my.secure.prometheus.service.com/api/v1
         ```
@@ -87,7 +91,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
         4. The `urlTemplate` field provides the URL of the prometheus service.
 
 === "New Relic"
-    New Relic uses API Keys to authenticate requests as documented [here](https://docs.newrelic.com/docs/apis/rest-api-v2/get-started/introduction-new-relic-rest-api-v2/). The API key may be directly specified within the metric, or supplied as part of a Kubernetes secret.
+    New Relic uses API Keys to authenticate requests as documented [here](https://docs.newrelic.com/docs/apis/rest-api-v2/get-started/introduction-new-relic-rest-api-v2/). The API key may be directly embedded within the Iter8 metric, or supplied as part of a Kubernetes secret.
 
     === "API key embedded in metric"
         The following is an example of an Iter8 metric with Prometheus as the provider. In this example, `t0p-secret-api-key` is the New Relic API key.
@@ -98,21 +102,21 @@ This document describes how an end-user can define new Iter8 metrics and (option
         metadata:
           name: name-count
         spec:
+          description: A New Relic example
+          provider: newrelic
           params:
           - name: nrql
             value: >-
               SELECT count(appName) FROM PageView WHERE revisionName='${revision}' SINCE ${elapsedTime} seconds ago
-          description: A New Relic example
           type: Counter
           headerTemplates:
           - name: X-Query-Key
             value: t0p-secret-api-key
-          provider: newrelic
           jqExpression: ".results[0].count | tonumber"
           urlTemplate: https://insights-api.newrelic.com/v1/accounts/my_account_id
         ```
 
-    === "API key within K8s secret"
+    === "API key embedded in secret"
         Suppose your New Relic API key is `t0p-secret-api-key`; you wish to store this API key in a Kubernetes secret, and reference this secret in an Iter8 metric. You can do so as follows.
 
         1. **Create secret:** Create a Kubernetes secret containing the API key.
@@ -134,18 +138,18 @@ This document describes how an end-user can define new Iter8 metrics and (option
         metadata:
           name: name-count
         spec:
+          description: A New Relic example
+          provider: newrelic
           params:
           - name: nrql
             value: >-
               SELECT count(appName) FROM PageView WHERE revisionName='${revision}' SINCE ${elapsedTime} seconds ago
-          description: A New Relic example
           type: Counter
           authType: APIKey
           secret: myns/nrcredentials
           headerTemplates:
           - name: X-Query-Key
             value: ${mykey}
-          provider: newrelic
           jqExpression: ".results[0].count | tonumber"
           urlTemplate: https://insights-api.newrelic.com/v1/accounts/my_account_id
         ```
@@ -157,12 +161,106 @@ This document describes how an end-user can define new Iter8 metrics and (option
         4. The `urlTemplate` field provides the URL of the New Relic service.
 
 === "Sysdig"
-    Conformance testing involves a single version, a baseline. If it is validated (i.e., it satisfies objectives) then baseline is the winner; else, there is no winner.
+    Sysdig data API accepts HTTP POST requests and uses a bearer token for authentication as documented [here](https://docs.sysdig.com/en/sysdig-rest-api-conventions.html). The bearer token may be directly embedded within the Iter8 metric, or supplied as part of a Kubernetes secret.
 
-    ![Conformance](../images/conformance.png)
+    === "Bearer token embedded in metric"
+        The following is an example of an Iter8 metric with Sysdig as the provider. In this example, `87654321-1234-1234-1234-123456789012` is the Sysdig bearer token (also referred to as access key by Sysdig).
 
-    !!! tip ""
-        Try a [conformance experiment](../../tutorials/knative/conformance/).
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: cpu-utilization
+        spec:
+          description: A Sysdig example
+          provider: sysdig
+          body: >-
+            {
+              "last": ${elapsedTime},
+              "sampling": 600,
+              "filter": "kubernetes.app.revision.name = '${revision}'",
+              "metrics": [
+                {
+                  "id": "cpu.cores.used",
+                  "aggregations": { "time": "avg", "group": "sum" }
+                }
+              ],
+              "dataSourceType": "container",
+              "paging": {
+                "from": 0,
+                "to": 99
+              }
+            }
+          method: POST
+          type: Gauge
+          headerTemplates:
+          - name: Accept
+            value: application/json
+          - name: Authorization
+            value: Bearer 87654321-1234-1234-1234-123456789012
+          jqExpression: ".data[0].d[0] | tonumber"
+          urlTemplate: https://secure.sysdig.com/api/data
+        ```
+
+    === "Bearer token embedded in secret"
+        Suppose your Sysdig token is `87654321-1234-1234-1234-123456789012`; you wish to store this token in a Kubernetes secret, and reference this secret in an Iter8 metric. You can do so as follows.
+
+        1. **Create secret:** Create a Kubernetes secret containing the token.
+        ```shell
+        kubectl create secret generic sdcredentials -n myns --from-literal=token=87654321-1234-1234-1234-123456789012
+        ```
+        The above secret contains a data field named `token` whose value is the Sysdig token. The data field name (which can be any string of your choice) will be used in Step 3 below as a placeholder.
+
+        2. **Create RBAC rule:** Provide the required permissions for Iter8 to read this secret. The service account `iter8-analytics` in the `iter8-system` namespace will have permissions to read secrets in the `myns` namespace.
+        ```shell
+        kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics --namespace=myns
+        ```
+
+        3. **Define metric:** When defining the metric, ensure that the `authType` field is set to `Bearer` and the appropriate `secret` is referenced. In the `headerTemplates` field, include `Authorize` header field (as [required by Sysdig](https://docs.sysdig.com/en/sysdig-rest-api-conventions.html)). The value for this header field is a templated string. Iter8 will substitute the placeholder ${token} at query time, by looking up the referenced `secret` named `sdcredentials` in the `myns` namespace.
+
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: cpu-utilization
+        spec:
+          description: A Sysdig example
+          provider: sysdig
+          body: >-
+            {
+              "last": ${elapsedTime},
+              "sampling": 600,
+              "filter": "kubernetes.app.revision.name = '${revision}'",
+              "metrics": [
+                {
+                  "id": "cpu.cores.used",
+                  "aggregations": { "time": "avg", "group": "sum" }
+                }
+              ],
+              "dataSourceType": "container",
+              "paging": {
+                "from": 0,
+                "to": 99
+              }
+            }
+          method: POST
+          authType: Bearer
+          secret: myns/sdcredentials
+          type: Gauge
+          headerTemplates:
+          - name: Accept
+            value: application/json
+          - name: Authorization
+            value: Bearer ${token}
+          jqExpression: ".data[0].d[0] | tonumber"
+          urlTemplate: https://secure.sysdig.com/api/data
+        ```
+
+    ???+ hint "Brief explanation of the `cpu-utilization` metric"
+        1. Sysdig enables metric queries using both POST requests; hence, the method field of the Iter8 metric is set to POST.
+        2. Iter8 will query Sysdig during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
+        3. The HTTP query used by Iter8 contains a JSON body as [required by Sysdig](https://docs.sysdig.com/en/working-with-the-data-api.html). This JSON body is derived by [substituting the placeholders](#placeholder-substitution) in body template.
+        4. The `urlTemplate` field provides the URL of the Sysdig service.
 
 === "Elastic"
 
@@ -229,12 +327,25 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
     ```
     
 === "Sysdig"
-    Conformance testing involves a single version, a baseline. If it is validated (i.e., it satisfies objectives) then baseline is the winner; else, there is no winner.
-
-    ![Conformance](../images/conformance.png)
-
-    !!! tip ""
-        Try a [conformance experiment](../../tutorials/knative/conformance/).
+    For the baseline version, Iter8 will send an HTTP(S) request with the following JSON body:
+    ```json linenums="1"
+    {
+      "last": 600,
+      "sampling": 600,
+      "filter": "kubernetes.app.revision.name = 'sample-app-v1'",
+      "metrics": [
+        {
+          "id": "cpu.cores.used",
+          "aggregations": { "time": "avg", "group": "sum" }
+        }
+      ],
+      "dataSourceType": "container",
+      "paging": {
+        "from": 0,
+        "to": 99
+      }
+    }
+    ```
 
 === "Elastic"
 
@@ -304,12 +415,21 @@ The metrics provider is expected to respond to Iter8's HTTP request with a JSON 
     ```
     
 === "Sysdig"
-    Conformance testing involves a single version, a baseline. If it is validated (i.e., it satisfies objectives) then baseline is the winner; else, there is no winner.
-
-    ![Conformance](../images/conformance.png)
-
-    !!! tip ""
-        Try a [conformance experiment](../../tutorials/knative/conformance/).
+    The format of the Sysdig JSON response is [discussed here](https://docs.sysdig.com/en/working-with-the-data-api.html). A sample Sysdig response is as follows.
+    ```json linenums="1"
+    {
+        "data": [
+            {
+                "t": 1582756200,
+                "d": [
+                    6.481
+                ]
+            }
+        ],
+        "start": 1582755600,
+        "end": 1582756200
+    }
+    ```
 
 === "Elastic"
 
@@ -379,12 +499,22 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `80275388`, a number, as required by Iter8. 
     
 === "Sysdig"
-    Conformance testing involves a single version, a baseline. If it is validated (i.e., it satisfies objectives) then baseline is the winner; else, there is no winner.
-
-    ![Conformance](../images/conformance.png)
-
-    !!! tip ""
-        Try a [conformance experiment](../../tutorials/knative/conformance/).
+    Consider the `jqExpression` defined in the [sample Prometheus metric](#defining-metrics). Let us apply it to the [sample JSON response from Prometheus](#json-response-format).
+    ```shell
+    echo '{
+        "data": [
+            {
+                "t": 1582756200,
+                "d": [
+                    6.481
+                ]
+            }
+        ],
+        "start": 1582755600,
+        "end": 1582756200
+    }' | jq ".data[0].d[0] | tonumber"
+    ```
+    Executing the above command results yields `6.481`, a number, as required by Iter8. 
 
 === "Elastic"
 
