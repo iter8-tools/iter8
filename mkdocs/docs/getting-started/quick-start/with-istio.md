@@ -64,8 +64,6 @@ For demonstration purposes, this quick install also installs the
 Prometheus add-on and the (Prometheus-based) sample metrics for Istio.
 
 ```shell
-export GIT_ACCOUNT=kalantar
-export TAG=istio-stack
 $ITER8/samples/istio/quickstart/platformsetup.sh
 ```
 

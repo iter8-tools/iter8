@@ -2,8 +2,6 @@
 
 set -e
 
-EXPERIMENT=istio-quickstart
-
 # dump logs from iter8 pods
 dump() {
     # dump handler logs
