@@ -26,7 +26,7 @@ hide:
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
     2. The `kubectl` CLI. Install `kubectl` [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install Go [here](https://golang.org/doc/install).
+    3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-istio/#7-observe-experiment)). Install Go [here](https://golang.org/doc/install).
 
 ## 1. Create Kubernetes cluster
 
@@ -286,45 +286,46 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         Experiment name: istio-quickstart
         Experiment namespace: default
         Target: bookinfo-iter8/productpage
-        Testing pattern: Canary
+        Testing pattern: A/B
         Deployment pattern: Progressive
 
         ****** Progress Summary ******
         Experiment stage: Running
-        Number of completed iterations: 7
+        Number of completed iterations: 3
 
         ****** Winner Assessment ******
-        > If the candidate version satisfies the experiment objectives, then it is the winner.
-        > Otherwise, if the baseline version satisfies the experiment objectives, it is the winner.
-        > Otherwise, there is no winner.
-        App versions in this experiment: [baseline candidate]
-        Winning version: candidate
-        Version recommended for promotion: candidate
+        App versions in this experiment: [A B]
+        Winning version: B
+        Version recommended for promotion: B
 
         ****** Objective Assessment ******
         > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-        +--------------------------------+----------+-----------+
-        |           OBJECTIVE            | BASELINE | CANDIDATE |
-        +--------------------------------+----------+-----------+
-        | iter8-istio/mean-latency <=    | false    | true      |
-        |                        100.000 |          |           |
-        +--------------------------------+----------+-----------+
-        | iter8-istio/error-rate <=      | true     | true      |
-        |                          0.010 |          |           |
-        +--------------------------------+----------+-----------+
+        +--------------------------------+-------+------+
+        |           OBJECTIVE            |   A   |  B   |
+        +--------------------------------+-------+------+
+        | iter8-istio/mean-latency <=    | false | true |
+        |                        100.000 |       |      |
+        +--------------------------------+-------+------+
+        | iter8-istio/error-rate <=      | true  | true |
+        |                          0.010 |       |      |
+        +--------------------------------+-------+------+
 
         ****** Metrics Assessment ******
         > Most recently read values of experiment metrics for each version.
-        +--------------------------------+----------+-----------+
-        |             METRIC             | BASELINE | CANDIDATE |
-        +--------------------------------+----------+-----------+
-        | iter8-istio/mean-latency       |  106.228 |    44.644 |
-        | (milliseconds)                 |          |           |
-        +--------------------------------+----------+-----------+
-        | request-count                  | 1094.074 |   158.126 |
-        +--------------------------------+----------+-----------+
-        | iter8-istio/error-rate         |    0.000 |     0.000 |
-        +--------------------------------+----------+-----------+
+        +--------------------------------+---------+--------+
+        |             METRIC             |    A    |   B    |
+        +--------------------------------+---------+--------+
+        | books-purchased                |   0.000 |  0.000 |
+        +--------------------------------+---------+--------+
+        | iter8-istio/request-count      | 464.031 | 21.288 |
+        +--------------------------------+---------+--------+
+        | iter8-istio/mean-latency       | 190.375 | 38.084 |
+        | (milliseconds)                 |         |        |
+        +--------------------------------+---------+--------+
+        | request-count                  | 464.031 | 21.459 |
+        +--------------------------------+---------+--------+
+        | iter8-istio/error-rate         |   0.000 |  0.000 |
+        +--------------------------------+---------+--------+
         ``` 
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~2 mins), you will see the experiment stage change from `Running` to `Completed`.
@@ -338,14 +339,14 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     ??? info "kubectl get experiment output"
         The `kubectl` output will be similar to the following.
         ```shell
-        NAME               TYPE     TARGET                       STAGE     COMPLETED ITERATIONS   MESSAGE
-        istio-quickstart   Canary   bookinfo-iter8/productpage   Running   1                      IterationUpdate: Completed Iteration 1
-        istio-quickstart   Canary   bookinfo-iter8/productpage   Running   2                      IterationUpdate: Completed Iteration 2
-        istio-quickstart   Canary   bookinfo-iter8/productpage   Running   3                      IterationUpdate: Completed Iteration 3
-        istio-quickstart   Canary   bookinfo-iter8/productpage   Running   4                      IterationUpdate: Completed Iteration 4
-        istio-quickstart   Canary   bookinfo-iter8/productpage   Running   5                      IterationUpdate: Completed Iteration 5
-        istio-quickstart   Canary   bookinfo-iter8/productpage   Running   6                      IterationUpdate: Completed Iteration 6
-        istio-quickstart   Canary   bookinfo-iter8/productpage   Running   7                      IterationUpdate: Completed Iteration 7
+        NAME               TYPE   TARGET                       STAGE     COMPLETED ITERATIONS   MESSAGE
+        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   1                      IterationUpdate: Completed Iteration 1
+        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   2                      IterationUpdate: Completed Iteration 2
+        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   3                      IterationUpdate: Completed Iteration 3
+        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   4                      IterationUpdate: Completed Iteration 4
+        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   5                      IterationUpdate: Completed Iteration 5
+        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   6                      IterationUpdate: Completed Iteration 6
+        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   7                      IterationUpdate: Completed Iteration 7
         ```
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
@@ -395,7 +396,8 @@ kubectl delete namespace bookinfo-iter8
 ```
 
 ???+ info "Understanding what happened"
-    1. You deployed the bookinfo application which is composed of 4 microservices. You created two revisions of the `productpage` microservice, `productpage-v1` (baseline) and `productpage-v3` (candidate).
-    2. You generated requests to bookinfo using a Fortio job. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with canary testing and progressive deployment patterns. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that the candidate satisfied all objectives, identified the candidate as the winner, progressively shifted traffic from the baseline to the candidate, and eventually promoted the candidate using the `kubectl apply` command embedded within its finish action.
-    4. Had the candidate failed to satisfy objectives, then the baseline would have been promoted.
+    1. You defined a reward metric based on a business metric generated by the `productpage` microservice of the `bookinfo` application.
+    2. You deployed the bookinfo application including two versions of the `productpage` microservice, `productpage-v1` (A) and `productpage-v3` (B).
+    3. You generated requests to `bookinfo` using a Fortio job. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
+    4. You created an Iter8 experiment with A/B testing and progressive deployment patterns. In each iteration, Iter8 observed the reward metric, books purchased, and the mean latency and error-rate metrics collected by Prometheus. It verified that the candidate satisfied all objectives, identified B as the winner because it also had the highest reward, progressively shifted traffic from A to B, and eventually promoted B using the `kubectl apply` command embedded within its finish action.
+    5. Had B failed to satisfy objectives or had a lower reward, then A would have been promoted.
