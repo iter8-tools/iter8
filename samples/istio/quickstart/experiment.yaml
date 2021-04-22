@@ -42,7 +42,7 @@ spec:
       - name: namespace # used by final action if this version is the winner
         value: bookinfo-iter8
       - name: promote # used by final action if this version is the winner
-        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/baseline.yaml
+        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/A.yaml
       weightObjRef:
         apiVersion: networking.istio.io/v1beta1
         kind: VirtualService
@@ -57,7 +57,7 @@ spec:
       - name: namespace # used by final action if this version is the winner
         value: bookinfo-iter8
       - name: promote # used by final action if this version is the winner
-        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/candidate.yaml
+        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/B.yaml
       weightObjRef:
         apiVersion: networking.istio.io/v1beta1
         kind: VirtualService
