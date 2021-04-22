@@ -21,21 +21,23 @@ minikube start --cpus 6 --memory 12288
 echo "Setting up platform"
 $ITER8/samples/istio/quickstart/platformsetup.sh
 
-# create bookinfo app with multiple productpage versions
+echo "Define business metric"
+kubectl apply -f $ITER8/samples/istio/quickstart/books-purchased.yaml
+
+echo "Create bookinfo app with two productpage versions"
 kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v3.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
 kubectl -n bookinfo-iter8 wait --for=condition=Ready pods --all --timeout=240s
 
-# Generate requests
+echo "Generate requests"
 URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o jsonpath='{.spec.clusterIP}'):80/productpage"
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | kubectl apply -f -
 pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
 kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=240s
-     
-# Create Iter8 experiment
-echo "Creating an Iter8 experiment"
+
+echo "Creating A/B experiment"
 kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
 
 # Wait
@@ -53,6 +55,7 @@ source $ITER8/samples/istio/quickstart/check.sh
 set +e
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
+kubectl delete -f $ITER8/samples/istio/quickstart/books-purchased.yaml
 kubectl delete namespace bookinfo-iter8
 
 # delete kind cluster

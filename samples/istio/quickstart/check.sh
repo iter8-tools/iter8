@@ -50,13 +50,13 @@ else
     dump; exit 1
 fi
 
-# Check if versionRecommendedForPromotion is candidate
-candidate="candidate"
+# Check if versionRecommendedForPromotion is B
+expectedVrfp="B"
 vrfp=$(kubectl get experiment $EXPERIMENT -o json | jq -r .status.versionRecommendedForPromotion)
-if [[ $vrfp = $candidate ]]; then
+if [[ $vrfp = $expectedVrfp ]]; then
     echo "versionRecommendedForPromotion is $vrfp"
 else
-    echo "versionRecommendedForPromotion must be candidate; is" $vrfp
+    echo "versionRecommendedForPromotion must be $expectedVrfp; is" $vrfp
     dump; exit 1
 fi
 
@@ -64,7 +64,7 @@ fi
 expectedSubset="productpage-v3"
 subset=$(kubectl -n bookinfo-iter8 get vs bookinfo -o json | jq -r '.spec.http[0].route[0].destination.subset')
 if [[ $subset = $expectedSubset ]]; then
-    echo "subset is $expectedSubset"
+    echo "subset is $subset"
 else
     echo "subset must be $expectedSubset; is" $subset
     dump; exit 1

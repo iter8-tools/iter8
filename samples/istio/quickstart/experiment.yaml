@@ -3,14 +3,16 @@ kind: Experiment
 metadata:
   name: istio-quickstart
 spec:
-  # target identifies the knative service under experimentation using its fully qualified name
+  # target identifies the service under experimentation using its fully qualified name
   target: bookinfo-iter8/productpage
   strategy:
-    # this experiment will perform a canary test
-    testingPattern: Canary
+    # this experiment will perform an A/B test
+    testingPattern: A/B
+    # this experiment will progressively shift traffic to the winning version
     deploymentPattern: Progressive
     actions:
-      finish: # run the following sequence of tasks at the end of the experiment
+      # when the experiment completes, promote the winning version using kubectl apply
+      finish:
       - task: common/exec
         with:
           cmd: /bin/bash
@@ -19,24 +21,27 @@ spec:
           - kubectl -n {{ .namespace }} apply -f {{ .promote }}
 
   criteria:
-    objectives: 
+    rewards: # metrics to be used to determine the "value" or "benefit" of a version
+    - metric: books-purchased
+      preferredDirection: High
+    objectives: # metrics to be used to determine validity of a version
     - metric: iter8-istio/mean-latency
       upperLimit: 100
     - metric: iter8-istio/error-rate
       upperLimit: "0.01"
-  duration:
+  duration: # product of fields determines length of the experiment
     intervalSeconds: 10
     iterationsPerLoop: 10
   versionInfo:
-    # information about app versions used in this experiment
+    # information about the app versions used in this experiment
     baseline:
-      name: baseline
+      name: A
       variables:
-      - name: revision
+      - name: revision # used in Prometheus queries
         value: productpage-v1
-      - name: namespace
+      - name: namespace # used by final action if this version is the winner
         value: bookinfo-iter8
-      - name: promote
+      - name: promote # used by final action if this version is the winner
         value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/baseline.yaml
       weightObjRef:
         apiVersion: networking.istio.io/v1beta1
@@ -45,13 +50,13 @@ spec:
         name: bookinfo
         fieldPath: .spec.http[0].route[0].weight
     candidates:
-    - name: candidate
+    - name: B
       variables:
-      - name: revision
+      - name: revision # used in Prometheus queries
         value: productpage-v3
-      - name: namespace
+      - name: namespace # used by final action if this version is the winner
         value: bookinfo-iter8
-      - name: promote
+      - name: promote # used by final action if this version is the winner
         value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/candidate.yaml
       weightObjRef:
         apiVersion: networking.istio.io/v1beta1

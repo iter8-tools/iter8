@@ -9,17 +9,19 @@ hide:
 !!! info "Older version of Iter8 for Istio"
     An older version of Iter8 was tightly coupled with the Istio domain. If this is what you are looking for, it is available [here](https://github.com/iter8-tools/iter8-istio).
 
-!!! tip "Scenario: Canary testing and progressive deployment"
-    [Canary testing](../../../concepts/buildingblocks/#testing-pattern) enables you to reduce risk during a [release](../../../concepts/buildingblocks/#release) by [validating](../../../concepts/buildingblocks/#validation) your new version with a small fraction of users before exposing it to all users. In this tutorial, you will:
+!!! tip "Scenario: A/B testing and progressive deployment"
+    [A/B testing](../../../concepts/buildingblocks/#testing-pattern) enables you to evaluate two versions to determine which produces the greatest benefit. In addition, Iter8 enables you to [validate](../../../concepts/buildingblocks/#validation) your versions using a set of service-level objectives, or SLOs, ensuring that the winning version is also valid.
+    In this tutorial, you will:
 
-    1. Perform canary testing.
-    2. Specify service-level objectives or SLOs used by Iter8 to automatically validate your versions.
+    1. Perform A/B testing.
+    2. Specify a reward to evaluate the benefit of your versions.
+    3. Specify service-level objectives or SLOs used by Iter8 to validate your versions.
     3. Use metrics from Prometheus.
-    4. Combine canary testing with [progressive deployment](../../../concepts/buildingblocks/#deployment-pattern) in an Iter8 experiment.
+    4. Combine A/B testing with [progressive deployment](../../../concepts/buildingblocks/#deployment-pattern) in an Iter8 experiment.
     
-    Assuming the new version is validated, Iter8 will progressively increase the traffic percentage for the new version and promote it at the end as depicted below.
+    Assuming the new version is validated and produces a greater reward, Iter8 will progressively increase the traffic percentage for the winning version and promote it at the end as depicted below.
 
-    ![Canary](../../images/istio-canary-progressive-kubectl-iter8.png)
+    ![A/B](../../images/istio-ab-progressive-kubectl-iter8.png)
 
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
@@ -60,26 +62,53 @@ export ITER8=$(pwd)
 
 ## 3. Install Istio and Iter8
 
-For demonstration purposes, this quick install also installs the
-Prometheus add-on and the (Prometheus-based) sample metrics for Istio.
+For demonstration purposes, this quick install also installs the Prometheus add-on and the (Prometheus-based) sample metrics for Istio.
 
 ```shell
 $ITER8/samples/istio/quickstart/platformsetup.sh
 ```
 
+## 4. Add Business Metric
+
+We will use the [`bookinfo` application](https://istio.io/latest/docs/examples/bookinfo/). We modified the frontend [`productpage` microservice](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward) to produce a business metric, `number_of_books_purchased_total`.
+To use this metric, we must create a [`Metric`](http://localhost:8000/reference/apispec/#metric) resource, `books-purchased` telling Iter8 how to extract the value of this metric from Prometheus.
+
+```shell
+kubectl apply -f $ITER8/samples/istio/quickstart/books-purchased.yaml
+```
+
+??? info "Look inside `books-purchased.yaml`"
+    ```yaml linenums="1"
+    apiVersion: iter8.tools/v2alpha2
+    kind: Metric
+    metadata:
+      name: books-purchased
+    spec:
+      description: Total number of books purchased
+      params:
+      - name: query
+        value: |
+          sum(increase(number_of_books_purchased_total{destination_workload='$revision',destination_workload_namespace='$namespace'}[$elapsedTime])) or on() vector(0)
+      type: counter
+      provider: prometheus
+      jqExpression: ".data.result[0].value[1] | tonumber"
+      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    ```
+
 ## 4. Create app versions
 
-Deploy the [`bookinfo` application](https://istio.io/latest/docs/examples/bookinfo/) and deploy additional copies of the `productpage` microservice.
-The candidate version is also referred to as the *new* or *canary* version.
+Deploy the [`bookinfo` application](https://istio.io/latest/docs/examples/bookinfo/) and an additional copies of the `productpage` microservice to compare. The two versions we will compare have different color text, red and green. An A/B test is being used to determine which yields a greater number of books purchased.
+
 ```shell
 kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v3.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
+kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods --all
 ```
 
 ??? info "Look inside `productpage-v1` configuration"
-    The environment variables used to configure the service define the text color.
+    Environment variables are used to configure the service. They define the text color and the expected reward.
     ```yaml linenums="1"
     env:
     - name: color
@@ -91,8 +120,7 @@ kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gate
     ```
 
 ??? info "Look inside `productpage-v3` configuration"
-    ```yaml linenums="1"
-    The environment variables used to configure the service define the text color.
+    Environment variables are used to configure the service. They define the text color and the expected reward.
     ```yaml linenums="1"
     env:
     - name: color
@@ -107,8 +135,7 @@ kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gate
 In a production environment, your application would receive requests from end-users. For the purposes of this tutorial, simulate user requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
 ```shell
-kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods --all
-# URL_VALUE is the URL where your Knative application serves requests
+# URL_VALUE is the URL of the `bookinfo` application
 URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o jsonpath='{.spec.clusterIP}'):80/productpage"
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | kubectl apply -f -
 ```
@@ -156,7 +183,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
     ```
 
 ## 6. Launch Iter8 experiment
-Launch the Iter8 experiment. Iter8 will orchestrate the canary release of the new version with SLO validation and progressive deployment as specified in the experiment.
+Launch the Iter8 experiment. Iter8 will orchestrate the A/B test between two versions of `productpage` with SLO validation and progressive deployment as specified in the experiment.
 
 ```shell
 kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
@@ -169,41 +196,46 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
     metadata:
       name: istio-quickstart
     spec:
-      # target identifies the knative service under experimentation using its fully qualified name
+      # target identifies the service under experimentation using its fully qualified name
       target: bookinfo-iter8/productpage
       strategy:
-        # this experiment will perform a canary test
-        testingPattern: Canary
+        # this experiment will perform an A/B test
+        testingPattern: A/B
+        # this experiment will progressively shift traffic to the winning version
         deploymentPattern: Progressive
         actions:
-          finish: # run the following sequence of tasks at the end of the experiment
+          # when the experiment completes, promote the winning version using kubectl apply
+          finish:
           - task: common/exec
             with:
               cmd: /bin/bash
-              args:
+              args: 
               - "-c"
               - kubectl -n {{ .namespace }} apply -f {{ .promote }}
 
       criteria:
-        objectives: 
+        rewards: # metrics to be used to determine the "value" or "benefit" of a version
+        - metric: books-purchased
+          preferredDirection: High
+        objectives: # metrics to be used to determine validity of a version
         - metric: iter8-istio/mean-latency
-          upperLimit: 75
+          upperLimit: 100
         - metric: iter8-istio/error-rate
           upperLimit: "0.01"
-      duration:
+      duration: # product of fields determines length of the experiment
         intervalSeconds: 10
         iterationsPerLoop: 10
       versionInfo:
-        # information about app versions used in this experiment
+        # information about the app versions used in this experiment
         baseline:
-          name: baseline
+          name: A
           variables:
-          - name: revision
+          - name: revision # used in Prometheus queries
             value: productpage-v1
-          - name: namespace
+          - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/baseline.yaml
+          - name: promote # used by final action if this version is the winner
+            value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/baseline.yaml
           weightObjRef:
             apiVersion: networking.istio.io/v1beta1
             kind: VirtualService
@@ -211,14 +243,14 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
             name: bookinfo
             fieldPath: .spec.http[0].route[0].weight
         candidates:
-        - name: candidate
+        - name: B
           variables:
-          - name: revision
+          - name: revision # used in Prometheus queries
             value: productpage-v3
-          - name: namespace
+          - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/candidate.yaml
+          - name: promote # used by final action if this version is the winner
+            value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/candidate.yaml
           weightObjRef:
             apiVersion: networking.istio.io/v1beta1
             kind: VirtualService
@@ -229,7 +261,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
 
 The process automated by Iter8 during this experiment is depicted below.
 
-![Iter8 automation](../../images/istio-canary-progressive-kubectl-iter8.png)
+![Iter8 automation](../../images/istio-ab-progressive-kubectl-iter8.png)
 
 ## 7. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
@@ -358,6 +390,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 ```shell
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
+kubectl delete -f $ITER8/samples/istio/quickstart/books-purchased.yaml
 kubectl delete namespace bookinfo-iter8
 ```
 
