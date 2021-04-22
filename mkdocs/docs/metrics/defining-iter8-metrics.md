@@ -84,7 +84,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
           urlTemplate: https://my.secure.prometheus.service.com/api/v1
         ```
 
-    ???+ hint "Brief explanation of the `request-count` metric"
+    ??? hint "Brief explanation of the `request-count` metric"
         1. Prometheus enables metric queries using HTTP GET requests. `GET` is the default value for the `method` field of an Iter8 metric. This field is optional; it is omitted in the  definition of `request-count`, and defaulted to `GET`.
         2. Iter8 will query Prometheus during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
         3. The HTTP query used by Iter8 contains a single query parameter named `query` as [required by Prometheus](https://prometheus.io/docs/prometheus/latest/querying/api/). The value of this parameter is derived by [substituting the placeholders](#placeholder-substitution) in the value string.
@@ -346,16 +346,17 @@ Suppose the [metrics defined above](#defining-metrics) are referenced within an 
     spec:
       target: default/sample-app
       strategy:
-        testingPattern: A/B
+        testingPattern: Canary
       criteria:
-        requestCount: namespace-of-metric/request-count
+        # This experiment assumes that metrics have been created in the `myns` namespace
+        requestCount: myns/request-count
         objectives:
-        - metric: namespace-of-metric/mean-latency
-          upperLimit: 50
-        - metric: namespace-of-metric/95th-percentile-tail-latency
-          upperLimit: 100
-        - metric: namespace-of-metric/error-rate
-          upperLimit: "0.01"
+        - metric: myns/name-count
+          lowerLimit: 50
+        - metric: myns/cpu-utilization
+          upperLimit: 90
+        - metric: myns/average-sales
+          lowerLimit: "250.0"
       duration:
         intervalSeconds: 10
         iterationsPerLoop: 10
