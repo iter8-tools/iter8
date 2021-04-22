@@ -31,7 +31,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
         spec:
           params:
           - name: query
-            value: |
+            value: >-
               sum(increase(revision_app_request_latencies_count{service_name='${name}',${userfilter}}[${elapsedTime}s])) or on() vector(0)
           description: A Prometheus example
           type: Counter
@@ -69,7 +69,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
         spec:
           params:
           - name: query
-            value: |
+            value: >-
               sum(increase(revision_app_request_latencies_count{service_name='${name}',${userfilter}}[${elapsedTime}s])) or on() vector(0)
           description: A Prometheus example
           type: Counter
@@ -100,7 +100,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
         spec:
           params:
           - name: nrql
-            value: |
+            value: >-
               SELECT count(appName) FROM PageView WHERE revisionName='${revision}' SINCE ${elapsedTime} seconds ago
           description: A New Relic example
           type: Counter
@@ -108,7 +108,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
           - name: X-Query-Key
             value: t0p-secret-api-key
           provider: newrelic
-          jqExpression: ".data.result[0].value[1] | tonumber"
+          jqExpression: ".results[0].count | tonumber"
           urlTemplate: https://insights-api.newrelic.com/v1/accounts/my_account_id
         ```
 
@@ -136,7 +136,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
         spec:
           params:
           - name: nrql
-            value: |
+            value: >-
               SELECT count(appName) FROM PageView WHERE revisionName='${revision}' SINCE ${elapsedTime} seconds ago
           description: A New Relic example
           type: Counter
@@ -146,7 +146,7 @@ This document describes how an end-user can define new Iter8 metrics and (option
           - name: X-Query-Key
             value: ${mykey}
           provider: newrelic
-          jqExpression: ".data.result[0].value[1] | tonumber"
+          jqExpression: ".results[0].count | tonumber"
           urlTemplate: https://insights-api.newrelic.com/v1/accounts/my_account_id
         ```
 
