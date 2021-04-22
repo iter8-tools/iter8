@@ -155,7 +155,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
         ```
 
     ???+ hint "Brief explanation of the `name-count` metric"
-        1. New Relic enables metric queries using both HTTP GET and POST requests. `GET` is the default value for the `method` field of an Iter8 metric. This field is optional; it is omitted in the definition of `name-count`, and defaulted to `GET`.
+        1. New Relic enables metric queries using both HTTP GET or POST requests. `GET` is the default value for the `method` field of an Iter8 metric. This field is optional; it is omitted in the definition of `name-count`, and defaulted to `GET`.
         2. Iter8 will query New Relic during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
         3. The HTTP query used by Iter8 contains a single query parameter named `nrql` as [required by New Relic](https://docs.newrelic.com/docs/insights/event-data-sources/insights-api/query-insights-event-data-api/). The value of this parameter is derived by [substituting the placeholders](#placeholder-substitution) in its value string.
         4. The `urlTemplate` field provides the URL of the New Relic service.
@@ -264,6 +264,71 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
 
 === "Elastic"
 
+    Elasticsearch REST API accepts HTTP GET or POST requests and uses basic authentication as documented [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/http-clients.html#http-clients). Suppose Elasticsearch is set up to enforce basic auth with the following credentials:
+
+      ```yaml
+      username: produser
+      password: t0p-secret
+      ```
+
+      You can then enable Iter8 to query the Elasticsearch service as follows.
+
+      1. **Create secret:** Create a Kubernetes secret that contains the authentication information. In particular, this secret needs to have the `username` and `password` fields in the `data` section with correct values.
+      ```shell
+      kubectl create secret generic elasticcredentials -n myns --from-literal=username=produser --from-literal=password=t0p-secret
+      ```
+
+      2. **Create RBAC rule:** Provide the required permissions for Iter8 to read this secret. The service account `iter8-analytics` in the `iter8-system` namespace will have permissions to read secrets in the `myns` namespace.
+      ```shell
+      kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics --namespace=myns
+      ```
+
+      3. **Define metric:** When defining the metric, ensure that the `authType` field is set to `Basic` and the appropriate `secret` is referenced.
+
+      ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: average-sales
+        spec:
+          description: An elastic example
+          provider: elastic
+          body: >-
+            {
+              "aggs": {
+                "range": {
+                  "date_range": {
+                    "field": "date",
+                    "ranges": [
+                      { "from": "now-${elapsedTime}s/s" } 
+                    ]
+                  }
+                },
+                "items-to-sell": {
+                  "filter": { "term": { "version": "${revision}" } },
+                  "aggs": {
+                    "avg_sales": { "avg": { "field": "sale_price" } }
+                  }
+                }
+              }
+            }
+          method: POST
+          authType: Basic
+          secret: myns/elasticcredentials
+          type: Gauge
+          headerTemplates:
+          - name: Content-Type
+            value: application/json
+          jqExpression: ".data[0].d[0] | tonumber"
+          urlTemplate: https://secure.elastic.com/my/sales
+      ```
+
+  ???+ hint "Brief explanation of the `average sales` metric"
+      1. Elastic enables metric queries using GET or POST requests. In the elastic example, The method field of the Iter8 metric is set to POST.
+      2. Iter8 will query Elastic during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
+      3. The HTTP query used by Iter8 contains a JSON body as [required by Elastic](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html). This JSON body is derived by [substituting the placeholders](#placeholder-substitution) in body template.
+      4. The `urlTemplate` field provides the URL of the Elastic service.
+
 ## Placeholder substitution
 
 > **Note:** This step is automated by **Iter8**.
@@ -348,6 +413,27 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
     ```
 
 === "Elastic"
+    For the baseline version, Iter8 will send an HTTP(S) request with the following JSON body:
+    ```json linenums="1"
+    {
+      "aggs": {
+        "range": {
+          "date_range": {
+            "field": "date",
+            "ranges": [
+              { "from": "now-600s/s" } 
+            ]
+          }
+        },
+        "items-to-sell": {
+          "filter": { "term": { "version": "sample-app-v1" } },
+          "aggs": {
+            "avg_sales": { "avg": { "field": "sale_price" } }
+          }
+        }
+      }
+    }
+    ```
 
 The placeholder `$elapsedTime` has been substituted with 600, which is the time elapsed since the start of the experiment. The other placeholders have been substituted based on information associated with the baseline version in the experiment. Iter8 builds and sends an HTTP request in a similar manner for the candidate version as well.
 
@@ -432,6 +518,17 @@ The metrics provider is expected to respond to Iter8's HTTP request with a JSON 
     ```
 
 === "Elastic"
+    The format of the Elastic JSON response is [discussed here](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html). A sample Elastic response is as follows.
+    ```json linenums="1"
+    {
+      "aggregations": {
+        "items-to-sell": {
+          "doc_count": 3,
+          "avg_sales": { "value": 128.33333333333334 }
+        }
+      }
+    }
+    ```
 
 ## Processing the JSON response
 
@@ -517,6 +614,18 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `6.481`, a number, as required by Iter8. 
 
 === "Elastic"
+    Consider the `jqExpression` defined in the [sample Elastic metric](#defining-metrics). Let us apply it to the [sample JSON response from Elastic](#json-response-format).
+    ```shell
+    echo '{
+      "aggregations": {
+        "items-to-sell": {
+          "doc_count": 3,
+          "avg_sales": { "value": 128.33333333333334 }
+        }
+      }
+    }' | jq ".aggregations.items-to-sell.avg_sales.value | tonumber"
+    ```
+    Executing the above command results yields `128.33333333333334`, a number, as required by Iter8. 
 
 > **Note:** The shell command above is for illustration only. Iter8 uses Python bindings for `jq` to evaluate the `jqExpression`.
 
