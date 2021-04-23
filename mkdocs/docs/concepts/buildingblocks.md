@@ -39,7 +39,7 @@ When two or more versions participate in an experiment, Iter8 **recommends a ver
 
 ## Metrics
 
-Metric backends like Prometheus, New Relic, Sysdig and Elastic collect metrics for deployed versions and serve them through REST APIs. Iter8 defines a new Kubernetes resource called **Metric** that makes it easy to use metrics in experiments from any RESTful metrics backend.
+Metric providers like **Prometheus**, **New Relic**, **Sysdig** and **Elastic** can collect metrics for versions and serve them through REST APIs. Iter8 defines a new Kubernetes resource called **Metric** that makes it easy to use metrics in experiments from these and any other RESTful metrics provider.
 
 ## Objectives
 

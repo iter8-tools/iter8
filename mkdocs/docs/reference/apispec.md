@@ -8,7 +8,7 @@ template: main.html
     The Iter8 API provides two [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to automate metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
 
     1. The **Experiment** resource provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic shaping, and version promotion functions](../../../concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](../../../tutorials/knative/canary-progressive/).
-    2. The **Metric** resource encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics backend. Metrics are referenced in experiments.
+    2. The **Metric** resource encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics provider. Metrics are referenced in experiments.
 
 
 !!! note "API Version"    
@@ -132,16 +132,19 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 #### Spec
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics backend. Each name represents a parameter name; the corresponding value is a string template with placeholders, which will be interpolated by Iter8 at query time. | No |
-| description | string | Human readable description. | No |
-| units | string | Units of measurement. Units are used only for display purposes. | No |
-| type | string | Metric type. Valid values are `counter` and `gauge`. Default value = `gauge`. | No |
-| sampleSize | string | Reference to a metric that represents the number of data points over which the metric value is computed. This field applies only to `gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace of the referring metric. | No |
-| provider | string | Type of the metrics database. Provider is used only for display purposes. | No |
-| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response of the metrics backend to a metrics query. | Yes |
-| secret | string | Reference to a secret that contains information used for authenticating with the metrics database. In particular, Iter8 uses data in this secret to interpolate the HTTP headers and URL while querying the database. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace where Iter8 is installed (which is `iter8-system` by default). | No |
-| headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtime with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | No |
-| urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | Yes |
+| description | string | Human readable description. This field is meant for informational purposes. | No |
+| units | string | Units of measurement. This field is meant for informational purposes. | No |
+| provider | string | Type of the metrics provider. This field is meant for informational purposes. | No |
+| params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics provider. Each name represents a parameter name; the corresponding value is a string template with placeholders; the placeholders will be dynamically substituted by Iter8 with values at query time. | No |
+| body | string | String used to construct the JSON body of the HTTP request. Body may be templated, in which Iter8 will attempt to substitute placeholders in the template at query time using version information. | No |
+| type | string | Metric type. Valid values are `Counter` and `Gauge`. Default value = `Gauge`. A `Counter` metric is one whose value never decreases over time. A `Gauge` metric is one whose value may increase or decrease over time. | No |
+| method | string | HTTP method (verb) used in the HTTP request. Valid values are `GET` and `POST`. Default value = `GET`. | No |
+| authType | string | Identifies the type of authentication used in the HTTP request. Valid values are `Basic`, `Bearer` and `APIKey` which correspond to HTTP authentication with these respective methods. | No |
+| sampleSize | string | Reference to a metric that represents the number of data points over which the value of this metric is computed. This field applies only to `Gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace of the referring metric. | No |
+| secret | string | Reference to a secret that contains information used for authenticating with the metrics provider. In particular, Iter8 uses data in this secret to substitute placeholders in the HTTP headers and URL while querying the provider. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace where Iter8 is installed (which is `iter8-system` by default). | No |
+| headerTemplates | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP request headers used by Iter8 when querying the metrics provider. Each name represents a header field name; the corresponding value is a string template with placeholders; the placeholders will be dynamically substituted by Iter8 with values at query time. Placeholder substitution is attempted only if `authType` and `secret` fields are present. | No |
+| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response returned by the provider. | Yes |
+| urlTemplate | string | Template for the metric provider's URL. Typically, urlTemplate is expected to be the actual URL without any placeholders. However, urlTemplate may be templated, in which case, Iter8 will attempt to substitute placeholders in the urlTemplate at query time using the `secret` referenced in the metric. Placeholder substitution will not be attempted if `secret` is not specified. | Yes |
 
 ## Experiment field types
 
@@ -214,7 +217,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | name | string | Name of the version. | Yes |
-| variables | [][NamedValue](#namedvalue) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to interpolate these strings. | No |
+| variables | [][NamedValue](#namedvalue) | Variables are name-value pairs associated with a version. Metrics and tasks within experiment specs can contain strings with placeholders. Iter8 uses variables to substitute placeholders in these strings. | No |
 | weightObjRef | [corev1.ObjectReference](https://pkg.go.dev/k8s.io/api@v0.20.0/core/v1#ObjectReference) | Reference to a Kubernetes resource and a field-path within the resource. Iter8 uses `weightObjRef` to get or set weight (traffic percentage) for the version. | No |
 
 
@@ -534,7 +537,7 @@ The `common` task library provides the `exec` task. Use this task to execute she
               - "sample-app" # release name
               - "--namespace=iter8-system" # release namespace
               - "sample-app" # chart name
-              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # values URL dynamically interpolated
+              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # placeholder is substituted dynamically
     ```
 
 === "Kustomize"
@@ -562,7 +565,7 @@ The `common` task library provides the `exec` task. Use this task to execute she
               kustomize build github.com/iter8-tools/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=master | kubectl apply -f -
     ```
 
-### Interpolation of task inputs
+### Placeholder substitution in task inputs
 
 Inputs to tasks can contain placeholders, or template variables, which will be dynamically substituted when the task is executed by Iter8. For example, in the sample experiment above, one input is:
 
@@ -570,13 +573,13 @@ Inputs to tasks can contain placeholders, or template variables, which will be d
 "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
 ```
 
-In this case, the placeholder is `{{ .promote }}`. Variable interpolation works as follows.
+In this case, the placeholder is `{{ .promote }}`. Placeholder substitution in task inputs works as follows.
 
 1. Iter8 will find the version recommended for promotion. This information is stored in the `status.versionRecommendedForPromotion` field of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` field of the experiment.
 
 2. If the placeholder is `{{ .name }}`, Iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, Iter8 will substitute it with the value of the corresponding variable for the version recommended for promotion. Variable values are specified in the `variables` field of the version detail. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may already have been executed by Iter8 as part of the experiment.
 
-??? example "Interpolation Example 1"
+??? example "Placeholder substitution Example 1"
 
     Consider the sample experiment above. Suppose the `winner` of this experiment was `candidate`. Then:
     
@@ -585,7 +588,7 @@ In this case, the placeholder is `{{ .promote }}`. Variable interpolation works 
     3. The value of the placeholder for the version recommended for promotion is `candid`.
     4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candid.yaml`.
     
-??? example "Interpolation Example 2"
+??? example "Placeholder substitution Example 2"
 
     Consider the sample experiment above. Suppose the `winner` of this experiment was `current`. Then:
     
@@ -594,7 +597,7 @@ In this case, the placeholder is `{{ .promote }}`. Variable interpolation works 
     3. The value of the placeholder for the version recommended for promotion is `base`.
     4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
 
-??? example "Interpolation Example 3"
+??? example "Placeholder substitution Example 3"
 
     Consider the sample experiment above. Suppose the experiment did not yield a `winner`. Then:
     
@@ -604,7 +607,7 @@ In this case, the placeholder is `{{ .promote }}`. Variable interpolation works 
     4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
 
 ### Disable Interpolation (always do this in a `start` action)
-By default, the `common/exec` task will attempt to find the version recommended for promotion, and use its values to interpolate the inputs to the task. However, this behavior will lead to task failure since version recommended for promotion will be generally undefined at this stage of the experiment. To use the `common/exec` task as part of an experiment `start` action, set `disableInterpolation` to `true` as illustrated in the `kubectl/Helm/Kustomize` samples above.
+By default, the `common/exec` task will attempt to find the version recommended for promotion, and use its values to substitute placeholders in the inputs to the task. However, this behavior will lead to task failure since version recommended for promotion will be generally undefined at this stage of the experiment. To use the `common/exec` task as part of an experiment `start` action, set `disableInterpolation` to `true` as illustrated in the `kubectl/Helm/Kustomize` samples above.
 
 ### Error handling in tasks
 When a task exits with an error, it will result in the failure of the experiment to which it belongs.
