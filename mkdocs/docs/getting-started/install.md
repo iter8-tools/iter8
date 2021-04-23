@@ -14,9 +14,9 @@ export TAG=v0.4.3
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 ```
 
-## iter8ctl
+## iter8ctl (optional)
 The `iter8ctl` client facilitates real-time observability of Iter8 experiments. Install `iter8ctl` on your local machine as follows. This installation requires Go 1.13+.
 
 ```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl
+GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3
 ```
