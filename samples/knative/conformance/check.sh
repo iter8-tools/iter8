@@ -36,6 +36,14 @@ else
     exit 1
 fi
 
-# Check if winner is baseline?
+# Check if winner is baseline
+expectedwinner="current"
+winner=$(kubectl get experiment  ${EXPERIMENT} -o json | jq -r .status.analysis.winnerAssessment.data.winner)
+if [[ $winner = $expectedwinner ]]; then
+    echo "winner is $winner"
+else
+    echo "winner must be baseline; is" $winner
+    dump; exit 1
+fi
 
 set +e
