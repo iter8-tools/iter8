@@ -1,7 +1,5 @@
 ---
 template: main.html
-hide:
-- toc
 ---
 
 # Quick Start with Istio

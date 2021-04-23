@@ -7,9 +7,8 @@ spec:
   params:
   - name: query
     value: |
-      (sum(increase(number_of_books_purchased_total{destination_workload='$revision',destination_workload_namespace='$namespace'}[$elapsedTime])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[$elapsedTime])) or on() vector(0))
-  type: gauge
-  sampleSize: iter8-istio/request-count
+      (sum(increase(number_of_books_purchased_total{destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+  type: Gauge
   provider: prometheus
   jqExpression: ".data.result[0].value[1] | tonumber"
   urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
