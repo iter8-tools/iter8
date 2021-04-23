@@ -10,7 +10,7 @@ title: Installation
 Install Iter8 in your Kubernetes cluster as follows. This installation requires [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
 ```shell
-export TAG=v0.4.1
+export TAG=v0.4.3
 curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
 ```
 
