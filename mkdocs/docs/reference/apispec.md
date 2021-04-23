@@ -132,16 +132,19 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 #### Spec
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
+| description | string | Human readable description. This field is meant for informational purposes. | No |
+| units | string | Units of measurement. This field is meant for informational purposes. | No |
+| provider | string | Type of the metrics provider. This field is meant for informational purposes. | No |
 | params | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics provider. Each name represents a parameter name; the corresponding value is a string template with placeholders; the placeholders will be dynamically substituted by Iter8 with values at query time. | No |
-| description | string | Human readable description. | No |
-| units | string | Units of measurement. Units are used only for display purposes. | No |
+| body | string | String used to construct the JSON body of the HTTP request. Body may be templated, in which Iter8 will attempt to substitute placeholders in the template at query time using version information. | No |
 | type | string | Metric type. Valid values are `Counter` and `Gauge`. Default value = `Gauge`. A `Counter` metric is one whose value never decreases over time. A `Gauge` metric is one whose value may increase or decrease over time. | No |
+| method | string | HTTP method (verb) used in the HTTP request. Valid values are `GET` and `POST`. Default value = `GET`. | No |
+| authType | string | Identifies the type of authentication used in the HTTP request. Valid values are `Basic`, `Bearer` and `APIKey` which correspond to HTTP authentication with these respective methods. | No |
 | sampleSize | string | Reference to a metric that represents the number of data points over which the value of this metric is computed. This field applies only to `Gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace of the referring metric. | No |
-| provider | string | Type of the metrics provider. Provider is used only for display purposes. | No |
-| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response of the metrics provider to a metrics query. | Yes |
 | secret | string | Reference to a secret that contains information used for authenticating with the metrics provider. In particular, Iter8 uses data in this secret to substitute placeholders in the HTTP headers and URL while querying the provider. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace where Iter8 is installed (which is `iter8-system` by default). | No |
-| headerTemplates | [][NamedValue](#namedvalue) | List of templates for headers that should be added to metrics queries. Variable portions of the headers, expressed in the form `{.name}` will be replaced at runtime with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | No |
-| urlTemplate | string | Template for URL of metrics server. Variable portions of the URL, expressed in the form `{.name}` will be replaced at runtimme with the value of the `name` entry defined in the secret. If no value can be found in the secret, no replacement will be done. | Yes |
+| headerTemplates | [][NamedValue](#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP request headers used by Iter8 when querying the metrics provider. Each name represents a header field name; the corresponding value is a string template with placeholders; the placeholders will be dynamically substituted by Iter8 with values at query time. Placeholder substitution is attempted only if `authType` and `secret` fields are present. | No |
+| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response returned by the provider. | Yes |
+| urlTemplate | string | Template for the metric provider's URL. Typically, urlTemplate is expected to be the actual URL without any placeholders. However, urlTemplate may be templated, in which case, Iter8 will attempt to substitute placeholders in the urlTemplate at query time using the `secret` referenced in the metric. Placeholder substitution will not be attempted if `secret` is not specified. | Yes |
 
 ## Experiment field types
 

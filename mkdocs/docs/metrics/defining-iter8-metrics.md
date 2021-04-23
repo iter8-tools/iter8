@@ -12,7 +12,7 @@ Metric providers differ in the following aspects.
 * HTTP request method: GET or POST
 * Format of HTTP parameters and/or JSON body used while querying them
 * Format of the JSON response returned by the provider
-* The `jq` expression used by Iter8 to extract the metric value from the JSON response
+* The logic used by Iter8 to extract the metric value from the JSON response
 
 The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic. However, the principles illustrated here will enable you to use metrics from any provider in experiments.
 
@@ -45,14 +45,14 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
         ```
 
     === "Basic auth"
-        Suppose Prometheus, in conjunction with the reverse proxy, is set up to enforce basic auth with the following credentials:
+        Suppose Prometheus is set up to enforce basic auth with the following credentials:
 
         ```yaml
         username: produser
         password: t0p-secret
         ```
 
-        You can then enable Iter8 to query this Prometheus instance as follows.
+        You can enable Iter8 to query this Prometheus instance as follows.
 
         1. **Create secret:** Create a Kubernetes secret that contains the authentication information. In particular, this secret needs to have the `username` and `password` fields in the `data` section with correct values.
         ```shell
@@ -386,19 +386,19 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
 
 === "Prometheus"
 
-    For the baseline version, Iter8 will send an HTTP(S) request with a single parameter named `query` whose value equals:
+    Consider the baseline version. Iter8 will send an HTTP(S) request with a single parameter named `query` whose value equals:
     ```
     sum(increase(revision_app_request_latencies_count{service_name='current',usergroup!~"wakanda"}[600s])) or on() vector(0)
     ```
 
 === "New Relic"
-    For the baseline version, Iter8 will send an HTTP(S) request with a single parameter named `nrql` whose value equals:
+    Consider the baseline version. Iter8 will send an HTTP(S) request with a single parameter named `nrql` whose value equals:
     ```
     SELECT count(appName) FROM PageView WHERE revisionName='sample-app-v1' SINCE 600 seconds ago
     ```
     
 === "Sysdig"
-    For the baseline version, Iter8 will send an HTTP(S) request with the following JSON body:
+    Consider the baseline version. Iter8 will send an HTTP(S) request with the following JSON body:
     ```json linenums="1"
     {
       "last": 600,
@@ -419,7 +419,7 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
     ```
 
 === "Elastic"
-    For the baseline version, Iter8 will send an HTTP(S) request with the following JSON body:
+    Consider the baseline version. Iter8 will send an HTTP(S) request with the following JSON body:
     ```json linenums="1"
     {
       "aggs": {
@@ -602,7 +602,7 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `80275388`, a number, as required by Iter8. 
     
 === "Sysdig"
-    Consider the `jqExpression` defined in the [sample Prometheus metric](#defining-metrics). Let us apply it to the [sample JSON response from Prometheus](#json-response).
+    Consider the `jqExpression` defined in the [sample Sysdig metric](#defining-metrics). Let us apply it to the [sample JSON response from Sysdig](#json-response).
     ```shell
     echo '{
         "data": [
