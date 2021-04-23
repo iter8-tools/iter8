@@ -12,17 +12,17 @@ template: main.html
     In this tutorial, you will:
 
     1. Perform A/B testing.
-    2. Specify a reward to evaluate the benefit of your versions.
+    2. Specify a reward to evaluate the relative benefit of your versions.
     3. Specify service-level objectives or SLOs used by Iter8 to validate your versions.
-    3. Use metrics from Prometheus.
-    4. Combine A/B testing with [progressive deployment](../../../concepts/buildingblocks/#deployment-pattern) in an Iter8 experiment.
+    4. Use metrics from Prometheus.
+    5. Combine A/B testing with [progressive deployment](../../../concepts/buildingblocks/#deployment-pattern) in an Iter8 experiment.
     
-    Assuming the new version is validated and produces a greater reward, Iter8 will progressively increase the traffic percentage for the winning version and promote it at the end as depicted below.
+    Assuming the new version is valid and produces a greater reward, Iter8 will progressively increase the traffic percentage for the winning version and promote it at the end as depicted below.
 
     ![A/B](../../images/istio-ab-progressive-kubectl-iter8.png)
 
 ???+ warning "Before you begin, you will need... "
-    1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
+    1. **Kubernetes cluster.** You can also use, for example, [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
     2. The `kubectl` CLI. Install `kubectl` [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
     3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-istio/#7-observe-experiment)). Install Go [here](https://golang.org/doc/install).
 
@@ -68,7 +68,7 @@ $ITER8/samples/istio/quickstart/platformsetup.sh
 
 ## 4. Add Business Metric
 
-We will use the [`bookinfo` application](https://istio.io/latest/docs/examples/bookinfo/). We modified the frontend [`productpage` microservice](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward) to produce a business metric, `number_of_books_purchased_total`.
+We will use the [`bookinfo` application](https://istio.io/latest/docs/examples/bookinfo/) provided by Istio. The frontend [`productpage`](https://github.com/iter8-tools/bookinfoapp-productpage/tree/productpage-reward) microservice has been modified to produce a business metric, `number_of_books_purchased_total`.
 To use this metric, we must create a [`Metric`](http://localhost:8000/reference/apispec/#metric) resource, `books-purchased` telling Iter8 how to extract the value of this metric from Prometheus.
 
 ```shell
@@ -80,22 +80,22 @@ kubectl apply -f $ITER8/samples/istio/quickstart/books-purchased.yaml
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
     metadata:
-      name: books-purchased
+    name: books-purchased
     spec:
-      description: Total number of books purchased
-      params:
-      - name: query
+    description: Total number of books purchased
+    params:
+    - name: query
         value: |
-          sum(increase(number_of_books_purchased_total{destination_workload='$revision',destination_workload_namespace='$namespace'}[$elapsedTime])) or on() vector(0)
-      type: counter
-      provider: prometheus
-      jqExpression: ".data.result[0].value[1] | tonumber"
-      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+        (sum(increase(number_of_books_purchased_total{destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+    type: Gauge
+    provider: prometheus
+    jqExpression: ".data.result[0].value[1] | tonumber"
+    urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
     ```
 
 ## 4. Create app versions
 
-Deploy the [`bookinfo` application](https://istio.io/latest/docs/examples/bookinfo/) and an additional copies of the `productpage` microservice to compare. The two versions we will compare have different color text, red and green. An A/B test is being used to determine which yields a greater number of books purchased.
+Deploy the [`bookinfo` application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. The two versions have different color text, red and green. You will use an A/B test to determine which version yields a greater number of books purchased.
 
 ```shell
 kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
@@ -267,7 +267,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 === "iter8ctl"
     Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.2
+    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl
     ```
 
     Periodically describe the experiment.
@@ -395,7 +395,7 @@ kubectl delete namespace bookinfo-iter8
 
 ???+ info "Understanding what happened"
     1. You defined a reward metric based on a business metric generated by the `productpage` microservice of the `bookinfo` application.
-    2. You deployed the bookinfo application including two versions of the `productpage` microservice, `productpage-v1` (A) and `productpage-v3` (B).
+    2. You deployed the bookinfo application including two versions of the `productpage` microservice, `productpage-v1` (version A) and `productpage-v3` (version B).
     3. You generated requests to `bookinfo` using a Fortio job. At the start of the experiment, 100% of the requests are sent to version A and 0% to version B.
-    4. You created an Iter8 experiment with A/B testing and progressive deployment patterns. In each iteration, Iter8 observed the reward metric, books purchased, and the mean latency and error-rate metrics collected by Prometheus. It verified that the versions satisfied all objectives, identified B as the winner because it also had the highest reward, progressively shifted traffic from A to B, and eventually promoted B using the `kubectl apply` command embedded within its finish action.
-    5. Had B failed to satisfy objectives or had a lower reward, then A would have been promoted.
+    4. You created an Iter8 experiment with A/B testing and progressive deployment patterns. In each iteration, Iter8 observed the reward metric, books purchased, and the mean latency and error-rate metrics collected by Prometheus. It verified that the versions satisfied all objectives, identified B as the winner because it also had the highest reward, progressively shifted traffic from version A to version B, and eventually promoted B using the `kubectl apply` command embedded within its finish action.
+    5. Had version B failed to satisfy objectives or had a lower reward, then version A would have been promoted.
