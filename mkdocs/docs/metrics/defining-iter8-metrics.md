@@ -10,6 +10,7 @@ Metric providers differ in the following aspects.
 
 * HTTP request authentication method: no authentication, basic auth, API keys, or bearer token
 * HTTP request method: GET or POST
+* Format of HTTP parameters and/or JSON body used while querying them
 * Format of the JSON response returned by the provider
 * The `jq` expression used by Iter8 to extract the metric value from the JSON response
 
@@ -88,7 +89,8 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
         1. Prometheus enables metric queries using HTTP GET requests. `GET` is the default value for the `method` field of an Iter8 metric. This field is optional; it is omitted in the  definition of `request-count`, and defaulted to `GET`.
         2. Iter8 will query Prometheus during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
         3. The HTTP query used by Iter8 contains a single query parameter named `query` as [required by Prometheus](https://prometheus.io/docs/prometheus/latest/querying/api/). The value of this parameter is derived by [substituting the placeholders](#placeholder-substitution) in the value string.
-        4. The `urlTemplate` field provides the URL of the prometheus service.
+        4. The `jqExpression` enables Iter8 to extract the metric value from the JSON response returned by Prometheus.
+        5. The `urlTemplate` field provides the URL of the prometheus service.
 
 === "New Relic"
     New Relic uses API Keys to authenticate requests as documented [here](https://docs.newrelic.com/docs/apis/rest-api-v2/get-started/introduction-new-relic-rest-api-v2/). The API key may be directly embedded within the Iter8 metric, or supplied as part of a Kubernetes secret.
@@ -158,7 +160,8 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
         1. New Relic enables metric queries using both HTTP GET or POST requests. `GET` is the default value for the `method` field of an Iter8 metric. This field is optional; it is omitted in the definition of `name-count`, and defaulted to `GET`.
         2. Iter8 will query New Relic during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
         3. The HTTP query used by Iter8 contains a single query parameter named `nrql` as [required by New Relic](https://docs.newrelic.com/docs/insights/event-data-sources/insights-api/query-insights-event-data-api/). The value of this parameter is derived by [substituting the placeholders](#placeholder-substitution) in its value string.
-        4. The `urlTemplate` field provides the URL of the New Relic service.
+        4. The `jqExpression` enables Iter8 to extract the metric value from the JSON response returned by New Relic.
+        5. The `urlTemplate` field provides the URL of the New Relic service.
 
 === "Sysdig"
     Sysdig data API accepts HTTP POST requests and uses a bearer token for authentication as documented [here](https://docs.sysdig.com/en/sysdig-rest-api-conventions.html). The bearer token may be directly embedded within the Iter8 metric, or supplied as part of a Kubernetes secret.
@@ -260,7 +263,8 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
         1. Sysdig enables metric queries using both POST requests; hence, the method field of the Iter8 metric is set to POST.
         2. Iter8 will query Sysdig during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
         3. The HTTP query used by Iter8 contains a JSON body as [required by Sysdig](https://docs.sysdig.com/en/working-with-the-data-api.html). This JSON body is derived by [substituting the placeholders](#placeholder-substitution) in body template.
-        4. The `urlTemplate` field provides the URL of the Sysdig service.
+        4. The `jqExpression` enables Iter8 to extract the metric value from the JSON response returned by Sysdig.
+        5. The `urlTemplate` field provides the URL of the Sysdig service.
 
 === "Elastic"
 
@@ -327,7 +331,8 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
         1. Elastic enables metric queries using GET or POST requests. In the elastic example, The method field of the Iter8 metric is set to POST.
         2. Iter8 will query Elastic during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
         3. The HTTP query used by Iter8 contains a JSON body as [required by Elastic](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html). This JSON body is derived by [substituting the placeholders](#placeholder-substitution) in body template.
-        4. The `urlTemplate` field provides the URL of the Elastic service.
+        4. The `jqExpression` enables Iter8 to extract the metric value from the JSON response returned by Elastic.
+        5. The `urlTemplate` field provides the URL of the Elastic service.
 
 ## Placeholder substitution
 
@@ -436,7 +441,7 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
     }
     ```
 
-The placeholder `$elapsedTime` has been substituted with 600, which is the time elapsed since the start of the experiment. The other placeholders have been substituted based on information associated with the baseline version in the experiment. Iter8 builds and sends an HTTP request in a similar manner for the candidate version as well.
+The placeholder `$elapsedTime` has been substituted with 600, which is the time elapsed since the start of the experiment. The other placeholders have been substituted based on the *versionInfo* field of the baseline version in the experiment. Iter8 builds and sends an HTTP request in a similar manner for the candidate version as well.
 
 ## JSON response
 
