@@ -34,9 +34,11 @@
 }
 .mdx-hero__content {
   padding-bottom: 6rem;
+  padding: 1rem;
 }
 .mdx-hero__image {
   padding-bottom: 2.5rem;
+  padding: 1rem;
 }
 @media screen and (min-width: 60em) {
   .mdx-hero {
@@ -44,20 +46,12 @@
     align-items: stretch;
   }
   .mdx-hero__content {
-    max-width: 23rem;
     margin-top: 2rem;
     padding-bottom: 14vw;
   }
   .mdx-hero__image {
     order: 1;
-    width: 34rem;
     margin-top: 2rem;
-    transform: translateX(2rem);
-  }
-}
-@media screen and (min-width: 76.25em) {
-  .mdx-hero__image {
-    transform: translateX(4rem);
   }
 }
 .mdx-hero .md-button {
@@ -74,4 +68,8 @@
   color: #894da8;
   background-color: var(--md-primary-bg-color);
   border-color: var(--md-primary-bg-color);
+}
+
+.md-header__title {
+  font-size: 1.5rem;
 }

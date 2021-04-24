@@ -69,11 +69,13 @@
   // Hero content
   &__content {
     padding-bottom: px2rem(120px);
+    padding: px2rem(20px);
   }
 
   // Hero image
   &__image {
     padding-bottom: px2rem(50px);
+    padding: px2rem(20px);
   }
 
   // [tablet landscape +]: Columnar display
@@ -83,7 +85,7 @@
 
     // Adjust spacing and set dimensions
     &__content {
-      max-width: px2rem(460px);
+      // max-width: px2rem(460px);
       margin-top: px2rem(40px);
       padding-bottom: 14vw;
     }
@@ -91,20 +93,20 @@
     // Hero image
     &__image {
       order: 1;
-      width: px2rem(680px);
+      // width: px2rem(680px);
       margin-top: px2rem(40px);
-      transform: translateX(#{px2rem(40px)});
+      // transform: translateX(#{px2rem(40px)});
     }
   }
 
-  // [screen +]: Columnar display and adjusted spacing
-  @include break-from-device(screen) {
+  // // [screen +]: Columnar display and adjusted spacing
+  // @include break-from-device(screen) {
 
-    // Hero image
-    &__image {
-      transform: translateX(#{px2rem(80px)});
-    }
-  }
+  //   // Hero image
+  //   &__image {
+  //     transform: translateX(#{px2rem(80px)});
+  //   }
+  // }
 
   // Button
   .md-button {
