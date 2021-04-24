@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 makes it easy to maximize business value and guarantee SLOs during releases of your Kubernetes apps/ML models. Automate metrics-driven experiments and progressive delivery. Maximize release velocity while protecting end-user experience. Quick start in 5 mins.
+  Iter8 makes it easy to optimize business metrics and validate SLOs during releases of your Kubernetes apps/ML models. Automate metrics-driven experiments. Progressively rollout winning version. Maximize release velocity with confidence. Protect end-user experience with mirroring, user segmentation, dark launch, and sticky sessions. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
