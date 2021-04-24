@@ -53,6 +53,7 @@
 .mdx-hero {
   margin: 0 px2rem(16px);
   color: var(--md-primary-bg-color);
+  padding-bottom: px2rem(32px);
 
   // Hero headline
   h1 {
@@ -76,6 +77,7 @@
   &__image {
     padding-bottom: px2rem(50px);
     padding: px2rem(20px);
+    min-width: 60%;
   }
 
   // [tablet landscape +]: Columnar display
@@ -85,32 +87,31 @@
 
     // Adjust spacing and set dimensions
     &__content {
-      // max-width: px2rem(460px);
-      margin-top: px2rem(40px);
+      max-width: px2rem(460px);
+      margin-top: px2rem(20px);
       padding-bottom: 14vw;
     }
 
     // Hero image
     &__image {
       order: 1;
-      // width: px2rem(680px);
-      margin-top: px2rem(40px);
-      // transform: translateX(#{px2rem(40px)});
+      width: px2rem(680px);
+      margin-top: px2rem(20px);
+      transform: translateX(#{px2rem(30px)});
     }
   }
 
-  // // [screen +]: Columnar display and adjusted spacing
-  // @include break-from-device(screen) {
-
-  //   // Hero image
-  //   &__image {
-  //     transform: translateX(#{px2rem(80px)});
-  //   }
-  // }
+  // [screen +]: Columnar display and adjusted spacing
+  @include break-from-device(screen) {
+    // Hero image
+    &__image {
+      transform: translateX(#{px2rem(40px)});
+    }
+  }
 
   // Button
   .md-button {
-    margin-top: px2rem(10px);
+    margin-top: px2rem(20px);
     margin-right: px2rem(10px);
     color: var(--md-primary-bg-color);
 

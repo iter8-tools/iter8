@@ -21,6 +21,7 @@
 .mdx-hero {
   margin: 0 0.8rem;
   color: var(--md-primary-bg-color);
+  padding-bottom: 1.6rem;
 }
 .mdx-hero h1 {
   margin-bottom: 1rem;
@@ -39,6 +40,7 @@
 .mdx-hero__image {
   padding-bottom: 2.5rem;
   padding: 1rem;
+  min-width: 60%;
 }
 @media screen and (min-width: 60em) {
   .mdx-hero {
@@ -46,16 +48,24 @@
     align-items: stretch;
   }
   .mdx-hero__content {
-    margin-top: 2rem;
+    max-width: 23rem;
+    margin-top: 1rem;
     padding-bottom: 14vw;
   }
   .mdx-hero__image {
     order: 1;
-    margin-top: 2rem;
+    width: 34rem;
+    margin-top: 1rem;
+    transform: translateX(1.5rem);
+  }
+}
+@media screen and (min-width: 76.25em) {
+  .mdx-hero__image {
+    transform: translateX(2rem);
   }
 }
 .mdx-hero .md-button {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   margin-right: 0.5rem;
   color: var(--md-primary-bg-color);
 }
