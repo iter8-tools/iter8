@@ -5,7 +5,7 @@ metadata:
 spec:
   template:
     spec:
-      activeDeadlineSeconds: 600
+      activeDeadlineSeconds: 6000
       containers:
       - name: curl-from-gondor
         image: tutum/curl
