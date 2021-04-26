@@ -27,9 +27,10 @@ istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/traffic-segmentat
 cd $ITER8
     
 # Create Iter8 experiment
-echo "Creating an Iter8 experiment"
+echo "Creating the Iter8 metrics and experiment"
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
+kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 kubectl apply -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml        
 
 # Sleep

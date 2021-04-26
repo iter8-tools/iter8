@@ -31,7 +31,8 @@ istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/mirroring/curl.ya
 cd $ITER8
     
 # Create Iter8 experiment
-echo "Creating an Iter8 experiment"
+echo "Creating the Iter8 metrics and experiment"
+kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 
