@@ -1,22 +1,30 @@
 ---
 template: main.html
 title: Installation
+hide:
+- toc
 ---
 
 # Installation
 
-## Iter8
-
-Install Iter8 in your Kubernetes cluster as follows. This installation requires [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+Install Iter8 in your Kubernetes cluster using [Kustomize v3+](https://kubectl.docs.kubernetes.io/installation/kustomize/) as follows.
 
 ```shell
 export TAG=v0.4.3
-curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
+kustomize build github.com/iter8-tools/iter8-install/core?ref=$TAG | kubectl apply -f -
 ```
 
-## iter8ctl (optional)
-The `iter8ctl` client facilitates real-time observability of Iter8 experiments. Install `iter8ctl` on your local machine as follows. This installation requires Go 1.13+.
+The above command installs Iter8's controller and analytics services in the `iter8-system` namespace, the Experiment and Metric CRDs, and the following RBAC permissions.
 
-```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3
-```
+??? info "Default RBAC Permissions"
+    | Resource | Permissions | Scope |
+    | ----- | ---- | ----------- |
+    | experiments.iter8.tools | get, list, patch, update, watch | Cluster-wide |
+    | experiments.iter8.tools/status | get, patch, update | Cluster-wide |
+    | metrics.iter8.tools | get, list | Cluster-wide |
+    | jobs.batch | create, delete, get, list, watch | Cluster-wide |
+    | leases.coordination.k8s.io | get, list, watch, create, update, patch, delete | `iter8-system` namespace |
+    | events | create | `iter8-system` namespace |
+    | services.serving.knative.dev | get, list, patch, update | Cluster-wide |
+    | virtualservices.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
+    | destinationrules.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
