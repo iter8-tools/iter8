@@ -23,7 +23,7 @@ You will create the following resources in this tutorial.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    **ITER8 environment variable:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
     **[Helm v3](https://helm.sh/) and [`iter8ctl`](../../../getting-started/quick-start/with-knative/#8-observe-experiment):** This tutorial uses Helm v3 and `iter8ctl`.
 
@@ -106,112 +106,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio
           restartPolicy: Never
     ```
 
-## 4. Define metrics
-Define the Iter8 metrics used in this experiment.
-
-```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
-```
-
-??? info "Look inside metrics.yaml"
-    ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha2
-    kind: Metric
-    metadata:
-      labels:
-        creator: iter8
-      name: 95th-percentile-tail-latency
-      namespace: iter8-knative
-    spec:
-      description: 95th percentile tail latency
-      jqExpression: .data.result[0].value[1] | tonumber
-      params:
-      - name: query
-        value: |
-          histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[${elapsedTime}s])) by (le))
-      provider: prometheus
-      sampleSize: request-count
-      type: Gauge
-      units: milliseconds
-      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
-    ---
-    apiVersion: iter8.tools/v2alpha2
-    kind: Metric
-    metadata:
-      labels:
-        creator: iter8
-      name: error-count
-      namespace: iter8-knative
-    spec:
-      description: Number of error responses
-      jqExpression: .data.result[0].value[1] | tonumber
-      params:
-      - name: query
-        value: |
-          sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
-      provider: prometheus
-      type: Counter
-      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
-    ---
-    apiVersion: iter8.tools/v2alpha2
-    kind: Metric
-    metadata:
-      labels:
-        creator: iter8
-      name: error-rate
-      namespace: iter8-knative
-    spec:
-      description: Fraction of requests with error responses
-      jqExpression: .data.result[0].value[1] | tonumber
-      params:
-      - name: query
-        value: |
-          (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
-      provider: prometheus
-      sampleSize: request-count
-      type: Gauge
-      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
-    ---
-    apiVersion: iter8.tools/v2alpha2
-    kind: Metric
-    metadata:
-      labels:
-        creator: iter8
-      name: mean-latency
-      namespace: iter8-knative
-    spec:
-      description: Mean latency
-      jqExpression: .data.result[0].value[1] | tonumber
-      params:
-      - name: query
-        value: |
-          (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
-      provider: prometheus
-      sampleSize: request-count
-      type: Gauge
-      units: milliseconds
-      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
-    ---
-    apiVersion: iter8.tools/v2alpha2
-    kind: Metric
-    metadata:
-      labels:
-        creator: iter8
-      name: request-count
-      namespace: iter8-knative
-    spec:
-      description: Number of requests
-      jqExpression: .data.result[0].value[1] | tonumber
-      params:
-      - name: query
-        value: |
-          sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
-      provider: prometheus
-      type: Counter
-      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
-    ```
-
-## 5. Launch experiment
+## 4. Launch experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 ```
@@ -282,7 +177,7 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
             value: candidate
     ```
 
-## 6. Observe experiment
+## 5. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
 === "Metrics-based analysis"
@@ -324,7 +219,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
         - **Note:** You limited the maximum weight (traffic %) of `candidate` during iterations at 75% and maximum increment allowed during a single iteration to 20% using the field `spec.strategy.weights`. Traffic shifts during the experiment obeyed these limits.
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml

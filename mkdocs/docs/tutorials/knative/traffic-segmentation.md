@@ -21,8 +21,9 @@ You will create the following resources in this tutorial.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    **ITER8 environment variable:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
+    **[`iter8ctl`](../../../getting-started/quick-start/with-knative/#8-observe-experiment):** This tutorial uses `iter8ctl`.
 
 ## 1. Create versions
 ```shell
@@ -228,7 +229,7 @@ kubectl apply -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
 ## 5. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
-=== "iter8ctl"
+=== "Metrics-based analysis"
     ```shell
     while clear; do
     kubectl get experiment request-routing -o yaml | iter8ctl describe -f -
@@ -240,7 +241,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
-=== "kubectl get experiment"
+=== "Experiment progress"
     ```shell
     kubectl get experiment request-routing --watch
     ```
@@ -249,7 +250,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
-=== "kubectl get vs"
+=== "Traffic split"
     ```shell
     kubectl get vs routing-for-wakanda -o json --watch | jq .spec.http[0].route
     ```
@@ -257,14 +258,6 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     The output shows the traffic split for the wakanda as defined in the `VirtualService` resource.
 
     As the experiment progresses, you should see traffic progressively shift from host `sample-app-v1.default.svc.cluster.local` to host `sample-app-v2.default.svc.cluster.local`. When the experiment completes, the traffic remains split; this experiment has no _finish_ action to promote the winning version.
-
-## 6. Cleanup
-```shell
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/curl.yaml
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/services.yaml
-```
 
 ???+ info "Understanding what happened"
     1. You configured two Knative services corresponding to two versions of your app in `services.yaml`.
@@ -280,3 +273,11 @@ kubectl delete -f $ITER8/samples/knative/traffic-segmentation/services.yaml
         - **Note:** You used Istio version 1.8.2 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
     
     6. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern to evaluate the `candidate`. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that the `candidate` version satisfied all the `objectives` specified in the experiment. It progressively increased the proportion of traffic with `country: wakanda` header that is routed to the `candidate`.
+
+## 6. Cleanup
+```shell
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/curl.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
+kubectl delete -f $ITER8/samples/knative/traffic-segmentation/services.yaml
+```
