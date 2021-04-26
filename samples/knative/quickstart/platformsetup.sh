@@ -124,6 +124,8 @@ kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${T
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
+kubectl create ns iter8-istio
+kubectl create ns iter8-knative
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
 
 # Step 7: Verify Iter8 installation

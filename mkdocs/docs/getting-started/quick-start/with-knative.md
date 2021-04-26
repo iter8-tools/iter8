@@ -170,14 +170,6 @@ kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
 ??? info "Look inside metrics.yaml"
     ```yaml linenums="1"
-    apiVersion: v1
-    kind: Namespace
-    metadata:
-      labels:
-        creator: iter8
-        stack: knative
-      name: iter8-knative
-    ---
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
     metadata:
