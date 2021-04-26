@@ -39,7 +39,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
-        sed -i "s+120s+6000s+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml
+        sed -i "s/6000s/120s/g" $ITER8/samples/knative/canaryprogressive/fortio.yaml
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
         
         # Wait for Fortio to be ready
@@ -94,7 +94,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
-        sed -i "s+120s+6000s+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml        
+        sed -i "s/6000s/120s/g" $ITER8/samples/knative/canaryprogressive/fortio.yaml        
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml | kubectl apply -f -
 
@@ -143,7 +143,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
-        sed -i "s+120s+6000s+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml        
+        sed -i "s/6000s/120s/g" $ITER8/samples/knative/canaryprogressive/fortio.yaml        
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml | kubectl apply -f -        
         
@@ -189,7 +189,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
-        sed -i "s+120s+6000s+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml
+        sed -i "s/6000s/120s/g" $ITER8/samples/knative/canaryprogressive/fortio.yaml
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -        
         
