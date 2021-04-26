@@ -98,6 +98,8 @@ jobs:
 
     - name: Create Iter8 experiment
       run: |
+        export ITER8=$(pwd)
+
         # Define metrics
         kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
