@@ -39,11 +39,14 @@ jobs:
       run: |
         export ITER8=$(pwd)
         URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
-        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio-e2etest.yaml | kubectl apply -f -
         
         # Wait for Fortio to be ready
         pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
         kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=240s
+
+        # Define metrics
+        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
