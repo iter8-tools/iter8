@@ -16,7 +16,7 @@ spec:
       - task: common/exec
         with:
           cmd: /bin/bash
-          args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+          args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
 
   criteria:
     rewards: # metrics to be used to determine the "value" or "benefit" of a version
