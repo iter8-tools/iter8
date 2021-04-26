@@ -118,4 +118,4 @@ material
 site
 
 # backup pptx
-~$iter8++images.pptx
+~$*.pptx
