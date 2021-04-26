@@ -11,18 +11,7 @@ spec:
       containers:
       - name: fortio
         image: fortio/fortio
-        command:
-          - fortio
-          - load
-          - -t
-          - 6000s
-          - -qps
-          - "16"
-          - -json
-          - /shared/fortiooutput.json
-          - -H
-          - "Host: bookinfo.example.com"
-          - $(URL)
+        command: [ 'fortio', 'load', '-t', '6000s', '-qps', "16", '-json', '/shared/fortiooutput.json', '-H', 'Host: bookinfo.example.com', "$(URL)" ]
         env:
         - name: URL
           value: URL_VALUE

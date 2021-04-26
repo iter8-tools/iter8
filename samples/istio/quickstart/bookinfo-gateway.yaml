@@ -47,7 +47,7 @@ spec:
         host: productpage
         port:
           number: 9080
-        subset: productpage-v3
+        subset: productpage-v2
       weight: 0
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -63,5 +63,5 @@ spec:
     name: productpage-v1
   - labels:
       app: productpage
-      version: v3
-    name: productpage-v3
+      version: v2
+    name: productpage-v2

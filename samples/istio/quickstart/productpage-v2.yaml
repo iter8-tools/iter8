@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: productpage-v3
+  name: productpage-v2
   labels:
     app: productpage
-    version: v3
+    version: v2
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: productpage
-      version: v3
+      version: v2
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
         app: productpage
-        version: v3
+        version: v2
     spec:
       serviceAccountName: bookinfo-productpage
       containers:
@@ -28,7 +28,7 @@ spec:
         - containerPort: 9080
         env:
           - name: deployment
-            value: "productpage-v3"
+            value: "productpage-v2"
           - name: namespace
             valueFrom:
               fieldRef:
@@ -41,19 +41,3 @@ spec:
             value: "20"
           - name: port
             value: "9080"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: productpage-v3
-  labels:
-    app: productpage
-    version: v3
-    service: productpage-v3
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: productpage
-    version: v3

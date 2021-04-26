@@ -1,9 +1,6 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  labels:
-    iter8-tools/router: productpage.bookinfo-iter8.svc.cluster.local
-    iter8-tools/role: stable
   name: bookinfo
 spec:
   gateways:
@@ -29,5 +26,5 @@ spec:
         host: productpage
         port:
           number: 9080
-        subset: productpage-v3
+        subset: productpage-v2
       weight: 100
