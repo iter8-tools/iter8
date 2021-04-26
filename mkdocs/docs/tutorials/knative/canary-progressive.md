@@ -19,7 +19,7 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Helm
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, and the Prometheus add-on installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Prometheus add-on, and Iter8's sample metrics for Knative installed. You can do this by following Steps 1, 2, 3 and 6 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
@@ -35,7 +35,7 @@ Helm uses secrets to record information about releases. This tutorial uses an ex
 kubectl apply -f ${ITER8}/samples/knative/canaryprogressive/helm-rbac.yaml
 ```
 
-## 2. Create versions
+## 2. Create app versions
 ```shell
 helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=default
 kubectl wait ksvc/sample-app --for condition=Ready --timeout=120s
@@ -77,21 +77,21 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio
 
 ??? info "Look inside fortio.yaml"
     ```yaml linenums="1"
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: fortio
-spec:
-  template:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: fortio
     spec:
-      containers:
-      - name: fortio
-        image: fortio/fortio
-        command: ["fortio", "load", "-t", "6000s", "-qps", "16", $(URL)]
-        env:
-        - name: URL
-          value: URL_VALUE       
-      restartPolicy: Never
+      template:
+        spec:
+          containers:
+          - name: fortio
+            image: fortio/fortio
+            command: ["fortio", "load", "-t", "6000s", "-qps", "16", $(URL)]
+            env:
+            - name: URL
+              value: URL_VALUE       
+          restartPolicy: Never
     ```
 
 ## 4. Define metrics
@@ -198,9 +198,8 @@ kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
       type: Counter
       urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
     ```
-The `urlTemplate` field in these metrics point to the Prometheus add-on instance that was created as part of the quick start tutorial. If you wish to use these metrics in your production/staging/dev/test K8s cluster, change the `urlTemplate` values to match the URL of your Prometheus instance.
 
-## 4. Create Iter8 experiment
+## 5. Launch experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 ```
@@ -271,10 +270,10 @@ kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
             value: candidate
     ```
 
-## 5. Observe experiment
+## 6. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
-=== "iter8ctl"
+=== "Metrics-based analysis"
     Periodically describe the experiment.
     ```shell
     while clear; do
@@ -287,7 +286,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
-=== "kubectl get experiment"
+=== "Experiment progress"
     ```shell
     kubectl get experiment canary-progressive --watch
     ```
@@ -296,7 +295,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
-=== "kubectl get ksvc"
+=== "Traffic split"
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
@@ -304,13 +303,6 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     The output will look similar to the [kubectl get ksvc output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
-        
-## 6. Cleanup
-```shell
-kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml
-helm uninstall sample-app --namespace=default
-```
 
 ???+ info "Understanding what happened"
     1. You created a Knative service using `helm install` subcommand and upgraded the service to have two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using `helm upgrade --install` subcommand. 
@@ -319,3 +311,10 @@ helm uninstall sample-app --namespace=default
     4. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, progressively shifted traffic from `baseline` to `candidate` and eventually promoted the `candidate` using `helm upgrade --install` subcommand.
         - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
         - **Note:** You limited the maximum weight (traffic %) of `candidate` during iterations at 75% and maximum increment allowed during a single iteration to 20% using the field `spec.strategy.weights`. Traffic shifts during the experiment obeyed these limits.
+
+## 7. Cleanup
+```shell
+kubectl delete -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/canaryprogressive/fortio.yaml
+helm uninstall sample-app --namespace=default
+```
