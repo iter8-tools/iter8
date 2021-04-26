@@ -7,11 +7,11 @@ spec:
     spec:
       volumes:
       - name: shared
-        emptyDir: {}    
+        emptyDir: {}
       containers:
       - name: fortio
         image: fortio/fortio
-        command: ["fortio", "load", "-t", "100s", "-qps", "16","-json", "/shared/fortiooutput.json", $(URL)]
+        command: ["fortio", "load", "-t", "6000s", "-qps", "16", "-json", "/shared/fortiooutput.json", $(URL)]
         env:
         - name: URL
           value: URL_VALUE
@@ -20,7 +20,7 @@ spec:
           mountPath: /shared         
       - name: busybox
         image: busybox:1.28
-        command: ['sh', '-c', 'echo busybox is running! && sleep 600']          
+        command: ['sh', '-c', 'echo busybox is running! && sleep 600']
         volumeMounts:
         - name: shared
           mountPath: /shared       

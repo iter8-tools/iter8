@@ -17,11 +17,13 @@ You will create the following resources in this tutorial.
 4. An **Iter8 experiment** that verifies that the dark version satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have a Kubernetes cluster with Iter8, Knative with the Istio networking layer, Iter8 sample metrics for Knative, and Prometheus installed. You can do so by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
+    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have a Kubernetes cluster with Iter8, Knative with the Istio networking layer, Prometheus add-on, and Iter8's sample metrics for Knative installed. You can do so by following Steps 1, 2, 3 and 6 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    **ITER8 environment variable:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+
+    **[`iter8ctl`](../../../getting-started/quick-start/with-knative/#8-observe-experiment):** This tutorial uses `iter8ctl`.
 
 ## 1. Create app with live and dark versions
 ```shell
@@ -153,7 +155,7 @@ cd $ITER8
     spec:
       template:
         spec:
-          activeDeadlineSeconds: 600
+          activeDeadlineSeconds: 6000
           containers:
           - name: curl
             image: tutum/curl
@@ -214,7 +216,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 ## 5. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
-=== "iter8ctl"
+=== "Metrics-based analysis"
     ```shell
     while clear; do
     kubectl get experiment mirroring -o yaml | iter8ctl describe -f -
@@ -222,27 +224,18 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by the version being tested. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
-=== "kubectl get experiment"
+=== "Experiment progress"
     ```shell
     kubectl get experiment mirroring --watch
     ```
 
-    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
-
-## 6. Cleanup
-
-```shell
-kubectl delete -f $ITER8/samples/knative/mirroring/curl.yaml
-kubectl delete -f $ITER8/samples/knative/mirroring/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/mirroring/routing-rules.yaml
-kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
-```
 
 ???+ info "Understanding what happened"
     1. You configured a Knative service with two versions of your app. In the `service.yaml` manifest, you specified that the live version, `sample-app-v1`, should receive 100% of the production traffic and the dark version, `sample-app-v2`, should receive 0% of the production traffic.
@@ -256,3 +249,12 @@ kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
         - **Note:** You used Istio version 1.8.2 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
     
     5. You created an Iter8 `Conformance` experiment to evaluate the dark version. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the dark version satisfied all the objectives specified in `experiment.yaml`.
+
+## 6. Cleanup
+
+```shell
+kubectl delete -f $ITER8/samples/knative/mirroring/curl.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/routing-rules.yaml
+kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
+```

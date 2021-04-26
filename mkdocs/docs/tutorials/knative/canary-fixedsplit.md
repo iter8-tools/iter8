@@ -19,13 +19,13 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Kustomize
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Iter8 sample metrics for Knative, and Prometheus installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Prometheus add-on, and Iter8's sample metrics for Knative installed. You can do this by following Steps 1, 2, 3 and 6 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
-    **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    **ITER8 environment variable:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[Kustomize v3+](https://kustomize.io/) and [`iter8ctl`](../../../getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Kustomize v3+ and `iter8ctl`.
+    **[Kustomize v3+](https://kustomize.io/) and [`iter8ctl`](../../../getting-started/quick-start/with-knative/#8-observe-experiment):** This tutorial uses Kustomize v3+ and `iter8ctl`.
 
 ## 1. Create app versions
 
@@ -104,7 +104,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.
           containers:
           - name: fortio
             image: fortio/fortio
-            command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
+            command: ["fortio", "load", "-t", "6000s", "-json", "/shared/fortiooutput.json", $(URL)]
             env:
             - name: URL
               value: URL_VALUE
@@ -117,7 +117,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.
             volumeMounts:
             - name: shared
               mountPath: /shared       
-          restartPolicy: Never    
+          restartPolicy: Never
     ```
 
 ## 3. Create Iter8 experiment
@@ -182,7 +182,7 @@ kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 ## 4. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
 
-=== "iter8ctl"
+=== "Metrics-based analysis"
     Periodically describe the experiment.
     ```shell
     while clear; do
@@ -191,28 +191,35 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
-=== "kubectl get experiment"
+=== "Experiment progress"
 
     ```shell
     kubectl get experiment canary-fixedsplit --watch
     ```
 
-    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
 
-=== "kubectl get ksvc"
+=== "Traffic split"
 
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
-    The output will look similar to the [kubectl get ksvc output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get ksvc output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should see traffic remain unchanged. When the experiment completes, and the candidate, `sample-app-v2`, is identified as the winner, all of the traffic will all be sent to it.
+
+???+ info "Understanding what happened"
+    1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using Kustomize.
+    2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
+    4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `kustomize build ... | kubectl apply -f -` commands.
+        - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
+        - **Note:** There was no traffic shifting during experiment iterations since this used a `FixedSplit` deployment pattern.
 
 ## 5. Cleanup
 
@@ -221,10 +228,3 @@ kubectl delete -f $ITER8/samples/knative/canaryfixedsplit/fortio.yaml
 kubectl delete -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl delete -f -
 ```
-
-???+ info "Understanding what happened"
-    1. You created a Knative service with two revisions, sample-app-v1 (`baseline`) and sample-app-v2 (`candidate`) using Kustomize.
-    2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 75% of the requests are sent to `baseline` and 25% to `candidate`.
-    4. You created an Iter8 `Canary` experiment with `FixedSplit` deployment pattern. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that `candidate` satisfied all the objectives specified in the experiment, identified `candidate` as the `winner`, and eventually promoted the `candidate` using `kustomize build ... | kubectl apply -f -` commands.
-        - **Note:** Had `candidate` failed to satisfy `objectives`, then `baseline` would have been promoted.
-        - **Note:** There was no traffic shifting during experiment iterations since this used a `FixedSplit` deployment pattern.

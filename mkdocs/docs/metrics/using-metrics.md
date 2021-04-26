@@ -88,4 +88,4 @@ Use metrics in experiments by referencing them in criteria section. Reference me
 
 ## Observing metric values
 
-During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../../../getting-started/quick-start/with-knative/#7-observe-experiment) for an example.
+During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../../../getting-started/quick-start/with-knative/#8-observe-experiment) for an example.
