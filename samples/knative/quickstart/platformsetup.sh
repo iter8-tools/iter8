@@ -115,16 +115,16 @@ fi
 
 # Step 5: Install Iter8
 echo "Installing Iter8 with Knative support"
-kubectl apply -f https://raw.githubusercontent.com/${GIT_ACCOUNT}/iter8-install/${TAG}/core/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
 
 # Step 6: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
-kubectl apply -f https://raw.githubusercontent.com/${GIT_ACCOUNT}/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
 
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 
-kubectl apply -f https://raw.githubusercontent.com/${GIT_ACCOUNT}/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
-kubectl apply -f https://raw.githubusercontent.com/${GIT_ACCOUNT}/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
 
 # Step 7: Verify Iter8 installation
 echo "Verifying installation"
