@@ -19,7 +19,7 @@ template: main.html
 ???+ warning "Before you begin, you will need... "
     1. **Kubernetes cluster.** You can also use [Minikube](https://minikube.sigs.k8s.io/docs/) or [Kind](https://kind.sigs.k8s.io/).
     2. The `kubectl` CLI. Install `kubectl` [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#7-observe-experiment)). Install Go [here](https://golang.org/doc/install).
+    3. **Go 1.13+** (recommended; required for using `iter8ctl` in [Step 7](/getting-started/quick-start/with-knative/#8-observe-experiment)). Install Go [here](https://golang.org/doc/install).
 
 ## 1. Create Kubernetes cluster
 
@@ -50,10 +50,8 @@ cd iter8
 export ITER8=$(pwd)
 ```
 
-## 3. Install Knative and Iter8
+## 3. Install Knative, Iter8, and Prometheus
 Knative can work with multiple networking layers. So can Iter8's Knative extension. Choose a networking layer for Knative.
-
-This also installs sample metrics for Knative and Iter8's Prometheus add-on. These optional components are used by the sample experiment below.
 
 === "Contour"
 
@@ -265,7 +263,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
       type: Counter
       urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
     ```
-    The `urlTemplate` field in these metrics point to the Prometheus instance that was created in Step 3 above. If you wish to use these metrics in your production/staging/dev/test K8s cluster, change the `urlTemplate` values to match the URL of your Prometheus instance.
+The `urlTemplate` field in these metrics point to the Prometheus instance that was created in Step 3 above. If you wish to use these metrics in your production/staging/dev/test K8s cluster, change the `urlTemplate` values to match the URL of your Prometheus instance.
 
 ## 7. Launch Iter8 experiment
 Launch the Iter8 experiment. Iter8 will orchestrate the canary release of the new version with SLO validation and progressive deployment as specified in the experiment.

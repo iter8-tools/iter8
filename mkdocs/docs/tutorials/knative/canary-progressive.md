@@ -19,15 +19,15 @@ You will create the following resources in this tutorial.
     - eventually replaces `baseline` with `candidate` using Helm
 
 ???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, Iter8 sample metrics for Knative, and Prometheus installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
+    **Kubernetes cluster:** Ensure that you have a Kubernetes cluster with Iter8, Knative, and the Prometheus add-on installed. You can do this by following Steps 1, 2, and 3 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/).
 
     **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
 
     **ITER8:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
 
-    **[Helm v3](https://helm.sh/) and [`iter8ctl`](../../../getting-started/install/#optional-step-3-iter8ctl):** This tutorial uses Helm v3 and `iter8ctl`.
+    **[Helm v3](https://helm.sh/) and [`iter8ctl`](../../../getting-started/quick-start/with-knative/#8-observe-experiment):** This tutorial uses Helm v3 and `iter8ctl`.
 
-## 1. Give Permission to Iter8 to Call `helm upgrade`
+## 1. Give permissions to Iter8 to invoke `helm`
 
 Helm uses secrets to record information about releases. This tutorial uses an experiment that invokes Helm. Enable this experiment using the following RBAC.
 
@@ -77,34 +77,128 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio
 
 ??? info "Look inside fortio.yaml"
     ```yaml linenums="1"
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-      name: fortio
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fortio
+spec:
+  template:
     spec:
-      template:
-        spec:
-          volumes:
-          - name: shared
-            emptyDir: {}    
-          containers:
-          - name: fortio
-            image: fortio/fortio
-            command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
-            env:
-            - name: URL
-              value: URL_VALUE
-            volumeMounts:
-            - name: shared
-              mountPath: /shared         
-          - name: busybox
-            image: busybox:1.28
-            command: ['sh', '-c', 'echo busybox is running! && sleep 600']          
-            volumeMounts:
-            - name: shared
-              mountPath: /shared       
-          restartPolicy: Never    
+      containers:
+      - name: fortio
+        image: fortio/fortio
+        command: ["fortio", "load", "-t", "6000s", "-qps", "16", $(URL)]
+        env:
+        - name: URL
+          value: URL_VALUE       
+      restartPolicy: Never
     ```
+
+## 4. Define metrics
+Define the Iter8 metrics used in this experiment.
+
+```shell
+kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
+```
+
+??? info "Look inside metrics.yaml"
+    ```yaml linenums="1"
+    apiVersion: iter8.tools/v2alpha2
+    kind: Metric
+    metadata:
+      labels:
+        creator: iter8
+      name: 95th-percentile-tail-latency
+      namespace: iter8-knative
+    spec:
+      description: 95th percentile tail latency
+      jqExpression: .data.result[0].value[1] | tonumber
+      params:
+      - name: query
+        value: |
+          histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[${elapsedTime}s])) by (le))
+      provider: prometheus
+      sampleSize: request-count
+      type: Gauge
+      units: milliseconds
+      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    ---
+    apiVersion: iter8.tools/v2alpha2
+    kind: Metric
+    metadata:
+      labels:
+        creator: iter8
+      name: error-count
+      namespace: iter8-knative
+    spec:
+      description: Number of error responses
+      jqExpression: .data.result[0].value[1] | tonumber
+      params:
+      - name: query
+        value: |
+          sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+      provider: prometheus
+      type: Counter
+      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    ---
+    apiVersion: iter8.tools/v2alpha2
+    kind: Metric
+    metadata:
+      labels:
+        creator: iter8
+      name: error-rate
+      namespace: iter8-knative
+    spec:
+      description: Fraction of requests with error responses
+      jqExpression: .data.result[0].value[1] | tonumber
+      params:
+      - name: query
+        value: |
+          (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+      provider: prometheus
+      sampleSize: request-count
+      type: Gauge
+      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    ---
+    apiVersion: iter8.tools/v2alpha2
+    kind: Metric
+    metadata:
+      labels:
+        creator: iter8
+      name: mean-latency
+      namespace: iter8-knative
+    spec:
+      description: Mean latency
+      jqExpression: .data.result[0].value[1] | tonumber
+      params:
+      - name: query
+        value: |
+          (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+      provider: prometheus
+      sampleSize: request-count
+      type: Gauge
+      units: milliseconds
+      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    ---
+    apiVersion: iter8.tools/v2alpha2
+    kind: Metric
+    metadata:
+      labels:
+        creator: iter8
+      name: request-count
+      namespace: iter8-knative
+    spec:
+      description: Number of requests
+      jqExpression: .data.result[0].value[1] | tonumber
+      params:
+      - name: query
+        value: |
+          sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+      provider: prometheus
+      type: Counter
+      urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    ```
+The `urlTemplate` field in these metrics point to the Prometheus add-on instance that was created as part of the quick start tutorial. If you wish to use these metrics in your production/staging/dev/test K8s cluster, change the `urlTemplate` values to match the URL of your Prometheus instance.
 
 ## 4. Create Iter8 experiment
 ```shell
@@ -189,7 +283,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     done
     ```
 
-    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
@@ -198,7 +292,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get experiment canary-progressive --watch
     ```
 
-    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
 
@@ -207,7 +301,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    The output will look similar to the [kubectl get ksvc output](../../../getting-started/quick-start/with-knative/#7-observe-experiment) in the quick start instructions.
+    The output will look similar to the [kubectl get ksvc output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
 
     As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
         
