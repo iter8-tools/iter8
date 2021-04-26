@@ -104,7 +104,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.
           containers:
           - name: fortio
             image: fortio/fortio
-            command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
+            command: ["fortio", "load", "-t", "6000s", "-json", "/shared/fortiooutput.json", $(URL)]
             env:
             - name: URL
               value: URL_VALUE
@@ -117,7 +117,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.
             volumeMounts:
             - name: shared
               mountPath: /shared       
-          restartPolicy: Never    
+          restartPolicy: Never
     ```
 
 ## 3. Create Iter8 experiment

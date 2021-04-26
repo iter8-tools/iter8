@@ -70,7 +70,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml 
           containers:
           - name: fortio
             image: fortio/fortio
-            command: ["fortio", "load", "-t", "120s", "-json", "/shared/fortiooutput.json", $(URL)]
+            command: ["fortio", "load", "-t", "6000s", "-json", "/shared/fortiooutput.json", $(URL)]
             env:
             - name: URL
               value: URL_VALUE
