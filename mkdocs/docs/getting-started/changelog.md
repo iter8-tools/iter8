@@ -5,6 +5,10 @@ title: Changelog
 
 # Changelog
 
+**0.4.3** (April 26th, 2021)
+
+* Documented Iter8's default RBAC profile
+
 **0.4.0** (April 23rd, 2021)
 
 * Enabled metrics from any provider to be used in Iter8 experiments
