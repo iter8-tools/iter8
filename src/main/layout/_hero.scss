@@ -53,7 +53,7 @@
 .mdx-hero {
   margin: 0 px2rem(16px);
   color: var(--md-primary-bg-color);
-  padding-bottom: px2rem(32px);
+  // padding-bottom: px2rem(32px);
 
   // Hero headline
   h1 {
@@ -69,13 +69,17 @@
 
   // Hero content
   &__content {
-    padding-bottom: px2rem(120px);
+    padding-bottom: px2rem(60px);
     padding: px2rem(20px);
+
+    // [mobile portrait -]: Larger hero headline
+    @include break-to-device(tablet portrait) {
+      padding-bottom: px2rem(80px);
+    }    
   }
 
   // Hero image
   &__image {
-    padding-bottom: px2rem(50px);
     padding: px2rem(20px);
     min-width: 60%;
   }

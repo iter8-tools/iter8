@@ -24,81 +24,160 @@
 
 <!-- Render hero under tabs -->
 {% block tabs %}
-  {{ super() }}
+{{ super() }}
 
-  <!-- Additional styles for landing page -->
-  <style>
+<!-- Additional styles for landing page -->
+<style>
+  /* Application header should be static for the landing page */
+  .md-header {
+    position: initial;
+  }
 
-    /* Application header should be static for the landing page */
-    .md-header {
-      position: initial;
-    }
+  /* Remove spacing, as we cannot hide it completely */
+  .md-main__inner {
+    margin: 0;
+  }
 
-    /* Remove spacing, as we cannot hide it completely */
-    .md-main__inner {
-      margin: 0;
-    }
+  /* Hide main content for now */
+  .md-content {
+    display: none;
+  }
 
-    /* Hide main content for now */
-    .md-content {
+  /* Hide table of contents */
+  @media screen and (min-width: 60em) {
+    .md-sidebar--secondary {
       display: none;
     }
+  }
 
-    /* Hide table of contents */
-    @media screen and (min-width: 60em) {
-      .md-sidebar--secondary {
-        display: none;
-      }
+  /* Hide navigation */
+  @media screen and (min-width: 76.25em) {
+    .md-sidebar--primary {
+      display: none;
     }
+  }
+</style>
 
-    /* Hide navigation */
-    @media screen and (min-width: 76.25em) {
-      .md-sidebar--primary {
-        display: none;
-      }
-    }
-  </style>
+<!-- Hero for landing page -->
+<section class="mdx-container">
+  <div class="md-grid md-typeset">
 
-  <!-- Hero for landing page -->
-  <section class="mdx-container">
-    <div class="md-grid md-typeset">
-      <div class="mdx-hero">
+    <div class="mdx-hero">
 
-        <!-- Hero image -->
-        <div class="mdx-hero__image">
-          <img
-            src="{{ base_url }}/images/illustration.png"
-            alt=""
-            width="1075"
-            height="606"
-            draggable="false"
-          >
-        </div>
+      <!-- Hero image -->
+      <div class="mdx-hero__image">
+        <img src="{{ base_url }}/images/illustration.png" alt="" width="1075" height="606" draggable="false">
+      </div>
 
-        <!-- Hero content -->
-        <div class="mdx-hero__content">
-          <h1><strong>The AI-driven Kubernetes experimentation platform</strong></h1>
+      <!-- Hero content -->
+      <div class="mdx-hero__content">
+        <h1><strong>The AI-driven Kubernetes experimentation platform</strong></h1>
 
-          <h3><strong>Automate</strong> A/B, A/B/n, Canary, and Conformance experiments.</h3> 
+        <h2>Iter8 makes it easy to <strong>optimize business metrics</strong> and <strong>validate SLOs</strong> when you release new versions of Kubernetes apps/ML models</h2>
+
+        <!-- <h3><strong>Automate</strong> A/B, A/B/n, Canary, and Conformance experiments.</h3> 
           
           <h3><strong>Progressively rollout winning version</strong> of your app/ML model.</h3>
 
           <h3><strong>Optimize</strong> business rewards. <strong>Validate</strong> SLOs. <strong>Maximize</strong> release velocity with confidence.</h3>
 
-          <h3><strong>Protect end-user experience</strong> with mirroring, user segmentation, dark launch, and sticky sessions.</h3>
+          <h3><strong>Protect end-user experience</strong> with mirroring, user segmentation, dark launch, and sticky sessions.</h3> -->
 
-          <a
-            href="{{ base_url }}/getting-started/quick-start/with-knative"
-            title="Quick start in 5 mins"
-            class="md-button md-button--primary"
-          >
-            Quick start in 5 mins
-          </a>
+        <a href="{{ base_url }}/getting-started/quick-start/with-knative" title="Quick start in 5 mins"
+          class="md-button md-button--primary">
+          Quick start in 5 mins
+        </a>
 
-        </div>
       </div>
+    </div> 
+    <!-- Hero ^^ -->
+
+
+  </div>
+</section>
+
+
+<section>
+  <div class="md-grid md-typeset">
+
+    <!-- Main site box descriptions -->
+    <div class="top-hr">
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/atom.svg" %}
+          </span>
+          Experiments
+        </h2>
+        <p>Automate <strong>A/B, A/B/n, Canary, and Conformance experiments</strong> that enable you to compare multiple versions and find the <strong>winner</strong>.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/kubernetes.svg" %}
+          </span>
+          K8s stacks
+        </h2>
+        <p>Experiment over <strong>Knative, KFserving, or Istio</strong>. Or extend Iter8 over <strong>any</strong> K8s stack of your choice with just a few RBAC rules.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/database-plus.svg" %}
+          </span>
+          Metrics
+        </h2>
+        <p>Use metrics from <strong>any</strong> provider in your experiments including <strong>Prometheus, New Relic, Sysdig and Elastic</strong>.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/fontawesome/solid/cogs.svg" %}
+          </span>
+          AI-driven
+        </h2>
+        <p>Leverage <strong>Bayesian statistics</strong> for rigorous version assessments and <strong>multi-armed bandit algorithms</strong> for optimal traffic shifting.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/progress-check.svg" %}
+          </span>
+          Progressive rollout
+        </h2>
+        <p>Enable <strong>progressive traffic shift</strong> towards the winning version or specify a <strong>fixed traffic split</strong> during an experiment.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/router.svg" %}
+          </span>
+          Traffic engineering
+        </h2>
+        <p>Protect end-user experience with traffic engineering features such as <strong>mirroring, user segmentation, dark launch, and sticky sessions</strong>.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/octicons/file-code-16.svg" %}
+          </span>
+          Resource config tools
+        </h2>
+        <p>Use <strong>plain YAML/JSON files, Helm, or Kustomize</strong> for configuring all the resources needed for an experiment.</p>
+      </div>
+
     </div>
-  </section>
+
+  </div>
+</section>
+
 {% endblock %}
 
 <!-- Content -->
