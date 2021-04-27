@@ -6,16 +6,6 @@
 
 set -e
 
-cleanup () {
-    status=$?
-    if (( $status != 0 )); then
-        kind delete cluster
-        echo -e "\033[0;31mFAILED:\033[0m $0"
-    fi
-    exit $status
-}
-trap "cleanup" EXIT
-
 # create kind cluster
 kind create cluster
 kubectl cluster-info --context kind-kind
@@ -46,8 +36,9 @@ kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
 
-# Wait
-kubectl wait experiment mirroring --for=condition=Completed --timeout=150s
+# Sleep
+echo "Sleep for 150s"
+sleep 150.0
 
 # check experiment
 source $ITER8/samples/knative/mirroring/check.sh
@@ -62,5 +53,3 @@ kubectl delete -f $ITER8/samples/knative/mirroring/service.yaml
 kind delete cluster
 
 set +e
-
-echo -e "\033[0;32mSUCCESS:\033[0m $0"

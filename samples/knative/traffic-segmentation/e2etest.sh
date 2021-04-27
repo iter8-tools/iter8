@@ -2,16 +2,6 @@
 
 set -e
 
-cleanup () {
-    status=$?
-    if (( $status != 0 )); then
-        kind delete cluster
-        echo -e "\033[0;31mFAILED:\033[0m $0"
-    fi
-    exit $status
-}
-trap "cleanup" EXIT
-
 # create kind cluster
 kind create cluster
 kubectl cluster-info --context kind-kind
@@ -43,8 +33,9 @@ kubectl wait --for=condition=Ready ksvc/sample-app-v2
 kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 kubectl apply -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml        
 
-# Wait
-kubectl wait experiment request-routing --for=condition=Completed --timeout=150s
+# Sleep
+echo "Sleep for 150s"
+sleep 150.0
 
 # Check
 source  $ITER8/samples/knative/traffic-segmentation/check.sh
@@ -59,5 +50,3 @@ kubectl delete -f $ITER8/samples/knative/traffic-segmentation/services.yaml
 kind delete cluster
 
 set +e
-
-echo -e "\033[0;32mSUCCESS:\033[0m $0"

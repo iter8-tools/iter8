@@ -61,7 +61,7 @@ else
 fi
 
 # Check if latest revision is true
-expectedSubset="productpage-v3"
+expectedSubset="productpage-v2"
 subset=$(kubectl -n bookinfo-iter8 get vs bookinfo -o json | jq -r '.spec.http[0].route[0].destination.subset')
 if [[ $subset = $expectedSubset ]]; then
     echo "subset is $subset"

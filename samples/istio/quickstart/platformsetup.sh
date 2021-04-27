@@ -49,15 +49,17 @@ kubectl wait --for condition=ready --timeout=300s pods --all -n istio-system
 echo "Installing Iter8 with Istio Support"
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/metrics/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/metrics/build.yaml
 
 # Step 5: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
-kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
-kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
 
 # Step 6: Verify Iter8 installation
 echo "Verifying Iter8 and add-on installation"
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+sleep 20
+kubectl wait --for condition=ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system
