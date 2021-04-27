@@ -1,0 +1,65 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  name: istio-quickstart
+spec:
+  # target identifies the service under experimentation using its fully qualified name
+  target: bookinfo-iter8/productpage
+  strategy:
+    # this experiment will perform an A/B test
+    testingPattern: A/B
+    # this experiment will progressively shift traffic to the winning version
+    deploymentPattern: Progressive
+    actions:
+      # when the experiment completes, promote the winning version using kubectl apply
+      finish:
+      - task: common/exec
+        with:
+          cmd: /bin/bash
+          args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
+
+  criteria:
+    rewards: # metrics to be used to determine the "value" or "benefit" of a version
+    - metric: books-purchased
+      preferredDirection: High
+    objectives: # metrics to be used to determine validity of a version
+    - metric: iter8-istio/mean-latency
+      upperLimit: 100
+    - metric: iter8-istio/error-rate
+      upperLimit: "0.01"
+    requestCount: iter8-istio/request-count
+  duration: # product of fields determines length of the experiment
+    intervalSeconds: 10
+    iterationsPerLoop: 10
+  versionInfo:
+    # information about the app versions used in this experiment
+    baseline:
+      name: A
+      variables:
+      - name: version # used in Prometheus queries
+        value: productpage-v1
+      - name: namespace # used by final action if this version is the winner
+        value: bookinfo-iter8
+      - name: promote # used by final action if this version is the winner
+        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/A.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        kind: VirtualService
+        namespace: bookinfo-iter8
+        name: bookinfo
+        fieldPath: .spec.http[0].route[0].weight
+    candidates:
+    - name: B
+      variables:
+      - name: version # used in Prometheus queries
+        value: productpage-v2
+      - name: namespace # used by final action if this version is the winner
+        value: bookinfo-iter8
+      - name: promote # used by final action if this version is the winner
+        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/B.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        kind: VirtualService
+        namespace: bookinfo-iter8
+        name: bookinfo
+        fieldPath: .spec.http[0].route[1].weight

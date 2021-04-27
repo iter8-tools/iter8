@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productpage-v2
+  labels:
+    app: productpage
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productpage
+      version: v2
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: productpage
+        version: v2
+    spec:
+      serviceAccountName: bookinfo-productpage
+      containers:
+      - name: productpage
+        image: iter8/productpage:demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+        env:
+          - name: deployment
+            value: "productpage-v2"
+          - name: namespace
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: color
+            value: "green"
+          - name: reward_min
+            value: "10"
+          - name: reward_max
+            value: "20"
+          - name: port
+            value: "9080"
