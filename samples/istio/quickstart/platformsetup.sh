@@ -22,7 +22,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.4.5}"
+export TAG="${TAG:-v0.4.6}"
 export ISTIO_VERSION="${ISTIO_VERSION:-1.9.3}"
 echo "TAG = $TAG"
 echo "ISTIO_TAG = $ISTIO_VERSION"
@@ -47,12 +47,16 @@ kubectl wait --for condition=ready --timeout=300s pods --all -n istio-system
 
 # Step 4: Install Iter8
 echo "Installing Iter8 with Istio Support"
-echo "Installing Iter8"
-curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install.sh | bash
+kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
+kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/metrics/build.yaml
 
 # Step 5: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
-curl -s https://raw.githubusercontent.com/iter8-tools/iter8-install/main/install-prom-add-on.sh | bash
+kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
+kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
+kubectl apply -f https://raw.githubusercontent.com/iter8/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
 
 # Step 6: Verify Iter8 installation
 echo "Verifying Iter8 and add-on installation"

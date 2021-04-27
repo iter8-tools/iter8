@@ -129,6 +129,8 @@ nav:
       - Conformance testing with traffic mirroring: tutorials/knative/mirroring.md
       - Progressive canary release with traffic segmentation: tutorials/knative/traffic-segmentation.md
       - Useful Knative annotations: tutorials/knative/annotations.md
+    - Istio:
+      - Progressive Canary release: tutorials/canary/istio.md
   - Metrics:
     - Using metrics in experiments: metrics/using-metrics.md
     - Defining Iter8 metrics: metrics/defining-iter8-metrics.md
