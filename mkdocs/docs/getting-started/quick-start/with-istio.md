@@ -196,9 +196,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           - task: common/exec
             with:
               cmd: /bin/bash
-              args:
-              - "-c"
-              - kubectl -n {{ .namespace }} apply -f {{ .promote }}
+              args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
 
       criteria:
         rewards: # metrics to be used to determine the "value" or "benefit" of a version
@@ -209,6 +207,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           upperLimit: 100
         - metric: iter8-istio/error-rate
           upperLimit: "0.01"
+        requestCount: iter8-istio/request-count
       duration: # product of fields determines length of the experiment
         intervalSeconds: 10
         iterationsPerLoop: 10
@@ -217,7 +216,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
         baseline:
           name: A
           variables:
-          - name: revision # used in Prometheus queries
+          - name: version # used in Prometheus queries
             value: productpage-v1
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
@@ -232,7 +231,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
         candidates:
         - name: B
           variables:
-          - name: revision # used in Prometheus queries
+          - name: version # used in Prometheus queries
             value: productpage-v2
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
