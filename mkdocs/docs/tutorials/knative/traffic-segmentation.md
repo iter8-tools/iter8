@@ -5,7 +5,7 @@ template: main.html
 # Progressive Canary Release with Traffic Segmentation
 
 !!! tip ""
-    An experiment with [`Canary`](../../../concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](../../../concepts/buildingblocks/#deployment-pattern) deployment and [traffic segmentation](../../../concepts/buildingblocks/#traffic-shaping).
+    An experiment with [`Canary`](../../../concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](../../../concepts/buildingblocks/#deployment-pattern) deployment and [traffic segmentation](../../../concepts/buildingblocks/#traffic-engineering).
     
     ![Canary](../../images/request-routing.png)
 

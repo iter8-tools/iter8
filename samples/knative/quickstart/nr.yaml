@@ -1,0 +1,21 @@
+- provider: newrelic
+  uri: /newrelic
+  versions:
+  - params:
+    - name: nrql
+      value: "SELECT average\\(duration\\) FROM Sessions WHERE version='sample-app-v1' SINCE .* sec ago\n"
+    metric:
+      type: gauge
+      shift: 5
+      multiplier: 10
+      alpha: 2
+      beta: 2
+  - params:
+    - name: nrql
+      value: "SELECT average\\(duration\\) FROM Sessions WHERE version='sample-app-v2' SINCE .* sec ago\n"
+    metric:
+      type: gauge
+      shift: 10
+      multiplier: 10
+      alpha: 2
+      beta: 2

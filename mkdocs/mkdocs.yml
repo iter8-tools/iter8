@@ -57,7 +57,8 @@ plugins:
 extra:
   title: "Kubernetes experimentation platform"
   version:
-    provider: mike  
+    provider: mike
+    iter8_install_tag: v0.5.1
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/iter8-tools/iter8
@@ -111,13 +112,9 @@ nav:
   - Home: index.md
   - Concepts:
     - What is Iter8?: concepts/whatisiter8.md
-    - Features: concepts/features.md
-    - Conceptual building blocks: concepts/buildingblocks.md
+    - Experiment building blocks: concepts/buildingblocks.md
   - Getting Started:
-    - Quick start: 
-      - with Knative: getting-started/quick-start/with-knative.md
-      - with KFServing: getting-started/quick-start/with-kfserving.md
-      - with Istio: getting-started/quick-start/with-istio.md
+    - Quick start: getting-started/quick-start.md
     - Install: getting-started/install.md
     - Changelog: getting-started/changelog.md
     - Getting help: getting-started/help.md

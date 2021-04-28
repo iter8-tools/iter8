@@ -30,7 +30,7 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
 fi
 
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.4.6}"
+export TAG="${TAG:-v0.5.1}"
 export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
 echo "TAG = $TAG"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
@@ -117,18 +117,21 @@ fi
 echo "Installing Iter8 with Knative support"
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
 
-# Step 6: Install sample metrics for Knative and Iter8's Prometheus add-on
+# Step 6: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
 
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
-kubectl create ns iter8-istio
-kubectl create ns iter8-knative
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
 
-# Step 7: Verify Iter8 installation
-echo "Verifying installation"
+kubectl apply -f ${ITER8}/samples/knative/quickstart/service-monitor.yaml
+
+# Step 7: Install Iter8's mock New Relic service
+echo "Installing Iter8's mock New Relic service"
+kubectl apply -f ${ITER8}/samples/kfserving/quickstart/metrics-mock.yaml
+
+# Step 8: Verify platform setup
+echo "Verifying platform setup"
 kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
