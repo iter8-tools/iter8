@@ -22,7 +22,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.4.6}"
+export TAG="${TAG:-v0.5.1}"
 export ISTIO_VERSION="${ISTIO_VERSION:-1.9.3}"
 echo "TAG = $TAG"
 echo "ISTIO_TAG = $ISTIO_VERSION"
@@ -56,7 +56,8 @@ echo "Installing Iter8's Prometheus add-on"
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/service-monitors/build.yaml
+
+kubectl apply -f ${ITER8}/samples/istio/quickstart/service-monitor.yaml
 
 # Step 6: Verify Iter8 installation
 echo "Verifying Iter8 and add-on installation"

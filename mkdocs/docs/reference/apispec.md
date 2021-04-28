@@ -5,9 +5,9 @@ template: main.html
 # Iter8 API Specification
 
 !!! abstract "Abstract"
-    The Iter8 API provides two [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to automate metrics and AI-driven experiments, progressive delivery, and rollout of Kubernetes and OpenShift apps.
+    The Iter8 API provides two [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) to automate metrics-based experiments, progressive delivery, and safe promotion of Kubernetes and OpenShift apps/ML models.
 
-    1. The **Experiment** resource provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic shaping, and version promotion functions](../../../concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](../../../tutorials/knative/canary-progressive/).
+    1. The **Experiment** resource provides expressive controls required by application developers and service operators who wish to automate new releases of their apps in a robust, principled and metrics-driven manner. These controls encompass [testing, deployment, traffic engineering, and version promotion functions](../../../concepts/buildingblocks/) and can be flexibly composed to automate [diverse use-cases](../../../tutorials/knative/canary-progressive/).
     2. The **Metric** resource encapsulates the REST query that is used by Iter8 for retrieving a metric value from the metrics provider. Metrics are referenced in experiments.
 
 
@@ -84,7 +84,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ---- | ----------- | -------- |
 | target | string | Identifies the app under experimentation and determines which experiments can run concurrently. Experiments that have the same target value will not be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently. It is good practice to follow [target naming conventions](#target-naming-conventions). | Yes |
 | strategy | [Strategy](#strategy) | The experimentation strategy which specifies how app versions are tested, how traffic is shifted during experiment, and what tasks are executed at the start and end of the experiment. | Yes |
-| criteria | [Criteria](#criteria) | Criteria used for evaluating versions. This section includes service-level objectives (SLOs) and indicators (SLIs). | No |
+| criteria | [Criteria](#criteria) | Criteria used for evaluating versions. This section includes (business) rewards, service-level objectives (SLOs) and indicators (SLIs). | No |
 | duration | [Duration](#duration) | Duration of the experiment. | No |
 | versionInfo | [VersionInfo](#versioninfo) | Versions involved in the experiment. Every experiment involves a baseline version, and may involve zero or more candidates. | No |
 
@@ -171,6 +171,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | requestCount | string | Reference to the metric used to count the number of requests sent to app versions. | No |
+| rewards | [Reward](#reward)[] | A list of metrics along with their preferred directions. Currently, this list needs to be of size one. This field can only be used in experiments with A/B and A/B/n testing patterns. | No |
 | objectives | [Objective](#objective)[] | A list of metrics along with acceptable upper limits, lower limits, or both upper and lower limits for them. Iter8 will verify if app versions satisfy these objectives. | No |
 | indicators | string[] | A list of metric references. Iter8 will collect and report the values of these metrics in addition to those referenced in the `objectives` section. | No |
 
@@ -184,6 +185,13 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | metric | string | Reference to a metric resource. Also see [note on metric references](#criteria). | Yes |
 | upperLimit | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | Upper limit on the metric value. If specified, for a version to satisfy this objective, its metric value needs to be below the limit. | No |
 | lowerLimit | [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) | Lower limit on the metric value. If specified, for a version to satisfy this objective, its metric value needs to be above the limit. | No |    
+
+### Reward
+
+| Field name | Field type | Description | Required |
+| ----- | ---- | ----------- | -------- |
+| metric | string | Reference to a metric resource. Also see [note on metric references](#criteria). | Yes |
+| preferredDirection | string | Indicates if higher values or lower values of this metric are preferable. `High` and `Low` are the two permissible values for this string. | Yes |
 
 ### Duration
 
