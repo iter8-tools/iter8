@@ -734,6 +734,10 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
     kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
     ```
 
+    The process automated by Iter8 during this experiment is depicted below.
+
+    ![Iter8 automation](../images/quickstart-iter8-process.png)
+
     ??? info "Look inside experiment.yaml"
         ```yaml linenums="1"
         apiVersion: iter8.tools/v2alpha2
@@ -808,6 +812,11 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
     kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
     ```
 
+    The process automated by Iter8 during this experiment is depicted below.
+
+    ![Iter8 automation](../images/quickstart-iter8-process.png)
+
+
     ??? info "Look inside experiment.yaml"
         ```yaml linenums="1"
         apiVersion: iter8.tools/v2alpha2
@@ -870,6 +879,10 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
     kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
     ```
 
+    The process automated by Iter8 during this experiment is depicted below.
+
+    ![Iter8 automation](../images/quickstart-iter8-process.png)
+
     ??? info "Look inside experiment.yaml"
         ```yaml linenums="1"
         apiVersion: iter8.tools/v2alpha2
@@ -926,12 +939,10 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
                 value: candidate
         ```
 
-The process automated by Iter8 during this experiment is depicted below.
-
-![Iter8 automation](../images/quickstart-iter8-process.png)
-
 ## 8. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
+
+### a) Observe metrics and experiment progress
 
 === "Metrics-based analysis"
     Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
@@ -1027,7 +1038,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
     When the experiment completes, you will see the experiment stage change from `Running` to `Completed`.
 
-### Traffic split
+### b) Observe traffic split
 === "Istio"
 
     ```shell
@@ -1153,6 +1164,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 
 === "KFServing"
     ```shell
+    kubectl delete -f $ITER8/samples/kfserving/quickstart/experiment.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
     kubectl delete ns ns-baseline
     kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml

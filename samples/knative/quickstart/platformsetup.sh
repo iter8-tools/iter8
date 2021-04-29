@@ -129,7 +129,7 @@ kubectl apply -f ${ITER8}/samples/knative/quickstart/service-monitor.yaml
 
 # Step 7: Install Iter8's mock New Relic service
 echo "Installing Iter8's mock New Relic service"
-kubectl apply -f ${ITER8}/samples/kfserving/quickstart/metrics-mock.yaml
+kubectl apply -f ${ITER8}/samples/knative/quickstart/metrics-mock.yaml
 
 # Step 8: Verify platform setup
 echo "Verifying platform setup"
