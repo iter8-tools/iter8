@@ -4,30 +4,28 @@ metadata:
   name: routing-rule-one
 spec:
   gateways:
-  - istio-ingressgateway.istio-system
+  - knative-serving/knative-ingress-gateway
   hosts:
   - customdomain.com
   http:
-  - rewrite:
-      uri: /v1/models/flowers-v1:predict
-    route:
+  - route:
     - destination:
-        host: flowers-v1-predictor-default.default.svc.cluster.local
+        host: flowers-predictor-default.ns-baseline.svc.cluster.local
+      headers:
+        request:
+          set:
+            Host: flowers-predictor-default.ns-baseline
+        response:
+          set:
+            version: flowers-v1
       weight: 100
-# ---
-# apiVersion: networking.istio.io/v1alpha3
-# kind: VirtualService
-# metadata:
-#   name: routing-rule-two
-# spec:
-#   gateways:
-#   - istio-system/cluster-local-gateway
-#   hosts:
-#   - customdomain.com
-#   http:
-  # - rewrite:
-  #     uri: /v1/models/flowers-v1:predict
-  #   route:
-  #   - destination:
-  #       host: flowers-v1-predictor-default.default.svc.cluster.local
-  #     weight: 100
+    - destination:
+        host: flowers-predictor-default.ns-candidate.svc.cluster.local
+      headers:
+        request:
+          set:
+            Host: flowers-predictor-default.ns-candidate
+        response:
+          set:
+            version: flowers-v2
+      weight: 0
