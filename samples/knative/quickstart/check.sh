@@ -46,16 +46,6 @@ else
     exit 1
 fi
 
-# Check if latest revision is true
-latestRevision=true
-lrStatus=$(kubectl get ksvc sample-app -o json | jq -r '.spec.traffic[0].latestRevision')
-if [[ $lrStatus = $latestRevision ]]; then
-    echo "latestRevision is true"
-else
-    echo "latestRevision must be true; is" $lrStatus
-    exit 1
-fi
-
 #check if traffic percent is 100
 percent=100
 actualPercent=$(kubectl get ksvc sample-app -o json | jq -r '.spec.traffic[0].percent')
