@@ -6,8 +6,7 @@ spec:
   # target identifies the knative service under experimentation using its fully qualified name
   target: default/sample-app
   strategy:
-    # this experiment will perform a canary test
-    testingPattern: Canary
+    testingPattern: A/B
     deploymentPattern: Progressive
     actions:
       start: # run the following sequence of tasks at the start of the experiment
@@ -22,9 +21,9 @@ spec:
           - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
   criteria:
     requestCount: iter8-knative/request-count
-    # mean latency of version should be under 50 milliseconds
-    # 95th percentile latency should be under 100 milliseconds
-    # error rate should be under 1%
+    rewards: # Business rewards
+    - metric: iter8-knative/user-engagement
+      preferredDirection: High # maximize user engagement
     objectives: 
     - metric: iter8-knative/mean-latency
       upperLimit: 50
