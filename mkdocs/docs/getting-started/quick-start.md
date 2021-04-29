@@ -505,17 +505,17 @@ Define the Iter8 metrics used in this experiment.
         kind: Metric
         metadata:
           name: user-engagement
-          namespace: iter8-knative
+          namespace: iter8-kfserving
         spec:
           params:
           - name: nrql
             value: |
               SELECT average(duration) FROM Sessions WHERE version='$version' SINCE $elapsedTime sec ago
           description: Average duration of a session
-          type: gauge
+          type: Gauge
           provider: newrelic
           jqExpression: ".results[0] | .[] | tonumber"
-          urlTemplate: http://metrics-mock.default.svc.cluster.local:8080/newrelic
+          urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic
         ---
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
@@ -528,9 +528,9 @@ Define the Iter8 metrics used in this experiment.
           params:
           - name: query
             value: |
-              histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[${elapsedTime}s])) by (le))
+              histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{namespace_name='$ns'}[${elapsedTime}s])) by (le))
           provider: prometheus
-          sampleSize: request-count
+          sampleSize: iter8-kfserving/request-count
           type: Gauge
           units: milliseconds
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -546,7 +546,7 @@ Define the Iter8 metrics used in this experiment.
           params:
           - name: query
             value: |
-              sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+              sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',namespace_name='$ns'}[${elapsedTime}s])) or on() vector(0)
           provider: prometheus
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -562,9 +562,9 @@ Define the Iter8 metrics used in this experiment.
           params:
           - name: query
             value: |
-              (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+              (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',namespace_name='$ns'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{namespace_name='$ns'}[${elapsedTime}s])) or on() vector(0))
           provider: prometheus
-          sampleSize: request-count
+          sampleSize: iter8-kfserving/request-count
           type: Gauge
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ---
@@ -579,9 +579,9 @@ Define the Iter8 metrics used in this experiment.
           params:
           - name: query
             value: |
-              (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+              (sum(increase(revision_app_request_latencies_sum{namespace_name='$ns'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{namespace_name='$ns'}[${elapsedTime}s])) or on() vector(0))
           provider: prometheus
-          sampleSize: request-count
+          sampleSize: iter8-kfserving/request-count
           type: Gauge
           units: milliseconds
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -597,7 +597,7 @@ Define the Iter8 metrics used in this experiment.
           params:
           - name: query
             value: |
-              sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+              sum(increase(revision_app_request_latencies_count{namespace_name='$ns'}[${elapsedTime}s])) or on() vector(0)
           provider: prometheus
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -611,100 +611,111 @@ Define the Iter8 metrics used in this experiment.
 
     ??? info "Look inside metrics.yaml"
         ```yaml linenums="1"
-        apiVersion: iter8.tools/v2alpha2
-        kind: Metric
+        apiVersion: v1
+        kind: Namespace
         metadata:
-        labels:
-            creator: iter8
-        name: 95th-percentile-tail-latency
-        namespace: iter8-knative
-        spec:
-        description: 95th percentile tail latency
-        jqExpression: .data.result[0].value[1] | tonumber
-        params:
-        - name: query
-            value: |
-            histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[${elapsedTime}s])) by (le))
-        provider: prometheus
-        sampleSize: request-count
-        type: Gauge
-        units: milliseconds
-        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+          name: iter8-knative
         ---
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
         metadata:
-        labels:
-            creator: iter8
-        name: error-count
-        namespace: iter8-knative
+          name: user-engagement
+          namespace: iter8-knative
         spec:
-        description: Number of error responses
-        jqExpression: .data.result[0].value[1] | tonumber
-        params:
-        - name: query
+          params:
+          - name: nrql
             value: |
-            sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
-        provider: prometheus
-        type: Counter
-        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+              SELECT average(duration) FROM Sessions WHERE version='$revision' SINCE $elapsedTime sec ago
+          description: Average duration of a session
+          type: Gauge
+          provider: newrelic
+          jqExpression: ".results[0] | .[] | tonumber"
+          urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic
         ---
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
         metadata:
-        labels:
-            creator: iter8
-        name: error-rate
-        namespace: iter8-knative
+          name: 95th-percentile-tail-latency
+          namespace: iter8-knative
         spec:
-        description: Fraction of requests with error responses
-        jqExpression: .data.result[0].value[1] | tonumber
-        params:
-        - name: query
+          description: 95th percentile tail latency
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
             value: |
-            (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
-        provider: prometheus
-        sampleSize: request-count
-        type: Gauge
-        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+              histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[${elapsedTime}s])) by (le))
+          provider: prometheus
+          sampleSize: iter8-knative/request-count
+          type: Gauge
+          units: milliseconds
+          urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ---
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
         metadata:
-        labels:
-            creator: iter8
-        name: mean-latency
-        namespace: iter8-knative
+          name: error-count
+          namespace: iter8-knative
         spec:
-        description: Mean latency
-        jqExpression: .data.result[0].value[1] | tonumber
-        params:
-        - name: query
+          description: Number of error responses
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
             value: |
-            (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
-        provider: prometheus
-        sampleSize: request-count
-        type: Gauge
-        units: milliseconds
-        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+              sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+          provider: prometheus
+          type: Counter
+          urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ---
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
         metadata:
-        labels:
-            creator: iter8
-        name: request-count
-        namespace: iter8-knative
+          name: error-rate
+          namespace: iter8-knative
         spec:
-        description: Number of requests
-        jqExpression: .data.result[0].value[1] | tonumber
-        params:
-        - name: query
+          description: Fraction of requests with error responses
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
             value: |
-            sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
-        provider: prometheus
-        type: Counter
-        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+              (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+          provider: prometheus
+          sampleSize: iter8-knative/request-count
+          type: Gauge
+          urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: mean-latency
+          namespace: iter8-knative
+        spec:
+          description: Mean latency
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+          provider: prometheus
+          sampleSize: iter8-knative/request-count
+          type: Gauge
+          units: milliseconds
+          urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: request-count
+          namespace: iter8-knative
+        spec:
+          description: Number of requests
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+          provider: prometheus
+          type: Counter
+          urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ```
 
 ??? Note "Metrics in your environment"
