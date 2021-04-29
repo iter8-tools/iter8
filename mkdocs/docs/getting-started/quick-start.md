@@ -713,68 +713,82 @@ Define the Iter8 metrics used in this experiment.
     The `urlTemplate` field in the latter point to the Prometheus add-on that was created in Step 3 above. If you wish to use these latency and error-rate metrics in your production/staging/dev/test K8s cluster, change the `urlTemplate` values to match the URL of your Prometheus instance.
 
 ## 7. Launch experiment
-Launch the Iter8 experiment. Iter8 will orchestrate the canary release of the new version with SLO validation and progressive deployment as specified in the experiment.
+Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions as specified in the experiment.
 
-```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
-```
+=== "Istio"
 
-??? info "Look inside experiment.yaml"
-    ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha2
-    kind: Experiment
-    metadata:
-    name: quickstart-exp
-    spec:
-    # target identifies the knative service under experimentation using its fully qualified name
-    target: default/sample-app
-    strategy:
-        # this experiment will perform a canary test
-        testingPattern: Canary
-        deploymentPattern: Progressive
-        actions:
-        start: # run the following sequence of tasks at the start of the experiment
-        - task: knative/init-experiment
-        finish: # run the following sequence of tasks at the end of the experiment
-        - task: common/exec # promote the winning version
-            with:
-            cmd: kubectl
-            args:
-            - "apply"
-            - "-f"
-            - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
-    criteria:
-        requestCount: iter8-knative/request-count
-        # mean latency of version should be under 50 milliseconds
-        # 95th percentile latency should be under 100 milliseconds
-        # error rate should be under 1%
-        objectives: 
-        - metric: iter8-knative/mean-latency
-        upperLimit: 50
-        - metric: iter8-knative/95th-percentile-tail-latency
-        upperLimit: 100
-        - metric: iter8-knative/error-rate
-        upperLimit: "0.01"
-    duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 10
-    versionInfo:
-        # information about app versions used in this experiment
-        baseline:
-        name: current
-        variables:
-        - name: revision
-            value: sample-app-v1
-        - name: promote
-            value: baseline
-        candidates:
-        - name: candidate
-        variables:
-        - name: revision
-            value: sample-app-v2
-        - name: promote
-            value: candidate
+    ```shell
+    kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
     ```
+
+=== "KFServing"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
+    ```
+
+=== "Knative"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+    ```
+
+    ??? info "Look inside experiment.yaml"
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Experiment
+        metadata:
+        name: quickstart-exp
+        spec:
+        # target identifies the knative service under experimentation using its fully qualified name
+        target: default/sample-app
+        strategy:
+            # this experiment will perform a canary test
+            testingPattern: Canary
+            deploymentPattern: Progressive
+            actions:
+            start: # run the following sequence of tasks at the start of the experiment
+            - task: knative/init-experiment
+            finish: # run the following sequence of tasks at the end of the experiment
+            - task: common/exec # promote the winning version
+                with:
+                cmd: kubectl
+                args:
+                - "apply"
+                - "-f"
+                - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
+        criteria:
+            requestCount: iter8-knative/request-count
+            # mean latency of version should be under 50 milliseconds
+            # 95th percentile latency should be under 100 milliseconds
+            # error rate should be under 1%
+            objectives: 
+            - metric: iter8-knative/mean-latency
+            upperLimit: 50
+            - metric: iter8-knative/95th-percentile-tail-latency
+            upperLimit: 100
+            - metric: iter8-knative/error-rate
+            upperLimit: "0.01"
+        duration:
+            intervalSeconds: 10
+            iterationsPerLoop: 10
+        versionInfo:
+            # information about app versions used in this experiment
+            baseline:
+            name: current
+            variables:
+            - name: revision
+                value: sample-app-v1
+            - name: promote
+                value: baseline
+            candidates:
+            - name: candidate
+            variables:
+            - name: revision
+                value: sample-app-v2
+            - name: promote
+                value: candidate
+        ```
 
 The process automated by Iter8 during this experiment is depicted below.
 
