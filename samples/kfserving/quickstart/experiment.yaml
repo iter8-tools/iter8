@@ -7,21 +7,12 @@ spec:
   strategy:
     testingPattern: A/B
     deploymentPattern: Progressive
-    # actions:
-    #   finish: # run the following sequence of tasks at the end of the experiment
-    #   - task: common/exec # promote the winning version
-    #     with:
-    #       cmd: kubectl
-    #       args: 
-    #       - "apply"
-    #       - "-f"
-    #       - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
   criteria:
     requestCount: iter8-kfserving/request-count
     rewards: # Business rewards
     - metric: iter8-kfserving/user-engagement
       preferredDirection: High # maximize user engagement
-    objectives: 
+    objectives:
     - metric: iter8-kfserving/mean-latency
       upperLimit: 500
     - metric: iter8-kfserving/95th-percentile-tail-latency
@@ -32,18 +23,30 @@ spec:
     intervalSeconds: 10
     iterationsPerLoop: 10
   versionInfo:
-    # information about app versions used in this experiment
+    # information about model versions used in this experiment
     baseline:
       name: current
+      weightObjRef:
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        name: routing-rule-one
+        namespace: default
+        fieldPath: .spec.http[0].route[0].weight      
       variables:
       - name: version
-        value: flowers-v1 
-      # - name: promote
-      #   value: baseline
+        value: flowers-v1
+      - name: ns
+        value: ns-baseline
     candidates:
     - name: candidate
+      weightObjRef:
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        name: routing-rule-one
+        namespace: default
+        fieldPath: .spec.http[0].route[1].weight      
       variables:
       - name: version
         value: flowers-v2
-      # - name: promote
-      #   value: candidate 
+      - name: ns
+        value: ns-candidate
