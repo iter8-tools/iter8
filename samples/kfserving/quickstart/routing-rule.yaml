@@ -1,0 +1,31 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: routing-rule-one
+spec:
+  gateways:
+  - knative-serving/knative-ingress-gateway
+  hosts:
+  - customdomain.com
+  http:
+  - route:
+    - destination:
+        host: flowers-predictor-default.ns-baseline.svc.cluster.local
+      headers:
+        request:
+          set:
+            Host: flowers-predictor-default.ns-baseline
+        response:
+          set:
+            version: flowers-v1
+      weight: 100
+    - destination:
+        host: flowers-predictor-default.ns-candidate.svc.cluster.local
+      headers:
+        request:
+          set:
+            Host: flowers-predictor-default.ns-candidate
+        response:
+          set:
+            version: flowers-v2
+      weight: 0

@@ -48,8 +48,6 @@ kubectl wait --for condition=ready --timeout=300s pods --all -n istio-system
 # Step 4: Install Iter8
 echo "Installing Iter8 with Istio Support"
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
-kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/metrics/build.yaml
 
 # Step 5: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"

@@ -1,23 +1,19 @@
-# This Knative service will be used for the Iter8 experiment with traffic split between baseline and candidate revision
-# To begin with, candidate revision receives zero traffic
-# Apply this after applying baseline.yaml in order to create the second revision
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: sample-app # name of the app
-  namespace: default # namespace of the app
+  name: sample-app
+  namespace: default
 spec:
   template:
     metadata:
       name: sample-app-v2
     spec:
       containers:
-      # Docker image used by second revision
       - image: gcr.io/knative-samples/knative-route-demo:green 
         env:
         - name: T_VERSION
           value: "green"
-  traffic: # initially all traffic goes to sample-app-v1 and none to sample-app-v2
+  traffic:
   - tag: current
     revisionName: sample-app-v1
     percent: 100

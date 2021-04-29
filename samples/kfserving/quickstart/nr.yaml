@@ -3,7 +3,7 @@
   versions:
   - params:
     - name: nrql
-      value: "SELECT average\\(duration\\) FROM Sessions WHERE version='sample-app-v1' SINCE .* sec ago\n"
+      value: "SELECT average\\(duration\\) FROM Sessions WHERE version='flowers-v1' SINCE .* sec ago\n"
     metric:
       type: gauge
       shift: 5
@@ -12,7 +12,7 @@
       beta: 2
   - params:
     - name: nrql
-      value: "SELECT average\\(duration\\) FROM Sessions WHERE version='sample-app-v2' SINCE .* sec ago\n"
+      value: "SELECT average\\(duration\\) FROM Sessions WHERE version='flowers-v2' SINCE .* sec ago\n"
     metric:
       type: gauge
       shift: 10

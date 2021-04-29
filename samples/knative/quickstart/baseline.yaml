@@ -1,18 +1,15 @@
-# apply this yaml at the start of the experiment to create the baseline revision
-# Iter8 will apply this yaml at the end of the experiment if it needs to rollback to sample-app-v1
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: sample-app # The name of the app
-  namespace: default # The namespace the app will use
+  name: sample-app
+  namespace: default
 spec:
   template:
     metadata:
       name: sample-app-v1
     spec:
       containers:
-        # The URL to the sample app docker image
-        - image: gcr.io/knative-samples/knative-route-demo:blue 
-          env:
-            - name: T_VERSION
-              value: "blue"
+      - image: gcr.io/knative-samples/knative-route-demo:blue 
+        env:
+        - name: T_VERSION
+          value: "blue"
