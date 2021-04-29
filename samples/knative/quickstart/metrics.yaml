@@ -14,7 +14,7 @@ spec:
     value: |
       SELECT average(duration) FROM Sessions WHERE version='$revision' SINCE $elapsedTime sec ago
   description: Average duration of a session
-  type: gauge
+  type: Gauge
   provider: newrelic
   jqExpression: ".results[0] | .[] | tonumber"
   urlTemplate: http://metrics-mock.default.svc.cluster.local:8080/newrelic
