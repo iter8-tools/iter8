@@ -99,7 +99,7 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
 
 Create baseline and candidate versions of your app.
 === "Istio"
-    Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. The two versions have different color text, red and green. You will use an A/B test to determine which version yields a greater number of books purchased.
+    Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. The two versions have different color text, red and green. You will use an A/B test to determine which version yields a greater number of books purchased and satisfies latency and error rate objectives.
 
     ```shell
     kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
@@ -134,7 +134,7 @@ Create baseline and candidate versions of your app.
         ```
 
 === "KFServing"
-    Deploy two versions of a TensorFlow classification model, along with an Istio virtual service resource to split traffic between them. You will use an A/B test to determine which version yields a higher user-engagement, progressively shift traffic towards the winner, and safely promote the winner.
+    Deploy two versions of a TensorFlow classification model, along with an Istio virtual service resource to split traffic between them. You will use an A/B test to determine which version yields a higher user-engagement and satisfies latency and error-rate objectives, progressively shift traffic towards the winner, and safely promote the winner.
 
     ```shell
     kubectl create ns ns-baseline
@@ -206,6 +206,8 @@ Create baseline and candidate versions of your app.
         ```
 
 === "Knative"
+    Deploy two versions of a Knative app. You will use an A/B test to determine which version yields a higher user-engagement and satisfies latency and error-rate objectives, progressively shift traffic towards the winner, and safely promote the winner.
+
     ```shell
     kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
     kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
