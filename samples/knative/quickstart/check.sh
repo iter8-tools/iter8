@@ -46,14 +46,4 @@ else
     exit 1
 fi
 
-#check if traffic percent is 100
-percent=100
-actualPercent=$(kubectl get ksvc sample-app -o json | jq -r '.spec.traffic[0].percent')
-if [[ $actualPercent -eq $percent ]]; then
-    echo "percent is 100"
-else
-    echo "percent must be 100; is" $percent
-    exit 1
-fi
-
 set +e
