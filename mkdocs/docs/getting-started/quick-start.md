@@ -734,11 +734,135 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
     kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
     ```
 
+    ??? info "Look inside experiment.yaml"
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Experiment
+        metadata:
+          name: istio-quickstart
+        spec:
+          # target identifies the service under experimentation using its fully qualified name
+          target: bookinfo-iter8/productpage
+          strategy:
+            # this experiment will perform an A/B test
+            testingPattern: A/B
+            # this experiment will progressively shift traffic to the winning version
+            deploymentPattern: Progressive
+            actions:
+              # when the experiment completes, promote the winning version using kubectl apply
+              finish:
+              - task: common/exec
+                with:
+                  cmd: /bin/bash
+                  args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
+          criteria:
+            rewards: # metrics to be used to determine the "value" or "benefit" of a version
+            - metric: books-purchased
+              preferredDirection: High
+            objectives: # metrics to be used to determine validity of a version
+            - metric: iter8-istio/mean-latency
+              upperLimit: 100
+            - metric: iter8-istio/error-rate
+              upperLimit: "0.01"
+            requestCount: iter8-istio/request-count
+          duration: # product of fields determines length of the experiment
+            intervalSeconds: 10
+            iterationsPerLoop: 10
+          versionInfo:
+            # information about the app versions used in this experiment
+            baseline:
+              name: A
+              variables:
+              - name: version # used in Prometheus queries
+                value: productpage-v1
+              - name: namespace # used by final action if this version is the winner
+                value: bookinfo-iter8
+              - name: promote # used by final action if this version is the winner
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/A.yaml
+              weightObjRef:
+                apiVersion: networking.istio.io/v1beta1
+                kind: VirtualService
+                namespace: bookinfo-iter8
+                name: bookinfo
+                fieldPath: .spec.http[0].route[0].weight
+            candidates:
+            - name: B
+              variables:
+              - name: version # used in Prometheus queries
+                value: productpage-v2
+              - name: namespace # used by final action if this version is the winner
+                value: bookinfo-iter8
+              - name: promote # used by final action if this version is the winner
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/B.yaml
+              weightObjRef:
+                apiVersion: networking.istio.io/v1beta1
+                kind: VirtualService
+                namespace: bookinfo-iter8
+                name: bookinfo
+                fieldPath: .spec.http[0].route[1].weight
+        ```
+
 === "KFServing"
 
     ```shell
     kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
     ```
+
+    ??? info "Look inside experiment.yaml"
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Experiment
+        metadata:
+          name: quickstart-exp
+        spec:
+          target: flowers
+          strategy:
+            testingPattern: A/B
+            deploymentPattern: Progressive
+          criteria:
+            requestCount: iter8-kfserving/request-count
+            rewards: # Business rewards
+            - metric: iter8-kfserving/user-engagement
+              preferredDirection: High # maximize user engagement
+            objectives:
+            - metric: iter8-kfserving/mean-latency
+              upperLimit: 500
+            - metric: iter8-kfserving/95th-percentile-tail-latency
+              upperLimit: 2000
+            - metric: iter8-kfserving/error-rate
+              upperLimit: "0.01"
+          duration:
+            intervalSeconds: 10
+            iterationsPerLoop: 30
+          versionInfo:
+            # information about model versions used in this experiment
+            baseline:
+              name: current
+              weightObjRef:
+                apiVersion: networking.istio.io/v1alpha3
+                kind: VirtualService
+                name: routing-rule-one
+                namespace: default
+                fieldPath: .spec.http[0].route[0].weight      
+              variables:
+              - name: version
+                value: flowers-v1
+              - name: ns
+                value: ns-baseline
+            candidates:
+            - name: candidate
+              weightObjRef:
+                apiVersion: networking.istio.io/v1alpha3
+                kind: VirtualService
+                name: routing-rule-one
+                namespace: default
+                fieldPath: .spec.http[0].route[1].weight      
+              variables:
+              - name: version
+                value: flowers-v2
+              - name: ns
+                value: ns-candidate
+        ```
 
 === "Knative"
 
@@ -751,61 +875,60 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
         apiVersion: iter8.tools/v2alpha2
         kind: Experiment
         metadata:
-        name: quickstart-exp
+          name: quickstart-exp
         spec:
-        # target identifies the knative service under experimentation using its fully qualified name
-        target: default/sample-app
-        strategy:
-            # this experiment will perform a canary test
-            testingPattern: Canary
+          # target identifies the knative service under experimentation using its fully qualified name
+          target: default/sample-app
+          strategy:
+            testingPattern: A/B
             deploymentPattern: Progressive
             actions:
-            start: # run the following sequence of tasks at the start of the experiment
-            - task: knative/init-experiment
-            finish: # run the following sequence of tasks at the end of the experiment
-            - task: common/exec # promote the winning version
+              start: # run the following sequence of tasks at the start of the experiment
+              - task: knative/init-experiment
+              finish: # run the following sequence of tasks at the end of the experiment
+              - task: common/exec # promote the winning version
                 with:
-                cmd: kubectl
-                args:
-                - "apply"
-                - "-f"
-                - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
-        criteria:
+                  cmd: kubectl
+                  args: 
+                  - "apply"
+                  - "-f"
+                  - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
+          criteria:
             requestCount: iter8-knative/request-count
-            # mean latency of version should be under 50 milliseconds
-            # 95th percentile latency should be under 100 milliseconds
-            # error rate should be under 1%
+            rewards: # Business rewards
+            - metric: iter8-knative/user-engagement
+              preferredDirection: High # maximize user engagement
             objectives: 
             - metric: iter8-knative/mean-latency
-            upperLimit: 50
+              upperLimit: 50
             - metric: iter8-knative/95th-percentile-tail-latency
-            upperLimit: 100
+              upperLimit: 100
             - metric: iter8-knative/error-rate
-            upperLimit: "0.01"
-        duration:
+              upperLimit: "0.01"
+          duration:
             intervalSeconds: 10
             iterationsPerLoop: 10
-        versionInfo:
+          versionInfo:
             # information about app versions used in this experiment
             baseline:
-            name: current
-            variables:
-            - name: revision
-                value: sample-app-v1
-            - name: promote
+              name: current
+              variables:
+              - name: revision
+                value: sample-app-v1 
+              - name: promote
                 value: baseline
             candidates:
             - name: candidate
-            variables:
-            - name: revision
+              variables:
+              - name: revision
                 value: sample-app-v2
-            - name: promote
+              - name: promote
                 value: candidate
         ```
 
 The process automated by Iter8 during this experiment is depicted below.
 
-![Iter8 automation](../images/canary-progressive-kubectl-iter8.png)
+![Iter8 automation](../images/quickstart-iter8-process.png)
 
 ## 8. Observe experiment
 Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
@@ -879,7 +1002,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         +--------------------------------------------+---------+-----------+
         ``` 
 
-    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~2 mins), you will see the experiment stage change from `Running` to `Completed`.
+    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions and the candidate improves over the baseline version in terms of the reward metric. The candidate is identified as the winner and is recommended for promotion.
 
 === "Experiment progress"
 
@@ -902,9 +1025,91 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
         ```
 
-    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
+    When the experiment completes, you will see the experiment stage change from `Running` to `Completed`.
 
-=== "Traffic split"
+### Traffic split
+=== "Istio"
+
+    ```shell
+    kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq .spec.http[0].route
+    ```
+
+    ??? info "kubectl get vs output"
+        The `kubectl` output will be similar to the following.
+        ```shell
+        [
+          {
+            "destination": {
+              "host": "productpage",
+              "port": {
+                "number": 9080
+              },
+              "subset": "productpage-v1"
+            },
+            "weight": 35
+          },
+          {
+            "destination": {
+              "host": "productpage",
+              "port": {
+                "number": 9080
+              },
+              "subset": "productpage-v2"
+            },
+            "weight": 65
+          }
+        ]
+        ```
+
+=== "KFServing"
+
+    ```shell
+    kubectl get vs routing-rule-one -o json --watch | jq .spec.http[0].route
+    ```
+
+    ??? info "kubectl get vs output"
+        ```json
+        [
+          {
+            "destination": {
+              "host": "flowers-predictor-default.ns-baseline.svc.cluster.local"
+            },
+            "headers": {
+              "request": {
+                "set": {
+                  "Host": "flowers-predictor-default.ns-baseline"
+                }
+              },
+              "response": {
+                "set": {
+                  "version": "flowers-v1"
+                }
+              }
+            },
+            "weight": 5
+          },
+          {
+            "destination": {
+              "host": "flowers-predictor-default.ns-candidate.svc.cluster.local"
+            },
+            "headers": {
+              "request": {
+                "set": {
+                  "Host": "flowers-predictor-default.ns-candidate"
+                }
+              },
+              "response": {
+                "set": {
+                  "version": "flowers-v2"
+                }
+              }
+            },
+            "weight": 95
+          }
+        ]
+        ```    
+
+=== "Knative"
 
     ```shell
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
@@ -933,14 +1138,31 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
 
 ???+ info "Understanding what happened"
-    1. You created a Knative service with two revisions, `sample-app-v1` (baseline) and `sample-app-v2` (candidate).
-    2. You generated requests for the Knative service using a Fortio job. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with canary testing and progressive deployment patterns. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, verified that the candidate satisfied all objectives, identified the candidate as the winner, progressively shifted traffic from the baseline to the candidate, and eventually promoted the candidate using the `kubectl apply` command embedded within its finish action.
-    4. Had the candidate failed to satisfy objectives, then the baseline would have been promoted.
+    1. You created two versions of your app/ML model.
+    2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
+    3. You created an Iter8 experiment with A/B testing and progressive deployment. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, the business reward metric, verified that the candidate satisfied all objectives, identified the candidate as the winner since the candidate improved over the baseline in terms of the reward, and progressively shifted traffic from the baseline to the candidate.
 
 ## 9. Cleanup
-```shell
-kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
-kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-```
+=== "Istio"
+    ```shell
+    kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
+    kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
+    kubectl delete -f $ITER8/samples/istio/quickstart/books-purchased.yaml
+    kubectl delete namespace bookinfo-iter8
+    ```
+
+=== "KFServing"
+    ```shell
+    kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
+    kubectl delete ns ns-baseline
+    kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
+    kubectl delete ns ns-candidate
+    kubectl delete -f $ITER8/samples/kfserving/quickstart/routing-rule.yaml
+    ```
+
+=== "Knative"
+    ```shell
+    kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
+    kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml
+    kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+    ```
