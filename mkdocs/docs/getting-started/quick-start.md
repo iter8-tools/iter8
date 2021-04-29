@@ -22,13 +22,7 @@ template: main.html
 
 ## 1. Create Kubernetes cluster
 
-Create a local cluster using Minikube or Kind as follows, or use a managed Kubernetes service. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
-
-=== "Minikube"
-
-    ```shell
-    minikube start --cpus 8 --memory 12288
-    ```
+Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes service. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
 
 === "Kind"
 
@@ -42,6 +36,12 @@ Create a local cluster using Minikube or Kind as follows, or use a managed Kuber
 
         ![Resources](../images/ddresourcepreferences.png)
 
+=== "Minikube"
+
+    ```shell
+    minikube start --cpus 8 --memory 12288
+    ```
+
 ## 2. Clone Iter8 repo
 ```shell
 git clone https://github.com/iter8-tools/iter8.git
@@ -49,9 +49,23 @@ cd iter8
 export ITER8=$(pwd)
 ```
 
-## 3. Setup Kubernetes cluster
+## 3. Install K8s stack and Iter8
 
 Choose the K8s stack over which you wish to perform the A/B testing experiment.
+=== "Istio"
+    Setup Istio, Iter8, and Prometheus add-on within your cluster. 
+
+    ```shell
+    $ITER8/samples/istio/quickstart/platformsetup.sh
+    ```
+    
+=== "KFServing"
+    Setup KFServing, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
+
+    ```shell
+    $ITER8/samples/kfserving/quickstart/platformsetup.sh
+    ```
+
 === "Knative"
     Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. 
     
@@ -81,23 +95,77 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
         $ITER8/samples/knative/quickstart/platformsetup.sh istio
         ```
 
-=== "Istio"
-    Setup Istio, Iter8, and Prometheus add-on within your cluster. 
-
-    ```shell
-    $ITER8/samples/istio/quickstart/platformsetup.sh
-    ```
-    
-=== "KFServing"
-    Setup KFServing, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
-
-    ```shell
-    $ITER8/samples/kfserving/quickstart/platformsetup.sh
-    ```
-
 ## 4. Create app versions
 
-Choose the K8s stack over which you wish to perform the A/B testing experiment, and create baseline and candidate versions of your app.
+Create baseline and candidate versions of your app.
+=== "Istio"
+    Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. The two versions have different color text, red and green. You will use an A/B test to determine which version yields a greater number of books purchased.
+
+    ```shell
+    kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
+    kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
+    kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
+    kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
+    kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods --all
+    ```
+
+    ??? info "Look inside `productpage-v1` configuration"
+        Environment variables are used to configure the service. They define the text color and the expected reward.
+        ```yaml linenums="1"
+        env:
+        - name: color
+          value: "red"
+        - name: reward_min
+          value: "0"
+        - name: reward_max
+          value: "5"
+        ```
+
+    ??? info "Look inside `productpage-v2` configuration"
+        Environment variables are used to configure the service. They define the text color and the expected reward.
+        ```yaml linenums="1"
+        env:
+        - name: color
+          value: "green"
+        - name: reward_min
+          value: "10"
+        - name: reward_max
+          value: "20"
+        ```
+
+=== "KFServing"
+    Deploy two versions of a TensorFlow classification model, along with an Istio virtual service resource to split traffic between them. You will use an A/B test to determine which version yields a higher user-engagement, progressively shift traffic towards the winner, and safely promote the winner.
+
+    ```shell
+    kubectl apply -f $ITER8/samples/kfserving/quickstart/baseline.yaml
+    kubectl apply -f $ITER8/samples/kfserving/quickstart/candidate.yaml
+    kubectl apply -f $ITER8/samples/kfserving/quickstart/routing-rule.yaml
+    ```
+
+    ??? info "Look inside baseline.yaml"
+        ```yaml linenums="1"
+        apiVersion: serving.kubeflow.org/v1beta1
+        kind: InferenceService
+        metadata:
+          name: flowers-v1
+        spec:
+          predictor:
+            tensorflow:
+              storageUri: "gs://kfserving-samples/models/tensorflow/flowers"
+        ```
+
+    ??? info "Look inside candidate.yaml"
+        ```yaml linenums="1"
+        apiVersion: serving.kubeflow.org/v1beta1
+        kind: InferenceService
+        metadata:
+          name: flowers-v2
+        spec:
+          predictor:
+            tensorflow:
+              storageUri: "gs://kfserving-samples/models/tensorflow/flowers-2"
+        ```
+
 === "Knative"
     ```shell
     kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
@@ -109,18 +177,18 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment, 
         apiVersion: serving.knative.dev/v1
         kind: Service
         metadata:
-        name: sample-app
-        namespace: default
+          name: sample-app
+          namespace: default
         spec:
-        template:
+          template:
             metadata:
-            name: sample-app-v1
+              name: sample-app-v1
             spec:
-            containers:
-            - image: gcr.io/knative-samples/knative-route-demo:blue 
+              containers:
+              - image: gcr.io/knative-samples/knative-route-demo:blue 
                 env:
                 - name: T_VERSION
-                value: "blue"
+                  value: "blue"
         ```
 
     ??? info "Look inside experimentalservice.yaml"
@@ -128,33 +196,26 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment, 
         apiVersion: serving.knative.dev/v1
         kind: Service
         metadata:
-        name: sample-app # name of the app
-        namespace: default # namespace of the app
+          name: sample-app
+          namespace: default
         spec:
-        template:
+          template:
             metadata:
-            name: sample-app-v2
+              name: sample-app-v2
             spec:
-            containers:
-            - image: gcr.io/knative-samples/knative-route-demo:green 
+              containers:
+              - image: gcr.io/knative-samples/knative-route-demo:green 
                 env:
                 - name: T_VERSION
-                value: "green"
-        traffic:
-        # initially all traffic goes to sample-app-v1 and none to sample-app-v2
-        - tag: current
+                  value: "green"
+          traffic:
+          - tag: current
             revisionName: sample-app-v1
             percent: 100
-        - tag: candidate
+          - tag: candidate
             latestRevision: true
             percent: 0
         ```
-
-=== "Istio"
-    ```shell
-    kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
-    kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-    ```
 
 ## 5. Generate requests
 In a production environment, your application would receive requests from end-users. For the purposes of this tutorial, simulate user requests using [Fortio](https://github.com/fortio/fortio) as follows.

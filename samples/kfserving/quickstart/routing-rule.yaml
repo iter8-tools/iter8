@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: routing-rule-one
+spec:
+  gateways:
+  - istio-ingressgateway.istio-system
+  hosts:
+  - customdomain.com
+  http:
+  - rewrite:
+      uri: /v1/models/flowers-v1:predict
+    route:
+    - destination:
+        host: flowers-v1-predictor-default.default.svc.cluster.local
+      weight: 100
+# ---
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: routing-rule-two
+# spec:
+#   gateways:
+#   - istio-system/cluster-local-gateway
+#   hosts:
+#   - customdomain.com
+#   http:
+  # - rewrite:
+  #     uri: /v1/models/flowers-v1:predict
+  #   route:
+  #   - destination:
+  #       host: flowers-v1-predictor-default.default.svc.cluster.local
+  #     weight: 100
