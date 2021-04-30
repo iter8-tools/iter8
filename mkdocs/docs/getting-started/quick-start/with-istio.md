@@ -102,7 +102,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
-kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods --all
+kubectl -n bookinfo-iter8 wait --for=condition=Ready pods --all
 ```
 
 ??? info "Look inside `productpage-v1` configuration"
@@ -181,7 +181,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
     apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
-      name: istio-quickstart
+      name: quickstart-exp
     spec:
       # target identifies the service under experimentation using its fully qualified name
       target: bookinfo-iter8/productpage
@@ -221,7 +221,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
           - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/A.yaml
+            value: https://raw.githubusercontent.com/kalantar/iter8/quickstart-exp/samples/istio/quickstart/A.yaml
           weightObjRef:
             apiVersion: networking.istio.io/v1beta1
             kind: VirtualService
@@ -236,7 +236,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
           - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/B.yaml
+            value: https://raw.githubusercontent.com/kalantar/iter8/quickstart-exp/samples/istio/quickstart/B.yaml
           weightObjRef:
             apiVersion: networking.istio.io/v1beta1
             kind: VirtualService
@@ -261,7 +261,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     Periodically describe the experiment.
     ```shell
     while clear; do
-    kubectl get experiment istio-quickstart -o yaml | iter8ctl describe -f -
+    kubectl get experiment quickstart-exp -o yaml | iter8ctl describe -f -
     sleep 4
     done
     ```
@@ -269,7 +269,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         The `iter8ctl` output will be similar to the following.
         ```shell
         ****** Overview ******
-        Experiment name: istio-quickstart
+        Experiment name: quickstart-exp
         Experiment namespace: default
         Target: bookinfo-iter8/productpage
         Testing pattern: A/B
@@ -319,20 +319,20 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 === "kubectl get experiment"
 
     ```shell
-    kubectl get experiment istio-quickstart --watch
+    kubectl get experiment quickstart-exp --watch
     ```
 
     ??? info "kubectl get experiment output"
         The `kubectl` output will be similar to the following.
         ```shell
         NAME               TYPE   TARGET                       STAGE     COMPLETED ITERATIONS   MESSAGE
-        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   1                      IterationUpdate: Completed Iteration 1
-        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   2                      IterationUpdate: Completed Iteration 2
-        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   3                      IterationUpdate: Completed Iteration 3
-        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   4                      IterationUpdate: Completed Iteration 4
-        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   5                      IterationUpdate: Completed Iteration 5
-        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   6                      IterationUpdate: Completed Iteration 6
-        istio-quickstart   A/B    bookinfo-iter8/productpage   Running   7                      IterationUpdate: Completed Iteration 7
+        quickstart-exp   A/B    bookinfo-iter8/productpage   Running   1                      IterationUpdate: Completed Iteration 1
+        quickstart-exp   A/B    bookinfo-iter8/productpage   Running   2                      IterationUpdate: Completed Iteration 2
+        quickstart-exp   A/B    bookinfo-iter8/productpage   Running   3                      IterationUpdate: Completed Iteration 3
+        quickstart-exp   A/B    bookinfo-iter8/productpage   Running   4                      IterationUpdate: Completed Iteration 4
+        quickstart-exp   A/B    bookinfo-iter8/productpage   Running   5                      IterationUpdate: Completed Iteration 5
+        quickstart-exp   A/B    bookinfo-iter8/productpage   Running   6                      IterationUpdate: Completed Iteration 6
+        quickstart-exp   A/B    bookinfo-iter8/productpage   Running   7                      IterationUpdate: Completed Iteration 7
         ```
 
     When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.    
@@ -340,8 +340,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
 === "kubectl get virtualservice"
 
     ```shell
-    kubectl --namespace bookinfo-iter8 get virtualservice bookinfo -o json --watch \
-      | jq .spec.http[0].route
+    kubectl -n bookinfo-iter8 get virtualservice bookinfo -o json --watch | jq .spec.http[0].route
     ```
 
     ??? info "kubectl get virtualservice output"

@@ -61,7 +61,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
 
         2. **Create RBAC rule:** Provide the required permissions for Iter8 to read this secret. The service account `iter8-analytics` in the `iter8-system` namespace will have permissions to read secrets in the `myns` namespace.
         ```shell
-        kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics --namespace=myns
+        kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics -n myns
         ```
 
         3. **Define metric:** When defining the metric, ensure that the `authType` field is set to `Basic` and the appropriate `secret` is referenced.
@@ -129,7 +129,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
 
         2. **Create RBAC rule:** Provide the required permissions for Iter8 to read this secret. The service account `iter8-analytics` in the `iter8-system` namespace will have permissions to read secrets in the `myns` namespace.
         ```shell
-        kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics --namespace=myns
+        kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics =myns
         ```
 
         3. **Define metric:** When defining the metric, ensure that the `authType` field is set to `APIKey` and the appropriate `secret` is referenced. In the `headerTemplates` field, include `X-Query-Key` as the name of a header field (as [required by New Relic](https://docs.newrelic.com/docs/insights/event-data-sources/insights-api/query-insights-event-data-api/#create-request)). The value for this header field is a templated string. Iter8 will substitute the placeholder ${mykey} at query time, by looking up the referenced `secret` named `nrcredentials` in the `myns` namespace.
@@ -216,7 +216,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
 
         2. **Create RBAC rule:** Provide the required permissions for Iter8 to read this secret. The service account `iter8-analytics` in the `iter8-system` namespace will have permissions to read secrets in the `myns` namespace.
         ```shell
-        kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics --namespace=myns
+        kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics -n myns
         ```
 
         3. **Define metric:** When defining the metric, ensure that the `authType` field is set to `Bearer` and the appropriate `secret` is referenced. In the `headerTemplates` field, include `Authorize` header field (as [required by Sysdig](https://docs.sysdig.com/en/sysdig-rest-api-conventions.html)). The value for this header field is a templated string. Iter8 will substitute the placeholder ${token} at query time, by looking up the referenced `secret` named `sdcredentials` in the `myns` namespace.
@@ -284,7 +284,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
 
       2. **Create RBAC rule:** Provide the required permissions for Iter8 to read this secret. The service account `iter8-analytics` in the `iter8-system` namespace will have permissions to read secrets in the `myns` namespace.
       ```shell
-      kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics --namespace=myns
+      kubectl create rolebinding iter8-cred --clusterrole=iter8-secret-reader-analytics --serviceaccount=iter8-system:iter8-analytics -n myns
       ```
 
       3. **Define metric:** When defining the metric, ensure that the `authType` field is set to `Basic` and the appropriate `secret` is referenced.

@@ -82,7 +82,7 @@ elif [[ "contour" == ${1} ]]; then
 
     # Configure Knative Serving to use Contour by default:
     kubectl patch configmap/config-network \
-    --namespace knative-serving \
+    -n knative-serving \
     --type merge \
     --patch '{"data":{"ingress.class":"contour.ingress.networking.knative.dev"}}'
     echo "Contour installed successfully"
@@ -105,7 +105,7 @@ elif [[ "kourier" == ${1} ]]; then
 
     # Configure Knative Serving to use Kourier by default:
     kubectl patch configmap/config-network \
-    --namespace knative-serving \
+    -n knative-serving \
     --type merge \
     --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
     echo "Kourier installed successfully"
