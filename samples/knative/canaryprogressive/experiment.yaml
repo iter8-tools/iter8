@@ -20,16 +20,11 @@ spec:
       finish: # run the following sequence of tasks at the end of the experiment
       - task: common/exec # promote the winning version using Helm upgrade
         with:
-          cmd: helm
+          cmd: /bin/sh
           args:
-          - "upgrade"
-          - "--install"
-          - "--repo"
-          - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
-          - "sample-app" # release name
-          - "--namespace=default" # release namespace
-          - "sample-app" # chart name
-          - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # placeholder 'promote' is dynamically substituted
+          - "-c"
+          - |
+            helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app --namespace=default sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml
   criteria:
     # mean latency of version should be under 50 milliseconds
     # 95th percentile latency should be under 100 milliseconds
@@ -47,16 +42,12 @@ spec:
   versionInfo:
     # information about app versions used in this experiment
     baseline:
-      name: current
+      name: sample-app-v1
       variables:
-      - name: revision
-        value: sample-app-v1 
       - name: promote
         value: baseline
     candidates:
-    - name: candidate
+    - name: sample-app-v2
       variables:
-      - name: revision
-        value: sample-app-v2
       - name: promote
         value: candidate 
