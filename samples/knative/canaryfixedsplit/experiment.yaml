@@ -38,12 +38,6 @@ spec:
   versionInfo:
     # information about app versions used in this experiment
     baseline:
-      name: baseline
-      variables:
-      - name: revision
-        value: sample-app-v1 
+      name: sample-app-v1
     candidates:
-    - name: candidate
-      variables:
-      - name: revision
-        value: sample-app-v2
+    - name: sample-app-v2

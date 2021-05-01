@@ -53,12 +53,12 @@ else
 fi
 
 # Check if versionRecommendedForPromotion is candidate
-candidate="candidate"
+candidate="sample-app-v2"
 vrfp=$(kubectl get experiment  ${EXPERIMENT} -o json | jq -r .status.versionRecommendedForPromotion)
 if [[ $vrfp = $candidate ]]; then
     echo "versionRecommendedForPromotion is $vrfp"
 else
-    echo "versionRecommendedForPromotion must be candidate; is" $vrfp
+    echo "versionRecommendedForPromotion must be $candidate; is" $vrfp
     dump; exit 1
 fi
 
@@ -79,7 +79,7 @@ actualPercent=$(kubectl get ksvc sample-app -o json | jq -r '.spec.traffic[0].pe
 if [[ $actualPercent -eq $percent ]]; then
     echo "percent is 100"
 else
-    echo "percent must be 100; is" $percent
+    echo "percent must be $percent; is" $actualPercent
     dump; exit 1
 fi
 

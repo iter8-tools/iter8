@@ -60,9 +60,9 @@ fi
 percent=100
 actualPercent=$(kubectl get ksvc sample-app -o json | jq -r '.spec.traffic[0].percent')
 if [[ $actualPercent -eq $percent ]]; then
-    echo "percent is 100"
+    echo "percent is $percent"
 else
-    echo "percent must be 100; is" $percent
+    echo "percent must be $actualPercent; is" $percent
     exit 1
 fi
 
