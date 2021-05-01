@@ -8,9 +8,6 @@ spec:
   strategy:
     # this experiment will perform a conformance test
     testingPattern: Conformance
-    actions:
-      start: # run the following sequence of tasks at the start of the experiment
-      - task: knative/init-experiment
   criteria:
     # mean latency of version should be under 50 milliseconds
     # 95th percentile latency should be under 100 milliseconds

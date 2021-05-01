@@ -10,8 +10,6 @@ spec:
     testingPattern: Canary
     deploymentPattern: FixedSplit
     actions:
-      start: # run the following sequence of tasks at the start of the experiment
-      - task: knative/init-experiment
       finish: # run the following sequence of tasks at the end of the experiment
       - task: common/exec # promote the winning version using kustomize
         with:
