@@ -7,7 +7,7 @@ hide:
 
 # Installation
 
-Install Iter8 in your Kubernetes cluster using [Kustomize v3+](https://kubectl.docs.kubernetes.io/installation/kustomize/) as follows.
+Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
 export TAG=v0.5.1

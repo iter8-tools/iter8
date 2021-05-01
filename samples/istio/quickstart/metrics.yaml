@@ -9,17 +9,18 @@ metadata:
 apiVersion: iter8.tools/v2alpha2
 kind: Metric
 metadata:
-  name: books-purchased
+  name: user-engagement
+  namespace: iter8-istio
 spec:
-  description: Total number of books purchased
   params:
-  - name: query
+  - name: nrql
     value: |
-      (sum(increase(number_of_books_purchased_total{destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+      SELECT average(duration) FROM Sessions WHERE version='$name' SINCE $elapsedTime sec ago
+  description: Average duration of a session
   type: Gauge
-  provider: prometheus
-  jqExpression: ".data.result[0].value[1] | tonumber"
-  urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+  provider: newrelic
+  jqExpression: ".results[0] | .[] | tonumber"
+  urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic
 ---
 apiVersion: iter8.tools/v2alpha2
 kind: Metric

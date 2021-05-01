@@ -8,11 +8,11 @@ template: main.html
     [A/B testing](../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an app/ML model, and select a winner based on a (business) reward metric and objectives (SLOs). In this tutorial, you will:
 
     1. Perform A/B testing.
-    2. Specify `user-engagement` as the reward, and `latency` and `error-rate` based objectives. Iter8 will find a winner by comparing versions in terms of the reward, and by validating versions in terms of the objectives.
-    3. Use reward metric provided by New Relic, and use metrics used in objectives provided by Prometheus.
+    2. Specify *user-engagement* as the reward metric, and *latency* and *error-rate* based objectives. Iter8 will find a winner by comparing the two versions in terms of the reward, and by validating versions in terms of the objectives.
+    3. Use New Relic as the provider for user-engagement metric, and Prometheus as the provider for latency and error-rate metrics.
     4. Combine A/B testing with [progressive deployment](../../concepts/buildingblocks/#deployment-pattern).
     
-    Assuming a winner is found, Iter8 will progressively shift the traffic towards the winner and promote it at the end as depicted below.
+    Iter8 will progressively shift the traffic towards the winner and promote it at the end as depicted below.
 
     ![Canary](../images/quickstart.png)
 
@@ -22,7 +22,7 @@ template: main.html
 
 ## 1. Create Kubernetes cluster
 
-Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes service. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
+Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
 
 === "Kind"
 
@@ -53,7 +53,7 @@ export ITER8=$(pwd)
 
 Choose the K8s stack over which you wish to perform the A/B testing experiment.
 === "Istio"
-    Setup Istio, Iter8, and Prometheus add-on within your cluster. 
+    Setup Istio, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
 
     ```shell
     $ITER8/samples/istio/quickstart/platformsetup.sh
@@ -67,9 +67,7 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
     ```
 
 === "Knative"
-    Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. 
-    
-    Knative can work with multiple networking layers. So can Iter8's Knative extension. Choose a networking layer for Knative.
+    Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. Knative can work with multiple networking layers. So can Iter8's Knative extension. Choose a networking layer for Knative.
 
     === "Contour"
 
@@ -99,7 +97,7 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
 
 Create baseline and candidate versions of your app.
 === "Istio"
-    Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. The two versions have different color text, red and green. You will use an A/B test to determine which version yields a greater number of books purchased and satisfies latency and error rate objectives.
+    Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice.
 
     ```shell
     kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
@@ -109,32 +107,55 @@ Create baseline and candidate versions of your app.
     kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
     ```
 
-    ??? info "Look inside `productpage-v1` configuration"
-        Environment variables are used to configure the service. They define the text color and the expected reward.
+    ??? info "Look inside productpage-v2.yaml (v1 is similar)"
         ```yaml linenums="1"
-        env:
-        - name: color
-          value: "red"
-        - name: reward_min
-          value: "0"
-        - name: reward_max
-          value: "5"
-        ```
-
-    ??? info "Look inside `productpage-v2` configuration"
-        Environment variables are used to configure the service. They define the text color and the expected reward.
-        ```yaml linenums="1"
-        env:
-        - name: color
-          value: "green"
-        - name: reward_min
-          value: "10"
-        - name: reward_max
-          value: "20"
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: productpage-v2
+          labels:
+            app: productpage
+            version: v2
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: productpage
+              version: v2
+          template:
+            metadata:
+              annotations:
+                sidecar.istio.io/inject: "true"
+              labels:
+                app: productpage
+                version: v2
+            spec:
+              serviceAccountName: bookinfo-productpage
+              containers:
+              - name: productpage
+                image: iter8/productpage:demo
+                imagePullPolicy: IfNotPresent
+                ports:
+                - containerPort: 9080
+                env:
+                  - name: deployment
+                    value: "productpage-v2"
+                  - name: namespace
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: metadata.namespace
+                  - name: color
+                    value: "green"
+                  - name: reward_min
+                    value: "10"
+                  - name: reward_max
+                    value: "20"
+                  - name: port
+                    value: "9080"
         ```
 
 === "KFServing"
-    Deploy two versions of a TensorFlow classification model, along with an Istio virtual service resource to split traffic between them. You will use an A/B test to determine which version yields a higher user-engagement and satisfies latency and error-rate objectives, progressively shift traffic towards the winner, and safely promote the winner.
+    Deploy two KFServing inference services corresponding to two versions of a TensorFlow classification model, along with an Istio virtual service to split traffic between them.
 
     ```shell
     kubectl create ns ns-baseline
@@ -206,7 +227,7 @@ Create baseline and candidate versions of your app.
         ```
 
 === "Knative"
-    Deploy two versions of a Knative app. You will use an A/B test to determine which version yields a higher user-engagement and satisfies latency and error-rate objectives, progressively shift traffic towards the winner, and safely promote the winner.
+    Deploy two versions of a Knative app.
 
     ```shell
     kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
@@ -261,7 +282,7 @@ Create baseline and candidate versions of your app.
 ## 5. Generate requests
 
 === "Istio"
-    In a production environment, your application would receive requests from end-users. For the purposes of this tutorial, simulate user requests using [Fortio](https://github.com/fortio/fortio) as follows.
+    Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
     # URL_VALUE is the URL of the `bookinfo` application
@@ -298,10 +319,10 @@ Create baseline and candidate versions of your app.
                 - name: shared
                   mountPath: /shared
               restartPolicy: Never
-        ```
+        ```    
 
 === "KFServing"
-    In a production environment, your application would receive requests from end-users. For the purposes of this tutorial, we can simulate user requests using in a number of ways as documented [here](https://github.com/kubeflow/kfserving#curl-the-inferenceservice). We will choose port forwarding as follows.
+    Generate requests to your model as follows.
  
     === "Port forward Istio ingress in terminal one"
         ```shell
@@ -321,7 +342,7 @@ Create baseline and candidate versions of your app.
         ```
 
 === "Knative"
-    In a production environment, your application would receive requests from end-users. For the purposes of this tutorial, simulate user requests using [Fortio](https://github.com/fortio/fortio) as follows.
+    Generate requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
     kubectl wait --for=condition=Ready ksvc/sample-app
@@ -362,7 +383,7 @@ Create baseline and candidate versions of your app.
         ```
 
 ## 6. Define metrics
-Define the Iter8 metrics used in this experiment.
+Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. Define the Iter8 metrics used in this experiment as follows.
 
 === "Istio"
     ```shell
@@ -382,17 +403,18 @@ Define the Iter8 metrics used in this experiment.
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
         metadata:
-          name: books-purchased
+          name: user-engagement
+          namespace: iter8-istio
         spec:
-          description: Total number of books purchased
           params:
-          - name: query
+          - name: nrql
             value: |
-              (sum(increase(number_of_books_purchased_total{destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+              SELECT average(duration) FROM Sessions WHERE version='$name' SINCE $elapsedTime sec ago
+          description: Average duration of a session
           type: Gauge
-          provider: prometheus
-          jqExpression: ".data.result[0].value[1] | tonumber"
-          urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+          provider: newrelic
+          jqExpression: ".results[0] | .[] | tonumber"
+          urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic
         ---
         apiVersion: iter8.tools/v2alpha2
         kind: Metric
@@ -719,24 +741,23 @@ Define the Iter8 metrics used in this experiment.
         ```
 
 ??? Note "Metrics in your environment"
-    You can use metrics from any provider in Iter8 experiments. 
-    
-    In this tutorial, the business metric (`user-engagement` / `books-purchased`) is synthetically generated while the metrics related to latency and error-rate objectives are truly measured. 
-    
-    The `urlTemplate` field in the latter point to the Prometheus add-on that was created in Step 3 above. If you wish to use these latency and error-rate metrics in your production/staging/dev/test K8s cluster, change the `urlTemplate` values to match the URL of your Prometheus instance.
+    You can use metrics from any RESTful provider in Iter8 experiments. 
+        
+    The metrics related to latency and error-rate objectives are collected by the Prometheus instance created in Step 3. The `urlTemplate` field in these metrics point to this Prometheus instance. If you wish to use these latency and error-rate metrics with your own application, change the `urlTemplate` values to match the URL of your Prometheus instance.
+
+    The user-engagement metric is synthetically generated by a mock New Relic service. For your application, replace this metric with any business metric you wish to optimize.
+
 
 ## 7. Launch experiment
-Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions as specified in the experiment.
+Iter8 defines a Kubernetes resource called Experiment that automates A/B, A/B/n, Canary, and Conformance experiments. During an experiment, Iter8 can compare multiple versions, find, and safely promote the winning version (winner) based on business metrics and SLOs. 
+
+Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model in this tutorial.
 
 === "Istio"
 
     ```shell
     kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
     ```
-
-    The process automated by Iter8 during this experiment is depicted below.
-
-    ![Iter8 automation](../images/quickstart-iter8-process.png)
 
     ??? info "Look inside experiment.yaml"
         ```yaml linenums="1"
@@ -805,6 +826,10 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
                 name: bookinfo
                 fieldPath: .spec.http[0].route[1].weight
         ```
+
+    The process automated by Iter8 during this experiment is depicted below.
+
+    ![Iter8 automation](../images/quickstart-iter8-process.png)
 
 === "KFServing"
 
@@ -940,112 +965,89 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
         ```
 
 ## 8. Observe experiment
-Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
+Observe the experiment in realtime.
 
-### a) Observe metrics and experiment progress
+### a) Observe metrics
 
-=== "Metrics-based analysis"
-    Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
+Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
+```shell
+GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3
+```
+
+Periodically describe the experiment.
+```shell
+while clear; do
+kubectl get experiment quickstart-exp -o yaml | iter8ctl describe -f -
+sleep 8
+done
+```
+
+??? info "Look inside metrics summary"
+    The `iter8ctl` output will be similar to the following.
     ```shell
-    GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3
-    ```
+    ****** Overview ******
+    Experiment name: quickstart-exp
+    Experiment namespace: default
+    Target: default/sample-app
+    Testing pattern: Canary
+    Deployment pattern: Progressive
 
-    Periodically describe the experiment.
-    ```shell
-    while clear; do
-    kubectl get experiment quickstart-exp -o yaml | iter8ctl describe -f -
-    sleep 4
-    done
-    ```
-    ??? info "Look inside `iter8ctl` output"
-        The `iter8ctl` output will be similar to the following.
-        ```shell
-        ****** Overview ******
-        Experiment name: quickstart-exp
-        Experiment namespace: default
-        Target: default/sample-app
-        Testing pattern: Canary
-        Deployment pattern: Progressive
+    ****** Progress Summary ******
+    Experiment stage: Running
+    Number of completed iterations: 3
 
-        ****** Progress Summary ******
-        Experiment stage: Running
-        Number of completed iterations: 3
+    ****** Winner Assessment ******
+    > If the candidate version satisfies the experiment objectives, then it is the winner.
+    > Otherwise, if the baseline version satisfies the experiment objectives, it is the winner.
+    > Otherwise, there is no winner.
+    App versions in this experiment: [current candidate]
+    Winning version: candidate
+    Version recommended for promotion: candidate
 
-        ****** Winner Assessment ******
-        > If the candidate version satisfies the experiment objectives, then it is the winner.
-        > Otherwise, if the baseline version satisfies the experiment objectives, it is the winner.
-        > Otherwise, there is no winner.
-        App versions in this experiment: [current candidate]
-        Winning version: candidate
-        Version recommended for promotion: candidate
+    ****** Objective Assessment ******
+    > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
+    +--------------------------------------------+---------+-----------+
+    |                 OBJECTIVE                  | CURRENT | CANDIDATE |
+    +--------------------------------------------+---------+-----------+
+    | iter8-knative/mean-latency <=              | true    | true      |
+    |                                     50.000 |         |           |
+    +--------------------------------------------+---------+-----------+
+    | iter8-knative/95th-percentile-tail-latency | true    | true      |
+    | <= 100.000                                 |         |           |
+    +--------------------------------------------+---------+-----------+
+    | iter8-knative/error-rate <=                | true    | true      |
+    |                                      0.010 |         |           |
+    +--------------------------------------------+---------+-----------+
 
-        ****** Objective Assessment ******
-        > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-        +--------------------------------------------+---------+-----------+
-        |                 OBJECTIVE                  | CURRENT | CANDIDATE |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/mean-latency <=              | true    | true      |
-        |                                     50.000 |         |           |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/95th-percentile-tail-latency | true    | true      |
-        | <= 100.000                                 |         |           |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/error-rate <=                | true    | true      |
-        |                                      0.010 |         |           |
-        +--------------------------------------------+---------+-----------+
+    ****** Metrics Assessment ******
+    > Most recently read values of experiment metrics for each version.
+    +--------------------------------------------+---------+-----------+
+    |                   METRIC                   | CURRENT | CANDIDATE |
+    +--------------------------------------------+---------+-----------+
+    | iter8-knative/request-count                | 454.523 |    27.412 |
+    +--------------------------------------------+---------+-----------+
+    | iter8-knative/mean-latency                 |   1.265 |     1.415 |
+    | (milliseconds)                             |         |           |
+    +--------------------------------------------+---------+-----------+
+    | request-count                              | 454.523 |    27.619 |
+    +--------------------------------------------+---------+-----------+
+    | iter8-knative/95th-percentile-tail-latency |   4.798 |     4.928 |
+    | (milliseconds)                             |         |           |
+    +--------------------------------------------+---------+-----------+
+    | iter8-knative/error-rate                   |   0.000 |     0.000 |
+    +--------------------------------------------+---------+-----------+
+    ``` 
 
-        ****** Metrics Assessment ******
-        > Most recently read values of experiment metrics for each version.
-        +--------------------------------------------+---------+-----------+
-        |                   METRIC                   | CURRENT | CANDIDATE |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/request-count                | 454.523 |    27.412 |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/mean-latency                 |   1.265 |     1.415 |
-        | (milliseconds)                             |         |           |
-        +--------------------------------------------+---------+-----------+
-        | request-count                              | 454.523 |    27.619 |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/95th-percentile-tail-latency |   4.798 |     4.928 |
-        | (milliseconds)                             |         |           |
-        +--------------------------------------------+---------+-----------+
-        | iter8-knative/error-rate                   |   0.000 |     0.000 |
-        +--------------------------------------------+---------+-----------+
-        ``` 
+As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions and the candidate improves over the baseline version in terms of the reward metric. The candidate is identified as the winner and is recommended for promotion.
 
-    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions and the candidate improves over the baseline version in terms of the reward metric. The candidate is identified as the winner and is recommended for promotion.
-
-=== "Experiment progress"
-
-    ```shell
-    kubectl get experiment quickstart-exp --watch
-    ```
-
-    ??? info "kubectl get experiment output"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-        quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-        quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-        quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-        quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-        quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-        quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-        quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-        quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-        quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-        ```
-
-    When the experiment completes, you will see the experiment stage change from `Running` to `Completed`.
-
-### b) Observe traffic split
+### b) Observe traffic
 === "Istio"
 
     ```shell
     kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq .spec.http[0].route
     ```
 
-    ??? info "kubectl get vs output"
+    ??? info "Look inside traffic summary"
         The `kubectl` output will be similar to the following.
         ```shell
         [
@@ -1078,7 +1080,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get vs routing-rule-one -o json --watch | jq .spec.http[0].route
     ```
 
-    ??? info "kubectl get vs output"
+    ??? info "Look inside traffic summary"
         ```json
         [
           {
@@ -1126,7 +1128,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     kubectl get ksvc sample-app -o json --watch | jq .status.traffic
     ```
 
-    ??? info "kubectl get ksvc output"
+    ??? info "Look inside traffic summary"
         The `kubectl` output will be similar to the following.
         ```shell
         [
@@ -1146,12 +1148,35 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
         }
         ]
         ```
-    As the experiment progresses, you should see traffic progressively shift from `sample-app-v1` to `sample-app-v2`. When the experiment completes, all of the traffic will be sent to the winner, `sample-app-v2`.
+
+As the experiment progresses, you should see traffic progressively shift from the baseline version to the candidate version.
+
+### c) Observe progress
+```shell
+kubectl get experiment quickstart-exp --watch
+```
+
+??? info "Look inside progress summary"
+    The `kubectl` output will be similar to the following.
+    ```shell
+    NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
+    quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
+    quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
+    quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
+    quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
+    quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
+    quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
+    quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
+    quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
+    quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
+    ```
+
+When the experiment completes, you will see the experiment stage change from `Running` to `Completed`.
 
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.
     2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with A/B testing and progressive deployment. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, the business reward metric, verified that the candidate satisfied all objectives, identified the candidate as the winner since the candidate improved over the baseline in terms of the reward, and progressively shifted traffic from the baseline to the candidate.
+    3. You created an Iter8 experiment with A/B testing and progressive deployment. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic, verified that the candidate satisfied all objectives, identified the candidate as the winner since the candidate improved over the baseline in terms of user-engagement, and progressively shifted traffic from the baseline to the candidate.
 
 ## 9. Cleanup
 === "Istio"

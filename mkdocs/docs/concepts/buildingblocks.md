@@ -93,15 +93,18 @@ Iter8 enables you to take total advantage of all the traffic engineering feature
 
 ***
 
-## Version recommended for promotion
-
-When two or more versions participate in an experiment, Iter8 **recommends a version for promotion**; if the experiment yielded a winner, then the version recommended for promotion is the winner; otherwise, the version recommended for promotion is the **baseline** version of your app/ML model.
-
-***
 
 ## Version promotion
 
-Iter8 can optionally **promote a version** at the end of an experiment, based on the [version recommended for promotion](#version-recommended-for-promotion). As part of the version promotion task, Iter8 can configure Kubernetes resources by installing or upgrading Helm charts, building and applying Kustomize resources, or using the `kubectl` CLI to apply YAML/JSON resource manifests and perform other cleanup actions such as resource deletion.
+When two or more versions participate in an experiment, Iter8 **recommends a version for promotion**; if the experiment yielded a winner, then the version recommended for promotion is the winner; otherwise, the version recommended for promotion is the **baseline** version of your app/ML model.
+
+Iter8 can optionally **promote the recommended version** at the end of an experiment.
+
+![Canary](../images/yamljson.png)
+
+## Resource config tools
+
+Iter8 can be easily easily with Helm and Kustomize. This integration is especially useful if you use these tools for configuring Kubernetes resources needed for releases of your app/ML model.
 
 === "Helm charts"
     An experiment that uses `helm` charts for version promotion is illustrated below.
@@ -112,10 +115,5 @@ Iter8 can optionally **promote a version** at the end of an experiment, based on
     An experiment that uses `kustomize` resources for version promotion is illustrated below.
 
     ![Canary](../images/kustomize.png)
-
-=== "Plain YAML/JSON manifests"
-    An experiment that uses plain YAML/JSON manifests for version promotion is illustrated below.
-
-    ![Canary](../images/yamljson.png)
 
 [^1]: It is possible to mirror only a certain percentage of the requests instead of all requests.
