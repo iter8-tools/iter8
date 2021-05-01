@@ -803,7 +803,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               - name: namespace # used by final action if this version is the winner
                 value: bookinfo-iter8
               - name: promote # used by final action if this version is the winner
-                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/A.yaml
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml
               weightObjRef:
                 apiVersion: networking.istio.io/v1beta1
                 kind: VirtualService
@@ -818,7 +818,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               - name: namespace # used by final action if this version is the winner
                 value: bookinfo-iter8
               - name: promote # used by final action if this version is the winner
-                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/B.yaml
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
               weightObjRef:
                 apiVersion: networking.istio.io/v1beta1
                 kind: VirtualService
