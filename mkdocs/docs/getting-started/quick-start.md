@@ -429,7 +429,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)
+              sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)
           provider: prometheus
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -447,7 +447,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              (sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+              (sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
           provider: prometheus
           sampleSize: request-count
           type: Gauge
@@ -466,7 +466,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              (sum(increase(istio_request_duration_milliseconds_bucket{le='500',reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+              (sum(increase(istio_request_duration_milliseconds_bucket{le='500',reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_request_duration_milliseconds_bucket{le='+Inf',reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
           provider: prometheus
           sampleSize: iter8-istio/request-count
           type: Gauge
@@ -485,7 +485,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              (sum(increase(istio_request_duration_milliseconds_sum{reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+              (sum(increase(istio_request_duration_milliseconds_sum{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
           provider: prometheus
           sampleSize: request-count
           type: Gauge
@@ -505,7 +505,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              sum(increase(istio_requests_total{reporter='source',destination_workload='$version',destination_workload_namespace='$namespace'}[${elapsedTime}s]))
+              sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s]))
           provider: prometheus
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query

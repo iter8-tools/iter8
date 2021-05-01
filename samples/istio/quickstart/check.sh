@@ -32,7 +32,7 @@ if [[ $stage = $completed ]]; then
 else
     echo "Experiment must be $completed;" 
     echo "Experiment is $stage;"
-    dump; exit 1
+    exit 1
 fi
 
 # Check if no packets have been lost by Fortio
@@ -47,17 +47,17 @@ else
     echo "Packets were lost"
     echo "total requests:" $REQUESTSTOTAL
     echo "200 requests:" $REQUESTS200
-    dump; exit 1
+    exit 1
 fi
 
-# Check if versionRecommendedForPromotion is B
-expectedVrfp="B"
+# Check if versionRecommendedForPromotion is productpage-v2
+expectedVrfp="productpage-v2"
 vrfp=$(kubectl get experiment $EXPERIMENT -o json | jq -r .status.versionRecommendedForPromotion)
 if [[ $vrfp = $expectedVrfp ]]; then
     echo "versionRecommendedForPromotion is $vrfp"
 else
     echo "versionRecommendedForPromotion must be $expectedVrfp; is" $vrfp
-    dump; exit 1
+    exit 1
 fi
 
 # Check if latest revision is true
@@ -67,7 +67,7 @@ if [[ $subset = $expectedSubset ]]; then
     echo "subset is $subset"
 else
     echo "subset must be $expectedSubset; is" $subset
-    dump; exit 1
+    exit 1
 fi
 
 #check if traffic percent is 100
@@ -76,8 +76,8 @@ actualPercent=$(kubectl -n bookinfo-iter8 get vs bookinfo -o json | jq -r '.spec
 if [[ $actualPercent -eq $percent ]]; then
     echo "percent is 100"
 else
-    echo "percent must be 100; is" $percent
-    dump; exit 1
+    echo "percent must be 100; is" $actualPercent
+    exit 1
 fi
 
 set +e
