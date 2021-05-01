@@ -9,7 +9,7 @@ template: main.html
 
     1. Perform A/B testing.
     2. Specify `user-engagement` as the reward, and `latency` and `error-rate` based objectives. Iter8 will find a winner by comparing versions in terms of the reward, and by validating versions in terms of the objectives.
-    3. The reward metric will by provided by New Relic and metrics used in objectives will be provided by Prometheus.
+    3. Use reward metric provided by New Relic, and use metrics used in objectives provided by Prometheus.
     4. Combine A/B testing with [progressive deployment](../../concepts/buildingblocks/#deployment-pattern).
     
     Assuming a winner is found, Iter8 will progressively shift the traffic towards the winner and promote it at the end as depicted below.
@@ -106,7 +106,7 @@ Create baseline and candidate versions of your app.
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
-    kubectl --namespace bookinfo-iter8 wait --for=condition=Ready pods --all
+    kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
     ```
 
     ??? info "Look inside `productpage-v1` configuration"
@@ -305,8 +305,8 @@ Create baseline and candidate versions of your app.
  
     === "Port forward Istio ingress in terminal one"
         ```shell
-        INGRESS_GATEWAY_SERVICE=$(kubectl get svc --namespace istio-system --selector="app=istio-ingressgateway" --output jsonpath='{.items[0].metadata.name}')
-        kubectl port-forward --namespace istio-system svc/${INGRESS_GATEWAY_SERVICE} 8080:80
+        INGRESS_GATEWAY_SERVICE=$(kubectl get svc -n istio-system --selector="app=istio-ingressgateway" --output jsonpath='{.items[0].metadata.name}')
+        kubectl port-forward -n istio-system svc/${INGRESS_GATEWAY_SERVICE} 8080:80
         ```
 
     === "Send requests in terminal two"
@@ -743,7 +743,7 @@ Launch the Iter8 experiment. Iter8 will orchestrate A/B testing of the versions 
         apiVersion: iter8.tools/v2alpha2
         kind: Experiment
         metadata:
-          name: istio-quickstart
+          name: quickstart-exp
         spec:
           # target identifies the service under experimentation using its fully qualified name
           target: bookinfo-iter8/productpage

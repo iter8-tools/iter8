@@ -2,7 +2,7 @@
 
 set -e -x
 
-export EXPERIMENT=istio-quickstart
+export EXPERIMENT=quickstart-exp
 
 cleanup () {
     status=$?
@@ -37,6 +37,9 @@ URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o json
 sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | sed "s/6000s/120s/g" | kubectl apply -f -
 pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
 kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=240s
+
+echo "Defining metrics"
+kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
 
 echo "Creating A/B experiment"
 kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
