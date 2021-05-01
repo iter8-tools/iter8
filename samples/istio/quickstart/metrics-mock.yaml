@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-mock
+  namespace: iter8-system
+  labels:
+    app: metrics-mock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-mock
+  template:
+    metadata:
+      labels:
+        app: metrics-mock
+    spec:
+      containers:
+      - name: metrics-mock
+        image: iter8/metrics-mock:0.1.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: CONFIG_URL
+          value: "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/nr.yaml"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-mock
+  namespace: iter8-system
+spec:
+  selector:
+    app: metrics-mock
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
