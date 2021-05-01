@@ -22,9 +22,6 @@ kubectl cluster-info --context kind-kind
 echo "Setting up platform"
 $ITER8/samples/istio/quickstart/platformsetup.sh
 
-echo "Create book-purchased metric"
-kubectl apply -f $ITER8/samples/istio/quickstart/books-purchased.yaml
-
 echo "Create bookinfo app with two productpage versions"
 kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
@@ -59,7 +56,6 @@ source $ITER8/samples/istio/quickstart/check.sh
 set +e
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
-kubectl delete -f $ITER8/samples/istio/quickstart/books-purchased.yaml
 kubectl delete namespace bookinfo-iter8
 
 # delete cluster

@@ -1183,7 +1183,6 @@ When the experiment completes, you will see the experiment stage change from `Ru
     ```shell
     kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
     kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
-    kubectl delete -f $ITER8/samples/istio/quickstart/books-purchased.yaml
     kubectl delete namespace bookinfo-iter8
     ```
 
