@@ -12,9 +12,10 @@ Please discuss the change you wish to make using [issues](https://github.com/ite
 ## Locally serving Iter8 docs
 **Pre-requisite:** Python 3+. 
 
-Use a Python  3 virtual environment to locally serve Iter8 docs as follows.
+Use a Python 3 virtual environment to locally serve Iter8 docs. Run the following commands from the top-level directory of the iter8 repo.
 
 ```shell
+cd mkdocs
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
