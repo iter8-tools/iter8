@@ -12,7 +12,7 @@ spec:
   params:
   - name: nrql
     value: |
-      SELECT average(duration) FROM Sessions WHERE version='$revision' SINCE $elapsedTime sec ago
+      SELECT average(duration) FROM Sessions WHERE version='$name' SINCE $elapsedTime sec ago
   description: Average duration of a session
   type: Gauge
   provider: newrelic
@@ -30,7 +30,7 @@ spec:
   params:
   - name: query
     value: |
-      histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[${elapsedTime}s])) by (le))
+      histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$name'}[${elapsedTime}s])) by (le))
   provider: prometheus
   sampleSize: iter8-knative/request-count
   type: Gauge
@@ -48,7 +48,7 @@ spec:
   params:
   - name: query
     value: |
-      sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+      sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$name'}[${elapsedTime}s])) or on() vector(0)
   provider: prometheus
   type: Counter
   urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -64,7 +64,7 @@ spec:
   params:
   - name: query
     value: |
-      (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+      (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$name'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[${elapsedTime}s])) or on() vector(0))
   provider: prometheus
   sampleSize: iter8-knative/request-count
   type: Gauge
@@ -81,7 +81,7 @@ spec:
   params:
   - name: query
     value: |
-      (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+      (sum(increase(revision_app_request_latencies_sum{revision_name='$name'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[${elapsedTime}s])) or on() vector(0))
   provider: prometheus
   sampleSize: iter8-knative/request-count
   type: Gauge
@@ -99,7 +99,7 @@ spec:
   params:
   - name: query
     value: |
-      sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+      sum(increase(revision_app_request_latencies_count{revision_name='$name'}[${elapsedTime}s])) or on() vector(0)
   provider: prometheus
   type: Counter
   urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
