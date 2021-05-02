@@ -1,0 +1,31 @@
+apiVersion: serving.kubeflow.org/v1beta1
+kind: InferenceService
+metadata:
+  name: flowers
+  namespace: ns-flowers
+spec:
+  predictor:
+    tensorflow:
+      storageUri: "gs://kfserving-samples/models/tensorflow/flowers-2"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: routing-rule-one
+spec:
+  gateways:
+  - knative-serving/knative-ingress-gateway
+  hosts:
+  - example.com
+  http:
+  - route:
+    - destination:
+        host: flowers-predictor-default.ns-candidate.svc.cluster.local
+      headers:
+        request:
+          set:
+            Host: flowers-predictor-default.ns-candidate
+        response:
+          set:
+            version: flowers-v2
+      weight: 100
