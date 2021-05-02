@@ -8,7 +8,7 @@ spec:
   - knative-serving/knative-ingress-gateway
   - knative-serving/knative-local-gateway
   hosts:
-  - customdomain.com
+  - example.com
   http:
   - match:
     - headers:

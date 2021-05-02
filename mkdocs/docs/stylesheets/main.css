@@ -1,3 +1,7 @@
+.md-typeset .admonition {
+  font-size: 0.7rem;
+}
+
 .md-announce a,
 .md-announce a:focus,
 .md-announce a:hover {

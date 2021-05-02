@@ -1,0 +1,8 @@
+// Scoped in typesetted content to match specificity of regular content
+.md-typeset {
+
+    // Admonition
+    .admonition {
+      font-size: px2rem(14.0px);
+    }
+}

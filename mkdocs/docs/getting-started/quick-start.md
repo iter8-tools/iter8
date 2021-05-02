@@ -201,7 +201,7 @@ Create baseline and candidate versions of your app.
           gateways:
           - knative-serving/knative-ingress-gateway
           hosts:
-          - customdomain.com
+          - example.com
           http:
           - route:
             - destination:
@@ -336,7 +336,7 @@ Create baseline and candidate versions of your app.
         kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate        
         curl -o /tmp/input.json https://raw.githubusercontent.com/kubeflow/kfserving/master/docs/samples/v1beta1/rollout/input.json
         while true; do
-        curl -v -H "Host: customdomain.com" localhost:8080/v1/models/flowers:predict -d @/tmp/input.json
+        curl -v -H "Host: example.com" localhost:8080/v1/models/flowers:predict -d @/tmp/input.json
         sleep 0.2
         done
         ```

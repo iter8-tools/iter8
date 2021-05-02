@@ -14,7 +14,7 @@ spec:
         - -c
         - |
           while true; do
-          curl -sS customdomain.com -H "country: gondor"
+          curl -sS example.com -H "country: gondor"
           sleep 1.0
           done
       - name: curl-from-wakanda
@@ -24,7 +24,7 @@ spec:
         - -c
         - |
           while true; do
-          curl -sS customdomain.com -H "country: wakanda"
+          curl -sS example.com -H "country: wakanda"
           sleep 0.25
           done
       restartPolicy: Never

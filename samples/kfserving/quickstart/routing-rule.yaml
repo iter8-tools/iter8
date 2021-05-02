@@ -6,7 +6,7 @@ spec:
   gateways:
   - knative-serving/knative-ingress-gateway
   hosts:
-  - customdomain.com
+  - example.com
   http:
   - route:
     - destination:
