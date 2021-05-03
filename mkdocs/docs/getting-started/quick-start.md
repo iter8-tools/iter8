@@ -94,16 +94,12 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
         ```
 
 ## 4. Create app versions
-
-Create baseline and candidate versions of your app.
 === "Istio"
     Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice.
 
     ```shell
-    kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
-    kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
     kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
     ```
 
