@@ -776,7 +776,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                   args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
           criteria:
             rewards: # metrics to be used to determine the "value" or "benefit" of a version
-            - metric: books-purchased
+            - metric: user-engagement
               preferredDirection: High
             objectives: # metrics to be used to determine validity of a version
             - metric: iter8-istio/mean-latency
