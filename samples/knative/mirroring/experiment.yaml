@@ -6,9 +6,6 @@ spec:
   target: default/sample-app
   strategy:
     testingPattern: Conformance
-    actions:
-      start:
-      - task: knative/init-experiment
   criteria:
     # mean latency of version should be under 50 milliseconds
     # 95th percentile latency should be under 100 milliseconds
@@ -26,7 +23,4 @@ spec:
   versionInfo:
     # information about app version used in this experiment
     baseline:
-      name: current
-      variables:
-      - name: revision
-        value: sample-app-v2
+      name: sample-app-v2

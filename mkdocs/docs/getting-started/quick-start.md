@@ -93,17 +93,13 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
         $ITER8/samples/knative/quickstart/platformsetup.sh istio
         ```
 
-## 4. Create app versions
-
-Create baseline and candidate versions of your app.
+## 4. Create app/ML model versions
 === "Istio"
     Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice.
 
     ```shell
-    kubectl apply -f $ITER8/samples/istio/quickstart/namespace.yaml
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-app.yaml
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
-    kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/bookinfo-gateway.yaml
     kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
     ```
 
@@ -158,11 +154,11 @@ Create baseline and candidate versions of your app.
     Deploy two KFServing inference services corresponding to two versions of a TensorFlow classification model, along with an Istio virtual service to split traffic between them.
 
     ```shell
-    kubectl create ns ns-baseline
     kubectl apply -f $ITER8/samples/kfserving/quickstart/baseline.yaml
-    kubectl create ns ns-candidate
     kubectl apply -f $ITER8/samples/kfserving/quickstart/candidate.yaml
     kubectl apply -f $ITER8/samples/kfserving/quickstart/routing-rule.yaml
+    kubectl wait --for=condition=Ready isvc/flowers -n ns-baseline
+    kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate
     ```
 
     ??? info "Look inside baseline.yaml"
@@ -201,7 +197,7 @@ Create baseline and candidate versions of your app.
           gateways:
           - knative-serving/knative-ingress-gateway
           hosts:
-          - customdomain.com
+          - example.com
           http:
           - route:
             - destination:
@@ -332,11 +328,9 @@ Create baseline and candidate versions of your app.
 
     === "Send requests in terminal two"
         ```shell
-        kubectl wait --for=condition=Ready isvc/flowers -n ns-baseline        
-        kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate        
         curl -o /tmp/input.json https://raw.githubusercontent.com/kubeflow/kfserving/master/docs/samples/v1beta1/rollout/input.json
         while true; do
-        curl -v -H "Host: customdomain.com" localhost:8080/v1/models/flowers:predict -d @/tmp/input.json
+        curl -v -H "Host: example.com" localhost:8080/v1/models/flowers:predict -d @/tmp/input.json
         sleep 0.2
         done
         ```
@@ -1176,14 +1170,13 @@ When the experiment completes, you will see the experiment stage change from `Ru
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.
     2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with A/B testing and progressive deployment. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic, verified that the candidate satisfied all objectives, identified the candidate as the winner since the candidate improved over the baseline in terms of user-engagement, and progressively shifted traffic from the baseline to the candidate.
+    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic, verified that the candidate satisfied all objectives, identified the candidate as the winner since the candidate improved over the baseline in terms of user-engagement, and progressively shifted traffic from the baseline to the candidate.
 
 ## 9. Cleanup
 === "Istio"
     ```shell
     kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
     kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
-    kubectl delete -f $ITER8/samples/istio/quickstart/books-purchased.yaml
     kubectl delete namespace bookinfo-iter8
     ```
 
@@ -1191,10 +1184,7 @@ When the experiment completes, you will see the experiment stage change from `Ru
     ```shell
     kubectl delete -f $ITER8/samples/kfserving/quickstart/experiment.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
-    kubectl delete ns ns-baseline
     kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
-    kubectl delete ns ns-candidate
-    kubectl delete -f $ITER8/samples/kfserving/quickstart/routing-rule.yaml
     ```
 
 === "Knative"

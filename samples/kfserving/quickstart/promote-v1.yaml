@@ -19,13 +19,3 @@ spec:
           set:
             version: flowers-v1
       weight: 100
-    - destination:
-        host: flowers-predictor-default.ns-candidate.svc.cluster.local
-      headers:
-        request:
-          set:
-            Host: flowers-predictor-default.ns-candidate
-        response:
-          set:
-            version: flowers-v2
-      weight: 0

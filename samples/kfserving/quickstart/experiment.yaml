@@ -7,6 +7,13 @@ spec:
   strategy:
     testingPattern: A/B
     deploymentPattern: Progressive
+    actions:
+      # when the experiment completes, promote the winning version using kubectl apply
+      finish:
+      - task: common/exec
+        with:
+          cmd: /bin/bash
+          args: [ "-c", "kubectl apply -f {{ .promote }}" ]
   criteria:
     requestCount: iter8-kfserving/request-count
     rewards: # Business rewards
@@ -25,7 +32,7 @@ spec:
   versionInfo:
     # information about model versions used in this experiment
     baseline:
-      name: current
+      name: flowers-v1
       weightObjRef:
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
@@ -33,12 +40,12 @@ spec:
         namespace: default
         fieldPath: .spec.http[0].route[0].weight      
       variables:
-      - name: version
-        value: flowers-v1
       - name: ns
         value: ns-baseline
+      - name: promote
+        value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
     candidates:
-    - name: candidate
+    - name: flowers-v2
       weightObjRef:
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
@@ -46,7 +53,7 @@ spec:
         namespace: default
         fieldPath: .spec.http[0].route[1].weight      
       variables:
-      - name: version
-        value: flowers-v2
       - name: ns
         value: ns-candidate
+      - name: promote
+        value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml

@@ -8,6 +8,15 @@ spec:
   strategy:
     testingPattern: A/B
     deploymentPattern: Progressive
+    actions:
+      finish: # run the following sequence of tasks at the end of the experiment
+      - task: common/exec # promote the winning version      
+        with:
+          cmd: /bin/sh
+          args:
+          - "-c"
+          - |
+            kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
   criteria:
     requestCount: iter8-knative/request-count
     rewards: # Business rewards
@@ -26,7 +35,7 @@ spec:
   versionInfo:
     # information about app versions used in this experiment
     baseline:
-      name: current
+      name: sample-app-v1
       weightObjRef:
         apiVersion: serving.knative.dev/v1
         kind: Service
@@ -34,12 +43,10 @@ spec:
         namespace: default
         fieldPath: .spec.traffic[0].percent
       variables:
-      - name: revision
-        value: sample-app-v1 
       - name: promote
         value: baseline
     candidates:
-    - name: candidate
+    - name: sample-app-v2
       weightObjRef:
         apiVersion: serving.knative.dev/v1
         kind: Service
@@ -47,7 +54,5 @@ spec:
         namespace: default
         fieldPath: .spec.traffic[1].percent
       variables:
-      - name: revision
-        value: sample-app-v2
       - name: promote
         value: candidate 

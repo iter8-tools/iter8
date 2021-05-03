@@ -12,9 +12,12 @@ spec:
   params:
   - name: nrql
     value: |
-      SELECT average(duration) FROM Sessions WHERE version='$version' SINCE $elapsedTime sec ago
+      SELECT average(duration) FROM Sessions WHERE version='$name' SINCE $elapsedTime sec ago
   description: Average duration of a session
   type: Gauge
+  headerTemplates:
+  - name: X-Query-Key
+    value: t0p-secret-api-key  
   provider: newrelic
   jqExpression: ".results[0] | .[] | tonumber"
   urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic

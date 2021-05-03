@@ -15,7 +15,7 @@ spec:
         - |
           sleep 10.0
           while true; do
-          curl -sS customdomain.com
+          curl -sS example.com
           sleep 0.5
           done
       restartPolicy: Never

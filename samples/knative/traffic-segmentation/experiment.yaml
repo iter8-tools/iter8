@@ -26,10 +26,7 @@ spec:
   versionInfo:
     # information about app versions used in this experiment
     baseline:
-      name: current
-      variables:
-      - name: revision
-        value: sample-app-v1-blue
+      name: sample-app-v1-blue
       weightObjRef:
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
@@ -37,10 +34,7 @@ spec:
         namespace: default
         fieldPath: .spec.http[0].route[0].weight
     candidates:
-    - name: candidate
-      variables:
-      - name: revision
-        value: sample-app-v2-green
+    - name: sample-app-v2-green
       weightObjRef:
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
