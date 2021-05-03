@@ -2,7 +2,7 @@ apiVersion: serving.kubeflow.org/v1beta1
 kind: InferenceService
 metadata:
   name: flowers
-  namespace: ns-flowers
+  namespace: ns-baseline
 spec:
   predictor:
     tensorflow:
@@ -20,12 +20,15 @@ spec:
   http:
   - route:
     - destination:
-        host: flowers-predictor-default.ns-candidate.svc.cluster.local
+        host: flowers-predictor-default.ns-baseline.svc.cluster.local
       headers:
         request:
           set:
-            Host: flowers-predictor-default.ns-candidate
+            Host: flowers-predictor-default.ns-baseline
         response:
           set:
+            # this response header will be incorrect for a few seconds...
+            # when flowers.ns-baseline inference service is transitioning from v1 to v2
+            # eventually, this will be the right header
             version: flowers-v2
       weight: 100

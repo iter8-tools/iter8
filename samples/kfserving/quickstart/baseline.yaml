@@ -1,8 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-baseline
+---
 apiVersion: serving.kubeflow.org/v1beta1
 kind: InferenceService
 metadata:
   name: flowers
-  namespace: ns-flowers
+  namespace: ns-baseline
 spec:
   predictor:
     tensorflow:
