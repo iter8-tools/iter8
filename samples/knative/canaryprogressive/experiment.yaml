@@ -41,11 +41,23 @@ spec:
     # information about app versions used in this experiment
     baseline:
       name: sample-app-v1
+      weightObjRef:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: sample-app
+        namespace: default
+        fieldPath: .spec.traffic[0].percent
       variables:
       - name: promote
         value: baseline
     candidates:
     - name: sample-app-v2
+      weightObjRef:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: sample-app
+        namespace: default
+        fieldPath: .spec.traffic[1].percent
       variables:
       - name: promote
         value: candidate 

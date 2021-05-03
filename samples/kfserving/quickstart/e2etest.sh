@@ -39,12 +39,18 @@ echo "Generate requests"
 
 URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o jsonpath='{.spec.clusterIP}'):80/productpage"
 
+# Port-forward Istio ingress
 INGRESS_GATEWAY_SERVICE=$(kubectl get svc -n istio-system --selector="app=istio-ingressgateway" --output jsonpath='{.items[0].metadata.name}')
 kubectl port-forward -n istio-system svc/${INGRESS_GATEWAY_SERVICE} 8080:80 &
 
-# this step requires fortio
+# Get the prediction payload
 curl -o /tmp/input.json https://raw.githubusercontent.com/kubeflow/kfserving/master/docs/samples/v1beta1/rollout/input.json
-fortio load -t 310s -qps 5.0 -H "Host: example.com" -payload-file /tmp/input.json -json /tmp/fortiooutput.json localhost:8080/v1/models/flowers:predict 
+
+# Send prediction requests... this step requires fortio
+fortio load -t 360s -qps 4.0 -H "Host: example.com" -payload-file /tmp/input.json -json /tmp/fortiooutput.json http://localhost:8080/v1/models/flowers:predict
+
+# Wait
+kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
 
 # Log final experiment
 kubectl get experiment $EXPERIMENT -o yaml
@@ -52,12 +58,13 @@ kubectl get experiment $EXPERIMENT -o yaml
 # Check
 source $ITER8/samples/kfserving/quickstart/check.sh
 
-# Cleanup .. not needed since cluster is getting deleted
-# included to test manual instructions
-# continue even if errors
 kubectl delete -f $ITER8/samples/kfserving/quickstart/experiment.yaml
-kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
-kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
+# Cleanup .. delete inference services (and its ns takes forever)...
+# so skipping this for now... need to be fixed later;
+# possibly by bringing this up with KFServing
+
+# kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
+# kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
 
 # delete cluster
 kind delete cluster
