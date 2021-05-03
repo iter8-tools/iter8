@@ -5,6 +5,12 @@ title: Changelog
 
 # Changelog
 
+**0.5.0** (May 3rd, 2021)
+
+* A/B testing quick start tutorial for Istio
+* A/B testing quick start tutorial for KFServing
+* A/B testing quick start tutorial for Knative
+
 **0.4.3** (April 26th, 2021)
 
 * Documented Iter8's default RBAC profile
