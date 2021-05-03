@@ -21,14 +21,14 @@ spec:
       preferredDirection: High # maximize user engagement
     objectives:
     - metric: iter8-kfserving/mean-latency
-      upperLimit: 500
+      upperLimit: 1500
     - metric: iter8-kfserving/95th-percentile-tail-latency
       upperLimit: 2000
     - metric: iter8-kfserving/error-rate
       upperLimit: "0.01"
   duration:
     intervalSeconds: 10
-    iterationsPerLoop: 30
+    iterationsPerLoop: 25
   versionInfo:
     # information about model versions used in this experiment
     baseline:

@@ -44,7 +44,7 @@ kubectl port-forward -n istio-system svc/${INGRESS_GATEWAY_SERVICE} 8080:80 &
 
 # this step requires fortio
 curl -o /tmp/input.json https://raw.githubusercontent.com/kubeflow/kfserving/master/docs/samples/v1beta1/rollout/input.json
-fortio load -t 310s -qps 5.0 -H "Host: example.com" -payload-file /tmp/input.json -json /tmp/fortiooutput.json localhost:8080/v1/models/flowers:predict 
+fortio load -t 300s -qps 3.0 -H "Host: example.com" -payload-file /tmp/input.json -json /tmp/fortiooutput.json localhost:8080/v1/models/flowers:predict 
 
 # Log final experiment
 kubectl get experiment $EXPERIMENT -o yaml
