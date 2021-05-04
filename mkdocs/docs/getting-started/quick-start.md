@@ -50,8 +50,10 @@ export ITER8=$(pwd)
 ```
 
 ## 3. Install K8s stack and Iter8
+Choose the K8s stack over which you are performing the A/B testing experiment.
 
-Choose the K8s stack over which you wish to perform the A/B testing experiment.
+> **Note:** Please choose the same K8s stack consistently throughout the tutorial. If you finished running the tutorial for a specific stack, and wish to try it on another stack, start from Step 1 (i.e., a clean K8s cluster), so that your cluster is correctly setup.
+
 === "Istio"
     Setup Istio, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
 
@@ -67,8 +69,9 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
     ```
 
 === "Knative"
-    Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. Knative can work with multiple networking layers. So can Iter8's Knative extension. Choose a networking layer for Knative.
-
+    Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. Knative can work with multiple networking layers. So can Iter8's Knative extension. 
+    
+    Choose the networking layer for Knative.
     === "Contour"
 
         ```shell
@@ -276,7 +279,6 @@ Choose the K8s stack over which you wish to perform the A/B testing experiment.
         ```
 
 ## 5. Generate requests
-
 === "Istio"
     Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
