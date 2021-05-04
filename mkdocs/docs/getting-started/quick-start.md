@@ -96,7 +96,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         $ITER8/samples/knative/quickstart/platformsetup.sh istio
         ```
 
-## 4. Create app/ML model version
+## 4. Create app/ML model versions
 === "Istio"
     Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice.
 
