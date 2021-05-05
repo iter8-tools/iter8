@@ -117,7 +117,11 @@ nav:
     - Changelog: getting-started/changelog.md
     - Getting help: getting-started/help.md
   - Tutorials:
-    - Knative:
+    - Testing patterns:
+      - Canary: tutorials/testing-patterns/canary.md
+      - Conformance: tutorials/testing-patterns/conformance.md
+      - A/B (quick start): tutorials/testing-patterns/ab.md
+    - Knative-specific tutorials:
       - Progressive canary release: tutorials/knative/canary-progressive.md
       - Fixed split canary release: tutorials/knative/canary-fixedsplit.md
       - Conformance testing: tutorials/knative/conformance.md

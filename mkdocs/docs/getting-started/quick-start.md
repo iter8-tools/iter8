@@ -20,6 +20,8 @@ template: main.html
     1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
     2. [Go 1.13+](https://golang.org/doc/install).
 
+    > **Note:** Please choose the same K8s stack (for example, Istio, KFServing, or Knative) consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster (step 1 below), so that your cluster is correctly setup.
+
 ## 1. Create Kubernetes cluster
 
 Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
@@ -51,8 +53,6 @@ export ITER8=$(pwd)
 
 ## 3. Install K8s stack and Iter8
 Choose the K8s stack over which you are performing the A/B testing experiment.
-
-> **Note:** Please choose the same K8s stack consistently throughout the tutorial. If you finished running the tutorial for a specific stack, and wish to try it on another stack, start from Step 1 (i.e., a clean K8s cluster), so that your cluster is correctly setup.
 
 === "Istio"
     Setup Istio, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
@@ -1183,7 +1183,7 @@ When the experiment completes, you will see the experiment stage change from `Ru
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.
     2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic, verified that the candidate satisfied all objectives, verified that the candidate improved over the baseline in terms of user-engagement, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
+    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic; Iter8 verified that the candidate satisfied all objectives, verified that the candidate improved over the baseline in terms of user-engagement, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
 
 ## 9. Cleanup
 === "Istio"

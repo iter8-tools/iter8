@@ -62,6 +62,53 @@ jobs:
         export ITER8=$(pwd)
         source $ITER8/samples/knative/quickstart/check.sh
 
+  canary:
+    name: canary experiment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+
+    - name: create Knative service and readiness check
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
+        kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
+
+    - name: create Fortio job and create experiment
+      run: |
+        export ITER8=$(pwd)
+        sed -i "s/6000s/120s/g" $ITER8/samples/knative/quickstart/fortio.yaml
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+        
+        # Wait for Fortio to be ready
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=240s
+
+        # Define metrics
+        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
+
+        # Starting the experiment
+        kubectl apply -f $ITER8/samples/knative/canary/experiment.yaml
+
+    - name: Sleep until end of experiment
+      run: |
+        sleep 150.0
+        kubectl get experiment canary-exp -o yaml
+    
+    - name: Check if experiment is complete and successful
+      run: |
+        export ITER8=$(pwd)
+        source $ITER8/samples/knative/canary/check.sh
+
   canary-progressive-helm:
     name: progressive canary experiment using helm
     runs-on: ubuntu-latest
