@@ -166,6 +166,11 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
 
     ??? info "Look inside baseline.yaml"
         ```yaml linenums="1"
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: ns-baseline
+        ---
         apiVersion: serving.kubeflow.org/v1beta1
         kind: InferenceService
         metadata:
@@ -179,6 +184,11 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
 
     ??? info "Look inside candidate.yaml"
         ```yaml linenums="1"
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: ns-candidate
+        ---
         apiVersion: serving.kubeflow.org/v1beta1
         kind: InferenceService
         metadata:
@@ -643,9 +653,12 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: nrql
             value: |
-              SELECT average(duration) FROM Sessions WHERE version='$revision' SINCE $elapsedTime sec ago
+              SELECT average(duration) FROM Sessions WHERE version='$name' SINCE $elapsedTime sec ago
           description: Average duration of a session
           type: Gauge
+          headerTemplates:
+          - name: X-Query-Key
+            value: t0p-secret-api-key  
           provider: newrelic
           jqExpression: ".results[0] | .[] | tonumber"
           urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic
@@ -661,7 +674,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$revision'}[${elapsedTime}s])) by (le))
+              histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name='$name'}[${elapsedTime}s])) by (le))
           provider: prometheus
           sampleSize: iter8-knative/request-count
           type: Gauge
@@ -679,7 +692,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+              sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$name'}[${elapsedTime}s])) or on() vector(0)
           provider: prometheus
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -695,7 +708,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+              (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$name'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[${elapsedTime}s])) or on() vector(0))
           provider: prometheus
           sampleSize: iter8-knative/request-count
           type: Gauge
@@ -712,7 +725,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              (sum(increase(revision_app_request_latencies_sum{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0))
+              (sum(increase(revision_app_request_latencies_sum{revision_name='$name'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[${elapsedTime}s])) or on() vector(0))
           provider: prometheus
           sampleSize: iter8-knative/request-count
           type: Gauge
@@ -730,7 +743,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           params:
           - name: query
             value: |
-              sum(increase(revision_app_request_latencies_count{revision_name='$revision'}[${elapsedTime}s])) or on() vector(0)
+              sum(increase(revision_app_request_latencies_count{revision_name='$name'}[${elapsedTime}s])) or on() vector(0)
           provider: prometheus
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
@@ -739,9 +752,9 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
 ??? Note "Metrics in your environment"
     You can use metrics from any RESTful provider in Iter8 experiments. 
         
-    The metrics related to latency and error-rate objectives are collected by the Prometheus instance created in Step 3. The `urlTemplate` field in these metrics point to this Prometheus instance. If you wish to use these latency and error-rate metrics with your own application, change the `urlTemplate` values to match the URL of your Prometheus instance.
+    In this tutorial, the metrics related to latency and error-rate objectives are collected by the Prometheus instance created in Step 3. The `urlTemplate` field in these metrics point to this Prometheus instance. If you wish to use these latency and error-rate metrics with your own application, change the `urlTemplate` values to match the URL of your Prometheus instance.
 
-    The user-engagement metric is synthetically generated by a mock New Relic service. For your application, replace this metric with any business metric you wish to optimize.
+    In this tutorial, the user-engagement metric is synthetically generated by a mock New Relic service. For your application, replace this metric with any business metric you wish to optimize.
 
 
 ## 7. Launch experiment
@@ -777,10 +790,11 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                   cmd: /bin/bash
                   args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
           criteria:
-            rewards: # metrics to be used to determine the "value" or "benefit" of a version
-            - metric: user-engagement
+            rewards:
+            # (business) reward metric to optimize in this experiment
+            - metric: iter8-istio/user-engagement 
               preferredDirection: High
-            objectives: # metrics to be used to determine validity of a version
+            objectives: # used for validating versions
             - metric: iter8-istio/mean-latency
               upperLimit: 100
             - metric: iter8-istio/error-rate
@@ -792,10 +806,8 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
           versionInfo:
             # information about the app versions used in this experiment
             baseline:
-              name: A
+              name: productpage-v1
               variables:
-              - name: version # used in Prometheus queries
-                value: productpage-v1
               - name: namespace # used by final action if this version is the winner
                 value: bookinfo-iter8
               - name: promote # used by final action if this version is the winner
@@ -807,10 +819,8 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                 name: bookinfo
                 fieldPath: .spec.http[0].route[0].weight
             candidates:
-            - name: B
+            - name: productpage-v2
               variables:
-              - name: version # used in Prometheus queries
-                value: productpage-v2
               - name: namespace # used by final action if this version is the winner
                 value: bookinfo-iter8
               - name: promote # used by final action if this version is the winner
@@ -823,20 +833,11 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                 fieldPath: .spec.http[0].route[1].weight
         ```
 
-    The process automated by Iter8 during this experiment is depicted below.
-
-    ![Iter8 automation](../images/quickstart-iter8-process.png)
-
 === "KFServing"
 
     ```shell
     kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
     ```
-
-    The process automated by Iter8 during this experiment is depicted below.
-
-    ![Iter8 automation](../images/quickstart-iter8-process.png)
-
 
     ??? info "Look inside experiment.yaml"
         ```yaml linenums="1"
@@ -849,6 +850,13 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
           strategy:
             testingPattern: A/B
             deploymentPattern: Progressive
+            actions:
+              # when the experiment completes, promote the winning version using kubectl apply
+              finish:
+              - task: common/exec
+                with:
+                  cmd: /bin/bash
+                  args: [ "-c", "kubectl apply -f {{ .promote }}" ]
           criteria:
             requestCount: iter8-kfserving/request-count
             rewards: # Business rewards
@@ -856,18 +864,18 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               preferredDirection: High # maximize user engagement
             objectives:
             - metric: iter8-kfserving/mean-latency
-              upperLimit: 500
+              upperLimit: 1500
             - metric: iter8-kfserving/95th-percentile-tail-latency
               upperLimit: 2000
             - metric: iter8-kfserving/error-rate
               upperLimit: "0.01"
           duration:
             intervalSeconds: 10
-            iterationsPerLoop: 30
+            iterationsPerLoop: 25
           versionInfo:
             # information about model versions used in this experiment
             baseline:
-              name: current
+              name: flowers-v1
               weightObjRef:
                 apiVersion: networking.istio.io/v1alpha3
                 kind: VirtualService
@@ -875,12 +883,12 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                 namespace: default
                 fieldPath: .spec.http[0].route[0].weight      
               variables:
-              - name: version
-                value: flowers-v1
               - name: ns
                 value: ns-baseline
+              - name: promote
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
             candidates:
-            - name: candidate
+            - name: flowers-v2
               weightObjRef:
                 apiVersion: networking.istio.io/v1alpha3
                 kind: VirtualService
@@ -888,10 +896,10 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                 namespace: default
                 fieldPath: .spec.http[0].route[1].weight      
               variables:
-              - name: version
-                value: flowers-v2
               - name: ns
                 value: ns-candidate
+              - name: promote
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
         ```
 
 === "Knative"
@@ -899,10 +907,6 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
     ```shell
     kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
     ```
-
-    The process automated by Iter8 during this experiment is depicted below.
-
-    ![Iter8 automation](../images/quickstart-iter8-process.png)
 
     ??? info "Look inside experiment.yaml"
         ```yaml linenums="1"
@@ -917,16 +921,14 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
             testingPattern: A/B
             deploymentPattern: Progressive
             actions:
-              start: # run the following sequence of tasks at the start of the experiment
-              - task: knative/init-experiment
               finish: # run the following sequence of tasks at the end of the experiment
-              - task: common/exec # promote the winning version
+              - task: common/exec # promote the winning version      
                 with:
-                  cmd: kubectl
-                  args: 
-                  - "apply"
-                  - "-f"
-                  - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
+                  cmd: /bin/sh
+                  args:
+                  - "-c"
+                  - |
+                    kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
           criteria:
             requestCount: iter8-knative/request-count
             rewards: # Business rewards
@@ -945,20 +947,32 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
           versionInfo:
             # information about app versions used in this experiment
             baseline:
-              name: current
+              name: sample-app-v1
+              weightObjRef:
+                apiVersion: serving.knative.dev/v1
+                kind: Service
+                name: sample-app
+                namespace: default
+                fieldPath: .spec.traffic[0].percent
               variables:
-              - name: revision
-                value: sample-app-v1 
               - name: promote
                 value: baseline
             candidates:
-            - name: candidate
+            - name: sample-app-v2
+              weightObjRef:
+                apiVersion: serving.knative.dev/v1
+                kind: Service
+                name: sample-app
+                namespace: default
+                fieldPath: .spec.traffic[1].percent
               variables:
-              - name: revision
-                value: sample-app-v2
               - name: promote
                 value: candidate
         ```
+
+The process automated by Iter8 during this experiment is depicted below.
+
+![Iter8 automation](../images/quickstart-iter8-process.png)
 
 ## 8. Observe experiment
 Observe the experiment in realtime.
@@ -985,53 +999,50 @@ done
     Experiment name: quickstart-exp
     Experiment namespace: default
     Target: default/sample-app
-    Testing pattern: Canary
+    Testing pattern: A/B
     Deployment pattern: Progressive
 
     ****** Progress Summary ******
     Experiment stage: Running
-    Number of completed iterations: 3
+    Number of completed iterations: 8
 
     ****** Winner Assessment ******
-    > If the candidate version satisfies the experiment objectives, then it is the winner.
-    > Otherwise, if the baseline version satisfies the experiment objectives, it is the winner.
-    > Otherwise, there is no winner.
-    App versions in this experiment: [current candidate]
-    Winning version: candidate
-    Version recommended for promotion: candidate
+    App versions in this experiment: [sample-app-v1 sample-app-v2]
+    Winning version: sample-app-v2
+    Version recommended for promotion: sample-app-v2
 
     ****** Objective Assessment ******
     > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-    +--------------------------------------------+---------+-----------+
-    |                 OBJECTIVE                  | CURRENT | CANDIDATE |
-    +--------------------------------------------+---------+-----------+
-    | iter8-knative/mean-latency <=              | true    | true      |
-    |                                     50.000 |         |           |
-    +--------------------------------------------+---------+-----------+
-    | iter8-knative/95th-percentile-tail-latency | true    | true      |
-    | <= 100.000                                 |         |           |
-    +--------------------------------------------+---------+-----------+
-    | iter8-knative/error-rate <=                | true    | true      |
-    |                                      0.010 |         |           |
-    +--------------------------------------------+---------+-----------+
+    +--------------------------------------------+---------------+---------------+
+    |                 OBJECTIVE                  | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/mean-latency <=              | true          | true          |
+    |                                     50.000 |               |               |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/95th-percentile-tail-latency | true          | true          |
+    | <= 100.000                                 |               |               |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/error-rate <=                | true          | true          |
+    |                                      0.010 |               |               |
+    +--------------------------------------------+---------------+---------------+
 
     ****** Metrics Assessment ******
     > Most recently read values of experiment metrics for each version.
-    +--------------------------------------------+---------+-----------+
-    |                   METRIC                   | CURRENT | CANDIDATE |
-    +--------------------------------------------+---------+-----------+
-    | iter8-knative/request-count                | 454.523 |    27.412 |
-    +--------------------------------------------+---------+-----------+
-    | iter8-knative/mean-latency                 |   1.265 |     1.415 |
-    | (milliseconds)                             |         |           |
-    +--------------------------------------------+---------+-----------+
-    | request-count                              | 454.523 |    27.619 |
-    +--------------------------------------------+---------+-----------+
-    | iter8-knative/95th-percentile-tail-latency |   4.798 |     4.928 |
-    | (milliseconds)                             |         |           |
-    +--------------------------------------------+---------+-----------+
-    | iter8-knative/error-rate                   |   0.000 |     0.000 |
-    +--------------------------------------------+---------+-----------+
+    +--------------------------------------------+---------------+---------------+
+    |                   METRIC                   | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/request-count                |      1213.625 |       361.962 |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/user-engagement              |        10.023 |        14.737 |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/mean-latency                 |         1.133 |         1.175 |
+    | (milliseconds)                             |               |               |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/95th-percentile-tail-latency |         4.768 |         4.824 |
+    | (milliseconds)                             |               |               |
+    +--------------------------------------------+---------------+---------------+
+    | iter8-knative/error-rate                   |         0.000 |         0.000 |
+    +--------------------------------------------+---------------+---------------+
     ``` 
 
 As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions and the candidate improves over the baseline version in terms of the reward metric. The candidate is identified as the winner and is recommended for promotion.
@@ -1172,7 +1183,7 @@ When the experiment completes, you will see the experiment stage change from `Ru
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.
     2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic, verified that the candidate satisfied all objectives, identified the candidate as the winner since the candidate improved over the baseline in terms of user-engagement, and progressively shifted traffic from the baseline to the candidate.
+    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic, verified that the candidate satisfied all objectives, verified that the candidate improved over the baseline in terms of user-engagement, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
 
 ## 9. Cleanup
 === "Istio"
