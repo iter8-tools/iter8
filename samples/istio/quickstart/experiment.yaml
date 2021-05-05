@@ -17,7 +17,6 @@ spec:
         with:
           cmd: /bin/bash
           args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
-
   criteria:
     rewards:
     # (business) reward metric to optimize in this experiment
