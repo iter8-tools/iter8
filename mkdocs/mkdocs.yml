@@ -64,8 +64,6 @@ extra:
       link: https://github.com/iter8-tools/iter8
     - icon: fontawesome/brands/slack
       link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
-    - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/r/iter8
 
 # Extensions
 markdown_extensions:
@@ -135,8 +133,7 @@ nav:
     - Tasks: reference/tasks.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md
-  - Blog:
-    - Blog link: https://blog.iter8.tools
+  - News: news.md
 
 # Google Analytics
 google_analytics:

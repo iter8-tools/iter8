@@ -20,14 +20,11 @@ hide:
 5. **Notifications**
     * Integration with Slack, GitHub, and other RESTful services
 6. **Enhancing Kubernetes and OpenShift integration**
-    * Improved support for KFServing
-    * Enhanced support for Istio using new Iter8 Experiment API
     * Support for OpenShift Serverless
     * Enhanced Knative metrics in tutorials using OpenTelemetry collector
     * Support for Ambassador and Kong networking layers in KNative
     * Support for experimenting with configuration and routes in Knative
 7. **Git triggered workflows and CI/CD**
     * Integration with GitHub Actions and other pipeline providers
-8. **Helm tests**
-9. **Improved installation**
-    * Multi-stack installation, Iter8 Helm chart, Iter8 Operator
+8. **Improved installation**
+    * Iter8 Helm chart, Iter8 Operator
