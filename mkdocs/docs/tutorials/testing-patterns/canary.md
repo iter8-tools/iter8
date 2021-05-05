@@ -93,7 +93,7 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
 
 The process automated by Iter8 during this experiment is depicted below.
 
-![Iter8 automation](../../../../images/canary-iter8-process.png)
+![Iter8 automation](../../images/canary-iter8-process.png)
 
 ## 8. Observe experiment
 Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `canary-exp` in your commands.
