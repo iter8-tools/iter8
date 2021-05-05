@@ -8,7 +8,7 @@ Tasks are an extension mechanism for enhancing the behavior of Iter8 experiments
 
 ## `common/exec`
 
-Iter8 currently implements a single task called `common/exec` that help in setting up and finishing up experiments. Use this task to execute shell commands, in particular, the `kubectl`, `helm` and `kustomize` commands. Use the `exec` task as part of the `finish` action to promote the winning version at the end of an experiment. Use it as part of the `start` action to set up resources required for the experiment.
+Iter8 currently provides a single task type called `common/exec` that helps in setting up and finishing up experiments. Use `common/exec` tasks in experiments to execute shell commands, in particular, the `kubectl`, `helm` and `kustomize` commands. Use the `exec` task as part of the `finish` action to promote the winning version at the end of an experiment. Use it as part of the `start` action to set up resources required for the experiment.
 
 === "kubectl"
     ``` yaml linenums="1"
@@ -136,87 +136,3 @@ By default, the `common/exec` task will attempt to find the version recommended 
 
 ### Error handling in tasks
 When a task exits with an error, it will result in the failure of the experiment to which it belongs.
-
-??? example "Sample experiment with start and finish actions with tasks"
-    ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha2
-    kind: Experiment
-    metadata:
-      name: quickstart-exp
-    spec:
-      # `sample-app` Knative service in `default` namespace is the target of this experiment
-      target: default/sample-app
-      # information about app versions participating in this experiment
-      versionInfo:         
-        # every experiment has a baseline version
-        # we will name it `current`
-        baseline: 
-          name: current
-          variables:
-          # `revision` variable is used for fetching metrics from Prometheus
-          - name: revision 
-            value: sample-app-v1 
-          # `promote` variable is used by the finish task
-          - name: promote
-            value: base
-        # candidate version(s) of the app
-        # there is a single candidate in this experiment 
-        # we will name it `candidate`
-        candidates: 
-        - name: candidate
-          variables:
-          - name: revision
-            value: sample-app-v2
-          - name: promote
-            value: candid
-      criteria:
-        objectives: 
-        # mean latency should be under 50 milliseconds
-        - metric: iter8-knative/mean-latency
-          upperLimit: 50
-        # 95th percentile latency should be under 100 milliseconds
-        - metric: iter8-knative/95th-percentile-tail-latency
-          upperLimit: 100
-        # error rate should be under 1%
-        - metric: iter8-knative/error-rate
-          upperLimit: "0.01"
-        indicators:
-        # report values for the following metrics in addition those in spec.criteria.objectives
-        - 99th-percentile-tail-latency
-        - 90th-percentile-tail-latency
-        - 75th-percentile-tail-latency
-      strategy:
-        # canary testing => candidate `wins` if it satisfies objectives
-        testingPattern: Canary
-        # progressively shift traffic to candidate, assuming it satisfies objectives
-        deploymentPattern: Progressive
-        actions:
-          # run tasks under the `start` action at the start of an experiment   
-          start:
-          # the following task verifies that the `sample-app` Knative service in the `default` namespace is available and ready
-          # it then updates the experiment resource with information needed to shift traffic between app versions
-          - task: knative/init-experiment
-          # run tasks under the `finish` action at the end of an experiment   
-          finish:
-          # promote an app version
-          # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
-          # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
-          - task: common/exec # promote the winning version
-            with:
-              cmd: kubectl
-              args:
-              - "apply"
-              - "-f"
-              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
-      duration: # 12 iterations, 20 seconds each
-        intervalSeconds: 20
-        iterationsPerLoop: 12
-    ```
-
-#### `common/exec`
-
-
-## Target naming conventions
-
-=== "Knative"
-    When experimenting with a single Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`.

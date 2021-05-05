@@ -5,10 +5,7 @@ template: main.html
 # Experiment Resource
 
 !!! abstract "Experiment resource"
-    Iter8's **Experiment** resource type enables application developers and service operators to automate A/B, A/B/n, Canary and Conformance experiments of Kubernetes apps/ML models. The controls provided by the experiment resource type encompass [testing, deployment, traffic engineering, and version promotion functions](../../../concepts/buildingblocks/).
-
-!!! note "Version"
-    This document describes version `v2alpha2` of the Iter8 experiment API type.
+    Iter8's **Experiment** resource type enables application developers and service operators to automate A/B, A/B/n, Canary and Conformance experiments for Kubernetes apps/ML models. The controls provided by the experiment resource type encompass [testing, deployment, traffic engineering, and version promotion functions](../../../concepts/buildingblocks/).
 
 ??? info "Sample experiment"
     ```yaml linenums="1"
@@ -20,21 +17,22 @@ template: main.html
       # target identifies the knative service under experimentation using its fully qualified name
       target: default/sample-app
       strategy:
-        # this experiment will perform a canary test
-        testingPattern: Canary
+        testingPattern: A/B
+        deploymentPattern: Progressive
         actions:
           finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version
+          - task: common/exec # promote the winning version      
             with:
-              cmd: kubectl
+              cmd: /bin/sh
               args:
-              - "apply"
-              - "-f"
-              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
+              - "-c"
+              - |
+                kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
       criteria:
-        # mean latency of version should be under 50 milliseconds
-        # 95th percentile latency should be under 100 milliseconds
-        # error rate should be under 1%
+        requestCount: iter8-knative/request-count
+        rewards: # Business rewards
+        - metric: iter8-knative/user-engagement
+          preferredDirection: High # maximize user engagement
         objectives: 
         - metric: iter8-knative/mean-latency
           upperLimit: 50
@@ -47,23 +45,32 @@ template: main.html
         iterationsPerLoop: 10
       versionInfo:
         # information about app versions used in this experiment
-      baseline:
-        name: current
-        variables:
-        # variables are used when querying metrics and when interpolating task inputs
-        - name: revision
-          value: sample-app-v1 
-        - name: promote
-          value: baseline
-      candidates:
-      - name: candidate
-        variables:
-        # variables are used when querying metrics and when interpolating task inputs
-        - name: revision
-          value: sample-app-v2
-        - name: promote
-          value: candidate 
+        baseline:
+          name: sample-app-v1
+          weightObjRef:
+            apiVersion: serving.knative.dev/v1
+            kind: Service
+            name: sample-app
+            namespace: default
+            fieldPath: .spec.traffic[0].percent
+          variables:
+          - name: promote
+            value: baseline
+        candidates:
+        - name: sample-app-v2
+          weightObjRef:
+            apiVersion: serving.knative.dev/v1
+            kind: Service
+            name: sample-app
+            namespace: default
+            fieldPath: .spec.traffic[1].percent
+          variables:
+          - name: promote
+            value: candidate 
     ```
+
+!!! note "Version"
+    This document describes version `v2alpha2` of Iter8's experiment API.
 
 ## Metadata
 Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta) resource.
@@ -72,7 +79,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| target | string | Identifies the app under experimentation and determines which experiments can run concurrently. Experiments that have the same target value will not be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently. It is good practice to follow [target naming conventions](#target-naming-conventions). | Yes |
+| target | string | Identifies the app under experimentation and determines which experiments can run concurrently. Experiments that have the same target value will not be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently. | Yes |
 | strategy | [Strategy](#strategy) | The experimentation strategy which specifies how app versions are tested, how traffic is shifted during experiment, and what tasks are executed at the start and end of the experiment. | Yes |
 | criteria | [Criteria](#criteria) | Criteria used for evaluating versions. This section includes (business) rewards, service-level objectives (SLOs) and indicators (SLIs). | No |
 | duration | [Duration](#duration) | Duration of the experiment. | No |
@@ -88,7 +95,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
 | stage | string | Indicator of the progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running and `Completed` when the experiment terminates. | No |
 | completedIterations | int32 | Number of completed iterations of the experiment. This is undefined until the experiment reaches the `Running` stage. | No |
-| currentWeightDistribution | [][WeightData](#weightdata) | Currently observed split of traffic between versions. Expressed as percentage. | No |
+| currentWeightDistribution | [][WeightData](#weightdata) | The latest observed split of traffic between versions. Expressed as percentage. Iter8 ensures that this field is current  until the final iteration of the experiment. Iter8 will cease to update this field once a [finish action](#strategy) is invoked.  | No |
 | analysis | Analysis | Result of latest query to the Iter8 analytics service.  | No |
 | versionRecommendedForPromotion | string | The version recommended for promotion. This field is initially populated by Iter8 as the baseline version and continuously updated during the course of the experiment to match the winner. The value of this field is typically used by finish actions to promote a version at the end of an experiment. | No |
 | metrics | [][MetricInfo](#metricinfo) | A list of metrics referenced in the criteria section of this experiment. | No |
@@ -107,7 +114,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 ### TaskSpec
 
 !!! abstract ""
-    Specification of a task that will be executed as part of experiment actions. Task implementations are organized into libraries as documented [here](#task-implementations).
+    Specification of a task that will be executed as part of experiment actions. Tasks are documented [here](../tasks).
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
@@ -162,7 +169,9 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | candidates | [][VersionDetail](#versiondetail) | Details of the candidate version or versions, if any. | No |
 
 !!! note "Number of versions"
-    `Conformance` experiments involve only a single version (baseline). Hence, in `Conformance` experiments, the `candidates` field of versionInfo must be omitted. A `Canary` experiment involves two versions, `baseline` and `candidate`. Hence, in `Canary` experiments, the `candidates` field must be a list of length one and must contain a single versionDetail object.[^1]
+    1. `Conformance` experiments involve only a single version (baseline). Hence, in these  experiments, the `candidates` field must be omitted. 
+    2. `A/B` and `Canary` experiments involve two versions, a baseline and a candidate. Hence, the `candidates` field must be a list of length one in these experiments.
+    3. `A/B/n` experiments involve three or more versions. Hence, in these experiments, the `candidates` field must be of length two or more.
 
 ### VersionDetail
 
@@ -279,294 +288,5 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ------------ | ----------- | -------- |
 | name | string | Name of a variable. | Yes |
 | value | string | Value of a variable. | Yes |
-
-## Tasks
-
-Tasks are an extension mechanism for enhancing the behavior of Iter8 experiments and can be specified within the [spec.strategy.actions](#strategy) field of the experiment.
-
-### Task implementations
-
-Iter8 currently implements two tasks that help in setting up and finishing up experiments. These tasks are organized into the `knative` and `common` task libraries.
-
-??? example "Sample experiment with start and finish actions with tasks"
-    ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha2
-    kind: Experiment
-    metadata:
-      name: quickstart-exp
-    spec:
-      # `sample-app` Knative service in `default` namespace is the target of this experiment
-      target: default/sample-app
-      # information about app versions participating in this experiment
-      versionInfo:         
-        # every experiment has a baseline version
-        # we will name it `current`
-        baseline: 
-          name: current
-          variables:
-          # `revision` variable is used for fetching metrics from Prometheus
-          - name: revision 
-            value: sample-app-v1 
-          # `promote` variable is used by the finish task
-          - name: promote
-            value: base
-        # candidate version(s) of the app
-        # there is a single candidate in this experiment 
-        # we will name it `candidate`
-        candidates: 
-        - name: candidate
-          variables:
-          - name: revision
-            value: sample-app-v2
-          - name: promote
-            value: candid
-      criteria:
-        objectives: 
-        # mean latency should be under 50 milliseconds
-        - metric: iter8-knative/mean-latency
-          upperLimit: 50
-        # 95th percentile latency should be under 100 milliseconds
-        - metric: iter8-knative/95th-percentile-tail-latency
-          upperLimit: 100
-        # error rate should be under 1%
-        - metric: iter8-knative/error-rate
-          upperLimit: "0.01"
-        indicators:
-        # report values for the following metrics in addition those in spec.criteria.objectives
-        - 99th-percentile-tail-latency
-        - 90th-percentile-tail-latency
-        - 75th-percentile-tail-latency
-      strategy:
-        # canary testing => candidate `wins` if it satisfies objectives
-        testingPattern: Canary
-        # progressively shift traffic to candidate, assuming it satisfies objectives
-        deploymentPattern: Progressive
-        actions:
-          # run tasks under the `start` action at the start of an experiment   
-          start:
-          # the following task verifies that the `sample-app` Knative service in the `default` namespace is available and ready
-          # it then updates the experiment resource with information needed to shift traffic between app versions
-          - task: knative/init-experiment
-          # run tasks under the `finish` action at the end of an experiment   
-          finish:
-          # promote an app version
-          # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml` will be applied if candidate satisfies objectives
-          # `https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml` will be applied if candidate fails to satisfy objectives
-          - task: common/exec # promote the winning version
-            with:
-              cmd: kubectl
-              args:
-              - "apply"
-              - "-f"
-              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
-      duration: # 12 iterations, 20 seconds each
-        intervalSeconds: 20
-        iterationsPerLoop: 12
-    ```
-
-#### `knative/init-experiment`
-
-The `knative` task library provides the `init-experiment` task. Use this task as part of the `start` action when experimenting with a Knative service. This task will do the following.
-
-1. Verify that the target Knative service resource specified in the experiment is available. The target string in the experiment must be formatted as `namespace/name` of the Knative service.[^2]
-
-2. Verify that the target Knative service resource meets three conditions: `Ready`, `ConfigurationsReady` and `RoutesReady`.[^3]
-
-3. Verify that `revision` information supplied for app versions in the experiment can be found in the Knative service. For example, the sample experiment above refers to two revisions, namely, `sample-app-v1` and `sample-app-v2`. The `init-experiment` task will inspect the `status.traffic` field of the target Knative service to verify that the revisions are found.
-
-4. Add the `namespace` variable to the `spec.versionInfo` field in the experiment. The value of this variable is the namespace of the target Knative service.
-
-5. Add `weightObjRef` clause within the `spec.versionInfo` field in the experiment.
-
-??? info "`spec.versionInfo` before and after `init-experiment` is executed"
-    === "Before"
-        ``` yaml linenums="1"
-        versionInfo:         
-          baseline: 
-            name: current
-            variables:
-            - name: revision 
-              value: sample-app-v1 
-            - name: promote
-              value: baseline
-          candidates: 
-          - name: candidate
-            variables:
-            - name: revision
-              value: sample-app-v2
-            - name: promote
-              value: candidate 
-        ```
-
-    === "After"
-        ``` yaml linenums="1"
-        versionInfo:         
-          baseline: 
-            name: current
-            variables:
-            - name: revision 
-              value: sample-app-v1 
-            - name: promote
-              value: base
-            - name: namespace
-              value: default
-            weightObjRef:
-              apiVersion: serving.knative.dev/v1
-              kind: Service
-              name: sample-app
-              namespace: default
-              fieldPath: .spec.traffic[0].percent  
-          candidates: 
-          - name: candidate
-            variables:
-            - name: revision
-              value: sample-app-v2
-            - name: promote
-              value: candid
-            - name: namespace
-              value: default
-            weightObjRef:
-              apiVersion: serving.knative.dev/v1
-              kind: Service
-              name: sample-app
-              namespace: default
-              fieldPath: .spec.traffic[1].percent  
-        ```
-
-#### `common/exec`
-
-The `common` task library provides the `exec` task. Use this task to execute shell commands, in particular, the `kubectl`, `helm` and `kustomize` commands. Use the `exec` task as part of the `finish` action to promote the winning version at the end of an experiment. Use it as part of the `start` action to set up resources required for the experiment.
-
-=== "kubectl"
-    ``` yaml linenums="1"
-    spec:
-      strategy:
-        actions:
-          start:
-          # when using common/exec in a start action, always set disableInterpolation to true
-          - task: common/exec # create a K8s resource
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kubectl apply -f https://raw.githubusercontent.com/my/favourite/resource.yaml
-              disableInterpolation: true              
-          finish:
-          - task: common/exec # promote the winning version
-            with:
-              cmd: kubectl
-              args:
-              - "apply"
-              - "-f"
-              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
-    ```
-
-=== "Helm"
-    ``` yaml linenums="1"
-    spec:
-      strategy:
-        actions:
-          start:
-          # when using common/exec in a start action, always set disableInterpolation to true
-          - task: common/exec # install a helm chart
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                helm upgrade --install --repo https://raw.githubusercontent.com/my/favorite/helm-repo app --namespace=iter8-system app
-              disableInterpolation: true
-          finish:
-          - task: common/exec
-            with:
-              cmd: helm
-              args:
-              - "upgrade"
-              - "--install"
-              - "--repo"
-              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo" # repo url
-              - "sample-app" # release name
-              - "--namespace=iter8-system" # release namespace
-              - "sample-app" # chart name
-              - "--values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/{{ .promote }}-values.yaml" # placeholder is substituted dynamically
-    ```
-
-=== "Kustomize"
-    ``` yaml linenums="1"
-    spec:
-      strategy:
-        actions:
-          start:
-          # when using common/exec in a start action, always set disableInterpolation to true
-          - task: common/exec # create kubernetes resources
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kustomize build github.com/my/favorite/kustomize/folder?ref=master | kubectl apply -f -
-              disableInterpolation: true        
-          finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version using kustomize
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-              kustomize build github.com/iter8-tools/iter8/samples/knative/canaryfixedsplit/{{ .name }}?ref=master | kubectl apply -f -
-    ```
-
-### Placeholder substitution in task inputs
-
-Inputs to tasks can contain placeholders, or template variables, which will be dynamically substituted when the task is executed by Iter8. For example, in the sample experiment above, one input is:
-
-```bash 
-"https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
-```
-
-In this case, the placeholder is `{{ .promote }}`. Placeholder substitution in task inputs works as follows.
-
-1. Iter8 will find the version recommended for promotion. This information is stored in the `status.versionRecommendedForPromotion` field of the experiment. The version recommended for promotion is the `winner`, if a `winner` has been found in the experiment. Otherwise, it is the baseline version supplied in the `spec.versionInfo` field of the experiment.
-
-2. If the placeholder is `{{ .name }}`, Iter8 will substitute it with the name of the version recommended for promotion. Else, if it is any other variable, Iter8 will substitute it with the value of the corresponding variable for the version recommended for promotion. Variable values are specified in the `variables` field of the version detail. Note that variable values could have been supplied by the creator of the experiment, or by other tasks such as `init-experiment` that may already have been executed by Iter8 as part of the experiment.
-
-??? example "Placeholder substitution Example 1"
-
-    Consider the sample experiment above. Suppose the `winner` of this experiment was `candidate`. Then:
-    
-    1. The version recommended for promotion is `candidate`.
-    2. The placeholder in the argument to the `exec` task of the `finish` action is `{{ .promote }}`.
-    3. The value of the placeholder for the version recommended for promotion is `candid`.
-    4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candid.yaml`.
-    
-??? example "Placeholder substitution Example 2"
-
-    Consider the sample experiment above. Suppose the `winner` of this experiment was `current`. Then:
-    
-    1. The version recommended for promotion is `current`.
-    2. The placeholder in the argument of the `exec` task of the `finish` action is `{{ .promote }}`.
-    3. The value of the placeholder for the version recommended for promotion is `base`.
-    4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
-
-??? example "Placeholder substitution Example 3"
-
-    Consider the sample experiment above. Suppose the experiment did not yield a `winner`. Then:
-    
-    1. The version recommended for promotion is `current`.
-    2. The placeholder in the argument of the `exec` task of the `finish` action is `{{ .promote }}`.
-    3. The value of the placeholder for the version recommended for promotion is `base`.
-    4. The command executed by the `exec` task is then `kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/base.yaml`.
-
-### Disable Interpolation (always do this in a `start` action)
-By default, the `common/exec` task will attempt to find the version recommended for promotion, and use its values to substitute placeholders in the inputs to the task. However, this behavior will lead to task failure since version recommended for promotion will be generally undefined at this stage of the experiment. To use the `common/exec` task as part of an experiment `start` action, set `disableInterpolation` to `true` as illustrated in the `kubectl/Helm/Kustomize` samples above.
-
-### Error handling in tasks
-When a task exits with an error, it will result in the failure of the experiment to which it belongs.
-
-## Target naming conventions
-
-=== "Knative"
-    When experimenting with a single Knative service, the convention is to use the fully qualified name (namespace/name) of the Knative service as the target string. In the sample experiment above, the app under experimentation is the Knative service named `sample-app` under the `default` namespace. Hence, the target string is `default/sample-app`.
 
 [^1]: `A/B/n` experiments involve more than one candidate. Their description is coming soon.
