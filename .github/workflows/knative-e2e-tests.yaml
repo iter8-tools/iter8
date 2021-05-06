@@ -264,7 +264,7 @@ jobs:
     - name: Sleep until end of experiment
       run: |
         sleep 150.0
-        kubectl get experiment conformance-sample -o yaml
+        kubectl get experiment conformance-exp -o yaml
     
     - name: Check if experiment is complete and successful
       run: |

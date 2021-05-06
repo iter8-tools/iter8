@@ -2,7 +2,7 @@
 
 set -e
 
-EXPERIMENT=conformance-sample
+EXPERIMENT=conformance-exp
 
 # dump logs from iter8 pods
 dump() {
@@ -28,7 +28,7 @@ fi
 
 # Check if experiment has completed
 completed="Completed"
-stage=$(kubectl get experiment conformance-sample -o json | jq -r .status.stage)
+stage=$(kubectl get experiment conformance-exp -o json | jq -r .status.stage)
 if [[ $stage = $completed ]]; then
     echo "Experiment has Completed"
 else
