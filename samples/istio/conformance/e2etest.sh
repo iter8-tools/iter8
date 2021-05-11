@@ -3,15 +3,8 @@
 set -e -x
 
 export EXPERIMENT=conformance-exp
+source $ITER8/samples/library.sh
 
-# method to report failure
-reportFailure () {
-    status=$?
-    if (( $status != 0 )); then
-        echo -e "\033[0;31mFAILED:\033[0m $0"
-    fi
-    exit $status
-}
 trap "reportFailure" EXIT
 
 # create cluster
@@ -39,6 +32,7 @@ echo "Creating A/B experiment"
 kubectl apply -f $ITER8/samples/istio/conformance/experiment.yaml
 
 # Wait
+sleep 120s
 kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
 
 # Log final experiment

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -e -x
 
 # Ensure ITER8 environment variable is set
 if [[ -z ${ITER8} ]]; then
@@ -11,39 +11,13 @@ else
 fi
 
 # Check if experiment has completed
-completed="Completed"
-stage=$(kubectl get experiment $EXPERIMENT -o json | jq -r .status.stage)
-if [[ $stage = $completed ]]; then
-    echo "Experiment has Completed"
-else
-    echo "Experiment must be $completed;" 
-    echo "Experiment is $stage;"
-    exit 1
-fi
+checkObjectField "Condition Completed" "Completed" "experiment/${EXPERIMENT}" ".status.stage"
 
-# Check if no packets have been lost by Fortio
-pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
+# Check that no packets have been lost
+verifyNoPacketLoss
 
-REQUESTSTOTAL=$(jq -r .DurationHistogram.Count /tmp/fortiooutput.json)
-REQUESTS200=$(jq -r '.RetCodes."200"' /tmp/fortiooutput.json)
-if [[ $REQUESTSTOTAL -eq $REQUESTS200 ]]; then
-    echo "Packets were not lost"
-else
-    echo "Packets were lost"
-    echo "total requests:" $REQUESTSTOTAL
-    echo "200 requests:" $REQUESTS200
-    exit 1
-fi
+# Check if winner is found and is productpage-v1
+checkObjectField "winnerFound" "true" "experiment/${EXPERIMENT}" ".status.analysis.winnerAssessment.data.winnerFound"
+checkObjectField "winner" "productpage-v1" "experiment/${EXPERIMENT}" ".status.analysis.winnerAssessment.data.winner"
 
-# Check if versionRecommendedForPromotion is productpage-v1; implies winner found
-expectedVrfp="productpage-v1"
-vrfp=$(kubectl get experiment $EXPERIMENT -o json | jq -r .status.versionRecommendedForPromotion)
-if [[ $vrfp = $expectedVrfp ]]; then
-    echo "versionRecommendedForPromotion is $vrfp"
-else
-    echo "versionRecommendedForPromotion must be $expectedVrfp; is" $vrfp
-    exit 1
-fi
-
-set +e
+set +e +x

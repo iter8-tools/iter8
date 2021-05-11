@@ -22,7 +22,7 @@ Please follow steps 1, 2, and 3 of the [quick start tutorial](../../../getting-s
 
 ## 4. Create app/ML model version
 === "Istio"
-    Deploy a Knative app.
+    Deploy [bookinfo](https://istio.io/latest/docs/examples/bookinfo/) app:
 
     ```shell
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/conformance/bookinfo-app.yaml

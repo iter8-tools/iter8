@@ -11,7 +11,7 @@ spec:
   criteria:
     objectives: # used for validating versions
     - metric: iter8-istio/mean-latency
-      upperLimit: 100
+      upperLimit: 300
     - metric: iter8-istio/error-rate
       upperLimit: "0.01"
     requestCount: iter8-istio/request-count
