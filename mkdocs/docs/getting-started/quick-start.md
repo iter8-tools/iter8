@@ -4,7 +4,7 @@ template: main.html
 
 # Quick Start
 
-!!! tip "Scenario: A/B testing and progressive deployment"
+!!! tip "Scenario: A/B testing"
     [A/B testing](../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an app/ML model, and select a winner based on a (business) reward metric and objectives (SLOs). In this tutorial, you will:
 
     1. Perform A/B testing.

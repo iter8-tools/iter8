@@ -121,6 +121,9 @@ nav:
       - Canary: tutorials/testing-patterns/canary.md
       - Conformance: tutorials/testing-patterns/conformance.md
       - A/B (quick start): tutorials/testing-patterns/ab.md
+    - Deployment patterns:
+      - Progressive deployment: tutorials/deployment-patterns/progressive.md
+      - FixedSplit deployment: tutorials/deployment-patterns/fixed-split.md
     - Knative-specific tutorials:
       - Progressive canary release: tutorials/knative/canary-progressive.md
       - Fixed split canary release: tutorials/knative/canary-fixedsplit.md

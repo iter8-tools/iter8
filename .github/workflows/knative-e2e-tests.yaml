@@ -159,8 +159,8 @@ jobs:
         export ITER8=$(pwd)
         source $ITER8/samples/knative/conformance/check.sh
         
-  canary-progressive-helm:
-    name: progressive canary experiment using helm
+  progressive:
+    name: progressive experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
