@@ -125,8 +125,6 @@ nav:
       - Progressive deployment: tutorials/deployment-patterns/progressive.md
       - FixedSplit deployment: tutorials/deployment-patterns/fixed-split.md
     - Knative-specific tutorials:
-      - Progressive canary release: tutorials/knative/canary-progressive.md
-      - Fixed split canary release: tutorials/knative/canary-fixedsplit.md
       - Conformance testing with traffic mirroring: tutorials/knative/mirroring.md
       - Progressive canary release with traffic segmentation: tutorials/knative/traffic-segmentation.md
       - Useful Knative annotations: tutorials/knative/annotations.md
