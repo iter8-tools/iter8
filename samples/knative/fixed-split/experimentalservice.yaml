@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: sample-app
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: sample-app-v2
+    spec:
+      containers:
+      - image: gcr.io/knative-samples/knative-route-demo:green 
+        env:
+        - name: T_VERSION
+          value: "green"
+  traffic:
+  - tag: current
+    revisionName: sample-app-v1
+    percent: 60
+  - tag: candidate
+    latestRevision: true
+    percent: 40
+  

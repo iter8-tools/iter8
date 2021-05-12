@@ -6,7 +6,7 @@ template: main.html
 
 !!! tip "Scenario: FixedSplit deployment"
 
-    [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-patterns) enables you to fix the traffic split between versions ahead of the experiment. When you use FixedSplit deployment pattern in an experiment, Iter8 will work with the traffic split you specified and will **not** progressively shift traffic towards the winner during the iterations of an experiment. In this tutorial, you will:
+    [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-patterns), as the name indicates, is meant for scenarios where you do **not** want Iter8 to shift traffic between versions during the experiment. In this tutorial, you will:
 
     * Modify the [quick start tutorial](../../../getting-started/quick-start) to use FixedSplit instead of Progressive deployment.
 
@@ -18,18 +18,109 @@ template: main.html
 ???+ warning "Before you begin, you will need... "
     > **Note:** Please choose the same K8s stack (for example, Istio, KFServing, or Knative) consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
 
-## Steps 1 to 6
+## Steps 1 to 3
     
-Please follow steps 1 through 6 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
+Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
 
-
-## 7. Launch experiment
-Launch the Iter8 experiment that orchestrates canary testing for the app in this tutorial.
-
+## 4. Create versions of your application
 === "Istio"
 
     ```shell
-    kubectl apply -f $ITER8/samples/istio/canary/experiment.yaml
+    kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/fixed-split/bookinfo-app.yaml
+    kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
+    kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
+    ```
+
+=== "KFServing"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/kfserving/quickstart/baseline.yaml
+    kubectl apply -f $ITER8/samples/kfserving/quickstart/candidate.yaml
+    kubectl apply -f $ITER8/samples/kfserving/fixed-split/routing-rule.yaml
+    kubectl wait --for=condition=Ready isvc/flowers -n ns-baseline
+    kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate
+    ```
+
+    ??? info "Look inside routing-rule.yaml"
+        ```yaml linenums="1"
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        metadata:
+          name: routing-rule-one
+        spec:
+          gateways:
+          - knative-serving/knative-ingress-gateway
+          hosts:
+          - example.com
+          http:
+          - route:
+            - destination:
+                host: flowers-predictor-default.ns-baseline.svc.cluster.local
+              headers:
+                request:
+                  set:
+                    Host: flowers-predictor-default.ns-baseline
+                response:
+                  set:
+                    version: flowers-v1
+              weight: 60
+            - destination:
+                host: flowers-predictor-default.ns-candidate.svc.cluster.local
+              headers:
+                request:
+                  set:
+                    Host: flowers-predictor-default.ns-candidate
+                response:
+                  set:
+                    version: flowers-v2
+              weight: 40
+        ```
+
+=== "Knative"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
+    kubectl apply -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml
+    kubectl wait --for=condition=Ready ksvc/sample-app
+    ```
+
+    ??? info "Look inside experimentalservice.yaml"
+        ```yaml linenums="1"
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        metadata:
+          name: sample-app
+          namespace: default
+        spec:
+          template:
+            metadata:
+              name: sample-app-v2
+            spec:
+              containers:
+              - image: gcr.io/knative-samples/knative-route-demo:green 
+                env:
+                - name: T_VERSION
+                  value: "green"
+          traffic:
+          - tag: current
+            revisionName: sample-app-v1
+            percent: 60
+          - tag: candidate
+            latestRevision: true
+            percent: 40
+        ```
+
+## 5. Generate requests
+Please follow [Step 5 of the quick start tutorial](../../../getting-started/quick-start/#5-generate-requests).
+
+## 6. Define metrics
+Please follow [Step 6 of the quick start tutorial](../../../getting-started/quick-start/#6-define-metrics).
+
+## 7. Launch experiment
+=== "Istio"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/istio/fixed-split/experiment.yaml
     ```
 
     ??? info "Look inside experiment.yaml"
@@ -37,15 +128,15 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
         apiVersion: iter8.tools/v2alpha2
         kind: Experiment
         metadata:
-          name: canary-exp
+          name: fixedsplit-exp
         spec:
           # target identifies the service under experimentation using its fully qualified name
           target: bookinfo-iter8/productpage
           strategy:
-            # this experiment will perform a Canary test
-            testingPattern: Canary
-            # this experiment will progressively shift traffic to the winning version
-            deploymentPattern: Progressive
+            # this experiment will perform an A/B test
+            testingPattern: A/B
+            # this experiment will not shift traffic during iterations
+            deploymentPattern: FixedSplit
             actions:
               # when the experiment completes, promote the winning version using kubectl apply
               finish:
@@ -54,9 +145,13 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
                   cmd: /bin/bash
                   args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
           criteria:
-            objectives: # metrics used to validate versions
+            rewards:
+            # (business) reward metric to optimize in this experiment
+            - metric: iter8-istio/user-engagement 
+              preferredDirection: High
+            objectives: # used for validating versions
             - metric: iter8-istio/mean-latency
-              upperLimit: 100
+              upperLimit: 300
             - metric: iter8-istio/error-rate
               upperLimit: "0.01"
             requestCount: iter8-istio/request-count
@@ -68,34 +163,23 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
             baseline:
               name: productpage-v1
               variables:
-              - name: namespace # used in metric queries
+              - name: namespace # used by final action if this version is the winner
                 value: bookinfo-iter8
               - name: promote # used by final action if this version is the winner
                 value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml
-              weightObjRef:
-                apiVersion: networking.istio.io/v1beta1
-                kind: VirtualService
-                namespace: bookinfo-iter8
-                name: bookinfo
-                fieldPath: .spec.http[0].route[0].weight
             candidates:
             - name: productpage-v2
               variables:
-              - name: namespace # used in metric queries
+              - name: namespace # used by final action if this version is the winner
                 value: bookinfo-iter8
               - name: promote # used by final action if this version is the winner
                 value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
-              weightObjRef:
-                apiVersion: networking.istio.io/v1beta1
-                kind: VirtualService
-                namespace: bookinfo-iter8
-                name: bookinfo
-                fieldPath: .spec.http[0].route[1].weight
         ```
-=== "Knative"
+
+=== "KFServing"
 
     ```shell
-    kubectl apply -f $ITER8/samples/knative/canary/experiment.yaml
+    kubectl apply -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
     ```
 
     ??? info "Look inside experiment.yaml"
@@ -103,12 +187,70 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
         apiVersion: iter8.tools/v2alpha2
         kind: Experiment
         metadata:
-          name: canary-exp
+          name: fixedsplit-exp
         spec:
+          target: flowers
+          strategy:
+            testingPattern: A/B
+            deploymentPattern: FixedSplit
+            actions:
+              # when the experiment completes, promote the winning version using kubectl apply
+              finish:
+              - task: common/exec
+                with:
+                  cmd: /bin/bash
+                  args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+          criteria:
+            requestCount: iter8-kfserving/request-count
+            rewards: # Business rewards
+            - metric: iter8-kfserving/user-engagement
+              preferredDirection: High # maximize user engagement
+            objectives:
+            - metric: iter8-kfserving/mean-latency
+              upperLimit: 1500
+            - metric: iter8-kfserving/95th-percentile-tail-latency
+              upperLimit: 2000
+            - metric: iter8-kfserving/error-rate
+              upperLimit: "0.01"
+          duration:
+            intervalSeconds: 10
+            iterationsPerLoop: 25
+          versionInfo:
+            # information about model versions used in this experiment
+            baseline:
+              name: flowers-v1
+              variables:
+              - name: ns
+                value: ns-baseline
+              - name: promote
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
+            candidates:
+            - name: flowers-v2
+              variables:
+              - name: ns
+                value: ns-candidate
+              - name: promote
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
+        ```
+
+=== "Knative"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
+    ```
+
+    ??? info "Look inside experiment.yaml"
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Experiment
+        metadata:
+          name: fixedsplit-exp
+        spec:
+          # target identifies the knative service under experimentation using its fully qualified name
           target: default/sample-app
           strategy:
-            testingPattern: Canary
-            deploymentPattern: Progressive
+            testingPattern: A/B
+            deploymentPattern: FixedSplit
             actions:
               finish: # run the following sequence of tasks at the end of the experiment
               - task: common/exec # promote the winning version      
@@ -120,6 +262,9 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
                     kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
           criteria:
             requestCount: iter8-knative/request-count
+            rewards: # Business rewards
+            - metric: iter8-knative/user-engagement
+              preferredDirection: High # maximize user engagement
             objectives: 
             - metric: iter8-knative/mean-latency
               upperLimit: 50
@@ -134,23 +279,11 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
             # information about app versions used in this experiment
             baseline:
               name: sample-app-v1
-              weightObjRef:
-                apiVersion: serving.knative.dev/v1
-                kind: Service
-                name: sample-app
-                namespace: default
-                fieldPath: .spec.traffic[0].percent
               variables:
               - name: promote
                 value: baseline
             candidates:
             - name: sample-app-v2
-              weightObjRef:
-                apiVersion: serving.knative.dev/v1
-                kind: Service
-                name: sample-app
-                namespace: default
-                fieldPath: .spec.traffic[1].percent
               variables:
               - name: promote
                 value: candidate
@@ -158,26 +291,35 @@ Launch the Iter8 experiment that orchestrates canary testing for the app in this
 
 The process automated by Iter8 during this experiment is depicted below.
 
-![Iter8 automation](../../images/canary-iter8-process.png)
+![Iter8 automation](../../images/fixedsplit-iter8-process.png)
 
 ## 8. Observe experiment
-Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `canary-exp` in your commands.
+Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `fixedsplit-exp` in your commands.
+
 
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.
-    2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with canary testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus; Iter8 verified that the candidate satisfied all the SLOs, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
+    2. You generated requests for your app/ML model versions. At the start of the experiment, 60% of the requests are sent to the baseline and 40% to the candidate.
+    3. You created an Iter8 experiment with A/B testing pattern and FixedSplit deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic; Iter8 verified that the candidate satisfied all objectives, verified that the candidate improved over the baseline in terms of user-engagement, identified candidate as the winner, and finally promoted the candidate.
 
 ## 9. Cleanup
 === "Istio"
     ```shell
-    kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
-    kubectl delete -f $ITER8/samples/istio/canary/experiment.yaml
+    kubectl delete -f $ITER8/samples/istio/fixed-split/fortio.yaml
+    kubectl delete -f $ITER8/samples/istio/fixed-split/experiment.yaml
     kubectl delete namespace bookinfo-iter8
     ```
+
+=== "KFServing"
+    ```shell
+    kubectl delete -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
+    kubectl delete -f $ITER8/samples/kfserving/fixed-split/baseline.yaml
+    kubectl delete -f $ITER8/samples/kfserving/fixed-split/candidate.yaml
+    ```
+
 === "Knative"
     ```shell
-    kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
-    kubectl delete -f $ITER8/samples/knative/canary/experiment.yaml
-    kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+    kubectl delete -f $ITER8/samples/knative/fixed-split/fortio.yaml
+    kubectl delete -f $ITER8/samples/knative/fixed-split/experiment.yaml
+    kubectl delete -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml
     ```

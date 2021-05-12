@@ -241,6 +241,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
     ```shell
     kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
     kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+    kubectl wait --for=condition=Ready ksvc/sample-app
     ```
 
     ??? info "Look inside baseline.yaml"
@@ -351,7 +352,6 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
     Generate requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
-    kubectl wait --for=condition=Ready ksvc/sample-app
     # URL_VALUE is the URL where your Knative application serves requests
     URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
     sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
