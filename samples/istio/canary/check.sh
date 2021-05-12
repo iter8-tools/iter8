@@ -11,61 +11,22 @@ else
 fi
 
 # Check if experiment has completed
-completed="Completed"
-stage=$(kubectl get experiment $EXPERIMENT -o json | jq -r .status.stage)
-if [[ $stage = $completed ]]; then
-    echo "Experiment has Completed"
-else    
-    echo "Experiment must be $completed;" 
-    echo "Experiment is $stage;"
-    exit 1
-fi
+checkObjectField "Condition Completed" "Completed" "experiment/${EXPERIMENT}" ".status.stage"
 
-# Check if no packets have been lost by Fortio
-pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
+# Check that no packets have been lost
+verifyNoPacketLoss
 
-REQUESTSTOTAL=$(jq -r .DurationHistogram.Count /tmp/fortiooutput.json)
-REQUESTS200=$(jq -r '.RetCodes."200"' /tmp/fortiooutput.json)
-if [[ $REQUESTSTOTAL -eq $REQUESTS200 ]]; then
-    echo "Packets were not lost"
-else
-    echo "Packets were lost"
-    echo "total requests:" $REQUESTSTOTAL
-    echo "200 requests:" $REQUESTS200
-    exit 1
-fi
+# Check if versionRecommendedForPromotion is productpage-v2
+checkObjectField "versionRecommendedForPromotion" "productpage-v2" "experiment/${EXPERIMENT}" ".status.versionRecommendedForPromotion"
 
-# Check if versionRecommendedForPromotion is B
-expectedVrfp="productpage-v2"
-vrfp=$(kubectl get experiment $EXPERIMENT -o json | jq -r .status.versionRecommendedForPromotion)
-if [[ $vrfp = $expectedVrfp ]]; then
-    echo "versionRecommendedForPromotion is $vrfp"
-else
-    echo "versionRecommendedForPromotion must be $expectedVrfp; is" $vrfp
-    exit 1
-fi
+# Check if winner is found and is productpage-v2
+checkObjectField "winnerFound" "true" "experiment/${EXPERIMENT}" ".status.analysis.winnerAssessment.data.winnerFound"
+checkObjectField "winner" "productpage-v2" "experiment/${EXPERIMENT}" ".status.analysis.winnerAssessment.data.winner"
 
-# This experiment does not include a finish action; these are commented out.
+# Check if VirtualService updated
+checkObjectField "subset" "productpage-v2" "vs/bookinfo" ".spec.http[0].route[0].destination.subset" bookinfo-iter8
 
-# # Check if traffic percent to productpage-v2 is > 50
-# expectedPercent=100
-# actualPercent=$(kubectl -n bookinfo-iter8 get vs bookinfo -o json | jq -r '.spec.http[0].route[1].weight')
-# if (( $actualPercent >= $expectedPercent )); then
-#     echo "percent is $actualPercent"
-# else
-#     echo "percent must be greater than or equal to $expectedPercent; is" $actualPercent
-#     exit 1
-# fi
-
-#check if traffic percent is 100
-expectedPercent=100
-actualPercent=$(kubectl -n bookinfo-iter8 get vs bookinfo -o json | jq -r '.spec.http[0].route[0].weight')
-if [[ $actualPercent -eq $expectedPercent ]]; then
-    echo "percent is 100"
-else
-    echo "percent must be $expectedPercent; is" $actualPercent
-    exit 1
-fi
+# Check if traffic percent is 100
+checkObjectField "Traffic (percentage) to winner" 100 "vs/bookinfo" ".spec.http[0].route[0].weight" bookinfo-iter8
 
 set +e

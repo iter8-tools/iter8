@@ -3,16 +3,9 @@
 set -e -x
 
 export EXPERIMENT=quickstart-exp
+source $ITER8/samples/library.sh
 
-# cleanup () {
-#     status=$?
-#     if (( $status != 0 )); then
-#         kind delete cluster
-#         echo -e "\033[0;31mFAILED:\033[0m $0"
-#     fi
-#     exit $status
-# }
-# trap "cleanup" EXIT
+trap "reportFailure" EXIT
 
 # create cluster
 kind create cluster
@@ -40,6 +33,7 @@ echo "Creating A/B experiment"
 kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
 
 # Wait
+sleep 120s
 kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
 
 # Log final experiment
