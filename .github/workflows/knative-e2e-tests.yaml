@@ -107,6 +107,7 @@ jobs:
     - name: Check if experiment is complete and successful
       run: |
         export ITER8=$(pwd)
+        export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/canary/check.sh
 
   conformance:
@@ -264,6 +265,7 @@ jobs:
     - name: Check if experiment is complete and successful
       run: |
         export ITER8=$(pwd)
+        export EXPERIMENT=fixedsplit-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
   canary-fixedsplit-kustomize:
