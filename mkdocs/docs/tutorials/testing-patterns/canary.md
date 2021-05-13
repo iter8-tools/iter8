@@ -4,7 +4,7 @@ template: main.html
 
 # Canary Testing
 
-!!! tip "Scenario: Canary testing and progressive deployment"
+!!! tip "Scenario: Canary testing"
     [Canary testing](../../../concepts/buildingblocks/#testing-pattern) enables you to safely rollout a new version of your app/ML model after validating service-level objectives (SLOs). In this tutorial, you will:
 
     1. Perform canary testing.

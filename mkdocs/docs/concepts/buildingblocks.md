@@ -104,7 +104,7 @@ Iter8 can optionally **promote the recommended version** at the end of an experi
 
 ## Resource config tools
 
-Iter8 can be easily easily with Helm and Kustomize. This integration is especially useful if you use these tools for configuring Kubernetes resources needed for releases of your app/ML model.
+Iter8 can be easily integrated with Helm and Kustomize. This integration is especially useful if you use these tools for configuring Kubernetes resources needed for releases of your app/ML model.
 
 === "Helm charts"
     An experiment that uses `helm` charts for version promotion is illustrated below.
