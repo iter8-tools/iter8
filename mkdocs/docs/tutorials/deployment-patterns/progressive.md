@@ -17,7 +17,7 @@ The [A/B testing (quick start)](../../../getting-started/quick-start/) and [cana
 
 ## Specifying `weightObjRef`
 
-Iter8 uses the `weightObjRef` field specified in the experiment resource to get the current traffic split between versions and/or shift traffic. Ensure that this field is specified correctly for each version. Below are a few examples that demonstrate how to specify `weightObjRef` in experiments.
+Iter8 uses the `weightObjRef` field in the experiment resource to get the current traffic split between versions and/or modify the traffic split. Ensure that this field is specified correctly for each version. Below are a few examples that demonstrate how to specify `weightObjRef` in experiments.
 
 === "Istio"
     The [A/B testing experiment for Istio app](../../../getting-started/quick-start/#7-launch-experiment) uses an Istio virtual service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Istio virtual service and the traffic fields within the Istio virtual service corresponding to the versions.

@@ -22,7 +22,7 @@ template: main.html
     
 Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
 
-## 4. Create versions of your application
+## 4. Create versions and initialize traffic split
 === "Istio"
 
     ```shell
@@ -30,6 +30,46 @@ Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-s
     kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
     kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
     ```
+
+    ??? info "Virtual service with traffic split"
+        ```yaml linenums="1"
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        metadata:
+          name: bookinfo
+        spec:
+          gateways:
+          - mesh
+          - bookinfo-gateway
+          hosts:
+          - productpage
+          - "bookinfo.example.com"
+          http:
+          - match:
+            - uri:
+                exact: /productpage
+            - uri:
+                prefix: /static
+            - uri:
+                exact: /login
+            - uri:
+                exact: /logout
+            - uri:
+                prefix: /api/v1/products
+            route:
+            - destination:
+                host: productpage
+                port:
+                  number: 9080
+                subset: productpage-v1
+              weight: 60
+            - destination:
+                host: productpage
+                port:
+                  number: 9080
+                subset: productpage-v2
+              weight: 40
+        ```
 
 === "KFServing"
 
@@ -41,7 +81,7 @@ Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-s
     kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate
     ```
 
-    ??? info "Look inside routing-rule.yaml"
+    ??? info "Virtual service with traffic split"
         ```yaml linenums="1"
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
@@ -84,7 +124,7 @@ Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-s
     kubectl wait --for=condition=Ready ksvc/sample-app
     ```
 
-    ??? info "Look inside experimentalservice.yaml"
+    ??? info "Knative service with traffic split"
         ```yaml linenums="1"
         apiVersion: serving.knative.dev/v1
         kind: Service
@@ -305,21 +345,24 @@ Please follow [Step 8 of the quick start tutorial](../../../getting-started/quic
 ## 9. Cleanup
 === "Istio"
     ```shell
-    kubectl delete -f $ITER8/samples/istio/fixed-split/fortio.yaml
     kubectl delete -f $ITER8/samples/istio/fixed-split/experiment.yaml
-    kubectl delete namespace bookinfo-iter8
+    kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
+    kubectl delete ns bookinfo-iter8
     ```
 
 === "KFServing"
     ```shell
     kubectl delete -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
-    kubectl delete -f $ITER8/samples/kfserving/fixed-split/baseline.yaml
-    kubectl delete -f $ITER8/samples/kfserving/fixed-split/candidate.yaml
+    kubectl delete -f $ITER8/samples/kfserving/fixed-split/routing-rule.yaml
+    kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
+    kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
+    kubectl delete ns ns-baseline
+    kubectl delete ns ns-candidate
     ```
 
 === "Knative"
     ```shell
-    kubectl delete -f $ITER8/samples/knative/fixed-split/fortio.yaml
     kubectl delete -f $ITER8/samples/knative/fixed-split/experiment.yaml
-    kubectl delete -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml
+    kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
+    kubectl apply -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml
     ```
