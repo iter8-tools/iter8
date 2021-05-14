@@ -5,6 +5,11 @@ title: Changelog
 
 # Changelog
 
+**0.5.6** (May 14th, 2021)
+
+* Deployment pattern tutorials
+* Istio conformance testing tutorial
+
 **0.5.0** (May 3rd, 2021)
 
 * A/B testing quick start tutorial for Istio
