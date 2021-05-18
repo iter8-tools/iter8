@@ -8,7 +8,7 @@ hide:
 # News and Announcements
 * Iter8 at KubeCon + CloudNativeCon Europe, May 6, 2021
 
-<iframe width="560" height="315" src="https://youtu.be/6lwgFzRykPY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/6lwgFzRykPY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 * Iter8 at Knative meetup, Mar 24, 2021
 
