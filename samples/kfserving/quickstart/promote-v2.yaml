@@ -12,6 +12,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: routing-rule
+  namespace: default
 spec:
   gateways:
   - knative-serving/knative-ingress-gateway

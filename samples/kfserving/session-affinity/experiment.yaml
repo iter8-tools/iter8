@@ -13,7 +13,7 @@ spec:
       - task: common/exec
         with:
           cmd: /bin/bash
-          args: [ "-c", "kubectl apply -n default -f {{ .promote }}" ]
+          args: [ "-c", "kubectl apply -f {{ .promote }}" ]
   criteria:
     requestCount: iter8-kfserving/request-count
     rewards: # Business rewards

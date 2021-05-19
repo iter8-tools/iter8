@@ -212,6 +212,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         kind: VirtualService
         metadata:
           name: routing-rule
+          namespace: default
         spec:
           gateways:
           - knative-serving/knative-ingress-gateway
@@ -862,7 +863,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               - task: common/exec
                 with:
                   cmd: /bin/bash
-                  args: [ "-c", "kubectl apply -n default -f {{ .promote }}" ]
+                  args: [ "-c", "kubectl apply -f {{ .promote }}" ]
           criteria:
             requestCount: iter8-kfserving/request-count
             rewards: # Business rewards

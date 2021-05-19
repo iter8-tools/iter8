@@ -93,6 +93,7 @@ Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-s
         kind: VirtualService
         metadata:
           name: routing-rule
+          namespace: default
         spec:
           gateways:
           - knative-serving/knative-ingress-gateway
@@ -245,7 +246,7 @@ Please follow [Step 6 of the quick start tutorial](../../../getting-started/quic
               - task: common/exec
                 with:
                   cmd: /bin/bash
-                  args: [ "-c", "kubectl apply -n default -f {{ .promote }}" ]
+                  args: [ "-c", "kubectl apply -f {{ .promote }}" ]
           criteria:
             requestCount: iter8-kfserving/request-count
             rewards: # Business rewards
