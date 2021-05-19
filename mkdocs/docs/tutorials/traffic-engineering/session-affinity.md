@@ -6,13 +6,24 @@ template: main.html
 
 !!! tip "Scenario: A/B testing with session affinity (sticky sessions)"
 
-    [Session affinity](../../../concepts/buildingblocks/#traffic-engineering) ensures that the version to which a particular user's request is routed remains consistent throughout the duration of the experiment. In this tutorial, you will use a [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-patterns) in conjunction with session affinity as depicted below.
+    [Session affinity](../../../concepts/buildingblocks/#traffic-engineering) ensures that the version to which a particular user's request is routed remains consistent throughout the duration of the experiment. In this tutorial, you will use a [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-patterns) in conjunction with session affinity.
+
+    The experiment will involve two user groups, 1 and 2. Reqeusts from user group 1 will have a `userhash` header value prefixed with `111` and will be routed to the baseline version. Requests from user group 2 will have a `userhash` header value prefixed with `101` and will be routed to the candidate version.
+    
+    The session affinity experiment is depicted below.
 
     ![Session affinity](../../images/session-affinity-exp.png)
 
+    
 
-???+ warning "Before you begin, you will need... "
-    > **Note:** Please choose the same K8s stack (for example, Istio, KFServing, or Knative) consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+
+???+ warning "Before you begin... "
+
+    This tutorial is available for the following K8s stacks.
+
+    [KFServing](#before-you-begin){ .md-button }
+
+    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
 
 ## Steps 1 to 3
     

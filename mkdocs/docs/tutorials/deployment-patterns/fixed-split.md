@@ -14,10 +14,16 @@ template: main.html
 
     ![Canary](../../images/fixedsplitab-exp.png)
 
+???+ warning "Before you begin... "
 
-???+ warning "Before you begin, you will need... "
-    > **Note:** Please choose the same K8s stack (for example, Istio, KFServing, or Knative) consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+    This tutorial is available for the following K8s stacks.
 
+    [Istio](#before-you-begin){ .md-button }
+    [KFServing](#before-you-begin){ .md-button }
+    [Knative](#before-you-begin){ .md-button }
+
+    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+    
 ## Steps 1 to 3
     
 Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
@@ -86,7 +92,7 @@ Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-s
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
         metadata:
-          name: routing-rule-one
+          name: routing-rule
         spec:
           gateways:
           - knative-serving/knative-ingress-gateway

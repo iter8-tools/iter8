@@ -52,7 +52,7 @@ Iter8 uses the `weightObjRef` field in the experiment resource to get the curren
         weightObjRef:
           apiVersion: networking.istio.io/v1alpha3
           kind: VirtualService
-          name: routing-rule-one
+          name: routing-rule
           namespace: default
           fieldPath: .spec.http[0].route[0].weight      
       candidates:
@@ -60,7 +60,7 @@ Iter8 uses the `weightObjRef` field in the experiment resource to get the curren
         weightObjRef:
           apiVersion: networking.istio.io/v1alpha3
           kind: VirtualService
-          name: routing-rule-one
+          name: routing-rule
           namespace: default
           fieldPath: .spec.http[0].route[1].weight 
     ```

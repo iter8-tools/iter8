@@ -19,8 +19,14 @@ template: main.html
 ???+ warning "Before you begin, you will need... "
     1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
     2. [Go 1.13+](https://golang.org/doc/install).
+    
+    This tutorial is available for the following K8s stacks.
 
-    > **Note:** Please choose the same K8s stack (for example, Istio, KFServing, or Knative) consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster (step 1 below), so that your cluster is correctly setup.
+    [Istio](#before-you-begin){ .md-button }
+    [KFServing](#before-you-begin){ .md-button }
+    [Knative](#before-you-begin){ .md-button }
+
+    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
 
 ## 1. Create Kubernetes cluster
 
@@ -205,7 +211,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
         metadata:
-          name: routing-rule-one
+          name: routing-rule
         spec:
           gateways:
           - knative-serving/knative-ingress-gateway
@@ -879,7 +885,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               weightObjRef:
                 apiVersion: networking.istio.io/v1alpha3
                 kind: VirtualService
-                name: routing-rule-one
+                name: routing-rule
                 namespace: default
                 fieldPath: .spec.http[0].route[0].weight      
               variables:
@@ -892,7 +898,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               weightObjRef:
                 apiVersion: networking.istio.io/v1alpha3
                 kind: VirtualService
-                name: routing-rule-one
+                name: routing-rule
                 namespace: default
                 fieldPath: .spec.http[0].route[1].weight      
               variables:
@@ -1084,7 +1090,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
 === "KFServing"
 
     ```shell
-    kubectl get vs routing-rule-one -o json --watch | jq .spec.http[0].route
+    kubectl get vs routing-rule -o json --watch | jq .spec.http[0].route
     ```
 
     ??? info "Look inside traffic summary"
