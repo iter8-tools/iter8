@@ -356,8 +356,6 @@ Please follow [Step 8 of the quick start tutorial](../../../getting-started/quic
     kubectl delete -f $ITER8/samples/kfserving/fixed-split/routing-rule.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
-    kubectl delete ns ns-baseline
-    kubectl delete ns ns-candidate
     ```
 
 === "Knative"

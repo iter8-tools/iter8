@@ -124,6 +124,8 @@ nav:
     - Deployment patterns:
       - Progressive deployment: tutorials/deployment-patterns/progressive.md
       - FixedSplit deployment: tutorials/deployment-patterns/fixed-split.md
+    - Traffic engineering:
+      - Session affinity: tutorials/traffic-engineering/session-affinity.md
     - Knative-specific tutorials:
       - Conformance testing with traffic mirroring: tutorials/knative/mirroring.md
       - Progressive canary release with traffic segmentation: tutorials/knative/traffic-segmentation.md
