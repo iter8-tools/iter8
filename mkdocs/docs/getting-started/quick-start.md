@@ -871,9 +871,9 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               preferredDirection: High # maximize user engagement
             objectives:
             - metric: iter8-kfserving/mean-latency
-              upperLimit: 1500
-            - metric: iter8-kfserving/95th-percentile-tail-latency
               upperLimit: 2000
+            - metric: iter8-kfserving/95th-percentile-tail-latency
+              upperLimit: 5000
             - metric: iter8-kfserving/error-rate
               upperLimit: "0.01"
           duration:

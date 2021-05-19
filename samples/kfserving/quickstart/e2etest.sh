@@ -4,16 +4,6 @@ set -e -x
 
 export EXPERIMENT=quickstart-exp
 
-# cleanup () {
-#     status=$?
-#     if (( $status != 0 )); then
-#         kind delete cluster
-#         echo -e "\033[0;31mFAILED:\033[0m $0"
-#     fi
-#     exit $status
-# }
-# trap "cleanup" EXIT
-
 # create cluster
 kind create cluster
 kubectl cluster-info --context kind-kind
