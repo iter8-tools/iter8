@@ -245,7 +245,7 @@ Please follow [Step 6 of the quick start tutorial](../../../getting-started/quic
               - task: common/exec
                 with:
                   cmd: /bin/bash
-                  args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+                  args: [ "-c", "kubectl apply -n default -f {{ .promote }}" ]
           criteria:
             requestCount: iter8-kfserving/request-count
             rewards: # Business rewards

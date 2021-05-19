@@ -862,7 +862,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               - task: common/exec
                 with:
                   cmd: /bin/bash
-                  args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+                  args: [ "-c", "kubectl apply -n default -f {{ .promote }}" ]
           criteria:
             requestCount: iter8-kfserving/request-count
             rewards: # Business rewards
