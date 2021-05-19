@@ -42,7 +42,7 @@ URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o json
 # Port-forward Istio ingress
 INGRESS_GATEWAY_SERVICE=$(kubectl get svc -n istio-system --selector="app=istio-ingressgateway" --output jsonpath='{.items[0].metadata.name}')
 kubectl port-forward -n istio-system svc/${INGRESS_GATEWAY_SERVICE} 8080:80 &
-sleep 2.0
+sleep 5.0
 
 
 # Get the prediction payload
