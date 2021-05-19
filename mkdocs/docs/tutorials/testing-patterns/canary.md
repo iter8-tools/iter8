@@ -168,7 +168,7 @@ The process automated by Iter8 during this experiment is depicted below.
 ![Iter8 automation](../../images/canary-iter8-process.png)
 
 ## 8. Observe experiment
-Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `canary-exp` in your commands.
+Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `canary-exp` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
 
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.

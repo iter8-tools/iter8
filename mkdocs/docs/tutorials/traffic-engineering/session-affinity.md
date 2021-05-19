@@ -172,7 +172,7 @@ The process automated by Iter8 during this experiment is depicted below.
 ![Iter8 automation](../../images/session-affinity-iter8-process.png)
 
 ## 8. Observe experiment
-Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `session-affinity-exp` in your commands.
+Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `session-affinity-exp` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
 
 
 ???+ info "Understanding what happened"
