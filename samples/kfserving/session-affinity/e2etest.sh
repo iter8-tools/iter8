@@ -1,18 +1,8 @@
 #!/bin/bash
 
-set -e -x
+set -e
 
 export EXPERIMENT=session-affinity-exp
-
-# cleanup () {
-#     status=$?
-#     if (( $status != 0 )); then
-#         kind delete cluster
-#         echo -e "\033[0;31mFAILED:\033[0m $0"
-#     fi
-#     exit $status
-# }
-# trap "cleanup" EXIT
 
 # create cluster
 kind create cluster
@@ -48,9 +38,9 @@ sleep 5.0
 curl -o /tmp/input.json https://raw.githubusercontent.com/kubeflow/kfserving/master/docs/samples/v1beta1/rollout/input.json
 
 # Send prediction requests... this step requires fortio
-fortio load -t 280s -qps 3.5 -H "Host: example.com" -H "userhash: 1111100000" -payload-file /tmp/input.json -json /tmp/fortiooutput1.json http://localhost:8080/v1/models/flowers:predict &
+fortio load -t 100s -qps 3.5 -H "Host: example.com" -H "userhash: 1111100000" -payload-file /tmp/input.json -json /tmp/fortiooutput1.json http://localhost:8080/v1/models/flowers:predict &
 
-fortio load -t 280s -qps 0.5 -H "Host: example.com" -H "userhash: 1010101010" -payload-file /tmp/input.json -json /tmp/fortiooutput2.json http://localhost:8080/v1/models/flowers:predict &
+fortio load -t 100s -qps 0.5 -H "Host: example.com" -H "userhash: 1010101010" -payload-file /tmp/input.json -json /tmp/fortiooutput2.json http://localhost:8080/v1/models/flowers:predict &
 
 # Wait
 kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
