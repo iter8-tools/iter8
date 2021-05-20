@@ -5,6 +5,11 @@ title: Changelog
 
 # Changelog
 
+**0.5.7** (May 19th, 2021)
+
+* Created the session affinity tutorial for KFServing
+* Added a link to Kubecon EU 2021 Iter8 video presentation
+
 **0.5.6** (May 14th, 2021)
 
 * Deployment pattern tutorials
