@@ -5,6 +5,10 @@ title: Changelog
 
 # Changelog
 
+**0.5.7** (May 19th, 2021)
+
+* Session affinity tutorial for KFServing
+
 **0.5.6** (May 14th, 2021)
 
 * Deployment pattern tutorials
