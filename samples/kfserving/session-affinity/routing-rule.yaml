@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: routing-rule
+  namespace: default
+spec:
+  gateways:
+  - knative-serving/knative-ingress-gateway
+  hosts:
+  - example.com
+  http:
+  - match:
+    - headers:
+        userhash: # user hash is a 10-digit random binary string
+          prefix: "101" # in expectation, 1/8th of user hashes will match this prefix
+    route: # matching users will always go to v2
+    - destination:
+        host: flowers-predictor-default.ns-candidate.svc.cluster.local
+      headers:
+        request:
+          set:
+            Host: flowers-predictor-default.ns-candidate
+        response:
+          set:
+            version: flowers-v2
+  - route: # non-matching users will always go to v1
+    - destination:
+        host: flowers-predictor-default.ns-baseline.svc.cluster.local
+      headers:
+        request:
+          set:
+            Host: flowers-predictor-default.ns-baseline
+        response:
+          set:
+            version: flowers-v1

@@ -89,8 +89,14 @@ Iter8 enables you to take total advantage of all the traffic engineering feature
     
     For example, in the canary experiment depicted below, requests from the country `Wakanda` may be routed to baseline or candidate; requests that are not from `Wakanda` will not participate in the experiment and are routed only to the baseline.
 
-    ![Canary](../images/segmentation.png)
+    ![User segmentation](../images/segmentation.png)
 
+=== "Session affinity"
+    During A/B or canary testing experiments, it is often necessary to ensure that the version to which a particular user's request is routed remains consistent throughout the duration of the experiment. This traffic engineering feature is called **session affinity** or **session stickiness**. Service meshes and ingress controllers can enable this feature based on HTTP cookies or request attributes such as user identity, URI, IP address prefixes, or origin. Iter8 can leverage this functionality in experiments to control how user requests are routed to versions.
+
+    For example, in the A/B testing experiment depicted below, requests from user group 1 are always routed to the baseline while requests from user group 2 are always routed to the candidate during the experiment.
+
+    ![Session affinity](../images/session-affinity-exp.png)
 ***
 
 

@@ -16,8 +16,14 @@ template: main.html
 
     ![Canary](../../images/canary-exp.png)
 
-???+ warning "Before you begin, you will need... "
-    > **Note:** Please choose the same K8s stack (for example, Istio, KFServing, or Knative) consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+???+ warning "Before you begin... "
+
+    This tutorial is available for the following K8s stacks.
+
+    [Istio](#before-you-begin){ .md-button }
+    [Knative](#before-you-begin){ .md-button }
+
+    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
 
 ## Steps 1 to 6
     
@@ -162,7 +168,7 @@ The process automated by Iter8 during this experiment is depicted below.
 ![Iter8 automation](../../images/canary-iter8-process.png)
 
 ## 8. Observe experiment
-Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `canary-exp` in your commands.
+Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `canary-exp` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
 
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.

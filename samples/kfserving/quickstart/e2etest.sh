@@ -4,16 +4,6 @@ set -e -x
 
 export EXPERIMENT=quickstart-exp
 
-# cleanup () {
-#     status=$?
-#     if (( $status != 0 )); then
-#         kind delete cluster
-#         echo -e "\033[0;31mFAILED:\033[0m $0"
-#     fi
-#     exit $status
-# }
-# trap "cleanup" EXIT
-
 # create cluster
 kind create cluster
 kubectl cluster-info --context kind-kind
@@ -42,6 +32,7 @@ URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o json
 # Port-forward Istio ingress
 INGRESS_GATEWAY_SERVICE=$(kubectl get svc -n istio-system --selector="app=istio-ingressgateway" --output jsonpath='{.items[0].metadata.name}')
 kubectl port-forward -n istio-system svc/${INGRESS_GATEWAY_SERVICE} 8080:80 &
+sleep 5.0
 
 # Get the prediction payload
 curl -o /tmp/input.json https://raw.githubusercontent.com/kubeflow/kfserving/master/docs/samples/v1beta1/rollout/input.json

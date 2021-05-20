@@ -14,10 +14,16 @@ template: main.html
 
     ![Canary](../../images/fixedsplitab-exp.png)
 
+???+ warning "Before you begin... "
 
-???+ warning "Before you begin, you will need... "
-    > **Note:** Please choose the same K8s stack (for example, Istio, KFServing, or Knative) consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+    This tutorial is available for the following K8s stacks.
 
+    [Istio](#before-you-begin){ .md-button }
+    [KFServing](#before-you-begin){ .md-button }
+    [Knative](#before-you-begin){ .md-button }
+
+    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+    
 ## Steps 1 to 3
     
 Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
@@ -86,7 +92,8 @@ Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-s
         apiVersion: networking.istio.io/v1alpha3
         kind: VirtualService
         metadata:
-          name: routing-rule-one
+          name: routing-rule
+          namespace: default
         spec:
           gateways:
           - knative-serving/knative-ingress-gateway
@@ -334,7 +341,7 @@ The process automated by Iter8 during this experiment is depicted below.
 ![Iter8 automation](../../images/fixedsplit-iter8-process.png)
 
 ## 8. Observe experiment
-Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `fixedsplit-exp` in your commands.
+Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `fixedsplit-exp` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
 
 
 ???+ info "Understanding what happened"
@@ -356,8 +363,6 @@ Please follow [Step 8 of the quick start tutorial](../../../getting-started/quic
     kubectl delete -f $ITER8/samples/kfserving/fixed-split/routing-rule.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
-    kubectl delete ns ns-baseline
-    kubectl delete ns ns-candidate
     ```
 
 === "Knative"
