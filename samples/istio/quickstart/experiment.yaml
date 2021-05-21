@@ -12,11 +12,20 @@ spec:
     deploymentPattern: Progressive
     actions:
       # when the experiment completes, promote the winning version using kubectl apply
+      start:
+      - task: notification/slack
+        with:
+          channel: CU5FNKWCB
+          secret: default/slack-secret
       finish:
       - task: common/exec
         with:
           cmd: /bin/bash
           args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
+      - task: notification/slack
+        with:
+          channel: CU5FNKWCB
+          secret: default/slack-secret
   criteria:
     rewards:
     # (business) reward metric to optimize in this experiment
@@ -30,7 +39,7 @@ spec:
     requestCount: iter8-istio/request-count
   duration: # product of fields determines length of the experiment
     intervalSeconds: 10
-    iterationsPerLoop: 10
+    iterationsPerLoop: 5
   versionInfo:
     # information about the app versions used in this experiment
     baseline:
