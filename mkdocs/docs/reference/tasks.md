@@ -6,6 +6,12 @@ template: main.html
 
 Tasks are an extension mechanism for enhancing the behavior of Iter8 experiments and can be specified within the [spec.strategy.actions](../experiment/#strategy) field of the experiment.
 
+Available tasks implemented are:
+
+- `common` [tasks](common/#common-tasks)
+- `notification` [tasks](notification/#notification-tasks)
+
+<!--
 ## `common/exec`
 
 Iter8 currently provides a single task type called `common/exec` that helps in setting up and finishing up experiments. Use `common/exec` tasks in experiments to execute shell commands, in particular, the `kubectl`, `helm` and `kustomize` commands. Use the `exec` task as part of the `finish` action to promote the winning version at the end of an experiment. Use it as part of the `start` action to set up resources required for the experiment.
@@ -136,3 +142,4 @@ By default, the `common/exec` task will attempt to find the version recommended 
 
 ### Error handling in tasks
 When a task exits with an error, it will result in the failure of the experiment to which it belongs.
+-->
