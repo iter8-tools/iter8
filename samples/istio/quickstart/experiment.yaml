@@ -13,7 +13,7 @@ spec:
     actions:
       # when the experiment completes, promote the winning version using kubectl apply
       start:
-      - task: notification/slack
+      - task: notification/slacks
         with:
           channel: CU5FNKWCB
           secret: default/slack-secret
