@@ -39,17 +39,11 @@ A slack message describing the experiment will be posted to the specified channe
 
 #### Slack API Token
 
-An API token allowing posting messages to the desired slack channel is needed. It should be stored in a kubernetes secret as described below.
+An API token allowing posting messages to the desired slack channel is needed. To obtain a suitable token, see [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks). Once you have the token, store it in a Kubernetes secret. For example, to create the secret _slack-secret_ in the default namespace:
 
-1. Create a new slack app https://api.slack.com/apps?new_app=1. Select `from scratch`, set a name (ex., `iter8`), and select the workspace that contains the channel(s) where you want to send messages. Click the `Create App` button.
-2. Select `Permissions`
-3. Under `Scopes`, add Bot Token scopes `channels:read` and `chat:write`.
-4. Click the `Install to Workspace` button.
-5. Copy the token that is generated, add it to a secret. For example, to create the secret `slack-secret` in the default namespace:
-
-    ```shell
-    kubectl create secret generic slack-secret --from-literal=token=<slack token>
-    ```
+```shell
+kubectl create secret generic slack-secret --from-literal=token=<slack token>
+```
 
 #### Permission to read secret with Slack token
 
@@ -93,18 +87,3 @@ kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samp
 #### Target Slack Channel ID
 
 A slack channel is identified by an id. To find the id, open the slack channel in a web browser. The channel id is the portion of the URL of the form: `CXXXXXXXX`
-
-<!-- -->
-## `notification/webhook`
-
-### Overview
-
-### Examples
-
-### Result
-
-### Arguments
-
-### Requirements
-
-<!--  -->
