@@ -158,6 +158,7 @@
 }
 .cards {
   padding-top: 1rem;
+  padding-bottom: 1.5rem;
 }
 .cards .md-grid h1 {
   text-align: center;
