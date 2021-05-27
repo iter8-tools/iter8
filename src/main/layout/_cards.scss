@@ -80,6 +80,7 @@
 // section headers
 .cards {
     padding-top: px2rem(20px);
+    padding-bottom: px2rem(30px);
     .md-grid {  
         // Hero headline
         h1 {
@@ -94,21 +95,20 @@
         
     }
 
-    &:focus,
-    &:hover {
-        background-color: #7085fb47;
-        border-radius: 3px;
+    // // &:focus,
+    // // &:hover {
+    //     background-color: #7085fb47;
+    //     border-radius: 3px;
 
-        // Adjust for slate theme
-        [data-md-color-scheme="slate"] & {
-            background-color: #fb69b247;
-        }    
-    }
+    //     // Adjust for slate theme
+    //     [data-md-color-scheme="slate"] & {
+    //         background-color: #fb69b247;
+    //     }    
+    // // }
 
 }
 
 .tx-container {
-    margin-top: px2rem(40px);
     background: linear-gradient(
         to bottom,
         var(--md-primary-fg-color),
