@@ -28,7 +28,7 @@
   <!-- Open graph meta tags -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Iter8"/>
-  <meta property="og:title" content="The Kubernetes experimentation platform" />
+  <meta property="og:title" content="{{ config.extra.title }}" />
   <meta property="og:description" content="{{ config.site_description }}" />
   <meta property="og:url" content="https://iter8.tools" />
   <meta property="og:image" content="https://iter8.tools/0.5/images/illustration.png" />
@@ -37,7 +37,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:url" content="https://iter8.tools" />
   <meta name="twitter:creator" content="{{ config.site_author }}" />
-  <meta name="twitter:title" content="The Kubernetes experimentation platform" />
+  <meta name="twitter:title" content="{{ config.extra.title }}" />
   <meta name="twitter:description" content="{{ config.site_description }}" />
   <meta name="twitter:image" content="https://iter8.tools/0.5/images/illustration.png" />
   <meta name="twitter:label1" value="K8s stacks" />
@@ -48,16 +48,6 @@
     rel="stylesheet"
     href="{{ 'stylesheets/main.css' | url }}"
   />
-{% endblock %}
-
-<!-- Announcement bar -->
-{% block announce %}
-<strong>Iter8</strong> at <a href="https://sched.co/iE2l">KubeCon + CloudNativeCon Europe 2021</a>. For updates and support, 
-    <a href="https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw">
-      join <strong>Iter8</strong> workspace on <span class="twemoji">
-      {% include ".icons/fontawesome/brands/slack.svg" %} </span>
-      slack.
-    </a>
 {% endblock %}
 
 <!-- Theme-related JavaScript -->

@@ -76,3 +76,93 @@
 
     }
 }
+
+// section headers
+.cards {
+    padding-top: px2rem(20px);
+    .md-grid {  
+        // Hero headline
+        h1 {
+            text-align: center;
+            color: #333;
+        
+            // Adjust for slate theme
+            [data-md-color-scheme="slate"] & {
+                color: #fff;
+            }
+        }
+        
+    }
+
+    &:focus,
+    &:hover {
+        background-color: #7085fb47;
+        border-radius: 3px;
+
+        // Adjust for slate theme
+        [data-md-color-scheme="slate"] & {
+            background-color: #fb69b247;
+        }    
+    }
+
+}
+
+.tx-container {
+    margin-top: px2rem(40px);
+    background: linear-gradient(
+        to bottom,
+        var(--md-primary-fg-color),
+        hsla(280, 67%, 55%, 1) 99%,
+        var(--md-default-bg-color) 99%
+      );
+  
+    // Adjust background for slate theme
+    [data-md-color-scheme="slate"] & {
+      background: linear-gradient(
+          to bottom,
+          var(--md-primary-fg-color),
+          hsla(280, 67%, 55%, 1) 99%,
+          var(--md-default-bg-color) 99%
+        );
+    }
+
+
+    .tx-hero {
+        color: var(--md-primary-bg-color);
+
+        @media screen and (min-width:50.0em) {
+            display: flex;
+            flex-wrap: wrap;    
+
+            .tx-card {
+                width: 50%;
+            }
+        }
+
+
+        .tx-card {
+            padding-left: px2rem(50px);
+            padding-right: px2rem(50px);            
+
+            // Button
+            .md-button {
+                color: var(--md-primary-bg-color);
+
+                // Button on focus/hover
+                &:focus,
+                &:hover {
+                color: var(--md-default-bg-color);
+                background-color: var(--md-accent-fg-color);
+                border-color: var(--md-accent-fg-color);
+                }
+
+                // Primary button
+                &--primary {
+                color: hsla(280deg, 37%, 48%, 1);
+                background-color: var(--md-primary-bg-color);
+                border-color: var(--md-primary-bg-color);
+                }
+            }            
+        }      
+    }
+}
