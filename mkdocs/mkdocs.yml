@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 makes it easy to optimize business metrics and validate SLOs when you release new versions of Kubernetes apps/ML models. Quick start in 5 mins.
+  Iter8 makes it easy to optimize business metrics and validate SLOs when you deploy apps/ML models on Kubernetes. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -55,7 +55,7 @@ plugins:
         
 # Customization
 extra:
-  title: "SLO validation, A/B testing, and progressive delivery for Kubernetes apps/ML models"
+  title: "SLO validation, A/B testing, and progressive delivery for K8s apps/ML models"
   version:
     provider: mike
     iter8_install_tag: v0.5.1
