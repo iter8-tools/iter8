@@ -113,7 +113,7 @@
 .feature-item h2 {
   color: #333;
   font-weight: 300;
-  font-size: 25px;
+  font-size: 30px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -127,7 +127,7 @@
 }
 
 .feature-item p {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.8em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -151,7 +151,7 @@
   }
 
   .feature-item {
-    width: 25%;
+    width: 33%;
   }
 
   .feature-item:hover {
@@ -161,4 +161,7 @@
   [data-md-color-scheme=slate] .feature-item:hover {
     background-color: #fc058047;
   }
+}
+.md-tabs__link {
+  font-size: 0.8rem;
 }
