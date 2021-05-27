@@ -16,15 +16,16 @@
 
 .mdx-container {
   padding-top: 1rem;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1123 258'><path d='M1124,2c0,0 0,256 0,256l-1125,0l0,-48c0,0 16,5 55,5c116,0 197,-92 325,-92c121,0 114,46 254,46c140,0 214,-167 572,-166Z' style='fill: hsla(0, 0%, 100%, 1)' /></svg>") no-repeat bottom, linear-gradient(to bottom, var(--md-primary-fg-color), #a63fd9 99%, var(--md-default-bg-color) 99%);
+  background: linear-gradient(to bottom, var(--md-primary-fg-color), #a63fd9 99%, var(--md-default-bg-color) 99%);
 }
 [data-md-color-scheme=slate] .mdx-container {
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1123 258'><path d='M1124,2c0,0 0,256 0,256l-1125,0l0,-48c0,0 16,5 55,5c116,0 197,-92 325,-92c121,0 114,46 254,46c140,0 214,-167 572,-166Z' style='fill: hsla(232, 15%, 21%, 1)' /></svg>") no-repeat bottom, linear-gradient(to bottom, var(--md-primary-fg-color), #a63fd9 99%, var(--md-default-bg-color) 99%);
+  background: linear-gradient(to bottom, var(--md-primary-fg-color), #a63fd9 99%, var(--md-default-bg-color) 99%);
 }
 
 .mdx-hero {
   margin: 0 0.8rem;
   color: var(--md-primary-bg-color);
+  padding-bottom: 1.6rem;
 }
 .mdx-hero h1 {
   margin-bottom: 1rem;
@@ -37,13 +38,7 @@
   }
 }
 .mdx-hero__content {
-  padding-bottom: 3rem;
   padding: 1rem;
-}
-@media screen and (max-width: 59.9375em) {
-  .mdx-hero__content {
-    padding-bottom: 4rem;
-  }
 }
 .mdx-hero__image {
   padding: 1rem;
@@ -57,7 +52,6 @@
   .mdx-hero__content {
     max-width: 23rem;
     margin-top: 1rem;
-    padding-bottom: 14vw;
   }
   .mdx-hero__image {
     order: 1;
@@ -172,16 +166,8 @@
 [data-md-color-scheme=slate] .cards .md-grid h1 {
   color: #fff;
 }
-.cards:focus, .cards:hover {
-  background-color: #7085fb47;
-  border-radius: 3px;
-}
-[data-md-color-scheme=slate] .cards:focus, [data-md-color-scheme=slate] .cards:hover {
-  background-color: #fb69b247;
-}
 
 .tx-container {
-  margin-top: 2rem;
   background: linear-gradient(to bottom, var(--md-primary-fg-color), #a63fd9 99%, var(--md-default-bg-color) 99%);
 }
 [data-md-color-scheme=slate] .tx-container {
