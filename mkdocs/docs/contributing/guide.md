@@ -22,7 +22,7 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* [Iter8 documentation including tutorials](../tutorials)
+* [Iter8 documentation / tutorials](../tutorials)
 * New features
 * Builds, CI
 * Bug fixes
@@ -31,7 +31,7 @@ We welcome many different types of contributions including:
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
-[meetings](../../../getting-started/help) or [contact us](../../../getting-started/help) and let's discuss how we can work together. 
+[meetings](#come-to-meetings) or [contact us](../../../getting-started/help) and let's discuss how we can work together. 
 
 *** 
 
@@ -69,7 +69,7 @@ that you want to work on it. Something like "I want to work on this" is fine.
 
 The best ways to reach us with a question when contributing is to ask on:
 
-* the original GitHub issue
+* The original GitHub issue
 * `#development` channel in the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 
 <!-- ## Pull Request Lifecycle
