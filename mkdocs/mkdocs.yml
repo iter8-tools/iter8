@@ -140,6 +140,7 @@ nav:
   - Contributing: 
     - Guide: contributing/guide.md
     - Tutorials: contributing/tutorials.md
+    - Analytics: contributing/analytics.md
   - Roadmap: roadmap.md
   - News: news.md
 

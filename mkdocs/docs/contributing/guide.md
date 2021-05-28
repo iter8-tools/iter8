@@ -23,7 +23,11 @@ bug report and let us know!
 We welcome many different types of contributions including:
 
 * [Iter8 documentation / tutorials](../tutorials)
-* New features
+* New features which includes the following
+    * [Analytics](../analytics)
+    * Tasks
+    * Iter8 code samples for new K8s stacks / service meshes / ingresses
+    * Iter8 code samples for OpenShift
 * Builds, CI
 * Bug fixes
 * Web design for https://iter8.tools
