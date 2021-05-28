@@ -137,7 +137,9 @@ nav:
     - Experiment resource: reference/experiment.md
     - Metric resource: reference/metrics.md
     - Tasks: reference/tasks.md
-  - Contributing: contributing.md
+  - Contributing: 
+    - Guide: contributing/guide.md
+    - Tutorials: contributing/tutorials.md
   - Roadmap: roadmap.md
   - News: news.md
 

@@ -119,3 +119,6 @@ site
 
 # backup pptx
 ~$*.pptx
+
+# vscode
+.vscode
