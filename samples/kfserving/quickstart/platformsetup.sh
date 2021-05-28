@@ -22,7 +22,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.5.1}"
+export TAG="${TAG:-v0.5.2}"
 export KFSERVING_VERSION="${KFSERVING_VERSION:-v0.5.1}"
 echo "TAG=${TAG}"
 echo "KFSERVING_VERSION=${KFSERVING_VERSION}"

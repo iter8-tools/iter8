@@ -10,7 +10,7 @@ hide:
 Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
-export TAG=v0.5.1
+export TAG=v0.5.2
 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/$TAG/core/build.yaml
 ```
 
