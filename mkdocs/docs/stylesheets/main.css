@@ -153,7 +153,7 @@
     border-radius: 3px;
   }
   [data-md-color-scheme=slate] .feature-item:hover {
-    background-color: #fc058047;
+    background-color: rgba(193, 2, 97, 0.6);
   }
 }
 .cards {
@@ -166,6 +166,9 @@
 }
 [data-md-color-scheme=slate] .cards .md-grid h1 {
   color: #fff;
+}
+[data-md-color-scheme=default] .cards {
+  background: linear-gradient(to bottom, rgba(227, 187, 249, 0.99), rgba(255, 255, 255, 0.1));
 }
 
 .tx-container {

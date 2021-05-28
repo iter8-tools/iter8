@@ -71,7 +71,7 @@
 
         // Adjust for slate theme
         [data-md-color-scheme="slate"] & {
-            background-color: #fc058047;
+            background-color: rgba(193, 2, 97, 0.6);
         }
 
     }
@@ -95,16 +95,22 @@
         
     }
 
-    // // &:focus,
-    // // &:hover {
-    //     background-color: #7085fb47;
-    //     border-radius: 3px;
+    [data-md-color-scheme="default"] & {
+        background: linear-gradient(
+            to bottom,
+            rgba(227, 187, 249, 0.99),
+            rgba(255, 255, 255, 0.1),
+        );
+    }
 
-    //     // Adjust for slate theme
-    //     [data-md-color-scheme="slate"] & {
-    //         background-color: #fb69b247;
-    //     }    
-    // // }
+    // Adjust background for slate theme
+    // [data-md-color-scheme="slate"] & {
+    //     background: linear-gradient(
+    //         to bottom,
+    //         rgba(193, 2, 97, 0.9),
+    //         rgba(166, 63, 217, 0.9),
+    //       );
+    //   }
 
 }
 
