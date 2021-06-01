@@ -1,0 +1,8 @@
+configMapGenerator:
+- name: handlers
+  files:
+  - handler.yaml
+generatorOptions:
+  disableNameSuffixHash: true 
+
+# if you want to change handler version, do so by editing handler.yaml

@@ -1,0 +1,60 @@
+# This cluster role binding enables Iter8 controller and handler to manipulate 
+# Iter8 experiments in the cluster in any namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: experiments
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: experiments
+subjects:
+- kind: ServiceAccount
+  name: controller
+- kind: ServiceAccount
+  name: handlers
+---
+# This cluster role binding enables Iter8 controller and handlers to read 
+# Iter8 metrics in the cluster in any namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metrics
+subjects:
+- kind: ServiceAccount
+  name: controller
+- kind: ServiceAccount
+  name: handlers
+---
+# This role binding authorizes Iter8 controller to manipulate 
+# jobs in the cluster in Iter8 namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jobs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: jobs
+subjects:
+- kind: ServiceAccount
+  name: controller
+---
+# This role binding enables Iter8 controller to perform 
+# leader election in the namespace where Iter8 is installed
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: leader-election-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: controller
+---
