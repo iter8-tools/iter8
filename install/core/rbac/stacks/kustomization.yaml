@@ -1,0 +1,17 @@
+########## 
+# Kubernetes stacks are specified in three places: 
+#
+# 1. the resources array field in core/rbac/stacks/kustomization.yaml (this file),
+# 2. the resources array field in metrics/kustomization.yaml file, and
+# 3. the resources array field in prometheus-add-on/service-monitors/kustomization.file
+# 
+# By default, Iter8 will install manifests corresponding to all the stacks.
+#
+# To change selectively turn off stacks, comment out the corresponding resources
+# in these three files.
+###########
+
+resources:
+- iter8-knative
+- iter8-istio
+- iter8-kfserving

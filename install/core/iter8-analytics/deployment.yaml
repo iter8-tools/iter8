@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics
+  labels:
+    app: iter8-analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iter8-analytics
+  template:
+    metadata:
+      labels:
+        app: iter8-analytics
+    spec:
+      serviceAccountName: analytics
+      containers:
+        - name: iter8-analytics
+          image: "iter8/iter8-analytics:latest"
+          imagePullPolicy: Always
+          resources:
+            {}

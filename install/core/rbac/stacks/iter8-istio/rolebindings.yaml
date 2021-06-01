@@ -1,0 +1,35 @@
+# This cluster role binding enables Iter8 controller and handler to manipulate 
+# Knative services in the cluster in any namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-vs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-vs
+subjects:
+- kind: ServiceAccount
+  name: iter8-controller
+  namespace: iter8-system
+- kind: ServiceAccount
+  name: iter8-handlers
+  namespace: iter8-system
+---
+# This role binding enables Iter8 controller and handler to manipulate 
+# Istio virtual services in the cluster in any namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-dr
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-dr
+subjects:
+- kind: ServiceAccount
+  name: iter8-controller
+  namespace: iter8-system
+- kind: ServiceAccount
+  name: iter8-handlers
+  namespace: iter8-system

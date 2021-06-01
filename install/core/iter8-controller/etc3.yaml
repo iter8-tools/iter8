@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  labels:
+    control-plane: controller-manager
+spec:
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+    spec:
+      serviceAccountName: controller
+      containers:
+      - command:
+        - /manager
+        args:
+        - --enable-leader-election
+        image: iter8/etc3:latest
+        imagePullPolicy: Always
+        name: manager
+        env:
+          - name: ITER8_ANALYTICS_ENDPOINT
+            value: http://iter8-analytics.ITER8_NAMESPACE:8080/v2/analytics_results
+          - name: ITER8_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: HANDLERS_DIR
+            value: /handlers
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+        volumeMounts:
+          - mountPath: /handlers
+            name: handlers-volume
+      volumes:
+        - name: handlers-volume
+          configMap: 
+            name: iter8-handlers
+      terminationGracePeriodSeconds: 10

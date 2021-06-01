@@ -1,0 +1,20 @@
+########## 
+# Iter8 namespace is specified in four places: 
+#
+# 1. the namespace field in core/kustomization.yaml,
+# 2. the name field in core/namespace.yaml file (this file),
+# 3. the namespace field in prometheus-add-on/prometheus-operator/kustomization.yaml, and
+# 4. the namespace field in prometheus-add-on/prometheus/kustomization.yaml.
+# 
+# By default, Iter8 will be installed in the 'iter8-system' namespace.
+#
+# To change the namespace where Iter8 will be installed, 
+# substitute 'iter8-system' in these four locations with your namespace.
+###########
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: system
