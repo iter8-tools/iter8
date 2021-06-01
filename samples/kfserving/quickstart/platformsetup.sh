@@ -23,17 +23,23 @@ fi
 
 # Step 1: Export correct tags for install artifacts
 export TAG="${TAG:-v0.5.1}"
-export KFSERVING_TAG="${KFSERVING_TAG:-v0.5.1}"
-echo "TAG = ${TAG}"
-echo "KFSERVING_TAG = ${KFSERVING_TAG}"
+export KFSERVING_VERSION="${KFSERVING_VERSION:-v0.5.1}"
+echo "TAG=${TAG}"
+echo "KFSERVING_VERSION=${KFSERVING_VERSION}"
 
 # Step 2: Install KFServing (https://github.com/kubeflow/kfserving#install-kfserving)
 WORK_DIR=$(pwd)
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
-git clone -b ${KFSERVING_TAG} https://github.com/kubeflow/kfserving.git
+# git clone -b ${KFSERVING_TAG} https://github.com/kubeflow/kfserving.git
+git clone https://github.com/kubeflow/kfserving.git
 cd kfserving
-eval ./hack/quick_install.sh
+set +e # hacks needed to overcome this very glitchy quick_install below
+./hack/quick_install.sh
+kubectl delete ns kfserving-system
+kubectl apply -f ./install/${KFSERVING_VERSION}/kfserving.yaml
+set -e
+kubectl wait --for condition=ready --timeout=300s pods --all -n kfserving-system
 cd $WORK_DIR
 
 ### Note: the preceding steps perform domain install; following steps perform Iter8 install
@@ -58,5 +64,4 @@ kubectl apply -f ${ITER8}/samples/kfserving/quickstart/metrics-mock.yaml
 
 # Step 6: Verify platform setup
 echo "Verifying platform setup"
-kubectl wait --for condition=ready --timeout=300s pods --all -n kfserving-system
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system

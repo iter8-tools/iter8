@@ -58,7 +58,6 @@ extra:
   title: "SLO validation, A/B testing, and progressive delivery for K8s apps/ML models"
   version:
     provider: mike
-    iter8_install_tag: v0.5.1
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/iter8-tools/iter8
