@@ -23,8 +23,8 @@ bug report and let us know!
 We welcome many different types of contributions including:
 
 * [Iter8 documentation / tutorials](../tutorials)
-* New features which includes the following
-    * Add [a new K8s stack / service mesh / ingress](../newk8sstack)
+* New features
+    * [New K8s stack / service mesh / ingress](../newk8sstack)
     * Iter8 code samples for OpenShift
     * [Analytics](../analytics)
     * Tasks
