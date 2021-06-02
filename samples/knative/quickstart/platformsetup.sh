@@ -32,9 +32,9 @@ fi
 ## 0(d). Ensure Kustomize v3 or v4 is available
 KUSTOMIZE_VERSION=$(kustomize  version | cut -d. -f1 | tail -c 2)
 if [[ ${KUSTOMIZE_VERSION} -ge "3" ]]; then
-    echo "Kubernetes v3+ available"
+    echo "Kustomize v3+ available"
 else
-    echo "Kubernetes v3+ is unavailable"
+    echo "Kustomize v3+ is unavailable"
     exit 1
 fi
 

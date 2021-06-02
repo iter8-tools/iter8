@@ -17,7 +17,7 @@ kubectl wait --for=condition=Ready pods --all -n iter8-system
 
 To pin the version of Iter8, replace `master` with `v0.5.13` as the exported TAG. The above command installs Iter8's controller and analytics services in the `iter8-system` namespace, Iter8's experiment and metric CRDs, and the following RBAC rules.
 
-??? info "Default RBAC rules"
+??? info "Default RBAC Rules"
     | Resource | Permissions | Scope |
     | ----- | ---- | ----------- |
     | experiments.iter8.tools | get, list, patch, update, watch | Cluster-wide |
