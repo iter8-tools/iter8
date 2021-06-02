@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# Contributing Guide
+# Overview
 
 Welcome! We are delighted that you want to contribute to Iter8! 💖
 
@@ -22,20 +22,20 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* [Iter8 documentation / tutorials](../tutorials)
-* New features which includes the following
+* [Iter8 documentation/tutorials](../tutorials)
+* New features
+    * [New K8s stack/service mesh/ingress](../newk8sstack)
+    * Iter8 code samples for OpenShift
     * [Analytics](../analytics)
     * Tasks
-    * Iter8 code samples for new K8s stacks / service meshes / ingresses
-    * Iter8 code samples for OpenShift
 * Builds, CI
 * Bug fixes
 * Web design for https://iter8.tools
-* Communications / social media / blog posts
+* Communications/social media/blog posts
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
-[meetings](#come-to-meetings) or [contact us](../../../getting-started/help) and let's discuss how we can work together. 
+[meetings](#come-to-meetings) or [contact us](../../getting-started/help) and let's discuss how we can work together. 
 
 *** 
 
@@ -44,8 +44,7 @@ Absolutely everyone is welcome to come to any of our meetings. You never need an
 invite to join us. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
 
-You can find out more about our meetings [here](../../../getting-started/help). You don’t have to turn on your video. The first time you come, introducing yourself is more than enough.
-Over time, we hope that you feel comfortable voicing your opinions, giving
+You can find out more about our meetings [here](../../getting-started/help). We welcome everyone to join! Over time, we hope that you feel comfortable voicing your opinions, giving
 feedback on others’ ideas, and even sharing your own ideas, and experiences.
 
 ***
@@ -146,6 +145,8 @@ author(s) desired. We require that contributors sign off on commits submitted to
 our project's repositories. The [Developer Certificate of Origin
 (DCO)](https://developercertificate.org/) is a way to certify that you wrote and
 have the right to contribute the code you are submitting to the project.
+
+Read [GitHub's documentation on signing your commits](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
 
 You sign-off by adding the following to your commit messages. Your sign-off must
 match the git user and email associated with the commit.

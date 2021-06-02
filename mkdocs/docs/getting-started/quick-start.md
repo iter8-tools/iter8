@@ -18,7 +18,8 @@ template: main.html
 
 ???+ warning "Before you begin, you will need... "
     1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    2. [Go 1.13+](https://golang.org/doc/install).
+    2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
+    3. [Go 1.13+](https://golang.org/doc/install).
     
     This tutorial is available for the following K8s stacks.
 

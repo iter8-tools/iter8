@@ -140,7 +140,8 @@ nav:
       - Common Tasks: reference/tasks/common.md
       - Notification Tasks: reference/tasks/notification.md
   - Contributing: 
-    - Guide: contributing/guide.md
+    - Overview: contributing/overview.md
+    - New K8s stack: contributing/newk8sstack.md
     - Tutorials: contributing/tutorials.md
     - Analytics: contributing/analytics.md
   - Roadmap: roadmap.md
