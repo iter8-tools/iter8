@@ -5,6 +5,11 @@ title: Changelog
 
 # Changelog
 
+**0.5.14** (Jun 2nd, 2021)
+
+* Slack notification
+* Contributors' documentation on how to extend Iter8 to a new K8s stack/service mesh/ingress
+
 **0.5.7** (May 19th, 2021)
 
 * Created the session affinity tutorial for KFServing
