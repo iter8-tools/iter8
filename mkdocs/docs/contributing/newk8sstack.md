@@ -11,14 +11,14 @@ Enable Iter8 experiments over a new K8s stack by extending these RBAC rules.
 ## Step 0: Fork Iter8
 Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Locally clone your forked repo.
 
-For the rest of this document, `$ITER8` will refer to the root of your Iter8 repo.
+For the rest of this document, `$ITER8` will refer to the root of your local Iter8 repo.
 
 ## Step 1: Edit `kustomization.yaml`
 ```shell
 cd $ITER8/install/core/rbac/stacks
 ```
 
-Edit `kustomization.yaml` to add your k8s stack. At the time of writing, it contains the following stacks:
+Edit `kustomization.yaml` to add your K8s stack. At the time of writing, it contains the following stacks:
 ```yaml
 resources:
 - iter8-knative
