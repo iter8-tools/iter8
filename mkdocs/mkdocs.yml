@@ -136,6 +136,9 @@ nav:
     - Experiment resource: reference/experiment.md
     - Metric resource: reference/metrics.md
     - Tasks: reference/tasks.md
+    - Task Reference:
+      - Common Tasks: reference/tasks/common.md
+      - Notification Tasks: reference/tasks/notification.md
   - Contributing: 
     - Guide: contributing/guide.md
     - Tutorials: contributing/tutorials.md
