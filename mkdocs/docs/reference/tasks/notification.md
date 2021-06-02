@@ -8,18 +8,17 @@ template: main.html
 
 ### Overview
 
-The `notification/slack` task posts a slack message about current state the experiment.
+The `notification/slack` task posts a slack message about current state of the experiment.
 
 ### Examples
 
-The following task in the start action of an experiment creates a notification that will be posted to the slack channel with id `channel` during the execution of the `start` action.
+The following task creates a notification that will be posted to the slack channel with id `channel` during the execution of an action.
 
 ```yaml
-- start:
-  task: notification/slack
-    with:
-    - channel: channel
-    - secret: ns/slack-token
+task: notification/slack
+  with:
+  - channel: channel
+  - secret: ns/slack-token
 ```
 
 ### Result
