@@ -22,16 +22,16 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* [Iter8 documentation / tutorials](../tutorials)
+* [Iter8 documentation/tutorials](../tutorials)
 * New features
-    * [New K8s stack / service mesh / ingress](../newk8sstack)
+    * [New K8s stack/service mesh/ingress](../newk8sstack)
     * Iter8 code samples for OpenShift
     * [Analytics](../analytics)
     * Tasks
 * Builds, CI
 * Bug fixes
 * Web design for https://iter8.tools
-* Communications / social media / blog posts
+* Communications/social media/blog posts
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
@@ -44,8 +44,7 @@ Absolutely everyone is welcome to come to any of our meetings. You never need an
 invite to join us. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
 
-You can find out more about our meetings [here](../../getting-started/help). You don’t have to turn on your video. The first time you come, introducing yourself is more than enough.
-Over time, we hope that you feel comfortable voicing your opinions, giving
+You can find out more about our meetings [here](../../getting-started/help). We welcome everyone to join! Over time, we hope that you feel comfortable voicing your opinions, giving
 feedback on others’ ideas, and even sharing your own ideas, and experiences.
 
 ***

@@ -4,7 +4,7 @@ template: main.html
 
 # Add a K8s Stack / Service Mesh / Ingress
 
-Performing Iter8 experiments requires RBAC rules, which are contained in [this Kustomize folder](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks) and are installed as part of Iter8 installation.
+Performing Iter8 experiments requires RBAC rules, which are contained in [this Kustomize folder](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks) and are installed as part of the Iter8 installation.
 
 Enable Iter8 experiments over a new K8s stack by extending these RBAC rules.
 
@@ -38,8 +38,14 @@ cp iter8-kfserving/kustomization.yaml iter8-<your stack>/kustomization.yaml
 cd iter8-<your stack>
 ```
 
-=== "Foo resource & Istio virtual service"
-    Suppose your stack defines a custom resource called `foo` and uses the Istio service mesh.
+=== "Foo & Istio virtual service example"
+    Suppose Iter8 experiments on your stack involves manipulation of two types of resources:
+
+    1. The `foo` resource belonging to the API group `bar.my.org`.
+    2. The Istio virtual service resource.
+
+    > **Note:** `Foo` and `bar` are merely placeholders. It can be replaced by any standard K8s resource type like `deployment` or `service`, or a custom resource type, as required.
+    
     Create RBAC rules that will enable Iter8 to manipulate `foo` resources and Istio virtual service resources during experiments. You can do so by creating `roles.yaml` and `rolebindings.yaml` files as follows.
 
 
@@ -52,7 +58,7 @@ cd iter8-<your stack>
       name: foo-for-<your stack>
     rules:
     - apiGroups:
-      - <foo's api group>
+      - bar.my.org
       resources:
       - foo
       verbs:
