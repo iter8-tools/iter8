@@ -24,10 +24,10 @@ We welcome many different types of contributions including:
 
 * [Iter8 documentation / tutorials](../tutorials)
 * New features which includes the following
+    * Add [a new K8s stack / service mesh / ingress](../newk8sstack)
+    * Iter8 code samples for OpenShift
     * [Analytics](../analytics)
     * Tasks
-    * Iter8 code samples for new K8s stacks / service meshes / ingresses
-    * Iter8 code samples for OpenShift
 * Builds, CI
 * Bug fixes
 * Web design for https://iter8.tools
@@ -146,6 +146,8 @@ author(s) desired. We require that contributors sign off on commits submitted to
 our project's repositories. The [Developer Certificate of Origin
 (DCO)](https://developercertificate.org/) is a way to certify that you wrote and
 have the right to contribute the code you are submitting to the project.
+
+Read [GitHub's documentation on signing your commits](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
 
 You sign-off by adding the following to your commit messages. Your sign-off must
 match the git user and email associated with the commit.
