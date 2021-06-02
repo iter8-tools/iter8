@@ -122,4 +122,4 @@ cd iter8-<your stack>
     You can also refer to the [KFServing](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-kfserving), [Knative](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-knative), and [Istio](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-istio) examples.
 
 ## Step 4: Submit PR
-[Sign your commit](https://iter8.tools/0.5/contributing/guide/#sign-your-commits) and submit your pull request to the Iter8 repo.
+[Sign your commit](../overview/#sign-your-commits) and submit your pull request to the Iter8 repo.
