@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# Contributing Guide
+# Overview
 
 Welcome! We are delighted that you want to contribute to Iter8! 💖
 
@@ -35,7 +35,7 @@ We welcome many different types of contributions including:
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
-[meetings](#come-to-meetings) or [contact us](../../../getting-started/help) and let's discuss how we can work together. 
+[meetings](#come-to-meetings) or [contact us](../../getting-started/help) and let's discuss how we can work together. 
 
 *** 
 
@@ -44,7 +44,7 @@ Absolutely everyone is welcome to come to any of our meetings. You never need an
 invite to join us. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
 
-You can find out more about our meetings [here](../../../getting-started/help). You don’t have to turn on your video. The first time you come, introducing yourself is more than enough.
+You can find out more about our meetings [here](../../getting-started/help). You don’t have to turn on your video. The first time you come, introducing yourself is more than enough.
 Over time, we hope that you feel comfortable voicing your opinions, giving
 feedback on others’ ideas, and even sharing your own ideas, and experiences.
 
