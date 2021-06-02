@@ -29,10 +29,17 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
     exit 1
 fi
 
+## 0(d). Ensure Kustomize v3 or v4 is available
+KUSTOMIZE_VERSION=$(kustomize  version | cut -d. -f1 | tail -c 2)
+if [[ ${KUSTOMIZE_VERSION} -ge "3" ]]; then
+    echo "Kustomize v3+ available"
+else
+    echo "Kustomize v3+ is unavailable"
+    exit 1
+fi
+
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.5.2}"
 export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
-echo "TAG = $TAG"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
 
 # Step 2: Install Knative (https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-serving-component)
@@ -43,9 +50,7 @@ echo "Installing Knative CRDs"
 kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_TAG}/serving-crds.yaml
 
 # 2(b). Install the core components of Serving (see below for optional extensions):
-
 echo "Installing Knative core components"
-
 kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_TAG}/serving-core.yaml
 
 
@@ -115,15 +120,13 @@ fi
 
 # Step 5: Install Iter8
 echo "Installing Iter8 with Knative support"
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
+kustomize build $ITER8/install/core | kubectl apply -f -
 
 # Step 6: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
-
+kustomize build $ITER8/install/prometheus-add-on/prometheus-operator | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
+kustomize build $ITER8/install/prometheus-add-on/prometheus | kubectl apply -f -
 
 kubectl apply -f ${ITER8}/samples/knative/quickstart/service-monitor.yaml
 

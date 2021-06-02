@@ -21,10 +21,17 @@ else
     echo "Kubernetes cluster is available"
 fi
 
+## 0(c). Ensure Kustomize v3 or v4 is available
+KUSTOMIZE_VERSION=$(kustomize  version | cut -d. -f1 | tail -c 2)
+if [[ ${KUSTOMIZE_VERSION} -ge "3" ]]; then
+    echo "Kustomize v3+ available"
+else
+    echo "Kustomize v3+ is unavailable"
+    exit 1
+fi
+
 # Step 1: Export correct tags for install artifacts
-export TAG="${TAG:-v0.5.2}"
 export KFSERVING_VERSION="${KFSERVING_VERSION:-v0.5.1}"
-echo "TAG=${TAG}"
 echo "KFSERVING_VERSION=${KFSERVING_VERSION}"
 
 # Step 2: Install KFServing (https://github.com/kubeflow/kfserving#install-kfserving)
@@ -46,15 +53,13 @@ cd $WORK_DIR
 
 # Step 3: Install Iter8
 echo "Installing Iter8 with KFServing support"
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/core/build.yaml
+kustomize build $ITER8/install/core | kubectl apply -f -
 
 # Step 4: Install Iter8's Prometheus add-on
 echo "Installing Iter8's Prometheus add-on"
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus-operator/build.yaml
-
+kustomize build $ITER8/install/prometheus-add-on/prometheus-operator | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-
-kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8-install/${TAG}/prometheus-add-on/prometheus/build.yaml
+kustomize build $ITER8/install/prometheus-add-on/prometheus | kubectl apply -f -
 
 kubectl apply -f ${ITER8}/samples/kfserving/quickstart/service-monitor.yaml
 
