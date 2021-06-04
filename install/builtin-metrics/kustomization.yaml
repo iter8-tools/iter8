@@ -1,0 +1,7 @@
+namespace: iter8-system
+
+commonLabels:
+  creator: iter8
+
+resources:
+- metrics.yaml

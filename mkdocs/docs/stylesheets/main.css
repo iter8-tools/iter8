@@ -108,12 +108,11 @@
   color: #333;
   font-weight: 300;
   font-size: 30px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  display: block;
   line-height: normal;
-  margin-top: 20px;
-  margin-bottom: 10px;
+  margin-top: 10px;
   font-family: inherit;
 }
 [data-md-color-scheme=slate] .feature-item h2 {
@@ -145,7 +144,7 @@
   }
 
   .feature-item {
-    width: 33%;
+    width: 100%;
   }
 
   .feature-item:hover {

@@ -4,12 +4,14 @@ template: main.html
 
 # What is Iter8?
 
-**Iter8** is an AI-powered platform for cloud native release automation, validation, and experimentation. Iter8 makes it easy to unlock business value and guarantee SLOs by identifying the best performing app/ML model version and promoting it safely.
+**Iter8** is an AI-powered platform for cloud native release automation and experimentation platform that enables SLO validation, A/B testing and progressive delivery. 
 
-Iter8 is designed for **developers, SREs, service operators, data scientists, and ML engineers** who wish to maximize release velocity and business value with their apps/ML models while protecting end-user experience.
+Iter8 makes it easy to **unlock business value and guarantee SLOs** by identifying the best performing version of your app/ML model and promoting it safely.
+
+Iter8 is designed for **DevOps and MLOps teams** interested in maximizing release velocity and business value with their apps/ML models while protecting end-user experience.
 
 ## What is an Iter8 experiment?
-Iter8 defines a Kubernetes resource called **Experiment** that automates A/B, A/B/n, Canary, and Conformance experiments. During an experiment, Iter8 can compare multiple versions, find,  and safely promote the winning version based on business metrics and SLOs.
+Iter8 defines a Kubernetes resource called **Experiment** that automates SLO validation, A/B, and A/B/n testing experiments. During an experiment, Iter8 can compare multiple versions, find, and safely promote the **winning version (winner)** based on business metrics and performance metrics like latency and error-rate.
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
 
