@@ -6,6 +6,7 @@ spec:
   description: Number of requests (Iter8 builtin metric)
   type: Counter
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -16,6 +17,7 @@ spec:
   description: Number of responses with HTTP status code 4xx or 5xx (Iter8 builtin metric)
   type: Counter
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -27,6 +29,7 @@ spec:
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -38,6 +41,7 @@ spec:
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -49,6 +53,7 @@ spec:
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -60,6 +65,7 @@ spec:
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -71,6 +77,7 @@ spec:
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -82,6 +89,7 @@ spec:
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -93,6 +101,7 @@ spec:
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
+  jqExpression: "dummy"
   urlTemplate: https://iter8.tools
 ---
 
