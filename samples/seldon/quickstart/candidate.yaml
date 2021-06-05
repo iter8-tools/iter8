@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: ns-candidate
+---
+apiVersion: machinelearning.seldon.io/v1
+kind: SeldonDeployment
+metadata:
+  name: mock2
+  namespace: ns-candidate
+spec:
+  predictors:
+  - name: default
+    componentSpecs:
+    - spec:
+        containers:
+        - image: seldonio/mock_classifier:1.8.0
+          name: classifier
+    graph:
+      name: classifier
+
