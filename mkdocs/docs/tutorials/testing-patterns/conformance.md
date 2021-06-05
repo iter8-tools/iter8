@@ -153,47 +153,14 @@ Please follow steps 1, 2, and 3 of the [quick start tutorial](../../../getting-s
         ```
 
 === "Knative"
-    Generate requests using Fortio as follows.
-
-    ```shell
-    kubectl wait --for=condition=Ready ksvc/sample-app
-    URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
-    sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -
-    ```
-
-    ??? info "Look inside fortio.yaml"
-        ```yaml
-        apiVersion: batch/v1
-        kind: Job
-        metadata:
-          name: fortio
-        spec:
-          template:
-            spec:
-              volumes:
-              - name: shared
-                emptyDir: {}    
-              containers:
-              - name: fortio
-                image: fortio/fortio
-                command: ["fortio", "load", "-t", "6000s", "-json", "/shared/fortiooutput.json", $(URL)]
-                env:
-                - name: URL
-                  value: URL_VALUE
-                volumeMounts:
-                - name: shared
-                  mountPath: /shared         
-              - name: busybox
-                image: busybox:1.28
-                command: ['sh', '-c', 'echo busybox is running! && sleep 600']          
-                volumeMounts:
-                - name: shared
-                  mountPath: /shared       
-              restartPolicy: Never
-        ```
+    Generation of requests is handled automatically by the Iter8 experiment. 
 
 ## 6. Define metrics
-Please follow step 6 of the [quick start tutorial](../../../getting-started/quick-start/#6-define-metrics).
+=== "Istio"
+    Please follow step 6 of the [quick start tutorial](../../../getting-started/quick-start/#6-define-metrics).
+
+=== "Knative"
+    This experiment Iter8's builtin metrics. So there is nothing to be done in terms of metric definitions.
 
 ## 7. Launch experiment
 Launch the Iter8 experiment that orchestrates conformance testing for the app/ML model in this tutorial.

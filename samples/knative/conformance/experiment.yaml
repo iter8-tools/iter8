@@ -8,20 +8,23 @@ spec:
   strategy:
     # this experiment will perform a conformance test
     testingPattern: Conformance
+    actions:
+      loop:
+      - task: metrics/collect
+        with:
+          versions: 
+          - name: sample-app-v1
+            url: http://sample-app.default.svc.cluster.local
   criteria:
-    # mean latency of version should be under 50 milliseconds
-    # 95th percentile latency should be under 100 milliseconds
-    # error rate should be under 1%
     objectives: 
-    - metric: iter8-knative/mean-latency
+    - metric: iter8-system/mean-latency
       upperLimit: 50
-    - metric: iter8-knative/95th-percentile-tail-latency
-      upperLimit: 100
-    - metric: iter8-knative/error-rate
-      upperLimit: "0.01"
+    - metric: iter8-system/error-count
+      upperLimit: 0
   duration:
-    intervalSeconds: 10
-    iterationsPerLoop: 10
+    maxLoops: 10
+    intervalSeconds: 1
+    iterationsPerLoop: 1
   versionInfo:
     # information about app versions used in this experiment
     baseline:
