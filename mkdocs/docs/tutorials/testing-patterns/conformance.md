@@ -9,7 +9,6 @@ template: main.html
 
     1. Perform conformance testing.
     2. Specify *latency* and *error-rate* based service-level objectives (SLOs). If your version satisfies SLOs, Iter8 will declare it as the winner.
-    3. Use Prometheus as the provider for latency and error-rate metrics.
     
     ![Conformance](../../images/conformance.png)
 
@@ -160,7 +159,7 @@ Please follow steps 1, 2, and 3 of the [quick start tutorial](../../../getting-s
     Please follow step 6 of the [quick start tutorial](../../../getting-started/quick-start/#6-define-metrics).
 
 === "Knative"
-    This experiment Iter8's builtin metrics. So there is nothing to be done in terms of metric definitions.
+    Metrics collection is handled automatically by the Iter8 experiment.
 
 ## 7. Launch experiment
 Launch the Iter8 experiment that orchestrates conformance testing for the app/ML model in this tutorial.
@@ -201,6 +200,10 @@ Launch the Iter8 experiment that orchestrates conformance testing for the app/ML
                 value: bookinfo-iter8
         ```
 
+        The process automated by Iter8 during this experiment is depicted below.
+
+        ![Iter8 automation](../../images/conformance-iter8-process.png)
+
 === "Knative"
     ```shell
     kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
@@ -218,29 +221,32 @@ Launch the Iter8 experiment that orchestrates conformance testing for the app/ML
           strategy:
             # this experiment will perform a conformance test
             testingPattern: Conformance
+            actions:
+              loop:
+              - task: metrics/collect
+                with:
+                  versions: 
+                  - name: sample-app-v1
+                    url: http://sample-app.default.svc.cluster.local
           criteria:
-            # mean latency of version should be under 50 milliseconds
-            # 95th percentile latency should be under 100 milliseconds
-            # error rate should be under 1%
             objectives: 
-            - metric: iter8-knative/mean-latency
+            - metric: iter8-system/mean-latency
               upperLimit: 50
-            - metric: iter8-knative/95th-percentile-tail-latency
-              upperLimit: 100
-            - metric: iter8-knative/error-rate
-              upperLimit: "0.01"
+            - metric: iter8-system/error-count
+              upperLimit: 0
           duration:
-            intervalSeconds: 10
-            iterationsPerLoop: 10
+            maxLoops: 10
+            intervalSeconds: 1
+            iterationsPerLoop: 1
           versionInfo:
             # information about app versions used in this experiment
             baseline:
               name: sample-app-v1
         ```
 
-The process automated by Iter8 during this experiment is depicted below.
+        The process automated by Iter8 during this experiment is depicted below.
 
-![Iter8 automation](../../images/conformance-iter8-process.png)
+        ![Iter8 automation](../../images/conformance-iter8-knative-process.png)
 
 ## 8. Observe experiment
 
@@ -250,7 +256,7 @@ Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-
 ???+ info "Understanding what happened"
     1. You created a single version of an app/ML model.
     2. You generated requests for your app/ML model versions.
-    3. You created an Iter8 experiment with conformance testing pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus; Iter8 verified that the version (referred to as baseline in a conformance experiment) satisfied all the SLOs, and identified baseline as the winner.
+    3. You created an Iter8 experiment with conformance testing pattern. In each iteration, Iter8 observed the latency and error-rate metrics for your application; Iter8 verified that the version (referred to as baseline in a conformance experiment) satisfied all the SLOs, and identified baseline as the winner.
 
 ## 9. Cleanup
 
@@ -263,7 +269,6 @@ Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-
 
 === "Knative"
     ```shell
-    kubectl delete -f $ITER8/samples/knative/conformance/fortio.yaml
     kubectl delete -f $ITER8/samples/knative/conformance/experiment.yaml
     kubectl delete -f $ITER8/samples/knative/conformance/baseline.yaml
     ```
