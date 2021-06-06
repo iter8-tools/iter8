@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# Defining Iter8 Metrics
+# Defining Custom Metrics
 
 This document describes how you can create Iter8 metrics and (optionally) supply authentication information that may be required by the metrics provider.
 

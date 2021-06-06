@@ -130,14 +130,16 @@ nav:
       - Progressive canary release with traffic segmentation: tutorials/knative/traffic-segmentation.md
       - Useful Knative annotations: tutorials/knative/annotations.md
   - Metrics:
-    - Using metrics in experiments: metrics/using-metrics.md
-    - Defining Iter8 metrics: metrics/defining-iter8-metrics.md
+    - Using metrics: metrics/using-metrics.md
+    - Builtin metrics: metrics/builtin.md
+    - Custom metrics: metrics/custom.md
   - Reference:
     - Experiment resource: reference/experiment.md
     - Metric resource: reference/metrics.md
     - Tasks: reference/tasks.md
     - Task Reference:
       - Common Tasks: reference/tasks/common.md
+      - Metrics Tasks: reference/tasks/metrics.md
       - Notification Tasks: reference/tasks/notification.md
   - Contributing: 
     - Overview: contributing/overview.md
