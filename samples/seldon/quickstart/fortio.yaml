@@ -12,7 +12,7 @@ spec:
       containers:
       - name: fortio
         image: fortio/fortio
-        command: [ 'fortio', 'load', '-t', '6000s', '-qps', "1", '-json', '/shared/fortiooutput.json', '-H', 'Host: iris.example.com', '-H', 'Content-Type: application/json', '-payload', '{"data": {"ndarray":[[6.8,2.8,4.8,1.4]]}}',  "$(URL)" ]
+        command: [ 'fortio', 'load', '-t', '6000s', '-qps', "5", '-json', '/shared/fortiooutput.json', '-H', 'Host: iris.example.com', '-H', 'Content-Type: application/json', '-payload', '{"data": {"ndarray":[[6.8,2.8,4.8,1.4]]}}',  "$(URL)" ]
         env:
         - name: URL
           value: URL_VALUE/api/v1.0/predictions
@@ -30,7 +30,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: fortio-mock1-rewards
+  name: fortio-irisv1-rewards
 spec:
   template:
     spec:
@@ -58,7 +58,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: fortio-mock2-rewards
+  name: fortio-irisv2-rewards
 spec:
   template:
     spec:

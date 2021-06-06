@@ -18,7 +18,7 @@ spec:
         response:
           set:
             version: iris-v1
-      weight: 50
+      weight: 100
     - destination:
         host: iris-default.ns-candidate.svc.cluster.local
         port:
@@ -27,4 +27,4 @@ spec:
         response:
           set:
             version: iris-v2
-      weight: 50
+      weight: 0
