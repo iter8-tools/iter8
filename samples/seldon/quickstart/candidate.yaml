@@ -6,16 +6,13 @@ metadata:
 apiVersion: machinelearning.seldon.io/v1
 kind: SeldonDeployment
 metadata:
-  name: mock2
+  name: iris
   namespace: ns-candidate
 spec:
   predictors:
   - name: default
-    componentSpecs:
-    - spec:
-        containers:
-        - image: seldonio/mock_classifier:1.8.0
-          name: classifier
     graph:
       name: classifier
+      modelUri: gs://seldon-models/xgboost/iris
+      implementation: XGBOOST_SERVER
 
