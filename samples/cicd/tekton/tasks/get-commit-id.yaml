@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: get-commit-id
+  annotations:
+    tekton.dev/displayName: "Get commit id of a git repo"
+spec:
+  description: >-
+    This task gets the repo head's commit id
+
+  resources:
+    inputs:
+    - name: source
+      type: git
+      description: Holds git repo
+  results:
+  - name: commit-id
+    description: Commit id of the repo head
+
+  steps:
+  - name: get-commit-id
+    workingDir: $(resources.inputs.source.path)
+    image: alpine/git:latest
+    script: |
+      #!/usr/bin/env sh
+      git rev-parse --short HEAD | tr -d '\n' | tee $(results.commit-id.path)

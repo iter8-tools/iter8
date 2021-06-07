@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitops
+  namespace: openshift-gitops
+  labels:
+    app.kubernetes.io/instance: gitops
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: samples/cicd
+    repoURL: https://github.com/MY_ORG/iter8
+    targetRevision: master
+  syncPolicy:
+    automated:
+      prune: true
+  ignoreDifferences:
+  - group: route.openshift.io
+    kind: Route
+    jsonPointers:
+    - /spec/to/weight
+    - /spec/alternateBackends/0/weight

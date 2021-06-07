@@ -1,0 +1,10 @@
+{
+    "action": "opened",
+    "pull_request": {
+        "merged": "false",
+        "commits": "1",
+        "base": {
+            "ref": "master"
+        }
+    }
+}

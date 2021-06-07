@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iter8-app-candidate
+  labels:
+    app: iter8-app-candidate
+    service: iter8-app-candidate
+spec:
+  ports:
+  - port: 8000
+    name: http
+  selector:
+    app: iter8-app-candidate

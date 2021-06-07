@@ -1,0 +1,38 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: iter8-triggertemplate
+spec:
+  params:
+  - name: ACTION
+    description: Action performed on the pull request
+  - name: MERGED
+    description: Whether or not pull request is merged
+  - name: COMMITS
+    description: Number of commits from the pull request
+  - name: BRANCH
+    description: The base branch of the pull request
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: iter8-cicd-pipelinerun-
+    spec:
+      serviceAccountName: pipeline
+      pipelineRef:
+        name: iter8-pipeline
+      resources:
+      - name: source
+        resourceRef:
+          name: iter8-git
+      params:
+      - name: CONTEXT
+        value: samples/cicd/app
+      - name: ACTION
+        value: $(tt.params.ACTION)
+      - name: MERGED
+        value: $(tt.params.MERGED)
+      - name: COMMITS
+        value: $(tt.params.COMMITS)
+      - name: BRANCH
+        value: $(tt.params.BRANCH)
