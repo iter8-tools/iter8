@@ -31,8 +31,8 @@ else
 fi
 
 ## 0(d). Ensure Helm is available
-KUSTOMIZE_VERSION=$(helm  version | cut -d. -f2 | tail -c 2)
-if [[ ${KUSTOMIZE_VERSION} -ge "3" ]]; then
+HELM_VERSION=$(helm  version | cut -d. -f2 | tail -c 2)
+if [[ ${HELM_VERSION} -ge "3" ]]; then
     echo "Helm v3+ available"
 else
     echo "Helm v3+ is unavailable"
