@@ -7,8 +7,8 @@ hide:
 
 # Installation
 
-!!! tip "Kustomize"
-    Kustomize is a pre-requisite for Iter8 installation. Get Kustomize by following [these instructions](https://kubectl.docs.kubernetes.io/installation/kustomize/).
+!!! tip "Pre-requisite: Kustomize v3+"
+    Get Kustomize v3+ by following [these instructions](https://kubectl.docs.kubernetes.io/installation/kustomize/).
 
 Install Iter8 in your Kubernetes cluster as follows.
 
@@ -20,6 +20,13 @@ kustomize build https://github.com/iter8-tools/iter8/install/builtin-metrics/?re
 kubectl wait --for=condition=Ready pods --all -n iter8-system
 ```
 
+## Pinning the Iter8 version
+Iter8 release history is available [here](https://github.com/iter8-tools/iter8/releases). To pin the version of Iter8 during the installation, select any Iter8 version >= v0.5.13 and change the `TAG` above.
+
+For example, to install version `v0.5.14` of Iter8, use `export TAG=v0.5.14` in the above commands.
+
+## RBAC rules
+As part of Iter8 installation, the following RBAC rules are also installed in your cluster.
 ??? info "Default RBAC Rules"
     | Resource | Permissions | Scope |
     | ----- | ---- | ----------- |
@@ -33,9 +40,4 @@ kubectl wait --for=condition=Ready pods --all -n iter8-system
     | inferenceservices.serving.knative.dev | get, list, patch, update | Cluster-wide |
     | virtualservices.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
     | destinationrules.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
-
-## Pinning the Iter8 version
-
-Iter8 release history is available [here](https://github.com/iter8-tools/iter8/releases). To pin the version of Iter8 during the installation, select any Iter8 version >= v0.5.13 and change the `TAG` above. 
-
-For example, to install version `v0.5.14`, do `export TAG=v0.5.14` in the command above.
+    | seldondeployments.machinelearning.seldon.io | get, list, patch, update | Cluster-wide |
