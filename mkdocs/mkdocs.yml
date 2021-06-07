@@ -128,7 +128,6 @@ nav:
     - Knative-specific tutorials:
       - Conformance testing with traffic mirroring: tutorials/knative/mirroring.md
       - Progressive canary release with traffic segmentation: tutorials/knative/traffic-segmentation.md
-      - Useful Knative annotations: tutorials/knative/annotations.md
   - Metrics:
     - Using metrics: metrics/using-metrics.md
     - Builtin metrics: metrics/builtin.md
