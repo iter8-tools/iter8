@@ -20,12 +20,14 @@ template: main.html
     1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
     2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
     3. [Go 1.13+](https://golang.org/doc/install).
+    4. (Seldon Only) [Helm 3+](https://helm.sh/docs/intro/install/)
     
     This tutorial is available for the following K8s stacks.
 
     [Istio](#before-you-begin){ .md-button }
     [KFServing](#before-you-begin){ .md-button }
     [Knative](#before-you-begin){ .md-button }
+    [Seldon](#before-you-begin){ .md-button }    
 
     Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
 
@@ -102,6 +104,12 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         ```shell
         $ITER8/samples/knative/quickstart/platformsetup.sh istio
         ```
+=== "Seldon"
+    Setup Seldon Core, Seldon Analytics and Iter8 within your cluster.
+
+    ```shell
+    $ITER8/samples/seldon/quickstart/platformsetup.sh
+    ```
 
 ## 4. Create app/ML model versions
 === "Istio"
@@ -297,6 +305,95 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
             percent: 0
         ```
 
+=== "Seldon"
+    Deploy two Seldon Deployments corresponding to two versions of an Iris classification model, along with an Istio virtual service to split traffic between them.
+
+    ```shell
+    kubectl apply -f $ITER8/samples/seldon/quickstart/baseline.yaml
+    kubectl apply -f $ITER8/samples/seldon/quickstart/candidate.yaml
+    kubectl apply -f $ITER8/samples/seldon/quickstart/routing-rule.yaml
+    kubectl wait --for condition=ready --timeout=600s pods --all -n ns-baseline
+    kubectl wait --for condition=ready --timeout=600s pods --all -n ns-candidate
+    ```
+
+    ??? info "Look inside baseline.yaml"
+        ```yaml linenums="1"
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: ns-baseline
+        ---
+        apiVersion: machinelearning.seldon.io/v1
+        kind: SeldonDeployment
+        metadata:
+          name: iris
+          namespace: ns-baseline
+        spec:
+          predictors:
+          - name: default
+            graph:
+              name: classifier
+              modelUri: gs://seldon-models/sklearn/iris
+              implementation: SKLEARN_SERVER
+        ```
+
+    ??? info "Look inside candidate.yaml"
+        ```yaml linenums="1"
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+            name: ns-candidate
+        ---
+        apiVersion: machinelearning.seldon.io/v1
+        kind: SeldonDeployment
+        metadata:
+          name: iris
+          namespace: ns-candidate
+        spec:
+          predictors:
+          - name: default
+            graph:
+              name: classifier
+              modelUri: gs://seldon-models/xgboost/iris
+              implementation: XGBOOST_SERVER
+        ```
+
+    ??? info "Look inside routing-rule.yaml"
+        ```yaml linenums="1"
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        metadata:
+          name: routing-rule
+          namespace: default
+        spec:
+          gateways:
+          - istio-system/seldon-gateway
+          hosts:
+          - iris.example.com
+          http:
+          - route:
+            - destination:
+                host: iris-default.ns-baseline.svc.cluster.local
+                port:
+                  number: 8000
+              headers:
+                response:
+                  set:
+                    version: iris-v1
+              weight: 100
+            - destination:
+                host: iris-default.ns-candidate.svc.cluster.local
+                port:
+                  number: 8000
+              headers:
+                response:
+                  set:
+                    version: iris-v2
+              weight: 0
+	
+        ```
+
+
 ## 5. Generate requests
 === "Istio"
     Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
@@ -394,6 +491,101 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
                 - name: shared
                 mountPath: /shared       
             restartPolicy: Never
+        ```
+=== "Seldon"
+    Generate requests using [Fortio](https://github.com/fortio/fortio) as follows.
+
+    ```shell
+    URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o jsonpath='{.spec.clusterIP}'):80"
+    sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/seldon/quickstart/fortio.yaml | sed "s/6000s/600s/g" | kubectl apply -f -
+    ```
+
+    ??? info "Look inside fortio.yaml"
+        ```yaml linenums="1"
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: fortio-requests
+        spec:
+          template:
+            spec:
+              volumes:
+              - name: shared
+                emptyDir: {}    
+              containers:
+              - name: fortio
+                image: fortio/fortio
+                command: [ 'fortio', 'load', '-t', '6000s', '-qps', "5", '-json', '/shared/fortiooutput.json', '-H', 'Host: iris.example.com', '-H', 'Content-Type: application/json', '-payload', '{"data": {"ndarray":[[6.8,2.8,4.8,1.4]]}}',  "$(URL)" ]
+                env:
+                - name: URL
+                  value: URL_VALUE/api/v1.0/predictions
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared         
+              - name: busybox
+                image: busybox:1.28
+                command: ['sh', '-c', 'echo busybox is running! && sleep 6000']          
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared       
+              restartPolicy: Never
+        ---
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: fortio-irisv1-rewards
+        spec:
+          template:
+            spec:
+              volumes:
+              - name: shared
+                emptyDir: {}    
+              containers:
+              - name: fortio
+                image: fortio/fortio
+                command: [ 'fortio', 'load', '-t', '6000s', '-qps', "0.7", '-json', '/shared/fortiooutput.json', '-H', 'Content-Type: application/json', '-payload', '{"reward": 1}',  "$(URL)" ]
+                env:
+                - name: URL
+                  value: URL_VALUE/seldon/ns-baseline/iris/api/v1.0/feedback
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared         
+              - name: busybox
+                image: busybox:1.28
+                command: ['sh', '-c', 'echo busybox is running! && sleep 6000']          
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared       
+              restartPolicy: Never
+        ---
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: fortio-irisv2-rewards
+        spec:
+          template:
+            spec:
+              volumes:
+              - name: shared
+                emptyDir: {}    
+              containers:
+              - name: fortio
+                image: fortio/fortio
+                command: [ 'fortio', 'load', '-t', '6000s', '-qps', "1", '-json', '/shared/fortiooutput.json', '-H', 'Content-Type: application/json', '-payload', '{"reward": 1}',  "$(URL)" ]
+                env:
+                - name: URL
+                  value: URL_VALUE/seldon/ns-candidate/iris/api/v1.0/feedback
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared         
+              - name: busybox
+                image: busybox:1.28
+                command: ['sh', '-c', 'echo busybox is running! && sleep 6000']          
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared       
+              restartPolicy: Never
+        
         ```
 
 ## 6. Define metrics
@@ -756,13 +948,129 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ```
+=== "Seldon"
+    ```shell
+    kubectl apply -f $ITER8/samples/seldon/quickstart/metrics.yaml
+    ```
+
+    ??? info "Look inside metrics.yaml"
+        ```yaml linenums="1"
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: iter8-seldon
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: 95th-percentile-tail-latency
+          namespace: iter8-seldon
+        spec:
+          description: 95th percentile tail latency
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              histogram_quantile(0.95, sum(rate(seldon_api_executor_client_requests_seconds_bucket{seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) by (le))
+          provider: prometheus
+          sampleSize: iter8-seldon/request-count
+          type: Gauge
+          units: milliseconds
+          urlTemplate: http://seldon-core-analytics-prometheus-seldon.seldon-system/api/v1/query
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: error-count
+          namespace: iter8-seldon
+        spec:
+          description: Number of error responses
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              sum(increase(seldon_api_executor_server_requests_seconds_count{code!='200',seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) or on() vector(0)
+          provider: prometheus
+          type: Counter
+          urlTemplate: http://seldon-core-analytics-prometheus-seldon.seldon-system/api/v1/query  
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: error-rate
+          namespace: iter8-seldon
+        spec:
+          description: Fraction of requests with error responses
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              (sum(increase(seldon_api_executor_server_requests_seconds_count{code!='200',seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(seldon_api_executor_server_requests_seconds_count{seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) or on() vector(0))
+          provider: prometheus
+          sampleSize: iter8-seldon/request-count
+          type: Gauge
+          urlTemplate: http://seldon-core-analytics-prometheus-seldon.seldon-system/api/v1/query    
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: mean-latency
+          namespace: iter8-seldon
+        spec:
+          description: Mean latency
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              (sum(increase(seldon_api_executor_client_requests_seconds_sum{seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(seldon_api_executor_client_requests_seconds_count{seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) or on() vector(0))
+          provider: prometheus
+          sampleSize: iter8-seldon/request-count
+          type: Gauge
+          units: milliseconds
+          urlTemplate: http://seldon-core-analytics-prometheus-seldon.seldon-system/api/v1/query      
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: request-count
+          namespace: iter8-seldon
+        spec:
+          description: Number of requests
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              sum(increase(seldon_api_executor_client_requests_seconds_sum{seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) or on() vector(0)
+          provider: prometheus
+          type: Counter
+          urlTemplate: http://seldon-core-analytics-prometheus-seldon.seldon-system/api/v1/query
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          name: user-engagement
+          namespace: iter8-seldon
+        spec:
+          description: Number of feedback requests
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              sum(increase(seldon_api_executor_server_requests_seconds_count{service='feedback',seldon_deployment_id='$sid',kubernetes_namespace='$ns'}[${elapsedTime}s])) or on() vector(0)
+          provider: prometheus
+          type: Gauge
+          urlTemplate: http://seldon-core-analytics-prometheus-seldon.seldon-system/api/v1/query
+        
+        ```
+
+
 
 ??? Note "Metrics in your environment"
     You can use metrics from any RESTful provider in Iter8 experiments. 
         
     In this tutorial, the metrics related to latency and error-rate objectives are collected by the Prometheus instance created in Step 3. The `urlTemplate` field in these metrics point to this Prometheus instance. If you wish to use these latency and error-rate metrics with your own application, change the `urlTemplate` values to match the URL of your Prometheus instance.
 
-    In this tutorial, the user-engagement metric is synthetically generated by a mock New Relic service. For your application, replace this metric with any business metric you wish to optimize.
+    In this tutorial, the user-engagement metric is synthetically generated by a mock New Relic service/Prometheus service. For your application, replace this metric with any business metric you wish to optimize.
 
 
 ## 7. Launch experiment
@@ -977,6 +1285,78 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               - name: promote
                 value: candidate
         ```
+=== "Seldon"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml
+    ```
+
+    ??? info "Look inside experiment.yaml"
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Experiment
+        metadata:
+          name: quickstart-exp
+        spec:
+          target: iris
+          strategy:
+            testingPattern: A/B
+            deploymentPattern: Progressive
+            actions:
+              # when the experiment completes, promote the winning version using kubectl apply
+              finish:
+              - task: common/exec
+                with:
+                  cmd: /bin/bash
+                  args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+          criteria:
+            requestCount: iter8-seldon/request-count
+            rewards: # Business rewards
+            - metric: iter8-seldon/user-engagement
+              preferredDirection: High # maximize user engagement
+            objectives:
+            - metric: iter8-seldon/mean-latency
+              upperLimit: 2000
+            - metric: iter8-seldon/95th-percentile-tail-latency
+              upperLimit: 5000
+            - metric: iter8-seldon/error-rate
+              upperLimit: "0.01"
+          duration:
+            intervalSeconds: 10
+            iterationsPerLoop: 10
+          versionInfo:
+            # information about model versions used in this experiment
+            baseline:
+              name: iris-v1
+              weightObjRef:
+                apiVersion: networking.istio.io/v1alpha3
+                kind: VirtualService
+                name: routing-rule
+                namespace: default
+                fieldPath: .spec.http[0].route[0].weight      
+              variables:
+              - name: ns
+                value: ns-baseline
+              - name: sid
+                value: iris
+              - name: promote
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v1.yaml
+            candidates:
+            - name: iris-v2
+              weightObjRef:
+                apiVersion: networking.istio.io/v1alpha3
+                kind: VirtualService
+                name: routing-rule
+                namespace: default
+                fieldPath: .spec.http[0].route[1].weight      
+              variables:
+              - name: ns
+                value: ns-candidate
+              - name: sid
+                value: iris
+              - name: promote
+                value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v2.yaml     
+        ```
 
 The process automated by Iter8 during this experiment is depicted below.
 
@@ -1163,6 +1543,50 @@ As the experiment progresses, you should eventually see that all of the objectiv
         }
         ]
         ```
+=== "Seldon"
+
+    ```shell
+    kubectl get vs routing-rule -o json --watch | jq .spec.http[0].route
+    ```
+
+    ??? info "Look inside traffic summary"
+        ```json
+        [
+          {
+            "destination": {
+              "host": "iris-default.ns-baseline.svc.cluster.local",
+              "port": {
+                "number": 8000
+              }
+            },
+            "headers": {
+              "response": {
+                "set": {
+                  "version": "iris-v1"
+                }
+              }
+            },
+            "weight": 25
+          },
+          {
+            "destination": {
+              "host": "iris-default.ns-candidate.svc.cluster.local",
+              "port": {
+                "number": 8000
+              }
+            },
+            "headers": {
+              "response": {
+                "set": {
+                  "version": "iris-v2"
+                }
+              }
+            },
+            "weight": 75
+          }
+	
+        ```    
+
 
 As the experiment progresses, you should see traffic progressively shift from the baseline version to the candidate version.
 
@@ -1191,7 +1615,7 @@ When the experiment completes, you will see the experiment stage change from `Ru
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.
     2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic; Iter8 verified that the candidate satisfied all objectives, verified that the candidate improved over the baseline in terms of user-engagement, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
+    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic/Prometheus; Iter8 verified that the candidate satisfied all objectives, verified that the candidate improved over the baseline in terms of user-engagement, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
 
 ## 9. Cleanup
 === "Istio"
@@ -1213,4 +1637,12 @@ When the experiment completes, you will see the experiment stage change from `Ru
     kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
     kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml
     kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+    ```
+
+=== "Seldon"
+    ```shell
+    kubectl delete -f $ITER8/samples/seldon/quickstart/fortio.yaml
+    kubectl delete -f $ITER8/samples/seldon/quickstart/experiment.yaml
+    kubectl delete -f $ITER8/samples/seldon/quickstart/baseline.yaml
+    kubectl delete -f $ITER8/samples/seldon/quickstart/candidate.yaml
     ```

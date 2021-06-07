@@ -44,6 +44,7 @@ kubectl get experiment $EXPERIMENT -o yaml
 # Check
 source $ITER8/samples/seldon/quickstart/check.sh
 
+kubectl delete -f $ITER8/samples/seldon/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/seldon/quickstart/experiment.yaml
 kubectl delete -f $ITER8/samples/seldon/quickstart/baseline.yaml
 kubectl delete -f $ITER8/samples/seldon/quickstart/candidate.yaml
