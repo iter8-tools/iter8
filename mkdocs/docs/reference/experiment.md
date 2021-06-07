@@ -109,7 +109,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ---- | ----------- | -------- |
 | testingPattern | string | Determines the logic used to evaluate the app versions and determine the winner of the experiment. Iter8 supports two testing patterns, namely, `Canary` and `Conformance`. | Yes |
 | deploymentPattern | string | Determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. Iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`. | No |
-| actions | map[string][][TaskSpec](#taskspec) | An action is a sequence of tasks that can be executed by Iter8. `spec.strategy.actions` can be used to specify start and finish actions that will be run at the start and end of an experiment respectively. | No |
+| actions | map[ActionType][][TaskSpec](#taskspec) | An action is a sequence of tasks that can be executed by Iter8. `ActionType` is a string enum with three valid values: `start`, `loop`, and `finish`. The start action, if specified, is executed at the start of the experiment. The loop action, if specified, is executed during every loop of the experiment, after all the iterations within the loop have completed. The finish action, if specified, is executed at the end of the experiment after all the loops have completed. The `actions` field is used to specify all three types of actions. | No |
 
 ### TaskSpec
 
@@ -155,8 +155,11 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
+| maxLoops | int32 | Maximum number of loops in the experiment. In case of a failure, the experiment may be terminated earlier. Default value = 1. | No |
+| iterationsPerLoop | int32 | Number of iterations *per experiment loop*. In case of a failure, the experiment may be terminated earlier. Default value = 15. | No |
 | intervalSeconds | int32 | Duration of a single iteration of the experiment in seconds. Default value = 20 seconds. | No |
-| maxIterations | int32 | Maximum number of iterations in the experiment. In case of failure, the experiment may be terminated earlier. Default value = 15. | No |
+
+> *Note*: Suppose an experiment has `maxLoops = x`, `iterationsPerLoop = y`, and `intervalSeconds = z`. Assuming the experiment does not terminate early due to failures, it would take a minimum of `x*y*z` seconds to complete. The actual duration may be more due to additional time incurred in [acquiring the target](#spec), and executing the `start`, `loop` and `finish` [actions](#strategy).
 
 ### VersionInfo
 
@@ -206,10 +209,21 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
+| aggregatedBuiltinHists | [AggregatedBuiltinHists](#aggregatedbuiltinhists) | This field is used to store intermediate results from the [`metrics/collect` task](../tasks/metrics/#metrics-tasks) that enables [builtin metrics](../../metrics/builtin/). Reserved for Iter8 internal use. | No |
 | aggregatedMetrics | [AggregatedMetricsAnalysis](#aggregatedmetricsanalysis) | Most recently observed metric values for all metrics referenced in the experiment criteria. | No |
 | winnerAssessment | [WinnerAssessmentAnalysis](#winnerassessmentanalysis) | Information about the `winner` of the experiment. | No |
 | versionAssessments | [VersionAssessmentAnalysis](#versionassessmentanalysis) | For each version, a summary analysis identifying whether or not the version is satisfying the experiment criteria. | No |
 | weights | [WeightsAnalysis](#weightanalysis) | Recommended weight distribution to be applied before the next iteration of the experiment. | No |
+
+### AggregatedBuiltinHists
+
+| Field name | Field type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| provenance | string | Source of the data. Currently, Iter8 builtin metrics collect task is the only valid value for this field. Reserved for Iter8 internal use. | Yes |
+| timestamp | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when this field was last updated. Reserved for Iter8 internal use. | Yes |
+| message | string | Human readable message. Reserved for Iter8 internal use. | No |
+| data | [apiextensionsv1.JSON](https://pkg.go.dev/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1#JSON) | Aggregated histogram data for storing intermediate results for builtin metics collection. Reserved for Iter8 internal use. | No |
+
 
 ### VersionAssessmentAnalysis
 

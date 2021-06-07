@@ -8,6 +8,10 @@ Tasks are an extension mechanism for enhancing the behavior of Iter8 experiments
 
 Tasks are grouped into libraries. The following task libraries are available.
 
-- `common` [tasks](common/#common-tasks)
-- `metrics` [tasks](metrics/#metrics-tasks)
-- `notification` [tasks](notification/#notification-tasks)
+- `common` [library](common/#common-tasks)
+    * Task for executing a shell command.
+- `metrics` [library](metrics/#metrics-tasks)
+    * Task for collecting builtin metrics.
+    * The above task can also be used to generate requests for app/ML model versions without collecting builtin metrics.
+- `notification` [library](notification/#notification-tasks)
+    * Task for sending a slack notification.

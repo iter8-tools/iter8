@@ -58,6 +58,8 @@ type CollectInputs struct {
 	Versions []Version `json:"versions" yaml:"versions"`
 	// URL of the JSON file to send during the query; optional
 	PayloadURL *string `json:"payloadURL,omitempty" yaml:"payloadURL,omitempty"`
+	// if LoadOnly is set to true, this task will send requests without collecting metrics; optional
+	LoadOnly *bool `json:"loadOnly,omitempty" yaml:"loadOnly,omitempty"`	
 } -->
 
 | Field name | Field type | Description | Required |
@@ -65,6 +67,7 @@ type CollectInputs struct {
 | time | string | Duration of the `metrics/collect` task run. Specified in the [Go duration string format](https://golang.org/pkg/time/#ParseDuration). Default value is `5s`. | No |
 | payloadURL | string | URL of JSON-encoded data. If this field is specified, the metrics collector will send HTTP POST requests to versions, and the POST requests will contain this JSON data as payload. | No |
 | versions | [][Version](#version) | A non-empty list of versions. | Yes |
+| loadOnly | bool | If set to true, this task will send requests without collecting metrics. Default value is `false`. | No |
 
 #### Version
 | Field name | Field type | Description | Required |
@@ -85,3 +88,6 @@ The task may result in an error, for instance, if one or more required fields ar
 If this task is embedded in start actions, it will run once at the beginning of the experiment.
 
 If this task is embedded in loop actions, it will run in each loop of the experiment. The results from each run will be aggregated.
+
+### Load generation without metrics collection
+You can use this task to send HTTP GET and POST requests to app/ML model versions without collecting metrics by setting the [`loadOnly` input](#inputs) to `true`.

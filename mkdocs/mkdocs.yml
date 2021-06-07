@@ -113,7 +113,6 @@ nav:
   - Getting Started:
     - Quick start: getting-started/quick-start.md
     - Install: getting-started/install.md
-    - Changelog: getting-started/changelog.md
     - Getting help: getting-started/help.md
   - Tutorials:
     - Testing patterns:
