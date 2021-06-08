@@ -74,43 +74,18 @@ The best ways to reach us with a question when contributing is to ask on:
 
 * The original GitHub issue
 * `#development` channel in the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
+* Bring your questions to [Iter8 meetings](#come-to-meetings)
 
-<!-- ## Pull Request Lifecycle
+## Pull Request Lifecycle
 
-**TODO** -->
-<!-- This is an optional section but we encourage you to think about your 
-pull request process and help set expectations for both contributors and 
-reviewers.
+* Your PR is associated with one (and infrequently, with more than one) [GitHub issue](https://github.com/iter8-tools/iter8/issues). You can start the submission of your PR as soon as this issue has been created.
+* Follow the [standard GitHub fork and pull request process](https://gist.github.com/Chaser324/ce0505fbed06b947d962) when creating and submitting your PR.
+* The associated GitHub issue might need to go through design discussions and may not be ready for development. Your PR might require new tests; these new or existing tests may not yet be running successfully. At this stage, [keep your PR as a draft](https://github.blog/2019-02-14-introducing-draft-pull-requests/), to signal that it is not yet ready for review.
+* Once design discussions are complete and tests pass, convert the draft PR into a regular PR to signal that it is ready for review. Additionally, post a message in the #development slack channel of the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) with a link to your PR. This will expedite the review.
+* You can expect an initial review within 1-2 days of submitting a PR, and follow up reviews (if any) to happen over 2-5 days.
+* Use the #development slack channel of [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) to ping/bump when the pull request is ready for further review or if it appears stalled.
+* Iter8 releases happen frequently. Once your PR is merged, you can expect your contribution to show up *live* in a short amount of time at https://iter8.tools.
 
-Instead of a fixed template, use these questions below as an exercise to uncover
-the unwritten rules and norms your project has for both reviewers and
-contributors. Using your answers, write a description of what a
-contributor can expect during their pull request.
-
-* When should contributors start to submit a PR - when it’s ready for review or
-  as a work-in-progress?
-* How do contributors signal that a PR is ready for review or that it’s not
-  complete and still a work-in-progress?
-* When should the contributor should expect initial review? The follow-up
-  reviews?
-* When and how should the author ping/bump when the pull request is ready for
-  further review or appears stalled?
-* How to handle stuck pull requests that you can’t seem to get reviewed?
-* How to handle follow-up issues and pull requests?
-* What kind of pull requests do you prefer: small scope, incremental value or
-  feature complete?
-* What should contributors do if they no longer want to follow-through with the
-  PR? For example, will maintainers potentially refactor and use the code?
-  Will maintainers close a PR if the contributor hasn’t responded in a specific
-  timeframe?
-* Once a PR is merged, what is the process for it getting into the next release?
-* When does a contribution show up “live”?
-
-Here are some examples from other projects:
- 
-* https://porter.sh/src/CONTRIBUTING.md#the-life-of-a-pull-request
-
--->
 
 <!-- ## Development Environment Setup
 

@@ -127,5 +127,8 @@ cd iter8-<your stack>
 
     You can also refer to the [KFServing](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-kfserving), [Knative](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-knative), and [Istio](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-istio) examples.
 
-## Step 4: Submit PR
+## Step 4: Update RBAC rules
+Update the [RBAC rules that are applied to the Kubernetes cluster](../../getting-started/install/#rbac-rules) as part of the Iter8 installation.
+
+## Step 5: Submit PR
 [Sign your commit](../overview/#sign-your-commits) and submit your pull request to the Iter8 repo.
