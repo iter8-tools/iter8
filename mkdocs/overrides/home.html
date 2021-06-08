@@ -66,14 +66,14 @@
 
       <!-- Hero image -->
       <div class="mdx-hero__image">
-        <img src="{{ base_url }}/images/illustration.png" alt="" width="1197" height="541" draggable="false">
+        <img src="{{ base_url }}/images/illustration.png" alt="" width="1197" height="566" draggable="false">
       </div>
 
       <!-- Hero content -->
       <div class="mdx-hero__content">
         <h1><strong>SLO validation, A/B testing and Progressive Delivery</strong></h1>
 
-        <h2><strong>Easily optimize business metrics</strong> and <strong>validate SLOs</strong> when deploying apps and ML models on Kubernetes.</h2>
+        <h2>Iter8 makes it easy to <strong>optimize business metrics</strong> and <strong>validate SLOs</strong> when deploying K8s apps/ML models.</h2>
 
         <a href="{{ base_url }}/getting-started/quick-start/" title="Quick start in 5 mins"
           class="md-button md-button--primary">
@@ -91,9 +91,7 @@
 
 <section class="cards">
   <div class="md-grid md-typeset">
-      <h1>Why Iter8?</h1>
-
-
+      <h1><strong>Highlights</strong></h1>
     <!-- Main site box descriptions -->
     <div class="top-hr">
 
@@ -102,9 +100,8 @@
           <span class="twemoji">
             {% include ".icons/material/atom.svg" %}
           </span>
-          Experiments
+          Statistically rigorous SLO validation and A/B testing
         </h2>
-        <p>Automate <strong>A/B, A/B/n, Canary, and Conformance experiments</strong>. Compare multiple versions. Find and safely promote the <strong>winning version</strong> based on business metrics and SLOs.</p>
       </div>
 
       <div class="feature-item">
@@ -112,9 +109,8 @@
           <span class="twemoji">
             {% include ".icons/material/kubernetes.svg" %}
           </span>
-          Any K8s stack
+          Integrate with Istio, KFServing, Knative, Seldon ... or any K8s stack of your choice
         </h2>
-        <p>Experiment over <strong>Knative, KFserving, or Istio</strong>. Or extend Iter8 over <strong>any</strong> K8s stack of your choice by adding just a few RBAC rules.</p>
       </div>
 
       <div class="feature-item">
@@ -122,9 +118,17 @@
           <span class="twemoji">
             {% include ".icons/material/database-plus.svg" %}
           </span>
-          Metrics
+          Builtin load generation and latency/error metrics collection
         </h2>
-        <p>Use metrics from <strong>any</strong> provider in your experiments, including <strong>Prometheus, New Relic, Sysdig and Elastic</strong>.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/database-plus.svg" %}
+          </span>
+          Custom metrics from Prometheus, New Relic, Sysdig, Elastic ... or any database of your choice
+        </h2>
       </div>
 
       <div class="feature-item">
@@ -132,9 +136,8 @@
           <span class="twemoji">
             {% include ".icons/fontawesome/solid/cogs.svg" %}
           </span>
-          AI-driven
+          AI-driven: Bayesian analysis for assessing versions and multi-armed bandit for shifting traffic
         </h2>
-        <p>Under the hood, Iter8 uses rigorous <strong>Bayesian analysis</strong> for version assessments and <strong>multi-armed bandit algorithms</strong> for traffic shifting.</p>
       </div>
 
       <div class="feature-item">
@@ -142,9 +145,8 @@
           <span class="twemoji">
             {% include ".icons/material/progress-check.svg" %}
           </span>
-          Progressive rollout
+          Progressive traffic shifting</strong> towards the winning version
         </h2>
-        <p><strong>Progressively shift traffic</strong> towards the winning version or <strong>specify a fixed traffic split</strong> during an experiment.</p>
       </div>
 
       <div class="feature-item">
@@ -152,9 +154,8 @@
           <span class="twemoji">
             {% include ".icons/material/router.svg" %}
           </span>
-          Traffic engineering
+          Traffic engineering: dark launch, mirroring, user segmentation, and session affinity
         </h2>
-        <p>Protect end-user experience with traffic engineering features such as <strong>mirroring, user segmentation, dark launch, and sticky sessions</strong>.</p>
       </div>
 
     </div>
