@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 makes it easy to optimize business metrics and validate SLOs when you deploy apps/ML models on Kubernetes. Quick start in 5 mins.
+  Iter8 makes it easy to optimize business metrics and validate SLOs when you deploy apps/ML models on Kubernetes. Integrate with any CI/CD/GitOps pipeline. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -113,7 +113,6 @@ nav:
   - Getting Started:
     - Quick start: getting-started/quick-start.md
     - Install: getting-started/install.md
-    - Changelog: getting-started/changelog.md
     - Getting help: getting-started/help.md
   - Tutorials:
     - Testing patterns:
@@ -128,16 +127,17 @@ nav:
     - Knative-specific tutorials:
       - Conformance testing with traffic mirroring: tutorials/knative/mirroring.md
       - Progressive canary release with traffic segmentation: tutorials/knative/traffic-segmentation.md
-      - Useful Knative annotations: tutorials/knative/annotations.md
   - Metrics:
-    - Using metrics in experiments: metrics/using-metrics.md
-    - Defining Iter8 metrics: metrics/defining-iter8-metrics.md
+    - Using metrics: metrics/using-metrics.md
+    - Builtin metrics: metrics/builtin.md
+    - Custom metrics: metrics/custom.md
   - Reference:
     - Experiment resource: reference/experiment.md
     - Metric resource: reference/metrics.md
     - Tasks: reference/tasks.md
     - Task Reference:
       - Common Tasks: reference/tasks/common.md
+      - Metrics Tasks: reference/tasks/metrics.md
       - Notification Tasks: reference/tasks/notification.md
   - Contributing: 
     - Overview: contributing/overview.md

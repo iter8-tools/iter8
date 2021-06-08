@@ -4,55 +4,42 @@ template: main.html
 
 # Using Metrics in Experiments
 
-!!! tip "Iter8 metrics API"    
-    Iter8 defines a new Kubernetes resource called Metric that makes it easy to use metrics in experiments from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic.
+!!! tip "Iter8 metric resources"    
+    Iter8 defines a custom Kubernetes resource (CRD) called **Metric** that makes it easy to define and use metrics in experiments. 
+    
+    Iter8 installation includes a set of pre-defined [builtin metrics](../builtin) that pertain to app/ML model latency/errors. You can also [define custom metrics](../custom) that enable you to utilize data from Prometheus, New Relic, Sysdig, Elastic or any other database of your choice.
 
-    List metrics available in your cluster using the `kubectl get metrics.iter8.tools` command. Use metrics in experiments by referencing them in experiment criteria.
-
-## Listing metrics
-Iter8 metrics are Kubernetes resources which means you can list them using `kubectl get`.
+## List metrics
+Find the set Iter8 metrics available in your cluster using `kubectl get`.
 
 ``` shell
 kubectl get metrics.iter8.tools --all-namespaces
 ```
 
 ```shell
-NAMESPACE       NAME                           TYPE      DESCRIPTION
-iter8-knative   95th-percentile-tail-latency   Gauge     95th percentile tail latency
-iter8-knative   error-count                    Counter   Number of error responses
-iter8-knative   error-rate                     Gauge     Fraction of requests with error responses
-iter8-knative   mean-latency                   Gauge     Mean latency
-iter8-knative   request-count                  Counter   Number of requests
+NAMESPACE         NAME                      TYPE      DESCRIPTION
+iter8-kfserving   user-engagement           Gauge     Average duration of a session
+iter8-system      error-count               Counter   Number of responses with HTTP status code 4xx or 5xx (Iter8 builtin metric)
+iter8-system      error-rate                Gauge     Fraction of responses with HTTP status code 4xx or 5xx (Iter8 builtin metric)
+iter8-system      latency-50th-percentile   Gauge     50th percentile (median) latency (Iter8 builtin metric)
+iter8-system      latency-75th-percentile   Gauge     75th percentile latency (Iter8 builtin metric)
+iter8-system      latency-90th-percentile   Gauge     90th percentile latency (Iter8 builtin metric)
+iter8-system      latency-95th-percentile   Gauge     95th percentile latency (Iter8 builtin metric)
+iter8-system      latency-99th-percentile   Gauge     99th percentile latency (Iter8 builtin metric)
+iter8-system      mean-latency              Gauge     Mean latency (Iter8 builtin metric)
+iter8-system      request-count             Counter   Number of requests (Iter8 builtin metric)
 ```
 
-## Referencing metrics
+## Referencing metrics within experiments
 
-Use metrics in experiments by referencing them in criteria section. Reference metrics using the `namespace/name` or `name` [format](../../../reference/apispec/#criteria).
+Use metrics in experiments by referencing them in the criteria section of the experiment manifest. Reference metrics using the `namespace/name` or `name` [format](../../../reference/apispec/#criteria).
 
 ??? example "Sample experiment illustrating the use of metrics"
     ```yaml
-    apiVersion: iter8.tools/v2alpha2
     kind: Experiment
-    metadata:
-      name: quickstart-exp
+    ... 
     spec:
-      # target identifies the knative service under experimentation using its fully qualified name
-      target: default/sample-app
-      strategy:
-        # this experiment will perform a canary test
-        testingPattern: Canary
-        deploymentPattern: Progressive
-        actions:
-          start: # run the following sequence of tasks at the start of the experiment
-          - task: knative/init-experiment
-          finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version
-            with:
-              cmd: kubectl
-              args: 
-              - "apply"
-              - "-f"
-              - "https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml"
+      ...
       criteria:
         requestCount: iter8-knative/request-count
         # mean latency of version should be under 50 milliseconds
@@ -65,27 +52,7 @@ Use metrics in experiments by referencing them in criteria section. Reference me
           upperLimit: 100
         - metric: iter8-knative/error-rate
           upperLimit: "0.01"
-      duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 10
-      versionInfo:
-        # information about app versions used in this experiment
-        baseline:
-          name: current
-          variables:
-          - name: revision
-            value: sample-app-v1 
-          - name: promote
-            value: baseline
-        candidates:
-        - name: candidate
-          variables:
-          - name: revision
-            value: sample-app-v2
-          - name: promote
-            value: candidate 
     ```
 
 ## Observing metric values
-
-During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../../../getting-started/quick-start/with-knative/#8-observe-experiment) for an example.
+During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../../../getting-started/quick-start/#a-observe-metrics) for an example.

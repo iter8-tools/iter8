@@ -39,7 +39,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ------------ | ----------- | -------- |
 | description | string | Human readable description. This field is meant for informational purposes. | No |
 | units | string | Units of measurement. This field is meant for informational purposes. | No |
-| provider | string | Type of the metrics provider. This field is meant for informational purposes. | No |
+| provider | string | Type of the metrics provider (example, `prometheus`, `newrelic`, `sysdig`, `elastic`, ...). The keyword `iter8` is reserved for Iter8 builtin metrics. | No |
 | params | [][NamedValue](../experiment/#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP query parameters used by Iter8 when querying the metrics provider. Each name represents a parameter name; the corresponding value is a string template with placeholders; the placeholders will be dynamically substituted by Iter8 with values at query time. | No |
 | body | string | String used to construct the JSON body of the HTTP request. Body may be templated, in which Iter8 will attempt to substitute placeholders in the template at query time using version information. | No |
 | type | string | Metric type. Valid values are `Counter` and `Gauge`. Default value = `Gauge`. A `Counter` metric is one whose value never decreases over time. A `Gauge` metric is one whose value may increase or decrease over time. | No |

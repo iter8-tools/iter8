@@ -74,6 +74,9 @@ helm upgrade --install --wait seldon-core-analytics seldon-core-analytics --repo
 # Step 6: Install Iter8
 echo "Installing Iter8 with Seldon Support"
 kustomize build $ITER8/install/core | kubectl apply -f -
+kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+kustomize build $ITER8/install/builtin-metrics | kubectl apply -f -
+kubectl wait --for=condition=Ready pods --all -n iter8-system
 
 # Step 7: Verify Iter8 installation
 echo "Verifying Iter8 and add-on installation"

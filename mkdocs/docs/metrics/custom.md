@@ -2,9 +2,9 @@
 template: main.html
 ---
 
-# Defining Iter8 Metrics
+# Defining Custom Metrics
 
-This document describes how you can create Iter8 metrics and (optionally) supply authentication information that may be required by the metrics provider.
+Custom Iter8 metrics enable you to use data from any database for evaluating app/ML model versions within Iter8 experiments. This document describes how you can define custom Iter8 metrics and (optionally) supply authentication information that may be required by the metrics provider.
 
 Metric providers differ in the following aspects.
 
@@ -16,7 +16,7 @@ Metric providers differ in the following aspects.
 
 The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic. However, the principles illustrated here will enable you to use metrics from any provider in experiments.
 
-## Defining metrics
+## Metrics with/without auth
 
 > **Note:** Metrics are defined by you, the **Iter8 end-user**.
 

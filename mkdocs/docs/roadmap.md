@@ -12,7 +12,7 @@ hide:
     * Blue/green deployment pattern
     * Experiments with `support` and `confidence`
 2. **Metrics**
-    * Support for more metric providers like MySQL, PostgreSQL, CouchDB, MongoDB, Google Analytics and Fortio.
+    * Support for more metric providers like MySQL, PostgreSQL, CouchDB, MongoDB, and Google Analytics.
 3. **Enhanced MLOps experiments**
     * Customized experiments/metrics for serving frameworks like TorchServe and TFServing
 4. **GitOps**
