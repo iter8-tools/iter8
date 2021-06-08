@@ -8,12 +8,12 @@ Performing Iter8 experiments requires RBAC rules, which are contained in [this K
 
 Enable Iter8 experiments over a new K8s stack by extending these RBAC rules.
 
-## Step 0: Fork Iter8
+## Step 1: Fork Iter8
 Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Locally clone your forked repo.
 
 For the rest of this document, `$ITER8` will refer to the root of your local Iter8 repo.
 
-## Step 1: Edit `kustomization.yaml`
+## Step 2: Edit `kustomization.yaml`
 ```shell
 cd $ITER8/install/core/rbac/stacks
 ```
@@ -24,16 +24,17 @@ resources:
 - iter8-knative
 - iter8-istio
 - iter8-kfserving
+- iter8-seldon
 # -iter8-<your stack> # add your stack here
 ```
 
-## Step 2: Create subfolder
+## Step 3: Create subfolder
 ```shell
 mkdir iter8-<your stack>
 cp iter8-kfserving/kustomization.yaml iter8-<your stack>/kustomization.yaml
 ```
 
-## Step 3: Create RBAC rules
+## Step 4: Create RBAC rules
 ```shell
 cd iter8-<your stack>
 ```
@@ -125,7 +126,10 @@ cd iter8-<your stack>
       name: handlers
     ```
 
-    You can also refer to the [KFServing](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-kfserving), [Knative](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-knative), and [Istio](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-istio) examples.
+    You can also refer to the [Istio](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-istio), [KFServing](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-kfserving), [Knative](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-knative), and [Seldon](https://github.com/iter8-tools/iter8/tree/master/install/core/rbac/stacks/iter8-seldon) examples.
 
-## Step 4: Submit PR
+## Step 5: Update RBAC rules
+Update the [RBAC rules that are applied to the Kubernetes cluster](../../getting-started/install/#rbac-rules) as part of the Iter8 installation.
+
+## Step 6: Submit PR
 [Sign your commit](../overview/#sign-your-commits) and submit your pull request to the Iter8 repo.
