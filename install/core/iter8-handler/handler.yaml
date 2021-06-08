@@ -9,7 +9,7 @@ spec:
       containers:
       - name: iter8-handler
         # to change handler version, edit the line below
-        image: iter8/handler:0.1.15
+        image: iter8/handler:0.1.17
         command: ["handler"]
         args: ["run", "-a", "$(ACTION)"]
         env:
@@ -19,6 +19,8 @@ spec:
           value: EXPERIMENT_NAMESPACE_VALUE
         - name: EXPERIMENT_NAME
           value: EXPERIMENT_NAME_VALUE
+        - name: LOG_LEVEL
+          value: trace
       restartPolicy: Never
   backoffLimit: 1
   activeDeadlineSeconds: 300
