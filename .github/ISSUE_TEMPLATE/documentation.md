@@ -1,8 +1,8 @@
 ---
 name: "Documentation issue"
 about: The documentation is unclear, missing informations, or could be improved
-title: "[Documentation Request]"
-labels: documentation
+title: ""
+labels: kind/docs
 assignees: ''
 ---
 
