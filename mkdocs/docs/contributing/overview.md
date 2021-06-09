@@ -52,9 +52,6 @@ If you have a topic you would like to discuss, please put it on the agenda as
 well as a time estimate. Community meetings will be recorded
 and available to the public on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
 
-We welcome everyone to join! Over time, we hope that you feel comfortable voicing your opinions, giving
-feedback on others’ ideas, and even sharing your own ideas, and experiences.
-
 ***
 
 ## Find an Issue
