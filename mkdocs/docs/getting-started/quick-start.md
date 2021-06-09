@@ -38,7 +38,7 @@ Create a local cluster using Kind or Minikube as follows, or use a managed Kuber
 === "Kind"
 
     ```shell
-    kind create cluster
+    kind create cluster --wait 5m
     kubectl cluster-info --context kind-kind
     ```
 

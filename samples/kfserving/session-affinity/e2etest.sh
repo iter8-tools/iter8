@@ -5,7 +5,7 @@ set -e
 export EXPERIMENT=session-affinity-exp
 
 # create cluster
-kind create cluster
+kind create cluster --wait 5m
 kubectl cluster-info --context kind-kind
 
 # platform setup
