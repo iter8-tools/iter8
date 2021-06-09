@@ -13,7 +13,7 @@ hide:
 
     - Everyone is welcome to join our community meetings.
     - Our community meetings are on Wednesdays at 1PM EST/EDT. 
-        * [Video conference link for community meetings](https://meet.google.com/hys-ubrv-bsd)
+        * [Video conference link for community meetings](https://meet.google.com/ocg-bzoa-gqe)
         * [Agenda](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing)
         * [Meeting notes](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing)
     - If you would like to discuss a topic, please list it on the agenda along with a time estimate.
