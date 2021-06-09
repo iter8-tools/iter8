@@ -14,4 +14,4 @@ Tasks are grouped into libraries. The following task libraries are available.
     * Task for collecting builtin metrics.
     * The above task can also be used to generate requests for app/ML model versions without collecting builtin metrics.
 - `notification` [library](notification/#notification-tasks)
-    * Task for sending a slack notification.
+    * Task for sending a Slack notification.
