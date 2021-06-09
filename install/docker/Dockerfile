@@ -26,5 +26,3 @@ RUN apk update && apk upgrade && apk add --no-cache bash git less openssh
 RUN curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
 RUN chmod +x ./kustomize
 RUN mv ./kustomize /bin/kustomize
-
-ENTRYPOINT [ "/iter8/iter8.sh" ]
