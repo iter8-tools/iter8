@@ -14,8 +14,6 @@ template: main.html
 
     ![Session affinity](../../images/session-affinity-exp.png)
 
-    
-
 
 ???+ warning "Before you begin... "
 

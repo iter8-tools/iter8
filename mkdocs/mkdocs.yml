@@ -124,9 +124,8 @@ nav:
       - FixedSplit deployment: tutorials/deployment-patterns/fixed-split.md
     - Traffic engineering:
       - Session affinity: tutorials/traffic-engineering/session-affinity.md
-    - Knative-specific tutorials:
-      - Conformance testing with traffic mirroring: tutorials/knative/mirroring.md
-      - Progressive canary release with traffic segmentation: tutorials/knative/traffic-segmentation.md
+      - User segmentation: tutorials/traffic-engineering/user-segmentation.md
+      - Traffic mirroring/shadowing: tutorials/traffic-engineering/mirroring.md
   - Metrics:
     - Using metrics: metrics/using-metrics.md
     - Builtin metrics: metrics/builtin.md

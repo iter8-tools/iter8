@@ -2,30 +2,30 @@
 template: main.html
 ---
 
-# Conformance Testing with Traffic Mirroring
+# Traffic Mirroring
 
-!!! tip ""
-    An experiment with [`Conformance`](../../../concepts/buildingblocks/#testing-pattern) testing and [traffic mirroring](../../../concepts/buildingblocks/#traffic-engineering).
+!!! tip "Scenario: SLO validation for a dark launched version with mirrored traffic"
+
+    [Traffic mirroring or shadowing](../../../concepts/buildingblocks/#traffic-engineering) enables experimenting with a dark launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
     
-    ![Canary](../../images/mirroring.png)
+    In this tutorial, you will use mirror traffic to a dark launched version as depicted below.
 
-You will create the following resources in this tutorial.
+    ![Mirroring](../../images/mirroring.png)
 
-1. A **Knative sample app** with live and dark versions.
-2. **Istio virtual services** which send all requests to the live version, mirror 40% of the requests and send the mirrored traffic to the dark version; responses from the dark version are ignored since it receives only mirrored requests.
-3. A **curl-based traffic generator** which simulates user requests.
-4. An **Iter8 experiment** that verifies that the dark version satisfies mean latency, 95th percentile tail latency, and error rate `objectives`.
+    
+???+ warning "Before you begin... "
 
-???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have a Kubernetes cluster with Iter8, Knative with the Istio networking layer, Prometheus add-on, and Iter8's sample metrics for Knative installed. You can do so by following Steps 1, 2, 3 and 6 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
+    This tutorial is available for the following K8s stacks.
 
-    **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
+    [Knative](#before-you-begin){ .md-button }
 
-    **ITER8 environment variable:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
+    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+    
+## Steps 1 to 3
+    
+Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
 
-    **[`iter8ctl`](../../../getting-started/quick-start/with-knative/#8-observe-experiment):** This tutorial uses `iter8ctl`.
-
-## 1. Create app with live and dark versions
+## 4. Create app with live and dark versions
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
 ```
@@ -70,7 +70,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
         percent: 0
     ```
 
-## 2. Create Istio virtual services
+## 5. Create Istio virtual services
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
 ```
@@ -136,7 +136,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
     ```
 
 
-## 3. Generate requests
+## 6. Generate requests
 
 ```shell
 TEMP_DIR=$(mktemp -d)
@@ -171,7 +171,7 @@ cd $ITER8
           restartPolicy: Never
     ```
 
-## 4. Create Iter8 experiment
+## 7. Create Iter8 experiment
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
@@ -213,29 +213,8 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
             value: sample-app-v2
     ```
 
-## 5. Observe experiment
-Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
-
-=== "Metrics-based analysis"
-    ```shell
-    while clear; do
-    kubectl get experiment mirroring -o yaml | iter8ctl describe -f -
-    sleep 4
-    done
-    ```
-
-    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
-
-    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by the version being tested. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
-
-=== "Experiment progress"
-    ```shell
-    kubectl get experiment mirroring --watch
-    ```
-
-    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
-
-    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
+## 8. Observe experiment
+Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `mirroring` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
 
 ???+ info "Understanding what happened"
     1. You configured a Knative service with two versions of your app. In the `service.yaml` manifest, you specified that the live version, `sample-app-v1`, should receive 100% of the production traffic and the dark version, `sample-app-v2`, should receive 0% of the production traffic.
@@ -250,7 +229,7 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     
     5. You created an Iter8 `Conformance` experiment to evaluate the dark version. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the dark version satisfied all the objectives specified in `experiment.yaml`.
 
-## 6. Cleanup
+## 9. Cleanup
 
 ```shell
 kubectl delete -f $ITER8/samples/knative/mirroring/curl.yaml
