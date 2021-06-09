@@ -35,16 +35,24 @@ We welcome many different types of contributions including:
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
-[meetings](#come-to-meetings) or [contact us](../../getting-started/help) and let's discuss how we can work together. 
+[community meetings](#come-to-meetings) or [contact us](../../getting-started/help) and let's discuss how we can work together. 
 
 *** 
 
-## Come to meetings!
-Absolutely everyone is welcome to come to any of our meetings. You never need an
-invite to join us. In fact, we want you to join us, even if you don’t have
+## Come to Meetings!
+Everyone is welcome to join our community meetings. You never need an
+invite to attend. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
 
-You can find out more about our meetings [here](../../getting-started/help). We welcome everyone to join! Over time, we hope that you feel comfortable voicing your opinions, giving
+Our community meetings are on Wednesday at 1PM EST/EDT. You can find the video
+conference link [here](https://meet.google.com/hys-ubrv-bsd). You can find the
+agenda [here](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing) 
+as well as the meeting notes [here](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing).
+If you have a topic you would like to discuss, please put it on the agenda as 
+well as a time estimate. Community meetings will be recorded
+and available to the public on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
+
+We welcome everyone to join! Over time, we hope that you feel comfortable voicing your opinions, giving
 feedback on others’ ideas, and even sharing your own ideas, and experiences.
 
 ***
@@ -61,7 +69,7 @@ your first pull request.
 
 Sometimes there won’t be any issues with these labels. That’s ok! There is
 likely still something for you to work on. If you want to contribute but you
-don’t know where to start or can't find a suitable issue, you can reach out to us over the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) for help finding something to work on.
+don’t know where to start or can't find a suitable issue, you can reach out to us over the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) for help finding something to work on.
 
 Once you see an issue that you'd like to work on, please post a comment saying
 that you want to work on it. Something like "I want to work on this" is fine.
@@ -73,17 +81,17 @@ that you want to work on it. Something like "I want to work on this" is fine.
 The best ways to reach us with a question when contributing is to ask on:
 
 * The original GitHub issue
-* `#development` channel in the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
-* Bring your questions to [Iter8 meetings](#come-to-meetings)
+* `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
+* Bring your questions to our [community meetings](#come-to-meetings)
 
 ## Pull Request Lifecycle
 
 * Your PR is associated with one (and infrequently, with more than one) [GitHub issue](https://github.com/iter8-tools/iter8/issues). You can start the submission of your PR as soon as this issue has been created.
 * Follow the [standard GitHub fork and pull request process](https://gist.github.com/Chaser324/ce0505fbed06b947d962) when creating and submitting your PR.
 * The associated GitHub issue might need to go through design discussions and may not be ready for development. Your PR might require new tests; these new or existing tests may not yet be running successfully. At this stage, [keep your PR as a draft](https://github.blog/2019-02-14-introducing-draft-pull-requests/), to signal that it is not yet ready for review.
-* Once design discussions are complete and tests pass, convert the draft PR into a regular PR to signal that it is ready for review. Additionally, post a message in the #development slack channel of the [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) with a link to your PR. This will expedite the review.
+* Once design discussions are complete and tests pass, convert the draft PR into a regular PR to signal that it is ready for review. Additionally, post a message in the `#development` Slack channel of the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) with a link to your PR. This will expedite the review.
 * You can expect an initial review within 1-2 days of submitting a PR, and follow up reviews (if any) to happen over 2-5 days.
-* Use the #development slack channel of [Iter8 slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) to ping/bump when the pull request is ready for further review or if it appears stalled.
+* Use the `#development` Slack channel of [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) to ping/bump when the pull request is ready for further review or if it appears stalled.
 * Iter8 releases happen frequently. Once your PR is merged, you can expect your contribution to show up *live* in a short amount of time at https://iter8.tools.
 
 
