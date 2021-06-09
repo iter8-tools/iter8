@@ -2,32 +2,30 @@
 template: main.html
 ---
 
-# Progressive Canary Release with Traffic Segmentation
+# User Segmentation
 
-!!! tip ""
-    An experiment with [`Canary`](../../../concepts/buildingblocks/#testing-pattern) testing, [`Progressive`](../../../concepts/buildingblocks/#deployment-pattern) deployment and [traffic segmentation](../../../concepts/buildingblocks/#traffic-engineering).
+!!! tip "Scenario: SLO validation with user segmentation"
+    [User segmentation](../../../concepts/buildingblocks/#traffic-engineering) is the ability to carve out a specific segment of users for an experiment, leaving the rest of the users unaffected by the experiment.
+
+    In this tutorial, we will segment users into two groups: those from Wakanda, and others. Users from Wakanda will participate in the experiment: specifically, requests originating in Wakanda may be routed to baseline or candidate; requests that are originating from Wakanda will not participate in the experiment and are routed only to the baseline The experiment is depicted below.
+
+    ![User segmentation](../../images/request-routing.png)    
+
+???+ warning "Before you begin... "
+
+    This tutorial is available for the following K8s stacks.
+
+    [Knative](#before-you-begin){ .md-button }
+
+    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+
+## Steps 1 to 3
     
-    ![Canary](../../images/request-routing.png)
+Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
 
-You will create the following resources in this tutorial.
-
-1. **Knative services** implementing an app with `baseline` and `candidate` versions.
-2. An  **Istio virtual service** which routes requests based on an HTTP header called `country`. All requests are routed to the `baseline`, except those with their `country` header field set to `wakanda`; these may be routed to the `baseline` or `candidate`.
-3. Two **curl-based traffic generators** which simulate user requests; one of them sets the `country` HTTP header field in its requests to `wakanda`, and the other sets it to `gondor`.
-4. An **Iter8 experiment** which verifies that the `candidate` satisfies mean latency, 95th percentile tail latency, and error rate `objectives`, and progressively increases the proportion of traffic with `country: wakanda` header that is routed to the `candidate`.
-
-???+ warning "Before you begin, you will need... "
-    **Kubernetes cluster with Iter8, Knative and Istio:** Ensure that you have a Kubernetes cluster with Iter8, Knative with the Istio networking layer, Prometheus add-on, and Iter8's sample metrics for Knative installed. You can do so by following Steps 1, 2, 3 and 6 of the [quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/), and selecting Istio during Step 3.
-
-    **Cleanup:** If you ran an Iter8 tutorial earlier, run the associated cleanup step.
-
-    **ITER8 environment variable:** Ensure that `ITER8` environment variable is set to the root directory of your cloned Iter8 repo. See [Step 2 of the quick start tutorial for Knative](../../../getting-started/quick-start/with-knative/#2-clone-iter8-repo) for example.
-
-    **[`iter8ctl`](../../../getting-started/quick-start/with-knative/#8-observe-experiment):** This tutorial uses `iter8ctl`.
-
-## 1. Create versions
+## 4. Create versions
 ```shell
-kubectl apply -f $ITER8/samples/knative/traffic-segmentation/services.yaml
+kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
 ```
 
 ??? info "Look inside services.yaml"
@@ -70,9 +68,9 @@ kubectl apply -f $ITER8/samples/knative/traffic-segmentation/services.yaml
     ```
 
 
-## 2. Create Istio virtual service
+## 5. Create routing rule
 ```shell
-kubectl apply -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
+kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
 ```
 
 ??? info "Look inside routing-rule.yaml"
@@ -123,12 +121,12 @@ kubectl apply -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
                 Host: sample-app-v1.default
     ```
 
-## 3. Generate traffic
+## 6. Generate traffic
 ```shell
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
 curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
-istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/traffic-segmentation/curl.yaml | kubectl create -f -
+istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/user-segmentation/curl.yaml | kubectl create -f -
 cd $ITER8
 ```
 
@@ -166,11 +164,11 @@ cd $ITER8
           restartPolicy: Never
     ```
 
-## 4. Create Iter8 experiment
+## 7. Create Iter8 experiment
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
-kubectl apply -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
+kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
 ```
 
 ??? info "Look inside experiment.yaml"
@@ -226,38 +224,8 @@ kubectl apply -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 5. Observe experiment
-Observe the experiment in realtime. Paste commands from the tabs below in separate terminals.
-
-=== "Metrics-based analysis"
-    ```shell
-    while clear; do
-    kubectl get experiment request-routing -o yaml | iter8ctl describe -f -
-    sleep 4
-    done
-    ```
-
-    The output will look similar to the [iter8ctl output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
-
-    As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions. The candidate is identified as the winner and is recommended for promotion. When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
-
-=== "Experiment progress"
-    ```shell
-    kubectl get experiment request-routing --watch
-    ```
-
-    The output will look similar to the [kubectl get experiment output](../../../getting-started/quick-start/with-knative/#8-observe-experiment) in the quick start instructions.
-
-    When the experiment completes (in ~ 2 mins), you will see the experiment stage change from `Running` to `Completed`.
-
-=== "Traffic split"
-    ```shell
-    kubectl get vs routing-for-wakanda -o json --watch | jq .spec.http[0].route
-    ```
-
-    The output shows the traffic split for the wakanda as defined in the `VirtualService` resource.
-
-    As the experiment progresses, you should see traffic progressively shift from host `sample-app-v1.default.svc.cluster.local` to host `sample-app-v2.default.svc.cluster.local`. When the experiment completes, the traffic remains split; this experiment has no _finish_ action to promote the winning version.
+## 8. Observe experiment
+Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `request-routing` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
 
 ???+ info "Understanding what happened"
     1. You configured two Knative services corresponding to two versions of your app in `services.yaml`.
@@ -274,10 +242,10 @@ Observe the experiment in realtime. Paste commands from the tabs below in separa
     
     6. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern to evaluate the `candidate`. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that the `candidate` version satisfied all the `objectives` specified in the experiment. It progressively increased the proportion of traffic with `country: wakanda` header that is routed to the `candidate`.
 
-## 6. Cleanup
+## 9. Cleanup
 ```shell
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/curl.yaml
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/routing-rule.yaml
-kubectl delete -f $ITER8/samples/knative/traffic-segmentation/services.yaml
+kubectl delete -f $ITER8/samples/knative/user-segmentation/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/user-segmentation/curl.yaml
+kubectl delete -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
+kubectl delete -f $ITER8/samples/knative/user-segmentation/services.yaml
 ```
