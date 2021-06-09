@@ -6,11 +6,13 @@ on:
     - master
     paths:
     - 'install/**'
+    - '!install/docker/**'
     - 'samples/knative/**'
     - '.github/workflows/knative-e2e-tests.yaml'
   pull_request:
     paths:
     - 'install/**'
+    - '!install/docker/**'
     - 'samples/knative/**'
     - '.github/workflows/knative-e2e-tests.yaml'
 
