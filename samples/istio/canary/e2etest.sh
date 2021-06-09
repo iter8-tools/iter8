@@ -8,7 +8,7 @@ source $ITER8/samples/library.sh
 trap "reportFailure" EXIT
 
 # create cluster
-kind create cluster
+kind create cluster --wait 5m
 kubectl cluster-info --context kind-kind
 
 # platform setup
