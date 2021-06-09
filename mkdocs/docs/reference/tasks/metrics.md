@@ -20,8 +20,8 @@ start:
   with:
     versions:
       # Version names must be unique. 
-      # Each name must match the name of a version specified in the
-      # versionInfo field of the experiment spec.
+      # Each version name in the task must match the name of some version
+      # in the versionInfo field of the experiment spec.
     - name: iter8-app
       # URL is where this version receives HTTP requests
       url: http://iter8-app.default.svc:8000
