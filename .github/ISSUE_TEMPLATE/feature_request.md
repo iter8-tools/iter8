@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for Iter8
 title: ""
-labels: 'enhancement'
+labels: kind/enhancement
 assignees: ''
 
 ---
