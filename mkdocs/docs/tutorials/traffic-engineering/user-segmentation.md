@@ -68,7 +68,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
     ```
 
 
-## 5. Create Istio virtual service
+## 5. Create routing rule
 ```shell
 kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
 ```

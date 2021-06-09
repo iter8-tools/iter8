@@ -14,8 +14,8 @@ $ITER8/samples/knative/quickstart/platformsetup.sh istio
 echo "Creating live and dark versions"
 kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
 
-# create Istio virtual services
-echo "Creating Istio virtual services"
+# create routing rule
+echo "Creating routing rule"
 kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml 
 
 # Generate requests

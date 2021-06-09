@@ -70,7 +70,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
         percent: 0
     ```
 
-## 5. Create Istio virtual services
+## 5. Create routing rule
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
 ```
