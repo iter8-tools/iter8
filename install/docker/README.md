@@ -14,12 +14,12 @@ cd $ITER8/install/docker
 
 2. Build image
 ```shell
-docker build -t iter8:ind .
+docker build -t ind:latest .
 ```
 
 3. Run image in detached mode
 ```shell
-docker run --name ind --privileged -d iter8:ind
+docker run --name ind --privileged -d ind:latest
 ```
 
 4. Run Iter8 in Docker
