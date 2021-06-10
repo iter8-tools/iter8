@@ -12,15 +12,21 @@ The `metrics/collect` takes enables collection of [builtin metrics](). It genera
 
 ### Example
 
-The following loop action contains a `metrics/collect` task which is executed during every loop of the experiment. The task sends a stream of HTTP requests to the version named `sample-app-v1` at the specified URL and collects builtin latency/error metrics for this version.
+The following start action contains a `metrics/collect` task which is executed at the start of the experiment. The task sends a certain number of HTTP requests to each version specified in the task, and collects builtin latency/error metrics for them.
 
 ```yaml
-loop:
+start:
 - task: metrics/collect
   with:
-    versions: 
-    - name: sample-app-v1
-      url: http://sample-app.default.svc.cluster.local
+    versions:
+      # Version names must be unique. 
+      # Each version name in the task must match the name of some version
+      # in the versionInfo field of the experiment spec.
+    - name: iter8-app
+      # URL is where this version receives HTTP requests
+      url: http://iter8-app.default.svc:8000
+    - name: iter8-app-candidate
+      url: http://iter8-app-candidate.default.svc:8000
 ```
 
 ### Inputs
