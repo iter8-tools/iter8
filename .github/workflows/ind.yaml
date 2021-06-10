@@ -4,7 +4,7 @@ on:
     types: [published]
   push:
     branches:
-      - main # Publish `main` as Docker `latest` image.
+      - master # Publish `master` as Docker `latest` image.
     tags:
       - v* # Publish `v1.2.3` tags as releases.
 
@@ -26,7 +26,7 @@ jobs:
         # Strip "v" prefix from tagref
         if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
           echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == *"main" ]]; then
+        elif [[ "${{ github.ref }}" == *"master" ]]; then
           echo "VERSION=latest" >> $GITHUB_ENV
         fi
     - name: Get owner and repo
