@@ -1,0 +1,4 @@
+# a path:
+/charts/index.yaml
+  # headers for that path:
+  content-type: text/yaml
