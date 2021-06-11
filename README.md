@@ -5,4 +5,5 @@
 
 For Iter8 project documentation, please visit [https://iter8.tools](https://iter8.tools).
 
-
+### Helm charts repo
+This is the `helm` branch of the Iter8 repo and is intended to store Helm experiment charts.
