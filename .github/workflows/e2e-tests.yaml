@@ -345,6 +345,10 @@ jobs:
         do 
           # Apply metrics
           kubectl apply -f $ITER8/samples/e2e-tests/race-condition/metrics.yaml
+
+          # Give a chance for metrics to be created
+          sleep 10.0
+          
           # Apply experiment
           kubectl apply -f $ITER8/samples/e2e-tests/race-condition/experiment.yaml
           # Wait for experiment to complete
