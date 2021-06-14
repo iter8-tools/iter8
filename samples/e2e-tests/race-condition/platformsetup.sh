@@ -31,7 +31,7 @@ else
 fi
 
 # Step 1: Install Iter8
-echo "Installing Iter8 with Knative support"
+echo "Installing Iter8"
 kustomize build $ITER8/install/core | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build $ITER8/install/builtin-metrics | kubectl apply -f -
