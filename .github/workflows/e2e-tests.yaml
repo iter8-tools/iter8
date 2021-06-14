@@ -346,8 +346,9 @@ jobs:
           kubectl apply -f $ITER8/samples/e2e-tests/race-condition/metrics.yaml
           # Apply experiment
           kubectl apply -f $ITER8/samples/e2e-tests/race-condition/experiment.yaml
-          sleep 20.0
-          # Check experiment terminated successfully
+          # Wait for experiment to complete
+          kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=20s
+          # Check experiment results are correct
           source $ITER8/samples/e2e-tests/race-condition/check.sh
 
           # delete metrics and experiment
