@@ -1,0 +1,83 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  name: gitops-exp
+spec:
+  # target identifies the service under experimentation using its fully qualified name
+  target: default/productpage
+  strategy:
+    # this experiment will perform an A/B test
+    testingPattern: Canary
+    # this experiment will progressively shift traffic to the winning version
+    deploymentPattern: Progressive
+    actions:
+      # when the experiment completes, promote the winning version in the Env repo
+      finish:
+      - task: common/exec
+        with:
+          cmd: /bin/bash
+          args: [
+                 "-c",
+                 "apt-get install -y git jq curl;\
+                  REPO=github.com/MY_ORG/iter8;\
+                  BRANCH=master;\
+                  USER=MY_ORG;\
+                  TOKEN=`kubectl -n {{ .namespace }} get secret iter8-token -o json | jq -r .data.token | base64 -d`;\
+                  git config --global user.email 'iter8@iter8.tools';\
+                  git config --global user.name 'Iter8';\
+                  git clone https://${USER}:${TOKEN}@${REPO} --branch=${BRANCH};\
+                  cd iter8/samples/gitops;\
+                  TMP=`mktemp`;\
+                  sed 's/candidate/stable/g' {{ .filepath }} > $TMP;\
+                  mv $TMP productpage.yaml;\
+                  rm -f productpage-candidate.yaml;\
+                  rm -f fortio.yaml;\
+                  rm -f experiment.yaml;\
+                  if [ `git status -s | wc -l` != 0 ];\
+                  then \
+                    git checkout -b iter8_exp;\
+                    git commit -a -m 'update baseline';\
+                    git push -f origin iter8_exp;\
+                    curl -u${USER}:${TOKEN} -XPOST https://api.github.com/repos/huang195/iter8/pulls -s -d \"{\\\"head\\\":\\\"iter8_exp\\\", \\\"base\\\":\\\"${BRANCH}\\\", \\\"body\\\":\\\"update baseline\\\", \\\"title\\\":\\\"Iter8 GitOps\\\"}\";\
+                  fi;\
+                  kubectl -n {{ .namespace }} apply -f istio-vs.yaml;\
+                 "
+                ]
+  criteria:
+    objectives: # used for validating versions
+    - metric: default/mean-latency
+      upperLimit: 300
+    - metric: default/error-rate
+      upperLimit: "0.01"
+    requestCount: default/request-count
+  duration: # product of fields determines length of the experiment
+    intervalSeconds: 10
+    iterationsPerLoop: 10
+  versionInfo:
+    # information about the app versions used in this experiment
+    baseline:
+      name: productpage-stable
+      variables:
+      - name: namespace # used by final action if this version is the winner
+        value: default
+      - name: filepath
+        value: productpage.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        kind: VirtualService
+        namespace: default
+        name: bookinfo
+        fieldPath: .spec.http[0].route[0].weight
+    candidates:
+    - name: productpage-candidate
+      variables:
+      - name: namespace # used by final action if this version is the winner
+        value: default
+      - name: filepath
+        value: productpage-candidate.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        kind: VirtualService
+        namespace: default
+        name: bookinfo
+        fieldPath: .spec.http[0].route[1].weight
