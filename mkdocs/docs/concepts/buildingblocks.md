@@ -4,7 +4,9 @@ template: main.html
 
 # Building Blocks
 
-> Iter8 defines a Kubernetes resource called **Experiment** that automates SLO validation, A/B, and A/B/n testing experiments. During an experiment, Iter8 can compare multiple versions, find, and safely promote the **winning version (winner)** based on business metrics and performance metrics like latency and error-rate.
+> Iter8 defines a Kubernetes resource called **Experiment** that automates SLO validation, A/B(/n) testing experiments. During an experiment, Iter8 can compare multiple versions, and find, & safely promote the **winning version (winner)** based on business rewards or performance metrics like latency and error-rate.
+
+> As part of an experiment, Iter8 can enable powerful **traffic engineering** features such as dark launches, progressive traffic shifting, traffic mirroring, user segmentation, and session affinity.
 
 We now introduce the building blocks of an Iter8 experiment.
 
@@ -19,7 +21,7 @@ An example of an objective is as follows: the 99th-percentile tail latency of th
 ***
 
 ## Reward
-**Reward** typically corresponds to a business metric which you wish to optimize during an experiment. In Iter8 experiments, reward is specified as a metrics along a preferred direction, which could be `high` or `low`. 
+**Reward** typically corresponds to a business metric which you wish to optimize during an experiment. In Iter8 experiments, reward is specified as a metrics along with a preferred direction, which could be `high` or `low`. 
 
 Examples of reward includes user-engagement, conversion rate, click-through rate, revenue, precision, recall, and accuracy (for ML models), all of which have a preferred direction `high`. The number of GPU cores consumed by an ML model version is an example of a reward with preferred direction `low`.
 

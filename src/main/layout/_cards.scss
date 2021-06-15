@@ -13,7 +13,7 @@
     font-family: 'Lato', sans-serif;
     font-weight: 300;
     box-sizing: border-box;
-    padding: 0 15px;
+    padding: 15px;
     word-break: break-word
 }
 
@@ -54,6 +54,21 @@
     }    
 }
 
+.feature-item ul {
+    font-size: 20px;
+    line-height: 1.8em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    color: #111;
+    margin: 0 0 10px;
+    display: block;
+
+    // Adjust for slate theme
+    [data-md-color-scheme="slate"] & {
+        color: #fff;
+    }    
+}
+
 @media screen and (min-width:76.25em) {
     .top-hr {
         width: 100%;
@@ -66,7 +81,7 @@
     }
 
     .feature-item {
-        width: 100%;        
+        width: 33%;        
     }
 
     .feature-item:hover {
@@ -142,12 +157,12 @@
     .tx-hero {
         color: var(--md-primary-bg-color);
 
-        @media screen and (min-width:50.0em) {
+        @media screen and (min-width:76.25em) {
             display: flex;
             flex-wrap: wrap;    
 
             .tx-card {
-                width: 50%;
+                width: 33%;
             }
         }
 

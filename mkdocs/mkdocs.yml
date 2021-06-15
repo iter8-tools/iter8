@@ -28,6 +28,7 @@ theme:
   # - navigation.instant
   - navigation.sections
   - navigation.tabs
+  - navigation.top  
   palette:
     - scheme: default
       primary: black
@@ -55,7 +56,7 @@ plugins:
         
 # Customization
 extra:
-  title: "SLO validation, A/B testing, and progressive delivery for K8s apps/ML models"
+  title: "SLO validation, A/B testing, and progressive deployments for K8s apps/ML models"
   version:
     provider: mike
   social:
@@ -111,9 +112,13 @@ nav:
     - What is Iter8?: concepts/whatisiter8.md
     - Experiment building blocks: concepts/buildingblocks.md
   - Getting Started:
-    - Quick start: getting-started/quick-start.md
     - Install: getting-started/install.md
     - Getting help: getting-started/help.md
+    - Quick start tutorial:
+      - KFServing: getting-started/quick-start/kfserving.md
+      - Seldon: getting-started/quick-start/seldon.md
+      - Knative: getting-started/quick-start/knative.md
+      - Istio: getting-started/quick-start/istio.md
   - Tutorials:
     - Testing patterns:
       - Canary: tutorials/testing-patterns/canary.md

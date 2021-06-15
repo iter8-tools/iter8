@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# Quick Start
+# Quick Start with Knative
 
 !!! tip "Scenario: A/B testing"
     [A/B testing](../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an app/ML model, and select a winner based on a (business) reward metric and objectives (SLOs). In this tutorial, you will:
