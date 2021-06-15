@@ -38,7 +38,7 @@ spec:
 
 ## Explanation
 1. When the `mock` field is present within a metric spec, Iter8 will mock the values for this metric.
-2. The `name` field refers to the name of the version. Version names should be unique. In order for the mocked metric to be useful, version name should match the name of a version in the experiment's `versionInfo` section.
+2. The `name` field refers to the name of the version. Version names should be unique. Version name should match the name of a version in the experiment's `versionInfo` section. If not, any value generated for the non-matching name will be ignored.
 3. You can mock both `Counter` and `Gauge` metrics.
 4. The semantics of `level` field are as follows:
 	* If the metric is a counter, level is `x`, and time elapsed since the start of the experiment is `y` seconds, then `xy` is the metric value. Note that the (mocked) metric value will keep increasing over time.
