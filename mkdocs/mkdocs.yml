@@ -126,6 +126,8 @@ nav:
       - Session affinity: tutorials/traffic-engineering/session-affinity.md
       - User segmentation: tutorials/traffic-engineering/user-segmentation.md
       - Traffic mirroring/shadowing: tutorials/traffic-engineering/mirroring.md
+    - GitOps:
+      - Argo CD + Istio: tutorials/gitops/argocd.md
   - Metrics:
     - Using metrics: metrics/using-metrics.md
     - Builtin metrics: metrics/builtin.md
