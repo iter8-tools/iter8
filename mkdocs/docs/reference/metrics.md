@@ -57,5 +57,5 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| name | string | Name of a version. Version name must match the name of some version in the versionInfo field of the experiment spec. | Yes |
-| level | string | Level of a version. The semantics of level are as follows. If the metric is a counter, if level is `x`, and time elapsed since the start of the experiment is `y`, then `xy` is the mocked metric value. This will keep increasing the metric value over time. If the metric is gauge, if level is `x`, the metric value is a random value with mean `x`. The expected value of the mocked metric is `x`; the actual value may increase or decrease over time. | Yes |
+| name | string | Name of a version. Version names should be unique. In order for the mocked metric to be useful, version name should match the name of a version in the experiment's `versionInfo` section. | Yes |
+| level | string | Level of a version. The semantics of level are as follows. If the metric is a counter, if level is `x`, and time elapsed since the start of the experiment is `y` seconds, then `xy` is the mocked metric value. This will keep increasing the metric value over time. If the metric is gauge, if level is `x`, the metric value is a random value with mean `x`. The expected value of the mocked metric is `x`; the actual value may increase or decrease over time. | Yes |

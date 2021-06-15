@@ -19,9 +19,14 @@ start:
 - task: metrics/collect
   with:
     versions:
-      # Version names must be unique. 
-      # Each version name in the task must match the name of some version
-      # in the versionInfo field of the experiment spec.
+	# Version names must be unique. 
+	# If the version name matches the name of a version in the experiment's `versionInfo` section, 
+	# then the version is considered *real*. 
+	# If the version name does not match the name of a version in the experiment's `versionInfo` section, 
+	# then the version is considered *pseudo*. 
+	# Builtin metrics collected for real versions can be used within the experiment's `criteria` section. 
+	# Pseudo versions are useful if the intent is only to generate load (`GET` and `POST` requests). 
+	# Builtin metrics collected for pseudo versions cannot be used with the experiment's `criteria` section.
     - name: iter8-app
       # URL is where this version receives HTTP requests
       url: http://iter8-app.default.svc:8000
@@ -78,7 +83,7 @@ type CollectInputs struct {
 #### Version
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| name | string | Name of the version. Version names must be unique and must match one of the version names in the VersionInfo field of the experiment. | Yes |
+| name | string | Name of the version. Version names must be unique. If the version name matches the name of a version in the experiment's `versionInfo` section, then the version is considered *real*. If the version name does not match the name of a version in the experiment's `versionInfo` section, then the version is considered *pseudo*. Builtin metrics collected for real versions can be used within the experiment's `criteria` section. Pseudo versions are useful if the intent is only to generate load (`GET` and `POST` requests). Builtin metrics collected for pseudo versions cannot be used with the experiment's `criteria` section. | Yes |
 | qps | float | How many queries per second will be sent to this version. Default is 8.0. | No |
 | headers | map[string]string | HTTP headers to be used in requests sent to this version. | No |
 | url | string | HTTP URL of this version. | Yes |
