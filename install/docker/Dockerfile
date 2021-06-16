@@ -1,4 +1,10 @@
 FROM docker:dind
+ 
+#install go
+COPY --from=golang:1.15-alpine /usr/local/go/ /usr/local/go/
+ 
+ENV PATH="/usr/local/go/bin:${PATH}"
+
 WORKDIR /iter8
 COPY iter8.sh .
 RUN chmod +x ./iter8.sh
@@ -26,3 +32,6 @@ RUN apk update && apk upgrade && apk add --no-cache bash git less openssh
 RUN curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
 RUN chmod +x ./kustomize
 RUN mv ./kustomize /bin/kustomize
+
+# get iter8ctl
+RUN GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3

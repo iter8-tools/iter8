@@ -22,9 +22,14 @@ docker build -t ind:latest .
 docker run --name ind --privileged -d ind:latest
 ```
 
-4. Run Iter8 in Docker
+4. Run Iter8 in Docker.
 ```shell
 docker exec ind /iter8/iter8.sh
+```
+
+If a version other than latest master version of iter8 needs to be run, use the following command instead
+```shell
+docker exec  -e TAG=v0.6.5 ind /iter8/iter8.sh
 ```
 
 5. Cleanup
