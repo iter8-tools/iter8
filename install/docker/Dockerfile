@@ -1,7 +1,7 @@
 FROM docker:dind
  
 #install go
-COPY --from=golang:1.13-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.15-alpine /usr/local/go/ /usr/local/go/
  
 ENV PATH="/usr/local/go/bin:${PATH}"
 
