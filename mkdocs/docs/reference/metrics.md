@@ -11,7 +11,7 @@ template: main.html
 !!! note "Version"
     This document describes version `v2alpha2` of Iter8's metric API.
 
-Metrics usage is documented [here](../../metrics/using-metrics/) and creation of metrics is documented [here](../../metrics/defining-iter8-metrics/).
+Metrics usage is documented [here](../../metrics/using-metrics/). Iter8 provides a set of builtin metrics that are documented [here](../../metrics/builtin/). Creation of custom metrics is documented [here](../../metrics/custom/). It is also possible to mock metric values; mock metrics are documented [here](../../metrics/mock).
 
 ??? example "Sample metric"
     ```yaml linenums="1"
@@ -48,5 +48,14 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | sampleSize | string | Reference to a metric that represents the number of data points over which the value of this metric is computed. This field applies only to `Gauge` metrics. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace of the referring metric. | No |
 | secret | string | Reference to a secret that contains information used for authenticating with the metrics provider. In particular, Iter8 uses data in this secret to substitute placeholders in the HTTP headers and URL while querying the provider. References can be expressed in the form 'name' or 'namespace/name'. If just `name` is used, the implied namespace is the namespace where Iter8 is installed (which is `iter8-system` by default). | No |
 | headerTemplates | [][NamedValue](../experiment/#namedvalue) | List of name/value pairs corresponding to the name and value of the HTTP request headers used by Iter8 when querying the metrics provider. Each name represents a header field name; the corresponding value is a string template with placeholders; the placeholders will be dynamically substituted by Iter8 with values at query time. Placeholder substitution is attempted only if `authType` and `secret` fields are present. | No |
-| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response returned by the provider. | Yes |
-| urlTemplate | string | Template for the metric provider's URL. Typically, urlTemplate is expected to be the actual URL without any placeholders. However, urlTemplate may be templated, in which case, Iter8 will attempt to substitute placeholders in the urlTemplate at query time using the `secret` referenced in the metric. Placeholder substitution will not be attempted if `secret` is not specified. | Yes |
+| jqExpression | string | The [jq](https://stedolan.github.io/jq/) expression used by Iter8 to extract the metric value from the JSON response returned by the provider. This field may be omitted if the metric is [mocked](../../metrics/mock). | No |
+| urlTemplate | string | Template for the metric provider's URL. Typically, urlTemplate is expected to be the actual URL without any placeholders. However, urlTemplate may be templated, in which case, Iter8 will attempt to substitute placeholders in the urlTemplate at query time using the `secret` referenced in the metric. Placeholder substitution will not be attempted if `secret` is not specified. This field may be omitted if the metric is [mocked](../../metrics/mock). | No |
+| urlTemplate | string | Template for the metric provider's URL. Typically, urlTemplate is expected to be the actual URL without any placeholders. However, urlTemplate may be templated, in which case, Iter8 will attempt to substitute placeholders in the urlTemplate at query time using the `secret` referenced in the metric. Placeholder substitution will not be attempted if `secret` is not specified. This field may be omitted if the metric is [mocked](../../metrics/mock). | No |
+| mock | [][NamedLevel](#named-level) | Information on how to mock this metric. The presence of this fields indicates that this metric will be mocked; the absence of this field indicates that this is a real metric. | No |
+
+##### Named Level
+
+| Field name | Field type         | Description | Required |
+| ----- | ------------ | ----------- | -------- |
+| name | string | Name of the version. Version names should be unique. Version name should match the name of a version in the experiment's `versionInfo` section. If not, any value generated for the non-matching name will be ignored. | Yes |
+| level | string | Level of a version. The semantics of level are as follows. If the metric is a counter, if level is `x`, and time elapsed since the start of the experiment is `y` seconds, then `xy` is the mocked metric value. This will keep increasing the metric value over time. If the metric is gauge, if level is `x`, the metric value is a random value with mean `x`. The expected value of the mocked metric is `x`; the actual value may increase or decrease over time. | Yes |

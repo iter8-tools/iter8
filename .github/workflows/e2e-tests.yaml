@@ -8,13 +8,13 @@ on:
     - 'install/**'
     - '!install/docker/**'
     - 'samples/knative/**'
-    - '.github/workflows/knative-e2e-tests.yaml'
+    - '.github/workflows/e2e-tests.yaml'
   pull_request:
     paths:
     - 'install/**'
     - '!install/docker/**'
     - 'samples/knative/**'
-    - '.github/workflows/knative-e2e-tests.yaml'
+    - '.github/workflows/e2e-tests.yaml'
 
 jobs:
   quickstart:
@@ -321,4 +321,43 @@ jobs:
       run: |
         export ITER8=$(pwd)
         source $ITER8/samples/knative/canaryfixedsplit/check.sh
+
+  race-condition:
+    name: testing race conditions with Iter8 metrics
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/e2e-tests/race-condition/platformsetup.sh
+
+    - name: test race condition
+      run: |
+        export ITER8=$(pwd)
+        export EXPERIMENT=race-condition
+
+        for x in 1 2 3 4 5
+        do 
+          # Apply metrics
+          kubectl apply -f $ITER8/samples/e2e-tests/race-condition/metrics.yaml
+
+          # Give a chance for metrics to be created
+          sleep 10.0
+          
+          # Apply experiment
+          kubectl apply -f $ITER8/samples/e2e-tests/race-condition/experiment.yaml
+          # Wait for experiment to complete
+          kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=20s
+          # Check experiment results are correct
+          source $ITER8/samples/e2e-tests/race-condition/check.sh
+
+          # delete metrics and experiment
+          kubectl delete -f $ITER8/samples/e2e-tests/race-condition/metrics.yaml
+          kubectl delete -f $ITER8/samples/e2e-tests/race-condition/experiment.yaml
+        done
 
