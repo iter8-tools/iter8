@@ -4,13 +4,20 @@ template: main.html
 
 # Building Blocks
 
-> Iter8 defines a Kubernetes resource called **Experiment** that automates SLO validation, A/B(/n) testing experiments. During an experiment, Iter8 can compare multiple versions, and find, & safely promote the **winning version (winner)** based on business rewards or performance metrics like latency and error-rate.
+> Iter8 defines a Kubernetes resource called **Experiment** that automates a variety of release engineering and experimentation strategies for Kubernetes applications.
 
-> As part of an experiment, Iter8 can enable powerful **traffic engineering** features such as dark launches, progressive traffic shifting, traffic mirroring, user segmentation, and session affinity.
-
-We now introduce the building blocks of an Iter8 experiment.
+We introduce the building blocks of an Iter8 experiment below.
 
 ***
+
+## Applications and Versions
+Iter8 defines an application very broadly as anything that can be instantiated (run) on Kubernetes, which can be versioned, and for which metrics can be collected. Examples of applications and versions are given below.
+
+1. A Kubernetes service whose versions correspond to `deployments`.
+2. A Kubernetes service whose versions correspond to `statefulsets`.
+3. A Knative service whose versions correspond to `revisions`.
+4. A KFServing inference service, whose versions correspond to model `revisions`.
+5. A distributed application whose versions correspond to Helm `releases`.
 
 ## Objectives
 
@@ -21,49 +28,141 @@ An example of an objective is as follows: the 99th-percentile tail latency of th
 ***
 
 ## Reward
-**Reward** typically corresponds to a business metric which you wish to optimize during an experiment. In Iter8 experiments, reward is specified as a metrics along with a preferred direction, which could be `high` or `low`. 
+**Reward** typically corresponds to a business metric which you wish to optimize during an A/B testing experiment. In Iter8 experiments, reward is specified as a metrics along with a preferred direction, which could be `high` or `low`. 
 
 Examples of reward includes user-engagement, conversion rate, click-through rate, revenue, precision, recall, and accuracy (for ML models), all of which have a preferred direction `high`. The number of GPU cores consumed by an ML model version is an example of a reward with preferred direction `low`.
 
 ***
 
-## Validation
-
-A version of your app/ML model is considered **validated**, if it satisfies the objectives specified in the experiment.
+## Baseline and candidate versions
+Every Iter8 experiment involves a `baseline` version and may also involve zero, one or more `candidate` versions. Experiments frequently involve two versions, baseline and a candidate.
 
 ***
 
 ## Testing pattern
 
-**Testing pattern** defines the number of versions involved in the experiment (1, 2, or more), and determines how the winner is identified. Iter8 supports **A/B**, **A/B/n**, **canary** and **conformance** testing patterns.
+**Testing pattern** determines how the **winning version (winner)** in an experiment is identified.
+
+=== "SLO Validation"
+    SLO validation experiments may involve a single version or two versions.
+
+    **SLO validation experiment with baseline version and no candidate:** If baseline satisfies the [objectives](#objectives), it is the winner. Otherwise, there is no winner.
+
+    **SLO validation experiment with baseline and candidate versions:** If candidate satisfies the [objectives](#objectives), it is the winner. Else, if baseline satisfies the [objectives](#objectives), it is the winner. Else, there is no winner.
+
+    ![SLO validation](../images/slovalidation.png)
+
 
 === "A/B"
-    A/B testing involves a baseline version, a candidate version, a reward metric, and objectives (optional). If both versions are validated, the version which optimizes the reward is the winner. If only a single version is validated, this version is the winner. If no version is validated, then there is no winner.
+    **A/B testing** involves a baseline version, a candidate version, and a reward metric, and objectives (optional). The version which performs best in terms of the reward metric is the winner.
 
     ![A/B](../images/ab.png)
 
 === "A/B/n"
-    A/B/n testing involves a baseline version, two or more candidate versions, a reward metric,  and objectives (optional). The winner of the experiment is the version which optimizes the reward among the subset of versions that are validated. If no version is validated, then there is no winner.
+    **A/B/n testing** involves a baseline version, two or more candidate versions, and a reward metric. The version which performs best in terms of the reward metric is the winner.
 
     ![A/B/n](../images/abn.png)
 
-=== "Canary"
-    Canary testing involves a baseline version, a candidate version, and objectives. If the candidate is validated, then candidate is the winner; else, if baseline is validated, then baseline is the winner. If no version is validated, then there is no winner.
+=== "Hybrid"
+    **Hybrid testing** pattern involves combines A/B or A/B/n testing on the one hand with SLO validation on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. If no version satisfies objectives, then there is no winner.
 
-    ![Canary](../images/canary.png)
-
-=== "Conformance"
-    Conformance testing involves a single version, a baseline. If it is validated, then baseline is the winner; else, there is no winner.
-
-    ![Conformance](../images/conformance.png)
+    ![Hybrid](../images/hybrid.png)
 
 ***
 
 ## Deployment pattern
+**Deployment pattern** defines how traffic is split between versions during the experiment. During Iter8 experiments, you can take advantage of all traffic engineering features available in your K8s environment (i.e., supported by the ingress or service mesh technology available in your K8s cluster). Some common deployment patterns that you can leverage in Iter8 experiments are described below.
 
-**Deployment pattern** determines how traffic is split between versions. Iter8 supports **progressive** and **fixed-split** deployment patterns.
+In the following description, `v1` and `v2` refer to the current and new versions of your application respectively.
 
-=== "Progressive"
+=== "Simple rollout & rollback"
+    This pattern is modeled after the [rolling update of a Kubernetes deployment](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/). 
+    
+    * After `v2` is deployed, it replaces `v1`.
+    * If `v2` is the winner of the experiment, it is retained.
+    * Else, `v2` is rolled back and `v1` is retained. 
+    
+    All traffic flows to `v2` during the experiment.
+
+    ![Simple rollout & rollback](../images/simplerolloutandrollback.png)
+
+=== "Blue/Green"
+
+    * After `v2` is deployed, both `v1` and `v2` are available. 
+    * All traffic is routed to `v2`. 
+    * If `v2` is the winner of the experiment, all traffic continues to flow to `v2`.
+    * Else, all traffic is routed back to `v1`.
+
+    ![Blue/Green](../images/bluegreen.png)
+
+=== "Dark launch"
+
+    * After `v2` is deployed, it is hidden from end-users.
+    * `v2` is not used to serve end-user requests but can still be experimented with.
+
+    === "Builtin load generation"
+        During the experiment, Iter8 generates load for `v2`.
+
+        ![Builtin](../images/darklaunchbuiltin.png)
+
+    === "Traffic mirroring (shadowing)"
+        Mirrored traffic is a replica of the real user requests[^1] that is routed to `v2`, and used to collect metrics for `v2`.
+
+        ![Mirroring](../images/mirroring.png)
+
+=== "Canary with traffic engineering"
+    Canary deployment involves exposing `v2` to a small fraction of end-user requests during the experiment before exposing it to a larger fraction of requests or all the requests.
+
+    === "%-based split"
+        A fixed % of end-user requests is sent to `v2` and the rest is sent to `v1`.
+
+        === "No segmentation"
+
+            * All users participate in the experiment.
+            * A fixed % of end-user requests is sent to `v2` and the rest is sent to `v1`.
+
+            ![canary-%-based](../images/canary-%-based.png)
+
+        === "User segmentation"
+
+            * Only a specific segment of the users participate in the experiment.
+            * A fixed % of requests from the participating segment is sent to `v2`. Rest is sent to `v1`.
+            * All requests from end-users in the non-participating segment is sent to `v1`.
+
+            ![canary-%-based-user-segmentation](../images/canary-%-segmentation.png)
+
+
+    === "Progressive traffic shift"
+
+        Traffic is incrementally shifted to the winner over multiple iterations.
+
+        === "No segmentation"
+
+            * All users participate in the experiment.
+            * Traffic is incrementally shifted to the winner over multiple iterations.
+
+            ![canary-progressive](../images/progressive.png)
+
+
+        === "User segmentation"
+
+            * Only a specific segment of the users participate in the experiment.
+            * Within this segment, traffic is incrementally shifted to the winner over multiple iterations.
+            * All requests from end-users in the non-participating segment is sent to `v1`.
+
+            ![canary-progressive-segmentation](../images/canary-progressive-segmentation.png)
+
+
+    === "Session affinity"
+        
+        Session affinity, sometimes referred to as sticky sessions, routes all requests coming from an end-user to the same version consistently throughout the experiment.
+
+        Session affinity is depicted in the picture below. User grouping and affinity can be configured based on a number of different attributes of the request including request headers, cookies, query parameters, geo location, user agent (browser version, screen size, operating system) and language.
+
+        ![session affinity](../images/session-affinity-exp.png)
+
+
+<!-- 
     Progressive deployment incrementally shifts traffic towards the winner over multiple iterations.
 
     ![Canary](../images/progressive.png)
@@ -71,11 +170,11 @@ A version of your app/ML model is considered **validated**, if it satisfies the 
 === "Fixed-split"
     Fixed-split deployment does not shift traffic between versions.
 
-    ![Canary](../images/fixedsplit.png)
+    ![Canary](../images/fixedsplit.png) -->
 
 ***
 
-## Traffic engineering
+<!-- ## Traffic engineering
 
 **Traffic engineering** refers to features such as **dark launch, traffic mirroring/shadowing, user segmentation** and **session affinity** that provide fine-grained controls over how traffic is routed to and from app versions.
 
@@ -104,14 +203,11 @@ Iter8 enables you to take total advantage of all the traffic engineering feature
     For example, in the A/B testing experiment depicted below, requests from user group 1 are always routed to the baseline while requests from user group 2 are always routed to the candidate during the experiment.
 
     ![Session affinity](../images/session-affinity-exp.png)
-***
+*** -->
 
 
 ## Version promotion
-
-When two or more versions participate in an experiment, Iter8 **recommends a version for promotion**; if the experiment yielded a winner, then the version recommended for promotion is the winner; otherwise, the version recommended for promotion is the **baseline** version of your app/ML model.
-
-Iter8 can **promote the recommended version** at the end of an experiment.
+Iter8 can **promote the winning version** at the end of an experiment.
 
 ![Canary](../images/yamljson.png)
 
