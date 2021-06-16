@@ -71,7 +71,7 @@ Every Iter8 experiment involves a `baseline` version and may also involve zero, 
 ***
 
 ## Deployment pattern
-**Deployment pattern** defines how traffic is split between versions during the experiment. During Iter8 experiments, you can take advantage of all traffic engineering features available in your K8s environment (i.e., supported by the ingress or service mesh technology available in your K8s cluster). Some common deployment patterns that you can leverage in Iter8 experiments are described below.
+**Deployment pattern** defines how traffic is split between versions during the experiment. During Iter8 experiments, you can take advantage of all the traffic engineering features available in your K8s environment (i.e., supported by the ingress or service mesh technology available in your K8s cluster). A few common deployment patterns used in Iter8 experiments are described below.
 
 In the following description, `v1` and `v2` refer to the current and new versions of your application respectively.
 

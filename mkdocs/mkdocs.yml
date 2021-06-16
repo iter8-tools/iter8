@@ -114,11 +114,16 @@ nav:
   - Getting Started:
     - Install: getting-started/install.md
     - Getting help: getting-started/help.md
-    - Quick start tutorial:
+    - Quick start tutorials:
       - KFServing: getting-started/quick-start/kfserving.md
       - Seldon: getting-started/quick-start/seldon.md
       - Knative: getting-started/quick-start/knative.md
       - Istio: getting-started/quick-start/istio.md
+    - Platform setup:
+      - KFServing: getting-started/platform-setup/kfserving.md
+      - Seldon: getting-started/platform-setup/seldon.md
+      - Knative: getting-started/platform-setup/knative.md
+      - Istio: getting-started/platform-setup/istio.md
   - Tutorials:
     - Testing patterns:
       - Canary: tutorials/testing-patterns/canary.md
