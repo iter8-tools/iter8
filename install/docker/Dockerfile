@@ -15,6 +15,15 @@ RUN echo http://mirror.yandex.ru/mirrors/alpine/v3.5/main > /etc/apk/repositorie
 # get curl
 RUN apk update && apk upgrade && apk add --no-cache curl
 
+# get bash, git, less, openssh
+RUN apk update && apk upgrade && apk add --no-cache bash git less openssh
+
+# get helm
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+RUN chmod 700 get_helm.sh
+RUN mv ./get_helm.sh /iter8/get_helm.sh
+RUN ./get_helm.sh
+
 # get kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 RUN chmod +x ./kubectl
@@ -24,9 +33,6 @@ RUN mv ./kubectl /bin/kubectl
 RUN curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.11.0/kind-linux-amd64
 RUN chmod +x ./kind
 RUN mv ./kind /bin/kind
-
-# get bash, git, less, openssh
-RUN apk update && apk upgrade && apk add --no-cache bash git less openssh
 
 # get kustomize
 RUN curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
