@@ -5,4 +5,4 @@ resources:
 images:
 - name: iter8/iter8-analytics
   # to change iter8-analytics version, edit the next line
-  newTag: 2.1.4
+  newTag: 2.1.5
