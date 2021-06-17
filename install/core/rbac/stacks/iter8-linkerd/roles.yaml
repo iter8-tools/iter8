@@ -5,7 +5,7 @@ metadata:
   name: linkerd-ts
 rules:
 - apiGroups:
-  - split.smi-spec.io/v1alpha2
+  - split.smi-spec.io
   resources:
   - trafficsplits
   verbs:
