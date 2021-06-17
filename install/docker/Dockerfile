@@ -40,4 +40,4 @@ RUN chmod +x ./kustomize
 RUN mv ./kustomize /bin/kustomize
 
 # get iter8ctl
-RUN GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3
+RUN GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
