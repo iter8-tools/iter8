@@ -372,7 +372,7 @@ Observe the experiment in realtime.
 
 Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
 ```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3
+GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
 ```
 
 Periodically describe the experiment.
@@ -442,7 +442,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
 === "Istio"
 
     ```shell
-    kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq .spec.http[0].route
+    kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq ".spec.http[0].route"
     ```
 
     ??? info "Look inside traffic summary"

@@ -2,10 +2,10 @@
 template: main.html
 ---
 
-# Quick Start with Knative
+# Quick Start with KFServing
 
 !!! tip "Scenario: A/B testing"
-    [A/B testing](../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an app/ML model, and select a winner based on a (business) reward metric and objectives (SLOs). In this tutorial, you will:
+    [A/B testing](../../../../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an app/ML model, and select a winner based on a (business) reward metric and objectives (SLOs). In this tutorial, you will:
 
     1. Perform A/B testing.
     2. Specify *user-engagement* as the reward metric, and *latency* and *error-rate* based objectives. Iter8 will find a winner by comparing the two versions in terms of the reward, and by validating versions in terms of the objectives.
@@ -458,7 +458,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
 
     ```shell
     # URL_VALUE is the URL where your Knative application serves requests
-    URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+    URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
     sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
     ```
 
@@ -1369,7 +1369,7 @@ Observe the experiment in realtime.
 
 Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
 ```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.3
+GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
 ```
 
 Periodically describe the experiment.
@@ -1439,7 +1439,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
 === "Istio"
 
     ```shell
-    kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq .spec.http[0].route
+    kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq ".spec.http[0].route"
     ```
 
     ??? info "Look inside traffic summary"
@@ -1472,7 +1472,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
 === "KFServing"
 
     ```shell
-    kubectl get vs routing-rule -o json --watch | jq .spec.http[0].route
+    kubectl get vs routing-rule -o json --watch | jq ".spec.http[0].route"
     ```
 
     ??? info "Look inside traffic summary"
@@ -1520,7 +1520,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
 === "Knative"
 
     ```shell
-    kubectl get ksvc sample-app -o json --watch | jq .status.traffic
+    kubectl get ksvc sample-app -o json --watch | jq ".status.traffic"
     ```
 
     ??? info "Look inside traffic summary"
@@ -1546,7 +1546,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
 === "Seldon"
 
     ```shell
-    kubectl get vs routing-rule -o json --watch | jq .spec.http[0].route
+    kubectl get vs routing-rule -o json --watch | jq ".spec.http[0].route"
     ```
 
     ??? info "Look inside traffic summary"

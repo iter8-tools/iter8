@@ -66,10 +66,6 @@ kustomize build $ITER8/install/prometheus-add-on/prometheus | kubectl apply -f -
 
 kubectl apply -f ${ITER8}/samples/kfserving/quickstart/service-monitor.yaml
 
-# Step 5: Install Iter8's mock New Relic service
-echo "Installing Iter8's mock New Relic service"
-kubectl apply -f ${ITER8}/samples/kfserving/quickstart/metrics-mock.yaml
-
 # Step 6: Verify platform setup
 echo "Verifying platform setup"
 kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system

@@ -4,7 +4,7 @@ hide:
 - toc
 ---
 
-# Getting Help
+# Get Help
 
 1. Read [Iter8 docs](https://iter8.tools).
 2. Join the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw).

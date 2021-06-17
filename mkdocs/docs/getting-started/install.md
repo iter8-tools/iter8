@@ -1,11 +1,11 @@
 ---
 template: main.html
-title: Installation
+title: Install Iter8
 hide:
 - toc
 ---
 
-# Installation
+# Install Iter8
 
 !!! tip "Pre-requisite: Kustomize v3+"
     Get Kustomize v3+ by following [these instructions](https://kubectl.docs.kubernetes.io/installation/kustomize/).

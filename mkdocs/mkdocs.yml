@@ -25,7 +25,7 @@ theme:
   # Default values, taken from mkdocs_theme.yml
   language: en
   features:
-  # - navigation.instant
+  - navigation.instant
   - navigation.sections
   - navigation.tabs
   - navigation.top  
@@ -112,32 +112,64 @@ nav:
     - What is Iter8?: concepts/whatisiter8.md
     - Experiment building blocks: concepts/buildingblocks.md
   - Getting Started:
-    - Install: getting-started/install.md
-    - Getting help: getting-started/help.md
-    - Quick start tutorials:
-      - KFServing: getting-started/quick-start/kfserving.md
-      - Seldon: getting-started/quick-start/seldon.md
-      - Knative: getting-started/quick-start/knative.md
-      - Istio: getting-started/quick-start/istio.md
-    - Platform setup:
-      - KFServing: getting-started/platform-setup/kfserving.md
-      - Seldon: getting-started/platform-setup/seldon.md
-      - Knative: getting-started/platform-setup/knative.md
-      - Istio: getting-started/platform-setup/istio.md
+    - Quick start:
+      - KFServing:
+        - A/B testing: getting-started/quick-start/kfserving/tutorial.md
+        - Platform setup: getting-started/quick-start/kfserving/platform-setup.md
+      - Seldon:
+        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/seldon/tutorial.md
+        - Platform setup: getting-started/quick-start/seldon/platform-setup.md
+      - Knative:
+        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/knative/tutorial.md
+        - Platform setup: getting-started/quick-start/knative/platform-setup.md
+      - Istio:
+        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/istio/tutorial.md
+        - Platform setup: getting-started/quick-start/istio/platform-setup.md
+    - Install Iter8: getting-started/install.md
+    - Get help: getting-started/help.md
   - Tutorials:
-    - Testing patterns:
-      - Canary: tutorials/testing-patterns/canary.md
-      - Conformance: tutorials/testing-patterns/conformance.md
-      - A/B (quick start): tutorials/testing-patterns/ab.md
-    - Deployment patterns:
-      - Progressive deployment: tutorials/deployment-patterns/progressive.md
-      - FixedSplit deployment: tutorials/deployment-patterns/fixed-split.md
-    - Traffic engineering:
-      - Session affinity: tutorials/traffic-engineering/session-affinity.md
-      - User segmentation: tutorials/traffic-engineering/user-segmentation.md
-      - Traffic mirroring/shadowing: tutorials/traffic-engineering/mirroring.md
-    - GitOps:
-      - Argo CD + Istio: tutorials/gitops/argocd.md
+    - KFServing:
+      - Testing patterns:
+        - SLO validation: tutorials/kfserving/testing-patterns/canary.md
+        - A/B testing (quick start): tutorials/kfserving/testing-patterns/ab.md
+        - Hybrid (A/B + SLOs): tutorials/kfserving/testing-patterns/hybrid.md
+      - Deployment patterns:
+        - Progressive deployment: tutorials/kfserving/deployment-patterns/progressive.md
+        - FixedSplit deployment: tutorials/kfserving/deployment-patterns/fixed-split.md
+      - Traffic engineering:
+        - Session affinity: tutorials/kfserving/traffic-engineering/session-affinity.md
+        - User segmentation: tutorials/kfserving/traffic-engineering/user-segmentation.md
+        - Traffic mirroring/shadowing: tutorials/kfserving/traffic-engineering/mirroring.md
+      - GitOps:
+        - Argo CD + Istio: tutorials/kfserving/gitops/argocd.md
+    - Knative:
+      - Testing patterns:
+        - Canary: tutorials/knative/testing-patterns/canary.md
+        - Conformance: tutorials/knative/testing-patterns/conformance.md
+        - A/B (quick start): tutorials/knative/testing-patterns/ab.md
+      - Deployment patterns:
+        - Progressive deployment: tutorials/knative/deployment-patterns/progressive.md
+        - FixedSplit deployment: tutorials/knative/deployment-patterns/fixed-split.md
+      - Traffic engineering:
+        - Session affinity: tutorials/knative/traffic-engineering/session-affinity.md
+        - User segmentation: tutorials/knative/traffic-engineering/user-segmentation.md
+        - Traffic mirroring/shadowing: tutorials/knative/traffic-engineering/mirroring.md
+      - GitOps:
+        - Argo CD + Istio: tutorials/knative/gitops/argocd.md
+    - Istio:
+      - Testing patterns:
+        - Canary: tutorials/istio/testing-patterns/canary.md
+        - Conformance: tutorials/istio/testing-patterns/conformance.md
+        - A/B (quick start): tutorials/istio/testing-patterns/ab.md
+      - Deployment patterns:
+        - Progressive deployment: tutorials/istio/deployment-patterns/progressive.md
+        - FixedSplit deployment: tutorials/istio/deployment-patterns/fixed-split.md
+      - Traffic engineering:
+        - Session affinity: tutorials/istio/traffic-engineering/session-affinity.md
+        - User segmentation: tutorials/istio/traffic-engineering/user-segmentation.md
+        - Traffic mirroring/shadowing: tutorials/istio/traffic-engineering/mirroring.md
+      - GitOps:
+        - Argo CD + Istio: tutorials/istio/gitops/argocd.md
   - Metrics:
     - Using metrics: metrics/using-metrics.md
     - Builtin metrics: metrics/builtin.md
