@@ -14,7 +14,7 @@ spec:
         command: ["fortio", "load", "-allow-initial-errors", "-t", "6000s", "-qps", "16", "-json", "/shared/fortiooutput.json", $(URL)]
         env:
         - name: URL
-          value: web:8080
+          value: web.test:8080
         volumeMounts:
         - name: shared
           mountPath: /shared         

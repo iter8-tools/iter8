@@ -78,8 +78,8 @@ kubectl wait --for=condition=Ready pods --all -n iter8-system
 # echo "Installing Iter8's mock New Relic service"
 # kubectl apply -f ${ITER8}/samples/istio/quickstart/metrics-mock.yaml
 
-# Step : Verify Iter8 installation
-echo "Verifying Iter8 and add-on installation"
-kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-sleep 20
-kubectl wait --for condition=ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system
+# # Step : Verify Iter8 installation
+# echo "Verifying Iter8 and add-on installation"
+# kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+# sleep 20
+# kubectl wait --for condition=ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system

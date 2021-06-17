@@ -615,7 +615,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
     Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
-    kubectl apply -n test -f $ITER8/samples/linkerd/quickstart/fortio.yaml
+    kubectl apply -f $ITER8/samples/linkerd/quickstart/fortio.yaml
     ```
 
 ## 6. Define metrics
