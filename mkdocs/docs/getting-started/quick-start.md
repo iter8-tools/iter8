@@ -104,11 +104,19 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         ```shell
         $ITER8/samples/knative/quickstart/platformsetup.sh istio
         ```
+
 === "Seldon"
     Setup Seldon Core, Seldon Analytics and Iter8 within your cluster.
 
     ```shell
     $ITER8/samples/seldon/quickstart/platformsetup.sh
+    ```
+
+=== "Linkerd"
+    Setup Linkerd and Iter8 within your cluster.
+
+    ```shell
+    $ITER8/samples/linkerd/quickstart/platformsetup.sh
     ```
 
 ## 4. Create app/ML model versions
@@ -393,6 +401,21 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
 	
         ```
 
+=== "Linkerd"
+    <!-- Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. -->
+
+    ```shell
+    kubectl create ns test
+    kubectl annotate namespace test linkerd.io/inject=enabled
+
+    kubectl create deployment web --image=gcr.io/google-samples/hello-app:1.0 -n test
+    kubectl expose deployment web --type=NodePort --port=8080 -n test
+
+    kubectl create deployment web2 --image=gcr.io/google-samples/hello-app:2.0 -n test
+    kubectl expose deployment web2 --type=NodePort --port=8080 -n test
+
+    kubectl wait -n test --for=condition=Ready pods --all
+    ```
 
 ## 5. Generate requests
 === "Istio"
@@ -587,6 +610,13 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
               restartPolicy: Never
         
         ```
+
+=== "Linkerd"
+    Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
+
+    ```shell
+    kubectl apply -n test -f $ITER8/samples/linkerd/quickstart/fortio.yaml
+    ```
 
 ## 6. Define metrics
 Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. Define the Iter8 metrics used in this experiment as follows.
