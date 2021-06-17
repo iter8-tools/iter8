@@ -29,11 +29,11 @@ spec:
     #   preferredDirection: High
 
     objectives: # used for validating versions
-    - metric: iter8-istio/mean-latency
+    - metric: iter8-linkerd/mean-latency
       upperLimit: 300
     # - metric: iter8-istio/error-rate
     #   upperLimit: "0.01"
-    requestCount: iter8-istio/request-count
+    requestCount: iter8-linkerd/request-count
   duration: # product of fields determines length of the experiment
     intervalSeconds: 10
     iterationsPerLoop: 10
