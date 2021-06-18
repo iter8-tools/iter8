@@ -47,6 +47,7 @@ Create a local cluster using Kind or Minikube as follows, or use a managed Kuber
 
         ![Resources](../images/ddresourcepreferences.png)
 
+
 === "Minikube"
 
     ```shell
@@ -64,20 +65,25 @@ export ITER8=$(pwd)
 Choose the K8s stack over which you are performing the A/B testing experiment.
 
 === "Istio"
+
     Setup Istio, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
 
     ```shell
     $ITER8/samples/istio/quickstart/platformsetup.sh
     ```
     
+
 === "KFServing"
+
     Setup KFServing, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
 
     ```shell
     $ITER8/samples/kfserving/quickstart/platformsetup.sh
     ```
 
+
 === "Knative"
+
     Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. Knative can work with multiple networking layers. So can Iter8's Knative extension. 
     
     Choose the networking layer for Knative.
@@ -87,11 +93,13 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         $ITER8/samples/knative/quickstart/platformsetup.sh contour
         ```
 
+
     === "Kourier"
 
         ```shell
         $ITER8/samples/knative/quickstart/platformsetup.sh kourier
         ```
+
 
     === "Gloo"
         This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
@@ -99,20 +107,25 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         $ITER8/samples/knative/quickstart/platformsetup.sh gloo
         ```
 
+
     === "Istio"
 
         ```shell
         $ITER8/samples/knative/quickstart/platformsetup.sh istio
         ```
 
+
 === "Seldon"
+
     Setup Seldon Core, Seldon Analytics and Iter8 within your cluster.
 
     ```shell
     $ITER8/samples/seldon/quickstart/platformsetup.sh
     ```
 
+
 === "Linkerd"
+
     Setup Linkerd and Iter8 within your cluster.
 
     ```shell
@@ -121,6 +134,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
 
 ## 4. Create app/ML model versions
 === "Istio"
+
     Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice.
 
     ```shell
@@ -176,7 +190,9 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
                     value: "9080"
         ```
 
+
 === "KFServing"
+
     Deploy two KFServing inference services corresponding to two versions of a TensorFlow classification model, along with an Istio virtual service to split traffic between them.
 
     ```shell
@@ -259,7 +275,9 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
               weight: 0
         ```
 
+
 === "Knative"
+
     Deploy two versions of a Knative app.
 
     ```shell
@@ -313,7 +331,9 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
             percent: 0
         ```
 
+
 === "Seldon"
+
     Deploy two Seldon Deployments corresponding to two versions of an Iris classification model, along with an Istio virtual service to split traffic between them.
 
     ```shell
@@ -398,8 +418,8 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
                   set:
                     version: iris-v2
               weight: 0
-	
         ```
+
 
 === "Linkerd"
     <!-- Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. -->
@@ -415,10 +435,14 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
     kubectl expose deployment web2 --type=NodePort --port=8080 -n test
 
     kubectl wait -n test --for=condition=Ready pods --all
+
+    kubectl apply -f $ITER8/samples/linkerd/quickstart/traffic-split.yaml -n test
     ```
+
 
 ## 5. Generate requests
 === "Istio"
+
     Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
@@ -458,16 +482,21 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
               restartPolicy: Never
         ```    
 
+
 === "KFServing"
+
     Generate requests to your model as follows.
  
     === "Port forward Istio ingress in terminal one"
+
         ```shell
         INGRESS_GATEWAY_SERVICE=$(kubectl get svc -n istio-system --selector="app=istio-ingressgateway" --output jsonpath='{.items[0].metadata.name}')
         kubectl port-forward -n istio-system svc/${INGRESS_GATEWAY_SERVICE} 8080:80
         ```
 
+
     === "Send requests in terminal two"
+
         ```shell
         curl -o /tmp/input.json https://raw.githubusercontent.com/kubeflow/kfserving/master/docs/samples/v1beta1/rollout/input.json
         while true; do
@@ -476,7 +505,9 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         done
         ```
 
+
 === "Knative"
+
     Generate requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
@@ -515,7 +546,10 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
                 mountPath: /shared       
             restartPolicy: Never
         ```
+
+
 === "Seldon"
+
     Generate requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
@@ -611,17 +645,23 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
         
         ```
 
+
 === "Linkerd"
+
     Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
+    kubectl annotate namespace default linkerd.io/inject=enabled
+
     kubectl apply -f $ITER8/samples/linkerd/quickstart/fortio.yaml
     ```
+
 
 ## 6. Define metrics
 Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. Define the Iter8 metrics used in this experiment as follows.
 
 === "Istio"
+
     ```shell
     kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
     ```
@@ -747,7 +787,9 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ```
 
+
 === "KFServing"
+
     ```shell
     kubectl apply -f $ITER8/samples/kfserving/quickstart/metrics.yaml
     ```
@@ -860,6 +902,7 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ```
+
 
 === "Knative"
 
@@ -978,7 +1021,10 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           type: Counter
           urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
         ```
+
+
 === "Seldon"
+
     ```shell
     kubectl apply -f $ITER8/samples/seldon/quickstart/metrics.yaml
     ```
@@ -1090,9 +1136,63 @@ Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metric
           provider: prometheus
           type: Gauge
           urlTemplate: http://seldon-core-analytics-prometheus-seldon.seldon-system/api/v1/query
-        
         ```
 
+
+=== "Linkerd"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
+    ```
+
+    ??? info "Look inside metrics.yaml"
+        ```yaml linenums="1"
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          labels:
+            creator: iter8
+            stack: linkerd
+          name: iter8-linkerd
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          labels:
+            creator: iter8
+          name: mean-latency
+          namespace: iter8-linkerd
+        spec:
+          description: Mean latency
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              (sum(increase(response_latency_ms_sum{deployment='$name',namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(request_total{deployment='$name',namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+          provider: prometheus
+          sampleSize: request-count
+          type: Gauge
+          units: milliseconds
+          urlTemplate: http://prometheus.linkerd-viz:9090/api/v1/query
+        ---
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata:
+          labels:
+            creator: iter8
+          name: request-count
+          namespace: iter8-linkerd
+        spec:
+          description: Number of requests
+          jqExpression: .data.result[0].value[1] | tonumber
+          params:
+          - name: query
+            value: |
+              sum(increase(request_total{deployment='$name',namespace='$namespace'}[${elapsedTime}s]))
+          provider: prometheus
+          type: Counter
+          urlTemplate: http://prometheus.linkerd-viz:9090/api/v1/query
+        ```
 
 
 ??? Note "Metrics in your environment"
@@ -1179,6 +1279,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                 fieldPath: .spec.http[0].route[1].weight
         ```
 
+
 === "KFServing"
 
     ```shell
@@ -1248,6 +1349,7 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
                 value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
         ```
 
+
 === "Knative"
 
     ```shell
@@ -1315,6 +1417,8 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               - name: promote
                 value: candidate
         ```
+
+
 === "Seldon"
 
     ```shell
@@ -1387,6 +1491,72 @@ Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model i
               - name: promote
                 value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v2.yaml     
         ```
+
+=== "Linkerd"
+
+    ```shell
+    kubectl apply -f $ITER8/samples/linkerd/quickstart/experiment.yaml
+    ```
+
+    ??? info "Look inside experiment.yaml"
+        ```yaml linenums="1"
+        apiVersion: iter8.tools/v2alpha2
+        kind: Experiment
+        metadata:
+          name: quickstart-exp
+        spec:
+          # target identifies the service under experimentation using its fully qualified name
+          target: bookinfo-iter8/productpage
+          strategy:
+            # this experiment will perform an Canary test
+            testingPattern: Canary
+
+            # this experiment will progressively shift traffic to the winning version
+            deploymentPattern: Progressive
+            actions:
+              # when the experiment completes, promote the winning version using kubectl apply
+              finish:
+              - task: common/exec
+                with:
+                  cmd: /bin/bash
+                  args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
+          criteria:objectives: # used for validating versions
+            - metric: iter8-linkerd/mean-latency
+              upperLimit: 300
+            requestCount: iter8-linkerd/request-count
+          duration: # product of fields determines length of the experiment
+            intervalSeconds: 10
+            iterationsPerLoop: 10
+          versionInfo:
+            # information about the app versions used in this experiment
+            baseline:
+              name: web
+              variables:
+              - name: namespace # used by final action if this version is the winner
+                value: test
+              - name: promote # used by final action if this version is the winner
+                value: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v1.yaml
+              weightObjRef:
+                apiVersion: split.smi-spec.io/v1alpha2
+                kind: TrafficSplit
+                namespace: test
+                name: web-traffic-split
+                fieldPath: .spec.backends[0].weight
+            candidates:
+            - name: web2
+              variables:
+              - name: namespace # used by final action if this version is the winner
+                value: test
+              - name: promote # used by final action if this version is the winner
+                value: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v2.yaml
+              weightObjRef:
+                apiVersion: split.smi-spec.io/v1alpha2
+                kind: TrafficSplit
+                namespace: test
+                name: web-traffic-split
+                fieldPath: .spec.backends[1].weight
+        ```
+
 
 The process automated by Iter8 during this experiment is depicted below.
 
@@ -1499,6 +1669,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
         ]
         ```
 
+
 === "KFServing"
 
     ```shell
@@ -1547,6 +1718,7 @@ As the experiment progresses, you should eventually see that all of the objectiv
         ]
         ```    
 
+
 === "Knative"
 
     ```shell
@@ -1573,6 +1745,8 @@ As the experiment progresses, you should eventually see that all of the objectiv
         }
         ]
         ```
+
+
 === "Seldon"
 
     ```shell
@@ -1649,30 +1823,52 @@ When the experiment completes, you will see the experiment stage change from `Ru
 
 ## 9. Cleanup
 === "Istio"
+
     ```shell
     kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
     kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
     kubectl delete namespace bookinfo-iter8
     ```
 
+
 === "KFServing"
+
     ```shell
     kubectl delete -f $ITER8/samples/kfserving/quickstart/experiment.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml
     kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
     ```
 
+
 === "Knative"
+
     ```shell
     kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
     kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml
     kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
     ```
 
+
 === "Seldon"
+
     ```shell
     kubectl delete -f $ITER8/samples/seldon/quickstart/fortio.yaml
     kubectl delete -f $ITER8/samples/seldon/quickstart/experiment.yaml
     kubectl delete -f $ITER8/samples/seldon/quickstart/baseline.yaml
     kubectl delete -f $ITER8/samples/seldon/quickstart/candidate.yaml
+    ```
+
+=== "Linkerd"
+
+    ```shell
+    kubectl delete -f $ITER8/samples/linkerd/quickstart/fortio.yaml -n test
+    kubectl delete -f $ITER8/samples/linkerd/quickstart/experiment.yaml -n test
+
+    kubectl delete deployment web -n test
+    kubectl delete deployment web2 -n test
+
+    kubectl annotate namespace test linkerd.io/inject=disabled
+    kubectl annotate namespace default linkerd.io/inject=disabled
+
+    kubectl delete namespace test
     ```
