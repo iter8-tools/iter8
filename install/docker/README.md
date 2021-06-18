@@ -4,7 +4,7 @@ Iter8 experiments can be performed for remote applications. In particular, Iter8
 
 The Dockerfile in this folder creates such an image.
 
-## Building Iter8 in Docker locally
+## Building Iter8-in-Docker locally
 
 1. Export ITER8 and cd
 ```shell
@@ -17,43 +17,42 @@ cd $ITER8/install/docker
 docker build -t ind:latest .
 ```
 
-## Running the Iter8 in Docker container
+## Running the Iter8-in-Docker container
 
 > If you want to run using the local image, replace iter8/ind:latest with ind:latest below.
 
 > If  you want to run a specific version, replace iter8/ind:latest with iter8/ind:<tag> below. For example, `iter8/ind:0.6.5`.
 
-1. Start ind container
+1. Start Iter8 container
 ```shell
 docker run --name ind --privileged -d iter8/ind:latest
 ```
+To pin the version of Iter8, replace `latest` above with tag (for example, with `0.6.5`)
 
-2. Create K8s cluster and install Iter8 -- all inside ind container
+2. Setup Iter8 within container
 ```shell
 docker exec ind ./iter8.sh
 ```
 
-To pin the version of the Dockerfile used in this image (example, `v0.6.5`), do as follows.
-```shell
-docker exec -e TAG=v0.6.5 ind iter8.sh
-```
-
-5. Create Iter8 experiment
+3. Run conformance test for your application
 ```shell
 docker exec ind helm install \
-  --set URL=https://example.com \
-  --set LimitMeanLatency='"200.0"' \
-  --set LimitErrorRate='"0.01"' \
-  codeengine /iter8/helm/conformance
+--set URL=https://example.com \
+--set LimitMeanLatency='"200.0"' \
+--set LimitErrorRate='"0.01"' \
+--set Limit95thPercentileLatency='"500.0"' \
+codeengine /iter8/helm/conformance
 ```
 
-6. Describe results of the experiments
+4. Describe results of the conformance test
 ```shell
-docker exec ind watch \
-  iter8ctl describe -f - <(kubectl get experiment conformance-experiment -o yaml)
+docker exec ind \
+watch -n 10.0 \
+"kubectl get experiment codeengine-experiment -o yaml | iter8ctl describe -f -"
 ```
 
-7. Cleanup (do this before Step 3 if needed)
+5. Remove Iter8-in-Docker container and image
 ```shell
-$ITER8/install/docker/cleanup.sh
+docker rm -f -v ind
+docker rmi -f iter8/ind:latest
 ```
