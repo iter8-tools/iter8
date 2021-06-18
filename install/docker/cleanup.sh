@@ -1,3 +1,2 @@
-docker rm -f ind
-docker rmi iter8:ind
-docker volume ls
+docker rm -f -v ind
+docker rmi -f iter8:ind

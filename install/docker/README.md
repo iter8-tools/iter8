@@ -24,32 +24,30 @@ docker run --name ind --privileged -d ind:latest
 
 4. Create K8s cluster and install Iter8 -- all inside ind container
 ```shell
-docker exec ind /iter8/iter8.sh
+docker exec ind iter8.sh
 ```
 
-To pin the version of Iter8 (example, `v0.6.5`), do as follows.
+To pin the version of the Dockerfile used in this image (example, `v0.6.5`), do as follows.
 ```shell
-docker exec -e TAG=v0.6.5 ind /iter8/iter8.sh
+docker exec -e TAG=v0.6.5 ind iter8.sh
 ```
 
 5. Create Iter8 experiment
 ```shell
-docker exec ind helm install --set LimitMeanLatency='"200.0"' --set LimitErrorRate='"0.01"' codeengine ./conformance
+docker exec ind helm install \
+  --set URL=https://example.com \
+  --set LimitMeanLatency='"200.0"' \
+  --set LimitErrorRate='"0.01"' \
+  codeengine /iter8/helm/conformance
 ```
 
 6. Describe results of the experiments
 ```shell
-docker exec ind watch -x iter8ctl describe -f -<(kubectl get experiment conformance-experiment -o yaml)
+docker exec ind watch \
+  iter8ctl describe -f - <(kubectl get experiment conformance-experiment -o yaml)
 ```
 
-
-6. Cleanup (do this before Step 3 if needed)
-```shell
-$ITER8/install/docker/cleanup.sh
-```
-
-
-6. Cleanup (do this before Step 3 if needed)
+7. Cleanup (do this before Step 3 if needed)
 ```shell
 $ITER8/install/docker/cleanup.sh
 ```

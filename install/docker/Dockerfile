@@ -5,10 +5,6 @@ COPY --from=golang:1.15-alpine /usr/local/go/ /usr/local/go/
  
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-WORKDIR /iter8
-COPY iter8.sh .
-RUN chmod +x ./iter8.sh
-
 RUN echo http://mirror.yandex.ru/mirrors/alpine/v3.5/main > /etc/apk/repositories; \
     echo http://mirror.yandex.ru/mirrors/alpine/v3.5/community >> /etc/apk/repositories
 
@@ -21,7 +17,6 @@ RUN apk update && apk upgrade && apk add --no-cache bash git less openssh
 # get helm
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
 RUN chmod 700 get_helm.sh
-RUN mv ./get_helm.sh /iter8/get_helm.sh
 RUN ./get_helm.sh
 
 # get kubectl
@@ -41,3 +36,7 @@ RUN mv ./kustomize /bin/kustomize
 
 # get iter8ctl
 RUN GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
+
+# clone Iter8 repo
+RUN git clone https://github.com/iter8-tools/iter8
+WORKDIR /iter8/install/docker
