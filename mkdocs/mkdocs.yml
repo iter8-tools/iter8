@@ -130,7 +130,6 @@ nav:
   - Tutorials:
     - KFServing:
       - Testing strategies:
-        - SLO validation: tutorials/kfserving/testing-strategies/canary.md
         - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
         - Hybrid (A/B + SLOs): tutorials/kfserving/testing-strategies/hybrid.md
       - Deployment strategies:
@@ -140,8 +139,6 @@ nav:
         - Session affinity: tutorials/kfserving/traffic-engineering/session-affinity.md
         - User segmentation: tutorials/kfserving/traffic-engineering/user-segmentation.md
         - Traffic mirroring/shadowing: tutorials/kfserving/traffic-engineering/mirroring.md
-      - GitOps:
-        - Argo CD + Istio: tutorials/kfserving/gitops/argocd.md
     - Knative:
       - Testing strategies:
         - Canary: tutorials/knative/testing-strategies/canary.md
@@ -151,11 +148,8 @@ nav:
         - progressive rollout: tutorials/knative/deployment-strategies/progressive.md
         - FixedSplit deployment: tutorials/knative/deployment-strategies/fixed-split.md
       - Traffic engineering:
-        - Session affinity: tutorials/knative/traffic-engineering/session-affinity.md
         - User segmentation: tutorials/knative/traffic-engineering/user-segmentation.md
         - Traffic mirroring/shadowing: tutorials/knative/traffic-engineering/mirroring.md
-      - GitOps:
-        - Argo CD + Istio: tutorials/knative/gitops/argocd.md
     - Istio:
       - Testing strategies:
         - Canary: tutorials/istio/testing-strategies/canary.md
