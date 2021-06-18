@@ -2,59 +2,28 @@
 template: main.html
 ---
 
-# Quick Start with Istio
+# Hybrid (A/B + SLOs) testing
 
-!!! tip "Scenario: A/B testing"
-    [A/B testing](../../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an app/ML model, and select a winner based on a (business) reward metric and objectives (SLOs). In this tutorial, you will:
+!!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive deployment of Seldon models"
+    [Hybrid (A/B + SLOs) testing](../../concepts/buildingblocks/#testing-pattern) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
 
-    1. Perform A/B testing.
-    2. Specify *user-engagement* as the reward metric, and *latency* and *error-rate* based objectives. Iter8 will find a winner by comparing the two versions in terms of the reward, and by validating versions in terms of the objectives.
-    3. Use New Relic as the provider for user-engagement metric, and Prometheus as the provider for latency and error-rate metrics.
-    4. Combine A/B testing with [progressive deployment](../../../concepts/buildingblocks/#deployment-pattern).
+    1. Perform hybrid (A/B + SLOs) testing.
+    2. Specify *user-engagement* as the reward metric. This metric will be mocked by Iter8 in this tutorial.
+    3. Specify *latency* and *error-rate* based objectives; data for these metrics will be provided by Prometheus.
+    4. Combine hybrid (A/B + SLOs) testing with [progressive deployment](../../../../../concepts/buildingblocks/#deployment-pattern). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
     
-    Iter8 will progressively shift the traffic towards the winner and promote it at the end as depicted below.
+    ![Quickstart Istio](../../../images/quickstart-hybrid.png)
 
-    ![Canary](../../images/quickstart.png)
+???+ warning "Before you begin, you will need... "
+    1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+    2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
+    3. [Go 1.13+](https://golang.org/doc/install).
 
-## 1. Create Kubernetes cluster
+## 1. Setup
+* Setup your K8s cluster with Istio and Iter8 as described [here](../platform-setup/). 
+* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
-Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
-
-=== "Kind"
-
-    ```shell
-    kind create cluster --wait 5m
-    kubectl cluster-info --context kind-kind
-    ```
-
-    ??? info "Ensuring your Kind cluster has sufficient resources"
-        Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
-
-        ![Resources](../../images/ddresourcepreferences.png)
-
-=== "Minikube"
-
-    ```shell
-    minikube start --cpus 8 --memory 12288
-    ```
-
-## 2. Clone Iter8 repo
-```shell
-git clone https://github.com/iter8-tools/iter8.git
-cd iter8
-export ITER8=$(pwd)
-```
-
-## 3. Install K8s stack and Iter8
-Choose the K8s stack over which you are performing the A/B testing experiment.
-
-Setup Istio, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
-
-```shell
-$ITER8/samples/istio/quickstart/platformsetup.sh
-```
-
-## 4. Create app versions
+## 2. Create application versions
 Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice.
 
 ```shell
@@ -110,7 +79,7 @@ kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
                 value: "9080"
     ```
 
-## 5. Generate requests
+## 3. Generate requests
 Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
 ```shell
@@ -150,8 +119,10 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
             restartPolicy: Never
     ```
 
-## 6. Define metrics
-Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. Define the Iter8 metrics used in this experiment as follows.
+## 4. Define metrics
+Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
+
+Define the Iter8 metrics used in this experiment as follows. For the purpose of this tutorial, you will [mock](../../../../metrics/mock/) the user-engagement metric. The latency and error metrics will be provided by Prometheus.
 
 ```shell
 kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
@@ -173,15 +144,11 @@ kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
         name: user-engagement
         namespace: iter8-istio
     spec:
-        params:
-        - name: nrql
-          value: |
-              SELECT average(duration) FROM Sessions WHERE version='$name' SINCE $elapsedTime sec ago
-        description: Average duration of a session
-        type: Gauge
-        provider: newrelic
-        jqExpression: ".results[0] | .[] | tonumber"
-        urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic
+      mock:
+      - name: productpage-v1
+        level: 15.0
+      - name: productpage-v2
+        level: 20.0
     ---
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
@@ -280,17 +247,13 @@ kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
 
 
 ??? Note "Metrics in your environment"
-    You can use metrics from any RESTful provider in Iter8 experiments. 
-        
-    In this tutorial, the metrics related to latency and error-rate objectives are collected by the Prometheus instance created in Step 3. The `urlTemplate` field in these metrics point to this Prometheus instance. If you wish to use these latency and error-rate metrics with your own application, change the `urlTemplate` values to match the URL of your Prometheus instance.
-
-    In this tutorial, the user-engagement metric is synthetically generated by a mock New Relic service/Prometheus service. For your application, replace this metric with any business metric you wish to optimize.
+    You can define and use custom metrics from any database in Iter8 experiments. 
+       
+    For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize. Documentation on defining custom metrics is [here](../../../../metrics/custom/).
 
 
-## 7. Launch experiment
-Iter8 defines a Kubernetes resource called Experiment that automates A/B, A/B/n, Canary, and Conformance experiments. During an experiment, Iter8 can compare multiple versions, find, and safely promote the winning version (winner) based on business metrics and SLOs. 
-
-Launch the Iter8 experiment that orchestrates A/B testing for the app/ML model in this tutorial.
+## 5. Launch experiment
+Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the Hybrid (A/B + SLOs) testing & progressive deployment experiment as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
@@ -361,29 +324,25 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-The process automated by Iter8 during this experiment is depicted below.
+## 6. Understand the experiment
+The process automated by Iter8 in this experiment is as follows.
+    
+![Iter8 automation](../../../images/quickstart-iter8-process.png)
 
-![Iter8 automation](../../images/quickstart-iter8-process.png)
-
-## 8. Observe experiment
-Observe the experiment in realtime.
-
-### a) Observe metrics
+Observe the results of the experiment in real-time as follows.
+### a) Observe results
 
 Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
 ```shell
 GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
 ```
 
-Periodically describe the experiment.
+Periodically describe the experiment results.
 ```shell
-while clear; do
-kubectl get experiment quickstart-exp -o yaml | iter8ctl describe -f -
-sleep 8
-done
+watch -x iter8ctl describe -f - <(kubectl get experiment quickstart-exp -o yaml)
 ```
 
-??? info "Look inside metrics summary"
+??? info "Experiment results will look similar to this"
     The `iter8ctl` output will be similar to the following.
     ```shell
     ****** Overview ******
@@ -436,43 +395,38 @@ done
     +--------------------------------------------+---------------+---------------+
     ``` 
 
-As the experiment progresses, you should eventually see that all of the objectives reported as being satisfied by both versions and the candidate improves over the baseline version in terms of the reward metric. The candidate is identified as the winner and is recommended for promotion.
-
+Observe how traffic is split between versions in real-time as follows.
 ### b) Observe traffic
-=== "Istio"
+```shell
+kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq ".spec.http[0].route"
+```
 
+??? info "Look inside traffic summary"
+    The `kubectl` output will be similar to the following.
     ```shell
-    kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq ".spec.http[0].route"
-    ```
-
-    ??? info "Look inside traffic summary"
-        The `kubectl` output will be similar to the following.
-        ```shell
-        [
-          {
-            "destination": {
-              "host": "productpage",
-              "port": {
-                "number": 9080
-              },
-              "subset": "productpage-v1"
-            },
-            "weight": 35
+    [
+      {
+        "destination": {
+          "host": "productpage",
+          "port": {
+            "number": 9080
           },
-          {
-            "destination": {
-              "host": "productpage",
-              "port": {
-                "number": 9080
-              },
-              "subset": "productpage-v2"
-            },
-            "weight": 65
-          }
-        ]
-        ```
-
-As the experiment progresses, you should see traffic progressively shift from the baseline version to the candidate version.
+          "subset": "productpage-v1"
+        },
+        "weight": 35
+      },
+      {
+        "destination": {
+          "host": "productpage",
+          "port": {
+            "number": 9080
+          },
+          "subset": "productpage-v2"
+        },
+        "weight": 65
+      }
+    ]
+    ```
 
 ### c) Observe progress
 ```shell
@@ -494,14 +448,7 @@ kubectl get experiment quickstart-exp --watch
     quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
     ```
 
-When the experiment completes, you will see the experiment stage change from `Running` to `Completed`.
-
-???+ info "Understanding what happened"
-    1. You created two versions of your app/ML model.
-    2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with A/B testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus, and the user-engagement metric from New Relic/Prometheus; Iter8 verified that the candidate satisfied all objectives, verified that the candidate improved over the baseline in terms of user-engagement, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
-
-## 9. Cleanup
+## 7. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml

@@ -8,7 +8,7 @@ template: main.html
     [A/B testing](../../../../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
 
     1. Perform A/B testing.
-    2. Specify *user-engagement* as the reward metric. This is mocked by Iter8 in this tutorial.
+    2. Specify *user-engagement* as the reward metric. This metric will be mocked by Iter8 in this tutorial.
     3. Combine A/B testing with [progressive deployment](../../../../../concepts/buildingblocks/#deployment-pattern). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
 
     ![Quickstart KFServing](../../../images/quickstart-ab.png)
