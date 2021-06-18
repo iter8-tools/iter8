@@ -4,12 +4,9 @@ metadata:
   name: quickstart-exp
 spec:
   # target identifies the service under experimentation using its fully qualified name
-  target: bookinfo-iter8/productpage
+  target: test/web-traffic-split
   strategy:
-
-    # # this experiment will perform an A/B test
-    # testingPattern: A/B
-    # this experiment will perform an A/B test
+    # this experiment will perform an Canary test
     testingPattern: Canary
 
     # this experiment will progressively shift traffic to the winning version
@@ -17,10 +14,9 @@ spec:
     actions:
       # when the experiment completes, promote the winning version using kubectl apply
       finish:
-      - task: common/exec
+      - task: common/bash
         with:
-          cmd: /bin/bash
-          args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
+          script: kubectl -n test apply -f {{ .promote }}
   criteria:
 
     # rewards:
