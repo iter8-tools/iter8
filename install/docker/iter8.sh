@@ -2,19 +2,21 @@
 echo "Hello from Iter8!"
 
 # Loop until 'docker version' exits with 0,  meaning docker daemon is ready
+echo "Looping until Docker in Docker is ready..."
 until docker version > /dev/null 2>&1
 do
+  echo -n "."
   sleep 1
 done
 
-echo "Docker in Docker is running..."
+echo "Docker in Docker is ready..."
 
-echo "Creating K8s cluster inside container..."
+echo "Creating Kind cluster inside Docker in Docker..."
 
 kind create cluster --wait 5m
 kubectl cluster-info --context kind-kind
 
-echo "Installing Iter8 in the K8s cluster..."
+echo "Installing Iter8 in the Kind cluster..."
 export TAG="${TAG:-master}"
 echo "ITER8 TAG=$TAG"
 

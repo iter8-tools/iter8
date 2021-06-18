@@ -4,7 +4,7 @@ Iter8 experiments can be performed for remote applications. In particular, Iter8
 
 The Dockerfile in this folder creates such an image.
 
-## Building and running Iter8 in Docker locally
+## Building Iter8 in Docker locally
 
 1. Export ITER8 and cd
 ```shell
@@ -17,14 +17,20 @@ cd $ITER8/install/docker
 docker build -t ind:latest .
 ```
 
-3. Start ind container
+## Running the Iter8 in Docker container
+
+> If you want to run using the local image, replace iter8/ind:latest with ind:latest below.
+
+> If  you want to run a specific version, replace iter8/ind:latest with iter8/ind:<tag> below. For example, `iter8/ind:0.6.5`.
+
+1. Start ind container
 ```shell
-docker run --name ind --privileged -d ind:latest
+docker run --name ind --privileged -d iter8/ind:latest
 ```
 
-4. Create K8s cluster and install Iter8 -- all inside ind container
+2. Create K8s cluster and install Iter8 -- all inside ind container
 ```shell
-docker exec ind iter8.sh
+docker exec ind ./iter8.sh
 ```
 
 To pin the version of the Dockerfile used in this image (example, `v0.6.5`), do as follows.
