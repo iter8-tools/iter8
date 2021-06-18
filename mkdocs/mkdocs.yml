@@ -129,13 +129,13 @@ nav:
     - Get help: getting-started/help.md
   - Tutorials:
     - KFServing:
-      - Testing patterns:
-        - SLO validation: tutorials/kfserving/testing-patterns/canary.md
-        - A/B testing (quick start): tutorials/kfserving/testing-patterns/ab.md
-        - Hybrid (A/B + SLOs): tutorials/kfserving/testing-patterns/hybrid.md
-      - Deployment patterns:
-        - progressive rollout: tutorials/kfserving/deployment-patterns/progressive.md
-        - FixedSplit deployment: tutorials/kfserving/deployment-patterns/fixed-split.md
+      - Testing strategies:
+        - SLO validation: tutorials/kfserving/testing-strategies/canary.md
+        - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
+        - Hybrid (A/B + SLOs): tutorials/kfserving/testing-strategies/hybrid.md
+      - Deployment strategies:
+        - progressive rollout: tutorials/kfserving/deployment-strategies/progressive.md
+        - FixedSplit deployment: tutorials/kfserving/deployment-strategies/fixed-split.md
       - Traffic engineering:
         - Session affinity: tutorials/kfserving/traffic-engineering/session-affinity.md
         - User segmentation: tutorials/kfserving/traffic-engineering/user-segmentation.md
@@ -143,13 +143,13 @@ nav:
       - GitOps:
         - Argo CD + Istio: tutorials/kfserving/gitops/argocd.md
     - Knative:
-      - Testing patterns:
-        - Canary: tutorials/knative/testing-patterns/canary.md
-        - Conformance: tutorials/knative/testing-patterns/conformance.md
-        - A/B (quick start): tutorials/knative/testing-patterns/ab.md
-      - Deployment patterns:
-        - progressive rollout: tutorials/knative/deployment-patterns/progressive.md
-        - FixedSplit deployment: tutorials/knative/deployment-patterns/fixed-split.md
+      - Testing strategies:
+        - Canary: tutorials/knative/testing-strategies/canary.md
+        - Conformance: tutorials/knative/testing-strategies/conformance.md
+        - A/B (quick start): tutorials/knative/testing-strategies/ab.md
+      - Deployment strategies:
+        - progressive rollout: tutorials/knative/deployment-strategies/progressive.md
+        - FixedSplit deployment: tutorials/knative/deployment-strategies/fixed-split.md
       - Traffic engineering:
         - Session affinity: tutorials/knative/traffic-engineering/session-affinity.md
         - User segmentation: tutorials/knative/traffic-engineering/user-segmentation.md
@@ -157,13 +157,13 @@ nav:
       - GitOps:
         - Argo CD + Istio: tutorials/knative/gitops/argocd.md
     - Istio:
-      - Testing patterns:
-        - Canary: tutorials/istio/testing-patterns/canary.md
-        - Conformance: tutorials/istio/testing-patterns/conformance.md
-        - A/B (quick start): tutorials/istio/testing-patterns/ab.md
-      - Deployment patterns:
-        - progressive rollout: tutorials/istio/deployment-patterns/progressive.md
-        - FixedSplit deployment: tutorials/istio/deployment-patterns/fixed-split.md
+      - Testing strategies:
+        - Canary: tutorials/istio/testing-strategies/canary.md
+        - Conformance: tutorials/istio/testing-strategies/conformance.md
+        - A/B (quick start): tutorials/istio/testing-strategies/ab.md
+      - Deployment strategies:
+        - progressive rollout: tutorials/istio/deployment-strategies/progressive.md
+        - FixedSplit deployment: tutorials/istio/deployment-strategies/fixed-split.md
       - Traffic engineering:
         - Session affinity: tutorials/istio/traffic-engineering/session-affinity.md
         - User segmentation: tutorials/istio/traffic-engineering/user-segmentation.md

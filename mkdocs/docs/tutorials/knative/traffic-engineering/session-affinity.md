@@ -6,7 +6,7 @@ template: main.html
 
 !!! tip "Scenario: A/B testing with session affinity (sticky sessions)"
 
-    [Session affinity](../../../concepts/buildingblocks/#traffic-engineering) ensures that the version to which a particular user's request is routed remains consistent throughout the duration of the experiment. In this tutorial, you will use a [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-patterns) in conjunction with session affinity.
+    [Session affinity](../../../concepts/buildingblocks/#traffic-engineering) ensures that the version to which a particular user's request is routed remains consistent throughout the duration of the experiment. In this tutorial, you will use a [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-strategies) in conjunction with session affinity.
 
     The experiment will involve two user groups, 1 and 2. Reqeusts from user group 1 will have a `userhash` header value prefixed with `111` and will be routed to the baseline version. Requests from user group 2 will have a `userhash` header value prefixed with `101` and will be routed to the candidate version.
     

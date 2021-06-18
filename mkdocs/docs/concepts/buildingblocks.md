@@ -81,7 +81,7 @@ Every Iter8 experiment involves a `baseline` version and may also involve zero, 
 
 Iter8 makes it easy for you to take total advantage of all the traffic engineering features available in your K8s environment (i.e., supported by the ingress or service mesh technology available in your K8s cluster). 
 
-A few common deployment patterns used in Iter8 experiments are described below. In the following description, `v1` and `v2` refer to the current and new versions of the application respectively.
+A few common deployment strategies used in Iter8 experiments are described below. In the following description, `v1` and `v2` refer to the current and new versions of the application respectively.
 
 === "Simple rollout & rollback"
     This pattern is modeled after the [rolling update of a Kubernetes deployment](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/). 

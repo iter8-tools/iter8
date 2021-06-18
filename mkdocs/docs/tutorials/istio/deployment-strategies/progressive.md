@@ -13,7 +13,7 @@ template: main.html
 
 ## Tutorials with progressive rollout
 
-The [A/B testing (quick start)](../../../getting-started/quick-start/) and [canary testing](../../testing-patterns/canary/) tutorials demonstrate progressive rollout.
+The [A/B testing (quick start)](../../../getting-started/quick-start/) and [canary testing](../../testing-strategies/canary/) tutorials demonstrate progressive rollout.
 
 ## Specifying `weightObjRef`
 

@@ -8,7 +8,7 @@ hide:
 # Roadmap
 
 1. **Enhanced experiments**
-    * A/B/n, and Pareto testing patterns with single and multiple reward metrics
+    * A/B/n, and Pareto testing strategies with single and multiple reward metrics
     * Blue/green deployment pattern
     * Experiments with `support` and `confidence`
 2. **Metrics**
