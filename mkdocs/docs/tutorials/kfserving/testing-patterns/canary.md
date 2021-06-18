@@ -10,7 +10,7 @@ template: main.html
     1. Perform canary testing.
     2. Specify *latency* and *error-rate* based service-level objectives (SLOs). If the candidate version satisfies SLOs, Iter8 will declare it as the winner.
     3. Use Prometheus as the provider for latency and error-rate metrics.
-    4. Combine canary testing with [progressive deployment](../../../concepts/buildingblocks/#deployment-pattern).
+    4. Combine canary testing with [progressive rollout](../../../concepts/buildingblocks/#deployment-pattern).
     
     Iter8 will progressively shift the traffic towards the winner and promote it at the end as depicted below.
 
@@ -173,7 +173,7 @@ Follow [step 8 of quick start tutorial](../../../getting-started/quick-start/#8-
 ???+ info "Understanding what happened"
     1. You created two versions of your app/ML model.
     2. You generated requests for your app/ML model versions. At the start of the experiment, 100% of the requests are sent to the baseline and 0% to the candidate.
-    3. You created an Iter8 experiment with canary testing pattern and progressive deployment pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus; Iter8 verified that the candidate satisfied all the SLOs, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
+    3. You created an Iter8 experiment with canary testing pattern and progressive rollout pattern. In each iteration, Iter8 observed the latency and error-rate metrics collected by Prometheus; Iter8 verified that the candidate satisfied all the SLOs, identified candidate as the winner, progressively shifted traffic from the baseline to the candidate, and promoted the candidate.
 
 ## 9. Cleanup
 === "Istio"

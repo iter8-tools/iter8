@@ -8,7 +8,7 @@ template: main.html
 
     [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-patterns), as the name indicates, is meant for scenarios where you do **not** want Iter8 to shift traffic between versions during the experiment. In this tutorial, you will:
 
-    * Modify the [quick start tutorial](../../../getting-started/quick-start) to use FixedSplit instead of Progressive deployment.
+    * Modify the [quick start tutorial](../../../getting-started/quick-start) to use FixedSplit instead of progressive rollout.
 
     The modified A/B testing experiment with FixedSplit deployment pattern is depicted below.
 

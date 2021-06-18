@@ -8,7 +8,7 @@ template: main.html
 
 Iter8 makes it easy to **unlock business value and guarantee service-level objectives (SLOs)** by identifying the best performing version of your app/ML model and promoting it safely.
 
-Iter8 is designed for **DevOps and MLOps teams** interested in maximizing release velocity and business value with their apps/ML models while protecting end-user experience. Use Iter8 for SLO validation, A/B testing and progressive deployments of K8s apps/ML models.
+Iter8 is designed for **DevOps and MLOps teams** interested in maximizing release velocity and business value with their apps/ML models while protecting end-user experience. Use Iter8 for SLO validation, A/B testing and progressive rollouts of K8s apps/ML models.
 
 ## What is an Iter8 experiment?
 Iter8 defines a Kubernetes resource called **Experiment** that automates SLO validation and A/B(/n) testing experiments as shown below.

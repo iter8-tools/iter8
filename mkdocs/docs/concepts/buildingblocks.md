@@ -158,7 +158,7 @@ A few common deployment patterns used in Iter8 experiments are described below. 
 
 
 <!-- 
-    Progressive deployment incrementally shifts traffic towards the winner over multiple iterations.
+    progressive rollout incrementally shifts traffic towards the winner over multiple iterations.
 
     ![Canary](../images/progressive.png)
 

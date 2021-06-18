@@ -56,7 +56,7 @@ plugins:
         
 # Customization
 extra:
-  title: "SLO validation, A/B testing, and progressive deployments"
+  title: "SLO validation, A/B testing, and progressive rollouts"
   version:
     provider: mike
   social:
@@ -134,7 +134,7 @@ nav:
         - A/B testing (quick start): tutorials/kfserving/testing-patterns/ab.md
         - Hybrid (A/B + SLOs): tutorials/kfserving/testing-patterns/hybrid.md
       - Deployment patterns:
-        - Progressive deployment: tutorials/kfserving/deployment-patterns/progressive.md
+        - progressive rollout: tutorials/kfserving/deployment-patterns/progressive.md
         - FixedSplit deployment: tutorials/kfserving/deployment-patterns/fixed-split.md
       - Traffic engineering:
         - Session affinity: tutorials/kfserving/traffic-engineering/session-affinity.md
@@ -148,7 +148,7 @@ nav:
         - Conformance: tutorials/knative/testing-patterns/conformance.md
         - A/B (quick start): tutorials/knative/testing-patterns/ab.md
       - Deployment patterns:
-        - Progressive deployment: tutorials/knative/deployment-patterns/progressive.md
+        - progressive rollout: tutorials/knative/deployment-patterns/progressive.md
         - FixedSplit deployment: tutorials/knative/deployment-patterns/fixed-split.md
       - Traffic engineering:
         - Session affinity: tutorials/knative/traffic-engineering/session-affinity.md
@@ -162,7 +162,7 @@ nav:
         - Conformance: tutorials/istio/testing-patterns/conformance.md
         - A/B (quick start): tutorials/istio/testing-patterns/ab.md
       - Deployment patterns:
-        - Progressive deployment: tutorials/istio/deployment-patterns/progressive.md
+        - progressive rollout: tutorials/istio/deployment-patterns/progressive.md
         - FixedSplit deployment: tutorials/istio/deployment-patterns/fixed-split.md
       - Traffic engineering:
         - Session affinity: tutorials/istio/traffic-engineering/session-affinity.md

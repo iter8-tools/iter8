@@ -2,18 +2,18 @@
 template: main.html
 ---
 
-# Progressive Deployment
+# progressive rollout
 
-!!! tip "Scenario: Progressive deployment"
-    [Progressive deployment](../../../concepts/buildingblocks/#deployment-pattern) enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment. 
+!!! tip "Scenario: progressive rollout"
+    [progressive rollout](../../../concepts/buildingblocks/#deployment-pattern) enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment. 
     
-    Progressive deployment is the default deployment pattern for Iter8 experiments. Progressive deployment during an A/B testing experiment is depicted below.
+    progressive rollout is the default deployment pattern for Iter8 experiments. progressive rollout during an A/B testing experiment is depicted below.
 
     ![Canary](../../images/quickstart.png)
 
-## Tutorials with progressive deployment
+## Tutorials with progressive rollout
 
-The [A/B testing (quick start)](../../../getting-started/quick-start/) and [canary testing](../../testing-patterns/canary/) tutorials demonstrate progressive deployment.
+The [A/B testing (quick start)](../../../getting-started/quick-start/) and [canary testing](../../testing-patterns/canary/) tutorials demonstrate progressive rollout.
 
 ## Specifying `weightObjRef`
 

@@ -4,12 +4,12 @@ template: main.html
 
 # A/B Testing
 
-!!! tip "Scenario: A/B testing and progressive deployment of KFServing models"
+!!! tip "Scenario: A/B testing and progressive rollout of KFServing models"
     [A/B testing](../../../../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
 
     1. Perform A/B testing.
     2. Specify *user-engagement* as the reward metric. This metric will be mocked by Iter8 in this tutorial.
-    3. Combine A/B testing with [progressive deployment](../../../../../concepts/buildingblocks/#deployment-pattern). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    3. Combine A/B testing with [progressive rollout](../../../../../concepts/buildingblocks/#deployment-pattern). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
 
     ![Quickstart KFServing](../../../images/quickstart-ab.png)
 
@@ -155,7 +155,7 @@ kubectl apply -f $ITER8/samples/kfserving/quickstart/metrics.yaml
     For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize in the A/B test. Documentation on defining custom metrics is [here](../../../../metrics/custom/).
 
 ## 5. Launch experiment
-Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the A/B testing & progressive deployment experiment as follows.
+Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the A/B testing & progressive rollout experiment as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
