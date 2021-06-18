@@ -12,29 +12,42 @@ export ITER8=<path-to-root-of-your-local-iter8-repo>
 cd $ITER8/install/docker
 ```
 
-2. Build image
+2. Build ind image
 ```shell
 docker build -t ind:latest .
 ```
 
-3. Run image in detached mode
+3. Start ind container
 ```shell
 docker run --name ind --privileged -d ind:latest
 ```
 
-4. Run Iter8 in Docker.
+4. Create K8s cluster and install Iter8 -- all inside ind container
 ```shell
-docker exec ind /iter8/iter8.sh
+docker exec ind iter8.sh
 ```
 
-If a version other than latest master version of iter8 needs to be run, use the following command instead
+To pin the version of the Dockerfile used in this image (example, `v0.6.5`), do as follows.
 ```shell
-docker exec  -e TAG=v0.6.5 ind /iter8/iter8.sh
+docker exec -e TAG=v0.6.5 ind iter8.sh
 ```
 
-5. Cleanup
-Cleanup remnants after finishing Step 4 (or before Step 3 if needed).
+5. Create Iter8 experiment
 ```shell
-docker kill ind
-docker rm ind
+docker exec ind helm install \
+  --set URL=https://example.com \
+  --set LimitMeanLatency='"200.0"' \
+  --set LimitErrorRate='"0.01"' \
+  codeengine /iter8/helm/conformance
+```
+
+6. Describe results of the experiments
+```shell
+docker exec ind watch \
+  iter8ctl describe -f - <(kubectl get experiment conformance-experiment -o yaml)
+```
+
+7. Cleanup (do this before Step 3 if needed)
+```shell
+$ITER8/install/docker/cleanup.sh
 ```
