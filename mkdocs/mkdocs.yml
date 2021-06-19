@@ -29,6 +29,7 @@ theme:
   - navigation.sections
   - navigation.tabs
   - navigation.top  
+  - navigation.expand
   palette:
     - scheme: default
       primary: black
@@ -112,7 +113,9 @@ nav:
     - What is Iter8?: concepts/whatisiter8.md
     - Experiment building blocks: concepts/buildingblocks.md
   - Getting Started:
-    - Quick start:
+    - Install Iter8: getting-started/install.md
+    - Get help: getting-started/help.md
+    - Quick start tutorials:
       - KFServing:
         - A/B testing: getting-started/quick-start/kfserving/tutorial.md
         - Platform setup: getting-started/quick-start/kfserving/platform-setup.md
@@ -125,8 +128,6 @@ nav:
       - Istio:
         - Hybrid (A/B + SLOs) testing: getting-started/quick-start/istio/tutorial.md
         - Platform setup: getting-started/quick-start/istio/platform-setup.md
-    - Install Iter8: getting-started/install.md
-    - Get help: getting-started/help.md
   - Tutorials:
     - KFServing:
       - Testing strategies:
@@ -158,10 +159,6 @@ nav:
       - Deployment strategies:
         - progressive rollout: tutorials/istio/deployment-strategies/progressive.md
         - FixedSplit deployment: tutorials/istio/deployment-strategies/fixed-split.md
-      - Traffic engineering:
-        - Session affinity: tutorials/istio/traffic-engineering/session-affinity.md
-        - User segmentation: tutorials/istio/traffic-engineering/user-segmentation.md
-        - Traffic mirroring/shadowing: tutorials/istio/traffic-engineering/mirroring.md
       - GitOps:
         - Argo CD + Istio: tutorials/istio/gitops/argocd.md
   - Metrics:

@@ -4,4 +4,4 @@ template: main.html
 
 # A/B Testing
 
-A/B testing pattern is documented as part of [quick start](../../../getting-started/quick-start/).
+Refer to the [quick start tutorial for KFServing](../../../getting-started/quick-start/kfserving/tutorial) for A/B testing with progressive rollout.

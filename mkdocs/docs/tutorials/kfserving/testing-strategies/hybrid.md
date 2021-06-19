@@ -2,114 +2,26 @@
 template: main.html
 ---
 
-# Quick Start with KFServing
+# Hybrid (A/B + SLOs) testing
 
-!!! tip "Scenario: A/B testing"
-    [A/B testing](../../../../../concepts/buildingblocks/#testing-pattern) enables you to compare two versions of an app/ML model, and select a winner based on a (business) reward metric and objectives (SLOs). In this tutorial, you will:
+!!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive rollout of KFServing models"
+    [Hybrid (A/B + SLOs) testing](../../concepts/buildingblocks/#testing-pattern) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
 
-    1. Perform A/B testing.
-    2. Specify *user-engagement* as the reward metric, and *latency* and *error-rate* based objectives. Iter8 will find a winner by comparing the two versions in terms of the reward, and by validating versions in terms of the objectives.
-    3. Use New Relic as the provider for user-engagement metric, and Prometheus as the provider for latency and error-rate metrics.
-    4. Combine A/B testing with [progressive rollout](../../concepts/buildingblocks/#deployment-pattern).
+    1. Perform hybrid (A/B + SLOs) testing.
+    2. Specify *user-engagement* as the reward metric.
+    3. Specify *latency* and *error-rate* based objectives; data for these will be collected using Iter8's built in metrics collection feature.
+    4. Combine hybrid (A/B + SLOs) testing with [progressive rollout](../../../../../concepts/buildingblocks/#deployment-pattern). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
     
-    Iter8 will progressively shift the traffic towards the winner and promote it at the end as depicted below.
-
-    ![Canary](../images/quickstart.png)
+    ![Hybrid testing](../../../images/quickstart-hybrid.png)
 
 ???+ warning "Before you begin, you will need... "
     1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
     2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
     3. [Go 1.13+](https://golang.org/doc/install).
-    4. (Seldon Only) [Helm 3+](https://helm.sh/docs/intro/install/)
     
-    This tutorial is available for the following K8s stacks.
-
-    [Istio](#before-you-begin){ .md-button }
-    [KFServing](#before-you-begin){ .md-button }
-    [Knative](#before-you-begin){ .md-button }
-    [Seldon](#before-you-begin){ .md-button }    
-
-    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
-
-## 1. Create Kubernetes cluster
-
-Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
-
-=== "Kind"
-
-    ```shell
-    kind create cluster --wait 5m
-    kubectl cluster-info --context kind-kind
-    ```
-
-    ??? info "Ensuring your Kind cluster has sufficient resources"
-        Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
-
-        ![Resources](../images/ddresourcepreferences.png)
-
-=== "Minikube"
-
-    ```shell
-    minikube start --cpus 8 --memory 12288
-    ```
-
-## 2. Clone Iter8 repo
-```shell
-git clone https://github.com/iter8-tools/iter8.git
-cd iter8
-export ITER8=$(pwd)
-```
-
-## 3. Install K8s stack and Iter8
-Choose the K8s stack over which you are performing the A/B testing experiment.
-
-=== "Istio"
-    Setup Istio, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
-
-    ```shell
-    $ITER8/samples/istio/quickstart/platformsetup.sh
-    ```
-    
-=== "KFServing"
-    Setup KFServing, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
-
-    ```shell
-    $ITER8/samples/kfserving/quickstart/platformsetup.sh
-    ```
-
-=== "Knative"
-    Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. Knative can work with multiple networking layers. So can Iter8's Knative extension. 
-    
-    Choose the networking layer for Knative.
-    === "Contour"
-
-        ```shell
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
-        ```
-
-    === "Kourier"
-
-        ```shell
-        $ITER8/samples/knative/quickstart/platformsetup.sh kourier
-        ```
-
-    === "Gloo"
-        This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
-        ```shell
-        $ITER8/samples/knative/quickstart/platformsetup.sh gloo
-        ```
-
-    === "Istio"
-
-        ```shell
-        $ITER8/samples/knative/quickstart/platformsetup.sh istio
-        ```
-=== "Seldon"
-    Setup Seldon Core, Seldon Analytics and Iter8 within your cluster.
-
-    ```shell
-    $ITER8/samples/seldon/quickstart/platformsetup.sh
-    ```
+## 1. Setup
+* Setup your K8s cluster with Knative and Iter8 as described [here](../platform-setup/). 
+* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
 ## 4. Create app/ML model versions
 === "Istio"
