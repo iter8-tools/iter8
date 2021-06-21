@@ -29,7 +29,6 @@ theme:
   - navigation.sections
   - navigation.tabs
   - navigation.top  
-  - navigation.expand
   palette:
     - scheme: default
       primary: black
