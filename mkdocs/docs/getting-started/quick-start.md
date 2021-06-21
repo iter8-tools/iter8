@@ -27,7 +27,8 @@ template: main.html
     [Istio](#before-you-begin){ .md-button }
     [KFServing](#before-you-begin){ .md-button }
     [Knative](#before-you-begin){ .md-button }
-    [Seldon](#before-you-begin){ .md-button }    
+    [Seldon](#before-you-begin){ .md-button }
+    [Linkerd](#before-you-begin){ .md-button }
 
     Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
 
@@ -334,7 +335,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
 
 === "Seldon"
 
-    Deploy two Seldon Deployments corresponding to two versions of an Iris classification model, along with an Istio virtual service to split traffic between them.
+    Deploy two Seldon deployments corresponding to two versions of an Iris classification model, along with an Istio virtual service to split traffic between them.
 
     ```shell
     kubectl apply -f $ITER8/samples/seldon/quickstart/baseline.yaml
@@ -422,7 +423,8 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
 
 
 === "Linkerd"
-    <!-- Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice. -->
+
+    Create a new namespace, enable Linkerd proxy injection, deploy two deployments, and create a traffic split. 
 
     ```shell
     kubectl create ns test
@@ -651,9 +653,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
     Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
     ```shell
-    kubectl annotate namespace default linkerd.io/inject=enabled
-
-    kubectl apply -f $ITER8/samples/linkerd/quickstart/fortio.yaml
+    kubectl apply -f $ITER8/samples/linkerd/quickstart/fortio.yaml -n test
     ```
 
 
@@ -1866,9 +1866,6 @@ When the experiment completes, you will see the experiment stage change from `Ru
 
     kubectl delete deployment web -n test
     kubectl delete deployment web2 -n test
-
-    kubectl annotate namespace test linkerd.io/inject=disabled
-    kubectl annotate namespace default linkerd.io/inject=disabled
 
     kubectl delete namespace test
     ```
