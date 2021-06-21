@@ -18,7 +18,7 @@ spec:
         with:
           script: kubectl -n test apply -f {{ .promote }}
   criteria:
-
+  
     # rewards:
     # # (business) reward metric to optimize in this experiment
     # - metric: iter8-istio/user-engagement 
@@ -27,8 +27,8 @@ spec:
     objectives: # used for validating versions
     - metric: iter8-linkerd/mean-latency
       upperLimit: 300
-    # - metric: iter8-istio/error-rate
-    #   upperLimit: "0.01"
+    - metric: iter8-linkerd/error-rate
+      upperLimit: "0.01"
     requestCount: iter8-linkerd/request-count
   duration: # product of fields determines length of the experiment
     intervalSeconds: 10
