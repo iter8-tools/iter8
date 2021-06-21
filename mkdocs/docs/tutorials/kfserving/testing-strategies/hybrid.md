@@ -9,7 +9,7 @@ template: main.html
 
     1. Perform hybrid (A/B + SLOs) testing.
     2. Specify *user-engagement* as the reward metric.
-    3. Specify *latency* and *error-rate* based objectives; data for these will be collected using Iter8's built in metrics collection feature.
+    3. Specify *latency* and *error-rate* based objectives, for which data will be provided by Prometheus.
     4. Combine hybrid (A/B + SLOs) testing with [progressive rollout](../../../../../concepts/buildingblocks/#deployment-pattern). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
     
     ![Hybrid testing](../../../images/quickstart-hybrid.png)
@@ -195,7 +195,7 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
     ```
 
 ## 6. Observe experiment
-Follow [Step 6 of the quick start tutorial for KFServing](../../../../getting-started/quick-start/kfserving/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name in your `iter8ctl` and `kubectl` commands.
+Follow [Step 6 of the quick start tutorial for KFServing](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`hybrid-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup
 ```shell

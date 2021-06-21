@@ -6,7 +6,7 @@ template: main.html
 
 !!! tip "Scenario: FixedSplit deployment"
 
-    [FixedSplit deployment](../../../concepts/buildingblocks/#deployment-strategies), as the name indicates, is meant for scenarios where you do **not** want Iter8 to shift traffic between versions during the experiment. In this tutorial, you will:
+    [FixedSplit deployment](../../../concepts/buildingblocks/#rollout-strategies), as the name indicates, is meant for scenarios where you do **not** want Iter8 to shift traffic between versions during the experiment. In this tutorial, you will:
 
     * Modify the [quick start tutorial](../../../getting-started/quick-start) to use FixedSplit instead of progressive rollout.
 

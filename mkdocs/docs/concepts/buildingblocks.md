@@ -11,32 +11,42 @@ We introduce the building blocks of an Iter8 experiment below.
 ***
 
 ## Applications and Versions
-Iter8 defines an application very broadly as anything that can be instantiated (run) on Kubernetes, which can be versioned, and for which metrics can be collected.
+Iter8 defines an application broadly as an entity that can be:
 
-### Examples
+1. instantiated (run) on Kubernetes, 
+2. can be versioned, and 
+3. for which metrics can be collected.
 
-* A Kubernetes service whose versions correspond to `deployments`.
-* A Kubernetes service whose versions correspond to `statefulsets`.
-* A Knative service whose versions correspond to `revisions`.
-* A KFServing inference service, whose versions correspond to model `revisions`.
-* A distributed application whose versions correspond to Helm `releases`.
+??? example "Examples"
+    * A Kubernetes service whose versions correspond to `deployments`.
+    * A Kubernetes service whose versions correspond to `statefulsets`.
+    * A Knative service whose versions correspond to `revisions`.
+    * A KFServing inference service, whose versions correspond to model `revisions`.
+    * A distributed application whose versions correspond to Helm `releases`.
 
 ## Objectives
 
 **Objectives** correspond to service-level objectives or SLOs. In Iter8 experiments, objectives are specified as metrics along with acceptable limits on their values. Iter8 will report how versions are performing with respect to these metrics and whether or not they satisfy the objectives.
 
-### Example
-
-An example of an objective is as follows: the 99th-percentile tail latency of the version should be under 50 msec.
+??? example "Examples"
+    * The 99th-percentile tail latency of the application should be under 50 msec.
+    * The precision of the ML model version should be over 92%.
+    * The (average) number of GPU cores consumed by a model should be under 5.0
 
 ***
 
 ## Reward
-**Reward** typically corresponds to a business metric which you wish to optimize during an A/B testing experiment. In Iter8 experiments, reward is specified as a metrics along with a preferred direction, which could be `high` or `low`. 
+**Reward** typically corresponds to a business metric which you wish to optimize during an A/B testing experiment. In Iter8 experiments, reward is specified as a metric along with a preferred direction, which could be `high` or `low`. 
 
-### Examples
+??? example "Examples"
+    * User-engagement 
+    * Conversion rate
+    * Click-through rate
+    * Revenue
+    * Precision, recall, or accuracy (for ML models)
+    * Number of GPU cores consumed by an ML model
 
-Examples of reward includes user-engagement, conversion rate, click-through rate, revenue, precision, recall, and accuracy (for ML models), all of which have a preferred direction `high`. The number of GPU cores consumed by an ML model version is an example of a reward with preferred direction `low`.
+    All but the last example above have a preferred direction `high`; the last example is that of a reward with preferred direction `low`.
 
 ***
 
@@ -45,9 +55,9 @@ Every Iter8 experiment involves a `baseline` version and may also involve zero, 
 
 ***
 
-## Testing pattern
+## Testing strategy
 
-**Testing pattern** determines how the **winning version (winner)** in an experiment is identified.
+**Testing strategy** determines how the **winning version (winner)** in an experiment is identified.
 
 === "SLO Validation"
     SLO validation experiments may involve a single version or two versions.
@@ -76,8 +86,8 @@ Every Iter8 experiment involves a `baseline` version and may also involve zero, 
 
 ***
 
-## Deployment pattern
-**Deployment pattern** defines how traffic is split between versions during the experiment. 
+## Rollout strategy
+**Rollout strategy** defines how traffic is split between versions during the experiment. 
 
 Iter8 makes it easy for you to take total advantage of all the traffic engineering features available in your K8s environment (i.e., supported by the ingress or service mesh technology available in your K8s cluster). 
 
@@ -94,14 +104,14 @@ A few common deployment strategies used in Iter8 experiments are described below
 
     ![Simple rollout & rollback](../images/simplerolloutandrollback.png)
 
-=== "Blue/Green"
+=== "BlueGreen"
 
     * After `v2` is deployed, both `v1` and `v2` are available. 
     * All traffic is routed to `v2`. 
     * If `v2` is the winner of the experiment, all traffic continues to flow to `v2`.
     * Else, all traffic is routed back to `v1`.
 
-    ![Blue/Green](../images/bluegreen.png)
+    ![BlueGreen](../images/bluegreen.png)
 
 === "Dark launch"
 
@@ -121,10 +131,10 @@ A few common deployment strategies used in Iter8 experiments are described below
 === "Canary"
     Canary deployment involves exposing `v2` to a small fraction of end-user requests during the experiment before exposing it to a larger fraction of requests or all the requests.
 
-    === "%-based split"
+    === "Fixed-%-split"
         A fixed % of end-user requests is sent to `v2` and the rest is sent to `v1`.
 
-        ![canary-%-based](../images/canary-%-based.png)
+        ![Fixed % split](../images/canary-%-based.png)
 
     === "Progressive traffic shift"
 
@@ -141,12 +151,12 @@ A few common deployment strategies used in Iter8 experiments are described below
             ![session affinity](../images/session-affinity-exp.png)
 
         === "User segmentation"
-            === "%-based split"
+            === "Fixed-%-split"
                 * Only a specific segment of the users participate in the experiment.
                 * A fixed % of requests from the participating segment is sent to `v2`. Rest is sent to `v1`.
                 * All requests from end-users in the non-participating segment is sent to `v1`.
 
-                ![canary-%-based-user-segmentation](../images/canary-%-segmentation.png)
+                ![Fixed % user segmentation](../images/canary-%-segmentation.png)
 
             === "Progressive traffic shift"
                 * Only a specific segment of the users participate in the experiment.
@@ -202,8 +212,6 @@ Iter8 enables you to take total advantage of all the traffic engineering feature
 
 
 ## Version promotion
-Iter8 can **promote the winning version** at the end of an experiment.
-
-![Version promotion](../images/versionpromotion.png)
+Iter8 can **automatically promote the winning version** at the end of an experiment.
 
 [^1]: It is possible to mirror only a certain percentage of the requests instead of all requests.

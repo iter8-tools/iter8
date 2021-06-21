@@ -18,7 +18,7 @@ Create a local cluster using Kind or Minikube as follows, or use a managed Kuber
     ??? info "Ensuring your Kind cluster has sufficient resources"
         Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
 
-        ![Resources](../images/ddresourcepreferences.png)
+        ![Resources](../../../../images/ddresourcepreferences.png)
 
 === "Minikube"
 

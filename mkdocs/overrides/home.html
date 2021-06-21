@@ -104,8 +104,8 @@
         <hr>
         <ul>
           <li>SLO validation</li>
-          <li>A/B and A/B/n experiments that optimize business reward metrics</li>
-          <li>Hybrid</li>
+          <li>A/B and A/B/n test with business reward</li>
+          <li>Hybrid (A/B + SLOs) testing</li>
         </ul>
       </div>
 
@@ -114,14 +114,18 @@
           <span class="twemoji">
             {% include ".icons/material/progress-check.svg" %}
           </span>
-          Deployment strategies
+          Rollout strategies
         </h2>
         <hr>
         <ul>
           <li>Simple rollout & rollback</li>
-          <li>Blue/Green</li>
-          <li>Dark launch with builtin load generation and traffic mirroring (shadowing)</li>
-          <li>Canary with %-split, progressive traffic shift, user segmentation, session affinity</li>
+          <li>BlueGreen</li>
+          <li>Dark launch with builtin load/metrics</li>
+          <li>Dark launch with mirroring (shadowing)</li>
+          <li>Canary with fixed-%-split</li>
+          <li>Canary with progressive traffic shift</li>
+          <li>Canary with user segmentation</li>
+          <li>Canary with session affinity</li>
         </ul>
       </div>
 

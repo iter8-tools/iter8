@@ -132,22 +132,18 @@ nav:
       - Testing strategies:
         - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
         - Hybrid (A/B + SLOs): tutorials/kfserving/testing-strategies/hybrid.md
-      - Deployment strategies:
-        - progressive rollout: tutorials/kfserving/deployment-strategies/progressive.md
-        - FixedSplit deployment: tutorials/kfserving/deployment-strategies/fixed-split.md
-      - Traffic engineering:
+      - Rollout strategies:
+        - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
+        - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
         - Session affinity: tutorials/kfserving/traffic-engineering/session-affinity.md
-        - User segmentation: tutorials/kfserving/traffic-engineering/user-segmentation.md
-        - Traffic mirroring/shadowing: tutorials/kfserving/traffic-engineering/mirroring.md
     - Knative:
       - Testing strategies:
         - Canary: tutorials/knative/testing-strategies/canary.md
         - Conformance: tutorials/knative/testing-strategies/conformance.md
         - A/B (quick start): tutorials/knative/testing-strategies/ab.md
-      - Deployment strategies:
-        - progressive rollout: tutorials/knative/deployment-strategies/progressive.md
-        - FixedSplit deployment: tutorials/knative/deployment-strategies/fixed-split.md
-      - Traffic engineering:
+      - Rollout strategies:
+        - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
+        - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
         - User segmentation: tutorials/knative/traffic-engineering/user-segmentation.md
         - Traffic mirroring/shadowing: tutorials/knative/traffic-engineering/mirroring.md
     - Istio:
@@ -155,9 +151,9 @@ nav:
         - Canary: tutorials/istio/testing-strategies/canary.md
         - Conformance: tutorials/istio/testing-strategies/conformance.md
         - A/B (quick start): tutorials/istio/testing-strategies/ab.md
-      - Deployment strategies:
-        - progressive rollout: tutorials/istio/deployment-strategies/progressive.md
-        - FixedSplit deployment: tutorials/istio/deployment-strategies/fixed-split.md
+      - Rollout strategies:
+        - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
+        - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
       - GitOps:
         - Argo CD + Istio: tutorials/istio/gitops/argocd.md
   - Metrics:

@@ -240,8 +240,8 @@ watch -x iter8ctl describe -f - <(kubectl get experiment quickstart-exp -o yaml)
     Experiment name: quickstart-exp
     Experiment namespace: default
     Target: default/sample-app
-    Testing pattern: A/B
-    Deployment pattern: Progressive
+    Testing strategy: A/B
+    Rollout strategy: Progressive
 
     ****** Progress Summary ******
     Experiment stage: Running
