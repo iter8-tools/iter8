@@ -65,8 +65,8 @@ jobs:
         export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  canary:
-    name: canary experiment
+  slovalidation:
+    name: slo validation experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -100,17 +100,17 @@ jobs:
         kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
         # Starting the experiment
-        kubectl apply -f $ITER8/samples/knative/canary/experiment.yaml
+        kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
 
     - name: Sleep until end of experiment
       run: |
         sleep 150.0
-        kubectl get experiment canary-exp -o yaml
+        kubectl get experiment slovalidation-exp -o yaml
     
     - name: Check if experiment is complete and successful
       run: |
         export ITER8=$(pwd)
-        source $ITER8/samples/knative/canary/check.sh
+        source $ITER8/samples/knative/slovalidation/check.sh
 
   conformance:
     name: conformance experiment
