@@ -147,7 +147,7 @@ nav:
         - User segmentation: tutorials/knative/rollout-strategies/user-segmentation.md
     - Istio:
       - Testing strategies:
-        - SLO validation: tutorials/istio/testing-strategies/canary.md
+        - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
         - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
         - A/B testing (quick start): tutorials/istio/testing-strategies/ab.md
       - Rollout strategies:
