@@ -146,7 +146,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
       type: Gauge
       headerTemplates:
       - name: X-Query-Key
-        value: t0p-secret-api-key  
+        value: t0p-secret-api-key
       provider: newrelic
       jqExpression: ".results[0] | .[] | tonumber"
       urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic

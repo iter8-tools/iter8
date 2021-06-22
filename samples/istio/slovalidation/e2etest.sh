@@ -40,7 +40,7 @@ kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
 kubectl get experiment $EXPERIMENT -o yaml
 
 # Check
-source $ITER8/samples/istio/canary/check.sh
+source $ITER8/samples/istio/slovalidation/check.sh
 
 # Cleanup .. not needed since cluster is getting deleted
 # included to test manual instructions
