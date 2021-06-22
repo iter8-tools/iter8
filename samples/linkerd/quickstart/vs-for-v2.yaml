@@ -4,7 +4,6 @@ metadata:
   name: web-traffic-split
 spec:
   service: web
-  # Services inside the namespace with their own selectors, endpoints and configuration.
   backends:
   - service: web
     weight: 0
