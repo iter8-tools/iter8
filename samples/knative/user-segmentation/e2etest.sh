@@ -10,7 +10,7 @@ kubectl cluster-info --context kind-kind
 echo "Setting up platform"
 $ITER8/samples/knative/quickstart/platformsetup.sh istio
 
-# create app with live and dark versions
+# create app versions
 echo "Creating live and dark versions"
 kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
 
@@ -31,7 +31,9 @@ echo "Creating the Iter8 metrics and experiment"
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
 kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
-kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml        
+kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml  
+
+export EXPERIMENT=user-segmentation-exp
 
 # Sleep
 echo "Sleep for 150s"

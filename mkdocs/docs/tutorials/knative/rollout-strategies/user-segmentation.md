@@ -5,25 +5,23 @@ template: main.html
 # User Segmentation
 
 !!! tip "Scenario: SLO validation with user segmentation"
-    [User segmentation](../../../concepts/buildingblocks/#traffic-engineering) is the ability to carve out a specific segment of users for an experiment, leaving the rest of the users unaffected by the experiment.
+    [User segmentation](../../../../concepts/buildingblocks/#user-segmentation_1) is the ability to carve out a specific segment of users for an experiment, leaving the rest of the users unaffected by the experiment.
 
-    In this tutorial, we will segment users into two groups: those from Wakanda, and others. Users from Wakanda will participate in the experiment: specifically, requests originating in Wakanda may be routed to baseline or candidate; requests that are originating from Wakanda will not participate in the experiment and are routed only to the baseline The experiment is depicted below.
+    In this tutorial, you will:
 
-    ![User segmentation](../../images/request-routing.png)    
+    1. Segment users into two groups: those from Wakanda, and others. 
+    2. Users from Wakanda will participate in the experiment: specifically, requests originating in Wakanda may be routed to baseline or candidate versions; requests that are originating from Wakanda will not participate in the experiment and will be routed to the baseline only. The experiment is shown below.
 
-???+ warning "Before you begin... "
+    ![User segmentation](../../../../images/canary-progressive-segmentation.png)
 
-    This tutorial is available for the following K8s stacks.
+## 1. Setup with Istio
+* Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).
+* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
-    [Knative](#before-you-begin){ .md-button }
+> Knative with Istio is required in this tutorial. During this setup, choose [Istio](../../../../getting-started/quick-start/knative/platform-setup/#3-install-knative-iter8-and-telemetry) as the networking layer for Knative.
 
-    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
 
-## Steps 1 to 3
-    
-Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
-
-## 4. Create versions
+## 2. Create versions of your application
 ```shell
 kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
 ```
@@ -68,7 +66,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
     ```
 
 
-## 5. Create routing rule
+## 3. Create routing rule to segment users
 ```shell
 kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
 ```
@@ -121,7 +119,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
                 Host: sample-app-v1.default
     ```
 
-## 6. Generate traffic
+## 4. Generate traffic
 ```shell
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
@@ -164,7 +162,7 @@ cd $ITER8
           restartPolicy: Never
     ```
 
-## 7. Create Iter8 experiment
+## 5. Create Iter8 experiment
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
@@ -176,7 +174,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
     apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
-      name: request-routing
+      name: user-segmentation-exp
     spec:
       # this experiment uses the fully-qualified name of the Istio virtual service as the target
       target: default/routing-for-wakanda
@@ -224,25 +222,10 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 8. Observe experiment
-Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `request-routing` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
+## 6. Observe experiment
+Follow [Step 6 of the quick start tutorial for Knative](../../../../getting-started/quick-start/knative/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`user-segmentation-exp`) in your `iter8ctl` and `kubectl` commands.
 
-???+ info "Understanding what happened"
-    1. You configured two Knative services corresponding to two versions of your app in `services.yaml`.
-
-    2. You used `example.com` as the HTTP host in this tutorial.
-        - **Note:** In your production cluster, use domain(s) that you own in the setup of the virtual service.
-
-    3. You set up an Istio virtual service which mapped the Knative services to this custom domain. The virtual service specified the following routing rules: all HTTP requests to `example.com` with their Host header or :authority pseudo-header **not** set to `wakanda` would be routed to the `baseline`; those with `wakanda` Host header or :authority pseudo-header may be routed to `baseline` and `candidate`.
-    
-    4. The percentage of `wakandan` requests sent to `candidate` is 0% at the beginning of the experiment.
-
-    5. You generated traffic for `example.com` using a `curl`-job with two `curl`-containers to simulate user requests. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. One of the `curl`-containers sets the `country` header field to `wakanda`, and the other to `gondor`.
-        - **Note:** You used Istio version 1.8.2 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
-    
-    6. You created an Iter8 `Canary` experiment with `Progressive` deployment pattern to evaluate the `candidate`. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics collected by Prometheus, and verified that the `candidate` version satisfied all the `objectives` specified in the experiment. It progressively increased the proportion of traffic with `country: wakanda` header that is routed to the `candidate`.
-
-## 9. Cleanup
+## 7. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/user-segmentation/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/user-segmentation/curl.yaml
