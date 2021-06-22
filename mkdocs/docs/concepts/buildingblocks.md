@@ -24,6 +24,8 @@ Iter8 defines an application broadly as an entity that can be:
     * A KFServing inference service, whose versions correspond to model `revisions`.
     * A distributed application whose versions correspond to Helm `releases`.
 
+*** 
+
 ## Objectives
 
 **Objectives** correspond to service-level objectives or SLOs. In Iter8 experiments, objectives are specified as metrics along with acceptable limits on their values. Iter8 will report how versions are performing with respect to these metrics and whether or not they satisfy the objectives.
@@ -59,30 +61,37 @@ Every Iter8 experiment involves a `baseline` version and may also involve zero, 
 
 **Testing strategy** determines how the **winning version (winner)** in an experiment is identified.
 
-=== "SLO Validation"
-    SLO validation experiments may involve a single version or two versions.
+***
 
-    **SLO validation experiment with baseline version and no candidate:** If baseline satisfies the [objectives](#objectives), it is the winner. Otherwise, there is no winner.
+### SLO validation
+SLO validation experiments may involve a single version or two versions.
 
-    **SLO validation experiment with baseline and candidate versions:** If candidate satisfies the [objectives](#objectives), it is the winner. Else, if baseline satisfies the [objectives](#objectives), it is the winner. Else, there is no winner.
+**SLO validation experiment with baseline version and no candidate:** If baseline satisfies the [objectives](#objectives), it is the winner. Otherwise, there is no winner.
 
-    ![SLO validation](../images/slovalidation.png)
+**SLO validation experiment with baseline and candidate versions:** If candidate satisfies the [objectives](#objectives), it is the winner. Else, if baseline satisfies the [objectives](#objectives), it is the winner. Else, there is no winner.
 
+![SLO validation](../images/slovalidation.png)
 
-=== "A/B testing"
-    **A/B testing experiments** involve a baseline version, a candidate version, and a reward metric. The version which performs best in terms of the reward metric is the winner.
+***
 
-    ![A/B](../images/ab.png)
+### A/B testing
+**A/B testing experiments** involve a baseline version, a candidate version, and a reward metric. The version which performs best in terms of the reward metric is the winner.
 
-=== "A/B/n testing"
-    **A/B/n testing experiments** involve a baseline version, two or more candidate versions, and a reward metric. The version which performs best in terms of the reward metric is the winner.
+![A/B](../images/ab.png)
 
-    ![A/B/n](../images/abn.png)
+***
 
-=== "Hybrid (A/B + SLOs) testing"
-    **Hybrid (A/B + SLOs) testing experiments** combine A/B or A/B/n testing on the one hand with SLO validation on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. If no version satisfies objectives, then there is no winner.
+### A/B/n testing
+**A/B/n testing experiments** involve a baseline version, two or more candidate versions, and a reward metric. The version which performs best in terms of the reward metric is the winner.
 
-    ![Hybrid](../images/hybrid.png)
+![A/B/n](../images/abn.png)
+
+***
+
+### Hybrid (A/B + SLOs) testing
+**Hybrid (A/B + SLOs) testing experiments** combine A/B or A/B/n testing on the one hand with SLO validation on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. If no version satisfies objectives, then there is no winner.
+
+![Hybrid](../images/hybrid.png)
 
 ***
 
@@ -93,79 +102,90 @@ Iter8 makes it easy for you to take total advantage of all the traffic engineeri
 
 A few common deployment strategies used in Iter8 experiments are described below. In the following description, `v1` and `v2` refer to the current and new versions of the application respectively.
 
-=== "Simple rollout & rollback"
-    This pattern is modeled after the [rolling update of a Kubernetes deployment](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/). 
-    
-    * After `v2` is deployed, it replaces `v1`.
-    * If `v2` is the winner of the experiment, it is retained.
-    * Else, `v2` is rolled back and `v1` is retained. 
-    
-    All traffic flows to `v2` during the experiment.
+***
 
-    ![Simple rollout & rollback](../images/simplerolloutandrollback.png)
+### Simple rollout & rollout
+This pattern is modeled after the [rolling update of a Kubernetes deployment](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/). 
 
-=== "BlueGreen"
+* After `v2` is deployed, it replaces `v1`.
+* If `v2` is the winner of the experiment, it is retained.
+* Else, `v2` is rolled back and `v1` is retained. 
 
-    * After `v2` is deployed, both `v1` and `v2` are available. 
-    * All traffic is routed to `v2`. 
-    * If `v2` is the winner of the experiment, all traffic continues to flow to `v2`.
-    * Else, all traffic is routed back to `v1`.
+All traffic flows to `v2` during the experiment.
 
-    ![BlueGreen](../images/bluegreen.png)
+![Simple rollout & rollback](../images/simplerolloutandrollback.png)
 
-=== "Dark launch"
+***
 
-    * After `v2` is deployed, it is hidden from end-users.
-    * `v2` is not used to serve end-user requests but can still be experimented with.
+### BlueGreen
+* After `v2` is deployed, both `v1` and `v2` are available. 
+* All traffic is routed to `v2`. 
+* If `v2` is the winner of the experiment, all traffic continues to flow to `v2`.
+* Else, all traffic is routed back to `v1`.
 
-    === "Builtin load generation"
-        During the experiment, Iter8 generates load for `v2`.
+![BlueGreen](../images/bluegreen.png)
 
-        ![Builtin](../images/darklaunchbuiltin.png)
+***
 
-    === "Traffic mirroring (shadowing)"
-        Mirrored traffic is a replica of the real user requests[^1] that is routed to `v2`, and used to collect metrics for `v2`.
+### Dark launch
+* After `v2` is deployed, it is hidden from end-users.
+* `v2` is not used to serve end-user requests but can still be experimented with.
 
-        ![Mirroring](../images/mirroring.png)
+#### Builtin load generation
+During the experiment, Iter8 generates load for `v2`.
 
-=== "Canary"
-    Canary deployment involves exposing `v2` to a small fraction of end-user requests during the experiment before exposing it to a larger fraction of requests or all the requests.
+![Builtin](../images/darklaunchbuiltin.png)
 
-    === "Fixed-%-split"
-        A fixed % of end-user requests is sent to `v2` and the rest is sent to `v1`.
+***
 
-        ![Fixed % split](../images/canary-%-based.png)
+#### Traffic mirroring (shadowing)
+Mirrored traffic is a replica of the real user requests[^1] that is routed to `v2`, and used to collect metrics for `v2`.
 
-    === "Progressive traffic shift"
+![Mirroring](../images/mirroring.png)
 
-        Traffic is incrementally shifted to the winner over multiple iterations.
+***
 
-        ![canary-progressive](../images/progressive.png)
+### Canary
+Canary deployment involves exposing `v2` to a small fraction of end-user requests during the experiment before exposing it to a larger fraction of requests or all the requests.
 
-    ???+ Tip "Canary with user segmentation and session affinity"
-        === "Session affinity"            
-            Session affinity, sometimes referred to as sticky sessions, routes all requests coming from an end-user to the same version consistently throughout the experiment.
+#### Fixed-%-split
+A fixed % of end-user requests is sent to `v2` and the rest is sent to `v1`.
 
-            Session affinity is depicted in the picture below. User grouping and affinity can be configured based on a number of different attributes of the request including request headers, cookies, query parameters, geo location, user agent (browser version, screen size, operating system) and language.
+![Fixed % split](../images/canary-%-based.png)
 
-            ![session affinity](../images/session-affinity-exp.png)
+***
 
-        === "User segmentation"
-            === "Fixed-%-split"
-                * Only a specific segment of the users participate in the experiment.
-                * A fixed % of requests from the participating segment is sent to `v2`. Rest is sent to `v1`.
-                * All requests from end-users in the non-participating segment is sent to `v1`.
+##### User segmentation
+* Only a specific segment of the users participate in the experiment.
+* A fixed % of requests from the participating segment is sent to `v2`. Rest is sent to `v1`.
+* All requests from end-users in the non-participating segment is sent to `v1`.
 
-                ![Fixed % user segmentation](../images/canary-%-segmentation.png)
+![Fixed % user segmentation](../images/canary-%-segmentation.png)
 
-            === "Progressive traffic shift"
-                * Only a specific segment of the users participate in the experiment.
-                * Within this segment, traffic is incrementally shifted to the winner over multiple iterations.
-                * All requests from end-users in the non-participating segment is sent to `v1`.
+***
 
-                ![canary-progressive-segmentation](../images/canary-progressive-segmentation.png)
+#### Progressive traffic shift
+Traffic is incrementally shifted to the winner over multiple iterations.
 
+![canary-progressive](../images/progressive.png)
 
+***
+
+##### User segmentation
+* Only a specific segment of the users participate in the experiment.
+* Within this segment, traffic is incrementally shifted to the winner over multiple iterations.
+* All requests from end-users in the non-participating segment is sent to `v1`.
+
+![canary-progressive-segmentation](../images/canary-progressive-segmentation.png)
+
+***
+
+#### Session affinity
+Session affinity, sometimes referred to as sticky sessions, routes all requests coming from an end-user to the same version consistently throughout the experiment.
+
+User grouping for affinity can be configured based on a number of different attributes of the request including request headers, cookies, query parameters, geo location, user agent (browser version, screen size, operating system) and language.
+
+![Session affinity](../images/session-affinity-exp.png)
 
 <!-- 
     progressive rollout incrementally shifts traffic towards the winner over multiple iterations.

@@ -130,12 +130,12 @@ nav:
   - Tutorials:
     - KFServing:
       - Testing strategies:
-        - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
         - Hybrid (A/B + SLOs): tutorials/kfserving/testing-strategies/hybrid.md
+        - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
-        - Session affinity: tutorials/kfserving/traffic-engineering/session-affinity.md
+        - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
     - Knative:
       - Testing strategies:
         - Canary: tutorials/knative/testing-strategies/canary.md

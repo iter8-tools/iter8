@@ -86,20 +86,12 @@ kubectl apply -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
               cmd: /bin/bash
               args: [ "-c", "kubectl apply -f {{ .promote }}" ]
       criteria:
-        requestCount: iter8-kfserving/request-count
         rewards: # Business rewards
         - metric: iter8-kfserving/user-engagement
           preferredDirection: High # maximize user engagement
-        objectives:
-        - metric: iter8-kfserving/mean-latency
-          upperLimit: 1500
-        - metric: iter8-kfserving/95th-percentile-tail-latency
-          upperLimit: 2000
-        - metric: iter8-kfserving/error-rate
-          upperLimit: "0.01"
       duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 25
+        intervalSeconds: 5
+        iterationsPerLoop: 20
       versionInfo:
         # information about model versions used in this experiment
         baseline:
