@@ -2,6 +2,8 @@
 
 set -e
 
+export EXPERIMENT=slovalidation-exp
+
 # Ensure ITER8 environment variable is set
 if [[ -z ${ITER8} ]]; then
     echo "ITER8 environment variable needs to be set to the root folder of Iter8"
@@ -12,7 +14,7 @@ fi
 
 # Check if experiment has completed
 completed="Completed"
-stage=$(kubectl get experiment canary-exp -o json | jq -r .status.stage)
+stage=$(kubectl get experiment ${EXPERIMENT} -o json | jq -r .status.stage)
 if [[ $stage = $completed ]]; then
     echo "Experiment has Completed"
 else
@@ -38,7 +40,7 @@ fi
 
 # Check if versionRecommendedForPromotion is candidate
 candidate="sample-app-v2"
-vrfp=$(kubectl get experiment canary-exp -o json | jq -r .status.versionRecommendedForPromotion)
+vrfp=$(kubectl get experiment ${EXPERIMENT} -o json | jq -r .status.versionRecommendedForPromotion)
 if [[ $vrfp = $candidate ]]; then
     echo "versionRecommendedForPromotion is $vrfp"
 else

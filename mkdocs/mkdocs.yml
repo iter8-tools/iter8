@@ -138,7 +138,7 @@ nav:
         - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
     - Knative:
       - Testing strategies:
-        - Canary: tutorials/knative/testing-strategies/canary.md
+        - SLO validation: tutorials/knative/testing-strategies/slovalidationprogressive.md
         - Conformance: tutorials/knative/testing-strategies/conformance.md
         - A/B (quick start): tutorials/knative/testing-strategies/ab.md
       - Rollout strategies:
