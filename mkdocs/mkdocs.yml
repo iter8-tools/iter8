@@ -130,7 +130,7 @@ nav:
   - Tutorials:
     - KFServing:
       - Testing strategies:
-        - Hybrid (A/B + SLOs): tutorials/kfserving/testing-strategies/hybrid.md
+        - Hybrid (A/B + SLOs) testing: tutorials/kfserving/testing-strategies/hybrid.md
         - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
@@ -140,16 +140,16 @@ nav:
       - Testing strategies:
         - SLO validation: tutorials/knative/testing-strategies/slovalidationprogressive.md
         - SLO validation (builtin metrics): tutorials/knative/testing-strategies/conformance.md
-        - A/B (quick start): tutorials/knative/testing-strategies/ab.md
+        - A/B testing (quick start): tutorials/knative/testing-strategies/ab.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
         - User segmentation: tutorials/knative/rollout-strategies/user-segmentation.md
     - Istio:
       - Testing strategies:
-        - Canary: tutorials/istio/testing-strategies/canary.md
-        - Conformance: tutorials/istio/testing-strategies/conformance.md
-        - A/B (quick start): tutorials/istio/testing-strategies/ab.md
+        - SLO validation: tutorials/istio/testing-strategies/canary.md
+        - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
+        - A/B testing (quick start): tutorials/istio/testing-strategies/ab.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md

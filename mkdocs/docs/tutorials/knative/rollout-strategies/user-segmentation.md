@@ -4,7 +4,7 @@ template: main.html
 
 # User Segmentation
 
-!!! tip "Scenario: SLO validation with user segmentation"
+!!! tip "Scenario: SLO validation with user segmentation and builtin metrics"
     [User segmentation](../../../../concepts/buildingblocks/#user-segmentation_1) is the ability to carve out a specific segment of users for an experiment, leaving the rest of the users unaffected by the experiment.
 
     In this tutorial, you will:
@@ -182,27 +182,34 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
         # this experiment will perform a canary test
         testingPattern: Canary
         deploymentPattern: Progressive
+        actions:
+          loop:
+          - task: metrics/collect
+            with:
+              versions:
+              - name: sample-app-v1
+                url: http://sample-app-v1.default.svc.cluster.local
+              - name: sample-app-v2
+                url: http://sample-app-v2.default.svc.cluster.local
       criteria:
         # mean latency of version should be under 50 milliseconds
         # 95th percentile latency should be under 100 milliseconds
         # error rate should be under 1%
         objectives: 
-        - metric: iter8-knative/mean-latency
+        - metric: iter8-system/mean-latency
           upperLimit: 50
-        - metric: iter8-knative/95th-percentile-tail-latency
+        - metric: iter8-system/latency-95th-percentile
           upperLimit: 100
-        - metric: iter8-knative/error-rate
+        - metric: iter8-system/error-count
           upperLimit: "0.01"
       duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 10
+        maxLoops: 10
+        intervalSeconds: 2
+        iterationsPerLoop: 1
       versionInfo:
-        # information about versions used in this experiment
+        # information about app versions used in this experiment
         baseline:
-          name: current
-          variables:
-          - name: revision
-            value: sample-app-v1-blue
+          name: sample-app-v1
           weightObjRef:
             apiVersion: networking.istio.io/v1alpha3
             kind: VirtualService
@@ -210,10 +217,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
             namespace: default
             fieldPath: .spec.http[0].route[0].weight
         candidates:
-        - name: candidate
-          variables:
-          - name: revision
-            value: sample-app-v2-green
+        - name: sample-app-v2
           weightObjRef:
             apiVersion: networking.istio.io/v1alpha3
             kind: VirtualService
