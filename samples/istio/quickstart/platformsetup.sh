@@ -31,7 +31,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export ISTIO_VERSION="${ISTIO_VERSION:-1.9.4}"
+export ISTIO_VERSION="${ISTIO_VERSION:-1.10.1}"
 echo "ISTIO_VERSION=$ISTIO_VERSION"
 
 # Step 2: Install Istio (https://istio.io/latest/docs/setup/getting-started/)

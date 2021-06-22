@@ -2,24 +2,16 @@
 template: main.html
 ---
 
-# Conformance Testing
+# SLO Validation with a single version
 
-!!! tip "Scenario: Conformance testing"
-    [Conformance testing](../../../concepts/buildingblocks/#testing-pattern) enables you to validate a  version of your app/ML model using service-level objectives (SLOs). In this tutorial, you will:
+!!! tip "Scenario: SLO validation with a single version"
+    Iter8 enables you to perform SLO validation with a single version of your application (a.k.a. [Conformance testing](../../../../concepts/buildingblocks/#slo-validation)). In this tutorial, you will:
 
     1. Perform conformance testing.
     2. Specify *latency* and *error-rate* based service-level objectives (SLOs). If your version satisfies SLOs, Iter8 will declare it as the winner.
+    3. Use Prometheus as the provider for latency and error-rate metrics.
     
-    ![Conformance](../../images/conformance.png)
-
-???+ warning "Before you begin... "
-
-    This tutorial is available for the following K8s stacks.
-
-    [Istio](#before-you-begin){ .md-button }
-    [Knative](#before-you-begin){ .md-button }
-
-    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
+    ![Conformance](../../../../images/conformance.png)
 
 ## Steps 1, 2, and 3
     

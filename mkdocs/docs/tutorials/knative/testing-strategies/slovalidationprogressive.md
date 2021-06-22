@@ -21,7 +21,7 @@ Please follow steps 1 through 4 of the [Knative quick start tutorial](../../../.
 ## 5. Launch experiment
 Launch the SLO validation experiment.
 ```shell
-kubectl apply -f $ITER8/samples/knative/canary/experiment.yaml
+kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
 ```
 
 ??? info "Look inside experiment.yaml"
