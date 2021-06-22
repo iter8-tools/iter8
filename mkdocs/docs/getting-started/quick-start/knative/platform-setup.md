@@ -6,7 +6,7 @@ template: main.html
 
 ## 1. Create Kubernetes cluster
 
-Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
+Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. If you choose Istio as the networking layer for Knative (see Step 3 below), then ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
 
 === "Kind"
 
