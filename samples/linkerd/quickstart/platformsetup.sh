@@ -53,33 +53,11 @@ echo "Waiting for all Viz extension pods to be running..."
 linkerd check
 echo "Linkerd installed successfully"
 
-# # Step 3: Ensure readiness of Linkerd pods
-# echo "Waiting for all Linkerd pods to be running..."
-# linkerd check
-
 ### Note: the preceding steps perform domain install; following steps perform Iter8 install
 
-# Step 4: Install Iter8
+# Step 3: Install Iter8
 echo "Installing Iter8 with Istio Support"
 kustomize build $ITER8/install/core | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build $ITER8/install/builtin-metrics | kubectl apply -f -
 kubectl wait --for=condition=Ready pods --all -n iter8-system
-
-# # Step 5: Install Iter8's Prometheus add-on
-# echo "Installing Iter8's Prometheus add-on"
-# kustomize build $ITER8/install/prometheus-add-on/prometheus-operator | kubectl apply -f -
-# kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-# kustomize build $ITER8/install/prometheus-add-on/prometheus | kubectl apply -f -
-
-# kubectl apply -f ${ITER8}/samples/istio/quickstart/service-monitor.yaml
-
-# # Step 6: Install Iter8's mock New Relic service
-# echo "Installing Iter8's mock New Relic service"
-# kubectl apply -f ${ITER8}/samples/istio/quickstart/metrics-mock.yaml
-
-# # Step : Verify Iter8 installation
-# echo "Verifying Iter8 and add-on installation"
-# kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
-# sleep 20
-# kubectl wait --for condition=ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system

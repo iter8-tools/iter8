@@ -6,9 +6,8 @@ spec:
   # target identifies the service under experimentation using its fully qualified name
   target: test/web-traffic-split
   strategy:
-    # this experiment will perform an Canary test
-    testingPattern: Canary
-
+    # this experiment will perform an A/B test
+    testingPattern: A/B
     # this experiment will progressively shift traffic to the winning version
     deploymentPattern: Progressive
     actions:
@@ -18,12 +17,10 @@ spec:
         with:
           script: kubectl -n test apply -f {{ .promote }}
   criteria:
-  
-    # rewards:
-    # # (business) reward metric to optimize in this experiment
-    # - metric: iter8-istio/user-engagement 
-    #   preferredDirection: High
-
+    rewards:
+    # (business) reward metric to optimize in this experiment
+    - metric: iter8-linkerd/user-engagement
+      preferredDirection: High
     objectives: # used for validating versions
     - metric: iter8-linkerd/mean-latency
       upperLimit: 300
