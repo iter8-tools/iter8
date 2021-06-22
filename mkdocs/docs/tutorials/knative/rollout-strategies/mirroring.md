@@ -2,30 +2,23 @@
 template: main.html
 ---
 
-# Traffic Mirroring
+# Traffic Mirroring (Shadowing)
 
-!!! tip "Scenario: SLO validation for a dark launched version with mirrored traffic"
+!!! tip "Scenario: Dark launch with traffic mirroring (shadowing)"
 
-    [Traffic mirroring or shadowing](../../../concepts/buildingblocks/#traffic-engineering) enables experimenting with a dark launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
+    [Traffic mirroring or shadowing](../../../concepts/buildingblocks/#traffic-mirroring-shadowing) enables experimenting with a dark launched version with zero-impact on end-users. Mirrored traffic is a replica of the real user requests that is routed to the dark version. Metrics are collected and evaluated for the dark version, but responses from the dark version are ignored.
     
-    In this tutorial, you will use mirror traffic to a dark launched version as depicted below.
+    In this tutorial, you will use mirror traffic to a dark launched version as shown below.
 
-    ![Mirroring](../../images/mirroring.png)
-
+    ![Mirroring](../../../../images/mirroring.png)
     
-???+ warning "Before you begin... "
+## 1. Setup with Istio
+* Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).
+* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
-    This tutorial is available for the following K8s stacks.
+> Knative with Istio is required in this tutorial. During this setup, choose [Istio](../../../../getting-started/quick-start/knative/platform-setup/#3-install-knative-iter8-and-telemetry) as the networking layer for Knative.
 
-    [Knative](#before-you-begin){ .md-button }
-
-    Please choose the same K8s stack consistently throughout this tutorial. If you wish to switch K8s stacks between tutorials, start from a clean K8s cluster, so that your cluster is correctly setup.
-    
-## Steps 1 to 3
-    
-Please follow steps 1 through 3 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster).
-
-## 4. Create app with live and dark versions
+## 2. Create app with live and dark versions
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
 ```
@@ -70,7 +63,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/service.yaml
         percent: 0
     ```
 
-## 5. Create routing rule
+## 3. Create Istio virtual service to mirror traffic
 ```shell
 kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
 ```
@@ -135,8 +128,7 @@ kubectl apply -f $ITER8/samples/knative/mirroring/routing-rules.yaml
                 Knative-Serving-Revision: sample-app-v1
     ```
 
-
-## 6. Generate requests
+## 4. Generate requests
 
 ```shell
 TEMP_DIR=$(mktemp -d)
@@ -171,7 +163,7 @@ cd $ITER8
           restartPolicy: Never
     ```
 
-## 7. Create Iter8 experiment
+## 5. Create Iter8 experiment
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app
 kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
@@ -213,23 +205,10 @@ kubectl apply -f $ITER8/samples/knative/mirroring/experiment.yaml
             value: sample-app-v2
     ```
 
-## 8. Observe experiment
-Please follow [Step 8 of the quick start tutorial](../../../getting-started/quick-start/#8-observe-experiment) to observe the experiment in realtime. Note that the experiment in this tutorial uses a different name from the quick start one. Replace the experiment name `quickstart-exp` with `mirroring` in your commands. You can also observe traffic by suitably modifying the commands for observing traffic.
+## 6. Observe experiment
+Follow [Step 6 of the quick start tutorial for Knative](../../../../getting-started/quick-start/knative/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`mirroring`) in your `iter8ctl` and `kubectl` commands.
 
-???+ info "Understanding what happened"
-    1. You configured a Knative service with two versions of your app. In the `service.yaml` manifest, you specified that the live version, `sample-app-v1`, should receive 100% of the production traffic and the dark version, `sample-app-v2`, should receive 0% of the production traffic.
-
-    2. You used `example.com` as the HTTP host in this tutorial.
-        - **Note:** In your production cluster, use domain(s) that you own in the setup of the virtual services.
-
-    3. You set up Istio virtual services which mapped the Knative revisions to the custom domain. The virtual services specified the following routing rules: all HTTP requests with their `Host` header or `:authority` pseudo-header set to `example.com` would be sent to `sample-app-v1`. 40% of these requests would be mirrored and sent to `sample-app-v2` and responses from `sample-app-v2` would be ignored.
-
-    4. You generated traffic for `example.com` using a `curl`-based job. You injected Istio sidecar injected into it to simulate traffic generation from within the cluster. The sidecar was needed in order to correctly route traffic. 
-        - **Note:** You used Istio version 1.8.2 to inject the sidecar. This version of Istio corresponds to the one installed in [Step 3 of the quick start tutorial](http://localhost:8000/getting-started/quick-start/with-knative/#3-install-knative-and-iter8). If you have a different version of Istio installed in your cluster, change the Istio version during sidecar injection appropriately.
-    
-    5. You created an Iter8 `Conformance` experiment to evaluate the dark version. In each iteration, Iter8 observed the mean latency, 95th percentile tail-latency, and error-rate metrics for the dark version collected by Prometheus, and verified that the dark version satisfied all the objectives specified in `experiment.yaml`.
-
-## 9. Cleanup
+## 7. Cleanup
 
 ```shell
 kubectl delete -f $ITER8/samples/knative/mirroring/curl.yaml

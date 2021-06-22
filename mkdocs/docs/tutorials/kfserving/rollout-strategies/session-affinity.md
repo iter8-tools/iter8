@@ -25,7 +25,7 @@ kubectl wait --for=condition=Ready isvc/flowers -n ns-baseline
 kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate
 ```
 
-??? info "Virtual service with routing rule"
+??? info "Istio virtual service"
     ```yaml linenums="1"
     apiVersion: networking.istio.io/v1alpha3
     kind: VirtualService
