@@ -57,7 +57,7 @@ kubectl apply --filename https://github.com/knative/serving/releases/download/${
 # Step 3: Ensure readiness of Knative-serving pods
 echo "Waiting for all Knative-serving pods to be running..."
 sleep 10 # allowing enough time for resource creation
-kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
+kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
 
 # Step 4: Install a network layer
 if [[ "istio" == ${1} ]]; then
@@ -133,5 +133,5 @@ kubectl apply -f ${ITER8}/samples/knative/quickstart/metrics-mock.yaml
 
 # Step 8: Verify platform setup
 echo "Verifying platform setup"
-kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
-kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
+kubectl wait --for condition=Ready --timeout=300s pods --all -n iter8-system
