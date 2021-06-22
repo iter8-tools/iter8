@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# progressive rollout
+# Progressive Traffic Shift
 
 !!! tip "Scenario: progressive rollout"
     [progressive rollout](../../../concepts/buildingblocks/#deployment-pattern) enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment. 
