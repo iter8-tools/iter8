@@ -13,7 +13,7 @@ spec:
       loop:
       - task: metrics/collect
         with:
-          versions: 
+          versions:
           - name: sample-app-v1
             url: http://sample-app-v1.default.svc.cluster.local
           - name: sample-app-v2
@@ -30,8 +30,9 @@ spec:
     - metric: iter8-system/error-count
       upperLimit: "0.01"
   duration:
-    intervalSeconds: 10
-    iterationsPerLoop: 10
+    maxLoops: 10
+    intervalSeconds: 5
+    iterationsPerLoop: 1
   versionInfo:
     # information about app versions used in this experiment
     baseline:

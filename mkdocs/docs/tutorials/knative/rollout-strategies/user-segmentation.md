@@ -123,8 +123,8 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
 ```shell
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
-curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
-istio-1.8.2/bin/istioctl kube-inject -f $ITER8/samples/knative/user-segmentation/curl.yaml | kubectl create -f -
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.0 sh -
+istio-1.7.0/bin/istioctl kube-inject -f $ITER8/samples/knative/user-segmentation/curl.yaml | kubectl create -f -
 cd $ITER8
 ```
 

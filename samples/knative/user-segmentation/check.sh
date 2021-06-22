@@ -22,7 +22,7 @@ else
 fi
 
 # Check if versionRecommendedForPromotion is candidate
-candidate="sample-app-v2-green"
+candidate="sample-app-v2"
 vrfp=$(kubectl get experiment ${EXPERIMENT} -o json | jq -r .status.versionRecommendedForPromotion)
 if [[ $vrfp = $candidate ]]; then
     echo "versionRecommendedForPromotion is $vrfp"
