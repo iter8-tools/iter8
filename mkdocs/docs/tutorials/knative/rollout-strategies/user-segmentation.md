@@ -10,7 +10,7 @@ template: main.html
     In this tutorial, you will:
 
     1. Segment users into two groups: those from Wakanda, and others. 
-    2. Users from Wakanda will participate in the experiment: specifically, requests originating in Wakanda may be routed to baseline or candidate versions; requests that are originating from Wakanda will not participate in the experiment and will be routed to the baseline only. The experiment is shown below.
+    2. Users from Wakanda will participate in the experiment: specifically, requests originating from Wakanda may be routed to baseline or candidate versions; requests that are originating from outside Wakanda will not participate in the experiment and will be routed to the baseline only. The experiment is shown below.
 
     ![User segmentation](../../../../images/canary-progressive-segmentation.png)
 
