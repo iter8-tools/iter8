@@ -35,9 +35,8 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
 
 export EXPERIMENT=user-segmentation-exp
 
-# Sleep
-echo "Sleep for 150s"
-sleep 150.0
+# Wait for experiment to complete
+kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
 
 # Check
 source  $ITER8/samples/knative/user-segmentation/check.sh
