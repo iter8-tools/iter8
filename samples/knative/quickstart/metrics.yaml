@@ -20,7 +20,7 @@ spec:
     value: t0p-secret-api-key  
   provider: newrelic
   jqExpression: ".results[0] | .[] | tonumber"
-  urlTemplate: http://metrics-mock.iter8-system.svc.cluster.local:8080/newrelic
+  urlTemplate: https://my-newrelic-service.com
   mock:
   - name: sample-app-v1
     level: 15.0
