@@ -5,7 +5,7 @@ template: main.html
 # SLO Validation with a single version
 
 !!! tip "Scenario: SLO validation with a single version"
-    Iter8 enables you to perform SLO validation with a single version of your application (a.k.a. [Conformance testing](../../../../concepts/buildingblocks/#slo-validation)). In this tutorial, you will:
+    Iter8 enables you to perform SLO validation with a single version of your application (a.k.a. [conformance testing](../../../../concepts/buildingblocks/#slo-validation)). In this tutorial, you will:
 
     1. Perform conformance testing.
     2. Specify *latency* and *error-rate* based service-level objectives (SLOs). If your version satisfies SLOs, Iter8 will declare it as the winner.
@@ -116,7 +116,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
     ```
 
 ## 4. Define metrics
-Please follow step 6 of the [quick start tutorial](../../../getting-started/quick-start/istio/tutorial/#4-define-metrics).
+Please follow step 4 of the [quick start tutorial](../../../../getting-started/quick-start/istio/tutorial/#4-define-metrics).
 
 ## 5. Launch experiment
 ```shell
