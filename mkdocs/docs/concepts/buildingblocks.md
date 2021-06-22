@@ -66,7 +66,7 @@ Every Iter8 experiment involves a `baseline` version and may also involve zero, 
 ### SLO validation
 SLO validation experiments may involve a single version or two versions.
 
-**SLO validation experiment with baseline version and no candidate:** If baseline satisfies the [objectives](#objectives), it is the winner. Otherwise, there is no winner.
+**SLO validation experiment with baseline version and no candidate (conformance testing):** If baseline satisfies the [objectives](#objectives), it is the winner. Otherwise, there is no winner.
 
 **SLO validation experiment with baseline and candidate versions:** If candidate satisfies the [objectives](#objectives), it is the winner. Else, if baseline satisfies the [objectives](#objectives), it is the winner. Else, there is no winner.
 

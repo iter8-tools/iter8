@@ -139,7 +139,7 @@ nav:
     - Knative:
       - Testing strategies:
         - SLO validation: tutorials/knative/testing-strategies/slovalidationprogressive.md
-        - Conformance: tutorials/knative/testing-strategies/conformance.md
+        - SLO validation (builtin metrics): tutorials/knative/testing-strategies/conformance.md
         - A/B (quick start): tutorials/knative/testing-strategies/ab.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
