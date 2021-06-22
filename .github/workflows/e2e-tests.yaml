@@ -187,7 +187,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=default
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=240s
+        kubectl wait ksvc/sample-app --for=condition=Ready --timeout=240s
         helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=default
         kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
 
@@ -288,7 +288,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         kustomize build $ITER8/samples/knative/canaryfixedsplit/baseline | kubectl apply -f -
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=240s
+        kubectl wait ksvc/sample-app --for=condition=Ready --timeout=240s
         kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl apply -f -        
 
     - name: Generate requests

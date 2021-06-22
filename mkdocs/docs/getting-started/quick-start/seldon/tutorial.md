@@ -31,8 +31,8 @@ Deploy two Seldon Deployments corresponding to two versions of an Iris classific
 kubectl apply -f $ITER8/samples/seldon/quickstart/baseline.yaml
 kubectl apply -f $ITER8/samples/seldon/quickstart/candidate.yaml
 kubectl apply -f $ITER8/samples/seldon/quickstart/routing-rule.yaml
-kubectl wait --for condition=ready --timeout=600s pods --all -n ns-baseline
-kubectl wait --for condition=ready --timeout=600s pods --all -n ns-candidate
+kubectl wait --for=condition=Ready --timeout=600s pods --all -n ns-baseline
+kubectl wait --for=condition=Ready --timeout=600s pods --all -n ns-candidate
 ```
 
 ??? info "Look inside baseline.yaml"

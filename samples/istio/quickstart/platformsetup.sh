@@ -48,7 +48,7 @@ echo "Istio installed successfully"
 
 # Step 3: Ensure readiness of Istio pods
 echo "Waiting for all Istio pods to be running..."
-kubectl wait --for condition=ready --timeout=300s pods --all -n istio-system
+kubectl wait --for=condition=Ready --timeout=300s pods --all -n istio-system
 
 ### Note: the preceding steps perform domain install; following steps perform Iter8 install
 
@@ -73,6 +73,6 @@ kubectl apply -f ${ITER8}/samples/istio/quickstart/metrics-mock.yaml
 
 # Step : Verify Iter8 installation
 echo "Verifying Iter8 and add-on installation"
-kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+kubectl wait --for=condition=Ready --timeout=300s pods --all -n iter8-system
 sleep 20
-kubectl wait --for condition=ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system
+kubectl wait --for=condition=Ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system

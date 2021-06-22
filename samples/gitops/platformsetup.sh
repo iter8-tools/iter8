@@ -34,7 +34,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 # Verify Argo CD installation
 echo "Verifying Argo CD installation"
-kubectl wait --for condition=ready --timeout=300s pods --all -n argocd
+kubectl wait --for=condition=Ready --timeout=300s pods --all -n argocd
 echo "Your Argo CD installation is complete"
 echo "Run the following commands: "
 echo "  1. kubectl port-forward svc/argocd-server -n argocd 8080:443"
