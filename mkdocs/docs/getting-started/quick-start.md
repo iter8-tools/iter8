@@ -441,7 +441,7 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
     kubectl apply -f $ITER8/samples/linkerd/quickstart/traffic-split.yaml -n test
     ```
 
-        ??? info "Look inside traffic-split.yaml"
+    ??? info "Look inside traffic-split.yaml"
         ```yaml linenums="1"
         apiVersion: split.smi-spec.io/v1alpha2
         kind: TrafficSplit
@@ -672,35 +672,35 @@ Choose the K8s stack over which you are performing the A/B testing experiment.
     ```
     
     ??? info "Look inside fortio.yaml"
-    ```yaml linenums="1"
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-      name: fortio
-    spec:
-      template:
+        ```yaml linenums="1"
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: fortio
         spec:
-          volumes:
-          - name: shared
-            emptyDir: {}
-          containers:
-          - name: fortio
-            image: fortio/fortio
-            command: ["fortio", "load", "-allow-initial-errors", "-t", "6000s", "-qps", "16", "-json", "/shared/fortiooutput.json", $(URL)]
-            env:
-            - name: URL
-              value: web.test:8080
-            volumeMounts:
-            - name: shared
-              mountPath: /shared         
-          - name: busybox
-            image: busybox:1.28
-            command: ['sh', '-c', 'echo busybox is running! && sleep 600']
-            volumeMounts:
-            - name: shared
-              mountPath: /shared       
-          restartPolicy: Never
-    ```    
+          template:
+            spec:
+              volumes:
+              - name: shared
+                emptyDir: {}
+              containers:
+              - name: fortio
+                image: fortio/fortio
+                command: ["fortio", "load", "-allow-initial-errors", "-t", "6000s", "-qps", "16", "-json", "/shared/fortiooutput.json", $(URL)]
+                env:
+                - name: URL
+                  value: web.test:8080
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared         
+              - name: busybox
+                image: busybox:1.28
+                command: ['sh', '-c', 'echo busybox is running! && sleep 600']
+                volumeMounts:
+                - name: shared
+                  mountPath: /shared       
+              restartPolicy: Never
+        ```    
 
 
 ## 6. Define metrics
