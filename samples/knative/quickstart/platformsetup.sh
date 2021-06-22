@@ -39,7 +39,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
+export KNATIVE_TAG="${KNATIVE_TAG:-v0.22.0}"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
 
 # Step 2: Install Knative (https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-serving-component)
@@ -63,17 +63,11 @@ kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
 if [[ "istio" == ${1} ]]; then
     ##########Installing ISTIO ###########
     echo "Installing Istio for Knative"
-    WORK_DIR=$(pwd)
-    TEMP_DIR=$(mktemp -d)
-    cd $TEMP_DIR
-    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
-    cd istio-1.8.2
-    export PATH=$PWD/bin:$PATH
-    cd $WORK_DIR
-    curl -L https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/istio-minimal-operator.yaml | istioctl install -y -f -
+    kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/istio.yaml
 
-    kubectl apply --filename https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/release.yaml
-    echo "Istio installed successfully"
+    kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/net-istio.yaml
+
+    echo "Istio networking layer installed successfully"
     
 
 elif [[ "contour" == ${1} ]]; then
