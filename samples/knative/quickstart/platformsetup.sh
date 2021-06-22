@@ -59,15 +59,31 @@ echo "Waiting for all Knative-serving pods to be running..."
 sleep 10 # allowing enough time for resource creation
 kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
 
+# # Step 4: Install a network layer
+# if [[ "istio" == ${1} ]]; then
+#     ##########Installing ISTIO ###########
+#     echo "Installing Istio for Knative"
+#     kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/istio.yaml
+
+#     kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/net-istio.yaml
+
+#     echo "Istio networking layer installed successfully"
+
 # Step 4: Install a network layer
 if [[ "istio" == ${1} ]]; then
     ##########Installing ISTIO ###########
     echo "Installing Istio for Knative"
-    kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/istio.yaml
+    WORK_DIR=$(pwd)
+    TEMP_DIR=$(mktemp -d)
+    cd $TEMP_DIR
+    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
+    cd istio-1.8.2
+    export PATH=$PWD/bin:$PATH
+    cd $WORK_DIR
+    curl -L https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/istio-minimal-operator.yaml | istioctl install -y -f -
 
-    kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/net-istio.yaml
-
-    echo "Istio networking layer installed successfully"
+    kubectl apply --filename https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/release.yaml
+    echo "Istio installed successfully"
     
 
 elif [[ "contour" == ${1} ]]; then
