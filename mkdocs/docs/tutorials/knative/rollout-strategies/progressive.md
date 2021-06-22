@@ -2,71 +2,22 @@
 template: main.html
 ---
 
-# progressive rollout
+# Progressive Traffic Shift
 
-!!! tip "Scenario: progressive rollout"
-    [progressive rollout](../../../concepts/buildingblocks/#deployment-pattern) enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment. 
-    
-    progressive rollout is the default deployment pattern for Iter8 experiments. progressive rollout during an A/B testing experiment is depicted below.
+!!! tip "Scenario: Progressive traffic shift"
+    [Progressive traffic shift](../../../../concepts/buildingblocks/#progressive-traffic-shift) is a type of canary rollout strategy. It enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment as shown below.
 
-    ![Canary](../../images/quickstart.png)
+    ![Progressive traffic shift](../../../../images/progressive.png)
 
 ## Tutorials with progressive rollout
 
-The [A/B testing (quick start)](../../../getting-started/quick-start/) and [canary testing](../../testing-strategies/canary/) tutorials demonstrate progressive rollout.
+The [hybrid testing (quick start)](../../../../getting-started/quick-start/knative/tutorial) and [the SLO validation](../../testing-strategies/slovalidationprogressive/) tutorials demonstrate progressive rollout.
 
 ## Specifying `weightObjRef`
+Iter8 uses the `weightObjRef` field in the experiment resource to get the current traffic split between versions and/or modify the traffic split. Ensure that this field is specified correctly for each version. The following example demonstrates how to specify `weightObjRef` in experiments.
 
-Iter8 uses the `weightObjRef` field in the experiment resource to get the current traffic split between versions and/or modify the traffic split. Ensure that this field is specified correctly for each version. Below are a few examples that demonstrate how to specify `weightObjRef` in experiments.
-
-=== "Istio"
-    The [A/B testing experiment for Istio app](../../../getting-started/quick-start/#7-launch-experiment) uses an Istio virtual service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Istio virtual service and the traffic fields within the Istio virtual service corresponding to the versions.
-
-    ```yaml
-    versionInfo:
-      baseline:
-        name: productpage-v1
-        weightObjRef:
-          apiVersion: networking.istio.io/v1beta1
-          kind: VirtualService
-          namespace: bookinfo-iter8
-          name: bookinfo
-          fieldPath: .spec.http[0].route[0].weight
-      candidates:
-      - name: productpage-v2
-        weightObjRef:
-          apiVersion: networking.istio.io/v1beta1
-          kind: VirtualService
-          namespace: bookinfo-iter8
-          name: bookinfo
-          fieldPath: .spec.http[0].route[1].weight
-    ```
-
-=== "KFServing"
-    The [A/B testing experiment for KFServing model](../../../getting-started/quick-start/#7-launch-experiment) uses an Istio virtual service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Istio virtual service and the traffic fields within the Istio virtual service corresponding to the versions.
-
-    ```yaml
-    versionInfo:
-      baseline:
-        name: flowers-v1
-        weightObjRef:
-          apiVersion: networking.istio.io/v1alpha3
-          kind: VirtualService
-          name: routing-rule
-          namespace: default
-          fieldPath: .spec.http[0].route[0].weight      
-      candidates:
-      - name: flowers-v2
-        weightObjRef:
-          apiVersion: networking.istio.io/v1alpha3
-          kind: VirtualService
-          name: routing-rule
-          namespace: default
-          fieldPath: .spec.http[0].route[1].weight 
-    ```
-
-=== "Knative"
-    The [A/B testing experiment for Knative app](../../../getting-started/quick-start/#7-launch-experiment) uses a Knative service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Knative service and the traffic fields within the Knative service corresponding to the versions.
+??? example "Example"
+    The [A/B testing quick start tutorial for Knative](../../../getting-started/quick-start/#7-launch-experiment) uses a Knative service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Knative service and the traffic fields within the Knative service corresponding to the versions.
 
     ```yaml
     versionInfo:
