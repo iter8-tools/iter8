@@ -11,7 +11,7 @@ template: main.html
 !!! note "Version"
     This document describes version `v2alpha2` of Iter8's metric API.
 
-Metrics usage is documented [here](../../metrics/using-metrics/). Iter8 provides a set of builtin metrics that are documented [here](../../metrics/builtin/). Creation of custom metrics is documented [here](../../metrics/custom/). It is also possible to mock metric values; mock metrics are documented [here](../../metrics/mock).
+Metrics usage is documented [here](../metrics/using-metrics.md). Iter8 provides a set of builtin metrics that are documented [here](../metrics/builtin.md). Creation of custom metrics is documented [here](../metrics/custom.md). It is also possible to mock metric values; mock metrics are documented [here](../metrics/mock.md).
 
 ??? example "Sample metric"
     ```yaml linenums="1"

@@ -110,7 +110,7 @@ kubectl apply -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
-## 6. Observe experiment
+## 6. Understand the experiment
 Follow [Step 6 of the quick start tutorial for KFServing](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`fixedsplit-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup

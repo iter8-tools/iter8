@@ -5,12 +5,12 @@ template: main.html
 # Hybrid (A/B + SLOs) testing
 
 !!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive traffic shift of KFServing models"
-    [Hybrid (A/B + SLOs) testing](../../concepts/buildingblocks/#hybrid-testing) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
+    [Hybrid (A/B + SLOs) testing](../../../concepts/buildingblocks.md#hybrid-testing) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
 
     1. Perform hybrid (A/B + SLOs) testing.
     2. Specify *user-engagement* as the reward metric.
     3. Specify *latency* and *error-rate* based objectives, for which data will be provided by Prometheus.
-    4. Combine hybrid (A/B + SLOs) testing with [progressive traffic shift](../../../../../concepts/buildingblocks/#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    4. Combine hybrid (A/B + SLOs) testing with [progressive traffic shift](../../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
     
     ![Hybrid testing](../../../images/quickstart-hybrid.png)
 
@@ -20,7 +20,7 @@ template: main.html
     3. [Go 1.13+](https://golang.org/doc/install).
     
 ## 1. Steps 1, 2, and 3
-* Follow [Steps 1, 2, and 3 of the KFServing quick start tutorial](getting-started/quick-start/kfserving/tutorial/). 
+* Follow [Steps 1, 2, and 3 of the KFServing quick start tutorial](../../../getting-started/quick-start/kfserving/tutorial.md). 
 
 ## 4. Define metrics
 ```shell
@@ -194,8 +194,8 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
-## 6. Observe experiment
-Follow [Step 6 of the quick start tutorial for KFServing](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`hybrid-exp`) in your `iter8ctl` and `kubectl` commands.
+## 6. Understand the experiment
+Follow [Step 6 of the quick start tutorial for KFServing](../../../getting-started/quick-start/kfserving/tutorial.md#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`hybrid-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup
 ```shell

@@ -48,10 +48,10 @@ kubectl wait --for=condition=Ready ksvc/sample-app
     ```
 
 ## 3. Generate requests
-Please follow [Step 3 of the quick start tutorial](../../../../getting-started/quick-start/knative/tutorial/#3-generate-requests).
+Please follow [Step 3 of the quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#3-generate-requests).
 
 ## 4. Define metrics
-Please follow [Step 4 of the quick start tutorial](../../../../getting-started/quick-start/knative/tutorial/#4-define-metrics).
+Please follow [Step 4 of the quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#4-define-metrics).
 
 ## 5. Launch experiment
 ```shell
@@ -108,7 +108,7 @@ kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
             value: candidate
     ```
 
-## 6. Observe experiment
+## 6. Understand the experiment
 Follow [Step 6 of the quick start tutorial for Knative](../../../../getting-started/quick-start/knative/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`fixedsplit-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup

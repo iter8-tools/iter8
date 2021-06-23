@@ -11,32 +11,33 @@ template: main.html
 
 ## Tutorials with progressive traffic shift
 
-The [hybrid testing (quick start)](../../../getting-started/quick-start/knative/tutorial.md) and [the SLO validation](../testing-strategies/slovalidationprogressive.md) tutorials demonstrate progressive traffic shift.
+The [hybrid (A/B + SLOs) testing](../../../getting-started/quick-start/seldon/tutorial.md) tutorial demonstrates progressive traffic shift.
 
 ## Specifying `weightObjRef`
+
 Iter8 uses the `weightObjRef` field in the experiment resource to get the current traffic split between versions and/or modify the traffic split. Ensure that this field is specified correctly for each version. The following example demonstrates how to specify `weightObjRef` in experiments.
 
 ??? example "Example"
-    The [A/B testing quick start tutorial for Knative](../../../getting-started/quick-start/knative/tutorial.md#5-launch-experiment) uses a Knative service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Knative service and the traffic fields within the Knative service corresponding to the versions.
+    The [hybrid (A/B + SLOs) testing](../../../getting-started/quick-start/seldon/tutorial.md) tutorial uses an Istio virtual service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Istio virtual service and the traffic fields within the Istio virtual service corresponding to the versions.
 
     ```yaml
     versionInfo:
       baseline:
-        name: sample-app-v1
+        name: iris-v1
         weightObjRef:
-          apiVersion: serving.knative.dev/v1
-          kind: Service
-          name: sample-app
+          apiVersion: networking.istio.io/v1alpha3
+          kind: VirtualService
+          name: routing-rule
           namespace: default
-          fieldPath: .spec.traffic[0].percent
+          fieldPath: .spec.http[0].route[0].weight      
       candidates:
-      - name: sample-app-v2
+      - name: iris-v2
         weightObjRef:
-          apiVersion: serving.knative.dev/v1
-          kind: Service
-          name: sample-app
+          apiVersion: networking.istio.io/v1alpha3
+          kind: VirtualService
+          name: routing-rule
           namespace: default
-          fieldPath: .spec.traffic[1].percent
+          fieldPath: .spec.http[0].route[1].weight
     ```
 
 ## Traffic controls

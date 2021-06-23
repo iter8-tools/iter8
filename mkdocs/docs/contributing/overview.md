@@ -22,11 +22,11 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* [Iter8 documentation/tutorials](../tutorials)
+* [Iter8 documentation/tutorials](tutorials.md)
 * New features
-    * [New K8s stack/service mesh/ingress](../newk8sstack)
+    * [New K8s stack/service mesh/ingress](newk8sstack.md)
     * Iter8 code samples for OpenShift
-    * [Analytics](../analytics)
+    * [Analytics](analytics.md)
     * Tasks
 * Builds, CI
 * Bug fixes
@@ -35,7 +35,7 @@ We welcome many different types of contributions including:
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
-[community meetings](#come-to-meetings) or [contact us](../../getting-started/help) and let's discuss how we can work together. 
+[community meetings](#come-to-weekly-community-meetings) or [contact us](../getting-started/help.md) and let's discuss how we can work together. 
 
 *** 
 
@@ -77,7 +77,7 @@ The best ways to reach us with a question when contributing is to ask on:
 
 * The original GitHub issue
 * `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
-* Bring your questions to our [community meetings](#come-to-meetings)
+* Bring your questions to our [community meetings](#come-to-weekly-community-meetings)
 
 ## Pull Request Lifecycle
 

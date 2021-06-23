@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Iter8 metric resources"    
     Iter8 defines a custom Kubernetes resource (CRD) called **Metric** that makes it easy to define and use metrics in experiments. 
     
-    Iter8 installation includes a set of pre-defined [builtin metrics](../builtin) that pertain to app/ML model latency/errors. You can also [define custom metrics](../custom) that enable you to utilize data from Prometheus, New Relic, Sysdig, Elastic or any other database of your choice.
+    Iter8 installation includes a set of pre-defined [builtin metrics](builtin.md) that pertain to app/ML model latency/errors. You can also [define custom metrics](custom.md) that enable you to utilize data from Prometheus, New Relic, Sysdig, Elastic or any other database of your choice.
 
 ## List metrics
 Find the set Iter8 metrics available in your cluster using `kubectl get`.
@@ -32,7 +32,7 @@ iter8-system      request-count             Counter   Number of requests (Iter8 
 
 ## Referencing metrics within experiments
 
-Use metrics in experiments by referencing them in the criteria section of the experiment manifest. Reference metrics using the `namespace/name` or `name` [format](../../../reference/apispec/#criteria).
+Use metrics in experiments by referencing them in the criteria section of the experiment manifest. Reference metrics using the `namespace/name` or `name` [format](../reference/experiment.md#criteria).
 
 ??? example "Sample experiment illustrating the use of metrics"
     ```yaml
@@ -55,4 +55,4 @@ Use metrics in experiments by referencing them in the criteria section of the ex
     ```
 
 ## Observing metric values
-During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../../../getting-started/quick-start/#a-observe-metrics) for an example.
+During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../getting-started/quick-start/kfserving/tutorial.md#a-observe-results) for an example.

@@ -5,11 +5,11 @@ template: main.html
 # SLO Validation
 
 !!! tip "Scenario: SLO validation with progressive traffic shift"
-    This tutorial illustrates an [SLO validation experiment with two versions](../../../../concepts/buildingblocks/#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
+    This tutorial illustrates an [SLO validation experiment with two versions](../../../concepts/buildingblocks.md#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
 
     1. Specify *latency* and *error-rate* based service-level objectives (SLOs). If the candidate version satisfies SLOs, Iter8 will declare it as the winner.
     2. Use Prometheus as the provider for latency and error-rate metrics.
-    3. Combine SLO validation with [progressive traffic shifting](../../../../concepts/buildingblocks/#progressive-traffic-shift).
+    3. Combine SLO validation with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift).
     
     ![SLO validation with progressive traffic shift](../../../images/slovalidationprogressive.png)
 
@@ -84,7 +84,7 @@ kubectl apply -f $ITER8/samples/istio/slovalidation/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 6. Observe experiment
+## 6. Understand the experiment
 Follow [Step 6 of the quick start tutorial for Istio](../../../../getting-started/quick-start/istio/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`slovalidation-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup

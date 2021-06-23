@@ -21,7 +21,7 @@ template: main.html
     4. [Helm 3+](https://helm.sh/docs/intro/install/)
     
 ## 1. Setup
-* Setup your K8s cluster with Seldon and Iter8 as described [here](../platform-setup/). 
+* Setup your K8s cluster with Seldon and Iter8 as described [here](platform-setup.md). 
 * Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
 ## 2. Create ML model versions
@@ -328,7 +328,7 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/metrics.yaml
 ??? Note "Metrics in your environment"
     You can define and use custom metrics from any database in Iter8 experiments. 
        
-    For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is [here](../../../../metrics/custom/).
+    For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
 
 ## 5. Launch experiment
 Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing & progressive traffic shift experiment as follows.

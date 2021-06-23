@@ -136,6 +136,11 @@ nav:
         - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
         - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
+    - Seldon:
+      - Testing strategies:
+        - Hybrid (A/B + SLOs) testing: tutorials/seldon/testing-strategies/hybrid.md
+      - Rollout strategies:
+        - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
     - Knative:
       - Testing strategies:
         - SLO validation: tutorials/knative/testing-strategies/slovalidationprogressive.md

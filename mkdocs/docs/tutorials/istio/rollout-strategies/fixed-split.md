@@ -122,8 +122,8 @@ kubectl apply -f $ITER8/samples/istio/fixed-split/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
     ```
 
-## 6. Observe experiment
-Follow [Step 6 of the quick start tutorial](../../../getting-started/quick-start/istio/tutorial.md#6-observe-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`fixedsplit-exp`) in your `iter8ctl` and `kubectl` commands.
+## 6. Understand the experiment
+Follow [Step 6 of the quick start tutorial](../../../getting-started/quick-start/istio/tutorial.md#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`fixedsplit-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup
 ```shell

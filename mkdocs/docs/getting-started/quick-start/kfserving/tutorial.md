@@ -5,11 +5,11 @@ template: main.html
 # A/B Testing
 
 !!! tip "Scenario: A/B testing and progressive rollout of KFServing models"
-    [A/B testing](../../../../../concepts/buildingblocks/#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
+    [A/B testing](../../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
 
     1. Perform A/B testing.
     2. Specify *user-engagement* as the reward metric. This metric will be mocked by Iter8 in this tutorial.
-    3. Combine A/B testing with [progressive traffic shifting](../../../../../concepts/buildingblocks/#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    3. Combine A/B testing with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
 
     ![Quickstart KFServing](../../../images/quickstart-ab.png)
 
@@ -19,7 +19,7 @@ template: main.html
     3. [Go 1.13+](https://golang.org/doc/install).
 
 ## 1. Setup
-* Setup your K8s cluster with KFServing and Iter8 as described [here](../platform-setup/). 
+* Setup your K8s cluster with KFServing and Iter8 as described [here](platform-setup.md). 
 * Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
 ## 2. Create ML model versions
@@ -152,7 +152,7 @@ kubectl apply -f $ITER8/samples/kfserving/quickstart/metrics.yaml
 ??? Note "Metrics in your environment"
     You can define and use custom metrics from any database in Iter8 experiments. 
        
-    For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize in the A/B test. Documentation on defining custom metrics is [here](../../../../metrics/custom/).
+    For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize in the A/B test. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
 
 ## 5. Launch experiment
 Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the A/B testing & progressive traffic shift experiment as follows.
