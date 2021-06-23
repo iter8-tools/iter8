@@ -4,7 +4,7 @@ template: main.html
 
 # Hybrid (A/B + SLOs) testing
 
-!!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive rollout of Seldon models"
+!!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive rollout"
     [Hybrid (A/B + SLOs) testing](../../concepts/buildingblocks/#testing-pattern) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
 
     1. Perform hybrid (A/B + SLOs) testing.

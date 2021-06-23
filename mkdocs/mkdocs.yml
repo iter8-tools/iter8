@@ -149,7 +149,7 @@ nav:
       - Testing strategies:
         - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
         - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
-        - A/B testing (quick start): tutorials/istio/testing-strategies/ab.md
+        - Hybrid (A/B + SLOs) testing (quick start): tutorials/istio/testing-strategies/hybrid.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
