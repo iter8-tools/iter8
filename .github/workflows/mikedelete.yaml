@@ -32,4 +32,4 @@ jobs:
         cd mkdocs
         pip install --upgrade pip
         pip install -r requirements.txt
-        mike delete ${{ github.event.inputs.version }}
+        mike delete ${{ github.event.inputs.version }} -p
