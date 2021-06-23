@@ -5,7 +5,7 @@ template: main.html
 # Hybrid (A/B + SLOs) testing
 
 !!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive traffic shift of KFServing models"
-    [Hybrid (A/B + SLOs) testing](../../../concepts/buildingblocks.md#hybrid-testing) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
+    [Hybrid (A/B + SLOs) testing](../../../concepts/buildingblocks.md#hybrid-ab-slos-testing) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
 
     1. Perform hybrid (A/B + SLOs) testing.
     2. Specify *user-engagement* as the reward metric.
