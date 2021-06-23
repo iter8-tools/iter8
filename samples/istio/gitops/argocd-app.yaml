@@ -16,7 +16,7 @@ spec:
   project: default
   source:
     path: samples/gitops
-    repoURL: https://github.com/sriumcp/iter8
+    repoURL: https://github.com/MY_ORG/iter8
     targetRevision: master
   syncPolicy:
     automated:

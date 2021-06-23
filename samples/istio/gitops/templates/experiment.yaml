@@ -19,9 +19,9 @@ spec:
           args: [
                  "-c",
                  "apt-get install -y git jq curl;\
-                  REPO=github.com/sriumcp/iter8;\
+                  REPO=github.com/MY_ORG/iter8;\
                   BRANCH=master;\
-                  USER=sriumcp;\
+                  USER=MY_ORG;\
                   TOKEN=`kubectl -n {{ .namespace }} get secret iter8-token -o json | jq -r .data.token | base64 -d`;\
                   git config --global user.email 'iter8@iter8.tools';\
                   git config --global user.name 'Iter8';\
