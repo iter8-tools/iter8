@@ -209,7 +209,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type         | Description | Required |
 | ----- | ------------ | ----------- | -------- |
-| aggregatedBuiltinHists | [AggregatedBuiltinHists](#aggregatedbuiltinhists) | This field is used to store intermediate results from the [`metrics/collect` task](../tasks/metrics/#metrics-tasks) that enables [builtin metrics](../../metrics/builtin/). Reserved for Iter8 internal use. | No |
+| aggregatedBuiltinHists | [AggregatedBuiltinHists](#aggregatedbuiltinhists) | This field is used to store intermediate results from the [`metrics/collect` task](../tasks/metrics.md#metrics-tasks) that enables [builtin metrics](../metrics/builtin.md). Reserved for Iter8 internal use. | No |
 | aggregatedMetrics | [AggregatedMetricsAnalysis](#aggregatedmetricsanalysis) | Most recently observed metric values for all metrics referenced in the experiment criteria. | No |
 | winnerAssessment | [WinnerAssessmentAnalysis](#winnerassessmentanalysis) | Information about the `winner` of the experiment. | No |
 | versionAssessments | [VersionAssessmentAnalysis](#versionassessmentanalysis) | For each version, a summary analysis identifying whether or not the version is satisfying the experiment criteria. | No |

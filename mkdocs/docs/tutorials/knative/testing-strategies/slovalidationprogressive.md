@@ -82,7 +82,7 @@ kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
             value: candidate
     ```
 
-## 6. Observe experiment
+## 6. Understand the experiment
 Follow [Step 6 of the quick start tutorial for KFServing](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`slovalidation-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup

@@ -226,7 +226,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 6. Observe experiment
+## 6. Understand the experiment
 Follow [Step 6 of the quick start tutorial for Knative](../../../../getting-started/quick-start/knative/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`user-segmentation-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup

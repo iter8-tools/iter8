@@ -84,7 +84,7 @@ kubectl apply -f $ITER8/samples/istio/slovalidation/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 6. Observe experiment
+## 6. Understand the experiment
 Follow [Step 6 of the quick start tutorial for Istio](../../../../getting-started/quick-start/istio/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`slovalidation-exp`) in your `iter8ctl` and `kubectl` commands.
 
 ## 7. Cleanup
