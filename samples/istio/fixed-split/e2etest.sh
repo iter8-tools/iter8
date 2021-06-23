@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -x
+set -e
 
 export EXPERIMENT=fixedsplit-exp
 source $ITER8/samples/library.sh
