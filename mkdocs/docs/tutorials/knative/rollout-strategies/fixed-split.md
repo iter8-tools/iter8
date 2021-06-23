@@ -48,10 +48,10 @@ kubectl wait --for=condition=Ready ksvc/sample-app
     ```
 
 ## 3. Generate requests
-Please follow [Step 3 of the quick start tutorial](../../../../getting-started/quick-start/knative/tutorial/#3-generate-requests).
+Please follow [Step 3 of the quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#3-generate-requests).
 
 ## 4. Define metrics
-Please follow [Step 4 of the quick start tutorial](../../../../getting-started/quick-start/knative/tutorial/#4-define-metrics).
+Please follow [Step 4 of the quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#4-define-metrics).
 
 ## 5. Launch experiment
 ```shell

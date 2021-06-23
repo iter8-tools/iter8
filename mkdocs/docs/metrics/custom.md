@@ -340,7 +340,7 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
 
 Iter8 will substitute placeholders in the metric query based on the time elapsed since the start of the experiment, and information associated with each version in the experiment.
 
-Suppose the [metrics defined above](#defining-metrics) are referenced within an experiment as follows. Further, suppose this experiment has started, Iter8 is about to do an iteration of this experiment, and the time elapsed since the start of the experiment is 600 seconds.
+Suppose the [metrics defined above](#metrics-withwithout-auth) are referenced within an experiment as follows. Further, suppose this experiment has started, Iter8 is about to do an iteration of this experiment, and the time elapsed since the start of the experiment is 600 seconds.
 
 ??? abstract "Look inside sample experiment"
     ```yaml linenums="1"
@@ -543,7 +543,7 @@ The metrics provider is expected to respond to Iter8's HTTP request with a JSON 
 Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from the JSON response of the provider. The `jqExpression` used by Iter8 is supplied as part of the metric definition. When the `jqExpression` is applied to the JSON response, it is expected to yield a number.
 
 === "Prometheus"
-    Consider the `jqExpression` defined in the [sample Prometheus metric](#defining-metrics). Let us apply it to the [sample JSON response from Prometheus](#json-response).
+    Consider the `jqExpression` defined in the [sample Prometheus metric](#metrics-withwithout-auth). Let us apply it to the [sample JSON response from Prometheus](#json-response).
     ```shell
     echo '{
       "status": "success",
@@ -560,7 +560,7 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `21.7639`, a number, as required by Iter8. 
     
 === "New Relic"
-    Consider the `jqExpression` defined in the [sample New Relic metric](#defining-metrics). Let us apply it to the [sample JSON response from New Relic](#json-response).
+    Consider the `jqExpression` defined in the [sample New Relic metric](#metrics-withwithout-auth). Let us apply it to the [sample JSON response from New Relic](#json-response).
     ```shell
     echo '{
       "results": [
@@ -602,7 +602,7 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `80275388`, a number, as required by Iter8. 
     
 === "Sysdig"
-    Consider the `jqExpression` defined in the [sample Sysdig metric](#defining-metrics). Let us apply it to the [sample JSON response from Sysdig](#json-response).
+    Consider the `jqExpression` defined in the [sample Sysdig metric](#metrics-withwithout-auth). Let us apply it to the [sample JSON response from Sysdig](#json-response).
     ```shell
     echo '{
         "data": [
@@ -620,7 +620,7 @@ Iter8 uses [jq](https://stedolan.github.io/jq/) to extract the metric value from
     Executing the above command results yields `6.481`, a number, as required by Iter8. 
 
 === "Elastic"
-    Consider the `jqExpression` defined in the [sample Elastic metric](#defining-metrics). Let us apply it to the [sample JSON response from Elastic](#json-response).
+    Consider the `jqExpression` defined in the [sample Elastic metric](#metrics-withwithout-auth). Let us apply it to the [sample JSON response from Elastic](#json-response).
     ```shell
     echo '{
       "aggregations": {

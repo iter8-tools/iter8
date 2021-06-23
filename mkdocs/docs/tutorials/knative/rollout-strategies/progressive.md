@@ -5,19 +5,19 @@ template: main.html
 # Progressive Traffic Shift
 
 !!! tip "Scenario: Progressive traffic shift"
-    [Progressive traffic shift](../../../../concepts/buildingblocks/#progressive-traffic-shift) is a type of canary rollout strategy. It enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment as shown below.
+    [Progressive traffic shift](../../../concepts/buildingblocks.md#progressive-traffic-shift) is a type of canary rollout strategy. It enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment as shown below.
 
     ![Progressive traffic shift](../../../images/progressive.png)
 
 ## Tutorials with progressive traffic shift
 
-The [hybrid testing (quick start)](../../../../getting-started/quick-start/knative/tutorial) and [the SLO validation](../../testing-strategies/slovalidationprogressive/) tutorials demonstrate progressive traffic shift.
+The [hybrid testing (quick start)](../../../getting-started/quick-start/knative/tutorial.md) and [the SLO validation](../testing-strategies/slovalidationprogressive.md) tutorials demonstrate progressive traffic shift.
 
 ## Specifying `weightObjRef`
 Iter8 uses the `weightObjRef` field in the experiment resource to get the current traffic split between versions and/or modify the traffic split. Ensure that this field is specified correctly for each version. The following example demonstrates how to specify `weightObjRef` in experiments.
 
 ??? example "Example"
-    The [A/B testing quick start tutorial for Knative](../../../getting-started/quick-start/#7-launch-experiment) uses a Knative service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Knative service and the traffic fields within the Knative service corresponding to the versions.
+    The [A/B testing quick start tutorial for Knative](../../../getting-started/quick-start/knative/tutorial.md#5-launch-experiment) uses a Knative service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this Knative service and the traffic fields within the Knative service corresponding to the versions.
 
     ```yaml
     versionInfo:

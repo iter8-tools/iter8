@@ -5,17 +5,17 @@ template: main.html
 # SLO Validation
 
 !!! tip "Scenario: SLO validation with progressive traffic shift"
-    This tutorial illustrates an [SLO validation experiment with two versions](../../../../concepts/buildingblocks/#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
+    This tutorial illustrates an [SLO validation experiment with two versions](../../../concepts/buildingblocks.md#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
 
     1. Specify *latency* and *error-rate* based service-level objectives (SLOs). If the candidate version satisfies SLOs, Iter8 will declare it as the winner.
     2. Use Prometheus as the provider for latency and error-rate metrics.
-    3. Combine SLO validation with [progressive traffic shifting](../../../../concepts/buildingblocks/#progressive-traffic-shift).
+    3. Combine SLO validation with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift).
     
     ![SLO validation with progressive traffic shift](../../../images/slovalidationprogressive.png)
 
 ## Steps 1 to 4
     
-Please follow steps 1 through 4 of the [Knative quick start tutorial](../../../../getting-started/quick-start/knative/quick-start/#1-setup).
+Please follow steps 1 through 4 of the [Knative quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#1-setup).
 
 
 ## 5. Launch experiment

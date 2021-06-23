@@ -21,7 +21,7 @@ template: main.html
     4. [Helm 3+](https://helm.sh/docs/intro/install/)
     
 ## 1. Setup
-* Setup your K8s cluster with Seldon and Iter8 as described [here](../platform-setup/). 
+* Setup your K8s cluster with Seldon and Iter8 as described [here](platform-setup.md). 
 * Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
 ## 2. Create ML model versions
