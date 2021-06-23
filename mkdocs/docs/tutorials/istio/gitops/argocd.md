@@ -41,18 +41,18 @@ In your K8s cluster, you will need to install Istio, Prometheus, Iter8, and Argo
 git clone https://github.com/[YOUR_ORG]/iter8.git
 cd iter8
 export ITER8=$(pwd)
-$ITER8/samples/gitops/platformsetup.sh
+$ITER8/samples/istio/gitops/platformsetup.sh
 ```
 
 replacing `[YOUR_ORG]` with your Github organization or username. Now, do the same replacement operation to update some references in the repo so they will point at your forked repo.
 
 === "MacOS"
     ```shell
-    find $ITER8/samples/gitops -name "*" -type f | xargs sed -i '' "s/MY_ORG/YOUR_ORG/"
+    find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i '' "s/MY_ORG/YOUR_ORG/"
     ```
 === "Linux"
     ```shell
-    find $ITER8/samples/gitops -name "*" -type f | xargs sed -i "s/MY_ORG/YOUR_ORG/"
+    find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i "s/MY_ORG/YOUR_ORG/"
     ```
 
 ## Step 4. Argo CD Setup
@@ -70,7 +70,7 @@ Run the following commands:
 Start the port-forward in a new terminal, and access the Argo CD UI from your browser. After logging in, you should see Argo CD showing no application is currently installed. To install the bookinfo application we will use for this tutorial, run the following:
 
 ```shell
-kubectl apply -f $ITER8/samples/gitops/argocd-app.yaml
+kubectl apply -f $ITER8/samples/istio/gitops/argocd-app.yaml
 ```
 
 Now Argo CD UI should show a new app called `gitops` is created. Make sure it is showing both Healthy and Synced - this might take a few minutes.
@@ -98,7 +98,7 @@ These are the same resources you would need to create even in an non-GitOps sett
 Run the following:
 
 ```shell
-(cd $ITER8/samples/gitops; ./runCI.sh)
+(cd $ITER8/samples/istio/gitops; ./runCI.sh)
 ```
 
 To start an Iter8 experiment, you need to commit these changes to the Env repo for Argo CD to sync them to the cluster. Run the following:
@@ -160,7 +160,7 @@ You can now merge the PR that Iter8 just created. Argo CD should detect the chan
                   git config --global user.email 'iter8@iter8.tools';\
                   git config --global user.name 'Iter8';\
                   git clone https://${USER}:${TOKEN}@${REPO} --branch=${BRANCH};\
-                  cd iter8/samples/gitops;\
+                  cd iter8/samples/istio/gitops;\
                   TMP=`mktemp`;\
                   sed 's/candidate/stable/g' {{ .filepath }} > $TMP;\
                   mv $TMP productpage.yaml;\
@@ -184,7 +184,7 @@ You can now merge the PR that Iter8 just created. Argo CD should detect the chan
 
 ## 8. Cleanup
 ```shell
-kubectl delete -f $ITER8/samples/gitops/
+kubectl delete -f $ITER8/samples/istio/gitops/
 kubectl delete ns istio-system
 kubectl delete ns iter8-system
 kubectl delete ns argocd
