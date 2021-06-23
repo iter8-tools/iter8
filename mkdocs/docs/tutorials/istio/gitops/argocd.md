@@ -177,7 +177,6 @@ You can now merge the PR that Iter8 just created. Argo CD should detect the chan
                   kubectl -n {{ .namespace }} apply -f istio-vs.yaml;\
                  "
                 ]
-
     ```
 
     For prototyping, one can write these tasks as shell scripts and inline them within an Experiment CR. This makes writing these tasks efficient and easy to debug. However, the down side is it makes the Experiment CR a lot more complicated and scary to read. We are currently working to simplify this interface, so stay tuned.
