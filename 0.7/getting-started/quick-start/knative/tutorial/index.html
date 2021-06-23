@@ -1,0 +1,595 @@
+<!--
+  Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to
+  deal in the Software without restriction, including without limitation the
+  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+--> <!doctype html><html lang=en class=no-js> <head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Iter8 is the release engineering platform for Kubernetes applications and ML models. Integrate with any CI/CD/GitOps tool. Quick start in 5 mins."><meta name=author content="Srinivasan Parthasarathy"><link href=https://iter8.tools/0.7/getting-started/quick-start/knative/tutorial/ rel=canonical><link rel=icon href=../../../../images/favicon.png><meta name=generator content="mkdocs-1.1, mkdocs-material-7.1.8"><title>Hybrid (A/B + SLOs) testing - Iter8</title><link rel=stylesheet href=../../../../assets/stylesheets/main.ca7ac06f.min.css><link rel=stylesheet href=../../../../assets/stylesheets/palette.f1a3b89f.min.css><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback"><style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style><script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-152813895-1","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),"undefined"!=typeof location$&&location$.subscribe(function(e){ga("send","pageview",e.pathname)})})</script><script async src=https://www.google-analytics.com/analytics.js></script><!-- Open graph meta tags --><meta property=og:type content=website><meta property=og:site_name content=Iter8><meta property=og:title content="SLO validation, A/B testing, and progressive rollouts"><meta property=og:description content="Iter8 is the release engineering platform for Kubernetes applications and ML models. Integrate with any CI/CD/GitOps tool. Quick start in 5 mins."><meta property=og:url content=https://iter8.tools><meta property=og:image content=https://iter8.tools/0.6/images/slack-image.png><!-- Twitter meta tags --><meta name=twitter:card content=summary_large_image><meta name=twitter:url content=https://iter8.tools><meta name=twitter:creator content="Srinivasan Parthasarathy"><meta name=twitter:title content="SLO validation, A/B testing, and progressive rollouts"><meta name=twitter:description content="Iter8 is the release engineering platform for Kubernetes applications and ML models. Integrate with any CI/CD/GitOps tool. Quick start in 5 mins."><meta name=twitter:image content=https://iter8.tools/0.6/images/slack-image.png><meta name=twitter:label1 value="K8s stacks"><meta name=twitter:data1 value="KFServing, Seldon, Knative, Istio, ..."><!-- Extra stylesheets --><link rel=stylesheet href=../../../../stylesheets/main.css></head> <body dir=ltr data-md-color-scheme=default data-md-color-primary=black data-md-color-accent=indigo> <script>function __prefix(e){return new URL("../../../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script> <script>var palette=__get("__palette");if(null!==palette&&"object"==typeof palette.color)for(var key in palette.color)document.body.setAttribute("data-md-color-"+key,palette.color[key])</script> <input class=md-toggle data-md-toggle=drawer type=checkbox id=__drawer autocomplete=off> <input class=md-toggle data-md-toggle=search type=checkbox id=__search autocomplete=off> <label class=md-overlay for=__drawer></label> <div data-md-component=skip> <a href=#hybrid-ab-slos-testing class=md-skip> Skip to content </a> </div> <div data-md-component=announce> </div> <header class=md-header data-md-component=header> <nav class="md-header__inner md-grid" aria-label=Header> <a href=../../../.. title=Iter8 class="md-header__button md-logo" aria-label=Iter8 data-md-component=logo> <img src=../../../../images/logo.svg alt=logo> </a> <label class="md-header__button md-icon" for=__drawer> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg> </label> <div class=md-header__title data-md-component=header-title> <div class=md-header__ellipsis> <div class=md-header__topic> <span class=md-ellipsis> Iter8 </span> </div> <div class=md-header__topic data-md-component=header-topic> <span class=md-ellipsis> Hybrid (A/B + SLOs) testing </span> </div> </div> </div> <form class=md-header__option data-md-component=palette> <input class=md-option data-md-color-media data-md-color-scheme=default data-md-color-primary=black data-md-color-accent=indigo aria-label="Switch to dark mode" type=radio name=__palette id=__palette_1> <label class="md-header__button md-icon" title="Switch to dark mode" for=__palette_2 hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M7 10a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m10-3a5 5 0 0 1 5 5 5 5 0 0 1-5 5H7a5 5 0 0 1-5-5 5 5 0 0 1 5-5h10M7 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3h10a3 3 0 0 0 3-3 3 3 0 0 0-3-3H7z"/></svg> </label> <input class=md-option data-md-color-media data-md-color-scheme=slate data-md-color-primary=pink data-md-color-accent=red aria-label="Switch to light mode" type=radio name=__palette id=__palette_2> <label class="md-header__button md-icon" title="Switch to light mode" for=__palette_1 hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3z"/></svg> </label> </form> <label class="md-header__button md-icon" for=__search> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg> </label> <div class=md-search data-md-component=search role=dialog> <label class=md-search__overlay for=__search></label> <div class=md-search__inner role=search> <form class=md-search__form name=search> <input type=text class=md-search__input name=query aria-label=Search placeholder=Search autocapitalize=off autocorrect=off autocomplete=off spellcheck=false data-md-component=search-query data-md-state=active required> <label class="md-search__icon md-icon" for=__search> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg> </label> <button type=reset class="md-search__icon md-icon" aria-label=Clear tabindex=-1> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg> </button> </form> <div class=md-search__output> <div class=md-search__scrollwrap data-md-scrollfix> <div class=md-search-result data-md-component=search-result> <div class=md-search-result__meta> Initializing search </div> <ol class=md-search-result__list></ol> </div> </div> </div> </div> </div> <div class=md-header__source> <a href=https://github.com/iter8-tools/iter8/ title="Go to repository" class=md-source data-md-component=source> <div class="md-source__icon md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg> </div> <div class=md-source__repository> iter8-tools/iter8 </div> </a> </div> </nav> </header> <div class=md-container data-md-component=container> <nav class=md-tabs aria-label=Tabs data-md-component=tabs> <div class="md-tabs__inner md-grid"> <ul class=md-tabs__list> <li class=md-tabs__item> <a href=../../../.. class=md-tabs__link> Home </a> </li> <li class=md-tabs__item> <a href=../../../../concepts/whatisiter8/ class=md-tabs__link> Concepts </a> </li> <li class=md-tabs__item> <a href=../../../install/ class="md-tabs__link md-tabs__link--active"> Getting Started </a> </li> <li class=md-tabs__item> <a href=../../../../tutorials/kfserving/testing-strategies/hybrid/ class=md-tabs__link> Tutorials </a> </li> <li class=md-tabs__item> <a href=../../../../metrics/using-metrics/ class=md-tabs__link> Metrics </a> </li> <li class=md-tabs__item> <a href=../../../../reference/experiment/ class=md-tabs__link> Reference </a> </li> <li class=md-tabs__item> <a href=../../../../contributing/overview/ class=md-tabs__link> Contributing </a> </li> <li class=md-tabs__item> <a href=../../../../roadmap/ class=md-tabs__link> Roadmap </a> </li> <li class=md-tabs__item> <a href=../../../../news/ class=md-tabs__link> News </a> </li> </ul> </div> </nav> <main class=md-main data-md-component=main> <div class="md-main__inner md-grid"> <div class="md-sidebar md-sidebar--primary" data-md-component=sidebar data-md-type=navigation> <div class=md-sidebar__scrollwrap> <div class=md-sidebar__inner> <nav class="md-nav md-nav--primary md-nav--lifted" aria-label=Navigation data-md-level=0> <label class=md-nav__title for=__drawer> <a href=../../../.. title=Iter8 class="md-nav__button md-logo" aria-label=Iter8 data-md-component=logo> <img src=../../../../images/logo.svg alt=logo> </a> Iter8 </label> <div class=md-nav__source> <a href=https://github.com/iter8-tools/iter8/ title="Go to repository" class=md-source data-md-component=source> <div class="md-source__icon md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg> </div> <div class=md-source__repository> iter8-tools/iter8 </div> </a> </div> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../.. class=md-nav__link> Home </a> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_2 type=checkbox id=__nav_2> <label class=md-nav__link for=__nav_2> Concepts <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Concepts data-md-level=1> <label class=md-nav__title for=__nav_2> <span class="md-nav__icon md-icon"></span> Concepts </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../concepts/whatisiter8/ class=md-nav__link> What is Iter8? </a> </li> <li class=md-nav__item> <a href=../../../../concepts/buildingblocks/ class=md-nav__link> Experiment building blocks </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--active md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_3 type=checkbox id=__nav_3 checked> <label class=md-nav__link for=__nav_3> Getting Started <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Getting Started" data-md-level=1> <label class=md-nav__title for=__nav_3> <span class="md-nav__icon md-icon"></span> Getting Started </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../install/ class=md-nav__link> Install Iter8 </a> </li> <li class=md-nav__item> <a href=../../../help/ class=md-nav__link> Get help </a> </li> <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_3_3 type=checkbox id=__nav_3_3 checked> <label class=md-nav__link for=__nav_3_3> Quick start tutorials <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Quick start tutorials" data-md-level=2> <label class=md-nav__title for=__nav_3_3> <span class="md-nav__icon md-icon"></span> Quick start tutorials </label> <ul class=md-nav__list data-md-scrollfix> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_3_3_1 type=checkbox id=__nav_3_3_1> <label class=md-nav__link for=__nav_3_3_1> KFServing <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=KFServing data-md-level=3> <label class=md-nav__title for=__nav_3_3_1> <span class="md-nav__icon md-icon"></span> KFServing </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../kfserving/tutorial/ class=md-nav__link> A/B testing </a> </li> <li class=md-nav__item> <a href=../../kfserving/platform-setup/ class=md-nav__link> Platform setup </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_3_3_2 type=checkbox id=__nav_3_3_2> <label class=md-nav__link for=__nav_3_3_2> Seldon <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Seldon data-md-level=3> <label class=md-nav__title for=__nav_3_3_2> <span class="md-nav__icon md-icon"></span> Seldon </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../seldon/tutorial/ class=md-nav__link> Hybrid (A/B + SLOs) testing </a> </li> <li class=md-nav__item> <a href=../../seldon/platform-setup/ class=md-nav__link> Platform setup </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--active md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_3_3_3 type=checkbox id=__nav_3_3_3 checked> <label class=md-nav__link for=__nav_3_3_3> Knative <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Knative data-md-level=3> <label class=md-nav__title for=__nav_3_3_3> <span class="md-nav__icon md-icon"></span> Knative </label> <ul class=md-nav__list data-md-scrollfix> <li class="md-nav__item md-nav__item--active"> <input class="md-nav__toggle md-toggle" data-md-toggle=toc type=checkbox id=__toc> <label class="md-nav__link md-nav__link--active" for=__toc> Hybrid (A/B + SLOs) testing <span class="md-nav__icon md-icon"></span> </label> <a href=./ class="md-nav__link md-nav__link--active"> Hybrid (A/B + SLOs) testing </a> <nav class="md-nav md-nav--secondary" aria-label="Table of contents"> <label class=md-nav__title for=__toc> <span class="md-nav__icon md-icon"></span> Table of contents </label> <ul class=md-nav__list data-md-component=toc data-md-scrollfix> <li class=md-nav__item> <a href=#1-setup class=md-nav__link> 1. Setup </a> </li> <li class=md-nav__item> <a href=#2-create-app-versions class=md-nav__link> 2. Create app versions </a> </li> <li class=md-nav__item> <a href=#3-generate-requests class=md-nav__link> 3. Generate requests </a> </li> <li class=md-nav__item> <a href=#4-define-metrics class=md-nav__link> 4. Define metrics </a> </li> <li class=md-nav__item> <a href=#5-launch-experiment class=md-nav__link> 5. Launch experiment </a> </li> <li class=md-nav__item> <a href=#6-understand-the-experiment class=md-nav__link> 6. Understand the experiment </a> <nav class=md-nav aria-label="6. Understand the experiment"> <ul class=md-nav__list> <li class=md-nav__item> <a href=#a-observe-results class=md-nav__link> a) Observe results </a> </li> <li class=md-nav__item> <a href=#b-observe-traffic class=md-nav__link> b) Observe traffic </a> </li> <li class=md-nav__item> <a href=#c-observe-progress class=md-nav__link> c) Observe progress </a> </li> </ul> </nav> </li> <li class=md-nav__item> <a href=#7-cleanup class=md-nav__link> 7. Cleanup </a> </li> </ul> </nav> </li> <li class=md-nav__item> <a href=../platform-setup/ class=md-nav__link> Platform setup </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_3_3_4 type=checkbox id=__nav_3_3_4> <label class=md-nav__link for=__nav_3_3_4> Istio <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Istio data-md-level=3> <label class=md-nav__title for=__nav_3_3_4> <span class="md-nav__icon md-icon"></span> Istio </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../istio/tutorial/ class=md-nav__link> Hybrid (A/B + SLOs) testing </a> </li> <li class=md-nav__item> <a href=../../istio/platform-setup/ class=md-nav__link> Platform setup </a> </li> </ul> </nav> </li> </ul> </nav> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4 type=checkbox id=__nav_4> <label class=md-nav__link for=__nav_4> Tutorials <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Tutorials data-md-level=1> <label class=md-nav__title for=__nav_4> <span class="md-nav__icon md-icon"></span> Tutorials </label> <ul class=md-nav__list data-md-scrollfix> <li class="md-nav__item md-nav__item--section md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_1 type=checkbox id=__nav_4_1> <label class=md-nav__link for=__nav_4_1> KFServing <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=KFServing data-md-level=2> <label class=md-nav__title for=__nav_4_1> <span class="md-nav__icon md-icon"></span> KFServing </label> <ul class=md-nav__list data-md-scrollfix> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_1_1 type=checkbox id=__nav_4_1_1> <label class=md-nav__link for=__nav_4_1_1> Testing strategies <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Testing strategies" data-md-level=3> <label class=md-nav__title for=__nav_4_1_1> <span class="md-nav__icon md-icon"></span> Testing strategies </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../tutorials/kfserving/testing-strategies/hybrid/ class=md-nav__link> Hybrid (A/B + SLOs) testing </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/kfserving/testing-strategies/ab/ class=md-nav__link> A/B testing (quick start) </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_1_2 type=checkbox id=__nav_4_1_2> <label class=md-nav__link for=__nav_4_1_2> Rollout strategies <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Rollout strategies" data-md-level=3> <label class=md-nav__title for=__nav_4_1_2> <span class="md-nav__icon md-icon"></span> Rollout strategies </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../tutorials/kfserving/rollout-strategies/progressive/ class=md-nav__link> Progressive traffic shift </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/kfserving/rollout-strategies/fixed-split/ class=md-nav__link> Fixed-%-split </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/kfserving/rollout-strategies/session-affinity/ class=md-nav__link> Session affinity </a> </li> </ul> </nav> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--section md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_2 type=checkbox id=__nav_4_2> <label class=md-nav__link for=__nav_4_2> Knative <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Knative data-md-level=2> <label class=md-nav__title for=__nav_4_2> <span class="md-nav__icon md-icon"></span> Knative </label> <ul class=md-nav__list data-md-scrollfix> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_2_1 type=checkbox id=__nav_4_2_1> <label class=md-nav__link for=__nav_4_2_1> Testing strategies <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Testing strategies" data-md-level=3> <label class=md-nav__title for=__nav_4_2_1> <span class="md-nav__icon md-icon"></span> Testing strategies </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../tutorials/knative/testing-strategies/slovalidationprogressive/ class=md-nav__link> SLO validation </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/knative/testing-strategies/conformance/ class=md-nav__link> SLO validation (builtin metrics) </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/knative/testing-strategies/ab/ class=md-nav__link> A/B testing (quick start) </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_2_2 type=checkbox id=__nav_4_2_2> <label class=md-nav__link for=__nav_4_2_2> Rollout strategies <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Rollout strategies" data-md-level=3> <label class=md-nav__title for=__nav_4_2_2> <span class="md-nav__icon md-icon"></span> Rollout strategies </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../tutorials/knative/rollout-strategies/progressive/ class=md-nav__link> Progressive traffic shift </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/knative/rollout-strategies/fixed-split/ class=md-nav__link> Fixed-%-split </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/knative/rollout-strategies/user-segmentation/ class=md-nav__link> User segmentation </a> </li> </ul> </nav> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--section md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_3 type=checkbox id=__nav_4_3> <label class=md-nav__link for=__nav_4_3> Istio <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Istio data-md-level=2> <label class=md-nav__title for=__nav_4_3> <span class="md-nav__icon md-icon"></span> Istio </label> <ul class=md-nav__list data-md-scrollfix> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_3_1 type=checkbox id=__nav_4_3_1> <label class=md-nav__link for=__nav_4_3_1> Testing strategies <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Testing strategies" data-md-level=3> <label class=md-nav__title for=__nav_4_3_1> <span class="md-nav__icon md-icon"></span> Testing strategies </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../tutorials/istio/testing-strategies/slovalidation/ class=md-nav__link> SLO validation </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/istio/testing-strategies/conformance/ class=md-nav__link> SLO validation (single version) </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/istio/testing-strategies/hybrid/ class=md-nav__link> Hybrid (A/B + SLOs) testing (quick start) </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_3_2 type=checkbox id=__nav_4_3_2> <label class=md-nav__link for=__nav_4_3_2> Rollout strategies <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Rollout strategies" data-md-level=3> <label class=md-nav__title for=__nav_4_3_2> <span class="md-nav__icon md-icon"></span> Rollout strategies </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../tutorials/istio/rollout-strategies/progressive/ class=md-nav__link> Progressive traffic shift </a> </li> <li class=md-nav__item> <a href=../../../../tutorials/istio/rollout-strategies/fixed-split/ class=md-nav__link> Fixed-%-split </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_4_3_3 type=checkbox id=__nav_4_3_3> <label class=md-nav__link for=__nav_4_3_3> GitOps <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=GitOps data-md-level=3> <label class=md-nav__title for=__nav_4_3_3> <span class="md-nav__icon md-icon"></span> GitOps </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../tutorials/istio/gitops/argocd/ class=md-nav__link> Argo CD + Istio </a> </li> </ul> </nav> </li> </ul> </nav> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_5 type=checkbox id=__nav_5> <label class=md-nav__link for=__nav_5> Metrics <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Metrics data-md-level=1> <label class=md-nav__title for=__nav_5> <span class="md-nav__icon md-icon"></span> Metrics </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../metrics/using-metrics/ class=md-nav__link> Using metrics </a> </li> <li class=md-nav__item> <a href=../../../../metrics/builtin/ class=md-nav__link> Builtin metrics </a> </li> <li class=md-nav__item> <a href=../../../../metrics/custom/ class=md-nav__link> Custom metrics </a> </li> <li class=md-nav__item> <a href=../../../../metrics/mock/ class=md-nav__link> Mock metrics </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_6 type=checkbox id=__nav_6> <label class=md-nav__link for=__nav_6> Reference <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Reference data-md-level=1> <label class=md-nav__title for=__nav_6> <span class="md-nav__icon md-icon"></span> Reference </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../reference/experiment/ class=md-nav__link> Experiment resource </a> </li> <li class=md-nav__item> <a href=../../../../reference/metrics/ class=md-nav__link> Metric resource </a> </li> <li class=md-nav__item> <a href=../../../../reference/tasks/ class=md-nav__link> Tasks </a> </li> <li class="md-nav__item md-nav__item--section md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_6_4 type=checkbox id=__nav_6_4> <label class=md-nav__link for=__nav_6_4> Task Reference <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="Task Reference" data-md-level=2> <label class=md-nav__title for=__nav_6_4> <span class="md-nav__icon md-icon"></span> Task Reference </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../reference/tasks/common/ class=md-nav__link> Common Tasks </a> </li> <li class=md-nav__item> <a href=../../../../reference/tasks/metrics/ class=md-nav__link> Metrics Tasks </a> </li> <li class=md-nav__item> <a href=../../../../reference/tasks/notification/ class=md-nav__link> Notification Tasks </a> </li> </ul> </nav> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_7 type=checkbox id=__nav_7> <label class=md-nav__link for=__nav_7> Contributing <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label=Contributing data-md-level=1> <label class=md-nav__title for=__nav_7> <span class="md-nav__icon md-icon"></span> Contributing </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../../../contributing/overview/ class=md-nav__link> Overview </a> </li> <li class=md-nav__item> <a href=../../../../contributing/newk8sstack/ class=md-nav__link> New K8s stack </a> </li> <li class=md-nav__item> <a href=../../../../contributing/tutorials/ class=md-nav__link> Tutorials </a> </li> <li class=md-nav__item> <a href=../../../../contributing/analytics/ class=md-nav__link> Analytics </a> </li> </ul> </nav> </li> <li class=md-nav__item> <a href=../../../../roadmap/ class=md-nav__link> Roadmap </a> </li> <li class=md-nav__item> <a href=../../../../news/ class=md-nav__link> News </a> </li> </ul> </nav> </div> </div> </div> <div class="md-sidebar md-sidebar--secondary" data-md-component=sidebar data-md-type=toc> <div class=md-sidebar__scrollwrap> <div class=md-sidebar__inner> <nav class="md-nav md-nav--secondary" aria-label="Table of contents"> <label class=md-nav__title for=__toc> <span class="md-nav__icon md-icon"></span> Table of contents </label> <ul class=md-nav__list data-md-component=toc data-md-scrollfix> <li class=md-nav__item> <a href=#1-setup class=md-nav__link> 1. Setup </a> </li> <li class=md-nav__item> <a href=#2-create-app-versions class=md-nav__link> 2. Create app versions </a> </li> <li class=md-nav__item> <a href=#3-generate-requests class=md-nav__link> 3. Generate requests </a> </li> <li class=md-nav__item> <a href=#4-define-metrics class=md-nav__link> 4. Define metrics </a> </li> <li class=md-nav__item> <a href=#5-launch-experiment class=md-nav__link> 5. Launch experiment </a> </li> <li class=md-nav__item> <a href=#6-understand-the-experiment class=md-nav__link> 6. Understand the experiment </a> <nav class=md-nav aria-label="6. Understand the experiment"> <ul class=md-nav__list> <li class=md-nav__item> <a href=#a-observe-results class=md-nav__link> a) Observe results </a> </li> <li class=md-nav__item> <a href=#b-observe-traffic class=md-nav__link> b) Observe traffic </a> </li> <li class=md-nav__item> <a href=#c-observe-progress class=md-nav__link> c) Observe progress </a> </li> </ul> </nav> </li> <li class=md-nav__item> <a href=#7-cleanup class=md-nav__link> 7. Cleanup </a> </li> </ul> </nav> </div> </div> </div> <div class=md-content data-md-component=content> <article class="md-content__inner md-typeset"> <a href=https://github.com/iter8-tools/iter8/edit/master/mkdocs/docs/getting-started/quick-start/knative/tutorial.md title="Edit this page" class="md-content__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg> </a> <h1 id=hybrid-ab-slos-testing>Hybrid (A/B + SLOs) testing<a class=headerlink href=#hybrid-ab-slos-testing title="Permanent link">&para;</a></h1> <div class="admonition tip"> <p class=admonition-title>Scenario: Hybrid (A/B + SLOs) testing and progressive rollout of Knative services</p> <p><a href=../../../../concepts/buildingblocks/#hybrid-ab-slos-testing>Hybrid (A/B + SLOs) testing</a> enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:</p> <ol> <li>Perform hybrid (A/B + SLOs) testing.</li> <li>Specify <em>user-engagement</em> as the reward metric.</li> <li>Specify <em>latency</em> and <em>error-rate</em> based objectives; data for these metrics will be provided by Prometheus.</li> <li>Combine hybrid (A/B + SLOs) testing with <a href=../../../../concepts/buildingblocks/#progressive-traffic-shift>progressive rollout</a>. Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.</li> </ol> <p><img alt="Quickstart Seldon" src=../../../../images/quickstart-hybrid.png></p> </div> <details class=warning open=open><summary>Before you begin, you will need... </summary><ol> <li>The <a href=https://kubernetes.io/docs/tasks/tools/install-kubectl/ >kubectl CLI</a>.</li> <li><a href=https://kubectl.docs.kubernetes.io/installation/kustomize/ >Kustomize 3+</a>.</li> <li><a href=https://golang.org/doc/install>Go 1.13+</a>.</li> </ol> </details> <h2 id=1-setup>1. Setup<a class=headerlink href=#1-setup title="Permanent link">&para;</a></h2> <ul> <li>Setup your K8s cluster with Knative and Iter8 as described <a href=../platform-setup/ >here</a>.</li> <li>Ensure that the <code>ITER8</code> environment variable is set to the root of your local Iter8 repo.</li> </ul> <h2 id=2-create-app-versions>2. Create app versions<a class=headerlink href=#2-create-app-versions title="Permanent link">&para;</a></h2> <p>Deploy two versions of a Knative app.</p> <div class=highlight><pre><span></span><code>kubectl apply -f <span class=nv>$ITER8</span>/samples/knative/quickstart/baseline.yaml
+kubectl apply -f <span class=nv>$ITER8</span>/samples/knative/quickstart/experimentalservice.yaml
+kubectl <span class=nb>wait</span> --for<span class=o>=</span><span class=nv>condition</span><span class=o>=</span>Ready ksvc/sample-app
+</code></pre></div> <details class=info><summary>Look inside baseline.yaml</summary><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal> 1</span>
+<span class=normal> 2</span>
+<span class=normal> 3</span>
+<span class=normal> 4</span>
+<span class=normal> 5</span>
+<span class=normal> 6</span>
+<span class=normal> 7</span>
+<span class=normal> 8</span>
+<span class=normal> 9</span>
+<span class=normal>10</span>
+<span class=normal>11</span>
+<span class=normal>12</span>
+<span class=normal>13</span>
+<span class=normal>14</span>
+<span class=normal>15</span></pre></div></td><td class=code><div class=highlight><pre><span></span><code><span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">serving.knative.dev/v1</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>template</span><span class=p>:</span>
+    <span class=nt>metadata</span><span class=p>:</span>
+      <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app-v1</span>
+    <span class=nt>spec</span><span class=p>:</span>
+      <span class=nt>containers</span><span class=p>:</span>
+      <span class="p p-Indicator">-</span> <span class=nt>image</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">gcr.io/knative-samples/knative-route-demo:blue</span> 
+        <span class=nt>env</span><span class=p>:</span>
+        <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">T_VERSION</span>
+          <span class=nt>value</span><span class=p>:</span> <span class=s>&quot;blue&quot;</span>
+</code></pre></div> </td></tr></table> </details> <details class=info><summary>Look inside experimentalservice.yaml</summary><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal> 1</span>
+<span class=normal> 2</span>
+<span class=normal> 3</span>
+<span class=normal> 4</span>
+<span class=normal> 5</span>
+<span class=normal> 6</span>
+<span class=normal> 7</span>
+<span class=normal> 8</span>
+<span class=normal> 9</span>
+<span class=normal>10</span>
+<span class=normal>11</span>
+<span class=normal>12</span>
+<span class=normal>13</span>
+<span class=normal>14</span>
+<span class=normal>15</span>
+<span class=normal>16</span>
+<span class=normal>17</span>
+<span class=normal>18</span>
+<span class=normal>19</span>
+<span class=normal>20</span>
+<span class=normal>21</span>
+<span class=normal>22</span></pre></div></td><td class=code><div class=highlight><pre><span></span><code><span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">serving.knative.dev/v1</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>template</span><span class=p>:</span>
+    <span class=nt>metadata</span><span class=p>:</span>
+      <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app-v2</span>
+    <span class=nt>spec</span><span class=p>:</span>
+      <span class=nt>containers</span><span class=p>:</span>
+      <span class="p p-Indicator">-</span> <span class=nt>image</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">gcr.io/knative-samples/knative-route-demo:green</span> 
+        <span class=nt>env</span><span class=p>:</span>
+        <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">T_VERSION</span>
+          <span class=nt>value</span><span class=p>:</span> <span class=s>&quot;green&quot;</span>
+  <span class=nt>traffic</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>tag</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">current</span>
+    <span class=nt>revisionName</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app-v1</span>
+    <span class=nt>percent</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+  <span class="p p-Indicator">-</span> <span class=nt>tag</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">candidate</span>
+    <span class=nt>latestRevision</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+    <span class=nt>percent</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+</code></pre></div> </td></tr></table> </details> <h2 id=3-generate-requests>3. Generate requests<a class=headerlink href=#3-generate-requests title="Permanent link">&para;</a></h2> <p>Generate requests using <a href=https://github.com/fortio/fortio>Fortio</a> as follows.</p> <div class=highlight><pre><span></span><code><span class=c1># URL_VALUE is the URL where your Knative application serves requests</span>
+<span class=nv>URL_VALUE</span><span class=o>=</span><span class=k>$(</span>kubectl get ksvc sample-app -o json <span class=p>|</span> jq <span class=s2>&quot;.status.address.url&quot;</span><span class=k>)</span>
+sed <span class=s2>&quot;s+URL_VALUE+</span><span class=si>${</span><span class=nv>URL_VALUE</span><span class=si>}</span><span class=s2>+g&quot;</span> <span class=nv>$ITER8</span>/samples/knative/quickstart/fortio.yaml <span class=p>|</span> kubectl apply -f -
+</code></pre></div> <details class=info><summary>Look inside fortio.yaml</summary><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal> 1</span>
+<span class=normal> 2</span>
+<span class=normal> 3</span>
+<span class=normal> 4</span>
+<span class=normal> 5</span>
+<span class=normal> 6</span>
+<span class=normal> 7</span>
+<span class=normal> 8</span>
+<span class=normal> 9</span>
+<span class=normal>10</span>
+<span class=normal>11</span>
+<span class=normal>12</span>
+<span class=normal>13</span>
+<span class=normal>14</span>
+<span class=normal>15</span>
+<span class=normal>16</span>
+<span class=normal>17</span>
+<span class=normal>18</span>
+<span class=normal>19</span>
+<span class=normal>20</span>
+<span class=normal>21</span>
+<span class=normal>22</span>
+<span class=normal>23</span>
+<span class=normal>24</span>
+<span class=normal>25</span>
+<span class=normal>26</span>
+<span class=normal>27</span></pre></div></td><td class=code><div class=highlight><pre><span></span><code><span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Job</span>
+<span class=nt>metadata</span><span class=p>:</span>
+<span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">fortio</span>
+<span class=nt>spec</span><span class=p>:</span>
+<span class=nt>template</span><span class=p>:</span>
+    <span class=nt>spec</span><span class=p>:</span>
+    <span class=nt>volumes</span><span class=p>:</span>
+    <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">shared</span>
+        <span class="l l-Scalar l-Scalar-Plain">emptyDir</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{}</span>
+    <span class=nt>containers</span><span class=p>:</span>
+    <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">fortio</span>
+        <span class="l l-Scalar l-Scalar-Plain">image</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">fortio/fortio</span>
+        <span class="l l-Scalar l-Scalar-Plain">command</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class=s>&quot;fortio&quot;</span><span class="p p-Indicator">,</span> <span class=s>&quot;load&quot;</span><span class="p p-Indicator">,</span> <span class=s>&quot;-t&quot;</span><span class="p p-Indicator">,</span> <span class=s>&quot;6000s&quot;</span><span class="p p-Indicator">,</span> <span class=s>&quot;-qps&quot;</span><span class="p p-Indicator">,</span> <span class=s>&quot;16&quot;</span><span class="p p-Indicator">,</span> <span class=s>&quot;-json&quot;</span><span class="p p-Indicator">,</span> <span class=s>&quot;/shared/fortiooutput.json&quot;</span><span class="p p-Indicator">,</span> <span class=nv>$(URL)</span><span class="p p-Indicator">]</span>
+        <span class=nt>env</span><span class=p>:</span>
+        <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">URL</span>
+        <span class=nt>value</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">URL_VALUE</span>
+        <span class=nt>volumeMounts</span><span class=p>:</span>
+        <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">shared</span>
+        <span class=nt>mountPath</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">/shared</span>         
+    <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">busybox</span>
+        <span class="l l-Scalar l-Scalar-Plain">image</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">busybox:1.28</span>
+        <span class="l l-Scalar l-Scalar-Plain">command</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class=s>&#39;sh&#39;</span><span class="p p-Indicator">,</span> <span class=s>&#39;-c&#39;</span><span class="p p-Indicator">,</span> <span class=s>&#39;echo</span><span class=nv> </span><span class=s>busybox</span><span class=nv> </span><span class=s>is</span><span class=nv> </span><span class=s>running!</span><span class=nv> </span><span class=s>&amp;&amp;</span><span class=nv> </span><span class=s>sleep</span><span class=nv> </span><span class=s>600&#39;</span><span class="p p-Indicator">]</span>
+        <span class=nt>volumeMounts</span><span class=p>:</span>
+        <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">shared</span>
+        <span class=nt>mountPath</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">/shared</span>       
+    <span class=nt>restartPolicy</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Never</span>
+</code></pre></div> </td></tr></table> </details> <h2 id=4-define-metrics>4. Define metrics<a class=headerlink href=#4-define-metrics title="Permanent link">&para;</a></h2> <p>Iter8 defines a custom K8s resource called <em>Metric</em> that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. Define the Iter8 metrics used in this experiment as follows.</p> <div class=highlight><pre><span></span><code>kubectl apply -f <span class=nv>$ITER8</span>/samples/knative/quickstart/metrics.yaml
+</code></pre></div> <details class=info><summary>Look inside metrics.yaml</summary><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal>  1</span>
+<span class=normal>  2</span>
+<span class=normal>  3</span>
+<span class=normal>  4</span>
+<span class=normal>  5</span>
+<span class=normal>  6</span>
+<span class=normal>  7</span>
+<span class=normal>  8</span>
+<span class=normal>  9</span>
+<span class=normal> 10</span>
+<span class=normal> 11</span>
+<span class=normal> 12</span>
+<span class=normal> 13</span>
+<span class=normal> 14</span>
+<span class=normal> 15</span>
+<span class=normal> 16</span>
+<span class=normal> 17</span>
+<span class=normal> 18</span>
+<span class=normal> 19</span>
+<span class=normal> 20</span>
+<span class=normal> 21</span>
+<span class=normal> 22</span>
+<span class=normal> 23</span>
+<span class=normal> 24</span>
+<span class=normal> 25</span>
+<span class=normal> 26</span>
+<span class=normal> 27</span>
+<span class=normal> 28</span>
+<span class=normal> 29</span>
+<span class=normal> 30</span>
+<span class=normal> 31</span>
+<span class=normal> 32</span>
+<span class=normal> 33</span>
+<span class=normal> 34</span>
+<span class=normal> 35</span>
+<span class=normal> 36</span>
+<span class=normal> 37</span>
+<span class=normal> 38</span>
+<span class=normal> 39</span>
+<span class=normal> 40</span>
+<span class=normal> 41</span>
+<span class=normal> 42</span>
+<span class=normal> 43</span>
+<span class=normal> 44</span>
+<span class=normal> 45</span>
+<span class=normal> 46</span>
+<span class=normal> 47</span>
+<span class=normal> 48</span>
+<span class=normal> 49</span>
+<span class=normal> 50</span>
+<span class=normal> 51</span>
+<span class=normal> 52</span>
+<span class=normal> 53</span>
+<span class=normal> 54</span>
+<span class=normal> 55</span>
+<span class=normal> 56</span>
+<span class=normal> 57</span>
+<span class=normal> 58</span>
+<span class=normal> 59</span>
+<span class=normal> 60</span>
+<span class=normal> 61</span>
+<span class=normal> 62</span>
+<span class=normal> 63</span>
+<span class=normal> 64</span>
+<span class=normal> 65</span>
+<span class=normal> 66</span>
+<span class=normal> 67</span>
+<span class=normal> 68</span>
+<span class=normal> 69</span>
+<span class=normal> 70</span>
+<span class=normal> 71</span>
+<span class=normal> 72</span>
+<span class=normal> 73</span>
+<span class=normal> 74</span>
+<span class=normal> 75</span>
+<span class=normal> 76</span>
+<span class=normal> 77</span>
+<span class=normal> 78</span>
+<span class=normal> 79</span>
+<span class=normal> 80</span>
+<span class=normal> 81</span>
+<span class=normal> 82</span>
+<span class=normal> 83</span>
+<span class=normal> 84</span>
+<span class=normal> 85</span>
+<span class=normal> 86</span>
+<span class=normal> 87</span>
+<span class=normal> 88</span>
+<span class=normal> 89</span>
+<span class=normal> 90</span>
+<span class=normal> 91</span>
+<span class=normal> 92</span>
+<span class=normal> 93</span>
+<span class=normal> 94</span>
+<span class=normal> 95</span>
+<span class=normal> 96</span>
+<span class=normal> 97</span>
+<span class=normal> 98</span>
+<span class=normal> 99</span>
+<span class=normal>100</span>
+<span class=normal>101</span>
+<span class=normal>102</span>
+<span class=normal>103</span>
+<span class=normal>104</span>
+<span class=normal>105</span>
+<span class=normal>106</span>
+<span class=normal>107</span>
+<span class=normal>108</span>
+<span class=normal>109</span>
+<span class=normal>110</span>
+<span class=normal>111</span>
+<span class=normal>112</span>
+<span class=normal>113</span></pre></div></td><td class=code><div class=highlight><pre><span></span><code><span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Namespace</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative</span>
+<span class=nn>---</span>
+<span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8.tools/v2alpha2</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Metric</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">user-engagement</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>params</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">nrql</span>
+    <span class=nt>value</span><span class=p>:</span> <span class="p p-Indicator">|</span>
+      <span class=no>SELECT average(duration) FROM Sessions WHERE version=&#39;$name&#39; SINCE $elapsedTime sec ago</span>
+  <span class=nt>description</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Average duration of a session</span>
+  <span class=nt>type</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Gauge</span>
+  <span class=nt>headerTemplates</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">X-Query-Key</span>
+    <span class=nt>value</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">t0p-secret-api-key</span>  
+  <span class=nt>provider</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">newrelic</span>
+  <span class=nt>jqExpression</span><span class=p>:</span> <span class=s>&quot;.results[0]</span><span class=nv> </span><span class=s>|</span><span class=nv> </span><span class=s>.[]</span><span class=nv> </span><span class=s>|</span><span class=nv> </span><span class=s>tonumber&quot;</span>
+  <span class=nt>urlTemplate</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">https://my-newrelic-service.com</span>
+  <span class=nt>mock</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app-v1</span>
+    <span class=nt>level</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">15.0</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app-v2</span>
+    <span class=nt>level</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">20.0</span>
+<span class=nn>---</span>
+<span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8.tools/v2alpha2</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Metric</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">95th-percentile-tail-latency</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>description</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">95th percentile tail latency</span>
+  <span class=nt>jqExpression</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">.data.result[0].value[1] | tonumber</span>
+  <span class=nt>params</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">query</span>
+    <span class=nt>value</span><span class=p>:</span> <span class="p p-Indicator">|</span>
+      <span class=no>histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{revision_name=&#39;$name&#39;}[${elapsedTime}s])) by (le))</span>
+  <span class=nt>provider</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+  <span class=nt>sampleSize</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/request-count</span>
+  <span class=nt>type</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Gauge</span>
+  <span class=nt>units</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">milliseconds</span>
+  <span class=nt>urlTemplate</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">http://prometheus-operated.iter8-system:9090/api/v1/query</span>
+<span class=nn>---</span>
+<span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8.tools/v2alpha2</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Metric</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">error-count</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>description</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Number of error responses</span>
+  <span class=nt>jqExpression</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">.data.result[0].value[1] | tonumber</span>
+  <span class=nt>params</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">query</span>
+    <span class=nt>value</span><span class=p>:</span> <span class="p p-Indicator">|</span>
+      <span class=no>sum(increase(revision_app_request_latencies_count{response_code_class!=&#39;2xx&#39;,revision_name=&#39;$name&#39;}[${elapsedTime}s])) or on() vector(0)</span>
+  <span class=nt>provider</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+  <span class=nt>type</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Counter</span>
+  <span class=nt>urlTemplate</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">http://prometheus-operated.iter8-system:9090/api/v1/query</span>
+<span class=nn>---</span>
+<span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8.tools/v2alpha2</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Metric</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">error-rate</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>description</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Fraction of requests with error responses</span>
+  <span class=nt>jqExpression</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">.data.result[0].value[1] | tonumber</span>
+  <span class=nt>params</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">query</span>
+    <span class=nt>value</span><span class=p>:</span> <span class="p p-Indicator">|</span>
+      <span class=no>(sum(increase(revision_app_request_latencies_count{response_code_class!=&#39;2xx&#39;,revision_name=&#39;$name&#39;}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name=&#39;$name&#39;}[${elapsedTime}s])) or on() vector(0))</span>
+  <span class=nt>provider</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+  <span class=nt>sampleSize</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/request-count</span>
+  <span class=nt>type</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Gauge</span>
+  <span class=nt>urlTemplate</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">http://prometheus-operated.iter8-system:9090/api/v1/query</span>
+<span class=nn>---</span>
+<span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8.tools/v2alpha2</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Metric</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">mean-latency</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>description</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Mean latency</span>
+  <span class=nt>jqExpression</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">.data.result[0].value[1] | tonumber</span>
+  <span class=nt>params</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">query</span>
+    <span class=nt>value</span><span class=p>:</span> <span class="p p-Indicator">|</span>
+      <span class=no>(sum(increase(revision_app_request_latencies_sum{revision_name=&#39;$name&#39;}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name=&#39;$name&#39;}[${elapsedTime}s])) or on() vector(0))</span>
+  <span class=nt>provider</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+  <span class=nt>sampleSize</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/request-count</span>
+  <span class=nt>type</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Gauge</span>
+  <span class=nt>units</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">milliseconds</span>
+  <span class=nt>urlTemplate</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">http://prometheus-operated.iter8-system:9090/api/v1/query</span>
+<span class=nn>---</span>
+<span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8.tools/v2alpha2</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Metric</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">request-count</span>
+  <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=nt>description</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Number of requests</span>
+  <span class=nt>jqExpression</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">.data.result[0].value[1] | tonumber</span>
+  <span class=nt>params</span><span class=p>:</span>
+  <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">query</span>
+    <span class=nt>value</span><span class=p>:</span> <span class="p p-Indicator">|</span>
+      <span class=no>sum(increase(revision_app_request_latencies_count{revision_name=&#39;$name&#39;}[${elapsedTime}s])) or on() vector(0)</span>
+  <span class=nt>provider</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+  <span class=nt>type</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Counter</span>
+  <span class=nt>urlTemplate</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">http://prometheus-operated.iter8-system:9090/api/v1/query</span>
+</code></pre></div> </td></tr></table> </details> <details class=note><summary>Metrics in your environment</summary><p>You can define and use custom metrics from any database in Iter8 experiments. </p> <p>For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is <a href=../../../../metrics/custom/ >here</a>.</p> </details> <h2 id=5-launch-experiment>5. Launch experiment<a class=headerlink href=#5-launch-experiment title="Permanent link">&para;</a></h2> <p>Iter8 defines a custom K8s resource called <em>Experiment</em> that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing &amp; progressive traffic shift experiment as follows.</p> <div class=highlight><pre><span></span><code>kubectl apply -f <span class=nv>$ITER8</span>/samples/knative/quickstart/experiment.yaml
+</code></pre></div> <details class=info><summary>Look inside experiment.yaml</summary><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal> 1</span>
+<span class=normal> 2</span>
+<span class=normal> 3</span>
+<span class=normal> 4</span>
+<span class=normal> 5</span>
+<span class=normal> 6</span>
+<span class=normal> 7</span>
+<span class=normal> 8</span>
+<span class=normal> 9</span>
+<span class=normal>10</span>
+<span class=normal>11</span>
+<span class=normal>12</span>
+<span class=normal>13</span>
+<span class=normal>14</span>
+<span class=normal>15</span>
+<span class=normal>16</span>
+<span class=normal>17</span>
+<span class=normal>18</span>
+<span class=normal>19</span>
+<span class=normal>20</span>
+<span class=normal>21</span>
+<span class=normal>22</span>
+<span class=normal>23</span>
+<span class=normal>24</span>
+<span class=normal>25</span>
+<span class=normal>26</span>
+<span class=normal>27</span>
+<span class=normal>28</span>
+<span class=normal>29</span>
+<span class=normal>30</span>
+<span class=normal>31</span>
+<span class=normal>32</span>
+<span class=normal>33</span>
+<span class=normal>34</span>
+<span class=normal>35</span>
+<span class=normal>36</span>
+<span class=normal>37</span>
+<span class=normal>38</span>
+<span class=normal>39</span>
+<span class=normal>40</span>
+<span class=normal>41</span>
+<span class=normal>42</span>
+<span class=normal>43</span>
+<span class=normal>44</span>
+<span class=normal>45</span>
+<span class=normal>46</span>
+<span class=normal>47</span>
+<span class=normal>48</span>
+<span class=normal>49</span>
+<span class=normal>50</span>
+<span class=normal>51</span>
+<span class=normal>52</span>
+<span class=normal>53</span>
+<span class=normal>54</span>
+<span class=normal>55</span>
+<span class=normal>56</span>
+<span class=normal>57</span>
+<span class=normal>58</span></pre></div></td><td class=code><div class=highlight><pre><span></span><code><span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8.tools/v2alpha2</span>
+<span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Experiment</span>
+<span class=nt>metadata</span><span class=p>:</span>
+  <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">quickstart-exp</span>
+<span class=nt>spec</span><span class=p>:</span>
+  <span class=c1># target identifies the knative service under experimentation using its fully qualified name</span>
+  <span class=nt>target</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">default/sample-app</span>
+  <span class=nt>strategy</span><span class=p>:</span>
+    <span class=nt>testingPattern</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">A/B</span>
+    <span class=nt>deploymentPattern</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Progressive</span>
+    <span class=nt>actions</span><span class=p>:</span>
+      <span class=nt>finish</span><span class=p>:</span> <span class=c1># run the following sequence of tasks at the end of the experiment</span>
+      <span class="p p-Indicator">-</span> <span class=nt>task</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">common/exec</span> <span class=c1># promote the winning version      </span>
+        <span class=nt>with</span><span class=p>:</span>
+          <span class=nt>cmd</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">/bin/sh</span>
+          <span class=nt>args</span><span class=p>:</span>
+          <span class="p p-Indicator">-</span> <span class=s>&quot;-c&quot;</span>
+          <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+            <span class=no>kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml</span>
+  <span class=nt>criteria</span><span class=p>:</span>
+    <span class=nt>requestCount</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/request-count</span>
+    <span class=nt>rewards</span><span class=p>:</span> <span class=c1># Business rewards</span>
+    <span class="p p-Indicator">-</span> <span class=nt>metric</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/user-engagement</span>
+      <span class=nt>preferredDirection</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">High</span> <span class=c1># maximize user engagement</span>
+    <span class=nt>objectives</span><span class=p>:</span> 
+    <span class="p p-Indicator">-</span> <span class=nt>metric</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/mean-latency</span>
+      <span class=nt>upperLimit</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="p p-Indicator">-</span> <span class=nt>metric</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/95th-percentile-tail-latency</span>
+      <span class=nt>upperLimit</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+    <span class="p p-Indicator">-</span> <span class=nt>metric</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">iter8-knative/error-rate</span>
+      <span class=nt>upperLimit</span><span class=p>:</span> <span class=s>&quot;0.01&quot;</span>
+  <span class=nt>duration</span><span class=p>:</span>
+    <span class=nt>intervalSeconds</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+    <span class=nt>iterationsPerLoop</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+  <span class=nt>versionInfo</span><span class=p>:</span>
+    <span class=c1># information about app versions used in this experiment</span>
+    <span class=nt>baseline</span><span class=p>:</span>
+      <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app-v1</span>
+      <span class=nt>weightObjRef</span><span class=p>:</span>
+        <span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">serving.knative.dev/v1</span>
+        <span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Service</span>
+        <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app</span>
+        <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+        <span class=nt>fieldPath</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">.spec.traffic[0].percent</span>
+      <span class=nt>variables</span><span class=p>:</span>
+      <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">promote</span>
+        <span class=nt>value</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">baseline</span>
+    <span class=nt>candidates</span><span class=p>:</span>
+    <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app-v2</span>
+      <span class=nt>weightObjRef</span><span class=p>:</span>
+        <span class=nt>apiVersion</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">serving.knative.dev/v1</span>
+        <span class=nt>kind</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">Service</span>
+        <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">sample-app</span>
+        <span class=nt>namespace</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+        <span class=nt>fieldPath</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">.spec.traffic[1].percent</span>
+      <span class=nt>variables</span><span class=p>:</span>
+      <span class="p p-Indicator">-</span> <span class=nt>name</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">promote</span>
+        <span class=nt>value</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">candidate</span>
+</code></pre></div> </td></tr></table> </details> <h2 id=6-understand-the-experiment>6. Understand the experiment<a class=headerlink href=#6-understand-the-experiment title="Permanent link">&para;</a></h2> <p>The process automated by Iter8 in this experiment is as follows.</p> <p><img alt="Iter8 automation" src=../../../../images/quickstart-iter8-process.png></p> <p>Observe the results of the experiment in real-time as follows.</p> <h3 id=a-observe-results>a) Observe results<a class=headerlink href=#a-observe-results title="Permanent link">&para;</a></h3> <p>Install <code>iter8ctl</code>. You can change the directory where <code>iter8ctl</code> binary is installed by changing <code>GOBIN</code> below. <div class=highlight><pre><span></span><code><span class=nv>GO111MODULE</span><span class=o>=</span>on <span class=nv>GOBIN</span><span class=o>=</span>/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
+</code></pre></div></p> <p>Periodically describe the experiment. <div class=highlight><pre><span></span><code>watch -x iter8ctl describe -f - &lt;<span class=o>(</span>kubectl get experiment quickstart-exp -o yaml<span class=o>)</span>
+</code></pre></div></p> <details class=info><summary>Experiment results will look similar to this</summary><div class=highlight><pre><span></span><code>****** Overview ******
+Experiment name: quickstart-exp
+Experiment namespace: default
+Target: default/sample-app
+Testing strategy: A/B
+Rollout strategy: Progressive
+
+****** Progress Summary ******
+Experiment stage: Running
+Number of completed iterations: <span class=m>8</span>
+
+****** Winner Assessment ******
+App versions <span class=k>in</span> this experiment: <span class=o>[</span>sample-app-v1 sample-app-v2<span class=o>]</span>
+Winning version: sample-app-v2
+Version recommended <span class=k>for</span> promotion: sample-app-v2
+
+****** Objective Assessment ******
+&gt; Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values <span class=k>for</span> each version.
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span>                 OBJECTIVE                  <span class=p>|</span> SAMPLE-APP-V1 <span class=p>|</span> SAMPLE-APP-V2 <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/mean-latency &lt;<span class=o>=</span>              <span class=p>|</span> <span class=nb>true</span>          <span class=p>|</span> <span class=nb>true</span>          <span class=p>|</span>
+<span class=p>|</span>                                     <span class=m>50</span>.000 <span class=p>|</span>               <span class=p>|</span>               <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/95th-percentile-tail-latency <span class=p>|</span> <span class=nb>true</span>          <span class=p>|</span> <span class=nb>true</span>          <span class=p>|</span>
+<span class=p>|</span> &lt;<span class=o>=</span> <span class=m>100</span>.000                                 <span class=p>|</span>               <span class=p>|</span>               <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/error-rate &lt;<span class=o>=</span>                <span class=p>|</span> <span class=nb>true</span>          <span class=p>|</span> <span class=nb>true</span>          <span class=p>|</span>
+<span class=p>|</span>                                      <span class=m>0</span>.010 <span class=p>|</span>               <span class=p>|</span>               <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+
+****** Metrics Assessment ******
+&gt; Most recently <span class=nb>read</span> values of experiment metrics <span class=k>for</span> each version.
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span>                   METRIC                   <span class=p>|</span> SAMPLE-APP-V1 <span class=p>|</span> SAMPLE-APP-V2 <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/request-count                <span class=p>|</span>      <span class=m>1213</span>.625 <span class=p>|</span>       <span class=m>361</span>.962 <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/user-engagement              <span class=p>|</span>        <span class=m>10</span>.023 <span class=p>|</span>        <span class=m>14</span>.737 <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/mean-latency                 <span class=p>|</span>         <span class=m>1</span>.133 <span class=p>|</span>         <span class=m>1</span>.175 <span class=p>|</span>
+<span class=p>|</span> <span class=o>(</span>milliseconds<span class=o>)</span>                             <span class=p>|</span>               <span class=p>|</span>               <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/95th-percentile-tail-latency <span class=p>|</span>         <span class=m>4</span>.768 <span class=p>|</span>         <span class=m>4</span>.824 <span class=p>|</span>
+<span class=p>|</span> <span class=o>(</span>milliseconds<span class=o>)</span>                             <span class=p>|</span>               <span class=p>|</span>               <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+<span class=p>|</span> iter8-knative/error-rate                   <span class=p>|</span>         <span class=m>0</span>.000 <span class=p>|</span>         <span class=m>0</span>.000 <span class=p>|</span>
++--------------------------------------------+---------------+---------------+
+</code></pre></div> </details> <p>Observe how traffic is split between versions in real-time as follows.</p> <h3 id=b-observe-traffic>b) Observe traffic<a class=headerlink href=#b-observe-traffic title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code>kubectl get ksvc sample-app -o json --watch <span class=p>|</span> jq <span class=s2>&quot;.status.traffic&quot;</span>
+</code></pre></div> <details class=info><summary>Look inside traffic summary</summary><p>The <code>kubectl</code> output will be similar to the following. <div class=highlight><pre><span></span><code><span class=o>[</span>
+<span class=o>{</span>
+    <span class=s2>&quot;latestRevision&quot;</span>: false,
+    <span class=s2>&quot;percent&quot;</span>: <span class=m>45</span>,
+    <span class=s2>&quot;revisionName&quot;</span>: <span class=s2>&quot;sample-app-v1&quot;</span>,
+    <span class=s2>&quot;tag&quot;</span>: <span class=s2>&quot;current&quot;</span>,
+    <span class=s2>&quot;url&quot;</span>: <span class=s2>&quot;http://current-sample-app.default.example.com&quot;</span>
+<span class=o>}</span>,
+<span class=o>{</span>
+    <span class=s2>&quot;latestRevision&quot;</span>: true,
+    <span class=s2>&quot;percent&quot;</span>: <span class=m>55</span>,
+    <span class=s2>&quot;revisionName&quot;</span>: <span class=s2>&quot;sample-app-v2&quot;</span>,
+    <span class=s2>&quot;tag&quot;</span>: <span class=s2>&quot;candidate&quot;</span>,
+    <span class=s2>&quot;url&quot;</span>: <span class=s2>&quot;http://candidate-sample-app.default.example.com&quot;</span>
+<span class=o>}</span>
+<span class=o>]</span>
+</code></pre></div></p> </details> <h3 id=c-observe-progress>c) Observe progress<a class=headerlink href=#c-observe-progress title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code>kubectl get experiment quickstart-exp --watch
+</code></pre></div> <details class=info><summary>Look inside progress summary</summary><p>The <code>kubectl</code> output will be similar to the following. <div class=highlight><pre><span></span><code>NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>1</span>                      IterationUpdate: Completed Iteration <span class=m>1</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>2</span>                      IterationUpdate: Completed Iteration <span class=m>2</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>3</span>                      IterationUpdate: Completed Iteration <span class=m>3</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>4</span>                      IterationUpdate: Completed Iteration <span class=m>4</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>5</span>                      IterationUpdate: Completed Iteration <span class=m>5</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>6</span>                      IterationUpdate: Completed Iteration <span class=m>6</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>7</span>                      IterationUpdate: Completed Iteration <span class=m>7</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>8</span>                      IterationUpdate: Completed Iteration <span class=m>8</span>
+quickstart-exp   Canary   default/sample-app   Running   <span class=m>9</span>                      IterationUpdate: Completed Iteration <span class=m>9</span>
+</code></pre></div></p> </details> <h2 id=7-cleanup>7. Cleanup<a class=headerlink href=#7-cleanup title="Permanent link">&para;</a></h2> <div class=highlight><pre><span></span><code>kubectl delete -f <span class=nv>$ITER8</span>/samples/knative/quickstart/fortio.yaml
+kubectl delete -f <span class=nv>$ITER8</span>/samples/knative/quickstart/experiment.yaml
+kubectl delete -f <span class=nv>$ITER8</span>/samples/knative/quickstart/experimentalservice.yaml
+</code></pre></div> </article> </div> </div> <a href=# class="md-top md-icon" title="Back to top" data-md-component=top data-md-state=hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg> </a> </main> <!--
+  Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to
+  deal in the Software without restriction, including without limitation the
+  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+--> <!-- Footer --> <footer class=md-footer> <!-- Link to previous and/or next page --> <nav class="md-footer__inner md-grid" aria-label=Footer> <!-- Link to previous page --> <a href=../../seldon/platform-setup/ class="md-footer__link md-footer__link--prev" rel=prev> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg> </div> <div class=md-footer__title> <div class=md-ellipsis> <span class=md-footer__direction> Previous </span> Platform setup </div> </div> </a> <!-- Link to next page --> <a href=../platform-setup/ class="md-footer__link md-footer__link--next" rel=next> <div class=md-footer__title> <div class=md-ellipsis> <span class=md-footer__direction> Next </span> Platform setup </div> </div> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg> </div> </a> </nav> <!-- Further information --> <div class="md-footer-meta md-typeset"> <div class="md-footer-meta__inner md-grid"> <!-- Copyright and theme information --> <div class=md-footer-copyright> <a href=https://iter8.tools/ target=_blank rel=noopener> Iter8 is Apache 2.0 licensed, 100% open, and community driven. </a> </div> <!-- Social links --> <div class=md-footer-social> <a href=https://github.com/iter8-tools/iter8 target=_blank rel=noopener title=github.com class=md-footer-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg> </a> <a href=https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw target=_blank rel=noopener title=join.slack.com class=md-footer-social__link> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 448 512"><path d="M94.12 315.1c0 25.9-21.16 47.06-47.06 47.06S0 341 0 315.1c0-25.9 21.16-47.06 47.06-47.06h47.06v47.06zm23.72 0c0-25.9 21.16-47.06 47.06-47.06s47.06 21.16 47.06 47.06v117.84c0 25.9-21.16 47.06-47.06 47.06s-47.06-21.16-47.06-47.06V315.1zm47.06-188.98c-25.9 0-47.06-21.16-47.06-47.06S139 32 164.9 32s47.06 21.16 47.06 47.06v47.06H164.9zm0 23.72c25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06H47.06C21.16 243.96 0 222.8 0 196.9s21.16-47.06 47.06-47.06H164.9zm188.98 47.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06s-21.16 47.06-47.06 47.06h-47.06V196.9zm-23.72 0c0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06V79.06c0-25.9 21.16-47.06 47.06-47.06 25.9 0 47.06 21.16 47.06 47.06V196.9zM283.1 385.88c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06-25.9 0-47.06-21.16-47.06-47.06v-47.06h47.06zm0-23.72c-25.9 0-47.06-21.16-47.06-47.06 0-25.9 21.16-47.06 47.06-47.06h117.84c25.9 0 47.06 21.16 47.06 47.06 0 25.9-21.16 47.06-47.06 47.06H283.1z"/></svg> </a> </div> </div> </div> </footer> </div> <div class=md-dialog data-md-component=dialog> <div class="md-dialog__inner md-typeset"></div> </div> <script id=__config type=application/json>{"base": "../../../..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.top"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../../../assets/javascripts/workers/search.b0710199.min.js", "version": {"provider": "mike"}}</script> <script src=../../../../assets/javascripts/bundle.76f349be.min.js></script> </body> </html>
