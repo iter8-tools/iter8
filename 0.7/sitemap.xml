@@ -72,6 +72,14 @@
      <lastmod>2021-06-23</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
+     <loc>https://iter8.tools/0.7/tutorials/seldon/testing-strategies/hybrid/</loc>
+     <lastmod>2021-06-23</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://iter8.tools/0.7/tutorials/seldon/rollout-strategies/progressive/</loc>
+     <lastmod>2021-06-23</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
      <loc>https://iter8.tools/0.7/tutorials/knative/testing-strategies/slovalidationprogressive/</loc>
      <lastmod>2021-06-23</lastmod>
      <changefreq>daily</changefreq>
