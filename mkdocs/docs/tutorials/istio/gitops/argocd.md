@@ -24,7 +24,7 @@ template: main.html
     Unlike other progressive delivery tools, Iter8 adheres to GitOps guarantees by ensuring the desired state is always in sync with the actual state. App version that failed promotion criteria will never get promoted, even if the cluster had to be recreated from scratch. This important GitOps property is often not guaranteed by other tools!
 
 ## Step 1. Create K8s cluster
-If you don't already have a K8s cluster, [create a Minikube or Kind K8s cluster locally](../../../getting-started/quick-start/istio/platform-setup.md).
+If you don't already have a K8s cluster, [create a Minikube or Kind K8s cluster locally](../../../getting-started/quick-start/istio/platform-setup.md#1-create-kubernetes-cluster).
 
 ## Step 2. Fork repo
 
