@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 makes it easy to optimize business metrics and validate SLOs when you deploy apps/ML models on Kubernetes. Integrate with any CI/CD/GitOps pipeline. Quick start in 5 mins.
+  Iter8 is the release engineering platform for Kubernetes applications and ML models. Integrate with any CI/CD/GitOps tool. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -25,9 +25,10 @@ theme:
   # Default values, taken from mkdocs_theme.yml
   language: en
   features:
-  # - navigation.instant
+  - navigation.instant
   - navigation.sections
   - navigation.tabs
+  - navigation.top  
   palette:
     - scheme: default
       primary: black
@@ -55,7 +56,7 @@ plugins:
         
 # Customization
 extra:
-  title: "SLO validation, A/B testing, and progressive delivery for K8s apps/ML models"
+  title: "SLO validation, A/B testing, and progressive rollouts"
   version:
     provider: mike
   social:
@@ -111,23 +112,49 @@ nav:
     - What is Iter8?: concepts/whatisiter8.md
     - Experiment building blocks: concepts/buildingblocks.md
   - Getting Started:
-    - Quick start: getting-started/quick-start.md
-    - Install: getting-started/install.md
-    - Getting help: getting-started/help.md
+    - Install Iter8: getting-started/install.md
+    - Get help: getting-started/help.md
+    - Quick start tutorials:
+      - KFServing:
+        - A/B testing: getting-started/quick-start/kfserving/tutorial.md
+        - Platform setup: getting-started/quick-start/kfserving/platform-setup.md
+      - Seldon:
+        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/seldon/tutorial.md
+        - Platform setup: getting-started/quick-start/seldon/platform-setup.md
+      - Knative:
+        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/knative/tutorial.md
+        - Platform setup: getting-started/quick-start/knative/platform-setup.md
+      - Istio:
+        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/istio/tutorial.md
+        - Platform setup: getting-started/quick-start/istio/platform-setup.md
   - Tutorials:
-    - Testing patterns:
-      - Canary: tutorials/testing-patterns/canary.md
-      - Conformance: tutorials/testing-patterns/conformance.md
-      - A/B (quick start): tutorials/testing-patterns/ab.md
-    - Deployment patterns:
-      - Progressive deployment: tutorials/deployment-patterns/progressive.md
-      - FixedSplit deployment: tutorials/deployment-patterns/fixed-split.md
-    - Traffic engineering:
-      - Session affinity: tutorials/traffic-engineering/session-affinity.md
-      - User segmentation: tutorials/traffic-engineering/user-segmentation.md
-      - Traffic mirroring/shadowing: tutorials/traffic-engineering/mirroring.md
-    - GitOps:
-      - Argo CD + Istio: tutorials/gitops/argocd.md
+    - KFServing:
+      - Testing strategies:
+        - Hybrid (A/B + SLOs) testing: tutorials/kfserving/testing-strategies/hybrid.md
+        - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
+      - Rollout strategies:
+        - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
+        - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
+        - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
+    - Knative:
+      - Testing strategies:
+        - SLO validation: tutorials/knative/testing-strategies/slovalidationprogressive.md
+        - SLO validation (builtin metrics): tutorials/knative/testing-strategies/conformance.md
+        - A/B testing (quick start): tutorials/knative/testing-strategies/ab.md
+      - Rollout strategies:
+        - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
+        - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
+        - User segmentation: tutorials/knative/rollout-strategies/user-segmentation.md
+    - Istio:
+      - Testing strategies:
+        - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
+        - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
+        - Hybrid (A/B + SLOs) testing (quick start): tutorials/istio/testing-strategies/hybrid.md
+      - Rollout strategies:
+        - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
+        - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
+      - GitOps:
+        - Argo CD + Istio: tutorials/istio/gitops/argocd.md
   - Metrics:
     - Using metrics: metrics/using-metrics.md
     - Builtin metrics: metrics/builtin.md

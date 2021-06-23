@@ -16,8 +16,8 @@ echo "Create app/ML model versions"
 kubectl apply -f $ITER8/samples/seldon/quickstart/baseline.yaml
 kubectl apply -f $ITER8/samples/seldon/quickstart/candidate.yaml
 kubectl apply -f $ITER8/samples/seldon/quickstart/routing-rule.yaml
-kubectl wait --for condition=ready --timeout=600s pods --all -n ns-baseline
-kubectl wait --for condition=ready --timeout=600s pods --all -n ns-candidate
+kubectl wait --for=condition=Ready --timeout=600s pods --all -n ns-baseline
+kubectl wait --for=condition=Ready --timeout=600s pods --all -n ns-candidate
 
 echo "Generate requests"
 URL_VALUE="http://$(kubectl -n istio-system get svc istio-ingressgateway -o jsonpath='{.spec.clusterIP}'):80"

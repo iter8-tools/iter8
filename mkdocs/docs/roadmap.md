@@ -8,8 +8,8 @@ hide:
 # Roadmap
 
 1. **Enhanced experiments**
-    * A/B/n, and Pareto testing patterns with single and multiple reward metrics
-    * Blue/green deployment pattern
+    * A/B/n, and Pareto testing strategies with single and multiple reward metrics
+    * BlueGreen rollout strategy
     * Experiments with `support` and `confidence`
 2. **Metrics**
     * Support for more metric providers like MySQL, PostgreSQL, CouchDB, MongoDB, and Google Analytics.

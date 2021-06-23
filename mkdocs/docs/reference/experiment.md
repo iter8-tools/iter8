@@ -107,7 +107,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| testingPattern | string | Determines the logic used to evaluate the app versions and determine the winner of the experiment. Iter8 supports two testing patterns, namely, `Canary` and `Conformance`. | Yes |
+| testingPattern | string | Determines the logic used to evaluate the app versions and determine the winner of the experiment. Iter8 supports two testing strategies, namely, `Canary` and `Conformance`. | Yes |
 | deploymentPattern | string | Determines if and how traffic is shifted during an experiment. This field is relevant only for experiments using the `Canary` testing pattern. Iter8 supports two deployment patterns, namely, `Progressive` and `FixedSplit`. | No |
 | actions | map[ActionType][][TaskSpec](#taskspec) | An action is a sequence of tasks that can be executed by Iter8. `ActionType` is a string enum with three valid values: `start`, `loop`, and `finish`. The start action, if specified, is executed at the start of the experiment. The loop action, if specified, is executed during every loop of the experiment, after all the iterations within the loop have completed. The finish action, if specified, is executed at the end of the experiment after all the loops have completed. The `actions` field is used to specify all three types of actions. | No |
 

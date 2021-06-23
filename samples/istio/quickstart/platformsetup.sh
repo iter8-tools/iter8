@@ -31,7 +31,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export ISTIO_VERSION="${ISTIO_VERSION:-1.9.4}"
+export ISTIO_VERSION="${ISTIO_VERSION:-1.10.1}"
 echo "ISTIO_VERSION=$ISTIO_VERSION"
 
 # Step 2: Install Istio (https://istio.io/latest/docs/setup/getting-started/)
@@ -48,7 +48,7 @@ echo "Istio installed successfully"
 
 # Step 3: Ensure readiness of Istio pods
 echo "Waiting for all Istio pods to be running..."
-kubectl wait --for condition=ready --timeout=300s pods --all -n istio-system
+kubectl wait --for=condition=Ready --timeout=300s pods --all -n istio-system
 
 ### Note: the preceding steps perform domain install; following steps perform Iter8 install
 
@@ -67,12 +67,8 @@ kustomize build $ITER8/install/prometheus-add-on/prometheus | kubectl apply -f -
 
 kubectl apply -f ${ITER8}/samples/istio/quickstart/service-monitor.yaml
 
-# Step 6: Install Iter8's mock New Relic service
-echo "Installing Iter8's mock New Relic service"
-kubectl apply -f ${ITER8}/samples/istio/quickstart/metrics-mock.yaml
-
-# Step : Verify Iter8 installation
+# Step 6: Verify Iter8 installation
 echo "Verifying Iter8 and add-on installation"
-kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+kubectl wait --for=condition=Ready --timeout=300s pods --all -n iter8-system
 sleep 20
-kubectl wait --for condition=ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system
+kubectl wait --for=condition=Ready --timeout=300s pods prometheus-iter8-prometheus-0 -n iter8-system

@@ -39,18 +39,16 @@ Not everything happens through a GitHub pull request. Please come to our
 
 *** 
 
-## Come to Meetings!
-Everyone is welcome to join our community meetings. You never need an
+## Come to Weekly Community Meetings!
+- Everyone is welcome to join our weekly community meetings. You never need an
 invite to attend. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
-
-Our community meetings are on Wednesday at 1PM EST/EDT. You can find the video
+- Our community meetings are on Wednesdays at 1PM EST/EDT. You can find the video
 conference link [here](https://meet.google.com/hys-ubrv-bsd). You can find the
-agenda [here](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing) 
-as well as the meeting notes [here](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing).
-If you have a topic you would like to discuss, please put it on the agenda as 
+agenda [here](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing) as well as the meeting notes [here](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing).
+- If you have a topic you would like to discuss, please put it on the agenda as 
 well as a time estimate. Community meetings will be recorded
-and available to the public on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
+and publicly available on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
 
 ***
 

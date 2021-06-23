@@ -57,7 +57,7 @@ echo "Istio installed successfully"
 
 # Step 3: Ensure readiness of Istio pods
 echo "Waiting for all Istio pods to be running..."
-kubectl wait --for condition=ready --timeout=300s pods --all -n istio-system
+kubectl wait --for=condition=Ready --timeout=300s pods --all -n istio-system
 
 # Step 4: Install Seldon
 echo "Installing Seldon"
@@ -80,5 +80,5 @@ kubectl wait --for=condition=Ready pods --all -n iter8-system
 
 # Step 7: Verify Iter8 installation
 echo "Verifying Iter8 and add-on installation"
-kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+kubectl wait --for=condition=Ready --timeout=300s pods --all -n iter8-system
 

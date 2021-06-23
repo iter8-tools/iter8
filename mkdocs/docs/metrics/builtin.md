@@ -28,4 +28,4 @@ The following are the set of builtin Iter8 metrics.
 Use the [`metrics/collect` task](../../reference/tasks/metrics/) in an experiment to collect builtin metrics for your app/ML model versions.
 
 ## Example
-For an example of an experiment that uses builtin metrics, look inside the Knative experiment in [this tutorial](../../tutorials/testing-patterns/conformance/#7-launch-experiment).
+For an example of an experiment that uses builtin metrics, look inside the Knative experiment in [this tutorial](../../tutorials/testing-strategies/conformance/#7-launch-experiment).

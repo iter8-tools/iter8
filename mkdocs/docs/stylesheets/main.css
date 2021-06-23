@@ -100,7 +100,7 @@
   font-family: "Lato", sans-serif;
   font-weight: 300;
   box-sizing: border-box;
-  padding: 0 15px;
+  padding: 15px;
   word-break: break-word;
 }
 
@@ -132,6 +132,19 @@
   color: #fff;
 }
 
+.feature-item ul {
+  font-size: 20px;
+  line-height: 1.8em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color: #111;
+  margin: 0 0 10px;
+  display: block;
+}
+[data-md-color-scheme=slate] .feature-item ul {
+  color: #fff;
+}
+
 @media screen and (min-width: 76.25em) {
   .top-hr {
     width: 100%;
@@ -144,7 +157,7 @@
   }
 
   .feature-item {
-    width: 100%;
+    width: 33%;
   }
 
   .feature-item:hover {
@@ -179,13 +192,13 @@
 .tx-container .tx-hero {
   color: var(--md-primary-bg-color);
 }
-@media screen and (min-width: 50em) {
+@media screen and (min-width: 76.25em) {
   .tx-container .tx-hero {
     display: flex;
     flex-wrap: wrap;
   }
   .tx-container .tx-hero .tx-card {
-    width: 50%;
+    width: 33%;
   }
 }
 .tx-container .tx-hero .tx-card {

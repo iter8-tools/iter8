@@ -25,6 +25,9 @@ jobs:
       uses: actions/checkout@v2
     
     - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"
+
     - name: platform setup
       run: |
         export ITER8=$(pwd)
@@ -41,7 +44,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         sed -i "s/6000s/120s/g" $ITER8/samples/knative/quickstart/fortio.yaml
-        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
         
         # Wait for Fortio to be ready
@@ -65,14 +68,17 @@ jobs:
         export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  canary:
-    name: canary experiment
+  slovalidation:
+    name: slo validation experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
     
     - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"  
+
     - name: platform setup
       run: |
         export ITER8=$(pwd)
@@ -89,7 +95,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         sed -i "s/6000s/120s/g" $ITER8/samples/knative/quickstart/fortio.yaml
-        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
         
         # Wait for Fortio to be ready
@@ -100,17 +106,17 @@ jobs:
         kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
         # Starting the experiment
-        kubectl apply -f $ITER8/samples/knative/canary/experiment.yaml
+        kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
 
     - name: Sleep until end of experiment
       run: |
         sleep 150.0
-        kubectl get experiment canary-exp -o yaml
+        kubectl get experiment slovalidation-exp -o yaml
     
     - name: Check if experiment is complete and successful
       run: |
         export ITER8=$(pwd)
-        source $ITER8/samples/knative/canary/check.sh
+        source $ITER8/samples/knative/slovalidation/check.sh
 
   conformance:
     name: conformance experiment
@@ -120,6 +126,8 @@ jobs:
       uses: actions/checkout@v2
     
     - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"    
 
     - name: platform setup
       run: |
@@ -136,7 +144,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         sed -i "s/6000s/120s/g" $ITER8/samples/knative/conformance/fortio.yaml
-        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/conformance/fortio.yaml | kubectl apply -f -
 
         # Wait for Fortio to be ready
@@ -170,6 +178,8 @@ jobs:
       uses: actions/checkout@v2
     
     - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"
 
     - name: platform setup
       run: |
@@ -187,7 +197,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=default
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=240s
+        kubectl wait ksvc/sample-app --for=condition=Ready --timeout=240s
         helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=default
         kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
 
@@ -195,7 +205,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         sed -i "s/6000s/120s/g" $ITER8/samples/knative/canaryprogressive/fortio.yaml        
-        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryprogressive/fortio.yaml | kubectl apply -f -
 
         # Wait for Fortio to be ready
@@ -230,6 +240,9 @@ jobs:
       uses: actions/checkout@v2
     
     - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1" 
+
     - name: platform setup
       run: |
         export ITER8=$(pwd)
@@ -246,7 +259,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         sed -i "s/6000s/120s/g" $ITER8/samples/knative/quickstart/fortio.yaml
-        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
         
         # Wait for Fortio to be ready
@@ -278,6 +291,8 @@ jobs:
       uses: actions/checkout@v2
     
     - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"    
 
     - name: platform setup
       run: |
@@ -288,7 +303,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         kustomize build $ITER8/samples/knative/canaryfixedsplit/baseline | kubectl apply -f -
-        kubectl wait ksvc/sample-app --for condition=Ready --timeout=240s
+        kubectl wait ksvc/sample-app --for=condition=Ready --timeout=240s
         kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl apply -f -        
 
     - name: Generate requests
@@ -296,7 +311,7 @@ jobs:
         export ITER8=$(pwd)
         kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
         sed -i "s/6000s/120s/g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml        
-        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq .status.address.url)
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
         sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/canaryfixedsplit/fortio.yaml | kubectl apply -f -
 
         # Wait for Fortio to be ready
@@ -330,6 +345,8 @@ jobs:
       uses: actions/checkout@v2
     
     - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"    
 
     - name: platform setup
       run: |

@@ -71,15 +71,14 @@
 
       <!-- Hero content -->
       <div class="mdx-hero__content">
-        <h1><strong>SLO validation, A/B testing and Progressive Delivery</strong></h1>
+        <h1><strong>SLO validation, A/B testing and progressive rollouts</strong></h1>
 
-        <h2>Iter8 makes it easy to <strong>optimize business metrics</strong> and <strong>validate SLOs</strong> when deploying K8s apps/ML models.</h2>
+        <h2>Iter8 is <strong>the release engineering platform</strong> for Kubernetes applications and ML models.</h2>
 
-        <a href="{{ base_url }}/getting-started/quick-start/" title="Quick start in 5 mins"
+        <a href="{{ base_url }}/getting-started/quick-start/kfserving/tutorial/" title="Quick start in 5 mins"
           class="md-button md-button--primary">
           Quick start in 5 mins
         </a>
-
       </div>
     </div> 
     <!-- Hero ^^ -->
@@ -91,7 +90,7 @@
 
 <section class="cards">
   <div class="md-grid md-typeset">
-      <h1><strong>Highlights</strong></h1>
+    <h1><strong>Features</strong></h1>
     <!-- Main site box descriptions -->
     <div class="top-hr">
 
@@ -100,44 +99,14 @@
           <span class="twemoji">
             {% include ".icons/material/atom.svg" %}
           </span>
-          Statistically rigorous SLO validation and A/B testing
+          Testing strategies
         </h2>
-      </div>
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/kubernetes.svg" %}
-          </span>
-          Integrate with Istio, KFServing, Knative, Seldon ... or any K8s stack of your choice
-        </h2>
-      </div>
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/database-plus.svg" %}
-          </span>
-          Builtin load generation and latency/error metrics collection
-        </h2>
-      </div>
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/database-plus.svg" %}
-          </span>
-          Custom metrics from Prometheus, New Relic, Sysdig, Elastic ... or any database of your choice
-        </h2>
-      </div>
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/fontawesome/solid/cogs.svg" %}
-          </span>
-          AI-driven: Bayesian analysis for assessing versions and multi-armed bandit for shifting traffic
-        </h2>
+        <hr>
+        <ul>
+          <li>SLO validation</li>
+          <li>A/B and A/B/n test with business reward</li>
+          <li>Hybrid (A/B + SLOs) testing</li>
+        </ul>
       </div>
 
       <div class="feature-item">
@@ -145,17 +114,36 @@
           <span class="twemoji">
             {% include ".icons/material/progress-check.svg" %}
           </span>
-          Progressive traffic shifting</strong> towards the winning version
+          Rollout strategies
         </h2>
+        <hr>
+        <ul>
+          <li>Simple rollout & rollback</li>
+          <li>BlueGreen</li>
+          <li>Dark launch with builtin load/metrics</li>
+          <li>Dark launch with mirroring (shadowing)</li>
+          <li>Canary with fixed-%-split</li>
+          <li>Canary with progressive traffic shift</li>
+          <li>Canary with user segmentation</li>
+          <li>Canary with session affinity</li>
+        </ul>
       </div>
 
       <div class="feature-item">
         <h2>
           <span class="twemoji">
-            {% include ".icons/material/router.svg" %}
+            {% include ".icons/fontawesome/solid/cogs.svg" %}
           </span>
-          Traffic engineering: dark launch, mirroring, user segmentation, and session affinity
+          AI/Metrics
         </h2>
+        <hr>
+        <ul>
+          <li>Traffic shifting using multi-armed bandit</li>
+          <li>Bayesian analysis for version assessment</li>
+          <li>Builtin latency/error metrics</li>
+          <li>Custom metrics from any DB</li>
+          <li>Metrics mock</li>
+        </ul>
       </div>
 
     </div>
@@ -168,6 +156,7 @@
   <div class="md-grid md-typeset">
 
     <div class="tx-hero">
+
       <div class=tx-card>
         <h2>Talk to us on slack</h2>
         <a href="https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw" title="Slack invite"
@@ -175,8 +164,17 @@
         Slack
       </a>
       <p>Interested in learning more, speaking to other contributors, or finding answers?</p>
-
       </div>
+
+      <div class=tx-card>
+        <h2>Come to meetings</h2>
+        <a href="{{ base_url }}/getting-started/help/#getting-help" title="Community meeting"
+        class="md-button md-button--primary">
+        Meet
+      </a>
+      <p>Everyone is welcome to join our weekly community meetings.</p>
+      </div>
+
 
       <div class=tx-card>
         <h2>Contributors welcome</h2>

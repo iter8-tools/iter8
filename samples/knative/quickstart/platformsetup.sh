@@ -39,7 +39,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export KNATIVE_TAG="${KNATIVE_TAG:-v0.21.0}"
+export KNATIVE_TAG="${KNATIVE_TAG:-v0.23.0}"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
 
 # Step 2: Install Knative (https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-serving-component)
@@ -57,7 +57,17 @@ kubectl apply --filename https://github.com/knative/serving/releases/download/${
 # Step 3: Ensure readiness of Knative-serving pods
 echo "Waiting for all Knative-serving pods to be running..."
 sleep 10 # allowing enough time for resource creation
-kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
+kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
+
+# # Step 4: Install a network layer
+# if [[ "istio" == ${1} ]]; then
+#     ##########Installing ISTIO ###########
+#     echo "Installing Istio for Knative"
+#     kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/istio.yaml
+
+#     kubectl apply -f https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/net-istio.yaml
+
+#     echo "Istio networking layer installed successfully"
 
 # Step 4: Install a network layer
 if [[ "istio" == ${1} ]]; then
@@ -66,8 +76,8 @@ if [[ "istio" == ${1} ]]; then
     WORK_DIR=$(pwd)
     TEMP_DIR=$(mktemp -d)
     cd $TEMP_DIR
-    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.8.2 sh -
-    cd istio-1.8.2
+    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.0 sh -
+    cd istio-1.7.0
     export PATH=$PWD/bin:$PATH
     cd $WORK_DIR
     curl -L https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/istio-minimal-operator.yaml | istioctl install -y -f -
@@ -133,11 +143,7 @@ kustomize build $ITER8/install/prometheus-add-on/prometheus | kubectl apply -f -
 
 kubectl apply -f ${ITER8}/samples/knative/quickstart/service-monitor.yaml
 
-# Step 7: Install Iter8's mock New Relic service
-echo "Installing Iter8's mock New Relic service"
-kubectl apply -f ${ITER8}/samples/knative/quickstart/metrics-mock.yaml
-
-# Step 8: Verify platform setup
+# Step 7: Verify platform setup
 echo "Verifying platform setup"
-kubectl wait --for condition=ready --timeout=300s pods --all -n knative-serving
-kubectl wait --for condition=ready --timeout=300s pods --all -n iter8-system
+kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
+kubectl wait --for condition=Ready --timeout=300s pods --all -n iter8-system

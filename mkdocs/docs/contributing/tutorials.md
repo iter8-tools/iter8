@@ -4,8 +4,11 @@ template: main.html
 
 # Contribute Tutorials
 
+## `MkDocs`
+Iter8 documentation uses [Mkdocs](https://www.mkdocs.org/user-guide/writing-your-docs/). The section on [linking to pages and images](https://www.mkdocs.org/user-guide/writing-your-docs/#writing-with-markdown) is especially useful for Iter8 tutorial authors.
+
 ## Test your tutorial
-All iter8 tutorials include e2e tests, either as [part of GitHub Actions workflows](https://github.com/iter8-tools/iter8/blob/master/.github/workflows/e2e-tests.yaml) or as a standalone test script [like this one](https://github.com/iter8-tools/iter8/blob/master/samples/knative/mirroring/e2etest.sh) if they require more resources than what is available in GitHub Actions workflows. When contributing a tutorial, please include relevant e2e tests.
+All Iter8 tutorials include e2e tests, either as [part of GitHub Actions workflows](https://github.com/iter8-tools/iter8/blob/master/.github/workflows/e2e-tests.yaml) or as a standalone test script [like this one](https://github.com/iter8-tools/iter8/blob/master/samples/knative/mirroring/e2etest.sh) if they require more resources than what is available in GitHub Actions workflows. When contributing a tutorial, please include relevant e2e tests.
 
 ## Locally serve Iter8 docs
 **Pre-requisite:** Python 3+. 
