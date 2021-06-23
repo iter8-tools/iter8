@@ -7,25 +7,24 @@ template: main.html
 !!! tip "Scenario: GitOps"
     GitOps methodology is being widely used in CI/CD pipelines in Kubernetes-based environments to ease cluster management tasks. When using this methodology, the desired states of one or more clusters are kept in a Git repo, and a CD pipeline tool will continuously monitor for changes in the repo and sync them to the clusters. Additionally, it is preferred that Git repos are structured in a certain way so that the code repo is separated from the environment (Env) repo. Commits to the code repo trigger the CI pipeline tool to build, test, lint, and eventually push newly built images to an image repository. The Env repo contains configuration files that describe how various resources should be deployed in the cluster. Subsequently, configurations in the Env repo are updated to point to the newly built images. And finally, the CD pipeline tool will sync the new desired states to the clusters. This process is shown below:
 
-    ![CICD](../../images/CICD.png)
+    ![CICD](../../../images/CICD.png)
 
 !!! tip "Scenario: Iter8+Gitops"
     Iter8 can be used in the context of GitOps (shown below) so that new versions of an application can be progressively rolled out, or even rolled back when problems are detected. In this tutorial, we will use Argo CD as the CD pipeline tool and Istio as the underlying service mesh,
 
-    ![CICD+Iter8](../../images/CICD+Iter8.png)
+    ![CICD+Iter8](../../../images/CICD+Iter8.png)
 
-    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
+    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../../../getting-started/quick-start.md#1-create-kubernetes-cluster). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
 
     1. How to setup an Env repo to work with Iter8+GitOps
     2. How to update the Env repo to start an Iter8 experiment
     3. How to cleanup the Env repo after an Iter8 experiment is finished
 
 ???+ warning "Iter8 GitOps Guarantees"
-    Unlike other progressive delivery tools, Iter8 adheres to GitOps guarantees by ensuring the desired state is always in sync with the actual state. App version that failed promition criteria will never get promoted, even if the cluster had to be recreated from scratch. This important GitOps property is often not guaranteed by other tools!
+    Unlike other progressive delivery tools, Iter8 adheres to GitOps guarantees by ensuring the desired state is always in sync with the actual state. App version that failed promotion criteria will never get promoted, even if the cluster had to be recreated from scratch. This important GitOps property is often not guaranteed by other tools!
 
 ## Step 1. Create K8s cluster
-
-If you don't already have a K8s cluster, create a Minikube or Kind K8s cluster locally by referring to step 1 of the [quick start tutorial](../../../getting-started/quick-start/#1-create-kubernetes-cluster). Otherwise, skip to the next step.
+If you don't already have a K8s cluster, [create a Minikube or Kind K8s cluster locally](../../../getting-started/quick-start/istio/platform-setup.md).
 
 ## Step 2. Fork repo
 
