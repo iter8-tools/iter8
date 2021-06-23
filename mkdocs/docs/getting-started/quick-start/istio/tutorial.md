@@ -20,7 +20,7 @@ template: main.html
     3. [Go 1.13+](https://golang.org/doc/install).
 
 ## 1. Setup
-* Setup your K8s cluster with Istio and Iter8 as described [here](../platform-setup/). 
+* Setup your K8s cluster with Istio and Iter8 as described [here](platform-setup.md). 
 * Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
 ## 2. Create application versions
@@ -122,7 +122,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
 ## 4. Define metrics
 Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 
-Define the Iter8 metrics used in this experiment as follows. For the purpose of this tutorial, you will [mock](../../../../metrics/mock/) the user-engagement metric. The latency and error metrics will be provided by Prometheus.
+Define the Iter8 metrics used in this experiment as follows. For the purpose of this tutorial, you will [mock](../../../metrics/mock.md) the user-engagement metric. The latency and error metrics will be provided by Prometheus.
 
 ```shell
 kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
@@ -249,7 +249,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
 ??? Note "Metrics in your environment"
     You can define and use custom metrics from any database in Iter8 experiments. 
        
-    For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize. Documentation on defining custom metrics is [here](../../../../metrics/custom/).
+    For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
 
 
 ## 5. Launch experiment
