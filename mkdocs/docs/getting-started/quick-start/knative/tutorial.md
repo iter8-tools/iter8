@@ -248,7 +248,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
     For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is [here](../../../../metrics/custom/).
 
 ## 5. Launch experiment
-Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing & progressive rollout experiment as follows.
+Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing & progressive traffic shift experiment as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml

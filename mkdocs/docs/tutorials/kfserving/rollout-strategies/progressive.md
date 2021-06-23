@@ -9,9 +9,9 @@ template: main.html
 
     ![Progressive traffic shift](../../../images/progressive.png)
 
-## Tutorials with progressive rollout
+## Tutorials with progressive traffic shift
 
-The [A/B testing (quick start)](../../../../getting-started/quick-start/kfserving/tutorial) and [hybrid (A/B + SLOs) testing](../../testing-strategies/hybrid) tutorials demonstrate progressive rollout.
+The [A/B testing (quick start)](../../../../getting-started/quick-start/kfserving/tutorial) and [hybrid (A/B + SLOs) testing](../../testing-strategies/hybrid) tutorials demonstrate progressive traffic shift.
 
 ## Specifying `weightObjRef`
 

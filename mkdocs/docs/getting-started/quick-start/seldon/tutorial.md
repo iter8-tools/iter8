@@ -4,13 +4,13 @@ template: main.html
 
 # Hybrid (A/B + SLOs) testing
 
-!!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive rollout of Seldon models"
-    [Hybrid (A/B + SLOs) testing](../../concepts/buildingblocks/#testing-pattern) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
+!!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive traffic shift of Seldon models"
+    [Hybrid (A/B + SLOs) testing](../../../concepts/buildingblocks.md#hybrid-ab-slos-testing) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
 
     1. Perform hybrid (A/B + SLOs) testing.
     2. Specify *user-engagement* as the reward metric; data for this metric will be provided by Prometheus.
     3. Specify *latency* and *error-rate* based objectives; data for these metrics will be provided by Prometheus.
-    4. Combine hybrid (A/B + SLOs) testing with [progressive rollout](../../../../../concepts/buildingblocks/#deployment-pattern). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    4. Combine hybrid (A/B + SLOs) testing with [progressive traffic shift](../../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
     
     ![Quickstart Seldon](../../../images/quickstart-hybrid.png)
 
@@ -331,7 +331,7 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/metrics.yaml
     For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is [here](../../../../metrics/custom/).
 
 ## 5. Launch experiment
-Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing & progressive rollout experiment as follows.
+Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing & progressive traffic shift experiment as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml

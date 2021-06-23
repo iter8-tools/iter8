@@ -87,7 +87,7 @@ kubectl create secret generic iter8-token --from-literal=token=xxxxxxxxxxxxxxxxx
 
 ## Step 6. Start experiment
 
-When new images become available and/or new configurations need to be tested, the CI pipeline tool (or some other entity) will make changes to the Env repo, so the new desired states can be deployed into the cluster. To use Iter8 to perform progressive rollout, the CI pipeline tool will need to make a few additional changes in the Env repo. Specifically, it will need to create at least the following resources:
+When new images become available and/or new configurations need to be tested, the CI pipeline tool (or some other entity) will make changes to the Env repo, so the new desired states can be deployed into the cluster. To use Iter8 to perform progressive traffic shift, the CI pipeline tool will need to make a few additional changes in the Env repo. Specifically, it will need to create at least the following resources:
 
 1. A candidate deployment
 2. An Iter8 experiment
