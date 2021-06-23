@@ -11,7 +11,7 @@ template: main.html
     2. Specify *latency* and *error-rate* based service-level objectives (SLOs). If your version satisfies SLOs, Iter8 will declare it as the winner.
     3. Use Iter8's its builtin load generation and metrics collection capability.
     
-    ![Conformance](../../../../images/conformance.png)
+    ![Conformance](../../../images/conformance.png)
 
 ## 1. Setup
 * Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).

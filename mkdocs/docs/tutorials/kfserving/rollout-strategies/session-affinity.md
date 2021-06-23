@@ -8,7 +8,7 @@ template: main.html
 
     [Session affinity](../../../../concepts/buildingblocks/#session-affinity) ensures that the version to which a particular user's request is routed remains consistent throughout the duration of the experiment. In this tutorial, you will use an experiment involving two user groups, 1 and 2. Reqeusts from user group 1 will have a `userhash` header value prefixed with `111` and will be routed to the baseline version. Requests from user group 2 will have a `userhash` header value prefixed with `101` and will be routed to the candidate version. The experiment is shown below.
 
-    ![Session affinity](../../../../images/session-affinity-exp.png)
+    ![Session affinity](../../../images/session-affinity-exp.png)
 
 ## 1. Setup
 * Setup your K8s cluster with KFServing and Iter8 as described [here](../../../../getting-started/quick-start/kfserving/platform-setup/).

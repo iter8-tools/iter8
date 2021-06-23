@@ -8,7 +8,7 @@ template: main.html
 
     [Fixed-%-split](../../../../concepts/buildingblocks/#rollout-strategy) is a type of canary rollout strategy. It enables you to experiment while sending a fixed percentage of traffic to each version as shown below.
 
-    ![Fixed % split](../../../../images/canary-%-based.png)
+    ![Fixed % split](../../../images/canary-%-based.png)
     
 ## 1. Setup
 * Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).

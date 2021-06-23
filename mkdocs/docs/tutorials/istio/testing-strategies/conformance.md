@@ -11,7 +11,7 @@ template: main.html
     2. Specify *latency* and *error-rate* based service-level objectives (SLOs). If your version satisfies SLOs, Iter8 will declare it as the winner.
     3. Use Prometheus as the provider for latency and error-rate metrics.
     
-    ![Conformance](../../../../images/conformance.png)
+    ![Conformance](../../../images/conformance.png)
 
 ## 1. Setup
 * Setup your K8s cluster with Istio and Iter8 as described [here](../../../../getting-started/quick-start/istio/platform-setup/).
@@ -116,7 +116,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
     ```
 
 ## 4. Define metrics
-Please follow step 4 of the [quick start tutorial](../../../../getting-started/quick-start/istio/tutorial/#4-define-metrics).
+Please follow step 4 of the [quick start tutorial](../../../getting-started/quick-start/istio/tutorial.md#4-define-metrics).
 
 ## 5. Launch experiment
 ```shell

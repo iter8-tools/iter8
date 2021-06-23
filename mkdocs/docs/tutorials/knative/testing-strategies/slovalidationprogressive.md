@@ -11,7 +11,7 @@ template: main.html
     2. Use Prometheus as the provider for latency and error-rate metrics.
     3. Combine SLO validation with [progressive traffic shifting](../../../../concepts/buildingblocks/#progressive-traffic-shift).
     
-    ![SLO validation with progressive traffic shift](../../../../images/slovalidationprogressive.png)
+    ![SLO validation with progressive traffic shift](../../../images/slovalidationprogressive.png)
 
 ## Steps 1 to 4
     

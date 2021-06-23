@@ -12,7 +12,7 @@ template: main.html
     1. Segment users into two groups: those from Wakanda, and others. 
     2. Users from Wakanda will participate in the experiment: specifically, requests originating from Wakanda may be routed to baseline or candidate versions; requests that are originating from outside Wakanda will not participate in the experiment and will be routed to the baseline only. The experiment is shown below.
 
-    ![User segmentation](../../../../images/canary-progressive-segmentation.png)
+    ![User segmentation](../../../images/canary-progressive-segmentation.png)
 
 ## 1. Setup with Istio
 * Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).

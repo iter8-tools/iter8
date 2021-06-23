@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Scenario: Progressive traffic shift"
     [Progressive traffic shift](../../../../concepts/buildingblocks/#progressive-traffic-shift) is a type of canary rollout strategy. It enables you to incrementally shift traffic towards the winning version over multiple iterations of an experiment as shown below.
 
-    ![Progressive traffic shift](../../../../images/progressive.png)
+    ![Progressive traffic shift](../../../images/progressive.png)
 
 ## Tutorials with progressive rollout
 

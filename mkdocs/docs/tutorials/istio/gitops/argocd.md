@@ -14,7 +14,7 @@ template: main.html
 
     ![CICD+Iter8](../../../images/CICD+Iter8.png)
 
-    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../../../getting-started/quick-start.md#1-create-kubernetes-cluster). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
+    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../../../getting-started/quick-start/istio/platform-setup.md#1-create-kubernetes-cluster). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
 
     1. How to setup an Env repo to work with Iter8+GitOps
     2. How to update the Env repo to start an Iter8 experiment
