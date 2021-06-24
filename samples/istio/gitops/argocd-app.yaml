@@ -15,7 +15,7 @@ spec:
     kind: VirtualService
   project: default
   source:
-    path: samples/gitops
+    path: samples/istio/gitops
     repoURL: https://github.com/MY_ORG/iter8
     targetRevision: master
   syncPolicy:
