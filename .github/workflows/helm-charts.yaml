@@ -11,6 +11,8 @@ jobs:
       - name: Publish Helm charts
         uses: stefanprodan/helm-gh-pages@master
         with:
+          commit_username: sriumcp
+          commit_email: spartha@us.ibm.com
           charts_dir: helm
           branch: helmex
           token: ${{ secrets.GITHUB_TOKEN }}
