@@ -26,7 +26,7 @@ spec:
                   git config --global user.email 'iter8@iter8.tools';\
                   git config --global user.name 'Iter8';\
                   git clone https://${USER}:${TOKEN}@${REPO} --branch=${BRANCH};\
-                  cd iter8/samples/gitops;\
+                  cd iter8/samples/istio/gitops;\
                   TMP=`mktemp`;\
                   sed 's/candidate/stable/g' {{ .filepath }} > $TMP;\
                   mv $TMP productpage.yaml;\
