@@ -12,5 +12,5 @@ jobs:
         uses: stefanprodan/helm-gh-pages@master
         with:
           charts_dir: helm
-          branch: helm
+          branch: helmex
           token: ${{ secrets.GITHUB_TOKEN }}
