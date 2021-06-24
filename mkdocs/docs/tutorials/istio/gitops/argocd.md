@@ -49,10 +49,14 @@ replacing `[YOUR_ORG]` with your Github organization or username. Now, do the sa
 === "MacOS"
     ```shell
     find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i '' "s/MY_ORG/YOUR_ORG/"
+    git commit -a -m "update references"
+    git push origin head
     ```
 === "Linux"
     ```shell
     find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i "s/MY_ORG/YOUR_ORG/"
+    git commit -a -m "update references"
+    git push origin head
     ```
 
 ## Step 4. Argo CD Setup
