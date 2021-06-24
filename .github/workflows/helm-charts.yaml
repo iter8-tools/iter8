@@ -1,7 +1,7 @@
 name: release-helm-charts
-on:
-  push:
-    tags: '*'
+
+on: 
+  workflow_dispatch:
 
 jobs:
   helm-charts:
