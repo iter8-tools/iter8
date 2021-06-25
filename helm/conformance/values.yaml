@@ -1,21 +1,19 @@
 # Default values for Iter8 conformance experiment.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 
 # URL of the code engine application for which this conformance test is performed
 URL: https://example.com
 
 # How long will Iter8 collect metrics
-Time: "5s"
+Time: 5s
 
 # Queries per second used by Iter8 for collecting metrics
 QPS: 8.0
 
 # Upper limit on the mean latency. Values beyond this limit are not acceptable
-LimitMeanLatency: '"1000.0"' # 1 second latency on an average is ok. Not more.
+LimitMeanLatency: 1000.0 # 1 second latency on an average is ok. Not more.
 
 # Upper limit on the error rate. Values beyond this limit are not acceptable
-LimitErrorRate: '"0.02"' # 2% error rate is ok. Not more.
+LimitErrorRate: 0.02 # 2% error rate is ok. Not more.
 
 # Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
-Limit95thPercentileLatency: '"3000.0"' # 3 second tail latency on an average is ok. Not more.
+Limit95thPercentileLatency: 3000.0 # 3 second tail latency on an average is ok. Not more.
