@@ -8,18 +8,72 @@ template: main.html
     This tutorial illustrates an [SLO validation experiment with two versions](../../../concepts/buildingblocks.md#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
 
     1. Specify *latency* and *error-rate* based service-level objectives (SLOs). If the candidate version satisfies SLOs, Iter8 will declare it as the winner.
-    2. Use Prometheus as the provider for latency and error-rate metrics.
+    2. Use Iter8's builtin capabilities for collecting latency and error-rate metrics.
     3. Combine SLO validation with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift).
     
     ![SLO validation with progressive traffic shift](../../../images/slovalidationprogressive.png)
 
-## Steps 1 to 4
-    
-Please follow steps 1 through 4 of the [Knative quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#1-setup).
+## 1. Setup
+* Setup your K8s cluster with Knative and Iter8 as described [here](../../../getting-started/quick-start/knative/platform-setup.md).
+* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
+## 2. Create app versions
+Deploy two versions of a Knative app.
 
-## 5. Launch experiment
-Launch the SLO validation experiment.
+```shell
+kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
+kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+kubectl wait --for=condition=Ready ksvc/sample-app
+```
+
+??? info "Look inside baseline.yaml"
+    ```yaml linenums="1"
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    metadata:
+      name: sample-app
+      namespace: default
+    spec:
+      template:
+        metadata:
+          name: sample-app-v1
+        spec:
+          containers:
+          - image: gcr.io/knative-samples/knative-route-demo:blue 
+            env:
+            - name: T_VERSION
+              value: "blue"
+    ```
+
+??? info "Look inside experimentalservice.yaml"
+    ```yaml linenums="1"
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    metadata:
+      name: sample-app
+      namespace: default
+    spec:
+      template:
+        metadata:
+          name: sample-app-v2
+        spec:
+          containers:
+          - image: gcr.io/knative-samples/knative-route-demo:green 
+            env:
+            - name: T_VERSION
+              value: "green"
+      traffic:
+      - tag: current
+        revisionName: sample-app-v1
+        percent: 100
+      - tag: candidate
+        latestRevision: true
+        percent: 0
+    ```
+
+## 3. Launch experiment
+Launch the SLO validation experiment. This experiment will generate requests for your application versions, collect latency and error-rate metrics, and progressively shift traffic and promote the candidate version after verifying that it satisfies SLOs.
+
 ```shell
 kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
 ```
@@ -82,10 +136,10 @@ kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
             value: candidate
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial for KFServing](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`slovalidation-exp`) in your `iter8ctl` and `kubectl` commands.
+## 4. Understand the experiment
+Follow [Step 6 of the quick start tutorial](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`slovalidation-exp`) in your `iter8ctl` and `kubectl` commands.
 
-## 7. Cleanup
+## 5. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/knative/slovalidation/experiment.yaml

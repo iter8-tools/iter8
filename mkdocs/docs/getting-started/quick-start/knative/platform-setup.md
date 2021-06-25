@@ -2,11 +2,10 @@
 template: main.html
 ---
 
-# Platform Setup for Knative
+# Platform Setup
 
-## 1. Create Kubernetes cluster
-
-Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. If you choose Istio as the networking layer for Knative (see Step 3 below), then ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
+## 1. K8s cluster
+Use a managed K8s cluster, or create a local K8s cluster as follows. If you wish to choose Istio as the networking layer for Knative, then ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
 
 === "Kind"
 
@@ -15,7 +14,7 @@ Create a local cluster using Kind or Minikube as follows, or use a managed Kuber
     kubectl cluster-info --context kind-kind
     ```
 
-    ??? info "Ensuring your Kind cluster has sufficient resources"
+    ??? info "Ensuring your Kind cluster has sufficient resources (needed for Istio networking layer)"
         Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
 
         ![Resources](../../../images/ddresourcepreferences.png)
@@ -23,40 +22,60 @@ Create a local cluster using Kind or Minikube as follows, or use a managed Kuber
 === "Minikube"
 
     ```shell
-    minikube start --cpus 8 --memory 12288
+    minikube start # --cpus 8 --memory 12288 # (needed for Istio networking layer)
     ```
 
-## 2. Clone Iter8 repo
-```shell
-git clone https://github.com/iter8-tools/iter8.git
-cd iter8
-export ITER8=$(pwd)
-```
+## 2. Install Knative Serving
+=== "Learning/tutorial purposes"
+    Use the Knative Serving install script, bundled as part of Iter8, as follows.
 
-## 3. Install Knative, Iter8 and Telemetry
-Setup Knative, Iter8, a mock New Relic service, and Prometheus add-on within your cluster. Knative can work with multiple networking layers. So can Iter8's Knative extension. 
-
-Choose the networking layer for Knative.
-=== "Contour"
-
+    * **Clone Iter8 repo**
     ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh contour
+    git clone https://github.com/iter8-tools/iter8.git
+    cd iter8
+    export ITER8=$(pwd)
     ```
 
-=== "Kourier"
+    * **Install Knative Serving**
+    Knative can work with multiple networking layers. So can Iter8. Choose the networking layer for Knative.
 
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh kourier
-    ```
+        === "Ambassador"
+            ```shell
+            $ITER8/samples/knative/quickstart/platformsetup.sh ambassador
+            ```
 
-=== "Gloo"
-    This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh gloo
-    ```
+        === "Kong"
 
-=== "Istio"
+            ```shell
+            $ITER8/samples/knative/quickstart/platformsetup.sh kong
+            ```
 
-    ```shell
-    $ITER8/samples/knative/quickstart/platformsetup.sh istio
-    ```
+        === "Contour"
+
+            ```shell
+            $ITER8/samples/knative/quickstart/platformsetup.sh contour
+            ```
+
+        === "Kourier"
+
+            ```shell
+            $ITER8/samples/knative/quickstart/platformsetup.sh kourier
+            ```
+
+        === "Gloo"
+            This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
+            ```shell
+            $ITER8/samples/knative/quickstart/platformsetup.sh gloo
+            ```
+
+        === "Istio"
+
+            ```shell
+            $ITER8/samples/knative/quickstart/platformsetup.sh istio
+            ```
+
+=== "Production usage"
+    Refer to the [official Knative serving install instructions](https://knative.dev/docs/install/).
+
+## 3. Install Iter8
+Iter8 installation instructions are [here](../../install.md).
