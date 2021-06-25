@@ -1,3 +1,5 @@
+name-template: 'Official release of Iter8 version $NEXT_PATCH_VERSION'
+tag-template: 'v$NEXT_PATCH_VERSION'
 categories:
 - title: '🚀 Features'
   labels:
