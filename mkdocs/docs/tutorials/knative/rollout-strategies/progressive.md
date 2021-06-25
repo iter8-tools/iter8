@@ -11,7 +11,7 @@ template: main.html
 
 ## Tutorials with progressive traffic shift
 
-The [hybrid testing (quick start)](../../../getting-started/quick-start/knative/tutorial.md) and [the SLO validation](../testing-strategies/slovalidationprogressive.md) tutorials demonstrate progressive traffic shift.
+The [hybrid testing (quick start)](../../../getting-started/quick-start/knative/tutorial.md) and [the SLO validation](../testing-strategies/slovalidation.md) tutorials demonstrate progressive traffic shift.
 
 ## Specifying `weightObjRef`
 Iter8 uses the `weightObjRef` field in the experiment resource to get the current traffic split between versions and/or modify the traffic split. Ensure that this field is specified correctly for each version. The following example demonstrates how to specify `weightObjRef` in experiments.
