@@ -67,68 +67,15 @@ Launch the SLO validation experiment. This experiment will generate requests for
 
 ```shell
 helm repo add iter8 https://iter8-tools.github.io/iter8/
+helm install \
+  --set URL=http://hello.default.svc.cluster.local:8080 \
+  --set LimitMeanLatency='"50.0"' \
+  --set LimitErrorRate='"0.0"' \
+  --set Limit95thPercentileLatency='"100.0"' \
+  experiment iter8/conformance
 ```
 
-??? info "Look inside experiment.yaml"
-    ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha2
-    kind: Experiment
-    metadata:
-      name: canary-exp
-    spec:
-      target: default/sample-app
-      strategy:
-        testingPattern: Canary
-        deploymentPattern: Progressive
-        actions:
-          finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version      
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
-      criteria:
-        requestCount: iter8-knative/request-count
-        objectives: 
-        - metric: iter8-knative/mean-latency
-          upperLimit: 50
-        - metric: iter8-knative/95th-percentile-tail-latency
-          upperLimit: 100
-        - metric: iter8-knative/error-rate
-          upperLimit: "0.01"
-      duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 10
-      versionInfo:
-        # information about app versions used in this experiment
-        baseline:
-          name: sample-app-v1
-          weightObjRef:
-            apiVersion: serving.knative.dev/v1
-            kind: Service
-            name: sample-app
-            namespace: default
-            fieldPath: .spec.traffic[0].percent
-          variables:
-          - name: promote
-            value: baseline
-        candidates:
-        - name: sample-app-v2
-          weightObjRef:
-            apiVersion: serving.knative.dev/v1
-            kind: Service
-            name: sample-app
-            namespace: default
-            fieldPath: .spec.traffic[1].percent
-          variables:
-          - name: promote
-            value: candidate
-    ```
-
-## 4. Understand the experiment
-Follow [Step 6 of the quick start tutorial](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`slovalidation-exp`) in your `iter8ctl` and `kubectl` commands.
+## 6. Understand the experiment
 
 ## 5. Cleanup
 ```shell
