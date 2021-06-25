@@ -67,11 +67,13 @@ Launch the SLO validation experiment. This experiment will generate requests for
 
 ```shell
 helm repo add iter8 https://iter8-tools.github.io/iter8/
+```
+```shell
 helm install \
   --set URL=http://hello.default.svc.cluster.local:8080 \
-  --set LimitMeanLatency='"50.0"' \
-  --set LimitErrorRate='"0.0"' \
-  --set Limit95thPercentileLatency='"100.0"' \
+  --set LimitMeanLatency=50.0 \
+  --set LimitErrorRate=0.0 \
+  --set Limit95thPercentileLatency=100.0 \
   experiment iter8/conformance
 ```
 
