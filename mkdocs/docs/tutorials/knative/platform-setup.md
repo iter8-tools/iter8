@@ -17,7 +17,7 @@ Use a managed K8s cluster, or create a local K8s cluster as follows. If you wish
     ??? info "Ensuring your Kind cluster has sufficient resources (needed for Istio networking layer)"
         Your Kind cluster inherits the CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as shown below.
 
-        ![Resources](../../../images/ddresourcepreferences.png)
+        ![Resources](../../images/ddresourcepreferences.png)
 
 === "Minikube"
 
@@ -78,4 +78,4 @@ Use a managed K8s cluster, or create a local K8s cluster as follows. If you wish
     Refer to the [official Knative serving install instructions](https://knative.dev/docs/install/).
 
 ## 3. Install Iter8
-Iter8 installation instructions are [here](../../install.md).
+Iter8 installation instructions are [here](../../getting-started/install.md).
