@@ -108,10 +108,9 @@ jobs:
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
 
-    - name: Sleep until end of experiment
+    - name: Wait until end of experiment
       run: |
-        sleep 150.0
-        kubectl get experiment slovalidation-exp -o yaml
+        kubectl wait experiment slovalidation-exp --for=condition=Completed --timeout=300s
     
     - name: Check if experiment is complete and successful
       run: |
