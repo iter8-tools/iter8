@@ -143,9 +143,9 @@ nav:
         - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
     - Knative:
       - Testing strategies:
-        - SLO validation: tutorials/knative/testing-strategies/slovalidationprogressive.md
+        - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
         - SLO validation (builtin metrics): tutorials/knative/testing-strategies/conformance.md
-        - A/B testing (quick start): tutorials/knative/testing-strategies/ab.md
+        - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
