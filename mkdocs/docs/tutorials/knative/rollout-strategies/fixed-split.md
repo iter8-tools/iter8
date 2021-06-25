@@ -11,7 +11,7 @@ template: main.html
     ![Fixed % split](../../../images/canary-%-based.png)
     
 ## 1. Setup
-* Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).
+* Setup your K8s cluster with Knative and Iter8 as described [here](../platform-setup.md).
 * Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
 ## 2. Create versions and initialize traffic split
