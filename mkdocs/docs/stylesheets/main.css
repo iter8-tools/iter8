@@ -1,5 +1,5 @@
-.md-typeset .admonition {
-  font-size: 0.7rem;
+.md-typeset .admonition, .md-typeset details {
+  font-size: 0.75rem;
 }
 
 .md-announce a,
