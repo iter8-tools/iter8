@@ -2,9 +2,9 @@
 template: main.html
 ---
 
-# A/B Testing
+# A/B Testing and Progressive traffic shift
 
-!!! tip "Scenario: A/B testing and progressive rollout of KFServing models"
+!!! tip "Scenario: A/B testing and progressive traffic shift for KFServing models"
     [A/B testing](../../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
 
     1. Perform A/B testing.
@@ -13,16 +13,10 @@ template: main.html
 
     ![Quickstart KFServing](../../../images/quickstart-ab.png)
 
-???+ warning "Before you begin, you will need... "
-    1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-    3. [Go 1.13+](https://golang.org/doc/install).
+???+ warning "Platform setup"
+    Follow [these steps](platform-setup.md) to install Iter8, KFServing and Prometheus in your K8s cluster.
 
-## 1. Setup
-* Setup your K8s cluster with KFServing and Iter8 as described [here](platform-setup.md). 
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
-
-## 2. Create ML model versions
+## 1. Create ML model versions
 Deploy two KFServing inference services corresponding to two versions of a TensorFlow classification model, along with an Istio virtual service to split traffic between them.
 
 ```shell
@@ -105,7 +99,7 @@ kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate
           weight: 0
     ```
 
-## 3. Generate requests
+## 2. Generate requests
 Generate requests for your model as follows.
 
 === "Port forward Istio ingress in terminal one"
@@ -120,7 +114,7 @@ Generate requests for your model as follows.
     watch --interval 0.2 -x curl -v -H "Host: example.com" localhost:8080/v1/models/flowers:predict -d @/tmp/input.json
     ```
 
-## 4. Define metrics
+## 3. Define metrics
 Iter8 defines a custom K8s resource called *Metric* that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 
 For the purpose of this tutorial, you will [mock](../../../../metrics/mock/) the user-engagement metric as follows.
@@ -154,7 +148,7 @@ kubectl apply -f $ITER8/samples/kfserving/quickstart/metrics.yaml
        
     For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize in the A/B test. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
 
-## 5. Launch experiment
+## 4. Launch experiment
 Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the A/B testing & progressive traffic shift experiment as follows.
 
 ```shell
@@ -216,7 +210,7 @@ kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
-## 6. Understand the experiment
+## 5. Understand the experiment
 The process automated by Iter8 in this experiment is as follows.
     
 ![Iter8 automation](../../../images/quickstart-iter8-process.png)
@@ -355,7 +349,7 @@ kubectl get experiment quickstart-exp --watch
     quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
     ```
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/kfserving/quickstart/experiment.yaml
 kubectl delete -f $ITER8/samples/kfserving/quickstart/baseline.yaml

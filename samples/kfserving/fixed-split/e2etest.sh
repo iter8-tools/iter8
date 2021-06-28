@@ -10,6 +10,7 @@ kubectl cluster-info --context kind-kind
 
 # platform setup
 echo "Setting up platform"
+$ITER8/samples/kfserving/quickstart/iter8setup.sh
 $ITER8/samples/kfserving/quickstart/platformsetup.sh
 
 echo "Create app/ML model versions"

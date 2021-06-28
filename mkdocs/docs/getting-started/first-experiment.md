@@ -14,11 +14,11 @@ template: main.html
     
     ![SLO validation](../../../images/yourfirstexperiment.png)
 
-???+ warning "Before you begin, you will need... "
+???+ warning "Platform setup"
     1. [Helm 3+](https://helm.sh/docs/intro/install/).
-    2. K8s cluster.
+    2. A Kubernetes cluster.
 
-        ??? note "Create local K8s cluster"
+        ??? note "Create a local Kubernetes cluster"
             You can create a local K8s cluster as follows. You may skip this step if you already have a K8s cluster to work with.
 
             === "Kind"
@@ -34,7 +34,7 @@ template: main.html
                 minikube start
                 ```
     3. [Iter8 installed in your K8s cluster](install.md#install-iter8).
-    4. [The `iter8ctl` client](install.md#install-iter8ctl).
+    4. [`iter8ctl`](install.md#install-iter8ctl).
 
 ## 1. Create stable version
 Deploy the stable version of the `hello world` application using Helm.
