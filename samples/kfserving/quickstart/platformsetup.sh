@@ -32,10 +32,12 @@ cd $TEMP_DIR
 # git clone -b ${KFSERVING_TAG} https://github.com/kubeflow/kfserving.git
 git clone https://github.com/kubeflow/kfserving.git
 cd kfserving
+git checkout ${KFSERVING_VERSION}
 set +e # hacks needed to overcome this very glitchy quick_install below
 ./hack/quick_install.sh
 kubectl delete ns kfserving-system
 kubectl apply -f ./install/${KFSERVING_VERSION}/kfserving.yaml
 set -e
+sleep 60.0
 kubectl wait --for=condition=Ready --timeout=300s pods --all -n kfserving-system
 cd $WORK_DIR
