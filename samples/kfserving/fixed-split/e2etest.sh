@@ -5,8 +5,7 @@ set -e -x
 export EXPERIMENT=fixedsplit-exp
 
 # create cluster
-kind create cluster --wait 5m
-kubectl cluster-info --context kind-kind
+minikube start --cpus 8 --memory 12288 --kubernetes-version=v1.17.11
 
 # platform setup
 echo "Setting up platform"
@@ -60,7 +59,7 @@ kubectl delete -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
 # kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
 
 # delete cluster
-kind delete cluster
+minikube delete
 
 set +e
 
