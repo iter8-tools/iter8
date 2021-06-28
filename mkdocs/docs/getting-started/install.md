@@ -7,9 +7,6 @@ hide:
 
 # Install Iter8
 
-!!! tip "Pre-requisite: Kustomize v3+"
-    Get Kustomize v3+ by following [these instructions](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-
 Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
