@@ -2,6 +2,8 @@
 
 set -e
 
+EXPERIMENT=canary-fixedsplit
+
 # Ensure ITER8 environment variable is set
 if [[ -z ${ITER8} ]]; then
     echo "ITER8 environment variable needs to be set to the root folder of Iter8"
@@ -12,7 +14,7 @@ fi
 
 # Check if experiment has completed
 completed="Completed"
-stage=$(kubectl get experiment canary-fixedsplit -o json | jq -r .status.stage)
+stage=$(kubectl get experiment ${EXPERIMENT} -o json | jq -r .status.stage)
 if [[ $stage = $completed ]]; then
     echo "Experiment has Completed"
 else
@@ -21,24 +23,9 @@ else
     exit 1
 fi
 
-# Check if no packets have been lost by Fortio
-pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-REQUESTSTOTAL=$(jq -r .DurationHistogram.Count /tmp/fortiooutput.json)
-REQUESTS200=$(jq -r '.RetCodes."200"' /tmp/fortiooutput.json)
-if [[ $REQUESTSTOTAL -eq $REQUESTS200 ]]; then
-    echo "Packets were not lost"
-else
-    echo "Packets were lost"
-    echo "total requests:" $REQUESTSTOTAL
-    echo "200 requests:" $REQUESTS200
-    exit 1
-fi
-
 # Check if versionRecommendedForPromotion is sample-app-v2
 candidate="sample-app-v2"
-vrfp=$(kubectl get experiment canary-fixedsplit -o json | jq -r .status.versionRecommendedForPromotion)
+vrfp=$(kubectl get experiment ${EXPERIMENT} -o json | jq -r .status.versionRecommendedForPromotion)
 if [[ $vrfp = $candidate ]]; then
     echo "versionRecommendedForPromotion is $vrfp"
 else
