@@ -2,8 +2,6 @@
 
 set -e
 
-export EXPERIMENT=quickstart-exp
-
 # Ensure ITER8 environment variable is set
 if [[ -z ${ITER8} ]]; then
     echo "ITER8 environment variable needs to be set to the root folder of Iter8"
