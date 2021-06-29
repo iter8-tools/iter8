@@ -17,3 +17,4 @@ resources:
 - iter8-kfserving
 - iter8-seldon
 - iter8-plain-k8s
+- iter8-linkerd
