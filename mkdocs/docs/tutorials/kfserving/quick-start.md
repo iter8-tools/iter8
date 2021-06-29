@@ -5,13 +5,13 @@ template: main.html
 # A/B Testing and Progressive traffic shift
 
 !!! tip "Scenario: A/B testing and progressive traffic shift for KFServing models"
-    [A/B testing](../../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
+    [A/B testing](../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
 
     1. Perform A/B testing.
     2. Specify *user-engagement* as the reward metric. This metric will be mocked by Iter8 in this tutorial.
-    3. Combine A/B testing with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    3. Combine A/B testing with [progressive traffic shifting](../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
 
-    ![Quickstart KFServing](../../../images/quickstart-ab.png)
+    ![Quickstart KFServing](../../images/quickstart-ab.png)
 
 ???+ warning "Platform setup"
     Follow [these steps](platform-setup.md) to install Iter8, KFServing and Prometheus in your K8s cluster.
@@ -117,7 +117,7 @@ Generate requests for your model as follows.
 ## 3. Define metrics
 Iter8 defines a custom K8s resource called *Metric* that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 
-For the purpose of this tutorial, you will [mock](../../../../metrics/mock/) the user-engagement metric as follows.
+For the purpose of this tutorial, you will [mock](../../metrics/mock.md) the user-engagement metric as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/kfserving/quickstart/metrics.yaml
@@ -146,10 +146,10 @@ kubectl apply -f $ITER8/samples/kfserving/quickstart/metrics.yaml
 ??? Note "Metrics in your environment"
     You can define and use custom metrics from any database in Iter8 experiments. 
        
-    For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize in the A/B test. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
+    For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize in the A/B test. Documentation on defining custom metrics is [here](../../metrics/custom.md).
 
 ## 4. Launch experiment
-Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the A/B testing & progressive traffic shift experiment as follows.
+Launch the A/B testing & progressive traffic shift experiment as follows. This experiment also promotes the winning version of the model at the end.
 
 ```shell
 kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
@@ -210,144 +210,8 @@ kubectl apply -f $ITER8/samples/kfserving/quickstart/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
-## 5. Understand the experiment
-The process automated by Iter8 in this experiment is as follows.
-    
-![Iter8 automation](../../../images/quickstart-iter8-process.png)
-
-Observe the results of the experiment in real-time as follows.
-### a) Observe results
-
-Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
-```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
-```
-
-Periodically describe the experiment results.
-```shell
-watch -x iter8ctl describe -f - <(kubectl get experiment quickstart-exp -o yaml)
-```
-
-??? info "Experiment results will look similar to this"
-    ```shell
-    ****** Overview ******
-    Experiment name: quickstart-exp
-    Experiment namespace: default
-    Target: default/sample-app
-    Testing strategy: A/B
-    Rollout strategy: Progressive
-
-    ****** Progress Summary ******
-    Experiment stage: Running
-    Number of completed iterations: 8
-
-    ****** Winner Assessment ******
-    App versions in this experiment: [sample-app-v1 sample-app-v2]
-    Winning version: sample-app-v2
-    Version recommended for promotion: sample-app-v2
-
-    ****** Objective Assessment ******
-    > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-    +--------------------------------------------+---------------+---------------+
-    |                 OBJECTIVE                  | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/mean-latency <=              | true          | true          |
-    |                                     50.000 |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/95th-percentile-tail-latency | true          | true          |
-    | <= 100.000                                 |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/error-rate <=                | true          | true          |
-    |                                      0.010 |               |               |
-    +--------------------------------------------+---------------+---------------+
-
-    ****** Metrics Assessment ******
-    > Most recently read values of experiment metrics for each version.
-    +--------------------------------------------+---------------+---------------+
-    |                   METRIC                   | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/request-count                |      1213.625 |       361.962 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/user-engagement              |        10.023 |        14.737 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/mean-latency                 |         1.133 |         1.175 |
-    | (milliseconds)                             |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/95th-percentile-tail-latency |         4.768 |         4.824 |
-    | (milliseconds)                             |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/error-rate                   |         0.000 |         0.000 |
-    +--------------------------------------------+---------------+---------------+
-    ``` 
-
-Observe how traffic is split between versions in real-time as follows.
-### b) Observe traffic
-
-```shell
-kubectl get vs routing-rule -o json --watch | jq ".spec.http[0].route"
-```
-
-??? info "Traffic summary will look similar to this"
-    ```json
-    [
-      {
-        "destination": {
-          "host": "flowers-predictor-default.ns-baseline.svc.cluster.local"
-        },
-        "headers": {
-          "request": {
-            "set": {
-              "Host": "flowers-predictor-default.ns-baseline"
-            }
-          },
-          "response": {
-            "set": {
-              "version": "flowers-v1"
-            }
-          }
-        },
-        "weight": 5
-      },
-      {
-        "destination": {
-          "host": "flowers-predictor-default.ns-candidate.svc.cluster.local"
-        },
-        "headers": {
-          "request": {
-            "set": {
-              "Host": "flowers-predictor-default.ns-candidate"
-            }
-          },
-          "response": {
-            "set": {
-              "version": "flowers-v2"
-            }
-          }
-        },
-        "weight": 95
-      }
-    ]
-    ```
-
-### c) Observe progress
-```shell
-kubectl get experiment quickstart-exp --watch
-```
-
-??? info "Look inside progress summary"
-    The `kubectl` output will be similar to the following.
-    ```shell
-    NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-    quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-    quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-    quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-    quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-    quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-    quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-    quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-    quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-    quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-    ```
+## 5. Observe experiment
+Follow [these steps](../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
 ## 6. Cleanup
 ```shell

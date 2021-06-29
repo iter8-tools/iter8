@@ -205,11 +205,7 @@ helm uninstall my-app
 **Next Steps**
 
 !!! tip "Use in production"
-    1. Details about the Helm chart... 
-    2. Iter8 can integrate with any CI/CD/GitOps pipeline. Try variations of this tutorial using GitHub actions and GitOps (ArgoCD).
-
-        [GitHub Actions](#){ .md-button .md-button--primary }
-        [GitOps (ArgoCD)](#){ .md-button .md-button--primary }
+    Details about the Helm chart... 
 
 !!! tip "Try other Iter8 tutorials"
     Iter8 can work in any K8s environment. Try Iter8 tutorials in the following environments.
