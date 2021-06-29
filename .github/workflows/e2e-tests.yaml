@@ -61,8 +61,8 @@ jobs:
         export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  quickstart-with-kong:
-    name: quickstart experiment with kong
+  hybrid-with-kong:
+    name: hybrid experiment with kong
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -89,12 +89,16 @@ jobs:
       run: |
         export ITER8=$(pwd)
 
+        # apply metrics
+        kubectl apply -f $ITER8/samples/knative/hybrid/metrics.yaml
+        sleep 10.0
+
         # Starting the experiment
-        kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+        kubectl apply -f $ITER8/samples/knative/hybrid/experiment.yaml
 
     - name: Wait until end of experiment
       run: |
-        export EXPERIMENT=quickstart-exp
+        export EXPERIMENT=hybrid-exp
         # Wait for experiment to complete
         kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
         kubectl get experiment $EXPERIMENT -o yaml
@@ -102,7 +106,7 @@ jobs:
     - name: Check if experiment is complete and successful
       run: |
         export ITER8=$(pwd)
-        export EXPERIMENT=quickstart-exp
+        export EXPERIMENT=hybrid-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
   conformance:
