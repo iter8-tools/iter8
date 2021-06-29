@@ -77,52 +77,12 @@ kubectl wait --for=condition=Ready ksvc/sample-app
         percent: 0
     ```
 
-## 3. Generate requests
-Generate requests using [Fortio](https://github.com/fortio/fortio) as follows.
-
-```shell
-# URL_VALUE is the URL where your Knative application serves requests
-URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
-sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
-```
-
-??? info "Look inside fortio.yaml"
-    ```yaml linenums="1"
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-    name: fortio
-    spec:
-    template:
-        spec:
-        volumes:
-        - name: shared
-            emptyDir: {}
-        containers:
-        - name: fortio
-            image: fortio/fortio
-            command: ["fortio", "load", "-t", "6000s", "-qps", "16", "-json", "/shared/fortiooutput.json", $(URL)]
-            env:
-            - name: URL
-            value: URL_VALUE
-            volumeMounts:
-            - name: shared
-            mountPath: /shared         
-        - name: busybox
-            image: busybox:1.28
-            command: ['sh', '-c', 'echo busybox is running! && sleep 600']
-            volumeMounts:
-            - name: shared
-            mountPath: /shared       
-        restartPolicy: Never
-    ```
-
-## 4. Define metrics
+## 3. Define metrics
 Iter8 defines a custom K8s resource called *Metric* that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 Define the Iter8 metrics used in this experiment as follows.
 
 ```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
+kubectl apply -f $ITER8/samples/knative/hybrid/metrics.yaml
 ```
 
 ??? info "Look inside metrics.yaml"
@@ -247,7 +207,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
        
     For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
 
-## 5. Launch experiment
+## 4. Launch experiment
 Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing & progressive traffic shift experiment as follows.
 
 ```shell
@@ -316,7 +276,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
             value: candidate
     ```
 
-## 6. Understand the experiment
+## 5. Understand the experiment
 The process automated by Iter8 in this experiment is as follows.
     
 ![Iter8 automation](../../../images/quickstart-iter8-process.png)
@@ -432,9 +392,8 @@ kubectl get experiment quickstart-exp --watch
     quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
     ```
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
-kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
-kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml
+kubectl delete -f $ITER8/samples/knative/hybrid/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
 ```
