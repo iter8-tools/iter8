@@ -2,7 +2,7 @@
 
 set -e
 
-export EXPERIMENT=slovalidation-exp
+export EXPERIMENT=quickstart-exp
 
 # Ensure ITER8 environment variable is set
 if [[ -z ${ITER8} ]]; then
