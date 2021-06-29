@@ -13,9 +13,9 @@ spec:
         with:
           versions: 
           - name: sample-app-v1
-            url: http://current-sample-app.default.svc.cluster.local
+            url: http://sample-app-v1.default.svc.cluster.local
           - name: sample-app-v2
-            url: http://candidate-sample-app.default.svc.cluster.local
+            url: http://sample-app-v2.default.svc.cluster.local
       finish: # run the following sequence of tasks at the end of the experiment
       - task: common/exec # promote the winning version      
         with:
