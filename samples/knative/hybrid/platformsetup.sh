@@ -135,15 +135,7 @@ kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build $ITER8/install/builtin-metrics | kubectl apply -f -
 kubectl wait --for=condition=Ready pods --all -n iter8-system
 
-# Step 6: Install Iter8's Prometheus add-on
-echo "Installing Iter8's Prometheus add-on"
-kustomize build $ITER8/install/prometheus-add-on/prometheus-operator | kubectl apply -f -
-kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build $ITER8/install/prometheus-add-on/prometheus | kubectl apply -f -
-
-kubectl apply -f ${ITER8}/samples/knative/quickstart/service-monitor.yaml
-
-# Step 7: Verify platform setup
+# Step 6: Verify platform setup
 echo "Verifying platform setup"
 kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
 kubectl wait --for condition=Ready --timeout=300s pods --all -n iter8-system

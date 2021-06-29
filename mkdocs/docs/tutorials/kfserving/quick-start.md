@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# A/B Testing and Progressive traffic shift
+# A/B Testing
 
 !!! tip "Scenario: A/B testing and progressive traffic shift for KFServing models"
     [A/B testing](../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:

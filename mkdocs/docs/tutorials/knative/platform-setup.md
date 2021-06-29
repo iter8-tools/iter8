@@ -41,37 +41,37 @@ Use a managed K8s cluster, or create a local K8s cluster as follows. If you wish
 
         === "Ambassador"
             ```shell
-            $ITER8/samples/knative/quickstart/platformsetup.sh ambassador
+            $ITER8/samples/knative/quickstart/platform-setup.sh ambassador
             ```
 
         === "Kong"
 
             ```shell
-            $ITER8/samples/knative/quickstart/platformsetup.sh kong
+            $ITER8/samples/knative/quickstart/platform-setup.sh kong
             ```
 
         === "Contour"
 
             ```shell
-            $ITER8/samples/knative/quickstart/platformsetup.sh contour
+            $ITER8/samples/knative/quickstart/platform-setup.sh contour
             ```
 
         === "Kourier"
 
             ```shell
-            $ITER8/samples/knative/quickstart/platformsetup.sh kourier
+            $ITER8/samples/knative/quickstart/platform-setup.sh kourier
             ```
 
         === "Gloo"
             This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
             ```shell
-            $ITER8/samples/knative/quickstart/platformsetup.sh gloo
+            $ITER8/samples/knative/quickstart/platform-setup.sh gloo
             ```
 
         === "Istio"
 
             ```shell
-            $ITER8/samples/knative/quickstart/platformsetup.sh istio
+            $ITER8/samples/knative/quickstart/platform-setup.sh istio
             ```
 
 === "Production usage"

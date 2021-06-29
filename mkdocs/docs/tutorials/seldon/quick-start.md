@@ -5,26 +5,19 @@ template: main.html
 # Hybrid (A/B + SLOs) testing
 
 !!! tip "Scenario: Hybrid (A/B + SLOs) testing and progressive traffic shift of Seldon models"
-    [Hybrid (A/B + SLOs) testing](../../../concepts/buildingblocks.md#hybrid-ab-slos-testing) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
+    [Hybrid (A/B + SLOs) testing](../../concepts/buildingblocks.md#hybrid-ab-slos-testing) enables you to combine A/B or A/B/n testing with a reward metric on the one hand with SLO validation using objectives on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. In this tutorial, you will:
 
     1. Perform hybrid (A/B + SLOs) testing.
     2. Specify *user-engagement* as the reward metric; data for this metric will be provided by Prometheus.
     3. Specify *latency* and *error-rate* based objectives; data for these metrics will be provided by Prometheus.
-    4. Combine hybrid (A/B + SLOs) testing with [progressive traffic shift](../../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    4. Combine hybrid (A/B + SLOs) testing with [progressive traffic shift](../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
     
-    ![Quickstart Seldon](../../../images/quickstart-hybrid.png)
-
-???+ warning "Before you begin, you will need... "
-    1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-    3. [Go 1.13+](https://golang.org/doc/install).
-    4. [Helm 3+](https://helm.sh/docs/intro/install/)
+    ![Quickstart Seldon](../../images/quickstart-hybrid.png)
     
-## 1. Setup
-* Setup your K8s cluster with Seldon and Iter8 as described [here](platform-setup.md). 
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+???+ warning "Platform setup"
+    Follow [these steps](platform-setup.md) to install Seldon and Iter8 in your K8s cluster.
 
-## 2. Create ML model versions
+## 1. Create ML model versions
 Deploy two Seldon Deployments corresponding to two versions of an Iris classification model, along with an Istio virtual service to split traffic between them.
 
 ```shell
@@ -112,7 +105,7 @@ kubectl wait --for=condition=Ready --timeout=600s pods --all -n ns-candidate
 
     ```
 
-## 3. Generate requests
+## 2. Generate requests
 Generate requests using [Fortio](https://github.com/fortio/fortio) as follows.
 
 ```shell
@@ -208,7 +201,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/seldon/quickstart/fortio.yaml | 
     
     ```
 
-## 4. Define metrics
+## 3. Define metrics
 Iter8 defines a custom K8s resource called *Metric* that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 Define the Iter8 metrics used in this experiment as follows.
 
@@ -328,10 +321,10 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/metrics.yaml
 ??? Note "Metrics in your environment"
     You can define and use custom metrics from any database in Iter8 experiments. 
        
-    For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
+    For your application, replace the mocked user-engagement metric used in this tutorial with any custom metric you wish to optimize in the hybrid (A/B + SLOs) test. Documentation on defining custom metrics is [here](../../metrics/custom.md).
 
-## 5. Launch experiment
-Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the hybrid (A/B + SLOs) testing & progressive traffic shift experiment as follows.
+## 4. Launch experiment
+Launch the hybrid (A/B + SLOs) testing & progressive traffic shift experiment as follows. This experiment also promotes the winning version of the model at the end.
 
 ```shell
 kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml
@@ -404,140 +397,10 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v2.yaml     
     ```
 
-## 6. Understand the experiment
-The process automated by Iter8 in this experiment is as follows.
+## 5. Observe experiment
+Follow [these steps](../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
     
-![Iter8 automation](../../../images/quickstart-iter8-process.png)
-
-Observe the results of the experiment in real-time as follows.
-### a) Observe results
-Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
-```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
-```
-
-Periodically describe the experiment.
-```shell
-watch -x iter8ctl describe -f - <(kubectl get experiment quickstart-exp -o yaml)
-```
-
-??? info "Experiment results will look similar to this"
-    ```shell
-    ****** Overview ******
-    Experiment name: quickstart-exp
-    Experiment namespace: default
-    Target: default/sample-app
-    Testing strategy: A/B
-    Rollout strategy: Progressive
-
-    ****** Progress Summary ******
-    Experiment stage: Running
-    Number of completed iterations: 8
-
-    ****** Winner Assessment ******
-    App versions in this experiment: [sample-app-v1 sample-app-v2]
-    Winning version: sample-app-v2
-    Version recommended for promotion: sample-app-v2
-
-    ****** Objective Assessment ******
-    > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-    +--------------------------------------------+---------------+---------------+
-    |                 OBJECTIVE                  | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/mean-latency <=              | true          | true          |
-    |                                     50.000 |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/95th-percentile-tail-latency | true          | true          |
-    | <= 100.000                                 |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/error-rate <=                | true          | true          |
-    |                                      0.010 |               |               |
-    +--------------------------------------------+---------------+---------------+
-
-    ****** Metrics Assessment ******
-    > Most recently read values of experiment metrics for each version.
-    +--------------------------------------------+---------------+---------------+
-    |                   METRIC                   | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/request-count                |      1213.625 |       361.962 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/user-engagement              |        10.023 |        14.737 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/mean-latency                 |         1.133 |         1.175 |
-    | (milliseconds)                             |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/95th-percentile-tail-latency |         4.768 |         4.824 |
-    | (milliseconds)                             |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/error-rate                   |         0.000 |         0.000 |
-    +--------------------------------------------+---------------+---------------+
-    ``` 
-
-Observe how traffic is split between versions in real-time as follows.
-### b) Observe traffic
-```shell
-kubectl get vs routing-rule -o json --watch | jq ".spec.http[0].route"
-```
-
-??? info "Look inside traffic summary"
-    ```json
-    [
-      {
-        "destination": {
-          "host": "iris-default.ns-baseline.svc.cluster.local",
-          "port": {
-            "number": 8000
-          }
-        },
-        "headers": {
-          "response": {
-            "set": {
-              "version": "iris-v1"
-            }
-          }
-        },
-        "weight": 25
-      },
-      {
-        "destination": {
-          "host": "iris-default.ns-candidate.svc.cluster.local",
-          "port": {
-            "number": 8000
-          }
-        },
-        "headers": {
-          "response": {
-            "set": {
-              "version": "iris-v2"
-            }
-          }
-        },
-        "weight": 75
-      }
-
-    ```
-
-### c) Observe progress
-```shell
-kubectl get experiment quickstart-exp --watch
-```
-
-??? info "Look inside progress summary"
-    The `kubectl` output will be similar to the following.
-    ```shell
-    NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-    quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-    quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-    quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-    quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-    quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-    quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-    quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-    quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-    quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-    ```
-    
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/seldon/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/seldon/quickstart/experiment.yaml
