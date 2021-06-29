@@ -17,8 +17,8 @@ on:
     - '.github/workflows/e2e-tests.yaml'
 
 jobs:
-  quickstart:
-    name: quickstart experiment
+  quickstart-with-courier:
+    name: quickstart experiment with courier
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -31,7 +31,113 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh contour
+
+    - name: create Knative service and readiness check
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
+        kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
+
+    - name: create Fortio job and create experiment
+      run: |
+        export ITER8=$(pwd)
+        sed -i "s/6000s/120s/g" $ITER8/samples/knative/quickstart/fortio.yaml
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
+        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+        
+        # Wait for Fortio to be ready
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=240s
+
+        # Define metrics
+        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
+
+        # Starting the experiment
+        kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+
+    - name: Sleep until end of experiment
+      run: |
+        sleep 150.0
+        kubectl get experiment quickstart-exp -o yaml
+    
+    - name: Check if experiment is complete and successful
+      run: |
+        export ITER8=$(pwd)
+        export EXPERIMENT=quickstart-exp
+        source $ITER8/samples/knative/quickstart/check.sh
+
+  quickstart-with-ambassador:
+    name: quickstart experiment with ambassador
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"
+
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh ambassador
+
+    - name: create Knative service and readiness check
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
+        kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
+
+    - name: create Fortio job and create experiment
+      run: |
+        export ITER8=$(pwd)
+        sed -i "s/6000s/120s/g" $ITER8/samples/knative/quickstart/fortio.yaml
+        URL_VALUE=$(kubectl get ksvc sample-app -o json | jq ".status.address.url")
+        sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/knative/quickstart/fortio.yaml | kubectl apply -f -
+        
+        # Wait for Fortio to be ready
+        pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
+        kubectl wait --for=condition=Ready pods/"$pod_name" --timeout=240s
+
+        # Define metrics
+        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
+
+        # Starting the experiment
+        kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+
+    - name: Sleep until end of experiment
+      run: |
+        sleep 150.0
+        kubectl get experiment quickstart-exp -o yaml
+    
+    - name: Check if experiment is complete and successful
+      run: |
+        export ITER8=$(pwd)
+        export EXPERIMENT=quickstart-exp
+        source $ITER8/samples/knative/quickstart/check.sh
+
+
+  quickstart-with-kong:
+    name: quickstart experiment with kong
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"
+
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/knative/quickstart/iter8-setup.sh        
+        $ITER8/samples/knative/quickstart/platform-setup.sh kong
 
     - name: create Knative service and readiness check
       run: |
@@ -82,7 +188,8 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh contour
 
     - name: create Knative service and readiness check
       run: |
@@ -131,7 +238,8 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh contour
 
     - name: create Knative app
       run: |
@@ -183,7 +291,8 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh kourier
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - uses: azure/setup-helm@v1
 
@@ -245,7 +354,8 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh contour
 
     - name: create Knative service and readiness check
       run: |
@@ -296,7 +406,8 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/platformsetup.sh contour
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh contour
 
     - name: create Knative app with canary
       run: |
@@ -350,7 +461,8 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/e2e-tests/race-condition/platformsetup.sh
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/e2e-tests/race-condition/platform-setup.sh
 
     - name: test race condition
       run: |
