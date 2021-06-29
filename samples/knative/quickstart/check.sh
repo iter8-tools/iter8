@@ -23,21 +23,6 @@ else
     exit 1
 fi
 
-# Check if no packets have been lost by Fortio
-pod_name=$(kubectl get pods --selector=job-name=fortio -o jsonpath='{.items[*].metadata.name}')
-kubectl cp default/"$pod_name":shared/fortiooutput.json /tmp/fortiooutput.json -c busybox
-
-REQUESTSTOTAL=$(jq -r .DurationHistogram.Count /tmp/fortiooutput.json)
-REQUESTS200=$(jq -r '.RetCodes."200"' /tmp/fortiooutput.json)
-if [[ $REQUESTSTOTAL -eq $REQUESTS200 ]]; then
-    echo "Packets were not lost"
-else
-    echo "Packets were lost"
-    echo "total requests:" $REQUESTSTOTAL
-    echo "200 requests:" $REQUESTS200
-    exit 1
-fi
-
 # Check if versionRecommendedForPromotion is candidate
 candidate="sample-app-v2"
 vrfp=$(kubectl get experiment ${EXPERIMENT} -o json | jq -r .status.versionRecommendedForPromotion)
