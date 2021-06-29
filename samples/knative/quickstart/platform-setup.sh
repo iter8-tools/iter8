@@ -63,9 +63,8 @@ kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
 if [[ "ambassador" == ${1} ]]; then
     ##########Installing AMBASSADOR ###########
     echo "Installing Ambassador for Knative"
-    kubectl create namespace ambassador
 
-    kubectl apply --namespace ambassador \
+    kubectl apply \
       -f https://getambassador.io/yaml/ambassador/ambassador-crds.yaml \
       -f https://getambassador.io/yaml/ambassador/ambassador-rbac.yaml \
       -f https://getambassador.io/yaml/ambassador/ambassador-service.yaml
