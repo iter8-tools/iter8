@@ -17,8 +17,8 @@ on:
     - '.github/workflows/e2e-tests.yaml'
 
 jobs:
-  quickstart-with-courier:
-    name: quickstart experiment with courier
+  quickstart-with-contour:
+    name: quickstart experiment with contour
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -45,9 +45,6 @@ jobs:
       run: |
         export ITER8=$(pwd)
 
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
-
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
@@ -61,52 +58,6 @@ jobs:
         export ITER8=$(pwd)
         export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/quickstart/check.sh
-
-  quickstart-with-ambassador:
-    name: quickstart experiment with ambassador
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - uses: engineerd/setup-kind@v0.5.0
-      with:
-        version: "v0.11.1"
-
-    - name: platform setup
-      run: |
-        export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh ambassador
-
-    - name: create Knative service and readiness check
-      run: |
-        export ITER8=$(pwd)
-        kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
-        kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
-
-    - name: Create experiment
-      run: |
-        export ITER8=$(pwd)
-
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
-
-        # Starting the experiment
-        kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
-
-    - name: Sleep until end of experiment
-      run: |
-        sleep 150.0
-        kubectl get experiment quickstart-exp -o yaml
-    
-    - name: Check if experiment is complete and successful
-      run: |
-        export ITER8=$(pwd)
-        export EXPERIMENT=quickstart-exp
-        source $ITER8/samples/knative/quickstart/check.sh
-
 
   quickstart-with-kong:
     name: quickstart experiment with kong
@@ -136,9 +87,6 @@ jobs:
       run: |
         export ITER8=$(pwd)
 
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
-
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
 
@@ -152,49 +100,6 @@ jobs:
         export ITER8=$(pwd)
         export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/quickstart/check.sh
-
-  slovalidation:
-    name: slo validation experiment
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - uses: engineerd/setup-kind@v0.5.0
-      with:
-        version: "v0.11.1"  
-
-    - name: platform setup
-      run: |
-        export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh contour
-
-    - name: create Knative service and readiness check
-      run: |
-        export ITER8=$(pwd)
-        kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
-        kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
-
-    - name: Create experiment
-      run: |
-        export ITER8=$(pwd)
-
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
-
-        # Starting the experiment
-        kubectl apply -f $ITER8/samples/knative/slovalidation/experiment.yaml
-
-    - name: Wait until end of experiment
-      run: |
-        kubectl wait experiment slovalidation-exp --for=condition=Completed --timeout=300s
-    
-    - name: Check if experiment is complete and successful
-      run: |
-        export ITER8=$(pwd)
-        source $ITER8/samples/knative/slovalidation/check.sh
 
   conformance:
     name: conformance experiment
@@ -222,9 +127,6 @@ jobs:
     - name: Create Iter8 experiment
       run: |
         export ITER8=$(pwd)
-
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
         kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
 
@@ -274,9 +176,6 @@ jobs:
       run: |
         export ITER8=$(pwd)
 
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
-
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
 
@@ -317,9 +216,6 @@ jobs:
     - name: Create experiment
       run: |
         export ITER8=$(pwd)
-
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
         # Starting the experiment
         kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
@@ -362,9 +258,6 @@ jobs:
     - name: Create Iter8 experiment
       run: |
         export ITER8=$(pwd)
-
-        # Define metrics
-        kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 
         kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
 
