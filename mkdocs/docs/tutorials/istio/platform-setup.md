@@ -34,7 +34,7 @@ export ITER8=$(pwd)
 ```
 
 ## 3. Install Istio, Iter8 and Telemetry
-Setup Istio, Iter8, a mock New Relic service, and Prometheus add-on within your cluster.
+Setup Istio, Iter8, and Prometheus add-on within your cluster.
 
 ```shell
 $ITER8/samples/istio/quickstart/platformsetup.sh
