@@ -137,7 +137,7 @@ nav:
       - Quick start: tutorials/knative/quick-start.md
       - Platform setup: tutorials/knative/platform-setup.md
       - Testing strategies:
-        - SLO validation (builtin metrics): tutorials/knative/testing-strategies/slovalidation.md
+        - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
         - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md

@@ -109,7 +109,7 @@ jobs:
         export EXPERIMENT=hybrid-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  conformance:
+  conformance with Kourier:
     name: conformance experiment
     runs-on: ubuntu-latest
     steps:
@@ -124,7 +124,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh contour
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative app
       run: |
@@ -135,7 +135,6 @@ jobs:
     - name: Create Iter8 experiment
       run: |
         export ITER8=$(pwd)
-
         kubectl apply -f $ITER8/samples/knative/conformance/experiment.yaml
 
     - name: Wait until end of experiment
@@ -148,6 +147,7 @@ jobs:
     - name: Check if experiment is complete and successful
       run: |
         export ITER8=$(pwd)
+        export EXPERIMENT=conformance-exp
         source $ITER8/samples/knative/conformance/check.sh
         
   progressive:
