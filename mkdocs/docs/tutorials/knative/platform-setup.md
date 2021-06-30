@@ -57,12 +57,6 @@ Use a managed K8s cluster, or create a local K8s cluster as follows. If you wish
             $ITER8/samples/knative/quickstart/platform-setup.sh kourier
             ```
 
-        === "Gloo"
-            This step requires Python. This will install `glooctl` binary under `$HOME/.gloo` folder.
-            ```shell
-            $ITER8/samples/knative/quickstart/platform-setup.sh gloo
-            ```
-
         === "Istio"
 
             ```shell
