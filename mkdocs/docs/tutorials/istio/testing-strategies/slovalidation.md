@@ -17,8 +17,7 @@ template: main.html
     Follow [these steps](../platform-setup.md) to install Iter8 and Istio in your K8s cluster.    
 
 ## Steps 1 to 3
-* Follow [Steps 1 to 3 of the Iter8 quick start tutorial](../quick-start.md).
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+Follow [Steps 1 to 3 of the Iter8 quick start tutorial](../quick-start.md).
 
 ## 4. Launch experiment
 Launch the SLO validation experiment.
