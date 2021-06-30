@@ -115,7 +115,7 @@ kubectl apply -f $ITER8/samples/knative/hybrid/metrics.yaml
 
 ## 3. Launch experiment
 ```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+kubectl apply -f $ITER8/samples/knative/hybrid/experiment.yaml
 ```
 
 ??? info "Look inside experiment.yaml"
@@ -123,14 +123,21 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
     apiVersion: iter8.tools/v2alpha2
     kind: Experiment
     metadata:
-      name: quickstart-exp
+      name: hybrid-exp
     spec:
-      # target identifies the knative service under experimentation using its fully qualified name
       target: default/sample-app
       strategy:
         testingPattern: A/B
         deploymentPattern: Progressive
         actions:
+          loop:
+          - task: metrics/collect
+            with:
+              versions:
+              - name: sample-app-v1
+                url: http://sample-app-v1.default.svc.cluster.local
+              - name: sample-app-v2
+                url: http://sample-app-v2.default.svc.cluster.local
           finish: # run the following sequence of tasks at the end of the experiment
           - task: common/exec # promote the winning version      
             with:
@@ -140,20 +147,21 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
               - |
                 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
       criteria:
-        requestCount: iter8-knative/request-count
         rewards: # Business rewards
         - metric: iter8-knative/user-engagement
           preferredDirection: High # maximize user engagement
         objectives: 
-        - metric: iter8-knative/mean-latency
+        - metric: iter8-system/mean-latency
           upperLimit: 50
-        - metric: iter8-knative/95th-percentile-tail-latency
+        - metric: iter8-system/latency-95th-percentile
           upperLimit: 100
-        - metric: iter8-knative/error-rate
+        - metric: iter8-system/error-rate
           upperLimit: "0.01"
+        requestCount: iter8-system/request-count
       duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 10
+        maxLoops: 10
+        intervalSeconds: 1
+        iterationsPerLoop: 1
       versionInfo:
         # information about app versions used in this experiment
         baseline:
