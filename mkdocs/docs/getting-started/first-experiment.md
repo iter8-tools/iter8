@@ -5,12 +5,7 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    In this tutorial, you will:
-
-    1. Create stable and candidate deployments of an application. The latter will be [dark launched](../concepts/buildingblocks.md#dark-launch).
-    2. Create an [Iter8 SLO validation experiment](../concepts/buildingblocks.md#slo-validation) with *latency* and *error-rate* SLOs.
-    3. Use Iter8's [builtin latency and error-rate metrics collection](../metrics/builtin.md) feature to evaluate candidate.
-    4. Verify that candidate satisfies SLOs and promote it as the latest stable version.
+    > In this tutorial, you will [dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), profile the candidate using Iter8's [builtin load generation and metrics collection](../metrics/builtin.md) feature, [validate the candidate with latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote it as the latest stable version assuming it is validated.
     
     ![SLO validation](../images/yourfirstexperiment.png)
 
@@ -205,12 +200,16 @@ helm uninstall my-app
 **Next Steps**
 
 !!! tip "Use in production"
-    Details about the Helm chart... 
+    The source for the Helm chart used in this tutorial can be found in the following location.
+    ```shell
+    $ITER8/helm/deploy
+    ```
+    Adapt the `deployment.yaml` and `hpa.yaml` templates as needed by your application in order use this chart in production.
 
 !!! tip "Try other Iter8 tutorials"
-    Iter8 can work in any K8s environment. Try Iter8 tutorials in the following environments.
+    Iter8 can work in any K8s environment. Try Iter8 in the following environments.
 
-    [KFServing](#){ .md-button .md-button--primary }
-    [Seldon](#){ .md-button .md-button--primary }
-    [Knative](#){ .md-button .md-button--primary }
-    [Istio](#){ .md-button .md-button--primary }
+    [KFServing](../tutorials/kfserving/quick-start.md){ .md-button .md-button--primary }
+    [Seldon](../tutorials/seldon/quick-start.md){ .md-button .md-button--primary }
+    [Knative](../tutorials/knative/quick-start.md){ .md-button .md-button--primary }
+    [Istio](../tutorials/istio/quick-start.md){ .md-button .md-button--primary }
