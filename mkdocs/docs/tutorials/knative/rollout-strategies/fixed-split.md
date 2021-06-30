@@ -13,7 +13,7 @@ template: main.html
 ???+ warning "Platform setup"
     Follow [these steps](../platform-setup.md) to install Iter8 and Knative in your K8s cluster.
 
-## 1. Create versions and initialize traffic split
+## 1. Create versions and fix traffic split
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
 kubectl apply -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml

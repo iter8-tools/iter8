@@ -14,7 +14,7 @@ template: main.html
 * Setup your K8s cluster with Istio and Iter8 as described [here](../../../getting-started/quick-start/istio/platform-setup.md).
 * Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
 
-## 2. Create versions and initialize traffic split
+## 2. Create versions and fix traffic split
 ```shell
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/fixed-split/bookinfo-app.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
