@@ -172,7 +172,7 @@ jobs:
         export ITER8=$(pwd)
         kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
         kubectl apply -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
+        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=360s
 
     - name: Create experiment
       run: |
