@@ -12,7 +12,7 @@ template: main.html
     3. Use Iter8's [builtin latency and error-rate metrics collection](../metrics/builtin.md) feature to evaluate candidate.
     4. Verify that candidate satisfies SLOs and promote it as the latest stable version.
     
-    ![SLO validation](../../../images/yourfirstexperiment.png)
+    ![SLO validation](../images/yourfirstexperiment.png)
 
 ???+ warning "Platform setup"
     1. [Helm 3+](https://helm.sh/docs/intro/install/).

@@ -14,7 +14,7 @@ template: main.html
 
     ![CICD+Iter8](../../../images/CICD+Iter8.png)
 
-    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../../../getting-started/quick-start/istio/platform-setup.md#1-create-kubernetes-cluster). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
+    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../quick-start.md). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
 
     1. How to setup an Env repo to work with Iter8+GitOps
     2. How to update the Env repo to start an Iter8 experiment
@@ -24,7 +24,7 @@ template: main.html
     Unlike other progressive delivery tools, Iter8 adheres to GitOps guarantees by ensuring the desired state is always in sync with the actual state. App version that failed promotion criteria will never get promoted, even if the cluster had to be recreated from scratch. This important GitOps property is often not guaranteed by other tools!
 
 ## Step 1. Create K8s cluster
-If you don't already have a K8s cluster, [create a Minikube or Kind K8s cluster locally](../../../getting-started/quick-start/istio/platform-setup.md).
+If you don't already have a K8s cluster, [create a Minikube or Kind K8s cluster locally](../platform-setup.md#1-create-kubernetes-cluster).
 
 ## Step 2. Fork repo
 

@@ -100,7 +100,7 @@ jobs:
       run: |
         export EXPERIMENT=hybrid-exp
         # Wait for experiment to complete
-        kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
+        kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=360s
         kubectl get experiment $EXPERIMENT -o yaml
     
     - name: Check if experiment is complete and successful
