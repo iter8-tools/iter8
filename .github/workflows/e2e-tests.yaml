@@ -150,8 +150,8 @@ jobs:
         export EXPERIMENT=conformance-exp
         source $ITER8/samples/knative/conformance/check.sh
         
-  fixed-split-with-gloo:
-    name: fixed-split experiment with gloo
+  fixed-split-with-contour:
+    name: fixed-split experiment with contour
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -165,7 +165,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh gloo
+        $ITER8/samples/knative/quickstart/platform-setup.sh contour
 
     - name: create Knative service and readiness check
       run: |

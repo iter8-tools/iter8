@@ -5,7 +5,7 @@ template: main.html
 # User Segmentation
 
 !!! tip "Scenario: SLO validation with user segmentation and builtin metrics"
-    [User segmentation](../../../../concepts/buildingblocks/#user-segmentation_1) is the ability to carve out a specific segment of users for an experiment, leaving the rest of the users unaffected by the experiment.
+    [User segmentation](../../../concepts/buildingblocks.md#progressive-traffic-shift-with-user-segmentation) is the ability to carve out a specific segment of users for an experiment, leaving the rest of the users unaffected by the experiment.
 
     In this tutorial, you will:
 
@@ -14,14 +14,12 @@ template: main.html
 
     ![User segmentation](../../../images/canary-progressive-segmentation.png)
 
-## 1. Setup with Istio
-* Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+???+ warning "Platform setup"
+    Follow [these steps](../platform-setup.md) to install Iter8 and Knative in your K8s cluster.
 
-> Knative with Istio is required in this tutorial. During this setup, choose [Istio](../../../../getting-started/quick-start/knative/platform-setup/#3-install-knative-iter8-and-telemetry) as the networking layer for Knative.
+    **Note:** Knative needs to be installed with the Istio networking layer for this tutorial.
 
-
-## 2. Create versions of your application
+## 1. Create app versions
 ```shell
 kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
 ```
@@ -66,7 +64,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/services.yaml
     ```
 
 
-## 3. Create Istio virtual service to segment users
+## 2. Create Istio virtual service to segment users
 ```shell
 kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
 ```
@@ -119,7 +117,7 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/routing-rule.yaml
                 Host: sample-app-v1.default
     ```
 
-## 4. Generate requests
+## 3. Generate requests
 ```shell
 TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
@@ -162,7 +160,7 @@ cd $ITER8
           restartPolicy: Never
     ```
 
-## 5. Create Iter8 experiment
+## 4. Create Iter8 experiment
 ```shell
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
@@ -226,10 +224,10 @@ kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial for Knative](../../../../getting-started/quick-start/knative/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`user-segmentation-exp`) in your `iter8ctl` and `kubectl` commands.
+## 5. Observe experiment
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/user-segmentation/experiment.yaml
 kubectl delete -f $ITER8/samples/knative/user-segmentation/curl.yaml
