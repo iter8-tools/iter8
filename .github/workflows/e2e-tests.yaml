@@ -150,59 +150,8 @@ jobs:
         export EXPERIMENT=conformance-exp
         source $ITER8/samples/knative/conformance/check.sh
         
-  progressive:
-    name: progressive experiment
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - uses: engineerd/setup-kind@v0.5.0
-      with:
-        version: "v0.11.1"
-
-    - name: platform setup
-      run: |
-        export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
-
-    - uses: azure/setup-helm@v1
-
-    - name: RBAC rules for helm
-      run: |
-        export ITER8=$(pwd)
-        kubectl apply -f ${ITER8}/samples/knative/canaryprogressive/helm-rbac.yaml
-
-    - name: create Knative app with canary
-      run: |
-        export ITER8=$(pwd)
-        helm install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --namespace=default
-        kubectl wait ksvc/sample-app --for=condition=Ready --timeout=240s
-        helm upgrade --install --repo https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/helm-repo sample-app sample-app --values=https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/canaryprogressive/experimental-values.yaml --namespace=default
-        kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
-
-    - name: Create Iter8 experiment
-      run: |
-        export ITER8=$(pwd)
-
-        export ITER8=$(pwd)
-        kubectl apply -f $ITER8/samples/knative/canaryprogressive/experiment.yaml
-
-    - name: Wait until end of experiment
-      run: |
-        export EXPERIMENT=canary-progressive
-        # Wait for experiment to complete
-        kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
-        kubectl get experiment $EXPERIMENT -o yaml
-    
-    - name: Check if experiment is complete and successful
-      run: |
-        export ITER8=$(pwd)
-        source $ITER8/samples/knative/canaryprogressive/check.sh
-
-  fixedsplit:
-    name: fixed-split experiment
+  fixed-split with gloo:
+    name: fixed-split experiment with Gloo
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -216,7 +165,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh contour
+        $ITER8/samples/knative/quickstart/platform-setup.sh gloo
 
     - name: create Knative service and readiness check
       run: |
@@ -244,48 +193,6 @@ jobs:
         export ITER8=$(pwd)
         export EXPERIMENT=fixedsplit-exp
         source $ITER8/samples/knative/quickstart/check.sh
-
-  canary-fixedsplit-kustomize:
-    name: fixedsplit canary experiment with kustomize
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - uses: engineerd/setup-kind@v0.5.0
-      with:
-        version: "v0.11.1"    
-
-    - name: platform setup
-      run: |
-        export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh contour
-
-    - name: create Knative app with canary
-      run: |
-        export ITER8=$(pwd)
-        kustomize build $ITER8/samples/knative/canaryfixedsplit/baseline | kubectl apply -f -
-        kubectl wait ksvc/sample-app --for=condition=Ready --timeout=240s
-        kustomize build $ITER8/samples/knative/canaryfixedsplit/experimentalservice | kubectl apply -f -        
-
-    - name: Create Iter8 experiment
-      run: |
-        export ITER8=$(pwd)
-
-        kubectl apply -f $ITER8/samples/knative/canaryfixedsplit/experiment.yaml
-
-    - name: Wait until end of experiment
-      run: |
-        export EXPERIMENT=canary-fixedsplit
-        # Wait for experiment to complete
-        kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
-        kubectl get experiment $EXPERIMENT -o yaml
-    
-    - name: Check if experiment is complete and successful
-      run: |
-        export ITER8=$(pwd)
-        source $ITER8/samples/knative/canaryfixedsplit/check.sh
 
   race-condition:
     name: testing race conditions with Iter8 metrics

@@ -1,3 +1,0 @@
-name: "sample-app-v1"
-image: "gcr.io/knative-samples/knative-route-demo:blue"
-tVersion: "blue"
