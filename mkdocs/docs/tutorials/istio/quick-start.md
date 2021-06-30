@@ -14,16 +14,10 @@ template: main.html
     
     ![Quickstart Istio](../../../images/quickstart-hybrid.png)
 
-???+ warning "Before you begin, you will need... "
-    1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-    3. [Go 1.13+](https://golang.org/doc/install).
+???+ warning "Platform setup"
+    Follow [these steps](platform-setup.md) to install Iter8 and Istio in your K8s cluster.
 
-## 1. Setup
-* Setup your K8s cluster with Istio and Iter8 as described [here](platform-setup.md). 
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
-
-## 2. Create application versions
+## 1. Create application versions
 Deploy the [`bookinfo` microservice application](https://istio.io/latest/docs/examples/bookinfo/) including two versions of the `productpage` microservice.
 
 ```shell
@@ -79,7 +73,7 @@ kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
                 value: "9080"
     ```
 
-## 3. Generate requests
+## 2. Generate requests
 Generate requests to your app using [Fortio](https://github.com/fortio/fortio) as follows.
 
 ```shell
@@ -119,7 +113,7 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
             restartPolicy: Never
     ```
 
-## 4. Define metrics
+## 3. Define metrics
 Iter8 introduces a Kubernetes CRD called Metric that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 
 Define the Iter8 metrics used in this experiment as follows. For the purpose of this tutorial, you will [mock](../../../metrics/mock.md) the user-engagement metric. The latency and error metrics will be provided by Prometheus.
@@ -252,7 +246,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/metrics.yaml
     For your application, replace the mocked metric used in this tutorial with any custom metric you wish to optimize. Documentation on defining custom metrics is [here](../../../metrics/custom.md).
 
 
-## 5. Launch experiment
+## 4. Launch experiment
 Iter8 defines a custom K8s resource called *Experiment* that automates a variety of release engineering and experimentation strategies for K8s applications and ML models. Launch the Hybrid (A/B + SLOs) testing & progressive traffic shift experiment as follows.
 
 ```shell
@@ -324,131 +318,10 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 6. Understand the experiment
-The process automated by Iter8 in this experiment is as follows.
-    
-![Iter8 automation](../../../images/quickstart-iter8-process.png)
+## 5. Observe experiment
+Follow [these steps](../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
-Observe the results of the experiment in real-time as follows.
-### a) Observe results
-
-Install `iter8ctl`. You can change the directory where `iter8ctl` binary is installed by changing `GOBIN` below.
-```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
-```
-
-Periodically describe the experiment results.
-```shell
-watch -x iter8ctl describe -f - <(kubectl get experiment quickstart-exp -o yaml)
-```
-
-??? info "Experiment results will look similar to this"
-    The `iter8ctl` output will be similar to the following.
-    ```shell
-    ****** Overview ******
-    Experiment name: quickstart-exp
-    Experiment namespace: default
-    Target: default/sample-app
-    Testing strategy: A/B
-    Rollout strategy: Progressive
-
-    ****** Progress Summary ******
-    Experiment stage: Running
-    Number of completed iterations: 8
-
-    ****** Winner Assessment ******
-    App versions in this experiment: [sample-app-v1 sample-app-v2]
-    Winning version: sample-app-v2
-    Version recommended for promotion: sample-app-v2
-
-    ****** Objective Assessment ******
-    > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-    +--------------------------------------------+---------------+---------------+
-    |                 OBJECTIVE                  | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/mean-latency <=              | true          | true          |
-    |                                     50.000 |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/95th-percentile-tail-latency | true          | true          |
-    | <= 100.000                                 |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/error-rate <=                | true          | true          |
-    |                                      0.010 |               |               |
-    +--------------------------------------------+---------------+---------------+
-
-    ****** Metrics Assessment ******
-    > Most recently read values of experiment metrics for each version.
-    +--------------------------------------------+---------------+---------------+
-    |                   METRIC                   | SAMPLE-APP-V1 | SAMPLE-APP-V2 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/request-count                |      1213.625 |       361.962 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/user-engagement              |        10.023 |        14.737 |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/mean-latency                 |         1.133 |         1.175 |
-    | (milliseconds)                             |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/95th-percentile-tail-latency |         4.768 |         4.824 |
-    | (milliseconds)                             |               |               |
-    +--------------------------------------------+---------------+---------------+
-    | iter8-knative/error-rate                   |         0.000 |         0.000 |
-    +--------------------------------------------+---------------+---------------+
-    ``` 
-
-Observe how traffic is split between versions in real-time as follows.
-### b) Observe traffic
-```shell
-kubectl -n bookinfo-iter8 get vs bookinfo -o json --watch | jq ".spec.http[0].route"
-```
-
-??? info "Look inside traffic summary"
-    The `kubectl` output will be similar to the following.
-    ```shell
-    [
-      {
-        "destination": {
-          "host": "productpage",
-          "port": {
-            "number": 9080
-          },
-          "subset": "productpage-v1"
-        },
-        "weight": 35
-      },
-      {
-        "destination": {
-          "host": "productpage",
-          "port": {
-            "number": 9080
-          },
-          "subset": "productpage-v2"
-        },
-        "weight": 65
-      }
-    ]
-    ```
-
-### c) Observe progress
-```shell
-kubectl get experiment quickstart-exp --watch
-```
-
-??? info "Look inside progress summary"
-    The `kubectl` output will be similar to the following.
-    ```shell
-    NAME             TYPE     TARGET               STAGE     COMPLETED ITERATIONS   MESSAGE
-    quickstart-exp   Canary   default/sample-app   Running   1                      IterationUpdate: Completed Iteration 1
-    quickstart-exp   Canary   default/sample-app   Running   2                      IterationUpdate: Completed Iteration 2
-    quickstart-exp   Canary   default/sample-app   Running   3                      IterationUpdate: Completed Iteration 3
-    quickstart-exp   Canary   default/sample-app   Running   4                      IterationUpdate: Completed Iteration 4
-    quickstart-exp   Canary   default/sample-app   Running   5                      IterationUpdate: Completed Iteration 5
-    quickstart-exp   Canary   default/sample-app   Running   6                      IterationUpdate: Completed Iteration 6
-    quickstart-exp   Canary   default/sample-app   Running   7                      IterationUpdate: Completed Iteration 7
-    quickstart-exp   Canary   default/sample-app   Running   8                      IterationUpdate: Completed Iteration 8
-    quickstart-exp   Canary   default/sample-app   Running   9                      IterationUpdate: Completed Iteration 9
-    ```
-
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/quickstart/experiment.yaml
