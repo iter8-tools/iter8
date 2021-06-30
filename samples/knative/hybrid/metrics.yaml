@@ -11,7 +11,7 @@ metadata:
 spec:
   mock:
   - name: sample-app-v1
-    level: 15.0
+    level: "15.0"
   - name: sample-app-v2
-    level: 20.0
+    level: "20.0"
 ---
