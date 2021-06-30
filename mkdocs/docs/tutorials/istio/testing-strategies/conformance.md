@@ -5,7 +5,7 @@ template: main.html
 # SLO Validation with a single version
 
 !!! tip "Scenario: SLO validation with a single version"
-    Iter8 enables you to perform SLO validation with a single version of your application (a.k.a. [conformance testing](../../../../concepts/buildingblocks/#slo-validation)). In this tutorial, you will:
+    Iter8 enables you to perform SLO validation with a single version of your application (a.k.a. [conformance testing](../../../concepts/buildingblocks.md#slo-validation)). In this tutorial, you will:
 
     1. Perform conformance testing.
     2. Specify *latency* and *error-rate* based service-level objectives (SLOs). If your version satisfies SLOs, Iter8 will declare it as the winner.
@@ -13,11 +13,10 @@ template: main.html
     
     ![Conformance](../../../images/conformance.png)
 
-## 1. Setup
-* Setup your K8s cluster with Istio and Iter8 as described [here](../../../../getting-started/quick-start/istio/platform-setup/).
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+???+ warning "Platform setup"
+    Follow [these steps](../platform-setup.md) to install Iter8 and Istio in your K8s cluster. 
 
-## 2. Create application version
+## 1. Create application version
 Deploy [bookinfo](https://istio.io/latest/docs/examples/bookinfo/) app:
 
 ```shell
@@ -74,7 +73,7 @@ kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/conformance/bookinfo-app
                 value: "9080"
     ```
 
-## 3. Generate requests
+## 2. Generate requests
 Generate requests using Fortio as follows.
 
 ```shell
@@ -115,10 +114,10 @@ sed "s+URL_VALUE+${URL_VALUE}+g" $ITER8/samples/istio/quickstart/fortio.yaml | k
           restartPolicy: Never
     ```
 
-## 4. Define metrics
-Please follow step 4 of the [quick start tutorial](../../../getting-started/quick-start/istio/tutorial.md#4-define-metrics).
+## 3. Define metrics
+Please follow step 3 of the [quick start tutorial](../quick-start.md).
 
-## 5. Launch experiment
+## 4. Launch experiment
 ```shell
 kubectl apply -f $ITER8/samples/istio/conformance/experiment.yaml
 ```
@@ -154,10 +153,10 @@ kubectl apply -f $ITER8/samples/istio/conformance/experiment.yaml
             value: bookinfo-iter8
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial for Istio](../../../../getting-started/quick-start/istio/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`conformance-exp`) in your `iter8ctl` and `kubectl` commands.
+## 5. Observe experiment
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/istio/conformance/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/conformance/experiment.yaml
