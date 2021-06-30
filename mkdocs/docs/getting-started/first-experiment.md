@@ -5,7 +5,7 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    > In this tutorial, you will [dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), profile the candidate using Iter8's [builtin load generation and metrics collection](../metrics/builtin.md) feature, [validate the candidate with latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote it as the latest stable version assuming it is validated.
+    [Dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), profile the candidate using Iter8's [builtin load generation and metrics collection](../metrics/builtin.md) feature, [validate the candidate with latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote it as the latest stable version assuming it is validated.
     
     ![SLO validation](../images/yourfirstexperiment.png)
 
