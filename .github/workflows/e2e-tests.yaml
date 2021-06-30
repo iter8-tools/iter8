@@ -109,8 +109,8 @@ jobs:
         export EXPERIMENT=hybrid-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  conformance with Kourier:
-    name: conformance experiment
+  conformance-with-kourier:
+    name: conformance experiment with kourier
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -150,8 +150,8 @@ jobs:
         export EXPERIMENT=conformance-exp
         source $ITER8/samples/knative/conformance/check.sh
         
-  fixed-split with gloo:
-    name: fixed-split experiment with Gloo
+  fixed-split-with-gloo:
+    name: fixed-split experiment with gloo
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
