@@ -11,7 +11,7 @@ Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
 # Kustomize v3+ is required for the following steps
-export TAG=v0.7.3 
+export TAG=v0.7.4 
 kustomize build https://github.com/iter8-tools/iter8/install/core/?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build https://github.com/iter8-tools/iter8/install/builtin-metrics/?ref=${TAG} | kubectl apply -f -
