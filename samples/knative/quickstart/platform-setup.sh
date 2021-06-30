@@ -49,7 +49,7 @@ echo "Installing Knative CRDs"
 
 kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_TAG}/serving-crds.yaml
 
-kubectl wait crd --for condition=established --timeout=120s
+kubectl wait crd --all --for condition=established --timeout=120s
 
 
 # 2(b). Install the core components of Serving (see below for optional extensions):
