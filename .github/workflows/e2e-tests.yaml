@@ -129,7 +129,7 @@ jobs:
     - name: create Knative app
       run: |
         export ITER8=$(pwd)
-        kubectl apply -f $ITER8/samples/knative/conformance/baseline.yaml        
+        kubectl apply -f $ITER8/samples/knative/conformance/baseline.yaml
         kubectl wait --for=condition=Ready ksvc/sample-app --timeout=240s
 
     - name: Create Iter8 experiment
