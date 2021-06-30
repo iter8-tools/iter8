@@ -39,7 +39,7 @@ else
 fi
 
 # Step 1: Export correct tags for install artifacts
-export KNATIVE_TAG="${KNATIVE_TAG:-v0.23.0}"
+export KNATIVE_TAG="${KNATIVE_TAG:-v0.24.0}"
 echo "KNATIVE_TAG = $KNATIVE_TAG"
 
 # Step 2: Install Knative (https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-serving-component)
