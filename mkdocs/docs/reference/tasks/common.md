@@ -8,7 +8,7 @@ template: main.html
 
 ### Overview
 
-The `common/bash` task executes a bash script. The script can be written to use placeholders that are [dynamically substituted at runtime](../../tasks#dynamic-variable-substitution). For example, the `common/bash` task can be used as part of a finish action to promote the winning version at the end of an experiment.
+The `common/bash` task executes a bash script. The script can be written to use placeholders that are [dynamically substituted at runtime](../tasks.md#dynamic-variable-substitution). For example, the `common/bash` task can be used as part of a finish action to promote the winning version at the end of an experiment.
 
 ### Example
 
@@ -52,7 +52,7 @@ spec:
 
 The script will be executed.
 
-In the [example above](#example), a YAML file corresponding to the baseline or candidate version will be applied to the cluster.
+In the example above, a YAML file corresponding to the baseline or candidate version will be applied to the cluster.
 
 If this task exits with a non-zero error code, the experiment to which it belongs will fail.
 
@@ -111,12 +111,12 @@ spec:
 
 The command with the supplied arguments will be executed. 
 
-In the [example above](#example), a YAML file corresponding to the baseline or candidate version will be applied to the cluster.
+In the example above, a YAML file corresponding to the baseline or candidate version will be applied to the cluster.
 
 If this task exits with a non-zero error code, the experiment to which it belongs will fail.
 
 ### Dynamic Variable Substitution
 
-The `common/exec` task only supports [dynamic variable subsitution](../../tasks#dynamic-variable-substitution) for variables of the version recommended for promotion.
+The `common/exec` task only supports [dynamic variable subsitution](../tasks.md#dynamic-variable-substitution) for variables of the version recommended for promotion.
 
 Instead of defaulting to a blank value when Iter8 has not determined a version to recommend for promotion (that is, in start tasks), this task supports the `disableInterpolation` option to prevent dynamic variable substitution.
