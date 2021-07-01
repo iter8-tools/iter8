@@ -173,7 +173,6 @@ nav:
       - Common Tasks: reference/tasks/common.md
       - Metrics Tasks: reference/tasks/metrics.md
       - Notification Tasks: reference/tasks/notification.md
-      - Dynamic Variable Substitution: reference/tasks/interpolation.md
   - Contributing: 
     - Overview: contributing/overview.md
     - New K8s stack: contributing/newk8sstack.md
