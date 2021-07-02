@@ -1,0 +1,11 @@
+# Default values for deploy.
+
+name: hello
+
+image:
+  repository: nginx
+  tag:
+    # must be supplied for every release
+    stable:
+    # must be supplied for every candidate release
+    candidate:

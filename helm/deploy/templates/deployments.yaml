@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    helm.sh/chart: {{ include "deploy.chart" . }}
+    app.kubernetes.io/managed-by: Iter8
+    {{- include "deploy.selectorLabels.stable" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "deploy.selectorLabels.stable" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "deploy.selectorLabels.stable" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{- printf "%s-candidate" .Values.name }}
+  labels:
+    helm.sh/chart: {{ include "deploy.chart" . }}
+    app.kubernetes.io/managed-by: Iter8
+    {{- include "deploy.selectorLabels.candidate" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "deploy.selectorLabels.candidate" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "deploy.selectorLabels.candidate" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
