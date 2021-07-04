@@ -1,51 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.name }}
+  name: {{ .Values.stable.name }}
   labels:
-    helm.sh/chart: {{ include "deploy.chart" . }}
-    app.kubernetes.io/managed-by: Iter8
-    {{- include "deploy.selectorLabels.stable" . | nindent 4 }}
+    {{ .Values.common.regularLabels | nindent 4 }}
+    {{ .Values.common.selectorLabels | nindent 4 }}
+    {{ .Values.stable.selectorLabels | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "deploy.selectorLabels.stable" . | nindent 6 }}
+      {{ .Values.common.selectorLabels | nindent 6 }}
+      {{ .Values.stable.selectorLabels | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "deploy.selectorLabels.stable" . | nindent 8 }}
+        {{ .Values.common.selectorLabels | nindent 8 }}
+        {{ .Values.stable.selectorLabels | nindent 8 }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: http
-          containerPort: 80
-          protocol: TCP
+      - {{ .Values.common.containerInfo }}
+        image: "{{ .Values.common.image.repo }}:{{ .Values.stable.image.tag }}"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{- printf "%s-candidate" .Values.name }}
+  name: {{ .Values.candidate.name }}
   labels:
-    helm.sh/chart: {{ include "deploy.chart" . }}
-    app.kubernetes.io/managed-by: Iter8
-    {{- include "deploy.selectorLabels.candidate" . | nindent 4 }}
+    {{ .Values.common.regularLabels | nindent 4 }}
+    {{ .Values.common.selectorLabels | nindent 4 }}
+    {{ .Values.candidate.selectorLabels | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "deploy.selectorLabels.candidate" . | nindent 6 }}
+      {{ .Values.common.selectorLabels | nindent 6 }}
+      {{ .Values.candidate.selectorLabels | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "deploy.selectorLabels.candidate" . | nindent 8 }}
+        {{ .Values.common.selectorLabels | nindent 8 }}
+        {{ .Values.candidate.selectorLabels | nindent 8 }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: http
-          containerPort: 80
-          protocol: TCP
+      - {{ .Values.common.containerInfo }}
+        image: "{{ .Values.common.image.repo }}:{{ .Values.candidate.image.tag }}"

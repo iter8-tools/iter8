@@ -1,11 +1,38 @@
-# Default values for deploy.
+# values common to both stable and candidate versions of the application;
+common:
+  application: hello
+  serviceType: ClusterIP
+  servicePortInfo:
+    port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  containerInfo:
+    name: {{ .Chart.Name }}
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+  image:
+    repo: nginx
+  regularLabels:
+    app.kubernetes.io/managed-by: Iter8
+  selectorLabels:
+    app.kubernetes.io/name: hello
 
-name: hello
+# values specific to stable version of the application;
+stable:
+  name: hello
+  selectorLabels:
+    app.kubernetes.io/versionType: stable
+  image:
+    tag: "" # required; this is the only thing that changes when  
 
-image:
-  repository: nginx
-  tag:
-    # must be supplied for every release
-    stable:
-    # must be supplied for every candidate release
-    candidate:
+# values specific to candidate version of the application;
+candidate:
+  name: hello-candidate
+  selectorLabels:
+    app.kubernetes.io/versionType: candidate
+  image:
+    tag: "" # required
