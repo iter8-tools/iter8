@@ -1,4 +1,4 @@
-# values common to both stable and candidate versions of the application;
+# values for both stable and candidate versions of the application;
 common:
   application: hello
   serviceType: ClusterIP
@@ -7,32 +7,33 @@ common:
     targetPort: http
     protocol: TCP
     name: http
-  containerInfo:
-    name: {{ .Chart.Name }}
-    imagePullPolicy: IfNotPresent
-    ports:
-    - name: http
-      containerPort: 80
-      protocol: TCP
-  image:
-    repo: nginx
   regularLabels:
     app.kubernetes.io/managed-by: Iter8
   selectorLabels:
     app.kubernetes.io/name: hello
 
-# values specific to stable version of the application;
+# values for stable version of the application;
 stable:
   name: hello
   selectorLabels:
     app.kubernetes.io/versionType: stable
-  image:
-    tag: "" # required; this is the only thing that changes when  
+  imageTag: ""
 
-# values specific to candidate version of the application;
+# values for candidate version of the application;
 candidate:
   name: hello-candidate
   selectorLabels:
     app.kubernetes.io/versionType: candidate
-  image:
-    tag: "" # required
+  imageTag: ""
+
+# values for the SLO validation experiment
+experiment:
+  # This experiment will collect Iter8's built-in latency and error metrics.
+  # Time is the duration over which queries will be sent for metrics collection.
+  # QPS is number of queries per second that will used for metrics collection.
+  # By default, there will be 8.0 * 5 = 40 queries used for metrics collection.
+  Time: 5s
+  QPS: 8.0
+  LimitMeanLatency: 500.0 # (msec) acceptable limit for mean latency
+  LimitErrorRate: 0.01 # (msec) acceptable error rate is 1%
+  Limit95thPercentileLatency: 1000.0 # (msec) acceptable limit for 95th percentile latency

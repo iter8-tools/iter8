@@ -3,43 +3,47 @@ kind: Deployment
 metadata:
   name: {{ .Values.stable.name }}
   labels:
-    {{ .Values.common.regularLabels | nindent 4 }}
-    {{ .Values.common.selectorLabels | nindent 4 }}
-    {{ .Values.stable.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.common.regularLabels | nindent 4 }}
+    {{- toYaml .Values.common.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.stable.selectorLabels | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{ .Values.common.selectorLabels | nindent 6 }}
-      {{ .Values.stable.selectorLabels | nindent 6 }}
+      {{- toYaml .Values.common.selectorLabels | nindent 6 }}
+      {{- toYaml .Values.stable.selectorLabels | nindent 6 }}
   template:
     metadata:
       labels:
-        {{ .Values.common.selectorLabels | nindent 8 }}
-        {{ .Values.stable.selectorLabels | nindent 8 }}
+        {{- toYaml .Values.common.selectorLabels | nindent 8 }}
+        {{- toYaml .Values.stable.selectorLabels | nindent 8 }}
     spec:
+      {{- with .Values.stable}}
       containers:
-      - {{ .Values.common.containerInfo }}
-        image: "{{ .Values.common.image.repo }}:{{ .Values.stable.image.tag }}"
+      - {{- include "deploy.common.containerInfo" . | nindent 8}}
+      {{- end }}
 ---
+{{- if .Values.candidate }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.candidate.name }}
   labels:
-    {{ .Values.common.regularLabels | nindent 4 }}
-    {{ .Values.common.selectorLabels | nindent 4 }}
-    {{ .Values.candidate.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.common.regularLabels | nindent 4 }}
+    {{- toYaml .Values.common.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.candidate.selectorLabels | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{ .Values.common.selectorLabels | nindent 6 }}
-      {{ .Values.candidate.selectorLabels | nindent 6 }}
+      {{- toYaml .Values.common.selectorLabels | nindent 6 }}
+      {{- toYaml .Values.candidate.selectorLabels | nindent 6 }}
   template:
     metadata:
       labels:
-        {{ .Values.common.selectorLabels | nindent 8 }}
-        {{ .Values.candidate.selectorLabels | nindent 8 }}
+        {{- toYaml .Values.common.selectorLabels | nindent 8 }}
+        {{- toYaml .Values.candidate.selectorLabels | nindent 8 }}
     spec:
+      {{- with .Values.candidate}}
       containers:
-      - {{ .Values.common.containerInfo }}
-        image: "{{ .Values.common.image.repo }}:{{ .Values.candidate.image.tag }}"
+      - {{- include "deploy.common.containerInfo" . | nindent 8}}
+      {{- end }}
+{{- end }}

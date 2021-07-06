@@ -1,6 +1,6 @@
 apiVersion: v2
-name: hello
-description: A Helm chart for Kubernetes deployment with Iter8 experiment
+name: deploy
+description: A Helm chart for Kubernetes deployment with SLO validation
 type: application
 version: 0.1.0
 appVersion: 0.1.0

@@ -3,29 +3,31 @@ kind: Service
 metadata:
   name: {{ .Values.stable.name }}
   labels:
-    {{ .Values.common.regularLabels | nindent 4 }}
-    {{ .Values.common.selectorLabels | nindent 4 }}
-    {{ .Values.stable.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.common.regularLabels | nindent 4 }}
+    {{- toYaml .Values.common.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.stable.selectorLabels | nindent 4 }}
 spec:
   type: ClusterIP
   ports:
   - {{ .Values.common.servicePortInfo }}
   selector:
-    {{ .Values.common.selectorLabels | nindent 4 }}
-    {{ .Values.stable.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.common.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.stable.selectorLabels | nindent 4 }}
 ---
+{{- if .Values.candidate }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.candidate.name }}
   labels:
-    {{ .Values.common.regularLabels | nindent 4 }}
-    {{ .Values.common.selectorLabels | nindent 4 }}
-    {{ .Values.candidate.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.common.regularLabels | nindent 4 }}
+    {{- toYaml .Values.common.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.candidate.selectorLabels | nindent 4 }}
 spec:
   type: ClusterIP
   ports:
   - {{ .Values.common.servicePortInfo }}
   selector:
-    {{ .Values.common.selectorLabels | nindent 4 }}
-    {{ .Values.candidate.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.common.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.candidate.selectorLabels | nindent 4 }}
+{{- end }}    
