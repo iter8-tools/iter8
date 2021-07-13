@@ -2,15 +2,10 @@
 template: main.html
 ---
 
-# Notification Tasks
-
-## `notification/slack`
-
-### Overview
-
+# `notification/slack`
 The `notification/slack` task posts a Slack message about current state of the experiment.
 
-### Example
+## Example
 
 The following task notifies a Slack channel with id `C0138103183` and using the token contained in the secret `slack-token` in the `ns` namespace.
 
@@ -21,22 +16,22 @@ with:
   secret: ns/slack-token
 ```
 
-### Inputs
+## Inputs
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | channel | string | Name of the Slack channel to which messages should be posted. | Yes |
 | secret | string | Identifies a secret containing a `token` to be used for authentication.  Expressed as `namespace/name`. If `namespace` is not specified, the namespace of the experiment is used. | Yes |
 
-### Result
+## Result
 
 A Slack message describing the experiment will be posted to the specified channel. Below is a sample Slack notification from this task.
 
 ![Sample Slack notificiation](../../images/slack-notification.png)
 
-### Requirements
+## Requirements
 
-#### Slack API token
+### Slack API token
 
 An API token allowing posting messages to the desired Slack channel is needed. To obtain a suitable token, see [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks). Once you have the token, store it in a Kubernetes secret. For example, to create the secret _slack-secret_ in the default namespace:
 
@@ -44,7 +39,7 @@ An API token allowing posting messages to the desired Slack channel is needed. T
 kubectl create secret generic slack-secret --from-literal=token=<slack token>
 ```
 
-#### Permission to read secret with Slack token
+### Permission to read secret with Slack token
 
 The Iter8 task runner needs permission to read the identified secret. For example the following RBAC changes will allow the task runner read the secret from the default namespace:
 
@@ -82,6 +77,6 @@ kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samp
       namespace: iter8-system
     ```
 
-#### Slack channel ID
+### Slack channel ID
 
 A Slack channel is identified by an id. To find the id, open the Slack channel in a web browser. The channel id is the portion of the URL of the form: `CXXXXXXXX`

@@ -25,7 +25,7 @@ The following are the set of builtin Iter8 metrics.
 | iter8-system | latency-99th-percentile | Gauge | 99th percentile response latency |
 
 ## Collecting builtin metrics
-Use the [`metrics/collect` task](../reference/tasks/metrics.md) in an experiment to collect builtin metrics for your app/ML model versions.
+Use the [`metrics/collect` task](../reference/tasks/metrics-collect.md) in an experiment to collect builtin metrics for your app/ML model versions.
 
 ## Example
 For an example of an experiment that uses builtin metrics, look inside the Knative experiment in [this tutorial](../../tutorials/knative/testing-strategies/conformance/#5-launch-experiment).
