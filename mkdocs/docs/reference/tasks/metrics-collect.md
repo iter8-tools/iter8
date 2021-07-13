@@ -30,44 +30,6 @@ start:
 ```
 
 ## Inputs
-
-<!-- const (
-	// CollectTaskName is the name of the task this file implements
-	CollectTaskName string = "collect"
-
-	// DefaultQPS is the default value of QPS (queries per sec) in collect task inputs
-	DefaultQPS float32 = 8
-
-	// DefaultTime is the default value of time (duration of queries) in collect task inputs
-	DefaultTime string = "5s"
-)
-
-// Version contains header and url information needed to send requests to each version.
-type Version struct {
-	// name of the version
-	// version names must be unique and must match one of the version names in the
-	// VersionInfo field of the experiment
-	Name string `json:"name" yaml:"name"`
-	// how many queries per second will be sent to this version; optional; default 8
-	QPS *float32 `json:"qps,omitempty" yaml:"qps,omitempty"`
-	// HTTP headers to use in the query for this version; optional
-	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
-	// URL to use for querying this version
-	URL string `json:"url" yaml:"url"`
-}
-
-// CollectInputs contain the inputs to the metrics collection task to be executed.
-type CollectInputs struct {
-	// how long to run the metrics collector; optional; default 5s
-	Time *string `json:"time,omitempty" yaml:"time,omitempty"`
-	// list of versions
-	Versions []Version `json:"versions" yaml:"versions"`
-	// URL of the JSON file to send during the query; optional
-	PayloadURL *string `json:"payloadURL,omitempty" yaml:"payloadURL,omitempty"`
-	// if LoadOnly is set to true, this task will send requests without collecting metrics; optional
-	LoadOnly *bool `json:"loadOnly,omitempty" yaml:"loadOnly,omitempty"`	
-} -->
-
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | time | string | Duration of the `metrics/collect` task run. Specified in the [Go duration string format](https://golang.org/pkg/time/#ParseDuration). Default value is `5s`. | No |
