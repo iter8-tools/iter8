@@ -44,7 +44,7 @@ export ITER8=$(pwd)
 $ITER8/samples/istio/gitops/platformsetup.sh
 ```
 
-replacing `[YOUR_ORG]` with your Github organization or username. Now, do the same replacement operation to update some references in the repo so they will point at your forked repo.
+replacing `[YOUR_ORG]` with your GitHub organization or username. Now, do the same replacement operation to update some references in the repo so they will point at your forked repo.
 
 === "MacOS"
     ```shell
@@ -79,9 +79,9 @@ kubectl apply -f $ITER8/samples/istio/gitops/argocd-app.yaml
 
 Now Argo CD UI should show a new app called `gitops` is created. Make sure it is showing both Healthy and Synced - this might take a few minutes.
 
-## Step 5. Setup Github token
+## Step 5. Setup GitHub token
 
-At the end of an experiment, Iter8 will need to update Env repo so the winner of the experiment becomes the new baseline (it will also need to perform various clean up tasks in the Env repo -- we will discuss these later). To accomplish this, Iter8 will need to have access to your Env repo, so it can make the necessary changes by creating PRs. First, login to www.github.com, and from the upper right corner of the page, go to Settings > Developer settings > Personal access token > Generate new token. Make sure the token is granted access for `repo.public_repo`. Now create a K8s secret from the token so that Iter8 can use it at runtime.
+At the end of an experiment, Iter8 will need to update Env repo so the winner of the experiment becomes the new baseline (it will also need to perform various clean up tasks in the Env repo -- we will discuss these later). To accomplish this, Iter8 will need to have access to your Env repo, so it can make the necessary changes by creating PRs. First, login to [github.com](https://github.com), and from the upper right corner of the page, go to Settings > Developer settings > Personal access token > Generate new token. Make sure the token is granted access for `repo.public_repo`. Now create a K8s secret from the token so that Iter8 can use it at runtime.
 
 Run the following (replace the token string with your own token):
 
