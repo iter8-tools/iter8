@@ -6,15 +6,14 @@ template: main.html
 
 !!! tip "Scenario: Canary rollout with fixed-%-split"
 
-    [Fixed-%-split](../../../../concepts/buildingblocks/#rollout-strategy) is a type of canary rollout strategy. It enables you to experiment while sending a fixed percentage of traffic to each version as shown below.
+    [Fixed-%-split](../../../concepts/buildingblocks.md#fixed-split) is a type of canary rollout strategy. It enables you to experiment while sending a fixed percentage of traffic to each version as shown below.
 
     ![Fixed % split](../../../images/canary-%-based.png)
     
-## 1. Setup
-* Setup your K8s cluster with Knative and Iter8 as described [here](../../../../getting-started/quick-start/knative/platform-setup/).
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+???+ warning "Platform setup"
+    Follow [these steps](../platform-setup.md) to install Iter8 and Knative in your K8s cluster.
 
-## 2. Create versions and initialize traffic split
+## 1. Create versions and fix traffic split
 ```shell
 kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
 kubectl apply -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml
@@ -47,13 +46,7 @@ kubectl wait --for=condition=Ready ksvc/sample-app
         percent: 40
     ```
 
-## 3. Generate requests
-Please follow [Step 3 of the quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#3-generate-requests).
-
-## 4. Define metrics
-Please follow [Step 4 of the quick start tutorial](../../../getting-started/quick-start/knative/tutorial.md#4-define-metrics).
-
-## 5. Launch experiment
+## 2. Launch experiment
 ```shell
 kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
 ```
@@ -68,9 +61,17 @@ kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
       # target identifies the knative service under experimentation using its fully qualified name
       target: default/sample-app
       strategy:
-        testingPattern: A/B
+        testingPattern: Canary
         deploymentPattern: FixedSplit
         actions:
+          loop:
+          - task: metrics/collect
+            with:
+              versions:
+              - name: sample-app-v1
+                url: http://sample-app-v1.default.svc.cluster.local
+              - name: sample-app-v2
+                url: http://sample-app-v2.default.svc.cluster.local
           finish: # run the following sequence of tasks at the end of the experiment
           - task: common/exec # promote the winning version      
             with:
@@ -80,20 +81,18 @@ kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
               - |
                 kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
       criteria:
-        requestCount: iter8-knative/request-count
-        rewards: # Business rewards
-        - metric: iter8-knative/user-engagement
-          preferredDirection: High # maximize user engagement
+        requestCount: iter8-system/request-count
         objectives: 
-        - metric: iter8-knative/mean-latency
+        - metric: iter8-system/mean-latency
           upperLimit: 50
-        - metric: iter8-knative/95th-percentile-tail-latency
+        - metric: iter8-system/latency-95th-percentile
           upperLimit: 100
-        - metric: iter8-knative/error-rate
+        - metric: iter8-system/error-rate
           upperLimit: "0.01"
       duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 10
+        maxLoops: 10
+        intervalSeconds: 1
+        iterationsPerLoop: 1
       versionInfo:
         # information about app versions used in this experiment
         baseline:
@@ -108,12 +107,11 @@ kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
             value: candidate
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial for Knative](../../../../getting-started/quick-start/knative/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`fixedsplit-exp`) in your `iter8ctl` and `kubectl` commands.
+## 3. Observe experiment
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
-## 7. Cleanup
+## 4. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/knative/fixed-split/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/quickstart/fortio.yaml
 kubectl apply -f $ITER8/samples/knative/fixed-split/experimentalservice.yaml
 ```

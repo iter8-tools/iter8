@@ -14,7 +14,7 @@ template: main.html
 
     ![CICD+Iter8](../../../images/CICD+Iter8.png)
 
-    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../../../getting-started/quick-start/istio/platform-setup.md#1-create-kubernetes-cluster). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
+    We assume the reader has at least a basic understanding of how Iter8 works from the [quick start tutorial](../quick-start.md). Since the Env repo is at the heart of GitOps, we will focus mainly on how to setup and manage the Env repo during application update. In this tutorial, we will cover the following topics.
 
     1. How to setup an Env repo to work with Iter8+GitOps
     2. How to update the Env repo to start an Iter8 experiment
@@ -24,7 +24,7 @@ template: main.html
     Unlike other progressive delivery tools, Iter8 adheres to GitOps guarantees by ensuring the desired state is always in sync with the actual state. App version that failed promotion criteria will never get promoted, even if the cluster had to be recreated from scratch. This important GitOps property is often not guaranteed by other tools!
 
 ## Step 1. Create K8s cluster
-If you don't already have a K8s cluster, [create a Minikube or Kind K8s cluster locally](../../../getting-started/quick-start/istio/platform-setup.md).
+If you don't already have a K8s cluster, [create a Minikube or Kind K8s cluster locally](../platform-setup.md#1-create-kubernetes-cluster).
 
 ## Step 2. Fork repo
 
@@ -44,7 +44,7 @@ export ITER8=$(pwd)
 $ITER8/samples/istio/gitops/platformsetup.sh
 ```
 
-replacing `[YOUR_ORG]` with your Github organization or username. Now, do the same replacement operation to update some references in the repo so they will point at your forked repo.
+replacing `[YOUR_ORG]` with your GitHub organization or username. Now, do the same replacement operation to update some references in the repo so they will point at your forked repo.
 
 === "MacOS"
     ```shell
@@ -79,9 +79,9 @@ kubectl apply -f $ITER8/samples/istio/gitops/argocd-app.yaml
 
 Now Argo CD UI should show a new app called `gitops` is created. Make sure it is showing both Healthy and Synced - this might take a few minutes.
 
-## Step 5. Setup Github token
+## Step 5. Setup GitHub token
 
-At the end of an experiment, Iter8 will need to update Env repo so the winner of the experiment becomes the new baseline (it will also need to perform various clean up tasks in the Env repo -- we will discuss these later). To accomplish this, Iter8 will need to have access to your Env repo, so it can make the necessary changes by creating PRs. First, login to www.github.com, and from the upper right corner of the page, go to Settings > Developer settings > Personal access token > Generate new token. Make sure the token is granted access for `repo.public_repo`. Now create a K8s secret from the token so that Iter8 can use it at runtime.
+At the end of an experiment, Iter8 will need to update Env repo so the winner of the experiment becomes the new baseline (it will also need to perform various clean up tasks in the Env repo -- we will discuss these later). To accomplish this, Iter8 will need to have access to your Env repo, so it can make the necessary changes by creating PRs. First, login to [github.com](https://github.com), and from the upper right corner of the page, go to Settings > Developer settings > Personal access token > Generate new token. Make sure the token is granted access for `repo.public_repo`. Now create a K8s secret from the token so that Iter8 can use it at runtime.
 
 Run the following (replace the token string with your own token):
 

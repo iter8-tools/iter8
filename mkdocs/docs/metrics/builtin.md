@@ -5,9 +5,9 @@ template: main.html
 # Builtin Metrics
 
 !!! tip "Builtin latency/error metrics"    
-    Iter8 ships with a set of nine builtin metrics that measure your app/ML model's performance in terms of latency and errors. You can collect and use these metrics in experiments without the need to configure any external databases. 
+    Iter8 ships with a set of nine builtin metrics that measure your application's performance in terms of latency and errors. You can collect and use these metrics in experiments without the need to configure any external databases. 
     
-    This feature enables you to get started with Iter8 experiments, especially, SLO validation experiments, quickly.
+    This feature enables you to get started with Iter8 experiments, especially, SLO validation experiments, quickly. As part of metrics collection, Iter8 will also generate HTTP requests to the application end-point.
 
 ## List of builtin metrics
 The following are the set of builtin Iter8 metrics.

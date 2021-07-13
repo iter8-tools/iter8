@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fortio
+spec:
+  template:
+    spec:
+      volumes:
+      - name: shared
+        emptyDir: {}
+      containers:
+      - name: fortio
+        image: fortio/fortio
+        command: ["fortio", "load", "-allow-initial-errors", "-t", "6000s", "-qps", "16", "-json", "/shared/fortiooutput.json", $(URL)]
+        env:
+        - name: URL
+          value: web.test:8080
+        volumeMounts:
+        - name: shared
+          mountPath: /shared         
+      - name: busybox
+        image: busybox:1.28
+        command: ['sh', '-c', 'echo busybox is running! && sleep 600']
+        volumeMounts:
+        - name: shared
+          mountPath: /shared       
+      restartPolicy: Never

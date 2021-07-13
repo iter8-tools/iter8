@@ -7,25 +7,27 @@ hide:
 
 # Install Iter8
 
-!!! tip "Pre-requisite: Kustomize v3+"
-    Get Kustomize v3+ by following [these instructions](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-
 Install Iter8 in your Kubernetes cluster as follows.
 
 ```shell
-export TAG=v0.6.5
+# Kustomize v3+ is required for the following steps
+export TAG=v0.7.4 
 kustomize build https://github.com/iter8-tools/iter8/install/core/?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build https://github.com/iter8-tools/iter8/install/builtin-metrics/?ref=${TAG} | kubectl apply -f -
 kubectl wait --for=condition=Ready pods --all -n iter8-system
 ```
 
-## Pinning the Iter8 version
-To select the version of Iter8 during installation, select any Iter8 version (>= v0.6.0) from  [Iter8's release history](https://github.com/iter8-tools/iter8/releases) and use it as the `TAG` above.
+## Install `iter8ctl`
+The `iter8ctl` CLI enables observing the results of Iter8 experiments in real-time. Install `iter8ctl` on your local machine as follows. You can change the directory where `iter8ctl` is installed by changing `GOBIN` below.
 
-## RBAC rules
-As part of Iter8 installation, the following RBAC rules are also installed in your cluster.
-??? info "Default RBAC Rules"
+```shell
+# Go 1.13+ is required for the following step
+GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
+```
+
+
+<!-- ??? info "As part of Iter8 install, these RBAC rules are installed in your cluster."
     | Resource | Permissions | Scope |
     | ----- | ---- | ----------- |
     | experiments.iter8.tools | get, list, patch, update, watch | Cluster-wide |
@@ -38,4 +40,4 @@ As part of Iter8 installation, the following RBAC rules are also installed in yo
     | inferenceservices.serving.knative.dev | get, list, patch, update | Cluster-wide |
     | virtualservices.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
     | destinationrules.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
-    | seldondeployments.machinelearning.seldon.io | get, list, patch, update | Cluster-wide |
+    | seldondeployments.machinelearning.seldon.io | get, list, patch, update | Cluster-wide | -->

@@ -10,11 +10,10 @@ template: main.html
 
     ![Session affinity](../../../images/session-affinity-exp.png)
 
-## 1. Setup
-* Setup your K8s cluster with KFServing and Iter8 as described [here](../../../../getting-started/quick-start/kfserving/platform-setup/).
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+???+ warning "Platform setup"
+    Follow [these steps](../platform-setup.md) to install Iter8, KFServing and Prometheus in your K8s cluster.
 
-## 2. Create ML model versions
+## 1. Create ML model versions
 Deploy two KFServing inference services corresponding to two versions of a TensorFlow classification model, along with an Istio virtual service to split traffic between them.
 
 ```shell
@@ -64,7 +63,7 @@ kubectl wait --for=condition=Ready isvc/flowers -n ns-candidate
                 version: flowers-v1
     ```
 
-## 3. Generate requests
+## 2. Generate requests
 Generate requests to your model as follows.
 
 === "Port forward (terminal one)"
@@ -91,10 +90,10 @@ Generate requests to your model as follows.
     done
     ```
 
-## 4. Define metrics
-Please follow [Step 4 of the quick start tutorial](../../../../getting-started/quick-start/kfserving/tutorial/#4-define-metrics).
+## 3. Define metrics
+Please follow [Step 3 of the quick start tutorial](../quick-start.md#3-define-metrics).
 
-## 5. Launch experiment
+## 4. Launch experiment
 ```shell
 kubectl apply -f $ITER8/samples/kfserving/session-affinity/experiment.yaml
 ```
@@ -150,10 +149,10 @@ kubectl apply -f $ITER8/samples/kfserving/session-affinity/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial for KFServing](../../../../getting-started/quick-start/kfserving/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`session-affinity-exp`) in your `iter8ctl` and `kubectl` commands.
+## 5. Observe experiment
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/kfserving/session-affinity/experiment.yaml
 kubectl delete -f $ITER8/samples/kfserving/session-affinity/routing-rule.yaml
