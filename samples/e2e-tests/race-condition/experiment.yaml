@@ -6,6 +6,9 @@ spec:
   target: default/sample-app
   strategy:
     testingPattern: Conformance
+    actions:
+      start:
+      - task: common/readiness
   criteria:
     requestCount: default/request-count
   duration:
