@@ -19,12 +19,10 @@ spec:
     spec:
       containers:
       - name: {{ .Values.common.application }}
-        imagePullPolicy: IfNotPresent
-        image: '{{ .Values.common.repo }}:{{ .Values.stable.imageTag }}'
+        image: '{{ .Values.common.repo }}:{{ required "stable.imageTag value is required!" .Values.stable.imageTag }}'
         ports:
         - name: http
           containerPort: 80
-          protocol: TCP
 ---
 {{- if .Values.candidate }}
 apiVersion: apps/v1
@@ -48,10 +46,8 @@ spec:
     spec:
       containers:
       - name: {{ .Values.common.application }}
-        imagePullPolicy: IfNotPresent
-        image: '{{ .Values.common.repo }}:{{ .Values.candidate.imageTag }}'
+        image: '{{ .Values.common.repo }}:{{ required "candidate.imageTag value is required!" .Values.candidate.imageTag }}'
         ports:
         - name: http
           containerPort: 80
-          protocol: TCP
 {{- end }}
