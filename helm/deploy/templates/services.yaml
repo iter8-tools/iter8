@@ -9,7 +9,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - {{ .Values.common.servicePortInfo }}
+  - {{- toYaml .Values.common.servicePortInfo | nindent 4}}
   selector:
     {{- toYaml .Values.common.selectorLabels | nindent 4 }}
     {{- toYaml .Values.stable.selectorLabels | nindent 4 }}
@@ -26,7 +26,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - {{ .Values.common.servicePortInfo }}
+  - {{- toYaml .Values.common.servicePortInfo | nindent 4}}
   selector:
     {{- toYaml .Values.common.selectorLabels | nindent 4 }}
     {{- toYaml .Values.candidate.selectorLabels | nindent 4 }}

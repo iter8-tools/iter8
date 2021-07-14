@@ -17,10 +17,14 @@ spec:
         {{- toYaml .Values.common.selectorLabels | nindent 8 }}
         {{- toYaml .Values.stable.selectorLabels | nindent 8 }}
     spec:
-      {{- with .Values.stable}}
       containers:
-      - {{- include "deploy.common.containerInfo" . | nindent 8}}
-      {{- end }}
+      - name: {{ .Values.common.application }}
+        imagePullPolicy: IfNotPresent
+        image: nginx:{{ required "A valid .Values.stable.imageTag entry required!" .Values.stable.imageTag }}
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
 ---
 {{- if .Values.candidate }}
 apiVersion: apps/v1
@@ -42,8 +46,12 @@ spec:
         {{- toYaml .Values.common.selectorLabels | nindent 8 }}
         {{- toYaml .Values.candidate.selectorLabels | nindent 8 }}
     spec:
-      {{- with .Values.candidate}}
       containers:
-      - {{- include "deploy.common.containerInfo" . | nindent 8}}
-      {{- end }}
+      - name: {{ .Values.common.application }}
+        imagePullPolicy: IfNotPresent
+        image: nginx:{{ required "A valid .Values.candidate.imageTag entry required!" .Values.candidate.imageTag }}
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
 {{- end }}
