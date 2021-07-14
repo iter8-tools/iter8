@@ -1,6 +1,7 @@
 # values meant for both stable and candidate versions of the application;
 common:
   application: hello
+  repo: "gcr.io/google-samples/hello-app"
   serviceType: ClusterIP
   servicePortInfo:
     port: 80
