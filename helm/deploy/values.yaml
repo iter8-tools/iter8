@@ -4,9 +4,7 @@ common:
   repo: "gcr.io/google-samples/hello-app"
   serviceType: ClusterIP
   servicePortInfo:
-    port: 80
-    targetPort: http
-    protocol: TCP
+    port: 8080
   regularLabels:
     app.kubernetes.io/managed-by: Iter8
   selectorLabels:

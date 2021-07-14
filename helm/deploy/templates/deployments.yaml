@@ -21,8 +21,7 @@ spec:
       - name: {{ .Values.common.application }}
         image: '{{ .Values.common.repo }}:{{ required "stable.imageTag value is required!" .Values.stable.imageTag }}'
         ports:
-        - name: http
-          containerPort: 80
+        - containerPort: 8080
 ---
 {{- if .Values.candidate }}
 apiVersion: apps/v1
@@ -48,6 +47,5 @@ spec:
       - name: {{ .Values.common.application }}
         image: '{{ .Values.common.repo }}:{{ required "candidate.imageTag value is required!" .Values.candidate.imageTag }}'
         ports:
-        - name: http
-          containerPort: 80
+        - containerPort: 8080
 {{- end }}
