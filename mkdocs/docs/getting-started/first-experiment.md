@@ -5,12 +5,12 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    [Dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), profile the candidate using Iter8's [builtin load generation and metrics collection](../metrics/builtin.md) feature, [validate the candidate with latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote it as the latest stable version assuming it is validated.
+    In this tutorial, you will [dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment). You will use an Iter8 experiment to [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote it as the latest stable version. The metrics needed for validation will be collected automatically using Iter8's [builtin metrics](../metrics/builtin.md) feature.
     
     ![SLO validation](../images/yourfirstexperiment.png)
 
 ???+ warning "Platform setup"
-    1. [Helm 3+](https://helm.sh/docs/intro/install/).
+    1. [Helm 3+](https://helm.sh/docs/intro/install/). While Helm is not a pre-requisite for using Iter8, this tutorial uses Helm.
     2. A Kubernetes cluster.
 
         ??? note "Create a local Kubernetes cluster"

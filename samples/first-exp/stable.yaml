@@ -1,0 +1,20 @@
+# values meant for both stable and candidate versions of the application;
+common:
+  application: hello
+  serviceType: ClusterIP
+  servicePortInfo:
+    port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  regularLabels:
+    app.kubernetes.io/managed-by: Iter8
+  selectorLabels:
+    app.kubernetes.io/name: hello
+
+# values meant for stable version of the application only;
+stable:
+  name: hello
+  selectorLabels:
+    app.kubernetes.io/versionType: stable
+  imageTag: "1.0"
