@@ -5,7 +5,6 @@ common:
   serviceType: ClusterIP
   servicePortInfo:
     port: 80
-    targetPort: http
     protocol: TCP
     name: http
   regularLabels:
