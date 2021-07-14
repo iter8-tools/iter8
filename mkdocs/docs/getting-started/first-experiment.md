@@ -40,7 +40,7 @@ helm repo add iter8 https://iter8-tools.github.io/iter8/
 
 ```shell
 helm install \
-  --set stable=gcr.io/google-samples/hello-app:1.0 \
+  -f https://raw.githubusercontent.com/sriumcp/iter8/simplifyknative/samples/first-exp/stable.yaml \
   my-app iter8/deploy
 ```
 
@@ -73,10 +73,7 @@ kubectl create svc clusterip hello --tcp=8080
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
 helm upgrade --install \
-  --set candidate=gcr.io/google-samples/hello-app:2.0 \
-  --set LimitMeanLatency=50.0 \
-  --set LimitErrorRate=0.0 \
-  --set Limit95thPercentileLatency=100.0 \
+  -f https://raw.githubusercontent.com/sriumcp/iter8/simplifyknative/samples/first-exp/stableandcandidate.yaml \
   my-app iter8/deploy
 ```
 
