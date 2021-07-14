@@ -47,7 +47,7 @@ helm install \
 ??? note "Verify that stable version is up"
     ```shell
     # do this in a separate terminal
-    kubectl port-forward svc/hello 8080:8080
+    kubectl port-forward svc/hello 8080:80
     ```
 
     ```shell
@@ -80,7 +80,7 @@ helm upgrade --install \
 ??? note "Verify that candidate version is up"
     ```shell
     # do this in a separate terminal
-    kubectl port-forward svc/hello-candidate 8081:8080
+    kubectl port-forward svc/hello-candidate 8081:80
     ```
 
     ```shell
