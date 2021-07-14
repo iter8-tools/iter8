@@ -1,0 +1,46 @@
+# values meant for both stable and candidate versions of the application;
+common:
+  application: hello
+  serviceType: ClusterIP
+  servicePortInfo:
+    port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  regularLabels:
+    app.kubernetes.io/managed-by: Iter8
+  selectorLabels:
+    app.kubernetes.io/name: hello
+
+# values meant for stable version of the application only;
+stable:
+  name: hello
+  selectorLabels:
+    app.kubernetes.io/versionType: stable
+  imageTag: ""
+
+# values meant for candidate version of the application only;
+candidate:
+  name: hello-candidate
+  selectorLabels:
+    app.kubernetes.io/versionType: candidate
+  imageTag: ""
+
+# values for the SLO validation experiment;
+# experiment.yaml template has these default values set;
+# to change the defaults, either modify experiment.yaml, or 
+# uncomment the following lines and modify the values below
+
+# experiment:
+#   # The SLO validation experiment will collect Iter8's built-in latency and error metrics.
+#   # There will be 8.0 * 5 = 40 queries sent during metrics collection.
+#   # Time is the duration over which queries are sent during metrics collection.
+#   Time: 5s
+#   # QPS is number of queries per second sent during metrics collection.
+#   QPS: 8.0
+#   # (msec) acceptable limit for mean latency of the application
+#   LimitMeanLatency: 500.0
+#   # (msec) acceptable error rate for the application (1%)
+#   LimitErrorRate: 0.01 
+#   # (msec) acceptable limit for 95th percentile latency of the application
+#   Limit95thPercentileLatency: 1000.0
