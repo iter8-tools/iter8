@@ -4,9 +4,7 @@ common:
   repo: "gcr.io/google-samples/hello-app"
   serviceType: ClusterIP
   servicePortInfo:
-    port: 80
-    protocol: TCP
-    name: http
+    port: 8080
   regularLabels:
     app.kubernetes.io/managed-by: Iter8
   selectorLabels:
@@ -16,31 +14,30 @@ common:
 stable:
   name: hello
   selectorLabels:
-    app.kubernetes.io/versionType: stable
+    app.kubernetes.io/track: stable
   imageTag: ""
 
 # values meant for candidate version of the application only;
 candidate:
   name: hello-candidate
   selectorLabels:
-    app.kubernetes.io/versionType: candidate
+    app.kubernetes.io/track: candidate
   imageTag: ""
 
 # values for the SLO validation experiment;
 # experiment.yaml template has these default values set;
-# to change the defaults, either modify experiment.yaml, or 
-# uncomment the following lines and modify the values below
+# to change the defaults, modify the values below
 
-# experiment:
-#   # The SLO validation experiment will collect Iter8's built-in latency and error metrics.
-#   # There will be 8.0 * 5 = 40 queries sent during metrics collection.
-#   # Time is the duration over which queries are sent during metrics collection.
-#   Time: 5s
-#   # QPS is number of queries per second sent during metrics collection.
-#   QPS: 8.0
-#   # (msec) acceptable limit for mean latency of the application
-#   LimitMeanLatency: 500.0
-#   # (msec) acceptable error rate for the application (1%)
-#   LimitErrorRate: 0.01 
-#   # (msec) acceptable limit for 95th percentile latency of the application
-#   Limit95thPercentileLatency: 1000.0
+experiment:
+  # The SLO validation experiment will collect Iter8's built-in latency and error metrics.
+  # There will be 8.0 * 5 = 40 queries sent during metrics collection.
+  # Time is the duration over which queries are sent during metrics collection.
+  Time: 5s
+  # QPS is number of queries per second sent during metrics collection.
+  QPS: 8.0
+  # (msec) acceptable limit for mean latency of the application
+  LimitMeanLatency: 500.0
+  # (msec) acceptable error rate for the application (1%)
+  LimitErrorRate: 0.01 
+  # (msec) acceptable limit for 95th percentile latency of the application
+  Limit95thPercentileLatency: 1000.0
