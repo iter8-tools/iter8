@@ -24,7 +24,8 @@ kubectl wait --for=condition=Ready pods --all -n iter8-system
 To select the version of Iter8 during installation, select any Iter8 version (>= v0.6.0) from  [Iter8's release history](https://github.com/iter8-tools/iter8/releases) and use it as the `TAG` above.
 
 ## RBAC rules
-As part of Iter8 installation, the following RBAC rules are also installed in your cluster.
+As part of Iter8 installation, the following RBAC rules are also installed in your cluster. You can Kustomize Iter8 installation in order to install Iter8 only for the K8s environments of your choice, and eliminate RBAC rules not needed in your environment.
+
 ??? info "Default RBAC Rules"
     | Resource | Permissions | Scope |
     | ----- | ---- | ----------- |
@@ -39,3 +40,5 @@ As part of Iter8 installation, the following RBAC rules are also installed in yo
     | virtualservices.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
     | destinationrules.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
     | seldondeployments.machinelearning.seldon.io | get, list, patch, update | Cluster-wide |
+    | services | get, list, watch | Cluster-wide |
+    | deployments | get, list, watch | Cluster-wide |
