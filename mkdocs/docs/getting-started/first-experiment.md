@@ -39,15 +39,15 @@ helm repo add iter8 https://iter8-tools.github.io/iter8/
 ```
 
 ```shell
-helm install \
-  -f https://raw.githubusercontent.com/sriumcp/iter8/simplifyknative/samples/first-exp/stable.yaml \
-  my-app iter8/deploy
+helm install my-app iter8/deploy \
+  --set stable.imageTag=1.0 \
+  --set candidate=null  
 ```
 
-??? note "Verify that stable version is up"
+??? note "Verify that stable version is 1.0.0"
     ```shell
     # do this in a separate terminal
-    kubectl port-forward svc/hello 8080:80
+    kubectl port-forward svc/hello 8080:8080
     ```
 
     ```shell
@@ -72,15 +72,24 @@ kubectl create svc clusterip hello --tcp=8080
 ## 2. Create candidate version
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
-helm upgrade --install \
-  -f https://raw.githubusercontent.com/sriumcp/iter8/simplifyknative/samples/first-exp/stableandcandidate.yaml \
-  my-app iter8/deploy
+helm upgrade my-app iter8/deploy \
+  --set stable.imageTag=1.0 \
+  --set candidate.imageTag=2.0 \
+  --install  
 ```
 
-??? note "Verify that candidate version is up"
+The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate deployment of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+
+??? note "View application and Iter8 experiment resources"
+    Use the command below to view your application and Iter8 experiment resources.
+    ```shell
+    helm get manifest my-app
+    ```
+
+??? note "Verify that candidate version is 2.0.0"
     ```shell
     # do this in a separate terminal
-    kubectl port-forward svc/hello-candidate 8081:80
+    kubectl port-forward svc/hello-candidate 8081:8080
     ```
 
     ```shell
@@ -94,8 +103,6 @@ helm upgrade --install \
     Version: 2.0.0
     Hostname: hello-bc95d9b56-xp9kv
     ```
-
-The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate deployment of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency SLO (50 msec), error rate SLO (no errors), 95th percentile tail latency SLO (100 msec) specified in the Helm command.
 
 <!-- 
 ```shell
@@ -169,12 +176,19 @@ iter8ctl assert last --condition=Completed --condition=CandidateWon
 Promote the winner as follows.
 
 ```shell
-helm install \
-  --set stable=gcr.io/google-samples/hello-app:2.0 \
-  my-app iter8/deploy
+helm upgrade my-app iter8/deploy \
+  --install \
+  --set stable.imageTag=2.0 \
+  --set candidate=null
 ```
 
-??? note "Verify that candidate is the latest stable version ..."
+??? note "Verify that stable version is 2.0.0"
+    ```shell
+    # kill the port-forward commands from steps 1 and 2
+    # do this in a separate terminal
+    kubectl port-forward svc/hello 8080:8080
+    ```
+
     ```shell
     curl localhost:8080
     ```
@@ -201,7 +215,7 @@ helm uninstall my-app
     ```shell
     $ITER8/helm/deploy
     ```
-    Adapt the `deployment.yaml` and `hpa.yaml` templates as needed by your application in order use this chart in production.
+    Adapt the templates as needed by your application in order use this chart in production.
 
 !!! tip "Try other Iter8 tutorials"
     Iter8 can work in any K8s environment. Try Iter8 in the following environments.
