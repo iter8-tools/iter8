@@ -171,6 +171,7 @@ nav:
     - Task descriptions: 
       - common/readiness: reference/tasks/common-readiness.md
       - common/bash: reference/tasks/common-bash.md
+      - common/http-request: reference/tasks/common-httprequest.md
       - common/exec: reference/tasks/common-exec.md
       - metrics/collect: reference/tasks/metrics-collect.md
       - notification/slack: reference/tasks/notification-slack.md
