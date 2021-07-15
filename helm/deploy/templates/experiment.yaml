@@ -39,7 +39,7 @@ spec:
           time: {{ .Values.experiment.Time | quote }}
           versions:
           - name: baseline
-            url: "http://{{ .Values.candidate.name }}.{{ .Release.Namespace}}:{{ .Values.common.servicePortInfo }}"
+            url: "http://{{ .Values.candidate.name }}.{{ .Release.Namespace}}:{{ .Values.common.servicePortInfo.port }}"
             qps: {{ .Values.experiment.QPS }}
   criteria:
     requestCount: iter8-system/request-count
