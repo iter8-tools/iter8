@@ -17,6 +17,46 @@ on:
     - '.github/workflows/e2e-tests.yaml'
 
 jobs:
+  your-first-experiment:
+    name: your first experiment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"
+
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/first-exp/iter8-setup.sh
+
+    - name: Get Helm
+      uses: azure/setup-helm@v1
+
+    - name: create Knative service versions and iter8 experiment
+      run: |
+        helm repo add iter8 https://iter8-tools.github.io/iter8/
+        helm upgrade my-app iter8/deploy \
+          --set stable.imageTag=1.0 \
+          --set candidate.imageTag=2.0 \
+          --install
+
+    - name: Wait until end of experiment
+      run: |
+        export EXPERIMENT=$(kubectl get experiment -o jsonpath='{.items[0].metadata.name}')
+        # Wait for experiment to complete
+        kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
+        kubectl get experiment $EXPERIMENT -o yaml
+    
+    - name: Check if experiment is complete and successful
+      run: |
+        export ITER8=$(pwd)
+        export EXPERIMENT=$(kubectl get experiment -o jsonpath='{.items[0].metadata.name}')
+        source $ITER8/samples/first-exp/check.sh
+
   quickstart:
     name: quickstart experiment
     runs-on: ubuntu-latest
@@ -31,7 +71,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/first-exp/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
@@ -75,7 +115,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/first-exp/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
@@ -123,7 +163,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/first-exp/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative app
@@ -164,7 +204,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/first-exp/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
@@ -208,7 +248,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh
+        $ITER8/samples/first-exp/iter8-setup.sh
         $ITER8/samples/e2e-tests/race-condition/platform-setup.sh
 
     - name: test race condition
