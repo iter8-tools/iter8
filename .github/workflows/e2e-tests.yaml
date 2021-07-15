@@ -61,8 +61,8 @@ jobs:
         export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  hybrid-with-kong:
-    name: hybrid experiment with kong
+  hybrid-with-ambassador:
+    name: hybrid experiment with ambassador
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -76,7 +76,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/knative/quickstart/iter8-setup.sh        
-        $ITER8/samples/knative/quickstart/platform-setup.sh kong
+        $ITER8/samples/knative/quickstart/platform-setup.sh ambassador
 
     - name: create Knative service and readiness check
       run: |
