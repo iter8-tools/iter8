@@ -17,8 +17,8 @@ on:
     - '.github/workflows/e2e-tests.yaml'
 
 jobs:
-  quickstart-with-contour:
-    name: quickstart experiment with contour
+  quickstart:
+    name: quickstart experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -32,7 +32,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh contour
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
       run: |
@@ -61,8 +61,8 @@ jobs:
         export EXPERIMENT=quickstart-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  hybrid-with-ambassador:
-    name: hybrid experiment with ambassador
+  hybrid:
+    name: hybrid experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -76,7 +76,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/knative/quickstart/iter8-setup.sh        
-        $ITER8/samples/knative/quickstart/platform-setup.sh ambassador
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
       run: |
@@ -109,8 +109,8 @@ jobs:
         export EXPERIMENT=hybrid-exp
         source $ITER8/samples/knative/quickstart/check.sh
 
-  conformance-with-kourier:
-    name: conformance experiment with kourier
+  conformance:
+    name: conformance experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -150,8 +150,8 @@ jobs:
         export EXPERIMENT=conformance-exp
         source $ITER8/samples/knative/conformance/check.sh
         
-  fixed-split-with-contour:
-    name: fixed-split experiment with contour
+  fixed-split:
+    name: fixed-split experiment
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -165,7 +165,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/knative/quickstart/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh contour
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
       run: |

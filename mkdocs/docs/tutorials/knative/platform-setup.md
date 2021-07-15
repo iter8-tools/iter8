@@ -37,19 +37,7 @@ Use a managed K8s cluster, or create a local K8s cluster as follows. If you wish
     ```
 
     * **Install Knative Serving**
-    Knative can work with multiple networking layers. So can Iter8. Choose the networking layer for Knative.
-
-        === "Kong"
-
-            ```shell
-            $ITER8/samples/knative/quickstart/platform-setup.sh kong
-            ```
-
-        === "Contour"
-
-            ```shell
-            $ITER8/samples/knative/quickstart/platform-setup.sh contour
-            ```
+    Knative can work with multiple networking layers. So can Iter8. For a quick start with Knative and Iter8, we recommend Kourier.
 
         === "Kourier"
 
@@ -63,7 +51,7 @@ Use a managed K8s cluster, or create a local K8s cluster as follows. If you wish
             $ITER8/samples/knative/quickstart/platform-setup.sh istio
             ```
 
-=== "Production usage"
+=== "Production install of Knative / other networking layers"
     Refer to the [official Knative serving install instructions](https://knative.dev/docs/install/).
 
 ## 3. Install Iter8

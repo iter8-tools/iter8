@@ -22,10 +22,10 @@ else
 fi
 
 ## 0(c). Ensure network layer is supported
-NETWORK_LAYERS="ambassador kong istio contour gloo kourier"
+NETWORK_LAYERS="istio kourier"
 if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
     echo "Network Layer ${1} unsupported"
-    echo "Use one of ambassador, kong, istio, gloo, kourier, contour"
+    echo "Use one of kourier or istio"
     exit 1
 fi
 
@@ -63,36 +63,7 @@ sleep 10 # allowing enough time for resource creation
 kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
 
 # Step 4: Install a network layer
-if [[ "ambassador" == ${1} ]]; then
-    ##########Installing AMBASSADOR ###########
-    echo "Installing Ambassador for Knative"
-
-    kubectl apply \
-      -f https://getambassador.io/yaml/ambassador/ambassador-crds.yaml \
-      -f https://getambassador.io/yaml/ambassador/ambassador-rbac.yaml \
-      -f https://getambassador.io/yaml/ambassador/ambassador-service.yaml
-
-    kubectl patch clusterrolebinding ambassador -p '{"subjects":[{"kind": "ServiceAccount", "name": "ambassador", "namespace": "ambassador"}]}'
-
-    kubectl set env --namespace ambassador deployments/ambassador AMBASSADOR_KNATIVE_SUPPORT=true
-
-    kubectl patch configmap/config-network \
-      --namespace knative-serving \
-      --type merge \
-      --patch '{"data":{"ingress.class":"ambassador.ingress.networking.knative.dev"}}'
-
-elif [[ "kong" == ${1} ]]; then
-    ##########Installing KONG ###########
-    echo "Installing Kong for Knative"
-
-    kubectl apply -f https://raw.githubusercontent.com/Kong/kubernetes-ingress-controller/0.9.x/deploy/single/all-in-one-dbless.yaml
-
-    kubectl patch configmap/config-network \
-      --namespace knative-serving \
-      --type merge \
-      --patch '{"data":{"ingress.class":"kong"}}'
-
-elif [[ "istio" == ${1} ]]; then
+if [[ "istio" == ${1} ]]; then
     ##########Installing ISTIO ###########
     echo "Installing Istio for Knative"
     WORK_DIR=$(pwd)
@@ -107,31 +78,6 @@ elif [[ "istio" == ${1} ]]; then
     kubectl apply --filename https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/release.yaml
     echo "Istio installed successfully"
     
-
-elif [[ "contour" == ${1} ]]; then
-    ##########Installing CONTOUR ###########
-    echo "Installing Contour for Knative"
-    # Install a properly configured Contour:
-    kubectl apply --filename https://github.com/knative/net-contour/releases/download/${KNATIVE_TAG}/contour.yaml
-
-    # Install the Knative Contour controller:
-    kubectl apply --filename https://github.com/knative/net-contour/releases/download/${KNATIVE_TAG}/net-contour.yaml
-
-    # Configure Knative Serving to use Contour by default:
-    kubectl patch configmap/config-network \
-    -n knative-serving \
-    --type merge \
-    --patch '{"data":{"ingress.class":"contour.ingress.networking.knative.dev"}}'
-    echo "Contour installed successfully"
-
-elif [[ "gloo" == ${1} ]]; then
-    ##########Installing GLOO ###########
-    echo "Installing Gloo for Knative"
-    # Install Gloo and the Knative integration:
-    curl -sL https://run.solo.io/gloo/install | sh
-    export PATH=$HOME/.gloo/bin:$PATH
-    glooctl install knative --install-knative=false
-    echo "Gloo installed successfully"
     
 elif [[ "kourier" == ${1} ]]; then
     ##########Installing KOURIER ###########
