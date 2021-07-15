@@ -112,23 +112,13 @@ nav:
     - What is Iter8?: concepts/whatisiter8.md
     - Experiment building blocks: concepts/buildingblocks.md
   - Getting Started:
+    - Your first experiment: getting-started/first-experiment.md
     - Install Iter8: getting-started/install.md
     - Get help: getting-started/help.md
-    - Quick start tutorials:
-      - KFServing:
-        - A/B testing: getting-started/quick-start/kfserving/tutorial.md
-        - Platform setup: getting-started/quick-start/kfserving/platform-setup.md
-      - Seldon:
-        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/seldon/tutorial.md
-        - Platform setup: getting-started/quick-start/seldon/platform-setup.md
-      - Knative:
-        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/knative/tutorial.md
-        - Platform setup: getting-started/quick-start/knative/platform-setup.md
-      - Istio:
-        - Hybrid (A/B + SLOs) testing: getting-started/quick-start/istio/tutorial.md
-        - Platform setup: getting-started/quick-start/istio/platform-setup.md
   - Tutorials:
     - KFServing:
+      - Quick start: tutorials/kfserving/quick-start.md
+      - Platform setup: tutorials/kfserving/platform-setup.md
       - Testing strategies:
         - Hybrid (A/B + SLOs) testing: tutorials/kfserving/testing-strategies/hybrid.md
         - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
@@ -137,24 +127,29 @@ nav:
         - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
         - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
     - Seldon:
+      - Quick start: tutorials/seldon/quick-start.md
+      - Platform setup: tutorials/seldon/platform-setup.md
       - Testing strategies:
         - Hybrid (A/B + SLOs) testing: tutorials/seldon/testing-strategies/hybrid.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
     - Knative:
+      - Quick start: tutorials/knative/quick-start.md
+      - Platform setup: tutorials/knative/platform-setup.md
       - Testing strategies:
-        - SLO validation: tutorials/knative/testing-strategies/slovalidationprogressive.md
-        - SLO validation (builtin metrics): tutorials/knative/testing-strategies/conformance.md
-        - A/B testing (quick start): tutorials/knative/testing-strategies/ab.md
+        - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
+        - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
         - User segmentation: tutorials/knative/rollout-strategies/user-segmentation.md
     - Istio:
+      - Quick start: tutorials/istio/quick-start.md
+      - Platform setup: tutorials/istio/platform-setup.md
       - Testing strategies:
         - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
         - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
-        - Hybrid (A/B + SLOs) testing (quick start): tutorials/istio/testing-strategies/hybrid.md
+        - Hybrid (A/B + SLOs) testing: tutorials/istio/testing-strategies/hybrid.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md

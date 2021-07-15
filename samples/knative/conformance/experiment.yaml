@@ -14,13 +14,14 @@ spec:
         with:
           versions: 
           - name: sample-app-v1
-            url: http://sample-app.default.svc.cluster.local
+            url: http://sample-app-v1.default.svc.cluster.local
   criteria:
     objectives: 
     - metric: iter8-system/mean-latency
       upperLimit: 50
     - metric: iter8-system/error-count
       upperLimit: 0
+    requestCount: iter8-system/request-count
   duration:
     maxLoops: 10
     intervalSeconds: 1
