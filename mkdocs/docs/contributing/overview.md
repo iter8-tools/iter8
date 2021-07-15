@@ -43,7 +43,7 @@ Not everything happens through a GitHub pull request. Please come to our
 - Everyone is welcome to join our weekly community meetings. You never need an
 invite to attend. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
-- Our community meetings are on Wednesdays at 1PM EST/EDT. You can find the video
+- Our community meetings are on Wednesdays from 11 AM - 12 PM EST/EDT. You can find the video
 conference link [here](https://meet.google.com/ocg-bzoa-gqe). You can find the
 agenda [here](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing) as well as the meeting notes [here](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing).
 - If you have a topic you would like to discuss, please put it on the agenda as 
