@@ -75,7 +75,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/knative/quickstart/iter8-setup.sh        
+        $ITER8/samples/knative/quickstart/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
