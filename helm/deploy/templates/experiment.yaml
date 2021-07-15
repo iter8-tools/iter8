@@ -36,22 +36,22 @@ spec:
       - task: metrics/collect
         with:
           # safe nesting of experiment values
-          time: {{ ( .Values.experiment | default dict ).Time | default "5s" }}
+          time: {{ .Values.experiment.Time | quote }}
           versions:
           - name: baseline
-            url: {{ .Values.candidate.name }}.{{ .Release.Namespace}}
-            qps: {{ ( .Values.experiment | default dict ).QPS | default 8.0 }}
+            url: "http://{{ .Values.candidate.name }}.{{ .Release.Namespace}}:{{ .Values.common.servicePortInfo }}"
+            qps: {{ .Values.experiment.QPS }}
   criteria:
     requestCount: iter8-system/request-count
     indicators:
     - iter8-system/error-count
     objectives:
     - metric: iter8-system/mean-latency
-      upperLimit: {{ ( .Values.experiment | default dict ).LimitMeanLatency | default 50.0 | quote }}
+      upperLimit: {{ .Values.experiment.LimitMeanLatency | quote }}
     - metric: iter8-system/error-rate
-      upperLimit: {{ ( .Values.experiment | default dict ).LimitErrorRate | default 0.0 | quote }}
+      upperLimit: {{ .Values.experiment.LimitErrorRate | quote }}
     - metric: iter8-system/latency-95th-percentile
-      upperLimit: {{ ( .Values.experiment | default dict ).Limit95thPercentileLatency | default 100.0 | quote }}
+      upperLimit: {{ .Values.experiment.Limit95thPercentileLatency | quote }}
   duration:
     intervalSeconds: 1
     iterationsPerLoop: 1
