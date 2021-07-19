@@ -29,81 +29,20 @@ if [[ ! " ${NETWORK_LAYERS[@]} " =~ " ${1} " ]]; then
     exit 1
 fi
 
-## 0(d). Ensure Kustomize v3 or v4 is available
-KUSTOMIZE_VERSION=$(kustomize  version | cut -d. -f1 | tail -c 2)
-if [[ ${KUSTOMIZE_VERSION} -ge "3" ]]; then
-    echo "Kustomize v3+ available"
-else
-    echo "Kustomize v3+ is unavailable"
-    exit 1
-fi
-
-# Step 1: Export correct tags for install artifacts
-export KNATIVE_TAG="${KNATIVE_TAG:-v0.24.0}"
-echo "KNATIVE_TAG = $KNATIVE_TAG"
-
-# Step 2: Install Knative (https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-serving-component)
-
-# 2(a). Install the Custom Resource Definitions (aka CRDs):
-echo "Installing Knative CRDs"
-
-kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_TAG}/serving-crds.yaml
-
-kubectl wait crd --all --for condition=established --timeout=120s
-
-
-# 2(b). Install the core components of Serving (see below for optional extensions):
-echo "Installing Knative core components"
-kubectl apply --filename https://github.com/knative/serving/releases/download/${KNATIVE_TAG}/serving-core.yaml
-
-
-# Step 3: Ensure readiness of Knative-serving pods
-echo "Waiting for all Knative-serving pods to be running..."
-sleep 10 # allowing enough time for resource creation
-kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
-
-# Step 4: Install a network layer
+# Step 4: Install Knative using operator
 if [[ "istio" == ${1} ]]; then
-    ##########Installing ISTIO ###########
-    echo "Installing Istio for Knative"
-    WORK_DIR=$(pwd)
-    TEMP_DIR=$(mktemp -d)
-    cd $TEMP_DIR
-    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.7.0 sh -
-    cd istio-1.7.0
-    export PATH=$PWD/bin:$PATH
-    cd $WORK_DIR
-    curl -L https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/istio-minimal-operator.yaml | istioctl install -y -f -
-
-    kubectl apply --filename https://github.com/knative/net-istio/releases/download/${KNATIVE_TAG}/release.yaml
-    echo "Istio installed successfully"
-    
+    kubectl apply -f https://github.com/knative/operator/releases/download/v0.24.0/operator.yaml
+    kubectl wait --for=condition=available deploy/knative-operator --timeout=120s
+    kubectl apply -f $ITER8/samples/knative/quickstart/withistio.yaml
+    kubectl wait --for=condition=available deployment --all -n knative-serving --timeout=120s
+    kubectl wait crd --all --for condition=established --timeout=120s
+    kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
     
 elif [[ "kourier" == ${1} ]]; then
-    ##########Installing KOURIER ###########
-    echo "Installing Kourier for Knative"
-    
-    # Install the Knative Kourier controller:
-    kubectl apply --filename https://github.com/knative/net-kourier/releases/download/${KNATIVE_TAG}/kourier.yaml
-
-    # Configure Knative Serving to use Kourier by default:
-    kubectl patch configmap/config-network \
-    -n knative-serving \
-    --type merge \
-    --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
-    echo "Kourier installed successfully"
+    kubectl apply -f https://github.com/knative/operator/releases/download/v0.24.0/operator.yaml
+    kubectl wait --for=condition=available deploy/knative-operator --timeout=120s
+    kubectl apply -f $ITER8/samples/knative/quickstart/withkourier.yaml
+    kubectl wait --for=condition=available deployment --all -n knative-serving --timeout=120s
+    kubectl wait crd --all --for condition=established --timeout=120s    
+    kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
 fi
-
-### Note: the preceding steps perform domain install; following steps perform Iter8 install
-
-# Step 5: Install Iter8
-echo "Installing Iter8 with Knative support"
-kustomize build $ITER8/install/core | kubectl apply -f -
-kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build $ITER8/install/builtin-metrics | kubectl apply -f -
-kubectl wait --for=condition=Ready pods --all -n iter8-system
-
-# Step 6: Verify platform setup
-echo "Verifying platform setup"
-kubectl wait --for condition=Ready --timeout=300s pods --all -n knative-serving
-kubectl wait --for condition=Ready --timeout=300s pods --all -n iter8-system
