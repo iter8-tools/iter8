@@ -5,12 +5,12 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    In this tutorial, you will [dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote it as the latest stable version.
+    In this tutorial, you will [dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote the candidate.
     
     ![SLO validation](../images/yourfirstexperiment.png)
 
 ???+ warning "Pre-requisites"
-    1. [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses Iter8's Helmex feature.
+    1. [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the Helmex pattern.
     2. A Kubernetes cluster.
 
         ??? note "Create a local Kubernetes cluster"
@@ -28,11 +28,11 @@ template: main.html
                 ```shell
                 minikube start
                 ```
-    3. [Iter8 installed in your K8s cluster](install.md#install-iter8).
+    3. [Iter8 installed in your K8s cluster](install.md).
     4. [`iter8ctl`](install.md#install-iter8ctl).
 
-## 1. Create stable version
-Deploy the stable version of the `hello world` application using Helm.
+## 1. Create baseline version
+Deploy the baseline version of the `hello world` application using Helm.
 
 ```shell
 helm repo add iter8 https://iter8-tools.github.io/iter8/
@@ -40,11 +40,11 @@ helm repo add iter8 https://iter8-tools.github.io/iter8/
 
 ```shell
 helm install my-app iter8/deploy \
-  --set stable.imageTag=1.0 \
+  --set baseline.imageTag=1.0 \
   --set candidate=null  
 ```
 
-??? note "Verify that stable version is 1.0.0"
+??? note "Verify that baseline version is 1.0.0"
     ```shell
     # do this in a separate terminal
     kubectl port-forward svc/hello 8080:8080
@@ -73,7 +73,7 @@ kubectl create svc clusterip hello --tcp=8080
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
 helm upgrade my-app iter8/deploy \
-  --set stable.imageTag=1.0 \
+  --set baseline.imageTag=1.0 \
   --set candidate.imageTag=2.0 \
   --install  
 ```
@@ -178,11 +178,11 @@ Promote the winner as follows.
 ```shell
 helm upgrade my-app iter8/deploy \
   --install \
-  --set stable.imageTag=2.0 \
+  --set baseline.imageTag=2.0 \
   --set candidate=null
 ```
 
-??? note "Verify that stable version is 2.0.0"
+??? note "Verify that baseline version is 2.0.0"
     ```shell
     # kill the port-forward commands from steps 1 and 2
     # do this in a separate terminal

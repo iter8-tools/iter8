@@ -40,7 +40,7 @@ jobs:
       run: |
         helm repo add iter8 https://iter8-tools.github.io/iter8/
         helm upgrade my-app iter8/deploy \
-          --set stable.imageTag=1.0 \
+          --set baseline.imageTag=1.0 \
           --set candidate.imageTag=2.0 \
           --install
 
@@ -72,7 +72,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/first-exp/iter8-setup.sh
-        curl -sL install.konk.dev | bash
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
       run: |
@@ -116,7 +116,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/first-exp/iter8-setup.sh
-        curl -sL install.konk.dev | bash
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
       run: |
@@ -164,7 +164,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/first-exp/iter8-setup.sh
-        curl -sL install.konk.dev | bash
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative app
       run: |
@@ -205,7 +205,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/first-exp/iter8-setup.sh
-        curl -sL install.konk.dev | bash
+        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
       run: |
@@ -249,7 +249,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/first-exp/iter8-setup.sh
-        curl -sL install.konk.dev | bash
+        $ITER8/samples/e2e-tests/race-condition/platform-setup.sh
 
     - name: test race condition
       run: |
