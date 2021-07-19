@@ -14,13 +14,9 @@ template: main.html
     
     ![Hybrid testing](../../../images/quickstart-hybrid.png)
 
-???+ warning "Before you begin, you will need... "
-    1. The [kubectl CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-    2. [Kustomize 3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-    3. [Go 1.13+](https://golang.org/doc/install).
     
 ## 1. Steps 1, 2, and 3
-* Follow [Steps 1, 2, and 3 of the KFServing quick start tutorial](../../../getting-started/quick-start/kfserving/tutorial.md). 
+* Follow [Steps 1, 2, and 3 of the KFServing quick start tutorial](../quick-start.md). 
 
 ## 4. Define metrics
 ```shell
@@ -194,8 +190,8 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial for KFServing](../../../getting-started/quick-start/kfserving/tutorial.md#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`hybrid-exp`) in your `iter8ctl` and `kubectl` commands.
+## 6. Observe experiment
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
 ## 7. Cleanup
 ```shell

@@ -13,11 +13,13 @@ template: main.html
     
     ![SLO validation with progressive traffic shift](../../../images/slovalidationprogressive.png)
 
-## Steps 1 to 4
-* Follow [Steps 1 to 4 of the Iter8 quick start tutorial](../../../../getting-started/quick-start/istio/tutorial/).
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+???+ warning "Platform setup"
+    Follow [these steps](../platform-setup.md) to install Iter8 and Istio in your K8s cluster.    
 
-## 5. Launch experiment
+## Steps 1 to 3
+Follow [Steps 1 to 3 of the Iter8 quick start tutorial](../quick-start.md).
+
+## 4. Launch experiment
 Launch the SLO validation experiment.
 ```shell
 kubectl apply -f $ITER8/samples/istio/slovalidation/experiment.yaml
@@ -84,10 +86,10 @@ kubectl apply -f $ITER8/samples/istio/slovalidation/experiment.yaml
             fieldPath: .spec.http[0].route[1].weight
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial for Istio](../../../../getting-started/quick-start/istio/tutorial/#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`slovalidation-exp`) in your `iter8ctl` and `kubectl` commands.
+## 5. Observe experiment
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/istio/slovalidation/experiment.yaml

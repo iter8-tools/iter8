@@ -6,11 +6,7 @@ hide:
 ---
 
 # Install Iter8
-
-!!! tip "Pre-requisite: Kustomize v3+"
-    Get Kustomize v3+ by following [these instructions](https://kubectl.docs.kubernetes.io/installation/kustomize/).
-
-Install Iter8 in your Kubernetes cluster as follows.
+Install Iter8 in your Kubernetes cluster as follows. This step requires [Kustomize v3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
 
 ```shell
 export TAG=v0.7.7
@@ -20,7 +16,13 @@ kustomize build https://github.com/iter8-tools/iter8/install/builtin-metrics/?re
 kubectl wait --for=condition=Ready pods --all -n iter8-system
 ```
 
-## Pinning the Iter8 version
+## Install `iter8ctl`
+Install `iter8ctl` CLI as follows. This step requires [Go 1.16+](https://golang.org/doc/install).
+```shell
+GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.5
+```
+
+<!-- ## Pinning the Iter8 version
 To select the version of Iter8 during installation, select any Iter8 version (>= v0.6.0) from  [Iter8's release history](https://github.com/iter8-tools/iter8/releases) and use it as the `TAG` above.
 
 ## RBAC rules
@@ -41,4 +43,4 @@ As part of Iter8 installation, the following RBAC rules are also installed in yo
     | destinationrules.networking.istio.io | get, list, patch, update, create, delete | Cluster-wide |
     | seldondeployments.machinelearning.seldon.io | get, list, patch, update | Cluster-wide |
     | services | get, list, watch | Cluster-wide |
-    | deployments | get, list, watch | Cluster-wide |
+    | deployments | get, list, watch | Cluster-wide | -->

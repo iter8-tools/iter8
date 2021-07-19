@@ -11,13 +11,13 @@ template: main.html
 
 ## Tutorials with progressive traffic shift
 
-The [hybrid testing (quick start)](../../../getting-started/quick-start/knative/tutorial.md) and [the SLO validation](../testing-strategies/slovalidation.md) tutorials demonstrate progressive traffic shift.
+The [hybrid testing (quick start)](../quick-start.md) and [the SLO validation](../testing-strategies/slovalidation.md) tutorials demonstrate progressive traffic shift.
 
 ## Specifying `weightObjRef`
 Iter8 uses the `weightObjRef` field in the experiment resource to get the current traffic split between versions and/or modify the traffic split. Ensure that this field is specified correctly for each version. The following example demonstrates how to specify `weightObjRef` in experiments.
 
 ??? example "Example"
-    The [hybrid (A/B + SLOs) testing quick start tutorial for Istio](../../../getting-started/quick-start/istio/tutorial.md#5-launch-experiment) uses an Istio virtual service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this virtual service and the traffic fields within the virtual service corresponding to the versions.
+    The [hybrid (A/B + SLOs) testing quick start tutorial for Istio](../quick-start.md#5-launch-experiment) uses an Istio virtual service for traffic shifting. Hence, the experiment manifest specifies the `weightObjRef` field for each version by referencing this virtual service and the traffic fields within the virtual service corresponding to the versions.
 
     ```yaml
     versionInfo:

@@ -4,8 +4,6 @@ template: main.html
 
 # Building Blocks
 
-> Iter8 defines a Kubernetes resource called **Experiment** that automates a variety of release engineering and experimentation strategies for Kubernetes applications.
-
 We introduce the building blocks of an Iter8 experiment below.
 
 ***
@@ -18,15 +16,15 @@ Iter8 defines an application broadly as an entity that can be:
 3. for which metrics can be collected.
 
 ??? example "Examples"
-    * A Kubernetes service whose versions correspond to `deployments`.
-    * A Kubernetes service whose versions correspond to `statefulsets`.
-    * A Knative service whose versions correspond to `revisions`.
+    * A stateless K8s application whose versions correspond to `deployments`.
+    * A stateful K8s application whose versions correspond to `statefulsets`.
+    * A Knative application whose versions correspond to `revisions`.
     * A KFServing inference service, whose versions correspond to model `revisions`.
     * A distributed application whose versions correspond to Helm `releases`.
 
 *** 
 
-## Objectives
+## Objectives (SLOs)
 
 **Objectives** correspond to service-level objectives or SLOs. In Iter8 experiments, objectives are specified as metrics along with acceptable limits on their values. Iter8 will report how versions are performing with respect to these metrics and whether or not they satisfy the objectives.
 
@@ -53,7 +51,7 @@ Iter8 defines an application broadly as an entity that can be:
 ***
 
 ## Baseline and candidate versions
-Every Iter8 experiment involves a `baseline` version and may also involve zero, one or more `candidate` versions. Experiments frequently involve two versions, baseline and a candidate.
+Every Iter8 experiment involves a `baseline` version and may also involve zero, one or more `candidate` versions. Experiments often involve two versions, baseline and a candidate, with the baseline version corresponding to the stable version of your app, and the candidate version corresponds to a canary. 
 
 ***
 
@@ -131,8 +129,8 @@ All traffic flows to `v2` during the experiment.
 * After `v2` is deployed, it is hidden from end-users.
 * `v2` is not used to serve end-user requests but can still be experimented with.
 
-#### Builtin load generation
-During the experiment, Iter8 generates load for `v2`.
+#### Builtin load/metrics
+During the experiment, Iter8 generates load for `v2` and/or collects builtin metrics.
 
 ![Builtin](../images/darklaunchbuiltin.png)
 
@@ -155,7 +153,7 @@ A fixed % of end-user requests is sent to `v2` and the rest is sent to `v1`.
 
 ***
 
-##### User segmentation
+#### Fixed-%-split with user segmentation
 * Only a specific segment of the users participate in the experiment.
 * A fixed % of requests from the participating segment is sent to `v2`. Rest is sent to `v1`.
 * All requests from end-users in the non-participating segment is sent to `v1`.
@@ -171,7 +169,7 @@ Traffic is incrementally shifted to the winner over multiple iterations.
 
 ***
 
-##### User segmentation
+#### Progressive traffic shift with user segmentation
 * Only a specific segment of the users participate in the experiment.
 * Within this segment, traffic is incrementally shifted to the winner over multiple iterations.
 * All requests from end-users in the non-participating segment is sent to `v1`.

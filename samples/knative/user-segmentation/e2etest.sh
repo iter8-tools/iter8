@@ -8,7 +8,8 @@ kubectl cluster-info --context kind-kind
 
 # platform setup
 echo "Setting up platform"
-$ITER8/samples/knative/quickstart/platformsetup.sh istio
+$ITER8/samples/first-exp/iter8-setup.sh
+$ITER8/samples/knative/quickstart/platform-setup.sh istio
 
 # create app versions
 echo "Creating live and dark versions"
@@ -27,10 +28,9 @@ istio-1.7.0/bin/istioctl kube-inject -f $ITER8/samples/knative/user-segmentation
 cd $ITER8
     
 # Create Iter8 experiment
-echo "Creating the Iter8 metrics and experiment"
+echo "Creating Iter8 experiment"
 kubectl wait --for=condition=Ready ksvc/sample-app-v1
 kubectl wait --for=condition=Ready ksvc/sample-app-v2
-kubectl apply -f $ITER8/samples/knative/quickstart/metrics.yaml
 kubectl apply -f $ITER8/samples/knative/user-segmentation/experiment.yaml  
 
 export EXPERIMENT=user-segmentation-exp

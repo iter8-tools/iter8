@@ -55,4 +55,4 @@ Use metrics in experiments by referencing them in the criteria section of the ex
     ```
 
 ## Observing metric values
-During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../getting-started/quick-start/kfserving/tutorial.md#a-observe-results) for an example.
+During an experiment, Iter8 reports the metric values observed for each version. Use `iter8ctl` to observe these metric values in realtime. See [here](../getting-started/first-experiment.md#3-observe-experiments) for an example.

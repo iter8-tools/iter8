@@ -10,11 +10,10 @@ template: main.html
 
     ![Fixed % split](../../../images/canary-%-based.png)
     
-## 1. Setup
-* Setup your K8s cluster with Istio and Iter8 as described [here](../../../getting-started/quick-start/istio/platform-setup.md).
-* Ensure that the `ITER8` environment variable is set to the root of your local Iter8 repo.
+???+ warning "Platform setup"
+    Follow [these steps](../platform-setup.md) to install Iter8 and Istio in your K8s cluster. 
 
-## 2. Create versions and initialize traffic split
+## 1. Create versions and fix traffic split
 ```shell
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/fixed-split/bookinfo-app.yaml
 kubectl apply -n bookinfo-iter8 -f $ITER8/samples/istio/quickstart/productpage-v2.yaml
@@ -61,10 +60,10 @@ kubectl wait -n bookinfo-iter8 --for=condition=Ready pods --all
           weight: 40
     ```
 
-## 3. Steps 3 and 4
-Please follow [Steps 3 and 4 of the quick start tutorial](../../../getting-started/quick-start/istio/tutorial.md#3-generate-requests).
+## 2. Steps 2 and 3
+Please follow [Steps 2 and 3 of the quick start tutorial](../quick-start.md).
 
-## 5. Launch experiment
+## 4. Launch experiment
 ```shell
 kubectl apply -f $ITER8/samples/istio/fixed-split/experiment.yaml
 ```
@@ -122,10 +121,10 @@ kubectl apply -f $ITER8/samples/istio/fixed-split/experiment.yaml
             value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
     ```
 
-## 6. Understand the experiment
-Follow [Step 6 of the quick start tutorial](../../../getting-started/quick-start/istio/tutorial.md#6-understand-the-experiment) to observe metrics, traffic and progress of the experiment. Ensure that you use the correct experiment name (`fixedsplit-exp`) in your `iter8ctl` and `kubectl` commands.
+## 5. Observe experiment
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
-## 7. Cleanup
+## 6. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/istio/fixed-split/experiment.yaml
 kubectl delete -f $ITER8/samples/istio/quickstart/fortio.yaml

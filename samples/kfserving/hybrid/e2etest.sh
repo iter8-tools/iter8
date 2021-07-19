@@ -5,11 +5,11 @@ set -e
 export EXPERIMENT=hybrid-exp
 
 # create cluster
-kind create cluster --wait 5m
-kubectl cluster-info --context kind-kind
+minikube start --cpus 8 --memory 12288 --kubernetes-version=v1.17.11
 
 # platform setup
 echo "Setting up platform"
+$ITER8/samples/kfserving/quickstart/iter8setup.sh
 $ITER8/samples/kfserving/quickstart/platformsetup.sh
 
 echo "Create app/ML model versions"
@@ -59,7 +59,7 @@ kubectl delete -f $ITER8/samples/kfserving/hybrid/metrics.yaml
 # kubectl delete -f $ITER8/samples/kfserving/quickstart/candidate.yaml
 
 # delete cluster
-kind delete cluster
+minikube delete
 
 set +e
 

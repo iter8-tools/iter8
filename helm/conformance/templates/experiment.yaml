@@ -30,7 +30,7 @@ spec:
       upperLimit: {{ .Values.LimitErrorRate | quote }}
     - metric: iter8-system/latency-95th-percentile
       # 3 second 95th percentile tail latency is acceptable
-      upperLimit: {{ .Values.Limit95thPercentileLatency | quote }} 
+      upperLimit: {{ .Values.Limit95thPercentileLatency | quote }}
   duration:
     intervalSeconds: 1
     iterationsPerLoop: 1
