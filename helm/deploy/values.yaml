@@ -1,4 +1,4 @@
-# values meant for both stable and candidate versions of the application;
+# values meant for both baseline and candidate versions of the application;
 common:
   application: hello
   repo: "gcr.io/google-samples/hello-app"
@@ -10,11 +10,11 @@ common:
   selectorLabels:
     app.kubernetes.io/name: hello
 
-# values meant for stable version of the application only;
-stable:
+# values meant for baseline version of the application only;
+baseline:
   name: hello
   selectorLabels:
-    app.kubernetes.io/track: stable
+    app.kubernetes.io/track: baseline
   imageTag: ""
 
 # values meant for candidate version of the application only;

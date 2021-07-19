@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.stable.name }}
+  name: {{ .Values.baseline.name }}
   labels:
     {{- toYaml .Values.common.regularLabels | nindent 4 }}
     {{- toYaml .Values.common.selectorLabels | nindent 4 }}
-    {{- toYaml .Values.stable.selectorLabels | nindent 4 }}
+    {{- toYaml .Values.baseline.selectorLabels | nindent 4 }}
 spec:
   selector:
     matchLabels:
       {{- toYaml .Values.common.selectorLabels | nindent 6 }}
-      {{- toYaml .Values.stable.selectorLabels | nindent 6 }}
+      {{- toYaml .Values.baseline.selectorLabels | nindent 6 }}
   template:
     metadata:
       labels:
         {{- toYaml .Values.common.selectorLabels | nindent 8 }}
-        {{- toYaml .Values.stable.selectorLabels | nindent 8 }}
+        {{- toYaml .Values.baseline.selectorLabels | nindent 8 }}
     spec:
       containers:
       - name: {{ .Values.common.application }}
-        image: '{{ .Values.common.repo }}:{{ required "stable.imageTag value is required!" .Values.stable.imageTag }}'
+        image: '{{ .Values.common.repo }}:{{ required "baseline.imageTag value is required!" .Values.baseline.imageTag }}'
         ports:
         - containerPort: 8080
 ---
