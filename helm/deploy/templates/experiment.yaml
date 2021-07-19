@@ -19,13 +19,13 @@ spec:
         with:
           objRefs:
           - kind: Service
-            name: {{ .Values.stable.name }}
+            name: {{ .Values.baseline.name }}
             namespace: {{ .Release.Namespace}}
           - kind: Service
             name: {{ .Values.candidate.name }}
             namespace: {{ .Release.Namespace}}
           - kind: Deployment
-            name: {{ .Values.stable.name }}
+            name: {{ .Values.baseline.name }}
             namespace: {{ .Release.Namespace}}
             waitFor: condition=available
           - kind: Deployment
