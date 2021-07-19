@@ -51,7 +51,7 @@ Iter8 defines an application broadly as an entity that can be:
 ***
 
 ## Baseline and candidate versions
-Every Iter8 experiment involves a `baseline` version and may also involve zero, one or more `candidate` versions. Experiments frequently involve two versions, baseline and a candidate.
+Every Iter8 experiment involves a `baseline` version and may also involve zero, one or more `candidate` versions. Experiments often involve two versions, baseline and a candidate, with the baseline version corresponding to the stable version of your app, and the candidate version corresponds to a canary. 
 
 ***
 

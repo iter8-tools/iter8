@@ -5,38 +5,40 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    In this tutorial, you will [dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote the candidate.
+    [Dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote the candidate.
     
     ![SLO validation](../images/yourfirstexperiment.png)
 
 ???+ warning "Pre-requisites"
-    1. [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the Helmex pattern.
-    2. A Kubernetes cluster.
-
-        ??? note "Create a local Kubernetes cluster"
-            You can create a local K8s cluster as follows. You may skip this step if you already have a K8s cluster to work with.
-
+    1. [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../concepts/whatisiter8.md#what-is-helmex).
+    2. 
+        ??? note "A Kubernetes cluster"
+            You can create a local K8s cluster as follows. Skip this step if you already have a K8s cluster to work with.
             === "Kind"
-
                 ```shell
                 kind create cluster --wait 5m
                 kubectl cluster-info --context kind-kind
                 ```
-
             === "Minikube"
-
                 ```shell
                 minikube start
                 ```
     3. [Iter8 installed in your K8s cluster](install.md).
-    4. [`iter8ctl`](install.md#install-iter8ctl).
+    4. The [`iter8ctl`](install.md#install-iter8ctl) CLI.
+    5. 
+        ??? note "Iter8 Helm repo"
+            Get the Iter8 Helm repo as follows.
+            ```shell
+            helm repo add iter8 https://iter8-tools.github.io/iter8/
+            ``` 
+            If you already have the Iter8 repo, ensure it is updated as follows.
+            ```shell
+            helm repo update
+            ```
 
 ## 1. Create baseline version
 Deploy the baseline version of the `hello world` application using Helm.
 
-```shell
-helm repo add iter8 https://iter8-tools.github.io/iter8/
-```
 
 ```shell
 helm install my-app iter8/deploy \
@@ -80,7 +82,7 @@ helm upgrade my-app iter8/deploy \
 
 The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate deployment of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
 
-??? note "View application and Iter8 experiment resources"
+??? note "View application and experiment resources"
     Use the command below to view your application and Iter8 experiment resources.
     ```shell
     helm get manifest my-app
@@ -112,7 +114,7 @@ kubectl create svc clusterip hello-candidate --tcp=8080
 -->
 
 ## 3. Observe experiment
-Periodically describe the state of the experiment.
+Describe the results of the Iter8 experiment. Wait 20 seconds before trying the following command. If the output is not as expected, try again after a few more seconds.
 ```shell
 iter8ctl describe
 ```
@@ -168,7 +170,7 @@ iter8ctl describe
     ``` 
 
 ## 4. Promote winner
-Assert that the winner of the experiment is the candidate version. The experiment may take a couple of minutes to complete, after which these assertions should be true.
+Assert that the experiment completed and found a winning version. If the conditions are not satisfied, try again after a few more seconds.
 ```shell
 iter8ctl assert -c completed -c winnerFound
 ```
@@ -211,11 +213,12 @@ helm uninstall my-app
 **Next Steps**
 
 !!! tip "Use in production"
-    The source for the Helm chart used in this tutorial can be found in the following location.
+    The source for the Helm chart used in this tutorial is located in the folder below.
     ```shell
+    #ITER8 is the root folder for the Iter8 GitHub repo
     $ITER8/helm/deploy
     ```
-    Adapt the templates as needed by your application in order use this chart in production.
+    Adapt the Helm templates as needed by your application in order use this chart in production.
 
 !!! tip "Try other Iter8 tutorials"
     Iter8 can work in any K8s environment. Try Iter8 in the following environments.
