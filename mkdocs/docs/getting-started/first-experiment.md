@@ -9,7 +9,7 @@ template: main.html
     
     ![SLO validation](../images/yourfirstexperiment.png)
 
-???+ warning "Pre-requisites"
+??? warning "Pre-requisites"
     1. [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../concepts/whatisiter8.md#what-is-helmex).
     2. 
         ??? note "A Kubernetes cluster"
