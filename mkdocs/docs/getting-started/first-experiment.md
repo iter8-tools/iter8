@@ -114,7 +114,7 @@ kubectl create svc clusterip hello-candidate --tcp=8080
 ## 3. Observe experiment
 Periodically describe the state of the experiment.
 ```shell
-iter8ctl describe -l
+iter8ctl describe
 ```
 
 ??? info "Experiment results will look similar to this ... "
@@ -170,7 +170,7 @@ iter8ctl describe -l
 ## 4. Promote winner
 Assert that the winner of the experiment is the candidate version. The experiment may take a couple of minutes to complete, after which these assertions should be true.
 ```shell
-iter8ctl assert -l -c completed -c winnerFound
+iter8ctl assert -c completed -c winnerFound
 ```
 
 Promote the winner as follows.
