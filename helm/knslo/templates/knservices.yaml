@@ -1,0 +1,36 @@
+{{- if .Values.candidate }}
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ .Values.common.application }}
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: {{ .Values.common.application }}-{{ .Values.candidate | toString | sha256sum | trunc 5 }}
+    spec:
+      containers:
+      - image: "{{ .Values.common.repo }}:{{ .Values.candidate.imageTag }}"
+  traffic:
+  - tag: baseline
+    revisionName: {{ .Values.common.application }}-{{ .Values.baseline | toString | sha256sum | trunc 5 }}
+    percent: 100
+  - tag: candidate
+    latestRevision: true
+    percent: 0
+{{- else }}
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ .Values.common.application }}
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: {{ .Values.common.application }}-{{ .Values.baseline | toString | sha256sum | trunc 5 }}
+    spec:
+      containers:
+      - image: "{{ .Values.common.repo }}:{{ .Values.baseline.imageTag }}"
+{{- end }}
