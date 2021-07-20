@@ -11,7 +11,7 @@ template: main.html
     ![Fixed % split](../../../images/canary-%-based.png)
     
 ???+ warning "Platform setup"
-    Follow [these steps](../platform-setup.md) to install Iter8 and Knative in your K8s cluster.
+    Follow [these steps](../setup-for-tutorials.md) to install Iter8 and Knative in your K8s cluster.
 
 ## 1. Create versions and fix traffic split
 ```shell

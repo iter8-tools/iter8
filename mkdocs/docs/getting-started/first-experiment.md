@@ -5,36 +5,16 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    [Dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a Kubernetes deployment), [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote the candidate.
+    [Dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a K8s service and deployment), [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote the candidate.
     
     ![SLO validation](../images/yourfirstexperiment.png)
 
-??? warning "Pre-requisites"
-    1. [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../concepts/whatisiter8.md#what-is-helmex).
-    2. 
-        ??? note "A Kubernetes cluster"
-            You can create a local K8s cluster as follows. Skip this step if you already have a K8s cluster to work with.
-            === "Kind"
-                ```shell
-                kind create cluster --wait 5m
-                kubectl cluster-info --context kind-kind
-                ```
-            === "Minikube"
-                ```shell
-                minikube start
-                ```
-    3. [Iter8 installed in your K8s cluster](install.md).
-    4. The [`iter8ctl`](install.md#install-iter8ctl) CLI.
-    5. 
-        ??? note "Iter8 Helm repo"
-            Get the Iter8 Helm repo as follows.
-            ```shell
-            helm repo add iter8 https://iter8-tools.github.io/iter8/
-            ``` 
-            If you already have the Iter8 repo, ensure it is updated as follows.
-            ```shell
-            helm repo update
-            ```
+??? warning "Setup K8s cluster and local environment"
+    1. Get [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../concepts/whatisiter8.md#what-is-helmex)
+    2. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
+    3. [Install Iter8 in K8s cluster](install.md)
+    4. Get [`iter8ctl`](install.md#install-iter8ctl)
+    5. Get [Iter8 Helm repo](setup-for-tutorials.md#iter8-helm-repo)
 
 ## 1. Create baseline version
 Deploy the baseline version of the `hello world` application using Helm.
