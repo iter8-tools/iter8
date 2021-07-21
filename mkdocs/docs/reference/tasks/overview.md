@@ -9,6 +9,7 @@ Tasks are an extension mechanism for enhancing the behavior of Iter8 experiments
 - [`common/bash`](common-bash.md): Execute a bash script.
 - [`common/exec`](common-readiness.md) (deprecated): Execute a shell command.
 - [`metrics/collect`](metrics-collect.md): Generate GET/POST requests for the application versions and collect latency and error metrics. This task supports Iter8's builtin metrics feature.
+- [`notification/http`](notification-http.md): Send a HTTP request to a specified target.
 - [`notification/slack`](notification-slack.md): Send a slack notification with a summary of the experiment.
 
 ## Actions
