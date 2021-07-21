@@ -2,11 +2,11 @@
 template: main.html
 ---
 
-# `common/http-request`
-The `common/http-request` task can be used to send an HTTP request either as a form of notification or to trigger an action. For example, this task can be used to trigger a GitHub Action or a Tekton pipeline.
+# `notification/http`
+The `notification/http` task can be used to send an HTTP request either as a form of notification or to trigger an action. For example, this task can be used to trigger a GitHub Action or a Tekton pipeline.
 
 ## Example
-The following is an experiment snippet with a `common/http-request` task that triggers a GitHub action that takes two inputs. Here the inputs are set to the name and namespace of the experiment.
+The following is an experiment snippet with a `notification/http` task that triggers a GitHub action that takes two inputs. Here the inputs are set to the name and namespace of the experiment.
 
 ```yaml
 ...
@@ -14,7 +14,7 @@ spec:
   strategy:
     actions:
       finish:
-      - task: common/http-request
+      - task: notification/http
         with:
           url: https://api.github.com/repos/ORG/REPO/actions/workflows/ACTION.yaml/dispatches
           body: |
@@ -42,6 +42,7 @@ spec:
 | secret | string | Name of a secret (in form of `namespace/name`). Values are used to dynamically substitute placeholders. | No |
 | headers | [][NamedValue](../../experiment/#namedvalue) | A list of name-value pairs that are converted into headers as part of the request. Values may contain placeholders that will be subsituted at runtime.| No |
 | body | string | The body of the request to be sent. May contain placeholders that will be subsituted at runtime. | No |
+| ignoreFailure | bool | A flag indicating whether or not to ignore failures. If failures are not ignored, they cause the experiment to fail. Default is `true`. | No |
 
 The `url`, `headers` and `body` may all contain placeholders that will be substituted at runtime. 
 A placeholder prefixed by `.secret` will use value from the secret. 
@@ -54,13 +55,20 @@ If not set, the default body will be of the following form:
   "summary": {
     "winnerFound": true,
     "winner": "candidate",
-    "versionRecommededForPromotion": "candidate"
+    "versionRecommededForPromotion": "candidate",
+    "lastRecommendedWeights": [
+      { "name": "candiate"
+        "weight": 95},
+      { "name": "baseline"
+        "weight": 5}
+    ]
   },
   "experiment": <JSON representation of the experiment object>
 }
 ```
 
 In the default body, the `winner` will be set only if `winnerFound` is `true`. The `versionRecommededForPromotion` field will be omitted in start actions but will be included thereafter.
+The weights are the last weights recommended by the analytics engine. Note that this may not match the current weights.
 
 No authoriziation is provided if `authtype` is not set. If it is set, the behavior is as follows:
 
@@ -79,4 +87,4 @@ By default, a `Content-type` header with value `application/json` is included in
 ```
 
 ## Result
-The task will create and send an HTTP request. If the request returns an error, the task will fail.
+The task will create and send an HTTP request.
