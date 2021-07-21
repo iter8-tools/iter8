@@ -155,6 +155,9 @@ nav:
         - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
       - GitOps:
         - Argo CD + Istio: tutorials/istio/gitops/argocd.md
+    - Linkerd:
+      - Quick start: tutorials/linkerd/quick-start.md
+      - Platform setup: tutorials/linkerd/platform-setup.md
   - Metrics:
     - Using metrics: metrics/using-metrics.md
     - Builtin metrics: metrics/builtin.md
