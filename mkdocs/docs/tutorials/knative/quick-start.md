@@ -26,12 +26,12 @@ helm install my-app iter8/knslo \
   --set candidate=null  
 ```
 
-Ensure that the Knative app is ready.
-```shell
-kubectl wait ksvc/hello --for=condition=Ready
-```
-
 ??? note "Verify that baseline version is 1.0.0"
+    Ensure that the Knative app is ready.
+    ```shell
+    kubectl wait ksvc/hello --for=condition=Ready
+    ```
+
     Port-forward the ingress service for Knative. Choose the networking layer used by your Knative installation.
     === "Kourier"
         ```shell
@@ -46,7 +46,7 @@ kubectl wait ksvc/hello --for=condition=Ready
         ```
 
     ```shell
-    curl localhost:8080 -H "Host: baseline-hello.default.example.com"
+    curl localhost:8080 -H "Host: hello.default.example.com"
     ```
 
     ```
@@ -75,6 +75,11 @@ The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#wh
     ```
 
 ??? note "Verify that candidate version is 2.0.0"
+    Ensure that the Knative app is ready.
+    ```shell
+    kubectl wait ksvc/hello --for=condition=Ready
+    ```
+
     ```shell
     # this command reuses the port-forward from the first step
     curl localhost:8080 -H "Host: candidate-hello.default.example.com"
@@ -153,16 +158,20 @@ iter8ctl assert -c completed -c winnerFound
 Promote the winner as follows.
 
 ```shell
-helm upgrade my-app iter8/deploy \
+helm upgrade my-app iter8/knslo \
   --install \
   --set baseline.imageTag=2.0 \
   --set candidate=null
 ```
 
 ??? note "Verify that baseline version is 2.0.0"
+    Ensure that the Knative app is ready.
+    ```shell
+    kubectl wait ksvc/hello --for=condition=Ready
+    ```
 
     ```shell
-    curl localhost:8080 -H "Host: baseline-hello.default.example.com"
+    curl localhost:8080 -H "Host: hello.default.example.com"
     ```
 
     ```
