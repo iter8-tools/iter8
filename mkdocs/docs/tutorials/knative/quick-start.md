@@ -2,153 +2,205 @@
 template: main.html
 ---
 
-# SLO Validation
+# Your First Knative Experiment
 
-!!! tip "Scenario: SLO validation with progressive traffic shift"
-    This tutorial illustrates an [SLO validation experiment with two versions](../../concepts/buildingblocks.md#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
-
-    1. Specify *latency* and *error-rate* based service-level objectives (SLOs). If the candidate version satisfies SLOs, Iter8 will declare it as the winner.
-    2. Use Iter8's builtin capabilities for collecting latency and error-rate metrics.
-    3. Combine SLO validation with [progressive traffic shifting](../../concepts/buildingblocks.md#progressive-traffic-shift).
+!!! tip "Scenario: Safely rollout new version of a Knative app with SLO validation"
+    [Dark launch](../../concepts/buildingblocks.md#dark-launch) a candidate version of your Knative application, [validate that the candidate satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation), and promote the candidate.
     
-    ![SLO validation with progressive traffic shift](../../images/slovalidationprogressive.png)
+    ![SLO validation](../../images/yourfirstexperiment.png)
 
-???+ warning "Platform setup"
-    Follow [these steps](platform-setup.md) to install Iter8 and Knative in your K8s cluster.
+??? warning "Setup K8s cluster with Knative and local environment"
+    1. Get [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../../concepts/whatisiter8.md#what-is-helmex)
+    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster). If you wish to use the Istio networking layer for Knative, ensure that the cluster has sufficient resources.
+    3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
+    4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
+    5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
+    6. Get [Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
 
-## 1. Create app versions
-Deploy two versions of a Knative app.
-
-```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/baseline.yaml
-kubectl apply -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
-kubectl wait --for=condition=Ready ksvc/sample-app
-```
-
-??? info "Look inside baseline.yaml"
-    ```yaml linenums="1"
-    apiVersion: serving.knative.dev/v1
-    kind: Service
-    metadata:
-      name: sample-app
-      namespace: default
-    spec:
-      template:
-        metadata:
-          name: sample-app-v1
-        spec:
-          containers:
-          - image: gcr.io/knative-samples/knative-route-demo:blue 
-            env:
-            - name: T_VERSION
-              value: "blue"
-    ```
-
-??? info "Look inside experimentalservice.yaml"
-    ```yaml linenums="1"
-    apiVersion: serving.knative.dev/v1
-    kind: Service
-    metadata:
-      name: sample-app
-      namespace: default
-    spec:
-      template:
-        metadata:
-          name: sample-app-v2
-        spec:
-          containers:
-          - image: gcr.io/knative-samples/knative-route-demo:green 
-            env:
-            - name: T_VERSION
-              value: "green"
-      traffic:
-      - tag: current
-        revisionName: sample-app-v1
-        percent: 100
-      - tag: candidate
-        latestRevision: true
-        percent: 0
-    ```
-
-## 2. Launch experiment
-Launch the SLO validation experiment. This experiment will generate requests for your application versions, collect latency and error-rate metrics, and progressively shift traffic and promote the candidate version after verifying that it satisfies SLOs.
+## 1. Create baseline version
+Deploy the baseline version of the `hello world` Knative app using Helm.
 
 ```shell
-kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
+helm install my-app iter8/knslo \
+  --set baseline.imageTag=1.0 \
+  --set candidate=null  
 ```
 
-??? info "Look inside experiment.yaml"
-    ```yaml linenums="1"
-    apiVersion: iter8.tools/v2alpha2
-    kind: Experiment
-    metadata:
-      name: quickstart-exp
-    spec:
-      target: default/sample-app
-      strategy:
-        testingPattern: Canary
-        deploymentPattern: Progressive
-        actions:
-          loop:
-          - task: metrics/collect
-            with:
-              versions: 
-              - name: sample-app-v1
-                url: http://current-sample-app.default.svc.cluster.local
-              - name: sample-app-v2
-                url: http://candidate-sample-app.default.svc.cluster.local
-          finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version      
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
-      criteria:
-        requestCount: iter8-system/request-count
-        objectives: 
-        - metric: iter8-system/mean-latency
-          upperLimit: 50
-        - metric: iter8-system/latency-95th-percentile
-          upperLimit: 100
-        - metric: iter8-system/error-rate
-          upperLimit: "0.01"
-      duration:
-        maxLoops: 10
-        intervalSeconds: 1
-        iterationsPerLoop: 1
-      versionInfo:
-        # information about app versions used in this experiment
-        baseline:
-          name: sample-app-v1
-          weightObjRef:
-            apiVersion: serving.knative.dev/v1
-            kind: Service
-            name: sample-app
-            namespace: default
-            fieldPath: .spec.traffic[0].percent
-          variables:
-          - name: promote
-            value: baseline
-        candidates:
-        - name: sample-app-v2
-          weightObjRef:
-            apiVersion: serving.knative.dev/v1
-            kind: Service
-            name: sample-app
-            namespace: default
-            fieldPath: .spec.traffic[1].percent
-          variables:
-          - name: promote
-            value: candidate
+??? note "Verify that baseline version is 1.0.0"
+    Ensure that the Knative app is ready.
+    ```shell
+    kubectl wait ksvc/hello --for=condition=Ready
+    ```
+
+    Port-forward the ingress service for Knative. Choose the networking layer used by your Knative installation.
+    === "Kourier"
+        ```shell
+        # do this in a separate terminal
+        kubectl port-forward svc/kourier -n knative-serving 8080:80
+        ```
+
+    === "Istio"
+        ```shell
+        # do this in a separate terminal
+        kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
+        ```
+
+    ```shell
+    curl localhost:8080 -H "Host: hello.default.example.com"
+    ```
+
+    ```
+    # output will be similar to the following (notice 1.0.0 version tag)
+    # hostname will be different in your environment
+    Hello, world!
+    Version: 1.0.0
+    Hostname: hello-bc95d9b56-xp9kv
+    ```
+
+## 2. Create candidate version
+Deploy the candidate version of the `hello world` application using Helm.
+```shell
+helm upgrade my-app iter8/knslo \
+  --set baseline.imageTag=1.0 \
+  --set candidate.imageTag=2.0 \
+  --install  
+```
+
+The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate version of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+
+??? note "View application and experiment resources"
+    Use the command below to view your application and Iter8 experiment resources.
+    ```shell
+    helm get manifest my-app
+    ```
+
+??? note "Verify that candidate version is 2.0.0"
+    Ensure that the Knative app is ready.
+    ```shell
+    kubectl wait ksvc/hello --for=condition=Ready
+    ```
+
+    ```shell
+    # this command reuses the port-forward from the first step
+    curl localhost:8080 -H "Host: candidate-hello.default.example.com"
+    ```
+
+    ```
+    # output will be similar to the following (notice 2.0.0 version tag)
+    # hostname will be different in your environment
+    Hello, world!
+    Version: 2.0.0
+    Hostname: hello-bc95d9b56-xp9kv
     ```
 
 ## 3. Observe experiment
-Follow [these steps](../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
-
-## 4. Cleanup
+Describe the results of the Iter8 experiment. Wait 20 seconds before trying the following command. If the output is not as expected, try again after a few more seconds.
 ```shell
-kubectl delete -f $ITER8/samples/knative/quickstart/experiment.yaml
-kubectl delete -f $ITER8/samples/knative/quickstart/experimentalservice.yaml
+iter8ctl describe
 ```
+
+??? info "Experiment results will look similar to this ... "
+    ```shell
+    ****** Overview ******
+    Experiment name: my-experiment
+    Experiment namespace: default
+    Target: my-app
+    Testing pattern: Conformance
+    Deployment pattern: Progressive
+
+    ****** Progress Summary ******
+    Experiment stage: Completed
+    Number of completed iterations: 1
+
+    ****** Winner Assessment ******
+    > If the version being validated; i.e., the baseline version, satisfies the experiment objectives, it is the winner.
+    > Otherwise, there is no winner.
+    Winning version: my-app
+
+    ****** Objective Assessment ******
+    > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
+    +--------------------------------------+--------+
+    |              OBJECTIVE               | MY-APP |
+    +--------------------------------------+--------+
+    | iter8-system/mean-latency <=         | true   |
+    |                               50.000 |        |
+    +--------------------------------------+--------+
+    | iter8-system/error-rate <=           | true   |
+    |                                0.000 |        |
+    +--------------------------------------+--------+
+    | iter8-system/latency-95th-percentile | true   |
+    | <= 100.000                           |        |
+    +--------------------------------------+--------+
+
+    ****** Metrics Assessment ******
+    > Most recently read values of experiment metrics for each version.
+    +--------------------------------------+--------+
+    |                METRIC                | MY-APP |
+    +--------------------------------------+--------+
+    | iter8-system/mean-latency            |  1.233 |
+    +--------------------------------------+--------+
+    | iter8-system/error-rate              |  0.000 |
+    +--------------------------------------+--------+
+    | iter8-system/latency-95th-percentile |  2.311 |
+    +--------------------------------------+--------+
+    | iter8-system/request-count           | 40.000 |
+    +--------------------------------------+--------+
+    | iter8-system/error-count             |  0.000 |
+    +--------------------------------------+--------+
+    ``` 
+
+## 4. Promote winner
+Assert that the experiment completed and found a winning version. If the conditions are not satisfied, try again after a few more seconds.
+```shell
+iter8ctl assert -c completed -c winnerFound
+```
+
+Promote the winner as follows.
+
+```shell
+helm upgrade my-app iter8/knslo \
+  --install \
+  --set baseline.imageTag=2.0 \
+  --set candidate=null
+```
+
+??? note "Verify that baseline version is 2.0.0"
+    Ensure that the Knative app is ready.
+    ```shell
+    kubectl wait ksvc/hello --for=condition=Ready
+    ```
+
+    ```shell
+    curl localhost:8080 -H "Host: hello.default.example.com"
+    ```
+
+    ```
+    # output will be similar to the following (notice 2.0.0 version tag)
+    # hostname will be different in your environment
+    Hello, world!
+    Version: 2.0.0
+    Hostname: hello-bc95d9b56-xp9kv
+    ```
+
+## 5. Cleanup
+```shell
+helm uninstall my-app
+```
+
+***
+
+**Next Steps**
+
+!!! tip "Use in production"
+    The source for the Helm chart used in this tutorial is located in the folder below.
+    ```shell
+    #ITER8 is the root folder for the Iter8 GitHub repo
+    $ITER8/helm/knslo
+    ```
+    Adapt the Helm templates as needed by your application in order use this chart in production.
+
+!!! tip "Try other Iter8 Knative tutorials"
+    * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
+    * [Hybrid testing](testing-strategies/hybrid.md)
+    * [Fixed traffic split](rollout-strategies/fixed-split.md)
+    * [User segmentation based on HTTP headers](rollout-strategies/user-segmentation.md)

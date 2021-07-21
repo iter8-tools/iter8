@@ -15,7 +15,7 @@ template: main.html
     ![User segmentation](../../../images/canary-progressive-segmentation.png)
 
 ???+ warning "Platform setup"
-    Follow [these steps](../platform-setup.md) to install Iter8 and Knative in your K8s cluster.
+    Follow [these steps](../setup-for-tutorials.md) to install Iter8 and Knative in your K8s cluster.
 
     **Note:** Knative needs to be installed with the Istio networking layer for this tutorial.
 
