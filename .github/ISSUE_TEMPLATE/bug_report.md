@@ -23,10 +23,10 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Kubernetes stack (please provide the following information):**
- - K8s environment: Minikube/Kind/Docker Desktop/...
+**Kubernetes environment (please provide the following information):**
+ - K8s cluster: Minikube/Kind/Docker Desktop/...
  - K8s version
- - K8s stack: KNative/KFServing/Istio/... along with version information
+ - K8s components: KNative/KFServing/Istio/... along with version information
 
 **Additional context**
 Add any other context about the problem here.
