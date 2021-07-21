@@ -1,6 +1,6 @@
 apiVersion: v2
-name: deploy
-description: A Helm chart for Kubernetes deployment with SLO validation
+name: knslo
+description: A Helm chart for Knative service with SLO validation
 type: application
 version: 0.1.0
 appVersion: 0.1.0
