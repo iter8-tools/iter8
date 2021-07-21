@@ -24,7 +24,7 @@ Use a managed K8s cluster or a local K8s cluster for running Iter8 tutorials. Yo
     === "Kind"
         A Kind cluster inherits its CPU and memory resources of its host. If you are using Docker Desktop, you can set its resources as follows.
 
-        ![Resources](../../images/ddresourcepreferences.png)
+        ![Resources](../images/ddresourcepreferences.png)
 
     === "Minikube"
         Set CPU and memory resources while starting Minikube as follows.
