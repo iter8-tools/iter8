@@ -18,13 +18,17 @@ template: main.html
     6. Get [Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
 
 ## 1. Create baseline version
-Deploy the baseline version of the `hello world` application using Helm.
-
+Deploy the baseline version of the `hello world` Knative app using Helm.
 
 ```shell
 helm install my-app iter8/knslo \
   --set baseline.imageTag=1.0 \
   --set candidate=null  
+```
+
+Ensure that the Knative app is ready.
+```shell
+kubectl wait ksvc/hello --for=condition=Ready
 ```
 
 ??? note "Verify that baseline version is 1.0.0"
