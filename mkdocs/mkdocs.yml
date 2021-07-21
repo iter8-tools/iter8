@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 is the release engineering platform for Kubernetes applications and ML models. Quick start in 5 mins.
+  Iter8 is the release engineering platform for Kubernetes. SLO validation, A/B testing with business reward metrics, and progressive rollouts. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
