@@ -25,6 +25,7 @@ resources:
 - iter8-istio
 - iter8-kfserving
 - iter8-seldon
+- iter8-linkerd
 # -iter8-<your stack> # add your stack here
 ```
 
