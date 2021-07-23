@@ -9,7 +9,7 @@ spec:
       containers:
       - name: iter8-handler
         # to change handler version, edit the line below
-        image: iter8/handler:0.1.20
+        image: iter8/handler:0.1.21
         command: ["handler"]
         args: ["run", "-a", "$(ACTION)"]
         env:
