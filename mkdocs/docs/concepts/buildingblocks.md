@@ -129,10 +129,10 @@ All traffic flows to `v2` during the experiment.
 * After `v2` is deployed, it is hidden from end-users.
 * `v2` is not used to serve end-user requests but can still be experimented with.
 
-#### Builtin load/metrics
-During the experiment, Iter8 generates load for `v2` and/or collects builtin metrics.
+#### Built-in load/metrics
+During the experiment, Iter8 generates load for `v2` and/or collects built-in metrics.
 
-![Builtin](../images/darklaunchbuiltin.png)
+![Built-in](../images/darklaunchbuiltin.png)
 
 ***
 

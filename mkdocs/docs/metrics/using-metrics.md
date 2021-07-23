@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Iter8 metric resources"    
     Iter8 defines a custom Kubernetes resource (CRD) called **Metric** that makes it easy to define and use metrics in experiments. 
     
-    Iter8 installation includes a set of pre-defined [builtin metrics](builtin.md) that pertain to app/ML model latency/errors. You can also [define custom metrics](custom.md) that enable you to utilize data from Prometheus, New Relic, Sysdig, Elastic or any other database of your choice.
+    Iter8 installation includes a set of pre-defined [built-in metrics](builtin.md) that pertain to app/ML model latency/errors. You can also [define custom metrics](custom.md) that enable you to utilize data from Prometheus, New Relic, Sysdig, Elastic or any other database of your choice.
 
 ## List metrics
 Find the set Iter8 metrics available in your cluster using `kubectl get`.
@@ -19,15 +19,15 @@ kubectl get metrics.iter8.tools --all-namespaces
 ```shell
 NAMESPACE         NAME                      TYPE      DESCRIPTION
 iter8-kfserving   user-engagement           Gauge     Average duration of a session
-iter8-system      error-count               Counter   Number of responses with HTTP status code 4xx or 5xx (Iter8 builtin metric)
-iter8-system      error-rate                Gauge     Fraction of responses with HTTP status code 4xx or 5xx (Iter8 builtin metric)
-iter8-system      latency-50th-percentile   Gauge     50th percentile (median) latency (Iter8 builtin metric)
-iter8-system      latency-75th-percentile   Gauge     75th percentile latency (Iter8 builtin metric)
-iter8-system      latency-90th-percentile   Gauge     90th percentile latency (Iter8 builtin metric)
-iter8-system      latency-95th-percentile   Gauge     95th percentile latency (Iter8 builtin metric)
-iter8-system      latency-99th-percentile   Gauge     99th percentile latency (Iter8 builtin metric)
-iter8-system      mean-latency              Gauge     Mean latency (Iter8 builtin metric)
-iter8-system      request-count             Counter   Number of requests (Iter8 builtin metric)
+iter8-system      error-count               Counter   Number of responses with HTTP status code 4xx or 5xx (Iter8 built-in metric)
+iter8-system      error-rate                Gauge     Fraction of responses with HTTP status code 4xx or 5xx (Iter8 built-in metric)
+iter8-system      latency-50th-percentile   Gauge     50th percentile (median) latency (Iter8 built-in metric)
+iter8-system      latency-75th-percentile   Gauge     75th percentile latency (Iter8 built-in metric)
+iter8-system      latency-90th-percentile   Gauge     90th percentile latency (Iter8 built-in metric)
+iter8-system      latency-95th-percentile   Gauge     95th percentile latency (Iter8 built-in metric)
+iter8-system      latency-99th-percentile   Gauge     99th percentile latency (Iter8 built-in metric)
+iter8-system      mean-latency              Gauge     Mean latency (Iter8 built-in metric)
+iter8-system      request-count             Counter   Number of requests (Iter8 built-in metric)
 ```
 
 ## Referencing metrics within experiments
