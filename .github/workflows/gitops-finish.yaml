@@ -1,0 +1,48 @@
+name: Update baseline version
+
+on:
+  workflow_dispatch:
+    inputs:
+      filepath:
+        description: 'Path to manifest of baseline version'
+        required: true
+      namespace:
+        description: 'Namespace where application deployed'
+        required: false
+        default: default
+
+jobs:
+  CI_pipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Update experiment baseline version with recommended version
+      env:
+        FILEPATH: "${{github.event.inputs.filepath}}"
+      run: |
+        export ENV="$(pwd)/samples/istio/gitops"
+        export TMP=`mktemp`
+
+        echo "FILEPATH = $FILEPATH"
+        echo "     ENV = $ENV"
+        echo "     TMP = $TMP"
+        sed 's/candidate/stable/g' $ENV/$FILEPATH > $TMP
+        mv $TMP $ENV/productpage.yaml
+        rm -f $ENV/productpage-candidate.yaml
+        rm -f $ENV/fortio.yaml
+        rm -f $ENV/experiment.yaml
+
+    - name: create pull request
+      # https://github.com/marketplace/actions/create-pull-request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: 'Update experiment baseline version with recommended version'
+        committer: 'Iter8 <iter8@iter8.tools>'
+        author: 'Iter8 <iter8@iter8.tools>'
+        signoff: true
+        branch: 'iter8-update-baseline'
+        delete-branch: true
+        title: 'Deploy version recommended by Iter8'
+        body: 'Update experiment baseline version with recommended version'
