@@ -31,7 +31,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/first-exp/iter8-setup.sh
+        $ITER8/samples/setup/iter8-setup.sh
 
     - name: Install Go
       uses: actions/setup-go@v2
@@ -75,7 +75,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/first-exp/iter8-setup.sh
+        $ITER8/samples/setup/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
@@ -119,7 +119,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/first-exp/iter8-setup.sh
+        $ITER8/samples/setup/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
@@ -167,7 +167,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/first-exp/iter8-setup.sh
+        $ITER8/samples/setup/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative app
@@ -208,7 +208,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/first-exp/iter8-setup.sh
+        $ITER8/samples/setup/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh kourier
 
     - name: create Knative service and readiness check
@@ -252,7 +252,7 @@ jobs:
     - name: platform setup
       run: |
         export ITER8=$(pwd)
-        $ITER8/samples/first-exp/iter8-setup.sh
+        $ITER8/samples/setup/iter8-setup.sh
         $ITER8/samples/e2e-tests/race-condition/platform-setup.sh
 
     - name: test race condition
