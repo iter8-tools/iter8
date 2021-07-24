@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-21T00:37:14.771408368Z"
+    created: "2021-07-24T20:45:45.115784843Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: cb74ed9a6b8dfea9a05099c80804aa10414bd8ab903e23b486f512787526e7d7
+    digest: 6f9d77e1cb0fa6edc255c56425204b63b4367e19f932b12018c47a111f060cbe
     name: conformance
     type: application
     urls:
@@ -13,9 +13,9 @@ entries:
   deploy:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-21T00:37:14.771908172Z"
-    description: A Helm chart for Kubernetes deployment with SLO validation
-    digest: b10575043b4d968be40e11d23998e8bd89e52d0ae43531a0a50a6047e185e729
+    created: "2021-07-24T20:45:45.116230751Z"
+    description: A Helmex chart for validating Kubernetes deployments
+    digest: 92dbf225a9ba6076561623c82c972c4ea7b06d737c0d9db3b191cc8e438084f1
     name: deploy
     type: application
     urls:
@@ -24,9 +24,9 @@ entries:
   knquickstart:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-21T00:37:14.772220174Z"
+    created: "2021-07-24T20:45:45.116505956Z"
     description: A Helm chart for Iter8 quick start sample for Knative
-    digest: 1d3079ed2748e64a8144429ee2234f6349a288cf9e7295146e6b5c35885d4ecd
+    digest: 6ac256fef6cda13b0993b7c1f8c0c83178bdab64611d70a982a3cafe146abd69
     name: knquickstart
     type: application
     urls:
@@ -35,12 +35,12 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-21T00:37:14.772601677Z"
+    created: "2021-07-24T20:45:45.116840962Z"
     description: A Helm chart for Knative service with SLO validation
-    digest: 4b149c4a19c98b4efb3ac367ccc55f571fbf96f64c5c6e5632a9c28c5fc5ed6b
+    digest: b9a24af2575620cf84bf4cfcb759adbf9b04c8d7bbc276e6a28b10666cc3f667
     name: knslo
     type: application
     urls:
     - https://iter8-tools.github.io/iter8/knslo-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-21T00:37:14.770806564Z"
+generated: "2021-07-24T20:45:45.114369817Z"
