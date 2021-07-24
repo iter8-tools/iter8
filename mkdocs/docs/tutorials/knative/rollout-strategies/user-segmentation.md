@@ -4,7 +4,7 @@ template: main.html
 
 # User Segmentation
 
-!!! tip "Scenario: SLO validation with user segmentation and builtin metrics"
+!!! tip "Scenario: SLO validation with user segmentation and built-in metrics"
     [User segmentation](../../../concepts/buildingblocks.md#progressive-traffic-shift-with-user-segmentation) is the ability to carve out a specific segment of users for an experiment, leaving the rest of the users unaffected by the experiment.
 
     In this tutorial, you will:

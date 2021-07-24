@@ -8,7 +8,7 @@ template: main.html
     This tutorial illustrates an [SLO validation experiment with two versions](../../../concepts/buildingblocks.md#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
 
     1. Specify *latency* and *error-rate* based service-level objectives (SLOs). If the candidate version satisfies SLOs, Iter8 will declare it as the winner.
-    2. Use Iter8's builtin capabilities for collecting latency and error-rate metrics.
+    2. Use Iter8's built-in capabilities for collecting latency and error-rate metrics.
     3. Combine SLO validation with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift).
     
     ![SLO validation with progressive traffic shift](../../../images/slovalidationprogressive.png)

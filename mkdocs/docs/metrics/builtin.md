@@ -2,15 +2,15 @@
 template: main.html
 ---
 
-# Builtin Metrics
+# Built-in Metrics
 
-!!! tip "Builtin latency/error metrics"    
-    Iter8 ships with a set of nine builtin metrics that measure your application's performance in terms of latency and errors. You can collect and use these metrics in experiments without the need to configure any external databases. 
+!!! tip "Built-in latency/error metrics"    
+    Iter8 ships with a set of nine built-in metrics that measure your application's performance in terms of latency and errors. You can collect and use these metrics in experiments without the need to configure any external databases. 
     
     This feature enables you to get started with Iter8 experiments, especially, SLO validation experiments, quickly. As part of metrics collection, Iter8 will also generate HTTP requests to the application end-point.
 
-## List of builtin metrics
-The following are the set of builtin Iter8 metrics.
+## List of built-in metrics
+The following are the set of built-in Iter8 metrics.
 
 | Namespace | Name         | Type | Description |
 | ----- | ------------ | ----------- | -------- |
@@ -24,8 +24,8 @@ The following are the set of builtin Iter8 metrics.
 | iter8-system | latency-95th-percentile | Gauge | 95th percentile response latency |
 | iter8-system | latency-99th-percentile | Gauge | 99th percentile response latency |
 
-## Collecting builtin metrics
-Use the [`metrics/collect` task](../reference/tasks/metrics-collect.md) in an experiment to collect builtin metrics for your app/ML model versions.
+## Collecting built-in metrics
+Use the [`metrics/collect` task](../reference/tasks/metrics-collect.md) in an experiment to collect built-in metrics for your app/ML model versions.
 
 ## Example
-For an example of an experiment that uses builtin metrics, look inside the Knative experiment in [this tutorial](../../tutorials/knative/testing-strategies/conformance/#5-launch-experiment).
+For an example of an experiment that uses built-in metrics, look inside the Knative experiment in [this tutorial](../../tutorials/knative/testing-strategies/conformance/#5-launch-experiment).
