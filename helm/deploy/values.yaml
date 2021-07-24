@@ -15,14 +15,16 @@ baseline:
   name: hello
   selectorLabels:
     app.kubernetes.io/track: baseline
-  imageTag: ""
+  dynamic:
+    tag: null
 
 # values meant for candidate version of the application only;
 candidate:
   name: hello-candidate
   selectorLabels:
     app.kubernetes.io/track: candidate
-  imageTag: ""
+  dynamic:
+    tag: null
 
 # values for the SLO validation experiment;
 # experiment.yaml template has these default values set;
