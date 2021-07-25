@@ -15,7 +15,7 @@ template: main.html
     3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
     4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
     5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
-    6. Get [Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
+    6. Clone [the Iter8 GitHub repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
 
 ## 1. Create baseline version
 Deploy the baseline version of the `hello world` Knative app using Helm.

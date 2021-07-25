@@ -33,7 +33,7 @@ candidate:
 experiment:
   # The SLO validation experiment will collect Iter8's built-in latency and error metrics.
   # There will be 8.0 * 5 = 40 queries sent during metrics collection.
-  # time is the duration over which queries are sent during metrics collection.
+  # Time is the duration over which queries are sent during metrics collection.
   time: 5s
   # QPS is number of queries per second sent during metrics collection.
   QPS: 8.0

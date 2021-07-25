@@ -9,35 +9,27 @@ metadata:
   # (for example, by CD pipeline)
   name: {{ required ".Values.common.application is required!" .Values.common.application }}-experiment-{{ required ".Values.candidate is required!" .Values.candidate | toString | sha256sum | trunc 5 }}
 spec:
-  # target identifies the knative service under experimentation using its fully qualified name
+  # target should uniquely identify the application under experimentation
   target: {{ .Values.common.application }}
   strategy:
-    # this experiment will perform a canary test
+    # this is an SLO validation experiment
     testingPattern: Conformance
     actions:
       start:
-      # ensure all services and deployments are available
+      # ensure candidate service and deployment of the application are available
       - task: common/readiness 
         with:
           objRefs:
           - kind: Service
-            name: {{required ".Values.baseline.name is required!" .Values.baseline.name }}
-            namespace: {{ .Release.Namespace}}
-          - kind: Service
             name: {{required ".Values.candidate.name is required!" .Values.candidate.name }}
             namespace: {{ .Release.Namespace}}
-          - kind: Deployment
-            name: {{ .Values.baseline.name }}
-            namespace: {{ .Release.Namespace}}
-            waitFor: condition=available
           - kind: Deployment
             name: {{ .Values.candidate.name }}
             namespace: {{ .Release.Namespace}}
             waitFor: condition=available
-      # collect metrics for candidate version
+      # collect Iter8's built-in metrics
       - task: metrics/collect
         with:
-          # safe nesting of experiment values
           time: {{required ".Values.experiment.time is required!" .Values.experiment.time | quote }}
           versions:
           - name: baseline
@@ -47,6 +39,8 @@ spec:
     requestCount: iter8-system/request-count
     indicators:
     - iter8-system/error-count
+    # service-level objectives (SLOs) that need to be satisfied by the new version
+    # in order for it to be considered a winner
     objectives:
     - metric: iter8-system/mean-latency
       upperLimit: {{required ".Values.experiment.limitMeanLatency is required!" .Values.experiment.limitMeanLatency | quote }}
@@ -59,4 +53,4 @@ spec:
     iterationsPerLoop: 1
   versionInfo:
     baseline:
-      name: baseline
+      name: new-version
