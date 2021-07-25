@@ -46,8 +46,8 @@ jobs:
 
     - name: create baseline and candidate versions, and Iter8 experiment
       run: |
-        helm repo add iter8 https://iter8-tools.github.io/iter8/
-        helm upgrade my-app iter8/deploy \
+        export ITER8=$(pwd)
+        helm upgrade my-app $ITER8/samples/first-exp/helm \
           --set baseline.imageTag=1.0 \
           --set candidate.imageTag=2.0 \
           --install
