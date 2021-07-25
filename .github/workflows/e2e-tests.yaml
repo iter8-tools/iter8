@@ -49,8 +49,8 @@ jobs:
         helm repo add iter8 https://iter8-tools.github.io/iter8/
         export ITER8=$(pwd)
         helm upgrade my-app $ITER8/samples/first-exp/helm \
-          --set baseline.imageTag=1.0 \
-          --set candidate.imageTag=2.0 \
+          --set baseline.dynamic.tag=1.0 \
+          --set candidate.dynamic.tag=2.0 \
           --install
 
     - name: Wait until end of experiment and dump experiment
