@@ -32,9 +32,10 @@ Use a managed K8s cluster or a local K8s cluster for running Iter8 tutorials. Yo
         minikube start --cpus 8 --memory 12288
         ```
 
-## Iter8 Helm repo
-Iter8 Helm repo contains Helm charts that support Iter8's [Helmex](../concepts/whatisiter8.md#what-is-helmex) tutorials. Get the repo as follows:
+## Iter8 GitHub repo
+Clone the Iter8 GitHub repo and set the ITER8 environment variable as follows:
 
 ```shell
-helm repo add iter8 https://iter8-tools.github.io/iter8/ --force-update
+git clone https://github.com/iter8-tools/iter8.git
+export ITER8=./iter8
 ```
