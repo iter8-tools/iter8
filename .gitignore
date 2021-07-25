@@ -122,3 +122,6 @@ site
 
 # vscode
 .vscode
+
+# Helm chart.lock
+Chart.lock

@@ -23,7 +23,7 @@ Deploy the baseline version of the `hello world` application using Helm.
 cd $ITER8/samples/first-exp/helm
 helm dependency update
 helm install my-app . \
-  --set baseline.imageTag=1.0 \
+  --set baseline.dynamic.tag=1.0 \
   --set candidate=null  
 ```
 
@@ -56,8 +56,8 @@ kubectl create svc clusterip hello --tcp=8080
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
 helm upgrade my-app . \
-  --set baseline.imageTag=1.0 \
-  --set candidate.imageTag=2.0 \
+  --set baseline.dynamic.tag=1.0 \
+  --set candidate.dynamic.tag=2.0 \
   --install  
 ```
 
@@ -161,7 +161,7 @@ Promote the winner as follows.
 ```shell
 helm upgrade my-app . \
   --install \
-  --set baseline.imageTag=2.0 \
+  --set baseline.dynamic.tag=2.0 \
   --set candidate=null
 ```
 
