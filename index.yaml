@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-26T11:50:36.886651851Z"
+    created: "2021-07-26T13:40:24.623515538Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: d8c7be9fb74a333a798dcbdfc4c96844c5c080bd20afc6e0eae0f0e8b35d18ad
+    digest: eea68a107353ce23529be2986fc99ba0b2c288677535cab76b0b6f9438cd0fb7
     name: conformance
     type: application
     urls:
@@ -13,9 +13,9 @@ entries:
   deploy:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-26T11:50:36.887019656Z"
+    created: "2021-07-26T13:40:24.623908241Z"
     description: A Helmex chart for validating Kubernetes deployments
-    digest: b2bd261389d854c814fb15ddc3993fc536bf007bde1431196c09233901d71add
+    digest: 78a9b6d0d755960057376ec4f9d463e8546858594102b811fc269d088210e3ea
     name: deploy
     type: application
     urls:
@@ -24,9 +24,9 @@ entries:
   knquickstart:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-26T11:50:36.887259459Z"
+    created: "2021-07-26T13:40:24.624211344Z"
     description: A Helm chart for Iter8 quick start sample for Knative
-    digest: 6301c9c758bfc5c2322d7bdfff1748c2229c20b83798fcae7ae1ccf6bbdbac60
+    digest: aa16bea0406585cdcfd7f977a8a401f26c7e34b8e0390c1b6a21b43dbaba18fa
     name: knquickstart
     type: application
     urls:
@@ -35,12 +35,12 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-26T11:50:36.887545762Z"
+    created: "2021-07-26T13:40:24.624803549Z"
     description: A Helm chart for Knative service with SLO validation
-    digest: 4f03a77fc5a2979e42b2d1752c1d771b1a31f42b2974abbabe682c1b5be1bd33
+    digest: d7a0edf8d1da0ff13b52c6634f1bfecd3bfca5c408d690a9d0a5d153b904c64e
     name: knslo
     type: application
     urls:
     - https://iter8-tools.github.io/iter8/knslo-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-26T11:50:36.886224446Z"
+generated: "2021-07-26T13:40:24.622924633Z"
