@@ -1,11 +1,11 @@
 apiVersion: iter8.tools/v2alpha2
 kind: Experiment
 metadata:
-{{- if .Values.candidate.dynamic.hash }}
+{{- if .Values.candidate.dynamic.id }}
   annotations:
-    # this hash is useful for preventing race conditions during experiment
-    # and auto-update of Helm values files in GitOps scenarios.
-    hash: {{ .Values.candidate.dynamic.hash }}
+    # iter8.candidate.id is useful for preventing race conditions during experiments
+    # especially, when Iter8 automatically promotes candidate versions
+    iter8.candidate.id: {{ .Values.candidate.dynamic.id }}
 {{- end }}
 {{- /*
   this create an experiment of with a name such as hello-experiment-71s20
