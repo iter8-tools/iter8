@@ -38,7 +38,7 @@ spec:
         with:
           time: {{required ".Values.experiment.time is required!" .Values.experiment.time | quote }}
           versions:
-          - name: baseline
+          - name: new-version # this name must match the name of a version in versionInfo
             url: "http://{{ .Values.candidate.name }}.{{ .Release.Namespace}}:{{ .Values.common.servicePortInfo.port }}"
             qps: {{required ".Values.experiment.QPS is required!" .Values.experiment.QPS }}
   criteria:
