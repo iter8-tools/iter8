@@ -4,3 +4,6 @@ baseline:
 candidate:
   dynamic:
     tag: "2.0"
+    # random alpha-numeric value which should be changed
+    # every time anything changes in the candidate section of Helm chart values
+    hash: "kj8a8"
