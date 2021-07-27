@@ -15,15 +15,16 @@ template: main.html
     3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
     4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
     5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
-    6. Clone [the Iter8 GitHub repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
+    6. Get [the Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
 
 ## 1. Create baseline version
 Deploy the baseline version of the `hello world` Knative app using Helm.
 
 ```shell
 helm install my-app iter8/knslo \
-  --set baseline.imageTag=1.0 \
-  --set candidate=null  
+  --set baseline.dynamic.tag="1.0" \
+  --set baseline.dynamic.id="v1" \
+  --set candidate=null
 ```
 
 ??? note "Verify that baseline version is 1.0.0"
@@ -61,9 +62,11 @@ helm install my-app iter8/knslo \
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
 helm upgrade my-app iter8/knslo \
-  --set baseline.imageTag=1.0 \
-  --set candidate.imageTag=2.0 \
-  --install  
+  --set baseline.dynamic.tag="1.0" \
+  --set baseline.dynamic.id="v1" \
+  --set candidate.dynamic.tag="2.0" \
+  --set candidate.dynamic.id="v2" \
+  --install
 ```
 
 The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate version of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
@@ -94,7 +97,7 @@ The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#wh
     ```
 
 ## 3. Observe experiment
-Describe the results of the Iter8 experiment. Wait 20 seconds before trying the following command. If the output is not as expected, try again after a few more seconds.
+Describe the results of the Iter8 experiment. Wait ~1 min before trying the following command. If the output is not as expected, try again after a few seconds.
 ```shell
 iter8ctl describe
 ```
@@ -150,7 +153,7 @@ iter8ctl describe
     ``` 
 
 ## 4. Promote winner
-Assert that the experiment completed and found a winning version. If the conditions are not satisfied, try again after a few more seconds.
+Assert that the experiment completed and found a winning version. If the conditions are not satisfied, try again after a few seconds.
 ```shell
 iter8ctl assert -c completed -c winnerFound
 ```
@@ -159,9 +162,10 @@ Promote the winner as follows.
 
 ```shell
 helm upgrade my-app iter8/knslo \
-  --install \
-  --set baseline.imageTag=2.0 \
-  --set candidate=null
+  --set baseline.dynamic.tag="2.0" \
+  --set baseline.dynamic.id="v2" \
+  --set candidate=null \
+  --install
 ```
 
 ??? note "Verify that baseline version is 2.0.0"
@@ -197,7 +201,11 @@ helm uninstall my-app
     #ITER8 is the root folder for the Iter8 GitHub repo
     $ITER8/helm/knslo
     ```
-    Adapt the Helm templates as needed by your application in order use this chart in production.
+    The source for the Iter8 experiment sub-chart used by the above chart is located below.
+    ```shell
+    $ITER8/helm/knslo-exp
+    ```
+    Adapt them as needed by your application in order use in production.
 
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)

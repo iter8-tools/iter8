@@ -39,3 +39,10 @@ Clone the Iter8 GitHub repo and set the ITER8 environment variable as follows:
 git clone https://github.com/iter8-tools/iter8.git
 export ITER8=./iter8
 ```
+
+## Iter8 Helm repo
+Iter8 Helm repo contains charts that support Iter8's Helmex tutorials. Get the repo as follows:
+
+```shell
+helm repo add iter8 https://iter8-tools.github.io/iter8/ --force-update
+```
