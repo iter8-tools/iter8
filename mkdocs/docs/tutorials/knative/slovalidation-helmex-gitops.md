@@ -34,7 +34,7 @@ export ITER8=$(pwd)
 Deploy the baseline version of the `hello world` Knative app using Helm.
 
 ```shell
-helm install my-app iter8/knslo \
+helm install my-app iter8/knslo-gitops \
   -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/second-exp/values.yaml
 ```
 
@@ -86,15 +86,11 @@ candidate:
     id: "v2"
 
 experiment:
-  # information needed by Iter8 to update values.yaml file in GitHub
+  # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
   helmexGitops:
-    # replace $USERNAME with your GitHub username
-    repo: 
-    # path to values.yaml relative to root of the repo
-    path:
-    # branch to be updated
-    branch: gitops-test
-    # replace $USERNAME with your GitHub username
+    repo: "https://github.com/$USERNAME/iter8.git"
+    path: "samples/knative/second-exp/values.yaml"
+    branch: $BRANCH
     username: $USERNAME
 EOF
 ```
@@ -102,17 +98,15 @@ EOF
 ### 4.b) Git push
 
 ```shell
-# push changes to the `gitops-test` branch of your fork
 git commit -a -m "update values.yaml with candidate version" --allow-empty
-git push origin gitops-test -f
+git push origin $BRANCH -f
 ```
 
 ### 4.c) Helm upgrade
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
-# replace $USERNAME with your GitHub username
-helm upgrade my-app iter8/knslo \
-  -f https://raw.githubusercontent.com/$USERNAME/iter8/gitops-test/samples/first-exp/helm/values.yaml
+helm upgrade my-app iter8/knslo-gitops \
+  -f https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/second-exp/values.yaml \
   --install
 ```
 
@@ -139,28 +133,27 @@ When the Iter8 experiment completes, assuming the candidate version is the winne
 
     baseline:
       dynamic:
-        tag: "1.0"
-        id: "v1"
-
-    candidate:
-      dynamic:
         tag: "2.0"
         id: "v2"
 
     experiment:
-      # information needed by Iter8 to update the GitHub repo
-    EOF
+      # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
+      helmexGitops:
+        repo: "https://github.com/$USERNAME/iter8.git"
+        path: "samples/knative/second-exp/values.yaml"
+        branch: $BRANCH
+        username: $USERNAME
     ```
 
 ### 6.b) Helm upgrade
 ```shell
 # replace $USERNAME with your GitHub username
-helm upgrade my-app iter8/knslo \
+helm upgrade my-app iter8/knslo-gitops \
   -f https://raw.githubusercontent.com/$USERNAME/iter8/gitops-test/samples/first-exp/helm/values.yaml
   --install
 ```
 
-Verify that baseline version is 1.0.0 as in [this tutorial](slovalidation-helmex.md#4-promote-winner).
+Verify that baseline version is 2.0.0 as in [this tutorial](slovalidation-helmex.md#4-promote-winner).
 
 ## 7. Cleanup
 ```shell
@@ -172,16 +165,16 @@ helm uninstall my-app
 **Next Steps**
 
 !!! tip "Use in production"
-    The source for the `Hello World` Helm application chart is located below.
-    ```shell
-    #ITER8 is the root folder for the Iter8 GitHub repo
-    $ITER8/helm/knslo
-    ```
-    The source for the Iter8 experiment sub-chart used by the above chart is located below.
-    ```shell
-    $ITER8/helm/knslo-exp
-    ```
-    Modify the application chart, and optionally modify the experiment chart, for production usage.
+    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
+
+!!! tip "Use with ArgoCD"
+    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
+
+!!! tip "Use with Flux"
+    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
+
+!!! tip "Use with GitHub Actions"
+    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
 
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
