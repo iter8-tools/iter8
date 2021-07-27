@@ -35,7 +35,7 @@ Deploy the baseline version of the `hello world` Knative app using Helm.
 
 ```shell
 helm install my-app iter8/knslo-gitops \
-  -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/second-exp/values.yaml
+  -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/knative/second-exp/values.yaml
 ```
 
 Verify that baseline version is 1.0.0 as in [this tutorial](slovalidation-helmex.md#1-create-baseline-version).
@@ -85,13 +85,14 @@ candidate:
     tag: "2.0"
     id: "v2"
 
-experiment:
-  # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
-  helmexGitops:
-    repo: "https://github.com/$USERNAME/iter8.git"
-    path: "samples/knative/second-exp/values.yaml"
-    branch: $BRANCH
-    username: $USERNAME
+knslo-gitops-exp:
+  experiment:
+    # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
+    helmexGitOps:
+      gitRepo: "https://github.com/$USERNAME/iter8.git"
+      filePath: "samples/knative/second-exp/values.yaml"
+      username: $USERNAME
+      branch: $BRANCH
 EOF
 ```
 
@@ -106,7 +107,7 @@ git push origin $BRANCH -f
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
 helm upgrade my-app iter8/knslo-gitops \
-  -f https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/second-exp/values.yaml \
+  -f https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml \
   --install
 ```
 
@@ -158,6 +159,8 @@ Verify that baseline version is 2.0.0 as in [this tutorial](slovalidation-helmex
 ## 7. Cleanup
 ```shell
 helm uninstall my-app
+git branch -D gitops-test
+git push -D origin gitops-test
 ```
 
 ***
