@@ -1,5 +1,5 @@
 apiVersion: v2
-name: knslo
+name: knslo-gitops
 description: A Helm chart for Knative service with SLO validation and GitOps Iter8 experiment
 type: application
 version: 0.1.0
