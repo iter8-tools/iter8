@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-27T12:27:06.462172354Z"
+    created: "2021-07-27T13:18:47.375253328Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: fcb334c586b5f2222c510fc48c4d9e8aa093336da920f6a3cdee273b4b3dd64f
+    digest: aa04687a976f88781ee02a468ba517bf2593ca9b842b0b15df8b01cffcf160dd
     name: conformance
     type: application
     urls:
@@ -13,9 +13,9 @@ entries:
   deploy:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T12:27:06.462504758Z"
+    created: "2021-07-27T13:18:47.37560633Z"
     description: A Helmex chart for validating Kubernetes deployments
-    digest: cb2de096485def41e3bb2cfd0b1aa1fca42b3538a3388f33d8f334a5e0b903f7
+    digest: b892fb504adca160959504a247f6d65a005b481e5a1f16f170ddcd6706ea4056
     name: deploy
     type: application
     urls:
@@ -35,14 +35,14 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T12:27:06.463049665Z"
+    created: "2021-07-27T13:18:47.376247635Z"
     dependencies:
     - condition: candidate,experiment
       name: knslo-exp
       repository: https://iter8-tools.github.io/iter8/
       version: 0.1.0
     description: A Helm chart for Knative service with SLO validation
-    digest: 07b06dba5523886ed12a0781688320f0668e1bf6d087096dac002b7ec2bb4433
+    digest: db947c5d4693eef18d819ee806d4367266f88a6fb9de198d7dbb7ce45b5604ad
     name: knslo
     type: application
     urls:
@@ -51,12 +51,12 @@ entries:
   knslo-exp:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T12:27:06.463315569Z"
+    created: "2021-07-27T13:18:47.376571638Z"
     description: A Helmex chart for validating Knative applications
-    digest: a58fdf22c0ee1f8e7e53006a018e96316bb20497d362f8fa989ed12b3ec78eac
+    digest: 96daab1984ac962c89a88ebcf32cad4d2a808554d838557a1a4cf039e35a1193
     name: knslo-exp
     type: application
     urls:
     - https://iter8-tools.github.io/iter8/knslo-exp-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-27T12:27:06.461797849Z"
+generated: "2021-07-27T13:18:47.374850225Z"
