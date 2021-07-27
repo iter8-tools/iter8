@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-27T23:21:46.47277518Z"
+    created: "2021-07-27T23:24:03.262940294Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: 84902b607b9a9658919bffec3714eeb536945c1848f65b30d75b53a829a39c25
+    digest: a271b13f652c382ac071f81cbca989edd4454c395ec709e991dc74e609110ec8
     name: conformance
     type: application
     urls:
@@ -13,9 +13,9 @@ entries:
   deploy:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T23:21:46.473124982Z"
+    created: "2021-07-27T23:24:03.2633684Z"
     description: A Helmex chart for validating Kubernetes deployments
-    digest: 4c72c072ce8fcaf8fe6c3715849f85de9b4d3c1b365e77becd96dbc2d608b3ee
+    digest: 83f42251d0d669a7d742190475fb827f273378dca7e6a1b8812afd618c00d73a
     name: deploy
     type: application
     urls:
@@ -24,9 +24,9 @@ entries:
   kn-hello-world:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T23:21:46.473338583Z"
+    created: "2021-07-27T23:24:03.263633204Z"
     description: Knative hello world application with dark launch
-    digest: 8b13dcdb8ae0ad7ad77bd0e26acc79c445705e02ec338f58d8127e145cfbc792
+    digest: 2315dd8b9a2fe791363ef702d30e4335cc15ef186034ae32cc85ad297c0861aa
     name: kn-hello-world
     type: application
     urls:
@@ -46,14 +46,14 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T23:21:46.473900487Z"
+    created: "2021-07-27T23:24:03.264316014Z"
     dependencies:
     - condition: candidate,experiment
       name: knslo-exp
       repository: https://iter8-tools.github.io/iter8/
       version: 0.1.0
     description: A Helm chart for Knative service with SLO validation
-    digest: 666154e74f1167db3956e8fcca6e869d9ca62cc3db938eaa9c0c2a24b66078f7
+    digest: c05add77cd6f96215144f7d8d2d442d29cf3be98313fb82b57d48b2e6ee66cfe
     name: knslo
     type: application
     urls:
@@ -62,9 +62,9 @@ entries:
   knslo-exp:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T23:21:46.474181988Z"
+    created: "2021-07-27T23:24:03.264662519Z"
     description: A Helmex chart for validating Knative applications
-    digest: 07a509b88ae050644c29932b0522b32481ec13293ba7cd26a48ede7814f3dec8
+    digest: 10c7f8e9d1cc4cf9272be2dc474e8938b4f356bbcb6a52ac682576a745a0d81e
     name: knslo-exp
     type: application
     urls:
@@ -73,13 +73,13 @@ entries:
   knslo-gitops-exp:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-27T23:21:46.47447989Z"
+    created: "2021-07-27T23:24:03.265071725Z"
     description: A Helmex chart for validating Knative applications with GitOps version
       promotion
-    digest: 232cd28a061bca091da95066bf061ecc8a74e102869d0e50e19f1c348949e56a
+    digest: a23f6c3efc111fc7e6f07e17c05a31213c6884b9f989114e8a31dcc6c28fc4e9
     name: knslo-gitops-exp
     type: application
     urls:
     - https://iter8-tools.github.io/iter8/knslo-gitops-exp-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-27T23:21:46.472355078Z"
+generated: "2021-07-27T23:24:03.262494787Z"
