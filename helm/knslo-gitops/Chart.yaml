@@ -6,7 +6,7 @@ version: 0.1.0
 appVersion: 0.1.0
 dependencies:
 # Iter8 experiment chart
-- name: knslo-gitops-exp
+- name: knslo-exp
   repository: https://iter8-tools.github.io/iter8/
   version: 0.1.0
   # create Iter8 experiment only if both candidate and experiment sections
