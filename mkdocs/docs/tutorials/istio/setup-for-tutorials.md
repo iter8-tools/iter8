@@ -21,6 +21,21 @@ If not already cloned, [clone the iter8 repositiory](#clone-iter8-repository).
 $ITER8/samples/istio/quickstart/istio-setup.sh
 ```
 
+## Install Optional Prometheus Add-On
+
+The Iter8 Prometheus add-on is suitable only for tutorials. To install Prometheus for production, see the [official Prometheus documentation](https://prometheus.io/docs/prometheus/latest/getting_started/).
+
+To install the add-on:
+
+```shell
+export TAG=v0.7.11
+kustomize build https://github.com/iter8-tools/iter8/install/prometheus-add-on/prometheus-operator/?ref=${TAG} | kubectl apply -f -
+kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
+kustomize build https://github.com/iter8-tools/iter8/install/prometheus-add-on/prometheus/?ref=${TAG} | kubectl apply -f -
+kubectl apply -f ${ITER8}/samples/istio/quickstart/service-monitor.yaml
+```
+
+
 ## Install Argo CD
 
 If not already cloned, [clone the iter8 repositiory](#clone-iter8-repository).

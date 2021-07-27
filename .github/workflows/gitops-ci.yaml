@@ -24,8 +24,8 @@ jobs:
         
         # use a random color for a new experiment candidate
         declare -a colors=("red" "orange" "blue" "green" "yellow" "violet" "brown")
-        color=`expr $RANDOM % ${#colors[@]}`
-        sed "s|value: COLOR|value: \"${colors[$color]}\"|" $ENV/templates/productpage-candidate.yaml > $ENV/productpage-candidate.yaml
+        color=${colors[$RANDOM % ${#colors[@]} ]}
+        sed "s|value: COLOR|value: \"${color}\"|" $ENV/templates/productpage-candidate.yaml > $ENV/productpage-candidate.yaml
         cat $ENV/productpage-candidate.yaml
 
     - name: git add and commit

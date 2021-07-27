@@ -43,13 +43,14 @@ This tutorial assumes a basic understanding of Iter8. See, for example, the Isti
         git push origin head
         ```
 
-??? warning "Setup a K8s cluster with Istio and Argo CD"
+??? warning "Setup a K8s cluster with Iter8, Istio and Argo CD"
     1. Setup [K8s cluster](../../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
-    2. [Install Istio in K8s cluster](../setup-for-tutorials.md#install-istio)
-    3. [Install Iter8 in K8s cluster](../../../getting-started/install.md)
-    4. Get [`iter8ctl`](../../../getting-started/install.md#install-iter8ctl)
-    5. [Install Argo CD in k8s cluster](../setup-for-tutorials.md#install-argo-cd)
-    6. [Setup a GitHub token](../setup-for-tutorials.md#create-github-token) and give Iter8 permission to use it.
+    2. [Install Iter8 in K8s cluster](../../../getting-started/install.md)
+    3. Get [`iter8ctl`](../../../getting-started/install.md#install-iter8ctl)
+    5. [Install Istio in K8s cluster](../setup-for-tutorials.md#install-istio)
+    4. [Install Prometheus add-on](../setup-for-tutorials.md#install-optional-prometheus-add-on)
+    6. [Install Argo CD in k8s cluster](../setup-for-tutorials.md#install-argo-cd)
+    7. [Setup a GitHub token](../setup-for-tutorials.md#create-github-token) and give Iter8 permission to use it.
 
 
 ## 1. Create Baseline Version
@@ -70,7 +71,7 @@ When the state is both `Healthy` and `Synced`, it is ready; this might take a fe
 
 When changes are merged into a code repository, a CI pipeline to, for example, lint, build, test, and push newly built images to an image repository runs.
 It then writes configuration changes to the environment repository indicating changes are needed to the deployed application.
-In this tutorial, we simulate the execution of a CI pipeline, by executing a simplified GitHub workflow: https://github.com/YOUR_ORG/iter8/actions/workflows/gitops-ci.yaml.
+In this tutorial, we simulate the execution of a CI pipeline, by executing a simplified GitHub workflow: https://github.com/YOUR_ORG/iter8/actions/workflows/gitops-ci.yaml
 
 Navigate to the workflow and click the button "Run workflow"
 
