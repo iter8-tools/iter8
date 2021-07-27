@@ -1,17 +1,16 @@
-# values meant for both baseline and candidate versions of the application;
-# common, common.application, and common.repo are required
 common:
   application: hello
   repo: "gcr.io/google-samples/hello-app"
 
-# values meant for baseline version of the application only;
-# baseline, baseline.dynamic, baseline.dynamic.tag, and baseline.dynamic.id are required
 baseline:
   dynamic:
     tag: "1.0"
-    # this alpha-numeric id is uniquely associated a revision and is required
-    # it is used as a suffix in baseline revision name
     id: "v1"
 
-# there is no candidate version
-candidate: null
+candidate:
+  dynamic:
+    tag: "2.0"
+    id: "v2"
+
+experiment:
+  # information needed by Iter8 to update the GitHub repo
