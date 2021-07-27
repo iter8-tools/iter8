@@ -5,9 +5,10 @@ type: application
 version: 0.1.0
 appVersion: 0.1.0
 dependencies:
-- name: deploy # Helmex chart
+# Iter8 experiment chart
+- name: deploy
   repository: https://iter8-tools.github.io/iter8/
   version: 0.1.0
-  # release deploy helmex chart only if both candidate and experiment sections
+  # create Iter8 experiment only if both candidate and experiment sections
   # are present in values.yaml
   condition: candidate,experiment
