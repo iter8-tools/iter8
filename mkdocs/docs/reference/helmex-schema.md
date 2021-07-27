@@ -4,7 +4,7 @@ template: main.html
 
 # Helmex Schema
 
-The Helmex schema is described below. This schema is intended for applications that are templated using Helm and use Iter8 experiments during releases.
+The Helmex schema for the Helm `values.yaml` file is described below. It is intended for applications that are templated using Helm and use Iter8 experiments during releases. In addition to the below requirements, an application may impose additional application-specific schema requirements on `values.yaml`.
 
 ## Top-level fields
 | Field name | Field type         | Description | Required |

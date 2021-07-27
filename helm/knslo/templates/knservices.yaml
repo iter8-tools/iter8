@@ -1,36 +1,28 @@
-{{- if .Values.candidate }}
----
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: {{ .Values.common.application }}
   namespace: default
 spec:
+{{- if .Values.candidate }}
   template:
     metadata:
-      name: {{ .Values.common.application }}-{{ .Values.candidate | toString | sha256sum | trunc 5 }}
+      name: {{ required ".Values.common.application is required!" .Values.common.application }}-{{ required ".Values.candidate.dynamic.id is required!" .Values.candidate.dynamic.id }}
     spec:
       containers:
-      - image: "{{ .Values.common.repo }}:{{ .Values.candidate.imageTag }}"
+      - image: '{{ required ".Values.common.repo is required!" .Values.common.repo }}:{{ required ".Values.candidate.dynamic.tag is required!" .Values.candidate.dynamic.tag }}'
   traffic:
   - tag: baseline
-    revisionName: {{ .Values.common.application }}-{{ .Values.baseline | toString | sha256sum | trunc 5 }}
+    revisionName: {{ .Values.common.application }}-{{ required ".Values.baseline.dynamic.id is required!" .Values.baseline.dynamic.id }}
     percent: 100
   - tag: candidate
     latestRevision: true
     percent: 0
 {{- else }}
----
-apiVersion: serving.knative.dev/v1
-kind: Service
-metadata:
-  name: {{ .Values.common.application }}
-  namespace: default
-spec:
   template:
     metadata:
-      name: {{ .Values.common.application }}-{{ .Values.baseline | toString | sha256sum | trunc 5 }}
+      name: {{ required ".Values.common.application is required!" .Values.common.application }}-{{ required ".Values.baseline.dynamic.id is required!" .Values.baseline.dynamic.id }}
     spec:
       containers:
-      - image: "{{ .Values.common.repo }}:{{ .Values.baseline.imageTag }}"
+      - image: '{{ required ".Values.common.repo is required!" .Values.common.repo }}:{{ .required ".Values.baseline.dynamic.tag is required!" .Values.baseline.dynamic.tag }}'
 {{- end }}
