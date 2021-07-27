@@ -201,6 +201,6 @@ helm uninstall my-app
 
     [KFServing](../tutorials/kfserving/quick-start.md){ .md-button .md-button--primary }
     [Seldon](../tutorials/seldon/quick-start.md){ .md-button .md-button--primary }
-    [Knative](../tutorials/knative/quick-start.md){ .md-button .md-button--primary }
+    [Knative](../tutorials/knative/slovalidation-helmex.md){ .md-button .md-button--primary }
     [Istio](../tutorials/istio/quick-start.md){ .md-button .md-button--primary }
     [Linkerd](../tutorials/linkerd/quick-start.md){ .md-button .md-button--primary }
