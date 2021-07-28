@@ -1,6 +1,0 @@
-apiVersion: v2
-name: kn-hello-world
-description: Knative hello world application with dark launch
-type: application
-version: 0.1.0
-appVersion: 0.1.0

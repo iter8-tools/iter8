@@ -23,21 +23,19 @@ candidate:
     # it is used as a suffix in candidate revision name
     id: null
 
-# name of the Iter8 experiment sub-chart
-knslo-exp: 
-  # values for the SLO validation experiment;
-  # experiment.yaml template has these default values set;
-  # to change the defaults, modify the values below
-  experiment:
-    # The SLO validation experiment will collect Iter8's built-in latency and error metrics.
-    # There will be 8.0 * 5 = 40 queries sent during metrics collection.
-    # time is the duration over which queries are sent during metrics collection.
-    time: 5s
-    # QPS is number of queries per second sent during metrics collection.
-    QPS: 8.0
-    # (msec) acceptable limit for mean latency of the application
-    limitMeanLatency: 500.0
-    # (msec) acceptable error rate for the application (1%)
-    limitErrorRate: 0.01 
-    # (msec) acceptable limit for 95th percentile latency of the application
-    limit95thPercentileLatency: 1000.0
+# values for the SLO validation experiment;
+# experiment.yaml template has these default values set;
+# to change the defaults, modify the values below
+experiment:
+  # The SLO validation experiment will collect Iter8's built-in latency and error metrics.
+  # There will be 8.0 * 5 = 40 queries sent during metrics collection.
+  # time is the duration over which queries are sent during metrics collection.
+  time: 5s
+  # QPS is number of queries per second sent during metrics collection.
+  QPS: 8.0
+  # (msec) acceptable limit for mean latency of the application
+  limitMeanLatency: 500.0
+  # (msec) acceptable error rate for the application (1%)
+  limitErrorRate: 0.01 
+  # (msec) acceptable limit for 95th percentile latency of the application
+  limit95thPercentileLatency: 1000.0
