@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-28T02:02:55.541322574Z"
+    created: "2021-07-28T04:14:10.470778877Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: e9340dafdcaaad5b7d8364c0ccdbd2e4c5457d92f9f25f6d9dafb3906234e3aa
+    digest: 541761d33d09d826a838065e022d6f5705db5212294e6826860e83927ffb7b36
     name: conformance
     type: application
     urls:
@@ -13,9 +13,9 @@ entries:
   deploy:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T02:02:55.541654683Z"
+    created: "2021-07-28T04:14:10.471261683Z"
     description: A Helmex chart for validating Kubernetes deployments
-    digest: 0e1b567d2f1cc9bc37c65fe8c2a1f016d9954efc61aaf232c5612e3f345623fa
+    digest: f1f934df74b8558339e3026c9f75ff9bc1af8223918d5ae93dde9d699554a891
     name: deploy
     type: application
     urls:
@@ -46,14 +46,9 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T02:02:55.542500304Z"
-    dependencies:
-    - condition: candidate,experiment
-      name: knslo-exp
-      repository: https://iter8-tools.github.io/iter8/
-      version: 0.1.0
+    created: "2021-07-28T04:14:10.471716189Z"
     description: A Helm chart for Knative service with SLO validation
-    digest: 0c0fb5bfed4d4ddffb6126782426ea433c5d4342085f43f1b25181e5e85554e9
+    digest: 7252b171bbaa3075d15e5d956edd2dfbc82867c7e5da5a4d40074943606c9488
     name: knslo
     type: application
     urls:
@@ -73,15 +68,10 @@ entries:
   knslo-gitops:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T02:02:55.543433227Z"
-    dependencies:
-    - condition: candidate,experiment
-      name: knslo-gitops-exp
-      repository: https://iter8-tools.github.io/iter8/
-      version: 0.1.0
+    created: "2021-07-28T04:14:10.472129894Z"
     description: A Helm chart for Knative service with SLO validation and GitOps Iter8
       experiment
-    digest: 8f7b1d5071c832eafdafa47dea3af8884df6d46fc8f0218beed575027a3f24ae
+    digest: 9b6e0c0156b67019099a729a0aadf11a9e892fa83b21a7ec82314160f2873c9d
     name: knslo-gitops
     type: application
     urls:
@@ -99,4 +89,4 @@ entries:
     urls:
     - https://iter8-tools.github.io/iter8/knslo-gitops-exp-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-28T02:02:55.540934064Z"
+generated: "2021-07-28T04:14:10.470320571Z"
