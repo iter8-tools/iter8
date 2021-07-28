@@ -2,17 +2,19 @@
 template: main.html
 ---
 
-# Your First Knative Experiment
+# SLO validation (Helmex)
 
 !!! tip "Scenario: Safely rollout new version of a Knative app with SLO validation"
-    [Dark launch](../../concepts/buildingblocks.md#dark-launch) a candidate version of your Knative application, [validate that the candidate satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation), and promote the candidate.
+    [Dark launch](../../concepts/buildingblocks.md#dark-launch) a candidate version of your Knative application, [validate that the candidate satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation), and promote the candidate. 
+    
+    This tutorial illustrates the [Helmex pattern](../../concepts/whatisiter8.md#what-is-helmex).
     
     ![SLO validation](../../images/yourfirstexperiment.png)
 
 ??? warning "Setup K8s cluster with Knative and local environment"
-    1. Get [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../../concepts/whatisiter8.md#what-is-helmex)
-    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster). If you wish to use the Istio networking layer for Knative, ensure that the cluster has sufficient resources.
-    3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
+    1. Get [Helm 3+](https://helm.sh/docs/intro/install/) 
+    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster). If you wish to use the Istio networking layer for Knative, ensure that the cluster has sufficient resources
+    3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster). This tutorial assumes Knative with Kourier networking layer.
     4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
     5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
     6. Get [the Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)

@@ -28,7 +28,7 @@ spec:
           objRefs:
           - kind: ksvc
             name: {{ .Values.common.application }}
-            namespace: {{ .Release.Namespace}}
+            namespace: {{ .Release.Namespace }}
             waitFor: condition=Ready
       - task: common/bash
         with:
@@ -39,13 +39,13 @@ spec:
       # collect Iter8's built-in metrics
       - task: metrics/collect
         with:
-          time: {{required ".Values.experiment.time is required!" .Values.experiment.time | quote }}
+          time: {{ required ".Values.experiment.time is required!" .Values.experiment.time | quote }}
           versions:
           # the name below must match a versionName in the versionInfo section
           - name: new-version
             # this route relies on the fact that the candidate revision is tagged
             # candidate in the traffic section of the ksvc
-            url: "http://candidate-{{ .Values.common.application }}.{{ .Release.Namespace}}"
+            url: "http://candidate-{{ .Values.common.application }}.{{ .Release.Namespace }}"
             qps: {{ .Values.experiment.QPS }}
       finish:
       # promote candidate version in GitHub repo
