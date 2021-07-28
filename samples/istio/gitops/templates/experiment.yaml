@@ -32,7 +32,7 @@ spec:
       - task: common/bash
         with:
           script: |
-            kubectl -n {{ .namespace }} apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/gitops/istio-vs.yaml
+            kubectl -n {{ .namespace }} apply -f https://raw.githubusercontent.com/MY_ORG/iter8/master/samples/istio/gitops/istio-vs.yaml
 
 
   criteria:
