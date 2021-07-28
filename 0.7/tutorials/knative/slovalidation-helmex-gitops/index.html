@@ -50,14 +50,13 @@ kubectl create rolebinding ghtoken-reader-binding <span class=se>\</span>
 <span class=s>    tag: &quot;2.0&quot;</span>
 <span class=s>    id: &quot;v2&quot;</span>
 
-<span class=s>knslo-gitops-exp:</span>
-<span class=s>  experiment:</span>
-<span class=s>    # Iter8 will update this values.yaml file in the $BRANCH branch of your repo</span>
-<span class=s>    helmexGitOps:</span>
-<span class=s>      gitRepo: &quot;https://github.com/$USERNAME/iter8.git&quot;</span>
-<span class=s>      filePath: &quot;samples/knative/second-exp/values.yaml&quot;</span>
-<span class=s>      username: $USERNAME</span>
-<span class=s>      branch: $BRANCH</span>
+<span class=s>experiment:</span>
+<span class=s>  # Iter8 will update this values.yaml file in the $BRANCH branch of your repo</span>
+<span class=s>  helmexGitOps:</span>
+<span class=s>    gitRepo: &quot;https://github.com/$USERNAME/iter8.git&quot;</span>
+<span class=s>    filePath: &quot;samples/knative/second-exp/values.yaml&quot;</span>
+<span class=s>    username: $USERNAME</span>
+<span class=s>    branch: $BRANCH</span>
 <span class=s>EOF</span>
 </code></pre></div> <h3 id=4b-git-push>4.b) Git push<a class=headerlink href=#4b-git-push title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code>git commit -a -m <span class=s2>&quot;update values.yaml with candidate version&quot;</span> --allow-empty
 git push origin <span class=nv>$BRANCH</span> -f
@@ -65,7 +64,8 @@ git push origin <span class=nv>$BRANCH</span> -f
   -f https://raw.githubusercontent.com/<span class=nv>$USERNAME</span>/iter8/<span class=nv>$BRANCH</span>/samples/knative/second-exp/values.yaml <span class=se>\</span>
   --install
 </code></pre></div></p> <p>View application and experiment resources, and verify candidate as in <a href=../slovalidation-helmex/#2-create-candidate-version>this tutorial</a>.</p> <h2 id=5-observe-experiment>5. Observe experiment<a class=headerlink href=#5-observe-experiment title="Permanent link">&para;</a></h2> <p>Describe the results of the Iter8 experiment as in <a href=../slovalidation-helmex/#3-observe-experiment>this tutorial</a>.</p> <h2 id=6-promote-winner>6. Promote winner<a class=headerlink href=#6-promote-winner title="Permanent link">&para;</a></h2> <h3 id=6a-assert-winner>6.a) Assert winner<a class=headerlink href=#6a-assert-winner title="Permanent link">&para;</a></h3> <p>Assert that the experiment completed and found a winning version. If the conditions are not satisfied, try again after a few seconds. <div class=highlight><pre><span></span><code>iter8ctl assert -c completed -c winnerFound
-</code></pre></div></p> <p>When the Iter8 experiment completes, assuming the candidate version is the winner (this is the expected case), Iter8 would have <strong>automatically promoted the candidate version</strong> in the GitHub <code>values.yaml</code> file as follows.</p> <details class=note><summary>Content of <code>values.yaml</code> after promotion by Iter8</summary><div class=highlight><pre><span></span><code><span class=nt>common</span><span class=p>:</span>
+</code></pre></div></p> <p>This Iter8 experiment is set up to <strong>automatically promoted the candidate version</strong> in the GitHub <code>values.yaml</code> file if the event of the candidate emerging as the winner, or rollback to the current baseline, otherwise.</p> <details class=note><summary>Content of <code>values.yaml</code> after candidate is promoted</summary><div class=highlight><pre><span></span><code>curl https://raw.githubusercontent.com/<span class=nv>$USERNAME</span>/iter8/<span class=nv>$BRANCH</span>/samples/knative/second-exp/values.yaml
+</code></pre></div> <p>The output of <code>curl</code> will resemble the following.</p> <div class=highlight><pre><span></span><code><span class=nt>common</span><span class=p>:</span>
   <span class=nt>application</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">hello</span>
   <span class=nt>repo</span><span class=p>:</span> <span class=s>&quot;gcr.io/google-samples/hello-app&quot;</span>
 
@@ -81,14 +81,12 @@ git push origin <span class=nv>$BRANCH</span> -f
     <span class=nt>path</span><span class=p>:</span> <span class=s>&quot;samples/knative/second-exp/values.yaml&quot;</span>
     <span class=nt>branch</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">$BRANCH</span>
     <span class=nt>username</span><span class=p>:</span> <span class="l l-Scalar l-Scalar-Plain">$USERNAME</span>
-</code></pre></div> </details> <h3 id=6b-helm-upgrade>6.b) Helm upgrade<a class=headerlink href=#6b-helm-upgrade title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code><span class=c1># replace $USERNAME with your GitHub username</span>
-helm upgrade my-app iter8/knslo-gitops <span class=se>\</span>
-  -f https://raw.githubusercontent.com/<span class=nv>$USERNAME</span>/iter8/gitops-test/samples/first-exp/helm/values.yaml
+</code></pre></div> </details> <h3 id=6b-helm-upgrade>6.b) Helm upgrade<a class=headerlink href=#6b-helm-upgrade title="Permanent link">&para;</a></h3> <div class=highlight><pre><span></span><code>helm upgrade my-app iter8/knslo-gitops <span class=se>\</span>
+  -f https://raw.githubusercontent.com/<span class=nv>$USERNAME</span>/iter8/<span class=nv>$BRANCH</span>/samples/knative/second-exp/values.yaml <span class=se>\</span>
   --install
 </code></pre></div> <p>Verify that baseline version is 2.0.0 as in <a href=../slovalidation-helmex/#4-promote-winner>this tutorial</a>.</p> <h2 id=7-cleanup>7. Cleanup<a class=headerlink href=#7-cleanup title="Permanent link">&para;</a></h2> <div class=highlight><pre><span></span><code>helm uninstall my-app
-git branch -D gitops-test
-git push -D origin gitops-test
-</code></pre></div> <hr> <p><strong>Next Steps</strong></p> <div class="admonition tip"> <p class=admonition-title>Use in production</p> <p>The <code>knslo-gitops</code> Helm chart comprises of the <code>kn-hello-world</code> and <code>knslo-gitops-exp</code> sub-charts. These sub-charts are located in the <code>$ITER8/helm</code> folder. Modify them as needed by your application for production usage.</p> </div> <div class="admonition tip"> <p class=admonition-title>Use with ArgoCD</p> <p>The <code>knslo-gitops</code> Helm chart comprises of the <code>kn-hello-world</code> and <code>knslo-gitops-exp</code> sub-charts. These sub-charts are located in the <code>$ITER8/helm</code> folder. Modify them as needed by your application for production usage.</p> </div> <div class="admonition tip"> <p class=admonition-title>Use with Flux</p> <p>The <code>knslo-gitops</code> Helm chart comprises of the <code>kn-hello-world</code> and <code>knslo-gitops-exp</code> sub-charts. These sub-charts are located in the <code>$ITER8/helm</code> folder. Modify them as needed by your application for production usage.</p> </div> <div class="admonition tip"> <p class=admonition-title>Use with GitHub Actions</p> <p>The <code>knslo-gitops</code> Helm chart comprises of the <code>kn-hello-world</code> and <code>knslo-gitops-exp</code> sub-charts. These sub-charts are located in the <code>$ITER8/helm</code> folder. Modify them as needed by your application for production usage.</p> </div> <div class="admonition tip"> <p class=admonition-title>Try other Iter8 Knative tutorials</p> <ul> <li><a href=../testing-strategies/slovalidation/ >SLO validation with progressive traffic shift</a></li> <li><a href=../testing-strategies/hybrid/ >Hybrid testing</a></li> <li><a href=../rollout-strategies/fixed-split/ >Fixed traffic split</a></li> <li><a href=../rollout-strategies/user-segmentation/ >User segmentation based on HTTP headers</a></li> </ul> </div> </article> </div> </div> <a href=# class="md-top md-icon" data-md-component=top data-md-state=hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg> Back to top </a> </main> <!--
+git push -d origin <span class=nv>$BRANCH</span>
+</code></pre></div> <hr> <p><strong>Next Steps</strong></p> <div class="admonition tip"> <p class=admonition-title>Use in production</p> <p>The <code>knslo-gitops</code> Helm chart is located in the <code>$ITER8/helm</code> folder. Modify the chart as needed by your application for production usage.</p> </div> <div class="admonition tip"> <p class=admonition-title>Try other Iter8 Knative tutorials</p> <ul> <li><a href=../testing-strategies/slovalidation/ >SLO validation with progressive traffic shift</a></li> <li><a href=../testing-strategies/hybrid/ >Hybrid testing</a></li> <li><a href=../rollout-strategies/fixed-split/ >Fixed traffic split</a></li> <li><a href=../rollout-strategies/user-segmentation/ >User segmentation based on HTTP headers</a></li> </ul> </div> </article> </div> </div> <a href=# class="md-top md-icon" data-md-component=top data-md-state=hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg> Back to top </a> </main> <!--
   Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
