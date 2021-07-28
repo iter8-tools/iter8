@@ -1,6 +1,0 @@
-apiVersion: v2
-name: knslo-gitops-exp
-description: A Helmex chart for validating Knative applications with GitOps version promotion
-type: application
-version: 0.1.0
-appVersion: 0.1.0
