@@ -16,7 +16,7 @@ template: main.html
     2. If you haven't done so already, try the [Knative Helmex tutorial for SLO validation](slovalidation-helmex.md), and cleanup. This will promote a better understanding of the current tutorial.
 
 ## 1. Fork and clone
-Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork and set the `$ITER8` environment variable as follows:
+Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the `$ITER8` environment variable as follows.
 
 ```shell
 export USERNAME=<your GitHub username>
@@ -32,17 +32,17 @@ git checkout -b $BRANCH
 export ITER8=$(pwd)
 ```
 
-## 2. Create baseline version
+## 2. Sync K8s cluster
 Deploy the baseline version of the `hello world` Knative app using Helm.
 
 ```shell
+# curl https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/knative/second-exp/values.yaml
 helm install my-app iter8/knslo-gitops \
   -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/knative/second-exp/values.yaml
+# helm get manifest my-app
 ```
 
-Verify that baseline version is 1.0.0 as in [this tutorial](slovalidation-helmex.md#1-create-baseline-version).
-
-## 3. Enable Iter8 to update Git
+## 3. Enable Iter8 to update Git repo
 
 ### 3.a) Create GitHub token
 Create a [personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, select `repo`. This will ensure that the token can be used by Iter8 to update the `values.yaml` file in GitHub.
@@ -97,25 +97,27 @@ experiment:
 EOF
 ```
 
-### 4.b) Git push
+### 4.b) Git push `values.yaml`
 
 ```shell
 git commit -a -m "update values.yaml with candidate version" --allow-empty
 git push origin $BRANCH -f
+# curl https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml
 ```
 
-### 4.c) Helm upgrade
-Deploy the candidate version of the `hello world` application using Helm.
+### 4.c) Sync K8s cluster
+Deploy the candidate version of the `hello world` Knative app and the Iter8 experiment using Helm.
 ```shell
 helm upgrade my-app iter8/knslo-gitops \
   -f https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml \
   --install
+# helm get manifest my-app
 ```
 
-View application and experiment resources, and verify candidate as in [this tutorial](slovalidation-helmex.md#2-create-candidate-version).
-
 ## 5. Observe experiment
-Describe the results of the Iter8 experiment as in [this tutorial](slovalidation-helmex.md#3-observe-experiment).
+```shell
+iter8ctl describe
+```
 
 ## 6. Promote winner
 
@@ -125,42 +127,62 @@ Assert that the experiment completed and found a winning version. If the conditi
 iter8ctl assert -c completed -c winnerFound
 ```
 
-This Iter8 experiment is set up to **automatically promoted the candidate version** in the GitHub `values.yaml` file if the event of the candidate emerging as the winner, or rollback to the current baseline, otherwise.
+### 6.b) GitOps-y promotion by Iter8
+This Iter8 experiment automates **version promotion in the GitHub `values.yaml` file**. 
 
-??? note "Content of `values.yaml` after candidate is promoted"
-    ```shell
-    curl https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml
-    ```
+??? note "GitHub `values.yaml` file before and after version promotion by Iter8"
+    === "Before"
+        ```yaml
+        common:
+          application: hello
+          repo: "gcr.io/google-samples/hello-app"
 
-    The output of `curl` will resemble the following.
+        baseline:
+          dynamic:
+            tag: "1.0"
+            id: "v1"
 
-    ```yaml
-    common:
-      application: hello
-      repo: "gcr.io/google-samples/hello-app"
+        candidate:
+          dynamic:
+            tag: "2.0"
+            id: "v2"
 
-    baseline:
-      dynamic:
-        tag: "2.0"
-        id: "v2"
+        experiment:
+          helmexGitOps:
+            gitRepo: "https://github.com/$USERNAME/iter8.git"
+            filePath: "samples/knative/second-exp/values.yaml"
+            username: $USERNAME
+            branch: $BRANCH
+        ```
 
-    experiment:
-      # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
-      helmexGitops:
-        repo: "https://github.com/$USERNAME/iter8.git"
-        path: "samples/knative/second-exp/values.yaml"
-        branch: $BRANCH
-        username: $USERNAME
-    ```
+    === "After"
+        ```yaml
+        common:
+          application: hello
+          repo: "gcr.io/google-samples/hello-app"
 
-### 6.b) Helm upgrade
+        baseline:
+          dynamic:
+            tag: "2.0"
+            id: "v2"
+
+        experiment:
+          helmexGitops:
+            repo: "https://github.com/$USERNAME/iter8.git"
+            path: "samples/knative/second-exp/values.yaml"
+            branch: $BRANCH
+            username: $USERNAME
+        ```
+
+### 6.b) Sync K8s cluster
+Deploy the winning version of the `hello world` Knative app using Helm.
 ```shell
+# curl https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml
 helm upgrade my-app iter8/knslo-gitops \
   -f https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml \
   --install
+# helm get manifest my-app
 ```
-
-Verify that baseline version is 2.0.0 as in [this tutorial](slovalidation-helmex.md#4-promote-winner).
 
 ## 7. Cleanup
 ```shell
