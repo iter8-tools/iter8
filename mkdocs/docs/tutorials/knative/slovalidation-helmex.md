@@ -198,16 +198,7 @@ helm uninstall my-app
 **Next Steps**
 
 !!! tip "Use in production"
-    The source for the `Hello World` Helm application chart is located below.
-    ```shell
-    #ITER8 is the root folder for the Iter8 GitHub repo
-    $ITER8/helm/knslo
-    ```
-    The source for the Iter8 experiment sub-chart used by the above chart is located below.
-    ```shell
-    $ITER8/helm/knslo-exp
-    ```
-    Modify the application chart, and optionally modify the experiment chart, for production usage.
+    The `knslo` Helm chart is located in the `$ITER8/helm` folder. Modify the chart as needed by your application for production usage.
 
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)

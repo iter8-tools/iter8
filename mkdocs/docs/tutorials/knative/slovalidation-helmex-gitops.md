@@ -85,14 +85,13 @@ candidate:
     tag: "2.0"
     id: "v2"
 
-knslo-gitops-exp:
-  experiment:
-    # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
-    helmexGitOps:
-      gitRepo: "https://github.com/$USERNAME/iter8.git"
-      filePath: "samples/knative/second-exp/values.yaml"
-      username: $USERNAME
-      branch: $BRANCH
+experiment:
+  # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
+  helmexGitOps:
+    gitRepo: "https://github.com/$USERNAME/iter8.git"
+    filePath: "samples/knative/second-exp/values.yaml"
+    username: $USERNAME
+    branch: $BRANCH
 EOF
 ```
 
@@ -168,16 +167,7 @@ git push -D origin gitops-test
 **Next Steps**
 
 !!! tip "Use in production"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
-
-!!! tip "Use with ArgoCD"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
-
-!!! tip "Use with Flux"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
-
-!!! tip "Use with GitHub Actions"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
+    The `knslo-gitops` Helm chart is located in the `$ITER8/helm` folder. Modify the chart as needed by your application for production usage.
 
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
