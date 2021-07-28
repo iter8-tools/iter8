@@ -29,6 +29,12 @@ helm install my-app iter8/knslo \
   --set candidate=null
 ```
 
+??? note "View K8s resources created by Helm"
+    Use the command below to view the K8s resources created by Helm during the release of `my-app`.
+    ```shell
+    helm get manifest my-app
+    ```
+
 ??? note "Verify that baseline version is 1.0.0"
     Ensure that the Knative app is ready.
     ```shell
@@ -72,12 +78,6 @@ helm upgrade my-app iter8/knslo \
 ```
 
 The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate version of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
-
-??? note "View application and experiment resources"
-    Use the command below to view your application and Iter8 experiment resources.
-    ```shell
-    helm get manifest my-app
-    ```
 
 ??? note "Verify that candidate version is 2.0.0"
     Ensure that the Knative app is ready.
@@ -199,6 +199,9 @@ helm uninstall my-app
 
 !!! tip "Use in production"
     The `knslo` Helm chart is located in the `$ITER8/helm` folder. Modify the chart as needed by your application for production usage.
+
+!!! tip "Try GitOps-friendly version"
+    Try the [GitOps-friendly version](slovalidation-helmex-gitops.md) of this tutorial.
 
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)

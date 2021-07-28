@@ -9,6 +9,8 @@ template: main.html
 
     ![SLO validation](../../images/helmexgitops.png)
 
+    In this tutorial, a Helm `values.yaml` file in a Git repo will be the *source of truth* about your deployed K8s application, and changes to application will be managed declaratively through this file. Steps **a)** and **b)** in the figure will be illustrated manually and Step **c)** will be automated by Iter8.
+
 ??? warning "Setup K8s cluster with Knative and local environment"
     1. Follow the setup in the [Knative Helmex tutorial for SLO validation](slovalidation-helmex.md).
     2. If you haven't done so already, try the [Knative Helmex tutorial for SLO validation](slovalidation-helmex.md), and cleanup. This will promote a better understanding of the current tutorial.
@@ -172,6 +174,24 @@ git push -d origin $BRANCH
 
 !!! tip "Use in production"
     The `knslo-gitops` Helm chart is located in the `$ITER8/helm` folder. Modify the chart as needed by your application for production usage.
+
+!!! tip "Use with ArgoCD (or any pull-based GitOps operator)"
+    ArgoCD can automatically deploy and sync a Helm chart in a Git repo into a K8s cluster. See [this example](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/#helm-example) and [these details](https://argoproj.github.io/argo-cd/user-guide/helm/). Try a flavor of this tutorial with ArgoCD by placing the `knslo-gitops` chart in your Git repo. Update its `values.yaml` file in the same manner as in the tutorial.
+
+!!! tip "Use Iter8 notifications"
+    Iter8 experiments can emit notifications, for example, once the experiment reaches the `finishing` stage. The notifications can include details about winning version. See [here](../../reference/tasks/notification-http.md) for more details. You can use Iter8 notifications to trigger CI/CD workflows.
+
+!!! tip "Use with GitHub Actions (or any push-based GitOps pipeline tool)"
+    Suppose you want a GitHub Actions workflow to automatically detect changes to `values.yaml` and deploy to a K8s cluster. The following snippet shows how you can structure this workflow.
+    ```yaml
+    on:
+      push:
+        paths:
+        - '/path/to/values.yaml'
+        # run the jobs in the GitHub actions workflow whenever `values.yaml` is modified.
+        # see https://github.com/iter8-tools/iter8/blob/master/.github/workflows/e2e-tests.yaml 
+        # for examples of GitHub Actions workflows perform Helm releases.
+    ```
 
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
