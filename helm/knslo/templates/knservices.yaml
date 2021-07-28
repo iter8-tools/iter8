@@ -25,6 +25,9 @@ spec:
   template:
     metadata:
       name: {{ required ".Values.common.application is required!" .Values.common.application }}-{{ required ".Values.baseline.dynamic.id is required!" .Values.baseline.dynamic.id }}
+      annotations:
+        # Disable scale to zero with a minScale of 1.
+        autoscaling.knative.dev/minScale: "1"      
     spec:
       containers:
       - image: '{{ required ".Values.common.repo is required!" .Values.common.repo }}:{{ required ".Values.baseline.dynamic.tag is required!" .Values.baseline.dynamic.tag }}'
