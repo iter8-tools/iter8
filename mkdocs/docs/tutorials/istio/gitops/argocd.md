@@ -16,14 +16,14 @@ template: main.html
 This tutorial assumes a basic understanding of Iter8. See, for example, the Istio [quick start tutorial](../quick-start.md).
 
 ??? warning "Setup the environment repository"
-    In this tutorial, a fork of the [iter8 repository](https://github.com/iter8-tools/iter8) is used as the environment repository. To make changes to it, you will need your own [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) of the repository. For the purpose of this tutorial, we assume that your fork is at: https://github.com/YOUR_ORG/iter8
+    In this tutorial, a fork of the [iter8 repository](https://github.com/iter8-tools/iter8) is used as the environment repository. To make changes to it, you will need your own [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) of the repository. For the purpose of this tutorial, we assume that your fork is at: https://github.com/[YOUR_ORG]/iter8
 
     Clone the forked repository and modify it to replace the generic `MY_ORG` with *YOUR_ORG*.
 
     * *Clone the forked repository*:
 
     ```shell
-    git clone https://github.com/[YOUR_ORG]/iter8.git
+    git clone git@github.com:kalantar/iter8.git
     cd iter8
     export ITER8=$(pwd)
     ```
@@ -32,13 +32,15 @@ This tutorial assumes a basic understanding of Iter8. See, for example, the Isti
 
     === "MacOS"
         ```shell
-        find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i '' "s/MY_ORG/YOUR_ORG/"
+        export YOUR_ORG=fill-in
+        find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i '' "s/MY_ORG/$YOUR_ORG/"
         git commit -a -m "update references"
         git push origin head
         ```
     === "Linux"
         ```shell
-        find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i "s/MY_ORG/YOUR_ORG/"
+        export YOUR_ORG=fill-in
+        find $ITER8/samples/istio/gitops -name "*" -type f | xargs sed -i "s/MY_ORG/$YOUR_ORG/"
         git commit -a -m "update references"
         git push origin head
         ```
@@ -71,7 +73,7 @@ When the state is both `Healthy` and `Synced`, it is ready; this might take a fe
 
 When changes are merged into a code repository, a CI pipeline to, for example, lint, build, test, and push newly built images to an image repository runs.
 It then writes configuration changes to the environment repository indicating changes are needed to the deployed application.
-In this tutorial, we simulate the execution of a CI pipeline, by executing a simplified GitHub workflow: https://github.com/YOUR_ORG/iter8/actions/workflows/gitops-ci.yaml
+In this tutorial, we simulate the execution of a CI pipeline, by executing a simplified GitHub workflow: https://github.com/[YOUR_ORG]/iter8/actions/workflows/gitops-ci.yaml
 
 Navigate to the workflow and click the button "Run workflow"
 
