@@ -123,9 +123,15 @@ Assert that the experiment completed and found a winning version. If the conditi
 iter8ctl assert -c completed -c winnerFound
 ```
 
-When the Iter8 experiment completes, assuming the candidate version is the winner (this is the expected case), Iter8 would have **automatically promoted the candidate version** in the GitHub `values.yaml` file as follows.
+This Iter8 experiment is set up to **automatically promoted the candidate version** in the GitHub `values.yaml` file if the event of the candidate emerging as the winner, or rollback to the current baseline, otherwise.
 
-??? note "Content of `values.yaml` after promotion by Iter8"
+??? note "Content of `values.yaml` after candidate is promoted"
+    ```shell
+    curl https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml
+    ```
+
+    The output of `curl` will resemble the following.
+
     ```yaml
     common:
       application: hello
@@ -147,9 +153,8 @@ When the Iter8 experiment completes, assuming the candidate version is the winne
 
 ### 6.b) Helm upgrade
 ```shell
-# replace $USERNAME with your GitHub username
 helm upgrade my-app iter8/knslo-gitops \
-  -f https://raw.githubusercontent.com/$USERNAME/iter8/gitops-test/samples/first-exp/helm/values.yaml
+  -f https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml \
   --install
 ```
 
@@ -158,8 +163,7 @@ Verify that baseline version is 2.0.0 as in [this tutorial](slovalidation-helmex
 ## 7. Cleanup
 ```shell
 helm uninstall my-app
-git branch -D gitops-test
-git push -D origin gitops-test
+git push -d origin $BRANCH
 ```
 
 ***
