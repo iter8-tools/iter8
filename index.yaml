@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-28T04:14:10.470778877Z"
+    created: "2021-07-28T04:20:52.045945239Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: 541761d33d09d826a838065e022d6f5705db5212294e6826860e83927ffb7b36
+    digest: e69ebaebef08eaeb762313941f73095978e8add8ae666fae537913a2816f7b3b
     name: conformance
     type: application
     urls:
@@ -13,9 +13,9 @@ entries:
   deploy:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T04:14:10.471261683Z"
+    created: "2021-07-28T04:20:52.046707544Z"
     description: A Helmex chart for validating Kubernetes deployments
-    digest: f1f934df74b8558339e3026c9f75ff9bc1af8223918d5ae93dde9d699554a891
+    digest: ed472399ce811dfc39c3e61d3360d160b52e552de0d5e53eee429aa8972699d5
     name: deploy
     type: application
     urls:
@@ -46,9 +46,9 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T04:14:10.471716189Z"
+    created: "2021-07-28T04:20:52.047100846Z"
     description: A Helm chart for Knative service with SLO validation
-    digest: 7252b171bbaa3075d15e5d956edd2dfbc82867c7e5da5a4d40074943606c9488
+    digest: b61d0103c840efa5833ac7e31b62ee6d85a6e0d0acdf02a588e4725e2e5343cb
     name: knslo
     type: application
     urls:
@@ -68,10 +68,10 @@ entries:
   knslo-gitops:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T04:14:10.472129894Z"
+    created: "2021-07-28T04:20:52.047592649Z"
     description: A Helm chart for Knative service with SLO validation and GitOps Iter8
       experiment
-    digest: 9b6e0c0156b67019099a729a0aadf11a9e892fa83b21a7ec82314160f2873c9d
+    digest: cb45dfcea26cc5c313d04bbd73fe8389a351db083138b63177d477b1c808f1d5
     name: knslo-gitops
     type: application
     urls:
@@ -89,4 +89,4 @@ entries:
     urls:
     - https://iter8-tools.github.io/iter8/knslo-gitops-exp-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-28T04:14:10.470320571Z"
+generated: "2021-07-28T04:20:52.045400236Z"
