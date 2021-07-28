@@ -85,14 +85,13 @@ candidate:
     tag: "2.0"
     id: "v2"
 
-knslo-gitops-exp:
-  experiment:
-    # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
-    helmexGitOps:
-      gitRepo: "https://github.com/$USERNAME/iter8.git"
-      filePath: "samples/knative/second-exp/values.yaml"
-      username: $USERNAME
-      branch: $BRANCH
+experiment:
+  # Iter8 will update this values.yaml file in the $BRANCH branch of your repo
+  helmexGitOps:
+    gitRepo: "https://github.com/$USERNAME/iter8.git"
+    filePath: "samples/knative/second-exp/values.yaml"
+    username: $USERNAME
+    branch: $BRANCH
 EOF
 ```
 
@@ -124,9 +123,15 @@ Assert that the experiment completed and found a winning version. If the conditi
 iter8ctl assert -c completed -c winnerFound
 ```
 
-When the Iter8 experiment completes, assuming the candidate version is the winner (this is the expected case), Iter8 would have **automatically promoted the candidate version** in the GitHub `values.yaml` file as follows.
+This Iter8 experiment is set up to **automatically promoted the candidate version** in the GitHub `values.yaml` file if the event of the candidate emerging as the winner, or rollback to the current baseline, otherwise.
 
-??? note "Content of `values.yaml` after promotion by Iter8"
+??? note "Content of `values.yaml` after candidate is promoted"
+    ```shell
+    curl https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml
+    ```
+
+    The output of `curl` will resemble the following.
+
     ```yaml
     common:
       application: hello
@@ -148,9 +153,8 @@ When the Iter8 experiment completes, assuming the candidate version is the winne
 
 ### 6.b) Helm upgrade
 ```shell
-# replace $USERNAME with your GitHub username
 helm upgrade my-app iter8/knslo-gitops \
-  -f https://raw.githubusercontent.com/$USERNAME/iter8/gitops-test/samples/first-exp/helm/values.yaml
+  -f https://raw.githubusercontent.com/$USERNAME/iter8/$BRANCH/samples/knative/second-exp/values.yaml \
   --install
 ```
 
@@ -159,8 +163,7 @@ Verify that baseline version is 2.0.0 as in [this tutorial](slovalidation-helmex
 ## 7. Cleanup
 ```shell
 helm uninstall my-app
-git branch -D gitops-test
-git push -D origin gitops-test
+git push -d origin $BRANCH
 ```
 
 ***
@@ -168,16 +171,7 @@ git push -D origin gitops-test
 **Next Steps**
 
 !!! tip "Use in production"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
-
-!!! tip "Use with ArgoCD"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
-
-!!! tip "Use with Flux"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
-
-!!! tip "Use with GitHub Actions"
-    The `knslo-gitops` Helm chart comprises of the `kn-hello-world` and `knslo-gitops-exp` sub-charts. These sub-charts are located in the `$ITER8/helm` folder. Modify them as needed by your application for production usage.
+    The `knslo-gitops` Helm chart is located in the `$ITER8/helm` folder. Modify the chart as needed by your application for production usage.
 
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
