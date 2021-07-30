@@ -22,6 +22,7 @@ spec:
             {
               "ref":"master", 
               "inputs":{
+                "basedir": "samples/istio/gitops",
                 "filepath": "{{.filepath}}"
               }
             }
