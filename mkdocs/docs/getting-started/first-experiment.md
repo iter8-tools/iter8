@@ -14,15 +14,13 @@ template: main.html
     2. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
     3. [Install Iter8 in K8s cluster](install.md)
     4. Get [`iter8ctl`](install.md#install-iter8ctl)
-    5. Clone [the Iter8 GitHub repo](setup-for-tutorials.md#iter8-github-repo). Set the `ITER8` environment variable to the root of the cloned repo.
+    5. Get [the Iter8 Helm repo](setup-for-tutorials.md#iter8-helm-repo)
 
 ## 1. Create baseline version
 Deploy the baseline version of the `hello world` application using Helm.
 
 ```shell
-cd $ITER8/samples/first-exp/helm
-helm dependency update
-helm install my-app . \
+helm install my-app iter8/hello \
   --set baseline.dynamic.tag=1.0 \
   --set candidate=null  
 ```
@@ -55,7 +53,7 @@ kubectl create svc clusterip hello --tcp=8080
 ## 2. Create candidate version
 Deploy the candidate version of the `hello world` application using Helm.
 ```shell
-helm upgrade my-app . \
+helm upgrade my-app iter8/hello \
   --set baseline.dynamic.tag=1.0 \
   --set candidate.dynamic.tag=2.0 \
   --install  
@@ -194,7 +192,7 @@ helm uninstall my-app
 **Next Steps**
 
 !!! tip "Use in production"
-    The Helm chart source for the Iter8 experiment is under `$ITER8/helm/deploy`. The Helm chart source for the sample application is under `$ITER8/samples/first-exp/helm`. Modify them as needed by your application for production usage.
+    The Helm chart source for this application is located in `$ITER8/helm/deploy`. Modify the chart, including the experiment template, as needed by your application for production usage.
 
 !!! tip "Try other Iter8 tutorials"
     Iter8 can work in any K8s environment. Try Iter8 in the following environments.
