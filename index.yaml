@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-30T18:52:49.270258963Z"
+    created: "2021-07-30T19:23:35.468898654Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: a5fe7d062eef225c6f991da504feea20f3d09210b774b378a87b3ed1ac84d17f
+    digest: 2fd8aa83c763c4f3096ff7af42e85b086bab16caa5d01fcdab508830807af19b
     name: conformance
     type: application
     urls:
@@ -24,9 +24,9 @@ entries:
   hello:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-30T18:52:49.27081647Z"
+    created: "2021-07-30T19:23:35.469348676Z"
     description: A Helmex chart for a hello-world application with Iter8 SLO validation
-    digest: e948f9e5b81813e6cf1f726ad868372238ad5c64cc0a76c5b492a3c8f412c1b6
+    digest: 27ebb75191f30a60af388c34c5b6f00022c8c164ec4637fc79ec040e14289fee
     name: hello
     type: application
     urls:
@@ -57,9 +57,9 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-30T18:52:49.271192476Z"
+    created: "2021-07-30T19:23:35.469717695Z"
     description: A Helm chart for Knative service with SLO validation
-    digest: 7c7ff68a183df805e8f4e805f9f827729c52097286d1efb57a4d9c14e1c49792
+    digest: 169e251665e06e512ff07ea9767f116801e74d961faee62beb57167a7425f5e1
     name: knslo
     type: application
     urls:
@@ -79,10 +79,10 @@ entries:
   knslo-gitops:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-30T18:52:49.271588881Z"
+    created: "2021-07-30T19:23:35.470123615Z"
     description: A Helm chart for Knative service with SLO validation and GitOps Iter8
       experiment
-    digest: aa8b8e2fc71cac4e7cb55bae0a155b86873dd148551c64f8c9c13af41b5912c6
+    digest: 6857404b1e2d362800d625d3178906892298b34a412efdab9e1b4c14b6474945
     name: knslo-gitops
     type: application
     urls:
@@ -100,4 +100,4 @@ entries:
     urls:
     - https://iter8-tools.github.io/iter8/knslo-gitops-exp-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-30T18:52:49.269822757Z"
+generated: "2021-07-30T19:23:35.46843103Z"
