@@ -47,7 +47,7 @@ jobs:
     - name: create baseline and candidate versions, and Iter8 experiment
       run: |
         export ITER8=$(pwd)
-        cd $ITER8/helm/deploy
+        cd $ITER8/helm/hello
         helm upgrade my-app . \
           --set baseline.dynamic.tag=1.0 \
           --set candidate.dynamic.tag=2.0 \
