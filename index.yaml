@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-07-28T04:20:52.045945239Z"
+    created: "2021-07-30T18:52:49.270258963Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: e69ebaebef08eaeb762313941f73095978e8add8ae666fae537913a2816f7b3b
+    digest: a5fe7d062eef225c6f991da504feea20f3d09210b774b378a87b3ed1ac84d17f
     name: conformance
     type: application
     urls:
@@ -20,6 +20,17 @@ entries:
     type: application
     urls:
     - https://iter8-tools.github.io/iter8/deploy-0.1.0.tgz
+    version: 0.1.0
+  hello:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2021-07-30T18:52:49.27081647Z"
+    description: A Helmex chart for a hello-world application with Iter8 SLO validation
+    digest: e948f9e5b81813e6cf1f726ad868372238ad5c64cc0a76c5b492a3c8f412c1b6
+    name: hello
+    type: application
+    urls:
+    - https://iter8-tools.github.io/iter8/hello-0.1.0.tgz
     version: 0.1.0
   kn-hello-world:
   - apiVersion: v2
@@ -46,9 +57,9 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T04:20:52.047100846Z"
+    created: "2021-07-30T18:52:49.271192476Z"
     description: A Helm chart for Knative service with SLO validation
-    digest: b61d0103c840efa5833ac7e31b62ee6d85a6e0d0acdf02a588e4725e2e5343cb
+    digest: 7c7ff68a183df805e8f4e805f9f827729c52097286d1efb57a4d9c14e1c49792
     name: knslo
     type: application
     urls:
@@ -68,10 +79,10 @@ entries:
   knslo-gitops:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-07-28T04:20:52.047592649Z"
+    created: "2021-07-30T18:52:49.271588881Z"
     description: A Helm chart for Knative service with SLO validation and GitOps Iter8
       experiment
-    digest: cb45dfcea26cc5c313d04bbd73fe8389a351db083138b63177d477b1c808f1d5
+    digest: aa8b8e2fc71cac4e7cb55bae0a155b86873dd148551c64f8c9c13af41b5912c6
     name: knslo-gitops
     type: application
     urls:
@@ -89,4 +100,4 @@ entries:
     urls:
     - https://iter8-tools.github.io/iter8/knslo-gitops-exp-0.1.0.tgz
     version: 0.1.0
-generated: "2021-07-28T04:20:52.045400236Z"
+generated: "2021-07-30T18:52:49.269822757Z"
