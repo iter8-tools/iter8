@@ -3,8 +3,11 @@ name: Update baseline version
 on:
   workflow_dispatch:
     inputs:
+      basedir:
+        description: 'Base directory of manifests'
+        required: true
       filepath:
-        description: 'Path to manifest of baseline version'
+        description: 'Path (relative to basedir) to manifest of baseline version'
         required: true
       namespace:
         description: 'Namespace where application deployed'
@@ -20,17 +23,20 @@ jobs:
 
     - name: Update experiment baseline version with recommended version
       env:
+        BASEDIR: "${{github.event.inputs.basedir}}"
         FILEPATH: "${{github.event.inputs.filepath}}"
       run: |
-        export ENV="$(pwd)/samples/istio/gitops"
+        export ENV="$(pwd)/$BASEDIR"
         export TMP=`mktemp`
 
         echo "FILEPATH = $FILEPATH"
         echo "     ENV = $ENV"
         echo "     TMP = $TMP"
+        FILENAME=`echo $FILEPATH | cut -d . -f 1 | cut -d - -f 1`
+        EXTENSION=`echo $FILEPATH | cut -d . -f 2`
         sed 's/candidate/stable/g' $ENV/$FILEPATH > $TMP
-        mv $TMP $ENV/productpage.yaml
-        rm -f $ENV/productpage-candidate.yaml
+        mv $TMP $ENV/$FILENAME.$EXTENSION
+        rm -f $ENV/${FILENAME}-candidate.$EXTENSION
         rm -f $ENV/fortio.yaml
         rm -f $ENV/experiment.yaml
 
