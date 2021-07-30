@@ -157,7 +157,7 @@ iter8ctl assert -c completed -c winnerFound
 Promote the winner as follows.
 
 ```shell
-helm upgrade my-app . \
+helm upgrade my-app iter8/hello \
   --install \
   --set baseline.dynamic.tag=2.0 \
   --set candidate=null
@@ -192,7 +192,7 @@ helm uninstall my-app
 **Next Steps**
 
 !!! tip "Use in production"
-    The Helm chart source for this application is located in `$ITER8/helm/deploy`. Modify the chart, including the experiment template, as needed by your application for production usage.
+    The Helm chart source for this application is located in `$ITER8/helm/hello`. Modify the chart, including the experiment template, as needed by your application for production usage.
 
 !!! tip "Try other Iter8 tutorials"
     Iter8 can work in any K8s environment. Try Iter8 in the following environments.
