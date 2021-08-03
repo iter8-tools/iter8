@@ -5,9 +5,14 @@
 name: kn quickstart
 
 on:
+  # this workflow can also be triggered manually
+  workflow_dispatch:
+  # when code is pushed to master
   push:
     branches:
     - master
+    # trigger workflow only if the following paths are affected
+    # ignore changes within install/docker folder
     paths:
     - 'install/**'
     - '!install/docker/**'
@@ -15,7 +20,10 @@ on:
     - 'samples/setup/**'
     - 'samples/knative/**'
     - '.github/workflows/knquickstart.yaml'
+  # of when a PR is submitted
   pull_request:
+    # trigger workflow only if the following paths are affected
+    # ignore changes within install/docker folder
     paths:
     - 'install/**'
     - '!install/docker/**'
