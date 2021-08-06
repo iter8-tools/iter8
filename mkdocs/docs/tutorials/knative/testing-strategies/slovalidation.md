@@ -94,17 +94,18 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
             with:
               versions: 
               - name: sample-app-v1
-                url: http://current-sample-app.default.svc.cluster.local
+                url: http://sample-app-v1.default.svc.cluster.local
               - name: sample-app-v2
-                url: http://candidate-sample-app.default.svc.cluster.local
+                url: http://sample-app-v2.default.svc.cluster.local
           finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version      
+          - task: common/bash # promote candidate, if candidate is the winner
+            condition: CandidateWon()
             with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
+              script: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml
+          - task: common/bash # promote baseline, if candidate is not the winner
+            condition: not CandidateWon()
+            with:
+              script: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml
       criteria:
         requestCount: iter8-system/request-count
         objectives: 
@@ -115,7 +116,7 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
         - metric: iter8-system/error-rate
           upperLimit: "0.01"
       duration:
-        maxLoops: 10
+        maxLoops: 3
         intervalSeconds: 1
         iterationsPerLoop: 1
       versionInfo:
@@ -128,9 +129,6 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
             name: sample-app
             namespace: default
             fieldPath: .spec.traffic[0].percent
-          variables:
-          - name: promote
-            value: baseline
         candidates:
         - name: sample-app-v2
           weightObjRef:
@@ -139,9 +137,6 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
             name: sample-app
             namespace: default
             fieldPath: .spec.traffic[1].percent
-          variables:
-          - name: promote
-            value: candidate
     ```
 
 ## 3. Observe experiment
