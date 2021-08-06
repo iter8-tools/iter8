@@ -160,6 +160,8 @@ nav:
     - Linkerd:
       - Quick start: tutorials/linkerd/quick-start.md
       - Platform setup: tutorials/linkerd/platform-setup.md
+    - Openshift:
+      - CI/CD integration: tutorials/openshift/openshift.md
   - Metrics:
     - Using metrics: metrics/using-metrics.md
     - Builtin metrics: metrics/builtin.md
