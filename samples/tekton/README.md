@@ -63,7 +63,7 @@ It will take a couple of minutes for your Task to complete. When it executes, it
 [iter8] 
 [iter8] kubectl cluster-info --context kind-kind
 [iter8] 
-[iter8] Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
+[iter8] Have a question, bug, or feature request? Let us know! https://iter8.tools 🙂
 [iter8] Kubernetes control plane is running at https://127.0.0.1:33979
 [iter8] CoreDNS is running at https://127.0.0.1:33979/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 [iter8] 
