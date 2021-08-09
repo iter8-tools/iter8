@@ -35,20 +35,18 @@ We welcome many different types of contributions including:
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
-[community meetings](#come-to-weekly-community-meetings) or [contact us](../getting-started/help.md) and let's discuss how we can work together. 
+[community meetings](#come-to-iter8-community-meetings) or [contact us](../getting-started/help.md) and let's discuss how we can work together. 
 
 *** 
 
-## Come to Weekly Community Meetings!
-- Everyone is welcome to join our weekly community meetings. You never need an
+## Come to Iter8 Community Meetings!
+- Everyone is welcome to join the Iter8 community meetings. You never need an
 invite to attend. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
-- Our community meetings are on Wednesdays from 11 AM - 12 PM EST/EDT. You can find the video
+- Iter8 community meetings are on the 1st and 3rd Wednesdays of each month from 11 AM - 12 PM EST/EDT. You can find the video
 conference link [here](https://meet.google.com/ocg-bzoa-gqe). You can find the
 agenda [here](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing) as well as the meeting notes [here](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing).
-- If you have a topic you would like to discuss, please put it on the agenda as 
-well as a time estimate. Community meetings will be recorded
-and publicly available on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
+- If you would like to present a demo or discuss a topic, please list it on the agenda along with a time estimate. Community meetings are recorded and publicly available on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
 
 ***
 
@@ -77,7 +75,7 @@ The best ways to reach us with a question when contributing is to ask on:
 
 * The original GitHub issue
 * `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
-* Bring your questions to our [community meetings](#come-to-weekly-community-meetings)
+* Bring your questions to our [community meetings](#come-to-iter8-community-meetings)
 
 ## Pull Request Lifecycle
 
