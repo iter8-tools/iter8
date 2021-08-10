@@ -1,0 +1,21 @@
+## Additional Steps (Verification)
+----------------------------------
+You can run the following commands if you wish to verify if all desired components are installed successfully.
+
+- Check if chaos api-resources are available: 
+
+root@demo:~# kubectl api-resources | grep litmus 
+chaosengines                                   litmuschaos.io                 true         ChaosEngine
+chaosexperiments                               litmuschaos.io                 true         ChaosExperiment
+chaosresults                                   litmuschaos.io                 true         ChaosResult
+
+- Check if the litmus chaos operator deployment is running successfully
+
+root@demo:~# kubectl get pods -n litmus 
+NAME                      READY   STATUS    RESTARTS   AGE
+litmus-7d998b6568-nnlcd   1/1     Running   0          106s
+
+## Start Running Chaos Experiments 
+----------------------------------
+With this, you are good to go!! Refer to the chaos experiment documentation @ https://docs.litmuschaos.io 
+to start executing your first experiment.

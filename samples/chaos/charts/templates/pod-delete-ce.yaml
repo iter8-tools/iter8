@@ -1,0 +1,17 @@
+{{ if not (has "pod-delete" .Values.experiments.disabled) }}
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: pod-delete-chaos
+spec:
+  appinfo:
+    appns: "{{ .Values.appinfo.appns }}"
+    applabel: "{{ .Values.appinfo.applabel }}"
+    appkind: "{{ .Values.appinfo.appkind }}"
+  # It can be active/stop
+  engineState: 'active'
+  chaosServiceAccount: pod-delete-sa
+  experiments:
+    - name: pod-delete
+{{ end }}

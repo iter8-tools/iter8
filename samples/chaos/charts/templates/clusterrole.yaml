@@ -1,0 +1,70 @@
+{{ if or (eq .Values.operatorMode "standard") (eq .Values.operatorMode "admin") }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "litmus.fullname" . }}
+  labels:
+    app: {{ template "litmus.name" . }}
+    {{- include "litmus.labels" . | indent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["replicationcontrollers","secrets"]
+  verbs: ["get","list"]
+- apiGroups: ["apps.openshift.io"]
+  resources: ["deploymentconfigs"]
+  verbs: ["get","list"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "daemonsets", "replicasets", "statefulsets"]
+  verbs: ["get","list"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get","list","deletecollection"]
+- apiGroups: ["argoproj.io"]
+  resources: ["rollouts"]
+  verbs: ["get","list"]
+- apiGroups: [""]
+  resources: ["pods","configmaps","events","services"]
+  verbs: ["get","create","update","patch","delete","list","watch","deletecollection"]
+- apiGroups: ["litmuschaos.io"]
+  resources: ["chaosengines","chaosexperiments","chaosresults"]
+  verbs: ["get","create","update","patch","delete","list","watch","deletecollection"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["list","get"]  
+{{ end }} 
+{{ if eq .Values.operatorMode "admin" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "litmus.fullname" . }}-admin
+  labels:
+    app: {{ template "litmus.name" . }}
+    {{- include "litmus.labels" . | indent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["pods","pods/exec","pods/eviction","events"]
+  verbs: ["create","delete","get","list","patch","update", "deletecollection"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets"]
+  verbs: ["create","delete","get","list","patch","update", "deletecollection"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["create","delete","get","list","patch","update", "deletecollection"]
+- apiGroups: ["litmuschaos.io"]
+  resources: ["chaosresults","chaosengines"]
+  verbs: ["create","delete","get","list","patch","update", "deletecollection"]
+- apiGroups: [""]
+  resources: ["configmaps","secrets","services","pods/log"]
+  verbs: ["get","list","patch","update"]
+- apiGroups: ["apps"]
+  resources: ["replicasets","deployments","statefulsets"]
+  verbs: ["get","list","patch","update"]
+- apiGroups: ["litmuschaos.io"]
+  resources: ["chaosexperiments"]
+  verbs: ["get","list","patch","update"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get","list","patch","update"]
+{{ end }}
