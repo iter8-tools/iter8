@@ -185,6 +185,7 @@ nav:
     - New K8s stack: contributing/newk8sstack.md
     - Tutorials: contributing/tutorials.md
     - Analytics: contributing/analytics.md
+    - Tasks: contributing/tasks.md
   - Roadmap: roadmap.md
   - News: news.md
 
