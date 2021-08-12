@@ -4,20 +4,20 @@ template: main.html
 
 # A/B Testing
 
-!!! tip "Scenario: A/B testing and progressive traffic shift for KFServing models"
-    [A/B testing](../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
+!!! tip "Scenario: A/B testing and progressive traffic shift"
+    [A/B testing](../../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
 
     1. Perform A/B testing.
     2. Specify *user-engagement* as the reward metric. This metric will be mocked by Iter8 in this tutorial.
-    3. Combine A/B testing with [progressive traffic shifting](../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    3. Combine A/B testing with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
 
-    ![Quickstart KFServing](../../images/quickstart-ab.png)
+    ![Quickstart KFServing](../../../images/quickstart-ab.png)
 
 ???+ warning "Platform setup"
-    1. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster). If you wish to use the Istio networking layer for Knative, ensure that the cluster has sufficient resources
-    2. Get [Linkerd](setup-for-tutorials.md)
-    3. [Install Iter8 in K8s cluster](../../getting-started/install.md)
-    4. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
+    1. Setup [K8s cluster](../../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    2. Get [Linkerd](../setup-for-tutorials.md)
+    3. [Install Iter8 in K8s cluster](../../../getting-started/install.md)
+    4. Get [`iter8ctl`](../../../getting-started/install.md#install-iter8ctl)
 
 ## 1. Create application versions
 Create a new namespace, enable Linkerd proxy injection, deploy two Hello World applications, and create a traffic split. 
@@ -90,7 +90,7 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/fortio.yaml
 ## 3. Define metrics
 Iter8 defines a custom K8s resource called *Metric* that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 
-For the purpose of this tutorial, you will [mock](../../metrics/mock.md) a number of metrics as follows.
+For the purpose of this tutorial, you will [mock](../../../metrics/mock.md) a number of metrics as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
@@ -273,7 +273,7 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/experiment.yaml
     ```
 
 ## 3. Observe experiment
-Follow [these steps](../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
 ## 4. Cleanup
 ```shell
