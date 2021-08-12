@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with an A/B experiment"
     Launch a candidate version of your application (a K8s service and deployment), compare it against the baseline version, and promote the winner.
     
-    ![SLO validation](../images/yourfirstexperiment.png)
+    ![SLO validation](../../images/yourfirstexperiment.png)
 
 ??? warning "Setup K8s cluster and local environment"
     1. Get [Helm 3+](https://helm.sh/docs/intro/install/) 
@@ -63,7 +63,7 @@ helm upgrade my-app iter8/linkerd \
   --install  
 ```
 
-The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate deployment of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate deployment of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
 
 ??? note "View application and experiment resources"
     Use the command below to view your application and Iter8 experiment resources.
@@ -205,12 +205,3 @@ helm uninstall my-app
 
 !!! tip "Use in production"
     The Helm chart source for this application is located in `$ITER8/helm/linkerd`. Modify the chart, including the experiment template, as needed by your application for production usage.
-
-!!! tip "Try other Iter8 tutorials"
-    Iter8 can work in any K8s environment. Try Iter8 in the following environments.
-
-    [KFServing](../tutorials/kfserving/quick-start.md){ .md-button .md-button--primary }
-    [Seldon](../tutorials/seldon/quick-start.md){ .md-button .md-button--primary }
-    [Knative](../tutorials/knative/slovalidation-helmex.md){ .md-button .md-button--primary }
-    [Istio](../tutorials/istio/quick-start.md){ .md-button .md-button--primary }
-    [Linkerd](../tutorials/linkerd/quick-start.md){ .md-button .md-button--primary }
