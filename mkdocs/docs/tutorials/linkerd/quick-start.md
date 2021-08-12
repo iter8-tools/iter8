@@ -98,21 +98,12 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
 
 ??? info "Look inside metrics.yaml"
     ```yaml linenums="1"
-    apiVersion: v1
-    kind: Namespace
-    metadata:
-      labels:
-        creator: iter8
-        stack: linkerd
-      name: iter8-linkerd
-    ---
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
     metadata:
       labels:
         creator: iter8
       name: user-engagement
-      namespace: iter8-linkerd
     spec:
       description: Number of error responses
       type: Gauge
@@ -127,8 +118,7 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
     metadata:
       labels:
         creator: iter8
-      name: error-count
-      namespace: iter8-linkerd 
+      name: error-count 
     spec:
       description: Number of error responses
       jqExpression: .data.result[0].value[1] | tonumber
@@ -146,7 +136,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: error-rate
-      namespace: iter8-linkerd
     spec:
       description: Fraction of requests with error responses
       jqExpression: .data.result[0].value[1] | tonumber
@@ -165,7 +154,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: le5ms-latency-percentile
-      namespace: iter8-linkerd
     spec:
       description: Less than 5 ms latency
       jqExpression: .data.result[0].value[1] | tonumber
@@ -184,7 +172,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: mean-latency
-      namespace: iter8-linkerd
     spec:
       description: Mean latency
       jqExpression: .data.result[0].value[1] | tonumber
@@ -204,7 +191,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: request-count
-      namespace: iter8-linkerd
     spec:
       description: Number of requests
       jqExpression: .data.result[0].value[1] | tonumber
@@ -243,18 +229,18 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/experiment.yaml
           finish:
           - task: common/bash
             with:
-              script: kubectl -n test apply -f {{ .promote }}
+              script: kubectl apply -f {{ .promote }}
       criteria:
         rewards:
         # (business) reward metric to optimize in this experiment
-        - metric: iter8-linkerd/user-engagement
+        - metric: default/user-engagement
           preferredDirection: High
         objectives: # used for validating versions
-        - metric: iter8-linkerd/mean-latency
+        - metric: default/mean-latency
           upperLimit: 300
-        - metric: iter8-linkerd/error-rate
+        - metric: default/error-rate
           upperLimit: "0.01"
-        requestCount: iter8-linkerd/request-count
+        requestCount: default/request-count
       duration: # product of fields determines length of the experiment
         intervalSeconds: 10
         iterationsPerLoop: 10
@@ -264,26 +250,24 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/experiment.yaml
           name: web
           variables:
           - name: namespace # used by final action if this version is the winner
-            value: test
+            value: default
           - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v1.yaml
+            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v1.yaml
           weightObjRef:
             apiVersion: split.smi-spec.io/v1alpha2
             kind: TrafficSplit
-            namespace: test
             name: web-traffic-split
             fieldPath: .spec.backends[0].weight
         candidates:
         - name: web2
           variables:
           - name: namespace # used by final action if this version is the winner
-            value: test
+            value: default
           - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v2.yaml
+            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v2.yaml
           weightObjRef:
             apiVersion: split.smi-spec.io/v1alpha2
             kind: TrafficSplit
-            namespace: test
             name: web-traffic-split
             fieldPath: .spec.backends[1].weight
     ```

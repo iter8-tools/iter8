@@ -17,7 +17,7 @@ export ITER8=$(pwd)
 
 * **Install Linkerd**
 ```shell
-$ITER8/samples/linkerd/quickstart/platform-setup.sh
+$ITER8/samples/linkerd/quickstart/platformsetup.sh
 ```
 
 * **Enable Linkerd in the default namespace**

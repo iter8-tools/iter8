@@ -49,11 +49,6 @@ spec:
           - name: new-version # this name must match the name of a version in versionInfo
             url: "http://{{ .Values.baseline.name }}.{{ .Release.Namespace }}:{{ .Values.common.servicePortInfo.port }}"
             qps: {{required ".Values.experiment.QPS is required!" .Values.experiment.QPS }}
-      # finish:
-      # - task: common/bash
-      #   with:
-      #     script: kubectl -n test apply -f {{ .promote }}
-      # - task: notification/slack
   criteria:
     rewards:
     # (business) reward metric to optimize in this experiment
@@ -71,24 +66,6 @@ spec:
   versionInfo:
     baseline:
       name: {{ .Values.baseline.name }}
-      # variables:
-      # - name: promote # used by final action if this version is the winner
-      #   value: {{required ".Values.experiment.promoteBaseline is required!" .Values.experiment.promoteBaseline | quote }}
-      # weightObjRef:
-      #   apiVersion: split.smi-spec.io/v1alpha2
-      #   kind: TrafficSplit
-      #   namespace: {{ .Release.Namespace}}
-      #   name: {{ required ".Values.common.application is required!" .Values.common.application }}-traffic-split
-      #   fieldPath: {{required ".Values.experiment.baselineFieldPath is required!" .Values.experiment.baselineFieldPath | quote }}
     candidates:
     - name: {{ .Values.candidate.name }}
-      # variables:
-      # - name: promote # used by final action if this version is the winner
-      #   value: {{required ".Values.experiment.promoteCandidate is required!" .Values.experiment.promoteCandidate | quote }}
-      # weightObjRef:
-      #   apiVersion: split.smi-spec.io/v1alpha2
-      #   kind: TrafficSplit
-      #   namespace: {{ .Release.Namespace}}
-      #   name: {{ required ".Values.common.application is required!" .Values.common.application }}-traffic-split
-      #   fieldPath: {{required ".Values.experiment.candidateFieldPath is required!" .Values.experiment.candidateFieldPath | quote }}
 {{ end -}}

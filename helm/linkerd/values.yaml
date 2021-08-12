@@ -17,6 +17,7 @@ baseline:
     app.kubernetes.io/track: baseline
   dynamic:
     tag: null
+  weight: 100
 
 # values meant for candidate version of the application only;
 candidate:
@@ -25,6 +26,7 @@ candidate:
     app.kubernetes.io/track: candidate
   dynamic:
     tag: null
+  weight: 0
 
 # values for the SLO validation experiment;
 # experiment.yaml template has these default values set;
@@ -49,8 +51,8 @@ experiment:
   # (msec) acceptable error rate for the application (1%)
   limitErrorRate: 0.01
 
-  promoteBaseline: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v1.yaml
-  promoteCandidate: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v2.yaml
+  promoteBaseline: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v1.yaml
+  promoteCandidate: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v2.yaml
 
   baselineFieldPath: .spec.backends[0].weight
   candidateFieldPath: .spec.backends[1].weight

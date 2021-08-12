@@ -6,8 +6,8 @@ spec:
   service: {{ .Values.baseline.name }}
   backends:
   - service: {{ .Values.baseline.name }}
-    weight: 100
+    weight: {{ .Values.baseline.weight }}
   {{- if .Values.candidate }}
   - service: {{ .Values.candidate.name }}
-    weight: 0
+    weight: {{ .Values.candidate.weight }}
   {{- end }}
