@@ -158,9 +158,9 @@ nav:
       - GitOps:
         - Argo CD + Istio: tutorials/istio/gitops/argocd.md
     - Linkerd:
-      - A/B experiment (Helmex): tutorials/linkerd/abexperiment.md
+      - A/B experiment (Helmex): tutorials/linkerd/abexperiment-helmex.md
       - Testing strategies:
-        - A/B experiment: tutorials/linkerd/testing-strategies/quick-start.md
+        - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
       - Platform setup: tutorials/linkerd/platform-setup.md
     - Openshift:
       - CI/CD integration: tutorials/openshift/openshift.md
