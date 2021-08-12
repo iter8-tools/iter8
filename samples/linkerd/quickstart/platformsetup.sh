@@ -43,21 +43,5 @@ curl -sL https://run.linkerd.io/install | LINKERD2_VERSION=${LINKERD2_VERSION} s
 export PATH=$PATH:~/.linkerd2/bin
 cd $WORK_DIR
 
-echo "Installing Linkerd..."
 linkerd install | kubectl apply -f -
-echo "Waiting for all Linkerd pods to be running..."
-linkerd check
-echo "Installing Viz extension..."
 linkerd viz install | kubectl apply -f -
-echo "Waiting for all Viz extension pods to be running..."
-linkerd check
-echo "Linkerd installed successfully"
-
-### Note: the preceding steps perform domain install; following steps perform Iter8 install
-
-# Step 3: Install Iter8
-echo "Installing Iter8 with Istio Support"
-kustomize build $ITER8/install/core | kubectl apply -f -
-kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build $ITER8/install/builtin-metrics | kubectl apply -f -
-kubectl wait --for=condition=Ready pods --all -n iter8-system

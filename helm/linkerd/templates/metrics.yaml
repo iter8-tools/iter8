@@ -1,25 +1,16 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    creator: iter8
-    stack: linkerd
-  name: iter8-linkerd
----
 apiVersion: iter8.tools/v2alpha2
 kind: Metric
 metadata:
   labels:
     creator: iter8
   name: user-engagement
-  namespace: iter8-linkerd
 spec:
   description: Number of error responses
   type: Gauge
   mock:
-  - name: web
+  - name: {{ .Values.baseline.name }}
     level: 5
-  - name: web2
+  - name: {{ .Values.candidate.name }}
     level: 10
 ---
 apiVersion: iter8.tools/v2alpha2
@@ -28,14 +19,13 @@ metadata:
   labels:
     creator: iter8
   name: error-count
-  namespace: iter8-linkerd 
 spec:
   description: Number of error responses
   jqExpression: .data.result[0].value[1] | tonumber
   params:
   - name: query
     value: |
-      sum(increase(response_total{status_code=~'5..',deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)
+      sum(increase(response_total{status_code=~'5..',deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)
   provider: prometheus
   type: Counter
   urlTemplate: http://prometheus.linkerd-viz:9090/api/v1/query
@@ -46,14 +36,13 @@ metadata:
   labels:
     creator: iter8
   name: error-rate
-  namespace: iter8-linkerd
 spec:
   description: Fraction of requests with error responses
   jqExpression: .data.result[0].value[1] | tonumber
   params:
   - name: query
     value: |
-      (sum(increase(response_total{status_code=~'5..',deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)) / sum(increase(request_total{deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s]))
+      (sum(increase(response_total{status_code=~'5..',deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)) / sum(increase(request_total{deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s]))
   provider: prometheus
   sampleSize: request-count
   type: Gauge
@@ -65,16 +54,15 @@ metadata:
   labels:
     creator: iter8
   name: le5ms-latency-percentile
-  namespace: iter8-linkerd
 spec:
   description: Less than 5 ms latency
   jqExpression: .data.result[0].value[1] | tonumber
   params:
   - name: query
     value: |
-      (sum(increase(response_latency_ms_bucket{le='5',deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)) / sum(increase(response_latency_ms_bucket{le='+Inf',deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)
+      (sum(increase(response_latency_ms_bucket{le='5',deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)) / sum(increase(response_latency_ms_bucket{le='+Inf',deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)
   provider: prometheus
-  sampleSize: iter8-linkerd/request-count
+  sampleSize: {{ .Release.Namespace }}/request-count
   type: Gauge
   urlTemplate: http://prometheus.linkerd-viz:9090/api/v1/query
 ---
@@ -84,14 +72,13 @@ metadata:
   labels:
     creator: iter8
   name: mean-latency
-  namespace: iter8-linkerd
 spec:
   description: Mean latency
   jqExpression: .data.result[0].value[1] | tonumber
   params:
   - name: query
     value: |
-      (sum(increase(response_latency_ms_sum{deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(request_total{deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0))
+      (sum(increase(response_latency_ms_sum{deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(request_total{deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s])) or on() vector(0))
   provider: prometheus
   sampleSize: request-count
   type: Gauge
@@ -104,14 +91,13 @@ metadata:
   labels:
     creator: iter8
   name: request-count
-  namespace: iter8-linkerd
 spec:
   description: Number of requests
   jqExpression: .data.result[0].value[1] | tonumber
   params:
   - name: query
     value: |
-      sum(increase(request_total{deployment='$name',namespace='$namespace',direction='inbound',tls='true'}[${elapsedTime}s]))
+      sum(increase(request_total{deployment='$name',namespace='{{ .Release.Namespace }}',direction='inbound',tls='true'}[${elapsedTime}s]))
   provider: prometheus
   type: Counter
   urlTemplate: http://prometheus.linkerd-viz:9090/api/v1/query

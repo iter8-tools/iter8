@@ -1,0 +1,13 @@
+apiVersion: split.smi-spec.io/v1alpha2
+kind: TrafficSplit
+metadata:
+  name: {{ required ".Values.common.application is required!" .Values.common.application }}-traffic-split
+spec:
+  service: {{ .Values.baseline.name }}
+  backends:
+  - service: {{ .Values.baseline.name }}
+    weight: 100
+  {{- if .Values.candidate }}
+  - service: {{ .Values.candidate.name }}
+    weight: 0
+  {{- end }}

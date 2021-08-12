@@ -14,24 +14,24 @@ template: main.html
     ![Quickstart KFServing](../../images/quickstart-ab.png)
 
 ???+ warning "Platform setup"
-    Follow [these steps](platform-setup.md) to install Iter8 and Linkerd in your K8s cluster.
+    1. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster). If you wish to use the Istio networking layer for Knative, ensure that the cluster has sufficient resources
+    2. Get [Linkerd](setup-for-tutorials.md)
+    3. [Install Iter8 in K8s cluster](../../getting-started/install.md)
+    4. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
 
 ## 1. Create application versions
 Create a new namespace, enable Linkerd proxy injection, deploy two Hello World applications, and create a traffic split. 
 
 ```shell
-kubectl create ns test
-kubectl annotate namespace test linkerd.io/inject=enabled
+kubectl create deployment web --image=gcr.io/google-samples/hello-app:1.0
+kubectl expose deployment web --type=NodePort --port=8080
 
-kubectl create deployment web --image=gcr.io/google-samples/hello-app:1.0 -n test
-kubectl expose deployment web --type=NodePort --port=8080 -n test
+kubectl create deployment web2 --image=gcr.io/google-samples/hello-app:2.0
+kubectl expose deployment web2 --type=NodePort --port=8080
 
-kubectl create deployment web2 --image=gcr.io/google-samples/hello-app:2.0 -n test
-kubectl expose deployment web2 --type=NodePort --port=8080 -n test
+kubectl wait --for=condition=Ready pods --all
 
-kubectl wait --for=condition=Ready pods --all -n test
-
-kubectl apply -f $ITER8/samples/linkerd/quickstart/traffic-split.yaml -n test
+kubectl apply -f $ITER8/samples/linkerd/quickstart/traffic-split.yaml
 ```
 
 ??? info "Look inside traffic-split.yaml"
@@ -139,7 +139,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       provider: prometheus
       type: Counter
       urlTemplate: http://prometheus.linkerd-viz:9090/api/v1/query
-      # (sum(increase(request_total{namespace='$namespace',deployment='$name',direction='inbound',tls='true'}[${elapsedTime}s]))) - (sum(increase(response_total{classification='success',namespace='$namespace',deployment='$name',direction='inbound',tls='true'}[${elapsedTime}s])))
     ---
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
@@ -296,5 +295,4 @@ Follow [these steps](../../getting-started/first-experiment.md#3-observe-experim
 ```shell
 kubectl delete -f $ITER8/samples/linkerd/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/linkerd/quickstart/experiment.yaml
-kubectl delete namespace test
 ```
