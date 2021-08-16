@@ -8,6 +8,8 @@ spec:
     testingPattern: A/B
     deploymentPattern: Progressive
     actions:
+      start:
+      - run: sleep 10.0
       loop:
       - task: metrics/collect
         with:
