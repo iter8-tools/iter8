@@ -270,10 +270,10 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
         actions:
           # when the experiment completes, promote the winning version using kubectl apply
           finish:
-          - task: common/exec
-            with:
-              cmd: /bin/bash
-              args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
+          - if: CandidateWon()
+            run: kubectl -n bookinfo-iter8 apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
+          - if: not CandidateWon()
+            run: kubectl -n bookinfo-iter8 apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml
       criteria:
         rewards:
         # (business) reward metric to optimize in this experiment
@@ -281,7 +281,7 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           preferredDirection: High
         objectives: # used for validating versions
         - metric: iter8-istio/mean-latency
-          upperLimit: 100
+          upperLimit: 300
         - metric: iter8-istio/error-rate
           upperLimit: "0.01"
         requestCount: iter8-istio/request-count
@@ -295,8 +295,6 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           variables:
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
-          - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml
           weightObjRef:
             apiVersion: networking.istio.io/v1beta1
             kind: VirtualService
@@ -308,8 +306,6 @@ kubectl apply -f $ITER8/samples/istio/quickstart/experiment.yaml
           variables:
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
-          - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
           weightObjRef:
             apiVersion: networking.istio.io/v1beta1
             kind: VirtualService

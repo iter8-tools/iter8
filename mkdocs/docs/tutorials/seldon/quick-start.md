@@ -344,10 +344,10 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml
         actions:
           # when the experiment completes, promote the winning version using kubectl apply
           finish:
-          - task: common/exec
-            with:
-              cmd: /bin/bash
-              args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+          - if: CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v2.yaml
+          - if: not CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v1.yaml
       criteria:
         requestCount: iter8-seldon/request-count
         rewards: # Business rewards
@@ -378,8 +378,6 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml
             value: ns-baseline
           - name: sid
             value: iris
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v1.yaml
         candidates:
         - name: iris-v2
           weightObjRef:
@@ -392,9 +390,7 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml
           - name: ns
             value: ns-candidate
           - name: sid
-            value: iris
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/seldon/quickstart/promote-v2.yaml     
+            value: iris   
     ```
 
 ## 5. Observe experiment

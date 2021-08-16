@@ -112,25 +112,17 @@ kubectl apply -f $ITER8/samples/kfserving/session-affinity/experiment.yaml
         actions:
           # when the experiment completes, promote the winning version using kubectl apply
           finish:
-          - task: common/exec
-            with:
-              cmd: /bin/bash
-              args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+          - if: CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
+          - if: not CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
       criteria:
-        requestCount: iter8-kfserving/request-count
         rewards: # Business rewards
         - metric: iter8-kfserving/user-engagement
           preferredDirection: High # maximize user engagement
-        objectives:
-        - metric: iter8-kfserving/mean-latency
-          upperLimit: 2000
-        - metric: iter8-kfserving/95th-percentile-tail-latency
-          upperLimit: 5000
-        - metric: iter8-kfserving/error-rate
-          upperLimit: "0.01"
       duration:
-        intervalSeconds: 10
-        iterationsPerLoop: 10
+        intervalSeconds: 5
+        iterationsPerLoop: 20
       versionInfo:
         # information about model versions used in this experiment
         baseline:
@@ -138,15 +130,11 @@ kubectl apply -f $ITER8/samples/kfserving/session-affinity/experiment.yaml
           variables:
           - name: ns
             value: ns-baseline
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
         candidates:
         - name: flowers-v2
           variables:
           - name: ns
             value: ns-candidate
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
 ## 5. Observe experiment

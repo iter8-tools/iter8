@@ -80,10 +80,10 @@ kubectl apply -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
         actions:
           # when the experiment completes, promote the winning version using kubectl apply
           finish:
-          - task: common/exec
-            with:
-              cmd: /bin/bash
-              args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+          - if: CandidateWon()
+            run: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
+          - if: not CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
       criteria:
         rewards: # Business rewards
         - metric: iter8-kfserving/user-engagement
@@ -98,15 +98,11 @@ kubectl apply -f $ITER8/samples/kfserving/fixed-split/experiment.yaml
           variables:
           - name: ns
             value: ns-baseline
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
         candidates:
         - name: flowers-v2
           variables:
           - name: ns
             value: ns-candidate
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
 ## 5. Observe experiment

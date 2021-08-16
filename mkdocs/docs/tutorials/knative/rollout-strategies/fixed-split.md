@@ -73,13 +73,10 @@ kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
               - name: sample-app-v2
                 url: http://sample-app-v2.default.svc.cluster.local
           finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version      
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
+          - if: CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml
+          - if: not CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml
       criteria:
         requestCount: iter8-system/request-count
         objectives: 
@@ -97,14 +94,8 @@ kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
         # information about app versions used in this experiment
         baseline:
           name: sample-app-v1
-          variables:
-          - name: promote
-            value: baseline
         candidates:
         - name: sample-app-v2
-          variables:
-          - name: promote
-            value: candidate
     ```
 
 ## 3. Observe experiment
