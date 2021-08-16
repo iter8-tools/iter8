@@ -99,11 +99,11 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
                 url: http://sample-app-v2.default.svc.cluster.local
           finish: # run the following sequence of tasks at the end of the experiment
           - task: common/bash # promote candidate, if candidate is the winner
-            condition: CandidateWon()
+            if: CandidateWon()
             with:
               script: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml
           - task: common/bash # promote baseline, if candidate is not the winner
-            condition: not CandidateWon()
+            if: not CandidateWon()
             with:
               script: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml
       criteria:
