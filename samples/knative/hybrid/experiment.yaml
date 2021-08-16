@@ -9,7 +9,7 @@ spec:
     deploymentPattern: Progressive
     actions:
       start:
-      - run: sleep 10.0
+      - run: sleep 20.0
       loop:
       - task: metrics/collect
         with:
