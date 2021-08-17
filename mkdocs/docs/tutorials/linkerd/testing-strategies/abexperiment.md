@@ -243,7 +243,7 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/experiment.yaml
         requestCount: default/request-count
       duration: # product of fields determines length of the experiment
         intervalSeconds: 10
-        iterationsPerLoop: 10
+        iterationsPerLoop: 5
       versionInfo:
         # information about the app versions used in this experiment
         baseline:

@@ -362,7 +362,7 @@ kubectl apply -f $ITER8/samples/seldon/quickstart/experiment.yaml
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
-        iterationsPerLoop: 10
+        iterationsPerLoop: 5
       versionInfo:
         # information about model versions used in this experiment
         baseline:

@@ -364,7 +364,7 @@ Suppose the [metrics defined above](#metrics-withwithout-auth) are referenced wi
           lowerLimit: "250.0"
       duration:
         intervalSeconds: 10
-        iterationsPerLoop: 10
+        iterationsPerLoop: 5
       versionInfo:
         baseline:
           name: current

@@ -159,7 +159,7 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
           preferredDirection: High # maximize user engagement
       duration:
         intervalSeconds: 5
-        iterationsPerLoop: 20
+        iterationsPerLoop: 5
       versionInfo:
         # information about model versions used in this experiment
         baseline:

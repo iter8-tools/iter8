@@ -42,7 +42,7 @@ template: main.html
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
-        iterationsPerLoop: 10
+        iterationsPerLoop: 5
       versionInfo:
         # information about app versions used in this experiment
         baseline:

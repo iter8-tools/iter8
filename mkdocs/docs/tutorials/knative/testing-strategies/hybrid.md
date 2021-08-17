@@ -156,7 +156,7 @@ kubectl apply -f $ITER8/samples/knative/hybrid/experiment.yaml
           upperLimit: "0.01"
         requestCount: iter8-system/request-count
       duration:
-        maxLoops: 10
+        maxLoops: 3
         intervalSeconds: 1
         iterationsPerLoop: 1
       versionInfo:

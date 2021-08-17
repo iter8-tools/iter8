@@ -87,7 +87,7 @@ kubectl apply -f $ITER8/samples/knative/fixed-split/experiment.yaml
         - metric: iter8-system/error-rate
           upperLimit: "0.01"
       duration:
-        maxLoops: 10
+        maxLoops: 3
         intervalSeconds: 1
         iterationsPerLoop: 1
       versionInfo:
