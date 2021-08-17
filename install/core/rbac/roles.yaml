@@ -28,6 +28,7 @@ rules:
   - events
   verbs:
   - create
+  - patch
 ---
 # This role enables reading metrics
 kind: ClusterRole

@@ -14,8 +14,8 @@ template: main.html
     
     ![Hybrid testing](../../../images/quickstart-hybrid.png)
 
-???+ warning "Platform setup"
-    Follow [these steps](../setup-for-tutorials.md) to install Iter8 and Knative in your K8s cluster.
+??? warning "Platform setup"
+    1. Install Iter8 and Knative in your K8s cluster as described in the [platform setup instructions for slo validation quick start experiment](../slovalidation-helmex.md).
 
 ## 1. Create app versions
 Deploy two versions of a Knative app.

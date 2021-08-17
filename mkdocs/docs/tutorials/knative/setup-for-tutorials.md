@@ -9,6 +9,9 @@ For production installation of Knative, refer to the [official Knative instructi
 ```shell
 git clone https://github.com/iter8-tools/iter8.git
 cd iter8
+```
+
+```shell
 export ITER8=$(pwd)
 $ITER8/samples/knative/quickstart/platform-setup.sh
 ```
