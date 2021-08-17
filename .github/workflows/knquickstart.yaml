@@ -57,7 +57,7 @@ jobs:
       run: |
         export ITER8=$(pwd)
         $ITER8/samples/setup/iter8-setup.sh
-        $ITER8/samples/knative/quickstart/platform-setup.sh kourier
+        $ITER8/samples/knative/quickstart/platform-setup.sh
 
     # install Go locally
     - name: Install Go

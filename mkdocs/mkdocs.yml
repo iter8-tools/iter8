@@ -143,7 +143,6 @@ nav:
       - Rollout strategies:
         - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
-        - User segmentation: tutorials/knative/rollout-strategies/user-segmentation.md
       - Setup for tutorials: tutorials/knative/setup-for-tutorials.md
     - Istio:
       - Quick start: tutorials/istio/quick-start.md

@@ -219,4 +219,3 @@ git push -d origin $BRANCH
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
     * [Hybrid testing](testing-strategies/hybrid.md)
     * [Fixed traffic split](rollout-strategies/fixed-split.md)
-    * [User segmentation based on HTTP headers](rollout-strategies/user-segmentation.md)

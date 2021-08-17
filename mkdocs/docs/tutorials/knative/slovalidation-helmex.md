@@ -13,8 +13,8 @@ template: main.html
 
 ??? warning "Setup K8s cluster with Knative and local environment"
     1. Get [Helm 3+](https://helm.sh/docs/intro/install/) 
-    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster). If you wish to use the Istio networking layer for Knative, ensure that the cluster has sufficient resources
-    3. [Install Knative in K8s cluster](setup-for-tutorials.md). This tutorial can be tried with any Knative networking layer.
+    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster).
+    3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster). This tutorial can be tried with any Knative networking layer.
     4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
     5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
     6. Get [the Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
@@ -41,17 +41,11 @@ helm install my-app iter8/knslo \
     kubectl wait ksvc/hello --for=condition=Ready
     ```
 
-    Port-forward the ingress service for Knative. Choose the networking layer used by your Knative installation.
+    Port-forward the ingress service for Knative. With the `Kourier` networking layer, you can do this as follows.
     === "Kourier"
         ```shell
         # do this in a separate terminal
         kubectl port-forward svc/kourier -n knative-serving 8080:80
-        ```
-
-    === "Istio"
-        ```shell
-        # do this in a separate terminal
-        kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
         ```
 
     ```shell
@@ -211,4 +205,3 @@ helm uninstall my-app
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
     * [Hybrid testing](testing-strategies/hybrid.md)
     * [Fixed traffic split](rollout-strategies/fixed-split.md)
-    * [User segmentation based on HTTP headers](rollout-strategies/user-segmentation.md)
