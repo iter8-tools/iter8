@@ -8,8 +8,6 @@ spec:
     testingPattern: A/B
     deploymentPattern: Progressive
     actions:
-      start:
-      - run: sleep 20.0
       loop:
       - task: metrics/collect
         with:
@@ -24,9 +22,7 @@ spec:
       - if: not CandidateWon()
       - run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml
   criteria:
-    rewards: # Business rewards
-    - metric: iter8-knative/user-engagement
-      preferredDirection: High # maximize user engagement
+    requestCount: iter8-system/request-count
     objectives: 
     - metric: iter8-system/mean-latency
       upperLimit: 50
@@ -34,7 +30,9 @@ spec:
       upperLimit: 100
     - metric: iter8-system/error-rate
       upperLimit: "0.01"
-    requestCount: iter8-system/request-count
+    rewards: # Business rewards
+    - metric: iter8-knative/user-engagement
+      preferredDirection: High # maximize user engagement
   duration:
     maxLoops: 3
     intervalSeconds: 1
