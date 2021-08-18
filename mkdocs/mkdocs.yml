@@ -177,7 +177,6 @@ nav:
       - run: reference/tasks/run.md
       - common/readiness: reference/tasks/common-readiness.md
       - metrics/collect: reference/tasks/metrics-collect.md
-      - gitops/helmex-update: reference/tasks/gitops-helmex-update.md
       - notification/http: reference/tasks/notification-http.md
       - notification/slack: reference/tasks/notification-slack.md
   - Contributing: 
