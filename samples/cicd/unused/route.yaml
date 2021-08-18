@@ -1,0 +1,19 @@
+# Ref: https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#alternateBackends
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: iter8-app-route
+  annotations:
+    haproxy.router.openshift.io/balance: roundrobin
+  labels:
+    app.kubernetes.io/instance: gitops
+spec:
+  host: "iter8-app.example.com"
+  to:
+    kind: Service
+    name: iter8-app-stable
+    weight: 100
+  alternateBackends:
+  - kind: Service
+    name: iter8-app-candidate
+    weight: 0

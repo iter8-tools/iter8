@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: iter8-git
+spec:
+  type: git
+  params:
+    - name: url
+      value: https://github.com/MY_ORG/iter8.git
+    - name: revision
+      value: master
+    - name: refspec
+      value: refs/heads/master:refs/heads/master
+    - name: depth
+      value: "0"

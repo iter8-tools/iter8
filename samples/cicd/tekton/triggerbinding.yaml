@@ -1,0 +1,14 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: iter8-triggerbinding
+spec:
+  params:
+  - name: ACTION
+    value: $(body.action)
+  - name: MERGED
+    value: $(body.pull_request.merged)
+  - name: COMMITS
+    value: $(body.pull_request.commits)
+  - name: BRANCH
+    value: $(body.pull_request.base.ref)
