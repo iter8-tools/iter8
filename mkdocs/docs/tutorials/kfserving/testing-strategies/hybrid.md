@@ -150,9 +150,9 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
           # when the experiment completes, promote the winning version using kubectl apply
           finish:
           - if: CandidateWon()
-            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
+            run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml"
           - if: not CandidateWon()
-            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
+            run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml"
       criteria:
         rewards: # Business rewards
         - metric: iter8-kfserving/user-engagement

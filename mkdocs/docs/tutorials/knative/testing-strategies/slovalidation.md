@@ -99,9 +99,9 @@ kubectl apply -f $ITER8/samples/knative/quickstart/experiment.yaml
                 url: http://sample-app-v2.default.svc.cluster.local
           finish: # run the following sequence of tasks at the end of the experiment
           - if: CandidateWon()
-            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml
+            run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml"
           - if: not CandidateWon()
-            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml
+            run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml"
       criteria:
         requestCount: iter8-system/request-count
         objectives: 
