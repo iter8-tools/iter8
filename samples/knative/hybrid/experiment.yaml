@@ -27,14 +27,14 @@ spec:
     - metric: iter8-system/mean-latency
       upperLimit: 50
     - metric: iter8-system/latency-95th-percentile
-      upperLimit: 100
+      upperLimit: 300
     - metric: iter8-system/error-rate
       upperLimit: "0.01"
     rewards: # Business rewards
     - metric: iter8-knative/user-engagement
       preferredDirection: High # maximize user engagement
   duration:
-    maxLoops: 3
+    maxLoops: 4
     intervalSeconds: 1
     iterationsPerLoop: 1
   versionInfo:
