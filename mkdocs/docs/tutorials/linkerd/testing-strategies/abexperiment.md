@@ -4,34 +4,34 @@ template: main.html
 
 # A/B Testing
 
-!!! tip "Scenario: A/B testing and progressive traffic shift for KFServing models"
-    [A/B testing](../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
+!!! tip "Scenario: A/B testing and progressive traffic shift"
+    [A/B testing](../../../concepts/buildingblocks.md#ab-testing) enables you to compare two versions of an ML model, and select a winner based on a (business) reward metric. In this tutorial, you will:
 
     1. Perform A/B testing.
     2. Specify *user-engagement* as the reward metric. This metric will be mocked by Iter8 in this tutorial.
-    3. Combine A/B testing with [progressive traffic shifting](../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
+    3. Combine A/B testing with [progressive traffic shifting](../../../concepts/buildingblocks.md#progressive-traffic-shift). Iter8 will progressively shift traffic towards the winner and promote it at the end as depicted below.
 
-    ![Quickstart KFServing](../../images/quickstart-ab.png)
+    ![Quickstart KFServing](../../../images/quickstart-ab.png)
 
 ???+ warning "Platform setup"
-    Follow [these steps](platform-setup.md) to install Iter8 and Linkerd in your K8s cluster.
+    1. Setup [K8s cluster](../../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    2. Get [Linkerd](../setup-for-tutorials.md)
+    3. [Install Iter8 in K8s cluster](../../../getting-started/install.md)
+    4. Get [`iter8ctl`](../../../getting-started/install.md#install-iter8ctl)
 
 ## 1. Create application versions
 Create a new namespace, enable Linkerd proxy injection, deploy two Hello World applications, and create a traffic split. 
 
 ```shell
-kubectl create ns test
-kubectl annotate namespace test linkerd.io/inject=enabled
+kubectl create deployment web --image=gcr.io/google-samples/hello-app:1.0
+kubectl expose deployment web --type=NodePort --port=8080
 
-kubectl create deployment web --image=gcr.io/google-samples/hello-app:1.0 -n test
-kubectl expose deployment web --type=NodePort --port=8080 -n test
+kubectl create deployment web2 --image=gcr.io/google-samples/hello-app:2.0
+kubectl expose deployment web2 --type=NodePort --port=8080
 
-kubectl create deployment web2 --image=gcr.io/google-samples/hello-app:2.0 -n test
-kubectl expose deployment web2 --type=NodePort --port=8080 -n test
+kubectl wait --for=condition=Ready pods --all
 
-kubectl wait --for=condition=Ready pods --all -n test
-
-kubectl apply -f $ITER8/samples/linkerd/quickstart/traffic-split.yaml -n test
+kubectl apply -f $ITER8/samples/linkerd/quickstart/traffic-split.yaml
 ```
 
 ??? info "Look inside traffic-split.yaml"
@@ -90,7 +90,7 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/fortio.yaml
 ## 3. Define metrics
 Iter8 defines a custom K8s resource called *Metric* that makes it easy to use metrics from RESTful metric providers like Prometheus, New Relic, Sysdig and Elastic during experiments. 
 
-For the purpose of this tutorial, you will [mock](../../metrics/mock.md) a number of metrics as follows.
+For the purpose of this tutorial, you will [mock](../../../metrics/mock.md) a number of metrics as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
@@ -98,21 +98,12 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
 
 ??? info "Look inside metrics.yaml"
     ```yaml linenums="1"
-    apiVersion: v1
-    kind: Namespace
-    metadata:
-      labels:
-        creator: iter8
-        stack: linkerd
-      name: iter8-linkerd
-    ---
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
     metadata:
       labels:
         creator: iter8
       name: user-engagement
-      namespace: iter8-linkerd
     spec:
       description: Number of error responses
       type: Gauge
@@ -127,8 +118,7 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
     metadata:
       labels:
         creator: iter8
-      name: error-count
-      namespace: iter8-linkerd 
+      name: error-count 
     spec:
       description: Number of error responses
       jqExpression: .data.result[0].value[1] | tonumber
@@ -139,7 +129,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       provider: prometheus
       type: Counter
       urlTemplate: http://prometheus.linkerd-viz:9090/api/v1/query
-      # (sum(increase(request_total{namespace='$namespace',deployment='$name',direction='inbound',tls='true'}[${elapsedTime}s]))) - (sum(increase(response_total{classification='success',namespace='$namespace',deployment='$name',direction='inbound',tls='true'}[${elapsedTime}s])))
     ---
     apiVersion: iter8.tools/v2alpha2
     kind: Metric
@@ -147,7 +136,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: error-rate
-      namespace: iter8-linkerd
     spec:
       description: Fraction of requests with error responses
       jqExpression: .data.result[0].value[1] | tonumber
@@ -166,7 +154,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: le5ms-latency-percentile
-      namespace: iter8-linkerd
     spec:
       description: Less than 5 ms latency
       jqExpression: .data.result[0].value[1] | tonumber
@@ -185,7 +172,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: mean-latency
-      namespace: iter8-linkerd
     spec:
       description: Mean latency
       jqExpression: .data.result[0].value[1] | tonumber
@@ -205,7 +191,6 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/metrics.yaml
       labels:
         creator: iter8
       name: request-count
-      namespace: iter8-linkerd
     spec:
       description: Number of requests
       jqExpression: .data.result[0].value[1] | tonumber
@@ -244,18 +229,18 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/experiment.yaml
           finish:
           - task: common/bash
             with:
-              script: kubectl -n test apply -f {{ .promote }}
+              script: kubectl apply -f {{ .promote }}
       criteria:
         rewards:
         # (business) reward metric to optimize in this experiment
-        - metric: iter8-linkerd/user-engagement
+        - metric: default/user-engagement
           preferredDirection: High
         objectives: # used for validating versions
-        - metric: iter8-linkerd/mean-latency
+        - metric: default/mean-latency
           upperLimit: 300
-        - metric: iter8-linkerd/error-rate
+        - metric: default/error-rate
           upperLimit: "0.01"
-        requestCount: iter8-linkerd/request-count
+        requestCount: default/request-count
       duration: # product of fields determines length of the experiment
         intervalSeconds: 10
         iterationsPerLoop: 10
@@ -265,36 +250,33 @@ kubectl apply -f $ITER8/samples/linkerd/quickstart/experiment.yaml
           name: web
           variables:
           - name: namespace # used by final action if this version is the winner
-            value: test
+            value: default
           - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v1.yaml
+            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v1.yaml
           weightObjRef:
             apiVersion: split.smi-spec.io/v1alpha2
             kind: TrafficSplit
-            namespace: test
             name: web-traffic-split
             fieldPath: .spec.backends[0].weight
         candidates:
         - name: web2
           variables:
           - name: namespace # used by final action if this version is the winner
-            value: test
+            value: default
           - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v2.yaml
+            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v2.yaml
           weightObjRef:
             apiVersion: split.smi-spec.io/v1alpha2
             kind: TrafficSplit
-            namespace: test
             name: web-traffic-split
             fieldPath: .spec.backends[1].weight
     ```
 
 ## 3. Observe experiment
-Follow [these steps](../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
+Follow [these steps](../../../getting-started/first-experiment.md#3-observe-experiment) to observe your experiment.
 
 ## 4. Cleanup
 ```shell
 kubectl delete -f $ITER8/samples/linkerd/quickstart/fortio.yaml
 kubectl delete -f $ITER8/samples/linkerd/quickstart/experiment.yaml
-kubectl delete namespace test
 ```

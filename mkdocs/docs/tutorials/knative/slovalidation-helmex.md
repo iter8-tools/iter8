@@ -14,13 +14,13 @@ template: main.html
 ??? warning "Setup K8s cluster with Knative and local environment"
     1. Get [Helm 3+](https://helm.sh/docs/intro/install/) 
     2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster). If you wish to use the Istio networking layer for Knative, ensure that the cluster has sufficient resources
-    3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster). This tutorial can be tried with any Knative networking layer.
+    3. [Install Knative in K8s cluster](setup-for-tutorials.md). This tutorial can be tried with any Knative networking layer.
     4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
     5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
     6. Get [the Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
 
 ## 1. Create baseline version
-Deploy the baseline version of the `hello world` Knative app using Helm.
+Deploy the baseline version of the `hello world` application using Helm.
 
 ```shell
 helm install my-app iter8/knslo \
@@ -68,6 +68,7 @@ helm install my-app iter8/knslo \
 
 ## 2. Create candidate version
 Deploy the candidate version of the `hello world` application using Helm.
+
 ```shell
 helm upgrade my-app iter8/knslo \
   --set baseline.dynamic.tag="1.0" \
@@ -100,6 +101,7 @@ The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#wh
 
 ## 3. Observe experiment
 Describe the results of the Iter8 experiment. Wait ~1 min before trying the following command. If the output is not as expected, try again after a few seconds.
+
 ```shell
 iter8ctl describe
 ```
@@ -156,6 +158,7 @@ iter8ctl describe
 
 ## 4. Promote winner
 Assert that the experiment completed and found a winning version. If the conditions are not satisfied, try again after a few seconds.
+
 ```shell
 iter8ctl assert -c completed -c winnerFound
 ```
@@ -189,6 +192,7 @@ helm upgrade my-app iter8/knslo \
     ```
 
 ## 5. Cleanup
+
 ```shell
 helm uninstall my-app
 ```
