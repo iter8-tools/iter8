@@ -136,7 +136,6 @@ nav:
         - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
     - Knative:
       - SLO validation (Helmex): tutorials/knative/slovalidation-helmex.md
-      - SLO validation (Helmex, GitOps): tutorials/knative/slovalidation-helmex-gitops.md
       - Testing strategies:
         - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
         - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
