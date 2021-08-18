@@ -30,9 +30,7 @@ spec:
           - name: Accept
             value: application/vnd.github.v3+json
 
-      - task: common/bash
-        with:
-          script: |
+      - run: |
             kubectl -n {{ .namespace }} apply -f https://raw.githubusercontent.com/MY_ORG/iter8/master/samples/istio/gitops/istio-vs.yaml
 
 

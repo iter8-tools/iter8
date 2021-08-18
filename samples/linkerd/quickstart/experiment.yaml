@@ -13,9 +13,10 @@ spec:
     actions:
       # when the experiment completes, promote the winning version using kubectl apply
       finish:
-      - task: common/bash
-        with:
-          script: kubectl apply -f {{ .promote }}
+      - if: CandidateWon()
+        run: kubectl -n test apply -f https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v2.yaml
+      - if: not CandidateWon()
+        run: kubectl -n test apply -f https://raw.githubusercontent.com/alan-cha/iter8/linkerd/samples/linkerd/quickstart/vs-for-v1.yaml
   criteria:
     rewards:
     # (business) reward metric to optimize in this experiment
@@ -36,9 +37,7 @@ spec:
       name: web
       variables:
       - name: namespace # used by final action if this version is the winner
-        value: default
-      - name: promote # used by final action if this version is the winner
-        value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v1.yaml
+        value: test
       weightObjRef:
         apiVersion: split.smi-spec.io/v1alpha2
         kind: TrafficSplit
@@ -48,9 +47,7 @@ spec:
     - name: web2
       variables:
       - name: namespace # used by final action if this version is the winner
-        value: default
-      - name: promote # used by final action if this version is the winner
-        value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v2.yaml
+        value: test
       weightObjRef:
         apiVersion: split.smi-spec.io/v1alpha2
         kind: TrafficSplit
