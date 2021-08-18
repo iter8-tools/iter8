@@ -20,7 +20,7 @@ spec:
       - if: CandidateWon()
         run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml"
       - if: not CandidateWon()
-      - run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml"
+        run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml"
   criteria:
     requestCount: iter8-system/request-count
     objectives: 

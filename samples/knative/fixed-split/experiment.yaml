@@ -3,7 +3,6 @@ kind: Experiment
 metadata:
   name: fixedsplit-exp
 spec:
-  # target identifies the knative service under experimentation using its fully qualified name
   target: default/sample-app
   strategy:
     testingPattern: Canary
