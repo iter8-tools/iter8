@@ -198,9 +198,6 @@ helm uninstall my-app
 !!! tip "Use in production"
     The `knslo` Helm chart is located in the `$ITER8/helm` folder. Modify the chart as needed by your application for production usage.
 
-!!! tip "Try GitOps-friendly version"
-    Try the [GitOps-friendly version](slovalidation-helmex-gitops.md) of this tutorial.
-
 !!! tip "Try other Iter8 Knative tutorials"
     * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
     * [Hybrid testing](testing-strategies/hybrid.md)
