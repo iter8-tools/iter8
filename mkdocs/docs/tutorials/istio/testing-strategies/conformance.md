@@ -143,7 +143,7 @@ kubectl apply -f $ITER8/samples/istio/conformance/experiment.yaml
         requestCount: iter8-istio/request-count
       duration: # product of fields determines length of the experiment
         intervalSeconds: 10
-        iterationsPerLoop: 10
+        iterationsPerLoop: 5
       versionInfo:
         # information about the app versions used in this experiment
         baseline:

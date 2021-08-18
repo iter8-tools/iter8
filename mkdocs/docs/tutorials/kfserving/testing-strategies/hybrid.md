@@ -149,17 +149,17 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
         actions:
           # when the experiment completes, promote the winning version using kubectl apply
           finish:
-          - task: common/exec
-            with:
-              cmd: /bin/bash
-              args: [ "-c", "kubectl apply -f {{ .promote }}" ]
+          - if: CandidateWon()
+            run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml"
+          - if: not CandidateWon()
+            run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml"
       criteria:
         rewards: # Business rewards
         - metric: iter8-kfserving/user-engagement
           preferredDirection: High # maximize user engagement
       duration:
         intervalSeconds: 5
-        iterationsPerLoop: 20
+        iterationsPerLoop: 5
       versionInfo:
         # information about model versions used in this experiment
         baseline:
@@ -173,8 +173,6 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
           variables:
           - name: ns
             value: ns-baseline
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v1.yaml
         candidates:
         - name: flowers-v2
           weightObjRef:
@@ -186,8 +184,6 @@ kubectl apply -f $ITER8/samples/kfserving/hybrid/experiment.yaml
           variables:
           - name: ns
             value: ns-candidate
-          - name: promote
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/kfserving/quickstart/promote-v2.yaml
     ```
 
 ## 6. Observe experiment

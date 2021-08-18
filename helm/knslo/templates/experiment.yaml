@@ -31,12 +31,7 @@ spec:
             name: {{ .Values.common.application }}
             namespace: {{ .Release.Namespace }}
             waitFor: condition=Ready
-      - task: common/bash
-        with:
-          # sometimes Knative declares that the service is ready
-          # even though routes are still unavailable or not ready; this sleep provides 
-          # some level of safeguard for such situations
-          script: "sleep 30.0" 
+      - run: "sleep 30.0"
       # collect Iter8's built-in metrics
       - task: metrics/collect
         with:

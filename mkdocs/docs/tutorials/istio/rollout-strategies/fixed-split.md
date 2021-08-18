@@ -85,10 +85,10 @@ kubectl apply -f $ITER8/samples/istio/fixed-split/experiment.yaml
         actions:
           # when the experiment completes, promote the winning version using kubectl apply
           finish:
-          - task: common/exec
-            with:
-              cmd: /bin/bash
-              args: [ "-c", "kubectl -n bookinfo-iter8 apply -f {{ .promote }}" ]
+          - if: CandidateWon()
+            run: kubectl -n bookinfo-iter8 apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
+          - if: not CandidateWon()
+            run: kubectl -n bookinfo-iter8 apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml
       criteria:
         rewards:
         # (business) reward metric to optimize in this experiment
@@ -102,7 +102,7 @@ kubectl apply -f $ITER8/samples/istio/fixed-split/experiment.yaml
         requestCount: iter8-istio/request-count
       duration: # product of fields determines length of the experiment
         intervalSeconds: 10
-        iterationsPerLoop: 10
+        iterationsPerLoop: 5
       versionInfo:
         # information about the app versions used in this experiment
         baseline:
@@ -110,15 +110,11 @@ kubectl apply -f $ITER8/samples/istio/fixed-split/experiment.yaml
           variables:
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
-          - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml
         candidates:
         - name: productpage-v2
           variables:
           - name: namespace # used by final action if this version is the winner
             value: bookinfo-iter8
-          - name: promote # used by final action if this version is the winner
-            value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
     ```
 
 ## 5. Observe experiment

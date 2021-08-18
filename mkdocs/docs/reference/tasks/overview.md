@@ -3,13 +3,11 @@ template: main.html
 ---
 
 # Tasks
-Tasks are an extension mechanism for enhancing the behavior of Iter8 experiments and can be specified within the [spec.strategy.actions](../experiment.md#strategy) field of the experiment. Tasks are grouped into libraries, namely, `common`, `metrics` and `notification`. They are referenced in Iter8 experiments using the `libraryName/taskName` format. The following tasks are available for use in Iter8 experiments.
+Tasks are an extension mechanism for enhancing the behavior of Iter8 experiments and can be specified within the [spec.strategy.actions](../experiment.md#strategy) field of the experiment. The following tasks are available for use in Iter8 experiments.
 
+- [`run`](run.md): Execute a bash script.
 - [`common/readiness`](common-readiness.md): Check if K8s resources needed for an experiment are available and/or ready.
-- [`common/bash`](common-bash.md): Execute a bash script.
-- [`common/exec`](common-readiness.md) (deprecated): Execute a shell command.
 - [`metrics/collect`](metrics-collect.md): Generate GET/POST requests for the application versions and collect latency and error metrics. This task supports Iter8's built-in metrics feature.
-- [`gitops/helmex-update`](gitops-helmex-update.md): Update Helm values in a GitHub repo using `git push`. The Helm values file must satisfy the [Helmex schema](../helmex-schema.md).
 - [`notification/http`](notification-http.md): Send a HTTP request to a specified target.
 - [`notification/slack`](notification-slack.md): Send a slack notification with a summary of the experiment.
 

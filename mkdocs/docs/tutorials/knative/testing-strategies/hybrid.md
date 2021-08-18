@@ -14,8 +14,8 @@ template: main.html
     
     ![Hybrid testing](../../../images/quickstart-hybrid.png)
 
-???+ warning "Platform setup"
-    Follow [these steps](../setup-for-tutorials.md) to install Iter8 and Knative in your K8s cluster.
+??? warning "Platform setup"
+    1. Install Iter8 and Knative in your K8s cluster as described in the [platform setup instructions for slo validation quick start experiment](../slovalidation-helmex.md).
 
 ## 1. Create app versions
 Deploy two versions of a Knative app.
@@ -139,13 +139,10 @@ kubectl apply -f $ITER8/samples/knative/hybrid/experiment.yaml
               - name: sample-app-v2
                 url: http://sample-app-v2.default.svc.cluster.local
           finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version      
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
+          - if: CandidateWon()
+            run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml"
+          - if: not CandidateWon()
+          - run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml"
       criteria:
         rewards: # Business rewards
         - metric: iter8-knative/user-engagement
@@ -159,7 +156,7 @@ kubectl apply -f $ITER8/samples/knative/hybrid/experiment.yaml
           upperLimit: "0.01"
         requestCount: iter8-system/request-count
       duration:
-        maxLoops: 10
+        maxLoops: 3
         intervalSeconds: 1
         iterationsPerLoop: 1
       versionInfo:
@@ -172,9 +169,6 @@ kubectl apply -f $ITER8/samples/knative/hybrid/experiment.yaml
             name: sample-app
             namespace: default
             fieldPath: .spec.traffic[0].percent
-          variables:
-          - name: promote
-            value: baseline
         candidates:
         - name: sample-app-v2
           weightObjRef:
@@ -183,9 +177,6 @@ kubectl apply -f $ITER8/samples/knative/hybrid/experiment.yaml
             name: sample-app
             namespace: default
             fieldPath: .spec.traffic[1].percent
-          variables:
-          - name: promote
-            value: candidate
     ```
 
 ## 4. Observe experiment

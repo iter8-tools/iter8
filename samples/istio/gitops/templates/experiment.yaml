@@ -30,9 +30,7 @@ spec:
           - name: Accept
             value: application/vnd.github.v3+json
 
-      - task: common/bash
-        with:
-          script: |
+      - run: |
             kubectl -n {{ .namespace }} apply -f https://raw.githubusercontent.com/MY_ORG/iter8/master/samples/istio/gitops/istio-vs.yaml
 
 
@@ -45,7 +43,7 @@ spec:
     requestCount: default/request-count
   duration: # product of fields determines length of the experiment
     intervalSeconds: 10
-    iterationsPerLoop: 10
+    iterationsPerLoop: 5
   versionInfo:
     # information about the app versions used in this experiment
     baseline:

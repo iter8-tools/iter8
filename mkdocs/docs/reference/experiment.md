@@ -21,13 +21,10 @@ template: main.html
         deploymentPattern: Progressive
         actions:
           finish: # run the following sequence of tasks at the end of the experiment
-          - task: common/exec # promote the winning version      
-            with:
-              cmd: /bin/sh
-              args:
-              - "-c"
-              - |
-                kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/{{ .promote }}.yaml
+          - if: CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml
+          - if: not CandidateWon()
+            run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml
       criteria:
         requestCount: iter8-knative/request-count
         rewards: # Business rewards
@@ -42,7 +39,7 @@ template: main.html
           upperLimit: "0.01"
       duration:
         intervalSeconds: 10
-        iterationsPerLoop: 10
+        iterationsPerLoop: 5
       versionInfo:
         # information about app versions used in this experiment
         baseline:
@@ -53,9 +50,6 @@ template: main.html
             name: sample-app
             namespace: default
             fieldPath: .spec.traffic[0].percent
-          variables:
-          - name: promote
-            value: baseline
         candidates:
         - name: sample-app-v2
           weightObjRef:
@@ -64,9 +58,6 @@ template: main.html
             name: sample-app
             namespace: default
             fieldPath: .spec.traffic[1].percent
-          variables:
-          - name: promote
-            value: candidate 
     ```
 
 !!! note "Version"

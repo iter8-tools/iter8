@@ -136,14 +136,12 @@ nav:
         - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
     - Knative:
       - SLO validation (Helmex): tutorials/knative/slovalidation-helmex.md
-      - SLO validation (Helmex, GitOps): tutorials/knative/slovalidation-helmex-gitops.md
       - Testing strategies:
         - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
         - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
       - Rollout strategies:
         - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
         - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
-        - User segmentation: tutorials/knative/rollout-strategies/user-segmentation.md
       - Setup for tutorials: tutorials/knative/setup-for-tutorials.md
     - Istio:
       - Quick start: tutorials/istio/quick-start.md
@@ -175,11 +173,9 @@ nav:
     - Helmex schema: reference/helmex-schema.md
     - Task overview: reference/tasks/overview.md
     - Task descriptions: 
+      - run: reference/tasks/run.md
       - common/readiness: reference/tasks/common-readiness.md
-      - common/bash: reference/tasks/common-bash.md
-      - common/exec: reference/tasks/common-exec.md
       - metrics/collect: reference/tasks/metrics-collect.md
-      - gitops/helmex-update: reference/tasks/gitops-helmex-update.md
       - notification/http: reference/tasks/notification-http.md
       - notification/slack: reference/tasks/notification-slack.md
   - Contributing: 
