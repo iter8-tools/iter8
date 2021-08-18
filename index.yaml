@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   conformance:
   - apiVersion: v2
-    created: "2021-08-18T00:58:58.041057096Z"
+    created: "2021-08-18T19:20:50.571458221Z"
     description: A Helm chart for Iter8 conformance experiment
-    digest: 4bb829e924b4cecfa4011512125f0daa582c75b6ee0a05c22af8f5dd02ae6a05
+    digest: 322ae274e9e1d58254bdd3fecf4bdc73dfd235f19aa40205ea59e0a6fa459476
     name: conformance
     type: application
     urls:
@@ -24,9 +24,9 @@ entries:
   hello:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-08-18T00:58:58.041469624Z"
+    created: "2021-08-18T19:20:50.571977821Z"
     description: A Helmex chart for a hello-world application with Iter8 SLO validation
-    digest: c0d6b842c87c5c5e6959497d3a43c53a49470c435ee04b6f63270453f108ecce
+    digest: 004b49b24f0a5574c69901e88c9be2d67189c617789255bea841ef46e3c99229
     name: hello
     type: application
     urls:
@@ -57,9 +57,9 @@ entries:
   knslo:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-08-18T00:58:58.041832048Z"
+    created: "2021-08-18T19:20:50.572385321Z"
     description: A Helm chart for Knative service with SLO validation
-    digest: ab973fc2f59ab5c1a9f31c738a09c7107aff76a160f20d919bc5c295ee6b2c30
+    digest: 3101ba8cafdfafa1750218b532cef5cbb5657a8d09ffff68024693858b6df542
     name: knslo
     type: application
     urls:
@@ -103,13 +103,13 @@ entries:
   linkerd:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-08-18T00:58:58.042758911Z"
+    created: "2021-08-18T19:20:50.57291532Z"
     description: A Helmex chart for a hello-world application with Iter8 SLO validation
       and Linkerd
-    digest: adfa247c2e55a3c1d42ae4395536da5b93580018f2b9cbdaf87bf4d857e4529b
+    digest: 4bd042cdec1d567ebe580e71030663a3c67a43c1239d4977e1619b7ee05d642e
     name: linkerd
     type: application
     urls:
     - https://iter8-tools.github.io/iter8/linkerd-0.1.0.tgz
     version: 0.1.0
-generated: "2021-08-18T00:58:58.040640268Z"
+generated: "2021-08-18T19:20:50.570948122Z"
