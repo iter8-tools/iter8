@@ -162,6 +162,8 @@ nav:
       - Testing strategies:
         - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
       - Platform setup: tutorials/linkerd/platform-setup.md
+    - Chaos: 
+      - Chaos Testing:  tutorials/chaos/chaos.md
     - Openshift:
       - CI/CD integration: tutorials/openshift/openshift.md
   - Metrics:
