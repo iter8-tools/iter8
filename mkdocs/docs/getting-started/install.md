@@ -10,9 +10,9 @@ Install Iter8 in your Kubernetes cluster as follows. This step requires [Kustomi
 
 ```shell
 export TAG=v0.7.19
-kustomize build https://github.com/iter8-tools/iter8/install/core/?ref=${TAG} | kubectl apply -f -
+kustomize build "https://github.com/iter8-tools/iter8/install/core/?ref=${TAG}" | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
-kustomize build https://github.com/iter8-tools/iter8/install/builtin-metrics/?ref=${TAG} | kubectl apply -f -
+kustomize build "https://github.com/iter8-tools/iter8/install/builtin-metrics/?ref=${TAG}" | kubectl apply -f -
 kubectl wait --for=condition=Ready pods --all -n iter8-system
 ```
 
