@@ -1,239 +1,227 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
      <loc>https://iter8.tools/0.7/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/concepts/whatisiter8/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/concepts/buildingblocks/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/getting-started/first-experiment/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/getting-started/install/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/getting-started/help/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/getting-started/setup-for-tutorials/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/kfserving/quick-start/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/kfserving/platform-setup/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/kfserving/testing-strategies/hybrid/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/kfserving/testing-strategies/ab/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/kfserving/rollout-strategies/progressive/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/kfserving/rollout-strategies/fixed-split/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/kfserving/rollout-strategies/session-affinity/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/seldon/quick-start/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/seldon/platform-setup/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/seldon/testing-strategies/hybrid/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/seldon/rollout-strategies/progressive/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/knative/slovalidation-helmex/</loc>
-     <lastmod>2021-08-10</lastmod>
-     <changefreq>daily</changefreq>
-    </url><url>
-     <loc>https://iter8.tools/0.7/tutorials/knative/slovalidation-helmex-gitops/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/knative/testing-strategies/slovalidation/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/knative/testing-strategies/hybrid/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/knative/rollout-strategies/progressive/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/knative/rollout-strategies/fixed-split/</loc>
-     <lastmod>2021-08-10</lastmod>
-     <changefreq>daily</changefreq>
-    </url><url>
-     <loc>https://iter8.tools/0.7/tutorials/knative/rollout-strategies/user-segmentation/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/knative/setup-for-tutorials/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/quick-start/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/platform-setup/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/testing-strategies/slovalidation/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/testing-strategies/conformance/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/testing-strategies/hybrid/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/rollout-strategies/progressive/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/rollout-strategies/fixed-split/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/istio/gitops/argocd/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://iter8.tools/0.7/tutorials/linkerd/quick-start/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <loc>https://iter8.tools/0.7/tutorials/linkerd/abexperiment-helmex/</loc>
+     <lastmod>2021-08-19</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://iter8.tools/0.7/tutorials/linkerd/testing-strategies/abexperiment/</loc>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/linkerd/platform-setup/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/tutorials/openshift/openshift/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/metrics/using-metrics/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/metrics/builtin/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/metrics/custom/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/metrics/mock/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/experiment/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/metrics/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/helmex-schema/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/tasks/overview/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://iter8.tools/0.7/reference/tasks/run/</loc>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/tasks/common-readiness/</loc>
-     <lastmod>2021-08-10</lastmod>
-     <changefreq>daily</changefreq>
-    </url><url>
-     <loc>https://iter8.tools/0.7/reference/tasks/common-bash/</loc>
-     <lastmod>2021-08-10</lastmod>
-     <changefreq>daily</changefreq>
-    </url><url>
-     <loc>https://iter8.tools/0.7/reference/tasks/common-exec/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/tasks/metrics-collect/</loc>
-     <lastmod>2021-08-10</lastmod>
-     <changefreq>daily</changefreq>
-    </url><url>
-     <loc>https://iter8.tools/0.7/reference/tasks/gitops-helmex-update/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/tasks/notification-http/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/reference/tasks/notification-slack/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/contributing/overview/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/contributing/newk8sstack/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/contributing/tutorials/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/contributing/analytics/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/contributing/tasks/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/roadmap/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://iter8.tools/0.7/news/</loc>
-     <lastmod>2021-08-10</lastmod>
+     <lastmod>2021-08-19</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
