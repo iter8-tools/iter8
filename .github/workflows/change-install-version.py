@@ -9,7 +9,7 @@ import sys
 from ruamel.yaml import YAML
 
 if len(sys.argv) < 2:
-  raise ValueError('Please provide an install version as a value.')
+  raise ValueError('Please provide an install version as an argument.')
 
 new_install_version=sys.argv[1]
 mkdocs_file_path='./mkdocs/mkdocs.yml'
