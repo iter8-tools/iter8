@@ -29,15 +29,16 @@ jobs:
         elif [[ "${{ github.ref }}" == *"master" ]]; then
           echo "VERSION=latest" >> $GITHUB_ENV
         fi
-    - name: Get owner and repo
-      run: |
-        ownerrepo=${{ github.repository }}
-        owner=$(echo $ownerrepo | cut -f1 -d/)
-        if [[ "$owner" == "iter8-tools" ]]; then
-          owner=iter8
-        fi
-        echo "OWNER=$owner" >> $GITHUB_ENV
-        echo "REPO=ind" >> $GITHUB_ENV
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: pip3 install -r ./.github/workflows/requirements.txt
+    - name: Run a one-line script
+      run: python ./.github/workflows/change-install-version.py ${{ env.VERSION }}
+    - uses: EndBug/add-and-commit@v7
+      with:
+        message: "Update install version to match new tag"
     - uses: docker/build-push-action@v2
       with:
         context: ./install/docker
