@@ -53,9 +53,20 @@ plugins:
   - search
   - minify:
       minify_html: true
+  - macros:
+      # Replace {{ variable }} syntax with [[ variable ]] to avoid conflicts
+      j2_block_start_string: '[[%'
+      j2_block_end_string: '%]]'
+      j2_variable_start_string: '[['
+      j2_variable_end_string: ']]'
         
 # Customization
 extra:
+  # Google Analytics
+  analytics:
+    provider: google
+    property: UA-152813895-1
+  
   title: "SLO validation, A/B testing, and progressive rollouts"
   version:
     provider: mike
@@ -64,7 +75,10 @@ extra:
       link: https://github.com/iter8-tools/iter8
     - icon: fontawesome/brands/slack
       link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
-
+  
+  iter8:
+    install_version: v0.7.18
+    
 # Extensions
 markdown_extensions:
   - admonition
@@ -190,8 +204,3 @@ nav:
     - Tasks: contributing/tasks.md
   - Roadmap: roadmap.md
   - News: news.md
-
-# Google Analytics
-google_analytics:
-  - UA-152813895-1
-  - auto
