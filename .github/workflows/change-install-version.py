@@ -12,7 +12,7 @@ if len(sys.argv) < 2:
   raise ValueError('Please provide an install version as a value.')
 
 new_install_version=sys.argv[1]
-mkdocs_file_path='../../mkdocs/mkdocs.yml'
+mkdocs_file_path='./mkdocs/mkdocs.yml'
 
 with open(mkdocs_file_path, 'r') as fp:
   # Read YAML
