@@ -34,29 +34,3 @@ jobs:
         context: ./install/docker
         tags: ${{ env.OWNER }}/${{ env.REPO }}:${{ env.VERSION }}
         push: true
-  # Update install version
-  update-install-version:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    steps:
-    - uses: actions/checkout@v2
-    - name: Get version
-      run: |
-        tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        # Strip "v" prefix from tagref
-        if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-          echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == *"master" ]]; then
-          echo "VERSION=latest" >> $GITHUB_ENV
-        fi
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: pip3 install -r ./.github/workflows/requirements.txt
-    - name: Edit install version
-      run: python ./.github/workflows/change-install-version.py ${{ env.VERSION }}
-    - uses: EndBug/add-and-commit@v7
-      with:
-        branch: master
-        message: "Update install version to match new tag"
