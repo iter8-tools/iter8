@@ -36,4 +36,5 @@ jobs:
         cd mkdocs
         pip install --upgrade pip
         pip install -r requirements.txt
+        mike --version
         mike deploy ${{ env.MAJOR_MINOR_VERSION }} latest -p -u
