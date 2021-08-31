@@ -1,4 +1,4 @@
-name: Mike versioning
+name: Post-release changes
 on:
   release:
     types: [published]
@@ -26,7 +26,11 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: '3.x'
-    - name: Create new version
+    - name: Change install version
+      run: |
+        pip install -r ./.github/workflows/requirements.txt
+        python3 ./.github/workflows/change-install-version.py ${{ env.VERSION }}
+    - name: Update docs and commit
       run: |
         git config --global user.name "Alan Cha"
         git config --global user.email ac3805@columbia.edu 
