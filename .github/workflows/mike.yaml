@@ -4,8 +4,8 @@ on:
     types: [published]
 
 jobs:
-  # Update install version
-  update-install-version:
+  # Update the documentation using Mike versioning
+  mike-update:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
