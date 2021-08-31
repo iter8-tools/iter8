@@ -8,7 +8,11 @@ jobs:
   mike-update:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    # setup pre-reqs
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # fetch all commits/branches      
     - name: Get version
       run: |
         tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
