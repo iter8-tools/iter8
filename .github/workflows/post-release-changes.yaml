@@ -1,4 +1,4 @@
-name: Mike versioning
+name: Post-release changes
 
 on:
   release:
@@ -8,25 +8,37 @@ env:
   PYTHON_VERSION: 3.9
 
 jobs:
-  push-doc-version:
-    name: Push doc version
+  post-release-changes:
     runs-on: ubuntu-latest
     steps:
     # setup pre-reqs
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        fetch-depth: 0 # fetch all commits/branches      
+        fetch-depth: 0 # fetch all commits/branches
     - name: Setup Python
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    # create
-    - name: Create new version
+        python-version: ${{ env.PYTHON_VERSION }}      
+    - name: Get version
       run: |
-        git config --global user.name "Srinivasan Parthasarathy"
-        git config --global user.email spartha@us.ibm.com  
+        tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        # Strip "v" prefix from tagref
+        if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+          echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
+          echo "MAJOR_MINOR_VERSION=$(echo $tarref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
+        elif [[ "${{ github.ref }}" == *"master" ]]; then
+          echo "VERSION=latest" >> $GITHUB_ENV
+        fi
+    - name: Change install version
+      run: |
+        pip install -r ./.github/workflows/requirements.txt
+        python3 ./.github/workflows/change-install-version.py ${{ env.VERSION }}
+    - name: Update docs and commit
+      run: |
+        git config --global user.name "Alan Cha"
+        git config --global user.email ac3805@columbia.edu 
         cd mkdocs
         pip install --upgrade pip
         pip install -r requirements.txt
-        mike deploy ${{ github.event.inputs.version }} vtest1.3.0 -p -u
+        mike deploy ${{ env.MAJOR_MINOR_VERSION }} latest -p -u
