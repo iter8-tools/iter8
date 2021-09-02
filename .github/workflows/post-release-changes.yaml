@@ -30,15 +30,15 @@ jobs:
         elif [[ "${{ github.ref }}" == *"master" ]]; then
           echo "VERSION=latest" >> $GITHUB_ENV
         fi
-    # - name: Change install version
-    #   run: |
-    #     pip install -r ./.github/workflows/requirements.txt
-    #     python3 ./.github/workflows/change-install-version.py ${{ env.VERSION }}
-    - name: Update docs and commit
+    - name: Change install version
       run: |
-        git config --global user.name "Alan Cha"
-        git config --global user.email ac3805@columbia.edu 
-        cd mkdocs
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        mike deploy ${{ env.MAJOR_MINOR_VERSION }} latest -p -u
+        pip install -r ./.github/workflows/requirements.txt
+        python3 ./.github/workflows/change-install-version.py ${{ env.VERSION }}
+    # - name: Update docs and commit
+    #   run: |
+    #     git config --global user.name "Alan Cha"
+    #     git config --global user.email ac3805@columbia.edu 
+    #     cd mkdocs
+    #     pip install --upgrade pip
+    #     pip install -r requirements.txt
+    #     mike deploy ${{ env.MAJOR_MINOR_VERSION }} latest -p -u
