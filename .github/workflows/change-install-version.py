@@ -16,7 +16,7 @@ mkdocs_file_path='./mkdocs/mkdocs.yml'
 
 with open(mkdocs_file_path, 'r') as fp:
   # Read YAML
-  yaml=YAML(typ='unsafe')
+  yaml=YAML()
   data=yaml.load(fp)
 
   # Replace install version
