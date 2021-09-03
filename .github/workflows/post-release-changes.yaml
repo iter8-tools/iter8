@@ -34,6 +34,7 @@ jobs:
       run: |
         pip install -r ./.github/workflows/requirements.txt
         python3 ./.github/workflows/change-install-version.py ${{ env.VERSION }}
+        sed -i 's/!%21python/!!python/g' filename
     - name: Update docs and commit
       run: |
         git config --global user.name "Alan Cha"
