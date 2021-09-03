@@ -23,8 +23,8 @@ jobs:
     - name: Get version
       run: |
         tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        # Strip "v" prefix from tagref
         if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+          # Strip "v" prefix from tagref
           echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
           echo "MAJOR_MINOR_VERSION=$(echo $tarref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
         elif [[ "${{ github.ref }}" == *"master" ]]; then
