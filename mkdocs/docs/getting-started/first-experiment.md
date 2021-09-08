@@ -4,13 +4,13 @@ template: main.html
 
 # Your First Experiment
 
-!!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    Deploy a K8s application (service and deployment), and [validate that the application satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation).
+!!! tip "Scenario: Validate service-level objectives (SLOs) for a K8s app"
+    Deploy a K8s app (service and deployment), and [validate that the app satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation).
     
 ??? warning "Setup K8s cluster and local environment"
-    1. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
-    2. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
-    3. [Install Iter8 in K8s cluster](install.md)
+    1. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
+    2. [Install Iter8 in K8s cluster](install.md)
+    3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
     4. Get [`iter8ctl`](install.md#get-iter8ctl)
     5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
     ```shell
@@ -23,7 +23,7 @@ template: main.html
     ```
 
 ## 1. Create application
-The `hello world` app consists of a K8s deployment and service. Deploy them as follows.
+The `hello world` app consists of a K8s deployment and service. Deploy the app as follows.
 
 ```shell
 kubectl apply -f $ITER8/samples/deployments/app/deploy.yaml
@@ -49,7 +49,7 @@ kubectl apply -f $ITER8/samples/deployments/app/service.yaml
     ```
 
 ## 2. Create Iter8 experiment
-Deploy the Iter8 experiment for SLO validation of the app as follows.
+Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
 helm upgrade my-exp $ITER8/samples/first-exp \
   --set URL='http://hello.default.svc.cluster.local:8080' \
@@ -59,10 +59,10 @@ helm upgrade my-exp $ITER8/samples/first-exp \
   --install  
 ```
 
-The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
 
-??? note "View Iter8 experiment deployed by Helm"
-    Use the command below to view the Iter8 experiment deployed by the Helm command.
+??? note "View Iter8 experiment"
+    View the Iter8 experiment as follows.
     ```shell
     helm get manifest my-exp
     ```
