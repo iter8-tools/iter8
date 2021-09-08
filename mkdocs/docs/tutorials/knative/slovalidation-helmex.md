@@ -12,7 +12,7 @@ template: main.html
     ![SLO validation](../../images/yourfirstexperiment.png)
 
 ??? warning "Setup K8s cluster with Knative and local environment"
-    1. Get [Helm 3+](https://helm.sh/docs/intro/install/) 
+    1. Get [Helm 3.4+](https://helm.sh/docs/intro/install/) 
     2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster).
     3. [Install Knative in K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster). This tutorial can be tried with any Knative networking layer.
     4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
