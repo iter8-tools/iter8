@@ -22,10 +22,10 @@ spec:
         run: |
           git config --global user.email 'iter8tools@gmail.com'
           git config --global user.name 'Iter8'
-          git clone https://{{ .Values.username }}:"{{" .Secret 'token' "}}"@{{ .Values.repo }}
+          git clone https://{{ .Values.username }}:{{ "{{" }} .Secret 'token' {{ "}}" }}@{{ .Values.repo }}
           cd iter8
           git checkout -b iter8-gitops
-          kubectl set image --local -f samples/deployments/app/deploy.yaml hello='gcr.io/google-samples/hello-app:2.0'
+          kubectl set image --local -f samples/deployments/app/deploy.yaml hello='gcr.io/google-samples/hello-app:2.0' -o yaml > samples/deployments/app/deploy.yaml
           git commit --allow-empty -a -m "promote candidate version to production"
           git push -f origin iter8-gitops
           git request-pull master https://{{ .Values.repo }} iter8-gitops
