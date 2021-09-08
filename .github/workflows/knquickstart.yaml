@@ -69,7 +69,7 @@ jobs:
     # among other things, this Iter8 CLI can help verify that 
     # the experiment completed successfully.
     - name: Install iter8ctl
-      run: sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.5
+      run: sudo GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
 
     # install Helm locally

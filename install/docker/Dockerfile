@@ -35,7 +35,7 @@ RUN chmod +x ./kustomize
 RUN mv ./kustomize /bin/kustomize
 
 # get iter8ctl
-RUN GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.4
+RUN GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
 # clone Iter8 repo
 RUN git clone https://github.com/iter8-tools/iter8
