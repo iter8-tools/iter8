@@ -43,7 +43,7 @@ jobs:
         echo $GOROOT
         sudo echo $GOROOT
         #sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
-        sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@0.1.6
+        sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.6
 
     - name: Get Helm
       uses: azure/setup-helm@v1
