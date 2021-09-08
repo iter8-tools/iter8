@@ -19,7 +19,7 @@ kubectl wait --for=condition=Ready pods --all -n iter8-system
 ## Install `iter8ctl`
 Install `iter8ctl` CLI on your local machine as follows. This step requires [Go 1.16+](https://golang.org/doc/install).
 ```shell
-GOBIN=/usr/local/bin go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
+GO111MODULE=on GOBIN=/usr/local/bin go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
 ```
 
 <!-- ## Pinning the Iter8 version
