@@ -48,7 +48,7 @@ This tutorial assumes a basic understanding of Iter8. See, for example, the Isti
 ??? warning "Setup a K8s cluster with Iter8, Istio and Argo CD"
     1. Setup [K8s cluster](../../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
     2. [Install Iter8 in K8s cluster](../../../getting-started/install.md)
-    3. Get [`iter8ctl`](../../../getting-started/install.md#install-iter8ctl)
+    3. Get [`iter8ctl`](../../../getting-started/install.md#get-iter8ctl)
     5. [Install Istio in K8s cluster](../setup-for-tutorials.md#install-istio)
     4. [Install Prometheus add-on](../setup-for-tutorials.md#install-optional-prometheus-add-on)
     6. [Install Argo CD in k8s cluster](../setup-for-tutorials.md#install-argo-cd)

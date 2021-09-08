@@ -9,6 +9,9 @@ spec:
     actions:
       start:
       - task: common/readiness
+        with:
+          initialDelaySeconds: 5
+          numRetries: 0
   criteria:
     requestCount: default/request-count
   duration:
