@@ -26,7 +26,7 @@ template: main.html
     export ITER8=$(pwd)
     ```
     6. Enable Iter8 to update your fork.
-        1. [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, select repo. This will ensure that the token can be used by Iter8 to update your application manifest in GitHub.
+        1. [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, select repo. This will ensure that the token can be used by Iter8 to update your app manifest in GitHub.
         2. Create K8s secret
         ```shell
         # replace $GHTOKEN with GitHub token created above
@@ -45,38 +45,63 @@ template: main.html
 
 
 ## 1. Create stable version
-Create version `1.0` of the `hello world` application as follows.
+Create version `1.0` of the `hello world` app as follows.
 
 ```shell
-kubectl apply -f https://github.com/iter8-tools/iter8/samples/deployments/baseline.yaml
+# USERNAME is exported as part of setup steps.
+kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/service.yaml
 ```
 
 ## 2. Create candidate version
-Create `hello` application version `2.0`.
+Create version `2.0` of the `hello world` app as follows.
 
 ```shell
-kubectl apply -f https://github.com/iter8-tools/iter8/samples/deployments/candidate.yaml
+kubectl create ns staging
+# version 2.0 of hello world app will in the staging namespace
+kubectl set image --local -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/deploy.yaml hello='gcr.io/google-samples/hello-app:2.0' -o yaml | kubectl apply -n staging -f -
+kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/service.yaml -n staging
 ```
+
+Adapt [these instructions](../../getting-started/first-experiment.md#1-create-app) to verify that stable and candidate versions of your app are running.
 
 ## 3. Create Iter8 experiment
-Create `hello` application version `2.0`.
-
+Deploy an Iter8 experiment for SLO validation and GitOps-y promotion of the app as follows.
 ```shell
-kubectl apply -f https://github.com/iter8-tools/iter8/samples/deployments/candidate.yaml
+helm upgrade my-exp $ITER8/samples/first-exp \
+  --set URL='http://hello.default.svc.cluster.local:8080' \
+  --set limitMeanLatency=50.0 \
+  --set limitErrorRate=0.0 \
+  --set limit95thPercentileLatency=100.0 \
+  --install  
 ```
 
-## 4. Understand experiment results
+The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs, and promotes the candidate by raising a GitHub pull-request.
 
-## 5. Merge Iter8's pull-request
+## 4. View and observe experiment
+View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment).
 
-## 6. Use with your app
+## 5. Review Iter8's PR
 
-??? tip "Use with your app"
-    Hello hello hello halo
+## 6. Cleanup
 
-??? tip "Use with a GitOps operator like ArgoCD or FluxCD"
-    Hello hello hello halo
+```shell
+# remove experiment
+helm uninstall my-exp
+# remove candidate and stable versions of the app
+kubectl delete ns staging
+kubectl delete deploy/hello
+kubectl delete svc/hello
+```
 
-??? tip "Promote from a staging to production cluster"
-    Hello hello hello halo
+***
+
+**Next Steps**
+
+!!! tip "Use with your app"
+    1. Replace hello
+
+    2. Use with a GitOps operator like ArgoCD or FluxCD
+
+    3. Promote from a staging to production cluster
 

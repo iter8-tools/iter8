@@ -22,7 +22,7 @@ template: main.html
     export ITER8=$(pwd)
     ```
 
-## 1. Create application
+## 1. Create app
 The `hello world` app consists of a K8s deployment and service. Deploy the app as follows.
 
 ```shell
@@ -33,7 +33,7 @@ kubectl apply -f $ITER8/samples/deployments/app/service.yaml
 ??? note "Verify app is running"
     ```shell
     # do this in a separate terminal
-    kubectl port-forward svc/hello 8080:8080
+    kubectl port-forward -n default svc/hello 8080:8080
     ```
 
     ```shell
@@ -133,7 +133,7 @@ iter8ctl describe
 ```shell
 # remove experiment
 helm uninstall my-exp
-# remove application
+# remove app
 kubectl delete -f $ITER8/samples/deployments/app/service.yaml
 kubectl delete -f $ITER8/samples/deployments/app/deploy.yaml
 ```
@@ -141,8 +141,8 @@ kubectl delete -f $ITER8/samples/deployments/app/deploy.yaml
 
 **Next Steps**
 
-!!! tip "Use with your application"
-    1. Run the above experiment with your application by setting the `URL` value in the Helm command to the URL of your application. 
+!!! tip "Use with your app"
+    1. Run the above experiment with your app by setting the `URL` value in the Helm command to the URL of your app. 
     
     2. You can also customize the mean latency, error rate, and tail latency limits.
 
