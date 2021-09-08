@@ -39,7 +39,10 @@ jobs:
         go-version: 1.17
     
     - name: Get iter8ctl
-      run: sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
+      run: |
+        echo $GOROOT
+        sudo echo $GOROOT
+        sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
     - name: Get Helm
       uses: azure/setup-helm@v1
