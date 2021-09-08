@@ -68,15 +68,19 @@ Adapt [these instructions](../../getting-started/first-experiment.md#1-create-ap
 ## 3. Create Iter8 experiment
 Deploy an Iter8 experiment for SLO validation and GitOps-y promotion of the app as follows.
 ```shell
-helm upgrade my-exp $ITER8/samples/first-exp \
+helm upgrade my-exp $ITER8/samples/slo-gitops \
   --set URL='http://hello.default.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
-  --install  
+  --set repo="https://$USERNAME:{{ .Secret 'token' }}@github.com/$USERNAME/iter8.git"
+  --set newImage='gcr.io/google-samples/hello-app:2.0'
+  --install
 ```
 
-The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs, and promotes the candidate by raising a GitHub pull-request.
+The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, and verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs. 
+
+In the above command, the *USERNAME* environment variable was defined during setup. After the Iter8 experiment validates SLOs for the candidate, it uses the GitHub token (also provided during setup) to promote the candidate to production using a GitHub pull-request.
 
 ## 4. View and observe experiment
 View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment).
