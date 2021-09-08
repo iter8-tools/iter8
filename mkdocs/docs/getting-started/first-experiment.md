@@ -46,7 +46,7 @@ kubectl apply -f $ITER8/samples/deployments/app/service.yaml
 Deploy the Iter8 experiment for SLO validation of the app as follows.
 ```shell
 helm upgrade my-exp $ITER8/samples/first-exp \
-  --set URL='http://hello.default.svc.cluster.local' \
+  --set URL='http://hello.default.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
@@ -136,7 +136,7 @@ kubectl delete -f $ITER8/samples/deployments/app/deploy.yaml
 **Next Steps**
 
 !!! tip "Use with your application"
-    1. Run the above experiment with **your** application by setting the `URL` value in the Helm command to the URL of your application. 
+    1. Run the above experiment with your application by setting the `URL` value in the Helm command to the URL of your application. 
     
     2. You can also customize the mean latency, error rate, and tail latency limits.
 

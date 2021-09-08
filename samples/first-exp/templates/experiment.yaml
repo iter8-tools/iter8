@@ -1,7 +1,7 @@
 apiVersion: iter8.tools/v2alpha2
 kind: Experiment
 metadata:
-  name: slo-validation
+  name: slo-validation-{{ randAlphaNum 5 | lower }}
 spec:
   # target identifies application for which SLO validation experiment is performed
   target: app
@@ -12,22 +12,22 @@ spec:
       start:
       - task: metrics/collect
         with:
-          time: {{ .Values.time | quote }}
+          time: {{ required ".Values.time is required!" .Values.time | quote }}
           versions:
           - name: my-app
-            url: {{ .Values.URL | quote }}
-            qps: {{ .Values.QPS }}
+            url: {{ required ".Values.URL is required!" .Values.URL | quote }}
+            qps: {{ required ".Values.QPS is required!" .Values.QPS }}
   criteria:
     requestCount: iter8-system/request-count
     indicators:
     - iter8-system/error-count
     objectives:
     - metric: iter8-system/mean-latency
-      upperLimit: {{ .Values.limitMeanLatency | quote }}
+      upperLimit: {{ required ".Values.limitMeanLatency is required!" .Values.limitMeanLatency | quote }}
     - metric: iter8-system/error-rate
-      upperLimit: {{ .Values.limitErrorRate | quote }}
+      upperLimit: {{ required ".Values.limitErrorRate is required!" .Values.limitErrorRate | quote }}
     - metric: iter8-system/latency-95th-percentile
-      upperLimit: {{ .Values.limit95thPercentileLatency | quote }}
+      upperLimit: {{ required ".Values.limit95thPercentileLatency is required!" .Values.limit95thPercentileLatency | quote }}
   duration:
     intervalSeconds: 1
     iterationsPerLoop: 1
