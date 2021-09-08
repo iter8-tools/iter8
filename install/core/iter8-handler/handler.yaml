@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: handler
+  name: taskrunner
 spec:
   template:
     spec:
@@ -9,8 +9,8 @@ spec:
       containers:
       - name: iter8-handler
         # to change handler version, edit the line below
-        image: iter8/handler:0.1.28
-        command: ["handler"]
+        image: iter8/taskrunner:mergerepos
+        command: ["taskrunner"]
         args: ["run", "-a", "$(ACTION)"]
         env:
         - name: ACTION
