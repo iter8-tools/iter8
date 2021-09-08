@@ -117,6 +117,8 @@ nav:
     - Get help: getting-started/help.md
     - Setup for tutorials: getting-started/setup-for-tutorials.md
   - Tutorials:
+    - K8s Deployments:
+      - SLO Validation with GitOps: tutorials/deployments/slo-validation-gitops.md
     - KFServing:
       - Quick start: tutorials/kfserving/quick-start.md
       - Platform setup: tutorials/kfserving/platform-setup.md
