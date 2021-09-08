@@ -17,7 +17,7 @@ template: main.html
     1. Setup [K8s cluster](../../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
     2. Get [Linkerd](../setup-for-tutorials.md)
     3. [Install Iter8 in K8s cluster](../../../getting-started/install.md)
-    4. Get [`iter8ctl`](../../../getting-started/install.md#install-iter8ctl)
+    4. Get [`iter8ctl`](../../../getting-started/install.md#get-iter8ctl)
 
 ## 1. Create application versions
 Create a new namespace, enable Linkerd proxy injection, deploy two Hello World applications, and create a traffic split. 

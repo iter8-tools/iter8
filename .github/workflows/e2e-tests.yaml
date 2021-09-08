@@ -38,19 +38,26 @@ jobs:
       with:
         go-version: 1.16
     
-    - name: Install iter8ctl
+    - name: Get iter8ctl
       run: sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.5
 
     - name: Get Helm
       uses: azure/setup-helm@v1
 
-    - name: create baseline and candidate versions, and Iter8 experiment
+    - name: create application
       run: |
         export ITER8=$(pwd)
-        cd $ITER8/helm/hello
-        helm upgrade my-app . \
-          --set baseline.dynamic.tag=1.0 \
-          --set candidate.dynamic.tag=2.0 \
+        kubectl apply -f $ITER8/samples/deployments/app/deploy.yaml
+        kubectl apply -f $ITER8/samples/deployments/app/service.yaml
+
+    - name: create Iter8 experiment
+      run: |
+        export ITER8=$(pwd)
+        helm upgrade my-exp $ITER8/samples/first-exp \
+          --set URL='http://hello.default.svc.cluster.local:8080' \
+          --set limitMeanLatency=50.0 \
+          --set limitErrorRate=0.0 \
+          --set limit95thPercentileLatency=100.0 \
           --install
 
     - name: Wait until end of experiment and dump experiment

@@ -5,16 +5,22 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Safely rollout a Kubernetes deployment with SLO validation"
-    [Dark launch](../concepts/buildingblocks.md#dark-launch) a candidate version of your application (a K8s service and deployment), [validate that the candidate satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation), and promote the candidate.
+    Deploy a K8s application (service and deployment), and [validate that the application satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation).
     
-    ![SLO validation](../images/yourfirstexperiment.png)
-
 ??? warning "Setup K8s cluster and local environment"
-    1. Get [Helm 3.4+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../concepts/whatisiter8.md#what-is-helmex)
+    1. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
     2. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
     3. [Install Iter8 in K8s cluster](install.md)
-    4. Get [`iter8ctl`](install.md#install-iter8ctl)
-    5. Get [the Iter8 Helm repo](setup-for-tutorials.md#iter8-helm-repo)
+    4. Get [`iter8ctl`](install.md#get-iter8ctl)
+    5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
+    ```shell
+    export USERNAME=<your GitHub username>
+    ```
+    ```shell
+    git clone git@github.com:$USERNAME/iter8.git
+    cd iter8
+    export ITER8=$(pwd)
+    ```
 
 ## 1. Create application
 The `hello world` app consists of a K8s deployment and service. Deploy them as follows.
@@ -53,7 +59,7 @@ helm upgrade my-exp $ITER8/samples/first-exp \
   --install  
 ```
 
-The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that will generate requests, collect latency and error rate metrics for the application, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
 
 ??? note "View Iter8 experiment deployed by Helm"
     Use the command below to view the Iter8 experiment deployed by the Helm command.
