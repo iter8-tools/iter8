@@ -3,7 +3,7 @@ template: main.html
 ---
 
 # SLO Validation with GitOps
-!!! tip "Scenario: SLO validation of a K8s app with GitOps-y promotion to production"
+!!! tip "Scenario: Validate SLOs and promote a new version of a K8s app"
     **Problem:** You have a new version of a K8s app. You want to verify that it satisfies latency and error rate SLOs, and promote it to production as the stable version of your app in a GitOps-y manner.
 
     **Solution:** In this tutorial, you will [dark launch](../../concepts/buildingblocks.md#dark-launch) the new version of your K8s app along with an Iter8 experiment. Iter8 will [validate that the new satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../../metrics/builtin.md) and [promote the new version by raising a pull-request in a GitHub repo](../../concepts/buildingblocks.md#version-promotion).
@@ -11,9 +11,10 @@ template: main.html
     ![SLO Validation GitOps](../../images/slo-validation-gitops.png)
 
 ??? warning "Setup K8s cluster, local environment, and GitHub credentials"
-    1. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
-    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
-    3. [Install Iter8 in K8s cluster](../../getting-started/install.md)
+    0. Complete the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) and then skip ahead to step 7 of setup.
+    1. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    2. [Install Iter8 in K8s cluster](../../getting-started/install.md)
+    3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
     4. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
     5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
     ```shell
@@ -44,7 +45,7 @@ template: main.html
 
 
 ## 1. Create stable version
-In the Create `hello` application version `1.0`.
+Create version `1.0` of the `hello world` application as follows.
 
 ```shell
 kubectl apply -f https://github.com/iter8-tools/iter8/samples/deployments/baseline.yaml
