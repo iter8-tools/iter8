@@ -39,7 +39,7 @@ jobs:
         go-version: 1.16
     
     - name: Install iter8ctl
-      run: sudo GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
+      run: sudo GOBIN=/usr/local/bin go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
     - name: Get Helm
       uses: azure/setup-helm@v1
