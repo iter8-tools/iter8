@@ -17,6 +17,18 @@ spec:
           - name: my-app
             url: {{ required ".Values.URL is required!" .Values.URL | quote }}
             qps: {{ required ".Values.QPS is required!" .Values.QPS }}
+      finish:
+      - if: CandidateWon()
+        run: |
+          git config --global user.email 'iter8tools@gmail.com'
+          git config --global user.name 'Iter8'
+          git clone https://{{ .Values.username }}:"{{" .Secret 'token' "}}"@{{ .Values.repo }}
+          cd iter8
+          git checkout -b iter8-gitops
+          kubectl set image --local -f samples/deployments/app/deploy.yaml hello='gcr.io/google-samples/hello-app:2.0'
+          git commit --allow-empty -a -m "promote candidate version to production"
+          git push -f origin iter8-gitops
+          git request-pull master https://{{ .Values.repo }} iter8-gitops
   criteria:
     requestCount: iter8-system/request-count
     indicators:

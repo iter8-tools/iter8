@@ -26,8 +26,8 @@ template: main.html
 The `hello world` app consists of a K8s deployment and service. Deploy the app as follows.
 
 ```shell
-kubectl apply -f $ITER8/samples/deployments/app/deploy.yaml
-kubectl apply -f $ITER8/samples/deployments/app/service.yaml
+kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
+kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ```
 
 ??? note "Verify app is running"
@@ -51,7 +51,7 @@ kubectl apply -f $ITER8/samples/deployments/app/service.yaml
 ## 2. Create Iter8 experiment
 Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
-helm upgrade my-exp $ITER8/samples/first-exp \
+helm upgrade -n default my-exp $ITER8/samples/first-exp \
   --set URL='http://hello.default.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
@@ -64,7 +64,7 @@ The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-
 ??? note "View Iter8 experiment"
     View the Iter8 experiment as follows.
     ```shell
-    helm get manifest my-exp
+    helm get manifest -n default my-exp
     ```
 
 ## 3. Observe experiment
@@ -132,10 +132,10 @@ iter8ctl describe
 ## 4. Cleanup
 ```shell
 # remove experiment
-helm uninstall my-exp
+helm uninstall -n default my-exp
 # remove app
-kubectl delete -f $ITER8/samples/deployments/app/service.yaml
-kubectl delete -f $ITER8/samples/deployments/app/deploy.yaml
+kubectl delete -n default -f $ITER8/samples/deployments/app/service.yaml
+kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 ```
 ***
 

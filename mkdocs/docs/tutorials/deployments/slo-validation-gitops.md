@@ -54,7 +54,7 @@ kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/sample
 ```
 
 ## 2. Create candidate version
-Create version `2.0` of the `hello world` app as follows.
+Create version `2.0` of the `hello world` app in the staging environment as follows. For the purpose of this tutorial, the production environment is the `default` namespace, and the staging environment is the `staging` namespace.
 
 ```shell
 kubectl create ns staging
@@ -68,13 +68,14 @@ Adapt [these instructions](../../getting-started/first-experiment.md#1-create-ap
 ## 3. Create Iter8 experiment
 Deploy an Iter8 experiment for SLO validation and GitOps-y promotion of the app as follows.
 ```shell
-helm upgrade my-exp $ITER8/samples/slo-gitops \
-  --set URL='http://hello.default.svc.cluster.local:8080' \
+helm upgrade -n staging my-exp $ITER8/samples/slo-gitops \
+  --set URL='http://hello.staging.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
-  --set repo="https://$USERNAME:{{ .Secret 'token' }}@github.com/$USERNAME/iter8.git"
-  --set newImage='gcr.io/google-samples/hello-app:2.0'
+  --set username=$USERNAME \
+  --set repo="github.com/$USERNAME/iter8.git" \
+  --set newImage='gcr.io/google-samples/hello-app:2.0' \
   --install
 ```
 
@@ -83,17 +84,16 @@ The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#wh
 In the above command, the *USERNAME* environment variable was defined during setup. After the Iter8 experiment validates SLOs for the candidate, it uses the GitHub token (also provided during setup) to promote the candidate to production using a GitHub pull-request.
 
 ## 4. View and observe experiment
-View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment).
+View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Make sure you supply the correct namespace (`staging`).
 
 ## 5. Review Iter8's PR
 
 ## 6. Cleanup
 
 ```shell
-# remove experiment
-helm uninstall my-exp
-# remove candidate and stable versions of the app
+# remove Iter8 experiment and candidate version of the app
 kubectl delete ns staging
+# remove stable version of the app
 kubectl delete deploy/hello
 kubectl delete svc/hello
 ```

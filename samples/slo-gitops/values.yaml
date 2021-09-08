@@ -1,14 +1,19 @@
-baseline:
-  dynamic:
-    tag: "1.0"
-    # see explanation for id below
-    id: "8nlos"
-candidate:
-  # when promoting a candidate version, copy candidate.dynamic into baseline.dynamic
-  # and make the candidate field null
-  dynamic:
-    tag: "2.0"
-    # id is a random alpha-numeric value that is uniquely associated with a given version
-    # change candidate.dynamic.id every time anything else changes 
-    # in the candidate section of Helm chart values
-    id: "kj8a8"
+# Default values for Iter8 SLO validation experiment
+
+# URL of the application for which this SLO validation experiment is performed
+# URL: https://example.com
+
+# The duration for which Iter8 will send requests to the app
+time: 5s
+
+# Queries per second used by Iter8 for sending requests
+QPS: 8.0
+
+# Upper limit on the mean latency. Values beyond this limit are not acceptable
+limitMeanLatency: 500.0 # 500 msec latency on an average is ok. Not more.
+
+# Upper limit on the error rate. Values beyond this limit are not acceptable
+limitErrorRate: 0.00 # Zero %. Errors are not acceptable.
+
+# Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
+limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.
