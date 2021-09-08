@@ -10,7 +10,7 @@ template: main.html
     ![SLO validation](../images/yourfirstexperiment.png)
 
 ??? warning "Setup K8s cluster and local environment"
-    1. Get [Helm 3+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../concepts/whatisiter8.md#what-is-helmex)
+    1. Get [Helm 3.4+](https://helm.sh/docs/intro/install/). This tutorial uses the [Helmex pattern](../concepts/whatisiter8.md#what-is-helmex)
     2. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
     3. [Install Iter8 in K8s cluster](install.md)
     4. Get [`iter8ctl`](install.md#install-iter8ctl)
