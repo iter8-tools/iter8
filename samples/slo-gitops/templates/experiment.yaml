@@ -18,17 +18,20 @@ spec:
             url: {{ required ".Values.URL is required!" .Values.URL | quote }}
             qps: {{ required ".Values.QPS is required!" .Values.QPS }}
       finish:
-      - if: CandidateWon()
+      - if: WinnerFound()
         run: |
+          echo "Winner found. Creating PR."
           git config --global user.email 'iter8tools@gmail.com'
           git config --global user.name 'Iter8'
-          git clone https://{{ .Values.username }}:{{ "{{" }} .Secret 'token' {{ "}}" }}@{{ .Values.repo }}
+          git clone https://{{ required ".Values.username is required!" .Values.username }}:{{ "{{" }} .Secret "token" {{ "}}" }}@{{ required ".Values.repo is required!" .Values.repo }}
           cd iter8
           git checkout -b iter8-gitops
-          kubectl set image --local -f samples/deployments/app/deploy.yaml hello='gcr.io/google-samples/hello-app:2.0' -o yaml > samples/deployments/app/deploy.yaml
+          yq e -i '.spec.template.spec.containers[0].image = "{{ required ".Values.newImage is required!" .Values.newImage }}"' samples/deployments/app/deploy.yaml 
           git commit --allow-empty -a -m "promote candidate version to production"
           git push -f origin iter8-gitops
           git request-pull master https://{{ .Values.repo }} iter8-gitops
+        with:
+          secret: {{ .Release.Namespace }}/ghtoken
   criteria:
     requestCount: iter8-system/request-count
     indicators:

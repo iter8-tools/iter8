@@ -10,8 +10,8 @@ template: main.html
 
     ![SLO Validation GitOps](../../images/slo-validation-gitops.png)
 
-??? warning "Setup K8s cluster, local environment, and GitHub credentials"
-    0. Complete the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) and then skip ahead to step 7 of setup.
+??? warning "Setup K8s cluster and local environment"
+    0. If you completed the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) (highly recommended), you may skip the remaining steps of setup.
     1. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
     2. [Install Iter8 in K8s cluster](../../getting-started/install.md)
     3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
@@ -25,24 +25,6 @@ template: main.html
     cd iter8
     export ITER8=$(pwd)
     ```
-    6. Enable Iter8 to update your fork.
-        1. [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, select repo. This will ensure that the token can be used by Iter8 to update your app manifest in GitHub.
-        2. Create K8s secret
-        ```shell
-        # replace $GHTOKEN with GitHub token created above
-        kubectl create secret generic ghtoken --from-literal=token=$GHTOKEN
-        ```
-        3. Provide RBAC permission
-        ```shell
-        kubectl create role ghtoken-reader \
-          --verb=get \
-          --resource=secrets \
-          --resource-name=ghtoken
-        kubectl create rolebinding ghtoken-reader-binding \
-          --role=ghtoken-reader \
-          --serviceaccount=iter8-system:iter8-handlers
-        ```
-
 
 ## 1. Create stable version
 Create version `1.0` of the `hello world` app as follows.
@@ -65,7 +47,27 @@ kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/sample
 
 Adapt [these instructions](../../getting-started/first-experiment.md#1-create-app) to verify that stable and candidate versions of your app are running.
 
-## 3. Create Iter8 experiment
+## 3. Enable Iter8 GitOps
+3.1) [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, select repo. This will ensure that the token can be used by Iter8 to update your app manifest in GitHub.
+
+3.2) Create K8s secret
+```shell
+# replace $GHTOKEN with GitHub token created above
+kubectl create secret generic -n staging ghtoken --from-literal=token=$GHTOKEN
+```
+
+3.3) Provide RBAC permission
+```shell
+kubectl create role -n staging ghtoken-reader \
+  --verb=get \
+  --resource=secrets \
+  --resource-name=ghtoken
+kubectl create rolebinding -n staging ghtoken-reader-binding \
+  --role=ghtoken-reader \
+  --serviceaccount=iter8-system:iter8-handlers
+```
+
+## 4. Create Iter8 experiment
 Deploy an Iter8 experiment for SLO validation and GitOps-y promotion of the app as follows.
 ```shell
 helm upgrade -n staging my-exp $ITER8/samples/slo-gitops \
@@ -83,12 +85,12 @@ The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#wh
 
 In the above command, the *USERNAME* environment variable was defined during setup. After the Iter8 experiment validates SLOs for the candidate, it uses the GitHub token (also provided during setup) to promote the candidate to production using a GitHub pull-request.
 
-## 4. View and observe experiment
-View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Make sure you supply the correct namespace (`staging`).
+## 5. View and observe experiment
+View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Ensure correct namespace (`staging`) is used.
 
-## 5. Review Iter8's PR
+## 6. Review Iter8's PR
 
-## 6. Cleanup
+## 7. Cleanup
 
 ```shell
 # remove Iter8 experiment and candidate version of the app
