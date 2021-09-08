@@ -65,10 +65,10 @@ jobs:
       with:
         go-version: 1.16.6
     
-    # install iter8ctl;
+    # get iter8ctl;
     # among other things, this Iter8 CLI can help verify that 
     # the experiment completed successfully.
-    - name: Install iter8ctl
+    - name: Get iter8ctl
       run: sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
 

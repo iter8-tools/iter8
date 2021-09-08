@@ -14,7 +14,7 @@ template: main.html
     2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
     3. Get [Linkerd](setup-for-tutorials.md)
     4. [Install Iter8 in K8s cluster](../../getting-started/install.md)
-    5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
+    5. Get [`iter8ctl`](../../getting-started/install.md#get-iter8ctl)
     6. Get [the Iter8 Helm repo](../../getting-started/setup-for-tutorials.md#iter8-helm-repo)
 
 ## 1. Create baseline version
