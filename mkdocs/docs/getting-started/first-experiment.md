@@ -16,16 +16,15 @@ template: main.html
     4. Get [`iter8ctl`](install.md#install-iter8ctl)
     5. Get [the Iter8 Helm repo](setup-for-tutorials.md#iter8-helm-repo)
 
-## 1. Create baseline version
-Deploy the baseline version of the `hello world` application using Helm.
+## 1. Create application
+The `hello world` app consists of a K8s deployment and service. Deploy them as follows.
 
 ```shell
-helm install my-app iter8/hello \
-  --set baseline.dynamic.tag=1.0 \
-  --set candidate=null  
+kubectl apply -f $ITER8/samples/deployments/app/deploy.yaml
+kubectl apply -f $ITER8/samples/deployments/app/service.yaml
 ```
 
-??? note "Verify that baseline version is 1.0.0"
+??? note "Verify app is running"
     ```shell
     # do this in a separate terminal
     kubectl port-forward svc/hello 8080:8080
@@ -43,57 +42,33 @@ helm install my-app iter8/hello \
     Hostname: hello-bc95d9b56-xp9kv
     ```
 
-<!-- 
+## 2. Create Iter8 experiment
+Deploy the Iter8 experiment for SLO validation of the app as follows.
 ```shell
-kubectl create deploy hello --image=gcr.io/google-samples/hello-app:1.0
-kubectl create svc clusterip hello --tcp=8080
-``` 
--->
-
-## 2. Create candidate version
-Deploy the candidate version of the `hello world` application using Helm.
-```shell
-helm upgrade my-app iter8/hello \
-  --set baseline.dynamic.tag=1.0 \
-  --set candidate.dynamic.tag=2.0 \
+helm upgrade my-exp $ITER8/samples/first-exp \
+  --set URL='http://hello.default.svc.cluster.local' \
+  --set limitMeanLatency=50.0 \
+  --set limitErrorRate=0.0 \
+  --set limit95thPercentileLatency=100.0 \
   --install  
 ```
 
-The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) alongside the candidate deployment of the `hello world` application. The experiment will collect latency and error rate metrics for the candidate, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that will generate requests, collect latency and error rate metrics for the application, and verify that it satisfies the mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
 
-??? note "View application and experiment resources"
-    Use the command below to view your application and Iter8 experiment resources.
+??? note "View Iter8 experiment deployed by Helm"
+    Use the command below to view the Iter8 experiment deployed by the Helm command.
     ```shell
-    helm get manifest my-app
+    helm get manifest my-exp
     ```
-
-??? note "Verify that candidate version is 2.0.0"
-    ```shell
-    # do this in a separate terminal
-    kubectl port-forward svc/hello-candidate 8081:8080
-    ```
-
-    ```shell
-    curl localhost:8081
-    ```
-
-    ```
-    # output will be similar to the following (notice 2.0.0 version tag)
-    # hostname will be different in your environment
-    Hello, world!
-    Version: 2.0.0
-    Hostname: hello-bc95d9b56-xp9kv
-    ```
-
-<!-- 
-```shell
-kubectl create deploy hello-candidate --image=gcr.io/google-samples/hello-app:2.0
-kubectl create svc clusterip hello-candidate --tcp=8080
-``` 
--->
 
 ## 3. Observe experiment
-Describe the results of the Iter8 experiment. Wait 20 seconds before trying the following command. If the output is not as expected, try again after a few more seconds.
+Assert that the experiment completed and found a winning version. Wait 20 seconds before trying the following command. If the assertions are not satisfied, try again after a few seconds.
+
+```shell
+iter8ctl assert -c completed -c winnerFound
+```
+
+Describe the results of the Iter8 experiment. 
 ```shell
 iter8ctl describe
 ```
@@ -148,57 +123,21 @@ iter8ctl describe
     +--------------------------------------+--------+
     ``` 
 
-## 4. Promote winner
-Assert that the experiment completed and found a winning version. If the conditions are not satisfied, try again after a few more seconds.
+## 4. Cleanup
 ```shell
-iter8ctl assert -c completed -c winnerFound
+# remove experiment
+helm uninstall my-exp
+# remove application
+kubectl delete -f $ITER8/samples/deployments/app/service.yaml
+kubectl delete -f $ITER8/samples/deployments/app/deploy.yaml
 ```
-
-Promote the winner as follows.
-
-```shell
-helm upgrade my-app iter8/hello \
-  --install \
-  --set baseline.dynamic.tag=2.0 \
-  --set candidate=null
-```
-
-??? note "Verify that baseline version is 2.0.0"
-    ```shell
-    # kill the port-forward commands from steps 1 and 2
-    # do this in a separate terminal
-    kubectl port-forward svc/hello 8080:8080
-    ```
-
-    ```shell
-    curl localhost:8080
-    ```
-
-    ```
-    # output will be similar to the following (notice 2.0.0 version tag)
-    # hostname will be different in your environment
-    Hello, world!
-    Version: 2.0.0
-    Hostname: hello-bc95d9b56-xp9kv
-    ```
-
-## 5. Cleanup
-```shell
-helm uninstall my-app
-```
-
 ***
 
 **Next Steps**
 
-!!! tip "Use in production"
-    The Helm chart source for this application is located in `$ITER8/helm/hello`. Modify the chart, including the experiment template, as needed by your application for production usage.
+!!! tip "Use with your application"
+    1. Run the above experiment with **your** application by setting the `URL` value in the Helm command to the URL of your application. 
+    
+    2. You can also customize the mean latency, error rate, and tail latency limits.
 
-!!! tip "Try other Iter8 tutorials"
-    Iter8 can work in any K8s environment. Try Iter8 in the following environments.
-
-    [KFServing](../tutorials/kfserving/quick-start.md){ .md-button .md-button--primary }
-    [Seldon](../tutorials/seldon/quick-start.md){ .md-button .md-button--primary }
-    [Knative](../tutorials/knative/slovalidation-helmex.md){ .md-button .md-button--primary }
-    [Istio](../tutorials/istio/quick-start.md){ .md-button .md-button--primary }
-    [Linkerd](../tutorials/linkerd/abexperiment-helmex.md){ .md-button .md-button--primary }
+    3. This experiment can be run in any K8s environment such as a dev, test, staging, or production cluster.
