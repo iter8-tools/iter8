@@ -21,6 +21,13 @@ jobs:
     name: your first experiment
     runs-on: ubuntu-latest
     steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - run: go version
+    - run: which go
+
     - name: Checkout repository
       uses: actions/checkout@v2
     
@@ -43,11 +50,6 @@ jobs:
     #     which go
     #     sudo which go
     
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-
     - env:
         GOBIN: ${{ env.GOROOT }}/bin
       run: |
@@ -58,9 +60,11 @@ jobs:
         which go
         go version
     
+    - run: go version
+    - run: which go
+
     - name: Get iter8ctl
-      run: |
-        sudo go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
+      run: go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
     - name: Get Helm
       uses: azure/setup-helm@v1
