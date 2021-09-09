@@ -49,10 +49,10 @@ jobs:
         go-version: 1.17
 
     - env:
-        GOBIN: $GOPATH/bin
-        PATH: $GOPATH/bin;$PATH
+        GOBIN: $GOROOT/bin
       run: |
         echo "PATH=$PATH"
+        echo "GOBIN=$GOBIN"
         sudo which go
         sudo go version
         which go
