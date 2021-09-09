@@ -34,7 +34,7 @@ jobs:
         $ITER8/samples/setup/iter8-setup.sh
 
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: ibrt/golang-github-action@v1
       with:
         go-version: 1.17
     
@@ -42,8 +42,7 @@ jobs:
       run: |
         echo $GOROOT
         sudo echo $GOROOT
-        #sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
-        sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/kalantar/iter8ctl@versions
+        sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
     - name: Get Helm
       uses: azure/setup-helm@v1
