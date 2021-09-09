@@ -35,11 +35,11 @@ jobs:
 
     - name: Install Go
       run: |
-        apt-get update && apt-get install -y wget curl
-        wget https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
-        rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.1.linux-amd64.tar.gz
-        export PATH=$PATH:/usr/local/go/bin
-        go version
+        wget -q https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
+        sudo rm -rf /usr/local/go
+        sudo tar -C /usr/local -xzf go1.17.1.linux-amd64.tar.gz
+        sudo export PATH=$PATH:/usr/local/go/bin
+        sudo go version
     
     # - name: Install Go
     #   uses: actions/setup-go@v2
@@ -48,7 +48,7 @@ jobs:
     
     - name: Get iter8ctl
       run: |
-        go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
+        sudo go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
     - name: Get Helm
       uses: azure/setup-helm@v1
