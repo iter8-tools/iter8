@@ -41,7 +41,7 @@ jobs:
     - name: Get iter8ctl
       run: |
         echo $GOROOT
-        sudo GO111MODULE=on go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
+        sudo GO111MODULE=on go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
     - name: Get Helm
       uses: azure/setup-helm@v1
