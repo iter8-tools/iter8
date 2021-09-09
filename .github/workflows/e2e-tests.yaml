@@ -49,7 +49,7 @@ jobs:
         go-version: 1.17
 
     - env:
-        GOBIN: $GOROOT/bin
+        GOBIN: ${{ env.GOROOT }}/bin
       run: |
         echo "PATH=$PATH"
         echo "GOBIN=$GOBIN"
