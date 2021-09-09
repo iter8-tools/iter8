@@ -41,6 +41,7 @@ jobs:
     - name: Get iter8ctl
       run: |
         echo $GOROOT
+        sudo go mod init
         sudo GO111MODULE=on go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
     - name: Get Helm
