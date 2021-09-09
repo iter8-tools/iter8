@@ -33,18 +33,27 @@ jobs:
         export ITER8=$(pwd)
         $ITER8/samples/setup/iter8-setup.sh
 
-    - name: Install Go
-      run: |
-        wget -q https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
-        sudo rm -rf /usr/local/go
-        sudo tar -C /usr/local -xzf go1.17.1.linux-amd64.tar.gz
-        export PATH=$PATH:/usr/local/go/bin
-        sudo go version
-    
     # - name: Install Go
-    #   uses: actions/setup-go@v2
-    #   with:
-    #     go-version: 1.17
+    #   run: |
+    #     wget -q https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
+    #     sudo rm -rf /usr/local/go
+    #     sudo tar -C /usr/local -xzf go1.17.1.linux-amd64.tar.gz
+    #     export PATH=$PATH:/usr/local/go/bin
+    #     sudo go version
+    #     which go
+    #     sudo which go
+    
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - run: |
+        echo "PATH=$PATH"
+        sudo which go
+        sudo go version
+        which go
+        go version
     
     - name: Get iter8ctl
       run: |
