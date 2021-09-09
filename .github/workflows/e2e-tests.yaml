@@ -48,9 +48,10 @@ jobs:
       with:
         go-version: 1.17
 
-    - run: export PATH=$GOROOT/bin;$PATH
-    
-    - run: |
+    - env:
+        GOBIN: $GOPATH/bin
+        PATH: $GOPATH/bin;$PATH
+      run: |
         echo "PATH=$PATH"
         sudo which go
         sudo go version
