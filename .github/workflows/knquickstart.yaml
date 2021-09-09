@@ -42,6 +42,12 @@ jobs:
 
     steps:
 
+    # install Go locally
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+    
     # checkout the Git repo
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -59,17 +65,11 @@ jobs:
         $ITER8/samples/setup/iter8-setup.sh
         $ITER8/samples/knative/quickstart/platform-setup.sh
 
-    # install Go locally
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16.6
-    
     # get iter8ctl;
     # among other things, this Iter8 CLI can help verify that 
     # the experiment completed successfully.
     - name: Get iter8ctl
-      run: sudo GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/etc3/iter8ctl@mergerepos
+      run: go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
 
 
     # install Helm locally
