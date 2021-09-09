@@ -38,7 +38,7 @@ jobs:
         wget -q https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
         sudo rm -rf /usr/local/go
         sudo tar -C /usr/local -xzf go1.17.1.linux-amd64.tar.gz
-        sudo export PATH=$PATH:/usr/local/go/bin
+        export PATH=$PATH:/usr/local/go/bin
         sudo go version
     
     # - name: Install Go
