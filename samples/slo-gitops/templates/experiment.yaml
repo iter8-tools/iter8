@@ -20,16 +20,27 @@ spec:
       finish:
       - if: WinnerFound()
         run: |
-          echo "Winner found. Creating PR."
+          # identify committer
           git config --global user.email 'iter8tools@gmail.com'
           git config --global user.name 'Iter8'
-          git clone https://{{ required ".Values.username is required!" .Values.username }}:{{ "{{" }} .Secret "token" {{ "}}" }}@{{ required ".Values.repo is required!" .Values.repo }}
+
+          # extract token into an env variable
+          export TOKEN={{ "{{" }} .Secret "token" {{ "}}" }}
+
+          # clone repo using token
+          git clone https://{{ required ".Values.username is required!" .Values.username }}:$TOKEN@{{ required ".Values.repo is required!" .Values.repo }}
+
+          # make changes, commit, and push to a branch
           cd iter8
           git checkout -b iter8-gitops
           yq e -i '.spec.template.spec.containers[0].image = "{{ required ".Values.newImage is required!" .Values.newImage }}"' samples/deployments/app/deploy.yaml 
           git commit --allow-empty -a -m "promote candidate version to production"
           git push -f origin iter8-gitops
-          git request-pull master https://{{ .Values.repo }} iter8-gitops
+
+          # create pull request using credentials
+          echo $TOKEN > $SCRATCH/token.txt
+          gh auth login --with-token < $SCRATCH/token.txt
+          gh pr create --fill
         with:
           secret: {{ .Release.Namespace }}/ghtoken
   criteria:
