@@ -40,7 +40,7 @@ Create version `2.0` of the `hello world` app in the staging environment as foll
 
 ```shell
 kubectl create ns staging
-# version 2.0 of hello world app will in the staging namespace
+# create version 2.0 of hello world app in the staging namespace
 kubectl set image --local -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/deploy.yaml hello='gcr.io/google-samples/hello-app:2.0' -o yaml | kubectl apply -n staging -f -
 kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/service.yaml -n staging
 ```
@@ -48,7 +48,7 @@ kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/sample
 Adapt [these instructions](../../getting-started/first-experiment.md#1-create-app) to verify that stable and candidate versions of your app are running.
 
 ## 3. Enable Iter8 GitOps
-3.1) [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, select repo. This will ensure that the token can be used by Iter8 to update your app manifest in GitHub.
+3.1) [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, grant `repo` and `read:org` permissions to this token. This will ensure that the token can be used by Iter8 to update your app manifest in GitHub.
 
 3.2) Create K8s secret
 ```shell
@@ -76,7 +76,6 @@ helm upgrade -n staging my-exp $ITER8/samples/slo-gitops \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
   --set username=$USERNAME \
-  --set repo="github.com/$USERNAME/iter8.git" \
   --set newImage='gcr.io/google-samples/hello-app:2.0' \
   --install
 ```
@@ -89,6 +88,7 @@ In the above command, the *USERNAME* environment variable was defined during set
 View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Ensure correct namespace (`staging`) is used.
 
 ## 6. Review Iter8's PR
+Once the experiment completes, you can visit your fork at https://github.com/$USERNAME/iter8/pulls to review the pull-request created by Iter8.
 
 ## 7. Cleanup
 
@@ -104,10 +104,21 @@ kubectl delete svc/hello
 
 **Next Steps**
 
-!!! tip "Use with your app"
-    1. Replace hello
+??? tip "Use with your git repo/app"
+    1. The Helm chart used in this tutorial is located at $ITER8/samples/slo-gitops. Within this folder, the file `templates/experiment.yaml` contains the Iter8 experiment template. The following lines in this template are responsible for cloning the git repo, modifying it locally, and pushing the changes.
+    ```shell
+    # clone repo using token
+    git clone https://$USERNAME:$TOKEN@github.com/$USERNAME/iter8.git
 
-    2. Use with a GitOps operator like ArgoCD or FluxCD
+    # commit changes locally and push to a branch
+    cd iter8
+    git checkout -b iter8-gitops
+    yq e -i '.spec.template.spec.containers[0].image = "{{ required ".Values.newImage is required!" .Values.newImage }}"' samples/deployments/app/deploy.yaml 
+    git commit --allow-empty -a -m "promote candidate version to production"
+    git push -f origin iter8-gitops
+    ```
+    Change these lines in the template so that the correct repo is cloned and your app is modified correctly.
 
-    3. Promote from a staging to production cluster
+    2. Ensure that correct GitHub access token is supplied to Iter8.
 
+    3. You may need to supplement or replace the Helm values `username` and `newImage` used in this tutorial with other Helm values as needed by your repo/app.

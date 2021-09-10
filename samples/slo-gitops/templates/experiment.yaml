@@ -20,17 +20,21 @@ spec:
       finish:
       - if: WinnerFound()
         run: |
-          # identify committer
-          git config --global user.email 'iter8tools@gmail.com'
-          git config --global user.name 'Iter8'
+          # go to scratch folder
+          cd $SCRATCH_DIR
+          
+          # tell git who you are 
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"          
 
-          # extract token into an env variable
+          # extract token and username into env variables
+          export USERNAME={{ required ".Values.repo is required!" .Values.username }}
           export TOKEN={{ "{{" }} .Secret "token" {{ "}}" }}
 
           # clone repo using token
-          git clone https://{{ required ".Values.username is required!" .Values.username }}:$TOKEN@{{ required ".Values.repo is required!" .Values.repo }}
+          git clone https://$USERNAME:$TOKEN@github.com/$USERNAME/iter8.git
 
-          # make changes, commit, and push to a branch
+          # commit changes locally and push to a branch
           cd iter8
           git checkout -b iter8-gitops
           yq e -i '.spec.template.spec.containers[0].image = "{{ required ".Values.newImage is required!" .Values.newImage }}"' samples/deployments/app/deploy.yaml 
@@ -38,8 +42,8 @@ spec:
           git push -f origin iter8-gitops
 
           # create pull request using credentials
-          echo $TOKEN > $SCRATCH/token.txt
-          gh auth login --with-token < $SCRATCH/token.txt
+          echo $TOKEN > $SCRATCH_DIR/token.txt
+          gh auth login --with-token < $SCRATCH_DIR/token.txt
           gh pr create --fill
         with:
           secret: {{ .Release.Namespace }}/ghtoken
