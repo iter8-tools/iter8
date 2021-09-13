@@ -1,7 +1,7 @@
 resources:
 - etc3.yaml
 # to change Iter8 CRDs version, edit the next line
-- github.com/iter8-tools/etc3/config/crd/?ref=0.1.32
+- github.com/iter8-tools/etc3/config/crd/?ref=v0.1.32
 
 images:
 - name: iter8/controller:latest
