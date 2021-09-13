@@ -45,7 +45,7 @@ kubectl set image --local -f https://raw.githubusercontent.com/$USERNAME/iter8/m
 kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/service.yaml -n staging
 ```
 
-Adapt [these instructions](../../getting-started/first-experiment.md#1-create-app) to verify that stable and candidate versions of your app are running.
+Adapt [these instructions](../../getting-started/first-experiment.md#verify-app) to verify that stable and candidate versions of your app are running.
 
 ## 3. Enable Iter8 GitOps
 3.1) [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, grant `repo` and `read:org` permissions to this token. This will ensure that the token can be used by Iter8 to update your app manifest in GitHub.

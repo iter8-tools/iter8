@@ -5,7 +5,11 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Scenario: Validate service-level objectives (SLOs) for a K8s app"
-    Deploy a K8s app (service and deployment), and [validate that the app satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation).
+    **Problem**: You have a K8s app. You want to verify that it satisfies latency and error rate SLOs.
+
+    **Solution**: In this tutorial, you will launch a K8s app along with an Iter8 experiment. Iter8 will [validate that the new satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md).
+
+    ![SLO Validation](../images/slo-validation.png)
     
 ??? warning "Setup K8s cluster and local environment"
     1. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
@@ -30,7 +34,9 @@ kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
 kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ```
 
-??? note "Verify app is running"
+### Verify app
+
+??? note "Verify that the app is running using these instructions"
     ```shell
     # do this in a separate terminal
     kubectl port-forward -n default svc/hello 8080:8080
