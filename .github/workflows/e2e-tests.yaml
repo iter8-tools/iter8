@@ -40,7 +40,7 @@ jobs:
         $ITER8/samples/setup/iter8-setup.sh
 
     - name: Get iter8ctl
-      run: go install github.com/iter8-tools/etc3/iter8ctl@mergerepos
+      run: go install github.com/iter8-tools/etc3/iter8ctl
 
     - name: Get Helm
       uses: azure/setup-helm@v1
