@@ -1,0 +1,67 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  name: slo-validation-{{ randAlphaNum 5 | lower }}
+spec:
+  # target identifies application for which SLO validation experiment is performed
+  target: app
+  strategy:
+    # this experiment will perform a conformance test
+    testingPattern: Conformance
+    actions:
+      start:
+      - task: metrics/collect
+        with:
+          time: {{ required ".Values.time is required!" .Values.time | quote }}
+          versions:
+          - name: my-app
+            url: {{ required ".Values.URL is required!" .Values.URL | quote }}
+            qps: {{ required ".Values.QPS is required!" .Values.QPS }}
+      finish:
+      - if: WinnerFound()
+        run: |
+          # go to scratch folder
+          cd $SCRATCH_DIR
+          
+          # tell git who you are 
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"          
+
+          # extract token and username into env variables
+          export USERNAME={{ required ".Values.repo is required!" .Values.username }}
+          export TOKEN={{ "{{" }} .Secret "token" {{ "}}" }}
+
+          # clone repo using token
+          git clone https://$USERNAME:$TOKEN@github.com/$USERNAME/iter8.git
+
+          # commit changes locally and push to a branch
+          cd iter8
+          git checkout -b iter8-gitops
+          yq e -i '.spec.template.spec.containers[0].image = "{{ required ".Values.newImage is required!" .Values.newImage }}"' samples/deployments/app/deploy.yaml 
+          git commit --allow-empty -a -m "promote candidate version to production"
+          git push -f origin iter8-gitops
+
+          # create pull request using credentials
+          echo $TOKEN > $SCRATCH_DIR/token.txt
+          gh auth login --with-token < $SCRATCH_DIR/token.txt
+          gh pr create --fill
+        with:
+          secret: {{ .Release.Namespace }}/ghtoken
+  criteria:
+    requestCount: iter8-system/request-count
+    indicators:
+    - iter8-system/error-count
+    objectives:
+    - metric: iter8-system/mean-latency
+      upperLimit: {{ required ".Values.limitMeanLatency is required!" .Values.limitMeanLatency | quote }}
+    - metric: iter8-system/error-rate
+      upperLimit: {{ required ".Values.limitErrorRate is required!" .Values.limitErrorRate | quote }}
+    - metric: iter8-system/latency-95th-percentile
+      upperLimit: {{ required ".Values.limit95thPercentileLatency is required!" .Values.limit95thPercentileLatency | quote }}
+  duration:
+    intervalSeconds: 1
+    iterationsPerLoop: 1
+  versionInfo:
+    # information about app versions used in this experiment
+    baseline:
+      name: my-app

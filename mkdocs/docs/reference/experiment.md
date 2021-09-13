@@ -110,7 +110,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | task | string | Name of the task. Task names express both the library and the task within the library in the format 'library/task' . | Yes |
-| condition | string | Execute the task only if the specified condition is satisfied. Two built-in conditions are supported namely, `WinnerFound()` and `CandidateWon()`. They can be combined with predicates like `not`: `not WinnerFound()` and `not CandidateWon()` are also valid conditions.[^2] | No |
+| condition | string | Execute the task only if the specified condition is satisfied. Two built-in conditions are supported namely, `WinnerFound()` and `CandidateWon()`. They can be combined with predicates like `not`: `not WinnerFound()` and `not CandidateWon()` are also valid conditions.[^1] | No |
 | with | map[string][apiextensionsv1.JSON](https://pkg.go.dev/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1#JSON) | Inputs to the task. | No |
 
 ### Criteria
@@ -295,5 +295,4 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | name | string | Name of a variable. | Yes |
 | value | string | Value of a variable. | Yes |
 
-[^1]: `A/B/n` experiments involve more than one candidate. Their description is coming soon.
-[^1]: This feature is built using the [`expr` Go expression library](https://github.com/antonmedv/expr). The [Experiment Go struct](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.30/api/v2alpha2#Experiment) is used as the environment for expression evaluation. Hence, `.Status.Analysis != nil` is also a valid condition.
+[^1]: This feature uses the [`expr` Go expression library](https://github.com/antonmedv/expr). The [Experiment Go struct](https://pkg.go.dev/github.com/iter8-tools/etc3@v0.1.30/api/v2alpha2#Experiment) is used as the environment for expression evaluation. Hence, `.Status.Analysis != nil` is also a valid condition.
