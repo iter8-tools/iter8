@@ -5,6 +5,22 @@
 
 # Usage: python3 change-install-version.py <version number>
 
+# Note: For some reason, ruamel.yaml does not correctly dump tags.
+#
+# For example, 
+# !!python/name:materialx.emoji.twemoji
+# is outputted as
+# !%21python/name:materialx.emoji.twemoji
+# from mkdocs/mkdocs.yaml
+#
+# Unsafe loading corrects this problem but has other issues, such as
+# outputting tags in a strange format:
+# !!python/name:materialx.emoji.twemoji ''
+# as well as deleting all the comments.
+#
+# PyYAML, an alternative, will not preserve comments. Unsafe loading also
+# outputs tags in the same strange format.
+
 import sys
 from ruamel.yaml import YAML
 
