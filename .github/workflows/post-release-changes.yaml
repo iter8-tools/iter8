@@ -40,7 +40,7 @@ jobs:
       uses: EndBug/add-and-commit@v7
       with:
         branch: master
-        message: "Update install version to match new tag"
+        message: "Update install version to ${{ env.VERSION }}"
     - name: Update docs
       run: |
         git config --global user.name "Alan Cha"
