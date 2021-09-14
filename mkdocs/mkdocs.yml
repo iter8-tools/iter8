@@ -5,8 +5,8 @@ site_description: >-
   Iter8 is the release engineering platform for Kubernetes. SLO validation, A/B testing with business reward metrics, and progressive rollouts. Quick start in 5 mins.
 
 # Repository
-repo_name: alan-cha/iter8
-repo_url: https://github.com/alan-cha/iter8
+repo_name: iter8-tools/iter8
+repo_url: https://github.com/iter8-tools/iter8
 edit_uri: edit/master/mkdocs/docs
 
 # Configuration
