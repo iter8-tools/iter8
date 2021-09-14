@@ -43,8 +43,8 @@ jobs:
         message: "Update install version to ${{ env.VERSION }}"
     - name: Update docs
       run: |
-        git config --global user.name "Alan Cha"
-        git config --global user.email ac3805@columbia.edu 
+        git config --global user.name "Srinivasan Parthasarathy"
+        git config --global user.email spartha@us.ibm.com
         cd mkdocs
         pip install --upgrade pip
         pip install -r requirements.txt
