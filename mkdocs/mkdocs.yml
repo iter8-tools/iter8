@@ -2,7 +2,8 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 is the release engineering platform for Kubernetes. SLO validation, A/B testing with business reward metrics, and progressive rollouts. Quick start in 5 mins.
+  Iter8 is the release engineering platform for Kubernetes. SLO validation, A/B testing
+  with business reward metrics, and progressive rollouts. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -28,20 +29,20 @@ theme:
   - navigation.instant
   - navigation.sections
   - navigation.tabs
-  - navigation.top  
+  - navigation.top
   palette:
-    - scheme: default
-      primary: black
-      accent: indigo
-      toggle:
-        icon: material/toggle-switch-off-outline
-        name: Switch to dark mode
-    - scheme: slate
-      primary: pink
-      accent: red
-      toggle:
-        icon: material/toggle-switch
-        name: Switch to light mode
+  - scheme: default
+    primary: black
+    accent: indigo
+    toggle:
+      icon: material/toggle-switch-off-outline
+      name: Switch to dark mode
+  - scheme: slate
+    primary: pink
+    accent: red
+    toggle:
+      icon: material/toggle-switch
+      name: Switch to light mode
   font:
     text: Roboto
     code: Roboto Mono
@@ -50,154 +51,154 @@ theme:
 
 # Plugins
 plugins:
-  - search
-  - minify:
-      minify_html: true
-  - macros:
+- search
+- minify:
+    minify_html: true
+- macros:
       # Replace {{ variable }} syntax with [[ variable ]] to avoid conflicts
-      j2_block_start_string: '[[%'
-      j2_block_end_string: '%]]'
-      j2_variable_start_string: '[['
-      j2_variable_end_string: ']]'
-  - mike
-        
+    j2_block_start_string: '[[%'
+    j2_block_end_string: '%]]'
+    j2_variable_start_string: '[['
+    j2_variable_end_string: ']]'
+- mike
+
 # Customization
 extra:
   # Google Analytics
   analytics:
     provider: google
     property: UA-152813895-1
-  
-  title: "SLO validation, A/B testing, and progressive rollouts"
+
+  title: SLO validation, A/B testing, and progressive rollouts
   version:
     provider: mike
   social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/iter8-tools/iter8
-    - icon: fontawesome/brands/slack
-      link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
-  
+  - icon: fontawesome/brands/github
+    link: https://github.com/iter8-tools/iter8
+  - icon: fontawesome/brands/slack
+    link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
+
   iter8:
-    install_version: v0.7.21
-    
+    install_version: test1.5.0
+
 # Extensions
 markdown_extensions:
-  - admonition
-  - abbr
-  - attr_list
-  - def_list
-  - footnotes
-  - meta
-  - md_in_html
-  - toc:
-      permalink: true
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.critic
-  - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-  - pymdownx.highlight
-  - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.magiclink:
-      repo_url_shorthand: true
-      user: iter8-tools
-      repo: iter8
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
+- admonition
+- abbr
+- attr_list
+- def_list
+- footnotes
+- meta
+- md_in_html
+- toc:
+    permalink: true
+- pymdownx.arithmatex:
+    generic: true
+- pymdownx.betterem:
+    smart_enable: all
+- pymdownx.caret
+- pymdownx.critic
+- pymdownx.details
+- pymdownx.emoji:
+    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:materialx.emoji.to_svg
+- pymdownx.highlight
+- pymdownx.inlinehilite
+- pymdownx.keys
+- pymdownx.magiclink:
+    repo_url_shorthand: true
+    user: iter8-tools
+    repo: iter8
+- pymdownx.mark
+- pymdownx.smartsymbols
+- pymdownx.superfences:
+    custom_fences:
+    - name: mermaid
+      class: mermaid
+      format: !!python/name:pymdownx.superfences.fence_code_format
+- pymdownx.tabbed
+- pymdownx.tasklist:
+    custom_checkbox: true
+- pymdownx.tilde
 
 # Page tree
 nav:
-  - Home: index.md
-  - Concepts:
-    - What is Iter8?: concepts/whatisiter8.md
-    - Experiment building blocks: concepts/buildingblocks.md
-  - Getting Started:
-    - Your first experiment: getting-started/first-experiment.md
-    - Install Iter8: getting-started/install.md
-    - Get help: getting-started/help.md
-    - Setup for tutorials: getting-started/setup-for-tutorials.md
-  - Tutorials:
-    - KFServing:
-      - Quick start: tutorials/kfserving/quick-start.md
-      - Platform setup: tutorials/kfserving/platform-setup.md
-      - Testing strategies:
-        - Hybrid (A/B + SLOs) testing: tutorials/kfserving/testing-strategies/hybrid.md
-        - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
-      - Rollout strategies:
-        - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
-        - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
-        - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
-    - Seldon:
-      - Quick start: tutorials/seldon/quick-start.md
-      - Platform setup: tutorials/seldon/platform-setup.md
-      - Testing strategies:
-        - Hybrid (A/B + SLOs) testing: tutorials/seldon/testing-strategies/hybrid.md
-      - Rollout strategies:
-        - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
-    - Knative:
-      - SLO validation (Helmex): tutorials/knative/slovalidation-helmex.md
-      - Testing strategies:
-        - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
-        - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
-      - Rollout strategies:
-        - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
-        - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
-      - Setup for tutorials: tutorials/knative/setup-for-tutorials.md
-    - Istio:
-      - Quick start: tutorials/istio/quick-start.md
-      - Platform setup: tutorials/istio/platform-setup.md
-      - Testing strategies:
-        - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
-        - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
-        - Hybrid (A/B + SLOs) testing: tutorials/istio/testing-strategies/hybrid.md
-      - Rollout strategies:
-        - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
-        - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
-      - GitOps:
-        - Argo CD + Istio: tutorials/istio/gitops/argocd.md
-    - Linkerd:
-      - A/B experiment (Helmex): tutorials/linkerd/abexperiment-helmex.md
-      - Testing strategies:
-        - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
-      - Platform setup: tutorials/linkerd/platform-setup.md
-    - Openshift:
-      - CI/CD integration: tutorials/openshift/openshift.md
-  - Metrics:
-    - Using metrics: metrics/using-metrics.md
-    - Builtin metrics: metrics/builtin.md
-    - Custom metrics: metrics/custom.md
-    - Mock metrics: metrics/mock.md
-  - Reference:
-    - Experiment resource: reference/experiment.md
-    - Metric resource: reference/metrics.md
-    - Helmex schema: reference/helmex-schema.md
-    - Task overview: reference/tasks/overview.md
-    - Task descriptions: 
-      - run: reference/tasks/run.md
-      - common/readiness: reference/tasks/common-readiness.md
-      - metrics/collect: reference/tasks/metrics-collect.md
-      - notification/http: reference/tasks/notification-http.md
-      - notification/slack: reference/tasks/notification-slack.md
-  - Contributing: 
-    - Overview: contributing/overview.md
-    - New K8s stack: contributing/newk8sstack.md
-    - Tutorials: contributing/tutorials.md
-    - Analytics: contributing/analytics.md
-    - Tasks: contributing/tasks.md
-  - Roadmap: roadmap.md
-  - News: news.md
+- Home: index.md
+- Concepts:
+  - What is Iter8?: concepts/whatisiter8.md
+  - Experiment building blocks: concepts/buildingblocks.md
+- Getting Started:
+  - Your first experiment: getting-started/first-experiment.md
+  - Install Iter8: getting-started/install.md
+  - Get help: getting-started/help.md
+  - Setup for tutorials: getting-started/setup-for-tutorials.md
+- Tutorials:
+  - KFServing:
+    - Quick start: tutorials/kfserving/quick-start.md
+    - Platform setup: tutorials/kfserving/platform-setup.md
+    - Testing strategies:
+      - Hybrid (A/B + SLOs) testing: tutorials/kfserving/testing-strategies/hybrid.md
+      - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
+    - Rollout strategies:
+      - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
+      - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
+      - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
+  - Seldon:
+    - Quick start: tutorials/seldon/quick-start.md
+    - Platform setup: tutorials/seldon/platform-setup.md
+    - Testing strategies:
+      - Hybrid (A/B + SLOs) testing: tutorials/seldon/testing-strategies/hybrid.md
+    - Rollout strategies:
+      - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
+  - Knative:
+    - SLO validation (Helmex): tutorials/knative/slovalidation-helmex.md
+    - Testing strategies:
+      - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
+      - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
+    - Rollout strategies:
+      - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
+      - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
+    - Setup for tutorials: tutorials/knative/setup-for-tutorials.md
+  - Istio:
+    - Quick start: tutorials/istio/quick-start.md
+    - Platform setup: tutorials/istio/platform-setup.md
+    - Testing strategies:
+      - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
+      - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
+      - Hybrid (A/B + SLOs) testing: tutorials/istio/testing-strategies/hybrid.md
+    - Rollout strategies:
+      - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
+      - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
+    - GitOps:
+      - Argo CD + Istio: tutorials/istio/gitops/argocd.md
+  - Linkerd:
+    - A/B experiment (Helmex): tutorials/linkerd/abexperiment-helmex.md
+    - Testing strategies:
+      - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
+    - Platform setup: tutorials/linkerd/platform-setup.md
+  - Openshift:
+    - CI/CD integration: tutorials/openshift/openshift.md
+- Metrics:
+  - Using metrics: metrics/using-metrics.md
+  - Builtin metrics: metrics/builtin.md
+  - Custom metrics: metrics/custom.md
+  - Mock metrics: metrics/mock.md
+- Reference:
+  - Experiment resource: reference/experiment.md
+  - Metric resource: reference/metrics.md
+  - Helmex schema: reference/helmex-schema.md
+  - Task overview: reference/tasks/overview.md
+  - Task descriptions:
+    - run: reference/tasks/run.md
+    - common/readiness: reference/tasks/common-readiness.md
+    - metrics/collect: reference/tasks/metrics-collect.md
+    - notification/http: reference/tasks/notification-http.md
+    - notification/slack: reference/tasks/notification-slack.md
+- Contributing:
+  - Overview: contributing/overview.md
+  - New K8s stack: contributing/newk8sstack.md
+  - Tutorials: contributing/tutorials.md
+  - Analytics: contributing/analytics.md
+  - Tasks: contributing/tasks.md
+- Roadmap: roadmap.md
+- News: news.md
