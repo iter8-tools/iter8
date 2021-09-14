@@ -79,7 +79,7 @@ extra:
     link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
 
   iter8:
-    install_version: test1.5.0
+    install_version: v0.7.21
 
 # Extensions
 markdown_extensions:
