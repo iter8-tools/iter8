@@ -1,7 +1,9 @@
 name: release-helm-charts
 
-on: 
-  workflow_dispatch:
+on:
+  push:
+    paths:
+      - 'helm/**'
 
 jobs:
   helm-charts:
