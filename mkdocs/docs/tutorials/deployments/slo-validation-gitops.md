@@ -10,7 +10,7 @@ template: main.html
 
     ![SLO Validation GitOps](../../images/slo-validation-gitops.png)
 
-??? warning "Setup K8s cluster and local environment"
+??? warning "Setup Kubernetes cluster and local environment"
     0. If you completed the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) (highly recommended), you may skip the remaining steps of setup.
     1. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
     2. [Install Iter8 in K8s cluster](../../getting-started/install.md)
