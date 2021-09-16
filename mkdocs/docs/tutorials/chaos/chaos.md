@@ -1,4 +1,4 @@
-# Chaos Testing
+# Chaos Testing with SLO Validation
 
 Chaos Testing enables you to perform chaos tests(w/ [litmus](https://litmuschaos.io/)) with SLO validation using objectives. In this tutorial, you will:
 
