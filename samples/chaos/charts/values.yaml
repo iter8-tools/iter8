@@ -77,7 +77,7 @@ policies:
 appinfo:
   appns:
   applabel:
-  appkind:
+  appkind: deployment
   
 experiments:
   disabled: []
