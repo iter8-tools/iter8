@@ -55,7 +55,7 @@ spec:
     env:
 
     - name: TOTAL_CHAOS_DURATION
-      value: '15'
+      value: '60'
 
     # Period to wait before injection of chaos in sec
     - name: RAMP_TIME
@@ -65,7 +65,7 @@ spec:
       value: 'true'
 
     - name: CHAOS_INTERVAL
-      value: '5'
+      value: '4'
 
     # Percentage of total pods to target
     - name: PODS_AFFECTED_PERC
