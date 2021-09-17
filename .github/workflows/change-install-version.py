@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Used by ind.yaml
+# Used by post-release-changes.yaml
 # Change the install version in mkdocs.yaml
 
 # Usage: python3 change-install-version.py <version number>

@@ -27,12 +27,15 @@ jobs:
           # Strip "v" prefix from tagref
           echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
           echo "MAJOR_MINOR_VERSION=$(echo $tarref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == *"master" ]]; then
-          echo "VERSION=latest" >> $GITHUB_ENV
+        else
+          exit 1
         fi
-    - name: Change install version
+    - name: Install Python modules
+      run: pip install -r ./.github/workflows/requirements.txt
+    - name: Verify semantic versioning
+      run: python3 ./.github/workflows/semver-check.py ${{ env.VERSION }}
+    - name: Change install version in docs
       run: |
-        pip install -r ./.github/workflows/requirements.txt
         python3 ./.github/workflows/change-install-version.py ${{ env.VERSION }}
         # Work around: YAML parser does not correctly dump tags ("!%21" instead of "!!")
         sed -i 's/!%21python/!!python/g' mkdocs/mkdocs.yml
@@ -43,8 +46,8 @@ jobs:
         message: "Update install version to ${{ env.VERSION }}"
     - name: Update docs
       run: |
-        git config --global user.name "Srinivasan Parthasarathy"
-        git config --global user.email spartha@us.ibm.com
+        git config --global user.name "Iter8"
+        git config --global user.email iter8tools@gmail.com
         cd mkdocs
         pip install --upgrade pip
         pip install -r requirements.txt
