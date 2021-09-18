@@ -1,0 +1,5 @@
+apiVersion: v2
+name: slo
+description: A Helm chart for Iter8 SLO validation experiment
+type: application
+version: 0.1.0

@@ -1,0 +1,8 @@
+appns: default
+applabel: app.kubernetes.io/name=hello
+appkind: deployment
+URL: http://hello.default.svc.cluster.local:8080
+limitMeanLatency: 50.0
+limitErrorRate: 0.01
+limit95thPercentileLatency: 100.0
+      

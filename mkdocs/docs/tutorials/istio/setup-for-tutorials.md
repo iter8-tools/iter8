@@ -28,7 +28,7 @@ The Iter8 Prometheus add-on is suitable only for tutorials. To install Prometheu
 To install the add-on:
 
 ```shell
-export TAG=v0.7.11
+export TAG=v0.7.21
 kustomize build https://github.com/iter8-tools/iter8/install/prometheus-add-on/prometheus-operator/?ref=${TAG} | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
 kustomize build https://github.com/iter8-tools/iter8/install/prometheus-add-on/prometheus/?ref=${TAG} | kubectl apply -f -
