@@ -1,9 +1,10 @@
+markdown>=3.2
+mike>=1.0.1
+mkdocs>=1.2.2
+mkdocs-macros-plugin>=0.5.12
 mkdocs-material>=7.1.8
-mike>=0.5.5
+mkdocs-material-extensions>=1.0
 mkdocs-minify-plugin>=0.4.0
 mkdocs-redirects>=1.0.1
-mkdocs>=1.2.2
-Pygments>=2.4
-markdown>=3.2
 pymdown-extensions>=7.0
-mkdocs-material-extensions>=1.0
+Pygments>=2.4
