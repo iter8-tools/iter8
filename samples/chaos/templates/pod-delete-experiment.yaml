@@ -1,5 +1,3 @@
-{{ if not (has "pod-delete" .Values.experiments.disabled) }}
----
 apiVersion: litmuschaos.io/v1alpha1
 description:
   message: |
@@ -8,7 +6,10 @@ kind: ChaosExperiment
 metadata:
   name: pod-delete
   labels:
-    {{- include "litmus.labels" . | indent 4 }}
+    name: pod-delete
+    app.kubernetes.io/part-of: litmus
+    app.kubernetes.io/component: chaosexperiment
+    app.kubernetes.io/version: 1.13.8
 spec:
   definition:
     scope: Namespaced
@@ -45,8 +46,8 @@ spec:
           - "update"
           - "delete"
           - "deletecollection"
-    image: "{{ .Values.litmusGO.image.repository }}:{{ .Values.litmusGO.image.tag }}"
-    imagePullPolicy: {{ .Values.litmusGO.image.pullPolicy }}
+    image: "litmuschaos/go-runner:1.13.8"
+    imagePullPolicy: Always
     args:
     - -c
     - ./experiments -name pod-delete
@@ -57,7 +58,7 @@ spec:
     - name: TOTAL_CHAOS_DURATION
       value: '15'
 
-    # Period to wait before injection of chaos in sec
+    # Period to wait before and after injection of chaos in sec
     - name: RAMP_TIME
       value: ''
 
@@ -67,12 +68,12 @@ spec:
     - name: CHAOS_INTERVAL
       value: '5'
 
-    # Percentage of total pods to target
+    ## percentage of total pods to target
     - name: PODS_AFFECTED_PERC
       value: ''
 
     - name: LIB
-      value: 'litmus'
+      value: 'litmus'    
 
     - name: TARGET_PODS
       value: ''
@@ -80,9 +81,10 @@ spec:
     ## it defines the sequence of chaos execution for multiple target pods
     ## supported values: serial, parallel
     - name: SEQUENCE
-      value: 'parallel'      
-
+      value: 'parallel'
+      
     labels:
       name: pod-delete
       app.kubernetes.io/part-of: litmus
-{{ end }}
+      app.kubernetes.io/component: experiment-job
+      app.kubernetes.io/version: 1.13.8

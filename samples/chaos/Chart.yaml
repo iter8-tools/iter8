@@ -1,8 +1,8 @@
 apiVersion: v1
 appVersion: "1.13.8"
-description: A Helm chart to install litmus infra components on Kubernetes
+description: A Helm chart to install litmus experiments on Kubernetes
 name: litmus
-version: 1.16.0
+version: 1.13.8
 home: https://litmuschaos.io
 sources:
   - https://github.com/litmuschaos/litmus
@@ -10,6 +10,7 @@ keywords:
   - chaos-engineering
   - resiliency
   - kubernetes
+  - pod
 maintainers:
   - name: ksatchit
     email: karthik.s@mayadata.io

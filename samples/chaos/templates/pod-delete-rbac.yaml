@@ -1,10 +1,9 @@
-{{ if not (has "pod-delete" .Values.experiments.disabled) }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pod-delete-sa
-  namespace:  {{ .Release.Namespace }}
+  namespace: default
   labels:
     name: pod-delete-sa
     app.kubernetes.io/part-of: litmus
@@ -13,7 +12,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: pod-delete-sa
-  namespace: {{ .Release.Namespace }}
+  namespace: default
   labels:
     name: pod-delete-sa
     app.kubernetes.io/part-of: litmus
@@ -44,7 +43,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: pod-delete-sa
-  namespace:  {{ .Release.Namespace }}
+  namespace: default
   labels:
     name: pod-delete-sa
     app.kubernetes.io/part-of: litmus
@@ -55,5 +54,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: pod-delete-sa
-  namespace:  {{ .Release.Namespace }}
-{{ end }}
+  namespace: default
