@@ -4,16 +4,16 @@ template: main.html
 
 # Your First Experiment
 
-!!! tip "Scenario: Validate service-level objectives (SLOs) for a K8s app"
-    **Problem**: You have a K8s app. You want to verify that it satisfies latency and error rate SLOs.
+!!! tip "Scenario: Validate service-level objectives (SLOs) for a Kubernetes app"
+    **Problem**: You have a Kubernetes app. You want to verify that it satisfies latency and error rate SLOs.
 
-    **Solution**: In this tutorial, you will launch a K8s app along with an Iter8 experiment. Iter8 will [validate that the new satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md).
+    **Solution**: In this tutorial, you will launch a Kubernetes app along with an Iter8 experiment. Iter8 will [validate that the new satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md). During this validation, Iter8 will generate GET requests for the app.
 
     ![SLO Validation](../images/slo-validation.png)
     
-??? warning "Setup K8s cluster and local environment"
-    1. Setup [K8s cluster](setup-for-tutorials.md#local-kubernetes-cluster)
-    2. [Install Iter8 in K8s cluster](install.md)
+??? warning "Setup Kubernetes cluster and local environment"
+    1. Setup [Kubernetes cluster](setup-for-tutorials.md#local-kubernetes-cluster)
+    2. [Install Iter8 in Kubernetes cluster](install.md)
     3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
     4. Get [`iter8ctl`](install.md#get-iter8ctl)
     5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
@@ -27,7 +27,7 @@ template: main.html
     ```
 
 ## 1. Create app
-The `hello world` app consists of a K8s deployment and service. Deploy the app as follows.
+The `hello world` app consists of a Kubernetes deployment and service. Deploy the app as follows.
 
 ```shell
 kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
@@ -152,4 +152,4 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
     
     2. You can also customize the mean latency, error rate, and tail latency limits.
 
-    3. This experiment can be run in any K8s environment such as a dev, test, staging, or production cluster.
+    3. This experiment can be run in any Kubernetes environment such as a dev, test, staging, or production cluster.

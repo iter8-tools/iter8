@@ -133,6 +133,10 @@ nav:
   - Get help: getting-started/help.md
   - Setup for tutorials: getting-started/setup-for-tutorials.md
 - Tutorials:
+  - Kubernetes deployments:
+    - SLO validation for POST APIs: tutorials/deployments/slo-validation-post.md
+    - SLO validation with Chaos:  tutorials/deployments/slo-validation-chaos.md
+    - SLO validation with GitOps: tutorials/deployments/slo-validation-gitops.md
   - KFServing:
     - Quick start: tutorials/kfserving/quick-start.md
     - Platform setup: tutorials/kfserving/platform-setup.md
@@ -176,8 +180,6 @@ nav:
     - Testing strategies:
       - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
     - Platform setup: tutorials/linkerd/platform-setup.md
-  - Chaos: 
-      - Chaos Testing:  tutorials/chaos/chaos.md
   - Openshift:
     - CI/CD integration: tutorials/openshift/openshift.md
 - Metrics:
