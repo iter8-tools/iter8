@@ -69,7 +69,7 @@ jobs:
     # among other things, this Iter8 CLI can help verify that 
     # the experiment completed successfully.
     - name: Get iter8ctl
-      run: go install github.com/iter8-tools/etc3/iter8ctl@latest
+      run: GO111MODULE=on GOBIN=/usr/local/bin go install github.com/iter8-tools/etc3/iter8ctl
 
 
     # install Helm locally
