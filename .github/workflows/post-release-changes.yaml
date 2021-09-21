@@ -17,8 +17,6 @@ jobs:
       with:
         fetch-depth: 0 # fetch all commits/branches
         ref: refs/heads/master # checkout master branch instead of tagged release
-    - name: Print ref
-      run: echo ${{ github.ref }}
     - name: Setup Python
       uses: actions/setup-python@v1
       with:
