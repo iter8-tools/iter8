@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin
+  labels:
+    app.kubernetes.io/managed-by: Iter8
+    app.kubernetes.io/name: httpbin
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: httpbin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: httpbin
+    spec:
+      containers:
+      - name: hello
+        image: 'kennethreitz/httpbin:latest'
+        ports:
+        - containerPort: 80

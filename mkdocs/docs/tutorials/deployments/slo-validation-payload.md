@@ -2,20 +2,19 @@
 template: main.html
 ---
 
-# Your First Experiment
+# SLO Validation with Payload
+!!! tip "Scenario: Validate SLOs for apps with POST APIs that receive payload"
+    **Problem**: You have a Kubernetes app that implements POST APIs that receive payload. You want to verify that the app satisfies latency and error rate SLOs.
 
-!!! tip "Scenario: Validate service-level objectives (SLOs) for a Kubernetes app"
-    **Problem**: You have a Kubernetes app. You want to verify that it satisfies latency and error rate SLOs.
+    **Solution**: In this tutorial, you will launch a Kubernetes app that implements a POST API that receives a payload, along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../../metrics/builtin.md). During this validation, Iter8 will generate POST requests with payload for the app.
 
-    **Solution**: In this tutorial, you will launch a Kubernetes app along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md). During this validation, Iter8 will generate GET requests for the app.
+    ![SLO Validation](../../images/slo-validation.png)
 
-    ![SLO Validation](../images/slo-validation.png)
-    
 ??? warning "Setup Kubernetes cluster and local environment"
-    1. Setup [Kubernetes cluster](setup-for-tutorials.md#local-kubernetes-cluster)
-    2. [Install Iter8 in Kubernetes cluster](install.md)
+    1. Setup [Kubernetes cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    2. [Install Iter8 in Kubernetes cluster](../../getting-started/install.md)
     3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
-    4. Get [`iter8ctl`](install.md#get-iter8ctl)
+    4. Get [`iter8ctl`](../../getting-started/install.md#get-iter8ctl)
     5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
     ```shell
     export USERNAME=<your GitHub username>
@@ -27,11 +26,11 @@ template: main.html
     ```
 
 ## 1. Create app
-The `hello world` app consists of a Kubernetes deployment and service. Deploy the app as follows.
+The `httpbin` app consists of a Kubernetes deployment and service. Deploy the app as follows.
 
 ```shell
-kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
-kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
+kubectl apply -n default -f $ITER8/samples/deployments/httpbin/deploy.yaml
+kubectl apply -n default -f $ITER8/samples/deployments/httpbin/service.yaml
 ```
 
 ### Verify app
@@ -39,33 +38,50 @@ kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ??? note "Verify that the app is running using these instructions"
     ```shell
     # do this in a separate terminal
-    kubectl port-forward -n default svc/hello 8080:8080
+    kubectl port-forward -n default svc/httpbin 8080:8080
     ```
 
     ```shell
-    curl localhost:8080
+    curl http://localhost:80/post -X POST -d @$ITER8/samples/deployments/httpbin/sample.json -H "Content-Type: application/json"
     ```
 
-    ```
-    # output will be similar to the following (notice 1.0.0 version tag)
-    # hostname will be different in your environment
-    Hello, world!
-    Version: 1.0.0
-    Hostname: hello-bc95d9b56-xp9kv
+    `Curl` output will be similar to the following.
+    ```json
+    {
+      "args": {}, 
+      "data": "{  \"hello\": \"world\",   \"real\": \"heroes\"}", 
+      "files": {}, 
+      "form": {}, 
+      "headers": {
+        "Accept": "*/*", 
+        "Content-Length": "40", 
+        "Content-Type": "application/json", 
+        "Host": "localhost", 
+        "User-Agent": "curl/7.64.1"
+      }, 
+      "json": {
+        "hello": "world", 
+        "real": "heroes"
+      }, 
+      "origin": "172.17.0.1", 
+      "url": "http://localhost/post"
+    }    
     ```
 
 ## 2. Create Iter8 experiment
 Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
 helm upgrade -n default my-exp $ITER8/samples/first-exp \
-  --set URL='http://hello.default.svc.cluster.local:8080' \
+  --set URL='http://httpbin.default.svc.cluster.local:8080' \
+  --set payloadURL='http://payload.com' \
+  --set contentType='application/json' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
   --install  
 ```
 
-The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
 
 ??? note "View Iter8 experiment"
     View the Iter8 experiment as follows.
@@ -73,19 +89,16 @@ The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-
     helm get manifest -n default my-exp
     ```
 
-## 3. Observe experiment
-The `iter8ctl` CLI makes it easy to observe experiment progress and outcomes.
+    There are two main aspects to this ... task and criteria.
 
-### Assert experiment outcomes
+## 3. Observe experiment
 Assert that the experiment completed and found a winning version. Wait 20 seconds before trying the following command. If the assertions are not satisfied, try again after a few seconds.
 
 ```shell
 iter8ctl assert -c completed -c winnerFound
 ```
 
-### Describe experiment
-Describe the results of the Iter8 experiment.
-
+Describe the results of the Iter8 experiment. 
 ```shell
 iter8ctl describe
 ```
@@ -138,19 +151,7 @@ iter8ctl describe
     +--------------------------------------+--------+
     | iter8-system/error-count             |  0.000 |
     +--------------------------------------+--------+
-    ```
-
-### Debug experiment
-The `iter8ctl` debug command is especially useful in situations where the experiment failed to complete successfully, or produces an unexpected outcome (such as failure to find a winning version).
-
-```shell
-iter8ctl debug --priority 3
-```
-
-??? info "Debugging output will look similar to this ... "
-    ```yaml
-    hello: world
-    ```
+    ``` 
 
 ## 4. Cleanup
 ```shell
@@ -169,4 +170,5 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
     
     2. You can also customize the mean latency, error rate, and tail latency limits.
 
-    3. This experiment can be run in any Kubernetes environment such as a dev, test, staging, or production cluster.
+    3. This experiment can be run in any Kubernetes environment such as a dev, test, staging, or production cluster.    
+

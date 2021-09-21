@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  labels:
+    app.kubernetes.io/managed-by: Iter8
+    app.kubernetes.io/name: httpbin
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app.kubernetes.io/name: httpbin
