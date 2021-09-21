@@ -116,7 +116,7 @@ The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-
           name: my-app
     ```    
 
-    The [`metrics/collect` task](../reference/tasks/metrics-collect.md) highlighted above is responsible for generating HTTP requests, sending them to the app's API end-point, receiving responses, and collecting metrics. The `objectives` stanza highlighted in the experiment above describes the SLOs that the app needs to satisfy in order to be deemed a winner.
+    The [`metrics/collect` task](../reference/tasks/metrics-collect.md) highlighted above is responsible for generating and sending HTTP requests to the app's API end-point, receiving responses, and creating latency and error-related metrics. The [`objectives`](../../concepts/buildingblocks/#objectives-slos) stanza describes the SLOs that the app needs to satisfy in order to be declared a winner.
 
 ## 3. Observe experiment
 The `iter8ctl` CLI makes it easy to observe experiment progress and outcomes.
@@ -191,7 +191,7 @@ iter8ctl describe
 The `iter8ctl` debug command is especially useful in situations where the experiment failed to complete successfully, or produces an unexpected outcome (such as failure to find a winning version).
 
 ```shell
-# print Iter8logs are priority levels 1 (error), 2 (warning), and 3 (info)
+# print Iter8logs at priority levels 1 (error), 2 (warning), and 3 (info)
 iter8ctl debug --priority 3
 ```
 
@@ -213,8 +213,12 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 **Next Steps**
 
 !!! tip "Use with your app"
-    1. Run the above experiment with your app by setting the `URL` value in the Helm command to the URL of your app. 
+    1. Run the above experiment with your app by setting the `URL` value in the Helm command to the URL of your app. You can run this experiment in any Kubernetes environment such as a dev, test, staging, or production cluster.
     
-    2. You can also customize the mean latency, error rate, and tail latency limits.
+    2. You can also customize the mean latency, error rate, and tail latency limits in the SLOs.
 
-    3. This experiment can be run in any Kubernetes environment such as a dev, test, staging, or production cluster.
+    3. [Try an SLO validation experiment where Iter8 generates payload for a POST API implemented by your app.](../tutorials/deployments/slo-validation-payload.md)
+
+    4. [Try an SLO validation experiment with chaos injection.](../tutorials/deployments/slo-validation-chaos.md)
+
+    5. [Try an SLO validation experiment with promotion of a candidate version using GitOps.](../tutorials/deployments/slo-validation-gitops.md)

@@ -38,34 +38,34 @@ kubectl apply -n default -f $ITER8/samples/deployments/httpbin/service.yaml
 ??? note "Verify that the app is running using these instructions"
     ```shell
     # do this in a separate terminal
-    kubectl port-forward -n default svc/httpbin 8080:8080
+    kubectl port-forward -n default svc/httpbin 8080:80
     ```
 
     ```shell
-    curl http://localhost:80/post -X POST -d @$ITER8/samples/deployments/httpbin/sample.json -H "Content-Type: application/json"
+    curl http://localhost:8080/post -X POST -d @$ITER8/samples/deployments/httpbin/payload.json -H "Content-Type: application/json"
     ```
 
     `Curl` output will be similar to the following.
     ```json
     {
       "args": {}, 
-      "data": "{  \"hello\": \"world\",   \"real\": \"heroes\"}", 
+      "data": "{  \"hello\": \"world\",  \"goodbye\": \"world\"}", 
       "files": {}, 
       "form": {}, 
       "headers": {
         "Accept": "*/*", 
-        "Content-Length": "40", 
+        "Content-Length": "41", 
         "Content-Type": "application/json", 
-        "Host": "localhost", 
+        "Host": "localhost:8080", 
         "User-Agent": "curl/7.64.1"
       }, 
       "json": {
-        "hello": "world", 
-        "real": "heroes"
+        "goodbye": "world", 
+        "hello": "world"
       }, 
-      "origin": "172.17.0.1", 
-      "url": "http://localhost/post"
-    }    
+      "origin": "127.0.0.1", 
+      "url": "http://localhost:8080/post"
+    }
     ```
 
 ## 2. Create Iter8 experiment
