@@ -4,7 +4,7 @@ template: main.html
 
 # SLO Validation with Payload
 !!! tip "Scenario: Validate SLOs for apps with POST APIs that receive payload"
-    **Problem**: You have a Kubernetes app that implements POST APIs that receive payload. You want to verify that the app satisfies latency and error rate SLOs.
+    **Problem**: You have a Kubernetes app that receives a payload through an HTTP POST API. You want to verify that it satisfies latency and error rate SLOs.
 
     **Solution**: In this tutorial, you will launch a Kubernetes app that implements a POST API that receives a payload, along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../../metrics/builtin.md). During this validation, Iter8 will generate POST requests with payload for the app.
 

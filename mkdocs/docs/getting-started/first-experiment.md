@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Scenario: Validate service-level objectives (SLOs) for a Kubernetes app"
     **Problem**: You have a Kubernetes app. You want to verify that it satisfies latency and error rate SLOs.
 
-    **Solution**: In this tutorial, you will launch a Kubernetes app along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md). During this validation, Iter8 will generate GET requests for the app.
+    **Solution**: In this tutorial, you will launch a Kubernetes app along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md). During this validation, Iter8 will generate HTTP GET requests for the app.
 
     ![SLO Validation](../images/slo-validation.png)
     
@@ -34,7 +34,7 @@ kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
 kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ```
 
-### Verify app
+### 1.a) Verify app is running
 
 ??? note "Verify that the app is running using these instructions"
     ```shell
@@ -67,30 +67,77 @@ helm upgrade -n default my-exp $ITER8/samples/first-exp \
 
 The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
 
-??? note "View Iter8 experiment"
+### 2.a) View manifest
+??? note "View Iter8 experiment manifest using these instructions"
     View the Iter8 experiment as follows.
     ```shell
     helm get manifest -n default my-exp
     ```
 
+    Your experiment will be similar to the following.
+    ```yaml linenums="1" hl_lines="14 15 16 17 18 19 20 25 26 27 28 29 30 31"
+    # Source: slo/templates/experiment.yaml
+    apiVersion: iter8.tools/v2alpha2
+    kind: Experiment
+    metadata:
+      name: slo-validation-mz8py
+    spec:
+      # target identifies application for which SLO validation experiment is performed
+      target: app
+      strategy:
+        # this experiment will perform a conformance test
+        testingPattern: Conformance
+        actions:
+          start:
+          - task: metrics/collect
+            with:
+              time: "5s"
+              versions:
+              - name: my-app
+                url: "http://hello.default.svc.cluster.local:8080"
+                qps: 8
+      criteria:
+        requestCount: iter8-system/request-count
+        indicators:
+        - iter8-system/error-count
+        objectives:
+        - metric: iter8-system/mean-latency
+          upperLimit: "50.0"
+        - metric: iter8-system/error-rate
+          upperLimit: "0.0"
+        - metric: iter8-system/latency-95th-percentile
+          upperLimit: "100.0"
+      duration:
+        intervalSeconds: 1
+        iterationsPerLoop: 1
+      versionInfo:
+        # information about app versions used in this experiment
+        baseline:
+          name: my-app
+    ```    
+
+    The [`metrics/collect` task](../reference/tasks/metrics-collect.md) highlighted above is responsible for generating HTTP requests, sending them to the app's API end-point, receiving responses, and collecting metrics. The `objectives` stanza highlighted in the experiment above describes the SLOs that the app needs to satisfy in order to be deemed a winner.
+
 ## 3. Observe experiment
 The `iter8ctl` CLI makes it easy to observe experiment progress and outcomes.
 
-### Assert experiment outcomes
+### 3.a) Assert outcomes
 Assert that the experiment completed and found a winning version. Wait 20 seconds before trying the following command. If the assertions are not satisfied, try again after a few seconds.
 
 ```shell
+# assert that the experiment completed and found a winner
 iter8ctl assert -c completed -c winnerFound
 ```
 
-### Describe experiment
+### 3.b) Describe results
 Describe the results of the Iter8 experiment.
 
 ```shell
+# describe results of the experiment
 iter8ctl describe
 ```
 
-??? info "Experiment results will look similar to this ... "
+??? info "Sample experiment results"
     ```shell
     ****** Overview ******
     Experiment name: my-experiment
@@ -140,14 +187,15 @@ iter8ctl describe
     +--------------------------------------+--------+
     ```
 
-### Debug experiment
+### 3.c) Debug
 The `iter8ctl` debug command is especially useful in situations where the experiment failed to complete successfully, or produces an unexpected outcome (such as failure to find a winning version).
 
 ```shell
+# print Iter8logs are priority levels 1 (error), 2 (warning), and 3 (info)
 iter8ctl debug --priority 3
 ```
 
-??? info "Debugging output will look similar to this ... "
+??? info "Sample debugging output"
     ```yaml
     hello: world
     ```
