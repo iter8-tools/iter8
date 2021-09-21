@@ -40,7 +40,7 @@ Use [these instructions](../../getting-started/first-experiment.md#1a-verify-app
 
 ## 2. Create joint experiment
 ```shell
-helm upgrade -n default my-exp $ITER8/samples/chaos \
+helm upgrade -n default my-exp $ITER8/samples/deployments/chaos \
   --set appns='default' \
   --set applabel='app.kubernetes.io/name=hello' \
   --set URL='http://hello.default.svc.cluster.local:8080' \
