@@ -14,8 +14,8 @@ jobs:
     # setup pre-reqs
     - name: Checkout repository
       uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # fetch all commits/branches
+      # with:
+      #   fetch-depth: 0 # fetch all commits/branches
     - name: Setup Python
       uses: actions/setup-python@v1
       with:
