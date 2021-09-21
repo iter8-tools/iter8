@@ -72,8 +72,8 @@ kubectl apply -n default -f $ITER8/samples/deployments/httpbin/service.yaml
 Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
 helm upgrade -n default my-exp $ITER8/samples/first-exp \
-  --set URL='http://httpbin.default.svc.cluster.local:8080' \
-  --set payloadURL='http://payload.com' \
+  --set URL='http://httpbin.default.svc.cluster.local/post' \
+  --set payloadURL='https://raw.githubusercontent.com/sriumcp/iter8/post/samples/deployments/httpbin/payload.json' \
   --set contentType='application/json' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
@@ -81,7 +81,7 @@ helm upgrade -n default my-exp $ITER8/samples/first-exp \
   --install  
 ```
 
-The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates HTTP requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs. These HTTP requests are POST requests and use the JSON data from the `payloadURL` specified in the command as request payload.
 
 ??? note "View Iter8 experiment"
     View the Iter8 experiment as follows.
@@ -89,86 +89,26 @@ The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#wh
     helm get manifest -n default my-exp
     ```
 
-    There are two main aspects to this ... task and criteria.
+    Notice the `metrics/collect` task in the experiment manifest and also the `objectives` stanza that specifies SLOs.
 
 ## 3. Observe experiment
-Assert that the experiment completed and found a winning version. Wait 20 seconds before trying the following command. If the assertions are not satisfied, try again after a few seconds.
-
-```shell
-iter8ctl assert -c completed -c winnerFound
-```
-
-Describe the results of the Iter8 experiment. 
-```shell
-iter8ctl describe
-```
-
-??? info "Experiment results will look similar to this ... "
-    ```shell
-    ****** Overview ******
-    Experiment name: my-experiment
-    Experiment namespace: default
-    Target: my-app
-    Testing pattern: Conformance
-    Deployment pattern: Progressive
-
-    ****** Progress Summary ******
-    Experiment stage: Completed
-    Number of completed iterations: 1
-
-    ****** Winner Assessment ******
-    > If the version being validated; i.e., the baseline version, satisfies the experiment objectives, it is the winner.
-    > Otherwise, there is no winner.
-    Winning version: my-app
-
-    ****** Objective Assessment ******
-    > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-    +--------------------------------------+--------+
-    |              OBJECTIVE               | MY-APP |
-    +--------------------------------------+--------+
-    | iter8-system/mean-latency <=         | true   |
-    |                               50.000 |        |
-    +--------------------------------------+--------+
-    | iter8-system/error-rate <=           | true   |
-    |                                0.000 |        |
-    +--------------------------------------+--------+
-    | iter8-system/latency-95th-percentile | true   |
-    | <= 100.000                           |        |
-    +--------------------------------------+--------+
-
-    ****** Metrics Assessment ******
-    > Most recently read values of experiment metrics for each version.
-    +--------------------------------------+--------+
-    |                METRIC                | MY-APP |
-    +--------------------------------------+--------+
-    | iter8-system/mean-latency            |  1.233 |
-    +--------------------------------------+--------+
-    | iter8-system/error-rate              |  0.000 |
-    +--------------------------------------+--------+
-    | iter8-system/latency-95th-percentile |  2.311 |
-    +--------------------------------------+--------+
-    | iter8-system/request-count           | 40.000 |
-    +--------------------------------------+--------+
-    | iter8-system/error-count             |  0.000 |
-    +--------------------------------------+--------+
-    ``` 
+Observe the experiment as described [here](../../getting-started/first-experiment.md#3-observe-experiment).
 
 ## 4. Cleanup
 ```shell
 # remove experiment
 helm uninstall -n default my-exp
 # remove app
-kubectl delete -n default -f $ITER8/samples/deployments/app/service.yaml
-kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
+kubectl delete -n default -f $ITER8/samples/deployments/httpbin/service.yaml
+kubectl delete -n default -f $ITER8/samples/deployments/httpbin/deploy.yaml
 ```
 ***
 
 **Next Steps**
 
-!!! tip "Use with your app"
-    1. Run the above experiment with your app by setting the `URL` value in the Helm command to the URL of your app. 
+!!! tip "Use in your environment"
+    1. Run the above experiment with your app by setting the `URL` value in the Helm command to the URL of your app, and also by using a `payloadURL` that is appropriate for your application. You can run this experiment in any Kubernetes environment such as a dev, test, staging, or production cluster.
     
-    2. You can also customize the mean latency, error rate, and tail latency limits.
+    2. You can also customize the mean latency, error rate, and tail latency limits in the SLOs.
 
-    3. This experiment can be run in any Kubernetes environment such as a dev, test, staging, or production cluster.    
-
+    3. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. For example, you may have a stable version running in production, have a candidate version deployed in a staging environment, perform this experiment, ensure that the candidate is successful, and promote it as the latest stable version in a GitOps-y manner as described [here](../deployments/slo-validation-gitops.md).

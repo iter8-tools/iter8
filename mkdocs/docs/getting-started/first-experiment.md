@@ -212,7 +212,7 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 
 **Next Steps**
 
-!!! tip "Use with your app"
+!!! tip "Use in your environment"
     1. Run the above experiment with your app by setting the `URL` value in the Helm command to the URL of your app. You can run this experiment in any Kubernetes environment such as a dev, test, staging, or production cluster.
     
     2. You can also customize the mean latency, error rate, and tail latency limits in the SLOs.
