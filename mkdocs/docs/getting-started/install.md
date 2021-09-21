@@ -21,7 +21,7 @@ To pin Iter8 to a specific version during install, export the appropriate Iter8 
 ## Get `iter8ctl`
 Get `iter8ctl` CLI on your local machine as follows. This step requires [Go 1.16+](https://golang.org/doc/install).
 ```shell
-GO111MODULE=on GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8ctl@v0.1.6
+go install github.com/iter8-tools/etc3/iter8ctl@latest
 ```
 
 <!-- ## Pinning the Iter8 version

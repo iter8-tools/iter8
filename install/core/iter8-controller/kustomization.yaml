@@ -1,12 +1,12 @@
 resources:
 - etc3.yaml
 # to change Iter8 CRDs version, edit the next line
-- github.com/iter8-tools/etc3/config/crd/?ref=v0.1.31
+- github.com/iter8-tools/etc3/config/crd/?ref=v0.1.32
 
 images:
-- name: iter8/etc3:latest
+- name: iter8/controller:latest
   # to change etc3 version, edit the next line
-  newTag: 0.1.31
+  newTag: 0.1.32
 
 # even if you do not change the CRD, 
 # keep the two version numbers in sync to keep them the same

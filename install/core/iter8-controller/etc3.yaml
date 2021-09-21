@@ -20,7 +20,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: iter8/etc3:latest
+        image: iter8/controller:latest
         imagePullPolicy: Always
         name: manager
         env:
