@@ -14,8 +14,9 @@ jobs:
     # setup pre-reqs
     - name: Checkout repository
       uses: actions/checkout@v2
-      # with:
-      #   fetch-depth: 0 # fetch all commits/branches
+      with:
+        fetch-depth: 0 # fetch all commits/branches
+        ref: ${{ github.event.release.head.ref }}
     - name: Print ref
       run: echo ${{ github.ref }}
     - name: Setup Python
