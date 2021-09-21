@@ -14,7 +14,6 @@ hide:
     - Everyone is welcome to join our community meetings.
     - Our community meetings are on the 1st and 3rd Wednesdays of each month from 11 AM to 12 PM EST/EDT.
         * [Video conference link for community meetings](https://meet.google.com/ocg-bzoa-gqe)
-        * [Agenda](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing)
-        * [Meeting notes](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing)
-    - If you would like to present a demo or discuss a topic, please list it on the agenda along with a time estimate.
+    - If you want to discuss an Iter8-related topic, please feel free to do so in any Iter8 community meeting. 
+    - If you want to present a demo, please drop us a note in the Iter8 slack workspace (`#general` channel).
     - Community meetings are recorded and publicly available on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).

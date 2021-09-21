@@ -44,9 +44,10 @@ Not everything happens through a GitHub pull request. Please come to our
 invite to attend. In fact, we want you to join us, even if you don’t have
 anything you feel like you want to contribute. Just being there is enough!
 - Iter8 community meetings are on the 1st and 3rd Wednesdays of each month from 11 AM - 12 PM EST/EDT. You can find the video
-conference link [here](https://meet.google.com/ocg-bzoa-gqe). You can find the
-agenda [here](https://drive.google.com/drive/folders/1khHMD7JKt-kNAkbLgiIfwDbJYAhHMkyg?usp=sharing) as well as the meeting notes [here](https://drive.google.com/drive/folders/1rVrheoO-nfUI7JdPEgCqM39rl59KrPBk?usp=sharing).
-- If you would like to present a demo or discuss a topic, please list it on the agenda along with a time estimate. Community meetings are recorded and publicly available on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
+conference link [here](https://meet.google.com/ocg-bzoa-gqe). 
+- If you want to discuss an Iter8-related topic, please feel free to do so in any Iter8 community meeting. 
+- If you want to present a demo, please drop us a note in the Iter8 slack workspace (`#general` channel).
+- Community meetings are recorded and publicly available on our [YouTube channel](https://www.youtube.com/channel/UCVybpnQAhr1o-QRPHBNdUgg).
 
 ***
 
