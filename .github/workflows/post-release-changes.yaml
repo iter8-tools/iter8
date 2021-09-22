@@ -15,12 +15,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        fetch-depth: 0 # fetch all commits/branches
-        ref: refs/heads/master # checkout master branch instead of tagged release
-    - name: Setup Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}      
+        fetch-depth: 0 # fetch all commits for mike deploy
+        ref: refs/heads/master # checkout master branch to make pull request    
     - name: Get version
       run: |
         tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -40,18 +36,16 @@ jobs:
         python3 ./.github/workflows/change-install-version.py ${{ env.VERSION }}
         # Work around: YAML parser does not correctly dump tags ("!%21" instead of "!!")
         sed -i 's/!%21python/!!python/g' mkdocs/mkdocs.yml
-    - name: Git config
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v3
+      with: 
+        commit-message: Post release changes for ${{ env.VERSION }}
+        title: Post release changes for ${{ env.VERSION }}
+        body: Automated changes by [post-release-changes.yaml](https://github.com/iter8-tools/iter8/blob/master/.github/workflows/post-release-changes.yaml) workflow
+    - name: Update docs
       run: |
         git config --global user.name "Iter8"
         git config --global user.email iter8tools@gmail.com
-    - name: Commit changes
-      run: |
-        git add .
-        git commit -am "Post release changes for ${{ env.VERSION }}"
-        git push
-    - name: Update docs
-      run: |
         cd mkdocs
-        pip install --upgrade pip
         pip install -r requirements.txt
         mike deploy ${{ env.MAJOR_MINOR_VERSION }} latest -p -u

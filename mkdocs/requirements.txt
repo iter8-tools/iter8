@@ -1,3 +1,4 @@
+Jinja2>=2.11.1 # Bug with material: https://github.com/squidfunk/mkdocs-material/issues/2291#issuecomment-851465172
 markdown>=3.2
 mike>=1.0.1
 mkdocs>=1.2.2
