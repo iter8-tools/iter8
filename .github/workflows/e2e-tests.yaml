@@ -111,9 +111,9 @@ jobs:
           --set URL='http://httpbin.default.svc.cluster.local/post' \
           --set payloadURL='https://raw.githubusercontent.com/sriumcp/iter8/post/samples/deployments/httpbin/payload.json' \
           --set contentType='application/json' \
-          --set limitMeanLatency=50.0 \
+          --set limitMeanLatency=100.0 \
           --set limitErrorRate=0.0 \
-          --set limit95thPercentileLatency=100.0 \
+          --set limit95thPercentileLatency=200.0 \
           --install
 
     - name: Wait until end of experiment and dump experiment
