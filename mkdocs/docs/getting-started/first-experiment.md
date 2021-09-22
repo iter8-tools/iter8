@@ -195,9 +195,10 @@ The `iter8ctl` debug command is especially useful in situations where the experi
 iter8ctl debug --priority 3
 ```
 
-??? info "Sample debugging output"
-    ```yaml
-    hello: world
+??? info "Sample output from iter8ctl debug"
+    ```
+    Debugging experiment slo-validation-rsuq7 in namespace default
+    source: task-runner priority: 3 message: metrics collection completed for all versions
     ```
 
 ## 4. Cleanup
