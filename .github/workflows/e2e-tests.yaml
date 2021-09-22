@@ -70,6 +70,127 @@ jobs:
     - name: Check if experiment is complete and found a winner
       run: iter8ctl assert -c completed -c winnerFound
 
+  slo-validation-with-post:
+    name: SLO validation with POST requests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - run: go version
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"
+
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/setup/iter8-setup.sh
+
+    - name: Get iter8ctl
+      run: go install github.com/iter8-tools/etc3/iter8ctl@latest
+
+    - name: Get Helm
+      uses: azure/setup-helm@v1
+
+    - name: create application
+      run: |
+        export ITER8=$(pwd)
+        kubectl apply -n default -f $ITER8/samples/deployments/httpbin/deploy.yaml
+        kubectl apply -n default -f $ITER8/samples/deployments/httpbin/service.yaml
+
+    - name: create Iter8 experiment
+      run: |
+        export ITER8=$(pwd)
+        helm upgrade -n default my-exp $ITER8/samples/deployments/payload \
+          --set URL='http://httpbin.default.svc.cluster.local/post' \
+          --set payloadURL='https://raw.githubusercontent.com/sriumcp/iter8/post/samples/deployments/httpbin/payload.json' \
+          --set contentType='application/json' \
+          --set limitMeanLatency=100.0 \
+          --set limitErrorRate=0.0 \
+          --set limit95thPercentileLatency=200.0 \
+          --install
+
+    - name: Wait until end of experiment and dump experiment
+      run: |
+        export EXPERIMENT=$(kubectl get experiment -o jsonpath='{.items[0].metadata.name}')
+        kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
+        kubectl get experiment $EXPERIMENT -o yaml
+    
+    - name: Check if experiment is complete and found a winner
+      run: iter8ctl assert -c completed -c winnerFound
+
+  # the following job demonstrates and tests 
+  # dark launch with SLO validation for a Knative hello world application
+  # it uses Helm for packaging the application along with Iter8 experiment
+  slovalidation-helmex-knative:
+    name: SLO validation experiment for Knative application using Helm
+    runs-on: ubuntu-latest
+    steps:
+    # install Go locally
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16    
+    # checkout the Git repo
+    - name: Checkout repository
+      uses: actions/checkout@v2    
+    # set up a local Kubernetes cluster using Kind for testing purposes
+    - uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.11.1"
+    # install Iter8 in the K8s cluster
+    # install Knative with Kourier networking layer in the K8s cluster
+    - name: platform setup
+      run: |
+        export ITER8=$(pwd)
+        $ITER8/samples/setup/iter8-setup.sh
+        $ITER8/samples/knative/quickstart/platform-setup.sh
+    # get iter8ctl;
+    # among other things, this Iter8 CLI can help verify that 
+    # the experiment completed successfully.
+    - name: Get iter8ctl
+      run: go install github.com/iter8-tools/etc3/iter8ctl@latest
+    # install Helm locally
+    - name: Get Helm
+      uses: azure/setup-helm@v1
+    # create baseline version of Knative hello world application
+    - name: create baseline version
+      run: |
+        export ITER8=$(pwd)
+        cd $ITER8/helm/knslo
+        helm dependency update
+        helm install my-app . \
+          --set baseline.dynamic.tag="1.0" \
+          --set baseline.dynamic.id="v1" \
+          --set candidate=null
+    - name: wait for baseline version to be ready
+      run: kubectl wait ksvc/hello --for=condition=Ready
+    # create candidate version of the Knative hello world application
+    # this step also creates an Iter8 experiment to validate the candidate version
+    - name: create candidate version
+      run: |
+        export ITER8=$(pwd)
+        cd $ITER8/helm/knslo
+        helm upgrade my-app . \
+          --set baseline.dynamic.tag="1.0" \
+          --set baseline.dynamic.id="v1" \
+          --set candidate.dynamic.tag="2.0" \
+          --set candidate.dynamic.id="v2" \
+          --install
+    - name: Wait until end of experiment and print experiment yaml
+      run: |
+        export EXPERIMENT=$(kubectl get experiment -o jsonpath='{.items[0].metadata.name}')
+        kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=300s
+        kubectl get experiment $EXPERIMENT -o yaml
+    - name: Check if experiment is complete and found a winner
+      run: iter8ctl assert -c completed -c winnerFound
+
   knative-slovalidation:
     name: knative slovalidation experiment
     runs-on: ubuntu-latest
@@ -277,7 +398,7 @@ jobs:
           # Apply experiment
           kubectl apply -f $ITER8/samples/e2e-tests/race-condition/experiment.yaml
           # Wait for experiment to complete
-          kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=20s
+          kubectl wait experiment $EXPERIMENT --for=condition=Completed --timeout=30s
           # Check experiment results are correct
           source $ITER8/samples/e2e-tests/race-condition/check.sh
 

@@ -15,10 +15,10 @@ spec:
       - task: metrics/collect
         with:
           time: "10s"
+          qps: 8
           versions:
           - name: iter8-app-candidate # this name must match the name of a version in versionInfo
             url: "http://iter8-app-candidate.default.svc.cluster.local:8000"
-            qps: 8
       # when the experiment completes, promote the winning version in the Env repo
       finish:
       - task: notification/http

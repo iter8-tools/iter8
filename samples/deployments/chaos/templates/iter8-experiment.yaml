@@ -33,10 +33,10 @@ spec:
       - task: metrics/collect
         with:
           time: 30s
+          qps: 8.0
           versions:
           - name: new-version # this name must match the name of a version in versionInfo
             url: "{{ .Values.URL }}"
-            qps: 8.0
   criteria:
     requestCount: iter8-system/request-count
     indicators:

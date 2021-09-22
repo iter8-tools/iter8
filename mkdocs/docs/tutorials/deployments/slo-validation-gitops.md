@@ -11,12 +11,12 @@ template: main.html
     ![SLO Validation GitOps](../../images/slo-validation-gitops.png)
 
 ??? warning "Setup Kubernetes cluster and local environment"
-    0. If you completed the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) (highly recommended), you may skip the remaining steps of setup.
-    1. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
-    2. [Install Iter8 in K8s cluster](../../getting-started/install.md)
-    3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
-    4. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
-    5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
+    1. If you completed the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) (highly recommended), you may skip the remaining steps of setup.
+    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    3. [Install Iter8 in K8s cluster](../../getting-started/install.md)
+    4. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
+    5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
+    6. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the `ITER8` environment variable as follows.
     ```shell
     export USERNAME=<your GitHub username>
     ```
@@ -80,7 +80,7 @@ helm upgrade -n staging my-exp $ITER8/samples/slo-gitops \
   --install
 ```
 
-The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, and verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs. 
+The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, and verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs. 
 
 In the above command, the *USERNAME* environment variable was defined during setup. After the Iter8 experiment validates SLOs for the candidate, it uses the GitHub token (also provided during setup) to promote the candidate to production using a GitHub pull-request.
 

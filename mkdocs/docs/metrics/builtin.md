@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Built-in latency/error metrics"    
     Iter8 ships with a set of nine built-in metrics that measure your application's performance in terms of latency and errors. You can collect and use these metrics in experiments without the need to configure any external databases. 
     
-    This feature enables you to get started with Iter8 experiments, especially, SLO validation experiments, quickly. As part of metrics collection, Iter8 will also generate HTTP requests to the application end-point.
+    This feature enables you to get started with Iter8 experiments, especially, SLO validation experiments, quickly. As part of metrics collection, Iter8 will also generate HTTP requests to the application endpoint.
 
 ## List of built-in metrics
 The following are the set of built-in Iter8 metrics.

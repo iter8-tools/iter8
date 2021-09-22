@@ -12,8 +12,10 @@ spec:
       start:
       - task: metrics/collect
         with:
-          time: {{ required ".Values.time is required!" .Values.time | quote }}
+          numQueries: {{ required ".Values.numQueries is required!" .Values.numQueries }}
           qps: {{ required ".Values.QPS is required!" .Values.QPS }}
+          payloadURL: {{ required ".Values.payloadURL is required!" .Values.payloadURL }}
+          contentType: {{ required ".Values.contentType is required!" .Values.contentType }}
           versions:
           - name: my-app
             url: {{ required ".Values.URL is required!" .Values.URL | quote }}
