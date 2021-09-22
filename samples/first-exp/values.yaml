@@ -3,7 +3,7 @@
 # URL of the application for which this SLO validation experiment is performed
 # URL: https://example.com
 
-# The duration for which Iter8 will send requests to the app
+# The duration for which Iter8 will send requests to app
 time: 5s
 
 # Queries per second used by Iter8 for sending requests
