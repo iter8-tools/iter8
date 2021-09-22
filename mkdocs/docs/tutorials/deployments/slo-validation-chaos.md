@@ -76,7 +76,7 @@ iter8ctl assert -c completed
 Due to chaos injection, and the fact that the number of replicas of the app in the deployment manifest is set to 1, the SLOs are not expected to be satisfied during this experiment. Verify this is the case.
 ```shell
 # this assertion is expected to fail
-iter8ctl assert -c winnerFound
+iter8ctl assert -c completed -c winnerFound
 ```
 
 [Describe](../../getting-started/first-experiment.md#3b-describe-results) and [debug](../../getting-started/first-experiment.md#3c-debug) the Iter8 experiment.
@@ -93,7 +93,7 @@ Retry steps 2 and 3 above. You should now find that SLOs are satisfied and a win
 
 ```shell
 # this assertion is expected to succeed
-iter8ctl assert -c winnerFound
+iter8ctl assert -c completed -c winnerFound
 ```
 
 ## 5. Cleanup
