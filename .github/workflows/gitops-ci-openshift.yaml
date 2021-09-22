@@ -1,0 +1,31 @@
+name: Simulate CI pipeline on Openshift
+
+on:
+  workflow_dispatch:
+
+jobs:
+  CI_pipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: create candidate and experiment
+      run: |
+        export ENV="$(pwd)/samples/openshift/gitops"
+        export RANDOM=$(od -An -N4 -i /dev/random)
+
+        # give experiment a random name so CI triggers new experiment each time a new app version is available
+        sed "s|name: gitops-exp|name: gitops-exp-$RANDOM|" $ENV/templates/experiment.yaml > $ENV/experiment.yaml
+
+        # use a random color for a new experiment candidate
+        declare -a colors=("red" "orange" "blue" "green" "yellow" "violet" "brown")
+        color=${colors[$RANDOM % ${#colors[@]} ]}
+        sed "s|value: COLOR|value: \"${color}\"|" $ENV/templates/productpage-candidate.yaml > $ENV/productpage-candidate.yaml
+
+    - name: git add and commit
+      #https://github.com/marketplace/actions/add-commit
+      uses: EndBug/add-and-commit@v7
+      with:
+          message: "Iter8 experiment"
+          add: '-A'

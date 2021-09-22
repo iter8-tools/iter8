@@ -1,0 +1,28 @@
+# This role enables reading secrets;
+# Iter8 handler uses this role to read github tokens stored as k8s secret
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: secret-reader
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+---
+# This role binding enables Iter8 handler to read secrets in the default namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-handler
+  namespace: default
+roleRef:
+  kind: Role
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: iter8-handlers
+  namespace: iter8-system
+  apiGroup: ""
+---
