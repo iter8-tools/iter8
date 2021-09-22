@@ -23,7 +23,7 @@ start:
 ## Inputs
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| numQueries | int | number of requests sent to each version. Default value is 100. | No |
+| numQueries | int | number of requests to be sent to each version. Default value is 100. | No |
 | time | string | Duration of the `metrics/collect` task run. Specified in the [Go duration string format](https://golang.org/pkg/time/#ParseDuration) (example, `5s`). If both `time` and `numQueries` are specified, then `time` is ignored. | No |
 | qps | float | Number of queries *per second* sent to each version. Default is 8.0. Setting this to 0 will maximizes query load without any wait time between queries. | No |
 | connections | int | Number of parallel connection used for sending queries. Default is 4. | No |
