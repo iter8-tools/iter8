@@ -92,10 +92,10 @@ The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-
           - task: metrics/collect
             with:
               time: "5s"
+              qps: 8
               versions:
               - name: my-app
                 url: "http://hello.default.svc.cluster.local:8080"
-                qps: 8
       criteria:
         requestCount: iter8-system/request-count
         indicators:

@@ -13,10 +13,10 @@ spec:
       - task: metrics/collect
         with:
           time: {{ .Values.Time | quote }}
+          qps: {{ .Values.QPS }}
           versions:
           - name: my-app
             url: {{ .Values.URL | quote }}
-            qps: {{ .Values.QPS }}
   criteria:
     requestCount: iter8-system/request-count
     indicators:

@@ -13,10 +13,10 @@ spec:
       - task: metrics/collect
         with:
           time: {{ required ".Values.time is required!" .Values.time | quote }}
+          qps: {{ required ".Values.QPS is required!" .Values.QPS }}
           versions:
           - name: my-app
             url: {{ required ".Values.URL is required!" .Values.URL | quote }}
-            qps: {{ required ".Values.QPS is required!" .Values.QPS }}
   criteria:
     requestCount: iter8-system/request-count
     indicators:

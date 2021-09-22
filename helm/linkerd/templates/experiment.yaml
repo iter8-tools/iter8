@@ -41,10 +41,10 @@ spec:
       - task: metrics/collect
         with:
           time: {{required ".Values.experiment.time is required!" .Values.experiment.time | quote }}
+          qps: {{required ".Values.experiment.QPS is required!" .Values.experiment.QPS }}
           versions:
           - name: new-version # this name must match the name of a version in versionInfo
             url: "http://{{ .Values.baseline.name }}.{{ .Release.Namespace }}:{{ .Values.common.servicePortInfo.port }}"
-            qps: {{required ".Values.experiment.QPS is required!" .Values.experiment.QPS }}
   criteria:
     rewards:
     # (business) reward metric to optimize in this experiment

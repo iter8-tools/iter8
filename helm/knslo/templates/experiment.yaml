@@ -36,13 +36,13 @@ spec:
       - task: metrics/collect
         with:
           time: {{required ".Values.experiment.time is required!" .Values.experiment.time | quote }}
+          qps: {{ .Values.experiment.QPS }}
           versions:
           # the name below must match a versionName in the versionInfo section
           - name: new-version
             # this route relies on the fact that the candidate revision is tagged
             # candidate in the traffic section of the ksvc
             url: "http://candidate-{{ .Values.common.application }}.{{ .Release.Namespace }}"
-            qps: {{ .Values.experiment.QPS }}
   criteria:
     requestCount: iter8-system/request-count
     indicators:
