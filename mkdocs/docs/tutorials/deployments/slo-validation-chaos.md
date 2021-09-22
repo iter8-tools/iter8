@@ -8,12 +8,12 @@
     ![Chaos with SLO Validation](../../images/chaos-slo-validation.png)
 
 ??? warning "Setup Kubernetes cluster and local environment"
-    0. Complete the [getting started tutorial](../../getting-started/first-experiment.md) (highly recommended), and skip to step 7 below.
-    1. Setup [Kubernetes cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
-    2. [Install Iter8 in Kubernetes cluster](../../getting-started/install.md)
-    3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
-    4. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
-    5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
+    1. Complete the [getting started tutorial](../../getting-started/first-experiment.md) (highly recommended), and skip to step 7 below.
+    2. Setup [Kubernetes cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    3. [Install Iter8 in Kubernetes cluster](../../getting-started/install.md)
+    4. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
+    5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
+    6. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
     ```shell
     export USERNAME=<your GitHub username>
     ```
@@ -22,7 +22,7 @@
     cd iter8
     export ITER8=$(pwd)
     ```
-    6. Install [Litmus](https://litmuschaos.io/) in Kubernetes cluster.
+    7. Install [Litmus](https://litmuschaos.io/) in Kubernetes cluster.
     ```shell
     kubectl apply -f https://litmuschaos.github.io/litmus/litmus-operator-v1.13.8.yaml
     ```

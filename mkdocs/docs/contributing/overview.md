@@ -39,7 +39,7 @@ Not everything happens through a GitHub pull request. Please come to our
 
 *** 
 
-## [Come to Iter8 Community Meetings!](../getting-started/help.md#iter8-community-meetings)
+## Come to [Iter8 Community Meetings](../getting-started/help.md#iter8-community-meetings)!
 
 ***
 

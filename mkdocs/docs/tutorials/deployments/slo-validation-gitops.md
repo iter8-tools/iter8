@@ -11,12 +11,12 @@ template: main.html
     ![SLO Validation GitOps](../../images/slo-validation-gitops.png)
 
 ??? warning "Setup Kubernetes cluster and local environment"
-    0. If you completed the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) (highly recommended), you may skip the remaining steps of setup.
-    1. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
-    2. [Install Iter8 in K8s cluster](../../getting-started/install.md)
-    3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
-    4. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
-    5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
+    1. If you completed the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) (highly recommended), you may skip the remaining steps of setup.
+    2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    3. [Install Iter8 in K8s cluster](../../getting-started/install.md)
+    4. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
+    5. Get [`iter8ctl`](../../getting-started/install.md#install-iter8ctl)
+    6. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
     ```shell
     export USERNAME=<your GitHub username>
     ```
