@@ -65,7 +65,7 @@ helm upgrade -n default my-exp $ITER8/samples/first-exp \
   --install  
 ```
 
-The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency SLO (100 msec) SLOs.
+The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs.
 
 ### 2.a) View manifest
 ??? note "View Iter8 experiment manifest using these instructions"
