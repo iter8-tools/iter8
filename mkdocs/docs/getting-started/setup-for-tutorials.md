@@ -33,7 +33,7 @@ Use a managed K8s cluster or a local K8s cluster for running Iter8 tutorials. Yo
         ```
 
 ## Iter8 GitHub repo
-Clone the Iter8 GitHub repo and set the ITER8 environment variable as follows:
+Clone the Iter8 GitHub repo and set the `ITER8` environment variable as follows:
 
 ```shell
 git clone https://github.com/iter8-tools/iter8.git

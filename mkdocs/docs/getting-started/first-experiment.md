@@ -16,7 +16,7 @@ template: main.html
     2. [Install Iter8 in Kubernetes cluster](install.md)
     3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
     4. Get [`iter8ctl`](install.md#get-iter8ctl)
-    5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the ITER8 environment variable as follows.
+    5. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the `ITER8` environment variable as follows.
     ```shell
     export USERNAME=<your GitHub username>
     ```
