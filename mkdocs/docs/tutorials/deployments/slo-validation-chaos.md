@@ -109,7 +109,7 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 
 **Next Steps**
 
-???+ tip "Use in your environment, and try other types of Chaos"
+???+ tip "Try in your environment, and try other types of Chaos"
     1. You can replace the `hello` app used in this tutorial with your own application. 
         * Modify [Step 1](#1-create-app) to use your service and deployment. 
         * Modify [Step 2](#2-create-joint-experiment) by supplying the correct namespace and label for your app, and also the correct URL where the app receives requests.
