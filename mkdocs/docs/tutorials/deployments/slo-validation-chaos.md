@@ -109,8 +109,10 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 
 **Next Steps**
 
-???+ tip "Use with your own app, and try other types of Chaos"
-    1. You can easily replace the `hello` app used in this tutorial with your own application. a) Modify [Step 1](#1-create-app) to use your service and deployment. b) Modify [Step 2](#2-create-joint-experiment) by supplying the correct namespace and label for your app, and also the correct URL where the app receives requests.
+???+ tip "Use in your environment, and try other types of Chaos"
+    1. You can replace the `hello` app used in this tutorial with your own application. 
+        * Modify [Step 1](#1-create-app) to use your service and deployment. 
+        * Modify [Step 2](#2-create-joint-experiment) by supplying the correct namespace and label for your app, and also the correct URL where the app receives requests.
 
     2. Litmus makes it possible to inject [over 51 types of Chaos](https://hub.litmuschaos.io/). Modify the Helm chart to use any of these other types of chaos experiments.
 
