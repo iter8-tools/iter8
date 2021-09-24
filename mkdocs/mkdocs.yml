@@ -33,7 +33,7 @@ theme:
   palette:
   - scheme: default
     primary: black
-    accent: indigo
+    accent: deep purple
   font:
     text: Roboto
     code: Roboto Mono
