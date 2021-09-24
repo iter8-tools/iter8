@@ -3,7 +3,7 @@ site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
   SLO validation, A/B(/n) testing with business metrics, chaos injection, and 
-  progressive rollouts. Use in any Kubernetes environment. Use within any CI/CD/GitOps process. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, and more. Quick start in 5 mins.
+  progressive rollouts. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, and more. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
