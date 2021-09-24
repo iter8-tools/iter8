@@ -2,8 +2,8 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 is the release engineering platform for Kubernetes. SLO validation, A/B testing
-  with business reward metrics, and progressive rollouts. Quick start in 5 mins.
+  SLO validation, A/B and A/B/n testing with business metrics, chaos injection, and 
+  progressive rollout with advanced traffic engineering. Use within any CI/CD/GitOps process. Use in any Kubernetes environment. Integrate easily with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, and more. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -69,7 +69,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: SLO validation, A/B testing, and progressive rollouts
+  title: Cloud Native Release Engineering
   version:
     provider: mike
   social:
