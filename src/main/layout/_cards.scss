@@ -1,8 +1,27 @@
-.feature-item h2 svg {
-    height: 30px;
+// Scoped in typesetted content to match specificity of regular content
+.cards {
+  .md-typeset {
+    // Emoji and icon container
+    .emojione,
+    .twemoji,
+    .gemoji {
+      display: inline-flex;
+      height: px2em(75px);
+      vertical-align: text-top;
+
+      // Icon - inlined via mkdocs-material-extensions
+      svg {
+        width: px2em(75px);
+        max-height: 100%;
+        fill: currentColor;
+      }
+    }
+  }
+}
+
+.feature-item span {
     float: left;
-    margin-right: 10px;
-    transform: translateY(10%);
+    display: block;
 }
 
 .top-hr {
@@ -20,7 +39,7 @@
 .feature-item h2 {
     color: #333;
     font-weight: 300;
-    font-size: 30px;
+    // font-size: 40px;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     // margin: 0 0 10px;
@@ -30,7 +49,7 @@
     // text-overflow: ellipsis;
     line-height: normal;
     margin-top: 10px;
-    // margin-bottom: 10px;
+    margin-bottom: 8px;
     font-family: inherit;
 
     // Adjust for slate theme
@@ -40,8 +59,8 @@
 }
 
 .feature-item p {
-    font-size: 18px;
-    line-height: 1.8em;
+    // font-size: 22px;
+    // line-height: 1.8em;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     color: #111;
@@ -81,11 +100,11 @@
     }
 
     .feature-item {
-        width: 33%;        
+        width: 49%;        
     }
 
     .feature-item:hover {
-        background-color: #526cfe47;
+        background-color: #fecfc780;
         border-radius: 3px;
 
         // Adjust for slate theme
@@ -117,42 +136,19 @@
     [data-md-color-scheme="default"] & {
         background: linear-gradient(
             to bottom,
-            rgba(245, 229, 255, 0.99),
-            rgba(255, 255, 255, 1.0),
-            rgba(255, 255, 255, 1.0),
-            rgba(255, 240, 240, 0.99),
-        );
+            rgb(247, 241, 251) 1%,
+            rgb(251, 238, 238),
+            );
     }
-
-    // Adjust background for slate theme
-    // [data-md-color-scheme="slate"] & {
-    //     background: linear-gradient(
-    //         to bottom,
-    //         rgba(193, 2, 97, 0.9),
-    //         rgba(166, 63, 217, 0.9),
-    //       );
-    //   }
-
 }
 
 .tx-container {
-    background: linear-gradient(
-        to bottom,
-        var(--md-primary-fg-color),
-        hsla(280, 67%, 55%, 1) 99%,
-        var(--md-default-bg-color) 99%
-      );
-  
-    // Adjust background for slate theme
-    [data-md-color-scheme="slate"] & {
-      background: linear-gradient(
-          to bottom,
-          var(--md-primary-fg-color),
-          hsla(280, 67%, 55%, 1) 99%,
-          var(--md-default-bg-color) 99%
-        );
-    }
-
+    background: 
+    linear-gradient(
+      to bottom,
+      hsla(0, 96%, 41%, 1),
+      rgb(67, 1, 149) 99%,
+    );
 
     .tx-hero {
         color: var(--md-primary-bg-color);
