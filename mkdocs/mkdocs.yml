@@ -2,8 +2,9 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  SLO validation, A/B(/n) testing with business metrics, chaos injection, and 
-  progressive rollouts. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, and more. Quick start in 5 mins.
+  SLO validation, A/B(/n) testing with business metrics, chaos injection, and  progressive
+  rollouts. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon,
+  and more. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -70,7 +71,7 @@ extra:
     link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
 
   iter8:
-    install_version: v0.7.21
+    install_version: 0.7.25
 
 # Extensions
 markdown_extensions:
@@ -126,7 +127,7 @@ nav:
 - Tutorials:
   - Kubernetes deployments:
     - SLO validation with Payload: tutorials/deployments/slo-validation-payload.md
-    - SLO validation with Chaos:  tutorials/deployments/slo-validation-chaos.md
+    - SLO validation with Chaos: tutorials/deployments/slo-validation-chaos.md
     - SLO validation with GitOps: tutorials/deployments/slo-validation-gitops.md
   - KFServing:
     - Quick start: tutorials/kfserving/quick-start.md
