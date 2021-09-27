@@ -4,7 +4,7 @@ site_author: Srinivasan Parthasarathy
 site_description: >-
   SLO validation, A/B(/n) testing with business metrics, chaos injection, and  progressive
   rollouts. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon,
-  and more. Quick start in 5 mins.
+  and more.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -61,7 +61,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Cloud Native Release Engineering
+  title: Cloud Native Release Engineering Platform
   version:
     provider: mike
   social:
