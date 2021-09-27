@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Scenario: Safely rollout new version of a Knative app with SLO validation"
     [Dark launch](../../concepts/buildingblocks.md#dark-launch) a candidate version of your Knative application, [validate that the candidate satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation), and promote the candidate.
     
-    This tutorial illustrates the [Helm based Iter8 experiment pattern](../../concepts/whatisiter8.md#iter8-and-helm).
+    This tutorial illustrates the [Helm-based experiment pattern](../../concepts/whatisiter8.md#iter8-and-helm).
     
     ![SLO validation](../../images/yourfirstexperiment.png)
 
