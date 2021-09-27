@@ -13,8 +13,8 @@ Iter8 defines a Kubernetes resource called **Experiment** that automates SLO val
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
 
-## What is Helmex?
-Helmex, short for Helm-based experiments, is an Iter8 experimentation pattern that uses Helm. In Helmex, the Helm values file used for managing the application releases satisfy the [Helmex schema](../reference/helmex-schema.md).
+## Iter8 and Helm
+While Helm is not a requirement for using Iter8, many Iter8 experiments are templated and packaged in the form of Helm charts for easy reusability.
 
 ## How does Iter8 work?
 

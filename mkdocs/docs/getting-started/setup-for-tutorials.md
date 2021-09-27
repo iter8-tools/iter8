@@ -41,7 +41,7 @@ export ITER8=./iter8
 ```
 
 ## Iter8 Helm repo
-Iter8 Helm repo contains charts that support Iter8's Helmex tutorials. Get the repo as follows:
+Iter8 Helm repo contains charts that support Iter8's Helm-based tutorials. Get the repo as follows:
 
 ```shell
 helm repo add iter8 https://iter8-tools.github.io/iter8/ --force-update

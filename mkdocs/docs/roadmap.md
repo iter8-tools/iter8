@@ -20,6 +20,8 @@ hide:
     * Integration with ArgoCD, Flux and other GitOps operators
 5. **Enhancing Kubernetes and OpenShift integration**
     * Support for OpenShift runtimes
+    * Support for progressive rollout of statefulsets
+    * Support for distributed Helm applications
     * Enhanced Knative metrics in tutorials using OpenTelemetry collector
 6. **Git triggered workflows and CI/CD**
     * Integration with GitHub Actions and other pipeline providers

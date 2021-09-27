@@ -66,20 +66,38 @@
 
       <!-- Hero image -->
       <div class="mdx-hero__image">
-        <img src="{{ base_url }}/images/illustration.png" alt="" width="2630" height="1411" draggable="false">
+        <img src="{{ base_url }}/images/illustration.png" alt="" width="2429" height="701" draggable="false">
       </div>
 
       <!-- Hero content -->
       <div class="mdx-hero__content">
-        <h1><strong>Cloud Native Release Engineering</strong></h1>
+        <h1><strong>Cloud Native Release Engineering Platform</strong></h1>
 
-        <h2>SLO validation, A/B(/n) testing with business metrics, chaos injection, and 
-          progressive rollouts.</h2>
+        <h3>Iter8 enables DevOps/MLOps/SRE teams to validate and safely release new app versions.</h3>
+          
+        <h3>Easily implement SLO validation, A/B(/n) testing with business metrics, chaos injection, dark launch, canaries, and progressive rollouts.</h3>
          
-        <a href="{{ base_url }}/getting-started/first-experiment/" title="Quick start in 5 mins"
+        <a href="{{ base_url }}/getting-started/first-experiment/" title="Quick start"
           class="md-button md-button--primary">
-          Quick start in 5 mins
+          Quick start
         </a>
+
+        <a href="{{ base_url }}/getting-started/first-experiment/" title="Quick start"
+        class="md-button md-button--info">
+          <span class="twemoji">
+            {% include ".icons/material/star.svg" %}
+          </span>
+          Star
+        </a>
+
+        <a href="{{ base_url }}/getting-started/first-experiment/" title="Quick start"
+          class="md-button md-button--info">
+          <span class="twemoji">
+            {% include ".icons/material/source-fork.svg" %}
+          </span>
+          Fork
+        </a>
+
       </div>
     </div> 
     <!-- Hero ^^ -->
@@ -91,7 +109,6 @@
 
 <section class="cards">
   <div class="md-grid md-typeset">
-    <h1><strong>Features</strong></h1>
     <!-- Main site box descriptions -->
     <div class="top-hr">
 
@@ -99,98 +116,85 @@
         <span class="twemoji" style="color:rgba(130, 28, 0, 0.9)">
           {% include ".icons/material/atom.svg" %}
         </span>
-        <h2 style="color:rgba(60, 13, 0, 0.9)">
-          Declarative Experiments
-        </h2>
-        <p>
-          Iter8 experiments enable SLO validation, A/B(/n) testing for optimizing business reward metrics, chaos testing, progressive rollouts with advanced traffic engineering, and their hybrids.
-        </p>
+        <div class="card-text">
+          <h2 style="color:rgba(60, 13, 0, 0.9)">
+            Declarative Experiments
+          </h2>
+          <h3>
+            Iter8 experiments enable SLO validation, A/B(/n) testing for optimizing business reward metrics, chaos testing, progressive rollouts with advanced traffic engineering, and their hybrids.
+          </h3>  
+        </div>
       </div>
 
       <div class="feature-item">
         <span class="twemoji" style="color:rgba(120, 76, 0, 0.9)">
           {% include ".icons/material/apps.svg" %}
         </span>
-        <h2 style="color:rgba(62, 39, 0, 0.9)">
-          Diverse App Frameworks
-        </h2>
-        <p>
-          Experiment with Kubernetes deployments, Helm releases, Knative (serverless) services, KFServing (ML) inference services, Seldon (ML) deployments, and more.
-        </p>
+        <div class="card-text">
+          <h2 style="color:rgba(62, 39, 0, 0.9)">
+            Diverse App Frameworks
+          </h2>
+          <h3>
+            Experiment with Kubernetes deployments, Helm releases, Knative (serverless) services, KFServing (ML) inference services, Seldon (ML) deployments, and more.
+          </h3>
+        </div>
       </div>
 
       <div class="feature-item">
         <span class="twemoji" style="color:rgba(13, 125, 0, 0.9)">
           {% include ".icons/material/database.svg" %}
         </span>
-        <h2 style="color:rgba(6, 62, 0, 0.9)">
-          Builtin/Custom Metrics
-        </h2>
-        <p>
-          Iter8 can generate HTTP GET/POST requests and collect latency and error related metrics. Experiments can also use custom metrics from any DB like Prometheus, Elastic, NewRelic, and Sysdig.
-        </p>
+        <div class="card-text">
+          <h2 style="color:rgba(6, 62, 0, 0.9)">
+            Built-in/Custom Metrics
+          </h2>
+          <h3>
+            Iter8's built-in metrics collection feature can be used to generate synthetic HTTP GET/POST requests and collect latency and error related metrics for apps. If you collect metrics metrics for your app in Prometheus, Elastic, NewRelic, Sysdig, or any other DB, you can use them in Iter8 experiments using Iter8's Custom metrics feature.
+          </h3>
+        </div>
       </div>
 
       <div class="feature-item">
         <span class="twemoji" style="color:rgba(0, 125, 81, 0.9)">
           {% include ".icons/material/call-split.svg" %}
         </span>
-        <h2 style="color:rgba(0, 63, 41, 0.9)">
-          Traffic Engineering
-        </h2>
-        <p>
-          Experiments can use any feature provided by the ingress or service mesh in your cluster like traffic mirroring, splitting traffic splitting based on percentage, headers, or cookies, and session affinity.
-        </p>
+        <div class="card-text">
+          <h2 style="color:rgba(0, 63, 41, 0.9)">
+            Traffic Engineering
+          </h2>
+          <h3>
+            Iter8 experiments co-exist with ingress or service mesh resources in your cluster and can leverage any features provided by them. Run experiments with traffic mirroring, traffic split based on percentage, headers, or cookies, and session affinity.
+          </h3>
+        </div>
       </div>
-
-      <!-- <div class="feature-item">
-        <span class="twemoji" style="color:rgba(0, 81, 125, 0.9)">
-          {% include ".icons/material/fire.svg" %}
-        </span>
-        <h2 style="color:rgba(1, 38, 58, 0.9)">
-          Chaos Injection
-        </h2>
-        <p>
-          Industry leading AI-driven Bayesian algorithms for version assessment and traffic shifting.
-        </p>
-      </div>
-
-      <div class="feature-item">
-        <span class="twemoji" style="color:rgba(16, 0, 120, 0.9)">
-          {% include ".icons/material/hexagon-multiple.svg" %}
-        </span>
-        <h2 style="color:rgba(8, 0, 62, 0.9)">
-          Auto Scaling
-        </h2>
-        <p>
-          Industry leading AI-driven Bayesian algorithms for version assessment and traffic shifting.
-        </p>
-      </div> -->
       
       <div class="feature-item">
         <span class="twemoji" style="color:rgba(91, 0, 121, 0.9)">
           {% include ".icons/material/transit-connection-variant.svg" %}
         </span>
-        <h2 style="color:rgba(45, 1, 60, 0.9)">
-          CI/CD/GitOps
-        </h2>
-        <p>
-          Experiments can send HTTP notifications. They can also automatically create git pull requests. Embed them within any CI/CD/GitOps process for promoting new app versions.
-        </p>
+        <div class="card-text">
+          <h2 style="color:rgba(45, 1, 60, 0.9)">
+            CI/CD/GitOps
+          </h2>
+          <h3>
+            Experiments can send HTTP notifications. They can also create git pull requests. Embed them within any CI/CD/GitOps process for promoting new app versions.
+          </h3>
+        </div>
       </div>
 
       <div class="feature-item">
         <span class="twemoji" style="color:rgba(125, 0, 52, 0.9)">
           {% include ".icons/material/cog-transfer-outline.svg" %}
         </span>
-        <h2 style="color:rgba(55, 1, 23, 0.9)">
-          AI-driven & Statistically Robust
-        </h2>
-        <p>
-          Iter8 uses statistically rigorous Bayesian analysis for version assessment and multi-armed bandit algorithms for progressive traffic shifting.
-        </p>
+        <div class="card-text">
+          <h2 style="color:rgba(55, 1, 23, 0.9)">
+            AI-driven & Statistically Robust
+          </h2>
+          <h3>
+            Iter8 uses statistically rigorous Bayesian analysis for version assessment and multi-armed bandit algorithms for progressive traffic shifting.
+          </h3>
       </div>
-
+      </div>
     </div>
   </div>
 </section>

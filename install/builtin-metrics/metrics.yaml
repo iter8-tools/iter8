@@ -3,7 +3,7 @@ kind: Metric
 metadata:
   name: request-count
 spec:
-  description: Number of requests (Iter8 builtin metric)
+  description: Number of requests (Iter8 built-in metric)
   type: Counter
   provider: iter8
   jqExpression: "dummy"
@@ -14,7 +14,7 @@ kind: Metric
 metadata:
   name: error-count
 spec:
-  description: Number of responses with HTTP status code 4xx or 5xx (Iter8 builtin metric)
+  description: Number of responses with HTTP status code 4xx or 5xx (Iter8 built-in metric)
   type: Counter
   provider: iter8
   jqExpression: "dummy"
@@ -25,7 +25,7 @@ kind: Metric
 metadata:
   name: error-rate
 spec:
-  description: Fraction of responses with HTTP status code 4xx or 5xx (Iter8 builtin metric)
+  description: Fraction of responses with HTTP status code 4xx or 5xx (Iter8 built-in metric)
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
@@ -37,7 +37,7 @@ kind: Metric
 metadata:
   name: mean-latency
 spec:
-  description: Mean latency (Iter8 builtin metric)
+  description: Mean latency (Iter8 built-in metric)
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
@@ -49,7 +49,7 @@ kind: Metric
 metadata:
   name: latency-50th-percentile
 spec:
-  description: 50th percentile (median) latency (Iter8 builtin metric)
+  description: 50th percentile (median) latency (Iter8 built-in metric)
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
@@ -61,7 +61,7 @@ kind: Metric
 metadata:
   name: latency-75th-percentile
 spec:
-  description: 75th percentile latency (Iter8 builtin metric)
+  description: 75th percentile latency (Iter8 built-in metric)
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
@@ -73,7 +73,7 @@ kind: Metric
 metadata:
   name: latency-90th-percentile
 spec:
-  description: 90th percentile latency (Iter8 builtin metric)
+  description: 90th percentile latency (Iter8 built-in metric)
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
@@ -85,7 +85,7 @@ kind: Metric
 metadata:
   name: latency-95th-percentile
 spec:
-  description: 95th percentile latency (Iter8 builtin metric)
+  description: 95th percentile latency (Iter8 built-in metric)
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8
@@ -97,7 +97,7 @@ kind: Metric
 metadata:
   name: latency-99th-percentile
 spec:
-  description: 99th percentile latency (Iter8 builtin metric)
+  description: 99th percentile latency (Iter8 built-in metric)
   type: Gauge
   sampleSize: iter8-system/request-count
   provider: iter8

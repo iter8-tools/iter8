@@ -4,7 +4,7 @@ site_author: Srinivasan Parthasarathy
 site_description: >-
   SLO validation, A/B(/n) testing with business metrics, chaos injection, and  progressive
   rollouts. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon,
-  and more. Quick start in 5 mins.
+  and more.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -61,7 +61,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Cloud Native Release Engineering
+  title: Cloud Native Release Engineering Platform
   version:
     provider: mike
   social:
@@ -147,7 +147,7 @@ nav:
     - Rollout strategies:
       - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
   - Knative:
-    - SLO validation (Helmex): tutorials/knative/slovalidation-helmex.md
+    - SLO validation: tutorials/knative/slovalidation-helmex.md
     - Testing strategies:
       - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
       - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
@@ -168,7 +168,7 @@ nav:
     - GitOps:
       - Argo CD + Istio: tutorials/istio/gitops/argocd.md
   - Linkerd:
-    - A/B experiment (Helmex): tutorials/linkerd/abexperiment-helmex.md
+    - A/B experiment: tutorials/linkerd/abexperiment-helmex.md
     - Testing strategies:
       - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
     - Platform setup: tutorials/linkerd/platform-setup.md
@@ -182,7 +182,6 @@ nav:
 - Reference:
   - Experiment resource: reference/experiment.md
   - Metric resource: reference/metrics.md
-  - Helmex schema: reference/helmex-schema.md
   - Task overview: reference/tasks/overview.md
   - Task descriptions:
     - run: reference/tasks/run.md
