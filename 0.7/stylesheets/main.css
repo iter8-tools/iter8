@@ -47,13 +47,13 @@
     align-items: stretch;
   }
   .mdx-hero__content {
-    max-width: 23rem;
+    max-width: 24rem;
     margin-top: 1rem;
   }
   .mdx-hero__image {
     order: 1;
-    width: 34rem;
-    margin-top: 1rem;
+    width: 33rem;
+    margin-top: 5rem;
     transform: translateX(1.5rem);
   }
 }
@@ -86,20 +86,15 @@
 .cards .md-typeset .twemoji,
 .cards .md-typeset .gemoji {
   display: inline-flex;
-  height: 4.6875em;
+  height: 10em;
   vertical-align: text-top;
 }
 .cards .md-typeset .emojione svg,
 .cards .md-typeset .twemoji svg,
 .cards .md-typeset .gemoji svg {
-  width: 4.6875em;
+  width: 10em;
   max-height: 100%;
   fill: currentColor;
-}
-
-.feature-item span {
-  float: left;
-  display: block;
 }
 
 .top-hr {
@@ -110,8 +105,22 @@
   font-family: "Lato", sans-serif;
   font-weight: 300;
   box-sizing: border-box;
-  padding: 15px;
+  padding: 0.75rem;
   word-break: break-word;
+  margin: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-item span {
+  width: 20%;
+  min-width: 8rem;
+}
+
+.feature-item .card-text {
+  width: 80%;
+  padding-left: 2rem;
 }
 
 .feature-item h2 {
@@ -121,42 +130,17 @@
   -webkit-font-smoothing: antialiased;
   display: block;
   line-height: normal;
-  margin-top: 10px;
+  margin-top: 20px;
   margin-bottom: 8px;
   font-family: inherit;
-}
-[data-md-color-scheme=slate] .feature-item h2 {
-  color: #fff;
-}
-
-.feature-item p {
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  color: #111;
-  margin: 0 0 10px;
-  display: block;
-}
-[data-md-color-scheme=slate] .feature-item p {
-  color: #fff;
-}
-
-.feature-item ul {
-  font-size: 20px;
-  line-height: 1.8em;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  color: #111;
-  margin: 0 0 10px;
-  display: block;
-}
-[data-md-color-scheme=slate] .feature-item ul {
-  color: #fff;
 }
 
 @media screen and (min-width: 76.25em) {
   .top-hr {
     width: 100%;
     display: flex;
+    align-items: center;
+    justify-content: center;
     max-width: 61rem;
     margin-right: auto;
     margin-left: auto;
@@ -165,15 +149,7 @@
   }
 
   .feature-item {
-    width: 49%;
-  }
-
-  .feature-item:hover {
-    background-color: #fecfc780;
-    border-radius: 3px;
-  }
-  [data-md-color-scheme=slate] .feature-item:hover {
-    background-color: rgba(193, 2, 97, 0.6);
+    width: 80%;
   }
 }
 .cards {
@@ -183,9 +159,6 @@
 .cards .md-grid h1 {
   text-align: center;
   color: #333;
-}
-[data-md-color-scheme=slate] .cards .md-grid h1 {
-  color: #fff;
 }
 [data-md-color-scheme=default] .cards {
   background: linear-gradient(to bottom, #f7f1fb 1%, #fbeeee);
