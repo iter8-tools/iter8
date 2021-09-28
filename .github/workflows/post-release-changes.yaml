@@ -42,6 +42,7 @@ jobs:
         commit-message: Post release changes for ${{ env.VERSION }}
         title: Post release changes for ${{ env.VERSION }}
         body: Automated changes by [post-release-changes.yaml](https://github.com/iter8-tools/iter8/blob/master/.github/workflows/post-release-changes.yaml) workflow
+        signoff: true
     - name: Update docs
       run: |
         git config --global user.name "Iter8"
