@@ -1,0 +1,65 @@
+{{- if .Values.candidate }}
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+{{- if .Values.candidate.dynamic.id }}
+  annotations:
+    # iter8.candidate.id is useful for preventing race conditions during experiments
+    # especially, when Iter8 automatically promotes candidate versions
+    iter8.candidate.id: {{ .Values.candidate.dynamic.id }}
+{{- end }}
+{{- /*
+  this creates an experiment with a name such as hello-experiment-71s20
+*/}}
+  # the sha256sum suffix based on candidate is useful; it ensures that 
+  # a new experiment is generated whenever the candidate version is updated 
+  # (for example, by CD pipeline)
+  name: {{ required ".Values.common.application is required!" .Values.common.application }}-experiment-{{ required ".Values.candidate is required!" .Values.candidate | toString | sha256sum | trunc 5 }}
+spec:
+  # target should uniquely identify the application under experimentation
+  target: {{ .Values.common.application }}
+  strategy:
+    # this is an SLO validation experiment
+    testingPattern: Conformance
+    actions:
+      start:
+      # ensure ksvc is available and ready
+      - task: common/readiness
+        with:
+          objRefs:
+          - kind: ksvc
+            name: {{ .Values.common.application }}
+            namespace: {{ .Release.Namespace }}
+            waitFor: condition=Ready
+      - run: "sleep 30.0"
+      # collect Iter8's built-in metrics
+      - task: metrics/collect
+        with:
+          time: {{required ".Values.experiment.time is required!" .Values.experiment.time | quote }}
+          qps: {{ .Values.experiment.QPS }}
+          versions:
+          # the name below must match a versionName in the versionInfo section
+          - name: new-version
+            # this route relies on the fact that the candidate revision is tagged
+            # candidate in the traffic section of the ksvc
+            url: "http://candidate-{{ .Values.common.application }}.{{ .Release.Namespace }}"
+  criteria:
+    requestCount: iter8-system/request-count
+    indicators:
+    - iter8-system/error-count
+    # service-level objectives (SLOs) that need to be satisfied by the new version
+    # in order for it to be considered a winner
+    objectives:
+    - metric: iter8-system/mean-latency
+      upperLimit: {{required ".Values.experiment.limitMeanLatency is required!" .Values.experiment.limitMeanLatency | quote }}
+    - metric: iter8-system/error-rate
+      upperLimit: {{required ".Values.experiment.limitErrorRate is required!" .Values.experiment.limitErrorRate | quote }}
+    - metric: iter8-system/latency-95th-percentile
+      upperLimit: {{required ".Values.experiment.limit95thPercentileLatency is required!" .Values.experiment.limit95thPercentileLatency | quote }}
+  duration:
+    intervalSeconds: 1
+    iterationsPerLoop: 1
+  versionInfo:
+    baseline:
+      name: new-version
+{{- end }}

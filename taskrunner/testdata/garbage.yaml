@@ -1,0 +1,74 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Expersion: "2410"
+  selfLink: /apis/iter8.tools/v2alpha2/namespaces/default/experiments/sklearn-iris-experiment-1
+  uid: b99489b6-a1b4-420f-9615-165d6ff88293
+spec: 
+  criteria: 
+    indicators: 
+      - 95th-percentile-tail-latency
+    objectives: 
+      - 
+        metric: meerenceService
+        name: sklearn-iris
+        namespace: default
+  metrics: 
+    - 
+      metricObj: 
+        apiVersion: iter8crease(revision_app_request_latencies_count{response_code_class!='2xx',service_name=~'.*$name'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0))"
+          provider: prometheus
+          jqExpression: ".data.result[0].value[1] | tonumber"
+          sampleSize: request-count
+          type: Gauge
+      name: error-rate
+    - 
+      metricObj: 
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata: 
+          annotations: 
+            kubectl.kubernetes.io/last-applied-configuration: "{\"apiVersion\":\"iter8.tools/v2alpha2 "sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0)"
+          provider: prometheus
+          jqExpression: ".data.result[0].value[1] | tonumber"
+          type: Counter
+          urlTemplate: url
+      name: request-count
+    - 
+      metricObj: 
+        apiVersion: iter8.tools/v2alpha2
+        kind: Metric
+        metadata: 
+          annotations: 
+            kubectl.kubernetes.io/last-applied-configuration: "{\"apiVersion\":\"iter8.tools/v2alpha2\",\"kind\":\"Metric\",\"metadata\":{\"annotations\":{},\"name\":\"95th-percentile-tail-latency\",\"namespace\":\"iter8-system\"},\"spec\":{\"description\":\"95th percentile tail latency\",\"params\":{\"query\":\"histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{service_name=~'.*$name'}[$interval])) by (le))\"},\"provider\":\"prometheus\",\"sampleSize\":\"request-count\",\"type\":\"Gauge\",\"units\":\"milliseconds\"}}\n"
+          creationTimestamp: "2020-12-27T21:53:23Z"
+          generation: 1
+          name: 95th-percentile-tail-latency
+          namespace: iter8-system
+          resourceVersion: "1920"
+          selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/95th-percentile-tail-latency
+          uid: b8375e54-33d1-4185-9eac-087ebf7693c9
+        spec: 
+          description: "95th percentile tail latency"
+          params: 
+          - name: query
+            value: "(sum(increase(revision_app_request_latencies_sum{service_name=~'.*$name'}[$interval]))or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0))"
+          provider: prometheus
+          jqExpression: ".data.result[0].value[1] | tonumber"
+          sampleSize: request-count
+          type: Gauge
+          units: milliseconds
+          urlTemplate: url
+      name: 95th-percentile-tail-latency
+  strategy: 
+    handlers: 
+      failure: finish
+      finish: finish
+      rolnched
+      status: "False"
+      type: Completed
+    - 
+      lastTransitionTime: "2020-12-27T21:55:48Z"
+      status: "False"
+      type: Failed
+  initTime: "2020-12-27T21:55:48Z"
+  lastUpdateTime: "2020-12-27T21:55:48Z"
+  message: "StartHandlerLaunched: Start handler 'start' launched"

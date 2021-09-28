@@ -1,0 +1,98 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  managedFields:
+  - apiVersion: serving.knative.dev/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+      f:spec:
+        .: {}
+        f:template:
+          .: {}
+          f:metadata:
+            .: {}
+            f:name: {}
+          f:spec:
+            .: {}
+            f:containers: {}
+        f:traffic: {}
+    manager: kubectl-client-side-apply
+    operation: Update
+    time: "2021-02-11T23:31:37Z"
+  - apiVersion: serving.knative.dev/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        .: {}
+        f:address:
+          .: {}
+          f:url: {}
+        f:conditions: {}
+        f:latestCreatedRevisionName: {}
+        f:latestReadyRevisionName: {}
+        f:observedGeneration: {}
+        f:traffic: {}
+        f:url: {}
+    manager: controller
+    operation: Update
+    time: "2021-02-11T23:32:10Z"
+  name: sample-application
+  namespace: default
+  resourceVersion: "17684"
+spec:
+  template:
+    metadata:
+      creationTimestamp: null
+      name: sample-application-v2
+    spec:
+      containerConcurrency: 0
+      containers:
+      - image: docker.io/sushmarchandran/sample-application:v2
+        name: user-container
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+        resources: {}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: false
+    percent: 99
+    revisionName: sample-application-v1
+    tag: current
+  - latestRevision: true
+    percent: 1
+    tag: candidate
+status:
+  address:
+    url: http://sample-application.knative-test.svc.cluster.local
+  conditions:
+  - lastTransitionTime: "2021-02-11T23:32:18Z"
+    status: "True"
+    type: ConfigurationsReady
+  - lastTransitionTime: "2021-02-11T23:32:19Z"
+    status: "True"
+    type: Ready
+  - lastTransitionTime: "2021-02-11T23:32:19Z"
+    status: "True"
+    type: RoutesReady
+  latestCreatedRevisionName: sample-application-v2
+  latestReadyRevisionName: sample-application-v2
+  observedGeneration: 2
+  traffic:
+  - latestRevision: false
+    percent: 99
+    revisionName: sample-application-v1
+    tag: current
+    url: http://current-sample-application.knative-test.example.com
+  - latestRevision: true
+    percent: 1
+    revisionName: sample-application-v2
+    tag: candidate
+    url: http://candidate-sample-application.knative-test.example.com
+  url: http://sample-application.knative-test.example.com

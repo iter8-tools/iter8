@@ -1,5 +1,0 @@
-resources:
-- stacks
-- rolebindings.yaml
-- roles.yaml
-- serviceaccounts.yaml

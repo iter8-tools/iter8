@@ -1,0 +1,306 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"iter8.tools/v2alpha2","kind":"Experiment","metadata":{"annotations":{},"name":"conformance-exp","namespace":"default"},"spec":{"criteria":{"objectives":[{"metric":"iter8-istio/mean-latency","upperLimit":300},{"metric":"iter8-istio/error-rate","upperLimit":"0.01"}],"requestCount":"iter8-istio/request-count"},"duration":{"intervalSeconds":10,"iterationsPerLoop":10},"strategy":{"testingPattern":"Conformance"},"target":"bookinfo-iter8/productpage","versionInfo":{"baseline":{"name":"productpage-v1","variables":[{"name":"namespace","value":"bookinfo-iter8"}]}}}}
+  creationTimestamp: "2021-05-20T19:54:49Z"
+  generation: 1
+  name: conformance-exp
+  namespace: default
+  resourceVersion: "42096"
+  uid: a5d64a73-5cfe-4ad2-9569-62dcaebd7e3e
+spec:
+  criteria:
+    objectives:
+    - metric: iter8-istio/mean-latency
+      upperLimit: 300
+    - metric: iter8-istio/error-rate
+      upperLimit: "0.01"
+    requestCount: iter8-istio/request-count
+  duration:
+    intervalSeconds: 10
+    iterationsPerLoop: 10
+  strategy:
+    testingPattern: Conformance
+  target: bookinfo-iter8/productpage
+  versionInfo:
+    baseline:
+      name: productpage-v1
+      variables:
+      - name: namespace
+        value: bookinfo-iter8
+status:
+  analysis:
+    aggregatedMetrics:
+      data:
+        iter8-istio/error-rate:
+          data:
+            productpage-v1:
+              value: "0"
+        iter8-istio/mean-latency:
+          data:
+            productpage-v1:
+              value: "101.520703125"
+        iter8-istio/request-count:
+          data:
+            productpage-v1:
+              value: 1537999399219n
+        request-count:
+          data:
+            productpage-v1:
+              value: 1537999399219n
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-05-20T19:56:26Z"
+    versionAssessments:
+      data:
+        productpage-v1:
+        - true
+        - true
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-05-20T19:56:26Z"
+    weights:
+      data: []
+      message: weight computation is not applicable to a conformance experiment
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-05-20T19:56:26Z"
+    winnerAssessment:
+      data:
+        winner: productpage-v1
+        winnerFound: true
+      message: 'Error: ; Warning: ; Info: baseline satisfies all objectives'
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-05-20T19:56:26Z"
+  completedIterations: 10
+  conditions:
+  - lastTransitionTime: "2021-05-20T19:56:26Z"
+    message: Experiment completed successfully
+    reason: ExperimentCompleted
+    status: "True"
+    type: Completed
+  - lastTransitionTime: "2021-05-20T19:54:49Z"
+    status: "False"
+    type: Failed
+  - lastTransitionTime: "2021-05-20T19:54:49Z"
+    message: ""
+    reason: TargetAcquired
+    status: "True"
+    type: TargetAcquired
+  currentWeightDistribution:
+  - name: productpage-v1
+    value: 100
+  initTime: "2021-05-20T19:54:49Z"
+  lastUpdateTime: "2021-05-20T19:56:26Z"
+  message: 'ExperimentCompleted: Experiment completed successfully'
+  metrics:
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"request-count","namespace":"iter8-istio"},"spec":{"description":"Number of requests","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s]))\n"}],"provider":"prometheus","type":"Counter","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-05-20T15:43:51Z"
+        generation: 1
+        labels:
+          creator: iter8
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:labels:
+                .: {}
+                f:creator: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:type: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-05-20T15:43:51Z"
+        name: request-count
+        namespace: iter8-istio
+        resourceVersion: "1841"
+        uid: 8403e95a-5000-4866-884c-97a6ca7eb9f2
+      spec:
+        description: Number of requests
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s]))
+        provider: prometheus
+        type: Counter
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: iter8-istio/request-count
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"mean-latency","namespace":"iter8-istio"},"spec":{"description":"Mean latency","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"(sum(increase(istio_request_duration_milliseconds_sum{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))\n"}],"provider":"prometheus","sampleSize":"request-count","type":"Gauge","units":"milliseconds","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-05-20T15:43:51Z"
+        generation: 1
+        labels:
+          creator: iter8
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:labels:
+                .: {}
+                f:creator: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:sampleSize: {}
+              f:type: {}
+              f:units: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-05-20T15:43:51Z"
+        name: mean-latency
+        namespace: iter8-istio
+        resourceVersion: "1840"
+        uid: 4c3a220d-0202-4f64-ae95-c7d0d78297d4
+      spec:
+        description: Mean latency
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            (sum(increase(istio_request_duration_milliseconds_sum{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+        provider: prometheus
+        sampleSize: request-count
+        type: Gauge
+        units: milliseconds
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: iter8-istio/mean-latency
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"request-count","namespace":"iter8-istio"},"spec":{"description":"Number of requests","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s]))\n"}],"provider":"prometheus","type":"Counter","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-05-20T15:43:51Z"
+        generation: 1
+        labels:
+          creator: iter8
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:labels:
+                .: {}
+                f:creator: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:type: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-05-20T15:43:51Z"
+        name: request-count
+        namespace: iter8-istio
+        resourceVersion: "1841"
+        uid: 8403e95a-5000-4866-884c-97a6ca7eb9f2
+      spec:
+        description: Number of requests
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s]))
+        provider: prometheus
+        type: Counter
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: request-count
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"error-rate","namespace":"iter8-istio"},"spec":{"description":"Fraction of requests with error responses","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"(sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))\n"}],"provider":"prometheus","sampleSize":"request-count","type":"Gauge","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-05-20T15:43:51Z"
+        generation: 1
+        labels:
+          creator: iter8
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:labels:
+                .: {}
+                f:creator: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:sampleSize: {}
+              f:type: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-05-20T15:43:51Z"
+        name: error-rate
+        namespace: iter8-istio
+        resourceVersion: "1838"
+        uid: 160318d9-2b38-482a-a12a-eb9a0ccad4ec
+      spec:
+        description: Fraction of requests with error responses
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            (sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$name',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+        provider: prometheus
+        sampleSize: request-count
+        type: Gauge
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: iter8-istio/error-rate
+  stage: Completed
+  startTime: "2021-05-20T19:54:50Z"
+  versionRecommendedForPromotion: productpage-v1

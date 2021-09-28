@@ -1,0 +1,66 @@
+# values meant for both baseline and candidate versions of the application;
+common:
+  application: hello
+  repo: "gcr.io/google-samples/hello-app"
+  serviceType: ClusterIP
+  servicePortInfo:
+    port: 8080
+  regularLabels:
+    app.kubernetes.io/managed-by: Iter8
+  selectorLabels:
+    app.kubernetes.io/name: hello
+
+# values meant for baseline version of the application only;
+baseline:
+  name: hello
+  selectorLabels:
+    app.kubernetes.io/track: baseline
+  dynamic:
+    tag: null
+  weight: 100
+
+# values meant for candidate version of the application only;
+candidate:
+  name: hello-candidate
+  selectorLabels:
+    app.kubernetes.io/track: candidate
+  dynamic:
+    tag: null
+  weight: 0
+
+# values for the SLO validation experiment;
+# experiment.yaml template has these default values set;
+# to change the defaults, modify the values below
+
+experiment:
+  # The SLO validation experiment will collect Iter8's built-in latency and error metrics.
+  # There will be 8.0 * 5 = 40 queries sent during metrics collection.
+  # time is the duration over which queries are sent during metrics collection.
+  time: 5s
+  # QPS is number of queries per second sent during metrics collection.
+  QPS: 8.0
+  # # (msec) acceptable limit for mean latency of the application
+  # limitMeanLatency: 500.0
+  # # (msec) acceptable error rate for the application (1%)
+  # limitErrorRate: 0.01 
+  # # (msec) acceptable limit for 95th percentile latency of the application
+  # limit95thPercentileLatency: 1000.0
+  userEngagementDirection: High
+  # (msec) acceptable limit for mean latency of the application
+  limitMeanLatency: 300.0
+  # (msec) acceptable error rate for the application (1%)
+  limitErrorRate: 0.01
+
+  promoteBaseline: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v1.yaml
+  promoteCandidate: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/linkerd/quickstart/vs-for-v2.yaml
+
+  baselineFieldPath: .spec.backends[0].weight
+  candidateFieldPath: .spec.backends[1].weight
+
+  # information needed by Iter8 to update values.yaml file in GitHub
+  helmexGitOps:
+    gitRepo: "gitops env repo"
+    filePath: "path to values.yaml relative to root of the repo"
+    username: "GitHub user name"
+    branch: "gitops-test"
+

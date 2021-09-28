@@ -11,8 +11,8 @@ jobs:
       - name: Publish Helm charts
         uses: stefanprodan/helm-gh-pages@master
         with:
-          commit_username: sriumcp
-          commit_email: spartha@us.ibm.com
-          charts_dir: helm
+          commit_username: Iter8
+          commit_email: iter8tools@gmail.com
+          charts_dir: iter8hub
           branch: helmex
           token: ${{ secrets.GITHUB_TOKEN }}

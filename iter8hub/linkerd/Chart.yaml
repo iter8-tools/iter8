@@ -1,0 +1,6 @@
+apiVersion: v2
+name: linkerd
+description: A Helmex chart for a hello-world application with Iter8 SLO validation and Linkerd
+type: application
+version: 0.1.0
+appVersion: 0.1.0

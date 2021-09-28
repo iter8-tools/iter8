@@ -1,0 +1,96 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"iter8.tools/v2alpha2","kind":"Experiment","metadata":{"annotations":{},"name":"quickstart-exp","namespace":"default"},"spec":{"criteria":{"objectives":[{"metric":"iter8-istio/mean-latency","upperLimit":300},{"metric":"iter8-istio/error-rate","upperLimit":"0.01"}],"requestCount":"iter8-istio/request-count","rewards":[{"metric":"iter8-istio/user-engagement","preferredDirection":"High"}]},"duration":{"intervalSeconds":10,"iterationsPerLoop":5},"strategy":{"actions":{"finish":[{"task":"common/exec","with":{"args":["-c","kubectl -n bookinfo-iter8 apply -f {{ .promote }}"],"cmd":"/bin/bash"}},{"task":"notification/slack","with":{"channel":"CU5FNKWCB","secret":"default/slack-secret"}}],"start":[{"task":"notification/slack","with":{"channel":"CU5FNKWCB","secret":"default/slack-secret"}}]},"deploymentPattern":"Progressive","testingPattern":"A/B"},"target":"bookinfo-iter8/productpage","versionInfo":{"baseline":{"name":"productpage-v1","variables":[{"name":"namespace","value":"bookinfo-iter8"},{"name":"promote","value":"https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml"}],"weightObjRef":{"apiVersion":"networking.istio.io/v1beta1","fieldPath":".spec.http[0].route[0].weight","kind":"VirtualService","name":"bookinfo","namespace":"bookinfo-iter8"}},"candidates":[{"name":"productpage-v2","variables":[{"name":"namespace","value":"bookinfo-iter8"},{"name":"promote","value":"https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml"}],"weightObjRef":{"apiVersion":"networking.istio.io/v1beta1","fieldPath":".spec.http[0].route[1].weight","kind":"VirtualService","name":"bookinfo","namespace":"bookinfo-iter8"}}]}}}
+  creationTimestamp: "2021-05-21T12:45:06Z"
+  generation: 1
+  name: quickstart-exp
+  namespace: default
+  resourceVersion: "103023"
+  uid: 10bf015f-21b0-48c6-ae4f-2934a28bb888
+spec:
+  criteria:
+    objectives:
+    - metric: iter8-istio/mean-latency
+      upperLimit: 300
+    - metric: iter8-istio/error-rate
+      upperLimit: "0.01"
+    requestCount: iter8-istio/request-count
+    rewards:
+    - metric: iter8-istio/user-engagement
+      preferredDirection: High
+  duration:
+    intervalSeconds: 10
+    iterationsPerLoop: 5
+  strategy:
+    actions:
+      finish:
+      - task: common/exec
+        with:
+          args:
+          - -c
+          - kubectl -n bookinfo-iter8 apply -f {{ .promote }}
+          cmd: /bin/bash
+      - task: notification/slack
+        with:
+          channel: CU5FNKWCB
+          secret: default/slack-secret
+      start:
+      - task: notification/slack
+        with:
+          channel: CU5FNKWCB
+          secret: default/slack-secret
+    deploymentPattern: Progressive
+    testingPattern: A/B
+  target: bookinfo-iter8/productpage
+  versionInfo:
+    baseline:
+      name: productpage-v1
+      variables:
+      - name: namespace
+        value: bookinfo-iter8
+      - name: promote
+        value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v1.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        fieldPath: .spec.http[0].route[0].weight
+        kind: VirtualService
+        name: bookinfo
+        namespace: bookinfo-iter8
+    candidates:
+    - name: productpage-v2
+      variables:
+      - name: namespace
+        value: bookinfo-iter8
+      - name: promote
+        value: https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/istio/quickstart/vs-for-v2.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        fieldPath: .spec.http[0].route[1].weight
+        kind: VirtualService
+        name: bookinfo
+        namespace: bookinfo-iter8
+status:
+  completedIterations: 0
+  conditions:
+  - lastTransitionTime: "2021-05-21T12:45:19Z"
+    message: Start actions failed
+    reason: ExperimentCompleted
+    status: "True"
+    type: Completed
+  - lastTransitionTime: "2021-05-21T12:45:19Z"
+    message: Start actions failed
+    reason: HandlerFailed
+    status: "True"
+    type: Failed
+  - lastTransitionTime: "2021-05-21T12:45:06Z"
+    message: ""
+    reason: TargetAcquired
+    status: "True"
+    type: TargetAcquired
+  initTime: "2021-05-21T12:45:06Z"
+  lastUpdateTime: "2021-05-21T12:45:06Z"
+  message: 'ExperimentCompleted: Start actions failed'
+  stage: Completed

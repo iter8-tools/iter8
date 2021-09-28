@@ -1,5 +1,0 @@
-apiVersion: v2
-name: conformance
-description: A Helm chart for Iter8 conformance experiment
-type: application
-version: 0.1.0

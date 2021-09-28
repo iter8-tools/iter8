@@ -1,0 +1,224 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"iter8.tools/v2alpha2","kind":"Experiment","metadata":{"annotations":{},"name":"sklearn-iris-experiment-1","namespace":"kfserving-test"},"spec":{"criteria":{"indicators":["95th-percentile-tail-latency"],"objectives":[{"metric":"mean-latency","upperLimit":1000},{"metric":"error-rate","upperLimit":"0.01"}]},"duration":{"intervalSeconds":15,"iterationsPerLoop":10},"strategy":{"type":"Canary"},"target":"kfserving-test/sklearn-iris"}}
+  creationTimestamp: "2020-12-28T18:33:34Z"
+  generation: 3
+  name: sklearn-iris-experiment-1
+  namespace: kfserving-test
+  resourceVersion: "3390"
+  selfLink: /apis/iter8.tools/v2alpha2/namespaces/kfserving-test/experiments/sklearn-iris-experiment-1
+  uid: e7aaa182-0cfd-4cab-99e5-8b171a282863
+spec:
+  criteria:
+    indicators:
+    - 95th-percentile-tail-latency
+    objectives:
+    - metric: mean-latency
+      upperLimit: 1k
+    - metric: error-rate
+      upperLimit: 10m
+    requestCount: request-count
+  duration:
+    intervalSeconds: 15
+    iterationsPerLoop: 10
+  strategy:
+    testingPattern: Canary
+    deploymentPattern: Progressive
+    weights:
+      maxCandidateWeight: 100
+      maxCandidateWeightIncrement: 10
+  target: kfserving-test/sklearn-iris
+  versionInfo:
+    baseline:
+      name: default
+    candidates:
+    - name: canary
+      weightObjRef:
+        apiVersion: serving.kubeflow.org/v1alpha2
+        fieldPath: .spec.canaryTrafficPercent
+        kind: InferenceService
+        name: sklearn-iris
+        namespace: kfserving-test
+status:
+  analysis:
+    aggregatedMetrics:
+      data:
+        95th-percentile-tail-latency:
+          data:
+            canary:
+              value: 1564360000001n
+            default:
+              value: 311666666667n
+        error-rate:
+          data:
+            canary:
+              value: "0"
+            default:
+              value: "0"
+        mean-latency:
+          data:
+            canary:
+              value: 219780667574n
+            default:
+              value: 226717391305n
+        request-count:
+          data:
+            canary:
+              value: 8754266667n
+            default:
+              value: 68116666667n
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2020-12-28T18:34:49Z"
+    versionAssessments:
+      data:
+        canary:
+        - true
+        - true
+        default:
+        - true
+        - true
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2020-12-28T18:34:49Z"
+    weights:
+      data:
+      - name: default
+        value: 65
+      - name: canary
+        value: 35
+      message: 'Error: ; Warning: ; Info: all ok'
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2020-12-28T18:34:49Z"
+    winnerAssessment:
+      data:
+        winner: canary
+        winnerFound: true
+      message: 'Error: ; Warning: ; Info: candidate satisfies all objectives'
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2020-12-28T18:34:49Z"
+  completedIterations: 5
+  conditions:
+  - lastTransitionTime: "2020-12-28T18:34:50Z"
+    message: Completed Iteration 5
+    reason: IterationUpdate
+    status: "False"
+    type: Completed
+  - lastTransitionTime: "2020-12-28T18:33:34Z"
+    status: "False"
+    type: Failed
+  currentWeightDistribution:
+  - name: default
+    value: 65
+  - name: canary
+    value: 35
+  initTime: "2020-12-28T18:33:34Z"
+  lastUpdateTime: "2020-12-28T18:34:50Z"
+  message: 'IterationUpdate: Completed Iteration 5'
+  versionRecommendedForPromotion: canary
+  startTime: "2020-12-28T18:33:42Z"
+  metrics:
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"name":"95th-percentile-tail-latency","namespace":"iter8-system"},"spec":{"description":"95th percentile tail latency","params":{"query":"histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{service_name=~'.*$name'}[$interval])) by (le))"},"provider":"prometheus","sampleSize":"request-count","type":"Gauge","units":"milliseconds"}}
+        creationTimestamp: "2020-12-28T18:27:03Z"
+        generation: 1
+        name: 95th-percentile-tail-latency
+        namespace: iter8-system
+        resourceVersion: "1794"
+        selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/95th-percentile-tail-latency
+        uid: 2838a999-2aed-45a1-980f-d0e097b2b991
+      spec:
+        description: 95th percentile tail latency
+        params:
+        - name: query
+          value: histogram_quantile(0.95, sum(rate(revision_app_request_latencies_bucket{service_name=~'.*$name'}[$interval])) by (le))
+        provider: prometheus
+        jqExpression: ".data.result[0].value[1] | tonumber"
+        sampleSize: request-count
+        type: Gauge
+        units: milliseconds
+        urlTemplate: url
+    name: 95th-percentile-tail-latency
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"name":"mean-latency","namespace":"iter8-system"},"spec":{"description":"Mean latency","params":{"query":"(sum(increase(revision_app_request_latencies_sum{service_name=~'.*$name'}[$interval]))or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0))"},"provider":"prometheus","sampleSize":"request-count","type":"Gauge","units":"milliseconds"}}
+        creationTimestamp: "2020-12-28T18:27:03Z"
+        generation: 1
+        name: mean-latency
+        namespace: iter8-system
+        resourceVersion: "1798"
+        selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/mean-latency
+        uid: 01577373-a040-41e4-b204-f57f0117e93d
+      spec:
+        description: Mean latency
+        params:
+        - name: query
+          value: (sum(increase(revision_app_request_latencies_sum{service_name=~'.*$name'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0))
+        provider: prometheus
+        jqExpression: ".data.result[0].value[1] | tonumber"
+        sampleSize: request-count
+        type: Gauge
+        units: milliseconds
+        urlTemplate: url
+    name: mean-latency
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"name":"error-rate","namespace":"iter8-system"},"spec":{"description":"Fraction of requests with error responses","params":{"query":"(sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',service_name=~'.*$name'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0))"},"provider":"prometheus","sampleSize":"request-count","type":"Gauge"}}
+        creationTimestamp: "2020-12-28T18:27:03Z"
+        generation: 1
+        name: error-rate
+        namespace: iter8-system
+        resourceVersion: "1796"
+        selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/error-rate
+        uid: 5103d62d-b572-4a05-885d-5e6dafd98284
+      spec:
+        description: Fraction of requests with error responses
+        params:
+        - name: query
+          value: (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',service_name=~'.*$name'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0))
+        provider: prometheus
+        jqExpression: ".data.result[0].value[1] | tonumber"
+        sampleSize: request-count
+        type: Gauge
+        urlTemplate: url
+    name: error-rate
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"name":"request-count","namespace":"iter8-system"},"spec":{"description":"Number of requests","params":{"query":"sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0)"},"provider":"prometheus","type":"Counter"}}
+        creationTimestamp: "2020-12-28T18:27:03Z"
+        generation: 1
+        name: request-count
+        namespace: iter8-system
+        resourceVersion: "1799"
+        selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/request-count
+        uid: 0c829747-6133-4161-b921-50ec36cdae73
+      spec:
+        description: Number of requests
+        params:
+        - name: query
+          value: sum(increase(revision_app_request_latencies_count{service_name=~'.*$name'}[$interval])) or on() vector(0)
+        provider: prometheus
+        jqExpression: ".data.result[0].value[1] | tonumber"
+        type: Counter
+        urlTemplate: url
+    name: request-count
