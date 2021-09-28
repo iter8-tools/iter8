@@ -1,0 +1,497 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"iter8.tools/v2alpha2","kind":"Experiment","metadata":{"annotations":{},"name":"istio-quickstart","namespace":"default"},"spec":{"criteria":{"objectives":[{"metric":"iter8-istio/mean-latency","upperLimit":100},{"metric":"iter8-istio/error-rate","upperLimit":"0.01"}],"rewards":[{"metric":"books-purchased","preferredDirection":"High"}]},"duration":{"intervalSeconds":10,"iterationsPerLoop":10},"strategy":{"actions":{"finish":[{"task":"common/exec","with":{"args":["-c","kubectl -n {{ .namespace }} apply -f {{ .promote }}"],"cmd":"/bin/bash"}}]},"deploymentPattern":"Progressive","testingPattern":"A/B"},"target":"bookinfo-iter8/productpage","versionInfo":{"baseline":{"name":"A","variables":[{"name":"revision","value":"productpage-v1"},{"name":"namespace","value":"bookinfo-iter8"},{"name":"promote","value":"https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/A.yaml"}],"weightObjRef":{"apiVersion":"networking.istio.io/v1beta1","fieldPath":".spec.http[0].route[0].weight","kind":"VirtualService","name":"bookinfo","namespace":"bookinfo-iter8"}},"candidates":[{"name":"B","variables":[{"name":"revision","value":"productpage-v3"},{"name":"namespace","value":"bookinfo-iter8"},{"name":"promote","value":"https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/B.yaml"}],"weightObjRef":{"apiVersion":"networking.istio.io/v1beta1","fieldPath":".spec.http[0].route[1].weight","kind":"VirtualService","name":"bookinfo","namespace":"bookinfo-iter8"}}]}}}
+  creationTimestamp: "2021-04-23T17:02:52Z"
+  generation: 1
+  managedFields:
+  - apiVersion: iter8.tools/v2alpha2
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+      f:spec:
+        .: {}
+        f:criteria:
+          .: {}
+          f:rewards: {}
+        f:duration:
+          .: {}
+          f:intervalSeconds: {}
+          f:iterationsPerLoop: {}
+        f:strategy:
+          .: {}
+          f:actions:
+            .: {}
+            f:finish: {}
+          f:deploymentPattern: {}
+          f:testingPattern: {}
+        f:target: {}
+        f:versionInfo:
+          .: {}
+          f:baseline:
+            .: {}
+            f:name: {}
+            f:variables: {}
+            f:weightObjRef:
+              .: {}
+              f:apiVersion: {}
+              f:fieldPath: {}
+              f:kind: {}
+              f:name: {}
+              f:namespace: {}
+          f:candidates: {}
+    manager: kubectl-client-side-apply
+    operation: Update
+    time: "2021-04-23T17:02:52Z"
+  - apiVersion: iter8.tools/v2alpha2
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:spec:
+        f:criteria:
+          f:objectives: {}
+        f:duration:
+          f:maxLoops: {}
+        f:strategy:
+          f:weights:
+            .: {}
+            f:maxCandidateWeight: {}
+            f:maxCandidateWeightIncrement: {}
+      f:status:
+        .: {}
+        f:analysis:
+          .: {}
+          f:aggregatedMetrics:
+            .: {}
+            f:data:
+              .: {}
+              f:books-purchased:
+                .: {}
+                f:data:
+                  .: {}
+                  f:A:
+                    .: {}
+                    f:value: {}
+                  f:B:
+                    .: {}
+                    f:value: {}
+              f:iter8-istio/error-rate:
+                .: {}
+                f:data:
+                  .: {}
+                  f:A:
+                    .: {}
+                    f:value: {}
+                  f:B:
+                    .: {}
+                    f:value: {}
+              f:iter8-istio/mean-latency:
+                .: {}
+                f:data:
+                  .: {}
+                  f:A:
+                    .: {}
+                    f:value: {}
+                  f:B:
+                    .: {}
+                    f:value: {}
+              f:request-count:
+                .: {}
+                f:data:
+                  .: {}
+                  f:A:
+                    .: {}
+                    f:value: {}
+                  f:B:
+                    .: {}
+                    f:value: {}
+            f:message: {}
+            f:provenance: {}
+            f:timestamp: {}
+          f:versionAssessments:
+            .: {}
+            f:data:
+              .: {}
+              f:A: {}
+              f:B: {}
+            f:message: {}
+            f:provenance: {}
+            f:timestamp: {}
+          f:weights:
+            .: {}
+            f:data: {}
+            f:message: {}
+            f:provenance: {}
+            f:timestamp: {}
+          f:winnerAssessment:
+            .: {}
+            f:data:
+              .: {}
+              f:winner: {}
+              f:winnerFound: {}
+            f:message: {}
+            f:provenance: {}
+            f:timestamp: {}
+        f:completedIterations: {}
+        f:conditions: {}
+        f:currentWeightDistribution: {}
+        f:initTime: {}
+        f:lastUpdateTime: {}
+        f:message: {}
+        f:metrics: {}
+        f:stage: {}
+        f:startTime: {}
+        f:versionRecommendedForPromotion: {}
+    manager: manager
+    operation: Update
+    time: "2021-04-23T17:03:37Z"
+  name: istio-quickstart
+  namespace: default
+  resourceVersion: "4214"
+  uid: bd65e2f5-fc02-4be0-9177-75fc8002d2c4
+spec:
+  criteria:
+    objectives:
+    - metric: iter8-istio/mean-latency
+      upperLimit: 100
+    - metric: iter8-istio/error-rate
+      upperLimit: "0.01"
+    rewards:
+    - metric: books-purchased
+      preferredDirection: High
+  duration:
+    intervalSeconds: 10
+    iterationsPerLoop: 10
+  strategy:
+    actions:
+      finish:
+      - task: common/exec
+        with:
+          args:
+          - -c
+          - kubectl -n {{ .namespace }} apply -f {{ .promote }}
+          cmd: /bin/bash
+    deploymentPattern: Progressive
+    testingPattern: A/B
+  target: bookinfo-iter8/productpage
+  versionInfo:
+    baseline:
+      name: A
+      variables:
+      - name: revision
+        value: productpage-v1
+      - name: namespace
+        value: bookinfo-iter8
+      - name: promote
+        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/A.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        fieldPath: .spec.http[0].route[0].weight
+        kind: VirtualService
+        name: bookinfo
+        namespace: bookinfo-iter8
+    candidates:
+    - name: B
+      variables:
+      - name: revision
+        value: productpage-v3
+      - name: namespace
+        value: bookinfo-iter8
+      - name: promote
+        value: https://raw.githubusercontent.com/kalantar/iter8/istio-quickstart/samples/istio/quickstart/B.yaml
+      weightObjRef:
+        apiVersion: networking.istio.io/v1beta1
+        fieldPath: .spec.http[0].route[1].weight
+        kind: VirtualService
+        name: bookinfo
+        namespace: bookinfo-iter8
+status:
+  analysis:
+    aggregatedMetrics:
+      data:
+        books-purchased:
+          data:
+            A:
+              value: 5029875003n
+            B:
+              value: 24453608192n
+        iter8-istio/error-rate:
+          data:
+            A:
+              value: "0"
+            B:
+              value: "0"
+        iter8-istio/mean-latency:
+          data:
+            A:
+              value: 90846332047n
+            B:
+              value: 43256981626n
+        request-count:
+          data:
+            A:
+              value: 1506618095820n
+            B:
+              value: 414575574077n
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-04-23T17:04:56Z"
+    versionAssessments:
+      data:
+        A:
+        - true
+        - true
+        B:
+        - true
+        - true
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-04-23T17:04:56Z"
+    weights:
+      data:
+      - name: A
+        value: 35
+      - name: B
+        value: 65
+      message: 'Error: ; Warning: ; Info: all ok'
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-04-23T17:04:56Z"
+    winnerAssessment:
+      data:
+        winner: B
+        winnerFound: true
+      message: 'Error: ; Warning: ; Info: found unique winner'
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-04-23T17:04:56Z"
+  completedIterations: 10
+  conditions:
+  - lastTransitionTime: "2021-04-23T17:05:21Z"
+    message: Experiment Completed
+    reason: ExperimentCompleted
+    status: "True"
+    type: Completed
+  - lastTransitionTime: "2021-04-23T17:02:52Z"
+    status: "False"
+    type: Failed
+  - lastTransitionTime: "2021-04-23T17:02:52Z"
+    message: ""
+    reason: TargetAcquired
+    status: "True"
+    type: TargetAcquired
+  currentWeightDistribution:
+  - name: A
+    value: 35
+  - name: B
+    value: 65
+  initTime: "2021-04-23T17:02:52Z"
+  lastUpdateTime: "2021-04-23T17:04:58Z"
+  message: 'ExperimentCompleted: Experiment Completed'
+  metrics:
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"name":"books-purchased","namespace":"default"},"spec":{"description":"Total number of books purchased","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"(sum(increase(number_of_books_purchased_total{destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))\n"}],"provider":"prometheus","type":"Gauge","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-04-23T16:45:13Z"
+        generation: 1
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:type: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-04-23T16:45:13Z"
+        name: books-purchased
+        namespace: default
+        resourceVersion: "1871"
+        uid: ad68a836-3828-474e-a53d-c80045387f60
+      spec:
+        description: Total number of books purchased
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            (sum(increase(number_of_books_purchased_total{destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+        provider: prometheus
+        type: Gauge
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: books-purchased
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"mean-latency","namespace":"iter8-istio"},"spec":{"description":"Mean latency","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"(sum(increase(istio_request_duration_milliseconds_sum{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))\n"}],"provider":"prometheus","sampleSize":"request-count","type":"Gauge","units":"milliseconds","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-04-23T16:44:33Z"
+        generation: 1
+        labels:
+          creator: iter8
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:labels:
+                .: {}
+                f:creator: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:sampleSize: {}
+              f:type: {}
+              f:units: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-04-23T16:44:33Z"
+        name: mean-latency
+        namespace: iter8-istio
+        resourceVersion: "1709"
+        uid: bf6537e4-e1c4-48ab-bba6-3f3483158d6c
+      spec:
+        description: Mean latency
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            (sum(increase(istio_request_duration_milliseconds_sum{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+        provider: prometheus
+        sampleSize: request-count
+        type: Gauge
+        units: milliseconds
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: iter8-istio/mean-latency
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"request-count","namespace":"iter8-istio"},"spec":{"description":"Number of requests","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s]))\n"}],"provider":"prometheus","type":"Counter","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-04-23T16:44:33Z"
+        generation: 1
+        labels:
+          creator: iter8
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:labels:
+                .: {}
+                f:creator: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:type: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-04-23T16:44:33Z"
+        name: request-count
+        namespace: iter8-istio
+        resourceVersion: "1710"
+        uid: 2cf00ece-2d3c-4f94-bb4b-bc07ba0ed71d
+      spec:
+        description: Number of requests
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s]))
+        provider: prometheus
+        type: Counter
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: request-count
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"error-rate","namespace":"iter8-istio"},"spec":{"description":"Fraction of requests with error responses","jqExpression":".data.result[0].value[1] | tonumber","params":[{"name":"query","value":"(sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))\n"}],"provider":"prometheus","sampleSize":"request-count","type":"Gauge","urlTemplate":"http://prometheus-operated.iter8-system:9090/api/v1/query"}}
+        creationTimestamp: "2021-04-23T16:44:33Z"
+        generation: 1
+        labels:
+          creator: iter8
+        managedFields:
+        - apiVersion: iter8.tools/v2alpha2
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:labels:
+                .: {}
+                f:creator: {}
+            f:spec:
+              .: {}
+              f:description: {}
+              f:jqExpression: {}
+              f:method: {}
+              f:params: {}
+              f:provider: {}
+              f:sampleSize: {}
+              f:type: {}
+              f:urlTemplate: {}
+          manager: kubectl-client-side-apply
+          operation: Update
+          time: "2021-04-23T16:44:33Z"
+        name: error-rate
+        namespace: iter8-istio
+        resourceVersion: "1707"
+        uid: fa8231ae-d226-462c-a0c0-6111ea57aee3
+      spec:
+        description: Fraction of requests with error responses
+        jqExpression: .data.result[0].value[1] | tonumber
+        method: GET
+        params:
+        - name: query
+          value: |
+            (sum(increase(istio_requests_total{response_code=~'5..',reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0)) / (sum(increase(istio_requests_total{reporter='source',destination_workload='$revision',destination_workload_namespace='$namespace'}[${elapsedTime}s])) or on() vector(0))
+        provider: prometheus
+        sampleSize: request-count
+        type: Gauge
+        urlTemplate: http://prometheus-operated.iter8-system:9090/api/v1/query
+    name: iter8-istio/error-rate
+  stage: Completed
+  startTime: "2021-04-23T17:02:54Z"
+  versionRecommendedForPromotion: B

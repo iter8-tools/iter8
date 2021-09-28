@@ -1,0 +1,221 @@
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"iter8.tools/v2alpha2","kind":"Experiment","metadata":{"annotations":{},"name":"experiment-1","namespace":"knative-test"},"spec":{"criteria":{"objectives":[{"metric":"mean-latency","upperLimit":2000},{"metric":"error-rate","upperLimit":"0.01"}]},"duration":{"intervalSeconds":20,"iterationsPerLoop":8},"strategy":{"handlers":{"failure":"none","finish":"none","rollback":"none","start":"none"},"testingPattern":"Canary"},"target":"knative-test/sample-application","versionInfo":{"baseline":{"name":"sample-application-v1","variables":[{"name":"revision","value":"default"}],"weightObjRef":{"apiVersion":"serving.knative.dev/v1","fieldPath":".spec.traffic[0].percent","kind":"Service","name":"sample-application","namespace":"knative-test"}},"candidates":[{"name":"sample-application-v2","variables":[{"name":"revision","value":"candidate-0"}],"weightObjRef":{"apiVersion":"serving.knative.dev/v1","fieldPath":".spec.traffic[1].percent","kind":"Service","name":"sample-application","namespace":"knative-test"}}]}}}
+  creationTimestamp: "2021-02-12T19:57:46Z"
+  finalizers:
+  - experiments.iter8.tools.finalizer
+  generation: 3
+  name: experiment-1
+  namespace: knative-test
+  resourceVersion: "9237"
+  selfLink: /apis/iter8.tools/v2alpha2/namespaces/knative-test/experiments/experiment-1
+  uid: 81cbdbe1-6f01-4960-be0d-75ab5ad1de53
+spec:
+  criteria:
+    objectives:
+    - metric: mean-latency
+      upperLimit: 2k
+    - metric: error-rate
+      upperLimit: 10m
+    requestCount: request-count
+  duration:
+    intervalSeconds: 20
+    iterationsPerLoop: 8
+  strategy:
+    deploymentPattern: Progressive
+    testingPattern: Canary
+    weights:
+      maxCandidateWeight: 100
+      maxCandidateWeightIncrement: 10
+  target: knative-test/sample-application
+  versionInfo:
+    baseline:
+      name: sample-application-v1
+      variables:
+      - name: revision
+        value: default
+      weightObjRef:
+        apiVersion: serving.knative.dev/v1
+        fieldPath: .spec.traffic[0].percent
+        kind: Service
+        name: sample-application
+        namespace: knative-test
+    candidates:
+    - name: sample-application-v2
+      variables:
+      - name: revision
+        value: candidate-0
+      weightObjRef:
+        apiVersion: serving.knative.dev/v1
+        fieldPath: .spec.traffic[1].percent
+        kind: Service
+        name: sample-application
+        namespace: knative-test
+status:
+  analysis:
+    aggregatedMetrics:
+      data:
+        error-rate:
+          data:
+            sample-application-v1:
+              value: "0"
+            sample-application-v2:
+              value: "0"
+        mean-latency:
+          data:
+            sample-application-v1:
+              value: 5880641926n
+            sample-application-v2:
+              value: 4701943845n
+        request-count:
+          data:
+            sample-application-v1:
+              value: 1022564102565n
+            sample-application-v2:
+              value: 514444444445n
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-02-12T20:01:07Z"
+    versionAssessments:
+      data:
+        sample-application-v1:
+        - true
+        - true
+        sample-application-v2:
+        - true
+        - true
+      message: 'Error: ; Warning: ; Info: '
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-02-12T20:01:07Z"
+    weights:
+      data:
+      - name: sample-application-v1
+        value: 25
+      - name: sample-application-v2
+        value: 75
+      message: 'Error: ; Warning: ; Info: all ok'
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-02-12T20:01:07Z"
+    winnerAssessment:
+      data:
+        winner: sample-application-v2
+        winnerFound: true
+      message: 'Error: ; Warning: ; Info: candidate satisfies all objectives'
+      provenance: http://iter8-analytics.iter8-system:8080/v2/analytics_results
+      timestamp: "2021-02-12T20:01:07Z"
+  completedIterations: 8
+  conditions:
+  - lastTransitionTime: "2021-02-12T20:01:08Z"
+    message: Experiment completed successfully
+    reason: ExperimentCompleted
+    status: "True"
+    type: Completed
+  - lastTransitionTime: "2021-02-12T19:57:46Z"
+    status: "False"
+    type: Failed
+  - lastTransitionTime: "2021-02-12T19:57:46Z"
+    message: ""
+    reason: TargetAcquired
+    status: "True"
+    type: TargetAcquired
+  currentWeightDistribution:
+  - name: sample-application-v1
+    value: 25
+  - name: sample-application-v2
+    value: 75
+  initTime: "2021-02-12T19:57:46Z"
+  lastUpdateTime: "2021-02-12T20:01:08Z"
+  message: 'ExperimentCompleted: Experiment completed successfully'
+  versionRecommendedForPromotion: sample-application-v2
+  stage: Completed
+  startTime: "2021-02-12T19:57:47Z"
+  metrics:
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"request-count","namespace":"iter8-system"},"spec":{"description":"Number of requests","params":[{"name":"query","value":"sum(increase(revision_app_request_latencies_count{revision_name='$name'}[$interval])) or on() vector(0)"}],"provider":"prometheus","type":"Counter"}}
+        creationTimestamp: "2021-02-12T19:48:16Z"
+        generation: 1
+        labels:
+          creator: iter8
+        name: request-count
+        namespace: iter8-system
+        resourceVersion: "1454"
+        selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/request-count
+        uid: 96b46576-b518-4c3c-89e4-df28d051383e
+      spec:
+        description: Number of requests
+        params:
+        - name: query
+          value: sum(increase(revision_app_request_latencies_count{revision_name='$name'}[$interval]))
+            or on() vector(0)
+        provider: prometheus
+        jqExpression: ".data.result[0].value[1] | tonumber"
+        type: Counter
+        urlTemplate: url
+    name: request-count
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"mean-latency","namespace":"iter8-system"},"spec":{"description":"Mean latency","params":[{"name":"query","value":"(sum(increase(revision_app_request_latencies_sum{revision_name='$name'}[$interval]))or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[$interval])) or on() vector(0))"}],"provider":"prometheus","sampleSize":"request-count","type":"Gauge","units":"milliseconds"}}
+        creationTimestamp: "2021-02-12T19:48:16Z"
+        generation: 1
+        labels:
+          creator: iter8
+        name: mean-latency
+        namespace: iter8-system
+        resourceVersion: "1453"
+        selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/mean-latency
+        uid: 2f0a42d5-c54e-4073-b5bb-1a09e7e7abe0
+      spec:
+        description: Mean latency
+        params:
+        - name: query
+          value: (sum(increase(revision_app_request_latencies_sum{revision_name='$name'}[$interval]))or
+            on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[$interval]))
+            or on() vector(0))
+        provider: prometheus
+        jqExpression: ".data.result[0].value[1] | tonumber"
+        sampleSize: request-count
+        type: Gauge
+        units: milliseconds
+        urlTemplate: url
+    name: mean-latency
+  - metricObj:
+      apiVersion: iter8.tools/v2alpha2
+      kind: Metric
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"iter8.tools/v2alpha2","kind":"Metric","metadata":{"annotations":{},"labels":{"creator":"iter8"},"name":"error-rate","namespace":"iter8-system"},"spec":{"description":"Fraction of requests with error responses","params":[{"name":"query","value":"(sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$name'}[$interval])) or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[$interval])) or on() vector(0))"}],"provider":"prometheus","sampleSize":"request-count","type":"Gauge"}}
+        creationTimestamp: "2021-02-12T19:48:16Z"
+        generation: 1
+        labels:
+          creator: iter8
+        name: error-rate
+        namespace: iter8-system
+        resourceVersion: "1452"
+        selfLink: /apis/iter8.tools/v2alpha2/namespaces/iter8-system/metrics/error-rate
+        uid: 66157ff1-6510-449c-bcba-a2de80d4c0d0
+      spec:
+        description: Fraction of requests with error responses
+        params:
+        - name: query
+          value: (sum(increase(revision_app_request_latencies_count{response_code_class!='2xx',revision_name='$name'}[$interval]))
+            or on() vector(0)) / (sum(increase(revision_app_request_latencies_count{revision_name='$name'}[$interval]))
+            or on() vector(0))
+        provider: prometheus
+        jqExpression: ".data.result[0].value[1] | tonumber"
+        sampleSize: request-count
+        type: Gauge
+        urlTemplate: url
+    name: error-rate

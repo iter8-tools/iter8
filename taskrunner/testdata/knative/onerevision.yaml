@@ -1,0 +1,93 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"serving.knative.dev/v1","kind":"Service","metadata":{"annotations":{},"name":"sample-application","namespace":"default"},"spec":{"template":{"metadata":{"name":"sample-application-v1"},"spec":{"containers":[{"image":"docker.io/sushmarchandran/sample-application:v1"}]}}}}
+    serving.knative.dev/creator: minikube-user
+    serving.knative.dev/lastModifier: minikube-user
+  creationTimestamp: "2021-02-12T15:07:26Z"
+  generation: 1
+  managedFields:
+  - apiVersion: serving.knative.dev/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+      f:spec:
+        .: {}
+        f:template:
+          .: {}
+          f:metadata:
+            .: {}
+            f:name: {}
+          f:spec:
+            .: {}
+            f:containers: {}
+    manager: kubectl-client-side-apply
+    operation: Update
+    time: "2021-02-12T15:07:26Z"
+  - apiVersion: serving.knative.dev/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        .: {}
+        f:address:
+          .: {}
+          f:url: {}
+        f:conditions: {}
+        f:latestCreatedRevisionName: {}
+        f:latestReadyRevisionName: {}
+        f:observedGeneration: {}
+        f:traffic: {}
+        f:url: {}
+    manager: controller
+    operation: Update
+    time: "2021-02-12T15:07:38Z"
+  name: sample-application
+  namespace: default
+  resourceVersion: "17684"
+  uid: aace246a-d762-432f-9928-9876183c82e2
+spec:
+  template:
+    metadata:
+      creationTimestamp: null
+      name: sample-application-v1
+    spec:
+      containerConcurrency: 0
+      containers:
+      - image: docker.io/sushmarchandran/sample-application:v1
+        name: user-container
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+        resources: {}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100
+status:
+  address:
+    url: http://sample-application.default.svc.cluster.local
+  conditions:
+  - lastTransitionTime: "2021-02-12T15:07:38Z"
+    status: "True"
+    type: ConfigurationsReady
+  - lastTransitionTime: "2021-02-12T15:07:39Z"
+    status: "True"
+    type: Ready
+  - lastTransitionTime: "2021-02-12T15:07:39Z"
+    status: "True"
+    type: RoutesReady
+  latestCreatedRevisionName: sample-application-v1
+  latestReadyRevisionName: sample-application-v1
+  observedGeneration: 1
+  traffic:
+  - latestRevision: true
+    percent: 100
+    revisionName: sample-application-v1
+  url: http://sample-application.default.example.com

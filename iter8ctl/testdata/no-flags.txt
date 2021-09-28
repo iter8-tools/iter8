@@ -1,0 +1,18 @@
+iter8ctl promotes understanding of an Iter8 experiment. It can be used to describe the stage of the experiment, how versions are performing, and assert various conditions relating to the experiment. This program is a K8s client and requires a valid K8s cluster with Iter8 installed.
+
+Usage:
+  iter8ctl [command]
+
+Available Commands:
+  assert      Assert conditions for an Iter8 experiment
+  completion  generate the autocompletion script for the specified shell
+  debug       Debug an Iter8 experiment
+  describe    Describe an Iter8 experiment
+  help        Help about any command
+
+Flags:
+      --config string      config file (default is $HOME/.iter8ctl.yaml)
+  -h, --help               help for iter8ctl
+  -n, --namespace string   namespace of the experiment; never ignored -- namespace from current context is used if not specified
+
+Use "iter8ctl [command] --help" for more information about a command.
