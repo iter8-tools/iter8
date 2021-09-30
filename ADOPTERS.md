@@ -7,3 +7,4 @@ If you have adopted or in the process of adopting Iter8, please raise a PR with 
 | IBM Cloud (DevOps Toolchains) | [Michael Kalantar](https://github.com/kalantar), [Srinivasan Parthasarathy](https://github.com/sriumcp) |
 | IBM Research Cloud Innovation Lab | [Atin Sood](https://github.com/atinsood)|
 | IBM Cloud (Code Engine) | [Doug Davis](https://github.com/duglin) |
+| ChaosNative(LitmusChaos) | [Shubham Chaudhary](https://github.com/ispeakc0de) |
