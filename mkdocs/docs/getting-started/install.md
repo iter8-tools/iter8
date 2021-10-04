@@ -9,6 +9,7 @@ hide:
 Install Iter8 in your Kubernetes cluster as follows. This step requires [Kustomize v3+](https://kubectl.docs.kubernetes.io/installation/kustomize/).
 
 ```shell
+# install Iter8 in the cluster
 export TAG=master
 kustomize build "https://github.com/iter8-tools/iter8/install/core/?ref=${TAG}" | kubectl apply -f -
 kubectl wait crd -l creator=iter8 --for condition=established --timeout=120s
@@ -21,7 +22,8 @@ To pin Iter8 to a specific version during install, export the appropriate Iter8 
 ## Get `iter8ctl`
 Get `iter8ctl` CLI on your local machine as follows. This step requires [Go 1.16+](https://golang.org/doc/install).
 ```shell
-go install github.com/iter8-tools/etc3/iter8ctl@latest
+# install iter8ctl locally
+GOBIN=/usr/local/bin go install github.com/iter8-tools/etc3/iter8ctl@latest
 ```
 
 <!-- ## Pinning the Iter8 version

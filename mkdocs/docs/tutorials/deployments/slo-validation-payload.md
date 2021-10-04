@@ -29,19 +29,22 @@ template: main.html
 The `httpbin` app consists of a Kubernetes deployment and service. Deploy the app as follows.
 
 ```shell
+# deploy app
 kubectl apply -n default -f $ITER8/samples/deployments/httpbin/deploy.yaml
 kubectl apply -n default -f $ITER8/samples/deployments/httpbin/service.yaml
 ```
 
-### Verify app
+### 1.a) Verify app is running
 
 ??? note "Verify that the app is running using these instructions"
     ```shell
     # do this in a separate terminal
+    # port-forward the app
     kubectl port-forward -n default svc/httpbin 8080:80
     ```
 
     ```shell
+    # query the app
     curl http://localhost:8080/post -X POST -d @$ITER8/samples/deployments/httpbin/payload.json -H "Content-Type: application/json"
     ```
 
@@ -71,6 +74,7 @@ kubectl apply -n default -f $ITER8/samples/deployments/httpbin/service.yaml
 ## 2. Create Iter8 experiment
 Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
+# create Iter8 experiment
 helm upgrade -n default my-exp $ITER8/samples/deployments/payload \
   --set URL='http://httpbin.default.svc.cluster.local/post' \
   --set payloadURL='https://raw.githubusercontent.com/sriumcp/iter8/post/samples/deployments/httpbin/payload.json' \
@@ -83,13 +87,8 @@ helm upgrade -n default my-exp $ITER8/samples/deployments/payload \
 
 The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates HTTP requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (100 msec), error rate (0.0), 95th percentile tail latency (200 msec) SLOs. These HTTP requests are POST requests and use the JSON data from the `payloadURL` specified in the command as request payload.
 
-??? note "View Iter8 experiment"
-    View the Iter8 experiment as follows.
-    ```shell
-    helm get manifest -n default my-exp
-    ```
-
-    Notice the `metrics/collect` task in the experiment manifest and also the `objectives` stanza that specifies SLOs.
+### 2.a) View manifest
+View the experiment manifest as described [here](../../getting-started/first-experiment.md#2a-view-manifest).
 
 ## 3. Observe experiment
 Observe the experiment as described [here](../../getting-started/first-experiment.md#3-observe-experiment).
