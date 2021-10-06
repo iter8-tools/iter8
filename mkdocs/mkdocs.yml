@@ -149,10 +149,10 @@ nav:
   - Knative:
     - SLO validation: tutorials/knative/slovalidation-helmex.md
     - Testing strategies:
-      - SLO validation: tutorials/knative/testing-strategies/slovalidation.md
+      - SLO validation with traffic shifting: tutorials/knative/testing-strategies/slo-validation-traffic-shift.md
       - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
     - Rollout strategies:
-      - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive.md
+      - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive-traffic-shift.md
       - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
     - Setup for tutorials: tutorials/knative/setup-for-tutorials.md
   - Istio:

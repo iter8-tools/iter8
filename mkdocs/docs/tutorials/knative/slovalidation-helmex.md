@@ -199,6 +199,6 @@ helm uninstall my-app
     The `knslo` Helm chart is located in the `$ITER8/helm` folder. Modify the chart as needed by your application for production usage.
 
 !!! tip "Try other Iter8 Knative tutorials"
-    * [SLO validation with progressive traffic shift](testing-strategies/slovalidation.md)
+    * [SLO validation with progressive traffic shift](testing-strategies/slo-validation-traffic-shift.md)
     * [Hybrid testing](testing-strategies/hybrid.md)
     * [Fixed traffic split](rollout-strategies/fixed-split.md)

@@ -47,3 +47,25 @@ sleep 20
 kubectl wait --for=condition=available deployment --all -n knative-serving --timeout=300s
 kubectl wait crd --all --for condition=established --timeout=300s    
 # fi
+
+# This work has potential ... but needs a lot of effort in terms of clean/docs
+# TBD later
+
+# # Install open telemetry metrics collector
+# # Follows https://knative.dev/docs/admin/collecting-metrics/
+
+# # namespace
+# kubectl create namespace metrics
+
+# # collector
+# kubectl apply -f https://raw.githubusercontent.com/knative/docs/main/docs/admin/collecting-metrics/collector.yaml
+
+# # patch
+# kubectl patch --namespace knative-serving configmap/config-observability \
+#   --type merge \
+#   --patch '{"data":{"metrics.backend-destination":"opencensus","request-metrics-backend-destination":"opencensus","metrics.opencensus-address":"otel-collector.metrics:55678"}}'
+
+# # prom operator in the default namespace
+# kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/bundle.yaml
+
+# kubectl apply -f $ITER8/samples/knative/quickstart/prometheus.yaml -n metrics
