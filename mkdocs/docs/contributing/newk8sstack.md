@@ -90,7 +90,7 @@ cd iter8-<your stack>
       - create
       - delete
       - watch
-    ```    
+    ```
 
     **rolebindings.yaml**
     ```yaml

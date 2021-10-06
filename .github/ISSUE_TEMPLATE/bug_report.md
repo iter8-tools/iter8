@@ -14,7 +14,7 @@ A clear and concise description of what the bug is.
 Steps to reproduce the behavior. For example:
 1. Go to '...'
 2. Try experiment '....'
-3. Look at experiment status  '....'
+3. Look at experiment status '....'
 4. See error
 
 **Expected behavior**

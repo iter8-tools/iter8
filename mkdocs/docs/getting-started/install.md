@@ -25,7 +25,7 @@ go install github.com/iter8-tools/etc3/iter8ctl@latest
 ```
 
 <!-- ## Pinning the Iter8 version
-To select the version of Iter8 during installation, select any Iter8 version (>= v0.6.0) from  [Iter8's release history](https://github.com/iter8-tools/iter8/releases) and use it as the `TAG` above.
+To select the version of Iter8 during installation, select any Iter8 version (>= v0.6.0) from [Iter8's release history](https://github.com/iter8-tools/iter8/releases) and use it as the `TAG` above.
 
 ## RBAC rules
 As part of Iter8 installation, the following RBAC rules are also installed in your cluster. You can Kustomize Iter8 installation in order to install Iter8 only for the K8s environments of your choice, and eliminate RBAC rules not needed in your environment.

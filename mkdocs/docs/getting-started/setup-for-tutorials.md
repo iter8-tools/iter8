@@ -6,16 +6,25 @@ template: main.html
 Setup common components that are required in Iter8 tutorials.
 
 ## Local Kubernetes cluster
-Use a managed K8s cluster or a local K8s cluster for running Iter8 tutorials. You can setup the latter using [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/) or [Minikube](https://minikube.sigs.k8s.io/docs/) as follows.
+Use a managed K8s cluster or a local K8s cluster for running Iter8 tutorials. You can setup the latter using [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/), [Minikube](https://minikube.sigs.k8s.io/docs/), or [CodeReady Containers](https://access.redhat.com/documentation/en-us/red_hat_codeready_containers/1.0/html/getting_started_guide/index) as follows.
 
 === "Kind"
+
     ```shell
     kind create cluster --wait 5m
     kubectl cluster-info --context kind-kind
     ```
+
 === "Minikube"
+
     ```shell
     minikube start
+    ```
+
+=== "CodeReady Containers"
+
+    ```shell
+    crc start
     ```
 
 ??? info "Setting CPU and memory resources for your local K8s cluster"
@@ -28,9 +37,21 @@ Use a managed K8s cluster or a local K8s cluster for running Iter8 tutorials. Yo
 
     === "Minikube"
         Set CPU and memory resources while starting Minikube as follows.
+
         ```shell
         minikube start --cpus 8 --memory 12288
         ```
+
+    === "CodeReady Containers"
+        Set CPU and memory resources while starting CodeReady Containers as follows.
+
+        ```
+        crc start --cpus 8 --memory 12288
+        ```
+
+        You can also change the CPU and memory resources in settings.
+
+        ![Resources](../images/crcresourcepreferences.png)
 
 ## Iter8 GitHub repo
 Clone the Iter8 GitHub repo and set the `ITER8` environment variable as follows:

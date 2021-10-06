@@ -21,7 +21,7 @@ docker build -t ind:latest .
 
 > If you want to run using the local image, replace iter8/ind:latest with ind:latest below.
 
-> If  you want to run a specific version, replace iter8/ind:latest with iter8/ind:<tag> below. For example, `iter8/ind:0.7.21`.
+> If you want to run a specific version, replace iter8/ind:latest with iter8/ind:<tag> below. For example, `iter8/ind:0.7.21`.
 
 1. Start Iter8 container
 ```shell
