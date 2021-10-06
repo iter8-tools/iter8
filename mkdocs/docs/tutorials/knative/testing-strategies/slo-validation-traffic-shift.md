@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# SLO Validation
+# SLO Validation with Traffic Shifting
 
 !!! tip "Scenario: SLO validation with progressive traffic shift"
     This tutorial illustrates an [SLO validation experiment with two versions](../../../concepts/buildingblocks.md#slo-validation); the candidate version will be promoted after Iter8 validates that it satisfies service-level objectives (SLOs). You will:
@@ -14,6 +14,21 @@ template: main.html
     ![SLO validation with progressive traffic shift](../../../images/slovalidationprogressive.png)
 
 ???+ warning "Platform setup"
+    1. Setup [Kubernetes cluster](../../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
+    2. [Install Iter8 in Kubernetes cluster](../../../getting-started/install.md)
+    3. [Install Knative in Kubernetes cluster](../setup-for-tutorials.md#install-knative)
+    4. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
+    5. Get [`iter8ctl`](../../../getting-started/install.md#get-iter8ctl)
+    6. Fork the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8). Clone your fork, and set the `ITER8` environment variable as follows.
+    ```shell
+    export USERNAME=<your GitHub username>
+    ```
+    ```shell
+    git clone git@github.com:$USERNAME/iter8.git
+    cd iter8
+    export ITER8=$(pwd)
+    ```
+
     Follow [these steps](../setup-for-tutorials.md) to install Iter8 and Knative in your K8s cluster.
 
 ## 1. Create app versions

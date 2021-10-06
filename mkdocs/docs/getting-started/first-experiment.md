@@ -10,6 +10,11 @@ template: main.html
     **Solution**: In this tutorial, you will launch a Kubernetes app along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md). During this validation, Iter8 will generate HTTP GET requests for the app.
 
     ![SLO Validation](../images/slo-validation.png)
+
+    ??? tip "30 second preview"
+
+        ![SLO Validation Movie](../images/slo-validation.movie.svg)
+
     
 ??? warning "Setup Kubernetes cluster and local environment"
     1. Setup [Kubernetes cluster](setup-for-tutorials.md#local-kubernetes-cluster)
@@ -30,33 +35,39 @@ template: main.html
 The `hello world` app consists of a Kubernetes deployment and service. Deploy the app as follows.
 
 ```shell
+# deploy app
 kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
 kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ```
 
 ### 1.a) Verify app is running
 
-??? note "Verify that the app is running using these instructions"
-    ```shell
-    # do this in a separate terminal
-    kubectl port-forward -n default svc/hello 8080:8080
-    ```
+```shell
+# create an interactive shell
+kubectl run curl --image=radial/busyboxplus:curl -i --tty --rm
+```
 
-    ```shell
-    curl localhost:8080
-    ```
+```shell
+# query the app
+curl hello.default.svc.cluster.local:8080
+```
 
-    ```
-    # output will be similar to the following (notice 1.0.0 version tag)
-    # hostname will be different in your environment
-    Hello, world!
-    Version: 1.0.0
-    Hostname: hello-bc95d9b56-xp9kv
-    ```
+`Curl` output will be similar to the following (notice 1.0.0 version tag).
+```
+Hello, world!
+Version: 1.0.0
+Hostname: hello-bc95d9b56-xp9kv
+```
+
+```shell
+# exit from the pod
+exit
+```
 
 ## 2. Create Iter8 experiment
 Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
+# create Iter8 experiment
 helm upgrade -n default my-exp $ITER8/samples/first-exp \
   --set URL='http://hello.default.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
@@ -69,8 +80,8 @@ The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-
 
 ### 2.a) View manifest
 ??? note "View Iter8 experiment manifest using these instructions"
-    View the Iter8 experiment as follows.
     ```shell
+    # view Iter8 experiment manifest
     helm get manifest -n default my-exp
     ```
 
@@ -140,9 +151,9 @@ iter8ctl describe
 ??? info "Sample experiment results"
     ```shell
     ****** Overview ******
-    Experiment name: my-experiment
+    Experiment name: slo-validation-1dhq3
     Experiment namespace: default
-    Target: my-app
+    Target: app
     Testing pattern: Conformance
     Deployment pattern: Progressive
 
@@ -156,30 +167,28 @@ iter8ctl describe
     Winning version: my-app
 
     ****** Objective Assessment ******
-    > Identifies whether or not the experiment objectives are satisfied by the most recently observed metrics values for each version.
-    +--------------------------------------+--------+
-    |              OBJECTIVE               | MY-APP |
-    +--------------------------------------+--------+
-    | iter8-system/mean-latency <=         | true   |
-    |                               50.000 |        |
-    +--------------------------------------+--------+
-    | iter8-system/error-rate <=           | true   |
-    |                                0.000 |        |
-    +--------------------------------------+--------+
-    | iter8-system/latency-95th-percentile | true   |
-    | <= 100.000                           |        |
-    +--------------------------------------+--------+
+    > Whether objectives specified in the experiment are satisfied by versions.
+    > This assessment is based on last known metric values for each version.
+    +--------------------------------------+------------+--------+
+    |                METRIC                | CONDITION  | MY-APP |
+    +--------------------------------------+------------+--------+
+    | iter8-system/mean-latency            | <= 50.000  | true   |
+    +--------------------------------------+------------+--------+
+    | iter8-system/error-rate              | <= 0.000   | true   |
+    +--------------------------------------+------------+--------+
+    | iter8-system/latency-95th-percentile | <= 100.000 | true   |
+    +--------------------------------------+------------+--------+
 
     ****** Metrics Assessment ******
-    > Most recently read values of experiment metrics for each version.
+    > Last known metric values for each version.
     +--------------------------------------+--------+
     |                METRIC                | MY-APP |
     +--------------------------------------+--------+
-    | iter8-system/mean-latency            |  1.233 |
+    | iter8-system/mean-latency            |  1.285 |
     +--------------------------------------+--------+
     | iter8-system/error-rate              |  0.000 |
     +--------------------------------------+--------+
-    | iter8-system/latency-95th-percentile |  2.311 |
+    | iter8-system/latency-95th-percentile |  2.208 |
     +--------------------------------------+--------+
     | iter8-system/request-count           | 40.000 |
     +--------------------------------------+--------+
