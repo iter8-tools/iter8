@@ -6,7 +6,7 @@ template: main.html
 
 ## 1. Create Kubernetes cluster
 
-Create a local cluster using Kind or Minikube as follows, or use a managed Kubernetes cluster. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
+Create a local cluster using Kind, Minikube, or CodeReady Containers as follows, or use a managed Kubernetes cluster. Ensure that the cluster has sufficient resources, for example, 8 CPUs and 12GB of memory.
 
 === "Kind"
 
@@ -24,6 +24,12 @@ Create a local cluster using Kind or Minikube as follows, or use a managed Kuber
 
     ```shell
     minikube start --cpus 8 --memory 12288
+    ```
+    
+=== "CodeReady Containers"
+
+    ```shell
+    crc start --cpus 8 --memory 12288
     ```
 
 ## 2. Clone Iter8 repo
