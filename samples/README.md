@@ -62,9 +62,9 @@ and then open a web browser to http://localhost:8080. In either case, you will n
 oc -n openshift-gitops  get secret argocd-cluster-cluster -o jsonpath="{.data.admin\.password}" | base64 -d
 ```
 
-### Setup Github token
+### Setup GitHub token
 
-Components in the CI/CD pipeline will need to modify your Github repo via creating PRs, and you need to provide authentication to it by creating a Github Personal Access Token. Go to github.com > upper right corner > Settings > Developer settings > Personal access token > Generate new token
+Components in the CI/CD pipeline will need to modify your GitHub repo via creating PRs, and you need to provide authentication to it by creating a GitHub Personal Access Token. Go to github.com > upper right corner > Settings > Developer settings > Personal access token > Generate new token
 
 Copy the token and make a Kubernetes secret from it so it can be used at runtime by the CI/CD pipeline.
 
@@ -76,7 +76,7 @@ oc create secret generic github-token --from-literal=token=xxxxxxxxxxxxxxxxxxxxx
 
 ### Repo setup
 
-Since this is a GitOps scenario, you will need to use your own Github repo. You can fork this repository: [https://github.com/iter8-tools/iter8](https://github.com/iter8-tools/iter8) so it is available at https://github.com/[YOUR_ORG]/iter8. Once this is done, you can clone it locally:
+Since this is a GitOps scenario, you will need to use your own GitHub repo. You can fork this repository: [https://github.com/iter8-tools/iter8](https://github.com/iter8-tools/iter8) so it is available at https://github.com/[YOUR_ORG]/iter8. Once this is done, you can clone it locally:
 
 ```shell
 git clone https://github.com/[YOUR_ORG]/iter8.git
@@ -85,7 +85,7 @@ export ITER8=$(pwd)
 $ITER8/samples/gitops/platformsetup.sh
 ```
 
-replacing [YOUR_ORG] with your Github organization or username. Now, do the same replacement operation to update some references in the repo so they will point at your forked repo.
+replacing [YOUR_ORG] with your GitHub organization or username. Now, do the same replacement operation to update some references in the repo so they will point at your forked repo.
 
 ```shell
 find $ITER8/samples/gitops -name "*" -type f | xargs sed -i '' "s/MY_ORG/YOUR_ORG/"
@@ -102,9 +102,9 @@ oc apply -f $ITER8/samples/cicd/argocd-app.yaml
 
 Now Argo CD Web Console should show that a new app called `gitops` is created. Make sure it is showing both Healthy and Synced - this might take a few minutes.
 
-## Setup Github webhook
+## Setup GitHub webhook
 
-When a developer makes a change in the repo that would require a new image to be built, we want Github to send a webhook call so it triggers pipeline tools to start building the image. We first need to setup Openshift Pipeline to be ready to receive the webhook calls, and then we will go to Github to configure the sending side of the webhook call.
+When a developer makes a change in the repo that would require a new image to be built, we want GitHub to send a webhook call so it triggers pipeline tools to start building the image. We first need to setup Openshift Pipeline to be ready to receive the webhook calls, and then we will go to GitHub to configure the sending side of the webhook call.
 
 ### Setup Openshift Pipeline
 
@@ -119,13 +119,13 @@ oc apply -f $ITER8/samples/cicd/tekton/triggertemplate.yaml
 oc apply -f $ITER8/samples/cicd/tekton/tasks/
 ```
 
-You will also need to expose the EventListener service via Openshift Route so Github can send webhook calls to the cluster. This can be done via
+You will also need to expose the EventListener service via Openshift Route so GitHub can send webhook calls to the cluster. This can be done via
 
 ```
 oc expose service el-iter8-eventlistener
 ```
 
-### Setup Github webhook
+### Setup GitHub webhook
 
 Go to github.com/[YOUR_ORG]/iter8 > Settings > Webhooks > Add webhook. To fill in `Payload URL`, run the following command:
 
@@ -137,6 +137,6 @@ Set `Content-type` to `application/json`. Set `Which event` to `Let me select in
 
 ## Start a progressive rollout
 
-Now that our application is deployed in the cluster, CI/CD pipeline configured to watch for commits from Github, it is time to see what happens when a developer merges a PR.
+Now that our application is deployed in the cluster, CI/CD pipeline configured to watch for commits from GitHub, it is time to see what happens when a developer merges a PR.
 
 

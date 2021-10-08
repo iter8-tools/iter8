@@ -1,6 +1,6 @@
 # Iter8-in-Docker-in-Tekton
 
-Iter8 experiments can be performed for remote applications. In particular, Iter8 can be run in a local cluster while the application/ML model resides in a remote K8s cluster. In these situations, it is desirable to run Iter8 within a local cluster like Minikube or Kind which itself is running within a Docker container.
+Iter8 experiments can be performed for remote applications. In particular, Iter8 can be run in a local cluster while the application/ML model resides in a remote K8s cluster. In these situations, it is desirable to run Iter8 within a local cluster like Kind, Minikube, or CodeReady Containers which itself is running within a Docker container.
 
 [This Dockerfile](https://github.com/iter8-tools/iter8/blob/master/install/docker/README.md) creates an Iter8-in-Docker (`iter8/ind`) image for the above scenario.
 

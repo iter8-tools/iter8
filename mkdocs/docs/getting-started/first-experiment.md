@@ -73,7 +73,7 @@ helm upgrade -n default my-exp $ITER8/samples/first-exp \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
-  --install  
+  --install
 ```
 
 The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs.
@@ -125,7 +125,7 @@ The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-
         # information about app versions used in this experiment
         baseline:
           name: my-app
-    ```    
+    ```
 
     The [`metrics/collect` task](../reference/tasks/metrics-collect.md) highlighted above is responsible for generating and sending HTTP requests to the app's API endpoint, receiving responses, and creating latency and error-related metrics. The [`objectives`](../../concepts/buildingblocks/#objectives-slos) stanza describes the SLOs that the app needs to satisfy in order to be declared a winner.
 

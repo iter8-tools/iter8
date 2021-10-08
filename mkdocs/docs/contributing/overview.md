@@ -150,7 +150,7 @@ Makefile target. Below is an example of a checklist:
   `make build test lint`
 * Impacted code has new or updated tests
 * Documentation created/updated
-* We use [Azure DevOps, GitHub Actions, CircleCI]  to test all pull
+* We use [Azure DevOps, GitHub Actions, CircleCI] to test all pull
   requests. We require that all tests succeed on a pull request before it is merged.
 
 -->

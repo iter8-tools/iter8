@@ -22,7 +22,8 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
 
 === "Prometheus"
 
-    Prometheus does not support any authentication mechanism *out-of-the-box*. However,     Prometheus can be setup in conjunction with a reverse proxy, which in turn can support HTTP request authentication, as described [here](https://prometheus.io/docs/guides/basic-auth/).
+    Prometheus does not support any authentication mechanism *out-of-the-box*. However,
+    Prometheus can be setup in conjunction with a reverse proxy, which in turn can support HTTP request authentication, as described [here](https://prometheus.io/docs/guides/basic-auth/).
 
     === "No Authentication"
         The following is an example of an Iter8 metric with Prometheus as the provider. This example assumes that Prometheus can be queried by Iter8 without any authentication.
@@ -86,7 +87,8 @@ The examples in this document focus on Prometheus, NewRelic, Sysdig, and Elastic
         ```
 
     ??? hint "Brief explanation of the `request-count` metric"
-        1. Prometheus enables metric queries using HTTP GET requests. `GET` is the default value for the `method` field of an Iter8 metric. This field is optional; it is omitted in the  definition of `request-count`, and defaulted to `GET`.
+        1. Prometheus enables metric queries using HTTP GET requests. `GET` is the default value for the `method` field of an Iter8 metric. This field is optional; it is omitted in the
+        definition of `request-count`, and defaulted to `GET`.
         2. Iter8 will query Prometheus during each iteration of the experiment. In each iteration, Iter8 will use `n` HTTP queries to fetch metric values for each version, where `n` is the number of versions in the experiment[^2].
         3. The HTTP query used by Iter8 contains a single query parameter named `query` as [required by Prometheus](https://prometheus.io/docs/prometheus/latest/querying/api/). The value of this parameter is derived by [substituting the placeholders](#placeholder-substitution) in the value string.
         4. The `jqExpression` enables Iter8 to extract the metric value from the JSON response returned by Prometheus.
