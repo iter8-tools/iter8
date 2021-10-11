@@ -1,13 +1,13 @@
 # SLO Validation with Chaos Injection
 
-!!! tip "Scenario: Inject Chaos into Kubernetes cluster and verify if application can satisfy SLOs"
+!!! tip "Inject Chaos into Kubernetes cluster and validate if app can satisfy SLOs"
     **Problem:** You have a Kubernetes app. You want to stress test it by injecting chaos, and verify that it can satisfy service-level objectives (SLOs). This helps you guarantee that your application is resilient, and works well even under periods of stress (like intermittent pod failures).
 
     **Solution:** You will launch a Kubernetes application along with a Helm chart consisting of a [Litmus Chaos](https://litmuschaos.io/) experiment, and an Iter8 experiment. The chaos experiment will delete pods of the application periodically, while the Iter8 experiment will send requests to the app and verify if it is able to satisfy SLOs.
 
-    ![Chaos with SLO Validation](../../images/chaos-slo-validation.png)
+    ![Chaos with SLO Validation](../../images/slo-validation-chaos.png)
 
-??? warning "Setup Kubernetes cluster and local environment"
+???+ warning "Setup Kubernetes cluster and local environment"
     1. Complete the [getting started tutorial](../../getting-started/first-experiment.md) (highly recommended), and skip to step 7 below.
     2. Setup [Kubernetes cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
     3. [Install Iter8 in Kubernetes cluster](../../getting-started/install.md)
@@ -38,7 +38,7 @@ kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 
 Use [these instructions](../../getting-started/first-experiment.md#1a-verify-app-is-running) to verify that your app is running.
 
-## 2. Create joint experiment
+## 2. Launch joint experiment
 ```shell
 helm upgrade -n default my-exp $ITER8/samples/deployments/chaos \
   --set appns='default' \
@@ -52,7 +52,7 @@ helm upgrade -n default my-exp $ITER8/samples/deployments/chaos \
 
 The above command creates a [Litmus chaos experiment](https://litmuschaos.io/) and an [Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment). The former injects chaos into your environment by periodically killing pods of your app. The latter generates HTTP requests, collects latency and error rate metrics for the app, and verifies if the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs, even in the midst of chaos.
 
-You can view the chaos and Iter8 experiment manifests as follows.
+View the experiment resources as follows.
 ```shell
 helm get manifest -n default my-exp
 ```
@@ -107,13 +107,15 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 
 ***
 
-**Next Steps**
-
-???+ tip "Try in your environment, and try other types of Chaos"
-    1. You can replace the `hello` app used in this tutorial with your own application. 
+!!! tip "Next Steps"
+    1. Replace the `hello` app used in this tutorial with your own application. 
         * Modify [Step 1](#1-create-app) to use your service and deployment. 
-        * Modify [Step 2](#2-create-joint-experiment) by supplying the correct namespace and label for your app, and also the correct URL where the app receives requests.
+        * Modify [Step 2](#2-launch-joint-experiment) by supplying the correct namespace and label for your app, and also the correct URL where the app receives requests.
 
-    2. Litmus makes it possible to inject [over 51 types of Chaos](https://hub.litmuschaos.io/). Modify the Helm chart to use any of these other types of chaos experiments.
+    2. Run the above experiment with *your* app by modifying the Helm values.
+    
+    3. Litmus makes it possible to inject [over 51 types of Chaos](https://hub.litmuschaos.io/). Modify the Helm chart to use any of these other types of chaos experiments.
 
-    3. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. For example, you may have a stable version running in production and a candidate version deployed in a staging environment, perform this experiment, ensure that the candidate is successful, and promote it as the latest stable version in a GitOps-y manner as described [here](../deployments/slo-validation-pr.md) and [here](../deployments/slo-validation-ghaction.md).
+    4. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. Enhance your Helm chart to achieve the following.
+        - [GitOps with automated pull request](../tutorials/deployments/slo-validation-pr.md)
+        - [GitOps with automated GH Actions workflow trigger](../tutorials/deployments/slo-validation-ghaction.md)

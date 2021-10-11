@@ -1,0 +1,13 @@
+name: Demo
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  print-inputs:
+    name: Print inputs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print inputs
+      run: |
+        echo "inputs: ${{ inputs }}"
