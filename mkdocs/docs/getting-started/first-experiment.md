@@ -231,4 +231,6 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 
     4. [Try an SLO validation experiment with chaos injection.](../tutorials/deployments/slo-validation-chaos.md)
 
-    5. [Try an SLO validation experiment with promotion of a candidate version using GitOps.](../tutorials/deployments/slo-validation-gitops.md)
+    5. [Try an SLO validation experiment where a candidate version is promoted by Iter8 by automatically creating a GitHub pull request.](../tutorials/deployments/slo-validation-pr.md)
+
+    6. [Try an SLO validation experiment where a candidate version is promoted by Iter8 by automatically creating triggering a GitHub Action.](../tutorials/deployments/slo-validation-ghaction.md)

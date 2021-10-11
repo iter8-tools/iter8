@@ -110,4 +110,4 @@ kubectl delete -n default -f $ITER8/samples/deployments/httpbin/deploy.yaml
     
     2. You can also customize the mean latency, error rate, and tail latency limits in the SLOs.
 
-    3. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. For example, you may have a stable version running in production, have a candidate version deployed in a staging environment, perform this experiment, ensure that the candidate is successful, and promote it as the latest stable version in a GitOps-y manner as described [here](../deployments/slo-validation-gitops.md).
+    3. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. For example, you may have a stable version running in production, have a candidate version deployed in a staging environment, perform this experiment, ensure that the candidate is successful, and promote it as the latest stable version in a GitOps-y manner as described [here](../deployments/slo-validation-pr.md) and [here](../deployments/slo-validation-ghaction.md).

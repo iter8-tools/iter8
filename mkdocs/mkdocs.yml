@@ -126,9 +126,10 @@ nav:
   - Setup for tutorials: getting-started/setup-for-tutorials.md
 - Tutorials:
   - Kubernetes deployments:
-    - SLO validation with Payload: tutorials/deployments/slo-validation-payload.md
-    - SLO validation with Chaos: tutorials/deployments/slo-validation-chaos.md
-    - SLO validation with GitOps: tutorials/deployments/slo-validation-gitops.md
+    - SLO validation with payload: tutorials/deployments/slo-validation-payload.md
+    - SLO validation with GitHub PR: tutorials/deployments/slo-validation-pr.md
+    - SLO validation with GH Action: tutorials/deployments/slo-validation-ghaction.md
+    - SLO validation with chaos: tutorials/deployments/slo-validation-chaos.md
   - KFServing:
     - Quick start: tutorials/kfserving/quick-start.md
     - Platform setup: tutorials/kfserving/platform-setup.md
