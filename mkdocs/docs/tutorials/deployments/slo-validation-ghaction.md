@@ -2,15 +2,15 @@
 template: main.html
 ---
 
-# SLO Validation with GitHub Actions Trigger
-!!! tip "Scenario: Validate SLOs and promote a new version of a K8s app"
-    **Problem:** You have a new version of a K8s app. You want to verify that it satisfies latency and error rate SLOs, and promote it to production as the stable version of your app in a GitOps-y manner.
+# SLO Validation with Auto GH Actions Trigger
+!!! tip "Validate SLOs and automatically trigger a GitHub Actions workflow"
+    **Problem:** You have a new version of an app. You want to verify that it satisfies latency and error rate SLOs and promote it to production as the stable version in a GitOps-y manner by triggering a GitHub Actions workflow.
 
-    **Solution:** In this tutorial, you will [dark launch](../../concepts/buildingblocks.md#dark-launch) the new version of your K8s app along with an Iter8 experiment. Iter8 will [validate that the new satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../../metrics/builtin.md) and [promote the new version by triggering a GitHub Actions workflow](../../concepts/buildingblocks.md#version-promotion).
+    **Solution:** In this tutorial, you will [dark launch](../../concepts/buildingblocks.md#dark-launch) the new version of your app along with an Iter8 experiment. Iter8 will [validate that the new satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../../metrics/builtin.md) and [automatically trigger a GitHub Actions workflow](../../concepts/buildingblocks.md#version-promotion).
 
     ![SLO Validation GitHub Action Trigger](../../images/slo-validation-ghaction.png)
 
-??? warning "Setup Kubernetes cluster and local environment"
+???+ warning "Setup Kubernetes cluster and local environment"
     1. If you completed the [Iter8 getting-started tutorial](../../getting-started/first-experiment.md) (highly recommended), you may skip the remaining steps of setup.
     2. Setup [K8s cluster](../../getting-started/setup-for-tutorials.md#local-kubernetes-cluster)
     3. [Install Iter8 in K8s cluster](../../getting-started/install.md)
@@ -47,7 +47,7 @@ kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/sample
 
 Adapt [these instructions](../../getting-started/first-experiment.md#verify-app) to verify that stable and candidate versions of your app are running.
 
-## 3. Enable Iter8 GitOps
+## 3. Enable GitOps
 3.1) [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, grant `repo`, `workflow` and `read:org` permissions to this token. This will ensure that the token can be used by Iter8 to trigger GitHub Actions workflows.
 
 3.2) Create K8s secret
@@ -56,7 +56,7 @@ Adapt [these instructions](../../getting-started/first-experiment.md#verify-app)
 kubectl create secret generic -n staging ghtoken --from-literal=token=$GHTOKEN
 ```
 
-## 4. Create Iter8 experiment
+## 4. Launch Iter8 experiment
 Deploy an Iter8 experiment for SLO validation followed by a notification that triggers a GitHub Actions workflow.
 ```shell
 helm upgrade -n staging my-exp $ITER8/samples/slo-ghaction \
@@ -64,32 +64,45 @@ helm upgrade -n staging my-exp $ITER8/samples/slo-ghaction \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
-  --set username=$USERNAME \
-  --set newImage='gcr.io/google-samples/hello-app:2.0' \
+  --set repo=iter8 \
+  --set workflow=demo.yaml \
   --install
 ```
 
 The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, and verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs. 
 
-In the above command, the *USERNAME* environment variable was defined during setup. After the Iter8 experiment validates SLOs for the candidate, it uses the GitHub token (also provided during setup) to trigger a GitHub Actions workflow. The workflow in turn creates a GitHub pull request for promoting the candidate as the latest stable version.
+Assuming that the candidate satisfies the SLOs, Iter8 will also trigger the `demo.yaml` workflow in the `iter8` repo using the `ghtoken` secret.
 
-## 5. View and observe experiment
-View the Iter8 experiment as described [here](../../getting-started/first-experiment.md#2-create-iter8-experiment). Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Ensure correct namespace (`staging`) is used.
+View the experiment manifest as follows.
+```shell
+helm get manifest -n staging my-exp
+```
 
-## 6. Review PR
+## 5. Observe experiment
+Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Ensure correct namespace (`staging`) is used.
+
+## 6. View workflow run
 Once the experiment completes, you can visit your fork at https://github.com/$USERNAME/iter8/pulls to review the GitHub pull request created by the GitHub Actions workflow.
 
 ## 7. Cleanup
 
 ```shell
-# remove Iter8 experiment and candidate version of the app
 kubectl delete ns staging
-# remove stable version of the app
 kubectl delete deploy/hello
 kubectl delete svc/hello
 ```
 
 ***
+
+!!! tip "Next Steps"
+    1. Run the above experiment with *your* app by modifying the Helm values and the token.
+    
+    2. You can also customize the number of queries and queries per second generated by Iter8 as part of this experiment.
+
+    3. Try other variations of SLO validation that involve:
+        - [HTTP POST API accepting a payload](../tutorials/deployments/slo-validation-payload.md)
+        - [GitOps with automated pull request](../tutorials/deployments/slo-validation-pr.md)
+        - [Chaos injection](../tutorials/deployments/slo-validation-chaos.md)
 
 **Next Steps**
 

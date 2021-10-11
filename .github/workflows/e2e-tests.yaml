@@ -54,7 +54,7 @@ jobs:
     - name: create Iter8 experiment
       run: |
         export ITER8=$(pwd)
-        helm upgrade my-exp $ITER8/samples/first-exp \
+        helm upgrade my-exp $ITER8/samples/slo-validation \
           --set URL='http://hello.default.svc.cluster.local:8080' \
           --set limitMeanLatency=50.0 \
           --set limitErrorRate=0.0 \
@@ -107,7 +107,7 @@ jobs:
     - name: create Iter8 experiment
       run: |
         export ITER8=$(pwd)
-        helm upgrade -n default my-exp $ITER8/samples/deployments/payload \
+        helm upgrade -n default my-exp $ITER8/samples/deployments/slo-validation \
           --set URL='http://httpbin.default.svc.cluster.local/post' \
           --set payloadURL='https://raw.githubusercontent.com/sriumcp/iter8/post/samples/deployments/httpbin/payload.json' \
           --set contentType='application/json' \

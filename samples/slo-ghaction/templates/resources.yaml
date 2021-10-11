@@ -32,30 +32,19 @@ spec:
           # go to scratch folder
           cd $SCRATCH_DIR
           
-          # tell git who you are 
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"          
+          # create a token file
+          echo {{ "{{" }} .Secret "token" {{ "}}" }} > token.txt
 
-          # extract token and username into env variables
-          export USERNAME={{ required ".Values.username is required!" .Values.username }}
-          export TOKEN={{ "{{" }} .Secret "token" {{ "}}" }}
-
-          # clone repo using token
-          git clone https://$USERNAME:$TOKEN@github.com/$USERNAME/iter8.git
-
-          # commit changes locally and push to a branch
-          cd iter8
-          git checkout -b iter8-gitops
-          yq e -i '.spec.template.spec.containers[0].image = "{{ required ".Values.newImage is required!" .Values.newImage }}"' samples/deployments/app/deploy.yaml 
-          git commit --allow-empty -a -m "promote candidate version to production"
-          git push -f origin iter8-gitops
-
-          # create pull request using credentials
-          echo $TOKEN > $SCRATCH_DIR/token.txt
+          # login
           gh auth login --with-token < $SCRATCH_DIR/token.txt
-          gh pr create --fill
+
+          # clone repo
+          gh repo clone {{ required ".Values.repo is required!" .Values.repo }}
+
+          # trigger workflow
+          echo '{"name":"scully", "greeting":"hello"}' | gh workflow run {{ required ".Values.workflow is required!" .Values.workflow }} --json
         with:
-          secret: {{ .Release.Namespace }}/ghtoken
+          secret: {{ .Release.Namespace }}/{{ .Values.secret }}
   criteria:
     requestCount: iter8-system/request-count
     indicators:

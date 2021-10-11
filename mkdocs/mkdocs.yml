@@ -127,8 +127,8 @@ nav:
 - Tutorials:
   - Kubernetes deployments:
     - SLO validation with payload: tutorials/deployments/slo-validation-payload.md
-    - SLO validation with GitHub PR: tutorials/deployments/slo-validation-pr.md
-    - SLO validation with GH Action: tutorials/deployments/slo-validation-ghaction.md
+    - Auto pull request: tutorials/deployments/slo-validation-pr.md
+    - Auto GH Actions trigger: tutorials/deployments/slo-validation-ghaction.md
     - SLO validation with chaos: tutorials/deployments/slo-validation-chaos.md
   - KFServing:
     - Quick start: tutorials/kfserving/quick-start.md
