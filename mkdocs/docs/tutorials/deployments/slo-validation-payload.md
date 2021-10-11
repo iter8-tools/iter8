@@ -74,7 +74,7 @@ kubectl apply -n default -f $ITER8/samples/deployments/httpbin/service.yaml
 ## 2. Launch Iter8 experiment
 Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
-helm upgrade -n default my-exp $ITER8/samples/deployments/slo-validation \
+helm upgrade -n default my-exp $ITER8/samples/slo-validation \
   --set URL='http://httpbin.default.svc.cluster.local/post' \
   --set payloadURL='https://raw.githubusercontent.com/sriumcp/iter8/post/samples/deployments/httpbin/payload.json' \
   --set contentType='application/json' \
