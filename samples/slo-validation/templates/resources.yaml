@@ -23,12 +23,12 @@ spec:
         with:
           numQueries: {{ required ".Values.numQueries is required!" .Values.numQueries }}
           qps: {{ required ".Values.QPS is required!" .Values.QPS }}
-          {{ if .Values.payloadURL }}
-          payloadURL: {{ required ".Values.payloadURL is required!" .Values.payloadURL }}
-          {{ end }}
-          {{ if .Values.contentType }}
-          contentType: {{ required ".Values.contentType is required!" .Values.contentType }}
-          {{ end }}
+          {{- if .Values.payloadURL }}
+          payloadURL: {{ .Values.payloadURL }}
+          {{- end }}
+          {{- if .Values.contentType }}
+          contentType: {{ .Values.contentType }}
+          {{- end }}
           versions:
           - name: my-app
             url: {{ required ".Values.URL is required!" .Values.URL | quote }}
