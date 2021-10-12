@@ -24,11 +24,7 @@ spec:
             name: hello
             namespace: default
             waitFor: condition=available
-      - task: common/bash
-        with:
-          # even though candidate is available, the url required for metrics collection
-          # below appears to take some time to become available
-          script: sleep 10.0 
+      - run: sleep 10.0
       # collect Iter8's built-in metrics
       - task: metrics/collect
         with:

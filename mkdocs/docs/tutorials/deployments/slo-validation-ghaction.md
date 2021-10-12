@@ -107,7 +107,7 @@ kubectl delete svc/hello
 **Next Steps**
 
 ??? tip "Use with your git repo/app"
-    1. The Helm chart used in this tutorial is located at $ITER8/samples/slo-gitops-ghaction. Within this folder, the file `templates/experiment.yaml` contains the Iter8 experiment template. The following lines in this template are responsible for cloning the git repo, modifying it locally, and pushing the changes.
+    1. The Helm chart used in this tutorial is located at $ITER8/samples/slo-ghaction. Within this folder, the file `templates/experiment.yaml` contains the Iter8 experiment template. The following lines in this template are responsible for cloning the git repo, modifying it locally, and pushing the changes.
     ```shell
     # clone repo using token
     git clone https://$USERNAME:$TOKEN@github.com/$USERNAME/iter8.git

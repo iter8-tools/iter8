@@ -1,10 +1,7 @@
-# Default values for Iter8 SLO validation experiment
+# Default values for Iter8 SLO validation experiment with automated PR creation
 
-# URL of the application for which this SLO validation experiment is performed
-# URL: https://example.com
-
-# The duration for which Iter8 will send requests to app
-time: 5s
+# Number of queries sent for validation
+numQueries: 100
 
 # Queries per second used by Iter8 for sending requests
 QPS: 8.0
@@ -17,3 +14,9 @@ limitErrorRate: 0.00 # 0%. Errors are not acceptable.
 
 # Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
 limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.
+
+# Base branch for PR
+base: master
+
+# Head branch for PR
+head: staging
