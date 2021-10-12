@@ -117,5 +117,5 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
     3. Litmus makes it possible to inject [over 51 types of Chaos](https://hub.litmuschaos.io/). Modify the Helm chart to use any of these other types of chaos experiments.
 
     4. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. Enhance your Helm chart to achieve the following.
-        - [GitOps with automated pull request](../tutorials/deployments/slo-validation-pr.md)
-        - [GitOps with automated GH Actions workflow trigger](../tutorials/deployments/slo-validation-ghaction.md)
+        - [GitOps with automated pull request](slo-validation-pr.md)
+        - [GitOps with automated GH Actions workflow trigger](slo-validation-ghaction.md)
