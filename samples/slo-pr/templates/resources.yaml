@@ -39,7 +39,7 @@ spec:
           cd $SCRATCH_DIR
           
           # extract token into env variable and file. Authenticate with token.
-          export TOKEN={{ "{{" }} .Secret "token" {{ "}}" }}
+          export TOKEN=@< .Secret "token" >@
           echo $TOKEN > $SCRATCH_DIR/token.txt
           gh auth login --with-token < $SCRATCH_DIR/token.txt
 
@@ -79,7 +79,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: ["{{ .Values.secret }}"]
+  resourceNames: ["@< .Values.secret >@"]
   verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

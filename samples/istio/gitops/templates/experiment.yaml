@@ -23,7 +23,7 @@ spec:
               "ref":"master", 
               "inputs":{
                 "basedir": "samples/istio/gitops",
-                "filepath": "{{.filepath}}"
+                "filepath": "@<.filepath>@"
               }
             }
           headers:
@@ -31,7 +31,7 @@ spec:
             value: application/vnd.github.v3+json
 
       - run: |
-            kubectl -n {{ .namespace }} apply -f https://raw.githubusercontent.com/MY_ORG/iter8/master/samples/istio/gitops/istio-vs.yaml
+            kubectl -n @< .namespace >@ apply -f https://raw.githubusercontent.com/MY_ORG/iter8/master/samples/istio/gitops/istio-vs.yaml
 
 
   criteria:
