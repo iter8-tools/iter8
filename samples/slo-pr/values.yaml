@@ -15,6 +15,9 @@ limitErrorRate: 0.00 # 0%. Errors are not acceptable.
 # Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
 limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.
 
+# default name for secret
+secret: ghtoken
+
 # Base branch for PR
 base: master
 
