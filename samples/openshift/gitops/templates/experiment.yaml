@@ -29,7 +29,7 @@ spec:
               "ref":"master", 
               "inputs":{
                 "basedir": "samples/openshift/gitops",
-                "filepath": "{{.filepath}}"
+                "filepath": "@<.filepath>@"
               }
             }
           headers:
