@@ -4,9 +4,9 @@ template: main.html
 
 # SLO Validation with Auto GH Actions Trigger
 !!! tip "Validate SLOs and automatically trigger a GitHub Actions workflow"
-    **Problem:** You have a new version of an app. You want to verify that it satisfies latency and error rate SLOs and promote it to production as the stable version in a GitOps-y manner by triggering a GitHub Actions workflow.
+    **Problem**: You have a Kubernetes app. You want to verify that it satisfies latency and error rate SLOs and automatically trigger a GitHub Actions workflow based on the result.
 
-    **Solution:** In this tutorial, you will [dark launch](../../concepts/buildingblocks.md#dark-launch) the new version of your app along with an Iter8 experiment. Iter8 will [validate that the new satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../../metrics/builtin.md) and [automatically trigger a GitHub Actions workflow](../../concepts/buildingblocks.md#version-promotion).
+    **Solution**: In this tutorial, you will launch a Kubernetes app along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../../metrics/builtin.md). During this validation, Iter8 will generate HTTP GET requests for the app. Once Iter8 verifies that the app satisfies SLOs, it will [automatically trigger a GitHub Actions workflow](../../concepts/buildingblocks.md#version-promotion).
 
     ![SLO Validation GitHub Action Trigger](../../images/slo-validation-ghaction.png)
 
@@ -26,44 +26,33 @@ template: main.html
     export ITER8=$(pwd)
     ```
 
-## 1. Create stable version
-Create version `1.0` of the `hello world` app as follows.
+## 1. Create app
+The `hello world` app consists of a Kubernetes deployment and service. Deploy the app as follows.
 
 ```shell
-# USERNAME is exported as part of setup steps.
-kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/deploy.yaml
-kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/service.yaml
+kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
+kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ```
 
-## 2. Create candidate version
-Create version `2.0` of the `hello world` app in the staging environment as follows. For the purpose of this tutorial, the production environment is the `default` namespace, and the staging environment is the `staging` namespace.
-
-```shell
-kubectl create ns staging
-# create version 2.0 of hello world app in the staging namespace
-kubectl set image --local -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/deploy.yaml hello='gcr.io/google-samples/hello-app:2.0' -o yaml | kubectl apply -n staging -f -
-kubectl apply -f https://raw.githubusercontent.com/$USERNAME/iter8/master/samples/deployments/app/service.yaml -n staging
-```
-
-Adapt [these instructions](../../getting-started/first-experiment.md#verify-app) to verify that stable and candidate versions of your app are running.
-
-## 3. Enable GitOps
+## 2. Enable GitOps
 3.1) [Create a personal access token on GitHub](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token). In Step 8 of this process, grant `repo`, `workflow` and `read:org` permissions to this token. This will ensure that the token can be used by Iter8 to trigger GitHub Actions workflows.
 
 3.2) Create K8s secret
 ```shell
-# replace $GHTOKEN with GitHub token created above
-kubectl create secret generic -n staging ghtoken --from-literal=token=$GHTOKEN
+# GHTOKEN environment variable contains the GitHub token created above
+kubectl create secret generic ghtoken --from-literal=token=$GHTOKEN
 ```
 
-## 4. Launch Iter8 experiment
+## 3. Launch Iter8 experiment
 Deploy an Iter8 experiment for SLO validation followed by a notification that triggers a GitHub Actions workflow.
 ```shell
-helm upgrade -n staging my-exp $ITER8/samples/slo-ghaction \
-  --set URL='http://hello.staging.svc.cluster.local:8080' \
+# USERNAME environment variable contains your GitHub username
+helm upgrade my-exp $ITER8/samples/slo-ghaction \
+  --set URL='http://hello.default.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
   --set limit95thPercentileLatency=100.0 \
+  --set owner=$USERNAME \
   --set repo=iter8 \
   --set workflow=demo.yaml \
   --install
@@ -71,25 +60,21 @@ helm upgrade -n staging my-exp $ITER8/samples/slo-ghaction \
 
 The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, and verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs. 
 
-Assuming that the candidate satisfies the SLOs, Iter8 will also trigger the `demo.yaml` workflow in the `iter8` repo using the `ghtoken` secret.
+Once Iter8 verifies that the app satisfies SLOs, it will trigger the `demo.yaml` workflow in the `iter8` repo. It uses the `ghtoken` secret to do this.
 
-View the experiment manifest as follows.
+View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release by following [the instructions in this step](../../getting-started/first-experiment.md#2a-view-manifest-and-values).
+
+## 4. Observe experiment
+Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment).
+
+## 5. View workflow run
+Once the experiment completes, you can visit your fork at https://github.com/$USERNAME/iter8/actions to view your workflow run.
+
+## 6. Cleanup
 ```shell
-helm get manifest -n staging my-exp
-```
-
-## 5. Observe experiment
-Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Ensure correct namespace (`staging`) is used.
-
-## 6. View workflow run
-Once the experiment completes, you can visit your fork at https://github.com/$USERNAME/iter8/pulls to review the GitHub pull request created by the GitHub Actions workflow.
-
-## 7. Cleanup
-
-```shell
-kubectl delete ns staging
-kubectl delete deploy/hello
-kubectl delete svc/hello
+helm uninstall -n default my-exp
+kubectl delete -n default -f $ITER8/samples/deployments/app/service.yaml
+kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 ```
 
 ***

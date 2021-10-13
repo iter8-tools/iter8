@@ -38,8 +38,9 @@ spec:
           # login
           gh auth login --with-token < $SCRATCH_DIR/token.txt
 
-          # clone repo
+          # clone repo and cd
           gh repo clone {{ required ".Values.repo is required!" .Values.repo }}
+          cd {{ .Values.repo }}
 
           # trigger workflow
           echo '{"name":"scully", "greeting":"hello"}' | gh workflow run {{ required ".Values.workflow is required!" .Values.workflow }} --json
@@ -71,7 +72,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: ["@< .Values.secret >@"]
+  resourceNames: ["{{ .Values.secret }}"]
   verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

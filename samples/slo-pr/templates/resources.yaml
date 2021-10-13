@@ -43,10 +43,8 @@ spec:
           echo $TOKEN > $SCRATCH_DIR/token.txt
           gh auth login --with-token < $SCRATCH_DIR/token.txt
 
-          # clone repo
+          # clone repo and cd
           gh repo clone {{ required ".Values.repo is required!" .Values.repo }}
-
-          # cd 
           cd {{ .Values.repo }}
 
           # create PR
@@ -79,14 +77,13 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: ["@< .Values.secret >@"]
+  resourceNames: ["{{ .Values.secret }}"]
   verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: read-secrets-{{ $sharedRand }}
-  namespace: default
 subjects:
 - kind: ServiceAccount
   name: iter8-handlers

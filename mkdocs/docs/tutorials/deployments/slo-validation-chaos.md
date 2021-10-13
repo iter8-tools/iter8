@@ -52,10 +52,7 @@ helm upgrade -n default my-exp $ITER8/samples/deployments/chaos \
 
 The above command creates a [Litmus chaos experiment](https://litmuschaos.io/) and an [Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment). The former injects chaos into your environment by periodically killing pods of your app. The latter generates HTTP requests, collects latency and error rate metrics for the app, and verifies if the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs, even in the midst of chaos.
 
-View the experiment resources as follows.
-```shell
-helm get manifest -n default my-exp
-```
+View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release using [the instructions in this step](../../getting-started/first-experiment.md#2a-view-manifest-and-values).
 
 ## 3. Observe Experiment
 Verify that the phase of the chaos experiment is `Completed`.

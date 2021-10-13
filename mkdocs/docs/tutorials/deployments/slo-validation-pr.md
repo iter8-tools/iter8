@@ -87,9 +87,9 @@ helm upgrade -n staging my-exp $ITER8/samples/slo-pr \
 
 The above command creates [an Iter8 experiment](../../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the candidate version of the app, and verifies that the candidate satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs. 
 
-Assuming the candidate version satisfies SLOs, it creates a pull request with `staging` as the head branch and `master` as the base branch. It uses the `ghtoken` secret to do so.
+Once Iter8 verifies that the candidate satisfies SLOs, it creates a pull request with `staging` as the head branch and `master` as the base branch. It uses the `ghtoken` secret to do this.
 
-View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release by adapting [the instructions in this step](../../getting-started/first-experiment.md#2-launch-iter8-experiment).
+View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release by adapting [the instructions in this step](../../getting-started/first-experiment.md#2a-view-manifest-and-values).
 
 ## 5. Observe experiment
 Observe the experiment by adapting [these steps](../../getting-started/first-experiment.md#3-observe-experiment).

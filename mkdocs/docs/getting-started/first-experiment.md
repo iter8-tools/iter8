@@ -74,6 +74,7 @@ helm upgrade -n default my-exp $ITER8/samples/slo-validation \
 
 The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs.
 
+### 2.a) View manifest and values
 View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release using the following instructions.
 
 ??? note "View experiment manifest using these instructions"
