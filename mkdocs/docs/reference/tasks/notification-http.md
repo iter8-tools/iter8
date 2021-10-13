@@ -21,8 +21,8 @@ spec:
             {
               "ref":"master", 
               "inputs":{
-                "name": "{{.this.metadata.name}}",
-                "home":"{{.this.metadata.namespace}}"
+                "name": "@<.this.metadata.name>@",
+                "home":"@<.this.metadata.namespace>@"
               }
             }
           secret: default/github-token
@@ -47,6 +47,7 @@ spec:
 The `url`, `headers` and `body` may all contain placeholders that will be substituted at runtime. 
 A placeholder prefixed by `.secret` will use value from the secret. 
 A placeholder prefixed by `.this` will use a value from the experiment.
+Placeholders in this task use `@<` and `>@` as the left and right delimiters respectively.
 
 If not set, the default body will be of the following form:
 

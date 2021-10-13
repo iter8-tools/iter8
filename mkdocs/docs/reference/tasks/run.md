@@ -53,13 +53,18 @@ spec:
     ...
     actions:
       finish: # run the following sequence of tasks at the end of the experiment
-      - run: "git clone https://username:{{ .Secret 'token' }}@github.com/username/repo.git"
+      - run: "git clone https://username:@< .Secret 'token' >@@github.com/username/repo.git"
         with:
           # reference to a K8s secret resource in the namespace/name format. If no namespace is specified, the namespace of the secret is assumed to be that of the experiment.
           secret: myns/mysecret
 ```
 
 In the above example, a `token` value is extracted from the given Kubernetes secret, and inserted into the (templated) `git clone` script. This task requires the secret resource `mysecret` to be available in the `myns` namespace, and requires the secret to contain `token` as a key in its `data` section.
+
+## Placeholders
+
+The script to be executed may contain placeholders. Placeholders in this task use `@<` and `>@` as the left and right delimiters respectively. Placeholders are especially handy for specifying data in a Kubernetes secret, supplying the secret as part of the task, and extracting the secret within the script at runtime. See [above](#secret) for an example.
+
 
 
 ## Scratch folder
