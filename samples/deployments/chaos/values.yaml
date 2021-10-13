@@ -1,8 +1,11 @@
-appns: default
-applabel: app.kubernetes.io/name=hello
+# Type of kubernetes workload
 appkind: deployment
-URL: http://hello.default.svc.cluster.local:8080
-limitMeanLatency: 50.0
-limitErrorRate: 0.01
-limit95thPercentileLatency: 100.0
-      
+
+# Mean latency SLO upper limit
+limitMeanLatency: 50.0 # msec
+
+# Error rate SLO upper limit
+limitErrorRate: 0.01 # 1% error is ok
+
+# 95th percentile tail latency SLO upper limit
+limit95thPercentileLatency: 100.0 # msec

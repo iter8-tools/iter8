@@ -41,7 +41,6 @@ Use [these instructions](../../getting-started/first-experiment.md#1a-verify-app
 ## 2. Launch joint experiment
 ```shell
 helm upgrade -n default my-exp $ITER8/samples/deployments/chaos \
-  --set appns='default' \
   --set applabel='app.kubernetes.io/name=hello' \
   --set URL='http://hello.default.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
@@ -55,28 +54,24 @@ The above command creates a [Litmus chaos experiment](https://litmuschaos.io/) a
 View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release using [the instructions in this step](../../getting-started/first-experiment.md#2a-view-manifest-and-values).
 
 ## 3. Observe Experiment
+Observe the Iter8 experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment). You can also observe the chaos experiment as follows.
+
 Verify that the phase of the chaos experiment is `Completed`.
 ```shell
-kubectl get chaosresults engine-hello-pod-delete -n default -ojsonpath='{.status.experimentStatus.phase}'
+export CHAOS=$(kubectl get chaosresults -o=jsonpath='{.items[0].metadata.name}' -n default)
+kubectl get chaosresults/$CHAOS -n default -ojsonpath='{.status.experimentStatus.phase}'
 ```
 
-Verify that the chaos experiment returned a `Pass` verdict. The `Pass` verdict states that the application is still running after the chaos.
+Verify that the chaos experiment returned a `Pass` verdict. The `Pass` verdict states that the application is still running after chaos has ended.
 ```shell
-kubectl get chaosresults engine-hello-pod-delete -n default -ojsonpath='{.status.experimentStatus.verdict}'
-```
-
-Ensure that the Iter8 experiment completed.
-```shell
-iter8ctl assert -c completed
+kubectl get chaosresults/$CHAOS -n default -o=jsonpath='{.status.experimentStatus.verdict}'
 ```
 
 Due to chaos injection, and the fact that the number of replicas of the app in the deployment manifest is set to 1, the SLOs are not expected to be satisfied during this experiment. Verify this is the case.
 ```shell
 # this assertion is expected to fail
-iter8ctl assert -c completed -c winnerFound
+iter8ctl assert -c completed -c winnerFound -n default
 ```
-
-[Describe](../../getting-started/first-experiment.md#3b-describe-results) and [debug](../../getting-started/first-experiment.md#3c-debug) the Iter8 experiment.
 
 ## 4. Scale app and retry
 Scale up the app so that replica count is increased to 2. 
@@ -84,20 +79,16 @@ Scale up the app so that replica count is increased to 2.
 kubectl scale --replicas=2 -n default -f $ITER8/samples/deployments/app/deploy.yaml
 ```
 
-The scaled app is now more resilient. Performing the same experiment as above will now result in SLOs being satisfied and a winner being found.
-
-Retry steps 2 and 3 above. You should now find that SLOs are satisfied and a winner is found at the end of the experiment.
+The scaled app is now more resilient. Performing the same experiment as above will now result in SLOs being satisfied and a winner being found. Retry steps 2 and 3 above. You should now find that SLOs are satisfied and a winner is found at the end of the experiment.
 
 ```shell
 # this assertion is expected to succeed
-iter8ctl assert -c completed -c winnerFound
+iter8ctl assert -c completed -c winnerFound -n default
 ```
 
 ## 5. Cleanup
 ```shell
-# remove joint experiments
 helm uninstall -n default my-exp
-# remove app
 kubectl delete -n default -f $ITER8/samples/deployments/app/service.yaml
 kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 ```

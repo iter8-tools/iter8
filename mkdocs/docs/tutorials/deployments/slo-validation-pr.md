@@ -92,13 +92,9 @@ Once Iter8 verifies that the candidate satisfies SLOs, it creates a pull request
 View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release by adapting [the instructions in this step](../../getting-started/first-experiment.md#2a-view-manifest-and-values).
 
 ## 5. Observe experiment
-Observe the experiment by adapting [these steps](../../getting-started/first-experiment.md#3-observe-experiment).
+Observe the experiment by adapting [these steps](../../getting-started/first-experiment.md#3-observe-experiment). Once the experiment completes, visit https://github.com/$USERNAME/iter8/pulls to view the pull request created by Iter8.
 
-## 6. Review pull request
-Once the experiment completes, you can visit your fork at https://github.com/$USERNAME/iter8/pulls to review the pull-request created by Iter8.
-
-## 7. Cleanup
-
+## 6. Cleanup
 ```shell
 kubectl delete ns staging
 kubectl delete deploy/hello

@@ -4,10 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  print-inputs:
-    name: Print inputs
+  hello-world:
+    name: Print hello world
     runs-on: ubuntu-latest
     steps:
-    - name: Print inputs
-      run: |
-        echo "inputs: ${{ inputs }}"
+    - run: echo "hello world"

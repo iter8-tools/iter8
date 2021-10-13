@@ -65,12 +65,9 @@ Once Iter8 verifies that the app satisfies SLOs, it will trigger the `demo.yaml`
 View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release by following [the instructions in this step](../../getting-started/first-experiment.md#2a-view-manifest-and-values).
 
 ## 4. Observe experiment
-Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment).
+Observe the experiment by following [these steps](../../getting-started/first-experiment.md#3-observe-experiment).Once the experiment completes, visit https://github.com/$USERNAME/iter8/actions to view your workflow run.
 
-## 5. View workflow run
-Once the experiment completes, you can visit your fork at https://github.com/$USERNAME/iter8/actions to view your workflow run.
-
-## 6. Cleanup
+## 5. Cleanup
 ```shell
 helm uninstall -n default my-exp
 kubectl delete -n default -f $ITER8/samples/deployments/app/service.yaml
