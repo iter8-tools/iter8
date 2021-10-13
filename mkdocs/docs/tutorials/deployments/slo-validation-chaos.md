@@ -95,15 +95,11 @@ kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 
 ***
 
-!!! tip "Next Steps"
-    1. Replace the `hello` app used in this tutorial with your own application. 
-        * Modify [Step 1](#1-create-app) to use your service and deployment. 
-        * Modify [Step 2](#2-launch-joint-experiment) by supplying the correct namespace and label for your app, and also the correct URL where the app receives requests.
-
-    2. Run the above experiment with *your* app by modifying the Helm values.
+!!! tip "Reuse with your app"
+    1. Reuse the above experiment with *your* app by replacing the `hello` app with *your* app, and modifying the Helm values appropriately.
     
-    3. Litmus makes it possible to inject [over 51 types of Chaos](https://hub.litmuschaos.io/). Modify the Helm chart to use any of these other types of chaos experiments.
+    2. Litmus makes it possible to inject [over 51 types of Chaos](https://hub.litmuschaos.io/). Modify the Helm chart to use any of these other types of chaos experiments.
 
-    4. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. Enhance your Helm chart to achieve the following.
+    3. Iter8 makes it possible to [promote the winning version](../../concepts/buildingblocks.md#version-promotion) in a number of different ways. Easily incorporate the following in your Helm chart.
         - [GitOps with automated pull request](slo-validation-pr.md)
-        - [GitOps with automated GH Actions workflow trigger](slo-validation-ghaction.md)
+        - [Auto trigger a GitHub Actions workflow](slo-validation-ghaction.md)
