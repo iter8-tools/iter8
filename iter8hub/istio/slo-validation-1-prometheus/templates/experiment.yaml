@@ -1,0 +1,34 @@
+apiVersion: iter8.tools/v2beta1
+kind: Experiment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  versionInfo:
+  - {{ .Values.version.name | quote }}
+  actions:
+    start:
+    - task: metrics/load-backend@v1
+      with:
+        metricsBackend: https://raw.githubusercontent.com/iter8-tools/iter8/samples/backends/istio/istio-prometheus.yaml
+        name: istio-prometheus
+        url: {{ required ".Values.prometheus.URL is required" .Values.prometheus.URL | quote }}
+        {{- if .Values.prometheus.authType }}
+        {{-   if ne .Values.prometheus.authType "Default" }}
+        authType: {{ .Values.prometheus.authType }}
+        secret: {{ required ".Values.prometheus.secret is required when authType is not Default" .Values.prometheus.secret }}
+        {{-   end }}
+        {{- end }}
+    - run: sleep {{ .Values.metricsCollectTime }}
+    - task: metrics/analyze@v1
+      with:
+        versions:
+        - revision: {{ .Values.version.name }}
+          namespace: {{ .Release.Namespace }}
+  criteria:
+    objectives:
+    - metric: istio-prometheus/mean-latency
+      upperLimit: {{ required ".Values.limitMeanLatency is required!" .Values.limitMeanLatency | quote }}
+    - metric: istio-prometheus/error-rate
+      upperLimit: {{ required ".Values.limitErrorRate is required!" .Values.limitErrorRate | quote }}
+    - metric: istio-prometheus/latency-95th-percentile
+      upperLimit: {{ required ".Values.limit95thPercentileLatency is required!" .Values.limit95thPercentileLatency | quote }}

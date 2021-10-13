@@ -1,0 +1,39 @@
+# Default values for Iter8 SLO validation experiment
+
+# Details of versions; for two version SLO validation, A/B testing and hybrid scenarios
+# name for each version is required when using
+versionA:
+  name: A # name is required
+  # URL - URL to query service (if using metrics/collect)
+  # service - will be used in URL if needed (if using metrics/collect)
+  # port - will be used in version if needed (if using metrics/collect)
+versionB:
+  name: B # name is required
+
+# Length of time to collect metrics on each iteration (if more than 1)
+metricsCollectTime: 10
+
+# Number of queries sent for validation
+numQueries: 100
+
+# Queries per second
+QPS: 8.0
+
+################################
+# metrics related values
+################################
+
+# Upper limit on the mean latency. Values beyond this limit are not acceptable
+limitMeanLatency: 500.0 # 500 msec latency on an average is ok. Not more.
+
+# Upper limit on the error rate. Values beyond this limit are not acceptable
+limitErrorRate: 0.00 # 0%. Errors are not acceptable.
+
+# Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
+limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.
+
+# Configuration of Prometheus backend; these values can be used to configure the backend
+# prometheus:
+  # URL
+  # authType:
+  # secret

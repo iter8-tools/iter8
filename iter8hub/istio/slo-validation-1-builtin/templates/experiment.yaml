@@ -1,0 +1,30 @@
+apiVersion: iter8.tools/v2beta1
+kind: Experiment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  versionInfo:
+  - {{ .Values.version.name | quote }}
+  actions:
+    start:
+    - task: metrics/collect@v1
+      with:
+        numQueries: {{ required ".Values.numQueries is required!" .Values.numQueries }}
+        qps: {{ required ".Values.QPS is required!" .Values.QPS }}
+        versions:
+        - name: {{ .Values.version.name | quote }}
+          url: {{ required ".Values.version.URL is required!" .Values.version.URL | quote }}
+          {{- if .Values.version.headers }}
+          headers:
+{{ toYaml .Values.version.headers | indent 12 }}
+          {{ end }}
+  criteria:
+    objectives:
+    - metric: iter8-fortio/mean-latency
+      upperLimit: {{ required ".Values.limitMeanLatency is required!" .Values.limitMeanLatency | quote }}
+    - metric: iter8-fortio/error-rate
+      upperLimit: {{ required ".Values.limitErrorRate is required!" .Values.limitErrorRate | quote }}
+    - metric: iter8-fortio/latency-95th-percentile
+      upperLimit: {{ required ".Values.limit95thPercentileLatency is required!" .Values.limit95thPercentileLatency | quote }}
+
+  # backends inserted by metrics/collect@v1

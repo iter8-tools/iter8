@@ -1,0 +1,41 @@
+apiVersion: iter8.tools/v2beta1
+kind: Experiment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  versionInfo:
+  - {{ .Values.versionA.name }}
+  - {{ .Values.versionB.name }}
+  actions:
+    start:
+    - task: metrics/load-backend@v1
+      with:
+        metricsBackend: https://raw.githubusercontent.com/iter8-tools/iter8/samples/backends/istio/istio-prometheus.yaml
+        name: istio-prometheus
+        url: {{ required ".Values.prometheus.URL is required" .Values.prometheus.URL | quote }}
+        {{- if .Values.prometheus.authType }}
+        {{-   if ne .Values.prometheus.authType "Default" }}
+        authType: {{ .Values.prometheus.authType }}
+        secret: {{ required ".Values.prometheus.secret is required" .Values.prometheus.secret }}
+        {{-   end }}
+        {{- end }}
+    - run: sleep {{ .Values.metricsCollectTime }}
+    - task: metrics/analyze@v1
+      with:
+        versions:
+        - revision: {{ .Values.versionA.name }}
+          namespace: {{ .Release.Namespace }}
+        - revision: {{ .Values.versionB.name }}
+          namespace: {{ .Release.Namespace }}
+    - if: CandidateWon()
+      run: kubectl apply -f {{ .Values.winner.versionB }}
+    - if: not CandidateWon()
+      run: kubectl apply -f {{ .Values.winner.versionA }}
+  criteria:
+    objectives:
+    - metric: iter8-prometheus/mean-latency
+      upperLimit: {{ required ".Values.limitMeanLatency is required!" .Values.limitMeanLatency | quote }}
+    - metric: iter8--prometheus/error-rate
+      upperLimit: {{ required ".Values.limitErrorRate is required!" .Values.limitErrorRate | quote }}
+    - metric: iter8-prometheus/latency-95th-percentile
+      upperLimit: {{ required ".Values.limit95thPercentileLatency is required!" .Values.limit95thPercentileLatency | quote }}
