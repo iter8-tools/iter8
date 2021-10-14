@@ -1,0 +1,224 @@
+{{- /*
+$uniqId is a random alpha numeric string of length 5 
+that is suffixed to all the resources in this chart. This ensures
+consistent naming across resources within a single experiment, and unique
+naming across multiple experiments.
+*/}}
+
+{{- $uniqId := randAlphaNum 5 | lower -}}
+
+apiVersion: iter8.tools/v2alpha2
+kind: Experiment
+metadata:
+  name: {{ .Chart.Name }}-{{ $uniqId }}
+spec:
+  # target should uniquely identify the application under experimentation
+  target: hello
+  strategy:
+    # this is an SLO validation experiment
+    testingPattern: Conformance
+    actions:
+      start:
+      # ensure candidate service and deployment of the application are available
+      - task: common/readiness 
+        with:
+          objRefs:
+          - kind: Service
+            name: hello
+          - kind: Deployment
+            name: hello
+            waitFor: condition=available
+      - run: sleep 10.0
+      # collect Iter8's built-in metrics
+      - task: metrics/collect
+        with:
+          time: 30s
+          qps: 8.0
+          versions:
+          - name: new-version # this name must match the name of a version in versionInfo
+            url: "{{ required ".Values.URL is required!" .Values.URL }}"
+  criteria:
+    requestCount: iter8-system/request-count
+    indicators:
+    - iter8-system/error-count
+    # service-level objectives (SLOs) that need to be satisfied by the new version
+    # in order for it to be considered a winner
+    objectives:
+    - metric: iter8-system/mean-latency
+      upperLimit: "{{ .Values.limitMeanLatency }}"
+    - metric: iter8-system/error-rate
+      upperLimit: "{{ .Values.limitErrorRate }}"
+    - metric: iter8-system/latency-95th-percentile
+      upperLimit: "{{ .Values.limit95thPercentileLatency }}"
+  duration:
+    intervalSeconds: 1
+    iterationsPerLoop: 1
+  versionInfo:
+    baseline:
+      name: new-version
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: {{ .Chart.Name }}-{{ $uniqId }}
+spec:
+  appinfo:
+    appns: "{{ .Release.Namespace }}"
+    applabel: "{{ required ".Values.applabel is required!" .Values.applabel }}"
+    appkind: "{{ .Values.appkind }}"
+  # It can be active/stop
+  engineState: 'active'
+  chaosServiceAccount: pod-delete
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+          - name: TOTAL_CHAOS_DURATION
+            value: '60'
+          - name: CHAOS_INTERVAL
+            value: '4'
+---
+apiVersion: litmuschaos.io/v1alpha1
+description:
+  message: |
+    Deletes a pod belonging to a deployment/statefulset/daemonset
+kind: ChaosExperiment
+metadata:
+  name: {{ .Chart.Name }}-{{ $uniqId }}
+  labels:
+    name: pod-delete
+    app.kubernetes.io/part-of: litmus
+    app.kubernetes.io/component: chaosexperiment
+    app.kubernetes.io/version: 1.13.8
+spec:
+  definition:
+    scope: Namespaced
+    permissions:
+      - apiGroups:
+          - ""
+          - "apps"
+          - "apps.openshift.io"
+          - "argoproj.io"
+          - "batch"
+          - "litmuschaos.io"
+        resources:
+          - "deployments"
+          - "jobs"
+          - "pods"
+          - "pods/log"
+          - "replicationcontrollers"
+          - "deployments"
+          - "statefulsets"
+          - "daemonsets"
+          - "replicasets"
+          - "deploymentconfigs"
+          - "rollouts"
+          - "pods/exec"
+          - "events"
+          - "chaosengines"
+          - "chaosexperiments"
+          - "chaosresults"
+        verbs:
+          - "create"
+          - "list"
+          - "get"
+          - "patch"
+          - "update"
+          - "delete"
+          - "deletecollection"
+    image: "litmuschaos/go-runner:1.13.8"
+    imagePullPolicy: Always
+    args:
+    - -c
+    - ./experiments -name pod-delete
+    command:
+    - /bin/bash
+    env:
+
+    - name: TOTAL_CHAOS_DURATION
+      value: '15'
+
+    # Period to wait before and after injection of chaos in sec
+    - name: RAMP_TIME
+      value: ''
+
+    - name: FORCE
+      value: 'true'
+
+    - name: CHAOS_INTERVAL
+      value: '5'
+
+    ## percentage of total pods to target
+    - name: PODS_AFFECTED_PERC
+      value: ''
+
+    - name: LIB
+      value: 'litmus'    
+
+    - name: TARGET_PODS
+      value: ''
+
+    ## it defines the sequence of chaos execution for multiple target pods
+    ## supported values: serial, parallel
+    - name: SEQUENCE
+      value: 'parallel'
+      
+    labels:
+      name: pod-delete
+      app.kubernetes.io/part-of: litmus
+      app.kubernetes.io/component: experiment-job
+      app.kubernetes.io/version: 1.13.8
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-delete
+  labels:
+    name: pod-delete
+    app.kubernetes.io/part-of: litmus
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-delete
+  labels:
+    name: pod-delete
+    app.kubernetes.io/part-of: litmus
+rules:
+- apiGroups: [""]
+  resources: ["pods","events"]
+  verbs: ["create","list","get","patch","update","delete","deletecollection"]
+- apiGroups: [""]
+  resources: ["pods/exec","pods/log","replicationcontrollers"]
+  verbs: ["create","list","get"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["create","list","get","delete","deletecollection"]
+- apiGroups: ["apps"]
+  resources: ["deployments","statefulsets","daemonsets","replicasets"]
+  verbs: ["list","get"]
+- apiGroups: ["apps.openshift.io"]
+  resources: ["deploymentconfigs"]
+  verbs: ["list","get"]
+- apiGroups: ["argoproj.io"]
+  resources: ["rollouts"]
+  verbs: ["list","get"]
+- apiGroups: ["litmuschaos.io"]
+  resources: ["chaosengines","chaosexperiments","chaosresults"]
+  verbs: ["create","list","get","patch","update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-delete
+  labels:
+    name: pod-delete
+    app.kubernetes.io/part-of: litmus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-delete
+subjects:
+- kind: ServiceAccount
+  name: pod-delete

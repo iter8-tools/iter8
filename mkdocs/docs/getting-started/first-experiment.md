@@ -4,19 +4,17 @@ template: main.html
 
 # Your First Experiment
 
-!!! tip "Scenario: Validate service-level objectives (SLOs) for a Kubernetes app"
+!!! tip "Validate service level objectives (SLOs) for an app"
     **Problem**: You have a Kubernetes app. You want to verify that it satisfies latency and error rate SLOs.
 
     **Solution**: In this tutorial, you will launch a Kubernetes app along with an Iter8 experiment. Iter8 will [validate that the app satisfies latency and error-based objectives (SLOs)](../concepts/buildingblocks.md#slo-validation) using [built-in metrics](../metrics/builtin.md). During this validation, Iter8 will generate HTTP GET requests for the app.
 
     ![SLO Validation](../images/slo-validation.png)
 
-    ??? tip "30 second preview"
+    **Preview**:
+    <script id="asciicast-439859" src="https://asciinema.org/a/439859.js" async></script>
 
-        ![SLO Validation Movie](../images/slo-validation.movie.svg)
-
-    
-??? warning "Setup Kubernetes cluster and local environment"
+???+ warning "Setup Kubernetes cluster and local environment"
     1. Setup [Kubernetes cluster](setup-for-tutorials.md#local-kubernetes-cluster)
     2. [Install Iter8 in Kubernetes cluster](install.md)
     3. Get [Helm 3.4+](https://helm.sh/docs/intro/install/).
@@ -35,7 +33,6 @@ template: main.html
 The `hello world` app consists of a Kubernetes deployment and service. Deploy the app as follows.
 
 ```shell
-# deploy app
 kubectl apply -n default -f $ITER8/samples/deployments/app/deploy.yaml
 kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ```
@@ -43,12 +40,12 @@ kubectl apply -n default -f $ITER8/samples/deployments/app/service.yaml
 ### 1.a) Verify app is running
 
 ```shell
-# create an interactive shell
+# create curl pod and get shell
 kubectl run curl --image=radial/busyboxplus:curl -i --tty --rm
 ```
 
 ```shell
-# query the app
+# curl app
 curl hello.default.svc.cluster.local:8080
 ```
 
@@ -60,15 +57,14 @@ Hostname: hello-bc95d9b56-xp9kv
 ```
 
 ```shell
-# exit from the pod
+# exit from curl pod
 exit
 ```
 
-## 2. Create Iter8 experiment
+## 2. Launch Iter8 experiment
 Deploy an Iter8 experiment for SLO validation of the app as follows.
 ```shell
-# create Iter8 experiment
-helm upgrade -n default my-exp $ITER8/samples/first-exp \
+helm upgrade -n default my-exp $ITER8/samples/slo-validation \
   --set URL='http://hello.default.svc.cluster.local:8080' \
   --set limitMeanLatency=50.0 \
   --set limitErrorRate=0.0 \
@@ -78,14 +74,15 @@ helm upgrade -n default my-exp $ITER8/samples/first-exp \
 
 The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-is-an-iter8-experiment) that generates requests, collects latency and error rate metrics for the app, and verifies that the app satisfies mean latency (50 msec), error rate (0.0), 95th percentile tail latency (100 msec) SLOs.
 
-### 2.a) View manifest
-??? note "View Iter8 experiment manifest using these instructions"
+### 2.a) View manifest and values
+View the manifest created by the Helm command, the default values used by the Helm chart, and the actual values used by the Helm release using the following instructions.
+
+??? note "View experiment manifest using these instructions"
     ```shell
-    # view Iter8 experiment manifest
     helm get manifest -n default my-exp
     ```
 
-    Your experiment will be similar to the following.
+    Your manifest created by will be similar to the following.
     ```yaml linenums="1" hl_lines="14 15 16 17 18 19 20 25 26 27 28 29 30 31"
     # Source: slo/templates/experiment.yaml
     apiVersion: iter8.tools/v2alpha2
@@ -129,6 +126,47 @@ The above command creates [an Iter8 experiment](../concepts/whatisiter8.md#what-
 
     The [`metrics/collect` task](../reference/tasks/metrics-collect.md) highlighted above is responsible for generating and sending HTTP requests to the app's API endpoint, receiving responses, and creating latency and error-related metrics. The [`objectives`](../../concepts/buildingblocks/#objectives-slos) stanza describes the SLOs that the app needs to satisfy in order to be declared a winner.
 
+??? note "View default values used by the Helm chart"
+    ```shell
+    helm show values $ITER8/samples/slo-validation
+    ```
+
+    This will display the defaults in the Helm chart's `values.yaml` file as follows.
+    ```yaml linenums="1"
+    # Default values for Iter8 SLO validation experiment
+
+    # Number of queries sent for validation
+    numQueries: 100
+
+    # Queries per second
+    QPS: 8.0
+
+    # Upper limit on the mean latency. Values beyond this limit are not acceptable
+    limitMeanLatency: 500.0 # 500 msec latency on an average is ok. Not more.
+
+    # Upper limit on the error rate. Values beyond this limit are not acceptable
+    limitErrorRate: 0.00 # 0%. Errors are not acceptable.
+
+    # Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
+    limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.
+    ```
+
+??? note "View values set in the Helm release"
+    ```shell
+    helm get values my-exp --all
+    ```
+
+    This will display the all the values set in the Helm release as follows.
+    ```yaml linenums="1"
+    COMPUTED VALUES:
+    QPS: 8
+    URL: http://hello.default.svc.cluster.local:8080
+    limit95thPercentileLatency: "100.0"
+    limitErrorRate: "0.0"
+    limitMeanLatency: "50.0"
+    numQueries: 100
+    ```
+
 ## 3. Observe experiment
 The `iter8ctl` CLI makes it easy to observe experiment progress and outcomes.
 
@@ -136,16 +174,14 @@ The `iter8ctl` CLI makes it easy to observe experiment progress and outcomes.
 Assert that the experiment completed and found a winning version. Wait 20 seconds before trying the following command. If the assertions are not satisfied, try again after a few seconds.
 
 ```shell
-# assert that the experiment completed and found a winner
-iter8ctl assert -c completed -c winnerFound
+iter8ctl assert -c completed -c winnerFound -n default
 ```
 
 ### 3.b) Describe results
 Describe the results of the Iter8 experiment.
 
 ```shell
-# describe results of the experiment
-iter8ctl describe
+iter8ctl describe -n default
 ```
 
 ??? info "Sample experiment results"
@@ -201,7 +237,7 @@ The `iter8ctl` debug command is especially useful in situations where the experi
 
 ```shell
 # print Iter8logs at priority levels 1 (error), 2 (warning), and 3 (info)
-iter8ctl debug --priority 3
+iter8ctl debug --priority 3 -n default
 ```
 
 ??? info "Sample output from iter8ctl debug"
@@ -212,23 +248,17 @@ iter8ctl debug --priority 3
 
 ## 4. Cleanup
 ```shell
-# remove experiment
 helm uninstall -n default my-exp
-# remove app
 kubectl delete -n default -f $ITER8/samples/deployments/app/service.yaml
 kubectl delete -n default -f $ITER8/samples/deployments/app/deploy.yaml
 ```
 ***
 
-**Next Steps**
+!!! tip "Reuse with your app"
+    1. Reuse the above experiment with *your* app by replacing the `hello` app with *your* app, and modifying the Helm values appropriately.
 
-!!! tip "Try in your environment"
-    1. Run the above experiment with your app by setting the `URL` value in the Helm command to the URL of your app. You can run this experiment in any Kubernetes environment such as a dev, test, staging, or production cluster.
-    
-    2. You can also customize the mean latency, error rate, and tail latency limits in the SLOs.
-
-    3. [Try an SLO validation experiment where Iter8 generates payload for a POST API implemented by your app.](../tutorials/deployments/slo-validation-payload.md)
-
-    4. [Try an SLO validation experiment with chaos injection.](../tutorials/deployments/slo-validation-chaos.md)
-
-    5. [Try an SLO validation experiment with promotion of a candidate version using GitOps.](../tutorials/deployments/slo-validation-gitops.md)
+    2. Try other variations of SLO validation that involve:
+        - [HTTP POST API accepting a payload](../tutorials/deployments/slo-validation-payload.md)
+        - [GitOps with automated pull request](../tutorials/deployments/slo-validation-pr.md)
+        - [Auto trigger GitHub Actions workflow](../tutorials/deployments/slo-validation-ghaction.md)
+        - [Chaos injection](../tutorials/deployments/slo-validation-chaos.md)

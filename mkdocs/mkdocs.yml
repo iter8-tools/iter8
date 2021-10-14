@@ -2,9 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  SLO validation, A/B(/n) testing with business metrics, chaos injection, and  progressive
-  rollouts. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon,
-  and more.
+    Maximize release velocity and business value of apps while protecting end-user experience. Use in any Kubernetes environment. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -61,7 +59,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Cloud Native Release Engineering Platform
+  title: Metrics Driven Experiments and Releases
   version:
     provider: mike
   social:
@@ -118,6 +116,7 @@ nav:
 - Home: index.md
 - Concepts:
   - What is Iter8?: concepts/whatisiter8.md
+  - Key featues: concepts/features.md
   - Experiment building blocks: concepts/buildingblocks.md
 - Getting Started:
   - Your first experiment: getting-started/first-experiment.md
@@ -126,9 +125,10 @@ nav:
   - Setup for tutorials: getting-started/setup-for-tutorials.md
 - Tutorials:
   - Kubernetes deployments:
-    - SLO validation with Payload: tutorials/deployments/slo-validation-payload.md
-    - SLO validation with Chaos: tutorials/deployments/slo-validation-chaos.md
-    - SLO validation with GitOps: tutorials/deployments/slo-validation-gitops.md
+    - SLO validation with payload: tutorials/deployments/slo-validation-payload.md
+    - Auto create pull request: tutorials/deployments/slo-validation-pr.md
+    - Auto trigger GitHub Actions: tutorials/deployments/slo-validation-ghaction.md
+    - SLO validation with chaos: tutorials/deployments/slo-validation-chaos.md
   - KFServing:
     - Quick start: tutorials/kfserving/quick-start.md
     - Platform setup: tutorials/kfserving/platform-setup.md

@@ -1,0 +1,17 @@
+# Number of queries sent by Iter8 during metrics collection
+numQueries: 100
+
+# Queries per second sent by Iter8 during metrics collection
+QPS: 8.0
+
+# Upper limit on the mean latency of app. 
+# Values beyond this limit are not acceptable
+limitMeanLatency: 500.0 # 500 msec latency on an average is ok. Not more.
+
+# Upper limit on the error rate of app. 
+# Values beyond this limit are not acceptable
+limitErrorRate: 0.00 # 0%. Errors are not acceptable.
+
+# Upper limit on the 95th percentile tail latency of app. 
+# Values beyond this limit are not acceptable
+limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.

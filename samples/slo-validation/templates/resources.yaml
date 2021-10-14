@@ -1,7 +1,16 @@
+{{- /*
+$uniqId is a random alpha numeric string of length 5 
+that is suffixed to all the resources in this chart. This ensures
+consistent naming across resources within a single experiment, and unique
+naming across multiple experiments.
+*/}}
+
+{{- $uniqId := randAlphaNum 5 | lower -}}
+
 apiVersion: iter8.tools/v2alpha2
 kind: Experiment
 metadata:
-  name: slo-validation-{{ randAlphaNum 5 | lower }}
+  name: {{ .Chart.Name }}-{{ $uniqId }}
 spec:
   # target identifies application for which SLO validation experiment is performed
   target: app
@@ -12,8 +21,14 @@ spec:
       start:
       - task: metrics/collect
         with:
-          time: {{ required ".Values.time is required!" .Values.time | quote }}
+          numQueries: {{ required ".Values.numQueries is required!" .Values.numQueries }}
           qps: {{ required ".Values.QPS is required!" .Values.QPS }}
+          {{- if .Values.payloadURL }}
+          payloadURL: {{ .Values.payloadURL }}
+          {{- end }}
+          {{- if .Values.contentType }}
+          contentType: {{ .Values.contentType }}
+          {{- end }}
           versions:
           - name: my-app
             url: {{ required ".Values.URL is required!" .Values.URL | quote }}
