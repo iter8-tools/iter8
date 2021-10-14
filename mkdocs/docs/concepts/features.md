@@ -22,7 +22,7 @@ Use advanced traffic engineering features from your service mesh/ingress such as
 ## Progressive traffic shifting
 Use Iter8's multi-armed bandit based AI to progressively shift traffic towards the winning version of your app.
 
-## Hybrid 
+## Hybrid experiments
 Combine any of the above testing and rollout patterns within an experiment.
 
 ## CI/CD/GitOps
