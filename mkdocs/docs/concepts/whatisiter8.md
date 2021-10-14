@@ -9,14 +9,9 @@ template: main.html
 ***
 
 ## What is an Iter8 experiment?
-Iter8 defines a Kubernetes resource called **Experiment** that automates the release engineering process as shown below. Use Iter8 for SLO validation, A/B(/n) testing with business metrics, chaos injection, dark launch, canaries, progressive rollouts with advanced traffic engineering, and their hybrids. 
-
+Iter8 defines a Kubernetes resource called **Experiment** that facilitates release engineering tasks such as SLO validation, A/B(/n) testing with business metrics, chaos testing, dark launch, canaries, progressive rollouts with advanced traffic engineering, and their hybrids. 
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
-
-***
-
-## Key Features
 
 ***
 

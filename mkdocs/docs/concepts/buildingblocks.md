@@ -8,14 +8,10 @@ We introduce the building blocks of an Iter8 experiment below.
 
 ***
 
-## Applications and Versions
-Iter8 defines an application broadly as an entity that can be:
+## Apps and Versions
+Iter8 defines an app broadly as any entity that can be deployed (run), versioned, and for which metrics can be collected.
 
-1. instantiated (run) on Kubernetes, 
-2. can be versioned, and 
-3. for which metrics can be collected.
-
-??? example "Examples"
+???+ example "Examples"
     * A stateless K8s application whose versions correspond to `deployments`.
     * A stateful K8s application whose versions correspond to `statefulsets`.
     * A Knative application whose versions correspond to `revisions`.
@@ -28,7 +24,7 @@ Iter8 defines an application broadly as an entity that can be:
 
 **Objectives** correspond to service-level objectives or SLOs. In Iter8 experiments, objectives are specified as metrics along with acceptable limits on their values. Iter8 will report how versions are performing with respect to these metrics and whether or not they satisfy the objectives.
 
-??? example "Examples"
+???+ example "Examples"
     * The 99th-percentile tail latency of the application should be under 50 msec.
     * The precision of the ML model version should be over 92%.
     * The (average) number of GPU cores consumed by a model should be under 5.0
@@ -38,7 +34,7 @@ Iter8 defines an application broadly as an entity that can be:
 ## Reward
 **Reward** typically corresponds to a business metric which you wish to optimize during an A/B testing experiment. In Iter8 experiments, reward is specified as a metric along with a preferred direction, which could be `high` or `low`. 
 
-??? example "Examples"
+???+ example "Examples"
     * User-engagement 
     * Conversion rate
     * Click-through rate

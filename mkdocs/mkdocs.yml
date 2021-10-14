@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-    Maximize release velocity and business value of apps while protecting end-user experience. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, Prometheus, Elastic, New Relic, Sysdig, and more.
+    Maximize release velocity and business value of apps while protecting end-user experience. Use in any Kubernetes environment. Quick start in 5 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -116,6 +116,7 @@ nav:
 - Home: index.md
 - Concepts:
   - What is Iter8?: concepts/whatisiter8.md
+  - Key featues: concepts/features.md
   - Experiment building blocks: concepts/buildingblocks.md
 - Getting Started:
   - Your first experiment: getting-started/first-experiment.md
