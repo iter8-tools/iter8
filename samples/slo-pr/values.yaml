@@ -7,19 +7,22 @@ numQueries: 100
 QPS: 8.0
 
 # Upper limit on the mean latency. Values beyond this limit are not acceptable
-limitMeanLatency: 500.0 # 500 msec latency on an average is ok. Not more.
+limitMeanLatency: 50.0 # 50 msec latency on an average is ok. Not more.
 
 # Upper limit on the error rate. Values beyond this limit are not acceptable
 limitErrorRate: 0.00 # 0%. Errors are not acceptable.
 
 # Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
-limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.
+limit95thPercentileLatency: 100.0 # One second tail latency is ok. Not more.
 
 # default name for secret
 secret: ghtoken
 
-# Base branch for PR
-base: master
+# Base ref for PR
+base: main
 
-# Head branch for PR
-head: staging
+# Head ref for PR
+head: null
+
+# Host
+host: github.com

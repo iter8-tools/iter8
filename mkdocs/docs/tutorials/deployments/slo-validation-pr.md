@@ -82,6 +82,8 @@ helm upgrade -n staging my-exp $ITER8/samples/slo-pr \
   --set limit95thPercentileLatency=100.0 \
   --set owner=$USERNAME \
   --set repo=iter8 \
+  --set base=master \
+  --set head=staging \
   --install
 ```
 

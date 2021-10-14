@@ -48,7 +48,11 @@ spec:
           cd {{ .Values.repo }}
 
           # create PR
-          gh pr create --title "Iter8 PR" --body "Pull request created automatically by Iter8 experiment" -B {{ .Values.base }} -H {{ .Values.head }} -R {{ required ".Values.owner is required!" .Values.owner }}/{{ .Values.repo }}
+          gh pr create --title "Iter8 PR" \
+          --body "Pull request created automatically by Iter8 experiment" \
+          -B {{ .Values.base }} \
+          -H {{ .Values.head }} \
+          -R {{ required ".Values.host is required!" .Values.host }}/{{ required ".Values.owner is required!" .Values.owner }}/{{ .Values.repo }}
         with:
           secret: {{ .Release.Namespace }}/{{ .Values.secret }}
   criteria:
