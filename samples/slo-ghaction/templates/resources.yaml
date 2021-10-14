@@ -43,7 +43,9 @@ spec:
           cd {{ .Values.repo }}
 
           # trigger workflow
-          gh workflow run {{ required ".Values.workflow is required!" .Values.workflow }} --ref {{ required ".Values.ref is required!" .Values.ref }} -R {{ required ".Values.owner is required!" .Values.owner }}/{{ .Values.repo }}
+          gh workflow run {{ required ".Values.workflow is required!" .Values.workflow }} \
+          --ref {{ required ".Values.ref is required!" .Values.ref }} \
+          -R {{ required ".Values.host is required!" .Values.host }}/{{ required ".Values.owner is required!" .Values.owner }}/{{ .Values.repo }}
         with:
           secret: {{ .Release.Namespace }}/{{ .Values.secret }}
   criteria:

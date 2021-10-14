@@ -22,4 +22,7 @@ limit95thPercentileLatency: 100.0 # 100 msec tail latency is ok. Not more.
 secret: ghtoken
 
 # Name of the branch or tag name which contains the version of the workflow file you'd like to run
-ref: master
+ref: main
+
+# Host
+host: github.com

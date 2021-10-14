@@ -54,6 +54,7 @@ helm upgrade my-exp $ITER8/samples/slo-ghaction \
   --set limit95thPercentileLatency=100.0 \
   --set owner=$USERNAME \
   --set repo=iter8 \
+  --set ref=master \
   --set workflow=demo.yaml \
   --install
 ```
