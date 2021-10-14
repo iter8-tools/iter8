@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Iter8 enables DevOps/MLOps/SRE teams to easily implement SLO validation, A/B(/n) testing with business metrics, chaos injection, dark launch, canaries, progressive rollouts with advanced traffic engineering, and their hybrids. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, and more.
+    Maximize release velocity and business value of apps while protecting end-user experience. Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, Prometheus, Elastic, New Relic, Sysdig, and more.
 
 # Repository
 repo_name: iter8-tools/iter8

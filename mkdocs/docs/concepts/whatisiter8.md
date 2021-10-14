@@ -4,22 +4,19 @@ template: main.html
 
 # What is Iter8?
 
-**Iter8** is a metrics-driven experimentation and release engineering platform.
-
-Iter8 is designed for **DevOps, SRE, and MLOps teams** interested in maximizing release velocity and business value of their apps while protecting end-user experience. 
-
-***
-
-Use Iter8 for SLO validation, A/B(/n) testing with business metrics, chaos injection, dark launch, canaries, progressive rollouts with advanced traffic engineering, and their hybrids. 
-
-Integrate with Helm, Istio, Linkerd, Litmus, Knative, KFServing, Seldon, and more.
+**Iter8** is a metrics-driven experimentation and release engineering platform. Iter8 enables **DevOps/MLOps/SRE teams** to maximize release velocity and business value of apps while protecting end-user experience.
 
 ***
 
 ## What is an Iter8 experiment?
-Iter8 defines a Kubernetes resource called **Experiment** that automates the release engineering process as shown below.
+Iter8 defines a Kubernetes resource called **Experiment** that automates the release engineering process as shown below. Use Iter8 for SLO validation, A/B(/n) testing with business metrics, chaos injection, dark launch, canaries, progressive rollouts with advanced traffic engineering, and their hybrids. 
+
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
+
+***
+
+## Key Features
 
 ***
 
