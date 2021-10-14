@@ -1,0 +1,5 @@
+apiVersion: v2
+name: slo-validation
+description: A Helm chart for Iter8 SLO validation with built-in metrics
+type: application
+version: 0.1.1

@@ -3,17 +3,26 @@
 # URL of the application for which this SLO validation experiment is performed
 # URL: https://example.com
 
-# The duration for which Iter8 will send requests to app
-time: 5s
+# Number of queries sent for validation
+numQueries: 100
 
-# Queries per second used by Iter8 for sending requests
+# Queries per second
 QPS: 8.0
 
 # Upper limit on the mean latency. Values beyond this limit are not acceptable
-limitMeanLatency: 500.0 # 500 msec latency on an average is ok. Not more.
+limitMeanLatency: 50.0 # 50 msec latency on an average is ok. Not more.
 
 # Upper limit on the error rate. Values beyond this limit are not acceptable
 limitErrorRate: 0.00 # 0%. Errors are not acceptable.
 
 # Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
-limit95thPercentileLatency: 1000.0 # One second tail latency is ok. Not more.
+limit95thPercentileLatency: 100.0 # 100 msec tail latency is ok. Not more.
+
+# Name of the secret containing GitHub token
+secret: ghtoken
+
+# Name of the branch or tag name which contains the version of the workflow file you'd like to run
+ref: main
+
+# Host
+host: github.com

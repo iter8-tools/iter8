@@ -2,7 +2,7 @@
 
 <img alt="Iter8" src="mkdocs/docs/images/favicon.png" width="100" align="left">
 
-## Cloud Native Release Engineering Platform 
+## Metrics Driven Experiments and Releases 
 
 [![GitHub stars](https://img.shields.io/github/stars/iter8-tools/iter8?style=social)](https://github.com/iter8-tools/iter8/stargazers)
 [![Slack channel](https://img.shields.io/badge/Slack-Join-purple)](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
@@ -11,7 +11,7 @@
 
 ## Overview
 
-> Iter8 enables DevOps/MLOps/SRE teams to validate and safely release new versions of cloud native apps.
+> Iter8 enables DevOps/MLOps/SRE teams to validate and safely rollout the best versions of their apps.
 
 > Use Iter8 to easily implement SLO validation, A/B(/n) testing with business metrics, chaos injection, dark launch, canaries, and progressive rollouts.
 

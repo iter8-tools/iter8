@@ -1,0 +1,5 @@
+apiVersion: v2
+name: slo-pr
+description: A Helm chart for Iter8 SLO validation experiment with automated PR creation
+type: application
+version: 0.1.0

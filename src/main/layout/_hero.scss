@@ -39,7 +39,7 @@
 .mdx-hero {
   margin: 0 px2rem(16px);
   color: var(--md-primary-bg-color);
-  padding-bottom: px2rem(32px);
+  padding-bottom: px2rem(20px);
 
   // Hero headline
   h1 {
@@ -86,7 +86,7 @@
     &__image {
       order: 1;
       width: px2rem(660px);
-      margin-top: px2rem(100px);
+      margin-top: px2rem(40px);
       transform: translateX(#{px2rem(30px)});
     }
   }
@@ -121,4 +121,60 @@
     }
   }
 }
+
+
+// Landing page container
+.ix-container {
+  padding-top: px2rem(20px);
+  background: whitesmoke;
+}
+
+.ix-hero {
+  margin: 0 px2rem(16px);
+  padding-bottom: px2rem(20px);
+
+  h1, h2, h3 {
+    color: var(--md-primary-fg-color--dark);    
+  }
+
+  // Hero content
+  &__content {
+    min-width: 40%;
+    padding: px2rem(20px);  
+  }
+
+  // Hero image
+  &__image {
+    padding: px2rem(20px);
+  }
+
+  // [tablet landscape +]: Columnar display
+  @include break-from-device(tablet landscape) {
+    display: flex;
+    align-items: stretch;
+
+    // Adjust spacing and set dimensions
+    &__content {
+      max-width: px2rem(640px);
+      transform: translateX(#{px2rem(40px)});
+    }
+
+    // Hero image
+    &__image {
+      order: 0;
+      width: px2rem(500px);
+      margin-top: px2rem(40px);
+    }
+  }
+
+  // [screen +]: Columnar display and adjusted spacing
+  @include break-from-device(screen) {
+    // Hero image
+    &__image {
+      transform: translateX(#{px2rem(40px)});
+    }
+  }
+}
+
+
 

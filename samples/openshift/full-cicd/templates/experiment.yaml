@@ -31,7 +31,7 @@ spec:
               "ref":"master",
               "inputs":{
                 "basedir": "samples/cicd",
-                "filepath": "{{.filepath}}"
+                "filepath": "@<.filepath>@"
               }
             }
           headers:

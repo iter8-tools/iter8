@@ -1,0 +1,28 @@
+# Default values for Iter8 SLO validation experiment with automated PR creation
+
+# Number of queries sent for validation
+numQueries: 100
+
+# Queries per second used by Iter8 for sending requests
+QPS: 8.0
+
+# Upper limit on the mean latency. Values beyond this limit are not acceptable
+limitMeanLatency: 50.0 # 50 msec latency on an average is ok. Not more.
+
+# Upper limit on the error rate. Values beyond this limit are not acceptable
+limitErrorRate: 0.00 # 0%. Errors are not acceptable.
+
+# Upper limit on the 95th percentile tail latency. Values beyond this limit are not acceptable
+limit95thPercentileLatency: 100.0 # One second tail latency is ok. Not more.
+
+# default name for secret
+secret: ghtoken
+
+# Base ref for PR
+base: main
+
+# Head ref for PR
+head: null
+
+# Host
+host: github.com
