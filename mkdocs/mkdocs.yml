@@ -117,7 +117,7 @@ nav:
 - Home: index.md
 - Concepts:
   - What is Iter8?: concepts/whatisiter8.md
-  - Key featues: concepts/features.md
+  - Key features: concepts/features.md
   - Experiment building blocks: concepts/buildingblocks.md
 - Getting Started:
   - Your first experiment: getting-started/first-experiment.md
