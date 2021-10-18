@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-{{ .Release.Revision }}
+data:
+  experiment.yaml: |
+    iter8Version: {{ .Chart.AppVersion }}
+    versions:
+    - my-app
+    start:
+    - task: collect-built-in-metrics
+      with:
+        {{- if .Values.numQueries }}
+        numQueries: {{ .Values.numQueries }}
+        {{- end }}
+        {{- if .Values.time }}
+        time: {{ .Values.time }}
+        {{- end }}
+        {{- if .Values.qps }}
+        qps: {{ .Values.qps }}
+        {{- end }}
+        {{- if .Values.connections }}
+        connections: {{ .Values.connections }}
+        {{- end }}
+        {{- if .Values.loadOnly }}
+        loadOnly: {{ .Values.loadOnly }}
+        {{- end }}
+        {{- if .Values.payloadStr }}
+        payloadStr: {{ .Values.payloadStr }}
+        {{- end }}
+        {{- if .Values.payloadURL }}
+        payloadURL: {{ .Values.payloadURL }}
+        {{- end }}
+        {{- if .Values.contentType }}
+        contentType: {{ .Values.contentType }}
+        {{- end }}
+        versionInfo:
+        - name: my-app
+          url: {{ required "A valid url is required!" .Values.url }}
+          {{- if .Values.headers }}
+          headers:
+            {{- range $k, $v := .Values.headers }}
+            {{ $k }}: {{ $v -}}
+            {{- end }}     
+          {{- end }}
+    - task: assess-versions
+      with:
+        criteria:
+immutable: true

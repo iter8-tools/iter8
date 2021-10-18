@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-{{ .Release.Revision }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: experiment
+        # image: iter8/runner:{{ .Values.appVersion }}
+        # command: ["iter8"]
+        # args:
+        # - "run"
+        # - "--context=kubernetes"
+        image: iter8/taskrunner:0.1.37
+        command: 
+        - "sh"
+        - "-c"
+        - |
+          cat $EXPERIMENT_DIR/experiment.yaml ; \
+          echo "nothing: to-report" > $RESULTS_DIR/results.yaml ; \
+          kubectl create configmap ${EXPERIMENT_PREFIX}-results --from-file=$RESULTS_DIR/results.yaml --dry-run=client -o yaml | kubectl apply -f -
+        env:
+        - name: EXPERIMENT_PREFIX
+          value: {{ .Chart.Name }}-{{ .Release.Revision }}
+        - name: EXPERIMENT_DIR
+          value: "/experiment"
+        - name: RESULTS_DIR
+          value: "/results"
+        volumeMounts:
+        - name: experiment-vol
+          mountPath: /experiment
+        - name: results-vol
+          mountPath: /results
+      volumes:
+      - name: experiment-vol
+        configMap:
+          name: {{ .Chart.Name }}-{{ .Release.Revision }}
+      - name: results-vol
+        emptyDir: {}
+      restartPolicy: Never
+  backoffLimit: 0
+  activeDeadlineSeconds: 300
