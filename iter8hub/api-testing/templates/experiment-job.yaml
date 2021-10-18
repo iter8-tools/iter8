@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
       - name: experiment
-        image: iter8/runner:{{ .Values.appVersion }}
+        image: iter8/runner:{{ .Chart.AppVersion }}
         command: ["iter8"]
         args:
         - "run"
