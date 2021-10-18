@@ -12,7 +12,7 @@ limitMeanLatency: 500.0
 # upper limit on the error rate of app;
 # values beyond this limit are not acceptable;
 # the default value below says that no errors are acceptable
-limitErrorRate: 0.00 # 0%. Errors are not acceptable.
+limitErrorRate: 0.00
 
 # upper limit on the 95th percentile tail latency of app; 
 # values beyond this limit are not acceptable

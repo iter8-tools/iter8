@@ -34,6 +34,9 @@ data:
         {{- if .Values.contentType }}
         contentType: {{ .Values.contentType }}
         {{- end }}
+        {{- if .Values.errorRegexp }}
+        contentType: {{ .Values.errorRegexp }}
+        {{- end }}
         versionInfo:
         - name: my-app
           url: {{ required "A valid url is required!" .Values.url }}
@@ -46,4 +49,33 @@ data:
     - task: assess-versions
       with:
         criteria:
+          requestCount: iter8-fortio/request-count
+          errorCount: iter8-fortio/error-count
+          objectives:
+            {{- if .Values.limitMeanLatency }}
+            - metric: iter8-fortio/mean-latency
+              upperLimit: {{ .Values.limitMeanLatency }}
+            {{- end }}
+            - metric: iter8-fortio/error-rate
+              upperLimit: {{ required "A valid limitErrorRate value is required!" .Values.limitErrorRate }}
+            {{- if .Values.limit50thPercentileLatency }}
+            - metric: iter8-fortio/latency-50th-percentile
+              upperLimit: {{ .Values.limit50thPercentileLatency }}
+            {{- end }}
+            {{- if .Values.limit75thPercentileLatency }}
+            - metric: iter8-fortio/latency-75th-percentile
+              upperLimit: {{ .Values.limit75thPercentileLatency }}
+            {{- end }}
+            {{- if .Values.limit90thPercentileLatency }}
+            - metric: iter8-fortio/latency-90th-percentile
+              upperLimit: {{ .Values.limit90thPercentileLatency }}
+            {{- end }}
+            {{- if .Values.limit95thPercentileLatency }}
+            - metric: iter8-fortio/latency-95th-percentile
+              upperLimit: {{ .Values.limit95thPercentileLatency }}
+            {{- end }}
+            {{- if .Values.limit99thPercentileLatency }}
+            - metric: iter8-fortio/latency-99th-percentile
+              upperLimit: {{ .Values.limit99thPercentileLatency }}
+            {{- end }}
 immutable: true
