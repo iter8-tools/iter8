@@ -7,19 +7,23 @@ spec:
     spec:
       containers:
       - name: experiment
-        # image: iter8/runner:{{ .Values.appVersion }}
-        # command: ["iter8"]
-        # args:
-        # - "run"
-        # - "--context=kubernetes"
-        image: iter8/taskrunner:0.1.37
-        command: 
-        - "sh"
-        - "-c"
-        - |
-          cat $EXPERIMENT_DIR/experiment.yaml ; \
-          echo "nothing: to-report" > $RESULTS_DIR/results.yaml ; \
-          kubectl create configmap ${EXPERIMENT_PREFIX}-results --from-file=$RESULTS_DIR/results.yaml --dry-run=client -o yaml | kubectl apply -f -
+        image: iter8/runner:{{ .Values.appVersion }}
+        command: ["iter8"]
+        args:
+        - "run"
+        - "--context=kubernetes"
+        # 
+        # the above image is yet to be implemented ...
+        # for now, comment out the above container, and uncomment the following
+        # 
+        # image: iter8/taskrunner:0.1.37
+        # command: 
+        # - "sh"
+        # - "-c"
+        # - |
+        #   cat $EXPERIMENT_DIR/experiment.yaml ; \
+        #   echo "nothing: to-report" > $RESULTS_DIR/results.yaml ; \
+        #   kubectl create configmap ${EXPERIMENT_PREFIX}-results --from-file=$RESULTS_DIR/results.yaml --dry-run=client -o yaml | kubectl apply -f -
         env:
         - name: EXPERIMENT_PREFIX
           value: {{ .Chart.Name }}-{{ .Release.Revision }}
