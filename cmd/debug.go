@@ -21,16 +21,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var priority uint8
+var logFile string
+
 // debugCmd represents the debug command
 var debugCmd = &cobra.Command{
 	Use:   "debug",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Debug an Iter8 experiment",
+	Long:  `Print logs for an Iter8 experiment filtered by priority.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("debug called")
 	},
@@ -38,14 +36,6 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(debugCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// debugCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// debugCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	debugCmd.Flags().Uint8VarP(&priority, "priority", "p", 1, "1, 2, or 3 corresponding to high, medium and low; for example, setting priority to 2 would print logs of priority 1 or 2")
+	debugCmd.Flags().StringVarP(&logFile, "log", "l", "experiment.log", "experiment log file")
 }

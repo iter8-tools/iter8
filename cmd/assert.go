@@ -19,15 +19,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/iter8-tools/iter8/core"
 	"github.com/spf13/cobra"
 )
 
-type assertFlags struct {
-	expFiles
-	conditions []string
-}
-
-var aFlags = assertFlags{}
+var conds []string
 
 // assertCmd represents the assert command
 var assertCmd = &cobra.Command{
@@ -35,12 +31,13 @@ var assertCmd = &cobra.Command{
 	Short: "Assert if the experiment satisfies the specified conditions",
 	Long:  `Assert one or more conditions using this command. This command is especially useful in CI/CD/Gitops pipelines prior to version promotion or rollback.`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		for _, cond := range aFlags.conditions {
+		conditions := []core.ConditionType{}
+		for _, cond := range conds {
 			switch cond {
-			case string(expr.Completed):
-				conds = append(conds, expr.Completed)
-			case string(expr.WinnerFound):
-				conds = append(conds, expr.WinnerFound)
+			case string(core.Completed):
+				conditions = append(conditions, core.Completed)
+			case string(core.WinnerFound):
+				conditions = append(conditions, core.WinnerFound)
 			default:
 				return errors.New("Invalid condition: " + cond)
 			}
@@ -54,16 +51,6 @@ var assertCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(assertCmd)
-	assertCmd.Flags().StringSliceVarP(&aFlags.conditions, "condition", "c", nil, "completed | winnerFound")
-	assertCmd.Flags().StringVarP(aFlags.specFile, "spec", "s", "experiment.yaml", "path to experiment yaml")
-	assertCmd.Flags().StringSliceVarP(&aFlags.conditions, "condition", "c", nil, "completed | winnerFound")
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// assertCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// assertCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, "completed | winnerFound")
+	assertCmd.Flags().StringVarP(&resultFile, "results", "r", "results.yaml", "experiment results yaml file")
 }
