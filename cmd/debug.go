@@ -22,13 +22,12 @@ import (
 )
 
 var priority uint8
-var logFile string
 
 // debugCmd represents the debug command
 var debugCmd = &cobra.Command{
 	Use:   "debug",
-	Short: "Debug an Iter8 experiment",
-	Long:  `Print logs for an Iter8 experiment filtered by priority.`,
+	Short: "debug an experiment",
+	Long:  `Print logs for an experiment. Logs will be at the given priority level or higher.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("debug called")
 	},
