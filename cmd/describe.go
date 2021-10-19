@@ -24,8 +24,8 @@ import (
 // describeCmd represents the describe command
 var describeCmd = &cobra.Command{
 	Use:   "describe",
-	Short: "Describe an Iter8 experiment",
-	Long:  `Summarize an experiment, including the stage of the experiment, how versions are performing with respect to the experiment criteria (reward, objectives, indicators), and information about the winning version.`,
+	Short: "describe an experiment",
+	Long:  `Describe an experiment, including the stage of the experiment, how versions are performing with respect to the experiment criteria (reward, objectives, indicators), and information about the winning version.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("describe called")
 	},

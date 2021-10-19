@@ -28,8 +28,8 @@ var conds []string
 // assertCmd represents the assert command
 var assertCmd = &cobra.Command{
 	Use:   "assert",
-	Short: "Assert if the experiment satisfies the specified conditions",
-	Long:  `Assert one or more conditions using this command. This command is especially useful in CI/CD/Gitops pipelines prior to version promotion or rollback.`,
+	Short: "assert if the experiment satisfies the specified conditions",
+	Long:  `Assert one or more conditions using this command. Assertions can be used in CI/CD/Gitops pipelines as part of automated version promotion or rollback.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		conditions := []core.ConditionType{}
 		for _, cond := range conds {
