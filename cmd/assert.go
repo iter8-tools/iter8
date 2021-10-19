@@ -1,0 +1,69 @@
+/*
+Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package cmd
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
+
+type assertFlags struct {
+	expFiles
+	conditions []string
+}
+
+var aFlags = assertFlags{}
+
+// assertCmd represents the assert command
+var assertCmd = &cobra.Command{
+	Use:   "assert",
+	Short: "Assert if the experiment satisfies the specified conditions",
+	Long:  `Assert one or more conditions using this command. This command is especially useful in CI/CD/Gitops pipelines prior to version promotion or rollback.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		for _, cond := range aFlags.conditions {
+			switch cond {
+			case string(expr.Completed):
+				conds = append(conds, expr.Completed)
+			case string(expr.WinnerFound):
+				conds = append(conds, expr.WinnerFound)
+			default:
+				return errors.New("Invalid condition: " + cond)
+			}
+		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("assert called")
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(assertCmd)
+	assertCmd.Flags().StringSliceVarP(&aFlags.conditions, "condition", "c", nil, "completed | winnerFound")
+	assertCmd.Flags().StringVarP(aFlags.specFile, "spec", "s", "experiment.yaml", "path to experiment yaml")
+	assertCmd.Flags().StringSliceVarP(&aFlags.conditions, "condition", "c", nil, "completed | winnerFound")
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// assertCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// assertCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
