@@ -1,5 +1,41 @@
 package core
 
+// MetricType identifies the type of the metric.
+type MetricType string
+
+const (
+	// CounterMetricType corresponds to Prometheus Counter metric type
+	CounterMetricType MetricType = "Counter"
+
+	// GaugeMetricType corresponds to Prometheus Gauge metric type
+	GaugeMetricType MetricType = "Gauge"
+)
+
+// AuthType identifies the type of authentication used in the HTTP request
+type AuthType string
+
+const (
+	// BasicAuthType corresponds to authentication with basic auth
+	BasicAuthType AuthType = "Basic"
+
+	// BearerAuthType corresponds to authentication with bearer token
+	BearerAuthType AuthType = "Bearer"
+
+	// APIKeyAuthType corresponds to authentication with API keys
+	APIKeyAuthType AuthType = "APIKey"
+)
+
+// MethodType identifies the HTTP request method (aka verb) used in the HTTP request
+type MethodType string
+
+const (
+	// GETMethodType corresponds to HTTP GET method
+	GETMethodType MethodType = "GET"
+
+	// POSTMethodType corresponds to HTTP POST method
+	POSTMethodType MethodType = "POST"
+)
+
 // BackendInfo is map of backends
 type BackendInfo map[string]Backend
 
