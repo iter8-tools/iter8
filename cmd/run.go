@@ -19,11 +19,16 @@ var runCmd = &cobra.Command{
 		exp := &core.Experiment{
 			ExperimentContext: &fc,
 		}
-		err := exp.Run()
+		err := exp.Build()
 		if err != nil {
-			core.Logger.Error("experiment run failed")
+			core.Logger.Error("experiment build failed")
 		} else {
-			core.Logger.Info("experiment run completed successfully")
+			err := exp.Run()
+			if err != nil {
+				core.Logger.Error("experiment run failed")
+			} else {
+				core.Logger.Info("experiment run completed successfully")
+			}
 		}
 	},
 }

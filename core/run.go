@@ -1,8 +1,10 @@
 package core
 
-import "errors"
-
 // Run an experiment
 func (e *Experiment) Run() error {
-	return errors.New("not implemented")
+	var err error
+	for i, t := range e.Tasks {
+		err = t.Run(i)
+	}
+	return err
 }
