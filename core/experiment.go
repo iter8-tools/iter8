@@ -1,10 +1,16 @@
 package core
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"github.com/ghodss/yaml"
+)
 
 // Experiment specification and result
 type Experiment struct {
 	ExperimentContext
+	TaskMaker
 	Tasks  []Task
 	Spec   *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
 	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
@@ -57,15 +63,28 @@ type Analysis struct {
 	Weights []int32 `json:"weights,omitempty" yaml:"weights,omitempty"`
 }
 
-func (e *Experiment) Build(tm TaskMaker) error {
+func (e *Experiment) String() string {
+	out, _ := yaml.Marshal(e)
+	return string(out)
+}
+
+func (e *Experiment) Build() error {
+	Logger.Trace("build called")
 	var err error
 	e.Spec, err = e.ExperimentContext.ReadSpec()
-	for _, ts := range e.Spec.Tasks {
-		t, err := tm.Make(&ts)
+	if err != nil {
+		Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
+		return err
+	}
+	Logger.WithStackTrace(e.String()).Trace("unmarshaled experiment")
+	for i, ts := range e.Spec.Tasks {
+		Logger.Trace(fmt.Sprintf("unmarshaling task %v", i))
+		t, err := e.TaskMaker.Make(&ts)
 		if err != nil {
 			Logger.WithStackTrace(err.Error()).Error("unable to unmarshal task")
 			return err
 		}
+		Logger.Info(fmt.Sprintf("task %v", i))
 		e.Tasks = append(e.Tasks, t)
 	}
 	return err

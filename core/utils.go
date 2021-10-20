@@ -1,5 +1,10 @@
 package core
 
+import (
+	"path/filepath"
+	"runtime"
+)
+
 // UInt32Pointer takes a uint32 as input, creates a new variable with the input value, and returns a pointer to the variable
 func UInt32Pointer(u uint32) *uint32 {
 	return &u
@@ -28,4 +33,11 @@ func StringPointer(s string) *string {
 // BoolPointer takes a bool as input, creates a new variable with the input value, and returns a pointer to the variable
 func BoolPointer(b bool) *bool {
 	return &b
+}
+
+// CompletePath is a helper function for converting file paths, specified relative to the caller of this function, into absolute ones.
+// CompletePath is useful in tests and enables deriving the absolute path of experiment YAML files.
+func CompletePath(prefix string, suffix string) string {
+	_, testFilename, _, _ := runtime.Caller(1) // one step up the call stack
+	return filepath.Join(filepath.Dir(testFilename), prefix, suffix)
 }

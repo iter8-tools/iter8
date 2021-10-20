@@ -1,5 +1,7 @@
 package core
 
+import "github.com/ghodss/yaml"
+
 // TaskMeta is common to all Tasks
 type TaskMeta struct {
 	// Task uniquely identifies the task to be executed.
@@ -14,9 +16,14 @@ type TaskMeta struct {
 
 // TaskSpec contains the specification of a task.
 type TaskSpec struct {
-	TaskMeta
+	TaskMeta `json:",inline" yaml:",inline"`
 	// With holds inputs to this task.
 	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
+}
+
+func (t *TaskSpec) String() string {
+	out, _ := yaml.Marshal(t)
+	return string(out)
 }
 
 // Task objects can be run
