@@ -1,24 +1,7 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/iter8-tools/etc3/taskrunner/core"
+	"github.com/iter8-tools/iter8/core"
 	"github.com/spf13/cobra"
 )
 
@@ -28,11 +11,24 @@ var runCmd = &cobra.Command{
 	Short: "run an experiment",
 	Long:  `Run an experiment locally`,
 	Run: func(cmd *cobra.Command, args []string) {
-		exp := &core.Experiment{}
-		exp.ReadSpec(specFile)
-		exp.InitResults(resultFile)
-		exp.Run()
-		fmt.Println("run called")
+		core.Logger.WithField("stack-trace", core.StackTrace{
+			Trace: "my \nmulti \nline \ntrace",
+		}).Info("experiment run started")
+		fc := core.FileContext{
+			SpecFile:   specFile,
+			ResultFile: resultFile,
+		}
+		exp := &core.Experiment{
+			ExperimentContext: &fc,
+		}
+		err := exp.Run()
+		if err != nil {
+			core.Logger.WithField("stack-trace", core.StackTrace{
+				Trace: "my \nmulti \nline \ntrace",
+			}).Error("experiment run failed")
+		} else {
+			core.Logger.Info("experiment run completed successfully")
+		}
 	},
 }
 
