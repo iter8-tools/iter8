@@ -11,6 +11,7 @@ type TaskMaker struct{}
 // Make constructs a Task from a tasp spec; returns error if any
 func (tm *TaskMaker) Make(t *core.TaskSpec) (core.Task, error) {
 	if t == nil || t.Task == nil || len(*t.Task) == 0 {
+		core.Logger.WithStackTrace(t.String()).Error("nil or empty task found")
 		return nil, errors.New("nil or empty task found")
 	}
 	switch *t.Task {

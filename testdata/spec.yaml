@@ -1,15 +1,14 @@
-experiment.yaml:
-  iter8Version: "0.8.0"
-  versions:
-  - my-app
-  tasks:
-  - task: collect-built-in-metrics
-    with:
-      versionInfo:
-      - name: my-app
-        url: hello.default.svc.cluster.local
-  - task: assess-versions
-    with:
-      criteria:
-        requestCount: iter8-fortio/request-count
-        errorCount: iter8-fortio/error-count
+iter8Version: "0.8.0"
+versions:
+- my-app
+tasks:
+- task: collect-built-in-metrics
+  with:
+    versionInfo:
+    - name: my-app
+      url: hello.default.svc.cluster.local
+# - task: assess-versions
+#   with:
+#     criteria:
+#       requestCount: iter8-fortio/request-count
+#       errorCount: iter8-fortio/error-count

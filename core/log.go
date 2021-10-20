@@ -31,6 +31,10 @@ func init() {
 	})
 }
 
+func SetLogLevel(ll logrus.Level) {
+	Logger.SetLevel(ll)
+}
+
 // WithStackTrace yields a log entry with a formatted stack trace field embedded in it
 func (l *Iter8Logger) WithStackTrace(t string) *logrus.Entry {
 	return l.WithField("stack-trace", &StackTrace{

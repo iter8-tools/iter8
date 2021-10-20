@@ -72,7 +72,7 @@ type CollectInputs struct {
 	// valid HTTP content type string; specifying this switches the request from GET to POST
 	ContentType *string `json:"contentType,omitempty" yaml:"contentType,omitempty"`
 	// information about versions
-	Versions []Version `json:"versions" yaml:"versions"`
+	VersionInfo []Version `json:"versionInfo" yaml:"versionInfo"`
 }
 
 // CollectTask enables collection of Iter8's built-in metrics.
@@ -95,8 +95,8 @@ func MakeCollect(t *core.TaskSpec) (core.Task, error) {
 	if err == nil {
 		ct := &CollectTask{}
 		err = json.Unmarshal(jsonBytes, &ct)
-		if ct.With.Versions == nil {
-			return nil, errors.New("collect task with nil versions")
+		if ct.With.VersionInfo == nil {
+			return nil, errors.New("collect task with nil versionInfo")
 		}
 		bt = ct
 	}
@@ -273,7 +273,7 @@ func (t *CollectTask) getFortioArgs(j int) ([]string, error) {
 	}
 
 	// append headers
-	for header, value := range t.With.Versions[j].Headers {
+	for header, value := range t.With.VersionInfo[j].Headers {
 		args = append(args, "-H", fmt.Sprintf("\"%v: %v\"", header, value))
 	}
 
@@ -281,7 +281,7 @@ func (t *CollectTask) getFortioArgs(j int) ([]string, error) {
 	args = append(args, "-json", filepath.Join(fortioFolder, fortioOutputFile))
 
 	// append URL to be queried by Fortio
-	args = append(args, t.With.Versions[j].URL)
+	args = append(args, t.With.VersionInfo[j].URL)
 
 	return args, nil
 }
@@ -343,13 +343,13 @@ func (t *CollectTask) Run(exp *core.Experiment) error {
 	// }
 
 	// run fortio queries for each version sequentially
-	for j := range t.With.Versions {
+	for j := range t.With.VersionInfo {
 		data, err := t.resultForVersion(j)
 		if err == nil {
 			// if this task is **not** loadOnly
 			if !*t.With.LoadOnly {
 				// Update fortioData in a threadsafe manner
-				fortioData = aggregate(fortioData, t.With.Versions[j].Name, data)
+				fortioData = aggregate(fortioData, t.With.VersionInfo[j].Name, data)
 			}
 		} else {
 			return err
