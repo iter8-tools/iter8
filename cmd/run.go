@@ -21,7 +21,6 @@ var runCmd = &cobra.Command{
 		}
 		err := exp.Run()
 		if err != nil {
-			core.Logger.WithStackTrace("my \nmulti \nline \ntrace").Error("experiment run failed")
 			core.Logger.Error("experiment run failed")
 		} else {
 			core.Logger.Info("experiment run completed successfully")
