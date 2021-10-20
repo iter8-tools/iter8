@@ -2,10 +2,6 @@ package core
 
 import "time"
 
-type Task interface {
-	Run(i int) error
-}
-
 // Experiment specification and result
 type Experiment struct {
 	ExperimentContext
@@ -24,20 +20,6 @@ type ExperimentSpec struct {
 
 	// Tasks is the sequence of tasks that constitute this experiment
 	Tasks []TaskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
-}
-
-// TaskSpec contains the specification of a task.
-type TaskSpec struct {
-	// Task uniquely identifies the task to be executed.
-	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
-	// Run is a special type of task meant to run a bash script.
-	// TaskSpec must include exactly one of the two fields, run or task.
-	Run *string `json:"run,omitempty" yaml:"run,omitempty"`
-	// If specifies if this task should be executed.
-	// Task will be evaluated if condition specified by if evaluates to true, and not otherwise.
-	If *string `json:"if,omitempty" yaml:"if,omitempty"`
-	// With holds inputs to this task.
-	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
 // ExperimentResult defines the current results from the experiment
@@ -75,8 +57,16 @@ type Analysis struct {
 	Weights []int32 `json:"weights,omitempty" yaml:"weights,omitempty"`
 }
 
-func (e *Experiment) Build() error {
+func (e *Experiment) Build(tm TaskMaker) error {
 	var err error
 	e.Spec, err = e.ExperimentContext.ReadSpec()
+	for _, ts := range e.Spec.Tasks {
+		t, err := tm.Make(&ts)
+		if err != nil {
+			Logger.WithStackTrace(err.Error()).Error("unable to unmarshal task")
+			return err
+		}
+		e.Tasks = append(e.Tasks, t)
+	}
 	return err
 }
