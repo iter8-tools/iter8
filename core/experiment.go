@@ -2,9 +2,14 @@ package core
 
 import "time"
 
+type Task interface {
+	Run(i int) error
+}
+
 // Experiment specification and result
 type Experiment struct {
 	ExperimentContext
+	Tasks  []Task
 	Spec   *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
 	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
 }
@@ -68,4 +73,10 @@ type Analysis struct {
 	// Weights is the most recently recommended traffic weights
 	// if not empty, the length of the slice must match the length of Spec.Versions
 	Weights []int32 `json:"weights,omitempty" yaml:"weights,omitempty"`
+}
+
+func (e *Experiment) Build() error {
+	var err error
+	e.Spec, err = e.ExperimentContext.ReadSpec()
+	return err
 }
