@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/iter8-tools/etc3/taskrunner/core"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,10 @@ var runCmd = &cobra.Command{
 	Short: "run an experiment",
 	Long:  `Run an experiment locally`,
 	Run: func(cmd *cobra.Command, args []string) {
+		exp := &core.Experiment{}
+		exp.ReadSpec(specFile)
+		exp.InitResults(resultFile)
+		exp.Run()
 		fmt.Println("run called")
 	},
 }
@@ -35,5 +40,4 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringVarP(&specFile, "spec", "s", "experiment.yaml", "experiment spec yaml file")
 	runCmd.Flags().StringVarP(&resultFile, "results", "r", "results.yaml", "experiment results yaml file")
-	runCmd.Flags().StringVarP(&logFile, "log", "l", "experiment.log", "experiment log file")
 }
