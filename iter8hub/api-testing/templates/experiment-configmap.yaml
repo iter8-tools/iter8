@@ -7,7 +7,7 @@ data:
     iter8Version: {{ .Chart.AppVersion }}
     versions:
     - my-app
-    start:
+    tasks:
     - task: collect-built-in-metrics
       with:
         {{- if .Values.numQueries }}
