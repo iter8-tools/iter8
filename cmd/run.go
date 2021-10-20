@@ -11,9 +11,7 @@ var runCmd = &cobra.Command{
 	Short: "run an experiment",
 	Long:  `Run an experiment locally`,
 	Run: func(cmd *cobra.Command, args []string) {
-		core.Logger.WithField("stack-trace", core.StackTrace{
-			Trace: "my \nmulti \nline \ntrace",
-		}).Info("experiment run started")
+		core.Logger.Info("experiment run started")
 		fc := core.FileContext{
 			SpecFile:   specFile,
 			ResultFile: resultFile,
@@ -23,9 +21,8 @@ var runCmd = &cobra.Command{
 		}
 		err := exp.Run()
 		if err != nil {
-			core.Logger.WithField("stack-trace", core.StackTrace{
-				Trace: "my \nmulti \nline \ntrace",
-			}).Error("experiment run failed")
+			core.Logger.WithStackTrace("my \nmulti \nline \ntrace").Error("experiment run failed")
+			core.Logger.Error("experiment run failed")
 		} else {
 			core.Logger.Info("experiment run completed successfully")
 		}
