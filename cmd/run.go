@@ -19,7 +19,7 @@ var runCmd = &cobra.Command{
 		exp := &core.Experiment{
 			ExperimentContext: &fc,
 		}
-		err := exp.Build()
+		err := exp.Build(&TaskMaker{})
 		if err != nil {
 			core.Logger.Error("experiment build failed")
 		} else {

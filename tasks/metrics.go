@@ -1,4 +1,4 @@
-package core
+package task
 
 // MetricType identifies the type of the metric.
 type MetricType string
