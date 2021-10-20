@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/iter8-tools/iter8/core"
+	task "github.com/iter8-tools/iter8/tasks"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +19,11 @@ var runCmd = &cobra.Command{
 		}
 		exp := &core.Experiment{
 			ExperimentContext: &fc,
+			TaskMaker:         &task.TaskMaker{},
 		}
-		err := exp.Build(&TaskMaker{})
+		core.Logger.Trace("build started")
+		err := exp.Build()
+		core.Logger.Trace("build finished")
 		if err != nil {
 			core.Logger.Error("experiment build failed")
 		} else {

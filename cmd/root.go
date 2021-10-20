@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/iter8-tools/iter8/core"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/spf13/viper"
@@ -49,6 +51,12 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	viper.BindEnv("LOG_LEVEL")
+	ll, err := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
+	if err == nil {
+		core.SetLogLevel(ll)
+	}
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.iter8.yaml)")
 }

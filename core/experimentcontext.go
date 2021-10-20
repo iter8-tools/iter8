@@ -3,7 +3,7 @@ package core
 import (
 	"io/ioutil"
 
-	"gopkg.in/yaml.v2"
+	"github.com/ghodss/yaml"
 )
 
 // Experiment context provides the methods needed to store and retrieve experiment spec and results
