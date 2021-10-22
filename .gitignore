@@ -125,3 +125,6 @@ site
 
 # Helm chart.lock
 Chart.lock
+
+# Iter8 binary
+iter8

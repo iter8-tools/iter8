@@ -147,5 +147,22 @@ func getMetricValue(e *core.Experiment, i int, m string) *float64 {
 
 // find winning version
 func findWinner(exp *core.Experiment) *string {
+	if *exp.Result.Analysis.TestingPattern == core.TestingPatternSLOValidation {
+		if len(exp.Spec.Versions) == 1 {
+			// check if all objectives are satisfied
+			for i, sat := range exp.Result.Analysis.Objectives[0] {
+				if !sat {
+					core.Logger.Info("version " + exp.Spec.Versions[0] + " failed to satisfy objective " + fmt.Sprintf("%v", i))
+					return nil
+				}
+			}
+			core.Logger.Info("all objectives satisfied by winner " + exp.Spec.Versions[0])
+			return &exp.Spec.Versions[0]
+		} else {
+			core.Logger.Warn("winner with multiple versions undefined for testing pattern " + core.TestingPatternSLOValidation)
+		}
+	} else {
+		core.Logger.Warn("winner undefined for testing pattern " + string(*exp.Result.Analysis.TestingPattern))
+	}
 	return nil
 }
