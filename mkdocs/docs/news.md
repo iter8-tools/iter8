@@ -9,10 +9,20 @@ hide:
 * **Nov 2021:** Iter8 at ACM Symposium on Cloud Computing. Full paper [here](https://github.com/sriumcp/papers/blob/main/socc2021-final106.pdf)
 
     ![SLO Validation](images/socc-thumbnail.jpg)
+    
+***
+
+* **Oct 2021:**  New Stack blog article by Hai Huang: [Progressive Delivery on OpenShift](https://thenewstack.io/progressive-delivery-on-openshift/)
+
 
 ***
 
 * **Oct 2021:** Iter8 at PREVAIL conference. Video coming soon. [Conference details](https://www.ibm.com/blogs/academy-of-technology/events/)
+
+***
+
+
+* **Oct 2021:**  New Stack blog article by Srinivasan Parthasarathy: [Validate Service-Level Objectives of REST APIs Using Iter8](https://thenewstack.io/validate-service-level-objectives-of-rest-apis-using-iter8/)
 
 ***
 
