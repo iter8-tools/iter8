@@ -8,7 +8,7 @@ data:
     versions:
     - my-app
     tasks:
-    - task: collect-built-in-metrics
+    - task: collect-fortio-metrics
       with:
         {{- if .Values.numQueries }}
         numQueries: {{ .Values.numQueries }}

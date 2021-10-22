@@ -3,6 +3,7 @@ package core
 import (
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
 // UInt32Pointer takes a uint32 as input, creates a new variable with the input value, and returns a pointer to the variable
@@ -12,6 +13,11 @@ func UInt32Pointer(u uint32) *uint32 {
 
 // Int32Pointer takes an int32 as input, creates a new variable with the input value, and returns a pointer to the variable
 func Int32Pointer(i int32) *int32 {
+	return &i
+}
+
+// IntPointer takes an int as input, creates a new variable with the input value, and returns a pointer to the variable
+func IntPointer(i int) *int {
 	return &i
 }
 
@@ -33,6 +39,16 @@ func StringPointer(s string) *string {
 // BoolPointer takes a bool as input, creates a new variable with the input value, and returns a pointer to the variable
 func BoolPointer(b bool) *bool {
 	return &b
+}
+
+// TimePointer takes time.Time object as input, creates a new variable with the input value, and returns a pointer to the variable
+func TimePointer(t time.Time) *time.Time {
+	return &t
+}
+
+// TestingPatternPointer takes a TestingPattern value as input, creates a new variable with the input value, and returns a pointer to the variable
+func TestingPatternPointer(t TestingPatternType) *TestingPatternType {
+	return &t
 }
 
 // CompletePath is a helper function for converting file paths, specified relative to the caller of this function, into absolute ones.
