@@ -3,6 +3,7 @@ module github.com/iter8-tools/iter8
 go 1.16
 
 require (
+	fortio.org/fortio v1.17.1 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect

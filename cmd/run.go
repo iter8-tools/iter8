@@ -12,7 +12,7 @@ var runCmd = &cobra.Command{
 	Short: "run an experiment",
 	Long:  `Run an experiment locally`,
 	Run: func(cmd *cobra.Command, args []string) {
-		core.Logger.Info("experiment run started")
+		core.Logger.Info("experiment started")
 		fc := core.FileContext{
 			SpecFile:   specFile,
 			ResultFile: resultFile,
@@ -29,9 +29,9 @@ var runCmd = &cobra.Command{
 		} else {
 			err := exp.Run()
 			if err != nil {
-				core.Logger.Error("experiment run failed")
+				core.Logger.Error("experiment failed")
 			} else {
-				core.Logger.Info("experiment run completed successfully")
+				core.Logger.Info("experiment completed successfully")
 			}
 		}
 	},
