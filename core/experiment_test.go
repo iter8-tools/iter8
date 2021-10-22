@@ -16,5 +16,5 @@ func TestSpecRead(t *testing.T) {
 	es, err := fc.ReadSpec()
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(es.Tasks))
-	assert.Equal(t, "collect-built-in-metrics", es.Tasks[0].Task)
+	assert.Equal(t, "collect-fortio-metrics", es.Tasks[0].Task)
 }

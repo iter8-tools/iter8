@@ -17,6 +17,8 @@ func (tm *TaskMaker) Make(t *core.TaskSpec) (core.Task, error) {
 	switch *t.Task {
 	case CollectTaskName:
 		return MakeCollect(t)
+	case AssessTaskName:
+		return MakeAssess(t)
 	default:
 		return nil, errors.New("unknown task: " + *t.Task)
 	}

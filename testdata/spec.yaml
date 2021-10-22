@@ -1,14 +1,21 @@
 iter8Version: "0.8.0"
 versions:
 - my-app
+- your-app
 tasks:
-- task: collect-built-in-metrics
+- task: collect-fortio-metrics
   with:
     versionInfo:
     - name: my-app
-      url: hello.default.svc.cluster.local
-# - task: assess-versions
-#   with:
-#     criteria:
-#       requestCount: iter8-fortio/request-count
-#       errorCount: iter8-fortio/error-count
+      url: https://example.com
+    - name: my-app
+      url: http://example.com
+- task: assess-versions
+  with:
+    criteria:
+      requestCount: iter8-fortio/request-count
+      objectives:
+      - metric: iter8-fortio/error-rate
+        upperLimit: 0
+      - metric: iter8-fortio/p99.9
+        upperLimit: 100

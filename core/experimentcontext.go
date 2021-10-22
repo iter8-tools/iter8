@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"io/ioutil"
 
 	"github.com/ghodss/yaml"
@@ -13,7 +14,7 @@ type ExperimentContext interface {
 	// ReadResult reads experiment result
 	ReadResult() (*ExperimentResult, error)
 	// WriteResult writes experiment result
-	WriteResult() error
+	WriteResult(*ExperimentResult) error
 }
 
 // File context enables file based experiments
@@ -44,6 +45,15 @@ func (fc *FileContext) ReadResult() (*ExperimentResult, error) {
 }
 
 // WriteResult to file
-func (fc *FileContext) WriteResult() error {
-	return nil
+func (fc *FileContext) WriteResult(r *ExperimentResult) error {
+	rBytes, err := yaml.Marshal(r)
+	if err != nil {
+		Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment result")
+		return errors.New("unable to marshal experiment result")
+	}
+	err = ioutil.WriteFile(fc.ResultFile, rBytes, 0664)
+	if err != nil {
+		Logger.WithStackTrace(err.Error()).Error("unable to write result file")
+	}
+	return err
 }

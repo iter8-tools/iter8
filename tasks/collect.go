@@ -1,24 +1,23 @@
 package task
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"math"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
 
+	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/core"
 )
 
 const (
 	// TaskName is the name of the task this file implements
-	CollectTaskName string = "collect-built-in-metrics"
+	CollectTaskName string = "collect-fortio-metrics"
 
 	// DefaultQPS is the default value of QPS (queries per sec) in the collect task
 	DefaultQPS float32 = 8
@@ -29,14 +28,19 @@ const (
 	// DefaultConnections is the default value of the number of connections
 	DefaultConnections uint32 = 4
 
-	// fortioFolder is where fortio data is held
-	fortioFolder string = "/tmp"
-
 	// fortioOutputFile is where fortio data is held within the fortioFolder
 	fortioOutputFile string = "output.json"
 
 	// fortioPayloadFile is where fortio payload data is held within the fortioFolder
 	fortioPayloadFile string = "payload.out"
+)
+
+var (
+	// DefaultErrorRanges is the default value of the error ranges
+	DefaultErrorRanges = []ErrorRange{{Lower: core.IntPointer(500)}}
+
+	// fortioFolder is where fortio data is held
+	fortioFolder = "/tmp"
 )
 
 // Version contains header and url information needed to send requests to each version.
@@ -51,6 +55,12 @@ type Version struct {
 	URL string `json:"url" yaml:"url"`
 }
 
+// HTTP status code within this range is considered an error
+type ErrorRange struct {
+	Lower *int `json:"lower,omitempty" yaml:"lower,omitempty"`
+	Upper *int `json:"upper,omitempty" yaml:"upper,omitempty"`
+}
+
 // CollectInputs contain the inputs to the metrics collection task to be executed.
 type CollectInputs struct {
 	// how many queries will be sent for each version; optional; default 100
@@ -62,8 +72,6 @@ type CollectInputs struct {
 	QPS *float32 `json:"qps,omitempty" yaml:"qps,omitempty"`
 	// how many parallel connections will be used; optional; default 4
 	Connections *uint32 `json:"connections,omitempty" yaml:"connections,omitempty"`
-	// if LoadOnly is true, send requests without collecting metrics; optional; default false
-	LoadOnly *bool `json:"loadOnly,omitempty" yaml:"loadOnly,omitempty"` // list of versions
 	// string to be sent during queries as payload; optional
 	PayloadStr *string `json:"payloadStr,omitempty" yaml:"payloadStr,omitempty"`
 	// URL whose content will be sent as payload during queries; optional
@@ -71,8 +79,29 @@ type CollectInputs struct {
 	PayloadURL *string `json:"payloadURL,omitempty" yaml:"payloadURL,omitempty"`
 	// valid HTTP content type string; specifying this switches the request from GET to POST
 	ContentType *string `json:"contentType,omitempty" yaml:"contentType,omitempty"`
+	// ranges of HTTP status codes that are considered as errors
+	ErrorRanges []ErrorRange `json:"errorRanges,omitempty" yaml:"errorRanges,omitempty"`
 	// information about versions
-	VersionInfo []Version `json:"versionInfo" yaml:"versionInfo"`
+	VersionInfo []*Version `json:"versionInfo" yaml:"versionInfo"`
+}
+
+// ErrorCode checks if a given code is an error code
+func (t *CollectTask) ErrorCode(code int) bool {
+	for _, lims := range t.With.ErrorRanges {
+		// if no lower limit (check upper)
+		if lims.Lower == nil && code <= *lims.Upper {
+			return true
+		}
+		// if no upper limit (check lower)
+		if lims.Upper == nil && code >= *lims.Lower {
+			return true
+		}
+		// if both limits are present (check both)
+		if lims.Upper != nil && lims.Lower != nil && code <= *lims.Upper && code >= *lims.Lower {
+			return true
+		}
+	}
+	return false
 }
 
 // CollectTask enables collection of Iter8's built-in metrics.
@@ -108,84 +137,23 @@ func (t *CollectTask) InitializeDefaults() {
 	if t.With.NumQueries == nil && t.With.Time == nil {
 		t.With.NumQueries = core.UInt32Pointer(DefaultNumQueries)
 	}
-	if t.With.LoadOnly == nil {
-		t.With.LoadOnly = core.BoolPointer(false)
-	}
 	if t.With.QPS == nil {
 		t.With.QPS = core.Float32Pointer(DefaultQPS)
 	}
 	if t.With.Connections == nil {
 		t.With.Connections = core.UInt32Pointer(DefaultConnections)
 	}
-}
-
-////
-/////////////
-////
-
-// DurationSample is a Fortio duration sample
-type DurationSample struct {
-	Start float64
-	End   float64
-	Count int
-}
-
-// DurationHist is the Fortio duration histogram
-type DurationHist struct {
-	Count int
-	Max   float64
-	Sum   float64
-	Data  []DurationSample
-}
-
-// Result is the result of a single Fortio run; it contains the result for a single version
-type Result struct {
-	DurationHistogram DurationHist
-	RetCodes          map[string]int
-}
-
-// aggregate existing results, with a new result for a specific version
-func aggregate(oldResults map[string]*Result, version string, newResult *Result) map[string]*Result {
-	// there are no existing results...
-	if oldResults == nil {
-		m := make(map[string]*Result)
-		m[version] = newResult
-		return m
+	if t.With.ErrorRanges == nil {
+		t.With.ErrorRanges = DefaultErrorRanges
 	}
-	if updatedResult, ok := oldResults[version]; ok {
-		// there are existing results for the input version
-		// aggregate count, max and sum
-		updatedResult.DurationHistogram.Count += newResult.DurationHistogram.Count
-		updatedResult.DurationHistogram.Max = math.Max(oldResults[version].DurationHistogram.Max, newResult.DurationHistogram.Max)
-		updatedResult.DurationHistogram.Sum = oldResults[version].DurationHistogram.Sum + newResult.DurationHistogram.Sum
-
-		// aggregation duration histogram data
-		updatedResult.DurationHistogram.Data = append(updatedResult.DurationHistogram.Data, newResult.DurationHistogram.Data...)
-
-		// aggregate return code counts
-		if updatedResult.RetCodes == nil {
-			updatedResult.RetCodes = newResult.RetCodes
-		} else {
-			for key := range newResult.RetCodes {
-				oldResults[version].RetCodes[key] += newResult.RetCodes[key]
-			}
-		}
-	} else {
-		// there are no existing results for the input version
-		oldResults[version] = newResult
-	}
-	// this is efficient because oldResults is a map with pointer values
-	// no deep copies of structs
-	return oldResults
 }
 
-// getResultFromFile reads the contents from a Fortio output file and returns it as a Result
-func getResultFromFile(fortioOutputFile string) (*Result, error) {
+// getResultFromFile reads the contents from a Fortio output file and returns it as a fortio result
+func getResultFromFile(fortioOutputFile string) (*fhttp.HTTPRunnerResults, error) {
 	// open JSON file
 	jsonFile, err := os.Open(fortioOutputFile)
 	// if os.Open returns an error, handle it
 	if err != nil {
-		core.Logger.Error(err)
 		return nil, err
 	}
 
@@ -196,15 +164,13 @@ func getResultFromFile(fortioOutputFile string) (*Result, error) {
 	bytes, err := ioutil.ReadAll(jsonFile)
 	// if ioutil.ReadAll returns an error, handle it
 	if err != nil {
-		core.Logger.Error(err)
 		return nil, err
 	}
 
 	// unmarshal the result and return
-	var res Result
+	var res fhttp.HTTPRunnerResults
 	err = json.Unmarshal(bytes, &res)
 	if err != nil {
-		core.Logger.Error(err)
 		return nil, err
 	}
 	return &res, nil
@@ -214,23 +180,19 @@ func getResultFromFile(fortioOutputFile string) (*Result, error) {
 func payloadFile(url string) (string, error) {
 	content, err := GetPayloadBytes(url)
 	if err != nil {
-		core.Logger.Error("Error while getting payload bytes: ", err)
 		return "", err
 	}
 
 	tmpfile, err := ioutil.TempFile(fortioFolder, fortioPayloadFile)
 	if err != nil {
-		core.Logger.Fatal(err)
 		return "", err
 	}
 
 	if _, err := tmpfile.Write(content); err != nil {
 		tmpfile.Close()
-		core.Logger.Fatal(err)
 		return "", err
 	}
 	if err := tmpfile.Close(); err != nil {
-		core.Logger.Fatal(err)
 		return "", err
 	}
 
@@ -287,12 +249,10 @@ func (t *CollectTask) getFortioArgs(j int) ([]string, error) {
 }
 
 // resultForVersion collects Fortio result for a given version
-func (t *CollectTask) resultForVersion(j int) (*Result, error) {
+func (t *CollectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) {
 	// the main idea is to run Fortio shell command with proper args
 	// collect Fortio output as a file
 	// and extract the result from the file, and return the result
-
-	var execOut bytes.Buffer
 
 	// get fortio args
 	args, err := t.getFortioArgs(j)
@@ -302,21 +262,20 @@ func (t *CollectTask) resultForVersion(j int) (*Result, error) {
 
 	// setup Fortio command
 	cmd := exec.Command("fortio", args...)
-	cmd.Stdout = &execOut
-	cmd.Stderr = os.Stderr
-	core.Logger.Trace("Invoking: " + cmd.String())
 
 	// execute Fortio command
-	err = cmd.Run()
+	stdoutBytes, err := cmd.CombinedOutput()
 	if err != nil {
-		core.Logger.Error(err)
+		core.Logger.WithStackTrace(err.Error()).Error("fortio execution error")
+		core.Logger.WithStackTrace(string(stdoutBytes)).Error("output from fortio")
 		return nil, err
+	} else {
+		core.Logger.WithStackTrace(string(stdoutBytes)).Trace("output from fortio")
 	}
 
 	// extract result from Fortio output file
 	ifr, err := getResultFromFile(filepath.Join(fortioFolder, fortioOutputFile))
 	if err != nil {
-		core.Logger.Error(err)
 		return nil, err
 	}
 
@@ -324,77 +283,123 @@ func (t *CollectTask) resultForVersion(j int) (*Result, error) {
 }
 
 // Run executes the metrics/collect task
-// ToDo: error handling
 func (t *CollectTask) Run(exp *core.Experiment) error {
 	var err error
-	core.Logger.Trace("collect task run started...")
 	t.InitializeDefaults()
 
-	// fortioData will be used if this not a loadOnly task
-	fortioData := make(map[string]*Result)
-
-	// // if this task is **not** loadOnly
-	// if !*t.With.LoadOnly {
-	// 	// bootstrap AggregatedBuiltinHists with data already present in experiment status
-	// 	if exp.Result.Analysis != nil && exp.Result.Analysis.AggregatedBuiltinHists != nil {
-	// 		jsonBytes, _ := json.Marshal(exp.Result.Analysis.AggregatedBuiltinHists.Data)
-	// 		json.Unmarshal(jsonBytes, &fortioData)
-	// 	}
-	// }
+	fm := make([]*fhttp.HTTPRunnerResults, len(exp.Spec.Versions))
 
 	// run fortio queries for each version sequentially
 	for j := range t.With.VersionInfo {
-		data, err := t.resultForVersion(j)
-		if err == nil {
-			// if this task is **not** loadOnly
-			if !*t.With.LoadOnly {
-				// Update fortioData in a threadsafe manner
-				fortioData = aggregate(fortioData, t.With.VersionInfo[j].Name, data)
-			}
+		var data *fhttp.HTTPRunnerResults
+		var err error
+		if t.With.VersionInfo[j] == nil {
+			data = nil
 		} else {
-			return err
+			data, err = t.resultForVersion(j)
+			if err == nil {
+				fm[j] = data
+			} else {
+				return err
+			}
 		}
 	}
-
-	// if this task is **not** loadOnly
-	if !*t.With.LoadOnly {
-		// Update experiment status with results
-		// update to experiment status will result in reconcile request to etc3
-		// unless the task runner job executing this action is completed, this request will not have have an immediate effect in the experiment reconcilation process
-
-		// bytes1, _ := json.Marshal(fortioData)
-
-		// exp.SetAggregatedBuiltinHists(bytes1)
-
-		// UpdateInClusterExperimentStatus(exp)
-
-		var prettyBody bytes.Buffer
-		bytes2, _ := json.Marshal(exp)
-
-		json.Indent(&prettyBody, bytes2, "", "  ")
-		core.Logger.Trace(prettyBody.String())
+	err = exp.SetFortioMetrics(fm)
+	if err != nil {
+		return err
 	}
 
-	// Iter8Log
-	// if err == nil {
-	// 	// get action from context
-	// 	a, err := GetActionStringFromContext(ctx)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+	// set metrics for each version for which fortio metrics are available
+	for i := range exp.Spec.Versions {
+		if exp.Result.Analysis.FortioMetrics[i] != nil {
+			for _, m := range core.IFBackend.Metrics {
+				fqName := core.IFBackend.Name + "/" + m.Name
+				switch m.Name {
+				case "request-count":
+					err = exp.UpdateMetricForVersion(fqName, i, float64(exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Count))
+					if err != nil {
+						return err
+					}
+				case "error-count": // and error rate
+					// compute val
+					val := float64(0)
+					for code, count := range exp.Result.Analysis.FortioMetrics[i].RetCodes {
+						if t.ErrorCode(code) {
+							val += float64(count)
+						}
+					}
+					err = exp.UpdateMetricForVersion(fqName, i, val)
+					if err != nil {
+						return err
+					}
 
-	// 	il := Iter8Log{
-	// 		IsIter8Log:          true,
-	// 		ExperimentName:      exp.Name,
-	// 		ExperimentNamespace: exp.Namespace,
-	// 		Source:              Iter8LogSourceTR,
-	// 		Priority:            Iter8LogPriorityLow,
-	// 		Message:             "metrics collection completed for all versions",
-	// 		Precedence:          GetIter8LogPrecedence(exp, a),
-	// 	}
-	// 	fmt.Println(il.JSON())
-	// }
+					// error-rate
+					rc := float64(exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Count)
+					if rc != 0 {
+						err = exp.UpdateMetricForVersion(core.IFBackend.Name+"/"+"error-rate", i, val/rc)
+						if err != nil {
+							return err
+						}
+					}
 
+				case "mean-latency":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Avg)
+					if err != nil {
+						return err
+					}
+
+				case "min-latency":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Min)
+					if err != nil {
+						return err
+					}
+
+				case "max-latency":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Max)
+					if err != nil {
+						return err
+					}
+
+				case "stddev-latency":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.StdDev)
+					if err != nil {
+						return err
+					}
+
+				case "p50":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[0].Value)
+					if err != nil {
+						return err
+					}
+
+				case "p75":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[1].Value)
+					if err != nil {
+						return err
+					}
+
+				case "p90":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[2].Value)
+					if err != nil {
+						return err
+					}
+
+				case "p99":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[3].Value)
+					if err != nil {
+						return err
+					}
+
+				case "p99.9":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[4].Value)
+					if err != nil {
+						return err
+					}
+
+				}
+			}
+		}
+	}
 	return err
 }
 
