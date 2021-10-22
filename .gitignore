@@ -126,6 +126,5 @@ site
 # Helm chart.lock
 Chart.lock
 
-# Iter8 binary and yamls
+# Iter8 binary
 iter8
-result.yaml

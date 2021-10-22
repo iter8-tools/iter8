@@ -1,15 +1,15 @@
 iter8Version: "0.8.0"
 versions:
 - my-app
-- your-app
+# - your-app
 tasks:
 - task: collect-fortio-metrics
   with:
     versionInfo:
     - name: my-app
       url: https://example.com
-    - name: my-app
-      url: http://example.com
+    # - name: my-app
+    #   url: http://example.com
 - task: assess-versions
   with:
     criteria:

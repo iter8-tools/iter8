@@ -17,10 +17,10 @@ func (e *Experiment) Run() error {
 		}
 	}
 	for i, t := range e.Tasks {
-		Logger.Info("task index " + fmt.Sprintf("%v", i) + " : " + *e.Spec.Tasks[i].Task + " : " + "started")
+		Logger.Info("task " + fmt.Sprintf("%v", i) + ": " + *e.Spec.Tasks[i].Task + " : " + "started")
 		err = t.Run(e)
 		if err != nil {
-			Logger.Error("task index " + fmt.Sprintf("%v", i) + " : " + *e.Spec.Tasks[i].Task + " : " + "failure")
+			Logger.Error("task " + fmt.Sprintf("%v", i) + ": " + *e.Spec.Tasks[i].Task + " : " + "failure")
 			e.failExperiment()
 			return err
 		} else {
@@ -28,7 +28,7 @@ func (e *Experiment) Run() error {
 			if ecerr != nil {
 				return ecerr
 			}
-			Logger.Info("task index " + fmt.Sprintf("%v", i) + " : " + *e.Spec.Tasks[i].Task + " : " + "completed")
+			Logger.Info("task " + fmt.Sprintf("%v", i) + ": " + *e.Spec.Tasks[i].Task + " : " + "completed")
 		}
 	}
 	return nil
