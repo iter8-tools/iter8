@@ -129,4 +129,4 @@ Chart.lock
 # Iter8 binary and yamls
 iter8
 spec.yaml
-result.yaml
+results.yaml
