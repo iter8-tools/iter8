@@ -68,5 +68,4 @@ var assertCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(assertCmd)
 	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, "completed | winnerFound")
-	assertCmd.Flags().StringVarP(&resultFile, "results", "r", "results.yaml", "experiment results yaml file")
 }
