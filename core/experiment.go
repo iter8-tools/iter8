@@ -1,7 +1,9 @@
 package core
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"fortio.org/fortio/fhttp"
@@ -10,8 +12,8 @@ import (
 
 // Experiment specification and result
 type Experiment struct {
-	ExperimentContext
 	TaskMaker
+	Name   string `json:"name" yaml:"name"`
 	Tasks  []Task
 	Spec   *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
 	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
@@ -53,6 +55,15 @@ const (
 
 	// TestingPatternNone implies no testing of any kind
 	TestingPatternNone TestingPatternType = "None"
+
+	// DefaultFilePath is the default path to experiment file
+	DefaultFilePath = "experiment.yaml"
+)
+
+var (
+	// Path to experiment file
+	// this variable is not intended to be modified in tests, and nowhere else
+	filePath = "experiment.yaml"
 )
 
 // Criteria is list of criteria to be evaluated throughout the experiment
@@ -81,16 +92,17 @@ type Objective struct {
 // Analysis is data from an analytics provider
 type Analysis struct {
 	// TestingPattern is the type of this experiment
-	TestingPattern *TestingPatternType
+	TestingPattern *TestingPatternType `json:"testingPattern,omitempty" yaml:"testingPattern,omitempty"`
+
 	// FortioMetrics populated by the collect-fortio-metrics task
 	// if not empty, the length of the outer slice must match the length of Spec.Versions
-	FortioMetrics []*fhttp.HTTPRunnerResults
+	FortioMetrics []*fhttp.HTTPRunnerResults `json:"fortioMetrics,omitempty" yaml:"fortioMetrics,omitempty"`
 
 	// Metrics
 	// if not empty, the length of the outer slice must match the length of Spec.Versions
 	// each key in the map is a metric name
 	// values are all the observed values of a metric until this point
-	Metrics []map[string][]float64
+	Metrics []map[string][]float64 `json:"metrics,omitempty" yaml:"metrics,omitempty"`
 
 	// Objectives
 	// if not empty, the length of the outer slice must match the length of Spec.Versions
@@ -107,36 +119,26 @@ func (e *Experiment) String() string {
 	return string(out)
 }
 
-// BuildSpec creates the experiment spec from the spec file
-func (e *Experiment) BuildSpec() error {
-	Logger.Trace("build spec called")
-	var err error
-	e.Spec, err = e.ExperimentContext.ReadSpec()
+// Build an experiment from file
+func (e *Experiment) Build() error {
+	// read it in
+	Logger.Trace("build called")
+	newExp, err := Read()
 	if err != nil {
-		Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
 		return err
 	}
-	Logger.WithStackTrace(e.String()).Trace("unmarshaled experiment")
+	e.Name, e.Spec, e.Result = newExp.Name, newExp.Spec, newExp.Result
+
+	// make tasks
 	for i, ts := range e.Spec.Tasks {
 		Logger.Trace(fmt.Sprintf("unmarshaling task %v", i))
 		t, err := e.TaskMaker.Make(&ts)
 		if err != nil {
-			Logger.WithStackTrace(err.Error()).Error("unable to unmarshal task")
 			return err
 		}
 		e.Tasks = append(e.Tasks, t)
 	}
 
-	return err
-}
-
-// Build creates the experiment from the spec and result files
-func (e *Experiment) Build() error {
-	err := e.BuildSpec()
-	if err != nil {
-		return err
-	}
-	// err = e.BuildResult()
 	return err
 }
 
@@ -146,7 +148,7 @@ func (e *Experiment) setStartTime() error {
 		e.initResults()
 	}
 	e.Result.StartTime = TimePointer(time.Now())
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
 }
 
 func (e *Experiment) failExperiment() error {
@@ -155,7 +157,7 @@ func (e *Experiment) failExperiment() error {
 		e.initResults()
 	}
 	e.Result.Failure = true
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
 }
 
 func (e *Experiment) incrementNumCompletedTasks() error {
@@ -164,7 +166,7 @@ func (e *Experiment) incrementNumCompletedTasks() error {
 		e.initResults()
 	}
 	e.Result.NumCompletedTasks++
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
 }
 
 // SetFortioMetrics sets fortio metrics in the experiment results
@@ -178,7 +180,7 @@ func (e *Experiment) SetFortioMetrics(fm []*fhttp.HTTPRunnerResults) error {
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.FortioMetrics = fm
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
 }
 
 // SetTestingPattern sets the testing pattern in the experiment results
@@ -196,7 +198,7 @@ func (e *Experiment) SetTestingPattern(c *Criteria) error {
 	} else {
 		e.Result.Analysis.TestingPattern = TestingPatternPointer(TestingPatternSLOValidation)
 	}
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
 }
 
 // SetObjectives sets objective assessment portion of the analysis
@@ -210,7 +212,7 @@ func (e *Experiment) SetObjectives(objs [][]bool) error {
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Objectives = objs
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
 }
 
 // SetWinner sets the winning version
@@ -224,7 +226,7 @@ func (e *Experiment) SetWinner(winner *string) error {
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Winner = winner
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
 }
 
 func (r *ExperimentResult) initAnalysis() {
@@ -261,5 +263,36 @@ func (e *Experiment) UpdateMetricForVersion(m string, i int, val float64) error 
 		e.Result.Analysis.Metrics[i][m] = []float64{}
 	}
 	e.Result.Analysis.Metrics[i][m] = append(e.Result.Analysis.Metrics[i][m], val)
-	return e.ExperimentContext.WriteResult(e.Result)
+	return Write(e)
+}
+
+// Read an experiment from a file
+func Read() (*Experiment, error) {
+	yamlFile, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
+		return nil, errors.New("unable to read experiment file")
+	}
+	e := Experiment{}
+	err = yaml.Unmarshal(yamlFile, &e)
+	if err != nil {
+		Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment")
+		return nil, err
+	}
+	return &e, err
+}
+
+// Write an experiment to a file
+func Write(r *Experiment) error {
+	rBytes, err := yaml.Marshal(r)
+	if err != nil {
+		Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment")
+		return errors.New("unable to marshal experiment")
+	}
+	err = ioutil.WriteFile(filePath, rBytes, 0664)
+	if err != nil {
+		Logger.WithStackTrace(err.Error()).Error("unable to write experiment file")
+		return err
+	}
+	return err
 }
