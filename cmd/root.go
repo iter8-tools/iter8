@@ -16,9 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/iter8-tools/iter8/core"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -26,18 +23,20 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	specFile   string
-	resultFile string
-	logFile    string
-	cfgFile    string
-)
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "iter8",
-	Short: "run and observe Iter8 experiments",
-	Long:  `Iter8 CLI that supports running experiments and observing their results`,
+	Short: "Metrics driven experiments",
+	Example: `
+	# view the current namespace in your KUBECONFIG
+	ns
+
+	# view all of the namespaces in use by contexts in your KUBECONFIG
+	ns --list
+	
+	# switch your current-context to one that contains the desired namespace
+	ns foo`,
+	SilenceUsage: true,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -50,37 +49,10 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
+	// initialize log level
 	viper.BindEnv("LOG_LEVEL")
-	ll, err := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
-	if err == nil {
-		core.SetLogLevel(ll)
-	}
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.iter8.yaml)")
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".iter8" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".iter8")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
+	viper.SetDefault("LOG_LEVEL ", "info")
+	ll, _ := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
+	core.Logger.Info("LOG_LEVEL ", ll)
+	core.SetLogLevel(ll)
 }

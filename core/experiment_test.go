@@ -8,13 +8,10 @@ import (
 
 func TestSpecRead(t *testing.T) {
 
-	fc := FileContext{
-		SpecFile:   CompletePath("../", "testdata/spec.yaml"),
-		ResultFile: "",
-	}
+	filePath = CompletePath("../", "testdata/spec.yaml")
 
-	es, err := fc.ReadSpec()
+	e, err := Read()
+	Logger.Info(e)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(es.Tasks))
-	assert.Equal(t, "collect-fortio-metrics", es.Tasks[0].Task)
+	assert.Equal(t, "collect-fortio-metrics", *e.Spec.Tasks[0].Task)
 }

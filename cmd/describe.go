@@ -53,5 +53,4 @@ var describeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(describeCmd)
-	describeCmd.Flags().StringVarP(&resultFile, "results", "r", "results.yaml", "experiment results yaml file")
 }
