@@ -60,7 +60,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Metrics Driven Experiments and Releases
+  title: Metrics Driven Experiments
   version:
     provider: mike
   social:
@@ -120,61 +120,21 @@ nav:
   - Key features: concepts/features.md
   - Experiment building blocks: concepts/buildingblocks.md
 - Getting Started:
-  - Your first experiment: getting-started/first-experiment.md
+  - Your first experiment: experiment-hub/first-experiment/README.md
   - Install Iter8: getting-started/install.md
   - Get help: getting-started/help.md
   - Setup for tutorials: getting-started/setup-for-tutorials.md
-- Tutorials:
-  - Kubernetes deployments:
-    - SLO validation with payload: tutorials/deployments/slo-validation-payload.md
-    - Auto create pull request: tutorials/deployments/slo-validation-pr.md
-    - Auto trigger GitHub Actions: tutorials/deployments/slo-validation-ghaction.md
-    - SLO validation with chaos: tutorials/deployments/slo-validation-chaos.md
-  - KFServing:
-    - Quick start: tutorials/kfserving/quick-start.md
-    - Platform setup: tutorials/kfserving/platform-setup.md
-    - Testing strategies:
-      - Hybrid (A/B + SLOs) testing: tutorials/kfserving/testing-strategies/hybrid.md
-      - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
-      - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
-      - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
-  - Seldon:
-    - Quick start: tutorials/seldon/quick-start.md
-    - Platform setup: tutorials/seldon/platform-setup.md
-    - Testing strategies:
-      - Hybrid (A/B + SLOs) testing: tutorials/seldon/testing-strategies/hybrid.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
-  - Knative:
-    - SLO validation: tutorials/knative/slovalidation-helmex.md
-    - Testing strategies:
-      - SLO validation with traffic shifting: tutorials/knative/testing-strategies/slo-validation-traffic-shift.md
-      - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive-traffic-shift.md
-      - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
-    - Setup for tutorials: tutorials/knative/setup-for-tutorials.md
-  - Istio:
-    - Quick start: tutorials/istio/quick-start.md
-    - Platform setup: tutorials/istio/platform-setup.md
-    - Testing strategies:
-      - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
-      - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
-      - Hybrid (A/B + SLOs) testing: tutorials/istio/testing-strategies/hybrid.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
-      - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
-    - GitOps:
-      - Argo CD + Istio: tutorials/istio/gitops/argocd.md
-  - Linkerd:
-    - A/B experiment: tutorials/linkerd/abexperiment-helmex.md
-    - Testing strategies:
-      - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
-    - Platform setup: tutorials/linkerd/platform-setup.md
-  - Openshift:
-    - CI/CD integration: tutorials/openshift/openshift.md
+- Experiment Hub:
+  - Load testing: https://example.com
+  - GitHub Actions trigger:
+  - GitHub pull request:
+  - SLO validation with chaos: 
+  - Hybrid-A/B testing:
+  - A/B testing:
+  - Progressive rollout: 
+  - Fixed %-based traffic split:
+  - Session affinity:
+  - Mirroring:
 - Metrics:
   - Using metrics: metrics/using-metrics.md
   - Builtin metrics: metrics/builtin.md
@@ -197,4 +157,4 @@ nav:
   - Analytics: contributing/analytics.md
   - Tasks: contributing/tasks.md
 - Roadmap: roadmap.md
-- News: news.md
+- News/Blog: news.md
