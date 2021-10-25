@@ -113,41 +113,51 @@ markdown_extensions:
 # Page tree
 nav:
 - Home: index.md
+- Concepts:
+  - What is Iter8?: concepts/whatisiter8.md
+  - Key features: concepts/features.md # include integrations
 - Getting Started:
   - Your first experiment: experiment-hub/first-experiment/README.md
   - Install Iter8: getting-started/install.md
   - Get help: getting-started/help.md
   - Setup for tutorials: getting-started/setup-for-tutorials.md
 - Experiment Hub:
-  - Load testing: https://example.com
-  - GitHub Actions trigger:
-  - GitHub pull request:
-  - SLO validation with chaos: 
-  - Hybrid-A/B testing:
-  - A/B testing:
-  - Progressive rollout: 
-  - Fixed %-based traffic split:
-  - Session affinity:
-  - Mirroring:
+  - Testing patterns:
+    - Load testing: concepts/whatisiter8.md
+    - SLO validation: concepts/whatisiter8.md
+    - A/B(/n) testing: concepts/whatisiter8.md
+    - Chaos testing: concepts/whatisiter8.md
+    - Hybrid testing: concepts/whatisiter8.md
+  - Advanced traffic engineering:
+    - Mirroring: concepts/whatisiter8.md
+    - \%-traffic split: concepts/whatisiter8.md
+    - User segmentation: concepts/whatisiter8.md
+    - Session affinity: concepts/whatisiter8.md
+    - Progressive rollout: concepts/whatisiter8.md
+  - CI/CD/GitOps integrations:
+    - GitHub Actions trigger: concepts/whatisiter8.md
+    - GitHub pull request: concepts/whatisiter8.md
 - Metrics:
-  - Using metrics: metrics/using-metrics.md
-  - Builtin metrics: metrics/builtin.md
-  - Custom metrics: metrics/custom.md
-  - Mock metrics: metrics/mock.md
+  - Built-in: metrics/builtin.md
+  - Pulled from backend: metrics/custom.md
+  - Pulled from app: metrics/custom.md
+  - Pushed by app: metrics/custom.md
+  - Mock: metrics/mock.md
 - Reference:
   - Experiment resource: reference/experiment.md
   - Metric resource: reference/metrics.md
   - Task overview: reference/tasks/overview.md
   - Task descriptions:
     - run: reference/tasks/run.md
-    - common/readiness: reference/tasks/common-readiness.md
     - metrics/collect: reference/tasks/metrics-collect.md
-    - notification/http: reference/tasks/notification-http.md
-    - notification/slack: reference/tasks/notification-slack.md
+    - assess-versions: reference/tasks/notification-http.md
 - Contributing:
   - Overview: contributing/overview.md
-  - New K8s stack: contributing/newk8sstack.md
-  - Tutorials: contributing/tutorials.md
+  - New experiment: contributing/experiment.md
+  - New integration: contributing/integration.md
+  - New template: contributing/template.md
+  - Docs: contributing/experiment.md
+  - CI: contributing/experiment.md
   - Analytics: contributing/analytics.md
   - Tasks: contributing/tasks.md
 - Roadmap: roadmap.md
