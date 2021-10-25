@@ -2,8 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Maximize release velocity and business value of apps while protecting end-user experience.
-  Use in any Kubernetes environment. Quick start in 5 mins.
+  Maximize release velocity and business value. Protect end-user experience. Quick start in 2 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -145,14 +144,14 @@ nav:
   - Pulled from app: metrics/custom.md
   - Pushed by app: metrics/custom.md
   - Mock: metrics/mock.md
-- Reference:
-  - Experiment resource: reference/experiment.md
-  - Metric resource: reference/metrics.md
-  - Task overview: reference/tasks/overview.md
+- User guide:
+  - Experiment resource: user-guide/experiment.md
+  - Metric resource: user-guide/metrics.md
+  - Task overview: user-guide/tasks/overview.md
   - Task descriptions:
-    - run: reference/tasks/run.md
-    - metrics/collect: reference/tasks/metrics-collect.md
-    - assess-versions: reference/tasks/notification-http.md
+    - run: user-guide/tasks/run.md
+    - metrics/collect: user-guide/tasks/metrics-collect.md
+    - assess-versions: user-guide/tasks/notification-http.md
 - Contributing:
   - Overview: contributing/overview.md
   - New experiment: contributing/experiment.md
