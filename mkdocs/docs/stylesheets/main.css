@@ -48,12 +48,10 @@
   }
   .mdx-hero__content {
     max-width: 24rem;
-    margin-top: 1rem;
   }
   .mdx-hero__image {
     order: 1;
     width: 33rem;
-    margin-top: 2rem;
     transform: translateX(1.5rem);
   }
 }
@@ -109,7 +107,6 @@
   .ix-hero__image {
     order: 0;
     width: 25rem;
-    margin-top: 2rem;
   }
 }
 @media screen and (min-width: 76.25em) {
