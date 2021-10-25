@@ -4,7 +4,7 @@ template: main.html
 
 # What is Iter8?
 
-**Iter8** is a metrics-driven experimentation and release engineering platform. Iter8 enables **DevOps/MLOps/SRE teams** to maximize release velocity and business value of apps while protecting end-user experience.
+**Iter8** is a metrics-driven experimentation platform. Iter8 enables **DevOps/MLOps/SRE teams** to maximize release velocity and business value of apps and ML models while protecting end-user experience.
 
 ***
 
