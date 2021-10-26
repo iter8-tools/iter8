@@ -3,11 +3,13 @@ package task
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	"fortio.org/fortio/fhttp"
+	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
 	"github.com/iter8-tools/iter8/core"
 )
@@ -129,11 +131,14 @@ func (t *CollectTask) InitializeDefaults() {
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
 func (t *CollectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) {
+	fortioLog.SetOutput(io.Discard)
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
-			RunType: "Iter8 load test",
-			QPS:     float64(*t.With.QPS),
+			RunType:     "Iter8 load test",
+			QPS:         float64(*t.With.QPS),
+			Percentiles: []float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9},
+			Out:         io.Discard,
 		},
 		HTTPOptions: fhttp.HTTPOptions{
 			URL: t.With.VersionInfo[j].URL,
@@ -228,6 +233,7 @@ func (t *CollectTask) Run(exp *core.Experiment) error {
 		if exp.Result.Analysis.FortioMetrics[i] != nil {
 			for _, m := range core.IFBackend.Metrics {
 				fqName := core.IFBackend.Name + "/" + m.Name
+
 				switch m.Name {
 				case "request-count":
 					err = exp.UpdateMetricForVersion(fqName, i, float64(exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Count))
@@ -298,14 +304,20 @@ func (t *CollectTask) Run(exp *core.Experiment) error {
 						return err
 					}
 
-				case "p99":
+				case "p95":
 					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[3].Value)
 					if err != nil {
 						return err
 					}
 
-				case "p99.9":
+				case "p99":
 					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[4].Value)
+					if err != nil {
+						return err
+					}
+
+				case "p99.9":
+					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[5].Value)
 					if err != nil {
 						return err
 					}
