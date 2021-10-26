@@ -16,6 +16,11 @@ func Int32Pointer(i int32) *int32 {
 	return &i
 }
 
+// Int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
+func Int64Pointer(i int64) *int64 {
+	return &i
+}
+
 // IntPointer takes an int as input, creates a new variable with the input value, and returns a pointer to the variable
 func IntPointer(i int) *int {
 	return &i
