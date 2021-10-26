@@ -16,7 +16,7 @@ func (e *Experiment) Run() error {
 			return err
 		}
 	}
-	for i, t := range e.Tasks {
+	for i, t := range e.Spec.tasks {
 		Logger.Info("task " + fmt.Sprintf("%v", i) + ": " + *e.Spec.Tasks[i].Task + " : " + "started")
 		err = t.Run(e)
 		if err != nil {

@@ -115,7 +115,7 @@ nav:
 - Home: index.md
 - Getting Started:
   - What is Iter8?: getting-started/what-is-iter8.md
-  - Your first experiment: experiment-hub/first-experiment/README.md
+  - Your first experiment: experimenthub/load-test/README.md
   - Install Iter8: getting-started/install.md
   - Get help: getting-started/help.md
   - Migrating to v0.8: getting-started/migration.md

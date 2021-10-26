@@ -12,11 +12,10 @@ import (
 
 // Experiment specification and result
 type Experiment struct {
-	TaskMaker
-	Name   string `json:"name" yaml:"name"`
-	Tasks  []Task
-	Spec   *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
-	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
+	TaskMaker `json:"-" yaml:"-"`
+	Name      string            `json:"name" yaml:"name"`
+	Spec      *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Result    *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
 }
 
 // ExperimentSpec specifies the experiment
@@ -29,6 +28,9 @@ type ExperimentSpec struct {
 
 	// Tasks is the sequence of tasks that constitute this experiment
 	Tasks []TaskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
+
+	// tasks is the runnable representation of tasks
+	tasks []Task
 }
 
 // ExperimentResult defines the current results from the experiment
@@ -120,7 +122,7 @@ func (e *Experiment) String() string {
 }
 
 // Build an experiment from file
-func (e *Experiment) Build() error {
+func (e *Experiment) Build(withResult bool) error {
 	// read it in
 	Logger.Trace("build called")
 	newExp, err := Read()
@@ -128,7 +130,9 @@ func (e *Experiment) Build() error {
 		return err
 	}
 	e.Name, e.Spec, e.Result = newExp.Name, newExp.Spec, newExp.Result
-
+	if !withResult {
+		e.Result = &ExperimentResult{}
+	}
 	// make tasks
 	for i, ts := range e.Spec.Tasks {
 		Logger.Trace(fmt.Sprintf("unmarshaling task %v", i))
@@ -136,7 +140,7 @@ func (e *Experiment) Build() error {
 		if err != nil {
 			return err
 		}
-		e.Tasks = append(e.Tasks, t)
+		e.Spec.tasks = append(e.Spec.tasks, t)
 	}
 
 	return err

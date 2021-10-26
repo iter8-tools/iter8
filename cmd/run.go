@@ -18,13 +18,13 @@ var runCmd = &cobra.Command{
 			TaskMaker: &task.TaskMaker{},
 		}
 		core.Logger.Trace("build started")
-		err := exp.Build()
+		err := exp.Build(false)
 		core.Logger.Trace("build finished")
 		if err != nil {
 			core.Logger.Error("experiment build failed")
 			os.Exit(1)
 		} else {
-			core.Logger.Info("building the experiment started")
+			core.Logger.Info("starting experiment run")
 			err := exp.Run()
 			if err != nil {
 				core.Logger.Error("experiment failed")
