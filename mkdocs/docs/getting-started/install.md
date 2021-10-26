@@ -6,9 +6,8 @@ hide:
 ---
 
 # Install Iter8
-
-Install Iter8 using [`go` (version 1.16 or above)](https://golang.org/doc/install) as follows.
-
+**Install the `iter8` command line utility**
 ```shell
-GOBIN=/usr/local/bin go get github.com/iter8-tools/iter8
+GOBIN=/usr/local/bin/ go get github.com/iter8-tools/iter8
 ```
+`GOBIN` can be any folder in your `PATH` environment variable.
