@@ -128,6 +128,13 @@ func init() {
 	})
 
 	ifb.Metrics = append(ifb.Metrics, Metric{
+		Name:        "p95",
+		Description: StringPointer("95th percentile (tail) latency"),
+		Units:       StringPointer("sec"),
+		Type:        GaugeMetricType,
+	})
+
+	ifb.Metrics = append(ifb.Metrics, Metric{
 		Name:        "p99",
 		Description: StringPointer("99th percentile (tail) latency"),
 		Units:       StringPointer("sec"),
