@@ -66,7 +66,11 @@
       <div class="mdx-hero__content">
         <h1><strong>Metrics Driven Experiments</strong></h1>
 
-        <h3>Maximize <strong>release velocity</strong> and <strong>business value</strong> of apps and ML models. Protect <strong>end-user experience</strong>.
+        <h3>Maximize <strong>release velocity</strong>.
+        </h3> 
+        <h3>Optimize <strong>business value</strong>.
+        </h3> 
+        <h3>Protect <strong>end-user experience</strong>.
         </h3> 
       
         <a href="{{ base_url }}/getting-started/first-experiment/" title="Quick start"
@@ -84,30 +88,22 @@
   </div>
 </section>
 
-<section class="tx-container">
-  <div class="md-grid md-typeset centered">
-      <h1>
-        <span class="twemoji">
-          {% include ".icons/material/github.svg" %}
-        </span>
-        Open Source
-      </h1>
-      <h3>
-        Iter8 is 100% open source and community-driven. Available under the <a
-          href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2 License</a> on <a
-          href="https://github.com/iter8-tools/iter8">GitHub</a>.
-      </h3>
-      <h3>
-        Built with <span class="twemoji" style="color:rgb(191, 26, 26)">
-          {% include ".icons/material/heart.svg" %}
-        </span> for DevOps/SRE/MLOps/data science teams.
-      </h3>     
-      <iframe src="https://ghbtns.com/github-btn.html?user=iter8-tools&repo=iter8&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
-    </div>
-</section>
-
-<section class="fx-container">
+<!-- <section>
   <div class="md-grid md-typeset">
+    <h1>Load testing and SLO validation with Iter8</h1>
+  </div>
+</section> -->
+
+<!-- <section>
+  <div class="md-grid md-typeset">
+    <h1>Adopters</h1>
+  </div>
+</section> -->
+
+
+<section>
+  <div class="md-grid md-typeset">
+
     <!-- Main site box descriptions -->
     <div class="top-hr">
 
@@ -116,30 +112,40 @@
           <span class="twemoji">
             {% include ".icons/material/atom.svg" %}
           </span>
-          Load testing/SLOs
+          Testing patterns
         </h2>
-        <p>Iter8 experiments can generate requests for <strong>HTTP</strong> and <strong>gRPC</strong> services, collect <strong>built-in</strong> latency and error related metrics and validate <strong>SLOs</strong>.</p>
+        <p><strong>Load</strong> testing, <strong>SLO</strong> validation, <strong>A/B(/n)</strong> testing with business rewards, <strong>chaos</strong> injection, and <strong>hybrid</strong> experiments that combine the above.</p>
       </div>
-      
+
       <div class="feature-item">
         <h2>
           <span class="twemoji">
-            {% include ".icons/material/rhombus-split.svg" %}
+            {% include ".icons/material/chart-areaspline.svg" %}
           </span>
-          A/B(/n) testing
+          Built-in metrics
         </h2>
-        <p><strong>Grow your business</strong> with every release. Iter8 experiments can compare multiple versions based on business value and identify a <strong>winner</strong>.</p>
+        <p>Iter8 can automatically generate requests for apps with REST endpoints and collect <strong>mean</strong> latency, <strong>tail</strong> latency, and <strong>error</strong> related metrics.</p>
       </div>
- 
+
       <div class="feature-item">
         <h2>
           <span class="twemoji">
-            {% include ".icons/material/check-all.svg" %}
+            {% include ".icons/material/database-plus.svg" %}
           </span>
-          Metric backends
+          Metrics from any provider
         </h2>
-        Metrics for SLO validation and A/B(/n) testing can be queried from any metrics backend like <strong>Prometheus, New Relic, Sysdig,</strong> and <strong>Elastic</strong>.</p>
-      </div>      
+        <p>Use metrics from <strong>any</strong> provider in your experiments, including <strong>Prometheus, New Relic, Sysdig and Elastic</strong>. Iter8 can also <strong>directly scrape</strong> metrics from app endpoints.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/fontawesome/solid/cogs.svg" %}
+          </span>
+          App/ML frameworks
+        </h2>
+        <p>Use Iter8 with any <strong>stateless, stateful, serverless app and ML</strong> framework.</p>
+      </div>
 
       <div class="feature-item">
         <h2>
@@ -151,7 +157,7 @@
           </span> -->
           Traffic engineering
         </h2>
-        <p>Combine Iter8 with your service mesh, ingress, or networking technology for <strong>mirroring</strong>, <strong>user segmentation</strong>, <strong>session affinity</strong>, and <strong>gradual rollout</strong>.</p>
+        <p>Iter8 experiments can be run with any ingress or service mesh to achieve <strong>mirroring</strong>, <strong>%-based traffic split</strong>, <strong>user segmentation</strong>, <strong>session affinity</strong> and <strong>progressive traffic shifting</strong>.</p>
       </div>
 
       <div class="feature-item">
@@ -159,55 +165,55 @@
           <span class="twemoji">
             {% include ".icons/material/powershell.svg" %}
           </span>
-          Simple to use
+          Run experiments locally
         </h2>
-        <p>Define experiments using a <strong>simple YAML file</strong>. Run them <strong>locally</strong>, in a <strong>container</strong>, inside <strong>Kubernetes</strong>, or inside your <strong>CI/CD/GitOps</strong> pipeline.</p>
+        <p>Use Iter8's powerful <strong>command line utility</strong> to run experiments locally.</p>
       </div>
 
       <div class="feature-item">
         <h2>
           <span class="twemoji">
-            {% include ".icons/material/share.svg" %}
+            {% include ".icons/material/kubernetes.svg" %}
           </span>
-          Simple to share
+          Run within K8s
         </h2>
-        <p>Find, host and share experiments using <strong>Iter8 Hub</strong>. Get started rapidly using the <strong>public</strong> hub of create your own <strong>private</strong> hub using any git repo.</p>
+        <p>You can run Iter8 experiments in any RBAC-enabled Kubernetes cluster using <strong>jobs</strong>.</p>
       </div>
 
 
       <div class="feature-item">
         <h2>
           <span class="twemoji">
-            {% include ".icons/material/apps.svg" %}
+            {% include ".icons/material/checkbox-multiple-marked-circle-outline.svg" %}
           </span>
-          Awesome integrations
+          Embed within CI/CD pipelines
         </h2>
-        <p>Use with any <strong>app, serverless, or ML</strong> framework like <strong>Kubernetes deployments, statefulsets</strong>, <strong>Knative</strong> serverless, and <strong>KServe/Seldon ML</strong> deployments.</p>
+        <p>Run Iter8 experiments as a <strong>step</strong> within your CI/CD pipeline.</p>
       </div>
 
       <div class="feature-item">
         <h2>
           <span class="twemoji">
-            {% include ".icons/material/webhook.svg" %}
+            {% include ".icons/material/git.svg" %}
           </span>
-          Eventing
+          GitOps ready
         </h2>
-        <p>Iter8 experiments can automatically create<strong> GitHub pull requests</strong>, trigger <strong>GitHub Action workflows</strong>, and send notifications to <strong>webhooks</strong> and <strong>slack</strong>.</p>
+        <p>Automatically <strong>create pull requests</strong> or <strong>trigger GitHub Action workflows</strong> based on experiment results.</p>
       </div>
 
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/chart-bar.svg" %}
-          </span>
-          Reporting
-        </h2>
-        <p>Iter8 can report results of the experiment in <strong>plain text</strong> or in any custom format specified by a <strong>Go template</strong>.</p>
-      </div>
+    </div>
 
     </div>
   </div>
 </section>
+
+<!-- <section>
+  <div class="md-grid md-typeset">
+    <h1>Integrations</h1>
+  </div>
+</section> -->
+
+
 
 <!-- Hero for landing page -->
 <section class="tx-container">

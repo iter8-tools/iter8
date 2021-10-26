@@ -1,19 +1,41 @@
+// Scoped in typesetted content to match specificity of regular content
+.cards {
+  .md-typeset {
+    // Emoji and icon container
+    .emojione,
+    .twemoji,
+    .gemoji {
+      display: inline-flex;
+      height: px2em(160px);
+      vertical-align: text-top;
+
+      // Icon - inlined via mkdocs-material-extensions
+      svg {
+        width: px2em(160px);
+        max-height: 100%;
+        fill: currentColor;
+      }
+    }
+  }
+}
+
+.feature-item h2 svg {
+  height: 30px;
+  float: left;
+  margin-right: 10px;
+  transform: translateY(10%);
+}
+
 .top-hr {
-  width: 100%;
-  display: flex;
-  max-width: 61rem;
-  margin-right: auto;
-  margin-left: auto;
   padding-top: px2rem(20px);
   padding-bottom: px2rem(20px);
-  flex-wrap: wrap;  
 }
 
 .feature-item {
   font-family: 'Lato', sans-serif;
   font-weight: 300;
   box-sizing: border-box;
-  padding: 25px;
+  padding: 0 15px;
   word-break: break-word
 }
 
@@ -28,6 +50,11 @@
   margin-top: 20px;
   margin-bottom: 10px;
   font-family: inherit;
+
+  // Adjust for slate theme
+  [data-md-color-scheme="slate"] & {
+      color: #fff;
+  }
 }
 
 .feature-item p {
@@ -37,58 +64,61 @@
   -webkit-font-smoothing: antialiased;
   color: #111;
   margin: 0 0 10px;
-  display: block;  
+  display: block;
+
+  // Adjust for slate theme
+  [data-md-color-scheme="slate"] & {
+      color: #fff;
+  }    
 }
 
-.feature-item h2 svg {
-  color: rgb(160, 1, 1);
-}
+@media screen and (min-width:76.25em) {
+  .top-hr {
+      width: 100%;
+      display: flex;
+      max-width: 61rem;
+      margin-right: auto;
+      margin-left: auto;
+      padding-top: px2rem(20px);
+      padding-bottom: px2rem(20px);
+      flex-wrap: wrap;
+  }
 
-
-@include break-from-device(mobile portrait) {
   .feature-item {
-    width: 100%;        
+      width: 33%;        
+  }
+
+  .feature-item:hover {
+      background-color: rgb(252, 234, 234);
+      border-radius: 3px;
+
   }
 }
 
-@include break-from-device(tablet portrait) {
-  .feature-item {
-    width: 50%;        
-  }
-}
+// section headers
+// .cards {
+//     padding-top: px2rem(20px);
+//     padding-bottom: px2rem(30px);
+//     .md-grid {  
+//         // Hero headline
+//         h1 {
+//             text-align: center;
+//             color: #333;
+//         }
+        
+//     }
 
-@include break-from-device(tablet landscape) {
-  .feature-item {
-    width: 33%;   
-  }
-}
-
-@include break-from-device(screen small) {
-  .feature-item {
-    width: 33%;   
-  }
-}
-
-.feature-item:hover {
-  background-color: rgb(254, 245, 245);
-  border-radius: 3px;
-}
+//     [data-md-color-scheme="default"] & {
+//         background: linear-gradient(
+//             to bottom,
+//             rgb(247, 241, 251) 1%,
+//             rgb(251, 238, 238),
+//             );
+//     }
+// }
 
 .tx-container {
-    background: rgb(254, 245, 245);
-
-    .centered {
-      padding: px2rem(30px);
-      text-align: center;
-
-      h1 {
-          margin: px2rem(0px);
-        }  
-      
-      h3 {
-        margin: px2em(16px, 20px) 0 px2em(16px, 20px);
-      }
-    }
+    background: rgb(252, 234, 234);
 
     .tx-hero {
         // color: var(--md-primary-fg-color);
@@ -97,25 +127,9 @@
             flex-wrap: wrap;    
 
             .tx-card {
+                width: 33%;
                 padding-bottom: px2rem(20px);            
               }
-
-        @include break-from-device(mobile portrait) {
-          .tx-card {
-            width: 100%;
-          }
-        }
-        
-        @include break-from-device(tablet portrait) {
-          .tx-card {
-            width: 100%;
-          }
-        }
-        
-        @include break-from-device(tablet landscape) {
-          .tx-card {
-            width: 33%;
-          }
         }
         
         @include break-from-device(screen small) {
@@ -132,12 +146,22 @@
 
             // Button
             .md-button {
+                // color: var(--md-primary-fg-color);
+
                 // Button on focus/hover
-                &:focus,
-                &:hover {
-                background-color: rgb(103, 0, 0);
-                border-color: rgb(103, 1, 1);
-                }
+                // &:focus,
+                // &:hover {
+                // color: var(--md-default-bg-color);
+                // background-color: var(--md-accent-fg-color);
+                // border-color: var(--md-accent-fg-color);
+                // }
+
+                // // Primary button
+                // &--primary {
+                // color: hsla(280deg, 37%, 48%, 1);
+                // background-color: var(--md-primary-bg-color);
+                // border-color: var(--md-primary-bg-color);
+                // }
             }        
         }      
     }

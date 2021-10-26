@@ -132,22 +132,23 @@
   transform: 2s;
 }
 
+.feature-item h2 svg {
+  height: 30px;
+  float: left;
+  margin-right: 10px;
+  transform: translateY(10%);
+}
+
 .top-hr {
-  width: 100%;
-  display: flex;
-  max-width: 61rem;
-  margin-right: auto;
-  margin-left: auto;
   padding-top: 1rem;
   padding-bottom: 1rem;
-  flex-wrap: wrap;
 }
 
 .feature-item {
   font-family: "Lato", sans-serif;
   font-weight: 300;
   box-sizing: border-box;
-  padding: 25px;
+  padding: 0 15px;
   word-break: break-word;
 }
 
@@ -162,6 +163,22 @@
   margin-top: 20px;
   margin-bottom: 10px;
   font-family: inherit;
+}
+[data-md-color-scheme=slate] .feature-item h2 {
+  color: #fff;
+}
+
+.feature-item p {
+  font-size: 16px;
+  line-height: 1.8em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color: #111;
+  margin: 0 0 10px;
+  display: block;
+}
+[data-md-color-scheme=slate] .feature-item p {
+  color: #fff;
 }
 
 .feature-item p {
@@ -181,44 +198,27 @@
 @media screen and (min-width: 13.75em) {
   .feature-item {
     width: 100%;
+    display: flex;
+    max-width: 61rem;
+    margin-right: auto;
+    margin-left: auto;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
   }
 }
 @media screen and (min-width: 45em) {
   .feature-item {
-    width: 50%;
-  }
-}
-@media screen and (min-width: 60em) {
-  .feature-item {
     width: 33%;
   }
-}
-@media screen and (min-width: 76.25em) {
-  .feature-item {
-    width: 33%;
-  }
-}
-.feature-item:hover {
-  background-color: #fef5f5;
-  border-radius: 3px;
-}
 
+  .feature-item:hover {
+    background-color: #fceaea;
+    border-radius: 3px;
+  }
+}
 .tx-container {
-  background: #fef5f5;
-}
-.tx-container .centered {
-  padding: 1.5rem;
-  text-align: center;
-}
-.tx-container .centered h1 {
-  margin: 0rem;
-}
-.tx-container .centered h3 {
-  margin: 0.8em 0 0.8em;
-}
-.tx-container .tx-hero {
-  display: flex;
-  flex-wrap: wrap;
+  background: #fceaea;
 }
 .tx-container .tx-hero .tx-card {
   padding-bottom: 1rem;
@@ -241,6 +241,7 @@
 @media screen and (min-width: 76.25em) {
   .tx-container .tx-hero .tx-card {
     width: 33%;
+    padding-bottom: 1rem;
   }
 }
 .tx-container .tx-hero .tx-card {
@@ -248,11 +249,6 @@
   padding-right: 2.5rem;
   padding-bottom: 1rem;
 }
-.tx-container .tx-hero .tx-card .md-button:focus, .tx-container .tx-hero .tx-card .md-button:hover {
-  background-color: #670000;
-  border-color: #670101;
-}
-
 .md-tabs__link {
   font-size: 0.8rem;
 }
