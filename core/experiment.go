@@ -176,11 +176,11 @@ func (e *Experiment) incrementNumCompletedTasks() error {
 // SetFortioMetrics sets fortio metrics in the experiment results
 func (e *Experiment) SetFortioMetrics(fm []*fhttp.HTTPRunnerResults) error {
 	if e.Result == nil {
-		Logger.Warn("SetFortioMetrics called on an experiment object without results")
+		Logger.Debug("SetFortioMetrics called on an experiment object without results")
 		e.initResults()
 	}
 	if e.Result.Analysis == nil {
-		Logger.Warn("SetFortioMetrics called on an experiment object without analysis")
+		Logger.Debug("SetFortioMetrics called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.FortioMetrics = fm
