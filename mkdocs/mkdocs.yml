@@ -114,14 +114,12 @@ markdown_extensions:
 # Page tree
 nav:
 - Home: index.md
-- Concepts:
-  - What is Iter8?: concepts/whatisiter8.md
-  - Key features: concepts/features.md # include integrations
 - Getting Started:
+  - What is Iter8?: getting-started/what-is-iter8.md
   - Your first experiment: experiment-hub/first-experiment/README.md
   - Install Iter8: getting-started/install.md
   - Get help: getting-started/help.md
-  - Setup for tutorials: getting-started/setup-for-tutorials.md
+  - Migrating to v0.8: getting-started/migration.md
 - Experiment Hub:
   - Testing patterns:
     - Load testing: concepts/whatisiter8.md
@@ -129,34 +127,30 @@ nav:
     - A/B(/n) testing: concepts/whatisiter8.md
     - Chaos testing: concepts/whatisiter8.md
     - Hybrid testing: concepts/whatisiter8.md
-  - Advanced traffic engineering:
+  - Traffic engineering patterns:
     - Mirroring: concepts/whatisiter8.md
     - \%-traffic split: concepts/whatisiter8.md
     - User segmentation: concepts/whatisiter8.md
     - Session affinity: concepts/whatisiter8.md
-    - Progressive rollout: concepts/whatisiter8.md
-  - CI/CD/GitOps integrations:
+    - Progressive traffic shifting: concepts/whatisiter8.md
+  - CI/CD/GitOps patterns:
     - GitHub Actions trigger: concepts/whatisiter8.md
     - GitHub pull request: concepts/whatisiter8.md
 - Metrics:
-  - Built-in: metrics/builtin.md
-  - Pulled from backend: metrics/custom.md
-  - Pulled from app: metrics/custom.md
-  - Pushed by app: metrics/custom.md
-  - Mock: metrics/mock.md
+  - Built-in metrics: metrics/builtin.md
+  - Metric providers: metrics/custom.md
+  - Scraping metrics from apps: metrics/custom.md
 - User guide:
-  - Experiment resource: user-guide/experiment.md
-  - Metric resource: user-guide/metrics.md
-  - Task overview: user-guide/tasks/overview.md
-  - Task descriptions:
-    - run: user-guide/tasks/run.md
+  - Experiment schema: user-guide/schema.md
+  - Task reference:
     - metrics/collect: user-guide/tasks/metrics-collect.md
     - assess-versions: user-guide/tasks/notification-http.md
+    - run: user-guide/tasks/run.md
+  - Private experiment hub: user-guide/privatehub.md
 - Contributing:
   - Overview: contributing/overview.md
-  - New experiment: contributing/experiment.md
-  - New integration: contributing/integration.md
-  - New template: contributing/template.md
+  - Experiments: contributing/experiment.md
+  - Templates: contributing/template.md
   - Docs: contributing/experiment.md
   - CI: contributing/experiment.md
   - Analytics: contributing/analytics.md
