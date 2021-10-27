@@ -12,7 +12,7 @@ import (
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "run an experiment",
-	Long:  `Run an experiment locally`,
+	Long:  `Run the experiment defined in the local file named experiment.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		exp := &core.Experiment{
 			TaskMaker: &task.TaskMaker{},

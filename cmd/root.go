@@ -13,14 +13,14 @@ var rootCmd = &cobra.Command{
 	Use:   "iter8",
 	Short: "Metrics driven experiments",
 	Example: `
-	# view the current namespace in your KUBECONFIG
-	ns
+	# run the experiment defined in the local file named experiment.yaml
+	iter8 run
 
-	# view all of the namespaces in use by contexts in your KUBECONFIG
-	ns --list
+	# assert that the experiment completed successfully and found a winner
+	iter8 assert -c completed -c successful -c winnerFound
 	
-	# switch your current-context to one that contains the desired namespace
-	ns foo`,
+	# report experiment results
+	iter8 report`,
 	SilenceUsage: true,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
