@@ -57,12 +57,32 @@ func (t *AssessTask) Run(exp *core.Experiment) error {
 		return err
 	}
 
+	err = exp.SetValid(computeValid(exp))
+	if err != nil {
+		return err
+	}
+
 	err = exp.SetWinner(findWinner(exp))
 	if err != nil {
 		return err
 	}
 
 	return err
+}
+
+// compute valid versions
+func computeValid(exp *core.Experiment) []string {
+	valid := []string{}
+	for i := range exp.Spec.Versions {
+		satisfied := true
+		for j := range exp.Result.Analysis.Objectives {
+			satisfied = satisfied && exp.Result.Analysis.Objectives[i][j]
+		}
+		if satisfied {
+			valid = append(valid, exp.Spec.Versions[i])
+		}
+	}
+	return valid
 }
 
 // evaluate objectives
