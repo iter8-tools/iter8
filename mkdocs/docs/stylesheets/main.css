@@ -207,7 +207,7 @@
   }
 }
 .fx-container {
-  background: #fbf9ff;
+  background: #fbfaff;
 }
 
 .feature-item:hover {
@@ -216,7 +216,7 @@
 }
 
 .tx-container {
-  background: #fff1f1;
+  background: #fff3f3;
 }
 .tx-container .centered {
   padding: 1.5rem;
@@ -227,6 +227,10 @@
 }
 .tx-container .centered h3 {
   margin: 0.8em 0 0.8em;
+}
+.tx-container .tx-hero {
+  display: flex;
+  flex-wrap: wrap;
 }
 .tx-container .tx-hero .tx-card {
   padding-bottom: 1rem;
@@ -249,7 +253,6 @@
 @media screen and (min-width: 76.25em) {
   .tx-container .tx-hero .tx-card {
     width: 33%;
-    padding-bottom: 1rem;
   }
 }
 .tx-container .tx-hero .tx-card {

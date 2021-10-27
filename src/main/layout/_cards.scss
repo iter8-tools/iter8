@@ -98,7 +98,7 @@
 }
 
 .fx-container {
-  background: rgb(251, 249, 255);
+  background: rgb(251, 250, 255);
 }
 
 .feature-item:hover {
@@ -107,7 +107,7 @@
 }
 
 .tx-container {
-    background: rgb(255, 241, 241);
+    background: rgb(255, 243, 243);
 
     .centered {
       padding: px2rem(30px);
@@ -129,9 +129,25 @@
             flex-wrap: wrap;    
 
             .tx-card {
-                width: 33%;
                 padding-bottom: px2rem(20px);            
               }
+
+        @include break-from-device(mobile portrait) {
+          .tx-card {
+            width: 100%;
+          }
+        }
+        
+        @include break-from-device(tablet portrait) {
+          .tx-card {
+            width: 100%;
+          }
+        }
+        
+        @include break-from-device(tablet landscape) {
+          .tx-card {
+            width: 33%;
+          }
         }
         
         @include break-from-device(screen small) {
@@ -139,6 +155,7 @@
             width: 33%;
           }
         }        
+
 
         .tx-card {
             padding-left: px2rem(50px);
