@@ -1,34 +1,12 @@
-// Scoped in typesetted content to match specificity of regular content
-.cards {
-  .md-typeset {
-    // Emoji and icon container
-    .emojione,
-    .twemoji,
-    .gemoji {
-      display: inline-flex;
-      height: px2em(160px);
-      vertical-align: text-top;
-
-      // Icon - inlined via mkdocs-material-extensions
-      svg {
-        width: px2em(160px);
-        max-height: 100%;
-        fill: currentColor;
-      }
-    }
-  }
-}
-
-.feature-item h2 svg {
-  height: 30px;
-  float: left;
-  margin-right: 10px;
-  transform: translateY(10%);
-}
-
 .top-hr {
+  width: 100%;
+  display: flex;
+  max-width: 61rem;
+  margin-right: auto;
+  margin-left: auto;
   padding-top: px2rem(20px);
   padding-bottom: px2rem(20px);
+  flex-wrap: wrap;  
 }
 
 .feature-item {
@@ -62,16 +40,10 @@
   display: block;  
 }
 
-.top-hr {
-  width: 100%;
-  display: flex;
-  max-width: 61rem;
-  margin-right: auto;
-  margin-left: auto;
-  padding-top: px2rem(20px);
-  padding-bottom: px2rem(20px);
-  flex-wrap: wrap;
+.feature-item h2 svg {
+  color: rgb(160, 1, 1);
 }
+
 
 @include break-from-device(mobile portrait) {
   .feature-item {
@@ -97,12 +69,8 @@
   }
 }
 
-.fx-container {
-  background: rgb(251, 250, 255);
-}
-
 .feature-item:hover {
-  background-color: rgb(239, 234, 252);
+  background-color: rgb(255, 243, 243);
   border-radius: 3px;
 }
 
