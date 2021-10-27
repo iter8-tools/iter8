@@ -50,11 +50,6 @@
   margin-top: 20px;
   margin-bottom: 10px;
   font-family: inherit;
-
-  // Adjust for slate theme
-  [data-md-color-scheme="slate"] & {
-      color: #fff;
-  }
 }
 
 .feature-item p {
@@ -64,61 +59,68 @@
   -webkit-font-smoothing: antialiased;
   color: #111;
   margin: 0 0 10px;
-  display: block;
-
-  // Adjust for slate theme
-  [data-md-color-scheme="slate"] & {
-      color: #fff;
-  }    
+  display: block;  
 }
 
-@media screen and (min-width:76.25em) {
-  .top-hr {
-      width: 100%;
-      display: flex;
-      max-width: 61rem;
-      margin-right: auto;
-      margin-left: auto;
-      padding-top: px2rem(20px);
-      padding-bottom: px2rem(20px);
-      flex-wrap: wrap;
-  }
+.top-hr {
+  width: 100%;
+  display: flex;
+  max-width: 61rem;
+  margin-right: auto;
+  margin-left: auto;
+  padding-top: px2rem(20px);
+  padding-bottom: px2rem(20px);
+  flex-wrap: wrap;
+}
 
+@include break-from-device(mobile portrait) {
   .feature-item {
-      width: 33%;        
-  }
-
-  .feature-item:hover {
-      background-color: rgb(252, 234, 234);
-      border-radius: 3px;
-
+    width: 100%;        
   }
 }
 
-// section headers
-// .cards {
-//     padding-top: px2rem(20px);
-//     padding-bottom: px2rem(30px);
-//     .md-grid {  
-//         // Hero headline
-//         h1 {
-//             text-align: center;
-//             color: #333;
-//         }
-        
-//     }
+@include break-from-device(tablet portrait) {
+  .feature-item {
+    width: 50%;        
+  }
+}
 
-//     [data-md-color-scheme="default"] & {
-//         background: linear-gradient(
-//             to bottom,
-//             rgb(247, 241, 251) 1%,
-//             rgb(251, 238, 238),
-//             );
-//     }
-// }
+@include break-from-device(tablet landscape) {
+  .feature-item {
+    width: 33%;   
+  }
+}
+
+@include break-from-device(screen small) {
+  .feature-item {
+    width: 25%;   
+  }
+}
+
+.fx-container {
+  background: rgb(251, 249, 255);
+}
+
+.feature-item:hover {
+  background-color: rgb(239, 234, 252);
+  border-radius: 3px;
+}
 
 .tx-container {
-    background: rgb(252, 234, 234);
+    background: rgb(255, 241, 241);
+
+    .centered {
+      padding: px2rem(30px);
+      text-align: center;
+
+      h1 {
+          margin: px2rem(0px);
+        }  
+      
+      h3 {
+        margin: px2em(16px, 20px) 0 px2em(16px, 20px);
+      }
+    }
 
     .tx-hero {
         // color: var(--md-primary-fg-color);
@@ -133,7 +135,6 @@
               }
         }
 
-
         .tx-card {
             padding-left: px2rem(50px);
             padding-right: px2rem(50px);
@@ -141,22 +142,12 @@
 
             // Button
             .md-button {
-                // color: var(--md-primary-fg-color);
-
                 // Button on focus/hover
-                // &:focus,
-                // &:hover {
-                // color: var(--md-default-bg-color);
-                // background-color: var(--md-accent-fg-color);
-                // border-color: var(--md-accent-fg-color);
-                // }
-
-                // // Primary button
-                // &--primary {
-                // color: hsla(280deg, 37%, 48%, 1);
-                // background-color: var(--md-primary-bg-color);
-                // border-color: var(--md-primary-bg-color);
-                // }
+                &:focus,
+                &:hover {
+                background-color: rgb(103, 0, 0);
+                border-color: rgb(103, 1, 1);
+                }
             }        
         }      
     }
