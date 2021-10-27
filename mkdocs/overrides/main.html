@@ -52,11 +52,13 @@
 
 <!-- Announcement bar -->
 {% block announce %}
-Welcome to the preview release of <strong>Iter8 v0.8</strong> which vastly simplifies metrics driven experiments.
+Welcome to the preview release of <strong>Iter8 v0.8</strong>. This release greatly simplifies metrics driven experiments.
 {% endblock %}
 
 <!-- Theme-related JavaScript -->
 {% block scripts %}
   {{ super() }}
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>  
 {% endblock %}
 
