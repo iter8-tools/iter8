@@ -69,11 +69,11 @@
       <div class="mdx-hero__content">
         <h1><strong>Metrics Driven Experiments</strong></h1>
 
-        <h3>Maximize <strong>release velocity</strong>.</h3>
-        <h3>Optimize <strong>business value</strong>.</h3>
-        <h3>Protect <strong>end-user experience</strong>.</h3> 
+        <h3>
+          Maximize <strong>release velocity</strong>. Optimize <strong>business value</strong>. Protect <strong>end-user experience</strong>.
+        </h3> 
       
-        <a href="{{ base_url }}/getting-started/first-experiment/" title="Quick start"
+        <a href="{{ base_url }}/experimenthub/load-test" title="Quick start"
           class="md-button md-button--primary">
           Quick start in 2 min
         </a>
@@ -129,11 +129,11 @@
       <div class="feature-item">
         <h2>
           <span class="twemoji">
-            {% include ".icons/material/atom.svg" %}
+            {% include ".icons/material/check-all.svg" %}
           </span>
-          Load testing
+          SLOs
         </h2>
-        <p><strong>Load</strong> testing, <strong>SLO</strong> validation, <strong>A/B(/n)</strong> testing with business rewards, <strong>chaos</strong> injection, and <strong>hybrid</strong> experiments that combine the above.</p>
+        <p>Iter8 <strong>validates</strong> if your app satisfies the service level objectives (<strong>SLOs</strong>) specified in the experiment.</p>
       </div>
 
       <div class="feature-item">
@@ -141,11 +141,10 @@
           <span class="twemoji">
             {% include ".icons/material/atom.svg" %}
           </span>
-          SLO validation
+          Load testing
         </h2>
-        <p><strong>Load</strong> testing, <strong>SLO</strong> validation, <strong>A/B(/n)</strong> testing with business rewards, <strong>chaos</strong> injection, and <strong>hybrid</strong> experiments that combine the above.</p>
+        <p>Iter8 can generate requests for <strong>HTTP</strong> and <strong>gRPC</strong> services, collect built-in latency and error related metrics and validates SLOs.</p>
       </div>
-
       
       <div class="feature-item">
         <h2>
@@ -154,7 +153,7 @@
           </span>
           A/B(/n) testing
         </h2>
-        <p><strong>Load</strong> testing, <strong>SLO</strong> validation, <strong>A/B(/n)</strong> testing with business rewards, <strong>chaos</strong> injection, and <strong>hybrid</strong> experiments that combine the above.</p>
+        <p><strong>Grow your business</strong> with every release. Iter8 compares multiple versions based on business value and identifies a <strong>winner</strong>.</p>
       </div>
 
       <div class="feature-item">
@@ -167,7 +166,7 @@
           </span> -->
           Traffic engineering
         </h2>
-        <p>Iter8 experiments can be run with any ingress or service mesh to achieve <strong>mirroring</strong>, <strong>%-based traffic split</strong>, <strong>user segmentation</strong>, <strong>session affinity</strong> and <strong>progressive traffic shifting</strong>.</p>
+        <p>Iter8 can leverage your service mesh, ingress, or networking technology for <strong>mirroring</strong>, <strong>user segmentation</strong>, <strong>session affinity</strong>, and <strong>gradual rollout</strong>.</p>
       </div>
 
       <div class="feature-item">
@@ -177,7 +176,7 @@
           </span>
           Simple to use
         </h2>
-        <p>Use Iter8's powerful <strong>command line utility</strong> to run experiments locally.</p>
+        <p>Define experiments using a <strong>simple YAML file</strong>. Run Iter8 <strong>locally</strong>, as a <strong>kubectl plugin</strong>, in a <strong>container</strong>, in <strong>Kubernetes</strong>, or as a step in your <strong>CI/CD/GitOps</strong> pipeline.</p>
       </div>
 
       <div class="feature-item">
@@ -185,10 +184,10 @@
           <span class="twemoji">
             {% include ".icons/material/database-plus.svg" %}
           </span>
-          Easy to integrate
+          Awesome integrations
         </h2>
-        <p>Use Iter8 with any <strong>stateless, stateful, serverless app and ML</strong> framework.</p>
-        <p>Use metrics from <strong>any</strong> provider in your experiments, including <strong>Prometheus, New Relic, Sysdig and Elastic</strong>.</p>
+        <p>Use Iter8 with any <strong>app, serverless, or ML</strong> framework.
+        Use metrics from <strong>any</strong> provider. Examples: <strong>Prometheus, New Relic, Sysdig, and Elastic</strong>.</p>
       </div>
 
       <div class="feature-item">
@@ -196,9 +195,9 @@
           <span class="twemoji">
             {% include ".icons/material/git.svg" %}
           </span>
-          Eventing & Alerting
+          Eventing
         </h2>
-        <p>Automatically <strong>create pull requests</strong> or <strong>trigger GitHub Action workflows</strong> based on experiment results.</p>
+        <p>Iter8 can automatically create<strong> GitHub pull requests</strong>. Trigger <strong>GitHub Action workflows</strong>. Notify <strong>webhooks and slack</strong>.</p>
       </div>
 
       <div class="feature-item">
@@ -208,7 +207,7 @@
           </span>
           Flexible reporting
         </h2>
-        <p>Automatically <strong>create pull requests</strong> or <strong>trigger GitHub Action workflows</strong> based on experiment results.</p>
+        <p>Iter8 reports results of the experiment in <strong>plain text</strong> or in any custom format specified by a <strong>Go template</strong>.</p>
       </div>      
       
     </div>
