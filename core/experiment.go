@@ -39,7 +39,7 @@ type ExperimentResult struct {
 	StartTime *time.Time `json:"startTime,omitempty" yaml:"startTime,omitempty"`
 
 	// NumCompletedTasks is the number of completed tasks
-	NumCompletedTasks int32 `json:"numCompletedTasks" yaml:"numCompletedTasks"`
+	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
 
 	// Failure is true if the experiment failed to complete all the tasks successfully
 	Failure bool `json:"failure" yaml:"failure"`
@@ -110,6 +110,9 @@ type Analysis struct {
 	// if not empty, the length of the outer slice must match the length of Spec.Versions
 	// if not empty, the length of an inner slice must match the number of objectives in the assess-versions task
 	Objectives [][]bool `json:"objectives,omitempty" yaml:"objectives,omitempty"`
+
+	// Valid is the set of all versions that satisfy objectives
+	Valid []string `json:"valid,omitempty" yaml:"valid,omitempty"`
 
 	// Winner is the winning version of the app
 	Winner *string `json:"winner,omitempty" yaml:"winner,omitempty"`
@@ -233,6 +236,20 @@ func (e *Experiment) SetWinner(winner *string) error {
 	return Write(e)
 }
 
+// SetValid sets the valid versions
+func (e *Experiment) SetValid(valid []string) error {
+	if e.Result == nil {
+		Logger.Warn("SetValid called on an experiment object without results")
+		e.initResults()
+	}
+	if e.Result.Analysis == nil {
+		Logger.Warn("SetValid called on an experiment object without analysis")
+		e.Result.initAnalysis()
+	}
+	e.Result.Analysis.Valid = valid
+	return Write(e)
+}
+
 func (r *ExperimentResult) initAnalysis() {
 	r.Analysis = &Analysis{}
 }
@@ -299,4 +316,64 @@ func Write(r *Experiment) error {
 		return err
 	}
 	return err
+}
+
+// Completed returns true if the experiment is complete
+func (exp *Experiment) Completed() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			return exp.Result.NumCompletedTasks == len(exp.Spec.tasks)
+		}
+	}
+	return false
+}
+
+// NoFailure returns true if experiment has a results stanza and has not failed
+func (exp *Experiment) NoFailure() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			return !exp.Result.Failure
+		}
+	}
+	return false
+}
+
+// WinnerFound returns true if experiment has a found a winner
+func (exp *Experiment) WinnerFound() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.Analysis != nil {
+				return exp.Result.Analysis.Winner != nil
+			}
+		}
+	}
+	return false
+}
+
+// IsWinner returns true if version is the winner
+func (exp *Experiment) IsWinner(ver string) bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.Analysis != nil {
+				return *exp.Result.Analysis.Winner == ver
+			}
+		}
+	}
+	return false
+}
+
+// IsValid returns true if version is valid
+func (exp *Experiment) IsValid(ver string) bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.Analysis != nil {
+				for _, version := range exp.Result.Analysis.Valid {
+					if version == ver {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
