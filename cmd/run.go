@@ -11,7 +11,7 @@ import (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "run an experiment",
+	Short: "run experiment",
 	Long:  `Run the experiment defined in the local file named experiment.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		exp := &core.Experiment{
