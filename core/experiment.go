@@ -64,7 +64,7 @@ const (
 
 var (
 	// Path to experiment file
-	// this variable is not intended to be modified in tests, and nowhere else
+	// this variable is intended to be modified in tests, and nowhere else
 	filePath = "experiment.yaml"
 )
 
