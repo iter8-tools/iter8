@@ -4,32 +4,31 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/iter8-tools/iter8/core"
 	task "github.com/iter8-tools/iter8/tasks"
 	"github.com/spf13/cobra"
 )
 
-// ConditionType is a type for conditions that can be asserted
-type ConditionType string
-
 const (
 	// Completed implies experiment is complete
-	Completed ConditionType = "completed"
-	NoFailure ConditionType = "nofailure"
-	Failure   ConditionType = "failure"
+	Completed = "completed"
+	NoFailure = "nofailure"
+	Failure   = "failure"
 
 	// WinnerFound implies experiment has found a winner
-	WinnerFound ConditionType = "winnerfound"
+	WinnerFound = "winnerfound"
 
 	// WinnerPrefix
-	WinnerPrefix ConditionType = "winner"
+	WinnerPrefix = "winner"
 
 	// ValidPrefix
-	ValidPrefix ConditionType = "valid"
+	ValidPrefix = "valid"
 )
 
 var conds []string
+var timeout time.Duration
 
 // assertCmd represents the assert command
 var assertCmd = &cobra.Command{
@@ -51,21 +50,21 @@ var assertCmd = &cobra.Command{
 		// check assert conditions
 		allGood := true
 		for _, cond := range conds {
-			if strings.ToLower(cond) == string(Completed) {
+			if strings.ToLower(cond) == Completed {
 				allGood = allGood && exp.Completed()
-			} else if strings.ToLower(cond) == string(NoFailure) {
+			} else if strings.ToLower(cond) == NoFailure {
 				allGood = allGood && exp.NoFailure()
-			} else if strings.ToLower(cond) == string(Failure) {
+			} else if strings.ToLower(cond) == Failure {
 				allGood = allGood && (!exp.NoFailure())
-			} else if strings.ToLower(cond) == string(WinnerFound) {
+			} else if strings.ToLower(cond) == WinnerFound {
 				allGood = allGood && exp.WinnerFound()
-			} else if strings.HasPrefix(cond, string(WinnerPrefix)) {
+			} else if strings.HasPrefix(cond, WinnerPrefix) {
 				version, err := extractVersion(exp, cond)
 				if err != nil {
 					os.Exit(1)
 				}
 				allGood = allGood && exp.IsWinner(version)
-			} else if strings.HasPrefix(cond, string(ValidPrefix)) {
+			} else if strings.HasPrefix(cond, ValidPrefix) {
 				version, err := extractVersion(exp, cond)
 				if err != nil {
 					os.Exit(1)
@@ -77,8 +76,9 @@ var assertCmd = &cobra.Command{
 			}
 		}
 		if allGood {
-			fmt.Println("all conditions satisfied")
+			core.Logger.Info("all conditions were satisfied")
 		} else {
+			core.Logger.Info("not all conditions were satisfied")
 			os.Exit(1)
 		}
 	},
@@ -100,6 +100,12 @@ func extractVersion(exp *core.Experiment, cond string) (string, error) {
 }
 
 func init() {
+	// f := func(cmd *cobra.Command, err error) error {
+	// 	core.Logger.WithStackTrace(err.Error()).Error("unparsable flags")
+	// 	return err
+	// }
+	// assertCmd.SetFlagErrorFunc(f)
 	rootCmd.AddCommand(assertCmd)
 	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, "completed | noFailure | failure | winnerFound | winner=<version name> | valid=<version name>")
+	assertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
 }
