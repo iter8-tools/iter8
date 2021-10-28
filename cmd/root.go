@@ -34,6 +34,9 @@ func Execute() {
 }
 
 func init() {
+	// disable completion command for now
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
 	// initialize log level
 	viper.BindEnv("LOG_LEVEL")
 	viper.SetDefault("LOG_LEVEL ", "info")
