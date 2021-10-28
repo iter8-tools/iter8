@@ -38,6 +38,7 @@ COPY --from=builder /bin/kubectl /bin/kubectl
 COPY --from=builder /bin/kustomize /bin/kustomize
 COPY --from=builder /workspace/linux-amd64/helm /bin/helm
 COPY --from=builder /bin/yq /bin/yq
+RUN mkdir /scratch
 
 # Install git
 RUN apt-get update && apt-get install -y git curl gpg

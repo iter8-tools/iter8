@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/core"
 	"github.com/iter8-tools/iter8/engine"
 	task "github.com/iter8-tools/iter8/tasks"
@@ -32,9 +33,10 @@ var templateCmd = &cobra.Command{
 		}
 
 		// ensure it is a valid template
-		tmpl, err := template.New("tpl").Funcs(template.FuncMap(engine.FuncMap)).Parse(string(tplBytes))
+		tmpl, err := template.New("tpl").Funcs(template.FuncMap(engine.FuncMap)).Option("missingkey=error").Funcs(sprig.FuncMap()).Parse(string(tplBytes))
 		if err != nil {
 			core.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")
+			os.Exit(1)
 		}
 
 		// build experiment

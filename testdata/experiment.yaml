@@ -1,8 +1,161 @@
 name: my-exp
+result:
+  analysis:
+    fortioMetrics:
+    - AbortOn: 0
+      ActualDuration: 13175952610
+      ActualQPS: 7.589584067272993
+      DurationHistogram:
+        Avg: 0.044362970579999994
+        Count: 100
+        Data:
+        - Count: 1
+          End: 0.004
+          Percent: 1
+          Start: 0.003981274
+        - Count: 17
+          End: 0.005
+          Percent: 18
+          Start: 0.004
+        - Count: 26
+          End: 0.006
+          Percent: 44
+          Start: 0.005
+        - Count: 24
+          End: 0.007
+          Percent: 68
+          Start: 0.006
+        - Count: 11
+          End: 0.008
+          Percent: 79
+          Start: 0.007
+        - Count: 2
+          End: 0.009000000000000001
+          Percent: 81
+          Start: 0.008
+        - Count: 2
+          End: 0.025
+          Percent: 83
+          Start: 0.02
+        - Count: 3
+          End: 0.03
+          Percent: 86
+          Start: 0.025
+        - Count: 2
+          End: 0.035
+          Percent: 88
+          Start: 0.03
+        - Count: 3
+          End: 0.09
+          Percent: 91
+          Start: 0.08
+        - Count: 6
+          End: 0.25
+          Percent: 97
+          Start: 0.2
+        - Count: 2
+          End: 0.7000000000000001
+          Percent: 99
+          Start: 0.6
+        - Count: 1
+          End: 0.735049279
+          Percent: 100
+          Start: 0.7000000000000001
+        Max: 0.735049279
+        Min: 0.003981274
+        Percentiles:
+        - Percentile: 50
+          Value: 0.00625
+        - Percentile: 75
+          Value: 0.0076363636363636364
+        - Percentile: 90
+          Value: 0.08666666666666667
+        - Percentile: 95
+          Value: 0.23333333333333334
+        - Percentile: 99
+          Value: 0.7000000000000001
+        - Percentile: 99.9
+          Value: 0.7315443511000003
+        StdDev: 0.12774460710385185
+        Sum: 4.436297057999999
+      Exactly: 100
+      HeaderSizes:
+        Avg: 0
+        Count: 100
+        Data:
+        - Count: 100
+          End: 0
+          Percent: 100
+          Start: 0
+        Max: 0
+        Min: 0
+        Percentiles: null
+        StdDev: 0
+        Sum: 0
+      Jitter: false
+      Labels: ""
+      NumThreads: 4
+      RequestedDuration: exactly 100 calls
+      RequestedQPS: "8"
+      RetCodes:
+        "200": 100
+      RunType: HTTP
+      Sizes:
+        Avg: 1256
+        Count: 100
+        Data:
+        - Count: 100
+          End: 1256
+          Percent: 100
+          Start: 1256
+        Max: 1256
+        Min: 1256
+        Percentiles: null
+        StdDev: 0
+        Sum: 125600
+      SocketCount: 0
+      StartTime: "2021-10-28T15:22:31.953513353Z"
+      URL: https://example.com
+      Version: dev
+    metrics:
+    - iter8-fortio/error-count:
+      - 0
+      iter8-fortio/error-rate:
+      - 0
+      iter8-fortio/max-latency:
+      - 0.735049279
+      iter8-fortio/mean-latency:
+      - 0.044362970579999994
+      iter8-fortio/min-latency:
+      - 0.003981274
+      iter8-fortio/p50:
+      - 0.00625
+      iter8-fortio/p75:
+      - 0.0076363636363636364
+      iter8-fortio/p90:
+      - 0.08666666666666667
+      iter8-fortio/p95:
+      - 0.23333333333333334
+      iter8-fortio/p99:
+      - 0.7000000000000001
+      iter8-fortio/p99.9:
+      - 0.7315443511000003
+      iter8-fortio/request-count:
+      - 100
+      iter8-fortio/stddev-latency:
+      - 0.12774460710385185
+    objectives:
+    - - true
+      - true
+    testingPattern: SLOValidation
+    valid:
+    - my-app
+    winner: my-app
+  failure: false
+  numCompletedTasks: 2
+  startTime: "2021-10-28T15:22:31.952859515Z"
 spec:
-  iter8Version: "0.8.0"
-  versions:
-  - my-app
+  iter8Version: 0.8.0
   tasks:
   - task: collect-fortio-metrics
     with:
@@ -12,9 +165,10 @@ spec:
   - task: assess-versions
     with:
       criteria:
-        requestCount: iter8-istio/request-count
         objectives:
-        - metric: iter8-istio/error-rate
+        - metric: iter8-fortio/error-rate
           upperLimit: 0
-        - metric: iter8-istio/p99.9
+        - metric: iter8-fortio/p99.9
           upperLimit: 100
+  versions:
+  - my-app
