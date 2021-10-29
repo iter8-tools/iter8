@@ -17,7 +17,7 @@ const (
 // AssessInputs contain the inputs to the assess-versions task to be executed.
 type AssessInputs struct {
 	// Criteria is the assessment criteria
-	Criteria *core.Criteria `json:"criteria,omitempty" yaml:"criteria,omitempty"`
+	Criteria *core.Criteria `json:"criteria" yaml:"criteria"`
 }
 
 // AssessTask enables assessment of versions

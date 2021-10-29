@@ -36,35 +36,35 @@ var (
 // Version contains header and url information needed to send requests to each version.
 type Version struct {
 	// HTTP headers to use in the query for this version; optional
-	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
+	Headers map[string]string `json:"headers" yaml:"headers"`
 	// URL to use for querying this version
 	URL string `json:"url" yaml:"url"`
 }
 
 // HTTP status code within this range is considered an error
 type ErrorRange struct {
-	Lower *int `json:"lower,omitempty" yaml:"lower,omitempty"`
-	Upper *int `json:"upper,omitempty" yaml:"upper,omitempty"`
+	Lower *int `json:"lower" yaml:"lower"`
+	Upper *int `json:"upper" yaml:"upper"`
 }
 
 // CollectInputs contain the inputs to the metrics collection task to be executed.
 type CollectInputs struct {
 	// how many requests will be sent for each version; optional; default 100
-	NumRequests *int64 `json:"numRequests,omitempty" yaml:"numRequests,omitempty"`
+	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
 	// how long to run the metrics collector; optional;
 	// if both time and numRequests are specified, numRequests takes precedence
-	Duration *string `json:"time,omitempty" yaml:"time,omitempty"`
+	Duration *string `json:"time" yaml:"time"`
 	// how many queries per second will be sent; optional; default 8
-	QPS *float32 `json:"qps,omitempty" yaml:"qps,omitempty"`
+	QPS *float32 `json:"qps" yaml:"qps"`
 	// string to be sent during queries as payload; optional
-	PayloadStr *string `json:"payloadStr,omitempty" yaml:"payloadStr,omitempty"`
+	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
 	// URL whose content will be sent as payload during queries; optional
 	// if both payloadURL and payloadStr are specified, the URL takes precedence
-	PayloadURL *string `json:"payloadURL,omitempty" yaml:"payloadURL,omitempty"`
+	PayloadURL *string `json:"payloadURL" yaml:"payloadURL"`
 	// valid HTTP content type string; specifying this switches the request from GET to POST
-	ContentType *string `json:"contentType,omitempty" yaml:"contentType,omitempty"`
+	ContentType *string `json:"contentType" yaml:"contentType"`
 	// ranges of HTTP status codes that are considered as errors
-	ErrorRanges []ErrorRange `json:"errorRanges,omitempty" yaml:"errorRanges,omitempty"`
+	ErrorRanges []ErrorRange `json:"errorRanges" yaml:"errorRanges"`
 	// information about versions
 	VersionInfo []*Version `json:"versionInfo" yaml:"versionInfo"`
 }
