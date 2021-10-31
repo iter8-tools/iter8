@@ -9,8 +9,8 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/core"
-	"github.com/iter8-tools/iter8/engine"
-	task "github.com/iter8-tools/iter8/tasks"
+	"github.com/iter8-tools/iter8/core/engine"
+	"github.com/iter8-tools/iter8/task"
 	"github.com/spf13/cobra"
 )
 
@@ -22,8 +22,9 @@ var (
 
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
-	Use:   "template",
-	Short: "generate textual output of the experiment using a Go template",
+	Use:    "template",
+	Short:  "generate textual output of the experiment using a Go template",
+	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		// read in the template file
 		tplBytes, err := ioutil.ReadFile(filePath)

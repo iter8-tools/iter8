@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/iter8-tools/iter8/core"
-	task "github.com/iter8-tools/iter8/tasks"
+	"github.com/iter8-tools/iter8/task"
 	"github.com/spf13/cobra"
 )
 

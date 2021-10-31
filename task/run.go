@@ -10,7 +10,7 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/core"
-	"github.com/iter8-tools/iter8/engine"
+	"github.com/iter8-tools/iter8/core/engine"
 )
 
 const (
