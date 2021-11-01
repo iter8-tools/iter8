@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/iter8-tools/iter8/core/log"
+	"github.com/iter8-tools/iter8/core/log"
 )
 
 const (
@@ -49,22 +49,22 @@ func MakeAssess(t *TaskSpec) (Task, error) {
 
 // Run executes the assess-versions task
 func (t *AssessTask) Run(exp *Experiment) error {
-	err := exp.SetTestingPattern(t.With.Criteria)
+	err := exp.setTestingPattern(t.With.Criteria)
 	if err != nil {
 		return err
 	}
 
-	err = exp.SetObjectives(evaluateObjectives(exp, t.With.Criteria.Objectives))
+	err = exp.setObjectives(evaluateObjectives(exp, t.With.Criteria.Objectives))
 	if err != nil {
 		return err
 	}
 
-	err = exp.SetValid(computeValid(exp))
+	err = exp.setValid(computeValid(exp))
 	if err != nil {
 		return err
 	}
 
-	err = exp.SetWinner(findWinner(exp))
+	err = exp.setWinner(findWinner(exp))
 	if err != nil {
 		return err
 	}
