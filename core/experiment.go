@@ -1,21 +1,25 @@
 package core
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
 	"time"
 
 	"fortio.org/fortio/fhttp"
 	"github.com/ghodss/yaml"
+	log "github.com/iter8-tools/iter8/core/log"
 )
 
 // Experiment specification and result
 type Experiment struct {
-	TaskMaker `json:"-" yaml:"-"`
-	Name      string            `json:"name" yaml:"name"`
-	Spec      *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
-	Result    *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
+	Name   string            `json:"name" yaml:"name"`
+	Spec   *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
+}
+
+// Task objects can be run
+type Task interface {
+	Run(exp *Experiment) error
 }
 
 // ExperimentSpec specifies the experiment
@@ -27,10 +31,7 @@ type ExperimentSpec struct {
 	Versions []string `json:"versions" yaml:"versions"`
 
 	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks []TaskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
-
-	// tasks is the runnable representation of tasks
-	tasks []Task
+	Tasks []Task `json:"tasks,omitempty" yaml:"tasks,omitempty"`
 }
 
 // ExperimentResult defines the current results from the experiment
@@ -57,15 +58,6 @@ const (
 
 	// TestingPatternNone implies no testing of any kind
 	TestingPatternNone TestingPatternType = "None"
-
-	// DefaultFilePath is the default path to experiment file
-	DefaultFilePath = "experiment.yaml"
-)
-
-var (
-	// Path to experiment file
-	// this variable is intended to be modified in tests, and nowhere else
-	filePath = "experiment.yaml"
 )
 
 // Criteria is list of criteria to be evaluated throughout the experiment
@@ -118,86 +110,97 @@ type Analysis struct {
 	Winner *string `json:"winner,omitempty" yaml:"winner,omitempty"`
 }
 
+type TaskMeta struct {
+	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
+	Run  *string `json:"run,omitempty" yaml:"run,omitempty"`
+	If   *string `json:"if,omitempty" yaml:"if,omitempty"`
+}
+
+// TaskSpec is an intermediate version of Task
+type TaskSpec struct {
+	TaskMeta
+	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
+}
+
+// func (t *TaskMeta) bytes() []byte {
+// 	b, _ := json.Marshal(t)
+// 	return b
+// }
+
+// experimentSpec is an intermediate version of ExperimentSpec
+type experimentSpec struct {
+	Iter8Version string     `json:"iter8Version" yaml:"iter8Version"`
+	Versions     []string   `json:"versions" yaml:"versions"`
+	Tasks        []TaskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
+}
+
+func (es *ExperimentSpec) UnmarshalJSON(data []byte) error {
+	temp := experimentSpec{}
+	if err := json.Unmarshal(data, &temp); err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("error unmarshaling experiment spec")
+		return err
+	}
+
+	// populate es
+	es.Iter8Version = temp.Iter8Version
+	es.Versions = temp.Versions
+
+	for _, t := range temp.Tasks {
+		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
+			log.Logger.Error("invalid task found without a task name or a run command")
+			return errors.New("invalid task found without a task name or a run command")
+		}
+
+		var task Task
+		var err error
+
+		// this is a run task
+		if t.Run != nil {
+			task, err = MakeRun(&t)
+			es.Tasks = append(es.Tasks, task)
+
+			// the following if statement seems necessary due to a bug in go linter
+			if err != nil {
+				return err
+			}
+		}
+
+		// this is some other task
+		switch *t.Task {
+		case CollectTaskName:
+			task, err = MakeCollect(&t)
+			es.Tasks = append(es.Tasks, task)
+		case AssessTaskName:
+			task, err = MakeAssess(&t)
+			es.Tasks = append(es.Tasks, task)
+		default:
+			log.Logger.Error("unknown task: " + *t.Task)
+			return errors.New("unknown task: " + *t.Task)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// no errors
+	return nil
+}
+
 // String converts the experiment into a yaml string
 func (e *Experiment) String() string {
 	out, _ := yaml.Marshal(e)
 	return string(out)
 }
 
-// Build an experiment from file
-func (e *Experiment) Build(withResult bool) error {
-	// read it in
-	Logger.Trace("build called")
-	newExp, err := Read()
-	if err != nil {
-		return err
-	}
-	e.Name, e.Spec, e.Result = newExp.Name, newExp.Spec, newExp.Result
-	if !withResult {
-		e.Result = &ExperimentResult{}
-	}
-	// make tasks
-	for i, ts := range e.Spec.Tasks {
-		Logger.Trace(fmt.Sprintf("unmarshaling task %v", i))
-		t, err := e.TaskMaker.Make(&ts)
-		if err != nil {
-			return err
-		}
-		e.Spec.tasks = append(e.Spec.tasks, t)
-	}
-
-	return err
-}
-
-func (e *Experiment) setStartTime() error {
-	if e.Result == nil {
-		Logger.Warn("setStartTime called on an experiment object without results")
-		e.initResults()
-	}
-	e.Result.StartTime = TimePointer(time.Now())
-	return Write(e)
-}
-
-func (e *Experiment) failExperiment() error {
-	if e.Result == nil {
-		Logger.Warn("failExperiment called on an experiment object without results")
-		e.initResults()
-	}
-	e.Result.Failure = true
-	return Write(e)
-}
-
-func (e *Experiment) incrementNumCompletedTasks() error {
-	if e.Result == nil {
-		Logger.Warn("incrementNumCompletedTasks called on an experiment object without results")
-		e.initResults()
-	}
-	e.Result.NumCompletedTasks++
-	return Write(e)
-}
-
-// SetFortioMetrics sets fortio metrics in the experiment results
-func (e *Experiment) SetFortioMetrics(fm []*fhttp.HTTPRunnerResults) error {
-	if e.Result == nil {
-		Logger.Debug("SetFortioMetrics called on an experiment object without results")
-		e.initResults()
-	}
-	if e.Result.Analysis == nil {
-		Logger.Debug("SetFortioMetrics called on an experiment object without analysis")
-		e.Result.initAnalysis()
-	}
-	e.Result.Analysis.FortioMetrics = fm
-	return Write(e)
-}
-
 // SetTestingPattern sets the testing pattern in the experiment results
 func (e *Experiment) SetTestingPattern(c *Criteria) error {
 	if e.Result == nil {
-		Logger.Warn("SetTestingPattern called on an experiment object without results")
-		e.initResults()
+		log.Logger.Warn("SetTestingPattern called on an experiment object without results")
+		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		Logger.Warn("SetTestingPattern called on an experiment object without analysis")
+		log.Logger.Warn("SetTestingPattern called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	if c == nil || c.Objectives == nil || len(c.Objectives) == 0 {
@@ -205,56 +208,56 @@ func (e *Experiment) SetTestingPattern(c *Criteria) error {
 	} else {
 		e.Result.Analysis.TestingPattern = TestingPatternPointer(TestingPatternSLOValidation)
 	}
-	return Write(e)
+	return nil
 }
 
 // SetObjectives sets objective assessment portion of the analysis
 func (e *Experiment) SetObjectives(objs [][]bool) error {
 	if e.Result == nil {
-		Logger.Warn("SetObjectivesSetObjectives called on an experiment object without results")
-		e.initResults()
+		log.Logger.Warn("SetObjectivesSetObjectives called on an experiment object without results")
+		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		Logger.Warn("SetObjectivesSetObjectives called on an experiment object without analysis")
+		log.Logger.Warn("SetObjectivesSetObjectives called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Objectives = objs
-	return Write(e)
+	return nil
 }
 
 // SetWinner sets the winning version
 func (e *Experiment) SetWinner(winner *string) error {
 	if e.Result == nil {
-		Logger.Warn("SetWinner called on an experiment object without results")
-		e.initResults()
+		log.Logger.Warn("SetWinner called on an experiment object without results")
+		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		Logger.Warn("SetWinner called on an experiment object without analysis")
+		log.Logger.Warn("SetWinner called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Winner = winner
-	return Write(e)
+	return nil
 }
 
 // SetValid sets the valid versions
 func (e *Experiment) SetValid(valid []string) error {
 	if e.Result == nil {
-		Logger.Warn("SetValid called on an experiment object without results")
-		e.initResults()
+		log.Logger.Warn("SetValid called on an experiment object without results")
+		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		Logger.Warn("SetValid called on an experiment object without analysis")
+		log.Logger.Warn("SetValid called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Valid = valid
-	return Write(e)
+	return nil
 }
 
 func (r *ExperimentResult) initAnalysis() {
 	r.Analysis = &Analysis{}
 }
 
-func (e *Experiment) initResults() {
+func (e *Experiment) InitResults() {
 	e.Result = &ExperimentResult{
 		StartTime:         TimePointer(time.Now()),
 		NumCompletedTasks: 0,
@@ -267,11 +270,11 @@ func (e *Experiment) initResults() {
 // UpdateMetricForVersion updates value of a given metric for a given version
 func (e *Experiment) UpdateMetricForVersion(m string, i int, val float64) error {
 	if e.Result == nil {
-		Logger.Warn("UpdateMetricForVersion called on an experiment object without results")
-		e.initResults()
+		log.Logger.Warn("UpdateMetricForVersion called on an experiment object without results")
+		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		Logger.Warn("UpdateMetricForVersion called on an experiment object without analysis")
+		log.Logger.Warn("UpdateMetricForVersion called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	if e.Result.Analysis.Metrics == nil {
@@ -284,45 +287,14 @@ func (e *Experiment) UpdateMetricForVersion(m string, i int, val float64) error 
 		e.Result.Analysis.Metrics[i][m] = []float64{}
 	}
 	e.Result.Analysis.Metrics[i][m] = append(e.Result.Analysis.Metrics[i][m], val)
-	return Write(e)
-}
-
-// Read an experiment from a file
-func Read() (*Experiment, error) {
-	yamlFile, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
-		return nil, errors.New("unable to read experiment file")
-	}
-	e := Experiment{}
-	err = yaml.Unmarshal(yamlFile, &e)
-	if err != nil {
-		Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment")
-		return nil, err
-	}
-	return &e, err
-}
-
-// Write an experiment to a file
-func Write(r *Experiment) error {
-	rBytes, err := yaml.Marshal(r)
-	if err != nil {
-		Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment")
-		return errors.New("unable to marshal experiment")
-	}
-	err = ioutil.WriteFile(filePath, rBytes, 0664)
-	if err != nil {
-		Logger.WithStackTrace(err.Error()).Error("unable to write experiment file")
-		return err
-	}
-	return err
+	return nil
 }
 
 // Completed returns true if the experiment is complete
 func (exp *Experiment) Completed() bool {
 	if exp != nil {
 		if exp.Result != nil {
-			return exp.Result.NumCompletedTasks == len(exp.Spec.tasks)
+			return exp.Result.NumCompletedTasks == len(exp.Spec.Tasks)
 		}
 	}
 	return false

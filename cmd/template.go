@@ -8,9 +8,7 @@ import (
 	"os"
 
 	"github.com/Masterminds/sprig"
-	"github.com/iter8-tools/iter8/core"
-	"github.com/iter8-tools/iter8/core/engine"
-	"github.com/iter8-tools/iter8/task"
+	"github.com/iter8-tools/iter8/core/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,26 +27,26 @@ var templateCmd = &cobra.Command{
 		// read in the template file
 		tplBytes, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			core.Logger.WithStackTrace(err.Error()).Error("unable to read template file")
+			log.Logger.WithStackTrace(err.Error()).Error("unable to read template file")
 			os.Exit(1)
 		}
 
 		// ensure it is a valid template
-		tmpl, err := template.New("tpl").Funcs(template.FuncMap(engine.FuncMap)).Option("missingkey=error").Funcs(sprig.FuncMap()).Parse(string(tplBytes))
+		tmpl, err := template.New("tpl").Funcs(template.FuncMap{
+			"toYAML": toYAML,
+		}).Option("missingkey=error").Funcs(sprig.FuncMap()).Parse(string(tplBytes))
 		if err != nil {
-			core.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")
+			log.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")
 			os.Exit(1)
 		}
 
 		// build experiment
-		exp := &core.Experiment{
-			TaskMaker: &task.TaskMaker{},
-		}
-		core.Logger.Trace("build started")
-		err = exp.Build(false)
-		core.Logger.Trace("build finished")
+
+		log.Logger.Trace("build started")
+		exp, err := Build(false)
+		log.Logger.Trace("build finished")
 		if err != nil {
-			core.Logger.Error("experiment build failed")
+			log.Logger.Error("experiment build failed")
 			os.Exit(1)
 		}
 
@@ -56,7 +54,7 @@ var templateCmd = &cobra.Command{
 		var b bytes.Buffer
 		err = tmpl.Execute(&b, exp)
 		if err != nil {
-			core.Logger.WithStackTrace(err.Error()).Error("unable to execute template")
+			log.Logger.WithStackTrace(err.Error()).Error("unable to execute template")
 			os.Exit(1)
 		}
 

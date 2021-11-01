@@ -1,163 +1,109 @@
 package core
 
-import "strings"
-
-// Backend defines a metrics backend
-type Backend struct {
-	// Name is name of the backend
-	Name string `json:"name" yaml:"name"`
-
-	// Text description of the backend
-	Description *string `json:"description,omitempty" yaml:"description,omitempty"`
-
-	// Provider identifies the type of metrics backend. Used for informational purposes.
-	Provider *string `json:"provider,omitempty" yaml:"provider,omitempty"`
-
-	// Metrics is list of metrics available from this backend
-	Metrics []Metric `json:"metrics,omitempty" yaml:"metrics,omitempty"`
-}
-
-// MetricType identifies the type of the metric.
-type MetricType string
-
 const (
-	// CounterMetricType corresponds to Prometheus Counter metric type
-	CounterMetricType MetricType = "Counter"
-
-	// GaugeMetricType is an enhancement of Prometheus Gauge metric type
-	GaugeMetricType MetricType = "Gauge"
+	// Iter8FortioPrefix for iter8-fortio metric names
+	Iter8FortioPrefix = "iter8-fortio"
 )
 
-// Metric defines a metric
-type Metric struct {
-	// Name of the metric
-	Name string `json:"name" yaml:"name"`
+// // MetricType identifies the type of the metric.
+// type MetricType string
 
-	// Text description of the metric
-	Description *string `json:"description,omitempty" yaml:"description,omitempty"`
+// const (
+// 	// CounterMetricType corresponds to Prometheus Counter metric type
+// 	CounterMetricType MetricType = "Counter"
 
-	// Units of the metric. Used for informational purposes.
-	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
+// 	// GaugeMetricType corresponds to Prometheus Gauge metric type
+// 	GaugeMetricType MetricType = "Gauge"
+// )
 
-	// Type of the metric
-	Type MetricType `json:"type" yaml:"type"`
-}
+// // AuthType identifies the type of authentication used in the HTTP request
+// type AuthType string
 
-var IFBackend Backend
+// const (
+// 	// BasicAuthType corresponds to authentication with basic auth
+// 	BasicAuthType AuthType = "Basic"
 
-func init() {
-	// initialize the backend
-	IFBackend = Backend{
-		Name:        "iter8-fortio",
-		Description: StringPointer("Iter8's built-in backend that supplies latency and error metrics"),
-		Provider:    StringPointer("Iter8"),
-		Metrics:     []Metric{},
-	}
+// 	// BearerAuthType corresponds to authentication with bearer token
+// 	BearerAuthType AuthType = "Bearer"
 
-	ifb := &IFBackend
+// 	// APIKeyAuthType corresponds to authentication with API keys
+// 	APIKeyAuthType AuthType = "APIKey"
+// )
 
-	// start adding metrics to this backend
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "request-count",
-		Description: StringPointer("number of requests sent per-version"),
-		Units:       nil,
-		Type:        CounterMetricType,
-	})
+// // MethodType identifies the HTTP request method (aka verb) used in the HTTP request
+// type MethodType string
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "error-count",
-		Description: StringPointer("number of error responses"),
-		Units:       nil,
-		Type:        CounterMetricType,
-	})
+// const (
+// 	// GETMethodType corresponds to HTTP GET method
+// 	GETMethodType MethodType = "GET"
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "error-rate",
-		Description: StringPointer("fraction of requests with error responses"),
-		Units:       nil,
-		Type:        GaugeMetricType,
-	})
+// 	// POSTMethodType corresponds to HTTP POST method
+// 	POSTMethodType MethodType = "POST"
+// )
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "mean-latency",
-		Description: StringPointer("average request latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// // BackendInfo is map of backends
+// type BackendInfo map[string]Backend
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "min-latency",
-		Description: StringPointer("minimum request latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// // Backend describes how to query the backend and the list of metrics supported by the backend
+// type Backend struct {
+// 	// Description of the backend
+// 	Description *string `json:"description,omitempty" yaml:"description,omitempty"`
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "max-latency",
-		Description: StringPointer("maximum request latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// 	// BackendRequest provides detailed information about how to query the backend
+// 	BackendRequest `json:",inline" yaml:",inline"`
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "stddev-latency",
-		Description: StringPointer("standard deviation of request latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// 	// Metrics is a list of metrics available from this backend
+// 	Metrics []Metric `json:"metrics,omitempty" yaml:"metrics,omitempty"`
+// }
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "p50",
-		Description: StringPointer("50th percentile (median) latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// // BackendRequests provides details about how to query a backend
+// type BackendRequest struct {
+// 	// AuthType is the type of authentication used in the HTTP request
+// 	AuthType *AuthType `json:"authType,omitempty" yaml:"authType,omitempty"`
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "p75",
-		Description: StringPointer("75th percentile (tail) latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// 	// Method is the HTTP method used in the HTTP request
+// 	Method *MethodType `json:"method,omitempty" yaml:"method,omitempty"`
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "p90",
-		Description: StringPointer("90th percentile (tail) latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// 	// Provider identifies the type of metric database. Used for informational purposes.
+// 	Provider *string `json:"provider,omitempty" yaml:"provider,omitempty"`
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "p95",
-		Description: StringPointer("95th percentile (tail) latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// 	// JQExpression defines the jq expression used by Iter8 to extract the metric value from the (JSON) response returned by the HTTP URL queried by Iter8.
+// 	// An empty string is a valid jq expression.
+// 	JQExpression *string `json:"jqExpression,omitempty" yaml:"jqExpression,omitempty"`
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "p99",
-		Description: StringPointer("99th percentile (tail) latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// 	// Secret is a reference to the Kubernetes secret.
+// 	// Secret contains data used for HTTP authentication.
+// 	// Secret may also contain data used for placeholder substitution in HeaderTemplates.
+// 	Secret *string `json:"secret,omitempty" yaml:"secret,omitempty"`
 
-	ifb.Metrics = append(ifb.Metrics, Metric{
-		Name:        "p99.9",
-		Description: StringPointer("99.9th percentile (tail) latency"),
-		Units:       StringPointer("sec"),
-		Type:        GaugeMetricType,
-	})
+// 	// Headers are key/value pairs corresponding to HTTP request headers and their values.
+// 	// Value may be templated, in which Iter8 will attempt to substitute placeholders in the template at query time using Secret.
+// 	// Placeholder substitution will be attempted only when Secret != nil.
+// 	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 
-}
+// 	// URL is HTTP URL of the metrics backend
+// 	URL *string `json:"url,omitempty" yaml:"url,omitempty"`
+// }
 
-// HasMetric checks if the backend contains a metric
-func (b *Backend) HasMetric(m string) bool {
-	if strings.HasPrefix(m, b.Name) {
-		for i := range b.Metrics {
-			if b.Name+"/"+b.Metrics[i].Name == m {
-				return true
-			}
-		}
-	}
-	return false
-}
+// // Metric object provides info about a specific metric provided by the backend
+// type Metric struct {
+// 	// Name is the name of the metric
+// 	Name string `json:"name" yaml:"name"`
+
+// 	// Text description of the metric
+// 	Description *string `json:"description,omitempty" yaml:"description,omitempty"`
+
+// 	// Params are key/value pairs corresponding to HTTP request parameters
+// 	// Value may contain place holders, to be substituted by Iter8 with version-specific values.
+// 	Params map[string]string `json:"params,omitempty" yaml:"params,omitempty"`
+
+// 	// Units of the metric. Used for informational purposes.
+// 	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
+
+// 	// Type of the metric
+// 	Type *MetricType `json:"type,omitempty" yaml:"type,omitempty"`
+
+// 	// Body is the string used to construct the (json) body of the HTTP request
+// 	// Body may contain place holders, to be substituted by Iter8 with version-specific values.
+// 	Body *string `json:"body,omitempty" yaml:"body,omitempty"`
+// }
