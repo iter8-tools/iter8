@@ -151,16 +151,12 @@ func getMetricValue(e *Experiment, i int, m string) *float64 {
 		return nil
 	}
 
-	if vals, ok := e.Result.Analysis.Metrics[i][m]; !ok {
-		log.Logger.Warn("metrics unavailable for version " + e.Spec.Versions[i])
-		return nil
-	} else if len(vals) == 0 {
+	if vals, ok := e.Result.Analysis.Metrics[i][m]; !ok || len(vals) == 0 {
 		log.Logger.Warn("metric " + m + "unavailable for version " + e.Spec.Versions[i])
 		return nil
 	} else {
 		return float64Pointer(vals[len(vals)-1])
 	}
-
 }
 
 // find winning version

@@ -53,7 +53,7 @@ func (e *experiment) run() error {
 		}
 	}
 	for i, t := range e.Spec.Tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v", i) + "started")
+		log.Logger.Info("task " + fmt.Sprintf("%v", i) + " : started")
 		err = t.Run(e.Experiment)
 		if err != nil {
 			log.Logger.Error("task " + fmt.Sprintf("%v", i) + " : " + "failure")
@@ -61,7 +61,7 @@ func (e *experiment) run() error {
 			return err
 		} else {
 			e.incrementNumCompletedTasks()
-			err = Write(e)
+			err = write(e)
 			if err != nil {
 				return err
 			}
@@ -71,8 +71,8 @@ func (e *experiment) run() error {
 	return nil
 }
 
-// Write an experiment to a file
-func Write(r *experiment) error {
+// write an experiment to a file
+func write(r *experiment) error {
 	rBytes, err := yaml.Marshal(r)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment")

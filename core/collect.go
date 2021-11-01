@@ -288,7 +288,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			}
 
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+fmt.Sprintf("%0.2f", p.Percentile), i, p.Value)
+				err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+fmt.Sprintf("p%0.1f", p.Percentile), i, p.Value)
 				if err != nil {
 					return err
 				}
