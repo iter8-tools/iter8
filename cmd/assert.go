@@ -12,19 +12,12 @@ import (
 )
 
 const (
-	// Completed implies experiment is complete
-	Completed = "completed"
-	NoFailure = "nofailure"
-	Failure   = "failure"
-
-	// WinnerFound implies experiment has found a winner
-	WinnerFound = "winnerfound"
-
-	// WinnerPrefix
-	WinnerPrefix = "winner"
-
-	// ValidPrefix
-	ValidPrefix = "valid"
+	completed    = "completed"
+	noFailure    = "nofailure"
+	failure      = "failure"
+	winnerFound  = "winnerfound"
+	winnerPrefix = "winner"
+	validPrefix  = "valid"
 )
 
 var conds []string
@@ -36,11 +29,11 @@ var assertCmd = &cobra.Command{
 	Short: "assert if the experiment satisfies the specified conditions",
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
-		exp := &Experiment{
+		exp := &experiment{
 			&core.Experiment{},
 		}
 		log.Logger.Trace("build started")
-		exp, err := Build(true)
+		exp, err := build(true)
 		log.Logger.Trace("build finished")
 		if err != nil {
 			log.Logger.Error("experiment build failed")
@@ -50,21 +43,21 @@ var assertCmd = &cobra.Command{
 		// check assert conditions
 		allGood := true
 		for _, cond := range conds {
-			if strings.ToLower(cond) == Completed {
-				allGood = allGood && exp.Completed()
-			} else if strings.ToLower(cond) == NoFailure {
+			if strings.ToLower(cond) == completed {
+				allGood = allGood && exp.completed()
+			} else if strings.ToLower(cond) == noFailure {
 				allGood = allGood && exp.noFailure()
-			} else if strings.ToLower(cond) == Failure {
+			} else if strings.ToLower(cond) == failure {
 				allGood = allGood && (!exp.noFailure())
-			} else if strings.ToLower(cond) == WinnerFound {
+			} else if strings.ToLower(cond) == winnerFound {
 				allGood = allGood && exp.winnerFound()
-			} else if strings.HasPrefix(cond, WinnerPrefix) {
+			} else if strings.HasPrefix(cond, winnerPrefix) {
 				version, err := exp.extractVersion(cond)
 				if err != nil {
 					os.Exit(1)
 				}
 				allGood = allGood && exp.isWinner(version)
-			} else if strings.HasPrefix(cond, ValidPrefix) {
+			} else if strings.HasPrefix(cond, validPrefix) {
 				version, err := exp.extractVersion(cond)
 				if err != nil {
 					os.Exit(1)
@@ -84,8 +77,8 @@ var assertCmd = &cobra.Command{
 	},
 }
 
-// Completed returns true if the experiment is complete
-func (exp *Experiment) Completed() bool {
+// completed returns true if the experiment is complete
+func (exp *experiment) completed() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			return exp.Result.NumCompletedTasks == len(exp.Spec.Tasks)
@@ -95,7 +88,7 @@ func (exp *Experiment) Completed() bool {
 }
 
 // extract version from string
-func (exp *Experiment) extractVersion(cond string) (string, error) {
+func (exp *experiment) extractVersion(cond string) (string, error) {
 	tokens := strings.Split(cond, "=")
 	if len(tokens) != 2 {
 		log.Logger.Error("unsupported condition detected; ", cond)
@@ -117,7 +110,7 @@ func init() {
 }
 
 // noFailure returns true if experiment has a results stanza and has not failed
-func (exp *Experiment) noFailure() bool {
+func (exp *experiment) noFailure() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			return !exp.Result.Failure
@@ -127,7 +120,7 @@ func (exp *Experiment) noFailure() bool {
 }
 
 // winnerFound returns true if experiment has a found a winner
-func (exp *Experiment) winnerFound() bool {
+func (exp *experiment) winnerFound() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Analysis != nil {
@@ -139,7 +132,7 @@ func (exp *Experiment) winnerFound() bool {
 }
 
 // isWinner returns true if version is the winner
-func (exp *Experiment) isWinner(ver string) bool {
+func (exp *experiment) isWinner(ver string) bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Analysis != nil {
@@ -151,7 +144,7 @@ func (exp *Experiment) isWinner(ver string) bool {
 }
 
 // isValid returns true if version is valid
-func (exp *Experiment) isValid(ver string) bool {
+func (exp *experiment) isValid(ver string) bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Analysis != nil {

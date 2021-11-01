@@ -9,27 +9,27 @@ import (
 	"github.com/iter8-tools/iter8/core/log"
 )
 
-const (
-	// AssessTaskName is the name of the task this file implements
-	AssessTaskName = "assess-versions"
-)
-
-// AssessInputs contain the inputs to the assess-versions task to be executed.
-type AssessInputs struct {
+// assessInputs contain the inputs to the assess-versions task to be executed.
+type assessInputs struct {
 	// Criteria is the assessment criteria
 	Criteria *Criteria `json:"criteria" yaml:"criteria"`
 }
 
-// AssessTask enables assessment of versions
-type AssessTask struct {
-	TaskMeta
-	With AssessInputs `json:"with" yaml:"with"`
+// assessTask enables assessment of versions
+type assessTask struct {
+	taskMeta
+	With assessInputs `json:"with" yaml:"with"`
 }
 
-// MakeAssess constructs a AssessTask out of a assess versions task spec
-func MakeAssess(t *TaskSpec) (Task, error) {
-	if t == nil || t.Task == nil || *t.Task != AssessTaskName {
-		return nil, errors.New("task need to be " + AssessTaskName)
+const (
+	// assessTaskName is the name of the task this file implements
+	assessTaskName = "assess-versions"
+)
+
+// makeAssess constructs an asessTask out of a task spec
+func makeAssess(t *taskSpec) (Task, error) {
+	if t == nil || t.Task == nil || *t.Task != assessTaskName {
+		return nil, errors.New("task need to be " + assessTaskName)
 	}
 	var err error
 	var jsonBytes []byte
@@ -37,7 +37,7 @@ func MakeAssess(t *TaskSpec) (Task, error) {
 	// convert t to jsonBytes
 	jsonBytes, _ = json.Marshal(t)
 	// convert jsonString to CollectTask
-	ct := &AssessTask{}
+	ct := &assessTask{}
 	err = json.Unmarshal(jsonBytes, &ct)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal assess task")
@@ -48,7 +48,7 @@ func MakeAssess(t *TaskSpec) (Task, error) {
 }
 
 // Run executes the assess-versions task
-func (t *AssessTask) Run(exp *Experiment) error {
+func (t *assessTask) Run(exp *Experiment) error {
 	err := exp.setTestingPattern(t.With.Criteria)
 	if err != nil {
 		return err
@@ -110,11 +110,12 @@ func evaluateObjectives(exp *Experiment, objs []Objective) [][]bool {
 func objectiveSatisfied(e *Experiment, i int, o Objective) bool {
 	// get metric value
 	val := getMetricValue(e, i, o.Metric)
-	// what kind of objective is this
+	// check if metric is available
 	if val == nil {
 		log.Logger.Warn(fmt.Sprintf("unable to find value for version %s and metric %s", e.Spec.Versions[i], o.Metric))
 		return false
 	}
+	// check lower and upper limits
 	if o.LowerLimit != nil {
 		if *val < *o.LowerLimit {
 			return false
@@ -130,7 +131,7 @@ func objectiveSatisfied(e *Experiment, i int, o Objective) bool {
 
 // get the value of the given metric for the given version
 func getMetricValue(e *Experiment, i int, m string) *float64 {
-	if !strings.HasPrefix(m, Iter8FortioPrefix) {
+	if !strings.HasPrefix(m, iter8FortioPrefix) {
 		log.Logger.Warn("unknown backend detected in metric " + m)
 		return nil
 	}
@@ -157,7 +158,7 @@ func getMetricValue(e *Experiment, i int, m string) *float64 {
 		log.Logger.Warn("metric " + m + "unavailable for version " + e.Spec.Versions[i])
 		return nil
 	} else {
-		return Float64Pointer(vals[len(vals)-1])
+		return float64Pointer(vals[len(vals)-1])
 	}
 
 }

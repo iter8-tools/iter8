@@ -9,20 +9,19 @@ import (
 	"github.com/iter8-tools/iter8/core/log"
 )
 
-// Experiment type with build and assert methods
-type Experiment struct {
+type experiment struct {
 	*core.Experiment
 }
 
 const (
-	ExperimentFilePath = "experiment.yaml"
+	experimentFilePath = "experiment.yaml"
 )
 
 // Build an experiment from file
-func Build(withResult bool) (*Experiment, error) {
+func build(withResult bool) (*experiment, error) {
 	// read it in
 	log.Logger.Trace("build called")
-	e, err := Read()
+	e, err := read()
 	if err != nil {
 		return nil, err
 	}
@@ -32,14 +31,14 @@ func Build(withResult bool) (*Experiment, error) {
 	return e, err
 }
 
-// Read an experiment from a file
-func Read() (*Experiment, error) {
-	yamlFile, err := ioutil.ReadFile(ExperimentFilePath)
+// read an experiment from a file
+func read() (*experiment, error) {
+	yamlFile, err := ioutil.ReadFile(experimentFilePath)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
 		return nil, errors.New("unable to read experiment file")
 	}
-	e := Experiment{}
+	e := experiment{}
 	err = yaml.Unmarshal(yamlFile, e.Experiment)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment")

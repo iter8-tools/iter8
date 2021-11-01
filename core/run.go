@@ -13,22 +13,22 @@ import (
 )
 
 const (
-	ScratchEnv string = "SCRATCH_DIR=/scratch"
+	scratchEnv string = "SCRATCH_DIR=/scratch"
 )
 
-// RunInputs contains inputs for the run task
-type RunInputs struct {
+// runInputs contains inputs for the run task
+type runInputs struct {
 	Template bool `json:"template" yaml:"template"`
 }
 
-// RunTask enables running a shell script
-type RunTask struct {
-	TaskMeta
-	With RunInputs `json:"with" yaml:"with"`
+// runTask enables running a shell script
+type runTask struct {
+	taskMeta
+	With runInputs `json:"with" yaml:"with"`
 }
 
-// MakeRun constructs a RunTask out of a run task spec
-func MakeRun(t *TaskSpec) (Task, error) {
+// makeRun constructs a RunTask out of a run task spec
+func makeRun(t *taskSpec) (Task, error) {
 	if t.Run == nil {
 		return nil, errors.New("task need to have a run command")
 	}
@@ -39,7 +39,7 @@ func MakeRun(t *TaskSpec) (Task, error) {
 	jsonBytes, err = json.Marshal(t)
 	// convert jsonString to RunTask
 	if err == nil {
-		rt := &RunTask{}
+		rt := &runTask{}
 		err = json.Unmarshal(jsonBytes, &rt)
 		bt = rt
 	}
@@ -47,9 +47,9 @@ func MakeRun(t *TaskSpec) (Task, error) {
 }
 
 // interpolate the script.
-func (t *RunTask) interpolate(exp *Experiment) (string, error) {
+func (t *runTask) interpolate(exp *Experiment) (string, error) {
 	// ensure it is a valid template
-	tmpl, err := template.New("tpl").Funcs(sprig.TxtFuncMap()).Option("missingkey=error").Parse(*t.TaskMeta.Run)
+	tmpl, err := template.New("tpl").Funcs(sprig.TxtFuncMap()).Option("missingkey=error").Parse(*t.taskMeta.Run)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse templated run command")
 		return "", err
@@ -69,13 +69,13 @@ func (t *RunTask) interpolate(exp *Experiment) (string, error) {
 }
 
 // get the command
-func (t *RunTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
+func (t *runTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 	var cmdStr string
 	var err error
 	if t.With.Template {
 		cmdStr, err = t.interpolate(exp)
 	} else {
-		cmdStr = *t.TaskMeta.Run
+		cmdStr = *t.taskMeta.Run
 	}
 	if err != nil {
 		return nil, err
@@ -84,12 +84,12 @@ func (t *RunTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 	// create command to be executed
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	// append the scratch environment variable
-	cmd.Env = append(os.Environ(), ScratchEnv)
+	cmd.Env = append(os.Environ(), scratchEnv)
 	return cmd, nil
 }
 
 // Run the command.
-func (t *RunTask) Run(exp *Experiment) error {
+func (t *runTask) Run(exp *Experiment) error {
 	cmd, err := t.getCommand(exp)
 	if err != nil {
 		return err
