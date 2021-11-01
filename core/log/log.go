@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 // Iter8Logger inherits all methods from logrus logger
@@ -29,6 +30,13 @@ func init() {
 		DisableQuote:    true,
 		DisableSorting:  true,
 	})
+
+	// initialize log level
+	viper.BindEnv("LOG_LEVEL")
+	viper.SetDefault("LOG_LEVEL ", "info")
+	ll, _ := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
+	Logger.Debug("LOG_LEVEL ", ll)
+	SetLogLevel(ll)
 }
 
 func SetLogLevel(ll logrus.Level) {

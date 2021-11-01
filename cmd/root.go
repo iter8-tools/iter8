@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"github.com/iter8-tools/iter8/core/log"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -35,11 +32,4 @@ func Execute() {
 func init() {
 	// disable completion command for now
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-
-	// initialize log level
-	viper.BindEnv("LOG_LEVEL")
-	viper.SetDefault("LOG_LEVEL ", "info")
-	ll, _ := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
-	log.Logger.Debug("LOG_LEVEL ", ll)
-	log.SetLogLevel(ll)
 }
