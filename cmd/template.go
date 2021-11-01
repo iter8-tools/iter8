@@ -15,7 +15,7 @@ import (
 var (
 	// Path to template file
 	// this variable is intended to be modified in tests, and nowhere else
-	filePath = "iter8.tpl"
+	templateFilePath = "iter8.tpl"
 )
 
 // templateCmd represents the template command
@@ -25,7 +25,7 @@ var templateCmd = &cobra.Command{
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		// read in the template file
-		tplBytes, err := ioutil.ReadFile(filePath)
+		tplBytes, err := ioutil.ReadFile(templateFilePath)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("unable to read template file")
 			os.Exit(1)
@@ -41,9 +41,8 @@ var templateCmd = &cobra.Command{
 		}
 
 		// build experiment
-
 		log.Logger.Trace("build started")
-		exp, err := Build(false)
+		exp, err := build(false)
 		log.Logger.Trace("build finished")
 		if err != nil {
 			log.Logger.Error("experiment build failed")
