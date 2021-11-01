@@ -1,8 +1,9 @@
-package task
+package core
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,26 +12,50 @@ import (
 	"fortio.org/fortio/fhttp"
 	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
-	"github.com/iter8-tools/iter8/core"
+	log "github.com/iter8-tools/iter8/core/log"
 )
 
 const (
 	// TaskName is the name of the task this file implements
-	CollectTaskName string = "collect-fortio-metrics"
+	CollectTaskName = "collect-fortio-metrics"
 
 	// DefaultQPS is the default value of QPS (queries per sec) in the collect task
-	DefaultQPS float32 = 8
+	DefaultQPS = float32(8)
 
 	// DefaultNumRequests is the default value of the number of requests used by the collect task
-	DefaultNumRequests int64 = 100
+	DefaultNumRequests = int64(100)
 
 	// DefaultConnections is the default value of the number of connections
-	DefaultConnections uint32 = 4
+	DefaultConnections = uint32(4)
+
+	// RequestCountMetricName is the name of the request-count metric
+	RequestCountMetricName = "request-count"
+
+	// ErrorCountMetricName is the name of the error-count metric
+	ErrorCountMetricName = "error-count"
+
+	// ErrorRateMetricName is the name of the error-rate metric
+	ErrorRateMetricName = "error-rate"
+
+	// MeanLatencyMetricName is the name of the mean-latency metric
+	MeanLatencyMetricName = "mean-latency"
+
+	// StdDevMetricName is the name of the latency standard deviation metric
+	StdDevMetricName = "stddev-latency"
+
+	// MinLatencyMetricName is the name of the min-latency metric
+	MinLatencyMetricName = "min-latency"
+
+	// MaxLatencyMetricName is the name of the max-latency metric
+	MaxLatencyMetricName = "max-latency"
 )
 
 var (
 	// DefaultErrorRanges is the default value of the error ranges
-	DefaultErrorRanges = []ErrorRange{{Lower: core.IntPointer(500)}}
+	DefaultErrorRanges = []ErrorRange{{Lower: IntPointer(500)}}
+
+	// DefaultPercentiles is the default value for latency percentiles
+	DefaultPercentiles = [...]float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9}
 )
 
 // Version contains header and url information needed to send requests to each version.
@@ -63,8 +88,10 @@ type CollectInputs struct {
 	PayloadURL *string `json:"payloadURL" yaml:"payloadURL"`
 	// valid HTTP content type string; specifying this switches the request from GET to POST
 	ContentType *string `json:"contentType" yaml:"contentType"`
-	// ranges of HTTP status codes that are considered as errors
+	// ErrorRanges of HTTP status codes that are considered as errors
 	ErrorRanges []ErrorRange `json:"errorRanges" yaml:"errorRanges"`
+	// Percentiles are the set of latency percentiles to be collected
+	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
 	// information about versions
 	VersionInfo []*Version `json:"versionInfo" yaml:"versionInfo"`
 }
@@ -90,18 +117,18 @@ func (t *CollectTask) ErrorCode(code int) bool {
 
 // CollectTask enables collection of Iter8's built-in metrics.
 type CollectTask struct {
-	core.TaskMeta
+	TaskMeta
 	With CollectInputs `json:"with" yaml:"with"`
 }
 
 // MakeCollect constructs a CollectTask out of a collect task spec
-func MakeCollect(t *core.TaskSpec) (core.Task, error) {
+func MakeCollect(t *TaskSpec) (Task, error) {
 	if *t.Task != CollectTaskName {
 		return nil, errors.New("task need to be " + CollectTaskName)
 	}
 	var err error
 	var jsonBytes []byte
-	var bt core.Task
+	var bt Task
 	// convert t to jsonBytes
 	jsonBytes, err = json.Marshal(t)
 	// convert jsonString to CollectTask
@@ -119,13 +146,18 @@ func MakeCollect(t *core.TaskSpec) (core.Task, error) {
 // InitializeDefaults sets default values for the collect task
 func (t *CollectTask) InitializeDefaults() {
 	if t.With.NumRequests == nil && t.With.Duration == nil {
-		t.With.NumRequests = core.Int64Pointer(DefaultNumRequests)
+		t.With.NumRequests = Int64Pointer(DefaultNumRequests)
 	}
 	if t.With.QPS == nil {
-		t.With.QPS = core.Float32Pointer(DefaultQPS)
+		t.With.QPS = Float32Pointer(DefaultQPS)
 	}
 	if t.With.ErrorRanges == nil {
 		t.With.ErrorRanges = DefaultErrorRanges
+	}
+	if t.With.Percentiles == nil {
+		for _, p := range DefaultPercentiles {
+			t.With.Percentiles = append(t.With.Percentiles, p)
+		}
 	}
 }
 
@@ -137,7 +169,7 @@ func (t *CollectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) 
 		RunnerOptions: periodic.RunnerOptions{
 			RunType:     "Iter8 load test",
 			QPS:         float64(*t.With.QPS),
-			Percentiles: []float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9},
+			Percentiles: t.With.Percentiles,
 			Out:         io.Discard,
 		},
 		HTTPOptions: fhttp.HTTPOptions{
@@ -158,7 +190,7 @@ func (t *CollectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) 
 		if err == nil {
 			fo.RunnerOptions.Duration = duration
 		} else {
-			core.Logger.WithStackTrace(err.Error()).Error("unable to parse duration")
+			log.Logger.WithStackTrace(err.Error()).Error("unable to parse duration")
 			return nil, err
 		}
 	}
@@ -202,7 +234,7 @@ func (t *CollectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) 
 }
 
 // Run executes the metrics/collect task
-func (t *CollectTask) Run(exp *core.Experiment) error {
+func (t *CollectTask) Run(exp *Experiment) error {
 	var err error
 	t.InitializeDefaults()
 
@@ -223,110 +255,71 @@ func (t *CollectTask) Run(exp *core.Experiment) error {
 			}
 		}
 	}
-	err = exp.SetFortioMetrics(fm)
-	if err != nil {
-		return err
-	}
 
 	// set metrics for each version for which fortio metrics are available
 	for i := range exp.Spec.Versions {
-		if exp.Result.Analysis.FortioMetrics[i] != nil {
-			for _, m := range core.IFBackend.Metrics {
-				fqName := core.IFBackend.Name + "/" + m.Name
+		if fm[i] != nil {
 
-				switch m.Name {
-				case "request-count":
-					err = exp.UpdateMetricForVersion(fqName, i, float64(exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Count))
-					if err != nil {
-						return err
-					}
-				case "error-count": // and error rate
-					// compute val
-					val := float64(0)
-					for code, count := range exp.Result.Analysis.FortioMetrics[i].RetCodes {
-						if t.ErrorCode(code) {
-							val += float64(count)
-						}
-					}
-					err = exp.UpdateMetricForVersion(fqName, i, val)
-					if err != nil {
-						return err
-					}
+			// request count
+			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+RequestCountMetricName, i, float64(fm[i].DurationHistogram.Count))
+			if err != nil {
+				return err
+			}
 
-					// error-rate
-					rc := float64(exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Count)
-					if rc != 0 {
-						err = exp.UpdateMetricForVersion(core.IFBackend.Name+"/"+"error-rate", i, val/rc)
-						if err != nil {
-							return err
-						}
-					}
+			// error count and rate
+			val := float64(0)
+			for code, count := range fm[i].RetCodes {
+				if t.ErrorCode(code) {
+					val += float64(count)
+				}
+			}
+			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+ErrorCountMetricName, i, val)
+			if err != nil {
+				return err
+			}
 
-				case "mean-latency":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Avg)
-					if err != nil {
-						return err
-					}
+			// error-rate
+			rc := float64(fm[i].DurationHistogram.Count)
+			if rc != 0 {
+				err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+ErrorRateMetricName, i, val/rc)
+				if err != nil {
+					return err
+				}
+			}
 
-				case "min-latency":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Min)
-					if err != nil {
-						return err
-					}
+			// mean-latency
+			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+MeanLatencyMetricName, i, fm[i].DurationHistogram.Avg)
+			if err != nil {
+				return err
+			}
 
-				case "max-latency":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Max)
-					if err != nil {
-						return err
-					}
+			// stddev-latency
+			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+StdDevMetricName, i, fm[i].DurationHistogram.StdDev)
+			if err != nil {
+				return err
+			}
 
-				case "stddev-latency":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.StdDev)
-					if err != nil {
-						return err
-					}
+			// min-latency
+			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+MinLatencyMetricName, i, fm[i].DurationHistogram.Min)
+			if err != nil {
+				return err
+			}
 
-				case "p50":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[0].Value)
-					if err != nil {
-						return err
-					}
+			// max-latency
+			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+MaxLatencyMetricName, i, fm[i].DurationHistogram.Max)
+			if err != nil {
+				return err
+			}
 
-				case "p75":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[1].Value)
-					if err != nil {
-						return err
-					}
-
-				case "p90":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[2].Value)
-					if err != nil {
-						return err
-					}
-
-				case "p95":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[3].Value)
-					if err != nil {
-						return err
-					}
-
-				case "p99":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[4].Value)
-					if err != nil {
-						return err
-					}
-
-				case "p99.9":
-					err = exp.UpdateMetricForVersion(fqName, i, exp.Result.Analysis.FortioMetrics[i].DurationHistogram.Percentiles[5].Value)
-					if err != nil {
-						return err
-					}
-
+			for _, p := range fm[i].DurationHistogram.Percentiles {
+				err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+fmt.Sprintf("%0.2f", p.Percentile), i, p.Value)
+				if err != nil {
+					return err
 				}
 			}
 		}
 	}
-	return err
+	return nil
 }
 
 // GetPayloadBytes downloads payload from URL and returns a byte slice

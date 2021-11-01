@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"github.com/iter8-tools/iter8/core"
+	"github.com/iter8-tools/iter8/core/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
 	"github.com/spf13/viper"
 )
 
@@ -41,6 +40,6 @@ func init() {
 	viper.BindEnv("LOG_LEVEL")
 	viper.SetDefault("LOG_LEVEL ", "info")
 	ll, _ := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
-	core.Logger.Debug("LOG_LEVEL ", ll)
-	core.SetLogLevel(ll)
+	log.Logger.Debug("LOG_LEVEL ", ll)
+	log.SetLogLevel(ll)
 }
