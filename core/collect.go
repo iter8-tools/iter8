@@ -261,7 +261,7 @@ func (t *CollectTask) Run(exp *Experiment) error {
 		if fm[i] != nil {
 
 			// request count
-			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+RequestCountMetricName, i, float64(fm[i].DurationHistogram.Count))
+			err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+RequestCountMetricName, i, float64(fm[i].DurationHistogram.Count))
 			if err != nil {
 				return err
 			}
@@ -273,7 +273,7 @@ func (t *CollectTask) Run(exp *Experiment) error {
 					val += float64(count)
 				}
 			}
-			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+ErrorCountMetricName, i, val)
+			err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+ErrorCountMetricName, i, val)
 			if err != nil {
 				return err
 			}
@@ -281,38 +281,38 @@ func (t *CollectTask) Run(exp *Experiment) error {
 			// error-rate
 			rc := float64(fm[i].DurationHistogram.Count)
 			if rc != 0 {
-				err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+ErrorRateMetricName, i, val/rc)
+				err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+ErrorRateMetricName, i, val/rc)
 				if err != nil {
 					return err
 				}
 			}
 
 			// mean-latency
-			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+MeanLatencyMetricName, i, fm[i].DurationHistogram.Avg)
+			err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+MeanLatencyMetricName, i, fm[i].DurationHistogram.Avg)
 			if err != nil {
 				return err
 			}
 
 			// stddev-latency
-			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+StdDevMetricName, i, fm[i].DurationHistogram.StdDev)
+			err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+StdDevMetricName, i, fm[i].DurationHistogram.StdDev)
 			if err != nil {
 				return err
 			}
 
 			// min-latency
-			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+MinLatencyMetricName, i, fm[i].DurationHistogram.Min)
+			err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+MinLatencyMetricName, i, fm[i].DurationHistogram.Min)
 			if err != nil {
 				return err
 			}
 
 			// max-latency
-			err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+MaxLatencyMetricName, i, fm[i].DurationHistogram.Max)
+			err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+MaxLatencyMetricName, i, fm[i].DurationHistogram.Max)
 			if err != nil {
 				return err
 			}
 
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				err = exp.UpdateMetricForVersion(Iter8FortioPrefix+"/"+fmt.Sprintf("%0.2f", p.Percentile), i, p.Value)
+				err = exp.updateMetricForVersion(Iter8FortioPrefix+"/"+fmt.Sprintf("%0.2f", p.Percentile), i, p.Value)
 				if err != nil {
 					return err
 				}

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"fortio.org/fortio/fhttp"
-	"github.com/ghodss/yaml"
 	log "github.com/iter8-tools/iter8/core/log"
 )
 
@@ -188,19 +187,19 @@ func (es *ExperimentSpec) UnmarshalJSON(data []byte) error {
 }
 
 // String converts the experiment into a yaml string
-func (e *Experiment) String() string {
-	out, _ := yaml.Marshal(e)
-	return string(out)
-}
+// func (e *Experiment) String() string {
+// 	out, _ := yaml.Marshal(e)
+// 	return string(out)
+// }
 
-// SetTestingPattern sets the testing pattern in the experiment results
-func (e *Experiment) SetTestingPattern(c *Criteria) error {
+// setTestingPattern sets the testing pattern in the experiment results
+func (e *Experiment) setTestingPattern(c *Criteria) error {
 	if e.Result == nil {
-		log.Logger.Warn("SetTestingPattern called on an experiment object without results")
+		log.Logger.Warn("setTestingPattern called on an experiment object without results")
 		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		log.Logger.Warn("SetTestingPattern called on an experiment object without analysis")
+		log.Logger.Warn("setTestingPattern called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	if c == nil || c.Objectives == nil || len(c.Objectives) == 0 {
@@ -211,42 +210,42 @@ func (e *Experiment) SetTestingPattern(c *Criteria) error {
 	return nil
 }
 
-// SetObjectives sets objective assessment portion of the analysis
-func (e *Experiment) SetObjectives(objs [][]bool) error {
+// setObjectives sets objective assessment portion of the analysis
+func (e *Experiment) setObjectives(objs [][]bool) error {
 	if e.Result == nil {
-		log.Logger.Warn("SetObjectivesSetObjectives called on an experiment object without results")
+		log.Logger.Warn("setObjectives called on an experiment object without results")
 		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		log.Logger.Warn("SetObjectivesSetObjectives called on an experiment object without analysis")
+		log.Logger.Warn("setObjectives called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Objectives = objs
 	return nil
 }
 
-// SetWinner sets the winning version
-func (e *Experiment) SetWinner(winner *string) error {
+// setWinner sets the winning version
+func (e *Experiment) setWinner(winner *string) error {
 	if e.Result == nil {
-		log.Logger.Warn("SetWinner called on an experiment object without results")
+		log.Logger.Warn("setWinner called on an experiment object without results")
 		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		log.Logger.Warn("SetWinner called on an experiment object without analysis")
+		log.Logger.Warn("setWinner called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Winner = winner
 	return nil
 }
 
-// SetValid sets the valid versions
-func (e *Experiment) SetValid(valid []string) error {
+// setValid sets the valid versions
+func (e *Experiment) setValid(valid []string) error {
 	if e.Result == nil {
-		log.Logger.Warn("SetValid called on an experiment object without results")
+		log.Logger.Warn("setValid called on an experiment object without results")
 		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		log.Logger.Warn("SetValid called on an experiment object without analysis")
+		log.Logger.Warn("setValid called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	e.Result.Analysis.Valid = valid
@@ -267,14 +266,14 @@ func (e *Experiment) InitResults() {
 	e.Result.initAnalysis()
 }
 
-// UpdateMetricForVersion updates value of a given metric for a given version
-func (e *Experiment) UpdateMetricForVersion(m string, i int, val float64) error {
+// updateMetricForVersion updates value of a given metric for a given version
+func (e *Experiment) updateMetricForVersion(m string, i int, val float64) error {
 	if e.Result == nil {
-		log.Logger.Warn("UpdateMetricForVersion called on an experiment object without results")
+		log.Logger.Warn("updateMetricForVersion called on an experiment object without results")
 		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		log.Logger.Warn("UpdateMetricForVersion called on an experiment object without analysis")
+		log.Logger.Warn("updateMetricForVersion called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
 	if e.Result.Analysis.Metrics == nil {
@@ -288,64 +287,4 @@ func (e *Experiment) UpdateMetricForVersion(m string, i int, val float64) error 
 	}
 	e.Result.Analysis.Metrics[i][m] = append(e.Result.Analysis.Metrics[i][m], val)
 	return nil
-}
-
-// Completed returns true if the experiment is complete
-func (exp *Experiment) Completed() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			return exp.Result.NumCompletedTasks == len(exp.Spec.Tasks)
-		}
-	}
-	return false
-}
-
-// NoFailure returns true if experiment has a results stanza and has not failed
-func (exp *Experiment) NoFailure() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			return !exp.Result.Failure
-		}
-	}
-	return false
-}
-
-// WinnerFound returns true if experiment has a found a winner
-func (exp *Experiment) WinnerFound() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if exp.Result.Analysis != nil {
-				return exp.Result.Analysis.Winner != nil
-			}
-		}
-	}
-	return false
-}
-
-// IsWinner returns true if version is the winner
-func (exp *Experiment) IsWinner(ver string) bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if exp.Result.Analysis != nil {
-				return *exp.Result.Analysis.Winner == ver
-			}
-		}
-	}
-	return false
-}
-
-// IsValid returns true if version is valid
-func (exp *Experiment) IsValid(ver string) bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if exp.Result.Analysis != nil {
-				for _, version := range exp.Result.Analysis.Valid {
-					if version == ver {
-						return true
-					}
-				}
-			}
-		}
-	}
-	return false
 }
