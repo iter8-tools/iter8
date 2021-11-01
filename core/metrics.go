@@ -1,8 +1,8 @@
 package core
 
 const (
-	// Iter8FortioPrefix for iter8-fortio metric names
-	Iter8FortioPrefix = "iter8-fortio"
+	// iter8FortioPrefix for iter8-fortio metric names
+	iter8FortioPrefix = "iter8-fortio"
 )
 
 // // MetricType identifies the type of the metric.

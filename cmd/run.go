@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/ghodss/yaml"
 	"github.com/iter8-tools/iter8/core"
@@ -20,14 +19,14 @@ var runCmd = &cobra.Command{
 	Long:  `Run the experiment defined in the local file named experiment.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Logger.Trace("build started")
-		exp, err := Build(false)
+		exp, err := build(false)
 		log.Logger.Trace("build finished")
 		if err != nil {
 			log.Logger.Error("experiment build failed")
 			os.Exit(1)
 		} else {
 			log.Logger.Info("starting experiment run")
-			err := exp.Run()
+			err := exp.run()
 			if err != nil {
 				log.Logger.Error("experiment failed")
 			} else {
@@ -42,7 +41,7 @@ func init() {
 }
 
 // Run an experiment
-func (e *Experiment) Run() error {
+func (e *experiment) run() error {
 	var err error
 	if e.Result == nil {
 		e.Result = &core.ExperimentResult{}
@@ -73,13 +72,13 @@ func (e *Experiment) Run() error {
 }
 
 // Write an experiment to a file
-func Write(r *Experiment) error {
+func Write(r *experiment) error {
 	rBytes, err := yaml.Marshal(r)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment")
 		return errors.New("unable to marshal experiment")
 	}
-	err = ioutil.WriteFile(ExperimentFilePath, rBytes, 0664)
+	err = ioutil.WriteFile(experimentFilePath, rBytes, 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment file")
 		return err
@@ -87,16 +86,15 @@ func Write(r *Experiment) error {
 	return err
 }
 
-func (e *Experiment) setStartTime() error {
+func (e *experiment) setStartTime() error {
 	if e.Result == nil {
 		log.Logger.Warn("setStartTime called on an experiment object without results")
 		e.Experiment.InitResults()
 	}
-	e.Result.StartTime = core.TimePointer(time.Now())
 	return nil
 }
 
-func (e *Experiment) failExperiment() error {
+func (e *experiment) failExperiment() error {
 	if e.Result == nil {
 		log.Logger.Warn("failExperiment called on an experiment object without results")
 		e.Experiment.InitResults()
@@ -105,7 +103,7 @@ func (e *Experiment) failExperiment() error {
 	return nil
 }
 
-func (e *Experiment) incrementNumCompletedTasks() error {
+func (e *experiment) incrementNumCompletedTasks() error {
 	if e.Result == nil {
 		log.Logger.Warn("incrementNumCompletedTasks called on an experiment object without results")
 		e.Experiment.InitResults()

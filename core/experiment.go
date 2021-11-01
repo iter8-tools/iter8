@@ -109,31 +109,31 @@ type Analysis struct {
 	Winner *string `json:"winner,omitempty" yaml:"winner,omitempty"`
 }
 
-type TaskMeta struct {
+type taskMeta struct {
 	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
 	Run  *string `json:"run,omitempty" yaml:"run,omitempty"`
 	If   *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
-// TaskSpec is an intermediate version of Task
-type TaskSpec struct {
-	TaskMeta
+// taskSpec is an intermediate version of Task
+type taskSpec struct {
+	taskMeta
 	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
-// func (t *TaskMeta) bytes() []byte {
+// func (t *taskMeta) bytes() []byte {
 // 	b, _ := json.Marshal(t)
 // 	return b
 // }
 
-// experimentSpec is an intermediate version of ExperimentSpec
-type experimentSpec struct {
-	Iter8Version string     `json:"iter8Version" yaml:"iter8Version"`
-	Versions     []string   `json:"versions" yaml:"versions"`
-	Tasks        []TaskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
-}
-
 func (es *ExperimentSpec) UnmarshalJSON(data []byte) error {
+	// experimentSpec is an intermediate version of ExperimentSpec
+	type experimentSpec struct {
+		Iter8Version string     `json:"iter8Version" yaml:"iter8Version"`
+		Versions     []string   `json:"versions" yaml:"versions"`
+		Tasks        []taskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
+	}
+
 	temp := experimentSpec{}
 	if err := json.Unmarshal(data, &temp); err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("error unmarshaling experiment spec")
@@ -155,7 +155,7 @@ func (es *ExperimentSpec) UnmarshalJSON(data []byte) error {
 
 		// this is a run task
 		if t.Run != nil {
-			task, err = MakeRun(&t)
+			task, err = makeRun(&t)
 			es.Tasks = append(es.Tasks, task)
 
 			// the following if statement seems necessary due to a bug in go linter
@@ -166,11 +166,11 @@ func (es *ExperimentSpec) UnmarshalJSON(data []byte) error {
 
 		// this is some other task
 		switch *t.Task {
-		case CollectTaskName:
-			task, err = MakeCollect(&t)
+		case collectTaskName:
+			task, err = makeCollect(&t)
 			es.Tasks = append(es.Tasks, task)
-		case AssessTaskName:
-			task, err = MakeAssess(&t)
+		case assessTaskName:
+			task, err = makeAssess(&t)
 			es.Tasks = append(es.Tasks, task)
 		default:
 			log.Logger.Error("unknown task: " + *t.Task)
@@ -203,9 +203,9 @@ func (e *Experiment) setTestingPattern(c *Criteria) error {
 		e.Result.initAnalysis()
 	}
 	if c == nil || c.Objectives == nil || len(c.Objectives) == 0 {
-		e.Result.Analysis.TestingPattern = TestingPatternPointer(TestingPatternNone)
+		e.Result.Analysis.TestingPattern = testingPatternPointer(TestingPatternNone)
 	} else {
-		e.Result.Analysis.TestingPattern = TestingPatternPointer(TestingPatternSLOValidation)
+		e.Result.Analysis.TestingPattern = testingPatternPointer(TestingPatternSLOValidation)
 	}
 	return nil
 }
@@ -258,7 +258,7 @@ func (r *ExperimentResult) initAnalysis() {
 
 func (e *Experiment) InitResults() {
 	e.Result = &ExperimentResult{
-		StartTime:         TimePointer(time.Now()),
+		StartTime:         timePointer(time.Now()),
 		NumCompletedTasks: 0,
 		Failure:           false,
 		Analysis:          nil,
