@@ -38,7 +38,9 @@ func read() (*experiment, error) {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
 		return nil, errors.New("unable to read experiment file")
 	}
-	e := experiment{}
+	e := experiment{
+		Experiment: &core.Experiment{},
+	}
 	err = yaml.Unmarshal(yamlFile, e.Experiment)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment")
