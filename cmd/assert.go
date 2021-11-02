@@ -30,7 +30,7 @@ var assertCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
 		exp := &experiment{
-			&base.Experiment{},
+			Experiment: &base.Experiment{},
 		}
 		log.Logger.Trace("build started")
 		exp, err := build(true)

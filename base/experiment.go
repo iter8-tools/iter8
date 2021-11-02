@@ -1,8 +1,6 @@
 package base
 
 import (
-	"encoding/json"
-	"errors"
 	"time"
 
 	"fortio.org/fortio/fhttp"
@@ -30,7 +28,7 @@ type ExperimentSpec struct {
 	Versions []string `json:"versions" yaml:"versions"`
 
 	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks []Task `json:"tasks,omitempty" yaml:"tasks,omitempty"`
+	Tasks []TaskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
 }
 
 // ExperimentResult defines the current results from the experiment
@@ -115,8 +113,8 @@ type taskMeta struct {
 	If   *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
-// taskSpec is an intermediate version of Task
-type taskSpec struct {
+// TaskSpec has information needed to construct a Task
+type TaskSpec struct {
 	taskMeta
 	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
@@ -125,66 +123,6 @@ type taskSpec struct {
 // 	b, _ := json.Marshal(t)
 // 	return b
 // }
-
-func (es *ExperimentSpec) UnmarshalJSON(data []byte) error {
-	// experimentSpec is an intermediate version of ExperimentSpec
-	type experimentSpec struct {
-		Iter8Version string     `json:"iter8Version" yaml:"iter8Version"`
-		Versions     []string   `json:"versions" yaml:"versions"`
-		Tasks        []taskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
-	}
-
-	temp := experimentSpec{}
-	if err := json.Unmarshal(data, &temp); err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("error unmarshaling experiment spec")
-		return err
-	}
-
-	// populate es
-	es.Iter8Version = temp.Iter8Version
-	es.Versions = temp.Versions
-
-	for _, t := range temp.Tasks {
-		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
-			log.Logger.Error("invalid task found without a task name or a run command")
-			return errors.New("invalid task found without a task name or a run command")
-		}
-
-		var task Task
-		var err error
-
-		// this is a run task
-		if t.Run != nil {
-			task, err = makeRun(&t)
-			es.Tasks = append(es.Tasks, task)
-
-			// the following if statement seems necessary due to a bug in go linter
-			if err != nil {
-				return err
-			}
-		}
-
-		// this is some other task
-		switch *t.Task {
-		case collectTaskName:
-			task, err = makeCollect(&t)
-			es.Tasks = append(es.Tasks, task)
-		case assessTaskName:
-			task, err = makeAssess(&t)
-			es.Tasks = append(es.Tasks, task)
-		default:
-			log.Logger.Error("unknown task: " + *t.Task)
-			return errors.New("unknown task: " + *t.Task)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
-
-	// no errors
-	return nil
-}
 
 // String converts the experiment into a yaml string
 // func (e *Experiment) String() string {

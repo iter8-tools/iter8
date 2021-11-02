@@ -52,7 +52,7 @@ func (e *experiment) run() error {
 			return err
 		}
 	}
-	for i, t := range e.Spec.Tasks {
+	for i, t := range e.tasks {
 		log.Logger.Info("task " + fmt.Sprintf("%v", i) + " : started")
 		err = t.Run(e.Experiment)
 		if err != nil {

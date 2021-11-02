@@ -10,6 +10,7 @@ import (
 )
 
 type experiment struct {
+	tasks []base.Task
 	*base.Experiment
 }
 
@@ -28,6 +29,42 @@ func build(withResult bool) (*experiment, error) {
 	if !withResult {
 		e.Result = &base.ExperimentResult{}
 	}
+
+	for _, t := range e.Spec.Tasks {
+		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
+			log.Logger.Error("invalid task found without a task name or a run command")
+			return nil, errors.New("invalid task found without a task name or a run command")
+		}
+
+		var task base.Task
+
+		// this is a run task
+		if t.Run != nil {
+			task, err = base.MakeRun(&t)
+			e.tasks = append(e.tasks, task)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// this is some other task
+		switch *t.Task {
+		case base.CollectTaskName:
+			task, err = base.MakeCollect(&t)
+			e.tasks = append(e.tasks, task)
+		case base.AssessTaskName:
+			task, err = base.MakeAssess(&t)
+			e.tasks = append(e.tasks, task)
+		default:
+			log.Logger.Error("unknown task: " + *t.Task)
+			return nil, errors.New("unknown task: " + *t.Task)
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return e, err
 }
 
