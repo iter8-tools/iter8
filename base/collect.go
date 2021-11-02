@@ -1,4 +1,4 @@
-package core
+package base
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"fortio.org/fortio/fhttp"
 	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
-	log "github.com/iter8-tools/iter8/core/log"
+	log "github.com/iter8-tools/iter8/base/log"
 )
 
 // version contains header and url information needed to send requests to each version.

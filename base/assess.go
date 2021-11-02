@@ -1,4 +1,4 @@
-package core
+package base
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/iter8-tools/iter8/core/log"
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 // assessInputs contain the inputs to the assess-versions task to be executed.

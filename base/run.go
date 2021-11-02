@@ -1,4 +1,4 @@
-package core
+package base
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	log "github.com/iter8-tools/iter8/core/log"
+	log "github.com/iter8-tools/iter8/base/log"
 )
 
 const (

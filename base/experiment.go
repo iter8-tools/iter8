@@ -1,4 +1,4 @@
-package core
+package base
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"fortio.org/fortio/fhttp"
-	log "github.com/iter8-tools/iter8/core/log"
+	log "github.com/iter8-tools/iter8/base/log"
 )
 
 // Experiment specification and result
