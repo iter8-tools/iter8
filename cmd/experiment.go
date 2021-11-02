@@ -4,9 +4,9 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/ghodss/yaml"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
+	"sigs.k8s.io/yaml"
 )
 
 type experiment struct {
