@@ -11,8 +11,8 @@ var builtInTemplates map[string]*template.Template
 
 func init() {
 	builtInTemplates = map[string]*template.Template{
-		"text": template.New("text").Funcs(template.FuncMap{
-			"formatText": formatText,
+		"txt": template.New("txt").Funcs(template.FuncMap{
+			"describeTxt": describeTxt,
 		}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()),
 	}
 }

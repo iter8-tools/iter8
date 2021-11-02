@@ -7,27 +7,27 @@ result:
       iter8-fortio/error-rate:
       - 0
       iter8-fortio/max-latency:
-      - 3.002850909
+      - 0.223595196
       iter8-fortio/mean-latency:
-      - 0.04688992487000001
+      - 0.01831568945
       iter8-fortio/min-latency:
-      - 0.003764632
+      - 0.004309408
       iter8-fortio/p50.0:
-      - 0.01075
+      - 0.01111111111111111
       iter8-fortio/p75.0:
-      - 0.012625
+      - 0.012894736842105263
       iter8-fortio/p90.0:
-      - 0.015333333333333334
+      - 0.01368421052631579
       iter8-fortio/p95.0:
-      - 0.035
+      - 0.013947368421052632
       iter8-fortio/p99.0:
-      - 0.25
+      - 0.21769639699999999
       iter8-fortio/p99.9:
-      - 3.0025658181000003
+      - 0.22300531610000002
       iter8-fortio/request-count:
       - 100
       iter8-fortio/stddev-latency:
-      - 0.29925100211515526
+      - 0.041928788601374105
     objectives:
     - - true
       - true
@@ -42,25 +42,8 @@ spec:
   tasks:
   - task: collect-fortio-metrics
     with:
-      contentType: null
-      errorRanges:
-      - lower: 500
-        upper: null
-      numRequests: 100
-      payloadStr: null
-      payloadURL: null
-      percentiles:
-      - 50
-      - 75
-      - 90
-      - 95
-      - 99
-      - 99.9
-      qps: 8
-      time: null
       versionInfo:
-      - headers: null
-        url: https://example.com
+      - url: https://example.com
   - task: assess-versions
     with:
       criteria:
