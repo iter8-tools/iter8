@@ -22,14 +22,14 @@ type assessTask struct {
 }
 
 const (
-	// assessTaskName is the name of the task this file implements
-	assessTaskName = "assess-versions"
+	// AssessTaskName is the name of the task this file implements
+	AssessTaskName = "assess-versions"
 )
 
-// makeAssess constructs an asessTask out of a task spec
-func makeAssess(t *taskSpec) (Task, error) {
-	if t == nil || t.Task == nil || *t.Task != assessTaskName {
-		return nil, errors.New("task need to be " + assessTaskName)
+// MakeAssess constructs an asessTask out of a task spec
+func MakeAssess(t *TaskSpec) (Task, error) {
+	if t == nil || t.Task == nil || *t.Task != AssessTaskName {
+		return nil, errors.New("task need to be " + AssessTaskName)
 	}
 	var err error
 	var jsonBytes []byte

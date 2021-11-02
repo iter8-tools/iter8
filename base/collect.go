@@ -54,7 +54,7 @@ type collectInputs struct {
 }
 
 const (
-	collectTaskName        = "collect-fortio-metrics"
+	CollectTaskName        = "collect-fortio-metrics"
 	defaultQPS             = float32(8)
 	defaultNumRequests     = int64(100)
 	defaultConnections     = uint32(4)
@@ -97,10 +97,10 @@ type collectTask struct {
 	With collectInputs `json:"with" yaml:"with"`
 }
 
-// makeCollect constructs a CollectTask out of a collect task spec
-func makeCollect(t *taskSpec) (Task, error) {
-	if *t.Task != collectTaskName {
-		return nil, errors.New("task need to be " + collectTaskName)
+// MakeCollect constructs a CollectTask out of a collect task spec
+func MakeCollect(t *TaskSpec) (Task, error) {
+	if *t.Task != CollectTaskName {
+		return nil, errors.New("task need to be " + CollectTaskName)
 	}
 	var err error
 	var jsonBytes []byte

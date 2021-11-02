@@ -27,8 +27,8 @@ type runTask struct {
 	With runInputs `json:"with" yaml:"with"`
 }
 
-// makeRun constructs a RunTask out of a run task spec
-func makeRun(t *taskSpec) (Task, error) {
+// MakeRun constructs a RunTask out of a run task spec
+func MakeRun(t *TaskSpec) (Task, error) {
 	if t.Run == nil {
 		return nil, errors.New("task need to have a run command")
 	}
