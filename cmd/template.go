@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/Masterminds/sprig"
-	"github.com/iter8-tools/iter8/core/log"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 

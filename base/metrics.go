@@ -1,4 +1,4 @@
-package core
+package base
 
 const (
 	// iter8FortioPrefix for iter8-fortio metric names

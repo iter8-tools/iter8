@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iter8-tools/iter8/core"
-	"github.com/iter8-tools/iter8/core/log"
+	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ var assertCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
 		exp := &experiment{
-			&core.Experiment{},
+			&base.Experiment{},
 		}
 		log.Logger.Trace("build started")
 		exp, err := build(true)
