@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ghodss/yaml"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/yaml"
 )
 
 // runCmd represents the run command
