@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 	"text/template"
@@ -14,11 +13,7 @@ import (
 )
 
 const (
-	RunTaskName = "run"
-)
-
-var (
-	tempDirEnv string = fmt.Sprintf("TEMP_DIR=%v", os.TempDir())
+	scratchEnv string = "SCRATCH_DIR=/scratch"
 )
 
 // runInputs contains inputs for the run task
@@ -32,8 +27,8 @@ type runTask struct {
 	With runInputs `json:"with" yaml:"with"`
 }
 
-// MakeRun constructs a RunTask out of a run task spec
-func MakeRun(t *TaskSpec) (Task, error) {
+// makeRun constructs a RunTask out of a run task spec
+func makeRun(t *taskSpec) (Task, error) {
 	if t.Run == nil {
 		return nil, errors.New("task need to have a run command")
 	}
@@ -88,14 +83,9 @@ func (t *runTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 
 	// create command to be executed
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
-	// append the environment variable for temp dir
-	cmd.Env = append(os.Environ(), tempDirEnv)
+	// append the scratch environment variable
+	cmd.Env = append(os.Environ(), scratchEnv)
 	return cmd, nil
-}
-
-// GetName returns the name of the assess task
-func (t *runTask) GetName() string {
-	return RunTaskName
 }
 
 // Run the command.
@@ -104,6 +94,7 @@ func (t *runTask) Run(exp *Experiment) error {
 	if err != nil {
 		return err
 	}
+	log.Logger.WithStackTrace(cmd.String()).Trace("running command")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("combined execution failed")

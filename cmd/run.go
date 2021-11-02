@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/ghodss/yaml"
-	"github.com/iter8-tools/iter8/core"
-	"github.com/iter8-tools/iter8/core/log"
+	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 
@@ -44,7 +44,7 @@ func init() {
 func (e *experiment) run() error {
 	var err error
 	if e.Result == nil {
-		e.Result = &core.ExperimentResult{}
+		e.Result = &base.ExperimentResult{}
 	}
 	if e.Result.StartTime == nil {
 		err = e.setStartTime()

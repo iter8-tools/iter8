@@ -5,12 +5,12 @@ import (
 	"io/ioutil"
 
 	"github.com/ghodss/yaml"
-	"github.com/iter8-tools/iter8/core"
-	"github.com/iter8-tools/iter8/core/log"
+	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 type experiment struct {
-	*core.Experiment
+	*base.Experiment
 }
 
 const (
@@ -26,7 +26,7 @@ func build(withResult bool) (*experiment, error) {
 		return nil, err
 	}
 	if !withResult {
-		e.Result = &core.ExperimentResult{}
+		e.Result = &base.ExperimentResult{}
 	}
 	return e, err
 }
@@ -39,7 +39,7 @@ func read() (*experiment, error) {
 		return nil, errors.New("unable to read experiment file")
 	}
 	e := experiment{
-		Experiment: &core.Experiment{},
+		Experiment: &base.Experiment{},
 	}
 	err = yaml.Unmarshal(yamlFile, e.Experiment)
 	if err != nil {

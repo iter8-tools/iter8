@@ -33,7 +33,7 @@ func init() {
 
 	// initialize log level
 	viper.BindEnv("LOG_LEVEL")
-	viper.SetDefault("LOG_LEVEL", "info")
+	viper.SetDefault("LOG_LEVEL ", "info")
 	ll, _ := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
 	Logger.Debug("LOG_LEVEL ", ll)
 	SetLogLevel(ll)
