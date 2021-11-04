@@ -27,7 +27,7 @@ spec:
           name: iter8-git
       params:
       - name: CONTEXT
-        value: samples/cicd/app
+        value: samples/openshift/full-cicd/app
       - name: ACTION
         value: $(tt.params.ACTION)
       - name: MERGED

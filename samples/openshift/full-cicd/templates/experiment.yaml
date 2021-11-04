@@ -6,9 +6,8 @@ spec:
   # target identifies the service under experimentation using its fully qualified name
   target: default/productpage
   strategy:
-    # this experiment will perform an A/B test
-    testingPattern: Canary
-    deploymentPattern: FixedSplit
+    # this experiment will perform a conformance test
+    testingPattern: Conformance
     actions:
       start:
       # collect Iter8's built-in metrics
@@ -21,28 +20,43 @@ spec:
             url: "http://iter8-app-candidate.default.svc.cluster.local:8000"
       # when the experiment completes, promote the winning version in the Env repo
       finish:
-      - task: notification/http
+      - if: WinnerFound()
+        task: notification/http
         with:
-          url: https://api.github.com/repos/MY_ORG/iter8/actions/workflows/gitops-finish.yaml/dispatches
+          url: https://api.github.com/repos/MY_ORG/iter8/actions/workflows/gitops-finish-openshift.yaml/dispatches
           authType: Bearer
           secret: github-token
           body:  |
             {
               "ref":"master",
               "inputs":{
-                "basedir": "samples/cicd",
-                "filepath": "@<.filepath>@"
+                "basedir": "samples/openshift/full-cicd",
+                "filepath": "deployment-candidate.yaml"
               }
             }
           headers:
           - name: Accept
             value: application/vnd.github.v3+json
-          method: POST
+      - if: not WinnerFound()
+        task: notification/http
+        with:
+          url: https://api.github.com/repos/MY_ORG/iter8/actions/workflows/gitops-finish-openshift.yaml/dispatches
+          authType: Bearer
+          secret: github-token
+          body:  |
+            {
+              "ref":"master",
+              "inputs":{
+                "basedir": "samples/openshift/full-cicd",
+                "filepath": "deployment.yaml"
+              }
+            }
+          headers:
+          - name: Accept
+            value: application/vnd.github.v3+json
 
   criteria:
     requestCount: iter8-system/request-count
-    indicators:
-    - iter8-system/error-count
     objectives:
     - metric: iter8-system/mean-latency
       upperLimit: "500"
@@ -54,12 +68,4 @@ spec:
   versionInfo:
     # information about the app versions used in this experiment
     baseline:
-      name: iter8-app-stable
-      variables:
-      - name: filepath
-        value: deployment.yaml
-    candidates:
-    - name: iter8-app-candidate
-      variables:
-      - name: filepath
-        value: deployment-candidate.yaml
+      name: iter8-app-candidate
