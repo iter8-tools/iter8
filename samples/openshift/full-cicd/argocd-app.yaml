@@ -11,7 +11,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: samples/cicd
+    path: samples/openshift/full-cicd
     repoURL: https://github.com/MY_ORG/iter8
     targetRevision: master
   syncPolicy:
