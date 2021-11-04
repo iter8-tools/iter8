@@ -111,3 +111,39 @@ func (e *experiment) incrementNumCompletedTasks() error {
 	e.Result.NumCompletedTasks++
 	return nil
 }
+
+/*
+// Run the given action.
+func (a *Action) Run(ctx context.Context) error {
+	for i := 0; i < len(*a); i++ {
+		log.Info("------ task starting")
+		shouldRun := true
+		exp, err := GetExperimentFromContext(ctx)
+		if err != nil {
+			return err
+		}
+		// if task has a condition
+		if cond := (*a)[i].GetIf(); cond != nil {
+			// condition evaluates to false ... then shouldRun is false
+			program, err := expr.Compile(*cond, expr.Env(exp), expr.AsBool())
+			if err != nil {
+				return err
+			}
+
+			output, err := expr.Run(program, exp)
+			if err != nil {
+				return err
+			}
+
+			shouldRun = output.(bool)
+		}
+		if shouldRun {
+			err := (*a)[i].Run(ctx)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+*/
