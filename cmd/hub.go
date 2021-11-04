@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
+	gg "github.com/hashicorp/go-getter"
+	urlhelper "github.com/hashicorp/go-getter/helper/url"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -46,12 +46,20 @@ var hubCmd = &cobra.Command{
 			return
 		}
 
-		// initialize iter8hub
+		// initialize the location of iter8hub
 		viper.BindEnv("ITER8HUB")
 		viper.SetDefault("ITER8HUB", "github.com/sriumcp/iter8/mkdocs/docs/iter8hub")
-
-		//
-		fmt.Println("hub called with", hubFolder)
+		ifurl := viper.GetString("ITER8HUB") + "/" + hubFolder
+		u, err := urlhelper.Parse(ifurl)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Fatalf("unable to parse iter8hub url: %s", ifurl)
+			return
+		}
+		g := new(gg.GitGetter)
+		if err := g.Get(hubFolder, u); err != nil {
+			log.Logger.WithStackTrace(err.Error()).Fatalf("unable to get: %v", u)
+			return
+		}
 	},
 }
 
