@@ -128,6 +128,4 @@ Chart.lock
 
 # Iter8 binary and yamls
 iter8
-experiment.yaml
-iter8.tpl
-manifest.yaml
+result.yaml
