@@ -25,20 +25,15 @@ var (
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "generate formatted output from experiment spec and result",
-	Long:  "Generate formatted output from experiment spec and result",
+	Short: "format experiment spec and its result using a go template",
 	Example: `
-	# download the load-test experiment
-	iter8 hub -e load-test
+	# generate text output of the experiment using the built-in Go template
+	iter8 gen -o text
+	# iter8 gen does the same thing as above
 
-	cd load-test
-
-	# run it
-	iter8 run
-
-	# generate formatted output
-	iter8 gen
-`,
+	# generate output from experiment using a custom Go template specified in the iter8.tpl file
+	iter8 gen -o custom`,
+	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		var tmpl *template.Template
 		var err error
@@ -96,7 +91,6 @@ var genCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(genCmd)
+	rootCmd.AddCommand(genCmd)
 	genCmd.Flags().StringVarP(&outputFormat, "outputFormat", "o", "text", "text | custom")
-	genCmd.Flags().MarkHidden("outputFormat")
 }
