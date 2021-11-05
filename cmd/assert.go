@@ -17,7 +17,7 @@ const (
 	noFailure        = "nofailure"
 	winnerFound      = "winnerfound"
 	winnerPrefix     = "winner"
-	satisfyingPrefix = "satisfying"
+	satisfyingPrefix = "satisfied"
 )
 
 // assert conditions
