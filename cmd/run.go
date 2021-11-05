@@ -61,7 +61,7 @@ func (e *experiment) run() error {
 			return err
 		} else {
 			e.incrementNumCompletedTasks()
-			err = write(e)
+			err = writeResult(e)
 			if err != nil {
 				return err
 			}
@@ -71,16 +71,16 @@ func (e *experiment) run() error {
 	return nil
 }
 
-// write an experiment to a file
-func write(r *experiment) error {
-	rBytes, err := yaml.Marshal(r)
+// write experiment result to file
+func writeResult(r *experiment) error {
+	rBytes, err := yaml.Marshal(r.Result)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment")
-		return errors.New("unable to marshal experiment")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment result")
+		return errors.New("unable to marshal experiment result")
 	}
-	err = ioutil.WriteFile(experimentFilePath, rBytes, 0664)
+	err = ioutil.WriteFile(experimentResultPath, rBytes, 0664)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment file")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
 		return err
 	}
 	return err

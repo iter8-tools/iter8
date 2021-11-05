@@ -1,6 +1,8 @@
 package base
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"fortio.org/fortio/fhttp"
@@ -9,8 +11,8 @@ import (
 
 // Experiment specification and result
 type Experiment struct {
-	Name   string            `json:"name" yaml:"name"`
-	Spec   *ExperimentSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
+	// Tasks is the sequence of tasks that constitute this experiment
+	Tasks  []TaskSpec        `json:"tasks,omitempty" yaml:"tasks,omitempty"`
 	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
 }
 
@@ -19,22 +21,13 @@ type Task interface {
 	Run(exp *Experiment) error
 }
 
-// ExperimentSpec specifies the experiment
-type ExperimentSpec struct {
-	// Iter8Version is the version of Iter8 used for this experiment spec
-	Iter8Version string `json:"iter8Version" yaml:"iter8Version"`
-
-	// Versions are the names of app versions that are assessed in this experiment
-	Versions []string `json:"versions" yaml:"versions"`
-
-	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks []TaskSpec `json:"tasks,omitempty" yaml:"tasks,omitempty"`
-}
-
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
 	// StartTime is the time when the experiment result is created
 	StartTime *time.Time `json:"startTime,omitempty" yaml:"startTime,omitempty"`
+
+	// NumAppVersions is the number of app versions detected by Iter8 in this experiment
+	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numVersions,omitempty"`
 
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
@@ -194,6 +187,10 @@ func (r *ExperimentResult) initAnalysis() {
 	r.Analysis = &Analysis{}
 }
 
+func (r *ExperimentResult) initNumAppVersions(n int) {
+	r.NumAppVersions = intPointer(n)
+}
+
 func (e *Experiment) InitResults() {
 	e.Result = &ExperimentResult{
 		StartTime:         timePointer(time.Now()),
@@ -207,15 +204,23 @@ func (e *Experiment) InitResults() {
 // updateMetricForVersion updates value of a given metric for a given version
 func (e *Experiment) updateMetricForVersion(m string, i int, val float64) error {
 	if e.Result == nil {
-		log.Logger.Warn("updateMetricForVersion called on an experiment object without results")
-		e.InitResults()
+		log.Logger.Error("updateMetricForVersion called on an experiment object without results")
+		return errors.New("updateMetricForVersion called on an experiment object without results")
 	}
 	if e.Result.Analysis == nil {
-		log.Logger.Warn("updateMetricForVersion called on an experiment object without analysis")
-		e.Result.initAnalysis()
+		log.Logger.Error("updateMetricForVersion called on an experiment object without analysis")
+		return errors.New("updateMetricForVersion called on an experiment object without analysis")
+	}
+	if e.Result.NumAppVersions == nil {
+		log.Logger.Error("updateMetricForVersion called on an experiment object without number of app versions uninitialized")
+		return errors.New("updateMetricForVersion called on an experiment object without number of app versions uninitialized")
 	}
 	if e.Result.Analysis.Metrics == nil {
-		e.Result.Analysis.Metrics = make([]map[string][]float64, len(e.Spec.Versions))
+		e.Result.Analysis.Metrics = make([]map[string][]float64, *e.Result.NumAppVersions)
+	}
+	if i >= *e.Result.NumAppVersions {
+		log.Logger.Error("updateMetricForVersion called for version ", i, " but number of app versions is set to ", *e.Result.NumAppVersions)
+		return errors.New(fmt.Sprint("updateMetricForVersion called for version ", i, " but number of app versions is set to ", *e.Result.NumAppVersions))
 	}
 	if e.Result.Analysis.Metrics[i] == nil {
 		e.Result.Analysis.Metrics[i] = make(map[string][]float64)
