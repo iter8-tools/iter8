@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-	"strings"
 	"text/tabwriter"
 )
 
@@ -45,14 +44,21 @@ func (e *experiment) winner() string {
 	}
 }
 
+// number of app versions
+func (e *experiment) numAppVersions() string {
+	if e == nil || e.Result == nil || e.Result.NumAppVersions == nil {
+		return "unknown"
+	}
+	return fmt.Sprint(*e.Result.NumAppVersions)
+}
+
 // print a summary of the experiment
 func (e *experiment) printSummary(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "--------------------------\t-----")
 	fmt.Fprintln(w, "Experiment summary\t")
 	fmt.Fprintln(w, "--------------------------\t-----")
-	fmt.Fprintln(w, "Name \t"+e.Name)
-	fmt.Fprintln(w, "App versions \t"+strings.Join(e.Spec.Versions, ", "))
+	fmt.Fprintln(w, "Num app versions \t"+e.numAppVersions())
 	fmt.Fprintln(w, "Winner \t"+e.winner())
 	fmt.Fprintln(w, "Testing pattern \t"+e.testingPatternString())
 	fmt.Fprintln(w, "Experiment completed \t"+strconv.FormatBool(e.completed()))

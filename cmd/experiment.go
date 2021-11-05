@@ -15,22 +15,31 @@ type experiment struct {
 }
 
 const (
-	experimentFilePath = "experiment.yaml"
+	experimentSpecPath   = "experiment.yaml"
+	experimentResultPath = "result.yaml"
 )
 
 // Build an experiment from file
 func build(withResult bool) (*experiment, error) {
+	e := &experiment{
+		Experiment: &base.Experiment{},
+	}
+	var err error
 	// read it in
 	log.Logger.Trace("build called")
-	e, err := read()
+	e.Tasks, err = readSpec()
 	if err != nil {
 		return nil, err
 	}
-	if !withResult {
-		e.Result = &base.ExperimentResult{}
+	e.Result = &base.ExperimentResult{}
+	if withResult {
+		e.Result, err = readResult()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	for _, t := range e.Spec.Tasks {
+	for _, t := range e.Tasks {
 		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
 			log.Logger.Error("invalid task found without a task name or a run command")
 			return nil, errors.New("invalid task found without a task name or a run command")
@@ -68,20 +77,34 @@ func build(withResult bool) (*experiment, error) {
 	return e, err
 }
 
-// read an experiment from a file
-func read() (*experiment, error) {
-	yamlFile, err := ioutil.ReadFile(experimentFilePath)
+// read experiment spec from file
+func readSpec() ([]base.TaskSpec, error) {
+	yamlFile, err := ioutil.ReadFile(experimentSpecPath)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
-		return nil, errors.New("unable to read experiment file")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
+		return nil, errors.New("unable to read experiment spec")
 	}
-	e := experiment{
-		Experiment: &base.Experiment{},
-	}
-	err = yaml.Unmarshal(yamlFile, e.Experiment)
+	e := []base.TaskSpec{}
+	err = yaml.Unmarshal(yamlFile, &e)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment spec")
 		return nil, err
 	}
-	return &e, err
+	return e, err
+}
+
+// read experiment result from file
+func readResult() (*base.ExperimentResult, error) {
+	yamlFile, err := ioutil.ReadFile(experimentResultPath)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
+		return nil, errors.New("unable to read experiment result")
+	}
+	e := &base.ExperimentResult{}
+	err = yaml.Unmarshal(yamlFile, e)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment result")
+		return nil, err
+	}
+	return e, err
 }

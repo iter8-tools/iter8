@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -81,9 +82,13 @@ var assertCmd = &cobra.Command{
 func (exp *experiment) completed() bool {
 	if exp != nil {
 		if exp.Result != nil {
-			return exp.Result.NumCompletedTasks == len(exp.Spec.Tasks)
+			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
+				log.Logger.Info("experiment completed")
+				return true
+			}
 		}
 	}
+	log.Logger.Info("experiment did not complete")
 	return false
 }
 
@@ -94,13 +99,17 @@ func (exp *experiment) extractVersion(cond string) (string, error) {
 		log.Logger.Error("unsupported condition detected; ", cond)
 		return "", fmt.Errorf("unsupported condition detected; %v", cond)
 	}
-	for _, ver := range exp.Spec.Versions {
-		if ver == tokens[1] {
-			return ver, nil
+	if exp.Result == nil || exp.Result.NumAppVersions == nil {
+		log.Logger.Error("number of app versions is yet to be initialized")
+		return "", errors.New("number of app versions is yet to be initialized")
+	}
+	for i := 0; i < *exp.Result.NumAppVersions; i++ {
+		if tokens[1] == fmt.Sprintf("v%v", i) {
+			return tokens[1], nil
 		}
 	}
-	log.Logger.Error("no such version; ", tokens[1])
-	return "", fmt.Errorf("no such version; %v", tokens[1])
+	log.Logger.Error("num app versions: ", *exp.Result.NumAppVersions, " invalid version: ", tokens[1])
+	return "", errors.New(fmt.Sprint("num app versions: ", *exp.Result.NumAppVersions, " invalid version: ", tokens[1]))
 }
 
 func init() {
@@ -113,9 +122,13 @@ func init() {
 func (exp *experiment) noFailure() bool {
 	if exp != nil {
 		if exp.Result != nil {
-			return !exp.Result.Failure
+			if !exp.Result.Failure {
+				log.Logger.Info("experiment has no failure")
+				return true
+			}
 		}
 	}
+	log.Logger.Info("experiment failed")
 	return false
 }
 
@@ -124,10 +137,14 @@ func (exp *experiment) winnerFound() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Analysis != nil {
-				return exp.Result.Analysis.Winner != nil
+				if exp.Result.Analysis.Winner != nil {
+					log.Logger.Info("experiment found a winner")
+					return true
+				}
 			}
 		}
 	}
+	log.Logger.Info("experiment did not find a winner")
 	return false
 }
 
@@ -136,10 +153,14 @@ func (exp *experiment) isWinner(ver string) bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Analysis != nil {
-				return *exp.Result.Analysis.Winner == ver
+				if *exp.Result.Analysis.Winner == ver {
+					log.Logger.Info("winner is ", ver)
+					return true
+				}
 			}
 		}
 	}
+	log.Logger.Info("winner is not ", ver)
 	return false
 }
 
@@ -150,11 +171,13 @@ func (exp *experiment) isValid(ver string) bool {
 			if exp.Result.Analysis != nil {
 				for _, version := range exp.Result.Analysis.Valid {
 					if version == ver {
+						log.Logger.Info(ver, " is a valid version")
 						return true
 					}
 				}
 			}
 		}
 	}
+	log.Logger.Info(ver, " is not a valid version")
 	return false
 }
