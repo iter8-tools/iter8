@@ -59,7 +59,7 @@ func (t *assessTask) Run(exp *Experiment) error {
 		return err
 	}
 
-	err = exp.setValid(computeValid(exp))
+	err = exp.setSatisfying(computeSatisfying(exp))
 	if err != nil {
 		return err
 	}
@@ -72,12 +72,12 @@ func (t *assessTask) Run(exp *Experiment) error {
 	return err
 }
 
-// compute valid versions
-func computeValid(exp *Experiment) []string {
-	valid := []string{}
+// compute set of versions satisfying objectives
+func computeSatisfying(exp *Experiment) []string {
+	satisfying := []string{}
 	if exp.Result == nil || exp.Result.NumAppVersions == nil {
 		log.Logger.Warn("unknown number of app versions")
-		return valid
+		return satisfying
 	}
 	for i := 0; i < *exp.Result.NumAppVersions; i++ {
 		satisfied := true
@@ -85,10 +85,10 @@ func computeValid(exp *Experiment) []string {
 			satisfied = satisfied && exp.Result.Analysis.Objectives[i][j]
 		}
 		if satisfied {
-			valid = append(valid, "v"+fmt.Sprint(i))
+			satisfying = append(satisfying, "v"+fmt.Sprint(i))
 		}
 	}
-	return valid
+	return satisfying
 }
 
 // evaluate objectives
