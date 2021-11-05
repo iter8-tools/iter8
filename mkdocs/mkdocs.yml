@@ -119,7 +119,7 @@ nav:
   - Your first experiment: iter8hub/load-test/README.md
   - Install Iter8: getting-started/install.md
   - Get help: getting-started/help.md
-  - Migrating to v0.8: getting-started/migration.md
+  - Design considerations behind v0.8: getting-started/v0.8.md
 - Experiment Hub:
   - Testing patterns:
     - Load testing: concepts/whatisiter8.md
