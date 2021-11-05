@@ -24,6 +24,11 @@ func float64Pointer(f float64) *float64 {
 	return &f
 }
 
+// stringPointer takes string as input, creates a new variable with the input value, and returns a pointer to the variable
+func stringPointer(s string) *string {
+	return &s
+}
+
 // timePointer takes time.Time object as input, creates a new variable with the input value, and returns a pointer to the variable
 func timePointer(t time.Time) *time.Time {
 	return &t

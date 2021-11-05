@@ -75,13 +75,17 @@ func (t *assessTask) Run(exp *Experiment) error {
 // compute valid versions
 func computeValid(exp *Experiment) []string {
 	valid := []string{}
-	for i := range exp.Spec.Versions {
+	if exp.Result == nil || exp.Result.NumAppVersions == nil {
+		log.Logger.Warn("unknown number of app versions")
+		return valid
+	}
+	for i := 0; i < *exp.Result.NumAppVersions; i++ {
 		satisfied := true
 		for j := range exp.Result.Analysis.Objectives {
 			satisfied = satisfied && exp.Result.Analysis.Objectives[i][j]
 		}
 		if satisfied {
-			valid = append(valid, exp.Spec.Versions[i])
+			valid = append(valid, "v"+fmt.Sprint(i))
 		}
 	}
 	return valid
@@ -89,12 +93,16 @@ func computeValid(exp *Experiment) []string {
 
 // evaluate objectives
 func evaluateObjectives(exp *Experiment, objs []Objective) [][]bool {
+	if exp.Result == nil || exp.Result.NumAppVersions == nil {
+		log.Logger.Warn("unknown number of app versions")
+		return nil
+	}
 	if *exp.Result.Analysis.TestingPattern == TestingPatternSLOValidation {
 		// Objectives
 		// if not empty, the length of the outer slice must match the length of Spec.Versions
 		// if not empty, the length of an inner slice must match the number of objectives in the assess-versions task
-		objAssessment := make([][]bool, len(exp.Spec.Versions))
-		for i := range exp.Spec.Versions {
+		objAssessment := make([][]bool, *exp.Result.NumAppVersions)
+		for i := 0; i < *exp.Result.NumAppVersions; i++ {
 			objAssessment[i] = make([]bool, len(objs))
 			for j := range objs {
 				objAssessment[i][j] = objectiveSatisfied(exp, i, objs[j])
@@ -112,7 +120,7 @@ func objectiveSatisfied(e *Experiment, i int, o Objective) bool {
 	val := getMetricValue(e, i, o.Metric)
 	// check if metric is available
 	if val == nil {
-		log.Logger.Warn(fmt.Sprintf("unable to find value for version %s and metric %s", e.Spec.Versions[i], o.Metric))
+		log.Logger.Warn(fmt.Sprintf("unable to find value for version %v and metric %s", i, o.Metric))
 		return false
 	}
 	// check lower and upper limits
@@ -141,18 +149,23 @@ func getMetricValue(e *Experiment, i int, m string) *float64 {
 		return nil
 	}
 
-	if len(e.Result.Analysis.Metrics) != len(e.Spec.Versions) {
+	if e.Result.NumAppVersions == nil {
+		log.Logger.Warn("unknown number of app versions")
+		return nil
+	}
+
+	if len(e.Result.Analysis.Metrics) != *e.Result.NumAppVersions {
 		log.Logger.Warn("metrics slice must be of the same length as versions slice")
 		return nil
 	}
 
 	if e.Result.Analysis.Metrics[i] == nil {
-		log.Logger.Warn("no metrics available for version " + e.Spec.Versions[i])
+		log.Logger.Warn("no metrics available for version ", i)
 		return nil
 	}
 
 	if vals, ok := e.Result.Analysis.Metrics[i][m]; !ok || len(vals) == 0 {
-		log.Logger.Warn("metric " + m + "unavailable for version " + e.Spec.Versions[i])
+		log.Logger.Warn("metric ", m, " unavailable for version ", i)
 		return nil
 	} else {
 		return float64Pointer(vals[len(vals)-1])
@@ -161,17 +174,22 @@ func getMetricValue(e *Experiment, i int, m string) *float64 {
 
 // find winning version
 func findWinner(exp *Experiment) *string {
+	if exp.Result.NumAppVersions == nil {
+		log.Logger.Warn("unknown number of app versions")
+		return nil
+	}
+
 	if *exp.Result.Analysis.TestingPattern == TestingPatternSLOValidation {
-		if len(exp.Spec.Versions) == 1 {
+		if *exp.Result.NumAppVersions == 1 {
 			// check if all objectives are satisfied
 			for i, sat := range exp.Result.Analysis.Objectives[0] {
 				if !sat {
-					log.Logger.Info("version " + exp.Spec.Versions[0] + " failed to satisfy objective " + fmt.Sprintf("%v", i))
+					log.Logger.Info("version 0 failed to satisfy objective " + fmt.Sprintf("%v", i))
 					return nil
 				}
 			}
-			log.Logger.Info("all objectives satisfied by winner " + exp.Spec.Versions[0])
-			return &exp.Spec.Versions[0]
+			log.Logger.Info("all objectives satisfied by winning version 0")
+			return stringPointer("v0")
 		} else {
 			log.Logger.Warn("winner with multiple versions undefined for testing pattern " + TestingPatternSLOValidation)
 		}

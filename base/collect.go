@@ -214,7 +214,12 @@ func (t *collectTask) Run(exp *Experiment) error {
 	var err error
 	t.initializeDefaults()
 
-	fm := make([]*fhttp.HTTPRunnerResults, len(exp.Spec.Versions))
+	if len(t.With.VersionInfo) == 0 {
+		log.Logger.Error("collect task must specify info for at least one version")
+		return errors.New("collect task must specify info for at least one version")
+	}
+
+	fm := make([]*fhttp.HTTPRunnerResults, len(t.With.VersionInfo))
 
 	// run fortio queries for each version sequentially
 	for j := range t.With.VersionInfo {
@@ -232,8 +237,23 @@ func (t *collectTask) Run(exp *Experiment) error {
 		}
 	}
 
+	// initialize analysis if needed
+	if exp.Result.NumAppVersions == nil {
+		exp.Result.initNumAppVersions(len(t.With.VersionInfo))
+	} else {
+		if *exp.Result.NumAppVersions != len(t.With.VersionInfo) {
+			log.Logger.Error("mismatch between num app versions ", *exp.Result.NumAppVersions, " and num versions in collect task ", len(t.With.VersionInfo))
+			return errors.New(fmt.Sprint("mismatch between num app versions ", *exp.Result.NumAppVersions, " and num versions in collect task ", len(t.With.VersionInfo)))
+		}
+	}
+
+	// initialize analysis if needed
+	if exp.Result.Analysis == nil {
+		exp.Result.initAnalysis()
+	}
+
 	// set metrics for each version for which fortio metrics are available
-	for i := range exp.Spec.Versions {
+	for i := range t.With.VersionInfo {
 		if fm[i] != nil {
 
 			// request count
