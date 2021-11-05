@@ -93,8 +93,8 @@ type Analysis struct {
 	// if not empty, the length of an inner slice must match the number of objectives in the assess-versions task
 	Objectives [][]bool `json:"objectives,omitempty" yaml:"objectives,omitempty"`
 
-	// Valid is the set of all versions that satisfy objectives
-	Valid []string `json:"valid,omitempty" yaml:"valid,omitempty"`
+	// Satisfying is the set of all versions that satisfy objectives
+	Satisfying []string `json:"satisfying,omitempty" yaml:"satisfying,omitempty"`
 
 	// Winner is the winning version of the app
 	Winner *string `json:"winner,omitempty" yaml:"winner,omitempty"`
@@ -169,17 +169,17 @@ func (e *Experiment) setWinner(winner *string) error {
 	return nil
 }
 
-// setValid sets the valid versions
-func (e *Experiment) setValid(valid []string) error {
+// setSatisfying sets the set of versions that satisfy objectives
+func (e *Experiment) setSatisfying(satisfying []string) error {
 	if e.Result == nil {
-		log.Logger.Warn("setValid called on an experiment object without results")
+		log.Logger.Warn("setSatisfying called on an experiment object without results")
 		e.InitResults()
 	}
 	if e.Result.Analysis == nil {
-		log.Logger.Warn("setValid called on an experiment object without analysis")
+		log.Logger.Warn("setSatisfying called on an experiment object without analysis")
 		e.Result.initAnalysis()
 	}
-	e.Result.Analysis.Valid = valid
+	e.Result.Analysis.Satisfying = satisfying
 	return nil
 }
 

@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 	"text/tabwriter"
 )
 
-// describeTxt provides a text description of the experiment
-func describeTxt(e *experiment) string {
+// formatText provides a text description of the experiment
+func formatText(e *experiment) string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.AlignRight|tabwriter.Debug)
 	e.printSummary(w)
@@ -52,6 +53,18 @@ func (e *experiment) numAppVersions() string {
 	return fmt.Sprint(*e.Result.NumAppVersions)
 }
 
+// app versions
+func (e *experiment) appVersions() string {
+	if e == nil || e.Result == nil || e.Result.NumAppVersions == nil {
+		return "unknown"
+	}
+	appVersions := []string{}
+	for i := 0; i < *e.Result.NumAppVersions; i++ {
+		appVersions = append(appVersions, fmt.Sprintf("v%v", i))
+	}
+	return fmt.Sprint("[", strings.Join(appVersions, ","), "]")
+}
+
 // print a summary of the experiment
 func (e *experiment) printSummary(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "")
@@ -59,7 +72,8 @@ func (e *experiment) printSummary(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "Experiment summary\t")
 	fmt.Fprintln(w, "--------------------------\t-----")
 	fmt.Fprintln(w, "Num app versions \t"+e.numAppVersions())
-	fmt.Fprintln(w, "Winner \t"+e.winner())
+	fmt.Fprintln(w, "App versions \t"+e.appVersions())
+	fmt.Fprintln(w, "Winning version \t"+e.winner())
 	fmt.Fprintln(w, "Testing pattern \t"+e.testingPatternString())
 	fmt.Fprintln(w, "Experiment completed \t"+strconv.FormatBool(e.completed()))
 	fmt.Fprintln(w, "Experiment failed \t"+strconv.FormatBool(!e.noFailure()))

@@ -12,12 +12,14 @@ var rootCmd = &cobra.Command{
 	# run the experiment defined in the local file named experiment.yaml
 	iter8 run
 
-	# assert that the experiment completed successfully and found a winner
-	iter8 assert -c completed -c successful -c winnerFound
+	# assert that the experiment completed without failure and found a winner
+	iter8 assert -c completed -c noFailure -c winnerFound
 	
-	# report experiment results
-	iter8 report`,
-	SilenceUsage: true,
+	# report experiment results using the built-in text template
+	iter8 gen
+
+	# report experiment results using a custom go template specified in iter8.tpl file
+	iter8 gen -o custom`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
