@@ -3,65 +3,69 @@ template: main.html
 ---
 
 # What is Iter8?
-Iter8 is a metrics-driven experimentation platform that enables **DevOps/SRE/MLOps/data science teams** to maximize release velocity and business value of apps and ML models while protecting end-user experience.
 
-Iter8 enables the following use-cases.
+Iter8 enables **DevOps/SRE/MLOps/data science teams** to maximize release velocity and business value of apps and ML models while protecting end-user experience.
 
-1.  Load testing/SLOs with built-in metrics
-2.  A/B(/n) testing with business metrics from any backend
-3.  SLOs with metrics from any backend
-4.  Mirroring
-5.  User segmentation
-6.  Session affinity
-7.  Gradual rollout
+Use **Iter8 experiments** for load testing, SLO validation, A/B(/n) testing different versions of apps and identifying a winner based on business metrics, dark launches and canary releases, chaos testing, and hybrids of the above. Combine Iter8 with your service mesh/ingress/networking technology to achieve advanced traffic engineering functions like mirroring, user segmentation, session affinity, and gradual rollouts.
 
-The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 along with a Kubernetes service-mesh or ingress.
+***
 
 ## What is an Iter8 experiment?
-An Iter8 experiment is a sequence of tasks. Iter8 provides a variety of tasks for the following purposes.
-
-1.  Getting metrics for one or more versions of the app.
-2.  Producing SLO validation and A/B/n testing insights based on metrics.
-3.  Triggering a variety of useful events based on these insights. Events include sending a slack or HTTP notification, triggering a CI/CD/GitHub actions workflow, creating a pull request, and changing application state (including traffic splits for versions) inside a Kubernetes cluster.
+Iter8 defines the concept of an experiment that automates various aspects of the application release process as shown below.[^1]
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
 
-Experiments are specified declaratively using a simple YAML file as shown below.
+***
+
+## How is an Iter8 experiment specified?
+Iter8 experiment is specified in a simple `experiment.yaml` file as shown in the following example. An experiment is simply a collection of tasks that are executed by Iter8. The set of tasks supported by Iter8 are [here](../reference/tasks/overview.md).
+
 ```yaml
 # the following experiment performs a load test for https://example.com
-# and validates error-rate and 95th percentile service level objectives (SLOs)
+# and assesses if it satisfies 
+# error-rate and 95th percentile service level objectives (SLOs)
 # 
-# task 1: generate requests for the app and collect built-in metrics
-- task: gen-load-and-collect-metrics
+# generate requests for the app and collect built-in metrics
+- task: collect-fortio-metrics
   with:
     versionInfo:
     - url: https://example.com
-# task 2: assess if app satisfies SLOs
-# this experiment involves only one version of the app
-- task: assess-app-versions
+# assess how the app is performing relative to criteria
+- task: assess-versions
   with:
-    SLOs:
-    - metric: built-in/error-rate
-      upperLimit: 0
-    - metric: built-in/p95
-      upperLimit: 100
+    criteria:
+      requestCount: iter8-fortio/request-count
+      objectives:
+      - metric: iter8-fortio/error-rate
+        upperLimit: 0
+      - metric: iter8-fortio/p95
+        upperLimit: 100
 ```
 
-## Where can I run experiments?
+Iter8 tasks can perform a variety of functions such as collecting built-in metrics, querying metrics from databases or app endpoints, assessing how the versions are performing relative to the experiment criteria, computing and applying optional traffic splits between versions, promoting the winning version, notifying event receivers, creating pull requests, and triggering webhooks or GitHub Action workflows to name a few.
 
-* On your local machine
-* In a container
-* Inside Kubernetes
-* As a step in your CI/CD/GitOps pipeline.
+## How are experiments run?
+Iter8 provides a command line utility for running experiments on your local machine.
 
-## Can I use Iter8 with ...?
-Use Iter8 with
+```shell
+# this will run experiment.yaml
+iter8 run
+```
+
+Iter8 experiments can also be run inside a container, in a Kubernetes cluster in the form of a job, as a step within a GitHub actions workflow, in any environment that can run a container image (such as a Tekton task), or in any environment that can run the Iter8 executable.
+
+***
+
+## Can Iter8 be used within [... my unique environment]?
+Iter8 can be used with:
 
   * any app/serverless/ML framework
-  * any metrics backend
-  * any service mesh/ingress/networking technology, and 
+  * any metrics provider
+  * any service mesh/ingress technology for managing traffic, and 
   * any CI/CD/GitOps process.
 
 ## How is Iter8 implemented?
 
-Iter8 is implemented as `go` module and comes with a command line interface that enables rapid experimentation.
+Iter8 is implemented as `go` module.
+
+[^1]: Tasks with squiggly and dashed boundaries are optional.

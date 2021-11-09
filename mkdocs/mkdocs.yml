@@ -114,11 +114,11 @@ markdown_extensions:
 nav:
 - Home: index.md
 - Getting Started:
-  - What is Iter8?: getting-started/what-is-iter8.md
   - Your first experiment: hub/load-test/README.md
   - Install Iter8: getting-started/install.md
+  - Concepts: getting-started/concepts.md
   - Get help: getting-started/help.md
-  - Design considerations: getting-started/v0.8.md
+  - Design: getting-started/v0.8.md
 - Hub:
   - Testing patterns:
     - Load testing: concepts/whatisiter8.md
