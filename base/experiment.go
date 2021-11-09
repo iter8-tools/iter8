@@ -3,9 +3,9 @@ package base
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
-	"fortio.org/fortio/fhttp"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -16,54 +16,84 @@ type Experiment struct {
 	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
 }
 
-// Task objects can be run
+// Task is an object that can be run
 type Task interface {
 	Run(exp *Experiment) error
 }
 
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
-	// StartTime is the time when the experiment result is created
+	// StartTime is the time when the experiment run was started
 	StartTime *time.Time `json:"startTime,omitempty" yaml:"startTime,omitempty"`
-
-	// NumAppVersions is the number of app versions detected by Iter8 in this experiment
-	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numVersions,omitempty"`
 
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
 
-	// Failure is true if the experiment failed to complete all the tasks successfully
+	// Failure is true if any of its tasks failed
 	Failure bool `json:"failure" yaml:"failure"`
 
-	// Analysis is the latest analysis
-	Analysis *Analysis `json:"analysis,omitempty" yaml:"analysis,omitempty"`
+	// Insights produced in this experiment
+	Insights *Insights `json:"insights,omitempty" yaml:"insights,omitempty"`
 }
 
-// TestingPatternType identifies the type of experiment
-type TestingPatternType string
+// Insights is a structure to contain experiment insights
+type Insights struct {
+	// NumAppVersions is the number of app versions detected by Iter8
+	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numVersions,omitempty"`
+
+	// InsightInfo identifies the types of insights produced by this experiment
+	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty"`
+
+	// MetricsInfo identifies the metrics involved in this experiment
+	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
+
+	// SLOStrs represents the SLOs involved in this experiment in string form
+	SLOStrs []string `json:"SLOStrs,omitempty" yaml:"SLOStrs,omitempty"`
+
+	// MetricValues:
+	// the outer slice must be the same length as the number of app versions
+	// the map key must match name of a metric in MetricsInfo
+	// the inner slice contains the list of all observed metric values for given version and given metric; float value [i]["foo/bar"][k] is the [k]th observation for version [i] for the metric bar under backend foo.
+	MetricValues []map[string][]float64 `json:"metricValues,omitempty" yaml:"metricValues,omitempty"`
+
+	// SLOsSatisfied:
+	// the outer slice must be of the same length as SLOStrs
+	// the length of the inner slice must be the number of app versions
+	// the boolean value at [i][j] indicate if SLO [i] is satisfied by version [j]
+	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
+
+	// SLOsSatisfiedBy is the subset of versions that satisfy all SLOs
+	// every integer in this slice must be in the range 0 to NumAppVersions - 1 (inclusive)
+	SLOsSatisfiedBy []int `json:"SLOsSatisfiedBy,omitempty" yaml:"SLOsSatisfiedBy,omitempty"`
+}
+
+// InsightType identifies the type of insight
+type InsightType string
 
 const (
-	// TestingPatternSLOValidation is an SLO validation experiment
-	TestingPatternSLOValidation TestingPatternType = "SLOValidation"
+	// InsightTypeMetrics indicates metrics are observed during this experiment
+	InsightTypeMetrics InsightType = "Metrics"
 
-	// TestingPatternNone implies no testing of any kind
-	TestingPatternNone TestingPatternType = "None"
+	// InsightTypeSLO indicatse SLOs are validated during this experiment
+	InsightTypeSLO InsightType = "SLOs"
 )
 
-// Criteria is list of criteria to be evaluated throughout the experiment
-type Criteria struct {
-	// Objectives is a list of conditions on metrics that must be tested on each loop of the experiment.
-	// Failure of an objective might reduces the likelihood that a version will be selected as the winning version.
-	Objectives []Objective `json:"objectives,omitempty" yaml:"objectives,omitempty"`
+// MetricMeta describes a metric
+type MetricMeta struct {
+	Description string     `json:"description" yaml:"description"`
+	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
+	Type        MetricType `json:"type" yaml:"type"`
 }
 
-// Objective is a service level objective
-type Objective struct {
-	// Metric is the name of the metric resource that defines the metric to be measured.
-	// If the value contains a "/", the prefix will be considered to be a namespace name.
-	// If the value does not contain a "/", the metric should be defined either in the same namespace
-	// or in the default domain namespace (defined as a property of iter8 when installed).
-	// The experiment namespace takes precedence.
+// Criteria is list of criteria against which app versions are evaluated
+type Criteria struct {
+	// SLOs is a list of SLOs
+	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
+}
+
+// SLO is a service level objective
+type SLO struct {
+	// Metric is the fully qualified metric name (i.e., in the backendName/metricName format)
 	Metric string `json:"metric" yaml:"metric"`
 
 	// UpperLimit is the maximum acceptable value of the metric.
@@ -71,33 +101,6 @@ type Objective struct {
 
 	// LowerLimit is the minimum acceptable value of the metric.
 	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
-}
-
-// Analysis is data from an analytics provider
-type Analysis struct {
-	// TestingPattern is the type of this experiment
-	TestingPattern *TestingPatternType `json:"testingPattern,omitempty" yaml:"testingPattern,omitempty"`
-
-	// FortioMetrics populated by the collect-fortio-metrics task
-	// if not empty, the length of the outer slice must match the length of Spec.Versions
-	FortioMetrics []*fhttp.HTTPRunnerResults `json:"fortioMetrics,omitempty" yaml:"fortioMetrics,omitempty"`
-
-	// Metrics
-	// if not empty, the length of the outer slice must match the length of Spec.Versions
-	// each key in the map is a metric name
-	// values are all the observed values of a metric until this point
-	Metrics []map[string][]float64 `json:"metrics,omitempty" yaml:"metrics,omitempty"`
-
-	// Objectives
-	// if not empty, the length of the outer slice must match the length of Spec.Versions
-	// if not empty, the length of an inner slice must match the number of objectives in the assess-versions task
-	Objectives [][]bool `json:"objectives,omitempty" yaml:"objectives,omitempty"`
-
-	// Satisfying is the set of all versions that satisfy objectives
-	Satisfying []string `json:"satisfying,omitempty" yaml:"satisfying,omitempty"`
-
-	// Winner is the winning version of the app
-	Winner *string `json:"winner,omitempty" yaml:"winner,omitempty"`
 }
 
 type taskMeta struct {
@@ -112,122 +115,101 @@ type TaskSpec struct {
 	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
-// func (t *taskMeta) bytes() []byte {
-// 	b, _ := json.Marshal(t)
-// 	return b
-// }
-
-// String converts the experiment into a yaml string
-// func (e *Experiment) String() string {
-// 	out, _ := yaml.Marshal(e)
-// 	return string(out)
-// }
-
-// setTestingPattern sets the testing pattern in the experiment results
-func (e *Experiment) setTestingPattern(c *Criteria) error {
-	if e.Result == nil {
-		log.Logger.Warn("setTestingPattern called on an experiment object without results")
-		e.InitResults()
+// hasInsightType returns true if the experiment has a specific insight type set
+func (in *Insights) hasInsightType(it InsightType) bool {
+	if in != nil {
+		if in.InsightTypes != nil {
+			for _, v := range in.InsightTypes {
+				if v == it {
+					return true
+				}
+			}
+		}
 	}
-	if e.Result.Analysis == nil {
-		log.Logger.Warn("setTestingPattern called on an experiment object without analysis")
-		e.Result.initAnalysis()
+	return false
+}
+
+// setInsightType adds a specific InsightType to the list of experiment insights types
+func (in *Insights) setInsightType(it InsightType) error {
+	if in.hasInsightType(it) {
+		return nil
 	}
-	if c == nil || c.Objectives == nil || len(c.Objectives) == 0 {
-		e.Result.Analysis.TestingPattern = testingPatternPointer(TestingPatternNone)
-	} else {
-		e.Result.Analysis.TestingPattern = testingPatternPointer(TestingPatternSLOValidation)
+	// LHS can be nil
+	in.InsightTypes = append(in.InsightTypes, it)
+	return nil
+}
+
+// setSLOStrs sets the SLOStrs field in insights
+// if this function is called multiple times (example, due to looping), then
+// it is intended to be called with the same argument each time
+func (in *Insights) setSLOStrs(sloStrs []string) error {
+	if in.SLOStrs != nil {
+		if reflect.DeepEqual(in.SLOStrs, sloStrs) {
+			return nil
+		} else {
+			log.Logger.WithStackTrace(fmt.Sprint("old: ", in.SLOStrs, "new: ", sloStrs)).Error("old and new value of sloStrs conflict")
+			return errors.New("old and new value of sloStrs conflict")
+		}
+	}
+	// LHS will be nil
+	in.SLOStrs = sloStrs
+	return nil
+}
+
+// initializeSLOsSatisfied initializes the SLOs satisfied field
+func (e *Experiment) initializeSLOsSatisfied() error {
+	if e.Result.Insights.SLOsSatisfied != nil {
+		return nil // already initialized
+	}
+	// LHS will be nil
+	e.Result.Insights.SLOsSatisfied = make([][]bool, len(e.Result.Insights.SLOStrs))
+	for i := 0; i < len(e.Result.Insights.SLOStrs); i++ {
+		e.Result.Insights.SLOsSatisfied[i] = make([]bool, *e.Result.Insights.NumAppVersions)
 	}
 	return nil
 }
 
-// setObjectives sets objective assessment portion of the analysis
-func (e *Experiment) setObjectives(objs [][]bool) error {
-	if e.Result == nil {
-		log.Logger.Warn("setObjectives called on an experiment object without results")
-		e.InitResults()
+// initialize the number of app versions
+func (in *Insights) initNumAppVersions(n int) error {
+	if in.NumAppVersions != nil {
+		if *in.NumAppVersions != n {
+			errStr := fmt.Sprint("inconsistent number for app versions; old: ", *in.NumAppVersions, " new: ", n)
+			log.Logger.Error(errStr)
+			return errors.New(errStr)
+		}
 	}
-	if e.Result.Analysis == nil {
-		log.Logger.Warn("setObjectives called on an experiment object without analysis")
-		e.Result.initAnalysis()
-	}
-	e.Result.Analysis.Objectives = objs
+
+	in.NumAppVersions = intPointer(n)
 	return nil
 }
 
-// setWinner sets the winning version
-func (e *Experiment) setWinner(winner *string) error {
-	if e.Result == nil {
-		log.Logger.Warn("setWinner called on an experiment object without results")
-		e.InitResults()
+// initialize metric values
+func (in *Insights) initMetricValues(n int) error {
+	if in.MetricValues != nil {
+		if len(in.MetricValues) != n {
+			errStr := fmt.Sprint("inconsistent number for app versions; in old metric values: ", len(in.MetricValues), " in new metric values: ", n)
+			log.Logger.Error(errStr)
+			return errors.New(errStr)
+		} else {
+			return nil
+		}
 	}
-	if e.Result.Analysis == nil {
-		log.Logger.Warn("setWinner called on an experiment object without analysis")
-		e.Result.initAnalysis()
+
+	in.MetricValues = make([]map[string][]float64, n)
+	for i := 0; i < n; i++ {
+		in.MetricValues[i] = make(map[string][]float64)
 	}
-	e.Result.Analysis.Winner = winner
 	return nil
-}
-
-// setSatisfying sets the set of versions that satisfy objectives
-func (e *Experiment) setSatisfying(satisfying []string) error {
-	if e.Result == nil {
-		log.Logger.Warn("setSatisfying called on an experiment object without results")
-		e.InitResults()
-	}
-	if e.Result.Analysis == nil {
-		log.Logger.Warn("setSatisfying called on an experiment object without analysis")
-		e.Result.initAnalysis()
-	}
-	e.Result.Analysis.Satisfying = satisfying
-	return nil
-}
-
-func (r *ExperimentResult) initAnalysis() {
-	r.Analysis = &Analysis{}
-}
-
-func (r *ExperimentResult) initNumAppVersions(n int) {
-	r.NumAppVersions = intPointer(n)
 }
 
 func (e *Experiment) InitResults() {
 	e.Result = &ExperimentResult{
-		StartTime:         timePointer(time.Now()),
+		StartTime:         nil,
 		NumCompletedTasks: 0,
 		Failure:           false,
-		Analysis:          nil,
+		Insights: &Insights{
+			NumAppVersions: nil,
+			MetricsInfo:    map[string]MetricMeta{},
+		},
 	}
-	e.Result.initAnalysis()
-}
-
-// updateMetricForVersion updates value of a given metric for a given version
-func (e *Experiment) updateMetricForVersion(m string, i int, val float64) error {
-	if e.Result == nil {
-		log.Logger.Error("updateMetricForVersion called on an experiment object without results")
-		return errors.New("updateMetricForVersion called on an experiment object without results")
-	}
-	if e.Result.Analysis == nil {
-		log.Logger.Error("updateMetricForVersion called on an experiment object without analysis")
-		return errors.New("updateMetricForVersion called on an experiment object without analysis")
-	}
-	if e.Result.NumAppVersions == nil {
-		log.Logger.Error("updateMetricForVersion called on an experiment object without number of app versions uninitialized")
-		return errors.New("updateMetricForVersion called on an experiment object without number of app versions uninitialized")
-	}
-	if e.Result.Analysis.Metrics == nil {
-		e.Result.Analysis.Metrics = make([]map[string][]float64, *e.Result.NumAppVersions)
-	}
-	if i >= *e.Result.NumAppVersions {
-		log.Logger.Error("updateMetricForVersion called for version ", i, " but number of app versions is set to ", *e.Result.NumAppVersions)
-		return errors.New(fmt.Sprint("updateMetricForVersion called for version ", i, " but number of app versions is set to ", *e.Result.NumAppVersions))
-	}
-	if e.Result.Analysis.Metrics[i] == nil {
-		e.Result.Analysis.Metrics[i] = make(map[string][]float64)
-	}
-	if _, ok := e.Result.Analysis.Metrics[i][m]; !ok {
-		e.Result.Analysis.Metrics[i][m] = []float64{}
-	}
-	e.Result.Analysis.Metrics[i][m] = append(e.Result.Analysis.Metrics[i][m], val)
-	return nil
 }
