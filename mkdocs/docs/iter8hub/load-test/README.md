@@ -65,14 +65,54 @@ iter8 gen
 
 ??? note "Sample output"
     ```
-    --------------------------|-----
-            Experiment summary|
-    --------------------------|-----
-                        Name |my-exp
-                App versions |my-app
-                      Winner |my-app
-              Testing pattern |SLOs
-        Experiment completed |true
-            Experiment failed |false
-    Number of completed tasks |2
+    -----------------------------|-----
+                Experiment summary|
+    -----------------------------|-----
+            Experiment completed |true
+    -----------------------------|-----
+                Experiment failed |false
+    -----------------------------|-----
+        Number of completed tasks |2
+    -----------------------------|-----
+
+
+
+    -----------------------------|-----
+                              SLOs|
+    -----------------------------|-----
+      iter8-fortio/error-rate <= 0|true
+    -----------------------------|-----
+        iter8-fortio/p95.0 <= 100|true
+    -----------------------------|-----
+
+
+    -----------------------------|-----
+                          Metrics|
+    -----------------------------|-----
+          iter8-fortio/error-count|0
+    -----------------------------|-----
+          iter8-fortio/error-rate|0
+    -----------------------------|-----
+          iter8-fortio/max-latency|200.45 (msec)
+    -----------------------------|-----
+        iter8-fortio/mean-latency|18.77 (msec)
+    -----------------------------|-----
+          iter8-fortio/min-latency|4.76 (msec)
+    -----------------------------|-----
+                iter8-fortio/p50.0|11.74 (msec)
+    -----------------------------|-----
+                iter8-fortio/p75.0|13.29 (msec)
+    -----------------------------|-----
+                iter8-fortio/p90.0|15.60 (msec)
+    -----------------------------|-----
+                iter8-fortio/p95.0|25 (msec)
+    -----------------------------|-----
+                iter8-fortio/p99.0|200.34 (msec)
+    -----------------------------|-----
+                iter8-fortio/p99.9|200.44 (msec)
+    -----------------------------|-----
+        iter8-fortio/request-count|100
+    -----------------------------|-----
+      iter8-fortio/stddev-latency|37.23 (msec)
+    -----------------------------|-----
     ```
