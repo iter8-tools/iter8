@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
@@ -44,7 +43,7 @@ func init() {
 func (e *experiment) run() error {
 	var err error
 	if e.Result == nil {
-		e.Result = &base.ExperimentResult{}
+		e.InitResults()
 	}
 	if e.Result.StartTime == nil {
 		err = e.setStartTime()

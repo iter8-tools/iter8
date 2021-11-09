@@ -9,7 +9,7 @@
 - task: assess-versions
   with:
     criteria:
-      objectives:
+      SLOs:
         # error rate must be 0
       - metric: iter8-fortio/error-rate
         upperLimit: 0
