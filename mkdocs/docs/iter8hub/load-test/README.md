@@ -65,7 +65,7 @@ iter8 gen
 ??? note "Sample output"
     ```
     -----------------------------|-----
-                Experiment summary|
+               Experiment summary|
     -----------------------------|-----
             Experiment completed |true
     -----------------------------|-----
@@ -77,7 +77,7 @@ iter8 gen
 
 
     -----------------------------|-----
-                              SLOs|
+                             SLOs|
     -----------------------------|-----
       iter8-fortio/error-rate <= 0|true
     -----------------------------|-----
