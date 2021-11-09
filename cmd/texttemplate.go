@@ -44,15 +44,15 @@ func (e *experiment) numCompletedTasksString() string {
 // print the current state of the experiment
 func (e *experiment) printState(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprintln(w, "Experiment summary\t")
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprintln(w, "Experiment completed \t"+strconv.FormatBool(e.completed()))
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprintln(w, "Experiment failed \t"+strconv.FormatBool(!e.noFailure()))
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprintln(w, "Number of completed tasks \t"+e.numCompletedTasksString())
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprintln(w, "")
 	w.Flush()
 }
@@ -100,8 +100,8 @@ func (e *experiment) printableSLOs() bool {
 // print SLOs
 func (e *experiment) printSLOs(w *tabwriter.Writer) {
 	in := e.Result.Insights
-	fmt.Fprint(w, "\n\n\n")
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprint(w, "\n\n")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "SLOs")
 	if *in.NumAppVersions > 1 {
 		for i := 0; i < *in.NumAppVersions; i++ {
@@ -111,7 +111,7 @@ func (e *experiment) printSLOs(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "\t")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 
 	for i := 0; i < len(in.SLOStrs); i++ {
 		fmt.Fprint(w, in.SLOStrs[i])
@@ -119,7 +119,7 @@ func (e *experiment) printSLOs(w *tabwriter.Writer) {
 			fmt.Fprintf(w, "\t%v", in.SLOsSatisfied[i][j])
 			fmt.Fprintln(w)
 		}
-		fmt.Fprintln(w, "--------------------------\t-----")
+		fmt.Fprintln(w, "-----------------------------\t-----")
 	}
 
 	w.Flush()
@@ -127,11 +127,11 @@ func (e *experiment) printSLOs(w *tabwriter.Writer) {
 
 // print no SLOs
 func (e *experiment) printNoSLOs(w *tabwriter.Writer) {
-	fmt.Fprint(w, "\n\n\n")
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprint(w, "\n\n")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "SLOs\tunavailable")
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 
 	w.Flush()
 }
@@ -159,8 +159,8 @@ func (e *experiment) printableMetrics() bool {
 // print metrics collected
 func (e *experiment) printMetrics(w *tabwriter.Writer) {
 	in := e.Result.Insights
-	fmt.Fprint(w, "\n\n\n")
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprint(w, "\n\n")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "Metrics")
 	if *in.NumAppVersions > 1 {
 		for i := 0; i < *in.NumAppVersions; i++ {
@@ -170,7 +170,7 @@ func (e *experiment) printMetrics(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "\t")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 
 	// sort metrics
 	keys := []string{}
@@ -185,18 +185,18 @@ func (e *experiment) printMetrics(w *tabwriter.Writer) {
 			fmt.Fprintf(w, "\t%v", e.getMetricValueWithUnits(keys[i], j))
 			fmt.Fprintln(w)
 		}
-		fmt.Fprintln(w, "--------------------------\t-----")
+		fmt.Fprintln(w, "-----------------------------\t-----")
 	}
 	w.Flush()
 }
 
 // print no metrics
 func (e *experiment) printNoMetrics(w *tabwriter.Writer) {
-	fmt.Fprint(w, "\n\n\n")
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprint(w, "\n\n")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "Metrics\tunavailable")
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--------------------------\t-----")
+	fmt.Fprintln(w, "-----------------------------\t-----")
 
 	w.Flush()
 }
