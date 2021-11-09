@@ -195,7 +195,7 @@
 }
 @media screen and (min-width: 76.25em) {
   .feature-item {
-    width: 25%;
+    width: 33%;
   }
 }
 .feature-item:hover {
