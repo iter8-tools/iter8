@@ -31,7 +31,7 @@ func build(withResult bool) (*experiment, error) {
 	if err != nil {
 		return nil, err
 	}
-	e.Result = &base.ExperimentResult{}
+	e.InitResults()
 	if withResult {
 		e.Result, err = readResult()
 		if err != nil {

@@ -237,81 +237,107 @@ func (t *collectTask) Run(exp *Experiment) error {
 		}
 	}
 
-	// initialize analysis if needed
-	if exp.Result.NumAppVersions == nil {
-		exp.Result.initNumAppVersions(len(t.With.VersionInfo))
-	} else {
-		if *exp.Result.NumAppVersions != len(t.With.VersionInfo) {
-			log.Logger.Error("mismatch between num app versions ", *exp.Result.NumAppVersions, " and num versions in collect task ", len(t.With.VersionInfo))
-			return errors.New(fmt.Sprint("mismatch between num app versions ", *exp.Result.NumAppVersions, " and num versions in collect task ", len(t.With.VersionInfo)))
-		}
+	in := exp.Result.Insights
+
+	// initialize num app versions (if needed)
+	err = in.initNumAppVersions(len(t.With.VersionInfo))
+	if err != nil {
+		return err
 	}
 
-	// initialize analysis if needed
-	if exp.Result.Analysis == nil {
-		exp.Result.initAnalysis()
+	// set insight type (if needed)
+	err = in.setInsightType(InsightTypeMetrics)
+	if err != nil {
+		return err
 	}
 
-	// set metrics for each version for which fortio metrics are available
+	// initialize metric values (if needed)
+	err = in.initMetricValues(len(t.With.VersionInfo))
+	if err != nil {
+		return err
+	}
+
+	// set metric value for each fortio metric for each version
+	// also set metric info if needed
 	for i := range t.With.VersionInfo {
 		if fm[i] != nil {
-
 			// request count
-			err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+requestCountMetricName, i, float64(fm[i].DurationHistogram.Count))
-			if err != nil {
-				return err
+			m := iter8FortioPrefix + "/" + requestCountMetricName
+			in.MetricsInfo[m] = MetricMeta{
+				Description: "number of requests",
+				Type:        CounterMetricType,
 			}
+			in.MetricValues[i][m] = append(in.MetricValues[i][m], float64(fm[i].DurationHistogram.Count))
 
-			// error count and rate
+			// error count & rate
 			val := float64(0)
 			for code, count := range fm[i].RetCodes {
 				if t.errorCode(code) {
 					val += float64(count)
 				}
 			}
-			err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+errorCountMetricName, i, val)
-			if err != nil {
-				return err
+			// error count
+			m = iter8FortioPrefix + "/" + errorCountMetricName
+			in.MetricsInfo[m] = MetricMeta{
+				Description: "number of errors",
+				Type:        CounterMetricType,
 			}
+			in.MetricValues[i][m] = append(in.MetricValues[i][m], val)
 
 			// error-rate
+			m = iter8FortioPrefix + "/" + errorRateMetricName
 			rc := float64(fm[i].DurationHistogram.Count)
 			if rc != 0 {
-				err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+errorRateMetricName, i, val/rc)
-				if err != nil {
-					return err
+				in.MetricsInfo[m] = MetricMeta{
+					Description: "error rate",
+					Type:        GaugeMetricType,
 				}
+				in.MetricValues[i][m] = append(in.MetricValues[i][m], val/rc)
 			}
 
 			// mean-latency
-			err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+meanLatencyMetricName, i, fm[i].DurationHistogram.Avg)
-			if err != nil {
-				return err
+			m = iter8FortioPrefix + "/" + meanLatencyMetricName
+			in.MetricsInfo[m] = MetricMeta{
+				Description: "mean latency",
+				Type:        GaugeMetricType,
+				Units:       stringPointer("msec"),
 			}
+			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Avg)
 
 			// stddev-latency
-			err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+stdDevMetricName, i, fm[i].DurationHistogram.StdDev)
-			if err != nil {
-				return err
+			m = iter8FortioPrefix + "/" + stdDevMetricName
+			in.MetricsInfo[m] = MetricMeta{
+				Description: "standard deviation of latency",
+				Type:        GaugeMetricType,
+				Units:       stringPointer("msec"),
 			}
+			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.StdDev)
 
 			// min-latency
-			err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+minLatencyMetricName, i, fm[i].DurationHistogram.Min)
-			if err != nil {
-				return err
+			m = iter8FortioPrefix + "/" + minLatencyMetricName
+			in.MetricsInfo[m] = MetricMeta{
+				Description: "minimum observed value of latency ",
+				Type:        GaugeMetricType,
+				Units:       stringPointer("msec"),
 			}
+			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
 
-			// max-latency
-			err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+maxLatencyMetricName, i, fm[i].DurationHistogram.Max)
-			if err != nil {
-				return err
+			m = iter8FortioPrefix + "/" + maxLatencyMetricName
+			in.MetricsInfo[m] = MetricMeta{
+				Description: "maximum observed value of latency ",
+				Type:        GaugeMetricType,
+				Units:       stringPointer("msec"),
 			}
+			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Max)
 
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				err = exp.updateMetricForVersion(iter8FortioPrefix+"/"+fmt.Sprintf("p%0.1f", p.Percentile), i, p.Value)
-				if err != nil {
-					return err
+				m = iter8FortioPrefix + "/" + fmt.Sprintf("p%0.1f", p.Percentile)
+				in.MetricsInfo[m] = MetricMeta{
+					Description: fmt.Sprintf("%0.1f percentile latency", p.Percentile),
+					Type:        GaugeMetricType,
+					Units:       stringPointer("msec"),
 				}
+				in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*p.Value)
 			}
 		}
 	}

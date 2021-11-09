@@ -5,16 +5,16 @@ const (
 	iter8FortioPrefix = "iter8-fortio"
 )
 
-// // MetricType identifies the type of the metric.
-// type MetricType string
+// MetricType identifies the type of the metric.
+type MetricType string
 
-// const (
-// 	// CounterMetricType corresponds to Prometheus Counter metric type
-// 	CounterMetricType MetricType = "Counter"
+const (
+	// CounterMetricType corresponds to Prometheus Counter metric type
+	CounterMetricType MetricType = "Counter"
 
-// 	// GaugeMetricType corresponds to Prometheus Gauge metric type
-// 	GaugeMetricType MetricType = "Gauge"
-// )
+	// GaugeMetricType corresponds to Prometheus Gauge metric type
+	GaugeMetricType MetricType = "Gauge"
+)
 
 // // AuthType identifies the type of authentication used in the HTTP request
 // type AuthType string
