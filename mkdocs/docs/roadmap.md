@@ -9,7 +9,7 @@ hide:
 
 1. **Design simplifications (v0.8)**
     * CRD and controller-less experimentation using Kubernetes configmaps and jobs
-    * *Iter8Hub:* Helm repo with reusable namespace-scoped experiment charts
+    * *Hub:* Helm repo with reusable namespace-scoped experiment charts
     * Multi-tenancy
 2. **GitOps**
     * Integration with ArgoCD, Flux, JenkinsX and other GitOps operators

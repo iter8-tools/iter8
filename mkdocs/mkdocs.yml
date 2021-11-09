@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Maximize release velocity and business value of apps and ML models. Protect end-user experience. Quick start in 2 mins.
+  Iter8 enables DevOps/SRE/MLOps/data science teams to maximize release velocity and business value of apps and ML models while protecting end-user experience. Quick start in 2 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -116,11 +116,11 @@ nav:
 - Home: index.md
 - Getting Started:
   - What is Iter8?: getting-started/what-is-iter8.md
-  - Your first experiment: iter8hub/load-test/README.md
+  - Your first experiment: hub/load-test/README.md
   - Install Iter8: getting-started/install.md
   - Get help: getting-started/help.md
   - Design considerations: getting-started/v0.8.md
-- Experiment Hub:
+- Hub:
   - Testing patterns:
     - Load testing: concepts/whatisiter8.md
     - SLO validation: concepts/whatisiter8.md
@@ -136,17 +136,13 @@ nav:
   - CI/CD/GitOps patterns:
     - GitHub Actions trigger: concepts/whatisiter8.md
     - GitHub pull request: concepts/whatisiter8.md
-- Metrics:
-  - Built-in metrics: metrics/builtin.md
-  - Metric providers: metrics/custom.md
-  - Scraping metrics from apps: metrics/custom.md
 - User guide:
   - Experiment schema: user-guide/schema.md
   - Task reference:
     - metrics/collect: user-guide/tasks/metrics-collect.md
     - assess-versions: user-guide/tasks/notification-http.md
     - run: user-guide/tasks/run.md
-  - Private experiment hub: user-guide/privatehub.md
+  - Private hub: user-guide/privatehub.md
 - Contributing:
   - Overview: contributing/overview.md
   - Experiments: contributing/experiment.md
