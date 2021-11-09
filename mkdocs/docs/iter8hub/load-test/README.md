@@ -27,18 +27,18 @@ The above command reads in the `experiment.yaml` file, executes the specified ta
 
 ??? note "experiment.yaml"
     ```yaml
-    # Task 1: generate HTTP requests for https://example.com
+    # task 1: generate HTTP requests for https://example.com
     # collect Iter8's built-in latency and error related metrics
     - task: collect-fortio-metrics
       with:
         versionInfo:
         - url: https://example.com
-    # Task 2: validate service level objectives for https://example.com 
-    # using the metrics collected in the above task
+    # task 2: validate service level objectives for https://example.com using
+    # the metrics collected in the above task
     - task: assess-versions
       with:
         criteria:
-          objectives:
+          SLOs:
             # error rate must be 0
           - metric: iter8-fortio/error-rate
             upperLimit: 0
@@ -51,7 +51,7 @@ The above command reads in the `experiment.yaml` file, executes the specified ta
 The above experiment must complete in a few seconds. Upon completion assert that all the SLOs are satisfied as follows.
 
 ```shell
-iter8 assert -c valid=v0
+iter8 assert -c completed -c nofailure -c slossatisfied
 ```
 
 This experiment involves only a single version of an app which serves the https://example.com URL. Iter8 names this version `v0`. The above command asserts that `v0` satisfies the `error-rate` and `p95.0` SLOs specified in the experiment.
@@ -60,7 +60,7 @@ This experiment involves only a single version of an app which serves the https:
 Generate a report of the experiment including winner, metrics, and objectives.
 
 ```shell
-iter8ctl gen 
+iter8 gen 
 ```
 
 ??? note "Sample output"
