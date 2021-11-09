@@ -35,7 +35,7 @@ Iter8 experiment is specified in a simple `experiment.yaml` file as shown in the
   with:
     criteria:
       requestCount: iter8-fortio/request-count
-      objectives:
+      SLOs:
       - metric: iter8-fortio/error-rate
         upperLimit: 0
       - metric: iter8-fortio/p95
