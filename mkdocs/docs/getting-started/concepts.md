@@ -20,9 +20,9 @@ The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 alon
 ## What is an Iter8 experiment?
 An Iter8 experiment is a sequence of tasks. Iter8 provides a variety of tasks for the following purposes.
 
-1.  Getting metrics
-2.  Analyzing the app (or versions of the app), and producing assessments and recommendations based on metrics
-3.  Achieving a variety of side effects such as sending a slack or HTTP notification, triggering a CI/CD/GitHub actions workflow, creating a pull request, waiting for a resource to become available or ready, and changing application state (including traffic splits) within a Kubernetes cluster.
+1.  Getting metrics for the app (or versions of the app)
+2.  Producing insights and recommendations based on metrics
+3.  Achieving a variety of useful side effects based on the insights and recommendations. Example side effects include sending a slack or HTTP notification, triggering a CI/CD/GitHub actions workflow, creating a pull request, and changing application state (including traffic splits) within a Kubernetes cluster.
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
 
@@ -50,8 +50,13 @@ Experiments are specified declaratively using a simple YAML file as shown below.
 
 ## Where can I run experiments?
 
+* On your local machine
+* In a container
+* Inside Kubernetes
+* As a step in your CI/CD/GitOps pipeline.
+
 ## Can I use Iter8 with ...?
-Iter8 can be used with:
+Use Iter8 with
 
   * any app/serverless/ML framework
   * any metrics backend
