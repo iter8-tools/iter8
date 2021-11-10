@@ -10,7 +10,7 @@ template: main.html
 ## 1. [Install Iter8](../../getting-started/install.md)
 
 ## 2. Download experiment
-[Iter8hub](iter8hub.md) provides useful samples for accelerating the creation of experiments. Download the `load-test` experiment sample from Iter8hub as follows.
+[Iter8 Hub](../README.md) enables users to share, find, and download Iter8 experiment samples. Download the `load-test` experiment sample from the hub as follows.
 
 ```shell
 iter8 hub -e load-test
@@ -22,18 +22,19 @@ cd load-test
 iter8 run
 ```
 
-The above command reads in the `experiment.yaml` file, executes the specified tasks, and writes the results into the `results.yaml` file. The contents of the `experiment.yaml` file is as follows.
+The above command reads in the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the results of the experiment into the `results.yaml` file.
 
-??? note "experiment.yaml"
+??? note "Look inside experiment.yaml"
     ```yaml
-    # task 1: generate HTTP requests for https://example.com
+    # task 1: generate HTTP requests for https://example.com and
     # collect Iter8's built-in latency and error related metrics
     - task: collect-fortio-metrics
       with:
         versionInfo:
         - url: https://example.com
-    # task 2: validate service level objectives for https://example.com using
-    # the metrics collected in the above task
+    # task 2: validate if the app (hosted at https://example.com) satisfies 
+    # service level objectives (SLOs)
+    # this task uses the built-in metrics collected by task 1 for validation
     - task: assess-versions
       with:
         criteria:
@@ -47,31 +48,38 @@ The above command reads in the `experiment.yaml` file, executes the specified ta
     ```
 
 ## 4. Assert outcomes
-The above experiment must complete in a few seconds. Upon completion assert that all the SLOs are satisfied as follows.
+The experiment should complete in a few seconds. Upon completion, assert that the experiment completed without any failures, and SLOs are satisfied, as follows.
 
 ```shell
-iter8 assert -c completed -c nofailure -c slossatisfied
+iter8 assert -c completed -c nofailure -c slos
 ```
 
-This experiment involves only a single version of an app which serves the https://example.com URL. Iter8 names this version `v0`. The above command asserts that `v0` satisfies the `error-rate` and `p95.0` SLOs specified in the experiment.
+??? note "Look inside sample output of assert"
+
+    ```shell
+    INFO[2021-11-10 09:33:12] experiment completed
+    INFO[2021-11-10 09:33:12] experiment has no failure                    
+    INFO[2021-11-10 09:33:12] SLOs are satisfied                           
+    INFO[2021-11-10 09:33:12] all conditions were satisfied
+    ```
 
 ## 5. Generate report
-Generate a report of the experiment including winner, metrics, and objectives.
+Generate a report of the experiment including a summary of the experiment, SLOs, and metrics.
 
 ```shell
 iter8 gen 
 ```
 
-??? note "Sample output"
+??? note "Look inside a sample report"
     ```
     -----------------------------|-----
                Experiment summary|
     -----------------------------|-----
             Experiment completed |true
     -----------------------------|-----
-                Experiment failed |false
+               Experiment failed |false
     -----------------------------|-----
-        Number of completed tasks |2
+       Number of completed tasks |2
     -----------------------------|-----
 
 
@@ -79,7 +87,7 @@ iter8 gen
     -----------------------------|-----
                              SLOs|
     -----------------------------|-----
-      iter8-fortio/error-rate <= 0|true
+     iter8-fortio/error-rate <= 0|true
     -----------------------------|-----
         iter8-fortio/p95.0 <= 100|true
     -----------------------------|-----
@@ -88,30 +96,32 @@ iter8 gen
     -----------------------------|-----
                           Metrics|
     -----------------------------|-----
-          iter8-fortio/error-count|0
+         iter8-fortio/error-count|0
     -----------------------------|-----
           iter8-fortio/error-rate|0
     -----------------------------|-----
-          iter8-fortio/max-latency|200.45 (msec)
+         iter8-fortio/max-latency|200.45 (msec)
     -----------------------------|-----
         iter8-fortio/mean-latency|18.77 (msec)
     -----------------------------|-----
-          iter8-fortio/min-latency|4.76 (msec)
+         iter8-fortio/min-latency|4.76 (msec)
     -----------------------------|-----
-                iter8-fortio/p50.0|11.74 (msec)
+               iter8-fortio/p50.0|11.74 (msec)
     -----------------------------|-----
-                iter8-fortio/p75.0|13.29 (msec)
+               iter8-fortio/p75.0|13.29 (msec)
     -----------------------------|-----
-                iter8-fortio/p90.0|15.60 (msec)
+               iter8-fortio/p90.0|15.60 (msec)
     -----------------------------|-----
-                iter8-fortio/p95.0|25 (msec)
+               iter8-fortio/p95.0|25 (msec)
     -----------------------------|-----
-                iter8-fortio/p99.0|200.34 (msec)
+               iter8-fortio/p99.0|200.34 (msec)
     -----------------------------|-----
-                iter8-fortio/p99.9|200.44 (msec)
+               iter8-fortio/p99.9|200.44 (msec)
     -----------------------------|-----
-        iter8-fortio/request-count|100
+       iter8-fortio/request-count|100
     -----------------------------|-----
       iter8-fortio/stddev-latency|37.23 (msec)
     -----------------------------|-----
     ```
+
+Congratulations :tada: You performed your first Iter8 experiment.

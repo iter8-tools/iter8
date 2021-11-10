@@ -4,13 +4,17 @@ template: main.html
 
 # What is Iter8?
 
+## What is an Iter8 experiment?
+## Where can experiments run?
+## How does Iter8 work?
+
 Iter8 enables **DevOps/SRE/MLOps/data science teams** to maximize release velocity and business value of apps and ML models while protecting end-user experience.
 
 Use **Iter8 experiments** for load testing, SLO validation, A/B(/n) testing different versions of apps and identifying a winner based on business metrics, dark launches and canary releases, chaos testing, and hybrids of the above. Combine Iter8 with your service mesh/ingress/networking technology to achieve advanced traffic engineering functions like mirroring, user segmentation, session affinity, and gradual rollouts.
 
 ***
 
-## What is an Iter8 experiment?
+## What is an experiment?
 Iter8 defines the concept of an experiment that automates various aspects of the application release process as shown below.[^1]
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)

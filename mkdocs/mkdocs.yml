@@ -117,8 +117,8 @@ nav:
   - Your first experiment: hub/load-test/README.md
   - Install Iter8: getting-started/install.md
   - Concepts: getting-started/concepts.md
-  - Get help: getting-started/help.md
-  - Design: getting-started/v0.8.md
+  - v0.8 preview: getting-started/v0.8.md
+  - Community: getting-started/help.md
 - Hub:
   - Testing patterns:
     - Load testing: concepts/whatisiter8.md
