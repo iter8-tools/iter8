@@ -54,7 +54,7 @@ type collectInputs struct {
 }
 
 const (
-	CollectTaskName        = "collect-fortio-metrics"
+	CollectTaskName        = "gen-load-and-collect-metrics"
 	defaultQPS             = float32(8)
 	defaultNumRequests     = int64(100)
 	defaultConnections     = uint32(4)

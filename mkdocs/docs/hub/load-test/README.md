@@ -28,14 +28,14 @@ The above command reads in the experiment specified in the `experiment.yaml` fil
     ```yaml
     # task 1: generate HTTP requests for https://example.com and
     # collect Iter8's built-in latency and error related metrics
-    - task: collect-fortio-metrics
+    - task: gen-load-and-collect-metrics
       with:
         versionInfo:
         - url: https://example.com
     # task 2: validate if the app (hosted at https://example.com) satisfies 
     # service level objectives (SLOs)
     # this task uses the built-in metrics collected by task 1 for validation
-    - task: assess-versions
+    - task: assess-app-versions
       with:
         criteria:
           SLOs:

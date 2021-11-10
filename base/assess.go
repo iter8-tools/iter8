@@ -8,7 +8,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// assessInputs contain the inputs to the assess-versions task to be executed.
+// assessInputs contain the inputs to the assess-app-versions task to be executed.
 type assessInputs struct {
 	// Criteria is the assessment criteria
 	Criteria *Criteria `json:"criteria" yaml:"criteria"`
@@ -22,7 +22,7 @@ type assessTask struct {
 
 const (
 	// AssessTaskName is the name of the task this file implements
-	AssessTaskName = "assess-versions"
+	AssessTaskName = "assess-app-versions"
 )
 
 // MakeAssess constructs an asessTask out of a task spec
@@ -63,7 +63,7 @@ func getSLOStrs(slos []SLO) []string {
 	return sloStrs
 }
 
-// Run executes the assess-versions task
+// Run executes the assess-app-versions task
 func (t *assessTask) Run(exp *Experiment) error {
 	if t.With.Criteria == nil ||
 		t.With.Criteria.SLOs == nil ||
