@@ -199,12 +199,12 @@
   }
 }
 .feature-item:hover {
-  background-color: #fff3f3;
+  background-color: #fef5f5;
   border-radius: 3px;
 }
 
 .tx-container {
-  background: #fff3f3;
+  background: #fef5f5;
 }
 .tx-container .centered {
   padding: 1.5rem;

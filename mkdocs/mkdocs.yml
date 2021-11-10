@@ -139,7 +139,7 @@ nav:
   - Experiment schema: user-guide/schema.md
   - Task reference:
     - metrics/collect: user-guide/tasks/metrics-collect.md
-    - assess-versions: user-guide/tasks/notification-http.md
+    - assess-app-versions: user-guide/tasks/notification-http.md
     - run: user-guide/tasks/run.md
   - Private hub: user-guide/privatehub.md
 - Contributing:
