@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	completed             = "completed"
-	noFailure             = "nofailure"
-	slosSatisfied         = "slossatisfied"
-	slosSatisfiedByPrefix = "slossatisfiedby"
+	completed    = "completed"
+	noFailure    = "nofailure"
+	slos         = "slos"
+	slosByPrefix = "slosby"
 )
 
 // assert conditions
@@ -68,7 +68,7 @@ var assertCmd = &cobra.Command{
 					} else {
 						log.Logger.Info("experiment failed")
 					}
-				} else if strings.ToLower(cond) == slosSatisfied {
+				} else if strings.ToLower(cond) == slos {
 					slos := exp.slosSatisfiedByAllVersions()
 					allGood = allGood && slos
 					if slos {
@@ -76,7 +76,7 @@ var assertCmd = &cobra.Command{
 					} else {
 						log.Logger.Info("SLOs are not satisfied")
 					}
-				} else if strings.HasPrefix(cond, slosSatisfiedByPrefix) {
+				} else if strings.HasPrefix(cond, slosByPrefix) {
 					version, err := exp.extractVersion(cond)
 					if err != nil {
 						os.Exit(1)
@@ -192,7 +192,7 @@ func (exp *experiment) slosSatisfiedBy(version int) bool {
 
 func init() {
 	rootCmd.AddCommand(assertCmd)
-	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", completed, noFailure, slosSatisfied, slosSatisfiedByPrefix))
+	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", completed, noFailure, slos, slosByPrefix))
 	assertCmd.MarkFlagRequired("condition")
 	assertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
 }
