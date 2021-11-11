@@ -124,4 +124,4 @@ iter8 gen
     -----------------------------|-----
     ```
 
-Congratulations :tada: You performed your first Iter8 experiment.
+Congratulations :tada: You completed your first Iter8 experiment.
