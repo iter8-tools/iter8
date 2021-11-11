@@ -29,6 +29,7 @@ theme:
   - navigation.sections
   - navigation.tabs
   - navigation.top
+  - navigation.indexes
   palette:
   - scheme: default
     primary: black
@@ -120,21 +121,24 @@ nav:
   - v0.8 tech preview: getting-started/v0.8.md
   - Community: getting-started/help.md
 - Hub:
-  - Testing patterns:
-    - Load testing: concepts/whatisiter8.md
-    - SLO validation: concepts/whatisiter8.md
-    - A/B(/n) testing: concepts/whatisiter8.md
-    - Chaos testing: concepts/whatisiter8.md
-    - Hybrid testing: concepts/whatisiter8.md
-  - Traffic engineering patterns:
-    - Mirroring: concepts/whatisiter8.md
-    - \%-traffic split: concepts/whatisiter8.md
-    - User segmentation: concepts/whatisiter8.md
-    - Session affinity: concepts/whatisiter8.md
-    - Progressive traffic shifting: concepts/whatisiter8.md
-  - CI/CD/GitOps patterns:
-    - GitHub Actions trigger: concepts/whatisiter8.md
-    - GitHub pull request: concepts/whatisiter8.md
+  - Insights:
+    - Load testing with SLOs: getting-started/v0.8.md
+    - SLOs with Prometheus: getting-started/v0.8.md
+    - A/B(/n) testing: getting-started/v0.8.md
+    - Chaos testing with SLOs: getting-started/v0.8.md
+  - Traffic engineering:
+    - Mirroring: getting-started/v0.8.md
+    - Traffic %-split: getting-started/v0.8.md
+    - User segmentation: getting-started/v0.8.md
+    - Session affinity: getting-started/v0.8.md
+    - Gradual traffic shifting: getting-started/v0.8.md
+  - Rollouts:
+    - GitHub Actions trigger: getting-started/v0.8.md
+    - GitHub pull request: getting-started/v0.8.md
+  - App/ML frameworks:
+    - Seldon: getting-started/v0.8.md
+    - Kserve: getting-started/v0.8.md
+    - Knative: getting-started/v0.8.md
 - User guide:
   - Experiment schema: user-guide/schema.md
   - Task reference:
