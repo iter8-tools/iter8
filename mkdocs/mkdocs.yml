@@ -29,7 +29,6 @@ theme:
   - navigation.sections
   - navigation.tabs
   - navigation.top
-  - navigation.indexes
   palette:
   - scheme: default
     primary: black
@@ -115,44 +114,28 @@ markdown_extensions:
 nav:
 - Home: index.md
 - Getting Started:
-  - Your first experiment: hub/load-test/README.md
+  - Your first experiment: getting-started/your-first-experiment.md
   - Install Iter8: getting-started/install.md
   - Concepts: getting-started/concepts.md
   - v0.8 tech preview: getting-started/v0.8.md
   - Community: getting-started/help.md
 - Hub:
   - Insights:
-    - Load testing with SLOs: getting-started/v0.8.md
-    - SLOs with Prometheus: getting-started/v0.8.md
-    - A/B(/n) testing: getting-started/v0.8.md
-    - Chaos testing with SLOs: getting-started/v0.8.md
+    - Load testing: tutorials/load-testing.md
+    - SLOs with Prometheus: tutorials/slos-with-prometheus.md
+    - A/B(/n) testing: tutorials/abn.md
+    - Chaos testing with SLOs: tutorials/chaos.md
   - Traffic engineering:
-    - Mirroring: getting-started/v0.8.md
-    - Traffic %-split: getting-started/v0.8.md
-    - User segmentation: getting-started/v0.8.md
-    - Session affinity: getting-started/v0.8.md
-    - Gradual traffic shifting: getting-started/v0.8.md
-  - Rollouts:
-    - GitHub Actions trigger: getting-started/v0.8.md
-    - GitHub pull request: getting-started/v0.8.md
-  - App/ML frameworks:
-    - Seldon: getting-started/v0.8.md
-    - Kserve: getting-started/v0.8.md
-    - Knative: getting-started/v0.8.md
+    - Mirroring: tutorials/mirroring.md
+    - Percentage traffic-split: tutorials/traffic-percent.md
+    - Session affinity: tutorials/session-affinity.md
+    - Gradual traffic shifting: tutorials/gradual-traffic-shifting.md
 - User guide:
-  - Experiment schema: user-guide/schema.md
+  - CLI reference: user-guide/commands.md
   - Task reference:
-    - metrics/collect: user-guide/tasks/metrics-collect.md
-    - assess-app-versions: user-guide/tasks/notification-http.md
+    - metrics/collect: user-guide/tasks/collect.md
+    - assess-app-versions: user-guide/tasks/assess.md
     - run: user-guide/tasks/run.md
-  - Private hub: user-guide/privatehub.md
-- Contributing:
-  - Overview: contributing/overview.md
-  - Experiments: contributing/experiment.md
-  - Templates: contributing/template.md
-  - Docs: contributing/experiment.md
-  - CI: contributing/experiment.md
-  - Analytics: contributing/analytics.md
-  - Tasks: contributing/tasks.md
+- Contributing: contributing.md
 - Roadmap: roadmap.md
 - News/Blog: news.md

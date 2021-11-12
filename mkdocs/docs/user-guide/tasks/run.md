@@ -5,61 +5,116 @@ template: main.html
 # `run`
 The `run` task executes a bash script.
 
-## Examples
-Send a Slack notification.
-```yaml
-- run: |
-    curl -d "text=Experiment is complete. New version is promoted." -d "channel=C123456" \
-    -H "Authorization: Bearer xoxb-not-a-real-token-this-will-not-work" \
-    -X POST https://slack.com/api/chat.postMessage  
-```
+## Basic Example
 
-Trigger a GitHub Actions workflow.
-```yaml
-- run: |
-    echo xoxb-not-a-real-token-this-will-not-work > token.txt
-    gh auth login --with-token < token.txt
-    gh repo clone my-repo
-    cd my-repo
-    gh workflow run promote.yaml -R github.com/me/my-repo
-```
+The following (partially-specified) experiment executes the one line script `kubectl apply` using a YAML manifest at the end of the experiment.
 
-Run a `kubectl` command.
 ```yaml
-- run: |
-    kubectl apply -f new-version-of-my-app.yaml -n my-app-namespace
-```
-
-Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback. This is an example of [conditional task execution](../topics/conditional.md).
-```yaml
-- task: assess-app-versions
+kind: Experiment
+...
+spec:
   ...
-- if: not SLOsBy(1)
-  run: |
-    kubectl rollout undo deployment/my-app-deployment
+  strategy:
+    ...
+    actions:
+      finish:
+      - run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/mysample/manifest.yaml
 ```
 
-## Temp dir
+## Conditional Execution
 
-The script in `run` can have environment variables. One such pre-defined variable is `$TEMP_DIR` which points to the default directory to use for temporary files.
+The `run` task can be [executed conditionally](../experiment.md#taskspec), where the condition is specified using the `if` clause. Supported conditions include `WinnerFound()`, `CandidateWon()` and their negations using the `not` keyword.
 
 ```yaml
-- run: |
-    cd $TEMP_DIR
-    echo "hello" > world.txt
+kind: Experiment
+...
+spec:
+  ...
+  strategy:
+    ...
+    actions:
+      finish: # run the following sequence of tasks at the end of the experiment
+      - if: CandidateWon()
+        run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml"
+      - if: not CandidateWon()
+        run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml"
+```
+
+## Secret
+
+The `run` task can be used with a Kubernetes secret provided to it as an input.
+
+```yaml
+kind: Experiment
+...
+spec:
+  ...
+  strategy:
+    ...
+    actions:
+      finish: # run the following sequence of tasks at the end of the experiment
+      - run: "git clone https://username:@< .Secret 'token' >@@github.com/username/repo.git"
+        with:
+          # reference to a K8s secret resource in the namespace/name format. If no namespace is specified, the namespace of the secret is assumed to be that of the experiment.
+          secret: myns/mysecret
+```
+
+In the above example, a `token` value is extracted from the given Kubernetes secret, and inserted into the (templated) `git clone` script. This task requires the secret resource `mysecret` to be available in the `myns` namespace, and requires the secret to contain `token` as a key in its `data` section.
+
+## Placeholders
+
+The script to be executed may contain placeholders. Placeholders in this task use `@<` and `>@` as the left and right delimiters respectively. Placeholders are especially handy for specifying data in a Kubernetes secret, supplying the secret as part of the task, and extracting the secret within the script at runtime. See [above](#secret) for an example.
+
+
+
+## Scratch folder
+
+The `SCRATCH_DIR` environment variable points to a scratch folder. This intended for creating and manipulating files as part of the `run` script.
+
+```yaml
+kind: Experiment
+...
+spec:
+  ...
+  strategy:
+    ...
+    actions:
+      finish: # run the following sequence of tasks at the end of the experiment
+      - run: |
+          cd $SCRATCH_DIR
+          echo "hello" > world.txt
 ```
 
 ## Available commands
 
-When running experiments on your local machine, any command that is available in your `PATH` can be used as part of the `run` task. When running experiments in Kubernetes, in addition to the `iter8` command, the Iter8 container also includes `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`, all of which can be used as part of the `run` task.
+The Dockerfile used to build the task runner image is [here](https://github.com/iter8-tools/handler/blob/main/Dockerfile). In addition to the standard linux commands (`sed`, `awk`, ...) available in its base image, the task runner also includes the commands `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`.
 
 ```yaml
-- run: |
-    kustomize build hello/world/folder > manifest.yaml
-    kubectl apply -f manifest.yaml
-    helm upgrade my-app helm/chart --install
-    yq -i a=b manifest.yaml
-    git clone https://github.com/iter8-tools/iter8.git
-    gh pr create
-    curl https://iter8.tools -O $SCARCH_DIR/i.html
+kind: Experiment
+...
+spec:
+  ...
+  strategy:
+    ...
+    actions:
+      finish: # a few things you can do within the run script
+      - run: |
+          kustomize build hello/world/folder > manifest.yaml
+          kubectl apply -f manifest.yaml
+          helm upgrade my-app helm/chart --install
+          yq -i a=b manifest.yaml
+          git clone https://github.com/iter8-tools/iter8.git
+          gh pr create
+          curl https://iter8.tools -O $SCARCH_DIR/i.html
 ```
+
+
+## Inputs
+
+| Field name | Field type | Description | Required |
+| ----- | ---- | ----------- | -------- |
+| secret | string | Reference to a K8s secret in the `namespace/name` format. If no namespace is specified, then the namespace is assumed to be that of the experiment.  | No |
+
+## Result
+
+The script will be executed. If this script exits with a non-zero error code, the `run` task and therefore the experiment to which it belongs will fail.

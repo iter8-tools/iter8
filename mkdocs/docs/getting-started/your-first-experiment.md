@@ -7,22 +7,22 @@ template: main.html
 !!! tip "Load test https://example.com"
     Use an Iter8 experiment to load test https://example.com and validate error and latency related service level objectives (SLOs).
 
-## 1. [Install Iter8](install.md)
+## 1. [Install Iter8](../../getting-started/install.md)
 
 ## 2. Download experiment
-Download the `load-test` experiment folder from the [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
+[Iter8 Hub](../README.md) enables users to share, find, and download Iter8 experiment samples. Download the `load-test` experiment sample from the hub as follows.
 
 ```shell
 iter8 hub -e load-test
 ```
 
-## 3. Run experiment
-The `iter8 run` command reads the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the result of the experiment into the `result.yaml` file. Run `load-test` as follows.
-
+## 3. Launch experiment
 ```shell
 cd load-test
 iter8 run
 ```
+
+The above command reads in the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the results of the experiment into the `results.yaml` file.
 
 ??? note "Look inside experiment.yaml"
     ```yaml
@@ -37,13 +37,14 @@ iter8 run
     # this task uses the built-in metrics collected by task 1 for validation
     - task: assess-app-versions
       with:
-        SLOs:
-          # error rate must be 0
-        - metric: built-in/error-rate
-          upperLimit: 0
-          # 95th percentile latency must be under 100 msec
-        - metric: built-in/p95.0
-          upperLimit: 100
+        criteria:
+          SLOs:
+            # error rate must be 0
+          - metric: iter8-fortio/error-rate
+            upperLimit: 0
+            # 95th percentile latency must be under 100 msec
+          - metric: iter8-fortio/p95.0
+            upperLimit: 100
     ```
 
 ## 4. Assert outcomes
@@ -86,40 +87,40 @@ iter8 gen
     -----------------------------|-----
                              SLOs|
     -----------------------------|-----
-         built-in/error-rate <= 0|true
+     iter8-fortio/error-rate <= 0|true
     -----------------------------|-----
-            built-in/p95.0 <= 100|true
+        iter8-fortio/p95.0 <= 100|true
     -----------------------------|-----
 
 
     -----------------------------|-----
                           Metrics|
     -----------------------------|-----
-             built-in/error-count|0
+         iter8-fortio/error-count|0
     -----------------------------|-----
-              built-in/error-rate|0
+          iter8-fortio/error-rate|0
     -----------------------------|-----
-             built-in/max-latency|201.75 (msec)
+         iter8-fortio/max-latency|200.45 (msec)
     -----------------------------|-----
-            built-in/mean-latency|17.02 (msec)
+        iter8-fortio/mean-latency|18.77 (msec)
     -----------------------------|-----
-             built-in/min-latency|3.80 (msec)
+         iter8-fortio/min-latency|4.76 (msec)
     -----------------------------|-----
-                   built-in/p50.0|10.75 (msec)
+               iter8-fortio/p50.0|11.74 (msec)
     -----------------------------|-----
-                   built-in/p75.0|12.12 (msec)
+               iter8-fortio/p75.0|13.29 (msec)
     -----------------------------|-----
-                   built-in/p90.0|13.88 (msec)
+               iter8-fortio/p90.0|15.60 (msec)
     -----------------------------|-----
-                   built-in/p95.0|15.60 (msec)
+               iter8-fortio/p95.0|25 (msec)
     -----------------------------|-----
-                   built-in/p99.0|201.31 (msec)
+               iter8-fortio/p99.0|200.34 (msec)
     -----------------------------|-----
-                   built-in/p99.9|201.71 (msec)
+               iter8-fortio/p99.9|200.44 (msec)
     -----------------------------|-----
-           built-in/request-count|100
+       iter8-fortio/request-count|100
     -----------------------------|-----
-          built-in/stddev-latency|37.81 (msec)
+      iter8-fortio/stddev-latency|37.23 (msec)
     -----------------------------|-----
     ```
 
