@@ -1,5 +1,10 @@
 package base
 
+import (
+	"path/filepath"
+	"runtime"
+)
+
 // int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
 func int64Pointer(i int64) *int64 {
 	return &i
@@ -23,4 +28,11 @@ func float64Pointer(f float64) *float64 {
 // stringPointer takes string as input, creates a new variable with the input value, and returns a pointer to the variable
 func stringPointer(s string) *string {
 	return &s
+}
+
+// CompletePath is a helper function for converting file paths, specified relative to the caller of this function, into absolute ones.
+// CompletePath is useful in tests and enables deriving the absolute path of experiment YAML files.
+func CompletePath(prefix string, suffix string) string {
+	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
+	return filepath.Join(filepath.Dir(filename), prefix, suffix)
 }

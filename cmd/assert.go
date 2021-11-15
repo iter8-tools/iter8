@@ -191,7 +191,7 @@ func (exp *experiment) slosSatisfiedBy(version int) bool {
 }
 
 func init() {
-	rootCmd.AddCommand(assertCmd)
+	RootCmd.AddCommand(assertCmd)
 	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", completed, noFailure, slos, slosByPrefix))
 	assertCmd.MarkFlagRequired("condition")
 	assertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")

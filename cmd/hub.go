@@ -57,7 +57,7 @@ var hubCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(hubCmd)
+	RootCmd.AddCommand(hubCmd)
 	hubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid iter8hub folder; must be one of { load-test }")
 	hubCmd.MarkFlagRequired("experiment")
 }

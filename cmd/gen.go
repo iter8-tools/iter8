@@ -33,7 +33,6 @@ var genCmd = &cobra.Command{
 
 	# generate output from experiment using a custom Go template specified in the iter8.tpl file
 	iter8 gen -o custom`,
-	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		var tmpl *template.Template
 		var err error
@@ -91,6 +90,6 @@ var genCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(genCmd)
+	RootCmd.AddCommand(genCmd)
 	genCmd.Flags().StringVarP(&outputFormat, "outputFormat", "o", "text", "text | custom")
 }
