@@ -31,7 +31,7 @@ var validHubFolders = map[string]bool{
 // hubCmd represents the hub command
 var hubCmd = &cobra.Command{
 	Use:   "hub",
-	Short: "download an experiment folder from the Iter8 Hub",
+	Short: "download experiment from Iter8 Hub",
 	Example: `
 	# download the load-test experiment folder
 	iter8 hub -e load-test

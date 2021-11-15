@@ -25,7 +25,7 @@ var (
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "format experiment spec and its result using a go template",
+	Short: "generate formatted output from experiment spec and result",
 	Example: `
 	# generate text output of the experiment using the built-in Go template
 	iter8 gen -o text
