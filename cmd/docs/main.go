@@ -21,15 +21,7 @@ func main() {
 		base := filepath.Base(filename)
 		name := strings.TrimSuffix(base, path.Ext(base))
 		title := strings.Title(strings.Replace(name, "_", " ", -1))
-		tpl := `---
-template: main.html
-title: "%s"
-hide:
-- toc
----
-
-`
-		return fmt.Sprintf(tpl, title)
+		return fmt.Sprintf("---\ntemplate: main.html\ntitle: \"%s\"\n---\n\n", title)
 	}
 
 	// initialize command docs dir

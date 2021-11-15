@@ -36,7 +36,7 @@ var runCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
+	RootCmd.AddCommand(runCmd)
 }
 
 // Run an experiment
