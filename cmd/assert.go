@@ -34,7 +34,7 @@ var timeout time.Duration
 // assertCmd represents the assert command
 var assertCmd = &cobra.Command{
 	Use:   "assert",
-	Short: "assert if the experiment satisfies the specified conditions",
+	Short: "assert if experiment run satisfies specified conditions",
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
 		exp := &experiment{

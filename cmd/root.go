@@ -4,22 +4,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var globalUsage = `The Kubernetes metrics-driven experimentation platform
+
+Environment variables:
+
+| Name               | Description |
+|--------------------| ------------|
+| $LOG_LEVEL         | Iter8 log level. Values are: Trace, Debug, Info (default), Warning, Error, Fatal and Panic. |
+`
+
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "iter8",
-	Short: "Metrics driven experiments",
-	Example: `
-	# run the experiment defined in the local file named experiment.yaml
-	iter8 run
-
-	# assert that the experiment completed without failure and found a winner
-	iter8 assert -c completed -c noFailure -c winnerFound
-	
-	# report experiment results using the built-in text template
-	iter8 gen
-
-	# report experiment results using a custom go template specified in iter8.tpl file
-	iter8 gen -o custom`,
+	Use:     "iter8",
+	Short:   "Metrics driven experiments",
+	Long:    globalUsage,
+	Version: "v0.8",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -34,4 +33,5 @@ func Execute() {
 func init() {
 	// disable completion command for now
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
+	RootCmd.InitDefaultVersionFlag()
 }
