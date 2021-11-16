@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/antonmedv/expr"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
@@ -14,8 +16,17 @@ import (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "run experiment",
-	Long:  `Run the experiment defined in the local file named experiment.yaml`,
+	Short: "run an experiment",
+	Long:  `Run an experiment. This command will read the experiment spec from the local file named experiment.yaml, and write the result of the experiment run to the local file named result.yaml.`,
+	Example: `
+	# download the load-test experiment
+	iter8 hub -e load-test
+	
+	cd load-test
+
+	# run it
+	iter8 run
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Logger.Trace("build started")
 		exp, err := build(false)
@@ -52,22 +63,45 @@ func (e *experiment) run() error {
 		}
 	}
 	for i, t := range e.tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v", i) + " : started")
-		err = t.Run(e.Experiment)
-		if err != nil {
-			log.Logger.Error("task " + fmt.Sprintf("%v", i) + " : " + "failure")
-			e.failExperiment()
-			return err
-		} else {
-			e.incrementNumCompletedTasks()
-			err = writeResult(e)
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : started")
+		shouldRun := true
+		// if task has a condition
+		if cond := base.GetIf(t); cond != nil {
+			// condition evaluates to false ... then shouldRun is false
+			program, err := expr.Compile(*cond, expr.Env(e), expr.AsBool())
 			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("unable to compile if clause")
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v", i) + " : " + "completed")
+
+			output, err := expr.Run(program, e)
+			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("unable to run if clause")
+				return err
+			}
+
+			shouldRun = output.(bool)
 		}
+		if shouldRun {
+			err = t.Run(e.Experiment)
+			if err != nil {
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "failure")
+				e.failExperiment()
+				return err
+			}
+		} else {
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "skipped")
+		}
+
+		e.incrementNumCompletedTasks()
+		err = writeResult(e)
+		if err != nil {
+			return err
+		}
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "completed")
 	}
 	return nil
+
 }
 
 // write experiment result to file

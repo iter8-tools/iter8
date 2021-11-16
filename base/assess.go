@@ -63,6 +63,11 @@ func getSLOStrs(slos []SLO) []string {
 	return sloStrs
 }
 
+// GetName returns the name of the assess task
+func (t *assessTask) GetName() string {
+	return AssessTaskName
+}
+
 // Run executes the assess-app-versions task
 func (t *assessTask) Run(exp *Experiment) error {
 	if t.With.Criteria == nil ||

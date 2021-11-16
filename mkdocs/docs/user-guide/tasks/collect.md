@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# `metrics/collect`
+# `gen-load-and-collect-metrics`
 The `metrics/collect` task enables collection of [built-in metrics](../../metrics/builtin.md). It generates a stream of HTTP requests to one or more app versions, with payload (optional), and collects latency and error metrics.
 
 ## Example

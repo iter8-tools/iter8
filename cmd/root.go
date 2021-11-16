@@ -16,7 +16,7 @@ Environment variables:
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:     "iter8",
-	Short:   "Metrics driven experiments",
+	Short:   "metrics driven experiments",
 	Long:    globalUsage,
 	Version: "v0.8",
 	// Uncomment the following line if your bare application

@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	scratchEnv string = "SCRATCH_DIR=/scratch"
+	RunTaskName        = "run"
+	scratchEnv  string = "SCRATCH_DIR=/scratch"
 )
 
 // runInputs contains inputs for the run task
@@ -86,6 +87,11 @@ func (t *runTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 	// append the scratch environment variable
 	cmd.Env = append(os.Environ(), scratchEnv)
 	return cmd, nil
+}
+
+// GetName returns the name of the assess task
+func (t *runTask) GetName() string {
+	return RunTaskName
 }
 
 // Run the command.
