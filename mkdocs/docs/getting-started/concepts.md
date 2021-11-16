@@ -40,12 +40,11 @@ Experiments are specified declaratively using a simple YAML file as shown below.
 # this experiment involves only one version of the app
 - task: assess-app-versions
   with:
-    criteria:
-      SLOs:
-      - metric: iter8-fortio/error-rate
-        upperLimit: 0
-      - metric: iter8-fortio/p95
-        upperLimit: 100
+    SLOs:
+    - metric: iter8-fortio/error-rate
+      upperLimit: 0
+    - metric: iter8-fortio/p95
+      upperLimit: 100
 ```
 
 ## Where can I run experiments?

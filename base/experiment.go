@@ -97,12 +97,6 @@ type MetricMeta struct {
 	Type        MetricType `json:"type" yaml:"type"`
 }
 
-// Criteria is list of criteria against which app versions are evaluated
-type Criteria struct {
-	// SLOs is a list of SLOs
-	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
-}
-
 // SLO is a service level objective
 type SLO struct {
 	// Metric is the fully qualified metric name (i.e., in the backendName/metricName format)
