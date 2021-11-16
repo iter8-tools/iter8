@@ -37,14 +37,13 @@ The above command reads in the experiment specified in the `experiment.yaml` fil
     # this task uses the built-in metrics collected by task 1 for validation
     - task: assess-app-versions
       with:
-        criteria:
-          SLOs:
-            # error rate must be 0
-          - metric: iter8-fortio/error-rate
-            upperLimit: 0
-            # 95th percentile latency must be under 100 msec
-          - metric: iter8-fortio/p95.0
-            upperLimit: 100
+        SLOs:
+          # error rate must be 0
+        - metric: iter8-fortio/error-rate
+          upperLimit: 0
+          # 95th percentile latency must be under 100 msec
+        - metric: iter8-fortio/p95.0
+          upperLimit: 100
     ```
 
 ## 4. Assert outcomes

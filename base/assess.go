@@ -10,8 +10,8 @@ import (
 
 // assessInputs contain the inputs to the assess-app-versions task to be executed.
 type assessInputs struct {
-	// Criteria is the assessment criteria
-	Criteria *Criteria `json:"criteria" yaml:"criteria"`
+	// SLOs is a list of service level objectives
+	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 }
 
 // assessTask enables assessment of versions
@@ -70,9 +70,7 @@ func (t *assessTask) GetName() string {
 
 // Run executes the assess-app-versions task
 func (t *assessTask) Run(exp *Experiment) error {
-	if t.With.Criteria == nil ||
-		t.With.Criteria.SLOs == nil ||
-		len(t.With.Criteria.SLOs) == 0 ||
+	if len(t.With.SLOs) == 0 ||
 		exp.Result.Insights.NumAppVersions == nil ||
 		*exp.Result.Insights.NumAppVersions == 0 {
 		// do nothing for now
@@ -89,7 +87,7 @@ func (t *assessTask) Run(exp *Experiment) error {
 	}
 
 	// set SLOStrs (if needed)
-	err = exp.Result.Insights.setSLOStrs(getSLOStrs(t.With.Criteria.SLOs))
+	err = exp.Result.Insights.setSLOStrs(getSLOStrs(t.With.SLOs))
 	if err != nil {
 		return err
 	}
@@ -101,7 +99,7 @@ func (t *assessTask) Run(exp *Experiment) error {
 	}
 
 	// set SLOsSatisfied
-	exp.Result.Insights.SLOsSatisfied = evaluateSLOs(exp, t.With.Criteria.SLOs)
+	exp.Result.Insights.SLOsSatisfied = evaluateSLOs(exp, t.With.SLOs)
 
 	// set SLOsSatisfiedBy
 	exp.Result.Insights.SLOsSatisfiedBy = computeSLOsSatisfiedBy(exp)
