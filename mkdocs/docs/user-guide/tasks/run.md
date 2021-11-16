@@ -2,119 +2,77 @@
 template: main.html
 ---
 
-# `run`
+# Run
 The `run` task executes a bash script.
 
-## Basic Example
-
-The following (partially-specified) experiment executes the one line script `kubectl apply` using a YAML manifest at the end of the experiment.
-
+## Illustrative Examples
+Send a Slack notification.
 ```yaml
-kind: Experiment
-...
-spec:
-  ...
-  strategy:
-    ...
-    actions:
-      finish:
-      - run: kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/mysample/manifest.yaml
+- run: |
+    curl -d "text=Experiment is complete. New version is promoted." -d "channel=C123456" \
+    -H "Authorization: Bearer xoxb-not-a-real-token-this-will-not-work" \
+    -X POST https://slack.com/api/chat.postMessage  
 ```
 
-## Conditional Execution
-
-The `run` task can be [executed conditionally](../experiment.md#taskspec), where the condition is specified using the `if` clause. Supported conditions include `WinnerFound()`, `CandidateWon()` and their negations using the `not` keyword.
-
+Trigger a GitHub Actions workflow.
 ```yaml
-kind: Experiment
-...
-spec:
-  ...
-  strategy:
-    ...
-    actions:
-      finish: # run the following sequence of tasks at the end of the experiment
-      - if: CandidateWon()
-        run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/candidate.yaml"
-      - if: not CandidateWon()
-        run: "kubectl apply -f https://raw.githubusercontent.com/iter8-tools/iter8/master/samples/knative/quickstart/baseline.yaml"
+- run: |
+    echo xoxb-not-a-real-token-this-will-not-work > token.txt
+    gh auth login --with-token < token.txt
+    gh repo clone my-repo
+    cd my-repo
+    gh workflow run promote.yaml -R github.com/me/my-repo
 ```
 
-## Secret
-
-The `run` task can be used with a Kubernetes secret provided to it as an input.
-
+Run a `kubectl` command.
 ```yaml
-kind: Experiment
-...
-spec:
-  ...
-  strategy:
-    ...
-    actions:
-      finish: # run the following sequence of tasks at the end of the experiment
-      - run: "git clone https://username:@< .Secret 'token' >@@github.com/username/repo.git"
-        with:
-          # reference to a K8s secret resource in the namespace/name format. If no namespace is specified, the namespace of the secret is assumed to be that of the experiment.
-          secret: myns/mysecret
+- run: |
+    kubectl apply -f new-version-of-my-app.yaml -n my-app-namespace
 ```
 
-In the above example, a `token` value is extracted from the given Kubernetes secret, and inserted into the (templated) `git clone` script. This task requires the secret resource `mysecret` to be available in the `myns` namespace, and requires the secret to contain `token` as a key in its `data` section.
+Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback.
+```yaml
+- task: assess-app-versions
+  ...
+- if: not SLOsBy(1)
+  run: |
+    kubectl rollout undo deployment/my-app-deployment
+```
 
-## Placeholders
+### Conditional Execution
+Tasks within an experiment can be [executed conditionally](../conditional.md) using `if` clauses. This feature is especially useful when combined with `run` tasks.
 
-The script to be executed may contain placeholders. Placeholders in this task use `@<` and `>@` as the left and right delimiters respectively. Placeholders are especially handy for specifying data in a Kubernetes secret, supplying the secret as part of the task, and extracting the secret within the script at runtime. See [above](#secret) for an example.
-
-
+Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback.
+```yaml
+- task: assess-app-versions
+  ...
+- if: not SLOsBy(1)
+  run: |
+    kubectl rollout undo deployment/my-app-deployment
+```
 
 ## Scratch folder
 
-The `SCRATCH_DIR` environment variable points to a scratch folder. This intended for creating and manipulating files as part of the `run` script.
+The `SCRATCH_DIR` environment variable points to a scratch folder. This space is intended for creating and manipulating files as part of the `run` script.
 
 ```yaml
-kind: Experiment
-...
-spec:
-  ...
-  strategy:
-    ...
-    actions:
-      finish: # run the following sequence of tasks at the end of the experiment
-      - run: |
-          cd $SCRATCH_DIR
-          echo "hello" > world.txt
+- run: |
+    cd $SCRATCH_DIR
+    echo "hello" > world.txt
 ```
 
 ## Available commands
 
-The Dockerfile used to build the task runner image is [here](https://github.com/iter8-tools/handler/blob/main/Dockerfile). In addition to the standard linux commands (`sed`, `awk`, ...) available in its base image, the task runner also includes the commands `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`.
+When you run experiments on your local machine, any command that is available in your `PATH` can be used as part of the `run` task. When you run experiments in Kubernetes, in addition to the `iter8` command, the Iter8 container also includes `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`, all of which can be used as part of the `run` task.
 
 ```yaml
 kind: Experiment
-...
-spec:
-  ...
-  strategy:
-    ...
-    actions:
-      finish: # a few things you can do within the run script
-      - run: |
-          kustomize build hello/world/folder > manifest.yaml
-          kubectl apply -f manifest.yaml
-          helm upgrade my-app helm/chart --install
-          yq -i a=b manifest.yaml
-          git clone https://github.com/iter8-tools/iter8.git
-          gh pr create
-          curl https://iter8.tools -O $SCARCH_DIR/i.html
+- run: |
+    kustomize build hello/world/folder > manifest.yaml
+    kubectl apply -f manifest.yaml
+    helm upgrade my-app helm/chart --install
+    yq -i a=b manifest.yaml
+    git clone https://github.com/iter8-tools/iter8.git
+    gh pr create
+    curl https://iter8.tools -O $SCARCH_DIR/i.html
 ```
-
-
-## Inputs
-
-| Field name | Field type | Description | Required |
-| ----- | ---- | ----------- | -------- |
-| secret | string | Reference to a K8s secret in the `namespace/name` format. If no namespace is specified, then the namespace is assumed to be that of the experiment.  | No |
-
-## Result
-
-The script will be executed. If this script exits with a non-zero error code, the `run` task and therefore the experiment to which it belongs will fail.
