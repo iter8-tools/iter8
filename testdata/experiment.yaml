@@ -16,3 +16,7 @@
         # 95th percentile latency must be under 100 msec
       - metric: iter8-fortio/p95.0
         upperLimit: 100
+- if: SLOs()
+  run: echo "all good"
+- if: not SLOs()
+  run: echo "whatever happened"  

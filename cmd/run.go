@@ -28,7 +28,7 @@ var runCmd = &cobra.Command{
 	iter8 run
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Logger.Trace("build started")
+		log.Logger.Trace("build called")
 		exp, err := build(false)
 		log.Logger.Trace("build finished")
 		if err != nil {
@@ -89,6 +89,7 @@ func (e *experiment) run() error {
 				e.failExperiment()
 				return err
 			}
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "completed")
 		} else {
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "skipped")
 		}
@@ -98,7 +99,6 @@ func (e *experiment) run() error {
 		if err != nil {
 			return err
 		}
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "completed")
 	}
 	return nil
 
