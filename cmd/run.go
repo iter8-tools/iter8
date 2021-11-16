@@ -91,7 +91,7 @@ func (e *experiment) run() error {
 			}
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "completed")
 		} else {
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("if clause evaluated to false: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "skipped")
 		}
 
 		e.incrementNumCompletedTasks()
