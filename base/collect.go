@@ -209,6 +209,11 @@ func (t *collectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) 
 	return ifr, err
 }
 
+// GetName returns the name of the assess task
+func (t *collectTask) GetName() string {
+	return CollectTaskName
+}
+
 // Run executes the metrics/collect task
 func (t *collectTask) Run(exp *Experiment) error {
 	var err error

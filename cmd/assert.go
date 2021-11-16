@@ -34,7 +34,34 @@ var timeout time.Duration
 // assertCmd represents the assert command
 var assertCmd = &cobra.Command{
 	Use:   "assert",
-	Short: "assert if experiment run satisfies specified conditions",
+	Short: "assert if experiment run satisfies the specified conditions",
+	Long:  "Assert if experiment run satisfies the specified conditions. This command exits with code 0, if assert conditions are satisfied. Else, it returns with code 1.",
+	Example: `
+	# download the load-test experiment
+	iter8 hub -e load-test
+
+	cd load-test
+
+	# run it
+	iter8 run
+
+	# assert that the experiment completed without failures, 
+	# and SLOs were satisfied
+	iter8 assert -c completed -c nofailure -c slos
+
+	# another way to write the above assertion
+	iter8 assert -c completed,nofailure,slos
+
+	# if the experiment involves multiple app versions, 
+	# SLOs can be asserted for individual versions
+	# for example, the following command asserts that
+	# SLOs are satisfied by version numbered 0
+	iter8 assert -c completed,nofailures,slosby=0
+
+	# timeouts are useful for an experiment that may be long running
+	# and may run in the background
+	iter8 assert -c completed,nofailures,slosby=0 -t 5s
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
 		exp := &experiment{
@@ -69,7 +96,7 @@ var assertCmd = &cobra.Command{
 						log.Logger.Info("experiment failed")
 					}
 				} else if strings.ToLower(cond) == slos {
-					slos := exp.slosSatisfiedByAllVersions()
+					slos := exp.SLOs()
 					allGood = allGood && slos
 					if slos {
 						log.Logger.Info("SLOs are satisfied")
@@ -81,7 +108,7 @@ var assertCmd = &cobra.Command{
 					if err != nil {
 						os.Exit(1)
 					}
-					iv := exp.slosSatisfiedBy(version)
+					iv := exp.SLOsBy(version)
 					allGood = allGood && iv
 					if iv {
 						log.Logger.Info(version, " satisfies objectives")
@@ -135,25 +162,6 @@ func (exp *experiment) noFailure() bool {
 	return false
 }
 
-// slosSatisfiedByAllVersions returns true if all versions satisfy SLOs
-// if the relevant values are missing, this function returns false
-func (exp *experiment) slosSatisfiedByAllVersions() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if exp.Result.Insights != nil {
-				if exp.Result.Insights.NumAppVersions != nil {
-					if exp.Result.Insights.SLOsSatisfiedBy != nil {
-						if *exp.Result.Insights.NumAppVersions == len(exp.Result.Insights.SLOsSatisfiedBy) {
-							return true
-						}
-					}
-				}
-			}
-		}
-	}
-	return false
-}
-
 // extract version from string
 func (exp *experiment) extractVersion(cond string) (int, error) {
 	tokens := strings.Split(cond, "=")
@@ -172,22 +180,6 @@ func (exp *experiment) extractVersion(cond string) (int, error) {
 	}
 	log.Logger.Error("number of app versions: ", *exp.Result.Insights.NumAppVersions, "; valid app version must be in the range 0 to ", *exp.Result.Insights.NumAppVersions-1)
 	return -1, errors.New(fmt.Sprint("number of app versions: ", *exp.Result.Insights.NumAppVersions, "; valid app version must be in the range 0 to ", *exp.Result.Insights.NumAppVersions-1))
-}
-
-// slosSatisfiedBy returns true if version satisfies SLOs
-func (exp *experiment) slosSatisfiedBy(version int) bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if exp.Result.Insights != nil {
-				for _, v := range exp.Result.Insights.SLOsSatisfiedBy {
-					if v == version {
-						return true
-					}
-				}
-			}
-		}
-	}
-	return false
 }
 
 func init() {

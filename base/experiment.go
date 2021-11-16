@@ -1,6 +1,7 @@
 package base
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -19,6 +20,17 @@ type Experiment struct {
 // Task is an object that can be run
 type Task interface {
 	Run(exp *Experiment) error
+	GetName() string
+}
+
+func GetIf(t Task) *string {
+	var jsonBytes []byte
+	var tm taskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to taskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+	return tm.If
 }
 
 // ExperimentResult defines the current results from the experiment
@@ -212,4 +224,38 @@ func (e *Experiment) InitResults() {
 			MetricsInfo:    map[string]MetricMeta{},
 		},
 	}
+}
+
+// SLOsBy returns true if version satisfies SLOs
+func (exp *Experiment) SLOsBy(version int) bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.Insights != nil {
+				for _, v := range exp.Result.Insights.SLOsSatisfiedBy {
+					if v == version {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
+// SLOs returns true if all versions satisfy SLOs
+func (exp *Experiment) SLOs() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.Insights != nil {
+				if exp.Result.Insights.NumAppVersions != nil {
+					if exp.Result.Insights.SLOsSatisfiedBy != nil {
+						if *exp.Result.Insights.NumAppVersions == len(exp.Result.Insights.SLOsSatisfiedBy) {
+							return true
+						}
+					}
+				}
+			}
+		}
+	}
+	return false
 }
