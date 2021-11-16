@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# Run
+# `run`
 The `run` task executes a bash script.
 
 ## Illustrative Examples
@@ -28,15 +28,6 @@ Run a `kubectl` command.
 ```yaml
 - run: |
     kubectl apply -f new-version-of-my-app.yaml -n my-app-namespace
-```
-
-Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback.
-```yaml
-- task: assess-app-versions
-  ...
-- if: not SLOsBy(1)
-  run: |
-    kubectl rollout undo deployment/my-app-deployment
 ```
 
 ### Conditional Execution
