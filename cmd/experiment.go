@@ -26,7 +26,7 @@ func build(withResult bool) (*experiment, error) {
 	}
 	var err error
 	// read it in
-	log.Logger.Trace("build called")
+	log.Logger.Trace("build started")
 	e.Tasks, err = readSpec()
 	if err != nil {
 		return nil, err
@@ -54,24 +54,25 @@ func build(withResult bool) (*experiment, error) {
 			if err != nil {
 				return nil, err
 			}
+		} else {
+			// this is some other task
+			switch *t.Task {
+			case base.CollectTaskName:
+				task, err = base.MakeCollect(&t)
+				e.tasks = append(e.tasks, task)
+			case base.AssessTaskName:
+				task, err = base.MakeAssess(&t)
+				e.tasks = append(e.tasks, task)
+			default:
+				log.Logger.Error("unknown task: " + *t.Task)
+				return nil, errors.New("unknown task: " + *t.Task)
+			}
+
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		// this is some other task
-		switch *t.Task {
-		case base.CollectTaskName:
-			task, err = base.MakeCollect(&t)
-			e.tasks = append(e.tasks, task)
-		case base.AssessTaskName:
-			task, err = base.MakeAssess(&t)
-			e.tasks = append(e.tasks, task)
-		default:
-			log.Logger.Error("unknown task: " + *t.Task)
-			return nil, errors.New("unknown task: " + *t.Task)
-		}
-
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return e, err

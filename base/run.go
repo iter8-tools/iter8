@@ -100,7 +100,6 @@ func (t *runTask) Run(exp *Experiment) error {
 	if err != nil {
 		return err
 	}
-	log.Logger.WithStackTrace(cmd.String()).Trace("running command")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("combined execution failed")
