@@ -13,7 +13,7 @@ The following start action contains a `metrics/collect` task which is executed a
 start:
 - task: metrics/collect
   with:
-    versions:
+    versionInfo:
     - name: iter8-app
       url: http://iter8-app.default.svc:8000
     - name: iter8-app-candidate
