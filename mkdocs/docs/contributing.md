@@ -25,7 +25,7 @@ bug report and let us know!
 We welcome many different types of contributions including:
 
 * New Iter8 hub samples and tutorials
-* New features
+* Documentation
 * Builds, CI
 * New features
 * Bug fixes
@@ -176,10 +176,3 @@ Browse [http://localhost:8000](http://localhost:8000) to view your local Iter8 d
 2. The markdown files for Iter8 docs are located under the `iter8/mkdocs/docs` folder.
 
 You will see live updates to [http://localhost:8000](http://localhost:8000) as you update the above files.
-
-### Auto generation
-Auto generate docs for Iter8 commands as follows.
-
-```shell
-go run cmd/docs/main.go
-```
