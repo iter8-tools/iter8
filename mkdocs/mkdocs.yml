@@ -141,8 +141,10 @@ nav:
     - gen-load-and-collect-metrics: user-guide/tasks/collect.md
     - assess-app-versions: user-guide/tasks/assess.md
     - run (a bash script): user-guide/tasks/run.md
-  - Conditional execution: user-guide/conditional.md
-  - Version numbering: user-guide/versionnumbering.md
+  - Topics:
+    - Version numbering: user-guide/topics/versionnumbering.md
+    - Metrics: user-guide/topics/metrics.md
+    - Conditional task execution: user-guide/topics/conditional.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
 - News/Blog: news.md

@@ -7,7 +7,7 @@ The `assess-app-versions` assesses if app versions satisfy service level objecti
 
 This task is intended to be preceded by the [`gen-load-and-collect-metrics` task](collect.md). The latter task collects metrics for app versions, while the former task performs version assessments based on metrics.
 
-## Illustrative Example
+## Illustrative example
 Validate service level objectives (SLOs) for app versions  based on [Iter8's builtin metrics](collect.md).
 
 ```yaml
