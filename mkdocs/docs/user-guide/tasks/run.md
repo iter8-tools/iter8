@@ -30,7 +30,7 @@ Run a `kubectl` command.
     kubectl apply -f new-version-of-my-app.yaml -n my-app-namespace
 ```
 
-Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback. This is an example of [conditional task execution](../conditional.md).
+Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback. This is an example of [conditional task execution](../topics/conditional.md).
 ```yaml
 - task: assess-app-versions
   ...
