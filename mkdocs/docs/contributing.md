@@ -24,8 +24,8 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* Tutorials
-* Other documentation
+* New Iter8 hub samples and tutorials
+* New features
 * Builds, CI
 * New features
 * Bug fixes

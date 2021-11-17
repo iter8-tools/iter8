@@ -267,7 +267,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 	for i := range t.With.VersionInfo {
 		if fm[i] != nil {
 			// request count
-			m := iter8FortioPrefix + "/" + requestCountMetricName
+			m := iter8BuiltInPrefix + "/" + requestCountMetricName
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "number of requests",
 				Type:        CounterMetricType,
@@ -282,7 +282,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				}
 			}
 			// error count
-			m = iter8FortioPrefix + "/" + errorCountMetricName
+			m = iter8BuiltInPrefix + "/" + errorCountMetricName
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "number of errors",
 				Type:        CounterMetricType,
@@ -290,7 +290,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], val)
 
 			// error-rate
-			m = iter8FortioPrefix + "/" + errorRateMetricName
+			m = iter8BuiltInPrefix + "/" + errorRateMetricName
 			rc := float64(fm[i].DurationHistogram.Count)
 			if rc != 0 {
 				in.MetricsInfo[m] = MetricMeta{
@@ -301,7 +301,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			}
 
 			// mean-latency
-			m = iter8FortioPrefix + "/" + meanLatencyMetricName
+			m = iter8BuiltInPrefix + "/" + meanLatencyMetricName
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "mean latency",
 				Type:        GaugeMetricType,
@@ -310,7 +310,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Avg)
 
 			// stddev-latency
-			m = iter8FortioPrefix + "/" + stdDevMetricName
+			m = iter8BuiltInPrefix + "/" + stdDevMetricName
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "standard deviation of latency",
 				Type:        GaugeMetricType,
@@ -319,7 +319,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.StdDev)
 
 			// min-latency
-			m = iter8FortioPrefix + "/" + minLatencyMetricName
+			m = iter8BuiltInPrefix + "/" + minLatencyMetricName
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "minimum observed value of latency ",
 				Type:        GaugeMetricType,
@@ -327,7 +327,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
 
-			m = iter8FortioPrefix + "/" + maxLatencyMetricName
+			m = iter8BuiltInPrefix + "/" + maxLatencyMetricName
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "maximum observed value of latency ",
 				Type:        GaugeMetricType,
@@ -336,7 +336,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Max)
 
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				m = iter8FortioPrefix + "/" + fmt.Sprintf("p%0.1f", p.Percentile)
+				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%0.1f", p.Percentile)
 				in.MetricsInfo[m] = MetricMeta{
 					Description: fmt.Sprintf("%0.1f percentile latency", p.Percentile),
 					Type:        GaugeMetricType,

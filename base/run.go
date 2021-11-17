@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"text/template"
@@ -13,8 +14,11 @@ import (
 )
 
 const (
-	RunTaskName        = "run"
-	scratchEnv  string = "SCRATCH_DIR=/scratch"
+	RunTaskName = "run"
+)
+
+var (
+	tempDirEnv string = fmt.Sprintf("TEMP_DIR=%v", os.TempDir())
 )
 
 // runInputs contains inputs for the run task
@@ -84,8 +88,8 @@ func (t *runTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 
 	// create command to be executed
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
-	// append the scratch environment variable
-	cmd.Env = append(os.Environ(), scratchEnv)
+	// append the environment variable for temp dir
+	cmd.Env = append(os.Environ(), tempDirEnv)
 	return cmd, nil
 }
 
