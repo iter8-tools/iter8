@@ -1,5 +1,7 @@
 ---
 template: main.html
+hide:
+- navigation
 ---
 
 # Overview
@@ -10,7 +12,7 @@ As you get started, you are in the best position to give us feedback on areas of
 our project that we need help with including:
 
 * Problems found during setup of Iter8
-* Gaps in our quick start guide or other tutorials and documentation
+* Gaps in our quick start tutorial and other documentation
 * Bugs in our test and automation scripts
 
 If anything doesn't make sense, or doesn't work when you run it, please open a
@@ -22,12 +24,8 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* [Iter8 documentation/tutorials](tutorials.md)
+* New Iter8 hub samples and tutorials
 * New features
-    * [New K8s stack/service mesh/ingress](newk8sstack.md)
-    * Iter8 code samples for OpenShift
-    * [Analytics](analytics.md)
-    * Tasks
 * Builds, CI
 * Bug fixes
 * Web design for https://iter8.tools
@@ -35,23 +33,21 @@ We welcome many different types of contributions including:
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
-[community meetings](../getting-started/help.md#iter8-community-meetings) or [contact us](../getting-started/help.md) and let's discuss how we can work together. 
+[community meetings](getting-started/help.md#iter8-community-meetings) or [contact us](getting-started/help.md) and let us discuss how we can work together. 
 
 *** 
 
-## Come to [Iter8 Community Meetings](../getting-started/help.md#iter8-community-meetings)!
+## Come to [Iter8 Community Meetings](getting-started/help.md#iter8-community-meetings)!
 
 ***
 
 ## Find an Issue
 
-Iter8 issues are managed centrally [here](https://github.com/iter8-tools/iter8/issues).
+Iter8 issues are managed [here](https://github.com/iter8-tools/iter8/issues).
 
-We have good first issues for new contributors and help wanted issues suitable
-for any contributor. Issued labeled **good first issue** have extra information to
+Issued labeled **good first issue** have extra information to
 help you make your first contribution. Issues labeled **help wanted** are issues
-suitable for someone who isn't a core maintainer and is good to move onto after
-your first pull request.
+suitable for someone who has already submitted their first pull request and is good to move on to the second one.
 
 Sometimes there won’t be any issues with these labels. That’s ok! There is
 likely still something for you to work on. If you want to contribute but you
@@ -68,7 +64,7 @@ The best ways to reach us with a question when contributing is to ask on:
 
 * The original GitHub issue
 * `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
-* Bring your questions to our [community meetings](../getting-started/help.md#iter8-community-meetings)
+* Bring your questions to our [community meetings](getting-started/help.md#iter8-community-meetings)
 
 ## Pull Request Lifecycle
 

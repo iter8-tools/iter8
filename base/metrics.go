@@ -1,8 +1,8 @@
 package base
 
 const (
-	// iter8FortioPrefix for iter8-fortio metric names
-	iter8FortioPrefix = "iter8-fortio"
+	// iter8BuiltInPrefix for built-in metric names
+	iter8BuiltInPrefix = "built-in"
 )
 
 // MetricType identifies the type of the metric.

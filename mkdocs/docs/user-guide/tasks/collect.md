@@ -5,8 +5,8 @@ template: main.html
 # `gen-load-and-collect-metrics`
 The `gen-load-and-collect-metrics` task enables collection of [Iter8's built-in metrics](#built-in-metrics). It generates a stream of HTTP GET or POST requests to one or more app versions, and collects latency and error related metrics.
 
-## Illustrative examples
-Generate load and collect built-in metrics for a single version of an app.
+## Examples
+Generate load and collect built-in metrics for an app.
 ```yaml
 - task: gen-load-and-collect-metrics
   with:
@@ -14,7 +14,7 @@ Generate load and collect built-in metrics for a single version of an app.
     - url: https://example.com
 ```
 
-Generate load and collect built-in metrics for two app versions.
+Generate load and collect built-in metrics for two versions of an app.
 ```yaml
 - task: gen-load-and-collect-metrics
   with:
@@ -23,7 +23,7 @@ Generate load and collect built-in metrics for two app versions.
     - url: http://iter8-app-candidate.default.svc:8000
 ```
 
-Set the number of app versions to 2. Generate load and collect built-in metrics for the second version only.
+Generate load and collect built-in metrics for only the second version of an app.
 ```yaml
 - task: gen-load-and-collect-metrics
   with:
@@ -33,6 +33,19 @@ Set the number of app versions to 2. Generate load and collect built-in metrics 
 ```
 
 ## Inputs
+Inputs to this task may be specified as part of its `with` clause. An example is shown below.
+```yaml
+# this will send 300 HTTP GET requests to https://example.com
+# and collect built-in metrics
+- task: gen-load-and-collect-metrics
+  with:
+    numQueries: 300    
+    versionInfo:
+    - url: https://example.com
+```
+
+The following inputs are supported.
+
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | numQueries | int | number of requests to be sent to each version. Default value is 100. | No |
@@ -52,20 +65,20 @@ Set the number of app versions to 2. Generate load and collect built-in metrics 
 | headers | map[string]string | HTTP headers to be used in requests sent to this version. | No |
 
 ## Built-in metrics
-The following are the set of built-in Iter8 metrics.
+The following are the set of metrics collected by this task. Note that the set of latency percentiles is configurable using the `percentiles` [input field](#inputs). All metrics collected by this task have their [backend name](../topics/metrics.md) set to `built-in`.
 
-| Namespace | Name         | Type | Description |
-| ----- | ------------ | ----------- | -------- |
-| iter8-system | request-count | Counter | Number of requests |
-| iter8-system | error-count | Gauge | Number of responses with HTTP status code 4xx or 5xx |
-| iter8-system | error-rate | Gauge | Fraction of responses with HTTP status code 4xx or 5xx |
-| iter8-system | mean-latency | Gauge | Mean response latency |
-| iter8-system | latency-50th-percentile | Gauge | 50th percentile (median) response latency |
-| iter8-system | latency-75th-percentile | Gauge | 75th percentile response latency |
-| iter8-system | latency-90th-percentile | Gauge | 90th percentile response latency |
-| iter8-system | latency-95th-percentile | Gauge | 95th percentile response latency |
-| iter8-system | latency-99th-percentile | Gauge | 99th percentile response latency |
+| Name         | Type | Description |
+| ------------ | ----------- | -------- |
+| request-count | Counter | Number of requests |
+| error-count | Gauge | Number of responses with HTTP status code 4xx or 5xx |
+| error-rate | Gauge | Fraction of responses with HTTP status code 4xx or 5xx |
+| mean-latency | Gauge | Mean response latency |
+| latency-50th-percentile | Gauge | 50th percentile (median) response latency |
+| latency-75th-percentile | Gauge | 75th percentile response latency |
+| latency-90th-percentile | Gauge | 90th percentile response latency |
+| latency-95th-percentile | Gauge | 95th percentile response latency |
+| latency-99th-percentile | Gauge | 99th percentile response latency |
 
 ## Number of app versions
 
-Iter8 sets the number of app versions in the experiment as the length of the `versionInfo` input field of this task. If this equals `n`, the versions are numbered `0, ..., n-1`.
+Iter8 sets the [number of app versions](../topics/versionnumbering.md) in the experiment as the length of the `versionInfo` input field of this task. If this value equals `n`, the versions are numbered `0, ..., n-1`.

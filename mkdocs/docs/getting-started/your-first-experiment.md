@@ -39,10 +39,10 @@ The above command reads in the experiment specified in the `experiment.yaml` fil
       with:
         SLOs:
           # error rate must be 0
-        - metric: iter8-fortio/error-rate
+        - metric: built-in/error-rate
           upperLimit: 0
           # 95th percentile latency must be under 100 msec
-        - metric: iter8-fortio/p95.0
+        - metric: built-in/p95.0
           upperLimit: 100
     ```
 
@@ -86,40 +86,40 @@ iter8 gen
     -----------------------------|-----
                              SLOs|
     -----------------------------|-----
-     iter8-fortio/error-rate <= 0|true
+     built-in/error-rate <= 0|true
     -----------------------------|-----
-        iter8-fortio/p95.0 <= 100|true
+        built-in/p95.0 <= 100|true
     -----------------------------|-----
 
 
     -----------------------------|-----
                           Metrics|
     -----------------------------|-----
-         iter8-fortio/error-count|0
+         built-in/error-count|0
     -----------------------------|-----
-          iter8-fortio/error-rate|0
+          built-in/error-rate|0
     -----------------------------|-----
-         iter8-fortio/max-latency|200.45 (msec)
+         built-in/max-latency|200.45 (msec)
     -----------------------------|-----
-        iter8-fortio/mean-latency|18.77 (msec)
+        built-in/mean-latency|18.77 (msec)
     -----------------------------|-----
-         iter8-fortio/min-latency|4.76 (msec)
+         built-in/min-latency|4.76 (msec)
     -----------------------------|-----
-               iter8-fortio/p50.0|11.74 (msec)
+               built-in/p50.0|11.74 (msec)
     -----------------------------|-----
-               iter8-fortio/p75.0|13.29 (msec)
+               built-in/p75.0|13.29 (msec)
     -----------------------------|-----
-               iter8-fortio/p90.0|15.60 (msec)
+               built-in/p90.0|15.60 (msec)
     -----------------------------|-----
-               iter8-fortio/p95.0|25 (msec)
+               built-in/p95.0|25 (msec)
     -----------------------------|-----
-               iter8-fortio/p99.0|200.34 (msec)
+               built-in/p99.0|200.34 (msec)
     -----------------------------|-----
-               iter8-fortio/p99.9|200.44 (msec)
+               built-in/p99.9|200.44 (msec)
     -----------------------------|-----
-       iter8-fortio/request-count|100
+       built-in/request-count|100
     -----------------------------|-----
-      iter8-fortio/stddev-latency|37.23 (msec)
+      built-in/stddev-latency|37.23 (msec)
     -----------------------------|-----
     ```
 

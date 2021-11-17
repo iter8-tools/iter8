@@ -10,10 +10,10 @@
   with:
     SLOs:
       # error rate must be 0
-    - metric: iter8-fortio/error-rate
+    - metric: built-in/error-rate
       upperLimit: 0
       # 95th percentile latency must be under 100 msec
-    - metric: iter8-fortio/p95.0
+    - metric: built-in/p95.0
       upperLimit: 100
 - if: SLOs()
   run: echo "all good"

@@ -41,9 +41,9 @@ Experiments are specified declaratively using a simple YAML file as shown below.
 - task: assess-app-versions
   with:
     SLOs:
-    - metric: iter8-fortio/error-rate
+    - metric: built-in/error-rate
       upperLimit: 0
-    - metric: iter8-fortio/p95
+    - metric: built-in/p95
       upperLimit: 100
 ```
 

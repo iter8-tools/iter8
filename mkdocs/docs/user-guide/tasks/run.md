@@ -5,7 +5,7 @@ template: main.html
 # `run`
 The `run` task executes a bash script.
 
-## Illustrative examples
+## Examples
 Send a Slack notification.
 ```yaml
 - run: |
@@ -30,10 +30,7 @@ Run a `kubectl` command.
     kubectl apply -f new-version-of-my-app.yaml -n my-app-namespace
 ```
 
-### Conditional Execution
-Tasks within an experiment can be [executed conditionally](../conditional.md) using `if` clauses. This feature is especially useful when combined with `run` tasks.
-
-Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback.
+Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback. This is an example of [conditional task execution](../conditional.md).
 ```yaml
 - task: assess-app-versions
   ...
@@ -42,19 +39,19 @@ Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollba
     kubectl rollout undo deployment/my-app-deployment
 ```
 
-## Scratch folder
+## Temp dir
 
-The `SCRATCH_DIR` environment variable points to a scratch folder. This space is intended for creating and manipulating files as part of the `run` script.
+The script in `run` can have environment variables. One such pre-defined variable is `$TEMP_DIR` which points to the default directory to use for temporary files.
 
 ```yaml
 - run: |
-    cd $SCRATCH_DIR
+    cd $TEMP_DIR
     echo "hello" > world.txt
 ```
 
 ## Available commands
 
-When you run experiments on your local machine, any command that is available in your `PATH` can be used as part of the `run` task. When you run experiments in Kubernetes, in addition to the `iter8` command, the Iter8 container also includes `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`, all of which can be used as part of the `run` task.
+When running experiments on your local machine, any command that is available in your `PATH` can be used as part of the `run` task. When running experiments in Kubernetes, in addition to the `iter8` command, the Iter8 container also includes `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`, all of which can be used as part of the `run` task.
 
 ```yaml
 - run: |

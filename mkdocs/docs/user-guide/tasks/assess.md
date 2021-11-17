@@ -3,25 +3,25 @@ template: main.html
 ---
 
 # `assess-app-versions`
-The `assess-app-versions` assesses if app versions satisfy service level objectives (SLOs). SLOs are specified as inputs to the task in the form of metrics, and acceptable upper and lower limits on the metric values.
+This task assesses if app versions satisfy service level objectives (SLOs). SLOs are specified as inputs to the task in the form of metrics along with acceptable upper and lower limits on their values.
 
-This task is intended to be preceded by the [`gen-load-and-collect-metrics` task](collect.md). The latter task collects metrics for app versions, while the former task performs version assessments based on metrics.
+This task should be preceded in the experiment spec by other tasks that collect metrics such as the [`gen-load-and-collect-metrics` task](collect.md).
 
 ## Illustrative example
-Validate service level objectives (SLOs) for app versions  based on [Iter8's builtin metrics](collect.md).
+Validate service level objectives (SLOs) for app versions based on [Iter8's built-in metrics](collect.md).
 
 ```yaml
 - task: assess-app-versions
   with:
     SLOs:
       # error rate must be 0
-    - metric: iter8-fortio/error-rate
+    - metric: built-in/error-rate
       upperLimit: 0
       # mean latency must be under 50 msec
-    - metric: iter8-fortio/mean-latency
+    - metric: built-in/mean-latency
       upperLimit: 50
       # 95th percentile latency must be under 100 msec
-    - metric: iter8-fortio/p95.0
+    - metric: built-in/p95.0
       upperLimit: 100
 ```
 
@@ -33,6 +33,6 @@ Validate service level objectives (SLOs) for app versions  based on [Iter8's bui
 ### SLO
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| metric | string | Fully-qualified metric name, in the `backend-name/metric-name` format. | Yes |
+| metric | string | [Fully-qualified metric name](../topics/metrics.md). | Yes |
 | upperLimit | float64 | Acceptable upper limit on the value of the metric. | No |
 | lowerLimit | float64 | Acceptable lower limit on the value of the metric. | No |
