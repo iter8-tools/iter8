@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Load test https://example.com"
     Use an Iter8 experiment to load test https://example.com and validate error and latency related service level objectives (SLOs).
 
-## 1. [Install Iter8](../../getting-started/install.md)
+## 1. [Install Iter8](install.md)
 
 ## 2. Download experiment
 [Iter8 Hub](../README.md) enables users to share, find, and download Iter8 experiment samples. Download the `load-test` experiment sample from the hub as follows.
