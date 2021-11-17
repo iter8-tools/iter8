@@ -2,10 +2,10 @@
 template: main.html
 ---
 
-# Conditional Execution
+# Conditional Task Execution
 The execution of a task within an experiment can be made conditional based on an `if` clause. The task is executed if and only if the clause evaluates to true, and is skipped otherwise. A few illustrative examples of conditional execution are shown below.
 
-## Illustrative Examples
+## Illustrative examples
 
 Assess app versions. `If` SLOs are `not` satisfied, send a Slack notification.
 ```yaml

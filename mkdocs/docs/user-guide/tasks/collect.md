@@ -3,21 +3,33 @@ template: main.html
 ---
 
 # `gen-load-and-collect-metrics`
-The `metrics/collect` task enables collection of [built-in metrics](../../metrics/builtin.md). It generates a stream of HTTP requests to one or more app versions, with payload (optional), and collects latency and error metrics.
+The `gen-load-and-collect-metrics` task enables collection of [Iter8's built-in metrics](#built-in-metrics). It generates a stream of HTTP GET or POST requests to one or more app versions, and collects latency and error related metrics.
 
-## Example
-
-The following start action contains a `metrics/collect` task which is executed at the start of the experiment. The task sends a certain number of HTTP requests to each version specified in the task, and collects built-in latency/error metrics for them.
-
+## Illustrative examples
+Generate load and collect built-in metrics for a single version of an app.
 ```yaml
-start:
-- task: metrics/collect
+- task: gen-load-and-collect-metrics
   with:
     versionInfo:
-    - name: iter8-app
-      url: http://iter8-app.default.svc:8000
-    - name: iter8-app-candidate
-      url: http://iter8-app-candidate.default.svc:8000
+    - url: https://example.com
+```
+
+Generate load and collect built-in metrics for two app versions.
+```yaml
+- task: gen-load-and-collect-metrics
+  with:
+    versionInfo:
+    - url: http://iter8-app.default.svc:8000
+    - url: http://iter8-app-candidate.default.svc:8000
+```
+
+Set the number of app versions to 2. Generate load and collect built-in metrics for the second version only.
+```yaml
+- task: gen-load-and-collect-metrics
+  with:
+    versionInfo:
+    - # set to null
+    - url: http://iter8-app-candidate.default.svc:8000
 ```
 
 ## Inputs
@@ -36,21 +48,24 @@ start:
 ### Version
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| name | string | Name of the version. Version names must be unique. If the version name matches the name of a version in the experiment's `versionInfo` section, then the version is considered *real*. If the version name does not match the name of a version in the experiment's `versionInfo` section, then the version is considered *pseudo*. Built-in metrics collected for real versions can be used within the experiment's `criteria` section. Pseudo versions are useful if the intent is only to generate load (`GET` and `POST` requests). Built-in metrics collected for pseudo versions cannot be used with the experiment's `criteria` section. | Yes |
-| headers | map[string]string | Additional HTTP headers to be used in requests sent to this version. | No |
-| url | string | HTTP URL of this version. | Yes |
+| url | string | HTTP(S) URL where version receives GET or POST requests. | Yes |
+| headers | map[string]string | HTTP headers to be used in requests sent to this version. | No |
 
+## Built-in metrics
+The following are the set of built-in Iter8 metrics.
 
-## Result
+| Namespace | Name         | Type | Description |
+| ----- | ------------ | ----------- | -------- |
+| iter8-system | request-count | Counter | Number of requests |
+| iter8-system | error-count | Gauge | Number of responses with HTTP status code 4xx or 5xx |
+| iter8-system | error-rate | Gauge | Fraction of responses with HTTP status code 4xx or 5xx |
+| iter8-system | mean-latency | Gauge | Mean response latency |
+| iter8-system | latency-50th-percentile | Gauge | 50th percentile (median) response latency |
+| iter8-system | latency-75th-percentile | Gauge | 75th percentile response latency |
+| iter8-system | latency-90th-percentile | Gauge | 90th percentile response latency |
+| iter8-system | latency-95th-percentile | Gauge | 95th percentile response latency |
+| iter8-system | latency-99th-percentile | Gauge | 99th percentile response latency |
 
-This task will run for the specified duration (`time`), send requests to each version (`versions`) at the specified rate (`qps`), and will collect [built-in metrics]() for each version. Built-in metric values are stored in the metrics field of the experiment status in the same manner as custom metric values.
+## Number of app versions
 
-The task may result in an error, for instance, if one or more required fields are missing or if URLs are mis-specified. In this case, the experiment to which it belongs will fail.
-
-## Start vs loop actions
-If this task is embedded in start actions, it will run once at the beginning of the experiment.
-
-If this task is embedded in loop actions, it will run in each loop of the experiment. The results from each run will be aggregated.
-
-## Load generation without metrics collection
-You can use this task to send HTTP GET and POST requests to app versions without collecting metrics by setting the [`loadOnly` input](#inputs) to `true`.
+Iter8 sets the number of app versions in the experiment as the length of the `versionInfo` input field of this task. If this equals `n`, the versions are numbered `0, ..., n-1`.

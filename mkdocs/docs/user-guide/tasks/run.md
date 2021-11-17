@@ -5,7 +5,7 @@ template: main.html
 # `run`
 The `run` task executes a bash script.
 
-## Illustrative Examples
+## Illustrative examples
 Send a Slack notification.
 ```yaml
 - run: |
@@ -57,7 +57,6 @@ The `SCRATCH_DIR` environment variable points to a scratch folder. This space is
 When you run experiments on your local machine, any command that is available in your `PATH` can be used as part of the `run` task. When you run experiments in Kubernetes, in addition to the `iter8` command, the Iter8 container also includes `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`, all of which can be used as part of the `run` task.
 
 ```yaml
-kind: Experiment
 - run: |
     kustomize build hello/world/folder > manifest.yaml
     kubectl apply -f manifest.yaml
