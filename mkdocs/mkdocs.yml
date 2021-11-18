@@ -2,8 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Maximize release velocity and business value of apps while protecting end-user experience.
-  Use in any Kubernetes environment. Quick start in 5 mins.
+  Iter8 enables DevOps/SRE/MLOps/data science teams to maximize release velocity and business value of apps and ML models while protecting end-user experience. Quick start in 2 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -60,7 +59,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Metrics Driven Experiments and Releases
+  title: Metrics Driven Experiments
   version:
     provider: mike
   social:
@@ -69,8 +68,7 @@ extra:
   - icon: fontawesome/brands/slack
     link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
 
-  iter8:
-    install_version: 0.7.30
+  generator: false
 
 # Extensions
 markdown_extensions:
@@ -115,86 +113,39 @@ markdown_extensions:
 # Page tree
 nav:
 - Home: index.md
-- Concepts:
-  - What is Iter8?: concepts/whatisiter8.md
-  - Key features: concepts/features.md
-  - Experiment building blocks: concepts/buildingblocks.md
 - Getting Started:
-  - Your first experiment: getting-started/first-experiment.md
+  - Your first experiment: getting-started/your-first-experiment.md
   - Install Iter8: getting-started/install.md
-  - Get help: getting-started/help.md
-  - Setup for tutorials: getting-started/setup-for-tutorials.md
+  - Concepts: getting-started/concepts.md
+  - v0.8 tech preview: getting-started/v0.8.md
+  - Community: getting-started/help.md
 - Tutorials:
-  - Kubernetes deployments:
-    - SLO validation with payload: tutorials/deployments/slo-validation-payload.md
-    - Auto create pull request: tutorials/deployments/slo-validation-pr.md
-    - Auto trigger GitHub Actions: tutorials/deployments/slo-validation-ghaction.md
-    - SLO validation with chaos: tutorials/deployments/slo-validation-chaos.md
-  - KFServing:
-    - Quick start: tutorials/kfserving/quick-start.md
-    - Platform setup: tutorials/kfserving/platform-setup.md
-    - Testing strategies:
-      - Hybrid (A/B + SLOs) testing: tutorials/kfserving/testing-strategies/hybrid.md
-      - A/B testing (quick start): tutorials/kfserving/testing-strategies/ab.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/kfserving/rollout-strategies/progressive.md
-      - Fixed-%-split: tutorials/kfserving/rollout-strategies/fixed-split.md
-      - Session affinity: tutorials/kfserving/rollout-strategies/session-affinity.md
-  - Seldon:
-    - Quick start: tutorials/seldon/quick-start.md
-    - Platform setup: tutorials/seldon/platform-setup.md
-    - Testing strategies:
-      - Hybrid (A/B + SLOs) testing: tutorials/seldon/testing-strategies/hybrid.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/seldon/rollout-strategies/progressive.md
-  - Knative:
-    - SLO validation: tutorials/knative/slovalidation-helmex.md
-    - Testing strategies:
-      - SLO validation with traffic shifting: tutorials/knative/testing-strategies/slo-validation-traffic-shift.md
-      - Hybrid (A/B + SLOs) testing: tutorials/knative/testing-strategies/hybrid.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/knative/rollout-strategies/progressive-traffic-shift.md
-      - Fixed-%-split: tutorials/knative/rollout-strategies/fixed-split.md
-    - Setup for tutorials: tutorials/knative/setup-for-tutorials.md
-  - Istio:
-    - Quick start: tutorials/istio/quick-start.md
-    - Platform setup: tutorials/istio/platform-setup.md
-    - Testing strategies:
-      - SLO validation: tutorials/istio/testing-strategies/slovalidation.md
-      - SLO validation (single version): tutorials/istio/testing-strategies/conformance.md
-      - Hybrid (A/B + SLOs) testing: tutorials/istio/testing-strategies/hybrid.md
-    - Rollout strategies:
-      - Progressive traffic shift: tutorials/istio/rollout-strategies/progressive.md
-      - Fixed-%-split: tutorials/istio/rollout-strategies/fixed-split.md
-    - GitOps:
-      - Argo CD + Istio: tutorials/istio/gitops/argocd.md
-  - Linkerd:
-    - A/B experiment: tutorials/linkerd/abexperiment-helmex.md
-    - Testing strategies:
-      - A/B experiment: tutorials/linkerd/testing-strategies/abexperiment.md
-    - Platform setup: tutorials/linkerd/platform-setup.md
-  - Openshift:
-    - CI/CD integration: tutorials/openshift/openshift.md
-- Metrics:
-  - Using metrics: metrics/using-metrics.md
-  - Builtin metrics: metrics/builtin.md
-  - Custom metrics: metrics/custom.md
-  - Mock metrics: metrics/mock.md
-- Reference:
-  - Experiment resource: reference/experiment.md
-  - Metric resource: reference/metrics.md
-  - Task overview: reference/tasks/overview.md
-  - Task descriptions:
-    - run: reference/tasks/run.md
-    - common/readiness: reference/tasks/common-readiness.md
-    - metrics/collect: reference/tasks/metrics-collect.md
-    - notification/http: reference/tasks/notification-http.md
-    - notification/slack: reference/tasks/notification-slack.md
-- Contributing:
-  - Overview: contributing/overview.md
-  - New K8s stack: contributing/newk8sstack.md
-  - Tutorials: contributing/tutorials.md
-  - Analytics: contributing/analytics.md
-  - Tasks: contributing/tasks.md
+  - Insights:
+    - Load testing: tutorials/load-testing.md
+    - SLOs with Prometheus: tutorials/slos-with-prometheus.md
+    - A/B(/n) testing: tutorials/abn.md
+    - Chaos testing with SLOs: tutorials/chaos.md
+  - Traffic engineering:
+    - Mirroring: tutorials/mirroring.md
+    - Percentage traffic-split: tutorials/traffic-percent.md
+    - Session affinity: tutorials/session-affinity.md
+    - Gradual traffic shifting: tutorials/gradual-traffic-shifting.md
+- User guide:
+  - Commands: 
+    - Iter8: user-guide/commands/iter8.md
+    - Iter8 Hub: user-guide/commands/iter8_hub.md
+    - Iter8 Run: user-guide/commands/iter8_run.md
+    - Iter8 Assert: user-guide/commands/iter8_assert.md
+    - Iter8 Gen: user-guide/commands/iter8_gen.md
+  - Tasks:
+    - gen-load-and-collect-metrics: user-guide/tasks/collect.md
+    - assess-app-versions: user-guide/tasks/assess.md
+    - run (a bash script): user-guide/tasks/run.md
+  - Topics:
+    - Version numbering: user-guide/topics/versionnumbering.md
+    - Metrics: user-guide/topics/metrics.md
+    - Conditional task execution: user-guide/topics/conditional.md
+    - Iter8 hub: user-guide/topics/iter8hub.md
+- Contributing: contributing.md
 - Roadmap: roadmap.md
-- News: news.md
+- News/Blog: news.md
