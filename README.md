@@ -11,4 +11,16 @@
 
 Iter8 is a metrics-driven experimentation platform that enables DevOps/SRE/MLOps/data science teams to maximize release velocity and business value of apps and ML models while protecting end-user experience.
 
+Iter8 enables the following use-cases.
+
+1. Load testing/SLOs with built-in metrics
+2. A/B(/n) testing with business metrics from any backend
+3. SLOs with metrics from any backend
+4. Mirroring
+5. User segmentation
+6. Session affinity
+7. Gradual rollout
+
+The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 along with a Kubernetes service-mesh or ingress.
+
 <img alt="Iter8" src="images/ghbanner.png" align="center">
