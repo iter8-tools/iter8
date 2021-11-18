@@ -11,8 +11,4 @@
 
 ## Overview
 
-> Iter8 enables DevOps/MLOps/SRE teams to validate and safely rollout the best versions of their apps.
-
-> Use Iter8 to easily implement SLO validation, A/B(/n) testing with business metrics, chaos injection, dark launch, canaries, and progressive rollouts.
-
-Please visit https://iter8.tools for Iter8 documentation.
+<img alt="Iter8" src="images/ghbanner.png" align="center">

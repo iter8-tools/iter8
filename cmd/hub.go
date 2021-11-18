@@ -16,6 +16,8 @@ limitations under the License.
 package cmd
 
 import (
+	"path"
+
 	"github.com/hashicorp/go-getter"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
@@ -25,25 +27,31 @@ import (
 var hubFolder string
 
 var hubUsage = `
-Download an experiment folder from Iter8 Hub. This is useful for fetching experiments to inspect, modify, run or repackage. By default, this command looks for the specified experiment folder in the public Iter8 hub. It is also possible to use private hubs by setting the ITER8HUB environment variable.
+Download an experiment folder from the Iter8 hub. This is useful for fetching experiments to inspect, modify, run or repackage. By default, this command looks for the specified experiment folder in the public Iter8 hub. It is also possible to use custom hubs by setting the ITER8HUB environment variable.
 
 Environment variables:
 
 | Name               | Description |
 |--------------------| ------------|
 | $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//mkdocs/docs/hub/ |
+
+The Iter8 hub location follows the following syntax:
+
+HOST/OWNER/REPO[?ref=branch]//path-to-experiment-folder-relative-to-root-of-the-repo
+
+For example: github.com/iter8-tools/iter8.git?ref=master//mkdocs/docs/hub/
 `
 
 // hubCmd represents the hub command
 var hubCmd = &cobra.Command{
 	Use:   "hub",
-	Short: "download an experiment folder from Iter8 Hub",
+	Short: "download an experiment folder from Iter8 hub",
 	Long:  hubUsage,
 	Example: `
 	# public hub
 	iter8 hub -e load-test
 
-	# private hub
+	# custom hub
 	# Suppose you forked github.com/iter8-tools/iter8, 
 	# created a branch called 'ml', and pushed a new experiment folder 
 	# called 'tensorflow' under the path 'mkdocs/docs/hub'. 
@@ -59,7 +67,8 @@ var hubCmd = &cobra.Command{
 		// initialize the location of iter8hub
 		viper.BindEnv("ITER8HUB")
 		viper.SetDefault("ITER8HUB", "github.com/iter8-tools/iter8.git//mkdocs/docs/hub/")
-		ifurl := viper.GetString("ITER8HUB") + hubFolder
+		ifurl := path.Join(viper.GetString("ITER8HUB"), hubFolder)
+		log.Logger.Info("downloading ", ifurl)
 		if err := getter.Get(hubFolder, ifurl); err != nil {
 			log.Logger.WithStackTrace(err.Error()).Fatalf("unable to get: %v", ifurl)
 			return

@@ -31,25 +31,23 @@ type errorRange struct {
 
 // collectInputs contain the inputs to the metrics collection task to be executed.
 type collectInputs struct {
-	// how many requests will be sent for each version; optional; default 100
+	// NumRequests is the number of requests to be sent to each version. Default value is 100.
 	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
-	// how long to run the metrics collector; optional;
-	// if both time and numRequests are specified, numRequests takes precedence
-	Duration *string `json:"time" yaml:"time"`
-	// how many queries per second will be sent; optional; default 8
+	// Duration of the metrics/collect task run. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
+	Duration *string `json:"duration" yaml:"duration"`
+	// QPS is the number of queries per second sent to each version. Default is 8.0.
 	QPS *float32 `json:"qps" yaml:"qps"`
-	// string to be sent during queries as payload; optional
+	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload.
 	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
-	// URL whose content will be sent as payload during queries; optional
-	// if both payloadURL and payloadStr are specified, the URL takes precedence
+	// PayloadURL is the URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored.
 	PayloadURL *string `json:"payloadURL" yaml:"payloadURL"`
-	// valid HTTP content type string; specifying this switches the request from GET to POST
+	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions using this content type header value.
 	ContentType *string `json:"contentType" yaml:"contentType"`
-	// ErrorRanges of HTTP status codes that are considered as errors
+	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
-	// Percentiles are the set of latency percentiles to be collected
+	// Percentiles are the latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
 	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
-	// information about versions
+	// A non-empty list of version values.
 	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo"`
 }
 
@@ -68,7 +66,7 @@ const (
 )
 
 var (
-	defaultErrorRanges = []errorRange{{Lower: intPointer(500)}}
+	defaultErrorRanges = []errorRange{{Lower: intPointer(400)}}
 	defaultPercentiles = [...]float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9}
 )
 
