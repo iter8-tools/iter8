@@ -13,17 +13,15 @@ Iter8 is a metrics-driven experimentation platform that enables DevOps/SRE/MLOps
 
 ## Use Cases
 
-1. Load testing/service level objectives (SLOs) with built-in metrics
-2. A/B(/n) testing with business metrics from any backend
-3. SLOs with metrics from any backend
-4. Mirroring
-5. User segmentation
-6. Session affinity
-7. Gradual rollout
+1.  Load testing with SLOs
+2.  A/B(/n) testing with metrics from any backend
+3.  SLOs with metrics from any backend
+4.  Traffic mirroring
+5.  User segmentation
+6.  Session affinity
+7.  Gradual rollout
 
-The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 along with a Kubernetes service-mesh or ingress.
-
-<!-- <img alt="Iter8" src="images/ghbanner.png" align="center"> -->
+The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 along with a Kubernetes service mesh or ingress.
 
 ## Your First Experiment
 
