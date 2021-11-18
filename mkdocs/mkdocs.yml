@@ -119,7 +119,7 @@ nav:
   - Concepts: getting-started/concepts.md
   - v0.8 tech preview: getting-started/v0.8.md
   - Community: getting-started/help.md
-- Hub:
+- Tutorials:
   - Insights:
     - Load testing: tutorials/load-testing.md
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
@@ -145,6 +145,7 @@ nav:
     - Version numbering: user-guide/topics/versionnumbering.md
     - Metrics: user-guide/topics/metrics.md
     - Conditional task execution: user-guide/topics/conditional.md
+    - Iter8 hub: user-guide/topics/iter8hub.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
 - News/Blog: news.md

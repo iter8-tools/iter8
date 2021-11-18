@@ -10,19 +10,19 @@ template: main.html
 ## 1. [Install Iter8](install.md)
 
 ## 2. Download experiment
-[Iter8 Hub](../README.md) enables users to share, find, and download Iter8 experiment samples. Download the `load-test` experiment sample from the hub as follows.
+Download the `load-test` experiment folder from the [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
 
 ```shell
 iter8 hub -e load-test
 ```
 
-## 3. Launch experiment
+## 3. Run experiment
 ```shell
 cd load-test
 iter8 run
 ```
 
-The above command reads in the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the results of the experiment into the `results.yaml` file.
+The `iter8 run` command reads the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the result of the experiment into the `result.yaml` file.
 
 ??? note "Look inside experiment.yaml"
     ```yaml
@@ -86,40 +86,40 @@ iter8 gen
     -----------------------------|-----
                              SLOs|
     -----------------------------|-----
-     built-in/error-rate <= 0|true
+         built-in/error-rate <= 0|true
     -----------------------------|-----
-        built-in/p95.0 <= 100|true
+            built-in/p95.0 <= 100|true
     -----------------------------|-----
 
 
     -----------------------------|-----
                           Metrics|
     -----------------------------|-----
-         built-in/error-count|0
+             built-in/error-count|0
     -----------------------------|-----
-          built-in/error-rate|0
+              built-in/error-rate|0
     -----------------------------|-----
-         built-in/max-latency|200.45 (msec)
+             built-in/max-latency|201.75 (msec)
     -----------------------------|-----
-        built-in/mean-latency|18.77 (msec)
+            built-in/mean-latency|17.02 (msec)
     -----------------------------|-----
-         built-in/min-latency|4.76 (msec)
+             built-in/min-latency|3.80 (msec)
     -----------------------------|-----
-               built-in/p50.0|11.74 (msec)
+                   built-in/p50.0|10.75 (msec)
     -----------------------------|-----
-               built-in/p75.0|13.29 (msec)
+                   built-in/p75.0|12.12 (msec)
     -----------------------------|-----
-               built-in/p90.0|15.60 (msec)
+                   built-in/p90.0|13.88 (msec)
     -----------------------------|-----
-               built-in/p95.0|25 (msec)
+                   built-in/p95.0|15.60 (msec)
     -----------------------------|-----
-               built-in/p99.0|200.34 (msec)
+                   built-in/p99.0|201.31 (msec)
     -----------------------------|-----
-               built-in/p99.9|200.44 (msec)
+                   built-in/p99.9|201.71 (msec)
     -----------------------------|-----
-       built-in/request-count|100
+           built-in/request-count|100
     -----------------------------|-----
-      built-in/stddev-latency|37.23 (msec)
+          built-in/stddev-latency|37.81 (msec)
     -----------------------------|-----
     ```
 

@@ -63,7 +63,7 @@ func (e *experiment) run() error {
 		}
 	}
 	for i, t := range e.tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : started")
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : started")
 		shouldRun := true
 		// if task has a condition
 		if cond := base.GetIf(t); cond != nil {
@@ -85,13 +85,13 @@ func (e *experiment) run() error {
 		if shouldRun {
 			err = t.Run(e.Experiment)
 			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "failure")
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "failure")
 				e.failExperiment()
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "completed")
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("if clause evaluated to false: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i, t.GetName()) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("if clause evaluated to false: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
 		}
 
 		e.incrementNumCompletedTasks()

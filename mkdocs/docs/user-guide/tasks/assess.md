@@ -26,11 +26,14 @@ Validate service level objectives (SLOs) for app versions based on [Iter8's buil
 ```
 
 ## Inputs
+The following inputs are supported by this task.
+
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | SLOs | [][SLO](#slo) | A list of [service level objectives (SLOs)](#slo) | No |
 
 ### SLO
+
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | metric | string | [Fully-qualified metric name](../topics/metrics.md). | Yes |

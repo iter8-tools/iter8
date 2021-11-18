@@ -7,9 +7,9 @@ Iter8 is a metrics-driven experimentation platform that enables **DevOps/SRE/MLO
 
 Iter8 enables the following use-cases.
 
-1.  Load testing with SLO validation
-2.  SLO validation
-3.  A/B(/n) testing with business metrics
+1.  Load testing/SLOs with built-in metrics
+2.  A/B(/n) testing with business metrics from any backend
+3.  SLOs with metrics from any backend
 4.  Mirroring
 5.  User segmentation
 6.  Session affinity
@@ -20,9 +20,9 @@ The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 alon
 ## What is an Iter8 experiment?
 An Iter8 experiment is a sequence of tasks. Iter8 provides a variety of tasks for the following purposes.
 
-1.  Getting metrics for the app (or versions of the app)
-2.  Producing insights and recommendations based on metrics
-3.  Achieving a variety of useful side effects based on the insights and recommendations. Example side effects include sending a slack or HTTP notification, triggering a CI/CD/GitHub actions workflow, creating a pull request, and changing application state (including traffic splits) within a Kubernetes cluster.
+1.  Getting metrics for one or more versions of the app.
+2.  Producing SLO validation and A/B/n testing insights based on metrics.
+3.  Triggering a variety of useful events based on these insights. Events include sending a slack or HTTP notification, triggering a CI/CD/GitHub actions workflow, creating a pull request, and changing application state (including traffic splits for versions) inside a Kubernetes cluster.
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
 
@@ -31,12 +31,12 @@ Experiments are specified declaratively using a simple YAML file as shown below.
 # the following experiment performs a load test for https://example.com
 # and validates error-rate and 95th percentile service level objectives (SLOs)
 # 
-# task 0: generate requests for the app and collect built-in metrics
+# task 1: generate requests for the app and collect built-in metrics
 - task: gen-load-and-collect-metrics
   with:
     versionInfo:
     - url: https://example.com
-# task 1: assess how the app is performing relative to SLOs
+# task 2: assess if app satisfies SLOs
 # this experiment involves only one version of the app
 - task: assess-app-versions
   with:

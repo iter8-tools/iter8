@@ -4,7 +4,9 @@ template: main.html
 
 # Load Testing
 
-Load testing experiments can generate requests for HTTP and gRPC services, collect built-in latency and error related metrics and validate SLOs. The [`gen-load-and-collect-metrics`](../user-guide/tasks/collect.md) task generates load and collects built-in metrics. The [`assess-app-versions`](../user-guide/tasks/assess.md) task validates SLOs.
+Load testing experiments can generate requests for HTTP and gRPC services, collect built-in latency and error related metrics and validate SLOs. 
+
+In these experiments, the [`gen-load-and-collect-metrics`](../user-guide/tasks/collect.md) task generates load and collects built-in metrics. The [`assess-app-versions`](../user-guide/tasks/assess.md) task validates SLOs.
 
 ***
 
