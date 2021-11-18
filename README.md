@@ -32,7 +32,7 @@ The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 alon
 GOBIN=/usr/local/bin/ go install github.com/iter8-tools/iter8@latest
 ```
 
-2. Download the `load-test` experiment folder from the [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
+2. Download the `load-test` experiment folder from the Iter8 hub as follows.
 
 ```shell
 iter8 hub -e load-test
