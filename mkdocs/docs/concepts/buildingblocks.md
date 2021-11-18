@@ -9,15 +9,11 @@ We introduce the building blocks of an Iter8 experiment below.
 ***
 
 ## Applications and Versions
-Iter8 defines an application broadly as an entity that can be:
-
-1. instantiated (run) on Kubernetes, 
-2. can be versioned, and 
-3. for which metrics can be collected.
+Iter8 defines an application broadly as an entity that can be instantiated (run) on Kubernetes, that can be versioned, and for which metrics can be collected.
 
 ??? example "Examples"
     * A stateless K8s application whose versions correspond to `deployments`.
-    * A stateful K8s application whose versions correspond to `statefulsets`.
+    * A stateful K8s application whose versions correspond to `statefulSets`.
     * A Knative application whose versions correspond to `revisions`.
     * A KFServing inference service, whose versions correspond to model `revisions`.
     * A distributed application whose versions correspond to Helm `releases`.
@@ -51,7 +47,7 @@ Iter8 defines an application broadly as an entity that can be:
 ***
 
 ## Baseline and candidate versions
-Every Iter8 experiment involves a `baseline` version and may also involve zero, one or more `candidate` versions. Experiments often involve two versions, baseline and a candidate, with the baseline version corresponding to the stable version of your app, and the candidate version corresponds to a canary. 
+Every Iter8 experiment involves a `baseline` version and may also involve zero, one, or more `candidate` versions. Experiments often involve two versions, baseline and a candidate, which correspond to the stable version and the new version of your app, respectively. 
 
 ***
 
@@ -73,21 +69,21 @@ SLO validation experiments may involve a single version or two versions.
 ***
 
 ### A/B testing
-**A/B testing experiments** involve a baseline version, a candidate version, and a reward metric. The version which performs best in terms of the reward metric is the winner.
+**A/B testing experiments** involve a baseline version, a candidate version, and a reward metric. The version that performs best in terms of the reward metric is the winner.
 
 ![A/B](../images/ab.png)
 
 ***
 
 ### A/B/n testing
-**A/B/n testing experiments** involve a baseline version, two or more candidate versions, and a reward metric. The version which performs best in terms of the reward metric is the winner.
+**A/B/n testing experiments** involve a baseline version, two or more candidate versions, and a reward metric. The version that performs best in terms of the reward metric is the winner.
 
 ![A/B/n](../images/abn.png)
 
 ***
 
 ### Hybrid (A/B + SLOs) testing
-**Hybrid (A/B + SLOs) testing experiments** combine A/B or A/B/n testing on the one hand with SLO validation on the other. Among the versions that satisfy objectives, the version which performs best in terms of the reward metric is the winner. If no version satisfies objectives, then there is no winner.
+**Hybrid (A/B + SLOs) testing experiments** combine A/B (or A/B/n) testing with SLO validation. Among the versions that satisfy objectives, the version that performs best in terms of the reward metric is the winner. If no version satisfies objectives, then there is no winner.
 
 ![Hybrid](../images/hybrid.png)
 
@@ -147,18 +143,18 @@ Mirrored traffic is a replica of the real user requests[^1] that is routed to `v
 Canary deployment involves exposing `v2` to a small fraction of end-user requests during the experiment before exposing it to a larger fraction of requests or all the requests.
 
 #### Fixed-%-split
-A fixed % of end-user requests is sent to `v2` and the rest is sent to `v1`.
+A fixed percentage of end-user requests is sent to `v2` and the rest is sent to `v1`.
 
-![Fixed % split](../images/canary-%-based.png)
+![Fixed percentage split](../images/canary-%-based.png)
 
 ***
 
 #### Fixed-%-split with user segmentation
 * Only a specific segment of the users participate in the experiment.
-* A fixed % of requests from the participating segment is sent to `v2`. Rest is sent to `v1`.
+* A fixed percentage of requests from the participating segment is sent to `v2`. Rest is sent to `v1`.
 * All requests from end-users in the non-participating segment is sent to `v1`.
 
-![Fixed % user segmentation](../images/canary-%-segmentation.png)
+![Fixed percentage user segmentation](../images/canary-%-segmentation.png)
 
 ***
 
@@ -181,7 +177,7 @@ Traffic is incrementally shifted to the winner over multiple iterations.
 #### Session affinity
 Session affinity, sometimes referred to as sticky sessions, routes all requests coming from an end-user to the same version consistently throughout the experiment.
 
-User grouping for affinity can be configured based on a number of different attributes of the request including request headers, cookies, query parameters, geo location, user agent (browser version, screen size, operating system) and language.
+User grouping for affinity can be configured based on a number of different attributes of the request including request headers, cookies, query parameters, geo location, user agent (browser version, screen size, operating system), and language.
 
 ![Session affinity](../images/session-affinity-exp.png)
 

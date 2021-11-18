@@ -22,7 +22,7 @@ with:
 | ----- | ---- | ----------- | -------- |
 | channel | string | Name of the Slack channel to which messages should be posted. | Yes |
 | secret | string | Identifies a secret containing a `token` to be used for authentication.  Expressed as `namespace/name`. If `namespace` is not specified, the namespace of the experiment is used. | Yes |
-| ignoreFailure | bool | A flag indicating whether or not to ignore failures. If failures are not ignored, they cause the experiment to fail. Default is `true`. | No |
+| ignoreFailure | bool | A flag indicating whether or not to ignore failures. If failures are not ignored, they cause the experiment to fail. The default value is `true`. | No |
 
 ## Result
 

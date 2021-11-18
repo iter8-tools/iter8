@@ -5,7 +5,7 @@ template: main.html
 # Experiment Resource
 
 !!! abstract "Experiment resource"
-    Iter8's **Experiment** resource type enables application developers and service operators to automate A/B, A/B/n, Canary and Conformance experiments for Kubernetes apps/ML models. The controls provided by the experiment resource type encompass [testing, deployment, traffic engineering, and version promotion functions](../concepts/buildingblocks.md).
+    Iter8's **Experiment** resource type enables application developers and service operators to automate A/B, A/B/n, canary, and conformance experiments for Kubernetes apps/ML models. The controls provided by the experiment resource type encompass [testing, deployment, traffic engineering, and version promotion functions](../concepts/buildingblocks.md).
 
 ??? info "Sample experiment"
     ```yaml linenums="1"
@@ -72,9 +72,9 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | ----- | ---- | ----------- | -------- |
 | target | string | Identifies the app under experimentation and determines which experiments can run concurrently. Experiments that have the same target value will not be scheduled concurrently but will be run sequentially in the order of their creation timestamps. Experiments whose target values differ from each other can be scheduled by Iter8 concurrently. | Yes |
 | strategy | [Strategy](#strategy) | The experimentation strategy which specifies how app versions are tested, how traffic is shifted during experiment, and what tasks are executed at the start and end of the experiment. | Yes |
-| criteria | [Criteria](#criteria) | Criteria used for evaluating versions. This section includes (business) rewards, service-level objectives (SLOs) and indicators (SLIs). | No |
+| criteria | [Criteria](#criteria) | Criteria used for evaluating versions. This section includes (business) rewards, service-level objectives (SLOs), and service-level indicators (SLIs). | No |
 | duration | [Duration](#duration) | Duration of the experiment. | No |
-| versionInfo | [VersionInfo](#versioninfo) | Versions involved in the experiment. Every experiment involves a baseline version, and may involve zero or more candidates. | No |
+| versionInfo | [VersionInfo](#versioninfo) | Versions involved in the experiment. Every experiment has a baseline version and zero or more candidates. | No |
 
 ## Status
 
@@ -84,7 +84,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | initTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time the experiment is created. | No |
 | startTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the first iteration of experiment begins  | No |
 | lastUpdateTime | [metav1.Time](https://pkg.go.dev/k8s.io/apimachinery@v0.20.2/pkg/apis/meta/v1#Time) | The time when the status was most recently updated. | No |
-| stage | string | Indicator of the progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running and `Completed` when the experiment terminates. | No |
+| stage | string | Indicator of the progress of an experiment. The stage is `Waiting` before an experiment executes its start action, `Initializing` while running the start action, `Running` while the experiment has begun its first iteration and is progressing, `Finishing` while any finish action is running, and `Completed` when the experiment terminates. | No |
 | completedIterations | int32 | Number of completed iterations of the experiment. This is undefined until the experiment reaches the `Running` stage. | No |
 | currentWeightDistribution | [][WeightData](#weightdata) | The latest observed split of traffic between versions. Expressed as percentage. Iter8 ensures that this field is current  until the final iteration of the experiment. Iter8 will cease to update this field once a [finish action](#strategy) is invoked.  | No |
 | analysis | Analysis | Result of latest query to the Iter8 analytics service.  | No |
@@ -109,8 +109,8 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| task | string | Name of the task. Task names express both the library and the task within the library in the format 'library/task' . | Yes |
-| condition | string | Execute the task only if the specified condition is satisfied. Two built-in conditions are supported namely, `WinnerFound()` and `CandidateWon()`. They can be combined with predicates like `not`: `not WinnerFound()` and `not CandidateWon()` are also valid conditions.[^1] | No |
+| task | string | Name of the task. Task names express both the library and the task within the library in the format `library/task` . | Yes |
+| condition | string | Execute the task only if the specified condition is satisfied. Two built-in conditions are supported namely, `WinnerFound()` and `CandidateWon()`. They can be combined with predicates like `not`; for example, `not WinnerFound()` and `not CandidateWon()` are valid conditions.[^1] | No |
 | with | map[string][apiextensionsv1.JSON](https://pkg.go.dev/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1#JSON) | Inputs to the task. | No |
 
 ### Criteria
@@ -123,7 +123,7 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 | indicators | string[] | A list of metric references. Iter8 will collect and report the values of these metrics in addition to those referenced in the `objectives` section. | No |
 
 !!! warning "" 
-    **Note:** References to metric resource objects within experiment criteria should be in the `namespace/name` format or in the `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then Iter8 searches for the metric in the namespace of the experiment resource. If Iter8 cannot find the metric, then the reference is considered invalid and the experiment will terminate in a failure.
+    **Note:** References to metric resource objects within experiment criteria should be in the `namespace/name` or `name` format. If the `name` format is used (i.e., if only the name of the metric is specified), then Iter8 searches for the metric in the namespace of the experiment resource. If Iter8 cannot find the metric, then the reference is considered invalid and the experiment will terminate in a failure.
 
 ### Objective
 
@@ -142,21 +142,15 @@ Standard Kubernetes [meta.v1/ObjectMeta](https://kubernetes.io/docs/reference/ge
 
 ### Duration
 
-!!! abstract ""
-    The duration of the experiment.
-
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| maxLoops | int32 | Maximum number of loops in the experiment. In case of a failure, the experiment may be terminated earlier. Default value = 1. | No |
-| iterationsPerLoop | int32 | Number of iterations *per experiment loop*. In case of a failure, the experiment may be terminated earlier. Default value = 15. | No |
-| intervalSeconds | int32 | Duration of a single iteration of the experiment in seconds. Default value = 20 seconds. | No |
+| maxLoops | int32 | Maximum number of loops in the experiment. In case of a failure, the experiment may be terminated earlier. The default value is 1. | No |
+| iterationsPerLoop | int32 | Number of iterations *per experiment loop*. In case of a failure, the experiment may be terminated earlier. The default value is 15. | No |
+| intervalSeconds | int32 | Duration of a single iteration of the experiment in seconds. The default value is 20 seconds. | No |
 
 > *Note*: Suppose an experiment has `maxLoops = x`, `iterationsPerLoop = y`, and `intervalSeconds = z`. Assuming the experiment does not terminate early due to failures, it would take a minimum of `x*y*z` seconds to complete. The actual duration may be more due to additional time incurred in [acquiring the target](#spec), and executing the `start`, `loop` and `finish` [actions](#strategy).
 
 ### VersionInfo
-
-!!! abstract ""
-    `spec.versionInfo` describes the app versions involved in the experiment. Every experiment involves a `baseline` version, and may involve zero or more `candidates`.
 
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |

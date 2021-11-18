@@ -23,10 +23,10 @@ start:
 ## Inputs
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| numQueries | int | number of requests to be sent to each version. Default value is 100. | No |
+| numQueries | int | Number of requests to be sent to each version. Default value is 100. | No |
 | time | string | Duration of the `metrics/collect` task run. Specified in the [Go duration string format](https://golang.org/pkg/time/#ParseDuration) (example, `5s`). If both `time` and `numQueries` are specified, then `time` is ignored. | No |
-| qps | float | Number of queries *per second* sent to each version. Default is 8.0. Setting this to 0 will maximizes query load without any wait time between queries. | No |
-| connections | int | Number of parallel connection used for sending queries. Default is 4. | No |
+| qps | float | Number of queries *per second* sent to each version. The default value is 8.0. Setting this to 0 will maximizes query load without any wait time between queries. | No |
+| connections | int | Number of parallel connection used for sending queries. The default value is 4. | No |
 | loadOnly | bool | If set to true, this task will send requests without collecting metrics. Default value is `false`. | No |
 | payloadStr | string | String data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data as the payload. | No |
 | payloadURL | string | URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored. | No |

@@ -82,7 +82,7 @@ spec:
 
 ## Available commands
 
-The Dockerfile used to build the task runner image is [here](https://github.com/iter8-tools/handler/blob/main/Dockerfile). In addition to the standard linux commands (`sed`, `awk`, ...) available in its base image, the task runner also includes the commands `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`.
+The Dockerfile used to build the task runner image is [here](https://github.com/iter8-tools/handler/blob/main/Dockerfile). In addition to the standard Linux commands (`sed`, `awk`, ...) available in its base image, the task runner also includes the commands `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`.
 
 ```yaml
 kind: Experiment

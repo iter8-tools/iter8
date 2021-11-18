@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Iter8 metric resources"    
     Iter8 defines a custom Kubernetes resource (CRD) called **Metric** that makes it easy to define and use metrics in experiments. 
     
-    Iter8 installation includes a set of pre-defined [built-in metrics](builtin.md) that pertain to app/ML model latency/errors. You can also [define custom metrics](custom.md) that enable you to utilize data from Prometheus, New Relic, Sysdig, Elastic or any other database of your choice.
+    Iter8 installation includes a set of pre-defined [built-in metrics](builtin.md) that pertain to app/ML model latency/errors. You can also [define custom metrics](custom.md) that enable you to utilize data from Prometheus, New Relic, Sysdig, Elastic, or any other database of your choice.
 
 ## List metrics
 Find the set Iter8 metrics available in your cluster using `kubectl get`.

@@ -441,7 +441,7 @@ For the sample experiment above, Iter8 will use two HTTP(S) queries to fetch met
     }
     ```
 
-The placeholder `$elapsedTime` has been substituted with 600, which is the time elapsed since the start of the experiment. The other placeholders have been substituted based on the *versionInfo* field of the baseline version in the experiment. Iter8 builds and sends an HTTP request in a similar manner for the candidate version as well.
+The placeholder `$elapsedTime` has been substituted with 600, which is the time elapsed since the start of the experiment. The other placeholders have been substituted based on the `versionInfo` field of the baseline version in the experiment. Iter8 builds and sends an HTTP request in a similar manner for the candidate version as well.
 
 ## JSON response
 

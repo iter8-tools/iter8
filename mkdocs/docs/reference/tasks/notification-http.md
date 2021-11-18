@@ -42,7 +42,7 @@ spec:
 | secret | string | Name of a secret (in form of `namespace/name`). Values are used to dynamically substitute placeholders. | No |
 | headers | [][NamedValue](../../experiment/#namedvalue) | A list of name-value pairs that are converted into headers as part of the request. Values may contain placeholders that will be subsituted at runtime.| No |
 | body | string | The body of the request to be sent. May contain placeholders that will be subsituted at runtime. | No |
-| ignoreFailure | bool | A flag indicating whether or not to ignore failures. If failures are not ignored, they cause the experiment to fail. Default is `true`. | No |
+| ignoreFailure | bool | A flag indicating whether or not to ignore failures. If failures are not ignored, they cause the experiment to fail. The default value is `true`. | No |
 
 The `url`, `headers` and `body` may all contain placeholders that will be substituted at runtime. 
 A placeholder prefixed by `.secret` will use value from the secret. 

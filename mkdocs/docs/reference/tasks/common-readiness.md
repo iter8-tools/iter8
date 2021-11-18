@@ -62,7 +62,7 @@ spec:
 ### ObjRef
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
-| kind | string | Kind of the Kubernetes resource. Specified in the TYPE[.VERSION][.GROUP] format used by the [`kubectl get` command](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#get) | Yes |
+| kind | string | Kind of the Kubernetes resource. Specified in the `TYPE[.VERSION][.GROUP]` format used by the [`kubectl get` command](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#get) | Yes |
 | namespace | string | Namespace of the Kubernetes resource. Default value is the namespace of the experiment resource. | No |
 | name | string | Name of the Kubernetes resource. | Yes |
 | waitFor | string | Any value that is accepted by the `--for` flag of the [`kubectl wait` command](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#wait). | No |
