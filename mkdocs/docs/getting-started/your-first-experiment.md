@@ -17,12 +17,12 @@ iter8 hub -e load-test
 ```
 
 ## 3. Run experiment
+The `iter8 run` command reads the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the result of the experiment into the `result.yaml` file. Run `load-test` as follows.
+
 ```shell
 cd load-test
 iter8 run
 ```
-
-The `iter8 run` command reads the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the result of the experiment into the `result.yaml` file.
 
 ??? note "Look inside experiment.yaml"
     ```yaml
