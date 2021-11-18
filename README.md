@@ -115,3 +115,7 @@ iter8 gen
 </details>
 
 Congratulations :tada: You completed your first Iter8 experiment.
+
+## [Documentation](https://iter8.tools)
+
+## [Contributing](https://iter8.tools/latest/contributing/overview/)
