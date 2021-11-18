@@ -31,7 +31,6 @@ The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 alon
 ```shell
 GOBIN=/usr/local/bin/ go install github.com/iter8-tools/iter8@latest
 ```
-`GOBIN` may be any folder in your `PATH`.
 
 2. Download the `load-test` experiment folder from the [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
 
@@ -63,21 +62,21 @@ iter8 gen
 
   ```
       -----------------------------|-----
-                  Experiment summary|
+                 Experiment summary|
       -----------------------------|-----
               Experiment completed |true
       -----------------------------|-----
-                  Experiment failed |false
+                 Experiment failed |false
       -----------------------------|-----
-          Number of completed tasks |2
+         Number of completed tasks |2
       -----------------------------|-----
 
 
 
       -----------------------------|-----
-                                SLOs|
+                               SLOs|
       -----------------------------|-----
-            built-in/error-rate <= 0|true
+           built-in/error-rate <= 0|true
       -----------------------------|-----
               built-in/p95.0 <= 100|true
       -----------------------------|-----
@@ -86,29 +85,29 @@ iter8 gen
       -----------------------------|-----
                             Metrics|
       -----------------------------|-----
-                built-in/error-count|0
+               built-in/error-count|0
       -----------------------------|-----
                 built-in/error-rate|0
       -----------------------------|-----
-                built-in/max-latency|201.75 (msec)
+               built-in/max-latency|201.75 (msec)
       -----------------------------|-----
               built-in/mean-latency|17.02 (msec)
       -----------------------------|-----
-                built-in/min-latency|3.80 (msec)
+               built-in/min-latency|3.80 (msec)
       -----------------------------|-----
-                      built-in/p50.0|10.75 (msec)
+                     built-in/p50.0|10.75 (msec)
       -----------------------------|-----
-                      built-in/p75.0|12.12 (msec)
+                     built-in/p75.0|12.12 (msec)
       -----------------------------|-----
-                      built-in/p90.0|13.88 (msec)
+                     built-in/p90.0|13.88 (msec)
       -----------------------------|-----
-                      built-in/p95.0|15.60 (msec)
+                     built-in/p95.0|15.60 (msec)
       -----------------------------|-----
-                      built-in/p99.0|201.31 (msec)
+                     built-in/p99.0|201.31 (msec)
       -----------------------------|-----
-                      built-in/p99.9|201.71 (msec)
+                     built-in/p99.9|201.71 (msec)
       -----------------------------|-----
-              built-in/request-count|100
+             built-in/request-count|100
       -----------------------------|-----
             built-in/stddev-latency|37.81 (msec)
       -----------------------------|-----
