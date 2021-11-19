@@ -59,8 +59,9 @@ var GenCmd = &cobra.Command{
 	iter8 gen
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		// build experiment
 		log.Logger.Trace("build started")
+		// build experiment
+		// replace FileExpIO with ClusterExpIO to build from cluster
 		fio := &FileExpIO{}
 		exp, err := Build(true, fio)
 		log.Logger.Trace("build finished")
@@ -70,7 +71,7 @@ var GenCmd = &cobra.Command{
 		}
 
 		// generate formatted output
-		err = Gen(outputFormat, exp)
+		err = exp.Gen(outputFormat)
 		if err != nil {
 			os.Exit(1)
 		}
@@ -78,7 +79,7 @@ var GenCmd = &cobra.Command{
 }
 
 // Gen creates output from experiment as per outputFormat
-func Gen(outputFormat string, exp *Experiment) error {
+func (exp *Experiment) Gen(outputFormat string) error {
 	var tmpl *template.Template
 	var err error
 
@@ -122,6 +123,21 @@ func Gen(outputFormat string, exp *Experiment) error {
 }
 
 func init() {
-	RootCmd.AddCommand(GenCmd)
-	GenCmd.Flags().StringSliceVarP(&values, "set", "s", []string{}, "key=value; value can be accessed in templates used by gen {{ Values.key }}")
+	RootCmd.AddCommand(genCmd)
+	genCmd.Flags().StringVarP(&outputFormat, "outputFormat", "o", "text", "text | custom")
+	genCmd.Flags().MarkHidden("outputFormat")
+
+	// create text template
+	tmpl, err := template.New("text").Funcs(template.FuncMap{
+		"formatText": formatText,
+	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse("{{ formatText . }}")
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
+		os.Exit(1)
+	}
+
+	// register text template
+	RegisterTemplate("text", tmpl)
+
+	// use the above pattern to register other templates for other output formats (like k8s)
 }

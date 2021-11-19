@@ -68,6 +68,7 @@ var AssertCmd = &cobra.Command{
 			Experiment: &base.Experiment{},
 		}
 		log.Logger.Trace("build started")
+		// replace FileExpIO with ClusterExpIO to build from cluster
 		fio := &FileExpIO{}
 		exp, err := Build(true, fio)
 		log.Logger.Trace("build finished")
@@ -81,6 +82,69 @@ var AssertCmd = &cobra.Command{
 			os.Exit(1)
 		}
 	},
+}
+
+// Assert if experiment satisfies conditions
+func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, error) {
+	// check assert conditions
+	allGood := true
+	for {
+		for _, cond := range conditions {
+			if strings.ToLower(cond) == completed {
+				c := exp.completed()
+				allGood = allGood && c
+				if c {
+					log.Logger.Info("experiment completed")
+				} else {
+					log.Logger.Info("experiment did not complete")
+				}
+			} else if strings.ToLower(cond) == noFailure {
+				nf := exp.noFailure()
+				allGood = allGood && nf
+				if nf {
+					log.Logger.Info("experiment has no failure")
+				} else {
+					log.Logger.Info("experiment failed")
+				}
+			} else if strings.ToLower(cond) == slos {
+				slos := exp.SLOs()
+				allGood = allGood && slos
+				if slos {
+					log.Logger.Info("SLOs are satisfied")
+				} else {
+					log.Logger.Info("SLOs are not satisfied")
+				}
+			} else if strings.HasPrefix(cond, slosByPrefix) {
+				version, err := exp.extractVersion(cond)
+				if err != nil {
+					return false, err
+				}
+				iv := exp.SLOsBy(version)
+				allGood = allGood && iv
+				if iv {
+					log.Logger.Info(version, " satisfies objectives")
+				} else {
+					log.Logger.Info(version, " does not satisfy objectives")
+				}
+			} else {
+				log.Logger.Error("unsupported assert condition detected; ", cond)
+				return false, fmt.Errorf("unsupported assert condition detected; %v", cond)
+			}
+		}
+		if allGood {
+			log.Logger.Info("all conditions were satisfied")
+			return true, nil
+		} else {
+			if timeSpent > to {
+				log.Logger.Info("not all conditions were satisfied")
+				return false, nil
+			} else {
+				log.Logger.Info("sleeping %v ...", sleepTime)
+				time.Sleep(sleepTime)
+				timeSpent += sleepTime
+			}
+		}
+	}
 }
 
 // completed returns true if the experiment is complete

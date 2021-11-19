@@ -26,6 +26,8 @@ var RunCmd = &cobra.Command{
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Logger.Trace("build called")
+		// Replace FileExpIO with ClusterExpIO to work with
+		// Spec and Results that might be inside the cluster
 		fio := &FileExpIO{}
 		exp, err := Build(false, fio)
 		log.Logger.Trace("build finished")
@@ -49,7 +51,7 @@ func init() {
 }
 
 // Run an experiment
-func (e *Experiment) run() error {
+func (e *Experiment) Run(expio ExpIO) error {
 	var err error
 	if e.Result == nil {
 		e.InitResults()
@@ -93,8 +95,7 @@ func (e *Experiment) run() error {
 		}
 
 		e.incrementNumCompletedTasks()
-		fio := &FileExpIO{}
-		err = fio.writeResult(e)
+		err = expio.writeResult(e)
 		if err != nil {
 			return err
 		}
