@@ -13,11 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
+const (
 	// Path to template file
-	// this variable is intended to be modified in tests, and nowhere else
 	templateFilePath = "iter8.tpl"
+)
 
+var (
 	// Output format
 	outputFormat string = "text"
 )
@@ -36,7 +37,7 @@ var genCmd = &cobra.Command{
 	# run it
 	iter8 run
 
-	# generate formatted output
+	# generate formatted text output
 	iter8 gen
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -45,11 +46,7 @@ var genCmd = &cobra.Command{
 
 		switch strings.ToLower(outputFormat) {
 		case "text":
-			tmpl, err = builtInTemplates["text"].Parse("{{ formatText . }}")
-			if err != nil {
-				log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
-				os.Exit(1)
-			}
+			tmpl = builtInTemplates["text"]
 
 		case "custom":
 			// read in the template file
