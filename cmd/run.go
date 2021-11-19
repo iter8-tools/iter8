@@ -1,16 +1,13 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/antonmedv/expr"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/yaml"
 )
 
 // runCmd represents the run command
@@ -29,7 +26,8 @@ var runCmd = &cobra.Command{
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Logger.Trace("build called")
-		exp, err := build(false)
+		fio := &FileExpIO{}
+		exp, err := Build(false, fio)
 		log.Logger.Trace("build finished")
 		if err != nil {
 			log.Logger.Error("experiment build failed")
@@ -95,28 +93,14 @@ func (e *Experiment) run() error {
 		}
 
 		e.incrementNumCompletedTasks()
-		err = writeResult(e)
+		fio := &FileExpIO{}
+		err = fio.writeResult(e)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
 
-}
-
-// write experiment result to file
-func writeResult(r *Experiment) error {
-	rBytes, err := yaml.Marshal(r.Result)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment result")
-		return errors.New("unable to marshal experiment result")
-	}
-	err = ioutil.WriteFile(experimentResultPath, rBytes, 0664)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
-		return err
-	}
-	return err
 }
 
 func (e *Experiment) setStartTime() error {

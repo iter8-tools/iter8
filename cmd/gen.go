@@ -43,7 +43,8 @@ var genCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
 		log.Logger.Trace("build started")
-		exp, err := build(true)
+		fio := &FileExpIO{}
+		exp, err := Build(true, fio)
 		log.Logger.Trace("build finished")
 		if err != nil {
 			log.Logger.Error("experiment build failed")

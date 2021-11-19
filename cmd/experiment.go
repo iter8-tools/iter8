@@ -14,26 +14,32 @@ type Experiment struct {
 	*base.Experiment
 }
 
+type ExpIO interface {
+	readSpec() ([]base.TaskSpec, error)
+	readResult() (*base.ExperimentResult, error)
+	writeResult(r *Experiment) error
+}
+
 const (
 	experimentSpecPath   = "experiment.yaml"
 	experimentResultPath = "result.yaml"
 )
 
-// Build an experiment from file
-func build(withResult bool) (*Experiment, error) {
+// Build an experiment
+func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 	e := &Experiment{
 		Experiment: &base.Experiment{},
 	}
 	var err error
 	// read it in
 	log.Logger.Trace("build started")
-	e.Tasks, err = readSpec()
+	e.Tasks, err = expio.readSpec()
 	if err != nil {
 		return nil, err
 	}
 	e.InitResults()
 	if withResult {
-		e.Result, err = readResult()
+		e.Result, err = expio.readResult()
 		if err != nil {
 			return nil, err
 		}
@@ -72,21 +78,17 @@ func build(withResult bool) (*Experiment, error) {
 				return nil, err
 			}
 		}
-
 	}
-
 	return e, err
 }
 
-// read experiment spec from file
-func readSpec() ([]base.TaskSpec, error) {
-	yamlFile, err := ioutil.ReadFile(experimentSpecPath)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
-		return nil, errors.New("unable to read experiment spec")
-	}
+//FileExpIO enables reading and writing through files
+type FileExpIO struct{}
+
+// SpecFromBytes reads experiment spec from bytes
+func SpecFromBytes(b []byte) ([]base.TaskSpec, error) {
 	e := []base.TaskSpec{}
-	err = yaml.Unmarshal(yamlFile, &e)
+	err := yaml.Unmarshal(b, &e)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment spec")
 		return nil, err
@@ -94,18 +96,44 @@ func readSpec() ([]base.TaskSpec, error) {
 	return e, err
 }
 
-// read experiment result from file
-func readResult() (*base.ExperimentResult, error) {
-	yamlFile, err := ioutil.ReadFile(experimentResultPath)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
-		return nil, errors.New("unable to read experiment result")
-	}
-	e := &base.ExperimentResult{}
-	err = yaml.Unmarshal(yamlFile, e)
+// ResultFromBytes reads experiment result from bytes
+func ResultFromBytes(b []byte) (*base.ExperimentResult, error) {
+	r := &base.ExperimentResult{}
+	err := yaml.Unmarshal(b, r)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment result")
 		return nil, err
 	}
-	return e, err
+	return r, err
+}
+
+// read experiment spec from file
+func (f *FileExpIO) readSpec() ([]base.TaskSpec, error) {
+	b, err := ioutil.ReadFile(experimentSpecPath)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
+		return nil, errors.New("unable to read experiment spec")
+	}
+	return SpecFromBytes(b)
+}
+
+// read experiment result from file
+func (f *FileExpIO) readResult() (*base.ExperimentResult, error) {
+	b, err := ioutil.ReadFile(experimentResultPath)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
+		return nil, errors.New("unable to read experiment result")
+	}
+	return ResultFromBytes(b)
+}
+
+// write experiment result to file
+func (f *FileExpIO) writeResult(r *Experiment) error {
+	rBytes, _ := yaml.Marshal(r.Result)
+	err := ioutil.WriteFile(experimentResultPath, rBytes, 0664)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
+		return err
+	}
+	return err
 }
