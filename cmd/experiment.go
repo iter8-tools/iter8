@@ -25,8 +25,8 @@ const (
 	experimentResultPath = "result.yaml"
 )
 
-// Build an experiment from file
-func build(withResult bool) (*Experiment, error) {
+// Build an experiment
+func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 	e := &Experiment{
 		Experiment: &base.Experiment{},
 	}
@@ -136,30 +136,4 @@ func (f *FileExpIO) writeResult(r *Experiment) error {
 		return err
 	}
 	return err
-}
-
-// Completed returns true if the experiment is complete
-// if the result stanza is missing, this function returns false
-func (exp *Experiment) Completed() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// NoFailure returns true if no task int he experiment has failed
-// if the result stanza is missing, this function returns false
-func (exp *Experiment) NoFailure() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if !exp.Result.Failure {
-				return true
-			}
-		}
-	}
-	return false
 }
