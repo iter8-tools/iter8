@@ -12,12 +12,6 @@
       # error rate must be 0
     - metric: built-in/error-rate
       upperLimit: 0
-      # 95th percentile latency must be under 1 msec
+      # 95th percentile latency must be under 100 msec
     - metric: built-in/p95.0
-      upperLimit: 1
-# task 3: if SLOs are satisfied, do something
-- if: SLOs()
-  run: echo "SLOs are satisfied"
-# task 4: if SLOs are not satisfied, do something else
-- if: not SLOs()
-  run: echo "SLOs are not satisfied"
+      upperLimit: 100
