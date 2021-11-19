@@ -3,7 +3,7 @@
 - task: gen-load-and-collect-metrics
   with:
     versionInfo:
-   - url: http://hello.default.127.0.0.1.nip.io
+    - url: http://hello.default.127.0.0.1.nip.io
 # task 2: validate service level objectives for https://example.com using
 # the metrics collected in the above task
 - task: assess-app-versions
