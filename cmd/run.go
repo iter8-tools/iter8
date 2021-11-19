@@ -51,7 +51,7 @@ func init() {
 }
 
 // Run an experiment
-func (e *experiment) run() error {
+func (e *Experiment) run() error {
 	var err error
 	if e.Result == nil {
 		e.InitResults()
@@ -105,7 +105,7 @@ func (e *experiment) run() error {
 }
 
 // write experiment result to file
-func writeResult(r *experiment) error {
+func writeResult(r *Experiment) error {
 	rBytes, err := yaml.Marshal(r.Result)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment result")
@@ -119,7 +119,7 @@ func writeResult(r *experiment) error {
 	return err
 }
 
-func (e *experiment) setStartTime() error {
+func (e *Experiment) setStartTime() error {
 	if e.Result == nil {
 		log.Logger.Warn("setStartTime called on an experiment object without results")
 		e.Experiment.InitResults()
@@ -127,7 +127,7 @@ func (e *experiment) setStartTime() error {
 	return nil
 }
 
-func (e *experiment) failExperiment() error {
+func (e *Experiment) failExperiment() error {
 	if e.Result == nil {
 		log.Logger.Warn("failExperiment called on an experiment object without results")
 		e.Experiment.InitResults()
@@ -136,7 +136,7 @@ func (e *experiment) failExperiment() error {
 	return nil
 }
 
-func (e *experiment) incrementNumCompletedTasks() error {
+func (e *Experiment) incrementNumCompletedTasks() error {
 	if e.Result == nil {
 		log.Logger.Warn("incrementNumCompletedTasks called on an experiment object without results")
 		e.Experiment.InitResults()

@@ -64,7 +64,7 @@ var assertCmd = &cobra.Command{
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
-		exp := &experiment{
+		exp := &Experiment{
 			Experiment: &base.Experiment{},
 		}
 		log.Logger.Trace("build started")
@@ -138,7 +138,7 @@ var assertCmd = &cobra.Command{
 
 // completed returns true if the experiment is complete
 // if the result stanza is missing, this function returns false
-func (exp *experiment) completed() bool {
+func (exp *Experiment) completed() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
@@ -151,7 +151,7 @@ func (exp *experiment) completed() bool {
 
 // noFailure returns true if no task int he experiment has failed
 // if the result stanza is missing, this function returns false
-func (exp *experiment) noFailure() bool {
+func (exp *Experiment) noFailure() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if !exp.Result.Failure {
@@ -163,7 +163,7 @@ func (exp *experiment) noFailure() bool {
 }
 
 // extract version from string
-func (exp *experiment) extractVersion(cond string) (int, error) {
+func (exp *Experiment) extractVersion(cond string) (int, error) {
 	tokens := strings.Split(cond, "=")
 	if len(tokens) != 2 {
 		log.Logger.Error("unsupported condition detected; ", cond)

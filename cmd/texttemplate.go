@@ -11,7 +11,7 @@ import (
 )
 
 // formatText provides a text description of the experiment
-func formatText(e *experiment) string {
+func formatText(e *Experiment) string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.AlignRight|tabwriter.Debug)
 	e.printState(w)
@@ -33,7 +33,7 @@ func formatText(e *experiment) string {
 }
 
 // number of completed tasks in the experiment
-func (e *experiment) numCompletedTasksString() string {
+func (e *Experiment) numCompletedTasksString() string {
 	if e == nil || e.Result == nil {
 		return "unknown"
 	} else {
@@ -42,7 +42,7 @@ func (e *experiment) numCompletedTasksString() string {
 }
 
 // print the current state of the experiment
-func (e *experiment) printState(w *tabwriter.Writer) {
+func (e *Experiment) printState(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprintln(w, "Experiment summary\t")
@@ -58,7 +58,7 @@ func (e *experiment) printState(w *tabwriter.Writer) {
 }
 
 // containsInsight checks if the experiment contains insight
-func (e *experiment) containsInsight(in base.InsightType) bool {
+func (e *Experiment) containsInsight(in base.InsightType) bool {
 	if e != nil {
 		if e.Result != nil {
 			if e.Result.Insights != nil {
@@ -76,7 +76,7 @@ func (e *experiment) containsInsight(in base.InsightType) bool {
 }
 
 // are SLOs in a printable condition in this experiment
-func (e *experiment) printableSLOs() bool {
+func (e *Experiment) printableSLOs() bool {
 	if e != nil {
 		if e.Result != nil {
 			if e.Result.Insights != nil {
@@ -98,7 +98,7 @@ func (e *experiment) printableSLOs() bool {
 }
 
 // print SLOs
-func (e *experiment) printSLOs(w *tabwriter.Writer) {
+func (e *Experiment) printSLOs(w *tabwriter.Writer) {
 	in := e.Result.Insights
 	fmt.Fprint(w, "\n\n")
 	fmt.Fprintln(w, "-----------------------------\t-----")
@@ -126,7 +126,7 @@ func (e *experiment) printSLOs(w *tabwriter.Writer) {
 }
 
 // print no SLOs
-func (e *experiment) printNoSLOs(w *tabwriter.Writer) {
+func (e *Experiment) printNoSLOs(w *tabwriter.Writer) {
 	fmt.Fprint(w, "\n\n")
 	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "SLOs\tunavailable")
@@ -137,7 +137,7 @@ func (e *experiment) printNoSLOs(w *tabwriter.Writer) {
 }
 
 // are metrics in a printable condition in this experiment
-func (e *experiment) printableMetrics() bool {
+func (e *Experiment) printableMetrics() bool {
 	if e != nil {
 		if e.Result != nil {
 			if e.Result.Insights != nil {
@@ -157,7 +157,7 @@ func (e *experiment) printableMetrics() bool {
 }
 
 // print metrics collected
-func (e *experiment) printMetrics(w *tabwriter.Writer) {
+func (e *Experiment) printMetrics(w *tabwriter.Writer) {
 	in := e.Result.Insights
 	fmt.Fprint(w, "\n\n")
 	fmt.Fprintln(w, "-----------------------------\t-----")
@@ -191,7 +191,7 @@ func (e *experiment) printMetrics(w *tabwriter.Writer) {
 }
 
 // print no metrics
-func (e *experiment) printNoMetrics(w *tabwriter.Writer) {
+func (e *Experiment) printNoMetrics(w *tabwriter.Writer) {
 	fmt.Fprint(w, "\n\n")
 	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "Metrics\tunavailable")
@@ -202,7 +202,7 @@ func (e *experiment) printNoMetrics(w *tabwriter.Writer) {
 }
 
 // get value of the metric with units
-func (e *experiment) getMetricValueWithUnits(m string, j int) string {
+func (e *Experiment) getMetricValueWithUnits(m string, j int) string {
 	vals := e.Result.Insights.MetricValues[j][m]
 	if len(vals) == 0 {
 		return "unavailable"

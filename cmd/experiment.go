@@ -9,7 +9,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type experiment struct {
+type Experiment struct {
 	tasks []base.Task
 	*base.Experiment
 }
@@ -20,8 +20,8 @@ const (
 )
 
 // Build an experiment from file
-func build(withResult bool) (*experiment, error) {
-	e := &experiment{
+func build(withResult bool) (*Experiment, error) {
+	e := &Experiment{
 		Experiment: &base.Experiment{},
 	}
 	var err error
