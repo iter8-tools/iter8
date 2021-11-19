@@ -148,7 +148,7 @@ func (t *collectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) 
 		RunnerOptions: periodic.RunnerOptions{
 			RunType:     "Iter8 load test",
 			QPS:         float64(*t.With.QPS),
-			NumThreads:  4,
+			NumThreads:  *t.With.Connections,
 			Percentiles: t.With.Percentiles,
 			Out:         io.Discard,
 		},
