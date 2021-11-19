@@ -84,64 +84,26 @@ var AssertCmd = &cobra.Command{
 	},
 }
 
-// Assert if experiment satisfies conditions
-func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, error) {
-	// check assert conditions
-	allGood := true
-	for {
-		for _, cond := range conditions {
-			if strings.ToLower(cond) == Completed {
-				c := exp.Completed()
-				allGood = allGood && c
-				if c {
-					log.Logger.Info("experiment completed")
-				} else {
-					log.Logger.Info("experiment did not complete")
-				}
-			} else if strings.ToLower(cond) == NoFailure {
-				nf := exp.NoFailure()
-				allGood = allGood && nf
-				if nf {
-					log.Logger.Info("experiment has no failure")
-				} else {
-					log.Logger.Info("experiment failed")
-				}
-			} else if strings.ToLower(cond) == SLOs {
-				slos := exp.SLOs()
-				allGood = allGood && slos
-				if slos {
-					log.Logger.Info("SLOs are satisfied")
-				} else {
-					log.Logger.Info("SLOs are not satisfied")
-				}
-			} else if strings.HasPrefix(cond, SLOsByPrefix) {
-				version, err := exp.extractVersion(cond)
-				if err != nil {
-					return false, err
-				}
-				iv := exp.SLOsBy(version)
-				allGood = allGood && iv
-				if iv {
-					log.Logger.Info(version, " satisfies objectives")
-				} else {
-					log.Logger.Info(version, " does not satisfy objectives")
-				}
-			} else {
-				log.Logger.Error("unsupported assert condition detected; ", cond)
-				return false, fmt.Errorf("unsupported assert condition detected; %v", cond)
+// completed returns true if the experiment is complete
+// if the result stanza is missing, this function returns false
+func (exp *Experiment) completed() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
+				return true
 			}
 		}
-		if allGood {
-			log.Logger.Info("all conditions were satisfied")
-			return true, nil
-		} else {
-			if timeSpent >= to {
-				log.Logger.Info("not all conditions were satisfied")
-				return false, nil
-			} else {
-				log.Logger.Infof("sleeping %v ................................", sleepTime)
-				time.Sleep(sleepTime)
-				timeSpent += sleepTime
+	}
+	return false
+}
+
+// noFailure returns true if no task int he experiment has failed
+// if the result stanza is missing, this function returns false
+func (exp *Experiment) noFailure() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if !exp.Result.Failure {
+				return true
 			}
 		}
 	}

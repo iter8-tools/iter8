@@ -51,7 +51,7 @@ func init() {
 }
 
 // Run an experiment
-func (e *Experiment) Run(expio ExpIO) error {
+func (e *Experiment) run() error {
 	var err error
 	if e.Result == nil {
 		e.InitResults()
@@ -102,6 +102,21 @@ func (e *Experiment) Run(expio ExpIO) error {
 	}
 	return nil
 
+}
+
+// write experiment result to file
+func writeResult(r *Experiment) error {
+	rBytes, err := yaml.Marshal(r.Result)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment result")
+		return errors.New("unable to marshal experiment result")
+	}
+	err = ioutil.WriteFile(experimentResultPath, rBytes, 0664)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
+		return err
+	}
+	return err
 }
 
 func (e *Experiment) setStartTime() error {
