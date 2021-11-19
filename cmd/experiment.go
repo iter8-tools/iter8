@@ -26,8 +26,8 @@ const (
 	experimentResultPath = "result.yaml"
 )
 
-// Build an experiment
-func Build(withResult bool, expio ExpIO) (*Experiment, error) {
+// Build an experiment from file
+func build(withResult bool) (*Experiment, error) {
 	e := &Experiment{
 		Experiment: &base.Experiment{},
 	}
