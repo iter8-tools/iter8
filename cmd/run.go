@@ -25,8 +25,6 @@ var RunCmd = &cobra.Command{
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		log.Logger.Trace("build called")
-		// Replace FileExpIO with ClusterExpIO to work with
-		// Spec and Results that might be inside the cluster
 		fio := &FileExpIO{}
 		exp, err := Build(false, fio)
 		log.Logger.Trace("build finished")
@@ -94,28 +92,14 @@ func (e *Experiment) run() error {
 		}
 
 		e.incrementNumCompletedTasks()
-		err = expio.WriteResult(e)
+		fio := &FileExpIO{}
+		err = fio.writeResult(e)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
 
-}
-
-// write experiment result to file
-func writeResult(r *Experiment) error {
-	rBytes, err := yaml.Marshal(r.Result)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment result")
-		return errors.New("unable to marshal experiment result")
-	}
-	err = ioutil.WriteFile(experimentResultPath, rBytes, 0664)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
-		return err
-	}
-	return err
 }
 
 func (e *Experiment) setStartTime() error {

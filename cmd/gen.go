@@ -60,8 +60,6 @@ var GenCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// build experiment
 		log.Logger.Trace("build started")
-		// build experiment
-		// replace FileExpIO with ClusterExpIO to build from cluster
 		fio := &FileExpIO{}
 		exp, err := Build(true, fio)
 		log.Logger.Trace("build finished")

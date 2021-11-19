@@ -67,7 +67,6 @@ var AssertCmd = &cobra.Command{
 			Experiment: &base.Experiment{},
 		}
 		log.Logger.Trace("build started")
-		// replace FileExpIO with ClusterExpIO to build from cluster
 		fio := &FileExpIO{}
 		exp, err := Build(true, fio)
 		log.Logger.Trace("build finished")
