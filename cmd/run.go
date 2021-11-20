@@ -91,7 +91,7 @@ func (e *Experiment) Run(expio ExpIO) error {
 			}
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("if clause evaluated to false: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
 		}
 
 		e.incrementNumCompletedTasks()
