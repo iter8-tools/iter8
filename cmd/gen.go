@@ -10,18 +10,45 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"helm.sh/helm/pkg/strvals"
+	"helm.sh/helm/v3/pkg/chartutil"
 )
 
 const (
 	// Path to template file
 	templateFilePath = "iter8.tpl"
+
+	// CustomOutputFormat is the output format used to create custom output
+	CustomOutputFormat = "custom"
+
+	// TextOutputFormat is the output format used to create text output
+	TextOutputFormatKey = "text"
 )
 
 var (
-	// Output format
-	outputFormat string = "text"
+	// Output format variable holds the output format to be used by gen
+	outputFormat string = TextOutputFormatKey
+	// values are user specified values used during gen
+	values []string
 )
+
+type ExperimentWithValues struct {
+	*Experiment
+	Values chartutil.Values
+}
+
+func (e *ExperimentWithValues) parseValues(values []string) error {
+	// User specified a value via --set
+	for _, value := range values {
+		if err := strvals.ParseInto(value, e.Values); err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("failed parsing --set data")
+			return errors.Wrap(err, "failed parsing --set data")
+		}
+	}
+	return nil
+}
 
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
@@ -52,8 +79,15 @@ var genCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		ev := &ExperimentWithValues{
+			Experiment: exp,
+		}
+		err = ev.parseValues(values)
+		if err != nil {
+			os.Exit(1)
+		}
 		// generate formatted output
-		err = exp.Gen(outputFormat)
+		err = ev.Gen(outputFormat)
 		if err != nil {
 			os.Exit(1)
 		}
@@ -61,15 +95,13 @@ var genCmd = &cobra.Command{
 }
 
 // Gen creates output from experiment as per outputFormat
-func (exp *Experiment) Gen(outputFormat string) error {
+func (exp *ExperimentWithValues) Gen(outputFormat string) error {
 	var tmpl *template.Template
 	var err error
 
-	switch strings.ToLower(outputFormat) {
-	case "text":
-		tmpl = builtInTemplates["text"]
+	templateKey := strings.ToLower(outputFormat)
 
-	case "custom":
+	if templateKey == CustomOutputFormat { // this is a custom template
 		// read in the template file
 		tplBytes, err := ioutil.ReadFile(templateFilePath)
 		if err != nil {
@@ -77,6 +109,8 @@ func (exp *Experiment) Gen(outputFormat string) error {
 			return err
 		}
 
+		// add toYAML and other sprig template functions
+		// they are all allowed to be used within the custom template
 		// ensure it is a valid template
 		tmpl, err = template.New("tpl").Funcs(template.FuncMap{
 			"toYAML": toYAML,
@@ -85,10 +119,13 @@ func (exp *Experiment) Gen(outputFormat string) error {
 			log.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")
 			return err
 		}
-
-	default:
-		log.Logger.Error("invalid output format; valid formats are: text | custom")
-		return err
+	} else { // this is a built-in template
+		var ok bool
+		tmpl, ok = builtInTemplates[templateKey]
+		if !ok {
+			log.Logger.Error("invalid output format; valid formats are: text | custom")
+			return errors.New("invalid output format; valid formats are: text | custom")
+		}
 	}
 
 	// execute template
@@ -107,7 +144,7 @@ func (exp *Experiment) Gen(outputFormat string) error {
 func init() {
 	RootCmd.AddCommand(genCmd)
 	genCmd.Flags().StringVarP(&outputFormat, "outputFormat", "o", "text", "text | custom")
-	genCmd.Flags().MarkHidden("outputFormat")
+	genCmd.Flags().StringSliceVarP(&values, "set", "s", []string{}, "key=value; value can be accessed in templates used by gen {{ Values.key }}")
 
 	// create text template
 	tmpl, err := template.New("text").Funcs(template.FuncMap{

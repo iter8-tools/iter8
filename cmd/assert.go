@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	completed    = "completed"
-	noFailure    = "nofailure"
-	slos         = "slos"
-	slosByPrefix = "slosby"
+	Completed    = "completed"
+	NoFailure    = "nofailure"
+	SLOs         = "slos"
+	SLOsByPrefix = "slosby"
 )
 
 // assert conditions
@@ -90,23 +90,23 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 	allGood := true
 	for {
 		for _, cond := range conditions {
-			if strings.ToLower(cond) == completed {
-				c := exp.completed()
+			if strings.ToLower(cond) == Completed {
+				c := exp.Completed()
 				allGood = allGood && c
 				if c {
 					log.Logger.Info("experiment completed")
 				} else {
 					log.Logger.Info("experiment did not complete")
 				}
-			} else if strings.ToLower(cond) == noFailure {
-				nf := exp.noFailure()
+			} else if strings.ToLower(cond) == NoFailure {
+				nf := exp.NoFailure()
 				allGood = allGood && nf
 				if nf {
 					log.Logger.Info("experiment has no failure")
 				} else {
 					log.Logger.Info("experiment failed")
 				}
-			} else if strings.ToLower(cond) == slos {
+			} else if strings.ToLower(cond) == SLOs {
 				slos := exp.SLOs()
 				allGood = allGood && slos
 				if slos {
@@ -114,7 +114,7 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 				} else {
 					log.Logger.Info("SLOs are not satisfied")
 				}
-			} else if strings.HasPrefix(cond, slosByPrefix) {
+			} else if strings.HasPrefix(cond, SLOsByPrefix) {
 				version, err := exp.extractVersion(cond)
 				if err != nil {
 					return false, err
@@ -147,32 +147,6 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 	}
 }
 
-// completed returns true if the experiment is complete
-// if the result stanza is missing, this function returns false
-func (exp *Experiment) completed() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// noFailure returns true if no task int he experiment has failed
-// if the result stanza is missing, this function returns false
-func (exp *Experiment) noFailure() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if !exp.Result.Failure {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 // extract version from string
 func (exp *Experiment) extractVersion(cond string) (int, error) {
 	tokens := strings.Split(cond, "=")
@@ -195,7 +169,7 @@ func (exp *Experiment) extractVersion(cond string) (int, error) {
 
 func init() {
 	RootCmd.AddCommand(assertCmd)
-	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", completed, noFailure, slos, slosByPrefix))
+	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
 	assertCmd.MarkFlagRequired("condition")
 	assertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
 }
