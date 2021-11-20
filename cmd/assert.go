@@ -142,7 +142,7 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 				log.Logger.Info("not all conditions were satisfied")
 				return false, nil
 			} else {
-				log.Logger.Info("sleeping %v ...", sleepTime)
+				log.Logger.Infof("sleeping %v ................................", sleepTime)
 				time.Sleep(sleepTime)
 				timeSpent += sleepTime
 			}
