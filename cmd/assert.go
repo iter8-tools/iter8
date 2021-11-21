@@ -135,7 +135,7 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 			log.Logger.Info("all conditions were satisfied")
 			return true, nil
 		} else {
-			if timeSpent > to {
+			if timeSpent >= to {
 				log.Logger.Info("not all conditions were satisfied")
 				return false, nil
 			} else {
