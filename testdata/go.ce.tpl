@@ -1,14 +1,14 @@
 {{- $suffix := randAlphaNum 5 | lower -}}
-apiVersion: batch/v1
-kind: Job
+apiVersion: codeengine.cloud.ibm.com/v1beta1
+kind: JobRun
 metadata:
   name: {{ .Name }}-{{ $suffix }}
 spec:
-  template:
-    spec:
+  jobDefinitionSpec:
+    template:
       containers:
       - name: iter8
-        image: asdf/iter8
+        image: puffinmuffin/iter8
         command:
         - "/bin/sh"
         - "-c"
@@ -25,8 +25,6 @@ spec:
 
           # update the secret
           kubectl create secret generic {{ .Name }}-{{ $suffix }} --from-file=experiment=experiment.yaml --dry-run=client -o yaml | kubectl apply -f -
-      restartPolicy: Never
-  backoffLimit: 4
 ---
 apiVersion: v1
 kind: Secret
@@ -39,7 +37,7 @@ stringData:
     - task: gen-load-and-collect-metrics
       with:
         versionInfo:
-        - url: https://example.com
+        - url: https://iter8-ce-demo.fgw1ut94lpp.ca-tor.codeengine.appdomain.cloud
     # task 2: validate service level objectives for https://example.com using
     # the metrics collected in the above task
     - task: assess-app-versions
@@ -51,31 +49,11 @@ stringData:
           # 95th percentile latency must be under 1 msec
         - metric: built-in/p95.0
           upperLimit: 1
-    # task 3: if SLOs are satisfied, do something
+    # task 3: if SLOs are satisfied, do nothing
     - if: SLOs()
       run: echo "SLOs are satisfied"
-    # task 4: if SLOs are not satisfied, do something else
+    # task 4: if SLOs are not satisfied, revert to the previous version
     - if: not SLOs()
-      run: echo "SLOs are not satisfied"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ .Name }}-{{ $suffix }}
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  resourceNames: ["{{ .Name }}-{{ $suffix }}"]
-  verbs: ["get", "patch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ .Name }}-{{ $suffix }}
-subjects:
-- kind: ServiceAccount
-  name: default
-roleRef:
-  kind: Role
-  name: {{ .Name }}-{{ $suffix }}
-  apiGroup: rbac.authorization.k8s.io
+      run: |
+        kubectl patch ksvc iter8-ce-demo --type='merge' \
+        -p='{"spec": {"traffic": [{"percent": 0, "latestRevision": true}, {"percent": 100, "revisionName": "iter8-ce-demo-00001"}]}}'
