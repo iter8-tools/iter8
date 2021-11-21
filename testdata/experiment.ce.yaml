@@ -15,9 +15,8 @@
       # 95th percentile latency must be under 1 msec
     - metric: built-in/p95.0
       upperLimit: 100
-# task 3: if SLOs are satisfied, do something
-- if: SLOs()
-  run: echo "SLOs are satisfied. Rollout."
-# task 4: if SLOs are not satisfied, do something else
+# task 3: if SLOs are not satisfied, revert to previous version
 - if: not SLOs()
-  run: echo "SLOs are not satisfied. Rollback."
+  run: |
+    kubectl patch ksvc iter8-ce-demo --type='merge' \
+    -p='{"spec": {"traffic": [{"percent": 0, "latestRevision": true}, {"percent": 100, "revisionName": "iter8-ce-demo-00001"}]}}'
