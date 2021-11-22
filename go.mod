@@ -6,6 +6,7 @@ require (
 	fortio.org/fortio v1.17.1
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
+	github.com/go-playground/validator/v10 v10.9.0
 	github.com/hashicorp/go-getter v1.5.9
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1

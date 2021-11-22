@@ -50,7 +50,7 @@ var ReportCmd = &cobra.Command{
 	# generate text report
 	iter8 report
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		log.Logger.Trace("build started")
 		// build experiment
 		// replace FileExpIO with ClusterExpIO to build from cluster
@@ -58,15 +58,15 @@ var ReportCmd = &cobra.Command{
 		exp, err := Build(true, fio)
 		log.Logger.Trace("build finished")
 		if err != nil {
-			log.Logger.Error("experiment build failed")
-			os.Exit(1)
+			return err
 		}
 
 		// generate formatted output from experiment
 		err = exp.Report(outputFormat)
 		if err != nil {
-			os.Exit(1)
+			return err
 		}
+		return nil
 	},
 }
 

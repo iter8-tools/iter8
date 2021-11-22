@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -62,7 +61,7 @@ var AssertCmd = &cobra.Command{
 	# and may run in the background
 	iter8 assert -c completed,nofailures,slosby=0 -t 5s
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// build experiment
 		exp := &Experiment{
 			Experiment: &base.Experiment{},
@@ -73,14 +72,18 @@ var AssertCmd = &cobra.Command{
 		exp, err := Build(true, fio)
 		log.Logger.Trace("build finished")
 		if err != nil {
-			log.Logger.Error("experiment build failed")
-			os.Exit(1)
+			return err
 		}
 
 		allGood, err := exp.Assert(conds, timeout)
-		if err != nil || !allGood {
-			os.Exit(1)
+		if err != nil {
+			return err
 		}
+		if !allGood {
+			log.Logger.Error("assert conditions failed")
+			return errors.New("assert conditions failed")
+		}
+		return nil
 	},
 }
 
