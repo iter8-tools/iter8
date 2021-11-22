@@ -18,6 +18,6 @@ In these experiments, the [`gen-load-and-collect-metrics`](../user-guide/tasks/c
 
 ## v0.7 Examples
 
-* Load testing and SLO validation of an app that receives a payload through an [HTTP POST API endpoint](https://iter8.tools/0.7/tutorials/deployments/slo-validation-payload/).
+* [HTTP POST API endpoint](https://iter8.tools/0.7/tutorials/deployments/slo-validation-payload/)
 
-* Load testing and SLO validation of a [Knative app managed by Helm](https://iter8.tools/0.7/tutorials/knative/slovalidation-helmex/).
+* [Knative app managed by Helm](https://iter8.tools/0.7/tutorials/knative/slovalidation-helmex/)

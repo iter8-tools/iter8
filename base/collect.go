@@ -37,6 +37,8 @@ type collectInputs struct {
 	Duration *string `json:"duration" yaml:"duration"`
 	// QPS is the number of queries per second sent to each version. Default is 8.0.
 	QPS *float32 `json:"qps" yaml:"qps"`
+	// Connections is the number of number of parallel connections used to send load. Default is 4.
+	Connections *int `json:"connections" yaml:"connections"`
 	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload.
 	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
 	// PayloadURL is the URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored.
@@ -55,7 +57,7 @@ const (
 	CollectTaskName        = "gen-load-and-collect-metrics"
 	defaultQPS             = float32(8)
 	defaultNumRequests     = int64(100)
-	defaultConnections     = uint32(4)
+	defaultConnections     = 4
 	requestCountMetricName = "request-count"
 	errorCountMetricName   = "error-count"
 	errorRateMetricName    = "error-rate"
@@ -125,6 +127,9 @@ func (t *collectTask) initializeDefaults() {
 	if t.With.QPS == nil {
 		t.With.QPS = float32Pointer(defaultQPS)
 	}
+	if t.With.Connections == nil {
+		t.With.Connections = intPointer(defaultConnections)
+	}
 	if t.With.ErrorRanges == nil {
 		t.With.ErrorRanges = defaultErrorRanges
 	}
@@ -143,6 +148,7 @@ func (t *collectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) 
 		RunnerOptions: periodic.RunnerOptions{
 			RunType:     "Iter8 load test",
 			QPS:         float64(*t.With.QPS),
+			NumThreads:  *t.With.Connections,
 			Percentiles: t.With.Percentiles,
 			Out:         io.Discard,
 		},
