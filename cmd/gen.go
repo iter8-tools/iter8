@@ -24,15 +24,10 @@ var (
 	values []string
 )
 
-type ExperimentWithValues struct {
-	*Experiment
-	Values chartutil.Values
-}
-
-func (e *ExperimentWithValues) parseValues(values []string) error {
+func parseValues(values []string, v chartutil.Values) error {
 	// User specified a value via --set
 	for _, value := range values {
-		if err := strvals.ParseInto(value, e.Values); err != nil {
+		if err := strvals.ParseInto(value, v); err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("failed parsing --set data")
 			return errors.Wrap(err, "failed parsing --set data")
 		}
@@ -43,40 +38,21 @@ func (e *ExperimentWithValues) parseValues(values []string) error {
 // GenCmd represents the gen command
 var GenCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "generate formatted output from experiment spec and result",
-	Long:  "Generate formatted output from experiment spec and result",
+	Short: "render go template with values",
+	Long:  "Render go template with values",
 	Example: `
-	# download the load-test experiment
-	iter8 hub -e load-test
-
-	cd load-test
-
-	# run it
-	iter8 run
-
-	# generate formatted text output
-	iter8 gen
+	# use go template in iter8.tpl
+	# execute it using values that are set
+	iter8 gen --set a=b
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		log.Logger.Trace("build started")
-		// build experiment
-		// replace FileExpIO with ClusterExpIO to build from cluster
-		fio := &FileExpIO{}
-		exp, err := Build(true, fio)
-		log.Logger.Trace("build finished")
-		if err != nil {
-			return err
-		}
-
-		ev := &ExperimentWithValues{
-			Experiment: exp,
-		}
-		err = ev.parseValues(values)
+		v := chartutil.Values{}
+		err := parseValues(values, v)
 		if err != nil {
 			return err
 		}
 		// generate formatted output
-		err = ev.Gen()
+		err = Gen(v)
 		if err != nil {
 			return err
 		}
@@ -84,8 +60,8 @@ var GenCmd = &cobra.Command{
 	},
 }
 
-// Gen creates formatted output from experiment spec and result
-func (exp *ExperimentWithValues) Gen() error {
+// Gen creates output from iter8.tpl
+func Gen(v chartutil.Values) error {
 	var tmpl *template.Template
 	var err error
 
@@ -109,7 +85,7 @@ func (exp *ExperimentWithValues) Gen() error {
 
 	// execute template
 	var b bytes.Buffer
-	err = tmpl.Execute(&b, exp)
+	err = tmpl.Execute(&b, v)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to execute template")
 		return err
