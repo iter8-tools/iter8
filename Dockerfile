@@ -11,7 +11,9 @@ COPY ./ ./
 RUN go mod download
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /bin/iter8 iter8.go
+WORKDIR /workspace/clibase
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /bin/iter8
+WORKDIR /workspace
 
 # Install kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -46,6 +48,3 @@ RUN apt-get update && apt-get install -y git curl gpg
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 RUN apt update && apt install gh
-
-#kubectl get secret my-exp-nag9h -o go-template='{{ .data.experiment }}' | base64 -D
-# Note: on GNU/Linux, the base64 flag is -d, not -D.
