@@ -5,7 +5,7 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Load test https://example.com"
-    Use an Iter8 experiment to load test https://example.com and validate error and latency related service level objectives (SLOs).
+    Use an Iter8 experiment to load test https://example.com and validate latency and error-related service level objectives (SLOs).
 
 ## 1. [Install Iter8](install.md)
 
@@ -27,7 +27,7 @@ iter8 run
 ??? note "Look inside experiment.yaml"
     ```yaml
     # task 1: generate HTTP requests for https://example.com and
-    # collect Iter8's built-in latency and error related metrics
+    # collect Iter8's built-in latency and error-related metrics
     - task: gen-load-and-collect-metrics
       with:
         versionInfo:
@@ -47,7 +47,7 @@ iter8 run
     ```
 
 ## 4. Assert outcomes
-The experiment should complete in a few seconds. Upon completion, assert that the experiment completed without any failures, and SLOs are satisfied, as follows.
+The experiment should complete in a few seconds. Upon completion, assert that the experiment completed without any failures and SLOs are satisfied, as follows.
 
 ```shell
 iter8 assert -c completed -c nofailure -c slos
@@ -123,4 +123,4 @@ iter8 gen
     -----------------------------|-----
     ```
 
-Congratulations :tada: You completed your first Iter8 experiment.
+Congratulations! :tada: You completed your first Iter8 experiment.

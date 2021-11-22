@@ -35,9 +35,9 @@ type collectInputs struct {
 	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
 	// Duration of the metrics/collect task run. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
 	Duration *string `json:"duration" yaml:"duration"`
-	// QPS is the number of queries per second sent to each version. Default is 8.0.
+	// QPS is the number of queries per second sent to each version. Default value is 8.0.
 	QPS *float32 `json:"qps" yaml:"qps"`
-	// Connections is the number of number of parallel connections used to send load. Default is 4.
+	// Connections is the number of number of parallel connections used to send load. Default value is 4.
 	Connections *int `json:"connections" yaml:"connections"`
 	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload.
 	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
@@ -47,7 +47,7 @@ type collectInputs struct {
 	ContentType *string `json:"contentType" yaml:"contentType"`
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
-	// Percentiles are the latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
+	// Percentiles are the latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
 	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
 	// A non-empty list of version values.
 	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo"`

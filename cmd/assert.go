@@ -34,7 +34,7 @@ var timeout time.Duration
 var AssertCmd = &cobra.Command{
 	Use:   "assert",
 	Short: "assert if experiment run satisfies the specified conditions",
-	Long:  "Assert if experiment run satisfies the specified conditions. This command exits with code 0, if assert conditions are satisfied. Else, it returns with code 1.",
+	Long:  "Assert if experiment run satisfies the specified conditions. If assert conditions are satisfied, exit with code 0. Else, return with code 1.",
 	Example: `
 	# download the load-test experiment
 	iter8 hub -e load-test

@@ -4,7 +4,7 @@ template: main.html
 
 # Iter8 Hub
 
-Iter8 hub is a git folder which hosts Iter8 experiment folders underneath it. The public Iter8 hub (often referred to as the Iter8 hub or simply the hub) is located at `github.com/iter8-tools/iter8//mkdocs/docs/hub`.
+Iter8 hub is a Git folder which hosts Iter8 experiment folders underneath it. The public Iter8 hub is located at `github.com/iter8-tools/iter8//mkdocs/docs/hub`.
 
 Experiment folders from the hub can be downloaded using the `iter8 hub` command.
 
@@ -28,4 +28,4 @@ export ITER8HUB=github.com/$GHUSER/iter8.git?ref=ml//mkdocs/docs/hub/
 iter8 hub -e tensorflow
 ```
 
-See the [iter8 hub](../commands/iter8_hub.md) command for the syntax of the $ITER8HUB environment variable used above.
+See the [iter8 hub](../commands/iter8_hub.md) command for the syntax of the `ITER8HUB` environment variable used above.

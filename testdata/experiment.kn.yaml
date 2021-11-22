@@ -1,5 +1,5 @@
 # task 1: generate HTTP requests for https://example.com
-# collect Iter8's built-in latency and error related metrics
+# collect Iter8's built-in latency and error-related metrics
 - task: gen-load-and-collect-metrics
   with:
     versionInfo:
