@@ -57,7 +57,7 @@ var GenCmd = &cobra.Command{
 	# generate formatted text output
 	iter8 gen
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		log.Logger.Trace("build started")
 		// build experiment
 		// replace FileExpIO with ClusterExpIO to build from cluster
@@ -73,7 +73,7 @@ var GenCmd = &cobra.Command{
 		}
 		err = ev.parseValues(values)
 		if err != nil {
-			os.Exit(1)
+			return err
 		}
 		// generate formatted output
 		err = ev.Gen()
