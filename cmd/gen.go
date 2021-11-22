@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
@@ -19,17 +18,9 @@ import (
 const (
 	// Path to template file
 	templateFilePath = "iter8.tpl"
-
-	// CustomOutputFormat is the output format used to create custom output
-	CustomOutputFormat = "custom"
-
-	// TextOutputFormat is the output format used to create text output
-	TextOutputFormatKey = "text"
 )
 
 var (
-	// Output format variable holds the output format to be used by gen
-	outputFormat string = TextOutputFormatKey
 	// values are user specified values used during gen
 	values []string
 )
@@ -87,45 +78,34 @@ var genCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		// generate formatted output
-		err = ev.Gen(outputFormat)
+		err = ev.Gen()
 		if err != nil {
 			os.Exit(1)
 		}
 	},
 }
 
-// Gen creates output from experiment as per outputFormat
-func (exp *ExperimentWithValues) Gen(outputFormat string) error {
+// Gen creates formatted output from experiment spec and result
+func (exp *ExperimentWithValues) Gen() error {
 	var tmpl *template.Template
 	var err error
 
-	templateKey := strings.ToLower(outputFormat)
+	// read in the template file
+	tplBytes, err := ioutil.ReadFile(templateFilePath)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read template file")
+		return err
+	}
 
-	if templateKey == CustomOutputFormat { // this is a custom template
-		// read in the template file
-		tplBytes, err := ioutil.ReadFile(templateFilePath)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("unable to read template file")
-			return err
-		}
-
-		// add toYAML and other sprig template functions
-		// they are all allowed to be used within the custom template
-		// ensure it is a valid template
-		tmpl, err = template.New("tpl").Funcs(template.FuncMap{
-			"toYAML": toYAML,
-		}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(string(tplBytes))
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")
-			return err
-		}
-	} else { // this is a built-in template
-		var ok bool
-		tmpl, ok = builtInTemplates[templateKey]
-		if !ok {
-			log.Logger.Error("invalid output format; valid formats are: text | custom")
-			return errors.New("invalid output format; valid formats are: text | custom")
-		}
+	// add toYAML and other sprig template functions
+	// they are all allowed to be used within the custom template
+	// ensure it is a valid template
+	tmpl, err = template.New("tpl").Funcs(template.FuncMap{
+		"toYAML": toYAML,
+	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(string(tplBytes))
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")
+		return err
 	}
 
 	// execute template
@@ -143,20 +123,5 @@ func (exp *ExperimentWithValues) Gen(outputFormat string) error {
 
 func init() {
 	RootCmd.AddCommand(genCmd)
-	genCmd.Flags().StringVarP(&outputFormat, "outputFormat", "o", "text", "text | custom")
 	genCmd.Flags().StringSliceVarP(&values, "set", "s", []string{}, "key=value; value can be accessed in templates used by gen {{ Values.key }}")
-
-	// create text template
-	tmpl, err := template.New("text").Funcs(template.FuncMap{
-		"formatText": formatText,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse("{{ formatText . }}")
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
-		os.Exit(1)
-	}
-
-	// register text template
-	RegisterTemplate("text", tmpl)
-
-	// use the above pattern to register other templates for other output formats (like k8s)
 }
