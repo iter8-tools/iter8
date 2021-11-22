@@ -51,7 +51,7 @@ func (l *Iter8Logger) WithStackTrace(t string) *logrus.Entry {
 }
 
 func (st *StackTrace) String() string {
-	out := "stack trace below ... \n"
+	out := "below ... \n"
 	scanner := bufio.NewScanner(strings.NewReader(st.Trace))
 	for scanner.Scan() {
 		out += "::Trace:: " + scanner.Text() + "\n"

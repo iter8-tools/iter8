@@ -10,10 +10,10 @@ Metrics collection using Prometheus is a common feature provided many app framew
 
 ## v0.7 Examples
 
-* SLO validation based on Prometheus metrics for [KServe ML models](https://iter8.tools/0.7/tutorials/kfserving/testing-strategies/hybrid/).
+* [KServe ML models](https://iter8.tools/0.7/tutorials/kfserving/testing-strategies/hybrid/)
 
-* SLO validation based on Prometheus metrics for [Seldon ML model deployments](https://iter8.tools/0.7/tutorials/seldon/quick-start/).
+* [Seldon ML models](https://iter8.tools/0.7/tutorials/seldon/quick-start/)
 
-* SLO validation based on Prometheus metrics with [Istio service mesh](https://iter8.tools/0.7/tutorials/istio/testing-strategies/slovalidation/).
+* [Istio](https://iter8.tools/0.7/tutorials/istio/testing-strategies/slovalidation/)
 
-* SLO validation based on Prometheus metrics with [Linkerd service mesh](https://iter8.tools/0.7/tutorials/linkerd/abexperiment-helmex/).
+* [Linkerd](https://iter8.tools/0.7/tutorials/linkerd/abexperiment-helmex/)

@@ -1,20 +1,17 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/antonmedv/expr"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/yaml"
 )
 
-// runCmd represents the run command
-var runCmd = &cobra.Command{
+// RunCmd represents the run command
+var RunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "run an experiment",
 	Long:  `Run an experiment. This command will read the experiment spec from the local file named experiment.yaml, and write the result of the experiment run to the local file named result.yaml.`,
@@ -29,14 +26,17 @@ var runCmd = &cobra.Command{
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Logger.Trace("build called")
-		exp, err := build(false)
+		// Replace FileExpIO with ClusterExpIO to work with
+		// Spec and Results that might be inside the cluster
+		fio := &FileExpIO{}
+		exp, err := Build(false, fio)
 		log.Logger.Trace("build finished")
 		if err != nil {
 			log.Logger.Error("experiment build failed")
 			os.Exit(1)
 		} else {
 			log.Logger.Info("starting experiment run")
-			err := exp.run()
+			err := exp.Run(fio)
 			if err != nil {
 				log.Logger.Error("experiment failed")
 			} else {
@@ -47,11 +47,11 @@ var runCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(runCmd)
+	RootCmd.AddCommand(RunCmd)
 }
 
 // Run an experiment
-func (e *experiment) run() error {
+func (e *Experiment) Run(expio ExpIO) error {
 	var err error
 	if e.Result == nil {
 		e.InitResults()
@@ -91,11 +91,11 @@ func (e *experiment) run() error {
 			}
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("if clause evaluated to false: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
 		}
 
 		e.incrementNumCompletedTasks()
-		err = writeResult(e)
+		err = expio.writeResult(e)
 		if err != nil {
 			return err
 		}
@@ -104,22 +104,7 @@ func (e *experiment) run() error {
 
 }
 
-// write experiment result to file
-func writeResult(r *experiment) error {
-	rBytes, err := yaml.Marshal(r.Result)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to marshal experiment result")
-		return errors.New("unable to marshal experiment result")
-	}
-	err = ioutil.WriteFile(experimentResultPath, rBytes, 0664)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
-		return err
-	}
-	return err
-}
-
-func (e *experiment) setStartTime() error {
+func (e *Experiment) setStartTime() error {
 	if e.Result == nil {
 		log.Logger.Warn("setStartTime called on an experiment object without results")
 		e.Experiment.InitResults()
@@ -127,7 +112,7 @@ func (e *experiment) setStartTime() error {
 	return nil
 }
 
-func (e *experiment) failExperiment() error {
+func (e *Experiment) failExperiment() error {
 	if e.Result == nil {
 		log.Logger.Warn("failExperiment called on an experiment object without results")
 		e.Experiment.InitResults()
@@ -136,7 +121,7 @@ func (e *experiment) failExperiment() error {
 	return nil
 }
 
-func (e *experiment) incrementNumCompletedTasks() error {
+func (e *Experiment) incrementNumCompletedTasks() error {
 	if e.Result == nil {
 		log.Logger.Warn("incrementNumCompletedTasks called on an experiment object without results")
 		e.Experiment.InitResults()
