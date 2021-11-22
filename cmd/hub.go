@@ -42,8 +42,8 @@ HOST/OWNER/REPO[?ref=branch]//path-to-experiment-folder-relative-to-root-of-the-
 For example: github.com/iter8-tools/iter8.git?ref=master//mkdocs/docs/hub/
 `
 
-// hubCmd represents the hub command
-var hubCmd = &cobra.Command{
+// HubCmd represents the hub command
+var HubCmd = &cobra.Command{
 	Use:   "hub",
 	Short: "download an experiment folder from Iter8 hub",
 	Long:  hubUsage,
@@ -77,7 +77,7 @@ var hubCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(hubCmd)
-	hubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid experiment folder located under hub")
-	hubCmd.MarkFlagRequired("experiment")
+	RootCmd.AddCommand(HubCmd)
+	HubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid experiment folder located under hub")
+	HubCmd.MarkFlagRequired("experiment")
 }

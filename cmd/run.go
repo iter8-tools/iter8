@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// runCmd represents the run command
-var runCmd = &cobra.Command{
+// RunCmd represents the run command
+var RunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "run an experiment",
 	Long:  `Run an experiment. This command will read the experiment spec from the local file named experiment.yaml, and write the result of the experiment run to the local file named result.yaml.`,
@@ -47,7 +47,7 @@ var runCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(runCmd)
+	RootCmd.AddCommand(RunCmd)
 }
 
 // Run an experiment

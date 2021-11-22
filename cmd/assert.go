@@ -31,8 +31,8 @@ var timeSpent, _ = time.ParseDuration("0s")
 // timeout for assert conditions to be satisfied
 var timeout time.Duration
 
-// assertCmd represents the assert command
-var assertCmd = &cobra.Command{
+// AssertCmd represents the assert command
+var AssertCmd = &cobra.Command{
 	Use:   "assert",
 	Short: "assert if experiment run satisfies the specified conditions",
 	Long:  "Assert if experiment run satisfies the specified conditions. This command exits with code 0, if assert conditions are satisfied. Else, it returns with code 1.",
@@ -168,8 +168,8 @@ func (exp *Experiment) extractVersion(cond string) (int, error) {
 }
 
 func init() {
-	RootCmd.AddCommand(assertCmd)
-	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
-	assertCmd.MarkFlagRequired("condition")
-	assertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
+	RootCmd.AddCommand(AssertCmd)
+	AssertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
+	AssertCmd.MarkFlagRequired("condition")
+	AssertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
 }
