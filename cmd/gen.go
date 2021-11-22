@@ -40,8 +40,8 @@ func (e *ExperimentWithValues) parseValues(values []string) error {
 	return nil
 }
 
-// genCmd represents the gen command
-var genCmd = &cobra.Command{
+// GenCmd represents the gen command
+var GenCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "generate formatted output from experiment spec and result",
 	Long:  "Generate formatted output from experiment spec and result",
@@ -121,6 +121,6 @@ func (exp *ExperimentWithValues) Gen() error {
 }
 
 func init() {
-	RootCmd.AddCommand(genCmd)
-	genCmd.Flags().StringSliceVarP(&values, "set", "s", []string{}, "key=value; value can be accessed in templates used by gen {{ Values.key }}")
+	RootCmd.AddCommand(GenCmd)
+	GenCmd.Flags().StringSliceVarP(&values, "set", "s", []string{}, "key=value; value can be accessed in templates used by gen {{ Values.key }}")
 }
