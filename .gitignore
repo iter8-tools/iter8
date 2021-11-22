@@ -128,4 +128,5 @@ Chart.lock
 
 # Iter8 binary and yamls
 iter8
+basecli
 result.yaml
