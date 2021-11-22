@@ -43,7 +43,7 @@ cd load-test
 iter8 run
 ```
 
-4. The experiment should complete in a few seconds. Upon completion, assert that the experiment completed without any failures, and SLOs are satisfied, as follows.
+4. The experiment should complete in a few seconds. Upon completion, assert that the experiment completed without any failures and SLOs are satisfied, as follows.
 
 ```shell
 iter8 assert -c completed -c nofailure -c slos

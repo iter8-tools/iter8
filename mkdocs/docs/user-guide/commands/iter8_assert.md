@@ -11,7 +11,7 @@ assert if experiment run satisfies the specified conditions
 
 ### Synopsis
 
-Assert if experiment run satisfies the specified conditions. This command exits with code 0, if assert conditions are satisfied. Else, it returns with code 1.
+Assert if experiment run satisfies the specified conditions. If assert conditions are satisfied, exit with code 0. Else, return with code 1.
 
 ```
 iter8 assert [flags]
