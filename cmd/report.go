@@ -74,10 +74,10 @@ var ReportCmd = &cobra.Command{
 func (exp *Experiment) Report(outputFormat string) error {
 	templateKey := strings.ToLower(outputFormat)
 
-	tmpl, ok := builtInTemplates[templateKey]
+	tmpl, ok := builtInTextTemplates[templateKey]
 	if !ok {
-		log.Logger.Error("invalid output format; valid formats are: text | html")
-		return errors.New("invalid output format; valid formats are: text | html")
+		log.Logger.Error("invalid output format; valid formats are: text | custom")
+		return errors.New("invalid output format; valid formats are: text | custom")
 	}
 
 	// execute template
