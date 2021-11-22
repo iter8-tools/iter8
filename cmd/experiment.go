@@ -4,13 +4,14 @@ import (
 	"errors"
 	"io/ioutil"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
 )
 
 type Experiment struct {
-	tasks []base.Task
+	tasks []base.Task `validate:"required"`
 	*base.Experiment
 }
 
@@ -74,6 +75,13 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 				return nil, errors.New("unknown task: " + *t.Task)
 			}
 
+			if err != nil {
+				return nil, err
+			}
+
+			validate := validator.New()
+			// returns nil or ValidationErrors ( []FieldError )
+			err := validate.Struct(e)
 			if err != nil {
 				return nil, err
 			}
