@@ -13,7 +13,7 @@ import (
 // Experiment specification and result
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks  []TaskSpec        `json:"tasks,omitempty" yaml:"tasks,omitempty"`
+	Tasks  []TaskSpec        `json:"tasks,omitempty" yaml:"tasks,omitempty" validate:"gt=0,required"`
 	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
 }
 

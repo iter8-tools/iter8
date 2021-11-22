@@ -11,7 +11,7 @@ import (
 )
 
 type Experiment struct {
-	tasks []base.Task `validate:"required"`
+	tasks []base.Task
 	*base.Experiment
 }
 
@@ -78,15 +78,17 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 			if err != nil {
 				return nil, err
 			}
-
-			validate := validator.New()
-			// returns nil or ValidationErrors ( []FieldError )
-			err := validate.Struct(e)
-			if err != nil {
-				return nil, err
-			}
 		}
 	}
+
+	validate := validator.New()
+	// returns nil or ValidationErrors ( []FieldError )
+	err = validate.Struct(e)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
+		return nil, err
+	}
+
 	return e, err
 }
 
