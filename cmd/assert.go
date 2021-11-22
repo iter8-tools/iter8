@@ -168,8 +168,8 @@ func (exp *Experiment) extractVersion(cond string) (int, error) {
 }
 
 func init() {
-	RootCmd.AddCommand(assertCmd)
-	assertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
-	assertCmd.MarkFlagRequired("condition")
-	assertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
+	RootCmd.AddCommand(AssertCmd)
+	AssertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
+	AssertCmd.MarkFlagRequired("condition")
+	AssertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
 }
