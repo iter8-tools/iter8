@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/antonmedv/expr"
 	"github.com/iter8-tools/iter8/base"
@@ -24,7 +23,7 @@ var RunCmd = &cobra.Command{
 	# run it
 	iter8 run
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		log.Logger.Trace("build called")
 		// Replace FileExpIO with ClusterExpIO to work with
 		// Spec and Results that might be inside the cluster
@@ -32,17 +31,17 @@ var RunCmd = &cobra.Command{
 		exp, err := Build(false, fio)
 		log.Logger.Trace("build finished")
 		if err != nil {
-			log.Logger.Error("experiment build failed")
-			os.Exit(1)
+			return err
 		} else {
 			log.Logger.Info("starting experiment run")
 			err := exp.Run(fio)
 			if err != nil {
-				log.Logger.Error("experiment failed")
+				return err
 			} else {
 				log.Logger.Info("experiment completed successfully")
 			}
 		}
+		return nil
 	},
 }
 

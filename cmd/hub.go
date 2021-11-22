@@ -63,7 +63,7 @@ var HubCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// initialize the location of iter8hub
 		viper.BindEnv("ITER8HUB")
 		viper.SetDefault("ITER8HUB", "github.com/iter8-tools/iter8.git//mkdocs/docs/hub/")
@@ -71,8 +71,9 @@ var HubCmd = &cobra.Command{
 		log.Logger.Info("downloading ", ifurl)
 		if err := getter.Get(hubFolder, ifurl); err != nil {
 			log.Logger.WithStackTrace(err.Error()).Fatalf("unable to get: %v", ifurl)
-			return
+			return err
 		}
+		return nil
 	},
 }
 

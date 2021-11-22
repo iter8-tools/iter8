@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -79,6 +80,15 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 			}
 		}
 	}
+
+	validate := validator.New()
+	// returns nil or ValidationErrors ( []FieldError )
+	err = validate.Struct(e)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
+		return nil, err
+	}
+
 	return e, err
 }
 
