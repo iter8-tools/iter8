@@ -12,7 +12,7 @@ download an experiment folder from Iter8 hub
 ### Synopsis
 
 
-Download an experiment folder from the Iter8 hub. This is useful for fetching experiments to inspect, modify, run or repackage. By default, this command looks for the specified experiment folder in the public Iter8 hub. It is also possible to use custom hubs by setting the ITER8HUB environment variable.
+Download an experiment folder from the Iter8 hub. This is useful for fetching experiments to inspect, modify, run, or repackage. By default, this command looks for the specified experiment folder in the public Iter8 hub. It is also possible to use custom hubs by setting the `ITER8HUB` environment variable.
 
 Environment variables:
 

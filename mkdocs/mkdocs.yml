@@ -132,11 +132,11 @@ nav:
     - Gradual traffic shifting: tutorials/gradual-traffic-shifting.md
 - User guide:
   - Commands: 
-    - Iter8: user-guide/commands/iter8.md
-    - Iter8 Hub: user-guide/commands/iter8_hub.md
-    - Iter8 Run: user-guide/commands/iter8_run.md
-    - Iter8 Assert: user-guide/commands/iter8_assert.md
-    - Iter8 Gen: user-guide/commands/iter8_gen.md
+    - iter8: user-guide/commands/iter8.md
+    - iter8 hub: user-guide/commands/iter8_hub.md
+    - iter8 run: user-guide/commands/iter8_run.md
+    - iter8 assert: user-guide/commands/iter8_assert.md
+    - iter8 gen: user-guide/commands/iter8_gen.md
   - Tasks:
     - gen-load-and-collect-metrics: user-guide/tasks/collect.md
     - assess-app-versions: user-guide/tasks/assess.md

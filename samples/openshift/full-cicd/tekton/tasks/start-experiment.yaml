@@ -13,13 +13,13 @@ spec:
     - name: VERSION
       description: version of the candidate deployment
     - name: USER
-      description: Github username
+      description: GitHub username
     - name: REPO
-      description: Github repo name
+      description: GitHub repo name
     - name: BRANCH
       description: Base branch PR is opened against
     - name: GITHUB-TOKEN-SECRET
-      description: Holds Github token
+      description: Holds GitHub token
 
   steps:
   - name: start-experiment

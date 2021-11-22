@@ -23,7 +23,7 @@ An Iter8 experiment is a sequence of *tasks* that are declaratively specified. I
 1.  Getting metrics for one or more versions of the app.
 2.  Producing SLO validation and A/B/n testing insights based on metrics.
 3.  Triggering events based on these insights. Events include:
-      * sending a slack or webhook notification
+      * sending a Slack or webhook notification
       * triggering a CI/CD/GitHub actions workflow
       * creating a pull request, and 
       * changing application state (including traffic splits) inside a Kubernetes cluster

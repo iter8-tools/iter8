@@ -29,8 +29,8 @@ We welcome many different types of contributions including:
 * Builds, CI
 * New features
 * Bug fixes
-* Web design for https://iter8.tools
-* Communications, social media, blog posts
+* Web design
+* Communication, social media, blog posts
 * Reviewing pull requests
 
 Not everything happens through a GitHub pull request. Please come to our
@@ -115,7 +115,7 @@ have the right to contribute the code you are submitting to the project.
 Read [GitHub's documentation on signing your commits](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
 
 You sign-off by adding the following to your commit messages. Your sign-off must
-match the git user and email associated with the commit.
+match the Git user and email associated with the commit.
 
     This is my commit message
 
@@ -126,7 +126,7 @@ Git has a `-s` command line option to do this automatically:
     git commit -s -m 'This is my commit message'
 
 If you forgot to do this and have not yet pushed your changes to the remote
-repository, you can amend your commit with the sign-off by running 
+repository, you can amend your commit with the sign-off by running:
 
     git commit --amend -s 
 
