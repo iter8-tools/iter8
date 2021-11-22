@@ -128,5 +128,5 @@ Chart.lock
 
 # Iter8 binary and yamls
 iter8
-clibase
+clibase/clibase
 result.yaml
