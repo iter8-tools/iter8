@@ -94,7 +94,7 @@ func (e *Experiment) Run(expio ExpIO) error {
 		}
 
 		e.incrementNumCompletedTasks()
-		err = expio.writeResult(e)
+		err = expio.WriteResult(e)
 		if err != nil {
 			return err
 		}
