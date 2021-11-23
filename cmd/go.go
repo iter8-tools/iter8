@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	// Path to template file
-	templateFilePath = "go.tpl"
+	// Path to go template file
+	goTemplateFilePath = "go.tpl"
 )
 
 func parseValues(values []string, v chartutil.Values) error {
@@ -47,24 +47,25 @@ var GoCmd = &cobra.Command{
 			return err
 		}
 		// generate formatted output
-		err = Go(v)
+		b, err := RenderGoTpl(v, goTemplateFilePath)
 		if err != nil {
 			return err
 		}
+		fmt.Println(b.String())
 		return nil
 	},
 }
 
-// Go creates output from go.tpl
-func Go(v chartutil.Values) error {
+// RenderGoTpl creates output from go.tpl
+func RenderGoTpl(v chartutil.Values, filePath string) (*bytes.Buffer, error) {
 	var tmpl *template.Template
 	var err error
 
 	// read in the template file
-	tplBytes, err := ioutil.ReadFile(templateFilePath)
+	tplBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read template file")
-		return err
+		return nil, err
 	}
 
 	// add toYAML and other sprig template functions
@@ -75,7 +76,7 @@ func Go(v chartutil.Values) error {
 	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(string(tplBytes))
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")
-		return err
+		return nil, err
 	}
 
 	// execute template
@@ -83,12 +84,11 @@ func Go(v chartutil.Values) error {
 	err = tmpl.Execute(&b, v)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to execute template")
-		return err
+		return nil, err
 	}
 
 	// print output
-	fmt.Println(b.String())
-	return nil
+	return &b, nil
 }
 
 func init() {
