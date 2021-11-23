@@ -38,7 +38,7 @@ var GoCmd = &cobra.Command{
 	Render a custom go template in the file go.tpl with values`,
 	Example: `
 	# render go template in go.tpl with values
-	iter8 gen go --set a=b
+	iter8 gen go --set key=val
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		v := chartutil.Values{}

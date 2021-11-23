@@ -27,18 +27,18 @@ import (
 
 const (
 	// Path to experiment template file
-	expTemplatePath = "exp.tpl"
+	expTemplatePath = "experiment.tpl"
 )
 
 // expCmd represents the exp command
 var expCmd = &cobra.Command{
 	Use:   "exp",
-	Short: "render experiment template in the file exp.tpl with values",
+	Short: "render experiment template in the file experiment.tpl with values",
 	Long: `
-	Render experiment template in the file exp.tpl with values`,
+	Render experiment template in the file experiment.tpl with values`,
 	Example: `
-	# render experiment template in the file exp.tpl with values
-	iter8 gen exp --set a=b
+	# render experiment template in the file experiment.tpl with values
+	iter8 gen exp --set key=val
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		v := chartutil.Values{}
