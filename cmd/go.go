@@ -92,5 +92,5 @@ func Go(v chartutil.Values) error {
 }
 
 func init() {
-	RootCmd.AddCommand(GenCmd)
+	GenCmd.AddCommand(GoCmd)
 }
