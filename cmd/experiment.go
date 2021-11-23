@@ -83,7 +83,7 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 
 	validate := validator.New()
 	// returns nil or ValidationErrors ( []FieldError )
-	err = validate.Struct(e)
+	err = validate.Struct(e.Experiment)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
 		return nil, err

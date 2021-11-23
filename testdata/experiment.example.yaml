@@ -17,7 +17,7 @@
       upperLimit: 1
 # task 3: if SLOs are satisfied, do something
 - if: SLOs()
-  run: echo "SLOs are satisfied"
+  run: echo "SLOs are satisfied. Rollout."
 # task 4: if SLOs are not satisfied, do something else
 - if: not SLOs()
-  run: echo "SLOs are not satisfied"
+  run: echo "SLOs are not satisfied. Rollback."

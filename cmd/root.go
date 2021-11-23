@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var globalUsage = `The Kubernetes metrics-driven experimentation platform
+var globalUsage = `Metrics driven experiments
 
 Environment variables:
 
