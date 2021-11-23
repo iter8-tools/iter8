@@ -34,8 +34,11 @@ var timeout time.Duration
 // AssertCmd represents the assert command
 var AssertCmd = &cobra.Command{
 	Use:   "assert",
-	Short: "assert if experiment run satisfies the specified conditions",
-	Long:  "Assert if experiment run satisfies the specified conditions. If assert conditions are satisfied, exit with code 0. Else, return with code 1.",
+	Short: "assert if experiment result satisfies the specified conditions",
+	Long: `
+	Assert if experiment result satisfies the specified conditions. 
+	If assert conditions are satisfied, exit with code 0. 
+	Else, return with code 1.`,
 	Example: `
 	# assert that the experiment completed without failures, 
 	# and SLOs were satisfied

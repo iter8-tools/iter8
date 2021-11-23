@@ -27,19 +27,22 @@ import (
 var hubFolder string
 
 var hubUsage = `
-Download an experiment folder from the Iter8 hub. This is useful for fetching experiments to inspect, modify, run, or repackage. By default, this command looks for the specified experiment folder in the public Iter8 hub. It is also possible to use custom hubs by setting the ITER8HUB environment variable.
+	Download an experiment folder from the Iter8 hub. 
+	This is useful for fetching experiments to inspect, modify, run, or repackage. 
+	By default, this command looks for the specified experiment folder in the public Iter8 hub. 
+	It is also possible to use custom hubs by setting the ITER8HUB environment variable.
 
-Environment variables:
+	Environment variables:
 
-| Name               | Description |
-|--------------------| ------------|
-| $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//mkdocs/docs/hub/ |
+	| Name               | Description |
+	|--------------------| ------------|
+	| $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//mkdocs/docs/hub/ |
 
-The Iter8 hub location follows the following syntax:
+	The Iter8 hub location follows the following syntax:
 
-HOST/OWNER/REPO[?ref=branch]//path-to-experiment-folder-relative-to-root-of-the-repo
+	HOST/OWNER/REPO[?ref=branch]//path-to-experiment-folder-relative-to-root-of-the-repo
 
-For example: github.com/iter8-tools/iter8.git?ref=master//mkdocs/docs/hub/
+	For example: github.com/iter8-tools/iter8.git?ref=master//mkdocs/docs/hub/
 `
 
 // HubCmd represents the hub command
@@ -48,10 +51,10 @@ var HubCmd = &cobra.Command{
 	Short: "download an experiment folder from Iter8 hub",
 	Long:  hubUsage,
 	Example: `
-	# public hub
+	# download load-test experiment folder from the public Iter8 hub
 	iter8 hub -e load-test
 
-	# custom hub
+	# custom Iter8 hubs are simply github repos that host Iter8 experiment folders
 	# Suppose you forked github.com/iter8-tools/iter8, 
 	# created a branch called 'ml', and pushed a new experiment folder 
 	# called 'tensorflow' under the path 'mkdocs/docs/hub'. 

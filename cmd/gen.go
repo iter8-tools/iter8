@@ -13,12 +13,8 @@ var (
 var GenCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "render templates with values",
-	Long:  "Render templates with values",
-	Example: `
-	# use go template in go.tpl
-	# execute it using values that are set
-	iter8 gen go --set a=b
-`,
+	Long: `
+	Render templates with values`,
 }
 
 func init() {

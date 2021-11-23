@@ -37,10 +37,14 @@ type executable interface {
 var ReportCmd = &cobra.Command{
 	Use:   "report",
 	Short: "generate report from experiment result",
-	Long:  "Generate report from experiment result",
+	Long: `
+	Generate report from experiment result`,
 	Example: `
 	# generate text report
 	iter8 report
+
+	# generate html report
+	iter8 report -o html
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		log.Logger.Trace("build started")

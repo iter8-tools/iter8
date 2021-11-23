@@ -33,11 +33,11 @@ func parseValues(values []string, v chartutil.Values) error {
 // GoCmd represents the go command
 var GoCmd = &cobra.Command{
 	Use:   "go",
-	Short: "render a custom go template with values",
-	Long:  "Render a custom go template with values",
+	Short: "render a custom go template in the file go.tpl with values",
+	Long: `
+	Render a custom go template in the file go.tpl with values`,
 	Example: `
-	# use go template in go.tpl
-	# execute it using values that are set
+	# render go template in go.tpl with values
 	iter8 gen go --set a=b
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
