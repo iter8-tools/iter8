@@ -39,14 +39,6 @@ var ReportCmd = &cobra.Command{
 	Short: "generate report from experiment result",
 	Long:  "Generate report from experiment result",
 	Example: `
-	# download the load-test experiment
-	iter8 hub -e load-test
-
-	cd load-test
-
-	# run it
-	iter8 run
-
 	# generate text report
 	iter8 report
 `,

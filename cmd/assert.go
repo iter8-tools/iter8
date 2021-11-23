@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -36,14 +37,6 @@ var AssertCmd = &cobra.Command{
 	Short: "assert if experiment run satisfies the specified conditions",
 	Long:  "Assert if experiment run satisfies the specified conditions. If assert conditions are satisfied, exit with code 0. Else, return with code 1.",
 	Example: `
-	# download the load-test experiment
-	iter8 hub -e load-test
-
-	cd load-test
-
-	# run it
-	iter8 run
-
 	# assert that the experiment completed without failures, 
 	# and SLOs were satisfied
 	iter8 assert -c completed -c nofailure -c slos
@@ -81,7 +74,7 @@ var AssertCmd = &cobra.Command{
 		}
 		if !allGood {
 			log.Logger.Error("assert conditions failed")
-			return errors.New("assert conditions failed")
+			os.Exit(1)
 		}
 		return nil
 	},
