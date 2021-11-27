@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	ht "html/template"
 	"io"
 	"os"
 	"strings"
@@ -109,15 +108,15 @@ func init() {
 	// register text template
 	RegisterTextTemplate(TextOutputFormatKey, tmpl)
 
-	// create HTML template
-	htmpl, err := ht.New(TextOutputFormatKey).Funcs(ht.FuncMap{
+	// create HTML template (for now, this will still use the text templating functionality)
+	htmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
 		"formatHTML": formatHTML,
-	}).Option("missingkey=error").Funcs(sprig.FuncMap()).Parse("{{ formatHTML . }}")
+	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse("{{ formatHTML . }}")
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
 		os.Exit(1)
 	}
 	// register HTML template
-	RegisterHTMLTemplate(HTMLOutputFormatKey, htmpl)
+	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
 
 }

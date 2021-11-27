@@ -13,6 +13,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	commandDocsDir = "COMMAND_DOCS_DIR"
+)
+
 func main() {
 
 	standardLinks := func(s string) string { return s }
@@ -33,13 +37,13 @@ hide:
 	}
 
 	// initialize command docs dir
-	viper.BindEnv("COMMAND_DOCS_DIR")
-	viper.SetDefault("COMMAND_DOCS_DIR", base.CompletePath("../../mkdocs/docs/user-guide", "commands"))
-	cdd := viper.GetString("COMMAND_DOCS_DIR")
+	viper.BindEnv(commandDocsDir)
+	viper.SetDefault(commandDocsDir, base.CompletePath("../../mkdocs/docs/user-guide", "commands"))
+	cdd := viper.GetString(commandDocsDir)
 
 	// automatically generate markdown documentation for all Iter8 commands
 	err := doc.GenMarkdownTreeCustom(cmd.RootCmd, cdd, hdrFunc, standardLinks)
 	if err != nil {
-		log.Logger.Fatal(err)
+		log.Logger.Error(err)
 	}
 }

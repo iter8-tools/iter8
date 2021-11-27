@@ -14,21 +14,46 @@ Generate load and collect built-in metrics for an app.
     - url: https://example.com
 ```
 
+Customize this task using various inputs.
+```yaml
+- task: gen-load-and-collect-metrics
+  with:
+    # Number of requests to be sent to each version.
+    numQueries: 200
+    # Duration of the `metrics/collect` task run. 
+    # If both `duration` and `numQueries` are specified, then `duration` is ignored.
+    duration: 10s
+    # Number of queries *per second* sent to each version.
+    qps: 10.0
+    # String data to be sent as payload. 
+    # If this field is specified, Iter8 will send HTTP POST requests 
+    # with this string as the payload.
+    payloadStr: "abc123"
+    # URL of payload. If this field is specified, 
+    # Iter8 will send HTTP POST requests to versions with 
+    # data downloaded from this URL as the payload. If both `payloadStr` 
+    # and `payloadURL` are specified, the former is ignored.
+    payloadURL: "https://www.my.image.com/image.png"
+    # The type of the payload. Indicated using the Content-Type HTTP header value. 
+    # This is intended to be used in conjunction with one of the `payload*` fields above. 
+    # If this field is specified, Iter8 will send HTTP POST requests to versions 
+    # with this content type header value.
+    contentType: "image/png"
+    versionInfo:
+    - # HTTP(S) URL where version receives GET or POST requests.
+      url: https://example.com
+      # HTTP headers to be used in requests sent to this version.
+      headers:
+        "hello": "mars"
+        "goodbye": "pluto"
+```
+
 Generate load and collect built-in metrics for two versions of an app.
 ```yaml
 - task: gen-load-and-collect-metrics
   with:
     versionInfo:
     - url: http://iter8-app.default.svc:8000
-    - url: http://iter8-app-candidate.default.svc:8000
-```
-
-Generate load and collect built-in metrics for only the second version of an app.
-```yaml
-- task: gen-load-and-collect-metrics
-  with:
-    versionInfo:
-    - # set to null
     - url: http://iter8-app-candidate.default.svc:8000
 ```
 
@@ -41,9 +66,9 @@ The following inputs are supported by this task.
 | duration | string | Duration of the `metrics/collect` task run. Specified in the [Go duration string format](https://golang.org/pkg/time/#ParseDuration) (example, `5s`). If both `duration` and `numQueries` are specified, then `duration` is ignored. | No |
 | qps | float | Number of queries *per second* sent to each version. Default value is 8.0. Setting this to 0 will maximizes query load without any wait time between queries. | No |
 | connections | int | Number of parallel connections used to send requests. Default value is 4. | No |
-| payloadStr | string | String data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload. | No |
-| payloadURL | string | URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored. | No |
-| contentType | string | [ContentType](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type) is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions using this content type header value. | No |
+| payloadStr | string | String data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions with this string as the payload. | No |
+| payloadURL | string | URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions with data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` are specified, the former is ignored. | No |
+| contentType | string | [ContentType](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type) is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions with this content type header value. | No |
 | errorRanges | [][ErrorRange](#error-range) | A list of [error ranges](#error-range). Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is `{{lower: 400},}`, i.e., HTTP status codes 400 and above are considered as error. | No |
 | percentiles | []float64 | Latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is `{50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}`. | No |
 | versionInfo | [][Version](#version) | A non-empty list of [version](#version) values. | Yes |

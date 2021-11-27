@@ -14,7 +14,7 @@ import (
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
 	Tasks  []TaskSpec        `json:"tasks,omitempty" yaml:"tasks,omitempty" validate:"gt=0,required"`
-	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty"`
+	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty" validate:"required"`
 }
 
 // Task is an object that can be run

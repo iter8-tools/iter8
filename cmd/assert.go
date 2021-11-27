@@ -121,9 +121,9 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 				iv := exp.SLOsBy(version)
 				allGood = allGood && iv
 				if iv {
-					log.Logger.Info(version, " satisfies objectives")
+					log.Logger.Info("version ", version, " satisfies objectives")
 				} else {
-					log.Logger.Info(version, " does not satisfy objectives")
+					log.Logger.Info("version ", version, " does not satisfy objectives")
 				}
 			} else {
 				log.Logger.Error("unsupported assert condition detected; ", cond)

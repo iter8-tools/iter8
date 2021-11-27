@@ -9,7 +9,7 @@
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
 [![GitHub issues](https://img.shields.io/github/issues/iter8-tools/iter8)](https://github.com/iter8tools/iter8/issues)
 
-Iter8 is a metrics-driven experimentation platform that enables DevOps/SRE/MLOps/data science teams to maximize release velocity and business value of apps and ML models while protecting end-user experience.
+Open-source cloud-native metrics-driven <strong>experiments</strong> and <strong>release engineering</strong>. Built for DevOps/SRE/MLOps/data science teams.
 
 ## Use Cases
 
