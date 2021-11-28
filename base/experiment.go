@@ -94,24 +94,24 @@ const (
 type MetricMeta struct {
 	Description string     `json:"description" yaml:"description"`
 	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
-	Type        MetricType `json:"type" yaml:"type"`
+	Type        MetricType `json:"type" yaml:"type" validate:"gt=0,required"`
 }
 
 // SLO is a service level objective
 type SLO struct {
 	// Metric is the fully qualified metric name (i.e., in the backendName/metricName format)
-	Metric string `json:"metric" yaml:"metric"`
+	Metric string `json:"metric" yaml:"metric" validate:"gt=0,required"`
 
 	// UpperLimit is the maximum acceptable value of the metric.
-	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty"`
+	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty" validate:"required_without=LowerLimit"`
 
 	// LowerLimit is the minimum acceptable value of the metric.
-	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
+	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty" validate:"required_without=UpperLimit"`
 }
 
 type taskMeta struct {
-	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
-	Run  *string `json:"run,omitempty" yaml:"run,omitempty"`
+	Task *string `json:"task,omitempty" yaml:"task,omitempty" validate:"required_without=Run"`
+	Run  *string `json:"run,omitempty" yaml:"run,omitempty" validate:"required_without=Task"`
 	If   *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 

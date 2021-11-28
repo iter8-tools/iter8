@@ -56,15 +56,20 @@ var expCmd = &cobra.Command{
 
 		// build and validate experiment here...
 		s, err := SpecFromBytes(specBytes)
-		e := &base.Experiment{
-			Tasks: s,
+		e := &Experiment{
+			Experiment: &base.Experiment{
+				Tasks: s,
+			}}
+		if err != nil {
+			return err
 		}
+		err = e.buildTasks()
 		if err != nil {
 			return err
 		}
 		validate := validator.New()
 		// returns nil or ValidationErrors ( []FieldError )
-		err = validate.Struct(e)
+		err = validate.Struct(e.Experiment)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
 			return err
