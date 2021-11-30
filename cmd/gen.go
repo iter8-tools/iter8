@@ -19,5 +19,5 @@ var GenCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(GenCmd)
-	GenCmd.PersistentFlags().StringSliceVarP(&values, "set", "s", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
+	GenCmd.PersistentFlags().StringSliceVarP(&values, "set", "x", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 }

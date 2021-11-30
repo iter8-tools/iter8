@@ -22,14 +22,23 @@ const (
 	HTMLOutputFormatKey = "html"
 )
 
-var (
-	// Output format variable holds the output format to be used by gen
-	outputFormat string = TextOutputFormatKey
-)
+// var (
+// 	// Output format variable holds the output format to be used by gen
+// 	outputFormat string = TextOutputFormatKey
+// )
 
 // executable
 type executable interface {
 	Execute(w io.Writer, data interface{}) error
+}
+
+type ReportOptionsType struct {
+	// Output format variable holds the output format to be used by gen
+	OutputFormat string
+}
+
+var ReportOptions = ReportOptionsType{
+	OutputFormat: TextOutputFormatKey,
 }
 
 // ReportCmd represents the report command
@@ -57,7 +66,7 @@ var ReportCmd = &cobra.Command{
 		}
 
 		// generate formatted output from experiment
-		err = exp.Report(outputFormat)
+		err = exp.Report(ReportOptions.OutputFormat)
 		if err != nil {
 			return err
 		}
@@ -76,11 +85,11 @@ func (exp *Experiment) Report(outputFormat string) error {
 	}
 
 	// execute template
-	return execTemplate(tmpl, exp)
+	return ExecTemplate(tmpl, exp)
 }
 
 // execute text or html template with experiment
-func execTemplate(t executable, exp *Experiment) error {
+func ExecTemplate(t executable, exp *Experiment) error {
 	var b bytes.Buffer
 	err := t.Execute(&b, exp)
 	if err != nil {
@@ -95,7 +104,7 @@ func execTemplate(t executable, exp *Experiment) error {
 
 func init() {
 	RootCmd.AddCommand(ReportCmd)
-	ReportCmd.Flags().StringVarP(&outputFormat, "outputFormat", "o", "text", "text | html")
+	ReportCmd.Flags().StringVarP(&ReportOptions.OutputFormat, "outputFormat", "o", "text", "text | html")
 
 	// create text template
 	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{

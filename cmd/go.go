@@ -19,7 +19,7 @@ const (
 	goTemplateFilePath = "go.tpl"
 )
 
-func parseValues(values []string, v chartutil.Values) error {
+func ParseValues(values []string, v chartutil.Values) error {
 	// User specified a value via --set
 	for _, value := range values {
 		if err := strvals.ParseInto(value, v); err != nil {
@@ -42,7 +42,7 @@ var GoCmd = &cobra.Command{
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		v := chartutil.Values{}
-		err := parseValues(values, v)
+		err := ParseValues(values, v)
 		if err != nil {
 			return err
 		}
