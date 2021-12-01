@@ -23,6 +23,9 @@ Validate service level objectives (SLOs) for app versions based on [Iter8's buil
       # 95th percentile latency must be under 100 msec
     - metric: built-in/p95.0
       upperLimit: 100
+      # 99th percentile latency must be under 300 msec
+    - metric: built-in/p99.0
+      upperLimit: 300
 ```
 
 ## Inputs

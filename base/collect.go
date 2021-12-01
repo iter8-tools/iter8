@@ -20,13 +20,13 @@ type version struct {
 	// HTTP headers to use in the query for this version; optional
 	Headers map[string]string `json:"headers" yaml:"headers"`
 	// URL to use for querying this version
-	URL string `json:"url" yaml:"url"`
+	URL string `json:"url" yaml:"url" validate:"required,url"`
 }
 
 // HTTP status code within this range is considered an error
 type errorRange struct {
-	Lower *int `json:"lower" yaml:"lower"`
-	Upper *int `json:"upper" yaml:"upper"`
+	Lower *int `json:"lower" yaml:"lower" validate:"required_without=Upper"`
+	Upper *int `json:"upper" yaml:"upper" validate:"required_without=Lower"`
 }
 
 // collectInputs contain the inputs to the metrics collection task to be executed.
@@ -44,13 +44,13 @@ type collectInputs struct {
 	// PayloadURL is the URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored.
 	PayloadURL *string `json:"payloadURL" yaml:"payloadURL"`
 	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions using this content type header value.
-	ContentType *string `json:"contentType" yaml:"contentType"`
+	ContentType *string `json:"contentType" yaml:"contentType" validate:"required_with=PayloadURL"`
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
 	// Percentiles are the latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
 	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
 	// A non-empty list of version values.
-	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo"`
+	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo" validate:"required"`
 }
 
 const (
@@ -254,8 +254,14 @@ func (t *collectTask) Run(exp *Experiment) error {
 		return err
 	}
 
-	// set insight type (if needed)
+	// set metrics insight type (if needed)
 	err = in.setInsightType(InsightTypeMetrics)
+	if err != nil {
+		return err
+	}
+
+	// set hist metrics insight type (if needed)
+	err = in.setInsightType(InsightTypeHistMetrics)
 	if err != nil {
 		return err
 	}

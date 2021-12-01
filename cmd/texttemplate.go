@@ -15,14 +15,14 @@ func formatText(e *Experiment) string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.AlignRight|tabwriter.Debug)
 	e.printState(w)
-	if e.containsInsight(base.InsightTypeSLO) {
+	if e.ContainsInsight(base.InsightTypeSLO) {
 		if e.printableSLOs() {
 			e.printSLOs(w)
 		} else {
 			e.printNoSLOs(w)
 		}
 	}
-	if e.containsInsight(base.InsightTypeMetrics) {
+	if e.ContainsInsight(base.InsightTypeMetrics) {
 		if e.printableMetrics() {
 			e.printMetrics(w)
 		} else {
@@ -57,8 +57,8 @@ func (e *Experiment) printState(w *tabwriter.Writer) {
 	w.Flush()
 }
 
-// containsInsight checks if the experiment contains insight
-func (e *Experiment) containsInsight(in base.InsightType) bool {
+// ContainsInsight checks if the experiment contains insight
+func (e *Experiment) ContainsInsight(in base.InsightType) bool {
 	if e != nil {
 		if e.Result != nil {
 			if e.Result.Insights != nil {
@@ -180,9 +180,16 @@ func (e *Experiment) printMetrics(w *tabwriter.Writer) {
 	sort.Strings(keys)
 
 	for i := 0; i < len(keys); i++ {
-		fmt.Fprint(w, keys[i])
+		u := ""
+		// add units if available
+		units := e.Result.Insights.MetricsInfo[keys[i]].Units
+		if units != nil {
+			u += " (" + *units + ")"
+		}
+
+		fmt.Fprint(w, keys[i], u)
 		for j := 0; j < *in.NumAppVersions; j++ {
-			fmt.Fprintf(w, "\t%v", e.getMetricValueWithUnits(keys[i], j))
+			fmt.Fprintf(w, "\t%v", e.getMetricValue(keys[i], j))
 			fmt.Fprintln(w)
 		}
 		fmt.Fprintln(w, "-----------------------------\t-----")
@@ -201,8 +208,8 @@ func (e *Experiment) printNoMetrics(w *tabwriter.Writer) {
 	w.Flush()
 }
 
-// get value of the metric with units
-func (e *Experiment) getMetricValueWithUnits(m string, j int) string {
+// get value of the metric
+func (e *Experiment) getMetricValue(m string, j int) string {
 	vals := e.Result.Insights.MetricValues[j][m]
 	if len(vals) == 0 {
 		return "unavailable"
@@ -213,11 +220,6 @@ func (e *Experiment) getMetricValueWithUnits(m string, j int) string {
 	// if the floatVal is not integral, take two decimal places
 	if floatVal != float64(int(floatVal)) {
 		val = fmt.Sprintf("%0.2f", floatVal)
-	}
-	// add units if available
-	units := e.Result.Insights.MetricsInfo[m].Units
-	if units != nil {
-		val += " (" + *units + ")"
 	}
 	return val
 }

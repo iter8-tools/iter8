@@ -34,8 +34,11 @@ var timeout time.Duration
 // AssertCmd represents the assert command
 var AssertCmd = &cobra.Command{
 	Use:   "assert",
-	Short: "assert if experiment run satisfies the specified conditions",
-	Long:  "Assert if experiment run satisfies the specified conditions. If assert conditions are satisfied, exit with code 0. Else, return with code 1.",
+	Short: "assert if experiment result satisfies the specified conditions",
+	Long: `
+	Assert if experiment result satisfies the specified conditions. 
+	If assert conditions are satisfied, exit with code 0. 
+	Else, return with code 1.`,
 	Example: `
 	# assert that the experiment completed without failures, 
 	# and SLOs were satisfied
@@ -118,9 +121,9 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 				iv := exp.SLOsBy(version)
 				allGood = allGood && iv
 				if iv {
-					log.Logger.Info(version, " satisfies objectives")
+					log.Logger.Info("version ", version, " satisfies objectives")
 				} else {
-					log.Logger.Info(version, " does not satisfy objectives")
+					log.Logger.Info("version ", version, " does not satisfy objectives")
 				}
 			} else {
 				log.Logger.Error("unsupported assert condition detected; ", cond)
@@ -165,7 +168,7 @@ func (exp *Experiment) extractVersion(cond string) (int, error) {
 
 func init() {
 	RootCmd.AddCommand(AssertCmd)
-	AssertCmd.Flags().StringSliceVarP(&conds, "condition", "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
+	AssertCmd.Flags().StringSliceVarP(&conds, `condition(s); can specify multiple or separate conditions with commas;`, "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
 	AssertCmd.MarkFlagRequired("condition")
 	AssertCmd.Flags().DurationVarP(&timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
 }
