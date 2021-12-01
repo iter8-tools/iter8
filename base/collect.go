@@ -254,8 +254,14 @@ func (t *collectTask) Run(exp *Experiment) error {
 		return err
 	}
 
-	// set insight type (if needed)
+	// set metrics insight type (if needed)
 	err = in.setInsightType(InsightTypeMetrics)
+	if err != nil {
+		return err
+	}
+
+	// set hist metrics insight type (if needed)
+	err = in.setInsightType(InsightTypeHistMetrics)
 	if err != nil {
 		return err
 	}

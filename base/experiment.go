@@ -83,7 +83,10 @@ type Insights struct {
 type InsightType string
 
 const (
-	// InsightTypeMetrics indicates metrics are observed during this experiment
+	// InsightTypeHistMetrics indicates histogram metrics are collected during this experiment
+	InsightTypeHistMetrics InsightType = "HistMetrics"
+
+	// InsightTypeMetrics indicates metrics are collected during this experiment
 	InsightTypeMetrics InsightType = "Metrics"
 
 	// InsightTypeSLO indicatse SLOs are validated during this experiment
