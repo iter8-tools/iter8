@@ -42,7 +42,7 @@ func (o *Options) validate(cmd *cobra.Command, args []string) (err error) {
 // run runs the command
 func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 	var expIO basecli.ExpIO
-	if !o.local {
+	if o.remote {
 		expIO = &utils.KubernetesExpIO{
 			Client:    o.client,
 			Namespace: o.namespace,

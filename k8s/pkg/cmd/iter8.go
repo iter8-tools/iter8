@@ -14,7 +14,6 @@ import (
 	assert "github.com/iter8-tools/iter8/k8s/pkg/cmd/assert"
 	gen "github.com/iter8-tools/iter8/k8s/pkg/cmd/gen"
 	hub "github.com/iter8-tools/iter8/k8s/pkg/cmd/hub"
-	logs "github.com/iter8-tools/iter8/k8s/pkg/cmd/logs"
 	report "github.com/iter8-tools/iter8/k8s/pkg/cmd/report"
 	run "github.com/iter8-tools/iter8/k8s/pkg/cmd/run"
 
@@ -65,12 +64,11 @@ func NewCmdIter8Command() *cobra.Command {
 			Message: "Current Commands:",
 			Commands: []*cobra.Command{
 				hub.NewCmd(),
-				run.NewCmd(),
+				run.NewCmd(factory, streams),
 				gen.NewCmd(),
 				get.NewCmd(factory, streams),
 				assert.NewCmd(factory, streams),
 				report.NewCmd(factory, streams),
-				logs.NewCmd(factory, streams),
 			},
 		},
 		{

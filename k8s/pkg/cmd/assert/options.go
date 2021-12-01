@@ -12,7 +12,7 @@ type Options struct {
 	namespace            string
 	client               *kubernetes.Clientset
 
-	local      bool
+	remote     bool
 	experiment string
 }
 

@@ -28,7 +28,7 @@ func NewCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra
 	}
 
 	cmd.Flags().StringVarP(&o.experiment, "experiment", "e", "", "experiment; if not specified, the most recently created one is used")
-	cmd.Flags().BoolVarP(&o.local, "local", "l", false, "use locally executed experiment; any cluster options are ignored")
+	cmd.Flags().BoolVarP(&o.remote, "remote", "r", false, "use locally executed experiment; any cluster options are ignored")
 
 	return cmd
 }

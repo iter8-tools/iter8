@@ -52,13 +52,14 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	fmt.Printf("%-16s  %-9s  %-6s\n", "NAME", "COMPLETED", "FAILED")
+	// fmt.Printf("%-16s  %-9s  %-6s\n", "NAME", "COMPLETED", "FAILED")
+	fmt.Printf("%-16s  %-9s  %-6s  %-9s  %-20s\n", "NAME", "COMPLETED", "FAILED", "NUM TASKS", "NUM TASKS COMPLETED")
 	for _, experiment := range experiments {
 
 		expIO := &utils.KubernetesExpIO{
 			Client:    o.client,
 			Namespace: o.namespace,
-			Name:      o.experiment,
+			Name:      experiment.Name,
 		}
 
 		log.Logger.Trace("build started")
@@ -68,7 +69,8 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		fmt.Printf("%-16s  %-9t  %-6t\n", experiment.GetName(), exp.Completed(), !exp.NoFailure())
+		// fmt.Printf("%-16s  %-9t  %-6t\n", experiment.GetName(), exp.Completed(), !exp.NoFailure())
+		fmt.Printf("%-16s  %-9t  %-6t  %-9d  %-20d\n", experiment.GetName(), exp.Completed(), !exp.NoFailure(), len(exp.Tasks), exp.Result.NumCompletedTasks)
 	}
 	return nil
 }
