@@ -5,7 +5,7 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Load test https://example.com"
-    Use an Iter8 experiment to load test https://example.com and validate latency and error-related service level objectives (SLOs).
+    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test https://example.com and validate latency and error-related service level objectives (SLOs).
 
 ## 1. [Install Iter8](install.md)
 
@@ -17,12 +17,16 @@ iter8 hub -e load-test
 ```
 
 ## 3. Run experiment
-The `iter8 run` command reads the experiment specified in the `experiment.yaml` file, runs the experiment, and writes the result of the experiment into the `result.yaml` file. Run `load-test` as follows.
+An [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) is a sequence of tasks that produce metrics-driven insights for your app/ML model, validates it, and optionally performs a rollout of your app/ML model. 
+
+Experiments are specified declaratively using the `experiment.yaml` file. The `iter8 run` command reads this file, runs the experiment, and writes the result of the experiment run into the `result.yaml` file. Run the `load-test` experiment as follows.
 
 ```shell
 cd load-test
 iter8 run
 ```
+
+This experiment uses the [`gen-load-and-collect-metrics` task](../user-guide/tasks/collect.md) for generating load and collecting metrics, and the [`assess-app-versions` task](../user-guide/tasks/assess.md) for validating SLOs.
 
 ??? note "Look inside experiment.yaml"
     ```yaml
@@ -47,7 +51,7 @@ iter8 run
     ```
 
 ## 4. Assert outcomes
-The experiment should complete in a few seconds. Upon completion, assert that the experiment completed without any failures and SLOs are satisfied, as follows.
+The `load-test` experiment you ran above should complete in a few seconds. Upon completion, assert that the experiment completed without any failures and SLOs are satisfied, as follows.
 
 ```shell
 iter8 assert -c completed -c nofailure -c slos
@@ -65,62 +69,79 @@ iter8 assert -c completed -c nofailure -c slos
 ## 5. Generate report
 Generate a report of the experiment including a summary of the experiment, SLOs, and metrics.
 
-```shell
-iter8 gen 
-```
-
-??? note "Look inside a sample report"
+=== "HTML"
+    ```shell
+    iter8 report -o html > report.html
+    # open report.html with a browser. In MacOS, you can use the command:
+    # open report.html
     ```
-    -----------------------------|-----
-               Experiment summary|
-    -----------------------------|-----
-            Experiment completed |true
-    -----------------------------|-----
-               Experiment failed |false
-    -----------------------------|-----
-       Number of completed tasks |2
-    -----------------------------|-----
 
+    ???+ note "The HTML report looks as follows"
+        ![HTML report](images/report.html.png)
 
-
-    -----------------------------|-----
-                             SLOs|
-    -----------------------------|-----
-         built-in/error-rate <= 0|true
-    -----------------------------|-----
-            built-in/p95.0 <= 100|true
-    -----------------------------|-----
-
-
-    -----------------------------|-----
-                          Metrics|
-    -----------------------------|-----
-             built-in/error-count|0
-    -----------------------------|-----
-              built-in/error-rate|0
-    -----------------------------|-----
-             built-in/max-latency|201.75 (msec)
-    -----------------------------|-----
-            built-in/mean-latency|17.02 (msec)
-    -----------------------------|-----
-             built-in/min-latency|3.80 (msec)
-    -----------------------------|-----
-                   built-in/p50.0|10.75 (msec)
-    -----------------------------|-----
-                   built-in/p75.0|12.12 (msec)
-    -----------------------------|-----
-                   built-in/p90.0|13.88 (msec)
-    -----------------------------|-----
-                   built-in/p95.0|15.60 (msec)
-    -----------------------------|-----
-                   built-in/p99.0|201.31 (msec)
-    -----------------------------|-----
-                   built-in/p99.9|201.71 (msec)
-    -----------------------------|-----
-           built-in/request-count|100
-    -----------------------------|-----
-          built-in/stddev-latency|37.81 (msec)
-    -----------------------------|-----
+=== "Text"
+    ```shell
+    iter8 report -o text
     ```
+
+    ???+ note "The text report looks as follows."
+
+        ```
+        -----------------------------|-----
+                   Experiment summary|
+        -----------------------------|-----
+                Experiment completed |true
+        -----------------------------|-----
+                   Experiment failed |false
+        -----------------------------|-----
+           Number of completed tasks |2
+        -----------------------------|-----
+
+
+
+        -----------------------------|-----
+                                 SLOs|
+        -----------------------------|-----
+             built-in/error-rate <= 0|true
+        -----------------------------|-----
+                built-in/p95.0 <= 100|true
+        -----------------------------|-----
+
+
+        -----------------------------|-----
+                              Metrics|
+        -----------------------------|-----
+                 built-in/error-count|0
+        -----------------------------|-----
+                  built-in/error-rate|0
+        -----------------------------|-----
+                 built-in/max-latency|201.75 (msec)
+        -----------------------------|-----
+                built-in/mean-latency|17.02 (msec)
+        -----------------------------|-----
+                 built-in/min-latency|3.80 (msec)
+        -----------------------------|-----
+                       built-in/p50.0|10.75 (msec)
+        -----------------------------|-----
+                       built-in/p75.0|12.12 (msec)
+        -----------------------------|-----
+                       built-in/p90.0|13.88 (msec)
+        -----------------------------|-----
+                       built-in/p95.0|15.60 (msec)
+        -----------------------------|-----
+                       built-in/p99.0|201.31 (msec)
+        -----------------------------|-----
+                       built-in/p99.9|201.71 (msec)
+        -----------------------------|-----
+               built-in/request-count|100
+        -----------------------------|-----
+              built-in/stddev-latency|37.81 (msec)
+        -----------------------------|-----
+        ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
+
+???+ tip "Customize"
+    1.  To load test and validate SLOs for your service, change the URL in `experiment.yaml` to that of your service.
+    2.  The [`gen-load-and-collect-metrics` task](../user-guide/tasks/collect.md) used in the experiment can be customized with various inputs including the number of queries sent to the URL, number of queries sent per second, number of parallel connections used, and the payload to be used as part of the queries.
+    3.  The SLOs specified as part of the [`assess-app-versions` task](../user-guide/tasks/assess.md#illustrative-example) can be customized, both in terms of the [built-in metrics](../user-guide/tasks/collect.md#built-in-metrics) used and their limits.

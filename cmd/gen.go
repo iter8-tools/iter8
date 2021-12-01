@@ -13,15 +13,11 @@ var (
 var GenCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "render templates with values",
-	Long:  "Render templates with values",
-	Example: `
-	# use go template in go.tpl
-	# execute it using values that are set
-	iter8 gen go --set a=b
-`,
+	Long: `
+	Render templates with values`,
 }
 
 func init() {
 	RootCmd.AddCommand(GenCmd)
-	GenCmd.PersistentFlags().StringSliceVarP(&values, "set", "s", []string{}, "key=value; value can be accessed in templates used by gen {{ Values.key }}")
+	GenCmd.PersistentFlags().StringSliceVarP(&values, "set", "s", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 }

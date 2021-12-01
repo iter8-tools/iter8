@@ -27,14 +27,19 @@ import (
 
 const (
 	// Path to experiment template file
-	expTemplatePath = "exp.tpl"
+	expTemplatePath = "experiment.tpl"
 )
 
 // expCmd represents the exp command
 var expCmd = &cobra.Command{
 	Use:   "exp",
-	Short: "render experiment template with values",
-	Long:  "Render experiment template with values",
+	Short: "render experiment template in the file experiment.tpl with values",
+	Long: `
+	Render experiment template in the file experiment.tpl with values`,
+	Example: `
+	# render experiment template in the file experiment.tpl with values
+	iter8 gen exp --set key=val
+	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		v := chartutil.Values{}
 		err := parseValues(values, v)
@@ -51,15 +56,20 @@ var expCmd = &cobra.Command{
 
 		// build and validate experiment here...
 		s, err := SpecFromBytes(specBytes)
-		e := &base.Experiment{
-			Tasks: s,
+		e := &Experiment{
+			Experiment: &base.Experiment{
+				Tasks: s,
+			}}
+		if err != nil {
+			return err
 		}
+		err = e.buildTasks()
 		if err != nil {
 			return err
 		}
 		validate := validator.New()
 		// returns nil or ValidationErrors ( []FieldError )
-		err = validate.Struct(e)
+		err = validate.Struct(e.Experiment)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
 			return err

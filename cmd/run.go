@@ -13,16 +13,10 @@ import (
 var RunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "run an experiment",
-	Long:  `Run an experiment. This command will read the experiment spec from the local file named experiment.yaml, and write the result of the experiment run to the local file named result.yaml.`,
-	Example: `
-	# download the load-test experiment
-	iter8 hub -e load-test
-	
-	cd load-test
-
-	# run it
-	iter8 run
-	`,
+	Long: `
+	Run an experiment. 
+	This command will read the experiment spec from the local file named experiment.yaml, 
+	and write the result of the experiment run to the local file named result.yaml.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		log.Logger.Trace("build called")
 		// Replace FileExpIO with ClusterExpIO to work with

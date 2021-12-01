@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	ht "html/template"
 	"io"
 	"os"
 	"strings"
@@ -37,10 +36,14 @@ type executable interface {
 var ReportCmd = &cobra.Command{
 	Use:   "report",
 	Short: "generate report from experiment result",
-	Long:  "Generate report from experiment result",
+	Long: `
+	Generate report from experiment result`,
 	Example: `
 	# generate text report
 	iter8 report
+
+	# generate html report
+	iter8 report -o html
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		log.Logger.Trace("build started")
@@ -105,15 +108,13 @@ func init() {
 	// register text template
 	RegisterTextTemplate(TextOutputFormatKey, tmpl)
 
-	// create HTML template
-	htmpl, err := ht.New(TextOutputFormatKey).Funcs(ht.FuncMap{
-		"formatHTML": formatHTML,
-	}).Option("missingkey=error").Funcs(sprig.FuncMap()).Parse("{{ formatHTML . }}")
+	// create HTML template (for now, this will still use the text templating functionality)
+	htmpl, err := template.New(TextOutputFormatKey).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(formatHTML)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
 		os.Exit(1)
 	}
 	// register HTML template
-	RegisterHTMLTemplate(HTMLOutputFormatKey, htmpl)
+	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
 
 }

@@ -3,7 +3,7 @@ template: main.html
 ---
 
 # What is Iter8?
-Iter8 is a metrics-driven experimentation platform that enables **DevOps/SRE/MLOps/data science teams** to maximize release velocity and business value of apps and ML models while protecting end-user experience.
+Iter8 is the open-source cloud-native platform for metrics-driven experiments and release engineering. Built for DevOps/SRE/MLOps/data science teams.
 
 ## Use cases
 
@@ -18,11 +18,12 @@ Iter8 is a metrics-driven experimentation platform that enables **DevOps/SRE/MLO
 The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 along with a Kubernetes service mesh or ingress.
 
 ## What is an Iter8 experiment?
-An Iter8 experiment is a sequence of *tasks* that are declaratively specified. Iter8 provides a variety of highly customizable tasks for the following purposes.
+An Iter8 experiment is a sequence of tasks that produce metrics-driven insights for your app/ML model, validates it, and optionally performs a rollout of your app/ML model. Iter8 provides a variety of highly customizable tasks that can be readily used within experiments to achieve the following.
 
-1.  Getting metrics for one or more versions of the app.
-2.  Producing SLO validation and A/B/n testing insights based on metrics.
-3.  Triggering events based on these insights. Events include:
+1.  Generating load and getting built-in metrics for one or more versions of the app.
+2.  Getting metrics by querying backends like Prometheus, New Relic, SysDig, or Elastic.
+3.  SLO validation and A/B/n testing.
+4.  Triggering events based on these insights. Events include:
       * sending a Slack or webhook notification
       * triggering a CI/CD/GitHub actions workflow
       * creating a pull request, and 

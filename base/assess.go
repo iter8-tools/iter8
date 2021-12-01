@@ -35,7 +35,7 @@ func MakeAssess(t *TaskSpec) (Task, error) {
 	var bt Task
 	// convert t to jsonBytes
 	jsonBytes, _ = json.Marshal(t)
-	// convert jsonString to CollectTask
+	// convert jsonString to AssessTask
 	ct := &assessTask{}
 	err = json.Unmarshal(jsonBytes, &ct)
 	if err != nil {
@@ -159,6 +159,13 @@ func computeSLOsSatisfiedBy(exp *Experiment) []int {
 
 // get the value of the given metric for the given version
 func getMetricValue(e *Experiment, i int, m string) *float64 {
+	if e == nil ||
+		e.Result == nil ||
+		e.Result.Insights == nil ||
+		len(e.Result.Insights.MetricValues) <= i {
+		log.Logger.Warnf("metric values uninitialized for version %v", i)
+		return nil
+	}
 	vals := e.Result.Insights.MetricValues[i][m]
 	if len(vals) == 0 {
 		return nil

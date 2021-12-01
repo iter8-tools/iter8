@@ -46,12 +46,31 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 		}
 	}
 
+	err = e.buildTasks()
+	if err != nil {
+		return nil, err
+	}
+
+	validate := validator.New()
+	// returns nil or ValidationErrors ( []FieldError )
+	err = validate.Struct(e.Experiment)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
+		return nil, err
+	}
+
+	return e, err
+}
+
+// build experiment tasks
+func (e *Experiment) buildTasks() error {
 	for _, t := range e.Tasks {
 		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
 			log.Logger.Error("invalid task found without a task name or a run command")
-			return nil, errors.New("invalid task found without a task name or a run command")
+			return errors.New("invalid task found without a task name or a run command")
 		}
 
+		var err error
 		var task base.Task
 
 		// this is a run task
@@ -59,7 +78,7 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 			task, err = base.MakeRun(&t)
 			e.tasks = append(e.tasks, task)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		} else {
 			// this is some other task
@@ -72,24 +91,15 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 				e.tasks = append(e.tasks, task)
 			default:
 				log.Logger.Error("unknown task: " + *t.Task)
-				return nil, errors.New("unknown task: " + *t.Task)
+				return errors.New("unknown task: " + *t.Task)
 			}
 
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 	}
-
-	validate := validator.New()
-	// returns nil or ValidationErrors ( []FieldError )
-	err = validate.Struct(e.Experiment)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
-		return nil, err
-	}
-
-	return e, err
+	return nil
 }
 
 //FileExpIO enables reading and writing through files
