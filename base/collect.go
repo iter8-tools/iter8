@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
+	"math/rand"
 	"net/http"
 	"time"
 
 	"fortio.org/fortio/fhttp"
 	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
+	"fortio.org/fortio/stats"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -54,17 +57,18 @@ type collectInputs struct {
 }
 
 const (
-	CollectTaskName        = "gen-load-and-collect-metrics"
-	defaultQPS             = float32(8)
-	defaultNumRequests     = int64(100)
-	defaultConnections     = 4
-	requestCountMetricName = "request-count"
-	errorCountMetricName   = "error-count"
-	errorRateMetricName    = "error-rate"
-	meanLatencyMetricName  = "mean-latency"
-	stdDevMetricName       = "stddev-latency"
-	minLatencyMetricName   = "min-latency"
-	maxLatencyMetricName   = "max-latency"
+	CollectTaskName            = "gen-load-and-collect-metrics"
+	defaultQPS                 = float32(8)
+	defaultNumRequests         = int64(100)
+	defaultConnections         = 4
+	requestCountMetricName     = "request-count"
+	errorCountMetricName       = "error-count"
+	errorRateMetricName        = "error-rate"
+	meanLatencyMetricName      = "mean-latency"
+	stdDevMetricName           = "stddev-latency"
+	minLatencyMetricName       = "min-latency"
+	maxLatencyMetricName       = "max-latency"
+	latencyHistogramMetricName = "latency-histogram"
 )
 
 var (
@@ -272,8 +276,17 @@ func (t *collectTask) Run(exp *Experiment) error {
 		return err
 	}
 
-	// set metric value for each fortio metric for each version
-	// also set metric info if needed
+	// compute min latency, max latency and bucket sizes needed for latency histograms
+	m := iter8BuiltInPrefix + "/" + latencyHistogramMetricName
+	var xMin float64 = 0   // msec
+	var xMax float64 = 200 // msec
+	if mi, ok := in.MetricsInfo[m]; ok {
+		xMin = *mi.XMin
+		xMax = *mi.XMax
+	}
+	xMin = aggregateLatencyBound(fm, xMin, true)
+	xMax = aggregateLatencyBound(fm, xMax, false)
+
 	for i := range t.With.VersionInfo {
 		if fm[i] != nil {
 			// request count
@@ -337,6 +350,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
 
+			// max-latency
 			m = iter8BuiltInPrefix + "/" + maxLatencyMetricName
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "maximum observed value of latency ",
@@ -345,6 +359,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Max)
 
+			// percentiles
 			for _, p := range fm[i].DurationHistogram.Percentiles {
 				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%0.1f", p.Percentile)
 				in.MetricsInfo[m] = MetricMeta{
@@ -354,9 +369,42 @@ func (t *collectTask) Run(exp *Experiment) error {
 				}
 				in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*p.Value)
 			}
+
+			// latency histogram
+			m = iter8BuiltInPrefix + "/" + latencyHistogramMetricName
+			in.MetricsInfo[m] = MetricMeta{
+				Description: "Latency Histogram",
+				Type:        HistogramMetricType,
+				Units:       stringPointer("msec"),
+				XMin:        float64Pointer(xMin),
+				XMax:        float64Pointer(xMax),
+				NumBuckets:  intPointer(20),
+			}
+			lh := latencyHist(in.MetricsInfo[m], fm[i].DurationHistogram)
+			if in.MetricValues[i][m] == nil {
+				in.MetricValues[i][m] = lh
+			} else {
+				in.MetricValues[i][m], err = vectorSum(in.MetricValues[i][m], lh)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
+}
+
+// sum up two vectors
+func vectorSum(a []float64, b []float64) ([]float64, error) {
+	if len(a) != len(b) {
+		log.Logger.Error("vector lengths do not match: ", len(a), " != ", len(b))
+		return nil, fmt.Errorf("vector lengths do not match: %v != %v", len(a), len(b))
+	}
+	sum := make([]float64, len(a))
+	for i := 0; i < len(a); i++ {
+		sum[i] = a[i] + b[i]
+	}
+	return sum, nil
 }
 
 // GetPayloadBytes downloads payload from URL and returns a byte slice
@@ -369,4 +417,60 @@ func GetPayloadBytes(url string) ([]byte, error) {
 	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	return body, err
+}
+
+// aggregateLatencyBound returns min or max latency value
+func aggregateLatencyBound(fm []*fhttp.HTTPRunnerResults, val float64, min bool) float64 {
+	extremeVal := val
+	for i := 0; i < len(fm); i++ {
+		if fm[i] != nil {
+			if fm[i].DurationHistogram != nil {
+				if min {
+					extremeVal = math.Min(extremeVal, 1000.0*fm[i].DurationHistogram.Min)
+				} else {
+					extremeVal = math.Max(extremeVal, 1000.0*fm[i].DurationHistogram.Max)
+				}
+			}
+		}
+	}
+	return extremeVal
+}
+
+// compute latency histogram by resampling
+func latencyHist(mm MetricMeta, hd *stats.HistogramData) []float64 {
+	rand.Seed(0) // we will make the random number generation deterministic
+	// initialize histogram
+	hist := make([]float64, *mm.NumBuckets)
+	if hd == nil {
+		return hist
+	}
+
+	// create sample
+	var sample []float64
+	for i := 0; i < len(hd.Data); i++ {
+		bucket := hd.Data[i]
+		for j := 0; j < int(bucket.Count); j++ {
+			// get a point; convert to msec
+			point := 1000.0 * (bucket.Start + (bucket.End-bucket.Start)*rand.Float64())
+			sample = append(sample, point)
+		}
+	}
+
+	log.Logger.Debug("sample: ", sample)
+
+	// update hist
+	for i := 0; i < len(sample); i++ {
+		width := (*mm.XMax - *mm.XMin) / float64(*mm.NumBuckets)
+		ind := int((sample[i] - (*mm.XMin)) / width)
+		if ind < 0 {
+			log.Logger.Warn("sample index out of range: ", ind)
+			ind = 0
+		}
+		if ind >= len(hist) {
+			log.Logger.Warn("sample index out of range: ", ind)
+			ind = len(hist) - 1
+		}
+		hist[ind]++
+	}
+	return hist
 }
