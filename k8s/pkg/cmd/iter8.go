@@ -17,7 +17,6 @@ import (
 	report "github.com/iter8-tools/iter8/k8s/pkg/cmd/report"
 	run "github.com/iter8-tools/iter8/k8s/pkg/cmd/run"
 
-	deleter "github.com/iter8-tools/iter8/k8s/pkg/cmd/deleter"
 	get "github.com/iter8-tools/iter8/k8s/pkg/cmd/get"
 )
 
@@ -61,20 +60,24 @@ func NewCmdIter8Command() *cobra.Command {
 
 	groups := templates.CommandGroups{
 		{
-			Message: "Current Commands:",
+			Message: "Prepare:",
 			Commands: []*cobra.Command{
 				hub.NewCmd(),
-				run.NewCmd(factory, streams),
 				gen.NewCmd(),
-				get.NewCmd(factory, streams),
-				assert.NewCmd(factory, streams),
-				report.NewCmd(factory, streams),
 			},
 		},
 		{
-			Message: "Deprecated commands:",
+			Message: "Run:",
 			Commands: []*cobra.Command{
-				deleter.NewCmd(factory, streams),
+				run.NewCmd(factory, streams),
+			},
+		},
+		{
+			Message: "Inspect/Analyze:",
+			Commands: []*cobra.Command{
+				get.NewCmd(factory, streams),
+				assert.NewCmd(factory, streams),
+				report.NewCmd(factory, streams),
 			},
 		},
 	}

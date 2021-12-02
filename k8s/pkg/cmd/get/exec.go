@@ -1,7 +1,9 @@
 package get
 
 import (
+	"bytes"
 	"fmt"
+	"text/tabwriter"
 
 	"github.com/iter8-tools/iter8/base/log"
 
@@ -10,6 +12,18 @@ import (
 
 	"github.com/spf13/cobra"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+)
+
+const (
+	AppHeader               = "APP"
+	IdHeader                = "ID"
+	CompletedHeader         = "COMPLETED"
+	FailedHeader            = "FAILED"
+	NumTasksHeader          = "TASKS"
+	NumTasksCompletedHeader = "TASKS_COMPLETED"
+
+	AppLabel = "iter8.tools/app"
+	IdLabel  = "app.kubernetes.io/instance"
 )
 
 // complete sets all information needed for processing the command
@@ -25,7 +39,7 @@ func (o *Options) complete(factory cmdutil.Factory, cmd *cobra.Command, args []s
 	}
 
 	if len(o.experiment) == 0 {
-		s, err := utils.GetExperiment(o.client, o.namespace, o.experiment)
+		s, err := utils.GetExperimentSecret(o.client, o.namespace, o.experiment)
 		if err != nil {
 			return err
 		}
@@ -42,24 +56,25 @@ func (o *Options) validate(cmd *cobra.Command, args []string) (err error) {
 
 // run runs the command
 func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
-	experiments, err := utils.GetExperiments(o.client, o.namespace)
+	experimentSecrets, err := utils.GetExperimentSecrets(o.client, o.namespace)
 	if err != nil {
 		return err
 	}
 
-	if len(experiments) == 0 {
+	if len(experimentSecrets) == 0 {
 		fmt.Println("no experiments found")
 		return err
 	}
 
-	// fmt.Printf("%-16s  %-9s  %-6s\n", "NAME", "COMPLETED", "FAILED")
-	fmt.Printf("%-16s  %-9s  %-6s  %-9s  %-20s\n", "NAME", "COMPLETED", "FAILED", "NUM TASKS", "NUM TASKS COMPLETED")
-	for _, experiment := range experiments {
+	var b bytes.Buffer
+	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', 0)
+	fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", AppHeader, IdHeader, CompletedHeader, FailedHeader, NumTasksHeader, NumTasksCompletedHeader)
+	for _, experimentSecret := range experimentSecrets {
 
 		expIO := &utils.KubernetesExpIO{
 			Client:    o.client,
 			Namespace: o.namespace,
-			Name:      experiment.Name,
+			Name:      experimentSecret.Name,
 		}
 
 		log.Logger.Trace("build started")
@@ -69,8 +84,12 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		// fmt.Printf("%-16s  %-9t  %-6t\n", experiment.GetName(), exp.Completed(), !exp.NoFailure())
-		fmt.Printf("%-16s  %-9t  %-6t  %-9d  %-20d\n", experiment.GetName(), exp.Completed(), !exp.NoFailure(), len(exp.Tasks), exp.Result.NumCompletedTasks)
+		app := experimentSecret.Labels[AppLabel]
+		id := experimentSecret.Labels[IdLabel]
+		fmt.Fprintf(w, "%s\t%s\t%t\t%t\t%d\t%d\n", app, id, exp.Completed(), !exp.NoFailure(), len(exp.Tasks), exp.Result.NumCompletedTasks)
+		w.Flush()
 	}
+
+	fmt.Printf("%s", b.String())
 	return nil
 }

@@ -34,7 +34,7 @@ func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error)
 	return clientSet, nil
 }
 
-func GetExperiment(client *kubernetes.Clientset, ns string, nm string) (experiment *corev1.Secret, err error) {
+func GetExperimentSecret(client *kubernetes.Clientset, ns string, nm string) (experiment *corev1.Secret, err error) {
 	ctx := context.Background()
 
 	// A name is provided; get this experiment, if it exists
@@ -56,7 +56,7 @@ func GetExperiment(client *kubernetes.Clientset, ns string, nm string) (experime
 	// There is no explict experiment name provided.
 	// Get a list of all experiments.
 	// Then select the one with the most recent create time.
-	experiments, err := GetExperiments(client, ns)
+	experiments, err := GetExperimentSecrets(client, ns)
 	if err != nil {
 		return experiment, err
 	}
@@ -78,10 +78,10 @@ func GetExperiment(client *kubernetes.Clientset, ns string, nm string) (experime
 	return experiment, nil
 }
 
-func GetExperiments(client *kubernetes.Clientset, ns string) (experiments []corev1.Secret, err error) {
+func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experiments []corev1.Secret, err error) {
 	secrets, err := client.CoreV1().Secrets(ns).List(
 		context.Background(), metav1.ListOptions{
-			LabelSelector: "iter8/type=experiment",
+			LabelSelector: "app.kubernetes.io/name=iter8,app.kubernetes.io/component=spec",
 		})
 	if err != nil {
 		return experiments, err

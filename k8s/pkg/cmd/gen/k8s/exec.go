@@ -14,7 +14,7 @@ import (
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"
 
-	// "helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/chartutil"
 	"sigs.k8s.io/yaml"
 )
 
@@ -28,23 +28,32 @@ func (o *Options) validate(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
+type K8sExperiment struct {
+	Tasks  []base.TaskSpec
+	Values chartutil.Values
+}
+
 // run runs the command
 func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
-	// v := chartutil.Values{}
-	// err = basecli.ParseValues(values, v)
-	// if err != nil {
-	// 	return err
-	// }
+	v := chartutil.Values{}
+	err = basecli.ParseValues(basecli.GenOptions.Values, v)
+	if err != nil {
+		return err
+	}
 
 	exp, err := basecli.Build(false, &basecli.FileExpIO{})
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
 		return err
 	}
+	k8sExp := K8sExperiment{
+		Tasks:  exp.Tasks,
+		Values: v,
+	}
 
 	// generate formatted output
 
-	b, err := RenderTpl(exp.Tasks, k8sTemplateFilePath)
+	b, err := RenderTpl(k8sExp, k8sTemplateFilePath)
 	if err != nil {
 		return err
 	}
@@ -56,7 +65,7 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 var tplBytes []byte
 
 // RenderTpl creates output from go.tpl
-func RenderTpl(tasks []base.TaskSpec, filePath string) (*bytes.Buffer, error) {
+func RenderTpl(k8sExp K8sExperiment, filePath string) (*bytes.Buffer, error) {
 	var tmpl *template.Template
 	var err error
 
@@ -75,7 +84,7 @@ func RenderTpl(tasks []base.TaskSpec, filePath string) (*bytes.Buffer, error) {
 
 	// execute template
 	var b bytes.Buffer
-	err = tmpl.Execute(&b, tasks)
+	err = tmpl.Execute(&b, k8sExp)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to execute template")
 		return nil, err

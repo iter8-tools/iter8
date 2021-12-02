@@ -4,10 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// values are user specified values used during gen
-	values []string
-)
+type GenOptionsType struct {
+	// Values are user specified values used during gen
+	Values []string
+}
+
+var GenOptions = GenOptionsType{}
 
 // GenCmd represents the gen command
 var GenCmd = &cobra.Command{
@@ -19,5 +21,5 @@ var GenCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(GenCmd)
-	GenCmd.PersistentFlags().StringSliceVarP(&values, "set", "x", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
+	GenCmd.PersistentFlags().StringSliceVarP(&GenOptions.Values, "set", "x", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 }

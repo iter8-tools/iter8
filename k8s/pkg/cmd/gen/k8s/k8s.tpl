@@ -1,23 +1,49 @@
-{{- $suffix := randAlphaNum 5 | lower -}}
-{{- $name := printf "experiment-%s" $suffix -}}
+{{/* -- id ------------------------------------------------- */}}
+{{- $id := randAlphaNum 5 | lower -}}
+{{- if hasKey .Values "id" -}}
+  {{- $id = .Values.id -}}
+{{- end -}}
+{{/* -- app ------------------------------------------------ */}}
+{{- $app := printf "default" -}}
+{{- if hasKey .Values "app" -}}
+  {{- $app = .Values.app -}}
+{{- end -}}
+{{/* -- loglevel ------------------------------------------- */}}
+{{- $loglevel := printf "info" -}}
+{{- if hasKey .Values "loglevel" -}}
+  {{- $loglevel = .Values.loglevel -}}
+{{- end -}}
+{{/* -- name ----------------------------------------------- */}}
+{{- $name := printf "experiment-%s" $id -}}
+{{/* -- version ----------------------------------------------- */}}
+{{- $version := printf "0.8" -}}
+{{/* -- manifest ------------------------------------------- */}}
 apiVersion: v1
 kind: Secret
 metadata:
   name: {{ $name }}
   labels:
-    iter8/type: experiment
-    iter8/experiment: {{ $name }}
+    app.kubernetes.io/name: iter8
+    app.kubernetes.io/instance: {{ $id }}
+    app.kubernetes.io/version: "{{ $version }}"
+    app.kubernetes.io/component: spec
+    app.kubernetes.io/created-by: iter8cli
+    iter8.tools/app: {{ $app }}
 stringData:
   experiment: |
-{{ . | toYAML | indent 4 }}
+{{ .Tasks | toYAML | indent 4 }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: {{ $name }}-result
   labels:
-    iter8/type: experiment
-    iter8/experiment: {{ $name }}
+    app.kubernetes.io/name: iter8
+    app.kubernetes.io/instance: {{ $id }}
+    app.kubernetes.io/version: "{{ $version }}"
+    app.kubernetes.io/component: result
+    app.kubernetes.io/created-by: iter8cli
+    iter8.tools/app: {{ $app }}
 stringData:
   result: |
     numCompletedTasks: 0
@@ -31,7 +57,12 @@ kind: Job
 metadata:
   name: {{ $name }}
   labels:
-    iter8/experiment: {{ $name }}
+    app.kubernetes.io/name: iter8
+    app.kubernetes.io/instance: {{ $id }}
+    app.kubernetes.io/version: "{{ $version }}"
+    app.kubernetes.io/component: job
+    app.kubernetes.io/created-by: iter8cli
+    iter8.tools/app: {{ $app }}
 spec:
   template:
     spec:
@@ -41,7 +72,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: LOG_LEVEL
-          value: info
+          value: {{ $loglevel }}
         command:
         - "/bin/sh"
         - "-c"
@@ -62,7 +93,12 @@ kind: Role
 metadata:
   name: {{ $name }}
   labels:
-    iter8/experiment: {{ $name }}
+    app.kubernetes.io/name: iter8
+    app.kubernetes.io/instance: {{ $id }}
+    app.kubernetes.io/version: "{{ $version }}"
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: iter8cli
+    iter8.tools/app: {{ $app }}
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -74,7 +110,12 @@ kind: RoleBinding
 metadata:
   name: {{ $name }}
   labels:
-    iter8/experiment: {{ $name }}
+    app.kubernetes.io/name: iter8
+    app.kubernetes.io/instance: {{ $id }}
+    app.kubernetes.io/version: "{{ $version }}"
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: iter8cli
+    iter8.tools/app: {{ $app }}
 subjects:
 - kind: ServiceAccount
   name: default
