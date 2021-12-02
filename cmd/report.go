@@ -22,11 +22,6 @@ const (
 	HTMLOutputFormatKey = "html"
 )
 
-// var (
-// 	// Output format variable holds the output format to be used by gen
-// 	outputFormat string = TextOutputFormatKey
-// )
-
 // executable
 type executable interface {
 	Execute(w io.Writer, data interface{}) error
@@ -44,7 +39,7 @@ var ReportOptions = ReportOptionsType{
 // ReportCmd represents the report command
 var ReportCmd = &cobra.Command{
 	Use:   "report",
-	Short: "generate report from experiment result",
+	Short: "Generate report from experiment result",
 	Long: `
 	Generate report from experiment result`,
 	Example: `

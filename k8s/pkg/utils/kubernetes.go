@@ -34,48 +34,48 @@ func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error)
 	return clientSet, nil
 }
 
-func GetExperimentSecret(client *kubernetes.Clientset, ns string, nm string) (experiment *corev1.Secret, err error) {
+func GetExperimentSecret(client *kubernetes.Clientset, ns string, nm string) (s *corev1.Secret, err error) {
 	ctx := context.Background()
 
 	// A name is provided; get this experiment, if it exists
 	if len(nm) != 0 {
-		experiment, err = client.CoreV1().Secrets(ns).Get(ctx, nm, metav1.GetOptions{})
+		s, err = client.CoreV1().Secrets(ns).Get(ctx, nm, metav1.GetOptions{})
 		if err != nil {
 			if k8serrors.IsNotFound(err) {
 				return nil, fmt.Errorf("experiment \"%s\" not found", nm)
 			}
 		}
-		// verify that the job corresponds to an experiment
-		if experiment != nil && !isExperiment(*experiment) {
+		// verify that the secret corresponds to an experiment
+		if s != nil && !isExperiment(*s) {
 			return nil, fmt.Errorf("experiment \"%s\" not found", nm)
 		}
 
-		return experiment, err
+		return s, err
 	}
 
 	// There is no explict experiment name provided.
 	// Get a list of all experiments.
 	// Then select the one with the most recent create time.
-	experiments, err := GetExperimentSecrets(client, ns)
+	experimentSecrets, err := GetExperimentSecrets(client, ns)
 	if err != nil {
-		return experiment, err
+		return s, err
 	}
 
 	// no experiments
-	if len(experiments) == 0 {
-		return experiment, errors.New("no experiments found")
+	if len(experimentSecrets) == 0 {
+		return s, errors.New("no experiments found")
 	}
 
-	for _, job := range experiments {
-		if experiment == nil {
-			experiment = &job
+	for _, experimentSecret := range experimentSecrets {
+		if s == nil {
+			s = &experimentSecret
 			continue
 		}
-		if job.ObjectMeta.CreationTimestamp.Time.After(experiment.ObjectMeta.CreationTimestamp.Time) {
-			experiment = &job
+		if experimentSecret.ObjectMeta.CreationTimestamp.Time.After(s.ObjectMeta.CreationTimestamp.Time) {
+			s = &experimentSecret
 		}
 	}
-	return experiment, nil
+	return s, nil
 }
 
 func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experiments []corev1.Secret, err error) {
@@ -87,10 +87,10 @@ func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experiments 
 		return experiments, err
 	}
 
-	return jobListToExperimentJobList(*secrets), err
+	return secretListToExperimentSecretList(*secrets), err
 }
 
-func jobListToExperimentJobList(secrets corev1.SecretList) (result []corev1.Secret) {
+func secretListToExperimentSecretList(secrets corev1.SecretList) (result []corev1.Secret) {
 	for _, secret := range secrets.Items {
 		if isExperiment(secret) {
 			result = append(result, secret)

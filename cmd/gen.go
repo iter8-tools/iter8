@@ -14,12 +14,12 @@ var GenOptions = GenOptionsType{}
 // GenCmd represents the gen command
 var GenCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "render templates with values",
+	Short: "Render templates with values",
 	Long: `
 	Render templates with values`,
 }
 
 func init() {
 	RootCmd.AddCommand(GenCmd)
-	GenCmd.PersistentFlags().StringSliceVarP(&GenOptions.Values, "set", "x", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
+	GenCmd.PersistentFlags().StringSliceVarP(&GenOptions.Values, "set", "s", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 }

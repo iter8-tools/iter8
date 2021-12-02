@@ -19,17 +19,11 @@ const (
 	SLOsByPrefix = "slosby"
 )
 
-// // assert conditions
-// var conds []string
-
 // how long to sleep in between retries of asserts
 var sleepTime, _ = time.ParseDuration("3s")
 
 // how long have we spent so far in assert attempts
 var timeSpent, _ = time.ParseDuration("0s")
-
-// // timeout for assert conditions to be satisfied
-// var timeout time.Duration
 
 type AssertOptionsType struct {
 	// assert conditions
@@ -43,7 +37,7 @@ var AssertOptions = AssertOptionsType{}
 // AssertCmd represents the assert command
 var AssertCmd = &cobra.Command{
 	Use:   "assert",
-	Short: "assert if experiment result satisfies the specified conditions",
+	Short: "Assert if experiment result satisfies the specified conditions",
 	Long: `
 	Assert if experiment result satisfies the specified conditions. 
 	If assert conditions are satisfied, exit with code 0. 
