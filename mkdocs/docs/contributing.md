@@ -33,12 +33,15 @@ We welcome many different types of contributions including:
 * Communication, social media, blog posts
 * Reviewing pull requests
 
-Not everything happens through a GitHub pull request. Please come to our
-[community meetings](getting-started/help.md#iter8-community-meetings) or [contact us](getting-started/help.md) and let us discuss how we can work together. 
+***
 
-*** 
+## Ask for Help
 
-## Come to [Iter8 Community Meetings](getting-started/help.md#iter8-community-meetings)!
+The best ways to reach us with a question is to ask...
+
+* On the original GitHub issue
+* In the `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
+* During our [community meetings](community.md#community-meetings)
 
 ***
 
@@ -59,14 +62,6 @@ that you want to work on it. Something like "I want to work on this" is fine.
 
 ***
 
-## Ask for Help
-
-The best ways to reach us with a question when contributing is to ask on:
-
-* The original GitHub issue
-* `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
-* Bring your questions to our [community meetings](getting-started/help.md#iter8-community-meetings)
-
 ## Pull Request Lifecycle
 
 * Your PR is associated with one (and infrequently, with more than one) [GitHub issue](https://github.com/iter8-tools/iter8/issues). You can start the submission of your PR as soon as this issue has been created.
@@ -76,7 +71,6 @@ The best ways to reach us with a question when contributing is to ask on:
 * You can expect an initial review within 1-2 days of submitting a PR, and follow up reviews (if any) to happen over 2-5 days.
 * Use the `#development` Slack channel of [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) to ping/bump when the pull request is ready for further review or if it appears stalled.
 * Iter8 releases happen frequently. Once your PR is merged, you can expect your contribution to show up *live* in a short amount of time at https://iter8.tools.
-
 
 <!-- ## Development Environment Setup
 
@@ -101,6 +95,7 @@ are used within the scope of your project.
   understanding how to use the project
 
 -->
+
 ***
 
 ## Sign Your Commits
@@ -151,6 +146,8 @@ Makefile target. Below is an example of a checklist:
   requests. We require that all tests succeed on a pull request before it is merged.
 
 -->
+
+***
 
 ## `MkDocs`
 Iter8 documentation uses [Mkdocs](https://www.mkdocs.org/user-guide/writing-your-docs/). The section on [linking to pages and images](https://www.mkdocs.org/user-guide/writing-your-docs/#writing-with-markdown) is especially useful for Iter8 documentation authors.
