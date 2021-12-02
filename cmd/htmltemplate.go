@@ -1,11 +1,36 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/iter8-tools/iter8/base"
 )
+
+type histBar struct {
+	X float64 `json:"x" yaml:"x"`
+	Y float64 `json:"y" yaml:"y"`
+}
+
+type hist struct {
+	Values []histBar `json:"values" yaml:"values"`
+	Key    string    `json:"key" yaml:"key"`
+}
+
+type histograms struct {
+	XAxisLabel string `json:"xAxisLabel" yaml:"xAxisLabel"`
+	Datum      []hist `json:"datum" yaml:"datum"`
+}
+
+func (hd *histograms) toJSON() string {
+	if hd == nil {
+		return ``
+	}
+	jb, _ := json.Marshal(hd)
+	return string(jb)
+}
 
 // formatHTML is the HTML template of the experiment results
 var formatHTML = `
@@ -33,7 +58,7 @@ var formatHTML = `
 					{{ .HTMLSLOSection }}
 				{{- end }}
 
-				{{ if .ContainsInsight "HistMetrics" }} 
+				{{ if .ContainsInsight "HistMetrics" }}
 					{{ .HTMLHistMetricsSection }}
 				{{- end }}
 
@@ -55,19 +80,7 @@ var formatHTML = `
 			<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
 
 			{{ if .ContainsInsight "HistMetrics" }}
-				<style>
-				text {
-						font: 12px sans-serif;
-				}
-				svg {
-						display: block;
-						margin: 0px;
-						padding: 0px;
-						height: 100%;
-						width: 100%;
-				}
-				</style>
-
+				{{ styleSection }}
 				{{ .HTMLHistData }}
 				{{ .HTMLHistCharts }}
 
@@ -77,80 +90,106 @@ var formatHTML = `
 	</html>
 	`
 
+// styleSection is the style section required for histogram charts
+func styleSection() string {
+	return `
+<style>
+text {
+		font: 12px sans-serif;
+}
+svg {
+		display: block;
+		margin: 0px;
+		padding: 0px;
+		height: 100%;
+		width: 100%;
+}
+</style>
+`
+}
+
 // HTMLHistData returns histogram data section in HTML report
 func (e *Experiment) HTMLHistData() string {
-	return `
-	<script>		
-	//Simple test data generators
-	function sinAndCos() {
-			var sin = [],
-					cos = [];
-
-			for (var i = 0; i < 30; i++) {
-					sin.push({x: i, y: Math.sin(i/10)});
-					cos.push({x: i, y: Math.cos(i/10)});
-			}
-
-			return [
-				{values: sin, key: "Version 0"},
-				{values: cos, key: "Version 1"}
-			];
+	hds := e.HistData()
+	hdsJSONs := []string{}
+	for _, hd := range hds {
+		hdsJSONs = append(hdsJSONs, hd.toJSON())
 	}
-
-	function sinData() {
-			var sin = [];
-
-			for (var i = 0; i < 10; i++) {
-					sin.push({x: i, y: Math.sin(i/10) * Math.random() * 100});
-			}
-
-			return [{
-					values: sin,
-					key: "Version 0",
-			}];
-	}
+	htmlhd := fmt.Sprintf(`
+	<script>
+		chartData = [%v]
 	</script>
-	`
+	`, strings.Join(hdsJSONs, ", \n"))
+	return htmlhd
+}
+
+// HistData provides histogram data for all histogram metrics
+func (e *Experiment) HistData() []histograms {
+	gramsList := []histograms{}
+	for mname, minfo := range e.Result.Insights.MetricsInfo {
+		if minfo.Type == base.HistogramMetricType {
+			grams := histograms{
+				XAxisLabel: fmt.Sprintf("Histogram of %v", mname),
+				Datum:      []hist{},
+			}
+			for i := 0; i < *e.Result.Insights.NumAppVersions; i++ {
+				gram := hist{
+					Values: []histBar{},
+					Key:    fmt.Sprintf("Version %v", i),
+				}
+				if counts, ok := e.Result.Insights.MetricValues[i][mname]; ok && len(counts) > 0 {
+					for j := 0; j < len(counts); j++ {
+						gram.Values = append(gram.Values, histBar{
+							X: *minfo.XMin + float64(j)*(*minfo.XMax-*minfo.XMin)/float64(*minfo.NumBuckets),
+							Y: counts[j],
+						})
+					}
+					grams.Datum = append(grams.Datum, gram)
+				}
+			}
+			if len(grams.Datum) > 0 {
+				gramsList = append(gramsList, grams)
+			}
+		}
+	}
+	return gramsList
 }
 
 // HTMLHistCharts returns histogram charts section in HTML report
 func (e *Experiment) HTMLHistCharts() string {
 	return `
 	<script>
-	var chart;
-	nv.addGraph(function() {
-			chart = nv.models.multiBarChart().stacked(false).showControls(false);
-			chart
-					.margin({left: 100, bottom: 100})
-					.useInteractiveGuideline(true)
-					.duration(250)
-					;
+		var charts = [];
+		for (let i = 0; i < chartData.length; i++) {
+			nv.addGraph(function() {
+				charts.push(nv.models.multiBarChart().stacked(false).showControls(false));
+				charts[i]
+						.margin({left: 100, bottom: 100})
+						.useInteractiveGuideline(true)
+						.duration(250)
+						;
 
-			// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
-			chart.xAxis
-					.axisLabel("Latency (msec)")
-					.tickFormat(function(d) { return d3.format(',.2f')(d);});
+				// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
+				charts[i].xAxis
+						.axisLabel(chartData[i].xAxisLabel)
+						.tickFormat(function(d) { return d3.format(',.2f')(d);});
 
-			chart.yAxis
-					.axisLabel('Count')
-					.tickFormat(d3.format(',.1f'));
+				charts[i].yAxis
+						.axisLabel('Count')
+						.tickFormat(d3.format(',.1f'));
 
-			chart.showXAxis(true);
+				charts[i].showXAxis(true);
 
-			d3.select('#hist-chart-1')
-					.datum(sinAndCos())
-					.transition()
-					.call(chart);
-
-			d3.select('#hist-chart-2')
-			.datum(sinData())
-			.transition()
-			.call(chart);
-					
-			nv.utils.windowResize(chart.update);
-			chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
-			return chart;
-	});
+				d3.select('#hist-chart-' + i)
+				.datum(chartData[i].datum)
+				.transition()
+				.call(charts[i]);
+						
+				nv.utils.windowResize(charts[i].update);
+				charts[i].dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+				return charts[i];
+		});
+	}
 	</script>	
 	`
 }
@@ -265,17 +304,24 @@ func (e *Experiment) printHTMLNoSLOs() string {
 
 // HTMLHistMetricsSection prints histogram metrics in the HTML report
 func (e *Experiment) HTMLHistMetricsSection() string {
-	return `
-	<section>
+	hd := e.HistData()
+	if len(hd) > 0 {
+		divs := []string{}
+		for i := 0; i < len(hd); i++ {
+			divs = append(divs, fmt.Sprintf(`
+					<div class='with-3d-shadow with-transitions'>
+						<svg id="hist-chart-%v" style="height:500px"></svg>
+					</div>
+			</section>
+			<hr>`, i))
+		}
+		return `
+		<section>
 		<h2>Histogram Metrics</h2>
-			<div class='with-3d-shadow with-transitions'>
-				<svg id="hist-chart-1" style="height:500px"></svg>
-			</div>
-			<div class='with-3d-shadow with-transitions'>
-				<svg id="hist-chart-2" style="height:500px"></svg>
-			</div>
-	</section>
-	<hr>`
+		` + strings.Join(divs, "\n") +
+			`</section>`
+	}
+	return ``
 }
 
 func (e *Experiment) printHTMLMetricVersions() string {
@@ -355,10 +401,4 @@ func (e *Experiment) HTMLMetricsSection() string {
 		`
 
 	return metricStrs
-}
-
-// HTMLHistMetricsDataSection prints the data needed for
-// the Hist Metrics section in HTML report
-func (e *Experiment) HTMLHistMetricsDataSection() string {
-	return ""
 }

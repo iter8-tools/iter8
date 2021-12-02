@@ -456,8 +456,6 @@ func latencyHist(mm MetricMeta, hd *stats.HistogramData) []float64 {
 		}
 	}
 
-	log.Logger.Debug("sample: ", sample)
-
 	// update hist
 	for i := 0; i < len(sample); i++ {
 		width := (*mm.XMax - *mm.XMin) / float64(*mm.NumBuckets)
