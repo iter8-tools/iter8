@@ -12,7 +12,7 @@ type Options struct {
 	namespace            string
 	client               *kubernetes.Clientset
 
-	experiment string
+	experimentId string
 }
 
 func newOptions(streams genericclioptions.IOStreams) *Options {

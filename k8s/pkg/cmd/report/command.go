@@ -18,7 +18,7 @@ func NewCmd() *cobra.Command {
 	cmd := basecli.ReportCmd
 	cmd.Example = fmt.Sprintf("%s%s\n", cmd.Example, example)
 
-	factory, streams := utils.AddGenericCliOptions(cmd, true)
+	factory, streams := utils.AddGenericCliOptions(cmd)
 
 	o := newOptions(streams)
 
@@ -35,7 +35,7 @@ func NewCmd() *cobra.Command {
 		return nil
 	}
 
-	cmd.Flags().StringVarP(&o.experiment, "experiment", "e", "", "remote experiment; if not specified, the most recent experiment is used")
+	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier; if not specified, the most recent experiment is used")
 	cmd.Flags().BoolVarP(&o.remote, "remote", "r", false, "report on remotely executed experiment")
 
 	return cmd

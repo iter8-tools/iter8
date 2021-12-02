@@ -1,14 +1,15 @@
 package k8s
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"k8s.io/kubectl/pkg/cmd/options"
 )
 
 var example = `
 # Generate Kubernetes manifest
-%[1]s gen k8s
+iter6 gen k8s
 `
 
 func NewCmd() *cobra.Command {
@@ -17,7 +18,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "k8s",
 		Short:        "Generate manifest for running experiment in Kubernetes",
-		Example:      fmt.Sprintf(example, "iter8"),
+		Example:      example,
 		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
 			if err := o.complete(c, args); err != nil {
@@ -33,5 +34,6 @@ func NewCmd() *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(options.NewCmdOptions(os.Stdout))
 	return cmd
 }

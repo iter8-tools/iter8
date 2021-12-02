@@ -21,9 +21,6 @@ const (
 	FailedHeader            = "FAILED"
 	NumTasksHeader          = "TASKS"
 	NumTasksCompletedHeader = "TASKS_COMPLETED"
-
-	AppLabel = "iter8.tools/app"
-	IdLabel  = "app.kubernetes.io/instance"
 )
 
 // complete sets all information needed for processing the command
@@ -38,12 +35,12 @@ func (o *Options) complete(factory cmdutil.Factory, cmd *cobra.Command, args []s
 		return err
 	}
 
-	if len(o.experiment) == 0 {
-		s, err := utils.GetExperimentSecret(o.client, o.namespace, o.experiment)
+	if len(o.experimentId) == 0 {
+		s, err := utils.GetExperimentSecret(o.client, o.namespace, o.experimentId)
 		if err != nil {
 			return err
 		}
-		o.experiment = s.GetName()
+		o.experimentId = s.Labels[utils.IdLabel]
 	}
 
 	return err
@@ -84,8 +81,8 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		app := experimentSecret.Labels[AppLabel]
-		id := experimentSecret.Labels[IdLabel]
+		app := experimentSecret.Labels[utils.AppLabel]
+		id := experimentSecret.Labels[utils.IdLabel]
 		fmt.Fprintf(w, "%s\t%s\t%t\t%t\t%d\t%d\n", app, id, exp.Completed(), !exp.NoFailure(), len(exp.Tasks), exp.Result.NumCompletedTasks)
 		w.Flush()
 	}

@@ -24,12 +24,12 @@ func (o *Options) complete(factory cmdutil.Factory, cmd *cobra.Command, args []s
 		return err
 	}
 
-	if len(o.experiment) == 0 {
-		s, err := utils.GetExperimentSecret(o.client, o.namespace, o.experiment)
+	if len(o.experimentId) == 0 {
+		s, err := utils.GetExperimentSecret(o.client, o.namespace, o.experimentId)
 		if err != nil {
 			return err
 		}
-		o.experiment = s.GetName()
+		o.experimentId = s.Labels[utils.IdLabel]
 	}
 
 	return err
@@ -50,7 +50,7 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 		expIO = &utils.KubernetesExpIO{
 			Client:    o.client,
 			Namespace: o.namespace,
-			Name:      o.experiment,
+			Name:      utils.SpecSecretPrefix + o.experimentId,
 		}
 	} else {
 		expIO = &basecli.FileExpIO{}

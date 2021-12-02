@@ -1,26 +1,24 @@
 package get
 
 import (
-	"fmt"
-
 	"github.com/iter8-tools/iter8/k8s/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
 var example = `
 # Get list of experiments running in cluster
-%[1]s get
+iter8 get
 `
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "get",
 		Short:        "Get a list of experiments running in the current context",
-		Example:      fmt.Sprintf(example, "iter8"),
+		Example:      example,
 		SilenceUsage: true,
 	}
 
-	factory, streams := utils.AddGenericCliOptions(cmd, true)
+	factory, streams := utils.AddGenericCliOptions(cmd)
 
 	o := newOptions(streams)
 
@@ -37,6 +35,6 @@ func NewCmd() *cobra.Command {
 		return nil
 	}
 
-	cmd.Flags().StringVar(&o.experiment, "experiment", "", "experiment")
+	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier")
 	return cmd
 }

@@ -12,8 +12,8 @@ type Options struct {
 	namespace            string
 	client               *kubernetes.Clientset
 
-	remote     bool
-	experiment string
+	remote       bool
+	experimentId string
 }
 
 func newOptions(streams genericclioptions.IOStreams) *Options {

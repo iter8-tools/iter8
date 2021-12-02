@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -19,6 +18,22 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
+)
+
+const (
+	SpecSecretPrefix = "experiment-"
+
+	NameLabel      = "app.kubernetes.io/name"
+	IdLabel        = "app.kubernetes.io/instance"
+	VersionLabel   = "app.kubernetes.io/version"
+	ComponentLabel = "app.kubernetes.io/component"
+	CreatedByLabel = "app.kubernetes.io/created-by"
+	AppLabel       = "iter8.tools/app"
+
+	ComponentSpec   = "spec"
+	ComponentResult = "result"
+	ComponentJob    = "job"
+	ComponentRbac   = "rbac"
 )
 
 func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error) {
@@ -34,11 +49,12 @@ func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error)
 	return clientSet, nil
 }
 
-func GetExperimentSecret(client *kubernetes.Clientset, ns string, nm string) (s *corev1.Secret, err error) {
+func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
 	ctx := context.Background()
 
 	// A name is provided; get this experiment, if it exists
-	if len(nm) != 0 {
+	if len(id) != 0 {
+		nm := SpecSecretPrefix + id
 		s, err = client.CoreV1().Secrets(ns).Get(ctx, nm, metav1.GetOptions{})
 		if err != nil {
 			if k8serrors.IsNotFound(err) {
@@ -78,13 +94,13 @@ func GetExperimentSecret(client *kubernetes.Clientset, ns string, nm string) (s 
 	return s, nil
 }
 
-func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experiments []corev1.Secret, err error) {
+func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experimentSecrets []corev1.Secret, err error) {
 	secrets, err := client.CoreV1().Secrets(ns).List(
 		context.Background(), metav1.ListOptions{
 			LabelSelector: "app.kubernetes.io/name=iter8,app.kubernetes.io/component=spec",
 		})
 	if err != nil {
-		return experiments, err
+		return experimentSecrets, err
 	}
 
 	return secretListToExperimentSecretList(*secrets), err
@@ -99,8 +115,12 @@ func secretListToExperimentSecretList(secrets corev1.SecretList) (result []corev
 	return result
 }
 
-func isExperiment(e corev1.Secret) bool {
-	return !strings.HasSuffix(e.GetName(), "-result")
+func isExperiment(s corev1.Secret) bool {
+	component, ok := s.Labels[ComponentLabel]
+	if !ok {
+		return false
+	}
+	return component == ComponentSpec
 }
 
 //KubernetesExpIO enables reading and writing through files

@@ -11,7 +11,7 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-func AddGenericCliOptions(cmd *cobra.Command, addOptionsCmd bool) (cmdutil.Factory, genericclioptions.IOStreams) {
+func AddGenericCliOptions(cmd *cobra.Command) (cmdutil.Factory, genericclioptions.IOStreams) {
 	// Add the default kubectl options as persistent flags
 	flags := cmd.PersistentFlags()
 	flags.SetNormalizeFunc(cliflag.WarnWordSepNormalizeFunc) // Warn for "_" flags
@@ -37,9 +37,7 @@ func AddGenericCliOptions(cmd *cobra.Command, addOptionsCmd bool) (cmdutil.Facto
 	// cmd.AddCommand(cmdconfig.NewCmdConfig(clientcmd.NewDefaultPathOptions(), streams))
 
 	// Add the "options" subcommand to display available options
-	if addOptionsCmd {
-		cmd.AddCommand(options.NewCmdOptions(streams.Out))
-	}
+	cmd.AddCommand(options.NewCmdOptions(streams.Out))
 
 	return factory, streams
 }
