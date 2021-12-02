@@ -54,7 +54,8 @@ var formatHTML = `
 			<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
 			<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
 
-			<style>
+			{{ if .ContainsInsight "HistMetrics" }}
+				<style>
 				text {
 						font: 12px sans-serif;
 				}
@@ -65,81 +66,94 @@ var formatHTML = `
 						height: 100%;
 						width: 100%;
 				}
-			</style>
+				</style>
 
-			{{ if .ContainsInsight "HistMetrics" }}
-				<script>
+				{{ .HTMLHistData }}
+				{{ .HTMLHistCharts }}
 
-				var chart;
-				nv.addGraph(function() {
-						chart = nv.models.multiBarChart().stacked(false).showControls(false);
-						chart
-								.margin({left: 100, bottom: 100})
-								.useInteractiveGuideline(true)
-								.duration(250)
-								;
-		
-						// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
-						chart.xAxis
-								.axisLabel("Latency (msec)")
-								.tickFormat(function(d) { return d3.format(',.2f')(d);});
-		
-						chart.yAxis
-								.axisLabel('Count')
-								.tickFormat(d3.format(',.1f'));
-		
-						chart.showXAxis(true);
-		
-						d3.select('#hist-chart-1')
-								.datum(sinAndCos())
-								.transition()
-								.call(chart);
-
-						d3.select('#hist-chart-2')
-						.datum(sinData())
-						.transition()
-						.call(chart);
-								
-						nv.utils.windowResize(chart.update);
-						chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
-						return chart;
-				});
-		
-				//Simple test data generators
-				function sinAndCos() {
-						var sin = [],
-								cos = [];
-		
-						for (var i = 0; i < 30; i++) {
-								sin.push({x: i, y: Math.sin(i/10)});
-								cos.push({x: i, y: Math.cos(i/10)});
-						}
-		
-						return [
-							{values: sin, key: "Version 0"},
-							{values: cos, key: "Version 1"}
-						];
-				}
-		
-				function sinData() {
-						var sin = [];
-		
-						for (var i = 0; i < 10; i++) {
-								sin.push({x: i, y: Math.sin(i/10) * Math.random() * 100});
-						}
-		
-						return [{
-								values: sin,
-								key: "Version 0",
-						}];
-				}
-		
-				</script>			
 			{{- end }}
 
 		</body>
 	</html>
 	`
+
+// HTMLHistData returns histogram data section in HTML report
+func (e *Experiment) HTMLHistData() string {
+	return `
+	<script>		
+	//Simple test data generators
+	function sinAndCos() {
+			var sin = [],
+					cos = [];
+
+			for (var i = 0; i < 30; i++) {
+					sin.push({x: i, y: Math.sin(i/10)});
+					cos.push({x: i, y: Math.cos(i/10)});
+			}
+
+			return [
+				{values: sin, key: "Version 0"},
+				{values: cos, key: "Version 1"}
+			];
+	}
+
+	function sinData() {
+			var sin = [];
+
+			for (var i = 0; i < 10; i++) {
+					sin.push({x: i, y: Math.sin(i/10) * Math.random() * 100});
+			}
+
+			return [{
+					values: sin,
+					key: "Version 0",
+			}];
+	}
+	</script>
+	`
+}
+
+// HTMLHistCharts returns histogram charts section in HTML report
+func (e *Experiment) HTMLHistCharts() string {
+	return `
+	<script>
+	var chart;
+	nv.addGraph(function() {
+			chart = nv.models.multiBarChart().stacked(false).showControls(false);
+			chart
+					.margin({left: 100, bottom: 100})
+					.useInteractiveGuideline(true)
+					.duration(250)
+					;
+
+			// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
+			chart.xAxis
+					.axisLabel("Latency (msec)")
+					.tickFormat(function(d) { return d3.format(',.2f')(d);});
+
+			chart.yAxis
+					.axisLabel('Count')
+					.tickFormat(d3.format(',.1f'));
+
+			chart.showXAxis(true);
+
+			d3.select('#hist-chart-1')
+					.datum(sinAndCos())
+					.transition()
+					.call(chart);
+
+			d3.select('#hist-chart-2')
+			.datum(sinData())
+			.transition()
+			.call(chart);
+					
+			nv.utils.windowResize(chart.update);
+			chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+			return chart;
+	});
+	</script>	
+	`
+}
 
 // HTMLState prints the current state of the experiment
 func (e *Experiment) HTMLState() string {
