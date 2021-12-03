@@ -142,13 +142,10 @@ func (in *Insights) hasInsightType(it InsightType) bool {
 }
 
 // setInsightType adds a specific InsightType to the list of experiment insights types
-func (in *Insights) setInsightType(it InsightType) error {
-	if in.hasInsightType(it) {
-		return nil
+func (in *Insights) setInsightType(it InsightType) {
+	if !in.hasInsightType(it) {
+		in.InsightTypes = append(in.InsightTypes, it)
 	}
-	// LHS can be nil
-	in.InsightTypes = append(in.InsightTypes, it)
-	return nil
 }
 
 // setSLOStrs sets the SLOStrs field in insights
@@ -178,18 +175,6 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 	for i := 0; i < len(e.Result.Insights.SLOStrs); i++ {
 		e.Result.Insights.SLOsSatisfied[i] = make([]bool, e.Result.Insights.NumVersions)
 	}
-	return nil
-}
-
-// initialize the number of app versions
-func (in *Insights) initNumVersions(n int) error {
-	if in.NumVersions != n {
-		errStr := fmt.Sprint("inconsistent number for app versions; old: ", in.NumVersions, " new: ", n)
-		log.Logger.Error(errStr)
-		return errors.New(errStr)
-	}
-
-	in.NumVersions = n
 	return nil
 }
 

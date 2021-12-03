@@ -80,13 +80,10 @@ func (t *assessTask) Run(exp *Experiment) error {
 	}
 
 	// set insight type (if needed)
-	err := exp.Result.Insights.setInsightType(InsightTypeSLO)
-	if err != nil {
-		return err
-	}
+	exp.Result.Insights.setInsightType(InsightTypeSLO)
 
 	// set SLOStrs (if needed)
-	err = exp.Result.Insights.setSLOStrs(getSLOStrs(t.With.SLOs))
+	err := exp.Result.Insights.setSLOStrs(getSLOStrs(t.With.SLOs))
 	if err != nil {
 		return err
 	}

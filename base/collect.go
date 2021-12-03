@@ -250,25 +250,15 @@ func (t *collectTask) Run(exp *Experiment) error {
 		}
 	}
 
+	// initialize insights if required
+	if exp.Result.Insights == nil {
+		exp.Result.InitInsights(len(t.With.VersionInfo), []InsightType{InsightTypeMetrics})
+	}
+
 	in := exp.Result.Insights
 
-	// initialize num app versions (if needed)
-	err = in.initNumVersions(len(t.With.VersionInfo))
-	if err != nil {
-		return err
-	}
-
-	// set metrics insight type (if needed)
-	err = in.setInsightType(InsightTypeMetrics)
-	if err != nil {
-		return err
-	}
-
 	// set hist metrics insight type (if needed)
-	err = in.setInsightType(InsightTypeHistMetrics)
-	if err != nil {
-		return err
-	}
+	in.setInsightType(InsightTypeHistMetrics)
 
 	// initialize metric values (if needed)
 	err = in.initMetricValues(len(t.With.VersionInfo))

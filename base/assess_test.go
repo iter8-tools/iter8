@@ -78,6 +78,7 @@ func TestRunAssess(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.InitResults()
+	exp.Result.InitInsights(1, []InsightType{InsightTypeMetrics})
 	err := task.Run(exp)
 	assert.NoError(t, err)
 
