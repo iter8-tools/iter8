@@ -1,0 +1,29 @@
+name: e2e tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-httpbin:
+    name: local httpbin test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - run: make build
+
+    - name: run Iter8 experiment and assert
+      run: |
+        cd testdata/httpbin
+        docker pull kennethreitz/httpbin
+        docker run -p 80:80 kennethreitz/httpbin &
+        iter8 run
+        iter8 assert -c completed -c nofailure -c slos
+
