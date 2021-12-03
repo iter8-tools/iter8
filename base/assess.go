@@ -71,8 +71,7 @@ func (t *assessTask) GetName() string {
 // Run executes the assess-app-versions task
 func (t *assessTask) Run(exp *Experiment) error {
 	if len(t.With.SLOs) == 0 ||
-		exp.Result.Insights.NumAppVersions == nil ||
-		*exp.Result.Insights.NumAppVersions == 0 {
+		exp.Result.Insights.NumVersions == 0 {
 		// do nothing for now
 		// todo: fix when rewards are introduced
 
@@ -111,8 +110,8 @@ func (t *assessTask) Run(exp *Experiment) error {
 func evaluateSLOs(exp *Experiment, slos []SLO) [][]bool {
 	slosSatisfied := make([][]bool, len(slos))
 	for i := 0; i < len(slos); i++ {
-		slosSatisfied[i] = make([]bool, *exp.Result.Insights.NumAppVersions)
-		for j := 0; j < *exp.Result.Insights.NumAppVersions; j++ {
+		slosSatisfied[i] = make([]bool, exp.Result.Insights.NumVersions)
+		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 			slosSatisfied[i][j] = sloSatisfied(exp, slos, i, j)
 		}
 	}
@@ -145,7 +144,7 @@ func sloSatisfied(e *Experiment, slos []SLO, i int, j int) bool {
 // computeSLOsSatisfiedBy computes the subset of versions that satisfy SLOs
 func computeSLOsSatisfiedBy(exp *Experiment) []int {
 	sats := []int{}
-	for j := 0; j < *exp.Result.Insights.NumAppVersions; j++ {
+	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 		sat := true
 		for i := range exp.Result.Insights.SLOStrs {
 			sat = sat && exp.Result.Insights.SLOsSatisfied[i][j]

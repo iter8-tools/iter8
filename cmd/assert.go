@@ -164,17 +164,17 @@ func (exp *Experiment) extractVersion(cond string) (int, error) {
 		log.Logger.Error("unsupported condition detected; ", cond)
 		return -1, fmt.Errorf("unsupported condition detected; %v", cond)
 	}
-	if exp.Result == nil || exp.Result.Insights == nil || exp.Result.Insights.NumAppVersions == nil {
-		log.Logger.Error("number of app versions is uninitialized")
-		return -1, errors.New("number of app versions is uninitialized")
+	if exp.Result == nil || exp.Result.Insights == nil {
+		log.Logger.Error("insights uninitialized")
+		return -1, errors.New("insights is uninitialized")
 	}
-	for i := 0; i < *exp.Result.Insights.NumAppVersions; i++ {
+	for i := 0; i < exp.Result.Insights.NumVersions; i++ {
 		if tokens[1] == fmt.Sprintf("%v", i) {
 			return i, nil
 		}
 	}
-	log.Logger.Error("number of app versions: ", *exp.Result.Insights.NumAppVersions, "; valid app version must be in the range 0 to ", *exp.Result.Insights.NumAppVersions-1)
-	return -1, errors.New(fmt.Sprint("number of app versions: ", *exp.Result.Insights.NumAppVersions, "; valid app version must be in the range 0 to ", *exp.Result.Insights.NumAppVersions-1))
+	log.Logger.Error("number of app versions: ", exp.Result.Insights.NumVersions, "; valid app version must be in the range 0 to ", exp.Result.Insights.NumVersions-1)
+	return -1, errors.New(fmt.Sprint("number of app versions: ", exp.Result.Insights.NumVersions, "; valid app version must be in the range 0 to ", exp.Result.Insights.NumVersions-1))
 }
 
 func init() {

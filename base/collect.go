@@ -253,7 +253,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 	in := exp.Result.Insights
 
 	// initialize num app versions (if needed)
-	err = in.initNumAppVersions(len(t.With.VersionInfo))
+	err = in.initNumVersions(len(t.With.VersionInfo))
 	if err != nil {
 		return err
 	}

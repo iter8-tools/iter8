@@ -56,8 +56,7 @@ func TestRunAssess(t *testing.T) {
 	}
 	task, _ := MakeAssess(ts)
 	exp := &Experiment{
-		Tasks:  []TaskSpec{},
-		Result: &ExperimentResult{},
+		Tasks: []TaskSpec{},
 	}
 	exp.InitResults()
 	task.Run(exp)
@@ -83,7 +82,7 @@ func TestRunAssess(t *testing.T) {
 	assert.NoError(t, err)
 
 	// assess with an experiment where num versions is 1
-	exp.Result.Insights.NumAppVersions = intPointer(1)
+	exp.Result.Insights.NumVersions = 1
 	err = task.Run(exp)
 	assert.NoError(t, err)
 

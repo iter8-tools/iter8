@@ -50,8 +50,8 @@ type ExperimentResult struct {
 
 // Insights is a structure to contain experiment insights
 type Insights struct {
-	// NumAppVersions is the number of app versions detected by Iter8
-	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numAppVersions,omitempty"`
+	// NumVersions is the number of app versions detected by Iter8
+	NumVersions int `json:"numVersions" yaml:"numVersions"`
 
 	// InsightInfo identifies the types of insights produced by this experiment
 	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty" validate:"gt=0,required"`
@@ -75,7 +75,7 @@ type Insights struct {
 	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
 
 	// SLOsSatisfiedBy is the subset of versions that satisfy all SLOs
-	// every integer in this slice must be in the range 0 to NumAppVersions - 1 (inclusive)
+	// every integer in this slice must be in the range 0 to NumVersions - 1 (inclusive)
 	SLOsSatisfiedBy []int `json:"SLOsSatisfiedBy,omitempty" yaml:"SLOsSatisfiedBy,omitempty"`
 }
 
@@ -176,22 +176,20 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 	// LHS will be nil
 	e.Result.Insights.SLOsSatisfied = make([][]bool, len(e.Result.Insights.SLOStrs))
 	for i := 0; i < len(e.Result.Insights.SLOStrs); i++ {
-		e.Result.Insights.SLOsSatisfied[i] = make([]bool, *e.Result.Insights.NumAppVersions)
+		e.Result.Insights.SLOsSatisfied[i] = make([]bool, e.Result.Insights.NumVersions)
 	}
 	return nil
 }
 
 // initialize the number of app versions
-func (in *Insights) initNumAppVersions(n int) error {
-	if in.NumAppVersions != nil {
-		if *in.NumAppVersions != n {
-			errStr := fmt.Sprint("inconsistent number for app versions; old: ", *in.NumAppVersions, " new: ", n)
-			log.Logger.Error(errStr)
-			return errors.New(errStr)
-		}
+func (in *Insights) initNumVersions(n int) error {
+	if in.NumVersions != n {
+		errStr := fmt.Sprint("inconsistent number for app versions; old: ", in.NumVersions, " new: ", n)
+		log.Logger.Error(errStr)
+		return errors.New(errStr)
 	}
 
-	in.NumAppVersions = intPointer(n)
+	in.NumVersions = n
 	return nil
 }
 
@@ -222,6 +220,13 @@ func (e *Experiment) InitResults() {
 	}
 }
 
+func (r *ExperimentResult) InitInsights(n int, it []InsightType) {
+	r.Insights = &Insights{
+		NumVersions:  n,
+		InsightTypes: it,
+	}
+}
+
 // SLOsBy returns true if version satisfies SLOs
 func (exp *Experiment) SLOsBy(version int) bool {
 	if exp != nil {
@@ -243,11 +248,9 @@ func (exp *Experiment) SLOs() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Insights != nil {
-				if exp.Result.Insights.NumAppVersions != nil {
-					if exp.Result.Insights.SLOsSatisfiedBy != nil {
-						if *exp.Result.Insights.NumAppVersions == len(exp.Result.Insights.SLOsSatisfiedBy) {
-							return true
-						}
+				if exp.Result.Insights.SLOsSatisfiedBy != nil {
+					if exp.Result.Insights.NumVersions == len(exp.Result.Insights.SLOsSatisfiedBy) {
+						return true
 					}
 				}
 			}

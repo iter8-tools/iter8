@@ -81,10 +81,10 @@ func (e *Experiment) printableSLOs() bool {
 		if e.Result != nil {
 			if e.Result.Insights != nil {
 				if len(e.Result.Insights.SLOStrs) > 0 {
-					if *e.Result.Insights.NumAppVersions > 0 {
+					if e.Result.Insights.NumVersions > 0 {
 						if len(e.Result.Insights.SLOsSatisfied) == len(e.Result.Insights.SLOStrs) {
 							if e.Result.Insights.SLOsSatisfied[0] != nil {
-								if len(e.Result.Insights.SLOsSatisfied[0]) == *e.Result.Insights.NumAppVersions {
+								if len(e.Result.Insights.SLOsSatisfied[0]) == e.Result.Insights.NumVersions {
 									return true
 								}
 							}
@@ -103,8 +103,8 @@ func (e *Experiment) printSLOs(w *tabwriter.Writer) {
 	fmt.Fprint(w, "\n\n")
 	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "SLOs")
-	if *in.NumAppVersions > 1 {
-		for i := 0; i < *in.NumAppVersions; i++ {
+	if in.NumVersions > 1 {
+		for i := 0; i < in.NumVersions; i++ {
 			fmt.Fprintf(w, "\t version %v", i)
 		}
 	} else {
@@ -115,7 +115,7 @@ func (e *Experiment) printSLOs(w *tabwriter.Writer) {
 
 	for i := 0; i < len(in.SLOStrs); i++ {
 		fmt.Fprint(w, in.SLOStrs[i])
-		for j := 0; j < *in.NumAppVersions; j++ {
+		for j := 0; j < in.NumVersions; j++ {
 			fmt.Fprintf(w, "\t%v", in.SLOsSatisfied[i][j])
 			fmt.Fprintln(w)
 		}
@@ -142,7 +142,7 @@ func (e *Experiment) printableMetrics() bool {
 		if e.Result != nil {
 			if e.Result.Insights != nil {
 				if e.Result.Insights.MetricsInfo != nil && len(e.Result.Insights.MetricsInfo) > 0 {
-					if *e.Result.Insights.NumAppVersions > 0 {
+					if e.Result.Insights.NumVersions > 0 {
 						if len(e.Result.Insights.MetricValues) > 0 {
 							if e.Result.Insights.MetricValues[0] != nil {
 								return true
@@ -162,8 +162,8 @@ func (e *Experiment) printMetrics(w *tabwriter.Writer) {
 	fmt.Fprint(w, "\n\n")
 	fmt.Fprintln(w, "-----------------------------\t-----")
 	fmt.Fprint(w, "Metrics")
-	if *in.NumAppVersions > 1 {
-		for i := 0; i < *in.NumAppVersions; i++ {
+	if in.NumVersions > 1 {
+		for i := 0; i < in.NumVersions; i++ {
 			fmt.Fprintf(w, "\t version %v", i)
 		}
 	} else {
@@ -188,7 +188,7 @@ func (e *Experiment) printMetrics(w *tabwriter.Writer) {
 		}
 
 		fmt.Fprint(w, keys[i], u)
-		for j := 0; j < *in.NumAppVersions; j++ {
+		for j := 0; j < in.NumVersions; j++ {
 			fmt.Fprintf(w, "\t%v", e.getMetricValue(keys[i], j))
 			fmt.Fprintln(w)
 		}

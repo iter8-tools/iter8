@@ -132,7 +132,7 @@ func (e *Experiment) HistData() []histograms {
 				XAxisLabel: fmt.Sprintf("Histogram of %v", mname),
 				Datum:      []hist{},
 			}
-			for i := 0; i < *e.Result.Insights.NumAppVersions; i++ {
+			for i := 0; i < e.Result.Insights.NumVersions; i++ {
 				gram := hist{
 					Values: []histBar{},
 					Key:    fmt.Sprintf("Version %v", i),
@@ -232,8 +232,8 @@ func (e *Experiment) HTMLSLOSection() string {
 func (e *Experiment) printHTMLSLOVersions() string {
 	in := e.Result.Insights
 	out := ""
-	if *in.NumAppVersions > 1 {
-		for i := 0; i < *in.NumAppVersions; i++ {
+	if in.NumVersions > 1 {
+		for i := 0; i < in.NumVersions; i++ {
 			out += fmt.Sprintf(`
 			<th scope="col">Version %v</th>
 			`, i)
@@ -255,7 +255,7 @@ func (e *Experiment) printHTMLSLORows() string {
 		<td>%v</td>
 		`, in.SLOStrs[i])
 
-		for j := 0; j < *in.NumAppVersions; j++ {
+		for j := 0; j < in.NumVersions; j++ {
 			out += fmt.Sprintf(`
 			<td>%v</td>
 			`, in.SLOsSatisfied[i][j])
@@ -327,8 +327,8 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 func (e *Experiment) printHTMLMetricVersions() string {
 	in := e.Result.Insights
 	out := ""
-	if *in.NumAppVersions > 1 {
-		for i := 0; i < *in.NumAppVersions; i++ {
+	if in.NumVersions > 1 {
+		for i := 0; i < in.NumVersions; i++ {
 			out += fmt.Sprintf(`
 			<th scope="col">Version %v</th>
 			`, i)
@@ -365,7 +365,7 @@ func (e *Experiment) printHTMLMetricRows() string {
 		<td>%v</td>
 		`, keys[i]+u)
 
-		for j := 0; j < *in.NumAppVersions; j++ {
+		for j := 0; j < in.NumVersions; j++ {
 			out += fmt.Sprintf(`
 			<td>%v</td>
 			`, e.getMetricValue(keys[i], j))
