@@ -215,6 +215,9 @@ func (r *ExperimentResult) InitInsights(n int, it []InsightType) {
 		SLOsSatisfied:   make([][]bool, n),
 		SLOsSatisfiedBy: []int{},
 	}
+	for i := 0; i < n; i++ {
+		r.Insights.MetricValues[i] = make(map[string][]float64)
+	}
 }
 
 // SLOsBy returns true if version satisfies SLOs
