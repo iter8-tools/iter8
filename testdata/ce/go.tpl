@@ -55,5 +55,13 @@ stringData:
     # task 4: if SLOs are not satisfied, revert to the previous version
     - if: not SLOs()
       run: |
-        kubectl patch ksvc iter8-ce-demo --type='merge' \
-        -p='{"spec": {"traffic": [{"percent": 0, "latestRevision": true}, {"percent": 100, "revisionName": "iter8-ce-demo-00001"}]}}'
+        # Get the name of the second to last revision
+        penultimateRevisionName=$(kubectl get revisions \
+        -l serving.knative.dev/configuration={{ .CEAppName }} \
+        -o go-template='{{"{{"}}range .items{{"}}"}} {{"{{"}}index . "metadata" "name"{{"}}"}} {{"{{"}}end{{"}}"}}' \
+        | awk '{print $(NF - 1)}'); \
+        
+        # Shift all the traffic weight away from the last revision to the second last
+        kubectl patch ksvc {{ .CEAppName }} --type='merge' \
+            -p="{\"spec\": {\"traffic\": [{\"percent\": 0, \"latestRevision\": true}, \
+            {\"percent\": 100, \"revisionName\": \"$penultimateRevisionName\"}]}}"
