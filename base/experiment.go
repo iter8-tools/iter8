@@ -215,14 +215,11 @@ func (in *Insights) initMetricValues(n int) error {
 }
 
 func (e *Experiment) InitResults() {
+	now := time.Now()
 	e.Result = &ExperimentResult{
-		StartTime:         nil,
+		StartTime:         &now,
 		NumCompletedTasks: 0,
 		Failure:           false,
-		Insights: &Insights{
-			NumAppVersions: nil,
-			MetricsInfo:    map[string]MetricMeta{},
-		},
 	}
 }
 
