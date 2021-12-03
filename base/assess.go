@@ -70,6 +70,10 @@ func (t *assessTask) GetName() string {
 
 // Run executes the assess-app-versions task
 func (t *assessTask) Run(exp *Experiment) error {
+	if exp.Result.Insights == nil {
+		log.Logger.Error("uninitialized insights within experiment")
+		return errors.New("uninitialized insights within experiment")
+	}
 	if len(t.With.SLOs) == 0 ||
 		exp.Result.Insights.NumVersions == 0 {
 		// do nothing for now
