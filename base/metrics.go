@@ -14,6 +14,9 @@ const (
 
 	// GaugeMetricType corresponds to Prometheus Gauge metric type
 	GaugeMetricType MetricType = "Gauge"
+
+	// HistogramMetricType corresponds to a Histogram metric type
+	HistogramMetricType MetricType = "Histogram"
 )
 
 // // AuthType identifies the type of authentication used in the HTTP request

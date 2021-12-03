@@ -97,7 +97,10 @@ const (
 type MetricMeta struct {
 	Description string     `json:"description" yaml:"description"`
 	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
-	Type        MetricType `json:"type" yaml:"type" validate:"gt=0,required"`
+	Type        MetricType `json:"type" yaml:"type" validate:"gt=0,required,oneof=Counter Gauge Histogram"`
+	XMin        *float64   `json:"xmin" yaml:"xmin" validate:"required_if=Type HistMetrics"`
+	XMax        *float64   `json:"xmax" yaml:"xmax" validate:"required_with=XMin"`
+	NumBuckets  *int       `json:"numBuckets" yaml:"numBuckets" validate:"required_with=XMin"`
 }
 
 // SLO is a service level objective
