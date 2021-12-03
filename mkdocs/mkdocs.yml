@@ -118,7 +118,7 @@ nav:
   - Install Iter8: getting-started/install.md
   - Concepts: getting-started/concepts.md
   - v0.8 tech preview: getting-started/v0.8.md
-  - Community: getting-started/help.md
+  - Get help: getting-started/help.md
 - Tutorials:
   - Insights:
     - Load testing: tutorials/load-testing.md
@@ -151,4 +151,5 @@ nav:
     - Iter8 hub: user-guide/topics/iter8hub.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
-- News/Blog: news.md
+- News: news.md
+- Community: community.md
