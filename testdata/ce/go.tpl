@@ -2,7 +2,7 @@
 apiVersion: codeengine.cloud.ibm.com/v1beta1
 kind: JobRun
 metadata:
-  name: {{ .Name }}-{{ $suffix }}
+  name: ce-experiment-run-{{ $suffix }}
 spec:
   jobDefinitionSpec:
     template:
@@ -17,19 +17,19 @@ spec:
           # trap 'kill $(jobs -p)' EXIT
 
           # get experiment from secret
-          kubectl get secret {{ .Name }}-{{ $suffix }} -o go-template='{{"{{"}} .data.experiment {{"}}"}}' | base64 -d > experiment.yaml
+          kubectl get secret ce-experiment-run-{{ $suffix }} -o go-template='{{"{{"}} .data.experiment {{"}}"}}' | base64 -d > experiment.yaml
 
           # local run
           export LOG_LEVEL=info
           iter8 run experiment.yaml
 
           # update the secret
-          kubectl create secret generic {{ .Name }}-{{ $suffix }} --from-file=experiment=experiment.yaml --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic ce-experiment-run-{{ $suffix }} --from-file=experiment=experiment.yaml --dry-run=client -o yaml | kubectl apply -f -
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Name }}-{{ $suffix }}
+  name: ce-experiment-run-{{ $suffix }}
 stringData:
   experiment: |
     # task 1: generate HTTP requests for https://example.com
@@ -37,7 +37,7 @@ stringData:
     - task: gen-load-and-collect-metrics
       with:
         versionInfo:
-        - url: https://iter8-ce-demo.fgw1ut94lpp.ca-tor.codeengine.appdomain.cloud
+        - url: {{ .URL }}
     # task 2: validate service level objectives for https://example.com using
     # the metrics collected in the above task
     - task: assess-app-versions
