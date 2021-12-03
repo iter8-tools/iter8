@@ -36,7 +36,7 @@ func GetIf(t Task) *string {
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
 	// StartTime is the time when the experiment run was started
-	StartTime *time.Time `json:"startTime,omitempty" yaml:"startTime,omitempty"`
+	StartTime *time.Time `json:"startTime,omitempty" yaml:"startTime,omitempty" validate:"required"`
 
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
@@ -54,7 +54,7 @@ type Insights struct {
 	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numAppVersions,omitempty"`
 
 	// InsightInfo identifies the types of insights produced by this experiment
-	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty"`
+	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty" validate:"gt=0,required"`
 
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
@@ -99,8 +99,8 @@ type MetricMeta struct {
 	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
 	Type        MetricType `json:"type" yaml:"type" validate:"gt=0,required,oneof=Counter Gauge Histogram"`
 	XMin        *float64   `json:"xmin" yaml:"xmin" validate:"required_if=Type HistMetrics"`
-	XMax        *float64   `json:"xmax" yaml:"xmax" validate:"required_with=XMin"`
-	NumBuckets  *int       `json:"numBuckets" yaml:"numBuckets" validate:"required_with=XMin"`
+	XMax        *float64   `json:"xmax" yaml:"xmax" validate:"required_if=Type HistMetrics"`
+	NumBuckets  *int       `json:"numBuckets" yaml:"numBuckets" validate:"required_if=Type HistMetrics"`
 }
 
 // SLO is a service level objective
