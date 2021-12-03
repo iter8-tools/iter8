@@ -207,13 +207,10 @@ func (e *Experiment) InitResults() {
 
 func (r *ExperimentResult) InitInsights(n int, it []InsightType) {
 	r.Insights = &Insights{
-		NumVersions:     n,
-		InsightTypes:    it,
-		MetricsInfo:     map[string]MetricMeta{},
-		SLOStrs:         []string{},
-		MetricValues:    make([]map[string][]float64, n),
-		SLOsSatisfied:   make([][]bool, n),
-		SLOsSatisfiedBy: []int{},
+		NumVersions:  n,
+		InsightTypes: it,
+		MetricsInfo:  make(map[string]MetricMeta),
+		MetricValues: make([]map[string][]float64, n),
 	}
 	for i := 0; i < n; i++ {
 		r.Insights.MetricValues[i] = make(map[string][]float64)

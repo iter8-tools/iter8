@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/antonmedv/expr"
 	"github.com/iter8-tools/iter8/base"
@@ -27,7 +28,7 @@ iter8 run
 			exp, err := Build(false, fio)
 			log.Logger.Trace("build finished")
 			if err != nil {
-				return err
+				os.Exit(1)
 			} else {
 				log.Logger.Info("starting experiment run")
 				err := exp.Run(fio)
