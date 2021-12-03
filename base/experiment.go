@@ -215,9 +215,8 @@ func (in *Insights) initMetricValues(n int) error {
 }
 
 func (e *Experiment) InitResults() {
-	now := time.Now()
 	e.Result = &ExperimentResult{
-		StartTime:         &now,
+		StartTime:         timePointer(time.Now()),
 		NumCompletedTasks: 0,
 		Failure:           false,
 	}
