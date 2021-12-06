@@ -13,8 +13,8 @@ import (
 // Experiment specification and result
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks  []TaskSpec        `json:"tasks,omitempty" yaml:"tasks,omitempty" validate:"gt=0,required"`
-	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty" validate:"required"`
+	Tasks  []TaskSpec        `json:"tasks" yaml:"tasks" validate:"gt=0,required"`
+	Result *ExperimentResult `json:"result" yaml:"result" validate:"required"`
 }
 
 // Task is an object that can be run
@@ -35,8 +35,8 @@ func GetIf(t Task) *string {
 
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
-	// StartTime is the time when the experiment run was started
-	StartTime *time.Time `json:"startTime,omitempty" yaml:"startTime,omitempty" validate:"required"`
+	// StartTime is the time when the experiment run started
+	StartTime time.Time `json:"startTime" yaml:"startTime" validate:"required"`
 
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
@@ -199,7 +199,7 @@ func (in *Insights) initMetricValues(n int) error {
 
 func (e *Experiment) InitResults() {
 	e.Result = &ExperimentResult{
-		StartTime:         timePointer(time.Now()),
+		StartTime:         time.Now(),
 		NumCompletedTasks: 0,
 		Failure:           false,
 	}

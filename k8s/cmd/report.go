@@ -13,7 +13,7 @@ import (
 func NewReportCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
 	o := newK8sExperimentOptions(streams)
 
-	cmd := basecli.NewReportCmd()
+	cmd := basecli.ReportCmd
 	var example = `
 # Generate text report for the most recent experiment running in current Kubernetes context
 iter8 k report`

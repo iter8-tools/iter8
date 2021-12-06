@@ -55,12 +55,6 @@ func (e *Experiment) Run(expio ExpIO) error {
 	if e.Result == nil {
 		e.InitResults()
 	}
-	if e.Result.StartTime == nil {
-		err = e.setStartTime()
-		if err != nil {
-			return err
-		}
-	}
 	for i, t := range e.tasks {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : started")
 		shouldRun := true
@@ -101,14 +95,6 @@ func (e *Experiment) Run(expio ExpIO) error {
 	}
 	return nil
 
-}
-
-func (e *Experiment) setStartTime() error {
-	if e.Result == nil {
-		log.Logger.Warn("setStartTime called on an experiment object without results")
-		e.Experiment.InitResults()
-	}
-	return nil
 }
 
 func (e *Experiment) failExperiment() error {

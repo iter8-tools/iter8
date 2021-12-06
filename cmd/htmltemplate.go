@@ -36,23 +36,18 @@ func (hd *histograms) toJSON() string {
 var formatHTML = `
 	<!doctype html>
 	<html lang="en">
-		<head>
-			<!-- Required meta tags -->
-			<meta charset="utf-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	
-			<!-- Bootstrap CSS -->
-			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	
-			<title>Iter8 Experiment Result</title>
-		</head>
+
+		{{ headSection }}
+
 		<body>
 
 			<div class="container">
-				<h1>Iter8 Experiment Report</h1>
+
+				<h1 class="display-4">Experiment Report</h1>
+				<h3 class="display-6 text-muted">Status, Insights, and Metrics from Iter8 experiment</h3>
 				<hr>
 
-				{{ .HTMLState }}
+				{{ .HTMLStatus }}
 
 				{{ if .ContainsInsight "SLOs" }} 
 					{{ .HTMLSLOSection }}
@@ -68,17 +63,6 @@ var formatHTML = `
 
 			</div>
 		
-			<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-			<!-- NVD3 -->
-		  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
-			<!-- Include d3.js first -->
-			<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
-			<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
-
 			{{ if .ContainsInsight "HistMetrics" }}
 				{{ styleSection }}
 				{{ .HTMLHistData }}
@@ -105,6 +89,38 @@ svg {
 		width: 100%;
 }
 </style>
+`
+}
+
+// headSection is the fixed head section for experiment report
+func headSection() string {
+	return `
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<title>Iter8 Experiment Report</title>
+	</head>
+`
+}
+
+// dependencies is the dependencies section for the HTML report
+func dependencies() string {
+	return `
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+	<!-- NVD3 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
+	<!-- Include d3.js first -->
+	<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
 `
 }
 
@@ -194,27 +210,54 @@ func (e *Experiment) HTMLHistCharts() string {
 	`
 }
 
-// HTMLState prints the current state of the experiment
-func (e *Experiment) HTMLState() string {
+// HTMLStatus prints the current state of the experiment
+func (e *Experiment) HTMLStatus() string {
+	completionStatus := "This experiment has completed."
+	if !e.Completed() {
+		completionStatus = "This experiment is yet to complete."
+	}
+
+	failureStatus := "This experiment has failures."
+	textColor := "text-failure"
+	if e.NoFailure() {
+		failureStatus = "This experiment has no failures."
+		textColor = "text-success"
+	}
+
+	taskStatus := fmt.Sprintf("This experiment has %v tasks of which %v have completed.", len(e.Tasks), e.Result.NumCompletedTasks)
+
 	return fmt.Sprintf(`
 	<section>
-		<h2>Summary</h2>
-		<ul class="list-group">
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				Experiment completed
-				<span><strong>%v</strong></span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				Experiment failed
-				<span><strong>%v</strong></span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				Number of completed tasks
-				<span><strong>%v</strong></span>
-			</li>
-		</ul>
+		<div class="row">
+			<div class="col-sm-4">
+				<div class="card">
+					<h5 class="card-header">Completion Status</h5>
+					<div class="card-body">
+						<p class="card-text">%v</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-4">
+				<div class="card">
+					<h5 class="card-header">Failure Status</h5>
+					<div class="card-body">
+						<p class="card-text %v">%v</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-4">
+				<div class="card">
+					<h5 class="card-header">Task Status</h5>
+					<div class="card-body">
+						<p class="card-text">%v</p>
+					</div>
+				</div>
+			</div>
+		</div>
 	</section>
-	<hr>`, e.Completed(), !e.NoFailure(), len(e.tasks))
+	<hr>`, completionStatus, textColor, failureStatus, taskStatus)
 }
 
 // HTMLSLOSection prints the SLO section in HTML report
@@ -268,8 +311,8 @@ func (e *Experiment) printHTMLSLORows() string {
 func (e *Experiment) printHTMLSLOs() string {
 	sloStrs := `
 	<section>
-			<h2>Service level objectives (SLOs)</h2>
-			<p>Whether or not SLOs are satisfied</p>
+			<h2 class="display-6">Service level objectives (SLOs)</h2>
+			<h3 class="display-7 text-muted">Indicates whether or not SLOs are satisfied</h3>
 			<table class="table">
 			<thead class="thead-dark">
 				<tr>
