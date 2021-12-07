@@ -40,6 +40,8 @@ var formatHTML = `
 		{{ headSection }}
 
 		<body>
+		
+			{{ dependencies }}
 
 			<div class="container">
 
@@ -67,7 +69,6 @@ var formatHTML = `
 				{{ styleSection }}
 				{{ .HTMLHistData }}
 				{{ .HTMLHistCharts }}
-
 			{{- end }}
 
 		</body>
