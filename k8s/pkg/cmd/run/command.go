@@ -5,12 +5,13 @@ import (
 	"github.com/iter8-tools/iter8/k8s/pkg/utils"
 
 	"github.com/spf13/cobra"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-func NewCmd() *cobra.Command {
-	cmd := basecli.RunCmd
-
-	factory, streams := utils.AddGenericCliOptions(cmd)
+func NewCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
+	cmd := basecli.NewRunCmd()
+	cmd.Hidden = true
 
 	o := newOptions(streams)
 
@@ -28,9 +29,9 @@ func NewCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier; if not specified, the most recent experiment is used")
-	cmd.Flags().MarkHidden("experiment-id")
-	cmd.Flags().BoolVarP(&o.remote, "remote", "r", false, "use remote stored experiment")
-	cmd.Flags().MarkHidden("remote")
+
+	// Prevent default options from being displayed by the help
+	utils.HideGenericCliOptions(cmd)
 
 	return cmd
 }

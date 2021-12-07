@@ -45,15 +45,10 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 	log.Logger.Trace("iter8 run run() called")
 	defer log.Logger.Trace("iter8 run run() completed")
 
-	var expIO basecli.ExpIO
-	if o.remote {
-		expIO = &utils.KubernetesExpIO{
-			Client:    o.client,
-			Namespace: o.namespace,
-			Name:      utils.SpecSecretPrefix + o.experimentId,
-		}
-	} else {
-		expIO = &basecli.FileExpIO{}
+	expIO := &utils.KubernetesExpIO{
+		Client:    o.client,
+		Namespace: o.namespace,
+		Name:      utils.SpecSecretPrefix + o.experimentId,
 	}
 
 	log.Logger.Trace("iter8 run: build started")

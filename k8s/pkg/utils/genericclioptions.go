@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/kubectl/pkg/cmd/options"
@@ -36,8 +37,15 @@ func AddGenericCliOptions(cmd *cobra.Command) (cmdutil.Factory, genericclioption
 	// This adds the "config" subcommand that allows changes to kubeconfig files
 	// cmd.AddCommand(cmdconfig.NewCmdConfig(clientcmd.NewDefaultPathOptions(), streams))
 
-	// Add the "options" subcommand to display available options
-	cmd.AddCommand(options.NewCmdOptions(streams.Out))
-
 	return factory, streams
+}
+
+func HideGenericCliOptions(cmd *cobra.Command) {
+	cmd.SetHelpFunc(func(command *cobra.Command, strings []string) {
+		// Hide flags for this command
+		command.Parent().Flags().VisitAll(func(f *pflag.Flag) { cmd.Flags().MarkHidden(f.Name) })
+		// Call parent help func
+		command.Parent().HelpFunc()(command, strings)
+	})
+	cmd.AddCommand(options.NewCmdOptions(os.Stdout))
 }

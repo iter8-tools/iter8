@@ -36,37 +36,62 @@ var ReportOptions = ReportOptionsType{
 	OutputFormat: TextOutputFormatKey,
 }
 
-// ReportCmd represents the report command
-var ReportCmd = &cobra.Command{
-	Use:   "report",
-	Short: "Generate report from experiment result",
-	Long: `
-	Generate report from experiment result`,
-	Example: `
-	# generate text report
-	iter8 report
+func NewReportCmd() *cobra.Command {
+	// ReportCmd represents the report command
+	var ReportCmd = &cobra.Command{
+		Use:   "report",
+		Short: "Generate report from experiment result",
+		Long:  `Generate report from experiment result`,
+		Example: `
+# generate text report
+iter8 report
 
-	# generate html report
-	iter8 report -o html
+# generate html report
+iter8 report -o html
 `,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		log.Logger.Trace("build started")
-		// build experiment
-		// replace FileExpIO with ClusterExpIO to build from cluster
-		fio := &FileExpIO{}
-		exp, err := Build(true, fio)
-		log.Logger.Trace("build finished")
-		if err != nil {
-			return err
-		}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Logger.Trace("build started")
+			// build experiment
+			// replace FileExpIO with ClusterExpIO to build from cluster
+			fio := &FileExpIO{}
+			exp, err := Build(true, fio)
+			log.Logger.Trace("build finished")
+			if err != nil {
+				return err
+			}
 
-		// generate formatted output from experiment
-		err = exp.Report(ReportOptions.OutputFormat)
-		if err != nil {
-			return err
-		}
-		return nil
-	},
+			// generate formatted output from experiment
+			err = exp.Report(ReportOptions.OutputFormat)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+
+	ReportCmd.Flags().StringVarP(&ReportOptions.OutputFormat, "outputFormat", "o", "text", "text | html")
+
+	// create text template
+	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
+		"formatText": formatText,
+	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse("{{ formatText . }}")
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
+		os.Exit(1)
+	}
+	// register text template
+	RegisterTextTemplate(TextOutputFormatKey, tmpl)
+
+	// create HTML template (for now, this will still use the text templating functionality)
+	htmpl, err := template.New(TextOutputFormatKey).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(formatHTML)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
+		os.Exit(1)
+	}
+	// register HTML template
+	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
+
+	return ReportCmd
 }
 
 // Report creates a report from experiment as per outputFormat
@@ -98,29 +123,5 @@ func ExecTemplate(t executable, exp *Experiment) error {
 }
 
 func init() {
-	RootCmd.AddCommand(ReportCmd)
-	ReportCmd.Flags().StringVarP(&ReportOptions.OutputFormat, "outputFormat", "o", "text", "text | html")
-
-	// create text template
-	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
-		"formatText": formatText,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse("{{ formatText . }}")
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
-		os.Exit(1)
-	}
-	// register text template
-	RegisterTextTemplate(TextOutputFormatKey, tmpl)
-
-	// create HTML template (for now, this will still use the text templating functionality)
-	htmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
-		"styleSection": styleSection,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(formatHTML)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
-		os.Exit(1)
-	}
-	// register HTML template
-	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
-
+	RootCmd.AddCommand(NewReportCmd())
 }

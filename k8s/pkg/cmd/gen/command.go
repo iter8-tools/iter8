@@ -9,7 +9,6 @@ import (
 
 func NewCmd() *cobra.Command {
 	cmd := basecli.GenCmd
-
 	cmd.AddCommand(k8s.NewCmd())
 
 	return cmd
