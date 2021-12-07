@@ -80,10 +80,11 @@ spec:
           set -e
 
           # ensure secret is created
+          # TODO remove this
           sleep 2
           
           # run experiment using remote secret
-          kubectl iter8 run --remote -e {{ $name }}
+          iter8 k run -e {{ $id }}
 
       restartPolicy: Never
   backoffLimit: 0
@@ -102,7 +103,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: ["{{ $name }}","{{ $name }}-result"]
+  #resourceNames: ["{{ $name }}","{{ $name }}-result"]
   verbs: ["get", "list", "patch", "create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
