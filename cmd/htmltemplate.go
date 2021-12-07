@@ -224,10 +224,10 @@ func (e *Experiment) HTMLStatus() string {
 		textColor = "text-success"
 	}
 
-	taskStatus := fmt.Sprintf("This experiment has %v tasks of which %v have completed.", len(e.Tasks), e.Result.NumCompletedTasks)
+	taskStatus := fmt.Sprintf("%v out of %v tasks have completed.", len(e.Tasks), e.Result.NumCompletedTasks)
 
 	return fmt.Sprintf(`
-	<section>
+	<section class="mt-5">
 		<div class="row">
 			<div class="col-sm-4">
 				<div class="card">
@@ -257,7 +257,7 @@ func (e *Experiment) HTMLStatus() string {
 			</div>
 		</div>
 	</section>
-	<hr>`, completionStatus, textColor, failureStatus, taskStatus)
+	`, completionStatus, textColor, failureStatus, taskStatus)
 }
 
 // HTMLSLOSection prints the SLO section in HTML report
@@ -283,7 +283,7 @@ func (e *Experiment) printHTMLSLOVersions() string {
 		}
 	} else {
 		out += `
-		<th scope="col">SLO satisfied</th>
+		<th scope="col">Satisfied</th>
 		`
 	}
 	return out
@@ -299,9 +299,13 @@ func (e *Experiment) printHTMLSLORows() string {
 		`, in.SLOStrs[i])
 
 		for j := 0; j < in.NumVersions; j++ {
+			cellClass := "text-success"
+			if !in.SLOsSatisfied[i][j] {
+				cellClass = "text-danger"
+			}
 			out += fmt.Sprintf(`
-			<td>%v</td>
-			`, in.SLOsSatisfied[i][j])
+			<td class="%v">%v</td>
+			`, cellClass, in.SLOsSatisfied[i][j])
 		}
 	}
 	return out
@@ -310,13 +314,14 @@ func (e *Experiment) printHTMLSLORows() string {
 // print HTML SLO validation results
 func (e *Experiment) printHTMLSLOs() string {
 	sloStrs := `
-	<section>
-			<h2 class="display-6">Service level objectives (SLOs)</h2>
-			<h3 class="display-7 text-muted">Indicates whether or not SLOs are satisfied</h3>
+	<section class="mt-5">
+			<h3 class="display-6">Service level objectives (SLOs)</h3>
+			<h4 class="display-7 text-muted">Indicates whether or not SLOs are satisfied</h4>
+			<hr>
 			<table class="table">
 			<thead class="thead-dark">
 				<tr>
-					<th scope="col">SLO</th>
+					<th scope="col">SLO condition</th>
 	` +
 		e.printHTMLSLOVersions() +
 		`</tr>
@@ -330,7 +335,6 @@ func (e *Experiment) printHTMLSLOs() string {
 		</tbody>
 		</table>
 		</section>
-		<hr>
 		`
 
 	return sloStrs
@@ -339,10 +343,10 @@ func (e *Experiment) printHTMLSLOs() string {
 // print HTML no SLOs
 func (e *Experiment) printHTMLNoSLOs() string {
 	return `
-	<section>
+	<section class="mt-5">
 		<h2>SLOs Unavailable</h2>
 	</section>
-	<hr>`
+	`
 }
 
 // HTMLHistMetricsSection prints histogram metrics in the HTML report
@@ -356,11 +360,12 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 						<svg id="hist-chart-%v" style="height:500px"></svg>
 					</div>
 			</section>
-			<hr>`, i))
+			`, i))
 		}
 		return `
-		<section>
+		<section class="mt-5">
 		<h2>Histogram Metrics</h2>
+		<hr>
 		` + strings.Join(divs, "\n") +
 			`</section>`
 	}
@@ -420,9 +425,10 @@ func (e *Experiment) printHTMLMetricRows() string {
 // HTMLMetricsSection prints metrics in the HTML report
 func (e *Experiment) HTMLMetricsSection() string {
 	metricStrs := `
-	<section>
+	<section class="mt-5">
 			<h2>Metrics</h2>
 			<p>Latest observed values of metrics</p>
+			<hr>
 			<table class="table">
 			<thead class="thead-dark">
 				<tr>
@@ -440,7 +446,6 @@ func (e *Experiment) HTMLMetricsSection() string {
 		</tbody>
 		</table>
 		</section>
-		<hr>
 		`
 
 	return metricStrs

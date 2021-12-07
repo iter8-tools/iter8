@@ -3,7 +3,6 @@ package base
 import (
 	"path/filepath"
 	"runtime"
-	"time"
 )
 
 // int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
@@ -29,11 +28,6 @@ func float64Pointer(f float64) *float64 {
 // stringPointer takes string as input, creates a new variable with the input value, and returns a pointer to the variable
 func stringPointer(s string) *string {
 	return &s
-}
-
-// timePointer takes time as input, creates a new variable with the input value, and returns a pointer to the variable
-func timePointer(t time.Time) *time.Time {
-	return &t
 }
 
 // CompletePath is a helper function for converting file paths, specified relative to the caller of this function, into absolute ones.
