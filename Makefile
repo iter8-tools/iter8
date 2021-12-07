@@ -23,3 +23,14 @@ cmddocs:
 ITER8_BIN ?= /usr/local/bin/iter8
 build:
 	cd clibase && go build -o $(ITER8_BIN)
+
+
+ITER8_IMG ?= iter8/iter8cli:latest
+docker-build:
+	docker build -f Dockerfile.k8s -t $(ITER8_IMG) .
+
+docker-push:
+	docker push $(ITER8_IMG)
+
+build-k8s:
+	go build -o $(ITER8_BIN) k8s/main.go

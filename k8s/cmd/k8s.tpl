@@ -15,9 +15,16 @@
 {{- end -}}
 {{/* -- name ----------------------------------------------- */}}
 {{- $name := printf "experiment-%s" $id -}}
-{{/* -- version ----------------------------------------------- */}}
+{{/* -- version -------------------------------------------- */}}
 {{- $version := printf "0.8" -}}
+{{/* -- image ---------------------------------------------- */}}
+{{- $image := printf "iter8/iter8cli:latest" -}}
+{{- if hasKey .Values "image" -}}
+  {{- $image = .Values.image -}}
+{{- end -}}
+{{/* ------------------------------------------------------- */}}
 {{/* -- manifest ------------------------------------------- */}}
+{{/* ------------------------------------------------------- */}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -68,7 +75,7 @@ spec:
     spec:
       containers:
       - name: iter8
-        image: kalantar/kubectl-iter8:latest
+        image: {{ $image }}
         imagePullPolicy: Always
         env:
         - name: LOG_LEVEL
