@@ -8,9 +8,13 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/cmd"
+
+	// "github.com/iter8-tools/iter8/cmd"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
+
+	basecli "github.com/iter8-tools/iter8/cmd"
+	k8scli "github.com/iter8-tools/iter8/k8s/cmd"
 )
 
 const (
@@ -42,7 +46,10 @@ hide:
 	cdd := viper.GetString(commandDocsDir)
 
 	// automatically generate markdown documentation for all Iter8 commands
-	err := doc.GenMarkdownTreeCustom(cmd.RootCmd, cdd, hdrFunc, standardLinks)
+	// err := doc.GenMarkdownTreeCustom(cmd.RootCmd, cdd, hdrFunc, standardLinks)
+	root := basecli.RootCmd
+	root.AddCommand(k8scli.NewCmdKCommand())
+	err := doc.GenMarkdownTreeCustom(root, cdd, hdrFunc, standardLinks)
 	if err != nil {
 		log.Logger.Error(err)
 	}
