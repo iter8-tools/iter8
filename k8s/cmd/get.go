@@ -1,4 +1,4 @@
-package get
+package cmd
 
 import (
 	"bytes"
@@ -8,11 +8,34 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 
 	basecli "github.com/iter8-tools/iter8/cmd"
-	"github.com/iter8-tools/iter8/k8s/pkg/utils"
+	"github.com/iter8-tools/iter8/k8s/utils"
 
 	"github.com/spf13/cobra"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/kubernetes"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
+
+type GetOptions struct {
+	Streams              genericclioptions.IOStreams
+	ConfigFlags          *genericclioptions.ConfigFlags
+	ResourceBuilderFlags *genericclioptions.ResourceBuilderFlags
+	namespace            string
+	client               *kubernetes.Clientset
+
+	experimentId string
+}
+
+func newGetOptions(streams genericclioptions.IOStreams) *GetOptions {
+	rbFlags := &genericclioptions.ResourceBuilderFlags{}
+	rbFlags.WithAllNamespaces(false)
+
+	return &GetOptions{
+		Streams:              streams,
+		ConfigFlags:          genericclioptions.NewConfigFlags(true),
+		ResourceBuilderFlags: rbFlags,
+	}
+}
 
 const (
 	AppHeader               = "APP"
@@ -24,7 +47,7 @@ const (
 )
 
 // complete sets all information needed for processing the command
-func (o *Options) complete(factory cmdutil.Factory, cmd *cobra.Command, args []string) (err error) {
+func (o *GetOptions) complete(factory cmdutil.Factory, cmd *cobra.Command, args []string) (err error) {
 	o.namespace, _, err = factory.ToRawKubeConfigLoader().Namespace()
 	if err != nil {
 		return err
@@ -47,12 +70,12 @@ func (o *Options) complete(factory cmdutil.Factory, cmd *cobra.Command, args []s
 }
 
 // validate ensures that all required arguments and flag values are provided
-func (o *Options) validate(cmd *cobra.Command, args []string) (err error) {
+func (o *GetOptions) validate(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
 // run runs the command
-func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
+func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
 	experimentSecrets, err := utils.GetExperimentSecrets(o.client, o.namespace)
 	if err != nil {
 		return err
@@ -89,4 +112,36 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 
 	fmt.Printf("%s", b.String())
 	return nil
+}
+
+func NewGetCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
+	o := newGetOptions(streams)
+
+	cmd := &cobra.Command{
+		Use:   "get",
+		Short: "Get a list of experiments running in the current context",
+		Example: `
+# Get list of experiments running in cluster
+iter8 get`,
+		SilenceUsage: true,
+	}
+	cmd.RunE = func(c *cobra.Command, args []string) error {
+		if err := o.complete(factory, c, args); err != nil {
+			return err
+		}
+		if err := o.validate(c, args); err != nil {
+			return err
+		}
+		if err := o.run(c, args); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier")
+
+	// Prevent default options from being displayed by the help
+	utils.HideGenericCliOptions(cmd)
+
+	return cmd
 }

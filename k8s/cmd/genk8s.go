@@ -1,9 +1,10 @@
-package k8s
+package cmd
 
 import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"os"
 	"strings"
 	"text/template"
 
@@ -13,28 +14,41 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"
-
 	"helm.sh/helm/v3/pkg/chartutil"
+	"k8s.io/kubectl/pkg/cmd/options"
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	// Path to go template file
+	k8sTemplateFilePath = "k8s.tpl"
+	experimentFilePath  = "experiment.yaml"
+)
+
+type GetK8sOptions struct {
+}
+
+func newGetK8sOptions() *GetK8sOptions {
+	return &GetK8sOptions{}
+}
+
 // complete sets all information needed for processing the command
-func (o *Options) complete(cmd *cobra.Command, args []string) (err error) {
+func (o *GetK8sOptions) complete(cmd *cobra.Command, args []string) (err error) {
 	return err
 }
 
 // validate ensures that all required arguments and flag values are provided
-func (o *Options) validate(cmd *cobra.Command, args []string) (err error) {
+func (o *GetK8sOptions) validate(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-type K8sExperiment struct {
+type k8sExperiment struct {
 	Tasks  []base.TaskSpec
 	Values chartutil.Values
 }
 
 // run runs the command
-func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
+func (o *GetK8sOptions) run(cmd *cobra.Command, args []string) (err error) {
 	v := chartutil.Values{}
 	err = basecli.ParseValues(basecli.GenOptions.Values, v)
 	if err != nil {
@@ -46,7 +60,7 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
 		return err
 	}
-	k8sExp := K8sExperiment{
+	k8sExp := k8sExperiment{
 		Tasks:  exp.Tasks,
 		Values: v,
 	}
@@ -65,7 +79,7 @@ func (o *Options) run(cmd *cobra.Command, args []string) (err error) {
 var tplBytes []byte
 
 // RenderTpl creates output from go.tpl
-func RenderTpl(k8sExp K8sExperiment, filePath string) (*bytes.Buffer, error) {
+func RenderTpl(k8sExp k8sExperiment, filePath string) (*bytes.Buffer, error) {
 	var tmpl *template.Template
 	var err error
 
@@ -105,4 +119,32 @@ func toYAML(v interface{}) string {
 		return ""
 	}
 	return strings.TrimSuffix(string(data), "\n")
+}
+
+func NewGetK8sCmd() *cobra.Command {
+	o := newGetK8sOptions()
+
+	cmd := &cobra.Command{
+		Use:   "k8s",
+		Short: "Generate manifest for running experiment in Kubernetes",
+		Example: `
+# Generate Kubernetes manifest
+iter8 gen k8s`,
+		SilenceUsage: true,
+		RunE: func(c *cobra.Command, args []string) error {
+			if err := o.complete(c, args); err != nil {
+				return err
+			}
+			if err := o.validate(c, args); err != nil {
+				return err
+			}
+			if err := o.run(c, args); err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+
+	cmd.AddCommand(options.NewCmdOptions(os.Stdout))
+	return cmd
 }
