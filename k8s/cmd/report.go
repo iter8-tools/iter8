@@ -5,7 +5,6 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	basecli "github.com/iter8-tools/iter8/cmd"
-	"github.com/iter8-tools/iter8/k8s/utils"
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -42,17 +41,17 @@ func (o *ReportOptions) complete(factory cmdutil.Factory, cmd *cobra.Command, ar
 		return err
 	}
 
-	o.client, err = utils.GetClient(o.ConfigFlags)
+	o.client, err = GetClient(o.ConfigFlags)
 	if err != nil {
 		return err
 	}
 
 	if len(o.experimentId) == 0 {
-		s, err := utils.GetExperimentSecret(o.client, o.namespace, o.experimentId)
+		s, err := GetExperimentSecret(o.client, o.namespace, o.experimentId)
 		if err != nil {
 			return err
 		}
-		o.experimentId = s.Labels[utils.IdLabel]
+		o.experimentId = s.Labels[IdLabel]
 	}
 
 	return err
@@ -65,10 +64,10 @@ func (o *ReportOptions) validate(cmd *cobra.Command, args []string) (err error) 
 
 // run runs the command
 func (o *ReportOptions) run(cmd *cobra.Command, args []string) (err error) {
-	expIO := &utils.KubernetesExpIO{
+	expIO := &KubernetesExpIO{
 		Client:    o.client,
 		Namespace: o.namespace,
-		Name:      utils.SpecSecretPrefix + o.experimentId,
+		Name:      SpecSecretPrefix + o.experimentId,
 	}
 
 	log.Logger.Trace("build started")
@@ -105,7 +104,7 @@ iter8 report --remote`
 	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier; if not specified, the most recent experiment is used")
 
 	// Prevent default options from being displayed by the help
-	utils.HideGenericCliOptions(cmd)
+	HideGenericCliOptions(cmd)
 
 	return cmd
 }

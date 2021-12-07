@@ -6,9 +6,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/iter8-tools/iter8/base/log"
-
 	basecli "github.com/iter8-tools/iter8/cmd"
-	"github.com/iter8-tools/iter8/k8s/utils"
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -53,17 +51,17 @@ func (o *GetOptions) complete(factory cmdutil.Factory, cmd *cobra.Command, args 
 		return err
 	}
 
-	o.client, err = utils.GetClient(o.ConfigFlags)
+	o.client, err = GetClient(o.ConfigFlags)
 	if err != nil {
 		return err
 	}
 
 	if len(o.experimentId) == 0 {
-		s, err := utils.GetExperimentSecret(o.client, o.namespace, o.experimentId)
+		s, err := GetExperimentSecret(o.client, o.namespace, o.experimentId)
 		if err != nil {
 			return err
 		}
-		o.experimentId = s.Labels[utils.IdLabel]
+		o.experimentId = s.Labels[IdLabel]
 	}
 
 	return err
@@ -76,7 +74,7 @@ func (o *GetOptions) validate(cmd *cobra.Command, args []string) (err error) {
 
 // run runs the command
 func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
-	experimentSecrets, err := utils.GetExperimentSecrets(o.client, o.namespace)
+	experimentSecrets, err := GetExperimentSecrets(o.client, o.namespace)
 	if err != nil {
 		return err
 	}
@@ -91,7 +89,7 @@ func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
 	fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", AppHeader, IdHeader, CompletedHeader, FailedHeader, NumTasksHeader, NumTasksCompletedHeader)
 	for _, experimentSecret := range experimentSecrets {
 
-		expIO := &utils.KubernetesExpIO{
+		expIO := &KubernetesExpIO{
 			Client:    o.client,
 			Namespace: o.namespace,
 			Name:      experimentSecret.Name,
@@ -104,8 +102,8 @@ func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		app := experimentSecret.Labels[utils.AppLabel]
-		id := experimentSecret.Labels[utils.IdLabel]
+		app := experimentSecret.Labels[AppLabel]
+		id := experimentSecret.Labels[IdLabel]
 		fmt.Fprintf(w, "%s\t%s\t%t\t%t\t%d\t%d\n", app, id, exp.Completed(), !exp.NoFailure(), len(exp.Tasks), exp.Result.NumCompletedTasks)
 		w.Flush()
 	}
@@ -141,7 +139,7 @@ iter8 get`,
 	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier")
 
 	// Prevent default options from being displayed by the help
-	utils.HideGenericCliOptions(cmd)
+	HideGenericCliOptions(cmd)
 
 	return cmd
 }
