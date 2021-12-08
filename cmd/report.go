@@ -22,80 +22,54 @@ const (
 	HTMLOutputFormatKey = "html"
 )
 
-var (
-	// Output format variable holds the output format to be used by gen
-	outputFormat string = TextOutputFormatKey
-)
-
 // executable
 type executable interface {
 	Execute(w io.Writer, data interface{}) error
 }
 
-// ReportCmd represents the report command
-var ReportCmd = &cobra.Command{
-	Use:   "report",
-	Short: "generate report from experiment result",
-	Long: `
-	Generate report from experiment result`,
-	Example: `
-	# generate text report
-	iter8 report
+type ReportOptionsType struct {
+	// Output format variable holds the output format to be used by gen
+	OutputFormat string
+}
 
-	# generate html report
-	iter8 report -o html
+var ReportOptions = ReportOptionsType{
+	OutputFormat: TextOutputFormatKey,
+}
+
+func NewReportCmd() *cobra.Command {
+	// ReportCmd represents the report command
+	var ReportCmd = &cobra.Command{
+		Use:   "report",
+		Short: "Generate report from experiment result",
+		Long:  `Generate report from experiment result`,
+		Example: `
+# generate text report
+iter8 report
+
+# generate html report
+iter8 report -o html
 `,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		log.Logger.Trace("build started")
-		// build experiment
-		// replace FileExpIO with ClusterExpIO to build from cluster
-		fio := &FileExpIO{}
-		exp, err := Build(true, fio)
-		log.Logger.Trace("build finished")
-		if err != nil {
-			return err
-		}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Logger.Trace("build started")
+			// build experiment
+			// replace FileExpIO with ClusterExpIO to build from cluster
+			fio := &FileExpIO{}
+			exp, err := Build(true, fio)
+			log.Logger.Trace("build finished")
+			if err != nil {
+				return err
+			}
 
-		// generate formatted output from experiment
-		err = exp.Report(outputFormat)
-		if err != nil {
-			return err
-		}
-		return nil
-	},
-}
-
-// Report creates a report from experiment as per outputFormat
-func (exp *Experiment) Report(outputFormat string) error {
-	templateKey := strings.ToLower(outputFormat)
-
-	tmpl, ok := builtInTemplates[templateKey]
-	if !ok {
-		log.Logger.Error("invalid output format; valid formats are: text | html")
-		return errors.New("invalid output format; valid formats are: text | html")
+			// generate formatted output from experiment
+			err = exp.Report(ReportOptions.OutputFormat)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
 	}
 
-	// execute template
-	return execTemplate(tmpl, exp)
-}
-
-// execute text or html template with experiment
-func execTemplate(t executable, exp *Experiment) error {
-	var b bytes.Buffer
-	err := t.Execute(&b, exp)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to execute template")
-		return err
-	}
-
-	// print output
-	fmt.Println(b.String())
-	return nil
-}
-
-func init() {
-	RootCmd.AddCommand(ReportCmd)
-	ReportCmd.Flags().StringVarP(&outputFormat, "outputFormat", "o", "text", "text | html")
+	ReportCmd.Flags().StringVarP(&ReportOptions.OutputFormat, "outputFormat", "o", "text", "text | html")
 
 	// create text template
 	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
@@ -116,7 +90,41 @@ func init() {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
 		os.Exit(1)
 	}
+
 	// register HTML template
 	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
 
+	return ReportCmd
+}
+
+// Report creates a report from experiment as per outputFormat
+func (exp *Experiment) Report(outputFormat string) error {
+	templateKey := strings.ToLower(outputFormat)
+
+	tmpl, ok := builtInTemplates[templateKey]
+	if !ok {
+		log.Logger.Error("invalid output format; valid formats are: text | html")
+		return errors.New("invalid output format; valid formats are: text | html")
+	}
+
+	// execute template
+	return ExecTemplate(tmpl, exp)
+}
+
+// execute text or html template with experiment
+func ExecTemplate(t executable, exp *Experiment) error {
+	var b bytes.Buffer
+	err := t.Execute(&b, exp)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to execute template")
+		return err
+	}
+
+	// print output
+	fmt.Println(b.String())
+	return nil
+}
+
+func init() {
+	RootCmd.AddCommand(NewReportCmd())
 }

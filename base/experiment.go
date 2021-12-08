@@ -51,7 +51,7 @@ type ExperimentResult struct {
 // Insights is a structure to contain experiment insights
 type Insights struct {
 	// NumAppVersions is the number of app versions detected by Iter8
-	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numVersions,omitempty"`
+	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numAppVersions,omitempty"`
 
 	// InsightInfo identifies the types of insights produced by this experiment
 	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty"`

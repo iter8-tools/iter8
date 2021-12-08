@@ -42,7 +42,7 @@ var expCmd = &cobra.Command{
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		v := chartutil.Values{}
-		err := parseValues(values, v)
+		err := ParseValues(GenOptions.Values, v)
 		if err != nil {
 			return err
 		}
