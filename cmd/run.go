@@ -10,43 +10,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewRunCmd() *cobra.Command {
-	// RunCmd represents the run command
-	var RunCmd = &cobra.Command{
-		Use:   "run",
-		Short: "Run an experiment",
-		Long:  "Run an experiment",
-		Example: `
+var RunCmd = &cobra.Command{
+	Use:   "run",
+	Short: "Run an experiment",
+	Long:  "Run an experiment",
+	Example: `
 # Run experiment defined in file 'experiment.yaml' and write result to 'result.yaml'
 iter8 run
 `,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Logger.Trace("build called")
-			// Replace FileExpIO with ClusterExpIO to work with
-			// Spec and Results that might be inside the cluster
-			fio := &FileExpIO{}
-			exp, err := Build(false, fio)
-			log.Logger.Trace("build finished")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		log.Logger.Trace("build called")
+		// Replace FileExpIO with ClusterExpIO to work with
+		// Spec and Results that might be inside the cluster
+		fio := &FileExpIO{}
+		exp, err := Build(false, fio)
+		log.Logger.Trace("build finished")
+		if err != nil {
+			os.Exit(1)
+		} else {
+			log.Logger.Info("starting experiment run")
+			err := exp.Run(fio)
 			if err != nil {
-				os.Exit(1)
+				return err
 			} else {
-				log.Logger.Info("starting experiment run")
-				err := exp.Run(fio)
-				if err != nil {
-					return err
-				} else {
-					log.Logger.Info("experiment completed successfully")
-				}
+				log.Logger.Info("experiment completed successfully")
 			}
-			return nil
-		},
-	}
-
-	return RunCmd
+		}
+		return nil
+	},
 }
 
 func init() {
-	RootCmd.AddCommand(NewRunCmd())
+	RootCmd.AddCommand(RunCmd)
 }
 
 // Run an experiment

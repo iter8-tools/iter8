@@ -15,7 +15,7 @@ func NewAssertCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) 
 	// o := &AssertOptions{K8sExperimentOptions: newK8sExperimentOptions(streams)}
 	o := newK8sExperimentOptions(streams)
 
-	cmd := basecli.NewAssertCmd()
+	cmd := basecli.AssertCmd
 	var example = `
 # assert that the most recent experiment running in the Kubernetes context is complete
 iter8 k assert -c completed`
