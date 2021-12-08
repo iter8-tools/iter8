@@ -113,6 +113,8 @@ func init() {
 	// create HTML template (for now, this will still use the text templating functionality)
 	htmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
 		"styleSection": styleSection,
+		"headSection":  headSection,
+		"dependencies": dependencies,
 	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(formatHTML)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")

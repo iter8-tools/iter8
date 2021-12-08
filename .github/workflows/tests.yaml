@@ -22,10 +22,10 @@ jobs:
       run: |
         export COVERAGE=$(go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
         echo "code coverage is at ${COVERAGE}"
-        if [ 1 -eq "$(echo "${COVERAGE} > 14.0" | bc)" ]; then \
-          echo "all good... coverage is above 14.0%"; 
+        if [ 1 -eq "$(echo "${COVERAGE} > 17.0" | bc)" ]; then \
+          echo "all good... coverage is above 17.0%"; 
         else \
-          echo "not good... coverage is not above 14.0%";
+          echo "not good... coverage is not above 17.0%";
           exit 1
         fi
     - name: Upload coverage to Codecov

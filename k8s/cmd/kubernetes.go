@@ -10,7 +10,7 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	basecli "github.com/iter8-tools/iter8/cmd"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
