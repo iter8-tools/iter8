@@ -8,16 +8,12 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-type RunOptions struct {
-	// options common to all the k8s commands
-	K8sExperimentOptions
-	// add other options here
-}
-
 func NewRunCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := &RunOptions{K8sExperimentOptions: newK8sExperimentOptions(streams)}
+	o := newK8sExperimentOptions(streams)
 
 	cmd := basecli.NewRunCmd()
+	// 	cmd.Example = `# run experimebt using Kubernetes secrets instead of files
+	// iter8 k run -e experiment-id`
 	cmd.Hidden = true
 	cmd.SilenceUsage = true
 	cmd.PreRunE = func(c *cobra.Command, args []string) error {
@@ -29,8 +25,8 @@ func NewRunCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *co
 		return o.experiment.Run(o.expIO)
 	}
 
-	// Add options
-	cmd.Flags().StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
+	AddExperimentIdOption(cmd, o)
+	// Add any other options here
 
 	// Prevent default options from being displayed by the help
 	HideGenericCliOptions(cmd)

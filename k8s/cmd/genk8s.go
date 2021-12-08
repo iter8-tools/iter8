@@ -23,16 +23,13 @@ const (
 	experimentFilePath  = "experiment.yaml"
 )
 
-type GetK8sOptions struct {
-}
-
 type k8sExperiment struct {
 	Tasks  []base.TaskSpec
 	Values chartutil.Values
 }
 
 // run runs the command
-func (o *GetK8sOptions) run(cmd *cobra.Command, args []string) (err error) {
+func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
 	v := chartutil.Values{}
 	err = basecli.ParseValues(basecli.GenOptions.Values, v)
 	if err != nil {
@@ -106,8 +103,6 @@ func toYAML(v interface{}) string {
 }
 
 func NewGetK8sCmd() *cobra.Command {
-	o := &GetK8sOptions{}
-
 	cmd := &cobra.Command{
 		Use:   "k8s",
 		Short: "Generate manifest for running experiment in Kubernetes",
@@ -115,10 +110,10 @@ func NewGetK8sCmd() *cobra.Command {
 # Generate Kubernetes manifest
 iter8 gen k8s`,
 		SilenceUsage: true,
-		// Put any optionm computation and/or validatiom here
+		// Put any option computation and/or validatiom here
 		// PreRunE: func(c *cobra.Command, args []string) error {
 		RunE: func(c *cobra.Command, args []string) error {
-			return o.run(c, args)
+			return runGetK8sCmd(c, args)
 		},
 	}
 

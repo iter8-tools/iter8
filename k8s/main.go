@@ -1,26 +1,30 @@
-/*
- */
-
 package main
 
-import (
-	"os"
+// import (
+// 	"github.com/spf13/cobra"
+// 	"github.com/spf13/pflag"
+// )
 
-	basecli "github.com/iter8-tools/iter8/cmd"
-	k8scli "github.com/iter8-tools/iter8/k8s/cmd"
+// var RootCmd *cobra.Command
 
-	"github.com/spf13/pflag"
-)
+// func main() {
+// 	flags := pflag.NewFlagSet("iter8", pflag.ExitOnError)
+// 	pflag.CommandLine = flags
+
+// 	RootCmd.Execute()
+
+// 	// // extend base CLI root command
+// 	// RootCmd := basecli.RootCmd
+// 	// // // Add k command
+// 	// // rootCmd.AddCommand(k8scli.NewKCommand())
+// 	// RootCmd.AddCommand(k8scli.KCmd)
+// 	// if err := RootCmd.Execute(); err != nil {
+// 	// 	os.Exit(1)
+// 	// }
+// }
+
+import "github.com/iter8-tools/iter8/k8s/cmd"
 
 func main() {
-	flags := pflag.NewFlagSet("iter8", pflag.ExitOnError)
-	pflag.CommandLine = flags
-
-	// extend base CLI root command
-	root := basecli.RootCmd
-	// Add k command
-	root.AddCommand(k8scli.NewCmdKCommand())
-	if err := root.Execute(); err != nil {
-		os.Exit(1)
-	}
+	cmd.Execute()
 }

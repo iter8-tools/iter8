@@ -4,8 +4,6 @@ import (
 	"flag"
 	"os"
 
-	basecli "github.com/iter8-tools/iter8/cmd"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -14,22 +12,37 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-func NewCmdKCommand() *cobra.Command {
-	root := &cobra.Command{
-		Use:   "k",
-		Short: "Work with experiments running in a Kubernetes cluster",
-		Example: `
+// var kCmd *cobra.Command
+
+var kCmd = &cobra.Command{
+	Use:   "k",
+	Short: "Work with experiments running in a Kubernetes cluster",
+	Example: `
 To run an experiment defined in 'experiment.yaml':
 iter8 gen k8s | kubectl apply -f -
 
 To delete an experiment with identifier $EXPERIMENT_ID:
 iter8 gen k8s --set id=$EXPERIMENT_ID | kubectl delete -f -`,
-		// There is no action associated with this command
-		// Run: func(cmd *cobra.Command, args []string) { },
-	}
+	// There is no action associated with this command
+	// Run: func(cmd *cobra.Command, args []string) { },
+}
+
+func addGenericCLIOptions(cmd *cobra.Command) {
+	// 	cmd := &cobra.Command{
+	// 		Use:   "k",
+	// 		Short: "Work with experiments running in a Kubernetes cluster",
+	// 		Example: `
+	// To run an experiment defined in 'experiment.yaml':
+	// iter8 gen k8s | kubectl apply -f -
+
+	// To delete an experiment with identifier $EXPERIMENT_ID:
+	// iter8 gen k8s --set id=$EXPERIMENT_ID | kubectl delete -f -`,
+	// 		// There is no action associated with this command
+	// 		// Run: func(cmd *cobra.Command, args []string) { },
+	// 	}
 
 	// Add the default kubectl options as persistent flags
-	flags := root.PersistentFlags()
+	flags := kCmd.PersistentFlags()
 	flags.SetNormalizeFunc(cliflag.WarnWordSepNormalizeFunc) // Warn for "_" flags
 
 	// Normalize all flags that are coming from other packages or pre-configurations
@@ -54,23 +67,23 @@ iter8 gen k8s --set id=$EXPERIMENT_ID | kubectl delete -f -`,
 
 	// Modify the help for this command to hide the k8s specific flags by default
 	// Provide 'options' command to display them
-	help := root.HelpFunc()
-	root.SetHelpFunc(func(command *cobra.Command, strings []string) {
+	help := kCmd.HelpFunc()
+	kCmd.SetHelpFunc(func(command *cobra.Command, strings []string) {
 		// Hide flags for this command
 		command.PersistentFlags().VisitAll(func(f *pflag.Flag) { command.PersistentFlags().MarkHidden(f.Name) })
 		// Call the cached help function
 		help(command, strings)
 	})
-	root.AddCommand(options.NewCmdOptions(streams.Out))
+	kCmd.AddCommand(options.NewCmdOptions(streams.Out))
 
 	// Include the valid subcommands for 'k':
-	root.AddCommand(NewRunCmd(factory, streams))
-	root.AddCommand(NewGetCmd(factory, streams))
-	root.AddCommand(NewAssertCmd(factory, streams))
-	root.AddCommand(NewReportCmd(factory, streams))
+	kCmd.AddCommand(NewRunCmd(factory, streams))
+	kCmd.AddCommand(NewGetCmd(factory, streams))
+	kCmd.AddCommand(NewAssertCmd(factory, streams))
+	kCmd.AddCommand(NewReportCmd(factory, streams))
+}
 
-	// extend base gen command with the k8s command
-	basecli.GenCmd.AddCommand(NewGetK8sCmd())
-
-	return root
+func init() {
+	addGenericCLIOptions(kCmd)
+	RootCmd.AddCommand(kCmd)
 }

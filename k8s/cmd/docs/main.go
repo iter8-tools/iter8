@@ -8,7 +8,6 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	basecli "github.com/iter8-tools/iter8/cmd"
 	k8scli "github.com/iter8-tools/iter8/k8s/cmd"
 
 	"github.com/spf13/cobra/doc"
@@ -45,8 +44,8 @@ hide:
 
 	// automatically generate markdown documentation for all Iter8 commands
 	// err := doc.GenMarkdownTreeCustom(cmd.RootCmd, cdd, hdrFunc, standardLinks)
-	root := basecli.RootCmd
-	root.AddCommand(k8scli.NewCmdKCommand())
+	root := k8scli.RootCmd
+	// root.AddCommand(k8scli.NewKCommand())
 	err := doc.GenMarkdownTreeCustom(root, cdd, hdrFunc, standardLinks)
 	if err != nil {
 		log.Logger.Error(err)

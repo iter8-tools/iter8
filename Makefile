@@ -17,20 +17,17 @@ htmlcov:
 	go tool cover -html=coverage.out
 
 cmddocs:
-	go run cmd/docs/main.go
+	go run k8s/cmd/docs/main.go
 	
 # complete path to iter8 binary
 ITER8_BIN ?= /usr/local/bin/iter8
 build:
-	cd clibase && go build -o $(ITER8_BIN)
+	go build -o $(ITER8_BIN) k8s/main.go
 
 
 ITER8_IMG ?= iter8/iter8cli:latest
 docker-build:
-	docker build -f Dockerfile.k8s -t $(ITER8_IMG) .
+	docker build -f Dockerfile -t $(ITER8_IMG) .
 
 docker-push:
 	docker push $(ITER8_IMG)
-
-build-k8s:
-	go build -o $(ITER8_BIN) k8s/main.go

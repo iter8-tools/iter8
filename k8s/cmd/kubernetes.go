@@ -12,6 +12,7 @@ import (
 	basecli "github.com/iter8-tools/iter8/cmd"
 	"gopkg.in/yaml.v2"
 
+	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -201,6 +202,11 @@ const (
 	ExperimentIdDescription = "remote experiment identifier; if not specified, the most recent experiment is used"
 )
 
+func AddExperimentIdOption(cmd *cobra.Command, o *K8sExperimentOptions) {
+	// Add options
+	cmd.Flags().StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
+}
+
 type K8sExperimentOptions struct {
 	Streams              genericclioptions.IOStreams
 	ConfigFlags          *genericclioptions.ConfigFlags
@@ -214,11 +220,11 @@ type K8sExperimentOptions struct {
 	experiment *basecli.Experiment
 }
 
-func newK8sExperimentOptions(streams genericclioptions.IOStreams) K8sExperimentOptions {
+func newK8sExperimentOptions(streams genericclioptions.IOStreams) *K8sExperimentOptions {
 	rbFlags := &genericclioptions.ResourceBuilderFlags{}
 	rbFlags.WithAllNamespaces(false)
 
-	return K8sExperimentOptions{
+	return &K8sExperimentOptions{
 		Streams:              streams,
 		ConfigFlags:          genericclioptions.NewConfigFlags(true),
 		ResourceBuilderFlags: rbFlags,

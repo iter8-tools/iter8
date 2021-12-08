@@ -13,12 +13,6 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-type GetOptions struct {
-	// options common to all the k8s commands
-	K8sExperimentOptions
-	// add other options here
-}
-
 const (
 	AppHeader               = "APP"
 	IdHeader                = "ID"
@@ -28,8 +22,7 @@ const (
 	NumTasksCompletedHeader = "TASKS_COMPLETED"
 )
 
-// run runs the command
-func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
+func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err error) {
 	experimentSecrets, err := GetExperimentSecrets(o.client, o.namespace)
 	if err != nil {
 		return err
@@ -69,14 +62,14 @@ func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func NewGetCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := &GetOptions{K8sExperimentOptions: newK8sExperimentOptions(streams)}
+	o := newK8sExperimentOptions(streams)
 
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a list of experiments running in the current context",
 		Example: `
 # Get list of experiments running in cluster
-iter8 get`,
+iter8 k get`,
 		SilenceUsage: true,
 	}
 	cmd.PreRunE = func(c *cobra.Command, args []string) error {
@@ -85,11 +78,11 @@ iter8 get`,
 		// add any additional precomutation and/or validation here
 	}
 	cmd.RunE = func(c *cobra.Command, args []string) error {
-		return o.run(c, args)
+		return runGetCmd(c, args, o)
 	}
 
-	// Add options
-	cmd.Flags().StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
+	AddExperimentIdOption(cmd, o)
+	// Add any other options here
 
 	// Prevent default options from being displayed by the help
 	HideGenericCliOptions(cmd)

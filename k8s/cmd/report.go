@@ -10,19 +10,13 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-type ReportOptions struct {
-	// options common to all the k8s commands
-	K8sExperimentOptions
-	// add other options here
-}
-
 func NewReportCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := &GetOptions{K8sExperimentOptions: newK8sExperimentOptions(streams)}
+	o := newK8sExperimentOptions(streams)
 
 	cmd := basecli.NewReportCmd()
 	var example = `
 # Generate text report for the most recent experiment running in current Kubernetes context
-iter8 report --remote`
+iter8 k report`
 	cmd.Example = fmt.Sprintf("%s%s\n", cmd.Example, example)
 	cmd.SilenceUsage = true
 	cmd.PreRunE = func(c *cobra.Command, args []string) error {
@@ -35,8 +29,8 @@ iter8 report --remote`
 
 	}
 
-	// Add options
-	cmd.Flags().StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
+	AddExperimentIdOption(cmd, o)
+	// Add any other options here
 
 	// Prevent default options from being displayed by the help
 	HideGenericCliOptions(cmd)
