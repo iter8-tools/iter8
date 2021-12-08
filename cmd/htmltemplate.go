@@ -40,7 +40,7 @@ var formatHTML = `
 		{{ headSection }}
 
 		<body>
-		
+
 			{{ dependencies }}
 
 			<div class="container">
@@ -79,8 +79,8 @@ var formatHTML = `
 func styleSection() string {
 	return `
 <style>
-text {
-		font: 12px sans-serif;
+.nvd3 text {
+	font-size: 16px;
 }
 svg {
 		display: block;
@@ -103,6 +103,12 @@ func headSection() string {
 
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<style>
+			html {
+				font-size: 18px;
+			}		
+		</style>
 
 		<title>Iter8 Experiment Report</title>
 	</head>
@@ -146,7 +152,7 @@ func (e *Experiment) HistData() []histograms {
 	for mname, minfo := range e.Result.Insights.MetricsInfo {
 		if minfo.Type == base.HistogramMetricType {
 			grams := histograms{
-				XAxisLabel: fmt.Sprintf("Histogram of %v", mname),
+				XAxisLabel: fmt.Sprintf("%v", mname),
 				Datum:      []hist{},
 			}
 			for i := 0; i < e.Result.Insights.NumVersions; i++ {
@@ -213,52 +219,38 @@ func (e *Experiment) HTMLHistCharts() string {
 
 // HTMLStatus prints the current state of the experiment
 func (e *Experiment) HTMLStatus() string {
-	completionStatus := "This experiment has completed."
+	completionStatus := "Experiment is complete."
 	if !e.Completed() {
-		completionStatus = "This experiment is yet to complete."
+		completionStatus = "Experiment is yet to complete."
 	}
 
-	failureStatus := "This experiment has failures."
+	failureStatus := "Experiment has failures."
 	textColor := "text-failure"
 	if e.NoFailure() {
-		failureStatus = "This experiment has no failures."
+		failureStatus = "Experiment has no failures."
 		textColor = "text-success"
 	}
 
-	taskStatus := fmt.Sprintf("%v out of %v tasks have completed.", len(e.Tasks), e.Result.NumCompletedTasks)
+	taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
+
+	msg := fmt.Sprintln(taskStatus)
+	msg += fmt.Sprintln(failureStatus)
+	msg += fmt.Sprintln(completionStatus)
 
 	return fmt.Sprintf(`
 	<section class="mt-5">
 		<div class="row">
-			<div class="col-sm-4">
+			<div class="col-sm-12">
 				<div class="card">
-					<h5 class="card-header">Completion Status</h5>
-					<div class="card-body">
-						<p class="card-text">%v</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="col-sm-4">
-				<div class="card">
-					<h5 class="card-header">Failure Status</h5>
+					<h5 class="card-header">Status</h5>
 					<div class="card-body">
 						<p class="card-text %v">%v</p>
 					</div>
 				</div>
 			</div>
-
-			<div class="col-sm-4">
-				<div class="card">
-					<h5 class="card-header">Task Status</h5>
-					<div class="card-body">
-						<p class="card-text">%v</p>
-					</div>
-				</div>
-			</div>
 		</div>
 	</section>
-	`, completionStatus, textColor, failureStatus, taskStatus)
+	`, textColor, msg)
 }
 
 // HTMLSLOSection prints the SLO section in HTML report
@@ -317,12 +309,12 @@ func (e *Experiment) printHTMLSLOs() string {
 	sloStrs := `
 	<section class="mt-5">
 			<h3 class="display-6">Service level objectives (SLOs)</h3>
-			<h4 class="display-7 text-muted">Indicates whether or not SLOs are satisfied</h4>
+			<h4 class="display-7 text-muted">Whether or not SLOs are satisfied</h4>
 			<hr>
 			<table class="table">
-			<thead class="thead-dark">
+			<thead class="thead-light">
 				<tr>
-					<th scope="col">SLO condition</th>
+					<th scope="col">SLO</th>
 	` +
 		e.printHTMLSLOVersions() +
 		`</tr>
@@ -365,8 +357,10 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 		}
 		return `
 		<section class="mt-5">
-		<h2>Histogram Metrics</h2>
+		<h3 class="display-6">Histogram Metrics</h3>
+		<h4 class="display-7 text-muted">Visualizations for Histogram-type Metrics</h4>
 		<hr>
+
 		` + strings.Join(divs, "\n") +
 			`</section>`
 	}
@@ -402,22 +396,24 @@ func (e *Experiment) printHTMLMetricRows() string {
 
 	out := ""
 	for i := 0; i < len(keys); i++ {
-		u := ""
-		// add units if available
-		units := e.Result.Insights.MetricsInfo[keys[i]].Units
-		if units != nil {
-			u += " (" + *units + ")"
-		}
+		if e.Result.Insights.MetricsInfo[keys[i]].Type != base.HistogramMetricType {
+			u := ""
+			// add units if available
+			units := e.Result.Insights.MetricsInfo[keys[i]].Units
+			if units != nil {
+				u += " (" + *units + ")"
+			}
 
-		out += `<tr scope="row">` + "\n"
-		out += fmt.Sprintf(`
-		<td>%v</td>
-		`, keys[i]+u)
-
-		for j := 0; j < in.NumVersions; j++ {
+			out += `<tr scope="row">` + "\n"
 			out += fmt.Sprintf(`
 			<td>%v</td>
-			`, e.getMetricValue(keys[i], j))
+			`, keys[i]+u)
+
+			for j := 0; j < in.NumVersions; j++ {
+				out += fmt.Sprintf(`
+				<td>%v</td>
+				`, e.getMetricValue(keys[i], j))
+			}
 		}
 	}
 	return out
@@ -427,11 +423,12 @@ func (e *Experiment) printHTMLMetricRows() string {
 func (e *Experiment) HTMLMetricsSection() string {
 	metricStrs := `
 	<section class="mt-5">
-			<h2>Metrics</h2>
-			<p>Latest observed values of metrics</p>
+			<h3 class="display-6">Metrics</h3>
+			<h4 class="display-7 text-muted">Latest observed values of metrics</h4>
 			<hr>
+
 			<table class="table">
-			<thead class="thead-dark">
+			<thead class="thead-light">
 				<tr>
 					<th scope="col">Metrics</th>
 	` +
