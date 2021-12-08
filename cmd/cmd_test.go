@@ -1,3 +1,3 @@
 package cmd
 
-func ExampleAssertCmd() {}
+func ExampleHubCmd() {}

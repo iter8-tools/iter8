@@ -48,7 +48,7 @@ var hubUsage = `
 // HubCmd represents the hub command
 var HubCmd = &cobra.Command{
 	Use:   "hub",
-	Short: "download an experiment folder from Iter8 hub",
+	Short: "Download an experiment folder from Iter8 hub",
 	Long:  hubUsage,
 	Example: `
 	# download load-test experiment folder from the public Iter8 hub

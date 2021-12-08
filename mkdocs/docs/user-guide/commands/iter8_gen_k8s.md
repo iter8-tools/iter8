@@ -1,36 +1,30 @@
 ---
 template: main.html
-title: "Iter8 Gen Exp"
+title: "Iter8 Gen K8s"
 hide:
 - toc
 ---
 
-## iter8 gen exp
+## iter8 gen k8s
 
-render experiment template in the file experiment.tpl with values
-
-### Synopsis
-
-
-	Render experiment template in the file experiment.tpl with values
+Generate manifest for running experiment in Kubernetes
 
 ```
-iter8 gen exp [flags]
+iter8 gen k8s [flags]
 ```
 
 ### Examples
 
 ```
 
-	# render experiment template in the file experiment.tpl with values
-	iter8 gen exp --set key=val
-	
+# Generate Kubernetes manifest
+iter8 gen k8s
 ```
 
 ### Options
 
 ```
-  -h, --help   help for exp
+  -h, --help   help for k8s
 ```
 
 ### Options inherited from parent commands
