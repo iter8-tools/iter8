@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"text/tabwriter"
 
@@ -29,8 +30,7 @@ func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err 
 	}
 
 	if len(experimentSecrets) == 0 {
-		fmt.Println("no experiments found")
-		return err
+		return errors.New("no experiments found")
 	}
 
 	var b bytes.Buffer
