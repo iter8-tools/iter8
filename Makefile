@@ -17,7 +17,7 @@ htmlcov:
 	go tool cover -html=coverage.out
 
 cmddocs:
-	go run k8s/cmd/docs/main.go
+	go run cmd/docs/main.go
 	
 # complete path to iter8 binary
 ITER8_BIN ?= /usr/local/bin/iter8

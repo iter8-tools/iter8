@@ -8,7 +8,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	k8scli "github.com/iter8-tools/iter8/k8s/cmd"
+	k8scli "github.com/iter8-tools/iter8/cmd"
 
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"

@@ -1,4 +1,4 @@
-package cmd
+package basecli
 
 import (
 	"github.com/spf13/cobra"

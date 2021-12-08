@@ -1,3 +1,3 @@
-package cmd
+package basecli
 
 func ExampleHubCmd() {}

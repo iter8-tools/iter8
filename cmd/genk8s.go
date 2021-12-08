@@ -9,7 +9,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	basecli "github.com/iter8-tools/iter8/cmd"
+	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"

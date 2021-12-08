@@ -1,147 +1,35 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"github.com/iter8-tools/iter8/basecli"
 
-	"github.com/antonmedv/expr"
-	"github.com/iter8-tools/iter8/base"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-var RunCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run an experiment",
-	Long:  "Run an experiment",
-	Example: `
-# Run experiment defined in file 'experiment.yaml' and write result to 'result.yaml'
-iter8 run
-`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		log.Logger.Trace("build called")
-		// Replace FileExpIO with ClusterExpIO to work with
-		// Spec and Results that might be inside the cluster
-		fio := &FileExpIO{}
-		exp, err := Build(false, fio)
-		log.Logger.Trace("build finished")
-		if err != nil {
-			os.Exit(1)
-		} else {
-			log.Logger.Info("starting experiment run")
-			err := exp.Run(fio)
-			if err != nil {
-				return err
-			} else {
-				log.Logger.Info("experiment completed successfully")
-			}
-		}
-		return nil
-	},
-}
+func NewRunCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
+	o := newK8sExperimentOptions(streams)
 
-func init() {
-	RootCmd.AddCommand(RunCmd)
-}
-
-// Run an experiment
-func (e *Experiment) Run(expio ExpIO) error {
-	var err error
-	if e.Result == nil {
-		e.InitResults()
+	cmd := basecli.RunCmd
+	// 	cmd.Example = `# run experimebt using Kubernetes secrets instead of files
+	// iter8 k run -e experiment-id`
+	cmd.Hidden = true
+	cmd.SilenceUsage = true
+	cmd.PreRunE = func(c *cobra.Command, args []string) error {
+		// precompute commonly used values derivable from GetOptions
+		return o.initK8sExperiment(factory)
+		// add any additional precomutation and/or validation here
 	}
-	for i, t := range e.tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : started")
-		shouldRun := true
-		// if task has a condition
-		if cond := base.GetIf(t); cond != nil {
-			// condition evaluates to false ... then shouldRun is false
-			program, err := expr.Compile(*cond, expr.Env(e), expr.AsBool())
-			if err != nil {
-				log.Logger.WithStackTrace(err.Error()).Error("unable to compile if clause")
-				return err
-			}
-
-			output, err := expr.Run(program, e)
-			if err != nil {
-				log.Logger.WithStackTrace(err.Error()).Error("unable to run if clause")
-				return err
-			}
-
-			shouldRun = output.(bool)
-		}
-		if shouldRun {
-			err = t.Run(e.Experiment)
-			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "failure")
-				e.failExperiment()
-				return err
-			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "completed")
-		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
-		}
-
-		e.incrementNumCompletedTasks()
-		err = expio.WriteResult(e)
-		if err != nil {
-			return err
-		}
+	cmd.RunE = func(c *cobra.Command, args []string) error {
+		return o.experiment.Run(o.expIO)
 	}
-	return nil
 
+	AddExperimentIdOption(cmd, o)
+	// Add any other options here
+
+	// Prevent default options from being displayed by the help
+	HideGenericCliOptions(cmd)
+
+	return cmd
 }
-
-func (e *Experiment) failExperiment() error {
-	if e.Result == nil {
-		log.Logger.Warn("failExperiment called on an experiment object without results")
-		e.Experiment.InitResults()
-	}
-	e.Result.Failure = true
-	return nil
-}
-
-func (e *Experiment) incrementNumCompletedTasks() error {
-	if e.Result == nil {
-		log.Logger.Warn("incrementNumCompletedTasks called on an experiment object without results")
-		e.Experiment.InitResults()
-	}
-	e.Result.NumCompletedTasks++
-	return nil
-}
-
-/*
-// Run the given action.
-func (a *Action) Run(ctx context.Context) error {
-	for i := 0; i < len(*a); i++ {
-		log.Info("------ task starting")
-		shouldRun := true
-		exp, err := GetExperimentFromContext(ctx)
-		if err != nil {
-			return err
-		}
-		// if task has a condition
-		if cond := (*a)[i].GetIf(); cond != nil {
-			// condition evaluates to false ... then shouldRun is false
-			program, err := expr.Compile(*cond, expr.Env(exp), expr.AsBool())
-			if err != nil {
-				return err
-			}
-
-			output, err := expr.Run(program, exp)
-			if err != nil {
-				return err
-			}
-
-			shouldRun = output.(bool)
-		}
-		if shouldRun {
-			err := (*a)[i].Run(ctx)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-*/

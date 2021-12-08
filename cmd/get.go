@@ -7,7 +7,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/iter8-tools/iter8/base/log"
-	basecli "github.com/iter8-tools/iter8/cmd"
+	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
