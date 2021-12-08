@@ -10,29 +10,13 @@ import (
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/client-go/kubernetes"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
 type GetOptions struct {
-	Streams              genericclioptions.IOStreams
-	ConfigFlags          *genericclioptions.ConfigFlags
-	ResourceBuilderFlags *genericclioptions.ResourceBuilderFlags
-	namespace            string
-	client               *kubernetes.Clientset
-
-	experimentId string
-}
-
-func newGetOptions(streams genericclioptions.IOStreams) *GetOptions {
-	rbFlags := &genericclioptions.ResourceBuilderFlags{}
-	rbFlags.WithAllNamespaces(false)
-
-	return &GetOptions{
-		Streams:              streams,
-		ConfigFlags:          genericclioptions.NewConfigFlags(true),
-		ResourceBuilderFlags: rbFlags,
-	}
+	// options common to all the k8s commands
+	K8sExperimentOptions
+	// add other options here
 }
 
 const (
@@ -43,34 +27,6 @@ const (
 	NumTasksHeader          = "TASKS"
 	NumTasksCompletedHeader = "TASKS_COMPLETED"
 )
-
-// complete sets all information needed for processing the command
-func (o *GetOptions) complete(factory cmdutil.Factory, cmd *cobra.Command, args []string) (err error) {
-	o.namespace, _, err = factory.ToRawKubeConfigLoader().Namespace()
-	if err != nil {
-		return err
-	}
-
-	o.client, err = GetClient(o.ConfigFlags)
-	if err != nil {
-		return err
-	}
-
-	if len(o.experimentId) == 0 {
-		s, err := GetExperimentSecret(o.client, o.namespace, o.experimentId)
-		if err != nil {
-			return err
-		}
-		o.experimentId = s.Labels[IdLabel]
-	}
-
-	return err
-}
-
-// validate ensures that all required arguments and flag values are provided
-func (o *GetOptions) validate(cmd *cobra.Command, args []string) (err error) {
-	return nil
-}
 
 // run runs the command
 func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
@@ -113,7 +69,7 @@ func (o *GetOptions) run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func NewGetCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newGetOptions(streams)
+	o := &GetOptions{K8sExperimentOptions: newK8sExperimentOptions(streams)}
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -123,20 +79,17 @@ func NewGetCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *co
 iter8 get`,
 		SilenceUsage: true,
 	}
+	cmd.PreRunE = func(c *cobra.Command, args []string) error {
+		// precompute commonly used values derivable from GetOptions
+		return o.initK8sExperiment(factory)
+		// add any additional precomutation and/or validation here
+	}
 	cmd.RunE = func(c *cobra.Command, args []string) error {
-		if err := o.complete(factory, c, args); err != nil {
-			return err
-		}
-		if err := o.validate(c, args); err != nil {
-			return err
-		}
-		if err := o.run(c, args); err != nil {
-			return err
-		}
-		return nil
+		return o.run(c, args)
 	}
 
-	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier")
+	// Add options
+	cmd.Flags().StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
 
 	// Prevent default options from being displayed by the help
 	HideGenericCliOptions(cmd)

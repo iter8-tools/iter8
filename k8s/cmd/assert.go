@@ -4,81 +4,22 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/iter8-tools/iter8/base/log"
 	basecli "github.com/iter8-tools/iter8/cmd"
 
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/client-go/kubernetes"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
 type AssertOptions struct {
-	Streams              genericclioptions.IOStreams
-	ConfigFlags          *genericclioptions.ConfigFlags
-	ResourceBuilderFlags *genericclioptions.ResourceBuilderFlags
-	namespace            string
-	client               *kubernetes.Clientset
-
-	experimentId string
-}
-
-func newAssertOptions(streams genericclioptions.IOStreams) *AssertOptions {
-	rbFlags := &genericclioptions.ResourceBuilderFlags{}
-	rbFlags.WithAllNamespaces(false)
-
-	return &AssertOptions{
-		Streams:              streams,
-		ConfigFlags:          genericclioptions.NewConfigFlags(true),
-		ResourceBuilderFlags: rbFlags,
-	}
-}
-
-// complete sets all information needed for processing the command
-func (o *AssertOptions) complete(factory cmdutil.Factory, cmd *cobra.Command, args []string) (err error) {
-
-	o.namespace, _, err = factory.ToRawKubeConfigLoader().Namespace()
-	if err != nil {
-		return err
-	}
-
-	o.client, err = GetClient(o.ConfigFlags)
-	if err != nil {
-		return err
-	}
-
-	if len(o.experimentId) == 0 {
-		s, err := GetExperimentSecret(o.client, o.namespace, o.experimentId)
-		if err != nil {
-			return err
-		}
-		o.experimentId = s.Labels[IdLabel]
-	}
-
-	return err
-}
-
-// validate ensures that all required arguments and flag values are provided
-func (o *AssertOptions) validate(cmd *cobra.Command, args []string) (err error) {
-	return nil
+	// options common to all the k8s commands
+	K8sExperimentOptions
+	// add other options here
 }
 
 // run runs the command
 func (o *AssertOptions) run(cmd *cobra.Command, args []string) (err error) {
-	expIO := &KubernetesExpIO{
-		Client:    o.client,
-		Namespace: o.namespace,
-		Name:      SpecSecretPrefix + o.experimentId,
-	}
-
-	log.Logger.Trace("build started")
-	exp, err := basecli.Build(true, expIO)
-	log.Logger.Trace("build finished")
-	if err != nil {
-		return err
-	}
-
-	allGood, err := exp.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
+	allGood, err := o.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
 	if err != nil || !allGood {
 		return err
 	}
@@ -91,27 +32,25 @@ func (o *AssertOptions) run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func NewAssertCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newAssertOptions(streams)
+	o := &AssertOptions{K8sExperimentOptions: newK8sExperimentOptions(streams)}
 
 	cmd := basecli.NewAssertCmd()
 	var example = `
 # assert that the most recent experiment running in the Kubernetes context is complete
 iter8 k assert -c completed`
 	cmd.Example = fmt.Sprintf("%s%s\n", cmd.Example, example)
+	cmd.SilenceUsage = true
+	cmd.PreRunE = func(c *cobra.Command, args []string) error {
+		// precompute commonly used values derivable from GetOptions
+		return o.initK8sExperiment(factory)
+		// add any additional precomutation and/or validation here
+	}
 	cmd.RunE = func(c *cobra.Command, args []string) error {
-		if err := o.complete(factory, c, args); err != nil {
-			return err
-		}
-		if err := o.validate(c, args); err != nil {
-			return err
-		}
-		if err := o.run(c, args); err != nil {
-			return err
-		}
-		return nil
+		return o.run(c, args)
 	}
 
-	cmd.Flags().StringVarP(&o.experimentId, "experiment-id", "e", "", "remote experiment identifier; if not specified, the most recent experiment is used")
+	// Add options
+	cmd.Flags().StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
 
 	// Prevent default options from being displayed by the help
 	HideGenericCliOptions(cmd)

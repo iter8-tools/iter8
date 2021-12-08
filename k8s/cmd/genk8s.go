@@ -4,7 +4,6 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 	"text/template"
 
@@ -15,7 +14,6 @@ import (
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/chartutil"
-	"k8s.io/kubectl/pkg/cmd/options"
 	"sigs.k8s.io/yaml"
 )
 
@@ -26,20 +24,6 @@ const (
 )
 
 type GetK8sOptions struct {
-}
-
-func newGetK8sOptions() *GetK8sOptions {
-	return &GetK8sOptions{}
-}
-
-// complete sets all information needed for processing the command
-func (o *GetK8sOptions) complete(cmd *cobra.Command, args []string) (err error) {
-	return err
-}
-
-// validate ensures that all required arguments and flag values are provided
-func (o *GetK8sOptions) validate(cmd *cobra.Command, args []string) (err error) {
-	return nil
 }
 
 type k8sExperiment struct {
@@ -122,7 +106,7 @@ func toYAML(v interface{}) string {
 }
 
 func NewGetK8sCmd() *cobra.Command {
-	o := newGetK8sOptions()
+	o := &GetK8sOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "k8s",
@@ -131,20 +115,12 @@ func NewGetK8sCmd() *cobra.Command {
 # Generate Kubernetes manifest
 iter8 gen k8s`,
 		SilenceUsage: true,
+		// Put any optionm computation and/or validatiom here
+		// PreRunE: func(c *cobra.Command, args []string) error {
 		RunE: func(c *cobra.Command, args []string) error {
-			if err := o.complete(c, args); err != nil {
-				return err
-			}
-			if err := o.validate(c, args); err != nil {
-				return err
-			}
-			if err := o.run(c, args); err != nil {
-				return err
-			}
-			return nil
+			return o.run(c, args)
 		},
 	}
 
-	cmd.AddCommand(options.NewCmdOptions(os.Stdout))
 	return cmd
 }

@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
 const (
@@ -190,6 +191,66 @@ func (f *KubernetesExpIO) WriteResult(r *basecli.Experiment) error {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
 		return err
 	}
+
+	return err
+}
+
+const (
+	ExperimentId            = "experiment-id"
+	ExperimentIdShort       = "e"
+	ExperimentIdDescription = "remote experiment identifier; if not specified, the most recent experiment is used"
+)
+
+type K8sExperimentOptions struct {
+	Streams              genericclioptions.IOStreams
+	ConfigFlags          *genericclioptions.ConfigFlags
+	ResourceBuilderFlags *genericclioptions.ResourceBuilderFlags
+	namespace            string
+	client               *kubernetes.Clientset
+
+	experimentId string
+
+	expIO      *KubernetesExpIO
+	experiment *basecli.Experiment
+}
+
+func newK8sExperimentOptions(streams genericclioptions.IOStreams) K8sExperimentOptions {
+	rbFlags := &genericclioptions.ResourceBuilderFlags{}
+	rbFlags.WithAllNamespaces(false)
+
+	return K8sExperimentOptions{
+		Streams:              streams,
+		ConfigFlags:          genericclioptions.NewConfigFlags(true),
+		ResourceBuilderFlags: rbFlags,
+	}
+}
+
+func (o *K8sExperimentOptions) initK8sExperiment(factory cmdutil.Factory) (err error) {
+	o.namespace, _, err = factory.ToRawKubeConfigLoader().Namespace()
+	if err != nil {
+		return err
+	}
+
+	o.client, err = GetClient(o.ConfigFlags)
+	if err != nil {
+		return err
+	}
+
+	if len(o.experimentId) == 0 {
+		s, err := GetExperimentSecret(o.client, o.namespace, o.experimentId)
+		if err != nil {
+			return err
+		}
+		o.experimentId = s.Labels[IdLabel]
+	}
+
+	o.expIO = &KubernetesExpIO{
+		Client:    o.client,
+		Namespace: o.namespace,
+		Name:      SpecSecretPrefix + o.experimentId,
+	}
+
+	o.experiment, err = basecli.Build(true, o.expIO)
 
 	return err
 }
