@@ -22,7 +22,7 @@ cmddocs:
 # complete path to iter8 binary
 ITER8_BIN ?= /usr/local/bin/iter8
 build:
-	go build -o $(ITER8_BIN) k8s/main.go
+	go build -o $(ITER8_BIN) main.go
 
 
 ITER8_IMG ?= iter8/iter8cli:latest

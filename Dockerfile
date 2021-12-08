@@ -12,7 +12,7 @@ RUN go mod download
 
 # Build
 WORKDIR /workspace
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /bin/iter8 k8s/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /bin/iter8 main.go
 WORKDIR /workspace
 
 # Install kubectl
