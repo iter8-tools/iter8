@@ -54,9 +54,9 @@ func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err 
 		app := experimentSecret.Labels[AppLabel]
 		id := experimentSecret.Labels[IdLabel]
 		fmt.Fprintf(w, "%s\t%s\t%t\t%t\t%d\t%d\n", app, id, exp.Completed(), !exp.NoFailure(), len(exp.Tasks), exp.Result.NumCompletedTasks)
-		w.Flush()
 	}
 
+	w.Flush()
 	fmt.Printf("%s", b.String())
 	return nil
 }
