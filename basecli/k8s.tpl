@@ -18,7 +18,7 @@
 {{/* -- version -------------------------------------------- */}}
 {{- $version := printf "0.8" -}}
 {{/* -- image ---------------------------------------------- */}}
-{{- $image := printf "iter8/iter8cli:latest" -}}
+{{- $image := printf "iter8/iter8:latest" -}}
 {{- if hasKey .Values "image" -}}
   {{- $image = .Values.image -}}
 {{- end -}}
@@ -34,7 +34,7 @@ metadata:
     app.kubernetes.io/instance: {{ $id }}
     app.kubernetes.io/version: "{{ $version }}"
     app.kubernetes.io/component: spec
-    app.kubernetes.io/created-by: iter8cli
+    app.kubernetes.io/created-by: iter8
     iter8.tools/app: {{ $app }}
 stringData:
   experiment: |
@@ -49,7 +49,7 @@ metadata:
     app.kubernetes.io/instance: {{ $id }}
     app.kubernetes.io/version: "{{ $version }}"
     app.kubernetes.io/component: result
-    app.kubernetes.io/created-by: iter8cli
+    app.kubernetes.io/created-by: iter8
     iter8.tools/app: {{ $app }}
 stringData:
   result: |
@@ -68,7 +68,7 @@ metadata:
     app.kubernetes.io/instance: {{ $id }}
     app.kubernetes.io/version: "{{ $version }}"
     app.kubernetes.io/component: job
-    app.kubernetes.io/created-by: iter8cli
+    app.kubernetes.io/created-by: iter8
     iter8.tools/app: {{ $app }}
 spec:
   template:
@@ -105,7 +105,7 @@ metadata:
     app.kubernetes.io/instance: {{ $id }}
     app.kubernetes.io/version: "{{ $version }}"
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: iter8cli
+    app.kubernetes.io/created-by: iter8
     iter8.tools/app: {{ $app }}
 rules:
 - apiGroups: [""]
@@ -122,7 +122,7 @@ metadata:
     app.kubernetes.io/instance: {{ $id }}
     app.kubernetes.io/version: "{{ $version }}"
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: iter8cli
+    app.kubernetes.io/created-by: iter8
     iter8.tools/app: {{ $app }}
 subjects:
 - kind: ServiceAccount

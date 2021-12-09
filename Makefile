@@ -25,7 +25,7 @@ build:
 	go build -o $(ITER8_BIN) main.go
 
 
-ITER8_IMG ?= iter8/iter8cli:latest
+ITER8_IMG ?= iter8/iter8:latest
 docker-build:
 	docker build -f Dockerfile -t $(ITER8_IMG) .
 
