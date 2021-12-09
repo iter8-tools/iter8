@@ -23,31 +23,23 @@ iter8 gen k8s --set id=$EXPERIMENT_ID | kubectl delete -f -
 ### Options
 
 ```
-      --as string                              Username to impersonate for the operation
-      --as-group stringArray                   Group to impersonate for the operation, this flag can be repeated to specify multiple groups.
-      --cache-dir string                       Default cache directory (default "/Users/srinivasanparthasarathy/.kube/cache")
-      --certificate-authority string           Path to a cert file for the certificate authority
-      --client-certificate string              Path to a client certificate file for TLS
-      --client-key string                      Path to a client key file for TLS
-      --cluster string                         The name of the kubeconfig cluster to use
-      --context string                         The name of the kubeconfig context to use
-      --echo-server-default-params DynString   Default parameters/querystring to use if there isn't one provided explicitly. E.g "status=404&delay=3s"
-  -h, --help                                   help for k
-      --insecure-skip-tls-verify               If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure
-      --kubeconfig string                      Path to the kubeconfig file to use for CLI requests.
-      --logcaller                              Logs filename and line number of callers to log (default true)
-      --loglevel DynString                     loglevel, one of [Debug Verbose Info Warning Error Critical Fatal] (default Info)
-      --logprefix string                       Prefix to log lines before logged messages (default "> ")
-      --match-server-version                   Require server version to match client version
-      --max-echo-delay DynDuration             Maximum sleep time for delay= echo server parameter. dynamic flag. (default 1.5s)
-  -n, --namespace string                       If present, the namespace scope for this CLI request
-      --password string                        Password for basic authentication to the API server
-      --request-timeout string                 The length of time to wait before giving up on a single server request. Non-zero values should contain a corresponding time unit (e.g. 1s, 2m, 3h). A value of zero means don't timeout requests. (default "0")
-  -s, --server string                          The address and port of the Kubernetes API server
-      --tls-server-name string                 Server name to use for server certificate validation. If it is not provided, the hostname used to contact the server is used
-      --token string                           Bearer token for authentication to the API server
-      --user string                            The name of the kubeconfig user to use
-      --username string                        Username for basic authentication to the API server
+      --as string                      Username to impersonate for the operation
+      --as-group stringArray           Group to impersonate for the operation, this flag can be repeated to specify multiple groups.
+      --cache-dir string               Default cache directory (default "/Users/srinivasanparthasarathy/.kube/cache")
+      --certificate-authority string   Path to a cert file for the certificate authority
+      --client-certificate string      Path to a client certificate file for TLS
+      --client-key string              Path to a client key file for TLS
+      --cluster string                 The name of the kubeconfig cluster to use
+      --context string                 The name of the kubeconfig context to use
+  -h, --help                           help for k
+      --insecure-skip-tls-verify       If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure
+      --kubeconfig string              Path to the kubeconfig file to use for CLI requests.
+  -n, --namespace string               If present, the namespace scope for this CLI request
+      --request-timeout string         The length of time to wait before giving up on a single server request. Non-zero values should contain a corresponding time unit (e.g. 1s, 2m, 3h). A value of zero means don't timeout requests. (default "0")
+  -s, --server string                  The address and port of the Kubernetes API server
+      --tls-server-name string         Server name to use for server certificate validation. If it is not provided, the hostname used to contact the server is used
+      --token string                   Bearer token for authentication to the API server
+      --user string                    The name of the kubeconfig user to use
 ```
 
 ### SEE ALSO
@@ -55,7 +47,6 @@ iter8 gen k8s --set id=$EXPERIMENT_ID | kubectl delete -f -
 * [iter8](iter8.md)	 - metrics driven experiments
 * [iter8 k assert](iter8_k_assert.md)	 - Assert if experiment result satisfies the specified conditions
 * [iter8 k get](iter8_k_get.md)	 - Get a list of experiments running in the current context
-* [iter8 k options](iter8_k_options.md)	 - Print the list of flags inherited by all commands
-* [iter8 k report](iter8_k_report.md)	 - Generate report from experiment result
+* [iter8 k get](iter8_k_get.md)	 - Get a list of experiments running in the current context
 
 ###### Auto generated by spf13/cobra on 9-Dec-2021
