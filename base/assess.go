@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-playground/validator"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
@@ -36,13 +37,21 @@ func MakeAssess(t *TaskSpec) (Task, error) {
 	// convert t to jsonBytes
 	jsonBytes, _ = json.Marshal(t)
 	// convert jsonString to AssessTask
-	ct := &assessTask{}
-	err = json.Unmarshal(jsonBytes, &ct)
+	at := &assessTask{}
+	err = json.Unmarshal(jsonBytes, &at)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal assess task")
 		return nil, err
 	}
-	bt = ct
+
+	validate := validator.New()
+	err = validate.Struct(at)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("invalid assess task specification")
+		return nil, err
+	}
+
+	bt = at
 	return bt, nil
 }
 

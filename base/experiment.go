@@ -13,8 +13,8 @@ import (
 // Experiment specification and result
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks  []TaskSpec        `json:"tasks" yaml:"tasks" validate:"gt=0,required"`
-	Result *ExperimentResult `json:"result" yaml:"result" validate:"required"`
+	Tasks  []TaskSpec        `json:"tasks" yaml:"tasks"`
+	Result *ExperimentResult `json:"result" yaml:"result"`
 }
 
 // Task is an object that can be run
@@ -36,7 +36,7 @@ func GetIf(t Task) *string {
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
 	// StartTime is the time when the experiment run started
-	StartTime time.Time `json:"startTime" yaml:"startTime" validate:"required"`
+	StartTime time.Time `json:"startTime" yaml:"startTime"`
 
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
@@ -54,7 +54,7 @@ type Insights struct {
 	NumVersions int `json:"numVersions" yaml:"numVersions"`
 
 	// InsightInfo identifies the types of insights produced by this experiment
-	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty" validate:"gt=0,required"`
+	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty"`
 
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
@@ -97,10 +97,10 @@ const (
 type MetricMeta struct {
 	Description string     `json:"description" yaml:"description"`
 	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
-	Type        MetricType `json:"type" yaml:"type" validate:"gt=0,required,oneof=Counter Gauge Histogram"`
-	XMin        *float64   `json:"xmin" yaml:"xmin" validate:"required_if=Type HistMetrics"`
-	XMax        *float64   `json:"xmax" yaml:"xmax" validate:"required_if=Type HistMetrics"`
-	NumBuckets  *int       `json:"numBuckets" yaml:"numBuckets" validate:"required_if=Type HistMetrics"`
+	Type        MetricType `json:"type" yaml:"type"`
+	XMin        *float64   `json:"xmin" yaml:"xmin"`
+	XMax        *float64   `json:"xmax" yaml:"xmax"`
+	NumBuckets  *int       `json:"numBuckets" yaml:"numBuckets"`
 }
 
 // SLO is a service level objective

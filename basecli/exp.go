@@ -18,7 +18,6 @@ package basecli
 import (
 	"io/ioutil"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
@@ -65,13 +64,6 @@ var expCmd = &cobra.Command{
 		}
 		err = e.buildTasks()
 		if err != nil {
-			return err
-		}
-		validate := validator.New()
-		// returns nil or ValidationErrors ( []FieldError )
-		err = validate.Struct(e.Experiment)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
 			return err
 		}
 
