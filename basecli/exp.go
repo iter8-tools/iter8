@@ -86,5 +86,5 @@ var expCmd = &cobra.Command{
 }
 
 func init() {
-	GenCmd.AddCommand(expCmd)
+	genCmd.AddCommand(expCmd)
 }

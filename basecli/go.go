@@ -92,5 +92,5 @@ func RenderGoTpl(v chartutil.Values, filePath string) (*bytes.Buffer, error) {
 }
 
 func init() {
-	GenCmd.AddCommand(GoCmd)
+	genCmd.AddCommand(GoCmd)
 }

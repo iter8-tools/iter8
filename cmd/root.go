@@ -11,8 +11,3 @@ var RootCmd = basecli.RootCmd
 func Execute() {
 	RootCmd.Execute()
 }
-
-func init() {
-	// extend base gen command with the k8s command
-	basecli.GenCmd.AddCommand(NewGetK8sCmd())
-}
