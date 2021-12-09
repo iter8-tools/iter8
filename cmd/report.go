@@ -17,7 +17,7 @@ func init() {
 	var example = `
 	# Generate text report for the most recent experiment running in current Kubernetes context
 	iter8 k report`
-	reportCmd.Example = fmt.Sprintf("%s%s\n", reportCmd.Example, example)
+	reportCmd.Example = fmt.Sprintf("%s %s\n", reportCmd.Example, example)
 
 	reportCmd.SilenceErrors = true
 	reportCmd.RunE = func(c *cobra.Command, args []string) error {
@@ -25,20 +25,8 @@ func init() {
 		return k8sExperimentOptions.experiment.Report(basecli.ReportOptions.OutputFormat)
 	}
 
-	getCmd = &cobra.Command{
-		Use:   "get",
-		Short: "Get a list of experiments running in the current context",
-		Example: `
-# Get list of experiments running in cluster
-iter8 k get`,
-		SilenceUsage: true,
-		RunE: func(c *cobra.Command, args []string) error {
-			k8sExperimentOptions.initK8sExperiment()
-			return runGetCmd(c, args, k8sExperimentOptions)
-		},
-	}
-	k8sExperimentOptions.addExperimentIdOption(getCmd.Flags())
+	k8sExperimentOptions.addExperimentIdOption(reportCmd.Flags())
 
-	// getCmd is now initialized
-	kCmd.AddCommand(getCmd)
+	// reportCmd is now initialized
+	kCmd.AddCommand(reportCmd)
 }
