@@ -19,7 +19,7 @@ func init() {
 		return k8sExperimentOptions.experiment.Run(k8sExperimentOptions.expIO)
 	}
 
-	k8sExperimentOptions.addExperimentIdOption(getCmd.Flags())
+	k8sExperimentOptions.addExperimentIdOption(runCmd.Flags())
 
 	// runCmd is now initialized
 	kCmd.AddCommand(runCmd)
