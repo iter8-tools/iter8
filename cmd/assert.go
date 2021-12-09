@@ -18,6 +18,7 @@ func init() {
 # assert that the most recent experiment running in the Kubernetes context is complete
 iter8 k assert -c completed`
 	assertCmd.Example = fmt.Sprintf("%s%s\n", assertCmd.Example, example)
+
 	assertCmd.RunE = func(c *cobra.Command, args []string) error {
 		k8sExperimentOptions.initK8sExperiment()
 		allGood, err := k8sExperimentOptions.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)

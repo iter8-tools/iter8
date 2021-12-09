@@ -176,6 +176,7 @@ type PayloadValue struct {
 
 // write experiment result to secret in Kubernetes context
 func (f *KubernetesExpIO) WriteResult(r *basecli.Experiment) error {
+	log.Logger.Debug("write result called")
 	rBytes, _ := yaml.Marshal(r.Result)
 
 	resultSecretName := f.Name + "-result"
@@ -192,7 +193,7 @@ func (f *KubernetesExpIO) WriteResult(r *basecli.Experiment) error {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
 		return err
 	}
-
+	log.Logger.Debug("wrote result: ", r.Result)
 	return err
 }
 
