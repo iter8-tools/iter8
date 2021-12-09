@@ -236,7 +236,7 @@ func newK8sExperimentOptions() *K8sExperimentOptions {
 	}
 }
 
-func (o *K8sExperimentOptions) initK8sExperiment() (err error) {
+func (o *K8sExperimentOptions) initK8sExperiment(withResult bool) (err error) {
 	o.namespace, _, err = o.ConfigFlags.ToRawKubeConfigLoader().Namespace()
 	if err != nil {
 		return err
@@ -261,7 +261,7 @@ func (o *K8sExperimentOptions) initK8sExperiment() (err error) {
 		Name:      SpecSecretPrefix + o.experimentId,
 	}
 
-	o.experiment, err = basecli.Build(true, o.expIO)
+	o.experiment, err = basecli.Build(withResult, o.expIO)
 
 	return err
 }

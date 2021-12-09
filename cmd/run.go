@@ -15,7 +15,7 @@ func init() {
 	runCmd.Hidden = true
 	runCmd.SilenceUsage = true
 	runCmd.RunE = func(c *cobra.Command, args []string) error {
-		k8sExperimentOptions.initK8sExperiment()
+		k8sExperimentOptions.initK8sExperiment(false)
 		return k8sExperimentOptions.experiment.Run(k8sExperimentOptions.expIO)
 	}
 

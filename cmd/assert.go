@@ -20,7 +20,7 @@ iter8 k assert -c completed`
 	assertCmd.Example = fmt.Sprintf("%s%s\n", assertCmd.Example, example)
 
 	assertCmd.RunE = func(c *cobra.Command, args []string) error {
-		k8sExperimentOptions.initK8sExperiment()
+		k8sExperimentOptions.initK8sExperiment(true)
 		allGood, err := k8sExperimentOptions.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
 		if err != nil || !allGood {
 			return err

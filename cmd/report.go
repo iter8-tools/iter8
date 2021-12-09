@@ -20,7 +20,7 @@ func init() {
 	reportCmd.SilenceErrors = true
 
 	reportCmd.RunE = func(c *cobra.Command, args []string) error {
-		k8sExperimentOptions.initK8sExperiment()
+		k8sExperimentOptions.initK8sExperiment(true)
 		return k8sExperimentOptions.experiment.Report(basecli.ReportOptions.OutputFormat)
 	}
 

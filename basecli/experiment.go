@@ -44,7 +44,8 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Logger.Debug("set result", e.Result)
+		resBytes, _ := yaml.Marshal(e.Result)
+		log.Logger.Debug("set result: ", string(resBytes))
 	}
 
 	err = e.buildTasks()
