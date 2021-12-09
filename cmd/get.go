@@ -62,7 +62,7 @@ func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err 
 }
 
 func NewGetCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newK8sExperimentOptions(streams)
+	o := newK8sExperimentOptions()
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -75,7 +75,7 @@ iter8 k get`,
 	cmd.PreRunE = func(c *cobra.Command, args []string) error {
 		// precompute commonly used values derivable from GetOptions
 		return o.initK8sExperiment(factory)
-		// add any additional precomutation and/or validation here
+		// add any additional precomputation and/or validation here
 	}
 	cmd.RunE = func(c *cobra.Command, args []string) error {
 		return runGetCmd(c, args, o)

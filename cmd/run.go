@@ -9,9 +9,9 @@ import (
 )
 
 func NewRunCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newK8sExperimentOptions(streams)
+	o := newK8sExperimentOptions()
 
-	cmd := basecli.RunCmd
+	cmd := basecli.NewRunCmd()
 	// 	cmd.Example = `# run experimebt using Kubernetes secrets instead of files
 	// iter8 k run -e experiment-id`
 	cmd.Hidden = true

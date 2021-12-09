@@ -34,15 +34,18 @@ type AssertOptionsType struct {
 
 var AssertOptions = AssertOptionsType{}
 
-// AssertCmd represents the assert command
-var AssertCmd = &cobra.Command{
-	Use:   "assert",
-	Short: "Assert if experiment result satisfies the specified conditions",
-	Long: `
+var assertCmd *cobra.Command
+
+// NewAssertCmd creates an assert command with the assert flagset
+func NewAssertCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "assert",
+		Short: "Assert if experiment result satisfies the specified conditions",
+		Long: `
 Assert if experiment result satisfies the specified conditions. 
 If assert conditions are satisfied, exit with code 0. 
 Else, return with code 1.`,
-	Example: `
+		Example: `
 # assert that the experiment completed without failures, 
 # and SLOs were satisfied
 iter8 assert -c completed -c nofailure -c slos
@@ -60,30 +63,36 @@ iter8 assert -c completed,nofailures,slosby=0
 # and may run in the background
 iter8 assert -c completed,nofailures,slosby=0 -t 5s
 `,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		// build experiment
-		exp := &Experiment{
-			Experiment: &base.Experiment{},
-		}
-		log.Logger.Trace("build started")
-		// replace FileExpIO with ClusterExpIO to build from cluster
-		fio := &FileExpIO{}
-		exp, err := Build(true, fio)
-		log.Logger.Trace("build finished")
-		if err != nil {
-			return err
-		}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// build experiment
+			exp := &Experiment{
+				Experiment: &base.Experiment{},
+			}
+			log.Logger.Trace("build started")
+			// replace FileExpIO with ClusterExpIO to build from cluster
+			fio := &FileExpIO{}
+			exp, err := Build(true, fio)
+			log.Logger.Trace("build finished")
+			if err != nil {
+				return err
+			}
 
-		allGood, err := exp.Assert(AssertOptions.Conds, AssertOptions.Timeout)
-		if err != nil {
-			return err
-		}
-		if !allGood {
-			log.Logger.Error("assert conditions failed")
-			os.Exit(1)
-		}
-		return nil
-	},
+			allGood, err := exp.Assert(AssertOptions.Conds, AssertOptions.Timeout)
+			if err != nil {
+				return err
+			}
+			if !allGood {
+				log.Logger.Error("assert conditions failed")
+				os.Exit(1)
+			}
+			return nil
+		},
+	}
+	// add flags
+	cmd.Flags().StringSliceVarP(&AssertOptions.Conds, `condition(s); can specify multiple or separate conditions with commas;`, "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
+	cmd.MarkFlagRequired("condition")
+	cmd.Flags().DurationVarP(&AssertOptions.Timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
+	return cmd
 }
 
 // Assert if experiment satisfies conditions
@@ -170,10 +179,6 @@ func (exp *Experiment) extractVersion(cond string) (int, error) {
 }
 
 func init() {
-
-	AssertCmd.Flags().StringSliceVarP(&AssertOptions.Conds, `condition(s); can specify multiple or separate conditions with commas;`, "c", nil, fmt.Sprintf("%v | %v | %v | %v=<version number>", Completed, NoFailure, SLOs, SLOsByPrefix))
-	AssertCmd.MarkFlagRequired("condition")
-	AssertCmd.Flags().DurationVarP(&AssertOptions.Timeout, "timeout", "t", 0, "timeout duration (e.g., 5s)")
-
-	RootCmd.AddCommand(AssertCmd)
+	assertCmd = NewAssertCmd()
+	RootCmd.AddCommand(assertCmd)
 }

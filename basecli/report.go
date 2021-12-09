@@ -10,7 +10,6 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -36,36 +35,43 @@ var ReportOptions = ReportOptionsType{
 	OutputFormat: TextOutputFormatKey,
 }
 
-// ReportCmd represents the report command
-var ReportCmd = &cobra.Command{
-	Use:   "report",
-	Short: "Generate report from experiment result",
-	Long:  `Generate report from experiment result`,
-	Example: `
-# generate text report
-iter8 report
+var reportCmd *cobra.Command
 
-# generate html report
-iter8 report -o html
-`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		log.Logger.Trace("build started")
-		// build experiment
-		// replace FileExpIO with ClusterExpIO to build from cluster
-		fio := &FileExpIO{}
-		exp, err := Build(true, fio)
-		log.Logger.Trace("build finished")
-		if err != nil {
-			return err
-		}
+// NewReportCmd creates a new report command
+func NewReportCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "report",
+		Short: "Generate report from experiment result",
+		Long:  `Generate report from experiment result`,
+		Example: `
+	# generate text report
+	iter8 report
+	
+	# generate html report
+	iter8 report -o html
+	`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Logger.Trace("build started")
+			// build experiment
+			// replace FileExpIO with ClusterExpIO to build from cluster
+			fio := &FileExpIO{}
+			exp, err := Build(true, fio)
+			log.Logger.Trace("build finished")
+			if err != nil {
+				return err
+			}
 
-		// generate formatted output from experiment
-		err = exp.Report(ReportOptions.OutputFormat)
-		if err != nil {
-			return err
-		}
-		return nil
-	},
+			// generate formatted output from experiment
+			err = exp.Report(ReportOptions.OutputFormat)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVarP(&ReportOptions.OutputFormat, "outputFormat", "o", "text", "text | html")
+
+	return cmd
 }
 
 // Report creates a report from experiment as per outputFormat
@@ -74,8 +80,9 @@ func (exp *Experiment) Report(outputFormat string) error {
 
 	tmpl, ok := builtInTemplates[templateKey]
 	if !ok {
-		log.Logger.Error("invalid output format; valid formats are: text | html")
-		return errors.New("invalid output format; valid formats are: text | html")
+		e := fmt.Errorf("invalid output format; valid formats are: %v | %v", TextOutputFormatKey, HTMLOutputFormatKey)
+		log.Logger.Error(e)
+		return e
 	}
 
 	// execute template
@@ -97,7 +104,6 @@ func ExecTemplate(t executable, exp *Experiment) error {
 }
 
 func init() {
-	ReportCmd.Flags().StringVarP(&ReportOptions.OutputFormat, "outputFormat", "o", "text", "text | html")
 
 	// create text template
 	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
@@ -124,5 +130,7 @@ func init() {
 	// register HTML template
 	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
 
-	RootCmd.AddCommand(ReportCmd)
+	reportCmd = NewReportCmd()
+
+	RootCmd.AddCommand(reportCmd)
 }

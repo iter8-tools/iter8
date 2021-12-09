@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -220,9 +221,11 @@ type K8sExperimentOptions struct {
 	experiment *basecli.Experiment
 }
 
-func newK8sExperimentOptions(streams genericclioptions.IOStreams) *K8sExperimentOptions {
+func newK8sExperimentOptions() *K8sExperimentOptions {
 	rbFlags := &genericclioptions.ResourceBuilderFlags{}
 	rbFlags.WithAllNamespaces(false)
+
+	streams := genericclioptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr}
 
 	return &K8sExperimentOptions{
 		Streams:              streams,

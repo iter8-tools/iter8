@@ -12,8 +12,6 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-// var kCmd *cobra.Command
-
 var kCmd = &cobra.Command{
 	Use:   "k",
 	Short: "Work with experiments running in a Kubernetes cluster",
