@@ -55,4 +55,3 @@ jobs:
         docker run -p 80:80 kennethreitz/httpbin &
         iter8 run
         iter8 assert -c completed -c nofailure -c slos
-
