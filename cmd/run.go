@@ -4,32 +4,23 @@ import (
 	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-func NewRunCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newK8sExperimentOptions()
+var runCmd *cobra.Command
 
-	cmd := basecli.NewRunCmd()
-	// 	cmd.Example = `# run experimebt using Kubernetes secrets instead of files
-	// iter8 k run -e experiment-id`
-	cmd.Hidden = true
-	cmd.SilenceUsage = true
-	cmd.PreRunE = func(c *cobra.Command, args []string) error {
-		// precompute commonly used values derivable from GetOptions
-		return o.initK8sExperiment(factory)
-		// add any additional precomutation and/or validation here
-	}
-	cmd.RunE = func(c *cobra.Command, args []string) error {
-		return o.experiment.Run(o.expIO)
+func init() {
+	// initialize runCmd
+	runCmd = basecli.NewRunCmd()
+
+	runCmd.Hidden = true
+	runCmd.SilenceUsage = true
+	runCmd.RunE = func(c *cobra.Command, args []string) error {
+		k8sExperimentOptions.initK8sExperiment()
+		return k8sExperimentOptions.experiment.Run(k8sExperimentOptions.expIO)
 	}
 
-	AddExperimentIdOption(cmd, o)
-	// Add any other options here
+	k8sExperimentOptions.addExperimentIdOption(getCmd.Flags())
 
-	// Prevent default options from being displayed by the help
-	HideGenericCliOptions(cmd)
-
-	return cmd
+	// runCmd is now initialized
+	kCmd.AddCommand(runCmd)
 }

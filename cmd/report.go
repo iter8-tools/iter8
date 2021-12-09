@@ -6,34 +6,39 @@ import (
 	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-func NewReportCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newK8sExperimentOptions()
+var reportCmd *cobra.Command
 
-	cmd := basecli.NewReportCmd()
+func init() {
+	// initialize reportCmd
+	reportCmd = basecli.NewReportCmd()
+
 	var example = `
-# Generate text report for the most recent experiment running in current Kubernetes context
-iter8 k report`
-	cmd.Example = fmt.Sprintf("%s%s\n", cmd.Example, example)
-	cmd.SilenceUsage = true
-	cmd.PreRunE = func(c *cobra.Command, args []string) error {
-		// precompute commonly used values derivable from GetOptions
-		return o.initK8sExperiment(factory)
-		// add any additional precomutation and/or validation here
-	}
-	cmd.RunE = func(c *cobra.Command, args []string) error {
-		return o.experiment.Report(basecli.ReportOptions.OutputFormat)
+	# Generate text report for the most recent experiment running in current Kubernetes context
+	iter8 k report`
+	reportCmd.Example = fmt.Sprintf("%s%s\n", reportCmd.Example, example)
 
+	reportCmd.SilenceErrors = true
+	reportCmd.RunE = func(c *cobra.Command, args []string) error {
+		k8sExperimentOptions.initK8sExperiment()
+		return k8sExperimentOptions.experiment.Report(basecli.ReportOptions.OutputFormat)
 	}
 
-	AddExperimentIdOption(cmd, o)
-	// Add any other options here
+	getCmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get a list of experiments running in the current context",
+		Example: `
+# Get list of experiments running in cluster
+iter8 k get`,
+		SilenceUsage: true,
+		RunE: func(c *cobra.Command, args []string) error {
+			k8sExperimentOptions.initK8sExperiment()
+			return runGetCmd(c, args, k8sExperimentOptions)
+		},
+	}
+	k8sExperimentOptions.addExperimentIdOption(getCmd.Flags())
 
-	// Prevent default options from being displayed by the help
-	HideGenericCliOptions(cmd)
-
-	return cmd
+	// getCmd is now initialized
+	kCmd.AddCommand(getCmd)
 }

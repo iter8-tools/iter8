@@ -7,25 +7,20 @@ import (
 	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
-func NewAssertCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newK8sExperimentOptions()
+var assertCmd *cobra.Command
 
-	cmd := basecli.NewAssertCmd()
+func init() {
+	// initialize assertCmd
+	assertCmd = basecli.NewAssertCmd()
 	var example = `
 # assert that the most recent experiment running in the Kubernetes context is complete
 iter8 k assert -c completed`
-	cmd.Example = fmt.Sprintf("%s%s\n", cmd.Example, example)
-	cmd.PreRunE = func(c *cobra.Command, args []string) error {
-		// precompute commonly used values derivable from GetOptions
-		return o.initK8sExperiment(factory)
-		// add any additional precomutation and/or validation here
-	}
-	cmd.RunE = func(c *cobra.Command, args []string) error {
-		allGood, err := o.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
+	assertCmd.Example = fmt.Sprintf("%s%s\n", assertCmd.Example, example)
+	assertCmd.RunE = func(c *cobra.Command, args []string) error {
+		k8sExperimentOptions.initK8sExperiment()
+		allGood, err := k8sExperimentOptions.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
 		if err != nil || !allGood {
 			return err
 		}
@@ -36,16 +31,8 @@ iter8 k assert -c completed`
 
 		return nil
 	}
+	k8sExperimentOptions.addExperimentIdOption(assertCmd.Flags())
 
-	AddExperimentIdOption(cmd, o)
-	// Add any other options here
-
-	// Prevent default options from being displayed by the help
-	HideGenericCliOptions(cmd)
-
-	return cmd
-}
-
-func init() {
-
+	// assertCmd is now initialized
+	kCmd.AddCommand(assertCmd)
 }
