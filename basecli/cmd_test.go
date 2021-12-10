@@ -1,3 +1,3 @@
 package basecli
 
-func ExampleHubCmd() {}
+func ExamplehubCmd() {}

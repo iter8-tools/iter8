@@ -92,7 +92,6 @@ var k8sCmd = &cobra.Command{
 	Example: `
 # Generate Kubernetes manifest
 iter8 gen k8s`,
-	SilenceUsage: true,
 	// Put any option computation and/or validatiom here
 	// PreRunE: func(c *cobra.Command, args []string) error {
 	RunE: func(c *cobra.Command, args []string) error {

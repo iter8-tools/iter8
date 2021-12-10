@@ -30,8 +30,8 @@ func ParseValues(values []string, v chartutil.Values) error {
 	return nil
 }
 
-// GoCmd represents the go command
-var GoCmd = &cobra.Command{
+// goCmd represents the go command
+var goCmd = &cobra.Command{
 	Use:   "go",
 	Short: "render a custom go template in the file go.tpl with values",
 	Long: `
@@ -92,5 +92,5 @@ func RenderGoTpl(v chartutil.Values, filePath string) (*bytes.Buffer, error) {
 }
 
 func init() {
-	genCmd.AddCommand(GoCmd)
+	genCmd.AddCommand(goCmd)
 }

@@ -70,7 +70,6 @@ func init() {
 		Example: `
 # Get list of experiments running in cluster
 iter8 k get`,
-		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)
 			return runGetCmd(c, args, k8sExperimentOptions)

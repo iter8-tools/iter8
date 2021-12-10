@@ -45,8 +45,8 @@ var hubUsage = `
 	For example: github.com/iter8-tools/iter8.git?ref=master//mkdocs/docs/hub/
 `
 
-// HubCmd represents the hub command
-var HubCmd = &cobra.Command{
+// hubCmd represents the hub command
+var hubCmd = &cobra.Command{
 	Use:   "hub",
 	Short: "Download an experiment folder from Iter8 hub",
 	Long:  hubUsage,
@@ -81,7 +81,7 @@ var HubCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(HubCmd)
-	HubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid experiment folder located under hub")
-	HubCmd.MarkFlagRequired("experiment")
+	RootCmd.AddCommand(hubCmd)
+	hubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid experiment folder located under hub")
+	hubCmd.MarkFlagRequired("experiment")
 }
