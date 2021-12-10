@@ -1,3 +1,0 @@
-package cmd
-
-func ExampleHubCmd() {}

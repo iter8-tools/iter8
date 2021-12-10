@@ -13,12 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package basecli
 
 import (
 	"io/ioutil"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
@@ -67,13 +66,6 @@ var expCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		validate := validator.New()
-		// returns nil or ValidationErrors ( []FieldError )
-		err = validate.Struct(e.Experiment)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("invalid experiment specification")
-			return err
-		}
 
 		// write experiment spec file
 		err = ioutil.WriteFile(experimentSpecPath, specBytes, 0664)
@@ -86,15 +78,5 @@ var expCmd = &cobra.Command{
 }
 
 func init() {
-	GenCmd.AddCommand(expCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// expCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// expCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	genCmd.AddCommand(expCmd)
 }

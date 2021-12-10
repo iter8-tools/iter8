@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-playground/validator"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
@@ -36,13 +37,21 @@ func MakeAssess(t *TaskSpec) (Task, error) {
 	// convert t to jsonBytes
 	jsonBytes, _ = json.Marshal(t)
 	// convert jsonString to AssessTask
-	ct := &assessTask{}
-	err = json.Unmarshal(jsonBytes, &ct)
+	at := &assessTask{}
+	err = json.Unmarshal(jsonBytes, &at)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal assess task")
 		return nil, err
 	}
-	bt = ct
+
+	validate := validator.New()
+	err = validate.Struct(at)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("invalid assess task specification")
+		return nil, err
+	}
+
+	bt = at
 	return bt, nil
 }
 
@@ -70,9 +79,12 @@ func (t *assessTask) GetName() string {
 
 // Run executes the assess-app-versions task
 func (t *assessTask) Run(exp *Experiment) error {
+	if exp.Result.Insights == nil {
+		log.Logger.Error("uninitialized insights within experiment")
+		return errors.New("uninitialized insights within experiment")
+	}
 	if len(t.With.SLOs) == 0 ||
-		exp.Result.Insights.NumAppVersions == nil ||
-		*exp.Result.Insights.NumAppVersions == 0 {
+		exp.Result.Insights.NumVersions == 0 {
 		// do nothing for now
 		// todo: fix when rewards are introduced
 
@@ -81,13 +93,10 @@ func (t *assessTask) Run(exp *Experiment) error {
 	}
 
 	// set insight type (if needed)
-	err := exp.Result.Insights.setInsightType(InsightTypeSLO)
-	if err != nil {
-		return err
-	}
+	exp.Result.Insights.setInsightType(InsightTypeSLO)
 
 	// set SLOStrs (if needed)
-	err = exp.Result.Insights.setSLOStrs(getSLOStrs(t.With.SLOs))
+	err := exp.Result.Insights.setSLOStrs(getSLOStrs(t.With.SLOs))
 	if err != nil {
 		return err
 	}
@@ -111,8 +120,8 @@ func (t *assessTask) Run(exp *Experiment) error {
 func evaluateSLOs(exp *Experiment, slos []SLO) [][]bool {
 	slosSatisfied := make([][]bool, len(slos))
 	for i := 0; i < len(slos); i++ {
-		slosSatisfied[i] = make([]bool, *exp.Result.Insights.NumAppVersions)
-		for j := 0; j < *exp.Result.Insights.NumAppVersions; j++ {
+		slosSatisfied[i] = make([]bool, exp.Result.Insights.NumVersions)
+		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 			slosSatisfied[i][j] = sloSatisfied(exp, slos, i, j)
 		}
 	}
@@ -145,7 +154,7 @@ func sloSatisfied(e *Experiment, slos []SLO, i int, j int) bool {
 // computeSLOsSatisfiedBy computes the subset of versions that satisfy SLOs
 func computeSLOsSatisfiedBy(exp *Experiment) []int {
 	sats := []int{}
-	for j := 0; j < *exp.Result.Insights.NumAppVersions; j++ {
+	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 		sat := true
 		for i := range exp.Result.Insights.SLOStrs {
 			sat = sat && exp.Result.Insights.SLOsSatisfied[i][j]
