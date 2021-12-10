@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -209,30 +208,17 @@ func (o *K8sExperimentOptions) addExperimentIdOption(p *pflag.FlagSet) {
 }
 
 type K8sExperimentOptions struct {
-	Streams              genericclioptions.IOStreams
-	ConfigFlags          *genericclioptions.ConfigFlags
-	ResourceBuilderFlags *genericclioptions.ResourceBuilderFlags
-	namespace            string
-	client               *kubernetes.Clientset
-
+	ConfigFlags  *genericclioptions.ConfigFlags
+	namespace    string
+	client       *kubernetes.Clientset
 	experimentId string
-
-	expIO      *KubernetesExpIO
-	experiment *basecli.Experiment
+	expIO        *KubernetesExpIO
+	experiment   *basecli.Experiment
 }
 
 func newK8sExperimentOptions() *K8sExperimentOptions {
-	rbFlags := &genericclioptions.ResourceBuilderFlags{}
-	rbFlags.WithAllNamespaces(false)
-
 	return &K8sExperimentOptions{
-		Streams: genericclioptions.IOStreams{
-			In:     os.Stdin,
-			Out:    os.Stdout,
-			ErrOut: os.Stderr,
-		},
-		ConfigFlags:          genericclioptions.NewConfigFlags(true),
-		ResourceBuilderFlags: rbFlags,
+		ConfigFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag(),
 	}
 }
 

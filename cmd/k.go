@@ -21,5 +21,6 @@ iter8 gen k8s --set id=$EXPERIMENT_ID | kubectl delete -f -`,
 
 func init() {
 	RootCmd.AddCommand(kCmd)
-	k8sExperimentOptions.ConfigFlags.AddFlags(kCmd.PersistentFlags())
+	flags := kCmd.PersistentFlags()
+	k8sExperimentOptions.ConfigFlags.AddFlags(flags)
 }
