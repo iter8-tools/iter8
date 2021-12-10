@@ -9,17 +9,16 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	basecli "github.com/iter8-tools/iter8/cmd"
-	"gopkg.in/yaml.v2"
+	"github.com/iter8-tools/iter8/basecli"
+	"github.com/spf13/pflag"
+	"sigs.k8s.io/yaml"
 
-	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
-	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
 const (
@@ -54,7 +53,7 @@ func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error)
 func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
 	ctx := context.Background()
 
-	// A name is provided; get this experiment, if it exists
+	// An id is provided; get this experiment, if it exists
 	if len(id) != 0 {
 		nm := SpecSecretPrefix + id
 		s, err = client.CoreV1().Secrets(ns).Get(ctx, nm, metav1.GetOptions{})
@@ -176,6 +175,7 @@ type PayloadValue struct {
 
 // write experiment result to secret in Kubernetes context
 func (f *KubernetesExpIO) WriteResult(r *basecli.Experiment) error {
+	log.Logger.Debug("write result called")
 	rBytes, _ := yaml.Marshal(r.Result)
 
 	resultSecretName := f.Name + "-result"
@@ -192,7 +192,7 @@ func (f *KubernetesExpIO) WriteResult(r *basecli.Experiment) error {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
 		return err
 	}
-
+	log.Logger.Debug("wrote result: ", r.Result)
 	return err
 }
 
@@ -202,37 +202,28 @@ const (
 	ExperimentIdDescription = "remote experiment identifier; if not specified, the most recent experiment is used"
 )
 
-func AddExperimentIdOption(cmd *cobra.Command, o *K8sExperimentOptions) {
+func (o *K8sExperimentOptions) addExperimentIdOption(p *pflag.FlagSet) {
 	// Add options
-	cmd.Flags().StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
+	p.StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
 }
 
 type K8sExperimentOptions struct {
-	Streams              genericclioptions.IOStreams
-	ConfigFlags          *genericclioptions.ConfigFlags
-	ResourceBuilderFlags *genericclioptions.ResourceBuilderFlags
-	namespace            string
-	client               *kubernetes.Clientset
-
+	ConfigFlags  *genericclioptions.ConfigFlags
+	namespace    string
+	client       *kubernetes.Clientset
 	experimentId string
-
-	expIO      *KubernetesExpIO
-	experiment *basecli.Experiment
+	expIO        *KubernetesExpIO
+	experiment   *basecli.Experiment
 }
 
-func newK8sExperimentOptions(streams genericclioptions.IOStreams) *K8sExperimentOptions {
-	rbFlags := &genericclioptions.ResourceBuilderFlags{}
-	rbFlags.WithAllNamespaces(false)
-
+func newK8sExperimentOptions() *K8sExperimentOptions {
 	return &K8sExperimentOptions{
-		Streams:              streams,
-		ConfigFlags:          genericclioptions.NewConfigFlags(true),
-		ResourceBuilderFlags: rbFlags,
+		ConfigFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag(),
 	}
 }
 
-func (o *K8sExperimentOptions) initK8sExperiment(factory cmdutil.Factory) (err error) {
-	o.namespace, _, err = factory.ToRawKubeConfigLoader().Namespace()
+func (o *K8sExperimentOptions) initK8sExperiment(withResult bool) (err error) {
+	o.namespace, _, err = o.ConfigFlags.ToRawKubeConfigLoader().Namespace()
 	if err != nil {
 		return err
 	}
@@ -256,7 +247,7 @@ func (o *K8sExperimentOptions) initK8sExperiment(factory cmdutil.Factory) (err e
 		Name:      SpecSecretPrefix + o.experimentId,
 	}
 
-	o.experiment, err = basecli.Build(true, o.expIO)
+	o.experiment, err = basecli.Build(withResult, o.expIO)
 
 	return err
 }

@@ -29,6 +29,7 @@ theme:
   - navigation.sections
   - navigation.tabs
   - navigation.top
+  - navigation.indexes
   palette:
   - scheme: default
     primary: black
@@ -141,9 +142,10 @@ nav:
     - iter8 gen exp: user-guide/commands/iter8_gen_exp.md
     - iter8 gen go: user-guide/commands/iter8_gen_go.md
     - iter8 gen k8s: user-guide/commands/iter8_gen_k8s.md
-    - iter8 k get: user-guide/commands/iter8_k.md
-    - iter8 k assert: user-guide/commands/iter8_k.md
-    - iter8 k report: user-guide/commands/iter8_k.md
+    - iter8 k: user-guide/commands/iter8_k.md
+    - iter8 k get: user-guide/commands/iter8_k_get.md
+    - iter8 k assert: user-guide/commands/iter8_k_assert.md
+    - iter8 k report: user-guide/commands/iter8_k_report.md
   - Tasks:
     - gen-load-and-collect-metrics: user-guide/tasks/collect.md
     - assess-app-versions: user-guide/tasks/assess.md

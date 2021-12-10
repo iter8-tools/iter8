@@ -13,8 +13,8 @@ import (
 // Experiment specification and result
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks  []TaskSpec        `json:"tasks,omitempty" yaml:"tasks,omitempty" validate:"gt=0,required"`
-	Result *ExperimentResult `json:"result,omitempty" yaml:"result,omitempty" validate:"required"`
+	Tasks  []TaskSpec        `json:"tasks" yaml:"tasks"`
+	Result *ExperimentResult `json:"result" yaml:"result"`
 }
 
 // Task is an object that can be run
@@ -35,8 +35,8 @@ func GetIf(t Task) *string {
 
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
-	// StartTime is the time when the experiment run was started
-	StartTime *time.Time `json:"startTime,omitempty" yaml:"startTime,omitempty"`
+	// StartTime is the time when the experiment run started
+	StartTime time.Time `json:"startTime" yaml:"startTime"`
 
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
@@ -50,8 +50,8 @@ type ExperimentResult struct {
 
 // Insights is a structure to contain experiment insights
 type Insights struct {
-	// NumAppVersions is the number of app versions detected by Iter8
-	NumAppVersions *int `json:"numAppVersions,omitempty" yaml:"numAppVersions,omitempty"`
+	// NumVersions is the number of app versions detected by Iter8
+	NumVersions int `json:"numVersions" yaml:"numVersions"`
 
 	// InsightInfo identifies the types of insights produced by this experiment
 	InsightTypes []InsightType `json:"insightTypes,omitempty" yaml:"insightTypes,omitempty"`
@@ -75,7 +75,7 @@ type Insights struct {
 	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
 
 	// SLOsSatisfiedBy is the subset of versions that satisfy all SLOs
-	// every integer in this slice must be in the range 0 to NumAppVersions - 1 (inclusive)
+	// every integer in this slice must be in the range 0 to NumVersions - 1 (inclusive)
 	SLOsSatisfiedBy []int `json:"SLOsSatisfiedBy,omitempty" yaml:"SLOsSatisfiedBy,omitempty"`
 }
 
@@ -97,10 +97,10 @@ const (
 type MetricMeta struct {
 	Description string     `json:"description" yaml:"description"`
 	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
-	Type        MetricType `json:"type" yaml:"type" validate:"gt=0,required,oneof=Counter Gauge Histogram"`
-	XMin        *float64   `json:"xmin" yaml:"xmin" validate:"required_if=Type HistMetrics"`
-	XMax        *float64   `json:"xmax" yaml:"xmax" validate:"required_with=XMin"`
-	NumBuckets  *int       `json:"numBuckets" yaml:"numBuckets" validate:"required_with=XMin"`
+	Type        MetricType `json:"type" yaml:"type"`
+	XMin        *float64   `json:"xmin" yaml:"xmin"`
+	XMax        *float64   `json:"xmax" yaml:"xmax"`
+	NumBuckets  *int       `json:"numBuckets" yaml:"numBuckets"`
 }
 
 // SLO is a service level objective
@@ -142,13 +142,10 @@ func (in *Insights) hasInsightType(it InsightType) bool {
 }
 
 // setInsightType adds a specific InsightType to the list of experiment insights types
-func (in *Insights) setInsightType(it InsightType) error {
-	if in.hasInsightType(it) {
-		return nil
+func (in *Insights) setInsightType(it InsightType) {
+	if !in.hasInsightType(it) {
+		in.InsightTypes = append(in.InsightTypes, it)
 	}
-	// LHS can be nil
-	in.InsightTypes = append(in.InsightTypes, it)
-	return nil
 }
 
 // setSLOStrs sets the SLOStrs field in insights
@@ -176,22 +173,8 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 	// LHS will be nil
 	e.Result.Insights.SLOsSatisfied = make([][]bool, len(e.Result.Insights.SLOStrs))
 	for i := 0; i < len(e.Result.Insights.SLOStrs); i++ {
-		e.Result.Insights.SLOsSatisfied[i] = make([]bool, *e.Result.Insights.NumAppVersions)
+		e.Result.Insights.SLOsSatisfied[i] = make([]bool, e.Result.Insights.NumVersions)
 	}
-	return nil
-}
-
-// initialize the number of app versions
-func (in *Insights) initNumAppVersions(n int) error {
-	if in.NumAppVersions != nil {
-		if *in.NumAppVersions != n {
-			errStr := fmt.Sprint("inconsistent number for app versions; old: ", *in.NumAppVersions, " new: ", n)
-			log.Logger.Error(errStr)
-			return errors.New(errStr)
-		}
-	}
-
-	in.NumAppVersions = intPointer(n)
 	return nil
 }
 
@@ -216,13 +199,21 @@ func (in *Insights) initMetricValues(n int) error {
 
 func (e *Experiment) InitResults() {
 	e.Result = &ExperimentResult{
-		StartTime:         nil,
+		StartTime:         time.Now(),
 		NumCompletedTasks: 0,
 		Failure:           false,
-		Insights: &Insights{
-			NumAppVersions: nil,
-			MetricsInfo:    map[string]MetricMeta{},
-		},
+	}
+}
+
+func (r *ExperimentResult) InitInsights(n int, it []InsightType) {
+	r.Insights = &Insights{
+		NumVersions:  n,
+		InsightTypes: it,
+		MetricsInfo:  make(map[string]MetricMeta),
+		MetricValues: make([]map[string][]float64, n),
+	}
+	for i := 0; i < n; i++ {
+		r.Insights.MetricValues[i] = make(map[string][]float64)
 	}
 }
 
@@ -247,11 +238,9 @@ func (exp *Experiment) SLOs() bool {
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Insights != nil {
-				if exp.Result.Insights.NumAppVersions != nil {
-					if exp.Result.Insights.SLOsSatisfiedBy != nil {
-						if *exp.Result.Insights.NumAppVersions == len(exp.Result.Insights.SLOsSatisfiedBy) {
-							return true
-						}
+				if exp.Result.Insights.SLOsSatisfiedBy != nil {
+					if exp.Result.Insights.NumVersions == len(exp.Result.Insights.SLOsSatisfiedBy) {
+						return true
 					}
 				}
 			}

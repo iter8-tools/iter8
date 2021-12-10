@@ -1,4 +1,4 @@
-package cmd
+package basecli
 
 import (
 	"encoding/json"
@@ -36,23 +36,20 @@ func (hd *histograms) toJSON() string {
 var formatHTML = `
 	<!doctype html>
 	<html lang="en">
-		<head>
-			<!-- Required meta tags -->
-			<meta charset="utf-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	
-			<!-- Bootstrap CSS -->
-			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	
-			<title>Iter8 Experiment Result</title>
-		</head>
+
+		{{ headSection }}
+
 		<body>
 
+			{{ dependencies }}
+
 			<div class="container">
-				<h1>Iter8 Experiment Report</h1>
+
+				<h1 class="display-4">Experiment Report</h1>
+				<h3 class="display-6 text-muted">Status, Insights, and Metrics from Iter8 experiment</h3>
 				<hr>
 
-				{{ .HTMLState }}
+				{{ .HTMLStatus }}
 
 				{{ if .ContainsInsight "SLOs" }} 
 					{{ .HTMLSLOSection }}
@@ -68,22 +65,10 @@ var formatHTML = `
 
 			</div>
 		
-			<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-			<!-- NVD3 -->
-		  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
-			<!-- Include d3.js first -->
-			<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
-			<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
-
 			{{ if .ContainsInsight "HistMetrics" }}
 				{{ styleSection }}
 				{{ .HTMLHistData }}
 				{{ .HTMLHistCharts }}
-
 			{{- end }}
 
 		</body>
@@ -94,8 +79,8 @@ var formatHTML = `
 func styleSection() string {
 	return `
 <style>
-text {
-		font: 12px sans-serif;
+.nvd3 text {
+	font-size: 16px;
 }
 svg {
 		display: block;
@@ -105,6 +90,44 @@ svg {
 		width: 100%;
 }
 </style>
+`
+}
+
+// headSection is the fixed head section for experiment report
+func headSection() string {
+	return `
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<style>
+			html {
+				font-size: 18px;
+			}		
+		</style>
+
+		<title>Iter8 Experiment Report</title>
+	</head>
+`
+}
+
+// dependencies is the dependencies section for the HTML report
+func dependencies() string {
+	return `
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+	<!-- NVD3 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
+	<!-- Include d3.js first -->
+	<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
 `
 }
 
@@ -129,10 +152,10 @@ func (e *Experiment) HistData() []histograms {
 	for mname, minfo := range e.Result.Insights.MetricsInfo {
 		if minfo.Type == base.HistogramMetricType {
 			grams := histograms{
-				XAxisLabel: fmt.Sprintf("Histogram of %v", mname),
+				XAxisLabel: fmt.Sprintf("%v", mname),
 				Datum:      []hist{},
 			}
-			for i := 0; i < *e.Result.Insights.NumAppVersions; i++ {
+			for i := 0; i < e.Result.Insights.NumVersions; i++ {
 				gram := hist{
 					Values: []histBar{},
 					Key:    fmt.Sprintf("Version %v", i),
@@ -194,27 +217,40 @@ func (e *Experiment) HTMLHistCharts() string {
 	`
 }
 
-// HTMLState prints the current state of the experiment
-func (e *Experiment) HTMLState() string {
+// HTMLStatus prints the current state of the experiment
+func (e *Experiment) HTMLStatus() string {
+	completionStatus := "Experiment is complete."
+	if !e.Completed() {
+		completionStatus = "Experiment is yet to complete."
+	}
+
+	failureStatus := "Experiment has failures."
+	textColor := "text-failure"
+	if e.NoFailure() {
+		failureStatus = "Experiment has no failures."
+		textColor = "text-success"
+	}
+
+	taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
+
+	msg := fmt.Sprintln(taskStatus)
+	msg += fmt.Sprintln(failureStatus)
+	msg += fmt.Sprintln(completionStatus)
+
 	return fmt.Sprintf(`
-	<section>
-		<h2>Summary</h2>
-		<ul class="list-group">
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				Experiment completed
-				<span><strong>%v</strong></span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				Experiment failed
-				<span><strong>%v</strong></span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				Number of completed tasks
-				<span><strong>%v</strong></span>
-			</li>
-		</ul>
+	<section class="mt-5">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="card">
+					<h5 class="card-header">Status</h5>
+					<div class="card-body">
+						<p class="card-text %v">%v</p>
+					</div>
+				</div>
+			</div>
+		</div>
 	</section>
-	<hr>`, e.Completed(), !e.NoFailure(), len(e.tasks))
+	`, textColor, msg)
 }
 
 // HTMLSLOSection prints the SLO section in HTML report
@@ -232,15 +268,15 @@ func (e *Experiment) HTMLSLOSection() string {
 func (e *Experiment) printHTMLSLOVersions() string {
 	in := e.Result.Insights
 	out := ""
-	if *in.NumAppVersions > 1 {
-		for i := 0; i < *in.NumAppVersions; i++ {
+	if in.NumVersions > 1 {
+		for i := 0; i < in.NumVersions; i++ {
 			out += fmt.Sprintf(`
 			<th scope="col">Version %v</th>
 			`, i)
 		}
 	} else {
 		out += `
-		<th scope="col">SLO satisfied</th>
+		<th scope="col">Satisfied</th>
 		`
 	}
 	return out
@@ -255,10 +291,14 @@ func (e *Experiment) printHTMLSLORows() string {
 		<td>%v</td>
 		`, in.SLOStrs[i])
 
-		for j := 0; j < *in.NumAppVersions; j++ {
+		for j := 0; j < in.NumVersions; j++ {
+			cellClass := "text-success"
+			if !in.SLOsSatisfied[i][j] {
+				cellClass = "text-danger"
+			}
 			out += fmt.Sprintf(`
-			<td>%v</td>
-			`, in.SLOsSatisfied[i][j])
+			<td class="%v">%v</td>
+			`, cellClass, in.SLOsSatisfied[i][j])
 		}
 	}
 	return out
@@ -267,11 +307,12 @@ func (e *Experiment) printHTMLSLORows() string {
 // print HTML SLO validation results
 func (e *Experiment) printHTMLSLOs() string {
 	sloStrs := `
-	<section>
-			<h2>Service level objectives (SLOs)</h2>
-			<p>Whether or not SLOs are satisfied</p>
+	<section class="mt-5">
+			<h3 class="display-6">Service level objectives (SLOs)</h3>
+			<h4 class="display-7 text-muted">Whether or not SLOs are satisfied</h4>
+			<hr>
 			<table class="table">
-			<thead class="thead-dark">
+			<thead class="thead-light">
 				<tr>
 					<th scope="col">SLO</th>
 	` +
@@ -287,7 +328,6 @@ func (e *Experiment) printHTMLSLOs() string {
 		</tbody>
 		</table>
 		</section>
-		<hr>
 		`
 
 	return sloStrs
@@ -296,10 +336,10 @@ func (e *Experiment) printHTMLSLOs() string {
 // print HTML no SLOs
 func (e *Experiment) printHTMLNoSLOs() string {
 	return `
-	<section>
+	<section class="mt-5">
 		<h2>SLOs Unavailable</h2>
 	</section>
-	<hr>`
+	`
 }
 
 // HTMLHistMetricsSection prints histogram metrics in the HTML report
@@ -313,11 +353,14 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 						<svg id="hist-chart-%v" style="height:500px"></svg>
 					</div>
 			</section>
-			<hr>`, i))
+			`, i))
 		}
 		return `
-		<section>
-		<h2>Histogram Metrics</h2>
+		<section class="mt-5">
+		<h3 class="display-6">Histogram Metrics</h3>
+		<h4 class="display-7 text-muted">Visualizations for Histogram-type Metrics</h4>
+		<hr>
+
 		` + strings.Join(divs, "\n") +
 			`</section>`
 	}
@@ -327,8 +370,8 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 func (e *Experiment) printHTMLMetricVersions() string {
 	in := e.Result.Insights
 	out := ""
-	if *in.NumAppVersions > 1 {
-		for i := 0; i < *in.NumAppVersions; i++ {
+	if in.NumVersions > 1 {
+		for i := 0; i < in.NumVersions; i++ {
 			out += fmt.Sprintf(`
 			<th scope="col">Version %v</th>
 			`, i)
@@ -353,22 +396,24 @@ func (e *Experiment) printHTMLMetricRows() string {
 
 	out := ""
 	for i := 0; i < len(keys); i++ {
-		u := ""
-		// add units if available
-		units := e.Result.Insights.MetricsInfo[keys[i]].Units
-		if units != nil {
-			u += " (" + *units + ")"
-		}
+		if e.Result.Insights.MetricsInfo[keys[i]].Type != base.HistogramMetricType {
+			u := ""
+			// add units if available
+			units := e.Result.Insights.MetricsInfo[keys[i]].Units
+			if units != nil {
+				u += " (" + *units + ")"
+			}
 
-		out += `<tr scope="row">` + "\n"
-		out += fmt.Sprintf(`
-		<td>%v</td>
-		`, keys[i]+u)
-
-		for j := 0; j < *in.NumAppVersions; j++ {
+			out += `<tr scope="row">` + "\n"
 			out += fmt.Sprintf(`
 			<td>%v</td>
-			`, e.getMetricValue(keys[i], j))
+			`, keys[i]+u)
+
+			for j := 0; j < in.NumVersions; j++ {
+				out += fmt.Sprintf(`
+				<td>%v</td>
+				`, e.getMetricValue(keys[i], j))
+			}
 		}
 	}
 	return out
@@ -377,11 +422,13 @@ func (e *Experiment) printHTMLMetricRows() string {
 // HTMLMetricsSection prints metrics in the HTML report
 func (e *Experiment) HTMLMetricsSection() string {
 	metricStrs := `
-	<section>
-			<h2>Metrics</h2>
-			<p>Latest observed values of metrics</p>
+	<section class="mt-5">
+			<h3 class="display-6">Metrics</h3>
+			<h4 class="display-7 text-muted">Latest observed values of metrics</h4>
+			<hr>
+
 			<table class="table">
-			<thead class="thead-dark">
+			<thead class="thead-light">
 				<tr>
 					<th scope="col">Metrics</th>
 	` +
@@ -397,7 +444,6 @@ func (e *Experiment) HTMLMetricsSection() string {
 		</tbody>
 		</table>
 		</section>
-		<hr>
 		`
 
 	return metricStrs

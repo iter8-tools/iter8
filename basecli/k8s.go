@@ -1,20 +1,17 @@
-package cmd
+package basecli
 
 import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"strings"
 	"text/template"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	basecli "github.com/iter8-tools/iter8/cmd"
 
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/chartutil"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -31,12 +28,12 @@ type k8sExperiment struct {
 // run runs the command
 func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
 	v := chartutil.Values{}
-	err = basecli.ParseValues(basecli.GenOptions.Values, v)
+	err = ParseValues(GenOptions.Values, v)
 	if err != nil {
 		return err
 	}
 
-	exp, err := basecli.Build(false, &basecli.FileExpIO{})
+	exp, err := Build(false, &FileExpIO{})
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
 		return err
@@ -89,33 +86,20 @@ func RenderTpl(k8sExp k8sExperiment, filePath string) (*bytes.Buffer, error) {
 	return &b, nil
 }
 
-// toYAML takes an interface, marshals it to yaml, and returns a string. It will
-// always return a string, even on marshal error (empty string).
-//
-// This is designed to be called from a template.
-func toYAML(v interface{}) string {
-	data, err := yaml.Marshal(v)
-	if err != nil {
-		// Swallow errors inside of a template.
-		return ""
-	}
-	return strings.TrimSuffix(string(data), "\n")
-}
-
-func NewGetK8sCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "k8s",
-		Short: "Generate manifest for running experiment in Kubernetes",
-		Example: `
+var k8sCmd = &cobra.Command{
+	Use:   "k8s",
+	Short: "Generate manifest for running experiment in Kubernetes",
+	Example: `
 # Generate Kubernetes manifest
 iter8 gen k8s`,
-		SilenceUsage: true,
-		// Put any option computation and/or validatiom here
-		// PreRunE: func(c *cobra.Command, args []string) error {
-		RunE: func(c *cobra.Command, args []string) error {
-			return runGetK8sCmd(c, args)
-		},
-	}
+	// Put any option computation and/or validatiom here
+	// PreRunE: func(c *cobra.Command, args []string) error {
+	RunE: func(c *cobra.Command, args []string) error {
+		return runGetK8sCmd(c, args)
+	},
+}
 
-	return cmd
+func init() {
+	// extend gen command with the k8s command
+	genCmd.AddCommand(k8sCmd)
 }

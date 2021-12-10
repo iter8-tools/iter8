@@ -15,6 +15,7 @@ import (
 	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
 	"fortio.org/fortio/stats"
+	"github.com/go-playground/validator"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -51,9 +52,9 @@ type collectInputs struct {
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
 	// Percentiles are the latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
-	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
+	Percentiles []float64 `json:"percentiles" yaml:"percentiles" validate:"unique,dive,gte=0.0,lte=100.0"`
 	// A non-empty list of version values.
-	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo" validate:"required"`
+	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo" validate:"required,notallnil"`
 }
 
 const (
@@ -68,7 +69,7 @@ const (
 	stdDevMetricName           = "stddev-latency"
 	minLatencyMetricName       = "min-latency"
 	maxLatencyMetricName       = "max-latency"
-	latencyHistogramMetricName = "latency-histogram"
+	latencyHistogramMetricName = "latency"
 )
 
 var (
@@ -98,7 +99,24 @@ func (t *collectTask) errorCode(code int) bool {
 // collectTask enables collection of Iter8's built-in metrics.
 type collectTask struct {
 	taskMeta
-	With collectInputs `json:"with" yaml:"with"`
+	With collectInputs `json:"with" yaml:"with" validate:"required"`
+}
+
+// notAllNil validates that not all entries in a slice are nil
+func notAllNil(fl validator.FieldLevel) bool {
+	slice, ok := fl.Field().Interface().([]*version)
+	if !ok {
+		log.Logger.WithStackTrace(fl.Field().String()).Error("unable to convert field to slice of version pointers")
+		return false
+	}
+	allnil := true
+	for _, s := range slice {
+		if s != nil {
+			allnil = false
+			break
+		}
+	}
+	return !allnil
 }
 
 // MakeCollect constructs a CollectTask out of a collect task spec
@@ -115,9 +133,21 @@ func MakeCollect(t *TaskSpec) (Task, error) {
 	if err == nil {
 		ct := &collectTask{}
 		err = json.Unmarshal(jsonBytes, &ct)
-		if ct.With.VersionInfo == nil {
-			return nil, errors.New("collect task with nil versionInfo")
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("invalid collect task specification")
+			return nil, err
 		}
+
+		validate := validator.New()
+		// returns nil or ValidationErrors ( []FieldError )
+		validate.RegisterValidation("notallnil", notAllNil)
+
+		err = validate.Struct(ct)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("invalid collect task specification")
+			return nil, err
+		}
+
 		bt = ct
 	}
 	return bt, err
@@ -250,25 +280,15 @@ func (t *collectTask) Run(exp *Experiment) error {
 		}
 	}
 
+	// initialize insights if required
+	if exp.Result.Insights == nil {
+		exp.Result.InitInsights(len(t.With.VersionInfo), []InsightType{InsightTypeMetrics})
+	}
+
 	in := exp.Result.Insights
 
-	// initialize num app versions (if needed)
-	err = in.initNumAppVersions(len(t.With.VersionInfo))
-	if err != nil {
-		return err
-	}
-
-	// set metrics insight type (if needed)
-	err = in.setInsightType(InsightTypeMetrics)
-	if err != nil {
-		return err
-	}
-
 	// set hist metrics insight type (if needed)
-	err = in.setInsightType(InsightTypeHistMetrics)
-	if err != nil {
-		return err
-	}
+	in.setInsightType(InsightTypeHistMetrics)
 
 	// initialize metric values (if needed)
 	err = in.initMetricValues(len(t.With.VersionInfo))

@@ -7,11 +7,9 @@ import (
 	"text/tabwriter"
 
 	"github.com/iter8-tools/iter8/base/log"
-	basecli "github.com/iter8-tools/iter8/cmd"
+	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
 const (
@@ -22,6 +20,8 @@ const (
 	NumTasksHeader          = "TASKS"
 	NumTasksCompletedHeader = "TASKS_COMPLETED"
 )
+
+var getCmd *cobra.Command
 
 func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err error) {
 	experimentSecrets, err := GetExperimentSecrets(o.client, o.namespace)
@@ -36,6 +36,7 @@ func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err 
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', 0)
 	fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", AppHeader, IdHeader, CompletedHeader, FailedHeader, NumTasksHeader, NumTasksCompletedHeader)
+
 	for _, experimentSecret := range experimentSecrets {
 
 		expIO := &KubernetesExpIO{
@@ -61,31 +62,21 @@ func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err 
 	return nil
 }
 
-func NewGetCmd(factory cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := newK8sExperimentOptions(streams)
-
-	cmd := &cobra.Command{
+func init() {
+	// initialize getCmd
+	getCmd = &cobra.Command{
 		Use:   "get",
 		Short: "Get a list of experiments running in the current context",
 		Example: `
 # Get list of experiments running in cluster
 iter8 k get`,
-		SilenceUsage: true,
+		RunE: func(c *cobra.Command, args []string) error {
+			k8sExperimentOptions.initK8sExperiment(true)
+			return runGetCmd(c, args, k8sExperimentOptions)
+		},
 	}
-	cmd.PreRunE = func(c *cobra.Command, args []string) error {
-		// precompute commonly used values derivable from GetOptions
-		return o.initK8sExperiment(factory)
-		// add any additional precomutation and/or validation here
-	}
-	cmd.RunE = func(c *cobra.Command, args []string) error {
-		return runGetCmd(c, args, o)
-	}
+	k8sExperimentOptions.addExperimentIdOption(getCmd.Flags())
 
-	AddExperimentIdOption(cmd, o)
-	// Add any other options here
-
-	// Prevent default options from being displayed by the help
-	HideGenericCliOptions(cmd)
-
-	return cmd
+	// getCmd is now initialized
+	kCmd.AddCommand(getCmd)
 }
