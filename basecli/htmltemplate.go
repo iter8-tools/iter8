@@ -101,6 +101,10 @@ func headSection() string {
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+
+		<!-- Font Awesome -->
+		<script src="https://kit.fontawesome.com/db794f5235.js" crossorigin="anonymous"></script>
+
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
@@ -226,11 +230,16 @@ func (e *Experiment) HTMLStatus() string {
 
 	failureStatus := "Experiment has failures."
 	showClass := "show"
-	textColor := "text-failure"
+	textColor := "text-danger"
+	thumbs := "down"
+	autoHide := "false"
+
 	if e.NoFailure() {
 		failureStatus = "Experiment has no failures."
 		textColor = "text-success"
 		showClass = ""
+		thumbs = "up"
+		autoHide = "true"
 	}
 
 	taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
@@ -241,8 +250,12 @@ func (e *Experiment) HTMLStatus() string {
 
 	return fmt.Sprintf(`
 		<div class="toast fade %v mw-100" role="alert" aria-live="assertive" aria-atomic="true">
-			<div class="toast-header">
-				<strong class="mr-auto">Experiment Status</strong>
+			<div class="toast-header %v">
+				<strong class="mr-auto">
+					Experiment Status
+					&nbsp;&nbsp;
+					<i class="fas fa-thumbs-%v"></i>
+				</strong>
 				<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -255,12 +268,12 @@ func (e *Experiment) HTMLStatus() string {
 		<script>
 		$(document).ready(function(){
 			$(".toast").toast({
-				autohide: true,
+				autohide: %v,
 				delay: 10000
 			}).toast('show');
 		});	
 		</script>
-	`, showClass, textColor, msg)
+	`, showClass, textColor, thumbs, textColor, msg, autoHide)
 }
 
 // HTMLSLOSection prints the SLO section in HTML report
