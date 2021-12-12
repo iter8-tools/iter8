@@ -39,13 +39,10 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 	}
 	e.InitResults()
 	if withResult {
-		log.Logger.Debug("with result is true... reading in result...")
 		e.Result, err = expio.ReadResult()
 		if err != nil {
 			return nil, err
 		}
-		resBytes, _ := yaml.Marshal(e.Result)
-		log.Logger.Debug("set result: ", string(resBytes))
 	}
 
 	err = e.buildTasks()

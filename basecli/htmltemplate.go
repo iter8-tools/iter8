@@ -46,7 +46,7 @@ var formatHTML = `
 			<div class="container">
 
 				<h1 class="display-4">Experiment Report</h1>
-				<h3 class="display-6 text-muted">Status, Insights, and Metrics from Iter8 experiment</h3>
+				<h3 class="display-6">Insights from Iter8 Experiment</h3>
 				<hr>
 
 				{{ .HTMLStatus }}
@@ -225,32 +225,42 @@ func (e *Experiment) HTMLStatus() string {
 	}
 
 	failureStatus := "Experiment has failures."
+	showClass := "show"
 	textColor := "text-failure"
 	if e.NoFailure() {
 		failureStatus = "Experiment has no failures."
 		textColor = "text-success"
+		showClass = ""
 	}
 
 	taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
 
-	msg := fmt.Sprintln(taskStatus)
+	msg := fmt.Sprintln(completionStatus)
 	msg += fmt.Sprintln(failureStatus)
-	msg += fmt.Sprintln(completionStatus)
+	msg += fmt.Sprintln(taskStatus)
 
 	return fmt.Sprintf(`
-	<section class="mt-5">
-		<div class="row">
-			<div class="col-sm-12">
-				<div class="card">
-					<h5 class="card-header">Status</h5>
-					<div class="card-body">
-						<p class="card-text %v">%v</p>
-					</div>
-				</div>
+		<div class="toast fade %v mw-100" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="toast-header">
+				<strong class="mr-auto">Experiment Status</strong>
+				<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
 			</div>
-		</div>
-	</section>
-	`, textColor, msg)
+			<div class="toast-body %v">
+				%v
+			</div>
+	 	</div>
+	
+		<script>
+		$(document).ready(function(){
+			$(".toast").toast({
+				autohide: true,
+				delay: 10000
+			}).toast('show');
+		});	
+		</script>
+	`, showClass, textColor, msg)
 }
 
 // HTMLSLOSection prints the SLO section in HTML report
