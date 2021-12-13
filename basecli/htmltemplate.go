@@ -268,6 +268,10 @@ func (e *Experiment) HTMLStatus() string {
 	
 		<script>
 		$(document).ready(function(){
+			$(function () {
+				$('[data-toggle="tooltip"]').tooltip()
+			});	
+
 			$(".toast").toast({
 				autohide: %v,
 				delay: 10000
@@ -306,23 +310,24 @@ func (e *Experiment) printHTMLSLOVersions() string {
 	return out
 }
 
-func getMetricWithUnits(in *base.Insights, metricName string) (string, error) {
+func getMetricWithUnitsAndDescription(in *base.Insights, metricName string) (string, string, error) {
 	m, ok := in.MetricsInfo[metricName]
 	if !ok {
 		e := fmt.Errorf("unknown metric name %v", metricName)
 		log.Logger.Error(e)
-		return "", e
+		return "", "", e
 	}
 	str := metricName
 	if m.Units != nil {
 		str = fmt.Sprintf("%v (%v)", str, *m.Units)
 	}
-	return str, nil
+	return str, m.Description, nil
 }
 
 func getMetricWithUnitsAndDescriptionHTML(in *base.Insights, metricName string) (string, error) {
-	str, err := getMetricWithUnits(in, metricName)
+	str, desc, err := getMetricWithUnitsAndDescription(in, metricName)
 	// TODO: Tooltip with description
+	str = fmt.Sprintf(`<a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="%v">%v</a>`, desc, str)
 	return str, err
 }
 
@@ -469,22 +474,18 @@ func (e *Experiment) printHTMLMetricRows() string {
 	out := ""
 	for i := 0; i < len(keys); i++ {
 		if e.Result.Insights.MetricsInfo[keys[i]].Type != base.HistogramMetricType {
-			u := ""
-			// add units if available
-			units := e.Result.Insights.MetricsInfo[keys[i]].Units
-			if units != nil {
-				u += " (" + *units + ")"
-			}
-
-			out += `<tr scope="row">` + "\n"
-			out += fmt.Sprintf(`
-			<td>%v</td>
-			`, keys[i]+u)
-
-			for j := 0; j < in.NumVersions; j++ {
+			str, err := getMetricWithUnitsAndDescriptionHTML(in, keys[i])
+			if err == nil {
+				out += `<tr scope="row">` + "\n"
 				out += fmt.Sprintf(`
 				<td>%v</td>
-				`, e.getMetricValue(keys[i], j))
+				`, str)
+
+				for j := 0; j < in.NumVersions; j++ {
+					out += fmt.Sprintf(`
+					<td>%v</td>
+					`, e.getMetricValue(keys[i], j))
+				}
 			}
 		}
 	}

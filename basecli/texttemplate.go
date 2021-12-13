@@ -114,7 +114,7 @@ func (e *Experiment) printSLOs(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "-----------------------------\t-----")
 
 	for i := 0; i < len(in.SLOs); i++ {
-		str, err := getMetricWithUnits(in, in.SLOs[i].Metric)
+		str, _, err := getMetricWithUnitsAndDescription(in, in.SLOs[i].Metric)
 		if err == nil {
 			fmt.Fprint(w, str)
 			for j := 0; j < in.NumVersions; j++ {
