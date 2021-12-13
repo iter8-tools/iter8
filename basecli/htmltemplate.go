@@ -21,8 +21,9 @@ type hist struct {
 }
 
 type histograms struct {
-	XAxisLabel string `json:"xAxisLabel" yaml:"xAxisLabel"`
-	Datum      []hist `json:"datum" yaml:"datum"`
+	XAxisLabel string  `json:"xAxisLabel" yaml:"xAxisLabel"`
+	Datum      []hist  `json:"datum" yaml:"datum"`
+	Width      float64 `json:"width" yaml:"width"`
 }
 
 func (hd *histograms) toJSON() string {
@@ -156,14 +157,25 @@ func (e *Experiment) HistData() []histograms {
 	gramsList := []histograms{}
 	for mname, minfo := range e.Result.Insights.MetricsInfo {
 		if minfo.Type == base.HistogramMetricType {
+			// figure out xAxisLabel
+			xAxisLabel := fmt.Sprintf("%v", mname)
+			if minfo.Units != nil {
+				xAxisLabel += " (" + *minfo.Units + ")"
+			}
+
 			grams := histograms{
-				XAxisLabel: fmt.Sprintf("%v", mname),
+				XAxisLabel: xAxisLabel,
 				Datum:      []hist{},
+				Width:      (*minfo.XMax - *minfo.XMin) / float64(*minfo.NumBuckets),
 			}
 			for i := 0; i < e.Result.Insights.NumVersions; i++ {
+				key := fmt.Sprintf("Version %v", i)
+				if e.Result.Insights.NumVersions == 1 {
+					key = "count"
+				}
 				gram := hist{
 					Values: []histBar{},
-					Key:    fmt.Sprintf("Version %v", i),
+					Key:    key,
 				}
 				if counts, ok := e.Result.Insights.MetricValues[i][mname]; ok && len(counts) > 0 {
 					for j := 0; j < len(counts); j++ {
@@ -190,13 +202,25 @@ func (e *Experiment) HTMLHistCharts() string {
 		var charts = [];
 		for (let i = 0; i < chartData.length; i++) {
 			nv.addGraph(function() {
-				charts.push(nv.models.multiBarChart().stacked(false).showControls(false));
+				charts.push(nv.models.multiBarChart());
+
 				charts[i]
+						.stacked(false)
+						.showControls(false)
 						.margin({left: 100, bottom: 100})
 						.useInteractiveGuideline(true)
-						.duration(250)
-						;
+						.duration(250);
 
+				var contentGenerator = charts[i].interactiveLayer.tooltip.contentGenerator();
+				var tooltip = charts[i].interactiveLayer.tooltip;
+				tooltip.headerFormatter(function (d) {
+					var lower = d;
+					var upper = d + chartData[i].width;
+					lower = lower.toFixed(2);
+					upper = upper.toFixed(2);
+					return "<p>Range: [" + lower + ", " + upper + "]";
+				});
+				
 				// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
 				charts[i].xAxis
 						.axisLabel(chartData[i].xAxisLabel)
@@ -240,7 +264,6 @@ func (e *Experiment) HTMLStatus() string {
 		textColor = "text-success"
 		showClass = ""
 		thumbs = "up"
-		autoHide = "true"
 	}
 
 	taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
@@ -434,8 +457,7 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 		}
 		return `
 		<section class="mt-5">
-		<h3 class="display-6">Histogram Metrics</h3>
-		<h4 class="display-7 text-muted">Visualizations for Histogram-type Metrics</h4>
+		<h3 class="display-6">Metric Histograms</h3>
 		<hr>
 
 		` + strings.Join(divs, "\n") +
@@ -496,8 +518,7 @@ func (e *Experiment) printHTMLMetricRows() string {
 func (e *Experiment) HTMLMetricsSection() string {
 	metricStrs := `
 	<section class="mt-5">
-			<h3 class="display-6">Metrics</h3>
-			<h4 class="display-7 text-muted">Latest observed values of metrics</h4>
+			<h3 class="display-6">Latest observed values for metrics</h3>
 			<hr>
 
 			<table class="table">
