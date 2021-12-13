@@ -80,9 +80,9 @@ func (e *Experiment) printableSLOs() bool {
 	if e != nil {
 		if e.Result != nil {
 			if e.Result.Insights != nil {
-				if len(e.Result.Insights.SLOStrs) > 0 {
+				if len(e.Result.Insights.SLOs) > 0 {
 					if e.Result.Insights.NumVersions > 0 {
-						if len(e.Result.Insights.SLOsSatisfied) == len(e.Result.Insights.SLOStrs) {
+						if len(e.Result.Insights.SLOsSatisfied) == len(e.Result.Insights.SLOs) {
 							if e.Result.Insights.SLOsSatisfied[0] != nil {
 								if len(e.Result.Insights.SLOsSatisfied[0]) == e.Result.Insights.NumVersions {
 									return true
@@ -113,13 +113,16 @@ func (e *Experiment) printSLOs(w *tabwriter.Writer) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "-----------------------------\t-----")
 
-	for i := 0; i < len(in.SLOStrs); i++ {
-		fmt.Fprint(w, in.SLOStrs[i])
-		for j := 0; j < in.NumVersions; j++ {
-			fmt.Fprintf(w, "\t%v", in.SLOsSatisfied[i][j])
-			fmt.Fprintln(w)
+	for i := 0; i < len(in.SLOs); i++ {
+		str, err := getMetricWithUnits(in, in.SLOs[i].Metric)
+		if err == nil {
+			fmt.Fprint(w, str)
+			for j := 0; j < in.NumVersions; j++ {
+				fmt.Fprintf(w, "\t%v", in.SLOsSatisfied[i][j])
+				fmt.Fprintln(w)
+			}
+			fmt.Fprintln(w, "-----------------------------\t-----")
 		}
-		fmt.Fprintln(w, "-----------------------------\t-----")
 	}
 
 	w.Flush()

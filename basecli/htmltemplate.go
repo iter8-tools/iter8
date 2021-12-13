@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 type histBar struct {
@@ -299,29 +300,77 @@ func (e *Experiment) printHTMLSLOVersions() string {
 		}
 	} else {
 		out += `
-		<th scope="col">Satisfied</th>
+		<th scope="col" class="text-center">Satisfied</th>
 		`
 	}
 	return out
 }
 
+func getMetricWithUnits(in *base.Insights, metricName string) (string, error) {
+	m, ok := in.MetricsInfo[metricName]
+	if !ok {
+		e := fmt.Errorf("unknown metric name %v", metricName)
+		log.Logger.Error(e)
+		return "", e
+	}
+	str := metricName
+	if m.Units != nil {
+		str = fmt.Sprintf("%v (%v)", str, *m.Units)
+	}
+	return str, nil
+}
+
+func getMetricWithUnitsAndDescriptionHTML(in *base.Insights, metricName string) (string, error) {
+	str, err := getMetricWithUnits(in, metricName)
+	// TODO: Tooltip with description
+	return str, err
+}
+
+func getSLOStrHTML(in *base.Insights, i int) (string, error) {
+	slo := in.SLOs[i]
+	// get metric with units and description
+	str, err := getMetricWithUnitsAndDescriptionHTML(in, slo.Metric)
+	if err != nil {
+		return "", err
+	}
+	// add lower limit if needed
+	if slo.LowerLimit != nil {
+		str = fmt.Sprintf("%0.2f &leq; %v", *slo.LowerLimit, str)
+	}
+	// add upper limit if needed
+	if slo.UpperLimit != nil {
+		str = fmt.Sprintf("%v &leq; %0.2f", str, *slo.UpperLimit)
+	}
+	return str, nil
+}
+
+func getSLOSatisfiedHTML(in *base.Insights, i int, j int) string {
+	if in.SLOsSatisfied[i][j] {
+		return `<i class="far fa-check-circle"></i>`
+	}
+	return `<i class="far fa-times-circle"></i>`
+}
+
 func (e *Experiment) printHTMLSLORows() string {
 	in := e.Result.Insights
 	out := ""
-	for i := 0; i < len(in.SLOStrs); i++ {
-		out += `<tr scope="row">` + "\n"
-		out += fmt.Sprintf(`
-		<td>%v</td>
-		`, in.SLOStrs[i])
-
-		for j := 0; j < in.NumVersions; j++ {
-			cellClass := "text-success"
-			if !in.SLOsSatisfied[i][j] {
-				cellClass = "text-danger"
-			}
+	for i := 0; i < len(in.SLOs); i++ {
+		str, err := getSLOStrHTML(in, i)
+		if err == nil {
+			out += `<tr scope="row">` + "\n"
 			out += fmt.Sprintf(`
-			<td class="%v">%v</td>
-			`, cellClass, in.SLOsSatisfied[i][j])
+			<td>%v</td>
+			`, str)
+
+			for j := 0; j < in.NumVersions; j++ {
+				cellClass := "text-success"
+				if !in.SLOsSatisfied[i][j] {
+					cellClass = "text-danger"
+				}
+				out += fmt.Sprintf(`
+				<td class="%v text-center">%v</td>
+				`, cellClass, getSLOSatisfiedHTML(in, i, j))
+			}
 		}
 	}
 	return out

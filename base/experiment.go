@@ -59,8 +59,8 @@ type Insights struct {
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
 
-	// SLOStrs represents the SLOs involved in this experiment in string form
-	SLOStrs []string `json:"SLOStrs,omitempty" yaml:"SLOStrs,omitempty"`
+	// SLOs involved in this experiment
+	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 
 	// MetricValues:
 	// the outer slice must be the same length as the number of app versions
@@ -69,7 +69,7 @@ type Insights struct {
 	MetricValues []map[string][]float64 `json:"metricValues,omitempty" yaml:"metricValues,omitempty"`
 
 	// SLOsSatisfied:
-	// the outer slice must be of the same length as SLOStrs
+	// the outer slice must be of the same length as SLOs
 	// the length of the inner slice must be the number of app versions
 	// the boolean value at [i][j] indicate if SLO [i] is satisfied by version [j]
 	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
@@ -148,20 +148,21 @@ func (in *Insights) setInsightType(it InsightType) {
 	}
 }
 
-// setSLOStrs sets the SLOStrs field in insights
+// setSLOs sets the SLOs field in insights
 // if this function is called multiple times (example, due to looping), then
 // it is intended to be called with the same argument each time
-func (in *Insights) setSLOStrs(sloStrs []string) error {
-	if in.SLOStrs != nil {
-		if reflect.DeepEqual(in.SLOStrs, sloStrs) {
+func (in *Insights) setSLOs(slos []SLO) error {
+	if in.SLOs != nil {
+		if reflect.DeepEqual(in.SLOs, slos) {
 			return nil
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("old: ", in.SLOStrs, "new: ", sloStrs)).Error("old and new value of sloStrs conflict")
-			return errors.New("old and new value of sloStrs conflict")
+			e := fmt.Errorf("old and new value of slos conflict")
+			log.Logger.WithStackTrace(fmt.Sprint("old: ", in.SLOs, "new: ", slos)).Error(e)
+			return e
 		}
 	}
 	// LHS will be nil
-	in.SLOStrs = sloStrs
+	in.SLOs = slos
 	return nil
 }
 
@@ -171,8 +172,8 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 		return nil // already initialized
 	}
 	// LHS will be nil
-	e.Result.Insights.SLOsSatisfied = make([][]bool, len(e.Result.Insights.SLOStrs))
-	for i := 0; i < len(e.Result.Insights.SLOStrs); i++ {
+	e.Result.Insights.SLOsSatisfied = make([][]bool, len(e.Result.Insights.SLOs))
+	for i := 0; i < len(e.Result.Insights.SLOs); i++ {
 		e.Result.Insights.SLOsSatisfied[i] = make([]bool, e.Result.Insights.NumVersions)
 	}
 	return nil
