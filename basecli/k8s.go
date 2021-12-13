@@ -27,16 +27,27 @@ type k8sExperiment struct {
 
 // run runs the command
 func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
-	v := chartutil.Values{}
-	err = ParseValues(GenOptions.Values, v)
+	result, err := Generate(GenOptions.Values)
 	if err != nil {
 		return err
+	}
+	if result != nil {
+		fmt.Println(result.String())
+	}
+	return nil
+}
+
+func Generate(values []string) (result *bytes.Buffer, err error) {
+	v := chartutil.Values{}
+	err = ParseValues(values, v)
+	if err != nil {
+		return nil, err
 	}
 
 	exp, err := Build(false, &FileExpIO{})
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment file")
-		return err
+		return nil, err
 	}
 	k8sExp := k8sExperiment{
 		Tasks:  exp.Tasks,
@@ -47,10 +58,9 @@ func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
 
 	b, err := RenderTpl(k8sExp, k8sTemplateFilePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	fmt.Println(b.String())
-	return nil
+	return b, nil
 }
 
 //go:embed k8s.tpl
