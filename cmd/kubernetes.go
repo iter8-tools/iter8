@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -50,6 +51,30 @@ func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error)
 	return clientSet, nil
 }
 
+func GetExperimentLogs(client *kubernetes.Clientset, ns string, id string) (err error) {
+	ctx := context.Background()
+	podList, err := client.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s", IdLabel, id)})
+	if err != nil {
+		return err
+	}
+
+	if len(podList.Items) == 0 {
+		return errors.New("logs not available")
+	}
+
+	for _, pod := range podList.Items {
+		req := client.CoreV1().Pods(ns).GetLogs(pod.Name, &corev1.PodLogOptions{})
+		logs, err := req.Stream(ctx)
+		if err != nil {
+			return err
+		}
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(logs)
+		fmt.Println(buf.String())
+	}
+	return nil
+}
+
 func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
 	ctx := context.Background()
 
@@ -83,16 +108,15 @@ func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s 
 		return s, errors.New("no experiments found")
 	}
 
-	for _, experimentSecret := range experimentSecrets {
-		if s == nil {
-			s = &experimentSecret
-			continue
-		}
-		if experimentSecret.ObjectMeta.CreationTimestamp.Time.After(s.ObjectMeta.CreationTimestamp.Time) {
-			s = &experimentSecret
+	sIndex := 0
+	for i, experimentSecret := range experimentSecrets {
+		if experimentSecret.ObjectMeta.CreationTimestamp.Time.After(
+			experimentSecrets[sIndex].ObjectMeta.CreationTimestamp.Time,
+		) {
+			sIndex = i
 		}
 	}
-	return s, nil
+	return &experimentSecrets[sIndex], nil
 }
 
 func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experimentSecrets []corev1.Secret, err error) {

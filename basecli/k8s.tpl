@@ -72,6 +72,14 @@ metadata:
     iter8.tools/app: {{ $app }}
 spec:
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: iter8
+        app.kubernetes.io/instance: {{ $id }}
+        app.kubernetes.io/version: "{{ $version }}"
+        app.kubernetes.io/component: pod
+        app.kubernetes.io/created-by: iter8
+        iter8.tools/app: {{ $app }}
     spec:
       containers:
       - name: iter8
@@ -110,7 +118,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
-  #resourceNames: ["{{ $name }}","{{ $name }}-result"]
+  resourceNames: ["{{ $name }}","{{ $name }}-result"]
   verbs: ["get", "list", "patch", "create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
