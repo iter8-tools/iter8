@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Open-source cloud-native metrics-driven experiments and release engineering. Built for DevOps/SRE/MLOps/data science teams. Quick start in 2 mins.
+  Open-source cloud-native platform for metrics-driven experiments and rollouts. Built for DevOps/SRE/MLOps/data science teams. Quick start in 2 mins.
 
 # Repository
 repo_name: iter8-tools/iter8

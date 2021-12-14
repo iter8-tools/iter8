@@ -9,7 +9,7 @@
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
 [![GitHub issues](https://img.shields.io/github/issues/iter8-tools/iter8)](https://github.com/iter8tools/iter8/issues)
 
-Open-source cloud-native metrics-driven <strong>experiments</strong> and <strong>release engineering</strong>. Built for DevOps/SRE/MLOps/data science teams.
+Open-source cloud-native metrics-driven <strong>experiments</strong> and <strong>rollouts</strong>. Built for DevOps/SRE/MLOps/data science teams.
 
 ## Use Cases
 
@@ -27,9 +27,8 @@ The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 alon
 
 1. Install Iter8 using [Go 1.16+](https://golang.org/) as follows.
 ```shell
-GOBIN=/usr/local/bin/ 
+GOBIN=/usr/local/bin/ # GOBIN may be any folder in your $PATH
 go install github.com/iter8-tools/iter8@latest
-# GOBIN may be any folder in your $PATH
 ```
 
 2. Download the `load-test` experiment folder from the Iter8 hub as follows.

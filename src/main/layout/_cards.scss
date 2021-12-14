@@ -74,12 +74,19 @@
   border-radius: 3px;
 }
 
+.text-center {
+  text-align: center;
+
+  .iframe-container {
+    display: block;
+  }
+}
+
 .tx-container {
     background: rgb(254, 245, 245);
 
-    .centered {
+    .pad-margin {
       padding: px2rem(30px);
-      text-align: center;
 
       h1 {
           margin: px2rem(0px);
