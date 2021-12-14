@@ -7,7 +7,14 @@ template: main.html
 !!! tip "Load test https://example.com"
     Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test https://example.com and validate latency and error-related service level objectives (SLOs).
 
-## 1. [Install Iter8](install.md)
+## 1. Install Iter8
+Install Iter8 using [Go 1.16+](https://golang.org/) as follows.
+```shell
+# GOBIN=/usr/local/bin/
+# Uncomment and set GOBIN in the above line
+# to install iter8 in any folder in your $PATH
+go install github.com/iter8-tools/iter8@latest
+```
 
 ## 2. Download experiment
 Download the `load-test` experiment folder from the [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.

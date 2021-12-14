@@ -3,7 +3,6 @@ package base
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/go-playground/validator"
 	"github.com/iter8-tools/iter8/base/log"
@@ -55,23 +54,6 @@ func MakeAssess(t *TaskSpec) (Task, error) {
 	return bt, nil
 }
 
-// get string representation of SLOs
-func getSLOStrs(slos []SLO) []string {
-	sloStrs := []string{}
-	for _, v := range slos {
-		str := ""
-		if v.LowerLimit != nil {
-			str += fmt.Sprint(*v.LowerLimit, " <= ")
-		}
-		str += v.Metric
-		if v.UpperLimit != nil {
-			str += fmt.Sprint(" <= ", *v.UpperLimit)
-		}
-		sloStrs = append(sloStrs, str)
-	}
-	return sloStrs
-}
-
 // GetName returns the name of the assess task
 func (t *assessTask) GetName() string {
 	return AssessTaskName
@@ -95,8 +77,8 @@ func (t *assessTask) Run(exp *Experiment) error {
 	// set insight type (if needed)
 	exp.Result.Insights.setInsightType(InsightTypeSLO)
 
-	// set SLOStrs (if needed)
-	err := exp.Result.Insights.setSLOStrs(getSLOStrs(t.With.SLOs))
+	// set SLOs (if needed)
+	err := exp.Result.Insights.setSLOs(t.With.SLOs)
 	if err != nil {
 		return err
 	}
@@ -156,7 +138,7 @@ func computeSLOsSatisfiedBy(exp *Experiment) []int {
 	sats := []int{}
 	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 		sat := true
-		for i := range exp.Result.Insights.SLOStrs {
+		for i := range exp.Result.Insights.SLOs {
 			sat = sat && exp.Result.Insights.SLOsSatisfied[i][j]
 		}
 		if sat {

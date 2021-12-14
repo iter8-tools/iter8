@@ -312,7 +312,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			// request count
 			m := iter8BuiltInPrefix + "/" + requestCountMetricName
 			in.MetricsInfo[m] = MetricMeta{
-				Description: "number of requests",
+				Description: "number of requests sent",
 				Type:        CounterMetricType,
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], float64(fm[i].DurationHistogram.Count))
@@ -327,7 +327,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			// error count
 			m = iter8BuiltInPrefix + "/" + errorCountMetricName
 			in.MetricsInfo[m] = MetricMeta{
-				Description: "number of errors",
+				Description: "number of responses that were errors",
 				Type:        CounterMetricType,
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], val)
@@ -337,7 +337,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			rc := float64(fm[i].DurationHistogram.Count)
 			if rc != 0 {
 				in.MetricsInfo[m] = MetricMeta{
-					Description: "error rate",
+					Description: "fraction of responses that were errors",
 					Type:        GaugeMetricType,
 				}
 				in.MetricValues[i][m] = append(in.MetricValues[i][m], val/rc)
@@ -346,7 +346,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			// mean-latency
 			m = iter8BuiltInPrefix + "/" + meanLatencyMetricName
 			in.MetricsInfo[m] = MetricMeta{
-				Description: "mean latency",
+				Description: "mean of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       stringPointer("msec"),
 			}
@@ -355,7 +355,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			// stddev-latency
 			m = iter8BuiltInPrefix + "/" + stdDevMetricName
 			in.MetricsInfo[m] = MetricMeta{
-				Description: "standard deviation of latency",
+				Description: "standard deviation of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       stringPointer("msec"),
 			}
@@ -364,7 +364,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			// min-latency
 			m = iter8BuiltInPrefix + "/" + minLatencyMetricName
 			in.MetricsInfo[m] = MetricMeta{
-				Description: "minimum observed value of latency ",
+				Description: "minimum of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       stringPointer("msec"),
 			}
@@ -373,7 +373,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			// max-latency
 			m = iter8BuiltInPrefix + "/" + maxLatencyMetricName
 			in.MetricsInfo[m] = MetricMeta{
-				Description: "maximum observed value of latency ",
+				Description: "maximum of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       stringPointer("msec"),
 			}
@@ -383,7 +383,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			for _, p := range fm[i].DurationHistogram.Percentiles {
 				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%0.1f", p.Percentile)
 				in.MetricsInfo[m] = MetricMeta{
-					Description: fmt.Sprintf("%0.1f percentile latency", p.Percentile),
+					Description: fmt.Sprintf("%0.1f-th percentile of observed latency values", p.Percentile),
 					Type:        GaugeMetricType,
 					Units:       stringPointer("msec"),
 				}
