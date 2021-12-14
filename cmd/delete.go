@@ -116,13 +116,14 @@ func init() {
 		Use:   "delete",
 		Short: "Delete experiment",
 		Example: `
-# Delete most recent experiment
+# Delete experiment most recently started in Kubernetes cluster
 iter8 k delete
 
 # Delete experient with identifier $EXPERIMENT_ID
 iter8 k delete -e $EXPERIMENT_ID`,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)
+			log.Logger.Infof("deleting experiment: %s\n", k8sExperimentOptions.experimentId)
 			return deleteObjects()
 		},
 	}

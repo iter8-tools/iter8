@@ -14,11 +14,11 @@ func init() {
 		Use:   "logs",
 		Short: "Get logs from experiment",
 		Example: `
-# Get logs of more recent experiment running in Kubernetes
+# Get logs of more recent experiment started in Kubernetes cluster
 iter8 k logs
 
-# Get logs of more experiment running in Kubernetes with identifier
-iter8 k logs -e identifier`,
+# Get logs of more experiment running in Kubernetes with identifier $EXPERIMENT_ID
+iter8 k logs -e $EXPERIMENT_ID`,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)
 			log.Logger.Infof("logs for experiment: %s\n", k8sExperimentOptions.experimentId)
