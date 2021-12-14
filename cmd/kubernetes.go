@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -50,6 +51,30 @@ func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error)
 	return clientSet, nil
 }
 
+func GetExperimentLogs(client *kubernetes.Clientset, ns string, id string) (err error) {
+	ctx := context.Background()
+	podList, err := client.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s", IdLabel, id)})
+	if err != nil {
+		return err
+	}
+
+	if len(podList.Items) == 0 {
+		return errors.New("logs not available")
+	}
+
+	for _, pod := range podList.Items {
+		req := client.CoreV1().Pods(ns).GetLogs(pod.Name, &corev1.PodLogOptions{})
+		logs, err := req.Stream(ctx)
+		if err != nil {
+			return err
+		}
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(logs)
+		fmt.Println(buf.String())
+	}
+	return nil
+}
+
 func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
 	ctx := context.Background()
 
@@ -83,16 +108,8 @@ func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s 
 		return s, errors.New("no experiments found")
 	}
 
-	for _, experimentSecret := range experimentSecrets {
-		if s == nil {
-			s = &experimentSecret
-			continue
-		}
-		if experimentSecret.ObjectMeta.CreationTimestamp.Time.After(s.ObjectMeta.CreationTimestamp.Time) {
-			s = &experimentSecret
-		}
-	}
-	return s, nil
+	mostRecent := experimentSecrets[len(experimentSecrets)-1]
+	return &mostRecent, nil
 }
 
 func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experimentSecrets []corev1.Secret, err error) {
@@ -104,16 +121,30 @@ func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experimentSe
 		return experimentSecrets, err
 	}
 
-	return secretListToExperimentSecretList(*secrets), err
+	return secretListToOrderedExperimentSecretList(*secrets), err
 }
 
-func secretListToExperimentSecretList(secrets corev1.SecretList) (result []corev1.Secret) {
+func secretListToOrderedExperimentSecretList(secrets corev1.SecretList) (results []corev1.Secret) {
+	results = []corev1.Secret{}
 	for _, secret := range secrets.Items {
-		if isExperiment(secret) {
-			result = append(result, secret)
+		if !isExperiment(secret) {
+			continue
+		}
+		index := len(results)
+		for j, r := range results {
+			if !secret.CreationTimestamp.Time.After(r.CreationTimestamp.Time) {
+				index = j
+				break
+			}
+		}
+		if index < len(results) {
+			results = append(results[:index+1], results[index:]...)
+			results[index] = secret
+		} else {
+			results = append(results, secret)
 		}
 	}
-	return result
+	return results
 }
 
 func isExperiment(s corev1.Secret) bool {
