@@ -2,7 +2,7 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Open-source cloud-native platform for metrics-driven experiments and rollouts. Built for DevOps/SRE/MLOps/data science teams. Quick start in 2 mins.
+  Open-source cloud-native platform for metrics-driven experiments and rollouts. For DevOps/SRE/MLOps/data science teams. Quick start in 2 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -140,21 +140,22 @@ nav:
     - iter8 report: user-guide/commands/iter8_report.md
     - iter8 gen: user-guide/commands/iter8_gen.md
     - iter8 gen exp: user-guide/commands/iter8_gen_exp.md
-    - iter8 gen go: user-guide/commands/iter8_gen_go.md
     - iter8 gen k8s: user-guide/commands/iter8_gen_k8s.md
     - iter8 k: user-guide/commands/iter8_k.md
     - iter8 k get: user-guide/commands/iter8_k_get.md
     - iter8 k assert: user-guide/commands/iter8_k_assert.md
     - iter8 k report: user-guide/commands/iter8_k_report.md
+    - iter8 k logs: user-guide/commands/iter8_k_logs.md
+    - iter8 k delete: user-guide/commands/iter8_k_delete.md
   - Tasks:
     - gen-load-and-collect-metrics: user-guide/tasks/collect.md
     - assess-app-versions: user-guide/tasks/assess.md
     - run (a bash script): user-guide/tasks/run.md
   - Topics:
+    - Iter8 hub: user-guide/topics/iter8hub.md
     - Version numbering: user-guide/topics/versionnumbering.md
     - Metrics: user-guide/topics/metrics.md
     - Conditional task execution: user-guide/topics/conditional.md
-    - Iter8 hub: user-guide/topics/iter8hub.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
 - News: news.md

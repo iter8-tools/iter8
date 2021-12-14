@@ -9,7 +9,7 @@
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
 [![GitHub issues](https://img.shields.io/github/issues/iter8-tools/iter8)](https://github.com/iter8tools/iter8/issues)
 
-Open-source cloud-native metrics-driven <strong>experiments</strong> and <strong>rollouts</strong>. Built for DevOps/SRE/MLOps/data science teams.
+Open-source cloud-native metrics-driven <strong>experiments</strong> and <strong>rollouts</strong>. For DevOps/SRE/MLOps/data science teams.
 
 ## Use Cases
 

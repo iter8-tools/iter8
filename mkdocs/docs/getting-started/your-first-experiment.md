@@ -22,7 +22,9 @@ iter8 hub -e load-test
 ```
 
 ## 3. Run experiment
-[Iter8 experiments](concepts.md#what-is-an-iter8-experiment) are specified using the `experiment.yaml` file. The `iter8 run` command reads the `experiment.yaml` file, runs the experiment, and writes experiment results into the `result.yaml` file. Run the experiment you downloaded above as follows.
+[Iter8 experiments](concepts.md#what-is-an-iter8-experiment) are specified using the `experiment.yaml` file. The `iter8 run` command reads this file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file.
+
+Run the experiment you downloaded above as follows.
 
 ```shell
 cd load-test
@@ -65,7 +67,7 @@ iter8 run
     ```
 
 ## 4. Assert outcomes
-The experiment you ran above should complete in a few seconds. Assert that the experiment completed without any failures and SLOs are satisfied, as follows.
+Assert that the experiment completed without any failures and SLOs are satisfied.
 
 ```shell
 iter8 assert -c completed -c nofailure -c slos
@@ -156,8 +158,3 @@ Generate a report of the experiment in HTML or text formats as follows.
         ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
-
-??? tip "Customizing this experiment"
-    1.  To load test and validate SLOs for your service, change the URL in `experiment.yaml` to that of your service.
-    2.  The [`gen-load-and-collect-metrics` task](../user-guide/tasks/collect.md) used in the experiment can be customized with various inputs including the number of queries sent to the URL, number of queries sent per second, number of parallel connections used, and the payload to be used as part of the queries.
-    3.  The SLOs specified as part of the [`assess-app-versions` task](../user-guide/tasks/assess.md#illustrative-example) can be customized, both in terms of the [built-in metrics](../user-guide/tasks/collect.md#built-in-metrics) used and their limits.

@@ -3,12 +3,12 @@ template: main.html
 ---
 
 # What is Iter8?
-Iter8 is the open-source cloud-native platform for metrics-driven experiments and rollouts. Built for DevOps/SRE/MLOps/data science teams.
+Iter8 is the open-source cloud-native platform for metrics-driven experiments and rollouts. For DevOps/SRE/MLOps/data science teams.
 
 ## Use cases
 
 1.  Load testing with SLOs
-2.  A/B(/n) testing with metrics from any backend
+2.  A/B(/n) testing with business reward metrics
 3.  SLOs with metrics from any backend
 4.  Traffic mirroring
 5.  User segmentation
@@ -18,16 +18,17 @@ Iter8 is the open-source cloud-native platform for metrics-driven experiments an
 The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 along with a Kubernetes service mesh or ingress.
 
 ## What is an Iter8 experiment?
-An Iter8 experiment is a sequence of tasks that produce metrics-driven insights for your app/ML model, validates it, and optionally performs a rollout of your app/ML model. Iter8 provides a variety of highly customizable tasks that can be readily used within experiments to achieve the following.
+An Iter8 experiment is a sequence of tasks that produce metrics-driven insights for your app/ML model versions, validates them, and optionally performs a rollout. Iter8 provides a set of pre-defined and customizable tasks for the following purposes.
 
 1.  Generating load and getting built-in metrics for one or more versions of the app.
 2.  Getting metrics by querying backends like Prometheus, New Relic, SysDig, or Elastic.
-3.  SLO validation and A/B/n testing.
-4.  Triggering events based on these insights. Events include:
+3.  Assessing app versions with SLOs and business reward metrics.
+4.  Triggering events based on experiments insights. Events include:
       * sending a Slack or webhook notification
       * triggering a CI/CD/GitHub actions workflow
-      * creating a pull request, and 
+      * creating a GitHub pull request, and 
       * changing application state (including traffic splits) inside a Kubernetes cluster
+      * sending a cloudevent notification
 
 ![Process automated by an Iter8 experiment](../images/whatisiter8.png)
 
@@ -59,14 +60,13 @@ Experiments are specified using a YAML file as shown below.
 * Inside Kubernetes
 * As a step in your CI/CD/GitOps pipeline
 
-## Can I use Iter8 with ...?
-Use Iter8 with
+## Iter8 can be used with ...
 
   * any app/serverless/ML framework
   * any metrics backend
   * any service mesh/ingress/networking technology, and 
   * any CI/CD/GitOps process
 
-## How is Iter8 implemented?
+## Implementation
 
-Iter8 is implemented as a `go` module and comes with a command line interface that enables rapid experimentation.
+Iter8 is implemented as a `go` module and comes with a command line interface (CLI) that enables rapid experimentation.
