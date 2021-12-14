@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -36,6 +37,9 @@ const (
 	ComponentResult = "result"
 	ComponentJob    = "job"
 	ComponentRbac   = "rbac"
+
+	MaxGetRetries    = 2
+	GetRetryInterval = 1 * time.Second
 )
 
 func GetClient(cf *genericclioptions.ConfigFlags) (*kubernetes.Clientset, error) {
@@ -75,23 +79,32 @@ func GetExperimentLogs(client *kubernetes.Clientset, ns string, id string) (err 
 	return nil
 }
 
-func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
-	ctx := context.Background()
+func getSecretWithRetry(client *kubernetes.Clientset, ns string, nm string) (s *corev1.Secret, err error) {
+	for i := 0; i < MaxGetRetries; i++ {
+		s, err = client.CoreV1().Secrets(ns).Get(context.Background(), nm, metav1.GetOptions{})
+		if err == nil {
+			return s, err
+		}
+		if !k8serrors.IsNotFound(err) {
+			log.Logger.Errorf("unable to read secret: %s; %s\n", nm, err.Error())
+			return nil, err
+		}
+		time.Sleep(GetRetryInterval)
+	}
+	// tried MAX_RETRIES times
+	log.Logger.Errorf("experiment \"%s\" not fouund; unable to read secret: %s\n", nm, err.Error())
+	return nil, fmt.Errorf("experiment not found")
+}
 
+func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
 	// An id is provided; get this experiment, if it exists
 	if len(id) != 0 {
 		nm := SpecSecretPrefix + id
-		s, err = client.CoreV1().Secrets(ns).Get(ctx, nm, metav1.GetOptions{})
-		if err != nil {
-			if k8serrors.IsNotFound(err) {
-				return nil, fmt.Errorf("experiment \"%s\" not found", nm)
-			}
+		s, err = getSecretWithRetry(client, ns, nm)
+		// verify that the secret (if found) corresponds to an experiment
+		if s != nil && err == nil && !isExperiment(*s) {
+			return nil, fmt.Errorf("experiment not found")
 		}
-		// verify that the secret corresponds to an experiment
-		if s != nil && !isExperiment(*s) {
-			return nil, fmt.Errorf("experiment \"%s\" not found", nm)
-		}
-
 		return s, err
 	}
 
@@ -165,10 +178,9 @@ type KubernetesExpIO struct {
 // read experiment spec from secret in the Kubernetes context
 func (f *KubernetesExpIO) ReadSpec() ([]base.TaskSpec, error) {
 
-	s, err := f.Client.CoreV1().Secrets(f.Namespace).Get(context.Background(), f.Name, metav1.GetOptions{})
+	s, err := getSecretWithRetry(f.Client, f.Namespace, f.Name)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
-		return nil, fmt.Errorf("experiment \"%s\" not found", f.Name)
+		return nil, err
 	}
 
 	exp, ok := s.Data["experiment"]
@@ -183,10 +195,9 @@ func (f *KubernetesExpIO) ReadSpec() ([]base.TaskSpec, error) {
 // read experiment result from Kubernetes context
 func (f *KubernetesExpIO) ReadResult() (*base.ExperimentResult, error) {
 	resultSecretName := f.Name + "-result"
-	s, err := f.Client.CoreV1().Secrets(f.Namespace).Get(context.Background(), resultSecretName, metav1.GetOptions{})
+	s, err := getSecretWithRetry(f.Client, f.Namespace, resultSecretName)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
-		return nil, fmt.Errorf("experiment \"%s\" not found", f.Name)
+		return nil, err
 	}
 
 	r, ok := s.Data["result"]

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
@@ -15,12 +16,16 @@ func init() {
 	// initialize assertCmd
 	assertCmd = basecli.NewAssertCmd()
 	var example = `
-# assert that the most recent experiment running in the Kubernetes context is complete
-iter8 k assert -c completed`
+# assert that the most recent experiment running in a Kubernetes cluster has completed
+iter8 k assert -c completed
+
+# assert experient with identifier $EXPERIMENT_ID has completed
+iter8 k assert -e $EXPERIMENT_ID -c completed`
 	assertCmd.Example = fmt.Sprintf("%s%s\n", assertCmd.Example, example)
 
 	assertCmd.RunE = func(c *cobra.Command, args []string) error {
 		k8sExperimentOptions.initK8sExperiment(true)
+		log.Logger.Infof("evaluating assert for experiment: %s\n", k8sExperimentOptions.experimentId)
 		allGood, err := k8sExperimentOptions.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
 		if err != nil || !allGood {
 			return err
