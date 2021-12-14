@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 type histBar struct {
@@ -20,8 +21,9 @@ type hist struct {
 }
 
 type histograms struct {
-	XAxisLabel string `json:"xAxisLabel" yaml:"xAxisLabel"`
-	Datum      []hist `json:"datum" yaml:"datum"`
+	XAxisLabel string  `json:"xAxisLabel" yaml:"xAxisLabel"`
+	Datum      []hist  `json:"datum" yaml:"datum"`
+	Width      float64 `json:"width" yaml:"width"`
 }
 
 func (hd *histograms) toJSON() string {
@@ -46,7 +48,7 @@ var formatHTML = `
 			<div class="container">
 
 				<h1 class="display-4">Experiment Report</h1>
-				<h3 class="display-6 text-muted">Status, Insights, and Metrics from Iter8 experiment</h3>
+				<h3 class="display-6">Insights from Iter8 Experiment</h3>
 				<hr>
 
 				{{ .HTMLStatus }}
@@ -101,6 +103,10 @@ func headSection() string {
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+
+		<!-- Font Awesome -->
+		<script src="https://kit.fontawesome.com/db794f5235.js" crossorigin="anonymous"></script>
+
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
@@ -151,14 +157,25 @@ func (e *Experiment) HistData() []histograms {
 	gramsList := []histograms{}
 	for mname, minfo := range e.Result.Insights.MetricsInfo {
 		if minfo.Type == base.HistogramMetricType {
+			// figure out xAxisLabel
+			xAxisLabel := fmt.Sprintf("%v", mname)
+			if minfo.Units != nil {
+				xAxisLabel += " (" + *minfo.Units + ")"
+			}
+
 			grams := histograms{
-				XAxisLabel: fmt.Sprintf("%v", mname),
+				XAxisLabel: xAxisLabel,
 				Datum:      []hist{},
+				Width:      (*minfo.XMax - *minfo.XMin) / float64(*minfo.NumBuckets),
 			}
 			for i := 0; i < e.Result.Insights.NumVersions; i++ {
+				key := fmt.Sprintf("Version %v", i)
+				if e.Result.Insights.NumVersions == 1 {
+					key = "count"
+				}
 				gram := hist{
 					Values: []histBar{},
-					Key:    fmt.Sprintf("Version %v", i),
+					Key:    key,
 				}
 				if counts, ok := e.Result.Insights.MetricValues[i][mname]; ok && len(counts) > 0 {
 					for j := 0; j < len(counts); j++ {
@@ -185,13 +202,25 @@ func (e *Experiment) HTMLHistCharts() string {
 		var charts = [];
 		for (let i = 0; i < chartData.length; i++) {
 			nv.addGraph(function() {
-				charts.push(nv.models.multiBarChart().stacked(false).showControls(false));
+				charts.push(nv.models.multiBarChart());
+
 				charts[i]
+						.stacked(false)
+						.showControls(false)
 						.margin({left: 100, bottom: 100})
 						.useInteractiveGuideline(true)
-						.duration(250)
-						;
+						.duration(250);
 
+				var contentGenerator = charts[i].interactiveLayer.tooltip.contentGenerator();
+				var tooltip = charts[i].interactiveLayer.tooltip;
+				tooltip.headerFormatter(function (d) {
+					var lower = d;
+					var upper = d + chartData[i].width;
+					lower = lower.toFixed(2);
+					upper = upper.toFixed(2);
+					return "<p>Range: [" + lower + ", " + upper + "]";
+				});
+				
 				// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
 				charts[i].xAxis
 						.axisLabel(chartData[i].xAxisLabel)
@@ -225,32 +254,54 @@ func (e *Experiment) HTMLStatus() string {
 	}
 
 	failureStatus := "Experiment has failures."
-	textColor := "text-failure"
+	showClass := "show"
+	textColor := "text-danger"
+	thumbs := "down"
+	autoHide := "false"
+
 	if e.NoFailure() {
 		failureStatus = "Experiment has no failures."
 		textColor = "text-success"
+		showClass = ""
+		thumbs = "up"
 	}
 
 	taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
 
-	msg := fmt.Sprintln(taskStatus)
+	msg := fmt.Sprintln(completionStatus)
 	msg += fmt.Sprintln(failureStatus)
-	msg += fmt.Sprintln(completionStatus)
+	msg += fmt.Sprintln(taskStatus)
 
 	return fmt.Sprintf(`
-	<section class="mt-5">
-		<div class="row">
-			<div class="col-sm-12">
-				<div class="card">
-					<h5 class="card-header">Status</h5>
-					<div class="card-body">
-						<p class="card-text %v">%v</p>
-					</div>
-				</div>
+		<div class="toast fade %v mw-100" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="toast-header %v">
+				<strong class="mr-auto">
+					Experiment Status
+					&nbsp;&nbsp;
+					<i class="fas fa-thumbs-%v"></i>
+				</strong>
+				<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
 			</div>
-		</div>
-	</section>
-	`, textColor, msg)
+			<div class="toast-body %v">
+				%v
+			</div>
+	 	</div>
+	
+		<script>
+		$(document).ready(function(){
+			$(function () {
+				$('[data-toggle="tooltip"]').tooltip()
+			});	
+
+			$(".toast").toast({
+				autohide: %v,
+				delay: 10000
+			}).toast('show');
+		});	
+		</script>
+	`, showClass, textColor, thumbs, textColor, msg, autoHide)
 }
 
 // HTMLSLOSection prints the SLO section in HTML report
@@ -276,29 +327,78 @@ func (e *Experiment) printHTMLSLOVersions() string {
 		}
 	} else {
 		out += `
-		<th scope="col">Satisfied</th>
+		<th scope="col" class="text-center">Satisfied</th>
 		`
 	}
 	return out
 }
 
+func getMetricWithUnitsAndDescription(in *base.Insights, metricName string) (string, string, error) {
+	m, ok := in.MetricsInfo[metricName]
+	if !ok {
+		e := fmt.Errorf("unknown metric name %v", metricName)
+		log.Logger.Error(e)
+		return "", "", e
+	}
+	str := metricName
+	if m.Units != nil {
+		str = fmt.Sprintf("%v (%v)", str, *m.Units)
+	}
+	return str, m.Description, nil
+}
+
+func getMetricWithUnitsAndDescriptionHTML(in *base.Insights, metricName string) (string, error) {
+	str, desc, err := getMetricWithUnitsAndDescription(in, metricName)
+	// TODO: Tooltip with description
+	str = fmt.Sprintf(`<a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="%v">%v</a>`, desc, str)
+	return str, err
+}
+
+func getSLOStrHTML(in *base.Insights, i int) (string, error) {
+	slo := in.SLOs[i]
+	// get metric with units and description
+	str, err := getMetricWithUnitsAndDescriptionHTML(in, slo.Metric)
+	if err != nil {
+		return "", err
+	}
+	// add lower limit if needed
+	if slo.LowerLimit != nil {
+		str = fmt.Sprintf("%0.2f &leq; %v", *slo.LowerLimit, str)
+	}
+	// add upper limit if needed
+	if slo.UpperLimit != nil {
+		str = fmt.Sprintf("%v &leq; %0.2f", str, *slo.UpperLimit)
+	}
+	return str, nil
+}
+
+func getSLOSatisfiedHTML(in *base.Insights, i int, j int) string {
+	if in.SLOsSatisfied[i][j] {
+		return `<i class="far fa-check-circle"></i>`
+	}
+	return `<i class="far fa-times-circle"></i>`
+}
+
 func (e *Experiment) printHTMLSLORows() string {
 	in := e.Result.Insights
 	out := ""
-	for i := 0; i < len(in.SLOStrs); i++ {
-		out += `<tr scope="row">` + "\n"
-		out += fmt.Sprintf(`
-		<td>%v</td>
-		`, in.SLOStrs[i])
-
-		for j := 0; j < in.NumVersions; j++ {
-			cellClass := "text-success"
-			if !in.SLOsSatisfied[i][j] {
-				cellClass = "text-danger"
-			}
+	for i := 0; i < len(in.SLOs); i++ {
+		str, err := getSLOStrHTML(in, i)
+		if err == nil {
+			out += `<tr scope="row">` + "\n"
 			out += fmt.Sprintf(`
-			<td class="%v">%v</td>
-			`, cellClass, in.SLOsSatisfied[i][j])
+			<td>%v</td>
+			`, str)
+
+			for j := 0; j < in.NumVersions; j++ {
+				cellClass := "text-success"
+				if !in.SLOsSatisfied[i][j] {
+					cellClass = "text-danger"
+				}
+				out += fmt.Sprintf(`
+				<td class="%v text-center">%v</td>
+				`, cellClass, getSLOSatisfiedHTML(in, i, j))
+			}
 		}
 	}
 	return out
@@ -357,8 +457,7 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 		}
 		return `
 		<section class="mt-5">
-		<h3 class="display-6">Histogram Metrics</h3>
-		<h4 class="display-7 text-muted">Visualizations for Histogram-type Metrics</h4>
+		<h3 class="display-6">Metric Histograms</h3>
 		<hr>
 
 		` + strings.Join(divs, "\n") +
@@ -397,22 +496,18 @@ func (e *Experiment) printHTMLMetricRows() string {
 	out := ""
 	for i := 0; i < len(keys); i++ {
 		if e.Result.Insights.MetricsInfo[keys[i]].Type != base.HistogramMetricType {
-			u := ""
-			// add units if available
-			units := e.Result.Insights.MetricsInfo[keys[i]].Units
-			if units != nil {
-				u += " (" + *units + ")"
-			}
-
-			out += `<tr scope="row">` + "\n"
-			out += fmt.Sprintf(`
-			<td>%v</td>
-			`, keys[i]+u)
-
-			for j := 0; j < in.NumVersions; j++ {
+			str, err := getMetricWithUnitsAndDescriptionHTML(in, keys[i])
+			if err == nil {
+				out += `<tr scope="row">` + "\n"
 				out += fmt.Sprintf(`
 				<td>%v</td>
-				`, e.getMetricValue(keys[i], j))
+				`, str)
+
+				for j := 0; j < in.NumVersions; j++ {
+					out += fmt.Sprintf(`
+					<td>%v</td>
+					`, e.getMetricValue(keys[i], j))
+				}
 			}
 		}
 	}
@@ -423,8 +518,7 @@ func (e *Experiment) printHTMLMetricRows() string {
 func (e *Experiment) HTMLMetricsSection() string {
 	metricStrs := `
 	<section class="mt-5">
-			<h3 class="display-6">Metrics</h3>
-			<h4 class="display-7 text-muted">Latest observed values of metrics</h4>
+			<h3 class="display-6">Latest observed values for metrics</h3>
 			<hr>
 
 			<table class="table">
