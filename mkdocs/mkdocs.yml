@@ -153,8 +153,8 @@ nav:
     - run (a bash script): user-guide/tasks/run.md
   - Topics:
     - Iter8 hub: user-guide/topics/iter8hub.md
-    - Version numbering: user-guide/topics/versionnumbering.md
     - Metrics: user-guide/topics/metrics.md
+    - Version numbering: user-guide/topics/versionnumbering.md
     - Conditional task execution: user-guide/topics/conditional.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
