@@ -30,7 +30,7 @@ Run a `kubectl` command.
     kubectl apply -f new-version-of-my-app.yaml -n my-app-namespace
 ```
 
-Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollback. This is an example of [conditional task execution](../topics/conditional.md).
+`If` SLOs are `not` satisfied by version numbered 1, rollback. This is an example of [conditional task execution](../topics/conditional.md).
 ```yaml
 - task: assess-app-versions
   ...
@@ -41,7 +41,7 @@ Assess app versions. `If` SLOs are `not` satisfied by version numbered 1, rollba
 
 ## Temp dir
 
-The script in `run` can have environment variables. One such pre-defined variable is `$TEMP_DIR` which points to the default directory to use for temporary files.
+The script in the `run` task has a pre-defined environment variable called `TEMP_DIR` which points to a temp directory. This directory can be used for processing temporary files.
 
 ```yaml
 - run: |
@@ -51,7 +51,7 @@ The script in `run` can have environment variables. One such pre-defined variabl
 
 ## Available commands
 
-When running experiments on your local machine, any command that is available in your `PATH` can be used as part of the `run` task. When running experiments in Kubernetes, in addition to the `iter8` command, the Iter8 container also includes `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`, all of which can be used as part of the `run` task.
+When running experiments on your local machine, any command that is available in your `PATH` can be used as part of the `run` task. When running experiments within the Iter8 container (this is the case when running Iter8 experiments inside Kubernetes), in addition to the `iter8` executable, the Iter8 container also includes `kubectl`, `kustomize`, `helm`, `yq`, `git`, `curl`, and `gh`, all of which can be used as part of the `run` task.
 
 ```yaml
 - run: |
