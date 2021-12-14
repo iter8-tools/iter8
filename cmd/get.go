@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"text/tabwriter"
 
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
@@ -45,9 +44,7 @@ func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err 
 			Name:      experimentSecret.Name,
 		}
 
-		log.Logger.Trace("build started")
 		exp, err := basecli.Build(true, expIO)
-		log.Logger.Trace("build finished")
 		if err != nil {
 			return err
 		}
@@ -66,9 +63,9 @@ func init() {
 	// initialize getCmd
 	getCmd = &cobra.Command{
 		Use:   "get",
-		Short: "Get a list of experiments running in the current context",
+		Short: "Get a list of experiments running in a Kubernetes cluster",
 		Example: `
-# Get list of experiments running in cluster
+# Get list of experiments running in a Kubernetes cluster
 iter8 k get`,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)
