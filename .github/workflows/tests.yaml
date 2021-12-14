@@ -17,8 +17,12 @@ jobs:
         go-version: ${{ matrix.go }}
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+    - uses: dominikh/staticcheck-action@latest
+      with:
+        install-go: false
+        cache-key: ${{ matrix.go }}
     - name: Test and compute coverage
-      run: make coverage # includes vet and lint (staticcheck)
+      run: make coverage # includes vet and lint
     - name: Enforce coverage
       run: |
         export COVERAGE=$(go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
@@ -34,12 +38,6 @@ jobs:
       uses: codecov/codecov-action@v2
       with:
         files: ./coverage.out
-
-  static-check:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: dominikh/staticcheck-action@v1.1.0
 
   e2e-test-httpbin:
     name: local httpbin test
