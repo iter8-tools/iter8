@@ -108,15 +108,8 @@ func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s 
 		return s, errors.New("no experiments found")
 	}
 
-	sIndex := 0
-	for i, experimentSecret := range experimentSecrets {
-		if experimentSecret.ObjectMeta.CreationTimestamp.Time.After(
-			experimentSecrets[sIndex].ObjectMeta.CreationTimestamp.Time,
-		) {
-			sIndex = i
-		}
-	}
-	return &experimentSecrets[sIndex], nil
+	mostRecent := experimentSecrets[len(experimentSecrets)-1]
+	return &mostRecent, nil
 }
 
 func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experimentSecrets []corev1.Secret, err error) {
@@ -128,16 +121,30 @@ func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experimentSe
 		return experimentSecrets, err
 	}
 
-	return secretListToExperimentSecretList(*secrets), err
+	return secretListToOrderedExperimentSecretList(*secrets), err
 }
 
-func secretListToExperimentSecretList(secrets corev1.SecretList) (result []corev1.Secret) {
+func secretListToOrderedExperimentSecretList(secrets corev1.SecretList) (results []corev1.Secret) {
+	results = []corev1.Secret{}
 	for _, secret := range secrets.Items {
-		if isExperiment(secret) {
-			result = append(result, secret)
+		if !isExperiment(secret) {
+			continue
+		}
+		index := len(results)
+		for j, r := range results {
+			if !secret.CreationTimestamp.Time.After(r.CreationTimestamp.Time) {
+				index = j
+				break
+			}
+		}
+		if index < len(results) {
+			results = append(results[:index+1], results[index:]...)
+			results[index] = secret
+		} else {
+			results = append(results, secret)
 		}
 	}
-	return result
+	return results
 }
 
 func isExperiment(s corev1.Secret) bool {
