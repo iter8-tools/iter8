@@ -91,16 +91,7 @@ spec:
         command:
         - "/bin/sh"
         - "-c"
-        - |
-          set -e
-
-          # ensure secret is created
-          # TODO remove this
-          sleep 2
-          
-          # run experiment using remote secret
-          iter8 k run -e {{ $id }}
-
+        - iter8 k run -e {{ $id }}  # run experiment using remote secret
       restartPolicy: Never
   backoffLimit: 0
 ---
