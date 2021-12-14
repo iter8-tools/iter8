@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '1.16', '1.17' ]
+        go: [ '1.15', '1.16', '1.17' ]
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
