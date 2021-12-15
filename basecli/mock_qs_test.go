@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRun(t *testing.T) {
+func TestMockQuickStart(t *testing.T) {
 	dir, _ := ioutil.TempDir("", "iter8-test")
 	defer os.RemoveAll(dir)
 
@@ -32,5 +32,27 @@ func TestRun(t *testing.T) {
 	// get into experiment folder and run
 	os.Chdir(path.Join(dir, hubFolder))
 	err = runCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// assert
+	AssertOptions = AssertOptionsType{
+		Conds:   []string{Completed, NoFailure, SLOs},
+		Timeout: 0,
+	}
+	err = assertCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// report text
+	ReportOptions = ReportOptionsType{
+		OutputFormat: TextOutputFormatKey,
+	}
+	err = reportCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// report HTML
+	ReportOptions = ReportOptionsType{
+		OutputFormat: HTMLOutputFormatKey,
+	}
+	err = reportCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 }
