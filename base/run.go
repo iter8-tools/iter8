@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig"
+	"github.com/go-playground/validator/v10"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -48,6 +49,18 @@ func MakeRun(t *TaskSpec) (Task, error) {
 		err = json.Unmarshal(jsonBytes, &rt)
 		bt = rt
 	}
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("invalid run task specification")
+		return nil, err
+	}
+
+	validate := validator.New()
+	err = validate.Struct(bt)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("invalid run task specification")
+		return nil, err
+	}
+
 	return bt, err
 }
 
