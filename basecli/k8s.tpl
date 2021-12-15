@@ -91,7 +91,7 @@ spec:
         command:
         - "/bin/sh"
         - "-c"
-        - iter8 k run -e {{ $id }}  # run experiment using remote secret
+        - iter8 k run --id {{ $id }}  # run experiment using remote secret
       restartPolicy: Never
   backoffLimit: 0
 ---
