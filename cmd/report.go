@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/basecli"
 
@@ -14,10 +12,15 @@ var reportCmd *cobra.Command
 func init() {
 	// initialize reportCmd
 	reportCmd = basecli.NewReportCmd()
-	var example = `
-# Generate a text report for the most recent experiment stared in a Kubernetes cluster
-iter8 k report`
-	reportCmd.Example = fmt.Sprintf("%s %s\n", reportCmd.Example, example)
+	reportCmd.Example = `
+# Generate a text report for the most recent experiment started in a Kubernetes cluster
+iter8 k report
+
+# Generate an html report for the most recent experiment
+iter8 k report -o html
+
+# Generate an html report the experiment with identifier $EXPERIMENT_ID
+iter8 k report -o html -e $EXPERIMENT_ID`
 	reportCmd.SilenceErrors = true
 
 	reportCmd.RunE = func(c *cobra.Command, args []string) error {

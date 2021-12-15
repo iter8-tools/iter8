@@ -114,7 +114,7 @@ func init() {
 	// initialize deleteCmd
 	deleteCmd = &cobra.Command{
 		Use:   "delete",
-		Short: "Delete experiment",
+		Short: "Delete an experiment running in a Kubernetes cluster",
 		Example: `
 # Delete experiment most recently started in Kubernetes cluster
 iter8 k delete
