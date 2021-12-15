@@ -22,7 +22,7 @@ It is easy to create and use your own custom Iter8 hubs.
 # called 'tensorflow' under the path 'mkdocs/docs/hub'. 
 # Anyone with read access to this repo can download `tensorflow` as follows.
 
-export ITER8HUB=github.com/$GHUSER/iter8.git?ref=ml//mkdocs/docs/hub/
+export ITER8HUB=github.com/$GHUSER/iter8.git?ref=ml//hub
 iter8 hub -e tensorflow
 ```
 

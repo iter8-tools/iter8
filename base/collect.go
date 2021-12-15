@@ -15,7 +15,7 @@ import (
 	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
 	"fortio.org/fortio/stats"
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
