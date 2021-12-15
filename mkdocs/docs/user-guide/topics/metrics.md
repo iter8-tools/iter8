@@ -19,4 +19,4 @@ A Counter metric is one whose value never decreases over time. For example, the 
 A Gauge metric is one whose value may increase or decrease over time. For example, the error rate for an app version may increase or decrease over the course of an experiment, and is a Gauge metric. 
 
 ### Histogram
-A Histogram metric has a set of buckets, and counts (number of observed metric values) associated with each bucket. For example, Iter8's built-in latency metric is stored in the form of a histogram. Each bucket represents a lower and upper value of observed latency value, and count represents the number of observed latency values that fell within a bucket.
+A Histogram metric has a set of buckets, and counts the number of observed metric values associated with each bucket. For example, Iter8's built-in latency metric is stored in the form of a histogram. Each bucket represents a lower and upper value of observed latency value, and count represents the number of observed latency values that fell within the bucket.
