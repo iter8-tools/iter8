@@ -132,6 +132,11 @@ nav:
     - Session affinity: tutorials/session-affinity.md
     - Gradual traffic shifting: tutorials/gradual-traffic-shifting.md
 - User guide:
+  - Topics:
+    - Iter8 hub: user-guide/topics/iter8hub.md
+    - Metrics: user-guide/topics/metrics.md
+    - Version numbering: user-guide/topics/versionnumbering.md
+    - Conditional task execution: user-guide/topics/conditional.md
   - Commands: 
     - iter8: user-guide/commands/iter8.md
     - iter8 hub: user-guide/commands/iter8_hub.md
@@ -151,11 +156,6 @@ nav:
     - gen-load-and-collect-metrics: user-guide/tasks/collect.md
     - assess-app-versions: user-guide/tasks/assess.md
     - run (a bash script): user-guide/tasks/run.md
-  - Topics:
-    - Iter8 hub: user-guide/topics/iter8hub.md
-    - Metrics: user-guide/topics/metrics.md
-    - Version numbering: user-guide/topics/versionnumbering.md
-    - Conditional task execution: user-guide/topics/conditional.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
 - News: news.md

@@ -24,6 +24,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	Iter8Hub = "github.com/iter8-tools/iter8.git//hub"
+)
+
 var hubFolder string
 
 var hubUsage = `
@@ -36,13 +40,13 @@ var hubUsage = `
 
 	| Name               | Description |
 	|--------------------| ------------|
-	| $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//mkdocs/docs/hub/ |
+	| $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//hub |
 
 	The Iter8 hub location follows the following syntax:
 
 	HOST/OWNER/REPO[?ref=branch]//path-to-experiment-folder-relative-to-root-of-the-repo
 
-	For example: github.com/iter8-tools/iter8.git?ref=master//mkdocs/docs/hub/
+	For example: github.com/iter8-tools/iter8.git?ref=master//hub
 `
 
 // hubCmd represents the hub command
@@ -60,7 +64,7 @@ var hubCmd = &cobra.Command{
 	# called 'tensorflow' under the path 'mkdocs/docs/hub'. 
 	# It can now be downloaded as follows.
 
-	export ITER8HUB=github.com/iter8-tools/iter8.git?ref=ml//mkdocs/docs/hub/
+	export ITER8HUB=github.com/iter8-tools/iter8.git?ref=ml//hub
 	iter8 hub -e tensorflow
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -69,7 +73,7 @@ var hubCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// initialize the location of iter8hub
 		viper.BindEnv("ITER8HUB")
-		viper.SetDefault("ITER8HUB", "github.com/iter8-tools/iter8.git//mkdocs/docs/hub/")
+		viper.SetDefault("ITER8HUB", Iter8Hub)
 		ifurl := path.Join(viper.GetString("ITER8HUB"), hubFolder)
 		log.Logger.Info("downloading ", ifurl)
 		if err := getter.Get(hubFolder, ifurl); err != nil {
