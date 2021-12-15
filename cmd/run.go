@@ -13,6 +13,9 @@ func init() {
 	runCmd = basecli.NewRunCmd()
 
 	runCmd.Hidden = true
+	runCmd.Example = `
+# Run experiment with identifier $EXPERIMENT_ID defined in a Kubernetes secret named "experiment-$EXPERIMENT_ID"
+iter8 k run -e $EXPERIMENT_ID`
 	runCmd.RunE = func(c *cobra.Command, args []string) error {
 		k8sExperimentOptions.initK8sExperiment(false)
 		return k8sExperimentOptions.experiment.Run(k8sExperimentOptions.expIO)
