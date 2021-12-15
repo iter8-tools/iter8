@@ -25,14 +25,14 @@ iter8 k assert -c completed,nofailure,slos
 # for experiments with multiple versions, specify that the SLOs for one version were satisfied
 iter8 k assert -c completed,nofailure,slosby=0
 
-# the above assertion for an experiment with identifier $EXPERIMENT_ID
-iter8 k assert -e $EXPERIMENT_ID -c completed,nofailure,slosby=0
+# the above assertion for an experiment with identifier $ID
+iter8 k assert --id $ID -c completed,nofailure,slosby=0
 
 # the above assertion with a runtime timeout
-iter8 k assert -e $EXPERIMENT_ID -c completed,nofailure,slosby=0 -t 5s`
+iter8 k assert --id $ID -c completed,nofailure,slosby=0 -t 5s`
 	assertCmd.RunE = func(c *cobra.Command, args []string) error {
 		k8sExperimentOptions.initK8sExperiment(true)
-		log.Logger.Infof("evaluating assert for experiment: %s\n", k8sExperimentOptions.experimentId)
+		log.Logger.Infof("evaluating assert for experiment: %s\n", k8sExperimentOptions.id)
 		allGood, err := k8sExperimentOptions.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
 		if err != nil || !allGood {
 			return err
@@ -44,7 +44,7 @@ iter8 k assert -e $EXPERIMENT_ID -c completed,nofailure,slosby=0 -t 5s`
 
 		return nil
 	}
-	k8sExperimentOptions.addExperimentIdOption(assertCmd.Flags())
+	k8sExperimentOptions.addIdOption(assertCmd.Flags())
 
 	// assertCmd is now initialized
 	kCmd.AddCommand(assertCmd)

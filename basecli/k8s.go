@@ -17,13 +17,14 @@ import (
 const (
 	// Path to go template file
 	k8sTemplateFilePath = "k8s.tpl"
-	experimentFilePath  = "experiment.yaml"
 )
 
 type k8sExperiment struct {
 	Tasks  []base.TaskSpec
 	Values chartutil.Values
 }
+
+var id string
 
 // run runs the command
 func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
@@ -39,6 +40,14 @@ func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
 
 func Generate(values []string) (result *bytes.Buffer, err error) {
 	v := chartutil.Values{}
+
+	// add id=id if --id option used
+	// note that if both --id=foo and --set id=bar are used,
+	// the --id option will take precedence
+	if len(id) > 0 {
+		values = append(values, "id="+id)
+	}
+
 	err = ParseValues(values, v)
 	if err != nil {
 		return nil, err
@@ -110,6 +119,9 @@ iter8 gen k8s`,
 }
 
 func init() {
+	// support --id option to set identifier
+	k8sCmd.Flags().StringVarP(&id, "id", "i", "", "if not specified, a randomly generated identifier will be used")
+
 	// extend gen command with the k8s command
 	genCmd.AddCommand(k8sCmd)
 }

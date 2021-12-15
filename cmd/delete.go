@@ -25,7 +25,7 @@ var deleteCmd *cobra.Command
 
 func getObjectManifests() ([]string, error) {
 	// use function of iter8 gen k8s to create manifest
-	generatedManifest, err := basecli.Generate([]string{fmt.Sprintf("%s=%s", "id", k8sExperimentOptions.experimentId)})
+	generatedManifest, err := basecli.Generate([]string{fmt.Sprintf("%s=%s", "id", k8sExperimentOptions.id)})
 	if err != nil {
 		return []string{}, err
 	}
@@ -119,15 +119,15 @@ func init() {
 # Delete experiment most recently started in Kubernetes cluster
 iter8 k delete
 
-# Delete experient with identifier $EXPERIMENT_ID
-iter8 k delete -e $EXPERIMENT_ID`,
+# Delete experient with identifier $ID
+iter8 k delete --id $ID`,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)
-			log.Logger.Infof("deleting experiment: %s\n", k8sExperimentOptions.experimentId)
+			log.Logger.Infof("deleting experiment: %s\n", k8sExperimentOptions.id)
 			return deleteObjects()
 		},
 	}
-	k8sExperimentOptions.addExperimentIdOption(deleteCmd.Flags())
+	k8sExperimentOptions.addIdOption(deleteCmd.Flags())
 
 	// deleteCmd is now initialized
 	kCmd.AddCommand(deleteCmd)
