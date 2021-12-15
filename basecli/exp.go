@@ -32,13 +32,14 @@ const (
 // expCmd represents the exp command
 var expCmd = &cobra.Command{
 	Use:   "exp",
-	Short: "render experiment template in the file experiment.tpl with values",
+	Short: "Render experiment template in the file experiment.tpl with values",
 	Long: `
 	Render experiment template in the file experiment.tpl with values`,
 	Example: `
 	# render experiment template in the file experiment.tpl with values
 	iter8 gen exp --set key=val
 	`,
+	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		v := chartutil.Values{}
 		err := ParseValues(GenOptions.Values, v)

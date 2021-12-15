@@ -246,7 +246,7 @@ func (o *K8sExperimentOptions) addIdOption(p *pflag.FlagSet) {
 }
 
 func (o *K8sExperimentOptions) addAppOption(p *pflag.FlagSet) {
-	p.StringVarP(&o.app, "app", "a", "", "app label")
+	p.StringVarP(&o.app, "app", "a", "", "app label; this flag is ignored if --id flag is specified")
 }
 
 type K8sExperimentOptions struct {
