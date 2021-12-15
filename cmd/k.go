@@ -11,10 +11,7 @@ var kCmd = &cobra.Command{
 	Short: "Work with experiments running in a Kubernetes cluster",
 	Example: `
 To run an experiment defined in 'experiment.yaml':
-iter8 gen k8s | kubectl apply -f -
-
-To delete an experiment with identifier $EXPERIMENT_ID:
-iter8 gen k8s --set id=$EXPERIMENT_ID | kubectl delete -f -`,
+iter8 gen k8s | kubectl apply -f -`,
 	// There is no action associated with this command
 	// Run: func(cmd *cobra.Command, args []string) { },
 }

@@ -19,6 +19,9 @@ iter8 k report
 # Generate an html report for the most recent experiment
 iter8 k report -o html
 
+# Generate an html report for the most recent experiment with app label $APP
+iter8 k report -o html -a $APP
+
 # Generate an html report the experiment with identifier $ID
 iter8 k report -o html --id $ID`
 	reportCmd.SilenceErrors = true
@@ -30,6 +33,7 @@ iter8 k report -o html --id $ID`
 	}
 
 	k8sExperimentOptions.addIdOption(reportCmd.Flags())
+	k8sExperimentOptions.addAppOption(reportCmd.Flags())
 
 	// reportCmd is now initialized
 	kCmd.AddCommand(reportCmd)
