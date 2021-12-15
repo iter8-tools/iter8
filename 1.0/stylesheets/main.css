@@ -1,0 +1,264 @@
+.md-typeset .admonition, .md-typeset details {
+  font-size: 0.75rem;
+}
+
+.md-announce a,
+.md-announce a:focus,
+.md-announce a:hover {
+  color: currentColor;
+}
+.md-announce strong {
+  white-space: nowrap;
+}
+.md-announce .twitter {
+  margin-left: 0.2em;
+}
+
+.mdx-container {
+  padding-top: 1rem;
+  background: linear-gradient(to bottom, #cd0404, #430195 99%);
+}
+
+.mdx-hero {
+  margin: 0 0.8rem;
+  color: var(--md-primary-bg-color);
+  padding-bottom: 1rem;
+}
+.mdx-hero h1 {
+  margin-bottom: 1rem;
+  color: currentColor;
+  font-weight: 700;
+}
+@media screen and (max-width: 29.9375em) {
+  .mdx-hero h1 {
+    font-size: 1.4rem;
+  }
+}
+.mdx-hero__content {
+  padding: 1rem;
+}
+.mdx-hero__image {
+  padding: 1rem;
+  min-width: 60%;
+}
+@media screen and (min-width: 60em) {
+  .mdx-hero {
+    display: flex;
+    align-items: stretch;
+  }
+  .mdx-hero__content {
+    max-width: 24rem;
+  }
+  .mdx-hero__image {
+    order: 1;
+    width: 33rem;
+    transform: translateX(1.5rem);
+  }
+}
+@media screen and (min-width: 76.25em) {
+  .mdx-hero__image {
+    transform: translateX(2rem);
+  }
+}
+.mdx-hero .md-button {
+  margin-top: 1rem;
+  margin-right: 0.5rem;
+  color: var(--md-primary-bg-color);
+}
+.mdx-hero .md-button:focus, .mdx-hero .md-button:hover {
+  color: var(--md-default-bg-color);
+  background-color: var(--md-accent-fg-color);
+  border-color: var(--md-accent-fg-color);
+}
+.mdx-hero .md-button--primary {
+  color: #894da8;
+  background-color: var(--md-primary-bg-color);
+  border-color: var(--md-primary-bg-color);
+}
+
+.ix-container {
+  padding-top: 1rem;
+  background: whitesmoke;
+}
+
+.ix-hero {
+  margin: 0 0.8rem;
+  padding-bottom: 1rem;
+}
+.ix-hero h1, .ix-hero h2, .ix-hero h3 {
+  color: var(--md-primary-fg-color--dark);
+}
+.ix-hero__content {
+  min-width: 40%;
+  padding: 1rem;
+}
+.ix-hero__image {
+  padding: 1rem;
+}
+@media screen and (min-width: 60em) {
+  .ix-hero {
+    display: flex;
+    align-items: stretch;
+  }
+  .ix-hero__content {
+    max-width: 32rem;
+    transform: translateX(2rem);
+  }
+  .ix-hero__image {
+    order: 0;
+    width: 25rem;
+  }
+}
+@media screen and (min-width: 76.25em) {
+  .ix-hero__image {
+    transform: translateX(2rem);
+  }
+}
+
+.md-header__title {
+  font-size: 1.5rem;
+}
+
+.md-header img:focus, .md-header img:hover {
+  -webkit-transform: rotate(720deg);
+  -moz-transform: rotate(720deg);
+  -o-transform: rotate(720deg);
+  -ms-transform: rotate(720deg);
+  transform: rotate(720deg);
+  -webkit-transition-duration: 2s;
+  -moz-transition-duration: 2s;
+  -o-transition-duration: 2s;
+  transition-duration: 2s;
+  transform: 2s;
+}
+
+.top-hr {
+  width: 100%;
+  display: flex;
+  max-width: 61rem;
+  margin-right: auto;
+  margin-left: auto;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.feature-item {
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  box-sizing: border-box;
+  padding: 25px;
+  word-break: break-word;
+}
+
+.feature-item h2 {
+  color: #333;
+  font-weight: 300;
+  font-size: 25px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: normal;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+.feature-item p {
+  font-size: 16px;
+  line-height: 1.8em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color: #111;
+  margin: 0 0 10px;
+  display: block;
+}
+
+.feature-item h2 svg {
+  color: #a00101;
+}
+
+@media screen and (min-width: 13.75em) {
+  .feature-item {
+    width: 100%;
+  }
+}
+@media screen and (min-width: 45em) {
+  .feature-item {
+    width: 50%;
+  }
+}
+@media screen and (min-width: 60em) {
+  .feature-item {
+    width: 33%;
+  }
+}
+@media screen and (min-width: 76.25em) {
+  .feature-item {
+    width: 33%;
+  }
+}
+.feature-item:hover {
+  background-color: #fef5f5;
+  border-radius: 3px;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-center .iframe-container {
+  display: block;
+}
+
+.tx-container {
+  background: #fef5f5;
+}
+.tx-container .pad-margin {
+  padding: 1.5rem;
+}
+.tx-container .pad-margin h1 {
+  margin: 0rem;
+}
+.tx-container .pad-margin h3 {
+  margin: 0.8em 0 0.8em;
+}
+.tx-container .tx-hero {
+  display: flex;
+  flex-wrap: wrap;
+}
+.tx-container .tx-hero .tx-card {
+  padding-bottom: 1rem;
+}
+@media screen and (min-width: 13.75em) {
+  .tx-container .tx-hero .tx-card {
+    width: 100%;
+  }
+}
+@media screen and (min-width: 45em) {
+  .tx-container .tx-hero .tx-card {
+    width: 100%;
+  }
+}
+@media screen and (min-width: 60em) {
+  .tx-container .tx-hero .tx-card {
+    width: 33%;
+  }
+}
+@media screen and (min-width: 76.25em) {
+  .tx-container .tx-hero .tx-card {
+    width: 33%;
+  }
+}
+.tx-container .tx-hero .tx-card {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  padding-bottom: 1rem;
+}
+.tx-container .tx-hero .tx-card .md-button:focus, .tx-container .tx-hero .tx-card .md-button:hover {
+  background-color: #670000;
+  border-color: #670101;
+}
+
+.md-tabs__link {
+  font-size: 0.8rem;
+}
