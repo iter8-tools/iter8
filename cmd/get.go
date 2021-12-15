@@ -66,7 +66,10 @@ func init() {
 		Short: "Get a list of experiments running in a Kubernetes cluster",
 		Example: `
 # Get list of experiments running in a Kubernetes cluster
-iter8 k get`,
+iter8 k get
+
+# Get list of experiments with app label $APP
+iter8 k get -a $APP`,
 		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)

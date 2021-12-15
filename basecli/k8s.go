@@ -25,6 +25,7 @@ type k8sExperiment struct {
 }
 
 var id string
+var app string
 
 // run runs the command
 func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
@@ -46,6 +47,13 @@ func Generate(values []string) (result *bytes.Buffer, err error) {
 	// the --id option will take precedence
 	if len(id) > 0 {
 		values = append(values, "id="+id)
+	}
+
+	// add app=app if --app option is used
+	// not that if both --app=foo and --set id=bar are used,
+	// the --app optiom will take precedence
+	if len(app) > 0 {
+		values = append(values, "app="+app)
 	}
 
 	err = ParseValues(values, v)
@@ -121,6 +129,8 @@ iter8 gen k8s`,
 func init() {
 	// support --id option to set identifier
 	k8sCmd.Flags().StringVarP(&id, "id", "i", "", "if not specified, a randomly generated identifier will be used")
+	// support --app option to set app
+	k8sCmd.Flags().StringVarP(&app, "app", "a", "", "label to be associated with an experiment, default is 'default'")
 
 	// extend gen command with the k8s command
 	genCmd.AddCommand(k8sCmd)

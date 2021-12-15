@@ -119,6 +119,9 @@ func init() {
 # Delete experiment most recently started in Kubernetes cluster
 iter8 k delete
 
+# Delete the most recent experiment with app label $APP
+iter8 k delete -a $APP
+
 # Delete experient with identifier $ID
 iter8 k delete --id $ID`,
 		RunE: func(c *cobra.Command, args []string) error {

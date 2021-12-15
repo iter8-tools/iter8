@@ -17,6 +17,9 @@ func init() {
 # Get logs of the most recent experiment started in a Kubernetes cluster
 iter8 k logs
 
+# Get logs of the most recent experiment with app label $APP
+iter8 k logs -a $APP
+
 # Get logs of the experiment running in a Kubernetes with identifier $ID
 iter8 k logs --id $ID`,
 		RunE: func(c *cobra.Command, args []string) error {

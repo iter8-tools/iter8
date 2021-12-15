@@ -38,8 +38,6 @@ const (
 	ComponentJob    = "job"
 	ComponentRbac   = "rbac"
 
-	AllApps = ""
-
 	MaxGetRetries    = 2
 	GetRetryInterval = 1 * time.Second
 )
@@ -98,7 +96,7 @@ func getSecretWithRetry(client *kubernetes.Clientset, ns string, nm string) (s *
 	return nil, fmt.Errorf("experiment not found")
 }
 
-func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
+func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string, app string) (s *corev1.Secret, err error) {
 	// An id is provided; get this experiment, if it exists
 	if len(id) != 0 {
 		nm := SpecSecretPrefix + id
@@ -113,7 +111,7 @@ func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s 
 	// There is no explict experiment name provided.
 	// Get a list of all experiments.
 	// Then select the one with the most recent create time.
-	experimentSecrets, err := GetExperimentSecrets(client, ns, AllApps)
+	experimentSecrets, err := GetExperimentSecrets(client, ns, app)
 	if err != nil {
 		return s, err
 	}
@@ -279,7 +277,7 @@ func (o *K8sExperimentOptions) initK8sExperiment(withResult bool) (err error) {
 	}
 
 	if len(o.id) == 0 {
-		s, err := GetExperimentSecret(o.client, o.namespace, o.id)
+		s, err := GetExperimentSecret(o.client, o.namespace, o.id, o.app)
 		if err != nil {
 			return err
 		}
