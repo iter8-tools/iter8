@@ -60,77 +60,129 @@
 
 <!-- Hero for landing page -->
 <section class="mdx-container">
-
   <div class="md-grid md-typeset">
-
     <div class="mdx-hero">
-
       <!-- Hero content -->
       <div class="mdx-hero__content">
-        <h1><strong>Metrics Driven Experiments and Releases</strong></h1>
-
-        <h2>Maximize <strong>release velocity</strong> and <strong>business value</strong> of apps while protecting <strong>end-user experience</strong>.
+        <h1><strong>Metrics Driven Experiments</strong></h1>
+        <h2>
+          Open-source platform for metrics-driven <strong>experiments</strong> and <strong>rollouts</strong>.
         </h2> 
-      
-        <a href="{{ base_url }}/getting-started/first-experiment/" title="Quick start"
+
+        <a href="{{ base_url }}/getting-started/your-first-experiment" title="Quick start"
           class="md-button md-button--primary">
-          Quick start
+          Quick start in 2 min
         </a>
-
-        <a class="github-button md-button md-button--primary" href="https://github.com/iter8-tools/iter8" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star iter8-tools/iter8 on GitHub">Star</a>
-
-        <a class="github-button md-button md-button--primary" href="https://github.com/iter8-tools/iter8/fork" data-icon="octicon-repo-forked" data-size="large" data-show-count="true" aria-label="Fork iter8-tools/iter8 on GitHub">Fork</a> 
       </div>
 
       <!-- Hero image -->
       <div class="mdx-hero__image">
         <img src="{{ base_url }}/images/illustration.png" alt="" width="2429" height="701" draggable="false">
       </div>
-
     </div>
-
-
-    <!-- Hero ^^ -->
-
-
   </div>
 </section>
 
-<section class="ix-container">
-  <div class="md-grid md-typeset">
-    <div class="ix-hero">
+<section class="tx-container">
+  <div class="md-grid md-typeset text-center pad-margin">
+      <h1>
+        <span class="twemoji">
+          {% include ".icons/material/github.svg" %}
+        </span>
+        Open Source
+      </h1>
 
-      <!-- Hero image -->
-      <div class="ix-hero__image">
-        <img src="{{ base_url }}/images/slack-image.png" alt="" width="1778" height="710" draggable="false">
+      <h3>
+        Iter8 is 100% open source and community-driven. Available under the <a
+          href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2 License</a> on <a
+          href="https://github.com/iter8-tools/iter8">GitHub</a>.
+      </h3>
+
+      <div class="iframe-container">
+        <!-- Place this tag where you want the button to render. -->
+        <iframe src="https://ghbtns.com/github-btn.html?user=iter8-tools&repo=iter8&type=star&size=large" frameborder="0" scrolling="0" width="85" height="30" title="Star"></iframe>
+        
+        <iframe src="https://ghbtns.com/github-btn.html?user=iter8-tools&repo=iter8&type=fork&size=large" frameborder="0" scrolling="0" width="85" height="30" title="Fork"></iframe>
+      </div>
+      
+      <p>Using Iter8? Please list yourself 
+        <a href="https://github.com/iter8-tools/iter8/blob/master/ADOPTERS.md">here.</a>
+      </p>
+    </div>
+</section>
+
+<section class="fx-container">
+  <div class="md-grid md-typeset">
+    <!-- Main site box descriptions -->
+    <div class="top-hr">
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/atom.svg" %}
+          </span>
+          Load testing/SLOs
+        </h2>
+        <p>Iter8 experiments can generate requests for <strong>HTTP</strong> and <strong>gRPC</strong> services, collect <strong>built-in</strong> latency and error-related metrics, and validate <strong>SLOs</strong>.</p>
+      </div>
+      
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/rhombus-split.svg" %}
+          </span>
+          A/B(/n) testing
+        </h2>
+        <p><strong>Grow your business</strong> with every release. Iter8 experiments can compare multiple versions based on business value and identify a <strong>winner</strong>.</p>
       </div>
 
-      <!-- Hero content -->
-      <div class="ix-hero__content">
-        <h1>Use Iter8 in <strong>any</strong> Kubernetes environment</strong></h1>
-          <h2>
-            <ul>
-            <li><strong>Any</strong> app/ML/serverless framework</li>
-            <li><strong>Any</strong> metric database</li>
-            <li><strong>Any</strong> service mesh/ingress</li>
-            <li><strong>Any</strong> CI/CD/GitOps process</li>  
-          </ul>
-        </h2>      
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/powershell.svg" %}
+          </span>
+          Simple to use
+        </h2>
+        <p>Define experiments using a <strong>simple YAML file</strong>. Run them <strong>locally</strong>, in a <strong>container</strong>, inside <strong>Kubernetes</strong>, or inside your <strong>CI/CD/GitOps</strong> pipeline.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/apps.svg" %}
+          </span>
+          Awesome integrations
+        </h2>
+        <p>Use with any <strong>app, serverless, or ML</strong> framework like <strong>Kubernetes deployments, statefulSets</strong>, <strong>Knative</strong> serverless, and <strong>KServe/Seldon ML</strong> deployments.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/webhook.svg" %}
+          </span>
+          Eventing
+        </h2>
+        <p>Iter8 experiments can automatically trigger <strong>GitHub Action workflows</strong>, notify <strong>Slack</strong>, <strong>webhook and cloudevent receivers</strong>.</p>
+      </div>
+
+      <div class="feature-item">
+        <h2>
+          <span class="twemoji">
+            {% include ".icons/material/chart-bar.svg" %}
+          </span>
+          Reporting
+        </h2>
+        <p>Iter8 can report results of the experiment in <strong>HTML format with D3 visualizations</strong>, or in <strong>plain text format</strong>.</p>
       </div>
 
     </div>
-
-
-    <!-- Hero ^^ -->
-
-
   </div>
 </section>
 
 <!-- Hero for landing page -->
 <section class="tx-container">
   <div class="md-grid md-typeset">
-
     <div class="tx-hero">
 
       <div class=tx-card>
@@ -144,27 +196,24 @@
 
       <div class=tx-card>
         <h2>Come to our meetings</h2>
-        <a href="{{ base_url }}/getting-started/help/#iter8-community-meetings" title="Community meetings"
+        <a href="{{ base_url }}/community/#community-meetings" title="Community meetings"
         class="md-button md-button--primary">
         Meet
       </a>
-      <p>Everyone is welcome to join Iter8 community meetings.</p>
+      <p>Everyone is welcome to join our community meetings.</p>
       </div>
-
 
       <div class=tx-card>
         <h2>Contributors welcome</h2>
-        <a href="{{ base_url }}/contributing/overview/" title="Contributing guide"
+        <a href="{{ base_url }}/contributing/" title="Contributing guide"
         class="md-button md-button--primary">
         Contribute
-      </a>
-      <p>Want to join the fun? New users and contributors are always welcome!</p>
-
+        </a>
+        <p>Want to join the fun? New users and contributors are always welcome!</p>
       </div>
     </div>
   </div>
 </section>
-
 
 {% endblock %}
 

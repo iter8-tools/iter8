@@ -48,13 +48,19 @@
     rel="stylesheet"
     href="{{ 'stylesheets/main.css' | url }}"
   />
+
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>  
+
+{% endblock %}
+
+<!-- Announcement bar -->
+{% block announce %}
+Welcome to the preview release of <strong>Iter8 v0.8</strong>. This release greatly simplifies metrics driven experiments.
 {% endblock %}
 
 <!-- Theme-related JavaScript -->
 {% block scripts %}
   {{ super() }}
-
-  <!-- Add functionality to the GitHub start/fork button  -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
 {% endblock %}
 

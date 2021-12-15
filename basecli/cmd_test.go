@@ -1,0 +1,3 @@
+package basecli
+
+func ExamplehubCmd() {}

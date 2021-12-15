@@ -1,4 +1,4 @@
-name: Build and push Iter8 in Docker image
+name: Build and push Iter8 Docker image
 on:
   release:
     types: [published]
@@ -12,7 +12,6 @@ jobs:
   # Push ind image to dockerhub
   build-and-push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'release'
     steps:
     - uses: actions/checkout@v2
     - name: Get version
@@ -24,7 +23,7 @@ jobs:
         elif [[ "${{ github.ref }}" == *"master" ]]; then
           echo "VERSION=latest" >> $GITHUB_ENV
         fi
-    - name: Get owner and repo
+    - name: Get owner
       run: |
         ownerrepo=${{ github.repository }}
         owner=$(echo $ownerrepo | cut -f1 -d/)
@@ -32,7 +31,6 @@ jobs:
           owner=iter8
         fi
         echo "OWNER=$owner" >> $GITHUB_ENV
-        echo "REPO=ind" >> $GITHUB_ENV
     - uses: docker/setup-buildx-action@v1
     - uses: docker/login-action@v1
       with:
@@ -40,6 +38,5 @@ jobs:
         password: ${{ secrets.DOCKERHUB_SECRET }}
     - uses: docker/build-push-action@v2
       with:
-        context: ./install/docker
-        tags: ${{ env.OWNER }}/${{ env.REPO }}:${{ env.VERSION }}
+        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }}
         push: true

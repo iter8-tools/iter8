@@ -7,26 +7,15 @@ hide:
 
 # Roadmap
 
-1. **Design simplifications (v0.8)**
-    * CRD and controller-less experimentation using Kubernetes configmaps and jobs
-    * *Iter8Hub:* Helm repo with reusable namespace-scoped experiment charts
-    * Multi-tenancy
-2. **GitOps**
-    * Integration with ArgoCD, Flux, JenkinsX and other GitOps operators
-3. **Enhanced experiments**
-    * Support for progressive rollout of statefulsets
-    * Support for distributed Helm applications
-    * Enhanced examples for mirroring/shadow deployments
-    * Enhanced examples for experiments with fixed traffic splits
-    * Enhanced examples for experiments with progressive traffic shifting
-4. **Metrics**
-    * Enhanced examples with built-in metrics, including for apps using gRPC
-    * Support for more metric providers like MySQL, PostgreSQL, CouchDB, MongoDB, and Google Analytics.
-5. **CNCF Sandbox project**
-6. **Enhanced MLOps experiments**
-    * Customized experiments/metrics for serving frameworks like TorchServe and TFServing
-7. **Analytics improvements**
-    * Pareto testing strategies with single and multiple reward metrics
-    * Early termination of experiments
-    * Extension points for traffic shifting and version assessment algorithms
-    * Experiments with `support` and `confidence` estimation
+The following are some Iter8 v0.8 issues which need to be resolved in order for it to graduate from a `preview` release to a regular release.
+
+1. Load testing with gRPC services
+2. A/B(/n) testing sample
+3. `read-external-metrics` task
+4. `recommend-traffic-split` task
+5. Ability to run multiple loops of an experiment
+
+The following features are also in the roadmap.
+
+6. Ability to run Iter8 experiments as a step in CI/CD/GitOps pipelines
+7. Auto triggering experiments

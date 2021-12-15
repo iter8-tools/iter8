@@ -22,6 +22,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+coverage.out
 *.lcov
 
 # nyc test coverage
@@ -125,3 +126,9 @@ site
 
 # Helm chart.lock
 Chart.lock
+
+# Iter8 binary and yamls and reports
+iter8
+clibase/clibase
+result.yaml
+report.html
