@@ -67,12 +67,13 @@ func init() {
 		Example: `
 # Get list of experiments running in a Kubernetes cluster
 iter8 k get`,
+		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)
 			return runGetCmd(c, args, k8sExperimentOptions)
 		},
 	}
-	k8sExperimentOptions.addExperimentIdOption(getCmd.Flags())
+	k8sExperimentOptions.addIdOption(getCmd.Flags())
 
 	// getCmd is now initialized
 	kCmd.AddCommand(getCmd)

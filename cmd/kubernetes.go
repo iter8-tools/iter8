@@ -236,24 +236,17 @@ func (f *KubernetesExpIO) WriteResult(r *basecli.Experiment) error {
 	return err
 }
 
-const (
-	ExperimentId            = "experiment-id"
-	ExperimentIdShort       = "e"
-	ExperimentIdDescription = "remote experiment identifier; if not specified, the most recent experiment is used"
-)
-
-func (o *K8sExperimentOptions) addExperimentIdOption(p *pflag.FlagSet) {
-	// Add options
-	p.StringVarP(&o.experimentId, ExperimentId, ExperimentIdShort, "", ExperimentIdDescription)
+func (o *K8sExperimentOptions) addIdOption(p *pflag.FlagSet) {
+	p.StringVarP(&o.id, "id", "i", "", "experiment identifier; if not specified, the most recent experiment is used")
 }
 
 type K8sExperimentOptions struct {
-	ConfigFlags  *genericclioptions.ConfigFlags
-	namespace    string
-	client       *kubernetes.Clientset
-	experimentId string
-	expIO        *KubernetesExpIO
-	experiment   *basecli.Experiment
+	ConfigFlags *genericclioptions.ConfigFlags
+	namespace   string
+	client      *kubernetes.Clientset
+	id          string
+	expIO       *KubernetesExpIO
+	experiment  *basecli.Experiment
 }
 
 func newK8sExperimentOptions() *K8sExperimentOptions {
@@ -273,18 +266,18 @@ func (o *K8sExperimentOptions) initK8sExperiment(withResult bool) (err error) {
 		return err
 	}
 
-	if len(o.experimentId) == 0 {
-		s, err := GetExperimentSecret(o.client, o.namespace, o.experimentId)
+	if len(o.id) == 0 {
+		s, err := GetExperimentSecret(o.client, o.namespace, o.id)
 		if err != nil {
 			return err
 		}
-		o.experimentId = s.Labels[IdLabel]
+		o.id = s.Labels[IdLabel]
 	}
 
 	o.expIO = &KubernetesExpIO{
 		Client:    o.client,
 		Namespace: o.namespace,
-		Name:      SpecSecretPrefix + o.experimentId,
+		Name:      SpecSecretPrefix + o.id,
 	}
 
 	o.experiment, err = basecli.Build(withResult, o.expIO)

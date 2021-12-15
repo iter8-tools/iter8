@@ -19,17 +19,17 @@ iter8 k report
 # Generate an html report for the most recent experiment
 iter8 k report -o html
 
-# Generate an html report the experiment with identifier $EXPERIMENT_ID
-iter8 k report -o html -e $EXPERIMENT_ID`
+# Generate an html report the experiment with identifier $ID
+iter8 k report -o html --id $ID`
 	reportCmd.SilenceErrors = true
 
 	reportCmd.RunE = func(c *cobra.Command, args []string) error {
 		k8sExperimentOptions.initK8sExperiment(true)
-		log.Logger.Infof("generating report for experiment: %s\n", k8sExperimentOptions.experimentId)
+		log.Logger.Infof("generating report for experiment: %s\n", k8sExperimentOptions.id)
 		return k8sExperimentOptions.experiment.Report(basecli.ReportOptions.OutputFormat)
 	}
 
-	k8sExperimentOptions.addExperimentIdOption(reportCmd.Flags())
+	k8sExperimentOptions.addIdOption(reportCmd.Flags())
 
 	// reportCmd is now initialized
 	kCmd.AddCommand(reportCmd)
