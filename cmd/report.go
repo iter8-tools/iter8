@@ -13,7 +13,7 @@ func init() {
 	// initialize reportCmd
 	reportCmd = basecli.NewReportCmd()
 	reportCmd.Example = `
-# Generate a text report for the most recent experiment started in a Kubernetes cluster
+# Generate a text report for the most recent experiment started in Kubernetes
 iter8 k report
 
 # Generate an html report for the most recent experiment

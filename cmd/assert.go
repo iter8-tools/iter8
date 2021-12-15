@@ -14,8 +14,9 @@ var assertCmd *cobra.Command
 func init() {
 	// initialize assertCmd
 	assertCmd = basecli.NewAssertCmd()
+	assertCmd.Short = `Assert if experiment result satisfies the specified conditions`
 	assertCmd.Example = `
-# Assert that the most recent experiment running in a Kubernetes cluster has completed
+# Assert that the most recent experiment has completed
 # without failure and its SLOs were satisfied for all versions
 iter8 k assert -c completed -c nofailure -c slos
 
