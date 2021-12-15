@@ -96,7 +96,7 @@ func getSecretWithRetry(client *kubernetes.Clientset, ns string, nm string) (s *
 	return nil, fmt.Errorf("experiment not found")
 }
 
-func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s *corev1.Secret, err error) {
+func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string, app string) (s *corev1.Secret, err error) {
 	// An id is provided; get this experiment, if it exists
 	if len(id) != 0 {
 		nm := SpecSecretPrefix + id
@@ -111,7 +111,7 @@ func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s 
 	// There is no explict experiment name provided.
 	// Get a list of all experiments.
 	// Then select the one with the most recent create time.
-	experimentSecrets, err := GetExperimentSecrets(client, ns)
+	experimentSecrets, err := GetExperimentSecrets(client, ns, app)
 	if err != nil {
 		return s, err
 	}
@@ -125,10 +125,15 @@ func GetExperimentSecret(client *kubernetes.Clientset, ns string, id string) (s 
 	return &mostRecent, nil
 }
 
-func GetExperimentSecrets(client *kubernetes.Clientset, ns string) (experimentSecrets []corev1.Secret, err error) {
+func GetExperimentSecrets(client *kubernetes.Clientset, ns string, app string) (experimentSecrets []corev1.Secret, err error) {
+	selector := NameLabel + "=" + "iter8"
+	selector += "," + ComponentLabel + "=" + ComponentSpec
+	if len(app) != 0 {
+		selector += "," + AppLabel + "=" + app
+	}
 	secrets, err := client.CoreV1().Secrets(ns).List(
 		context.Background(), metav1.ListOptions{
-			LabelSelector: "app.kubernetes.io/name=iter8,app.kubernetes.io/component=spec",
+			LabelSelector: selector,
 		})
 	if err != nil {
 		return experimentSecrets, err
@@ -240,6 +245,10 @@ func (o *K8sExperimentOptions) addIdOption(p *pflag.FlagSet) {
 	p.StringVarP(&o.id, "id", "i", "", "experiment identifier; if not specified, the most recent experiment is used")
 }
 
+func (o *K8sExperimentOptions) addAppOption(p *pflag.FlagSet) {
+	p.StringVarP(&o.app, "app", "a", "", "app label")
+}
+
 type K8sExperimentOptions struct {
 	ConfigFlags *genericclioptions.ConfigFlags
 	namespace   string
@@ -247,6 +256,7 @@ type K8sExperimentOptions struct {
 	id          string
 	expIO       *KubernetesExpIO
 	experiment  *basecli.Experiment
+	app         string
 }
 
 func newK8sExperimentOptions() *K8sExperimentOptions {
@@ -267,7 +277,7 @@ func (o *K8sExperimentOptions) initK8sExperiment(withResult bool) (err error) {
 	}
 
 	if len(o.id) == 0 {
-		s, err := GetExperimentSecret(o.client, o.namespace, o.id)
+		s, err := GetExperimentSecret(o.client, o.namespace, o.id, o.app)
 		if err != nil {
 			return err
 		}
