@@ -23,3 +23,18 @@ require (
 	k8s.io/client-go v0.22.4
 	sigs.k8s.io/yaml v1.2.0
 )
+
+retract (
+	// Published v1 too early
+	[v1.0.0, v1.0.2]
+	// Named iter8-istio controller as iter8 too early
+	v1.0.0-rc3
+	// Named iter8-istio controller as iter8 too early
+	v1.0.0-rc2
+	// Named iter8-istio controller as iter8 too early
+	v1.0.0-rc1
+	// Named iter8-istio controller as iter8 too early
+	v1.0.0-preview
+	// Named iter8-istio controller as iter8 too early
+	[v0.0.1, v0.7.30]
+)
