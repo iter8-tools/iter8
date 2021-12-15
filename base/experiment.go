@@ -116,8 +116,8 @@ type SLO struct {
 }
 
 type taskMeta struct {
-	Task *string `json:"task,omitempty" yaml:"task,omitempty" validate:"required_without=Run"`
-	Run  *string `json:"run,omitempty" yaml:"run,omitempty" validate:"required_without=Task"`
+	Task *string `json:"task,omitempty" yaml:"task,omitempty" validate:"required_without=Run,excluded_with=Run"`
+	Run  *string `json:"run,omitempty" yaml:"run,omitempty" validate:"required_without=Task,excluded_with=Task"`
 	If   *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 

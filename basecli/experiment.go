@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -63,6 +64,13 @@ func (e *Experiment) buildTasks() error {
 
 		var err error
 		var task base.Task
+
+		validate := validator.New()
+		err = validate.Struct(t)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("invalid task specification")
+			return err
+		}
 
 		// this is a run task
 		if t.Run != nil {

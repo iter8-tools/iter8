@@ -21,13 +21,13 @@ Download an experiment folder from Iter8 hub
 
 	| Name               | Description |
 	|--------------------| ------------|
-	| $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//mkdocs/docs/hub/ |
+	| $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//hub |
 
 	The Iter8 hub location follows the following syntax:
 
 	HOST/OWNER/REPO[?ref=branch]//path-to-experiment-folder-relative-to-root-of-the-repo
 
-	For example: github.com/iter8-tools/iter8.git?ref=master//mkdocs/docs/hub/
+	For example: github.com/iter8-tools/iter8.git?ref=master//hub
 
 
 ```
@@ -47,7 +47,7 @@ iter8 hub [flags]
 	# called 'tensorflow' under the path 'mkdocs/docs/hub'. 
 	# It can now be downloaded as follows.
 
-	export ITER8HUB=github.com/iter8-tools/iter8.git?ref=ml//mkdocs/docs/hub/
+	export ITER8HUB=github.com/iter8-tools/iter8.git?ref=ml//hub
 	iter8 hub -e tensorflow
 	
 ```
