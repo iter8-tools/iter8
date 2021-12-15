@@ -66,7 +66,7 @@
       <div class="mdx-hero__content">
         <h1><strong>Metrics Driven Experiments</strong></h1>
         <h2>
-          Open-source cloud-native metrics-driven <strong>experiments</strong> and <strong>release engineering</strong>.
+          Open-source cloud-native platform for metrics-driven <strong>experiments</strong> and <strong>rollouts</strong>.
         </h2> 
 
         <a href="{{ base_url }}/getting-started/your-first-experiment" title="Quick start"
@@ -84,19 +84,30 @@
 </section>
 
 <section class="tx-container">
-  <div class="md-grid md-typeset centered">
+  <div class="md-grid md-typeset text-center pad-margin">
       <h1>
         <span class="twemoji">
           {% include ".icons/material/github.svg" %}
         </span>
         Open Source
       </h1>
+
       <h3>
         Iter8 is 100% open source and community-driven. Available under the <a
           href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2 License</a> on <a
           href="https://github.com/iter8-tools/iter8">GitHub</a>.
       </h3>
-      <iframe src="https://ghbtns.com/github-btn.html?user=iter8-tools&repo=iter8&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+
+      <div class="iframe-container">
+        <!-- Place this tag where you want the button to render. -->
+        <iframe src="https://ghbtns.com/github-btn.html?user=iter8-tools&repo=iter8&type=star&size=large" frameborder="0" scrolling="0" width="85" height="30" title="Star"></iframe>
+        
+        <iframe src="https://ghbtns.com/github-btn.html?user=iter8-tools&repo=iter8&type=fork&size=large" frameborder="0" scrolling="0" width="85" height="30" title="Fork"></iframe>
+      </div>
+
+      <p>Using Iter8? Please list yourself 
+        <a href="https://github.com/iter8-tools/iter8/blob/master/ADOPTERS.md">here.</a>
+      </p>
     </div>
 </section>
 
@@ -124,29 +135,6 @@
         </h2>
         <p><strong>Grow your business</strong> with every release. Iter8 experiments can compare multiple versions based on business value and identify a <strong>winner</strong>.</p>
       </div>
- 
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/check-all.svg" %}
-          </span>
-          Metric backends
-        </h2>
-        Iter8 can use metrics for SLO validation and A/B(/n) testing from any backend like <strong>Prometheus, New Relic, Sysdig,</strong> and <strong>Elastic</strong>.</p>
-      </div>      
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/router.svg" %}
-          </span>
-          <!-- <span class="twemoji">
-            {% include ".icons/material/progress-check.svg" %}
-          </span> -->
-          Traffic engineering
-        </h2>
-        <p>Combine Iter8 with your service mesh and ingress to achieve <strong>traffic mirroring</strong>, <strong>user segmentation</strong>, <strong>session affinity</strong>, and <strong>gradual rollout</strong>.</p>
-      </div>
 
       <div class="feature-item">
         <h2>
@@ -157,17 +145,6 @@
         </h2>
         <p>Define experiments using a <strong>simple YAML file</strong>. Run them <strong>locally</strong>, in a <strong>container</strong>, inside <strong>Kubernetes</strong>, or inside your <strong>CI/CD/GitOps</strong> pipeline.</p>
       </div>
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/share.svg" %}
-          </span>
-          Simple to share
-        </h2>
-        <p>Find, store, and share experiments using <strong>Iter8 hub</strong>. Get started rapidly using the <strong>public</strong> Iter8 hub or create your own <strong>custom</strong> hub within a Git repo.</p>
-      </div>
-
 
       <div class="feature-item">
         <h2>
@@ -186,7 +163,7 @@
           </span>
           Eventing
         </h2>
-        <p>Iter8 experiments can automatically create<strong> GitHub pull requests</strong>, trigger <strong>GitHub Action workflows</strong>, and notify <strong>Slack</strong> and <strong>webhooks</strong>.</p>
+        <p>Iter8 experiments can automatically trigger <strong>GitHub Action workflows</strong>, notify <strong>Slack</strong>, <strong>webhook and cloudevent receivers</strong>.</p>
       </div>
 
       <div class="feature-item">
@@ -194,9 +171,9 @@
           <span class="twemoji">
             {% include ".icons/material/chart-bar.svg" %}
           </span>
-          Visualize Results
+          Reporting
         </h2>
-        <p>Iter8 can report results of the experiment in <strong>HTML format with Chart JS visualizations</strong>, or in <strong>plain text format</strong>.</p>
+        <p>Iter8 can report results of the experiment in <strong>HTML format with D3 visualizations</strong>, or in <strong>plain text format</strong>.</p>
       </div>
 
     </div>

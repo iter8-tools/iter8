@@ -203,17 +203,23 @@
   border-radius: 3px;
 }
 
+.text-center {
+  text-align: center;
+}
+.text-center .iframe-container {
+  display: block;
+}
+
 .tx-container {
   background: #fef5f5;
 }
-.tx-container .centered {
+.tx-container .pad-margin {
   padding: 1.5rem;
-  text-align: center;
 }
-.tx-container .centered h1 {
+.tx-container .pad-margin h1 {
   margin: 0rem;
 }
-.tx-container .centered h3 {
+.tx-container .pad-margin h3 {
   margin: 0.8em 0 0.8em;
 }
 .tx-container .tx-hero {

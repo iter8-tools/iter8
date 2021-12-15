@@ -8,7 +8,7 @@ Traffic mirroring or shadowing enables experimenting with a dark launched versio
 
 ***
 
-## v0.7 Examples
+## v0.6 Examples
 
 * [Mirroring with Knative services and Istio](https://iter8.tools/0.6/tutorials/traffic-engineering/mirroring/).
 

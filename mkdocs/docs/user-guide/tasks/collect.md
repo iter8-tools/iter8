@@ -18,29 +18,41 @@ Customize this task using various inputs.
 ```yaml
 - task: gen-load-and-collect-metrics
   with:
-    # Number of requests to be sent to each version.
+    # Number of requests sent to each version.
     numQueries: 200
-    # Duration of the `metrics/collect` task run. 
-    # If both `duration` and `numQueries` are specified, then `duration` is ignored.
+    # Duration for which requests are sent to each version. 
+    # This field is ignored if `numQueries` is specified.
     duration: 10s
     # Number of queries *per second* sent to each version.
     qps: 10.0
+    # Number of parallel connections used to send requests.
+    connections: 8
     # String data to be sent as payload. 
-    # If this field is specified, Iter8 will send HTTP POST requests 
+    # If this field is specified, Iter8 will send HTTP POST requests.
     # with this string as the payload.
+    # This field is ignored if `payloadURL` is specified.
     payloadStr: "abc123"
     # URL of payload. If this field is specified, 
     # Iter8 will send HTTP POST requests to versions with 
-    # data downloaded from this URL as the payload. If both `payloadStr` 
-    # and `payloadURL` are specified, the former is ignored.
+    # data downloaded from this URL as the payload.
     payloadURL: "https://www.my.image.com/image.png"
     # The type of the payload. Indicated using the Content-Type HTTP header value. 
     # This is intended to be used in conjunction with one of the `payload*` fields above. 
     # If this field is specified, Iter8 will send HTTP POST requests to versions 
     # with this content type header value.
     contentType: "image/png"
+    # A list of error ranges. 
+    # Each range specifies an upper and/or lower limit on HTTP status codes. 
+    # HTTP responses that fall within these error ranges are considered error.
+    # The following setting says that HTTP status codes 500 or above are errors.
+    errorRanges:
+    - lower: 500
+    # A list of latency percentiles computed by this task.
+    # Percentiles have single digit precision.
+    percentiles: [50.0, 75.0, 90.0, 95.0]
+    # Information about app versions.
     versionInfo:
-    - # HTTP(S) URL where version receives GET or POST requests.
+    - # HTTP(S) URL where this version receives GET or POST requests.
       url: https://example.com
       # HTTP headers to be used in requests sent to this version.
       headers:
@@ -63,7 +75,7 @@ The following inputs are supported by this task.
 | Field name | Field type | Description | Required |
 | ----- | ---- | ----------- | -------- |
 | numQueries | int | Number of requests to be sent to each version. Default value is 100. | No |
-| duration | string | Duration of the `metrics/collect` task run. Specified in the [Go duration string format](https://golang.org/pkg/time/#ParseDuration) (example, `5s`). If both `duration` and `numQueries` are specified, then `duration` is ignored. | No |
+| duration | string | Duration of this task. Specified in the [Go duration string format](https://golang.org/pkg/time/#ParseDuration) (example, `5s`). If both `duration` and `numQueries` are specified, then `duration` is ignored. | No |
 | qps | float | Number of queries *per second* sent to each version. Default value is 8.0. Setting this to 0 will maximizes query load without any wait time between queries. | No |
 | connections | int | Number of parallel connections used to send requests. Default value is 4. | No |
 | payloadStr | string | String data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions with this string as the payload. | No |
