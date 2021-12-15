@@ -7,11 +7,11 @@ hide:
 
 ## iter8
 
-metrics driven experiments
+Metrics driven experiments
 
 ### Synopsis
 
-Metrics driven experiments
+Perform metrics-driven experiments and rollouts for apps and ML models.
 
 Environment variables:
 
@@ -32,7 +32,7 @@ Environment variables:
 * [iter8 assert](iter8_assert.md)	 - Assert if experiment result satisfies the specified conditions
 * [iter8 gen](iter8_gen.md)	 - Render templates with values
 * [iter8 hub](iter8_hub.md)	 - Download an experiment folder from Iter8 hub
-* [iter8 k](iter8_k.md)	 - Work with experiments running in a Kubernetes cluster
+* [iter8 k](iter8_k.md)	 - Work with experiments running in Kubernetes
 * [iter8 report](iter8_report.md)	 - Generate report from experiment result
 * [iter8 run](iter8_run.md)	 - Run an experiment
 

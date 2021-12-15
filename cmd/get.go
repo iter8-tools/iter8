@@ -63,9 +63,9 @@ func init() {
 	// initialize getCmd
 	getCmd = &cobra.Command{
 		Use:   "get",
-		Short: "Get a list of experiments running in a Kubernetes cluster",
+		Short: "Get the list of experiments running in Kubernetes",
 		Example: `
-# Get list of experiments running in a Kubernetes cluster
+# Get the list of experiments running in Kubernetes
 iter8 k get
 
 # Get list of experiments with app label $APP
