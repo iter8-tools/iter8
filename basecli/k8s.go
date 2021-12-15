@@ -17,8 +17,6 @@ import (
 const (
 	// Path to go template file
 	k8sTemplateFilePath = "k8s.tpl"
-	// Path to experiment file
-	experimentFilePath = "experiment.yaml"
 )
 
 type k8sExperiment struct {
