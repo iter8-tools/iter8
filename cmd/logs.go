@@ -26,6 +26,7 @@ iter8 k logs --id $ID`,
 		},
 	}
 	k8sExperimentOptions.addIdOption(logsCmd.Flags())
+	k8sExperimentOptions.addAppOption(logsCmd.Flags())
 
 	// logsCmd is now initialized
 	kCmd.AddCommand(logsCmd)

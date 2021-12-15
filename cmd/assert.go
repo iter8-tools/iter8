@@ -45,6 +45,7 @@ iter8 k assert --id $ID -c completed,nofailure,slosby=0 -t 5s`
 		return nil
 	}
 	k8sExperimentOptions.addIdOption(assertCmd.Flags())
+	k8sExperimentOptions.addAppOption(assertCmd.Flags())
 
 	// assertCmd is now initialized
 	kCmd.AddCommand(assertCmd)

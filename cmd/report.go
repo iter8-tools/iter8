@@ -30,6 +30,7 @@ iter8 k report -o html --id $ID`
 	}
 
 	k8sExperimentOptions.addIdOption(reportCmd.Flags())
+	k8sExperimentOptions.addAppOption(reportCmd.Flags())
 
 	// reportCmd is now initialized
 	kCmd.AddCommand(reportCmd)

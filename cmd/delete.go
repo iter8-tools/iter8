@@ -128,6 +128,7 @@ iter8 k delete --id $ID`,
 		},
 	}
 	k8sExperimentOptions.addIdOption(deleteCmd.Flags())
+	k8sExperimentOptions.addAppOption(deleteCmd.Flags())
 
 	// deleteCmd is now initialized
 	kCmd.AddCommand(deleteCmd)

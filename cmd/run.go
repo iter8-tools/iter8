@@ -22,6 +22,7 @@ iter8 k run --id $ID`
 	}
 
 	k8sExperimentOptions.addIdOption(runCmd.Flags())
+	k8sExperimentOptions.addAppOption(runCmd.Flags())
 
 	// runCmd is now initialized
 	kCmd.AddCommand(runCmd)
