@@ -19,13 +19,11 @@ func TestHubGoodFolder(t *testing.T) {
 	// make sure load test folder is present
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
-	_, err = os.Stat(path.Join(dir, hubFolder))
+	_, err = os.Stat(path.Join(dir, hubFolder, "experiment.yaml"))
 	assert.False(t, os.IsNotExist(err))
 
 	hubFolder = "random-loc"
 	// make sure proper error is generated
 	err = hubCmd.RunE(nil, nil)
 	assert.Error(t, err)
-	_, err = os.Stat(path.Join(dir, hubFolder))
-	assert.True(t, os.IsNotExist(err))
 }

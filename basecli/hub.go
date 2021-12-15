@@ -77,7 +77,7 @@ var hubCmd = &cobra.Command{
 		ifurl := path.Join(viper.GetString("ITER8HUB"), hubFolder)
 		log.Logger.Info("downloading ", ifurl)
 		if err := getter.Get(hubFolder, ifurl); err != nil {
-			log.Logger.WithStackTrace(err.Error()).Fatalf("unable to get: %v", ifurl)
+			log.Logger.WithStackTrace(err.Error()).Errorf("unable to get: %v", ifurl)
 			return err
 		}
 		return nil
