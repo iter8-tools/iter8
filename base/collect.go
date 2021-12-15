@@ -37,7 +37,7 @@ type errorRange struct {
 type collectInputs struct {
 	// NumRequests is the number of requests to be sent to each version. Default value is 100.
 	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
-	// Duration of the metrics/collect task run. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
+	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
 	Duration *string `json:"duration" yaml:"duration"`
 	// QPS is the number of queries per second sent to each version. Default value is 8.0.
 	QPS *float32 `json:"qps" yaml:"qps"`
@@ -252,7 +252,7 @@ func (t *collectTask) GetName() string {
 	return CollectTaskName
 }
 
-// Run executes the metrics/collect task
+// Run executes this task
 func (t *collectTask) Run(exp *Experiment) error {
 	var err error
 	t.initializeDefaults()

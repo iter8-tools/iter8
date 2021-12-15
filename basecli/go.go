@@ -54,6 +54,7 @@ var goCmd = &cobra.Command{
 		fmt.Println(b.String())
 		return nil
 	},
+	Hidden: true,
 }
 
 // RenderGoTpl creates output from go.tpl

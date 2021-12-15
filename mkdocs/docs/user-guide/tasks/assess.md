@@ -3,11 +3,11 @@ template: main.html
 ---
 
 # `assess-app-versions`
-This task assesses if app versions satisfy service level objectives (SLOs). SLOs are specified as inputs to the task in the form of metrics along with acceptable upper and lower limits on their values.
+This task assesses if app versions satisfy service level objectives (SLOs). SLO inputs are specified in the form of metrics along with acceptable upper and lower limits on their values.
 
 This task should be preceded in the experiment spec by other tasks that collect metrics such as the [`gen-load-and-collect-metrics` task](collect.md).
 
-## Illustrative example
+## Example
 Validate service level objectives (SLOs) for app versions based on [Iter8's built-in metrics](collect.md).
 
 ```yaml
