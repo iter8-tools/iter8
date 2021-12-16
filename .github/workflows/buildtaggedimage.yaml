@@ -35,9 +35,5 @@ jobs:
         password: ${{ secrets.DOCKERHUB_SECRET }}
     - uses: docker/build-push-action@v2
       with:
-        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }}
-        push: true
-    - uses: docker/build-push-action@v2
-      with:
-        tags: ${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }}
+        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }}
         push: true
