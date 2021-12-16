@@ -1,12 +1,10 @@
-name: Build and push Iter8 Docker image
+name: Build and push Iter8 latest Docker image
 on:
   release:
     types: [published]
   push:
     branches:
-      - master # Publish `master` as Docker `latest` image.
-    tags:
-      - v* # Publish `v1.2.3` tags as releases.
+    - master # Publish `master` as Docker `latest` image.
 
 jobs:
   # Push ind image to dockerhub
@@ -14,15 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Get version
-      run: |
-        tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        # Strip "v" prefix from tagref
-        if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-          echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == *"master" ]]; then
-          echo "VERSION=latest" >> $GITHUB_ENV
-        fi
     - name: Get owner
       run: |
         ownerrepo=${{ github.repository }}
@@ -38,5 +27,5 @@ jobs:
         password: ${{ secrets.DOCKERHUB_SECRET }}
     - uses: docker/build-push-action@v2
       with:
-        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }}
+        tags: ${{ env.OWNER }}/iter8:latest
         push: true
