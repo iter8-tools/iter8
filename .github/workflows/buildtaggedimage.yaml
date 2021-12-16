@@ -1,0 +1,45 @@
+name: Build and push Iter8 tagged Docker image
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+    - v* # Publish `v1.2.3` tags as releases.
+
+jobs:
+  # Push ind image to dockerhub
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Get version
+      run: |
+        tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        # Strip "v" prefix from tagref
+        echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
+    - name: Get owner
+      run: |
+        ownerrepo=${{ github.repository }}
+        owner=$(echo $ownerrepo | cut -f1 -d/)
+        if [[ "$owner" == "iter8-tools" ]]; then
+          owner=iter8
+        fi
+        echo "OWNER=$owner" >> $GITHUB_ENV
+    - name: Determine Version
+      id: version
+      uses: gittools/actions/gitversion/execute@v0.9.7
+    - uses: docker/setup-buildx-action@v1
+    - uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_SECRET }}
+    - uses: docker/build-push-action@v2
+      with:
+        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }}
+        push: true
+    - uses: docker/build-push-action@v2
+      with:
+        tags: ${{ env.OWNER }}/iter8:${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}
+        push: true        
