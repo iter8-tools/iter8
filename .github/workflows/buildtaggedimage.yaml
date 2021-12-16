@@ -27,9 +27,6 @@ jobs:
           owner=iter8
         fi
         echo "OWNER=$owner" >> $GITHUB_ENV
-    - name: Determine Version
-      id: version
-      uses: gittools/actions/gitversion/execute@v0.9.7
     - uses: docker/setup-buildx-action@v1
     - uses: docker/login-action@v1
       with:
@@ -39,7 +36,10 @@ jobs:
       with:
         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }}
         push: true
+    - name: Determine Major/Minor
+      id: version
+      uses: gittools/actions/gitversion/execute@v0.9.7
     - uses: docker/build-push-action@v2
       with:
-        tags: ${{ env.OWNER }}/iter8:${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}
+        tags: ${{ env.OWNER }}/iter8:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
         push: true        
