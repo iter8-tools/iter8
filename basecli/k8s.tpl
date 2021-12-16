@@ -18,7 +18,7 @@
 {{/* -- version -------------------------------------------- */}}
 {{- $version := printf "0.8" -}}
 {{/* -- image ---------------------------------------------- */}}
-{{- $image := printf "iter8/iter8:latest" -}}
+{{- $image := printf "iter8/iter8:0.8" -}}
 {{- if hasKey .Values "image" -}}
   {{- $image = .Values.image -}}
 {{- end -}}
