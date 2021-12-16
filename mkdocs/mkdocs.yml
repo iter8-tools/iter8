@@ -45,12 +45,12 @@ plugins:
 - search
 - minify:
     minify_html: true
-- macros:
-      # Replace {{ variable }} syntax with [[ variable ]] to avoid conflicts
-    j2_block_start_string: '[[%'
-    j2_block_end_string: '%]]'
-    j2_variable_start_string: '[['
-    j2_variable_end_string: ']]'
+# - macros:
+#       # Replace {{ variable }} syntax with [[ variable ]] to avoid conflicts
+#     j2_block_start_string: '[[%'
+#     j2_block_end_string: '%]]'
+#     j2_variable_start_string: '[['
+#     j2_variable_end_string: ']]'
 - mike
 
 # Customization
@@ -70,6 +70,8 @@ extra:
     link: https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw
 
   generator: false
+
+copyright: Iter8 is open-source and available under the Apache 2 License.
 
 # Extensions
 markdown_extensions:
@@ -106,7 +108,8 @@ markdown_extensions:
     - name: mermaid
       class: mermaid
       format: !!python/name:pymdownx.superfences.fence_code_format
-- pymdownx.tabbed
+- pymdownx.tabbed:
+    alternate_style: true 
 - pymdownx.tasklist:
     custom_checkbox: true
 - pymdownx.tilde
