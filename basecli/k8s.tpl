@@ -16,9 +16,9 @@
 {{/* -- name ----------------------------------------------- */}}
 {{- $name := printf "experiment-%s" $id -}}
 {{/* -- version -------------------------------------------- */}}
-{{- $version := printf "0.8" -}}
+{{- $version := iter8MajorMinorVersion -}}
 {{/* -- image ---------------------------------------------- */}}
-{{- $image := printf "iter8/iter8:0.8" -}}
+{{- $image := defaultImage -}}
 {{- if hasKey .Values "image" -}}
   {{- $image = .Values.image -}}
 {{- end -}}
