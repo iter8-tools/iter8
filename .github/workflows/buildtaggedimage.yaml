@@ -19,6 +19,7 @@ jobs:
         tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
         # Strip "v" prefix from tagref
         echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
+        echo "MAJOR_MINOR_VERSION=$(echo $tarref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
     - name: Get owner
       run: |
         ownerrepo=${{ github.repository }}
@@ -36,10 +37,7 @@ jobs:
       with:
         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }}
         push: true
-    - name: Determine Major/Minor
-      id: version
-      uses: gittools/actions/gitversion/execute@v0.9.7
     - uses: docker/build-push-action@v2
       with:
-        tags: ${{ env.OWNER }}/iter8:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
-        push: true        
+        tags: ${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }}
+        push: true
