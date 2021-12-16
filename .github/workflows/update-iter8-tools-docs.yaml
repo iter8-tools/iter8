@@ -27,10 +27,6 @@ jobs:
         else
           exit 1
         fi
-    - name: Install Python modules
-      run: pip install -r ./.github/workflows/requirements.txt
-    - name: Verify semantic versioning
-      run: python3 ./.github/workflows/semver-check.py ${{ env.VERSION }}
     - name: Update docs
       run: |
         git config --global user.name "Iter8"
