@@ -45,12 +45,6 @@ plugins:
 - search
 - minify:
     minify_html: true
-# - macros:
-#       # Replace {{ variable }} syntax with [[ variable ]] to avoid conflicts
-#     j2_block_start_string: '[[%'
-#     j2_block_end_string: '%]]'
-#     j2_variable_start_string: '[['
-#     j2_variable_end_string: ']]'
 - mike
 
 # Customization
