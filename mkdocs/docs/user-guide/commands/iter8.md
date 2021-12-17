@@ -11,7 +11,7 @@ Metrics driven experiments
 
 ### Synopsis
 
-Perform metrics-driven experiments and rollouts for apps and ML models.
+Perform metrics-driven experiments and safe rollouts of apps and ML models.
 
 Environment variables:
 
