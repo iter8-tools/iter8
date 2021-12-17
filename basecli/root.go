@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var globalUsage = `Perform metrics-driven experiments and rollouts for apps and ML models.
+var globalUsage = `Perform metrics-driven experiments and safe rollouts of apps and ML models.
 
 Environment variables:
 

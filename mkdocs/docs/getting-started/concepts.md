@@ -3,7 +3,7 @@ template: main.html
 ---
 
 # What is Iter8?
-Iter8 is the open-source platform for metrics-driven experiments and rollouts. Built for DevOps/SRE/MLOps/data science teams.
+Iter8 is the open-source Kubernetes-friendly platform for metrics-driven experiments and safe rollouts. Built for DevOps/SRE/MLOps/data science teams.
 
 ## Use cases
 
