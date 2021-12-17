@@ -2,18 +2,6 @@
   font-size: 0.75rem;
 }
 
-.md-announce a,
-.md-announce a:focus,
-.md-announce a:hover {
-  color: currentColor;
-}
-.md-announce strong {
-  white-space: nowrap;
-}
-.md-announce .twitter {
-  margin-left: 0.2em;
-}
-
 .mdx-container {
   padding-top: 1rem;
   background: linear-gradient(to bottom, #cd0404, #430195 99%);
@@ -39,7 +27,7 @@
 }
 .mdx-hero__image {
   padding: 1rem;
-  min-width: 60%;
+  width: 100%;
 }
 @media screen and (min-width: 60em) {
   .mdx-hero {
@@ -47,11 +35,11 @@
     align-items: stretch;
   }
   .mdx-hero__content {
-    max-width: 24rem;
+    width: 100%;
   }
   .mdx-hero__image {
     order: 1;
-    width: 33rem;
+    width: 100%;
     transform: translateX(1.5rem);
   }
 }
