@@ -35,10 +35,11 @@ var expCmd = &cobra.Command{
 	Use:   "exp",
 	Short: "Render experiment.yaml file for local experiments",
 	Long: `
-	Render experiment.yaml file for local experiments. This command is intended to be run from the root of an Iter8 experiment chart.`,
+Render experiment.yaml file for local experiments.
+This command is intended to be run from the root of an Iter8 experiment chart.`,
 	Example: `
-	iter8 gen exp --set url=https://example.com
-	`,
+iter8 gen exp --set url=https://example.com
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// read in the experiment chart
 		c, err := loader.Load(".")

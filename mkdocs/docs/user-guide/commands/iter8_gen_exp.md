@@ -12,7 +12,8 @@ Render experiment.yaml file for local experiments
 ### Synopsis
 
 
-	Render experiment.yaml file for local experiments. This command is intended to be run from the root of an Iter8 experiment chart.
+Render experiment.yaml file for local experiments.
+This command is intended to be run from the root of an Iter8 experiment chart.
 
 ```
 iter8 gen exp [flags]
@@ -22,8 +23,8 @@ iter8 gen exp [flags]
 
 ```
 
-	iter8 gen exp --set url=https://example.com
-	
+iter8 gen exp --set url=https://example.com
+
 ```
 
 ### Options

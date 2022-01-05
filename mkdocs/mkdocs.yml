@@ -141,6 +141,7 @@ nav:
     - iter8 assert: user-guide/commands/iter8_assert.md
     - iter8 report: user-guide/commands/iter8_report.md
     - iter8 gen: user-guide/commands/iter8_gen.md
+    - iter8 gen exp: user-guide/commands/iter8_gen_exp.md
     - iter8 gen k8s: user-guide/commands/iter8_gen_k8s.md
     - iter8 k: user-guide/commands/iter8_k.md
     - iter8 k get: user-guide/commands/iter8_k_get.md
