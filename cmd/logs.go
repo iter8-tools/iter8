@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
 )
@@ -24,12 +25,14 @@ iter8 k logs -a $APP
 iter8 k logs --id $ID`,
 		RunE: func(c *cobra.Command, args []string) error {
 			k8sExperimentOptions.initK8sExperiment(true)
-			log.Logger.Infof("logs for experiment: %s\n", k8sExperimentOptions.id)
-			return GetExperimentLogs(k8sExperimentOptions.client, k8sExperimentOptions.namespace, k8sExperimentOptions.id)
+			log.Logger.Infof("logs for experiment: %s\n", *k8sExperimentOptions.id)
+			return GetExperimentLogs(k8sExperimentOptions.client, k8sExperimentOptions.namespace, *k8sExperimentOptions.id)
 		},
 	}
-	k8sExperimentOptions.addIdOption(logsCmd.Flags())
-	k8sExperimentOptions.addAppOption(logsCmd.Flags())
+
+	// initialize options for logsCmd
+	logsCmd.Flags().AddFlag(basecli.GetIdFlag())
+	logsCmd.Flags().AddFlag(basecli.GetAppFlag())
 
 	// logsCmd is now initialized
 	kCmd.AddCommand(logsCmd)

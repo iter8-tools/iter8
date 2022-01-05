@@ -12,7 +12,6 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/basecli"
-	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
 	corev1 "k8s.io/api/core/v1"
@@ -241,27 +240,21 @@ func (f *KubernetesExpIO) WriteResult(r *basecli.Experiment) error {
 	return err
 }
 
-func (o *K8sExperimentOptions) addIdOption(p *pflag.FlagSet) {
-	p.StringVarP(&o.id, "id", "i", "", "experiment identifier; if not specified, the most recent experiment is used")
-}
-
-func (o *K8sExperimentOptions) addAppOption(p *pflag.FlagSet) {
-	p.StringVarP(&o.app, "app", "a", "", "app label; this flag is ignored if --id flag is specified")
-}
-
 type K8sExperimentOptions struct {
 	ConfigFlags *genericclioptions.ConfigFlags
 	namespace   string
 	client      *kubernetes.Clientset
-	id          string
+	id          *string
 	expIO       *KubernetesExpIO
 	experiment  *basecli.Experiment
-	app         string
+	app         *string
 }
 
 func newK8sExperimentOptions() *K8sExperimentOptions {
 	return &K8sExperimentOptions{
 		ConfigFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag(),
+		id:          &basecli.Id,
+		app:         &basecli.App,
 	}
 }
 
@@ -276,18 +269,18 @@ func (o *K8sExperimentOptions) initK8sExperiment(withResult bool) (err error) {
 		return err
 	}
 
-	if len(o.id) == 0 {
-		s, err := GetExperimentSecret(o.client, o.namespace, o.id, o.app)
+	if len(*o.id) == 0 {
+		s, err := GetExperimentSecret(o.client, o.namespace, *o.id, *o.app)
 		if err != nil {
 			return err
 		}
-		o.id = s.Labels[IdLabel]
+		o.id = base.StringPointer(s.Labels[IdLabel])
 	}
 
 	o.expIO = &KubernetesExpIO{
 		Client:    o.client,
 		Namespace: o.namespace,
-		Name:      SpecSecretPrefix + o.id,
+		Name:      SpecSecretPrefix + (*o.id),
 	}
 
 	o.experiment, err = basecli.Build(withResult, o.expIO)

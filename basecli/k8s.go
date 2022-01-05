@@ -11,7 +11,10 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/getter"
 )
 
 const (
@@ -24,12 +27,12 @@ type k8sExperiment struct {
 	Values chartutil.Values
 }
 
-var id string
-var app string
+var Id string
+var App string
 
 // run runs the command
 func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
-	result, err := Generate(GenOptions.Values)
+	result, err := Generate()
 	if err != nil {
 		return err
 	}
@@ -39,26 +42,25 @@ func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-func Generate(values []string) (result *bytes.Buffer, err error) {
-	v := chartutil.Values{}
+func Generate() (result *bytes.Buffer, err error) {
+	p := getter.All(cli.New())
+	v, err := GenOptions.MergeValues(p)
+	if err != nil {
+		return nil, err
+	}
 
 	// add id=id if --id option used
 	// note that if both --id=foo and --set id=bar are used,
 	// the --id option will take precedence
-	if len(id) > 0 {
-		values = append(values, "id="+id)
+	if len(Id) > 0 {
+		v["id"] = Id
 	}
 
 	// add app=app if --app option is used
-	// not that if both --app=foo and --set id=bar are used,
-	// the --app optiom will take precedence
-	if len(app) > 0 {
-		values = append(values, "app="+app)
-	}
-
-	err = ParseValues(values, v)
-	if err != nil {
-		return nil, err
+	// note that if both --app=foo and --set id=bar are used,
+	// the --app option will take precedence
+	if len(App) > 0 {
+		v["app"] = App
 	}
 
 	exp, err := Build(false, &FileExpIO{})
@@ -128,12 +130,29 @@ iter8 gen k8s`,
 	},
 }
 
+func GetIdFlag() *pflag.Flag {
+	name := "id"
+	f := pflag.Lookup(name)
+	if f == nil {
+		pflag.StringVarP(&Id, name, "i", "", "if not specified, a randomly generated identifier will be used")
+	}
+	return pflag.Lookup(name)
+}
+
+func GetAppFlag() *pflag.Flag {
+	name := "app"
+	f := pflag.Lookup(name)
+	if f == nil {
+		pflag.StringVarP(&App, name, "a", "", "label to be associated with an experiment, default is 'default'")
+	}
+	return pflag.Lookup(name)
+}
+
 func init() {
 	// support --id option to set identifier
-	k8sCmd.Flags().StringVarP(&id, "id", "i", "", "if not specified, a randomly generated identifier will be used")
+	k8sCmd.Flags().AddFlag(GetIdFlag())
 	// support --app option to set app
-	k8sCmd.Flags().StringVarP(&app, "app", "a", "", "label to be associated with an experiment, default is 'default'")
-
+	k8sCmd.Flags().AddFlag(GetAppFlag())
 	// extend gen command with the k8s command
 	genCmd.AddCommand(k8sCmd)
 }

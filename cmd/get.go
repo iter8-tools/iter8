@@ -23,7 +23,7 @@ const (
 var getCmd *cobra.Command
 
 func runGetCmd(cmd *cobra.Command, args []string, o *K8sExperimentOptions) (err error) {
-	experimentSecrets, err := GetExperimentSecrets(o.client, o.namespace, o.app)
+	experimentSecrets, err := GetExperimentSecrets(o.client, o.namespace, *o.app)
 	if err != nil {
 		return err
 	}
@@ -76,8 +76,9 @@ iter8 k get -a $APP`,
 			return runGetCmd(c, args, k8sExperimentOptions)
 		},
 	}
-	k8sExperimentOptions.addIdOption(getCmd.Flags())
-	k8sExperimentOptions.addAppOption(getCmd.Flags())
+	// initialize options for getCmd
+	getCmd.Flags().AddFlag(basecli.GetIdFlag())
+	getCmd.Flags().AddFlag(basecli.GetAppFlag())
 
 	// getCmd is now initialized
 	kCmd.AddCommand(getCmd)

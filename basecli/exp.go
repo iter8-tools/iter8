@@ -16,64 +16,76 @@ limitations under the License.
 package basecli
 
 import (
+	"fmt"
 	"io/ioutil"
+	"path"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/chartutil"
-)
-
-const (
-	// Path to experiment template file
-	expTemplatePath = "experiment.tpl"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/engine"
+	"helm.sh/helm/v3/pkg/getter"
 )
 
 // expCmd represents the exp command
 var expCmd = &cobra.Command{
 	Use:   "exp",
-	Short: "Render experiment template in the file experiment.tpl with values",
+	Short: "Render experiment.yaml file for local experiments",
 	Long: `
-	Render experiment template in the file experiment.tpl with values`,
+	Render experiment.yaml file for local experiments. This command is intended to be run from the root of an Iter8 experiment chart.`,
 	Example: `
-	# render experiment template in the file experiment.tpl with values
-	iter8 gen exp --set key=val
+	iter8 gen exp --set url=https://example.com
 	`,
-	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		v := chartutil.Values{}
-		err := ParseValues(GenOptions.Values, v)
+		// read in the experiment chart
+		c, err := loader.Load(".")
 		if err != nil {
 			return err
 		}
 
-		// generate formatted output
-		b, err := RenderGoTpl(v, expTemplatePath)
-		if err != nil {
-			return err
-		}
-		specBytes := b.Bytes()
+		// add in experiment.yaml template
+		eData := []byte(fmt.Sprintf(`{{- include "%v.experiment" . }}`, c.Name()))
+		c.Templates = append(c.Templates, &chart.File{
+			Name: path.Join("templates", experimentSpecPath),
+			Data: eData,
+		})
 
-		// build and validate experiment here...
-		s, err := SpecFromBytes(specBytes)
-		e := &Experiment{
-			Experiment: &base.Experiment{
-				Tasks: s,
-			}}
+		// get values
+		p := getter.All(cli.New())
+		v, err := GenOptions.MergeValues(p)
 		if err != nil {
 			return err
 		}
-		err = e.buildTasks()
+
+		valuesToRender, err := chartutil.ToRenderValues(c, v, chartutil.ReleaseOptions{}, nil)
+		if err != nil {
+			return err
+		}
+
+		// render experiment.yaml
+		m, err := engine.Render(c, valuesToRender)
 		if err != nil {
 			return err
 		}
 
 		// write experiment spec file
+		specBytes := []byte(m[path.Join(c.Name(), "templates", experimentSpecPath)])
 		err = ioutil.WriteFile(experimentSpecPath, specBytes, 0664)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
 			return err
 		}
+
+		// build and validate experiment
+		fio := &FileExpIO{}
+		_, err = Build(false, fio)
+		if err != nil {
+			return err
+		}
+
 		return err
 	},
 }

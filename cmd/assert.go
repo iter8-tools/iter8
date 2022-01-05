@@ -7,6 +7,7 @@ import (
 	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var assertCmd *cobra.Command
@@ -36,7 +37,7 @@ iter8 k assert --id $ID -c completed,nofailure,slosby=0
 iter8 k assert --id $ID -c completed,nofailure,slosby=0 -t 5s`
 	assertCmd.RunE = func(c *cobra.Command, args []string) error {
 		k8sExperimentOptions.initK8sExperiment(true)
-		log.Logger.Infof("evaluating assert for experiment: %s\n", k8sExperimentOptions.id)
+		log.Logger.Infof("evaluating assert for experiment: %s\n", *k8sExperimentOptions.id)
 		allGood, err := k8sExperimentOptions.experiment.Assert(basecli.AssertOptions.Conds, basecli.AssertOptions.Timeout)
 		if err != nil || !allGood {
 			return err
@@ -48,8 +49,10 @@ iter8 k assert --id $ID -c completed,nofailure,slosby=0 -t 5s`
 
 		return nil
 	}
-	k8sExperimentOptions.addIdOption(assertCmd.Flags())
-	k8sExperimentOptions.addAppOption(assertCmd.Flags())
+
+	// initialize options for assertCmd
+	assertCmd.Flags().AddFlag(pflag.Lookup("id"))
+	assertCmd.Flags().AddFlag(pflag.Lookup("app"))
 
 	// assertCmd is now initialized
 	kCmd.AddCommand(assertCmd)

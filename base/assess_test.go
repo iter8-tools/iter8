@@ -9,7 +9,7 @@ import (
 func TestMakeWrongTask(t *testing.T) {
 	ts := &TaskSpec{
 		taskMeta: taskMeta{
-			Task: stringPointer(CollectTaskName),
+			Task: StringPointer(CollectTaskName),
 		},
 		With: map[string]interface{}{
 			"hello": "world",
@@ -25,7 +25,7 @@ func TestMakeAssess(t *testing.T) {
 	// should succeed
 	ts := &TaskSpec{
 		taskMeta: taskMeta{
-			Task: stringPointer(AssessTaskName),
+			Task: StringPointer(AssessTaskName),
 		},
 	}
 	task, err := MakeAssess(ts)
@@ -35,7 +35,7 @@ func TestMakeAssess(t *testing.T) {
 	// incorrect with clause
 	// should fail
 	ts = &TaskSpec{
-		taskMeta: taskMeta{Task: stringPointer(AssessTaskName)},
+		taskMeta: taskMeta{Task: StringPointer(AssessTaskName)},
 		With: map[string]interface{}{
 			"SLOs": "hello world",
 		},
@@ -51,7 +51,7 @@ func TestRunAssess(t *testing.T) {
 	// should succeed
 	ts := &TaskSpec{
 		taskMeta: taskMeta{
-			Task: stringPointer(AssessTaskName),
+			Task: StringPointer(AssessTaskName),
 		},
 	}
 	task, _ := MakeAssess(ts)
@@ -64,7 +64,7 @@ func TestRunAssess(t *testing.T) {
 	// assess with an SLO
 	// should succeed
 	ts = &TaskSpec{
-		taskMeta: taskMeta{Task: stringPointer(AssessTaskName)},
+		taskMeta: taskMeta{Task: StringPointer(AssessTaskName)},
 		With: map[string]interface{}{
 			"SLOs": []SLO{{
 				Metric:     "m",

@@ -348,7 +348,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "mean of observed latency values",
 				Type:        GaugeMetricType,
-				Units:       stringPointer("msec"),
+				Units:       StringPointer("msec"),
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Avg)
 
@@ -357,7 +357,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "standard deviation of observed latency values",
 				Type:        GaugeMetricType,
-				Units:       stringPointer("msec"),
+				Units:       StringPointer("msec"),
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.StdDev)
 
@@ -366,7 +366,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "minimum of observed latency values",
 				Type:        GaugeMetricType,
-				Units:       stringPointer("msec"),
+				Units:       StringPointer("msec"),
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
 
@@ -375,7 +375,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "maximum of observed latency values",
 				Type:        GaugeMetricType,
-				Units:       stringPointer("msec"),
+				Units:       StringPointer("msec"),
 			}
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Max)
 
@@ -385,7 +385,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				in.MetricsInfo[m] = MetricMeta{
 					Description: fmt.Sprintf("%0.1f-th percentile of observed latency values", p.Percentile),
 					Type:        GaugeMetricType,
-					Units:       stringPointer("msec"),
+					Units:       StringPointer("msec"),
 				}
 				in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*p.Value)
 			}
@@ -395,7 +395,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "Latency Histogram",
 				Type:        HistogramMetricType,
-				Units:       stringPointer("msec"),
+				Units:       StringPointer("msec"),
 				XMin:        float64Pointer(xMin),
 				XMax:        float64Pointer(xMax),
 				NumBuckets:  intPointer(20),

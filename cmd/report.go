@@ -28,12 +28,13 @@ iter8 k report -o html --id $ID`
 
 	reportCmd.RunE = func(c *cobra.Command, args []string) error {
 		k8sExperimentOptions.initK8sExperiment(true)
-		log.Logger.Infof("generating report for experiment: %s\n", k8sExperimentOptions.id)
+		log.Logger.Infof("generating report for experiment: %s\n", *k8sExperimentOptions.id)
 		return k8sExperimentOptions.experiment.Report(basecli.ReportOptions.OutputFormat)
 	}
 
-	k8sExperimentOptions.addIdOption(reportCmd.Flags())
-	k8sExperimentOptions.addAppOption(reportCmd.Flags())
+	// initialize options for reportCmd
+	reportCmd.Flags().AddFlag(basecli.GetIdFlag())
+	reportCmd.Flags().AddFlag(basecli.GetAppFlag())
 
 	// reportCmd is now initialized
 	kCmd.AddCommand(reportCmd)

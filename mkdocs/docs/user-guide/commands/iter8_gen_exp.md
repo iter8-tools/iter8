@@ -1,30 +1,35 @@
 ---
 template: main.html
-title: "Iter8 Gen K8s"
+title: "Iter8 Gen Exp"
 hide:
 - toc
 ---
 
-## iter8 gen k8s
+## iter8 gen exp
 
-Generate manifest for running experiment in Kubernetes
+Render experiment.yaml file for local experiments
+
+### Synopsis
+
+
+	Render experiment.yaml file for local experiments. This command is intended to be run from the root of an Iter8 experiment chart.
 
 ```
-iter8 gen k8s [flags]
+iter8 gen exp [flags]
 ```
 
 ### Examples
 
 ```
 
-# Generate Kubernetes manifest
-iter8 gen k8s
+	iter8 gen exp --set url=https://example.com
+	
 ```
 
 ### Options
 
 ```
-  -h, --help   help for k8s
+  -h, --help   help for exp
 ```
 
 ### Options inherited from parent commands

@@ -8,27 +8,16 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"helm.sh/helm/pkg/strvals"
 	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/getter"
 )
 
 const (
 	// Path to go template file
 	goTemplateFilePath = "go.tpl"
 )
-
-func ParseValues(values []string, v chartutil.Values) error {
-	// User specified a value via --set
-	for _, value := range values {
-		if err := strvals.ParseInto(value, v); err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("failed parsing --set data")
-			return errors.Wrap(err, "failed parsing --set data")
-		}
-	}
-	return nil
-}
 
 // goCmd represents the go command
 var goCmd = &cobra.Command{
@@ -41,8 +30,8 @@ var goCmd = &cobra.Command{
 	iter8 gen go --set key=val
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		v := chartutil.Values{}
-		err := ParseValues(GenOptions.Values, v)
+		p := getter.All(cli.New())
+		v, err := GenOptions.MergeValues(p)
 		if err != nil {
 			return err
 		}
