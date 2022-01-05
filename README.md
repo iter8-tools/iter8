@@ -31,8 +31,8 @@ The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 alon
 Install Iter8 using [Go 1.16+](https://golang.org/) as follows.
 ```shell
 go install github.com/iter8-tools/iter8@latest
-# you can now run iter8 (from your gopath bin/ directory)
 ```
+You can now run `iter8` (from your gopath bin/ directory)
 
 ## 2. Download experiment
 Download the `load-test` experiment folder from Iter8 hub as follows.
