@@ -132,6 +132,7 @@ nav:
   - Topics:
     - Iter8 hub: user-guide/topics/iter8hub.md
     - Metrics: user-guide/topics/metrics.md
+    - SLOs: user-guide/topics/slos.md
     - Version numbering: user-guide/topics/versionnumbering.md
     - Conditional task execution: user-guide/topics/conditional.md
   - Commands: 

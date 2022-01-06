@@ -35,7 +35,7 @@ go install github.com/iter8-tools/iter8@latest
 You can now run `iter8` (from your gopath bin/ directory)
 
 ## 2. Download experiment
-Download the `load-test` experiment folder from Iter8 hub as follows.
+Download the `load-test` experiment chart from Iter8 hub as follows.
 
 ```shell
 iter8 hub -e load-test

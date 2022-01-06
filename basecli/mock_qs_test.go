@@ -29,7 +29,7 @@ func TestMockQuickStart(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://example.com",
 		httpmock.NewStringResponder(200, `all good`))
 
-	// get into experiment folder and run
+	// get into experiment chart folder and run
 	os.Chdir(path.Join(dir, hubFolder))
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)

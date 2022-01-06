@@ -5,7 +5,7 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Load test an HTTP Service and validate SLOs" 
-    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service (https://example.com) and validate latency and error-related service level objectives (SLOs).
+    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service (https://example.com) and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
 
 ## 1. Install Iter8
 Install Iter8 using [Go 1.16+](https://golang.org/) as follows.
@@ -20,19 +20,13 @@ Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [
 ```shell
 iter8 hub -e load-test
 ```
+This creates a local folder called `load-test` containing the chart.
 
-## 3. Generate local experiment
+## 3. Generate `experiment.yaml`
 Generate the `experiment.yaml` file which specifies your load test experiment.
 ```shell
 cd load-test
 iter8 gen exp --set url=https://example.com
-```
-
-## 4. Run experiment
-The `iter8 run` command reads the `experiment.yaml` file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file.
-
-```shell
-iter8 run
 ```
 
 ??? note "Look inside experiment.yaml"
@@ -57,6 +51,17 @@ iter8 run
         - metric: built-in/p95.0
           upperLimit: 100  
     ```
+
+??? note "Iter8 and Helm"
+    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 gen exp` command](../user-guide/commands/iter8_gen_exp.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
+
+
+## 4. Run experiment
+The `iter8 run` command reads the `experiment.yaml` file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file.
+
+```shell
+iter8 run
+```
 
 ??? note "Sample output from `iter8 run`"
 
