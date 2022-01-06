@@ -33,9 +33,9 @@ import (
 // expCmd represents the exp command
 var expCmd = &cobra.Command{
 	Use:   "exp",
-	Short: "Render experiment.yaml file for local experiments",
+	Short: "Render experiment.yaml file by combining an experiment chart with values.",
 	Long: `
-Render experiment.yaml file for local experiments by combining an experiment chart with values.
+Render experiment.yaml file by combining an experiment chart with values.
 This command is intended to be run from the root of an Iter8 experiment chart. Values may be specified and are processed in the same manner as they are for Helm charts.`,
 	Example: `
 iter8 gen exp --set url=https://example.com
