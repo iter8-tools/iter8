@@ -7,7 +7,6 @@ import (
 	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var assertCmd *cobra.Command
@@ -51,8 +50,8 @@ iter8 k assert --id $ID -c completed,nofailure,slosby=0 -t 5s`
 	}
 
 	// initialize options for assertCmd
-	assertCmd.Flags().AddFlag(pflag.Lookup("id"))
-	assertCmd.Flags().AddFlag(pflag.Lookup("app"))
+	assertCmd.Flags().AddFlag(basecli.GetIdFlag())
+	assertCmd.Flags().AddFlag(basecli.GetAppFlag())
 
 	// assertCmd is now initialized
 	kCmd.AddCommand(assertCmd)
