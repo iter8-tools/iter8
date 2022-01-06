@@ -36,7 +36,7 @@ var expCmd = &cobra.Command{
 	Short: "Render experiment.yaml file for local experiments",
 	Long: `
 Render experiment.yaml file for local experiments by combining an experiment chart with values.
-This command is intended to be run from the root of an Iter8 experiment chart. Values may be specified and are processed in the same manner as they are form Helm charts.`,
+This command is intended to be run from the root of an Iter8 experiment chart. Values may be specified and are processed in the same manner as they are for Helm charts.`,
 	Example: `
 iter8 gen exp --set url=https://example.com
 `,

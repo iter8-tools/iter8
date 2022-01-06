@@ -11,8 +11,6 @@
 
 ### Kubernetes-friendly metrics-driven <strong>experiments</strong> and <strong>safe rollouts</strong>. 
 
-#### Built for DevOps/SRE/MLOps/data science teams.
-
 ## Use Cases
 
 1.  Load testing with SLOs
