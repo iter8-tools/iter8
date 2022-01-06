@@ -23,11 +23,16 @@ const (
 )
 
 type k8sExperiment struct {
-	Tasks  []base.TaskSpec
+	// Tasks are the set of tasks specifying the experiment
+	Tasks []base.TaskSpec
+	// Values used to generate the experiment
 	Values chartutil.Values
 }
 
+// Id of the experiment
 var Id string
+
+// App is the name of the app involved in the experiment
 var App string
 
 // run runs the command
@@ -42,6 +47,7 @@ func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
+// Generate the k8s experiment manifest
 func Generate() (result *bytes.Buffer, err error) {
 	p := getter.All(cli.New())
 	v, err := GenOptions.MergeValues(p)
@@ -74,7 +80,6 @@ func Generate() (result *bytes.Buffer, err error) {
 	}
 
 	// generate formatted output
-
 	b, err := RenderTpl(k8sExp, k8sTemplateFilePath)
 	if err != nil {
 		return nil, err
@@ -85,7 +90,7 @@ func Generate() (result *bytes.Buffer, err error) {
 //go:embed k8s.tpl
 var tplBytes []byte
 
-// RenderTpl creates output from go.tpl
+// RenderTpl creates the Kubernetes experiment manifest from k8s.tpl
 func RenderTpl(k8sExp k8sExperiment, filePath string) (*bytes.Buffer, error) {
 	var tmpl *template.Template
 	var err error
@@ -130,6 +135,8 @@ iter8 gen k8s`,
 	},
 }
 
+// GetIdFlag returns the id flag.
+// This function enables reuse of this flag across subcommands.
 func GetIdFlag() *pflag.Flag {
 	name := "id"
 	f := pflag.Lookup(name)
@@ -139,6 +146,8 @@ func GetIdFlag() *pflag.Flag {
 	return pflag.Lookup(name)
 }
 
+// GetIdFlag returns the app flag.
+// This function enables reuse of this flag across subcommands.
 func GetAppFlag() *pflag.Flag {
 	name := "app"
 	f := pflag.Lookup(name)

@@ -13,16 +13,21 @@ import (
 // Experiment specification and result
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks  []TaskSpec        `json:"tasks" yaml:"tasks"`
+	Tasks []TaskSpec `json:"tasks" yaml:"tasks"`
+	// Result is the current results from this experiment.
+	// The experiment may not have completed in which case results may be partial.
 	Result *ExperimentResult `json:"result" yaml:"result"`
 }
 
 // Task is an object that can be run
 type Task interface {
+	// Run this task
 	Run(exp *Experiment) error
+	// Get the name of this task
 	GetName() string
 }
 
+// GetIf returns the condition if any which determines whether of not if this task needs to run
 func GetIf(t Task) *string {
 	var jsonBytes []byte
 	var tm taskMeta
@@ -116,14 +121,19 @@ type SLO struct {
 }
 
 type taskMeta struct {
+	// Task is the name of the task
 	Task *string `json:"task,omitempty" yaml:"task,omitempty" validate:"required_without=Run,excluded_with=Run"`
-	Run  *string `json:"run,omitempty" yaml:"run,omitempty" validate:"required_without=Task,excluded_with=Task"`
-	If   *string `json:"if,omitempty" yaml:"if,omitempty"`
+	// Run is the script used in a run task
+	// Specify either Task or Run but not both
+	Run *string `json:"run,omitempty" yaml:"run,omitempty" validate:"required_without=Task,excluded_with=Task"`
+	// If is the condition used to determine if this task needs to run.
+	If *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
 // TaskSpec has information needed to construct a Task
 type TaskSpec struct {
 	taskMeta
+	// With contains the inputs for this task.
 	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 

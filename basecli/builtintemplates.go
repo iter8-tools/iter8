@@ -5,7 +5,7 @@ import (
 	"text/template"
 )
 
-// built-in templates that can be used for reporting experiment results
+// builtInTemplates that can be used for reporting experiment results
 var builtInTemplates = make(map[string]executable)
 
 // RegisterTextTemplate registers a text template

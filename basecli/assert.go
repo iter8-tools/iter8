@@ -13,25 +13,32 @@ import (
 )
 
 const (
-	Completed    = "completed"
-	NoFailure    = "nofailure"
-	SLOs         = "slos"
+	// Completed states that the experiment is complete
+	Completed = "completed"
+	// NoFailure states that none of the tasks in the experiment have failed
+	NoFailure = "nofailure"
+	// SLOs states that all app versions participating in the experiment satisfies SLOs
+	SLOs = "slos"
+	// SLOsByPrefix is used for ensuring that a specific app version participating in the
+	// experiment satisfies SLOs
 	SLOsByPrefix = "slosby"
 )
 
-// how long to sleep in between retries of asserts
+// sleepTime specifies how long to sleep in between retries of asserts
 var sleepTime, _ = time.ParseDuration("3s")
 
-// how long have we spent so far in assert attempts
+// timeSpent tracks how much time has been spent so far in assert attempts
 var timeSpent, _ = time.ParseDuration("0s")
 
+// AssertOptionsType is used to store the options used by the assert command
 type AssertOptionsType struct {
-	// assert conditions
+	// Conds is the list of conditions that are asserted
 	Conds []string
-	// timeout for assert conditions to be satisfied
+	// Timeout for assert conditions to be satisfied
 	Timeout time.Duration
 }
 
+// AssertOptions stores the options used by the assert command
 var AssertOptions = AssertOptionsType{}
 
 var assertCmd *cobra.Command
@@ -158,7 +165,7 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 	}
 }
 
-// extract version from string
+// extractVersion from string
 func (exp *Experiment) extractVersion(cond string) (int, error) {
 	tokens := strings.Split(cond, "=")
 	if len(tokens) != 2 {

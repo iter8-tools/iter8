@@ -27,9 +27,11 @@ type version struct {
 	URL string `json:"url" yaml:"url" validate:"required,url"`
 }
 
-// HTTP status code within this range is considered an error
+// errorRange has lower and upper limits for HTTP status codes. HTTP status code within this range is considered an error
 type errorRange struct {
+	// Lower end of the range
 	Lower *int `json:"lower" yaml:"lower" validate:"required_without=Upper"`
+	// Upper end of the range
 	Upper *int `json:"upper" yaml:"upper" validate:"required_without=Lower"`
 }
 
@@ -53,11 +55,12 @@ type collectInputs struct {
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
 	// Percentiles are the latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
 	Percentiles []float64 `json:"percentiles" yaml:"percentiles" validate:"unique,dive,gte=0.0,lte=100.0"`
-	// A non-empty list of version values.
+	// VersionInfo is a non-empty list of version values.
 	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo" validate:"required,notallnil"`
 }
 
 const (
+	// CollectTaskName is the name of this task which performs load generation and metrics collection.
 	CollectTaskName            = "gen-load-and-collect-metrics"
 	defaultQPS                 = float32(8)
 	defaultNumRequests         = int64(100)
@@ -247,7 +250,7 @@ func (t *collectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) 
 	return ifr, err
 }
 
-// GetName returns the name of the assess task
+// GetName returns the name of the collect task
 func (t *collectTask) GetName() string {
 	return CollectTaskName
 }
@@ -414,7 +417,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 	return nil
 }
 
-// sum up two vectors
+// vectorSum produces the sum of two equi-length vectors
 func vectorSum(a []float64, b []float64) ([]float64, error) {
 	if len(a) != len(b) {
 		log.Logger.Error("vector lengths do not match: ", len(a), " != ", len(b))

@@ -10,14 +10,19 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// Experiment type that includes a list of runnable tasks derived from the experiment spec
 type Experiment struct {
 	tasks []base.Task
 	*base.Experiment
 }
 
+// ExpIO enables interacting with experiment spec and result stored externally
 type ExpIO interface {
+	// ReadSpec reads the experiment spec
 	ReadSpec() ([]base.TaskSpec, error)
+	// ReadResult reads the experiment results
 	ReadResult() (*base.ExperimentResult, error)
+	// WriteResult writes the experimeent results
 	WriteResult(r *Experiment) error
 }
 
@@ -101,7 +106,7 @@ func (e *Experiment) buildTasks() error {
 	return nil
 }
 
-//FileExpIO enables reading and writing through files
+//FileExpIO enables reading and writing experiment spec and result files
 type FileExpIO struct{}
 
 // SpecFromBytes reads experiment spec from bytes
@@ -126,7 +131,7 @@ func ResultFromBytes(b []byte) (*base.ExperimentResult, error) {
 	return r, err
 }
 
-// read experiment spec from file
+// ReadSpec reads experiment spec from file
 func (f *FileExpIO) ReadSpec() ([]base.TaskSpec, error) {
 	b, err := ioutil.ReadFile(experimentSpecPath)
 	if err != nil {
@@ -136,7 +141,7 @@ func (f *FileExpIO) ReadSpec() ([]base.TaskSpec, error) {
 	return SpecFromBytes(b)
 }
 
-// read experiment result from file
+// ReadResult reads experiment result from file
 func (f *FileExpIO) ReadResult() (*base.ExperimentResult, error) {
 	b, err := ioutil.ReadFile(experimentResultPath)
 	if err != nil {
@@ -146,7 +151,7 @@ func (f *FileExpIO) ReadResult() (*base.ExperimentResult, error) {
 	return ResultFromBytes(b)
 }
 
-// write experiment result to file
+// WriteResult writes experiment result to file
 func (f *FileExpIO) WriteResult(r *Experiment) error {
 	rBytes, _ := yaml.Marshal(r.Result)
 	err := ioutil.WriteFile(experimentResultPath, rBytes, 0664)

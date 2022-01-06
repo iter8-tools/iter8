@@ -15,6 +15,7 @@ import (
 )
 
 const (
+	// RunTaskName is the name of the run task which performs running of a shell script.
 	RunTaskName = "run"
 )
 
@@ -106,7 +107,7 @@ func (t *runTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-// GetName returns the name of the assess task
+// GetName returns the name of the run task
 func (t *runTask) GetName() string {
 	return RunTaskName
 }

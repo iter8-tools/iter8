@@ -5,6 +5,8 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
+// GenOptions are the options used by the gen subcommands.
+// They store values that can be combined with templates for generating experiment.yaml files Kubernetes manifests.
 var GenOptions = values.Options{}
 
 // genCmd represents the gen command

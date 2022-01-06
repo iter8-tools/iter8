@@ -25,6 +25,7 @@ import (
 )
 
 const (
+	// Iter8Hub is the location of the public Iter8 Hub.
 	Iter8Hub = "github.com/iter8-tools/iter8.git//hub"
 )
 

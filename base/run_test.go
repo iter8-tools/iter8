@@ -53,7 +53,7 @@ func TestMakeRun(t *testing.T) {
 }
 
 func TestRunRun(t *testing.T) {
-	// valid collect task... should succeed
+	// valid run task... should succeed
 	rt := &runTask{
 		taskMeta: taskMeta{
 			Run: StringPointer("echo hello"),
