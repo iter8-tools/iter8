@@ -16,9 +16,9 @@ func TestMockQuickStart(t *testing.T) {
 
 	os.Chdir(dir)
 	// Todo: fix location below
-	os.Setenv("ITER8HUB", "github.com/sriumcp/iter8.git?ref=v0.8//hub/")
+	os.Setenv("ITER8HUB", "github.com/sriumcp/iter8.git?ref=chart//hub/")
 	hubFolder = "load-test"
-	// make sure load test folder is present
+	// hub
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -29,8 +29,13 @@ func TestMockQuickStart(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://example.com",
 		httpmock.NewStringResponder(200, `all good`))
 
-	// get into experiment chart folder and run
+	// gen exp
 	os.Chdir(path.Join(dir, hubFolder))
+	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
+	err = expCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// run experiment
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
