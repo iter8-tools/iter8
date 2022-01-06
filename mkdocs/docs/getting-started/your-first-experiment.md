@@ -57,7 +57,7 @@ iter8 gen exp --set url=https://example.com
 
 
 ## 4. Run experiment
-The `iter8 run` command reads the `experiment.yaml` file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file.
+The `iter8 run` command reads the `experiment.yaml` file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file. Run the experiment as follows.
 
 ```shell
 iter8 run
