@@ -55,16 +55,14 @@ func Generate() (result *bytes.Buffer, err error) {
 		return nil, err
 	}
 
-	// add id=id if --id option used
-	// note that if --app=foo and --id=bar are used,
-	// the --id option will take precedence
+	// set id if --id option used
 	if len(Id) > 0 {
 		v["id"] = Id
 	}
 
-	// add app=app if --app option is used
-	// note that if --app=foo and --id=bar are used,
-	// the --app option will take precedence
+	// set app if --app option is used
+	// if both id and app are set, then
+	// the --id option will take precedence
 	if len(App) > 0 {
 		v["app"] = App
 	}
