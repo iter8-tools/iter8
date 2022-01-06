@@ -144,7 +144,7 @@ func GetIdFlag() *pflag.Flag {
 	return pflag.Lookup(name)
 }
 
-// GetIdFlag returns the app flag.
+// GetAppFlag returns the app flag.
 // This function enables reuse of this flag across subcommands.
 func GetAppFlag() *pflag.Flag {
 	name := "app"
