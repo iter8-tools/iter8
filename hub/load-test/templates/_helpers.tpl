@@ -4,7 +4,7 @@
 - task: gen-load-and-collect-metrics
   with:
     versionInfo:
-    - url: {{ .Values.url }}
+    - url: {{ required "A valid url value is required!" .Values.url }}
 # task 2: validate service level objectives for app using
 # the metrics collected in the above task
 - task: assess-app-versions
