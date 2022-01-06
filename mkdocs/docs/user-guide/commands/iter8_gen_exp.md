@@ -7,12 +7,12 @@ hide:
 
 ## iter8 gen exp
 
-Render experiment.yaml file for local experiments
+Render experiment.yaml file by combining an experiment chart with values.
 
 ### Synopsis
 
 
-Render experiment.yaml file for local experiments by combining an experiment chart with values.
+Render experiment.yaml file by combining an experiment chart with values.
 This command is intended to be run from the root of an Iter8 experiment chart. Values may be specified and are processed in the same manner as they are for Helm charts.
 
 ```
