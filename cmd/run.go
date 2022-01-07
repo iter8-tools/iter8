@@ -22,7 +22,7 @@ iter8 k run --id $ID`
 	}
 
 	// initialize options for runCmd
-	runCmd.Flags().AddFlag(basecli.GetIdFlag())
+	runCmd.Flags().AddFlag(getIdFlag())
 
 	// runCmd is now initialized
 	kCmd.AddCommand(runCmd)

@@ -50,8 +50,8 @@ iter8 k assert --id $ID -c completed,nofailure,slosby=0 -t 5s`
 	}
 
 	// initialize options for assertCmd
-	assertCmd.Flags().AddFlag(basecli.GetIdFlag())
-	assertCmd.Flags().AddFlag(basecli.GetAppFlag())
+	assertCmd.Flags().AddFlag(getIdFlag())
+	assertCmd.Flags().AddFlag(getAppFlag())
 
 	// assertCmd is now initialized
 	kCmd.AddCommand(assertCmd)

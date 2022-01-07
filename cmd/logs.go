@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/basecli"
 
 	"github.com/spf13/cobra"
 )
@@ -31,8 +30,8 @@ iter8 k logs --id $ID`,
 	}
 
 	// initialize options for logsCmd
-	logsCmd.Flags().AddFlag(basecli.GetIdFlag())
-	logsCmd.Flags().AddFlag(basecli.GetAppFlag())
+	logsCmd.Flags().AddFlag(getIdFlag())
+	logsCmd.Flags().AddFlag(getAppFlag())
 
 	// logsCmd is now initialized
 	kCmd.AddCommand(logsCmd)

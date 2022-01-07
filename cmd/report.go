@@ -33,8 +33,8 @@ iter8 k report -o html --id $ID`
 	}
 
 	// initialize options for reportCmd
-	reportCmd.Flags().AddFlag(basecli.GetIdFlag())
-	reportCmd.Flags().AddFlag(basecli.GetAppFlag())
+	reportCmd.Flags().AddFlag(getIdFlag())
+	reportCmd.Flags().AddFlag(getAppFlag())
 
 	// reportCmd is now initialized
 	kCmd.AddCommand(reportCmd)

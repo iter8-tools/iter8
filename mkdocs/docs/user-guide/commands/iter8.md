@@ -23,10 +23,8 @@ Environment variables:
 ### Options
 
 ```
-  -a, --app string   label to be associated with an experiment, default is 'default'
-  -h, --help         help for iter8
-  -i, --id string    if not specified, a randomly generated identifier will be used
-  -v, --version      version for iter8
+  -h, --help      help for iter8
+  -v, --version   version for iter8
 ```
 
 ### SEE ALSO

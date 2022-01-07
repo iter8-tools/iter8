@@ -30,13 +30,14 @@ iter8 k delete --id $ID
 ### Options
 
 ```
-  -h, --help   help for delete
+  -a, --app string   app label; this flag is ignored if --id flag is specified
+  -h, --help         help for delete
+  -i, --id string    experiment identifier; if not specified, the most recent experiment is used
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -a, --app string                     label to be associated with an experiment, default is 'default'
       --as string                      Username to impersonate for the operation
       --as-group stringArray           Group to impersonate for the operation, this flag can be repeated to specify multiple groups.
       --cache-dir string               Default cache directory (default "/Users/srinivasanparthasarathy/.kube/cache")
@@ -45,7 +46,6 @@ iter8 k delete --id $ID
       --client-key string              Path to a client key file for TLS
       --cluster string                 The name of the kubeconfig cluster to use
       --context string                 The name of the kubeconfig context to use
-  -i, --id string                      if not specified, a randomly generated identifier will be used
       --insecure-skip-tls-verify       If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure
       --kubeconfig string              Path to the kubeconfig file to use for CLI requests.
   -n, --namespace string               If present, the namespace scope for this CLI request

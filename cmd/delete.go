@@ -131,8 +131,8 @@ iter8 k delete --id $ID`,
 		},
 	}
 	// initialize options for deleteCmd
-	deleteCmd.Flags().AddFlag(basecli.GetIdFlag())
-	deleteCmd.Flags().AddFlag(basecli.GetAppFlag())
+	deleteCmd.Flags().AddFlag(getIdFlag())
+	deleteCmd.Flags().AddFlag(getAppFlag())
 
 	// deleteCmd is now initialized
 	kCmd.AddCommand(deleteCmd)

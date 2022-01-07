@@ -36,8 +36,6 @@ iter8 gen exp --set url=https://example.com
 ### Options inherited from parent commands
 
 ```
-  -a, --app string               label to be associated with an experiment, default is 'default'
-  -i, --id string                if not specified, a randomly generated identifier will be used
       --set stringArray          set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)
       --set-file stringArray     set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)
       --set-string stringArray   set STRING values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)

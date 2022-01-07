@@ -77,8 +77,8 @@ iter8 k get -a $APP`,
 		},
 	}
 	// initialize options for getCmd
-	getCmd.Flags().AddFlag(basecli.GetIdFlag())
-	getCmd.Flags().AddFlag(basecli.GetAppFlag())
+	getCmd.Flags().AddFlag(getIdFlag())
+	getCmd.Flags().AddFlag(getAppFlag())
 
 	// getCmd is now initialized
 	kCmd.AddCommand(getCmd)

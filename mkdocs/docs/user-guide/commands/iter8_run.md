@@ -32,13 +32,6 @@ iter8 run [flags]
   -h, --help   help for run
 ```
 
-### Options inherited from parent commands
-
-```
-  -a, --app string   label to be associated with an experiment, default is 'default'
-  -i, --id string    if not specified, a randomly generated identifier will be used
-```
-
 ### SEE ALSO
 
 * [iter8](iter8.md)	 - Metrics driven experiments

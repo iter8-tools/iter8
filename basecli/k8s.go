@@ -11,7 +11,6 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/getter"
@@ -29,11 +28,11 @@ type k8sExperiment struct {
 	Values chartutil.Values
 }
 
-// Id of the experiment
-var Id string
+// id of the experiment
+var id string
 
-// App is the name of the app involved in the experiment
-var App string
+// app is the name of the app involved in the experiment
+var app string
 
 // run runs the command
 func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
@@ -56,15 +55,15 @@ func Generate() (result *bytes.Buffer, err error) {
 	}
 
 	// set id if --id option used
-	if len(Id) > 0 {
-		v["id"] = Id
+	if len(id) > 0 {
+		v["id"] = id
 	}
 
 	// set app if --app option is used
 	// if both id and app are set, then
 	// the --id option will take precedence
-	if len(App) > 0 {
-		v["app"] = App
+	if len(app) > 0 {
+		v["app"] = app
 	}
 
 	exp, err := Build(false, &FileExpIO{})
@@ -133,33 +132,11 @@ iter8 gen k8s`,
 	},
 }
 
-// GetIdFlag returns the id flag.
-// This function enables reuse of this flag across subcommands.
-func GetIdFlag() *pflag.Flag {
-	name := "id"
-	f := pflag.Lookup(name)
-	if f == nil {
-		pflag.StringVarP(&Id, name, "i", "", "if not specified, a randomly generated identifier will be used")
-	}
-	return pflag.Lookup(name)
-}
-
-// GetAppFlag returns the app flag.
-// This function enables reuse of this flag across subcommands.
-func GetAppFlag() *pflag.Flag {
-	name := "app"
-	f := pflag.Lookup(name)
-	if f == nil {
-		pflag.StringVarP(&App, name, "a", "", "label to be associated with an experiment, default is 'default'")
-	}
-	return pflag.Lookup(name)
-}
-
 func init() {
 	// support --id option to set identifier
-	k8sCmd.Flags().AddFlag(GetIdFlag())
+	k8sCmd.Flags().StringVarP(&id, "id", "i", "", "if not specified, a randomly generated identifier will be used")
 	// support --app option to set app
-	k8sCmd.Flags().AddFlag(GetAppFlag())
+	k8sCmd.Flags().StringVarP(&app, "app", "a", "default", "app to be associated with an experiment, default is 'default'")
 	// extend gen command with the k8s command
 	genCmd.AddCommand(k8sCmd)
 }

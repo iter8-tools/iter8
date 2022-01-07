@@ -253,8 +253,8 @@ type K8sExperimentOptions struct {
 func newK8sExperimentOptions() *K8sExperimentOptions {
 	return &K8sExperimentOptions{
 		ConfigFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag(),
-		id:          &basecli.Id,
-		app:         &basecli.App,
+		id:          new(string),
+		app:         new(string),
 	}
 }
 
