@@ -31,10 +31,8 @@ BINARY_VERSION ?= ${GIT_TAG}
 
 # Only set Version if building a tag or VERSION is set
 ifneq ($(BINARY_VERSION),)
-	LDFLAGS += -X github.com/iter8-tools/iter8/basecli/RootCmd.Version=${BINARY_VERSION}
+	LDFLAGS += -X 'github.com/iter8-tools/iter8/basecli/RootCmd.Version=${BINARY_VERSION}'
 endif
-
-LDFLAGS += $(EXT_LDFLAGS)
 
 .PHONY: all
 all: build
@@ -46,7 +44,7 @@ all: build
 build: $(BINDIR)/$(BINNAME)
 
 $(BINDIR)/$(BINNAME): $(SRC)
-	GO111MODULE=on go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)'/$(BINNAME) ./
+	GO111MODULE=on go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags "$(LDFLAGS)" -o '$(BINDIR)'/$(BINNAME) ./
 
 .PHONY: cmddocs
 cmddocs:
@@ -83,8 +81,7 @@ dist: build-cross
 		cd _dist && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf iter8-${VERSION}-{}.tar.gz {} \; && \
-		$(DIST_DIRS) zip -r iter8-${VERSION}-{}.zip {} \; \
+		$(DIST_DIRS) tar -zcf iter8-{}.tar.gz {} \; \
 	)
 
 .PHONY: clean
