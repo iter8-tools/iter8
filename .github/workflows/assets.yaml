@@ -21,8 +21,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: bin/iter8
-        asset_name: Iter8
+        file: _dist/iter8-*.tar.gz
         tag: ${{ github.ref }}
         overwrite: true
-        body: "This is my release text"
+        file_glob: true
