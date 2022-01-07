@@ -5,7 +5,7 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	versionCmd.RunE(nil, nil)
+	versionCmd.Run(nil, nil)
 	short = true
-	versionCmd.RunE(nil, nil)
+	versionCmd.Run(nil, nil)
 }
