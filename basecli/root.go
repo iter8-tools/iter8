@@ -15,10 +15,9 @@ Environment variables:
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:     "iter8",
-	Short:   "Metrics driven experiments",
-	Long:    globalUsage,
-	Version: "v0.8",
+	Use:   "iter8",
+	Short: "Metrics driven experiments",
+	Long:  globalUsage,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -30,5 +29,4 @@ func Execute() {
 func init() {
 	// disable completion command for now
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
-	RootCmd.InitDefaultVersionFlag()
 }
