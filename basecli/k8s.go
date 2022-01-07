@@ -60,8 +60,6 @@ func Generate() (result *bytes.Buffer, err error) {
 	}
 
 	// set app if --app option is used
-	// if both id and app are set, then
-	// the --id option will take precedence
 	if len(app) > 0 {
 		v["app"] = app
 	}
