@@ -54,7 +54,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     
-    - run: make build
+    - run: make install
 
     - name: run Iter8 experiment and assert
       run: |
