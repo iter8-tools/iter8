@@ -2,7 +2,6 @@ BINDIR      := $(CURDIR)/bin
 INSTALL_PATH ?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
 TARGETS     := darwin/amd64 darwin/arm64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
-
 BINNAME     ?= iter8
 ITER8_IMG ?= iter8/iter8:latest
 
