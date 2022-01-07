@@ -1,0 +1,25 @@
+name: Publish binaries
+
+on:
+  push:
+    tags:
+    - v* # Whenever `v1.2.3` type tags are created
+
+jobs:
+  build:
+    name: Publish binaries
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build binary
+      run: make build
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: bin/iter8
+        asset_name: Iter8
+        tag: ${{ github.ref }}
+        overwrite: true
+        body: "This is my release text"
