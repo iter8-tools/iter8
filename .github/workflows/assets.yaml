@@ -16,7 +16,10 @@ jobs:
         go-version: 1.17
     - uses: actions/checkout@v2
     - name: Build binaries
-      run: make dist
+      run: |
+        VERSION=${GITHUB_REF#refs/*/}
+        echo "Version: ${VERSION}"
+        make dist
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
