@@ -2,7 +2,7 @@ BINDIR      := $(CURDIR)/bin
 INSTALL_PATH ?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
 TARGETS     := darwin/amd64 darwin/arm64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
-TARGET_OBJS ?= darwin-amd64.tar.gz darwin-amd64.tar.gz.sha256 darwin-amd64.tar.gz.sha256sum darwin-arm64.tar.gz darwin-arm64.tar.gz.sha256 darwin-arm64.tar.gz.sha256sum linux-amd64.tar.gz linux-amd64.tar.gz.sha256 linux-amd64.tar.gz.sha256sum linux-386.tar.gz linux-386.tar.gz.sha256 linux-386.tar.gz.sha256sum linux-arm.tar.gz linux-arm.tar.gz.sha256 linux-arm.tar.gz.sha256sum linux-arm64.tar.gz linux-arm64.tar.gz.sha256 linux-arm64.tar.gz.sha256sum linux-ppc64le.tar.gz linux-ppc64le.tar.gz.sha256 linux-ppc64le.tar.gz.sha256sum linux-s390x.tar.gz linux-s390x.tar.gz.sha256 linux-s390x.tar.gz.sha256sum windows-amd64.zip windows-amd64.zip.sha256 windows-amd64.zip.sha256sum
+
 BINNAME     ?= iter8
 ITER8_IMG ?= iter8/iter8:latest
 
@@ -79,7 +79,7 @@ build-cross: $(GOX)
 	GOFLAGS="-trimpath" GO111MODULE=on CGO_ENABLED=0 $(GOX) -parallel=3 -output="_dist/{{.OS}}-{{.Arch}}/$(BINNAME)" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
 
 .PHONY: dist
-dist:
+dist: build-cross
 	( \
 		cd _dist && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
@@ -116,7 +116,7 @@ staticcheck:
 	staticcheck ./...
 
 .PHONY: test
-test: fmt vet ## Run tests.
+test: fmt vet staticcheck ## Run tests.
 	go test ./... -race -coverprofile=coverage.out -covermode=atomic	
 
 .PHONY: coverage
@@ -124,5 +124,5 @@ coverage: test
 	@echo "test coverage: $(shell go tool cover -func coverage.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}')"
 
 .PHONY: htmlcov
-htmlcov:
+htmlcov: coverage
 	go tool cover -html=coverage.out
