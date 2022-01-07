@@ -22,7 +22,10 @@ SRC := $(shell find . -type f -name '*.go' -print) go.mod go.sum
 # Required for globs to work correctly
 SHELL      = /usr/bin/env bash
 
+GIT_COMMIT = $(shell git rev-parse HEAD)
+GIT_SHA    = $(shell git rev-parse --short HEAD)
 GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
+GIT_DIRTY  = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "clean")
 
 ifdef VERSION
 	BINARY_VERSION = $(VERSION)
@@ -31,8 +34,18 @@ BINARY_VERSION ?= ${GIT_TAG}
 
 # Only set Version if building a tag or VERSION is set
 ifneq ($(BINARY_VERSION),)
-	LDFLAGS += -X 'github.com/iter8-tools/iter8/basecli/RootCmd.Version=${BINARY_VERSION}'
+	LDFLAGS += -X github.com/iter8-tools/iter8/basecli.version=${BINARY_VERSION}
 endif
+
+VERSION_METADATA = unreleased
+# Clear the "unreleased" string in BuildMetadata
+ifneq ($(GIT_TAG),)
+	VERSION_METADATA =
+endif
+
+LDFLAGS += -X github.com/iter8-tools/iter8/basecli.metadata=${VERSION_METADATA}
+LDFLAGS += -X github.com/iter8-tools/iter8/basecli.gitCommit=${GIT_COMMIT}
+LDFLAGS += -X github.com/iter8-tools/iter8/basecli.gitTreeState=${GIT_DIRTY}
 
 .PHONY: all
 all: build
@@ -44,7 +57,7 @@ all: build
 build: $(BINDIR)/$(BINNAME)
 
 $(BINDIR)/$(BINNAME): $(SRC)
-	GO111MODULE=on go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags "$(LDFLAGS)" -o '$(BINDIR)'/$(BINNAME) ./
+	GO111MODULE=on go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)'/$(BINNAME) ./
 
 .PHONY: cmddocs
 cmddocs:
