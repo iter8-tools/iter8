@@ -16,7 +16,7 @@ func TestMockQuickStart(t *testing.T) {
 
 	os.Chdir(dir)
 	// Todo: fix location below
-	os.Setenv("ITER8HUB", "github.com/sriumcp/iter8.git?ref=chart//hub/")
+	os.Setenv("ITER8HUB", "github.com/iter8-tools/iter8.git?ref=master//hub/")
 	hubFolder = "load-test"
 	// hub
 	err := hubCmd.RunE(nil, nil)

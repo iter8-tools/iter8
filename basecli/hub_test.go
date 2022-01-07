@@ -15,12 +15,12 @@ func TestHubGoodFolder(t *testing.T) {
 
 	os.Chdir(dir)
 	// Todo: fix location below
-	os.Setenv("ITER8HUB", "github.com/sriumcp/iter8.git?ref=v0.8//hub/")
+	os.Setenv("ITER8HUB", "github.com/iter8-tools/iter8.git?ref=master//hub/")
 	hubFolder = "load-test"
 	// make sure load test folder is present
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
-	_, err = os.Stat(path.Join(dir, hubFolder, "experiment.yaml"))
+	_, err = os.Stat(path.Join(dir, hubFolder, "Chart.yaml"))
 	assert.False(t, os.IsNotExist(err))
 
 	hubFolder = "random-loc"
