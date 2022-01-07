@@ -1,10 +1,9 @@
 name: Publish binaries
 
 on:
-  push:
-    tags:
-    - v* # Whenever `v1.2.3` type tags are created
-
+  release:
+    types: [published]
+    
 jobs:
   build:
     name: Publish binaries
