@@ -11,19 +11,14 @@
 
 ### Kubernetes-friendly metrics-driven <strong>experiments</strong> and <strong>safe rollouts</strong>. 
 
-#### Built for DevOps/SRE/MLOps/data science teams.
-
 ## Use Cases
 
 1.  Load testing with SLOs
-2.  A/B(/n) testing with business reward metrics
-3.  SLOs with metrics from any backend
-4.  Traffic mirroring
-5.  User segmentation
-6.  Session affinity
-7.  Gradual rollout
+2.  A/B(/n) testing for improving business value with each release of app/ML model
+3.  Safe rollout for multi-cluster and edge
+4.  Traffic mirroring experiments
 
-The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 along with a Kubernetes service mesh or ingress.
+The traffic mirroring use-case is achieved by using Iter8 along with a Kubernetes service mesh or ingress that supports mirroring.
 
 ## Quick Start
 
@@ -31,23 +26,30 @@ The traffic engineering use-cases (4 - 7 above) are achieved by using Iter8 alon
 Install Iter8 using [Go 1.16+](https://golang.org/) as follows.
 ```shell
 go install github.com/iter8-tools/iter8@latest
-# you can now run iter8 (from your gopath bin/ directory)
 ```
+You can now run `iter8` (from your gopath bin/ directory)
 
-## 2. Download experiment
-Download the `load-test` experiment folder from Iter8 hub as follows.
+## 2. Download experiment chart
+Download the `load-test` experiment chart from Iter8 hub as follows.
 
 ```shell
 iter8 hub -e load-test
 ```
 
-## 3. Run experiment
-Iter8 experiments are specified using the `experiment.yaml` file. The `iter8 run` command reads this file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file.
+This creates a local folder called `load-test` containing the chart.
 
-Run the experiment you downloaded above as follows.
+## 3. Generate `experiment.yaml`
+Generate the `experiment.yaml` file which specifies your load test experiment.
 
 ```shell
 cd load-test
+iter8 gen exp --set url=https://example.com
+```
+
+## 4. Run experiment
+The iter8 run command reads the `experiment.yaml` file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file. Run the experiment as follows.
+
+```shell
 iter8 run
 ```
 
@@ -81,6 +83,20 @@ iter8 report -o text
 
 Congratulations! :tada: You completed your first Iter8 experiment.
 
-## [Documentation](https://iter8.tools)
+## Documentation
+Iter8 documentation is available at https://iter8.tools.
 
-## [Contributing](https://iter8.tools/latest/contributing/overview/)
+## Contributing
+We are delighted that you want to contribute to Iter8! 💖
+
+As you get started, you are in the best position to give us feedback on areas of
+our project that we need help with including:
+
+* Problems found during setup of Iter8
+* Gaps in our quick start tutorial and other documentation
+* Bugs in our test and automation scripts
+
+If anything doesn't make sense, or doesn't work when you run it, please open a
+bug report and let us know!
+
+See [here](https://iter8.tools/latest/contributing/overview/) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.

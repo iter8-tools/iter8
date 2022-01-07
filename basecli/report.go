@@ -26,11 +26,13 @@ type executable interface {
 	Execute(w io.Writer, data interface{}) error
 }
 
+// ReportOptionsType enables options for the report command
 type ReportOptionsType struct {
-	// Output format variable holds the output format to be used by gen
+	// OutputFormat holds the output format to be used by report
 	OutputFormat string
 }
 
+// ReportOptions stores the options used by thee report command
 var ReportOptions = ReportOptionsType{
 	OutputFormat: TextOutputFormatKey,
 }
@@ -89,7 +91,7 @@ func (exp *Experiment) Report(outputFormat string) error {
 	return ExecTemplate(tmpl, exp)
 }
 
-// execute text or html template with experiment
+// ExecTemplate executes text or html template using experiment as the data
 func ExecTemplate(t executable, exp *Experiment) error {
 	var b bytes.Buffer
 	err := t.Execute(&b, exp)
@@ -104,7 +106,6 @@ func ExecTemplate(t executable, exp *Experiment) error {
 }
 
 func init() {
-
 	// create text template
 	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
 		"formatText": formatText,

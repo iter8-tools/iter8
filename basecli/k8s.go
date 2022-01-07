@@ -12,6 +12,8 @@ import (
 	"github.com/Masterminds/sprig"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/getter"
 )
 
 const (
@@ -20,16 +22,21 @@ const (
 )
 
 type k8sExperiment struct {
-	Tasks  []base.TaskSpec
+	// Tasks are the set of tasks specifying the experiment
+	Tasks []base.TaskSpec
+	// Values used to generate the experiment
 	Values chartutil.Values
 }
 
+// id of the experiment
 var id string
+
+// app is the name of the app involved in the experiment
 var app string
 
 // run runs the command
 func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
-	result, err := Generate(GenOptions.Values)
+	result, err := Generate()
 	if err != nil {
 		return err
 	}
@@ -39,26 +46,22 @@ func runGetK8sCmd(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-func Generate(values []string) (result *bytes.Buffer, err error) {
-	v := chartutil.Values{}
-
-	// add id=id if --id option used
-	// note that if both --id=foo and --set id=bar are used,
-	// the --id option will take precedence
-	if len(id) > 0 {
-		values = append(values, "id="+id)
-	}
-
-	// add app=app if --app option is used
-	// not that if both --app=foo and --set id=bar are used,
-	// the --app optiom will take precedence
-	if len(app) > 0 {
-		values = append(values, "app="+app)
-	}
-
-	err = ParseValues(values, v)
+// Generate the k8s experiment manifest
+func Generate() (result *bytes.Buffer, err error) {
+	p := getter.All(cli.New())
+	v, err := GenOptions.MergeValues(p)
 	if err != nil {
 		return nil, err
+	}
+
+	// set id if --id option used
+	if len(id) > 0 {
+		v["id"] = id
+	}
+
+	// set app if --app option is used
+	if len(app) > 0 {
+		v["app"] = app
 	}
 
 	exp, err := Build(false, &FileExpIO{})
@@ -72,7 +75,6 @@ func Generate(values []string) (result *bytes.Buffer, err error) {
 	}
 
 	// generate formatted output
-
 	b, err := RenderTpl(k8sExp, k8sTemplateFilePath)
 	if err != nil {
 		return nil, err
@@ -83,7 +85,7 @@ func Generate(values []string) (result *bytes.Buffer, err error) {
 //go:embed k8s.tpl
 var tplBytes []byte
 
-// RenderTpl creates output from go.tpl
+// RenderTpl creates the Kubernetes experiment manifest from k8s.tpl
 func RenderTpl(k8sExp k8sExperiment, filePath string) (*bytes.Buffer, error) {
 	var tmpl *template.Template
 	var err error
@@ -132,8 +134,7 @@ func init() {
 	// support --id option to set identifier
 	k8sCmd.Flags().StringVarP(&id, "id", "i", "", "if not specified, a randomly generated identifier will be used")
 	// support --app option to set app
-	k8sCmd.Flags().StringVarP(&app, "app", "a", "", "label to be associated with an experiment, default is 'default'")
-
+	k8sCmd.Flags().StringVarP(&app, "app", "a", "default", "app to be associated with an experiment, default is 'default'")
 	// extend gen command with the k8s command
 	genCmd.AddCommand(k8sCmd)
 }

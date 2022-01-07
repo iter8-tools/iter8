@@ -11,7 +11,7 @@ import (
 func TestMakeWrongCollectTask(t *testing.T) {
 	ts := &TaskSpec{
 		taskMeta: taskMeta{
-			Task: stringPointer(AssessTaskName),
+			Task: StringPointer(AssessTaskName),
 		},
 		With: map[string]interface{}{
 			"hello": "world",
@@ -26,7 +26,7 @@ func TestMakeCollect(t *testing.T) {
 	// collect without version info ... should fail
 	ts := &TaskSpec{
 		taskMeta: taskMeta{
-			Task: stringPointer(CollectTaskName),
+			Task: StringPointer(CollectTaskName),
 		},
 	}
 	task, err := MakeCollect(ts)
@@ -36,7 +36,7 @@ func TestMakeCollect(t *testing.T) {
 	// collect task with only nil versions... should fail
 	ct := &collectTask{
 		taskMeta: taskMeta{
-			Task: stringPointer(CollectTaskName),
+			Task: StringPointer(CollectTaskName),
 		},
 		With: collectInputs{
 			VersionInfo: []*version{nil, nil},
@@ -52,7 +52,7 @@ func TestMakeCollect(t *testing.T) {
 	// valid collect task... should succeed
 	ct = &collectTask{
 		taskMeta: taskMeta{
-			Task: stringPointer(CollectTaskName),
+			Task: StringPointer(CollectTaskName),
 		},
 		With: collectInputs{
 			VersionInfo: []*version{nil, {
@@ -73,7 +73,7 @@ func TestRunCollect(t *testing.T) {
 	// valid collect task... should succeed
 	ct := &collectTask{
 		taskMeta: taskMeta{
-			Task: stringPointer(CollectTaskName),
+			Task: StringPointer(CollectTaskName),
 		},
 		With: collectInputs{
 			VersionInfo: []*version{{

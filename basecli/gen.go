@@ -2,14 +2,12 @@ package basecli
 
 import (
 	"github.com/spf13/cobra"
+	"helm.sh/helm/v3/pkg/cli/values"
 )
 
-type GenOptionsType struct {
-	// Values are user specified values used during gen
-	Values []string
-}
-
-var GenOptions = GenOptionsType{}
+// GenOptions are the options used by the gen subcommands.
+// They store values that can be combined with templates for generating experiment.yaml files Kubernetes manifests.
+var GenOptions = values.Options{}
 
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
@@ -21,5 +19,10 @@ var genCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(genCmd)
-	genCmd.PersistentFlags().StringSliceVarP(&GenOptions.Values, "set", "s", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
+	f := genCmd.PersistentFlags()
+	// See: https://github.com/helm/helm/blob/663a896f4a815053445eec4153677ddc24a0a361/cmd/helm/flags.go#L42 which is the source of these persistent flags
+	f.StringSliceVarP(&GenOptions.ValueFiles, "values", "f", []string{}, "specify values in a YAML file or a URL (can specify multiple)")
+	f.StringArrayVar(&GenOptions.Values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
+	f.StringArrayVar(&GenOptions.StringValues, "set-string", []string{}, "set STRING values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
+	f.StringArrayVar(&GenOptions.FileValues, "set-file", []string{}, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
 }

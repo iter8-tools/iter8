@@ -30,9 +30,9 @@ An Iter8 experiment is a sequence of tasks that produce metrics-driven insights 
       * changing application state (including traffic splits) inside a Kubernetes cluster
       * sending a cloudevent notification
 
-![Process automated by an Iter8 experiment](../images/whatisiter8.png)
+![Process automated by an Iter8 experiment](images/whatisiter8.png)
 
-Experiments are specified using a YAML file as shown below.
+Experiments are specified using an `experiment.yaml` file as shown below.
 ```yaml
 # the following experiment performs a load test for https://example.com
 # and validates error-rate and 95th percentile service level objectives (SLOs)
@@ -52,6 +52,9 @@ Experiments are specified using a YAML file as shown below.
     - metric: built-in/p95
       upperLimit: 100
 ```
+
+### Experiment Chart
+In order to enable reuse, Iter8 experiments are templated and packaged in the form of [Helm charts](https://helm.sh/docs/topics/charts/). Iter8 experiment charts can be combined with values to generate `experiments.yaml` files, much like how Helm charts can be combined with values to produce Kubernetes manifests.
 
 ## Where can I run experiments?
 

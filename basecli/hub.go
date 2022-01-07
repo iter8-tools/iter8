@@ -25,15 +25,16 @@ import (
 )
 
 const (
+	// Iter8Hub is the location of the public Iter8 Hub.
 	Iter8Hub = "github.com/iter8-tools/iter8.git//hub"
 )
 
 var hubFolder string
 
 var hubUsage = `
-Download an experiment folder from the Iter8 hub. 
+Download an experiment chart from the Iter8 hub. 
 This is useful for fetching experiments to inspect, modify, run, or repackage. 
-By default, this command looks for the specified experiment folder in the public Iter8 hub. 
+By default, this command looks for the specified experiment chart in the public Iter8 hub. 
 It is also possible to use custom hubs by setting the ITER8HUB environment variable.
 
 Environment variables:
@@ -53,15 +54,15 @@ github.com/iter8-tools/iter8.git?ref=master//hub
 // hubCmd represents the hub command
 var hubCmd = &cobra.Command{
 	Use:   "hub",
-	Short: "Download an experiment folder from Iter8 hub",
+	Short: "Download an experiment chart from Iter8 hub",
 	Long:  hubUsage,
 	Example: `
-# download load-test experiment folder from the public Iter8 hub
+# download load-test experiment chart from the public Iter8 hub
 iter8 hub -e load-test
 
-# custom Iter8 hubs are simply github repos that host Iter8 experiment folders
+# custom Iter8 hubs are simply github repos that host Iter8 experiment charts
 # Suppose you forked github.com/iter8-tools/iter8 under the GitHub account $GHUSER,
-# created a branch called 'ml', and pushed a new experiment folder 
+# created a branch called 'ml', and pushed a new experiment chart 
 # called 'tensorflow' under the path 'my/path/to/hub'. 
 # It can now be downloaded as follows.
 
@@ -87,6 +88,6 @@ iter8 hub -e tensorflow
 
 func init() {
 	RootCmd.AddCommand(hubCmd)
-	hubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid experiment folder located under hub")
+	hubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid experiment chart located under hub")
 	hubCmd.MarkFlagRequired("experiment")
 }

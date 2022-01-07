@@ -11,7 +11,7 @@ func TestMakeWrongRunTask(t *testing.T) {
 	// no run ...
 	ts := &TaskSpec{
 		taskMeta: taskMeta{
-			Task: stringPointer(AssessTaskName),
+			Task: StringPointer(AssessTaskName),
 		},
 		With: map[string]interface{}{
 			"hello": "world",
@@ -24,8 +24,8 @@ func TestMakeWrongRunTask(t *testing.T) {
 	// both run and task
 	ts = &TaskSpec{
 		taskMeta: taskMeta{
-			Task: stringPointer(AssessTaskName),
-			Run:  stringPointer("echo hello"),
+			Task: StringPointer(AssessTaskName),
+			Run:  StringPointer("echo hello"),
 		},
 		With: map[string]interface{}{
 			"hello": "world",
@@ -40,7 +40,7 @@ func TestMakeRun(t *testing.T) {
 	// valid run task... should succeed
 	rt := &runTask{
 		taskMeta: taskMeta{
-			Run: stringPointer("echo hello"),
+			Run: StringPointer("echo hello"),
 		},
 	}
 
@@ -53,10 +53,10 @@ func TestMakeRun(t *testing.T) {
 }
 
 func TestRunRun(t *testing.T) {
-	// valid collect task... should succeed
+	// valid run task... should succeed
 	rt := &runTask{
 		taskMeta: taskMeta{
-			Run: stringPointer("echo hello"),
+			Run: StringPointer("echo hello"),
 		},
 	}
 

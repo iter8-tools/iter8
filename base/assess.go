@@ -1,3 +1,4 @@
+// Package base provides the core definitions and primitives for Iter8 experiment and experimeent tasks.
 package base
 
 import (
@@ -17,6 +18,7 @@ type assessInputs struct {
 // assessTask enables assessment of versions
 type assessTask struct {
 	taskMeta
+	// With contains the inputs for the assessTask
 	With assessInputs `json:"with" yaml:"with"`
 }
 
