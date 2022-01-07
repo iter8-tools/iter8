@@ -72,12 +72,8 @@ install: build
 # ------------------------------------------------------------------------------
 #  dependencies
 
-# If go get is run from inside the project directory it will add the dependencies
-# to the go.mod file. To avoid that we change to a directory without a go.mod file
-# when downloading the following dependencies
-
 $(GOX):
-	(cd /; GO111MODULE=on go get -u github.com/mitchellh/gox)
+	go install github.com/mitchellh/gox@latest
 
 # ------------------------------------------------------------------------------
 #  release
