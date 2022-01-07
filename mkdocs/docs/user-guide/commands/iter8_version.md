@@ -7,7 +7,7 @@ hide:
 
 ## iter8 version
 
-print the client version information
+Print Iter8 version information
 
 ### Synopsis
 

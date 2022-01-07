@@ -35,7 +35,7 @@ type BuildInfo struct {
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "print the client version information",
+	Short: "Print Iter8 version information",
 	Long: `
 Show the version for Iter8.
 
