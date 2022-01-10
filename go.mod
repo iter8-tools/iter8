@@ -30,14 +30,14 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
 	helm.sh/helm/v3 v3.7.2
-	k8s.io/api v0.23.1
-	k8s.io/apimachinery v0.23.1
-	k8s.io/cli-runtime v0.23.1
-	k8s.io/client-go v0.23.1
-	// k8s.io/api v0.22.4
-	// k8s.io/apimachinery v0.22.4
-	// k8s.io/cli-runtime v0.22.4
-	// k8s.io/client-go v0.22.4
-	sigs.k8s.io/yaml v1.2.0
-// sigs.k8s.io/yaml v1.3.0
+	k8s.io/api v0.22.4
+	k8s.io/apimachinery v0.22.4
+	k8s.io/cli-runtime v0.22.4
+	k8s.io/client-go v0.22.4
+	// sigs.k8s.io/yaml v1.2.0
+	// k8s.io/api v0.23.1
+	// k8s.io/apimachinery v0.23.1
+	// k8s.io/cli-runtime v0.23.1
+	// k8s.io/client-go v0.23.1
+	sigs.k8s.io/yaml v1.3.0
 )
