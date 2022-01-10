@@ -50,7 +50,10 @@ jobs:
         overwrite: true
 
   brew:
+    name: Publish binaries
+    runs-on: ubuntu-latest
     needs: binwchecksum
+    steps:
     - run: |
         VERSION=${GITHUB_REF#refs/*/}
         REVISION=$(git rev-parse -q --verify "${GITHUB_SHA}")
