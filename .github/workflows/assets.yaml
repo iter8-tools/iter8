@@ -49,52 +49,14 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
 
-  brew:
+  brew:  
     name: Update Homebrew formula
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Repository Dispatch
+      uses: peter-evans/repository-dispatch@v1
       with:
+        token: ${{ secrets.PERSONAL_TOKEN }}
         repository: iter8-tools/homebrew-iter8
-        fetch-depth: 0
-        ref: refs/heads/main
-    - run: |
-        VERSION=${GITHUB_REF#refs/*/}
-
-        cat >iter8.rb <<EOF
-        class Iter8 < Formula
-          desc "Kubernetes release engineering"
-          homepage "https://iter8.tools"
-          url "https://github.com/iter8-tools/iter8.git",
-              tag:      "${VERSION}",
-          license "Apache-2.0"
-          head "https://github.com/iter8-tools/iter8.git", branch: "master"
-
-          depends_on "go" => :build
-
-          def install
-            # Don't dirty the git tree
-            rm_rf ".brew_home"
-
-            system "make", "build"
-            bin.install "bin/iter8"
-          end
-
-          test do
-            system bin/"iter8", "hub", "-e", "load-test"
-            assert File.directory? testpath/"load-test/templates"
-
-            version_output = shell_output(bin/"iter8 version 2>&1")
-            assert_match "GitTreeState:\"clean\"", version_output
-            if build.stable?
-              assert_match "Version:\"v#{version}\"", version_output
-            end
-          end
-        end
-        EOF
-    - name: Update
-      run: |
-        git config --global user.name "Iter8"
-        git config --global user.email iter8tools@gmail.com
-        git commit --allow-empty -a -m "Update Homebrew formula"
-        git push origin main -f
+        event-type: release
+        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}' 
