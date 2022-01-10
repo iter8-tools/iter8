@@ -44,7 +44,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        asset_name: checksum
+        asset_name: checksum.txt
         file: checksum.txt
         tag: ${{ github.ref }}
         overwrite: true
@@ -54,6 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: master
     - run: |
         VERSION=${GITHUB_REF#refs/*/}
         REVISION=$(git rev-parse -q --verify "${GITHUB_SHA}")
@@ -94,4 +96,5 @@ jobs:
         EOF
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
+        branch: master
         commit_message: Apply changes to brew formula
