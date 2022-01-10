@@ -1,3 +1,0 @@
-/*! For license information please see 54.a34bea3b.chunk.js.LICENSE.txt */
-(this.webpackJsonpexcalidraw=this.webpackJsonpexcalidraw||[]).push([[54],{211:function(e,t,a){"use strict";a.r(t);const i=async(e,t,a=e.name)=>{const r=[],c=[];for await(const n of e.values()){const s="".concat(a,"/").concat(n.name);"file"===n.kind?c.push(n.getFile().then((t=>(t.directoryHandle=e,Object.defineProperty(t,"webkitRelativePath",{configurable:!0,enumerable:!0,get:()=>s}))))):"directory"===n.kind&&t&&r.push(i(n,t,s))}return[...(await Promise.all(r)).flat(),...await Promise.all(c)]};t.default=async(e={})=>{e.recursive=e.recursive||!1;const t=await window.showDirectoryPicker();return i(t,e.recursive)}}}]);
-//# sourceMappingURL=54.a34bea3b.chunk.js.map
