@@ -55,7 +55,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: homebrew-iter8
+        repository: iter8-tools/homebrew-iter8
     - run: |
         VERSION=${GITHUB_REF#refs/*/}
 
