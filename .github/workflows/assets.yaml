@@ -38,7 +38,7 @@ jobs:
         FILES="_dist/iter8-*.tar.gz"
         for f in $FILES
         do
-          sha256sum ${VERSION}.tar.gz >> checksum.txt
+          sha256sum ${f} >> checksum.txt
         done
     - name: Upload checksum to release
       uses: svenstaro/upload-release-action@v2
