@@ -1,14 +1,13 @@
-name: Publish binaries
+name: Publish binaries and brew formula
 
 on:
   release:
     types: [published]
 
 jobs:
-  build:
+  binwchecksum:
     name: Publish binaries
     runs-on: ubuntu-latest
-
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
@@ -28,3 +27,71 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+    - name: create-checksum
+      id: create-checksum
+      run: |
+        VERSION=${GITHUB_REF#refs/*/}
+        wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.zip
+        sha256sum ${VERSION}.zip > checksum.txt
+        wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.tar.gz
+        sha256sum ${VERSION}.tar.gz >> checksum.txt
+        FILES="_dist/iter8-*.tar.gz"
+        for f in $FILES
+        do
+          sha256sum ${VERSION}.tar.gz >> checksum.txt
+        done
+    - name: Upload checksum to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        asset_name: checksum
+        file: checksum.txt
+        tag: ${{ github.ref }}
+        overwrite: true
+
+  brew:
+    name: Publish binaries
+    runs-on: ubuntu-latest
+    needs: binwchecksum
+    steps:
+    - run: |
+        VERSION=${GITHUB_REF#refs/*/}
+        REVISION=$(git rev-parse -q --verify "${GITHUB_SHA}")
+
+        cat >iter8.rb <<EOF
+        class Iter8 < Formula
+          desc "Kubernetes release engineering"
+          homepage "https://iter8.tools"
+          url "https://github.com/iter8-tools/iter8.git",
+              tag:      "${VERSION}",
+              revision: "${REVISION}"
+          license "Apache-2.0"
+          head "https://github.com/iter8-tools/iter8.git", branch: "master"
+
+          depends_on "go" => :build
+
+          def install
+            # Don't dirty the git tree
+            rm_rf ".brew_home"
+
+            system "make", "build"
+            bin.install "bin/iter8"
+          end
+
+          test do
+            system bin/"iter8", "hub", "-e", "load-test"
+            assert File.directory? testpath/"load-test/templates"
+
+            version_output = shell_output(bin/"iter8 version 2>&1")
+            assert_match "GitTreeState:\"clean\"", version_output
+            if build.stable?
+              revision = stable.instance_variable_get(:@resource).instance_variable_get(:@specs)[:revision]
+              assert_match "GitCommit:\"#{revision}\"", version_output
+              assert_match "Version:\"v#{version}\"", version_output
+            end
+          end
+        end        
+        EOF
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Apply changes to brew formula
