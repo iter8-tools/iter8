@@ -2,7 +2,6 @@ BINDIR      := $(CURDIR)/bin
 INSTALL_PATH ?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
 TARGETS     := darwin/amd64 darwin/arm64 linux/amd64 linux/386 linux/arm linux/arm64 linux/ppc64le linux/s390x windows/amd64
-
 BINNAME     ?= iter8
 ITER8_IMG ?= iter8/iter8:latest
 
@@ -23,7 +22,9 @@ SRC := $(shell find . -type f -name '*.go' -print) go.mod go.sum
 # Required for globs to work correctly
 SHELL      = /usr/bin/env bash
 
+GIT_COMMIT = $(shell git rev-parse HEAD)
 GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
+GIT_DIRTY  = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "clean")
 
 ifdef VERSION
 	BINARY_VERSION = $(VERSION)
@@ -32,10 +33,18 @@ BINARY_VERSION ?= ${GIT_TAG}
 
 # Only set Version if building a tag or VERSION is set
 ifneq ($(BINARY_VERSION),)
-	LDFLAGS += -X github.com/iter8-tools/iter8/basecli/RootCmd.Version=${BINARY_VERSION}
+	LDFLAGS += -X github.com/iter8-tools/iter8/basecli.version=${BINARY_VERSION}
 endif
 
-LDFLAGS += $(EXT_LDFLAGS)
+VERSION_METADATA = unreleased
+# Clear the "unreleased" string in BuildMetadata
+ifneq ($(GIT_TAG),)
+	VERSION_METADATA =
+endif
+
+LDFLAGS += -X github.com/iter8-tools/iter8/basecli.metadata=${VERSION_METADATA}
+LDFLAGS += -X github.com/iter8-tools/iter8/basecli.gitCommit=${GIT_COMMIT}
+LDFLAGS += -X github.com/iter8-tools/iter8/basecli.gitTreeState=${GIT_DIRTY}
 
 .PHONY: all
 all: build
@@ -63,12 +72,8 @@ install: build
 # ------------------------------------------------------------------------------
 #  dependencies
 
-# If go get is run from inside the project directory it will add the dependencies
-# to the go.mod file. To avoid that we change to a directory without a go.mod file
-# when downloading the following dependencies
-
 $(GOX):
-	(cd /; GO111MODULE=on go get -u github.com/mitchellh/gox)
+	go install github.com/mitchellh/gox@latest
 
 # ------------------------------------------------------------------------------
 #  release
@@ -76,7 +81,7 @@ $(GOX):
 .PHONY: build-cross
 build-cross: LDFLAGS += -extldflags "-static"
 build-cross: $(GOX)
-	GOFLAGS="-trimpath" GO111MODULE=on CGO_ENABLED=0 $(GOX) -parallel=3 -output="_dist/{{.OS}}-{{.Arch}}/$(BINNAME)" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
+	GOFLAGS="-trimpath" GO111MODULE=on CGO_ENABLED=0 $(GOX) -parallel=2 -output="_dist/{{.OS}}-{{.Arch}}/$(BINNAME)" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
 
 .PHONY: dist
 dist: build-cross
@@ -84,8 +89,7 @@ dist: build-cross
 		cd _dist && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf iter8-${VERSION}-{}.tar.gz {} \; && \
-		$(DIST_DIRS) zip -r iter8-${VERSION}-{}.zip {} \; \
+		$(DIST_DIRS) tar -zcf iter8-{}.tar.gz {} \; \
 	)
 
 .PHONY: clean

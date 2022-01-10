@@ -97,8 +97,8 @@ func RenderTpl(k8sExp k8sExperiment, filePath string) (*bytes.Buffer, error) {
 	// ensure it is a valid template
 	tmpl, err = template.New("tpl").Funcs(template.FuncMap{
 		"toYAML":                 toYAML,
-		"defaultImage":           func() string { return "iter8/iter8:" + (RootCmd.Version)[1:] },
-		"iter8MajorMinorVersion": func() string { return RootCmd.Version },
+		"defaultImage":           func() string { return "iter8/iter8:" + majorMinor[1:] },
+		"iter8MajorMinorVersion": func() string { return majorMinor },
 	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(string(tplBytes))
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse template file")

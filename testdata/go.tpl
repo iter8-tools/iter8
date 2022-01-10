@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: iter8
-        image: sriumcp/iter8
+        image: iter8/iter8
         command:
         - "/bin/sh"
         - "-c"
