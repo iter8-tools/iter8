@@ -10,7 +10,7 @@ template: main.html
 ## 1. Install Iter8
 === "Brew"
     ```shell
-    brew tap iter8-tools/iter8 https://github.com/iter8-tools/iter8.git
+    brew tap iter8-tools/iter8
     brew install iter8
     ```
 

@@ -26,7 +26,7 @@ The traffic mirroring use-case is achieved by using Iter8 along with a Kubernete
 ### 1. Install Iter8
 #### Using Brew
 ```shell
-brew tap iter8-tools/iter8 https://github.com/iter8-tools/iter8.git
+brew tap iter8-tools/iter8
 brew install iter8
 ```
 
