@@ -56,6 +56,8 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: iter8-tools/homebrew-iter8
+        fetch-depth: 0
+        ref: refs/heads/main
     - run: |
         VERSION=${GITHUB_REF#refs/*/}
 
@@ -90,6 +92,9 @@ jobs:
           end
         end
         EOF
-    - uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: Apply changes to brew formula
+    - name: Update
+      run: |
+        git config --global user.name "Iter8"
+        git config --global user.email iter8tools@gmail.com
+        git commit --allow-empty -a -m "Update Homebrew formula"
+        git push origin main -f
