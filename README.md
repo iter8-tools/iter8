@@ -37,7 +37,7 @@ go install github.com/iter8-tools/iter8@latest
 You can now run `iter8` (from your gopath bin/ directory)
 
 #### Using pre-compiled binary
-Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases).
+Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
 
 ## 2. Download experiment chart
 Download the `load-test` experiment chart from Iter8 hub as follows.
