@@ -50,15 +50,14 @@ jobs:
         overwrite: true
 
   brew:
-    name: Publish binaries
+    name: Update Homebrew formula
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: master
+        repository: homebrew-iter8
     - run: |
         VERSION=${GITHUB_REF#refs/*/}
-        REVISION=$(git rev-parse -q --verify "${GITHUB_SHA}")
 
         cat >iter8.rb <<EOF
         class Iter8 < Formula
@@ -66,7 +65,6 @@ jobs:
           homepage "https://iter8.tools"
           url "https://github.com/iter8-tools/iter8.git",
               tag:      "${VERSION}",
-              revision: "${REVISION}"
           license "Apache-2.0"
           head "https://github.com/iter8-tools/iter8.git", branch: "master"
 
@@ -92,10 +90,8 @@ jobs:
               assert_match "Version:\"v#{version}\"", version_output
             end
           end
-        end        
+        end
         EOF
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        branch: master
-        push_options: --force
         commit_message: Apply changes to brew formula
