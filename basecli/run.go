@@ -12,20 +12,27 @@ import (
 
 var runCmd *cobra.Command
 
+// Dry indicates that run should be a dry run
+var Dry bool
+
 // NewRunCmd creates a new run command
 func NewRunCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run",
-		Short: "Run an experiment",
-		Long:  "Run an experiment",
+		Short: "Render `experiment.yaml` and run the experiment.",
+		Long: `
+Render the file named "experiment.yaml" by combining an experiment chart with values, and run the experiment. This command is intended to be executed from the root of an Iter8 experiment chart. Values may be specified and are processed in the same manner as they are for Helm charts.`,
 		Example: `
-	# Run experiment defined in file 'experiment.yaml' and write result to 'result.yaml'
-	iter8 run
+	# Render experiment.yaml and run the experiment
+	iter8 run --set url=https://example.com
 	`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// generate experiment here ...
+			err := expCmd.RunE(nil, nil)
+			if Dry || err != nil {
+				return err
+			}
 			log.Logger.Trace("build called")
-			// Replace FileExpIO with ClusterExpIO to work with
-			// Spec and Results that might be inside the cluster
 			fio := &FileExpIO{}
 			exp, err := Build(false, fio)
 			log.Logger.Trace("build finished")
@@ -43,6 +50,10 @@ func NewRunCmd() *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.Flags().BoolVar(&Dry, "dry", false, "render experiment.yaml without running the experiment")
+	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
+	addGenOptions(cmd.Flags())
 	return cmd
 }
 
