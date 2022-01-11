@@ -36,11 +36,13 @@ jobs:
         wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.tar.gz
         sha256sum ${VERSION}.tar.gz >> checksum.txt
         cd _dist
-        FILES="iter8-*.tar.gz"
+        FILES="./iter8-*.tar.gz"
         for f in $FILES
         do
           sha256sum ${f} >> checksum.txt
         done
+        # pick up darwin checksum and export it
+        echo "SHAFORMAC=$(grep darwin checksum.txt | awk '{print $1}')" >> $GITHUB_ENV
     - name: Upload checksum to release
       uses: svenstaro/upload-release-action@v2
       with:
@@ -49,15 +51,10 @@ jobs:
         file: checksum.txt
         tag: ${{ github.ref }}
         overwrite: true
-
-  brew:  
-    name: Update Homebrew formula
-    runs-on: ubuntu-latest
-    steps:
-    - name: Repository Dispatch
+    - name: Update Homebrew formula
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.PERSONAL_TOKEN }}
         repository: iter8-tools/homebrew-iter8
         event-type: release
-        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}' 
+        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}, "shaformac": "${{ env.SHAFORMAC }}"}'
