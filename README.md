@@ -2,14 +2,15 @@
 
 <img alt="Iter8" src="mkdocs/docs/images/favicon.png" width="100" align="left">
 
-## Metrics Driven Experiments
+## Kubernetes Release Engineering
 
 [![GitHub stars](https://img.shields.io/github/stars/iter8-tools/iter8?style=social)](https://github.com/iter8-tools/iter8/stargazers)
 [![Slack channel](https://img.shields.io/badge/Slack-Join-purple)](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
 [![GitHub issues](https://img.shields.io/github/issues/iter8-tools/iter8)](https://github.com/iter8tools/iter8/issues)
 
-### Kubernetes-friendly metrics-driven <strong>experiments</strong> and <strong>safe rollouts</strong>. 
+> Safely rollout new versions of apps and ML models. Maximize business value with each release.
+
 
 ## Use Cases
 
@@ -23,11 +24,20 @@ The traffic mirroring use-case is achieved by using Iter8 along with a Kubernete
 ## Quick Start
 
 ### 1. Install Iter8
-Install Iter8 using [Go 1.16+](https://golang.org/) as follows.
+#### Using Brew
+```shell
+brew tap iter8-tools/iter8
+brew install iter8
+```
+
+#### Using Go 1.16+
 ```shell
 go install github.com/iter8-tools/iter8@latest
 ```
 You can now run `iter8` (from your gopath bin/ directory)
+
+#### Using pre-compiled binary
+Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
 
 ## 2. Download experiment chart
 Download the `load-test` experiment chart from Iter8 hub as follows.

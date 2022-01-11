@@ -2,7 +2,8 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Kubernetes-friendly metrics-driven experiments and safe rollouts. Load testing with SLO validation. A/B(/n) testing for business growth. Quick start in 2 mins.
+  Safely rollout new versions of apps and ML models. Maximize business value with each release.
+  Load testing with SLO validation. A/B(/n) testing for business growth. Quick start in 2 mins.
 
 # Repository
 repo_name: iter8-tools/iter8
@@ -54,7 +55,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Metrics Driven Experiments
+  title: Kubernetes Release Engineering
   version:
     provider: mike
   social:

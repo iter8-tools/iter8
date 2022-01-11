@@ -8,11 +8,20 @@ template: main.html
     Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service (https://example.com) and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
 
 ## 1. Install Iter8
-Install Iter8 using [Go 1.16+](https://golang.org/) as follows.
-```shell
-go install github.com/iter8-tools/iter8@latest
-```
-You can now run `iter8` (from your gopath bin/ directory)
+=== "Brew"
+    ```shell
+    brew tap iter8-tools/iter8
+    brew install iter8
+    ```
+
+=== "Go 1.16+"
+    ```shell
+    go install github.com/iter8-tools/iter8@latest
+    ```
+    You can now run `iter8` (from your gopath bin/ directory)
+
+=== "Binaries"
+    Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
 
 ## 2. Download experiment chart
 Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.

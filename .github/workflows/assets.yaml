@@ -35,7 +35,8 @@ jobs:
         sha256sum ${VERSION}.zip > checksum.txt
         wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.tar.gz
         sha256sum ${VERSION}.tar.gz >> checksum.txt
-        FILES="_dist/iter8-*.tar.gz"
+        cd _dist
+        FILES="iter8-*.tar.gz"
         for f in $FILES
         do
           sha256sum ${f} >> checksum.txt
