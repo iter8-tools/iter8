@@ -57,4 +57,4 @@ jobs:
         token: ${{ secrets.PERSONAL_TOKEN }}
         repository: iter8-tools/homebrew-iter8
         event-type: release
-        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}, "shaformac": "${{ env.SHAFORMAC }}"}'
+        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "shaformac": "${{ env.SHAFORMAC }}"}'
