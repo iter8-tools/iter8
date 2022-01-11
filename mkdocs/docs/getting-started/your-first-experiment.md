@@ -168,3 +168,13 @@ Generate a report of the experiment in HTML or text formats as follows.
         ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
+
+???+ note "Next steps"
+
+    1. It is possible to control the request generation process during the load test, by setting the number of queries, the duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send request. [This tutorial](../tutorials/load-test/gen.md) shows how.
+
+    2. HTTP services with POST endpoints may accept payloads. [This tutorial](../tutorials/load-test/payload.md) shows how to send payloads during the load test.
+
+    3. It is possible to control the metrics collected, percentiles computed, and the SLOs used as part of the load test. [This tutorial](../tutorials/load-test/metrics-and-slos.md) shows how.
+    
+    4. The `load-test/README.md` file describes all the values that can be supplied during the load test experiment.

@@ -19,7 +19,7 @@ numQueries: 100
 # This field is ignored if `numQueries` is specified.
 duration: 10s
 
-# Number of queries per second sent to each version.
+# Number of requests per second sent to each version.
 qps: 10.0
 
 # Number of parallel connections used to send requests.
