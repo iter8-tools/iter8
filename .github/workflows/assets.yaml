@@ -36,10 +36,9 @@ jobs:
         wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.tar.gz
         sha256sum ${VERSION}.tar.gz >> checksum.txt
         cd _dist
-        FILES="./iter8-*.tar.gz"
-        for f in $FILES
+        for f in iter8-*.tar.gz
         do
-          sha256sum ${f} >> checksum.txt
+          sha256sum ${f} >> ../checksum.txt
         done
         # pick up darwin checksum and export it
         echo "SHAFORMAC=$(grep darwin checksum.txt | awk '{print $1}')" >> $GITHUB_ENV
