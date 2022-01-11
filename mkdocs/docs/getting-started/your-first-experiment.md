@@ -31,12 +31,24 @@ iter8 hub -e load-test
 ```
 This creates a local folder called `load-test` containing the chart.
 
-## 3. Generate `experiment.yaml`
-Generate the `experiment.yaml` file which specifies your load test experiment.
+## 3. Run experiment
+The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
+
 ```shell
 cd load-test
-iter8 gen exp --set url=https://example.com
+iter8 run --set url=https://example.com
 ```
+
+??? note "Sample output from `iter8 run`"
+
+    ```shell
+    INFO[2021-12-14 10:23:26] starting experiment run                      
+    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics : started 
+    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics : completed 
+    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : started        
+    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : completed      
+    INFO[2021-12-14 10:23:39] experiment completed successfully    
+    ```
 
 ??? note "Look inside experiment.yaml"
     This experiment contains the [`gen-load-and-collect-metrics` task](../user-guide/tasks/collect.md) for generating load and collecting metrics, and the [`assess-app-versions` task](../user-guide/tasks/assess.md) for validating SLOs.
@@ -62,28 +74,9 @@ iter8 gen exp --set url=https://example.com
     ```
 
 ??? note "Iter8 and Helm"
-    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 gen exp` command](../user-guide/commands/iter8_gen_exp.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
+    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 run` command](../user-guide/commands/iter8_run.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
 
-
-## 4. Run experiment
-The `iter8 run` command reads the `experiment.yaml` file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file. Run the experiment as follows.
-
-```shell
-iter8 run
-```
-
-??? note "Sample output from `iter8 run`"
-
-    ```shell
-    INFO[2021-12-14 10:23:26] starting experiment run                      
-    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics : started 
-    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics : completed 
-    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : started        
-    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : completed      
-    INFO[2021-12-14 10:23:39] experiment completed successfully    
-    ```
-
-## 5. Assert outcomes
+## 4. Assert outcomes
 Assert that the experiment completed without any failures and SLOs are satisfied.
 
 ```shell
@@ -99,7 +92,7 @@ iter8 assert -c completed -c nofailure -c slos
     INFO[2021-11-10 09:33:12] all conditions were satisfied
     ```
 
-## 6. Generate report
+## 5. Generate report
 Generate a report of the experiment in HTML or text formats as follows.
 
 === "HTML"
