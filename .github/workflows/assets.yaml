@@ -41,7 +41,7 @@ jobs:
           sha256sum ${f} >> ../checksum.txt
         done
         # pick up darwin checksum and export it
-        echo "SHAFORMAC=$(grep darwin checksum.txt | awk '{print $1}')" >> $GITHUB_ENV
+        echo "SHAFORMAC=$(grep darwin ../checksum.txt | awk '{print $1}')" >> $GITHUB_ENV
     - name: Upload checksum to release
       uses: svenstaro/upload-release-action@v2
       with:
