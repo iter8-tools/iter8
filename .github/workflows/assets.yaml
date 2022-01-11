@@ -38,7 +38,7 @@ jobs:
         cd _dist
         for f in iter8-*.tar.gz
         do
-          sha256sum ${f} >> checksum.txt
+          sha256sum ${f} >> ../checksum.txt
         done
         # pick up darwin checksum and export it
         echo "SHAFORMAC=$(grep darwin checksum.txt | awk '{print $1}')" >> $GITHUB_ENV
