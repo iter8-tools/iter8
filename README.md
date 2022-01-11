@@ -48,19 +48,12 @@ iter8 hub -e load-test
 
 This creates a local folder called `load-test` containing the chart.
 
-## 3. Generate `experiment.yaml`
-Generate the `experiment.yaml` file which specifies your load test experiment.
+## 3. Run experiment
+The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
 
 ```shell
 cd load-test
-iter8 gen exp --set url=https://example.com
-```
-
-## 4. Run experiment
-The iter8 run command reads the `experiment.yaml` file, runs the specified experiment, and writes the results of the experiment into the `result.yaml` file. Run the experiment as follows.
-
-```shell
-iter8 run
+iter8 run --set url=https://example.com
 ```
 
 ## 4. Assert outcomes
