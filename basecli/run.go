@@ -33,7 +33,7 @@ Render the file named "experiment.yaml" by combining an experiment chart with va
 				os.Exit(1)
 			}
 			if Dry {
-				os.Exit(0)
+				return nil
 			}
 			log.Logger.Trace("build called")
 			fio := &FileExpIO{}
