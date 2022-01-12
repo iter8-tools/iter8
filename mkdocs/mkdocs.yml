@@ -120,7 +120,10 @@ nav:
   - Get help: getting-started/help.md
 - Tutorials:
   - Insights:
-    - Load testing: tutorials/load-testing.md
+    - Load testing: 
+      - Overview: tutorials/load-test/overview.md
+      - Request generation: tutorials/load-test/requests.md
+      - HTTP POST with payload: tutorials/load-test/payload.md
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md
     - Chaos testing with SLOs: tutorials/chaos.md

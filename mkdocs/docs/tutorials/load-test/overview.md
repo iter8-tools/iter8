@@ -4,13 +4,16 @@ template: main.html
 
 # Load Testing
 
-Load testing experiments can generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics and validate SLOs. 
+Load testing experiments generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics and validate SLOs. 
 
 ***
 
 ## v0.8 Examples
 
 * Load testing and SLO validation of an app with an [HTTP GET API endpoint](../getting-started/your-first-experiment.md).
+
+* [Controlling the request generation process](requests.md).
+
 
 ***
 

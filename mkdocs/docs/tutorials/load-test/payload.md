@@ -2,34 +2,27 @@
 template: main.html
 ---
 
-# Your First Experiment
+# HTTP POST with Payload
 
-!!! tip "Load test an HTTP Service and validate SLOs" 
-    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service (https://example.com) and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
+!!! tip "Send a payload as part of the requests sent during the load-test"
+    HTTP services may implement an HTTP ... 
 
-## 1. Install Iter8
-=== "Brew"
-    ```shell
-    brew tap iter8-tools/iter8
-    brew install iter8
-    ```
+???+ note "Before you begin"
+    1. [Install Iter8](../../getting-started/install.md).
+    2. This tutorial uses [Docker](https://docker.com/). You may use Docker or alternatives like [Podman](https://podman.io).
+    3. You may find it useful to try the [quick start tutorial](../../getting-started/your-first-experiment.md) before trying this.
 
-=== "Go 1.16+"
-    ```shell
-    go install github.com/iter8-tools/iter8@latest
-    ```
-    You can now run `iter8` (from your gopath bin/ directory)
+## 1. Run sample app
+```shell
+docker run -p 80:80 kennethreitz/httpbin
+```
 
-=== "Binaries"
-    Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
+This runs the [httpbin](https://httpbin.org) sample app.
 
 ## 2. Download experiment chart
-Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
-
 ```shell
 iter8 hub -e load-test
 ```
-This creates a local folder called `load-test` containing the chart.
 
 ## 3. Run experiment
 The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
@@ -167,14 +160,3 @@ Generate a report of the experiment in HTML or text formats as follows.
           -----------------------------|-----
         ```
 
-Congratulations! :tada: You completed your first Iter8 experiment.
-
-???+ note "Next steps"
-
-    1. It is possible to control the request generation process during the load test, by setting the number of queries, the duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests. [This tutorial](../tutorials/load-test/requests.md) shows how.
-
-    2. HTTP services with POST endpoints may accept payloads. [This tutorial](../tutorials/load-test/payload.md) shows how to send payloads during the load test.
-
-    3. It is possible to control the metrics collected, percentiles computed, and the SLOs used as part of the load test. [This tutorial](../tutorials/load-test/metrics-and-slos.md) shows how.
-    
-    4. The `load-test/README.md` file describes all the values that can be supplied during the load test experiment.

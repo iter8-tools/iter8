@@ -16,6 +16,7 @@
 numQueries: 100
 
 # Duration for which requests are sent to the app.
+# Value can be any Go duration string (https://pkg.go.dev/maze.io/x/duration#ParseDuration)
 # This field is ignored if `numQueries` is specified.
 duration: 10s
 
