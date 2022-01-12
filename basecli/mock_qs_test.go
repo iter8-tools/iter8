@@ -15,7 +15,6 @@ func TestMockQuickStart(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	os.Chdir(dir)
-	// Todo: fix location below
 	os.Setenv("ITER8HUB", "github.com/iter8-tools/iter8.git?ref=master//hub/")
 	hubFolder = "load-test"
 	// hub
@@ -29,13 +28,9 @@ func TestMockQuickStart(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://example.com",
 		httpmock.NewStringResponder(200, `all good`))
 
-	// gen exp
+	// gen and run exp
 	os.Chdir(path.Join(dir, hubFolder))
 	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
-	err = expCmd.RunE(nil, nil)
-	assert.NoError(t, err)
-
-	// run experiment
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -60,4 +55,31 @@ func TestMockQuickStart(t *testing.T) {
 	}
 	err = reportCmd.RunE(nil, nil)
 	assert.NoError(t, err)
+}
+
+func TestDryRun(t *testing.T) {
+	dir, _ := ioutil.TempDir("", "iter8-test")
+	defer os.RemoveAll(dir)
+
+	os.Chdir(dir)
+	os.Setenv("ITER8HUB", "github.com/iter8-tools/iter8.git?ref=master//hub/")
+	hubFolder = "load-test"
+	// hub
+	err := hubCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://example.com",
+		httpmock.NewStringResponder(200, `all good`))
+
+	// dry run
+	os.Chdir(path.Join(dir, hubFolder))
+	Dry = true
+	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
+	err = runCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+	assert.FileExists(t, "experiment.yaml")
 }
