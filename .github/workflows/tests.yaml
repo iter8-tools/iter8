@@ -72,10 +72,36 @@ jobs:
         iter8 run --set url=http://127.0.0.1/get
         iter8 assert -c completed -c nofailure -c slos
 
-    - name: load test POST endpoint
+    - name: load test POST endpoint (application/octet-stream)
       run: |
         set -e
         cd hub/load-test
         iter8 run --set url=http://127.0.0.1/post \
                   --set payloadStr="abc123"                  
+        iter8 assert -c completed -c nofailure -c slos
+
+    - name: load test POST endpoint (text/plain)
+      run: |
+        set -e
+        cd hub/load-test
+        iter8 run --set url=http://127.0.0.1/post \
+                  --set payloadStr="abc123" \
+                  --set contentType="text/plain"
+ 
+    - name: load test POST endpoint (application/json)
+      run: |
+        set -e
+        cd hub/load-test
+        iter8 run --set url=http://127.0.0.1/post \
+                  --set payloadURL=https://json-generator.com/ \
+                  --set contentType="application/json"
+        iter8 assert -c completed -c nofailure -c slos
+
+    - name: load test POST endpoint (image/jpeg)
+      run: |
+        set -e
+        cd hub/load-test
+        iter8 run --set url=http://127.0.0.1/post \
+                  --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
+                  --set contentType="image/jpeg"
         iter8 assert -c completed -c nofailure -c slos
