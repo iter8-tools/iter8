@@ -89,7 +89,7 @@ SLOs:
   upperLimit: 250
 - metric: "built-in/p97.5"
   upperLimit: 500
-EOF
+        EOF
         iter8 run --set url=http://127.0.0.1/get
         iter8 assert -c completed -c nofailure -c slos
 
