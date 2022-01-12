@@ -42,7 +42,8 @@ connections: 4
 # The type of the payload. Indicated using the Content-Type HTTP header value. 
 # This is intended to be used in conjunction with one of the `payload*` fields above. 
 # If this field is specified, Iter8 will send HTTP POST requests to versions 
-# with this content type header value.
+# with this content type header value. If payload is supplied, and this field is omitted, 
+# it will be defaulted to "application/octet-stream".
 # Uncomment and edit the following line to set this field.
 # contentType: "image/png"
 

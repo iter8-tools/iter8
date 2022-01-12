@@ -123,6 +123,7 @@ nav:
     - Overview: tutorials/load-test/overview.md
     - Request generation: tutorials/load-test/requests.md
     - HTTP POST with payload: tutorials/load-test/payload.md
+    - Percentiles and SLOs: tutorials/load-test/percentilesandslos.md
   - Other Experiment Types:
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md
