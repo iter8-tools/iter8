@@ -58,8 +58,12 @@ jobs:
 
     - name: run Iter8 experiment and assert
       run: |
+        set -e
         cd hub/load-test
         docker pull kennethreitz/httpbin
         docker run -p 80:80 kennethreitz/httpbin &
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1/get)" != "200" ]]; do
+          sleep 5; 
+        done;
         iter8 run --set url=http://127.0.0.1/get
         iter8 assert -c completed -c nofailure -c slos
