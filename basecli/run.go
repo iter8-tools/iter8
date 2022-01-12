@@ -29,8 +29,11 @@ Render the file named "experiment.yaml" by combining an experiment chart with va
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// generate experiment here ...
 			err := expCmd.RunE(nil, nil)
-			if Dry || err != nil {
-				return err
+			if err != nil {
+				os.Exit(1)
+			}
+			if Dry {
+				os.Exit(0)
 			}
 			log.Logger.Trace("build called")
 			fio := &FileExpIO{}
@@ -42,7 +45,7 @@ Render the file named "experiment.yaml" by combining an experiment chart with va
 				log.Logger.Info("starting experiment run")
 				err := exp.Run(fio)
 				if err != nil {
-					return err
+					os.Exit(1)
 				} else {
 					log.Logger.Info("experiment completed successfully")
 				}

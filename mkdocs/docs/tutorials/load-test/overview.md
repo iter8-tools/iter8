@@ -10,7 +10,7 @@ Load testing experiments generate requests for HTTP and gRPC services, collect b
 
 ## v0.8 Examples
 
-* Load testing and SLO validation of an app with an [HTTP GET API endpoint](../getting-started/your-first-experiment.md).
+* Load testing and SLO validation of an app with an [HTTP GET API endpoint](../../getting-started/your-first-experiment.md).
 
 * [Controlling the request generation process](requests.md).
 

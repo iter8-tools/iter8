@@ -58,8 +58,8 @@ jobs:
 
     - name: run Iter8 experiment and assert
       run: |
-        cd testdata/httpbin
+        cd hub/load-test
         docker pull kennethreitz/httpbin
         docker run -p 80:80 kennethreitz/httpbin &
-        iter8 run
+        iter8 run --set url=http://127.0.0.1/get
         iter8 assert -c completed -c nofailure -c slos
