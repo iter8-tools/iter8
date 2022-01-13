@@ -5,7 +5,7 @@ template: main.html
 # Percentiles and SLOs
 
 !!! tip "Control the latency percentiles computed and SLOs evaluated during the load test"
-    While running a load test, you can control the latency percentiles that are computed and the SLOs that are evaluated by altering the `values.yaml` file. This tutorial shows you how.
+    While running a load test, you can control the latency percentiles that are computed and the SLOs that are evaluated.
 
 ## Latency percentiles and SLOs
 Follow the [quick start tutorial](../../getting-started/your-first-experiment.md). Before you run the experiment, copy and paste the following YAML into the `values.yaml` file.
@@ -25,7 +25,7 @@ SLOs:
   upperLimit: 500
 ```
 
-The above values ensure the following.
+The above values ensure the following in this example.
 
 1.  The 50th, 75th, 90th, 95th, 97.5th, 99th, and 99.9th latency percentile values are computed.
 2.  The following SLOs are evaluated.
@@ -35,4 +35,6 @@ The above values ensure the following.
     - 95th percentile latency is under 250 msec
     - 97.5th percentile latency is under 500 msec
 
-You can modify the `percentiles` and `SLOs` section of the `values.yaml` before the experiment run, as required by your testing needs.
+***
+
+You may modify the `percentiles` and `SLOs` sections of the `values.yaml` before running the experiment as required by your testing needs.
