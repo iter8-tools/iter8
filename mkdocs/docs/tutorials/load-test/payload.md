@@ -28,15 +28,17 @@ cd load-test
 ## 3. Run experiment
 The target URL for our load test is http://127.0.0.1/post, which implements an HTTP POST endpoint. You can send any type of content as payload during the load test, either by setting it as a string, or by fetching it from a payload URL.
 
+### Examples
+
 === "string (application/octet-stream)"
-    Supply a string as payload. This sets the content type to "application/octet-stream".
+    Supply a string as payload. This sets the content type to `application/octet-stream` during the load test.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadStr="abc123"
     ```
 
 === "string (text/plain)"
-    Supply a string as payload and explicitly set the content type to "text/plain".
+    Supply a string as payload and explicitly set the content type to `text/plain` during the load test.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadStr="abc123" \
@@ -44,7 +46,7 @@ The target URL for our load test is http://127.0.0.1/post, which implements an H
     ```
 
 === "URL (application/json)"
-    Fetch JSON content from a payload URL. Send it as payload and explicitly set the content type to "application/json".
+    Fetch JSON content from a payload URL. Use this JSON as payload and explicitly set the content type to `application/json` during the load test.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadURL=https://json-generator.com/ \
@@ -52,7 +54,7 @@ The target URL for our load test is http://127.0.0.1/post, which implements an H
     ```
 
 === "URL (image/jpeg)"
-    Fetch jpeg image from a payload URL. Send it as payload and explicitly set the content type to "image/jpeg".
+    Fetch jpeg image from a payload URL. Use this image as payload and explicitly set the content type to `image/jpeg` during the load test.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
