@@ -50,6 +50,7 @@ connections: 4
 # A list of error ranges. 
 # Each range specifies an upper and/or lower limit on HTTP status codes. 
 # HTTP responses that fall within these error ranges are considered error.
+# By default, status codes 400 and above are considered as errors.
 # The following setting says that HTTP status codes 500 or above are errors.
 # Uncomment and edit the following lines to set this field.
 # errorRanges:
