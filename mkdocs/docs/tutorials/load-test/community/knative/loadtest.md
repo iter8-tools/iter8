@@ -2,28 +2,24 @@
 template: main.html
 ---
 
-# Your First Experiment
+# Load test a Knative HTTP service
 
-!!! tip "Load test an HTTP Service and validate SLOs" 
-    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service (https://example.com) and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
+!!! tip "Load test a Knative HTTP Service with a GET endpoint and validate SLOs"
+    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) HTTP service and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
 
-## 1. Install Iter8
-=== "Brew"
+???+ note "Before you begin"
+    1. [Install Iter8](../../getting-started/install.md).
+    2. [Install Knative and deploy your first Knative Service](https://knative.dev/docs/getting-started/first-service/). As noted at the end of the Knative tutorial, when you curl the Knative service,
     ```shell
-    brew tap iter8-tools/iter8
-    brew install iter8
+    curl http://hello.default.127.0.0.1.sslip.io
     ```
-
-=== "Go 1.16+"
-    ```shell
-    go install github.com/iter8-tools/iter8@latest
+    you should see the expected output as follows.
     ```
-    You can now run `iter8` (from your gopath bin/ directory)
+    Hello World!
+    ```
+    3. This tutorial combines this and this tutorial in the context of Knative. You may find it useful to try out both those tutorials also.
 
-=== "Binaries"
-    Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
-
-## 2. Download experiment chart
+## 1. Download experiment chart
 Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
 
 ```shell
@@ -31,7 +27,7 @@ iter8 hub -e load-test
 cd load-test
 ```
 
-## 3. Run experiment
+## 2. Run experiment
 The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
 
 ```shell
@@ -81,9 +77,6 @@ Assert that the experiment completed without any failures and SLOs are satisfied
 ```shell
 iter8 assert -c completed -c nofailure -c slos
 ```
-
-The `iter8 assert` subcommand asserts if experiment result satisfies the specified conditions. 
-If assert conditions are satisfied, it exits with code `0`, and exits with code `1` otherwise. Assertions are especially useful within CI/CD/GitOps pipelines.
 
 ??? note "Sample output from `iter8 assert`"
 
