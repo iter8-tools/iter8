@@ -123,7 +123,7 @@ nav:
     - Overview: tutorials/load-test/overview.md
     - Request generation: tutorials/load-test/requests.md
     - HTTP POST with payload: tutorials/load-test/payload.md
-    - Percentiles and SLOs: tutorials/load-test/percentilesandslos.md
+    - Error codes, percentiles and SLOs: tutorials/load-test/percentilesandslos.md
     - Community:
       - Knative:
         - HTTP GET endpoint: tutorials/load-test/community/knative/loadtest.md

@@ -5,7 +5,7 @@ template: main.html
 # HTTP POST with Payload
 
 !!! tip "Send a payload as part of the requests sent during the load-test"
-    While load testing an HTTP service with a POST endpoint, you may send any type of content as payload during the load test. This tutorial shows how.
+    While load testing an HTTP service with a POST endpoint, you may send any type of content as payload during the load test.
 
 ???+ note "Before you begin"
     1. [Install Iter8](../../getting-started/install.md).

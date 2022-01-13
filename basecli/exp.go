@@ -29,6 +29,7 @@ iter8 gen exp --set url=https://example.com
 		// read in the experiment chart
 		c, err := loader.Load(".")
 		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to load experiment chart")
 			return err
 		}
 
@@ -43,17 +44,20 @@ iter8 gen exp --set url=https://example.com
 		p := getter.All(cli.New())
 		v, err := GenOptions.MergeValues(p)
 		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to obtain values for chart")
 			return err
 		}
 
 		valuesToRender, err := chartutil.ToRenderValues(c, v, chartutil.ReleaseOptions{}, nil)
 		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to compose chart information")
 			return err
 		}
 
 		// render experiment.yaml
 		m, err := engine.Render(c, valuesToRender)
 		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to render chart")
 			return err
 		}
 
@@ -64,6 +68,7 @@ iter8 gen exp --set url=https://example.com
 			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
 			return err
 		}
+		log.Logger.Info("Created the experiment.yaml file containing the experiment spec")
 
 		// build and validate experiment
 		fio := &FileExpIO{}

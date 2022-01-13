@@ -5,7 +5,7 @@ template: main.html
 # Your First Experiment
 
 !!! tip "Load test an HTTP Service and validate SLOs" 
-    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service (https://example.com) and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
+    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
 
 ## 1. Install Iter8
 === "Brew"
@@ -32,22 +32,11 @@ cd load-test
 ```
 
 ## 3. Run experiment
-The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
+The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows. In this example, we are load testing the HTTP service whose URL is https://example.com.
 
 ```shell
 iter8 run --set url=https://example.com
 ```
-
-??? note "Sample output from `iter8 run`"
-
-    ```shell
-    INFO[2021-12-14 10:23:26] starting experiment run                      
-    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics : started 
-    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics : completed 
-    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : started        
-    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : completed      
-    INFO[2021-12-14 10:23:39] experiment completed successfully    
-    ```
 
 ??? note "Look inside experiment.yaml"
     This experiment contains the [`gen-load-and-collect-metrics` task](../user-guide/tasks/collect.md) for generating load and collecting metrics, and the [`assess-app-versions` task](../user-guide/tasks/assess.md) for validating SLOs.
@@ -70,6 +59,17 @@ iter8 run --set url=https://example.com
           upperLimit: 50
         - metric: built-in/p95.0
           upperLimit: 100  
+    ```
+
+??? note "Sample output from `iter8 run`"
+
+    ```shell
+    INFO[2021-12-14 10:23:26] starting experiment run                      
+    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics : started 
+    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics : completed 
+    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : started        
+    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : completed      
+    INFO[2021-12-14 10:23:39] experiment completed successfully    
     ```
 
 ??? note "Iter8 and Helm"
