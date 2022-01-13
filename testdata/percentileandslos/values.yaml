@@ -1,3 +1,5 @@
+errorRanges:
+- lower: 500
 percentiles: [50.0, 75.0, 90.0, 95.0, 97.5, 99.0, 99.9]
 SLOs:
 - metric: "built-in/error-rate"
