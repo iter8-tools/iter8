@@ -22,9 +22,4 @@ func TestHubGoodFolder(t *testing.T) {
 	assert.NoError(t, err)
 	_, err = os.Stat(path.Join(dir, hubFolder, "Chart.yaml"))
 	assert.False(t, os.IsNotExist(err))
-
-	hubFolder = "random-loc"
-	// make sure proper error is generated
-	err = hubCmd.RunE(nil, nil)
-	assert.Error(t, err)
 }
