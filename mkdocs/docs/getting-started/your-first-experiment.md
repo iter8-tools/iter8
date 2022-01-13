@@ -168,7 +168,7 @@ Generate a report of the experiment in HTML or text formats as follows.
 
 Congratulations! :tada: You completed your first Iter8 experiment.
 
-???+ note "Useful ways to extend this load test"
+???+ note "Useful extensions"
 
     1. It is possible to control the request generation process during the load test by setting the number of queries, the duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests. [This tutorial](../tutorials/load-test/requests.md) shows how.
 

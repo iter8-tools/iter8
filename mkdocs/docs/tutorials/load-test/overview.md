@@ -8,17 +8,13 @@ Load testing experiments generate requests for HTTP and gRPC services, collect b
 
 ***
 
-## v0.8 Examples
+## Examples
 
-* Load testing and SLO validation of an app with an [HTTP GET API endpoint](../../getting-started/your-first-experiment.md).
+* [HTTP GET endpoint](../../getting-started/your-first-experiment.md).
 
 * [Controlling the request generation process](requests.md).
 
+* [HTTP POST endpoint accepting payload](payload.md).
 
-***
+* [Controlling percentiles computed and SLOs evaluated](percentilesandslos.md).
 
-## v0.7 Examples
-
-* [HTTP POST API endpoint](https://iter8.tools/0.7/tutorials/deployments/slo-validation-payload/)
-
-* [Knative app managed by Helm](https://iter8.tools/0.7/tutorials/knative/slovalidation-helmex/)
