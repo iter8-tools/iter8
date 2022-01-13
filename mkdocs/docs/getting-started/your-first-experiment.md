@@ -28,14 +28,13 @@ Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [
 
 ```shell
 iter8 hub -e load-test
+cd load-test
 ```
-This creates a local folder called `load-test` containing the chart.
 
 ## 3. Run experiment
 The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
 
 ```shell
-cd load-test
 iter8 run --set url=https://example.com
 ```
 
@@ -168,3 +167,13 @@ Generate a report of the experiment in HTML or text formats as follows.
         ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
+
+???+ note "Useful extensions"
+
+    1. It is possible to control the request generation process during the load test by setting the number of queries, the duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests. [This tutorial](../tutorials/load-test/requests.md) shows how.
+
+    2. HTTP services with POST endpoints may accept payloads. [This tutorial](../tutorials/load-test/payload.md) shows how to send various types of content as payload during the load test.
+
+    3. [This tutorial](../tutorials/load-test/percentilesandslos.md) shows how to control the latency percentiles computed and SLOs evaluated during the load test.
+    
+    4. The `load-test/README.md` file documents all the values that can be supplied during the load test experiment.

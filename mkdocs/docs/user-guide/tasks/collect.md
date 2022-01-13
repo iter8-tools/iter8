@@ -39,7 +39,8 @@ Customize this task using various inputs.
     # The type of the payload. Indicated using the Content-Type HTTP header value. 
     # This is intended to be used in conjunction with one of the `payload*` fields above. 
     # If this field is specified, Iter8 will send HTTP POST requests to versions 
-    # with this content type header value.
+    # with this content type header value. If payload is supplied, but this field 
+    # is unset, then its value will be defaulted to "application/octet-stream".
     contentType: "image/png"
     # A list of error ranges. 
     # Each range specifies an upper and/or lower limit on HTTP status codes. 

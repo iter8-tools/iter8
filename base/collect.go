@@ -246,7 +246,15 @@ func (t *collectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) 
 	if err != nil {
 		return nil, err
 	}
+	log.Logger.Trace("got fortio options")
 	ifr, err := fhttp.RunHTTPTest(fo)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
+		if ifr == nil {
+			log.Logger.Error("failed to get results since fortio run was aborted")
+		}
+	}
+	log.Logger.Trace("ran fortio http test")
 	return ifr, err
 }
 
@@ -269,6 +277,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 
 	// run fortio queries for each version sequentially
 	for j := range t.With.VersionInfo {
+		log.Logger.Trace("initiating fortio for version ", j)
 		var data *fhttp.HTTPRunnerResults
 		var err error
 		if t.With.VersionInfo[j] == nil {

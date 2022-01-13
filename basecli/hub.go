@@ -16,6 +16,7 @@ limitations under the License.
 package basecli
 
 import (
+	"os"
 	"path"
 
 	"github.com/hashicorp/go-getter"
@@ -80,7 +81,7 @@ iter8 hub -e tensorflow
 		log.Logger.Info("downloading ", ifurl)
 		if err := getter.Get(hubFolder, ifurl); err != nil {
 			log.Logger.WithStackTrace(err.Error()).Errorf("unable to get: %v", ifurl)
-			return err
+			os.Exit(1)
 		}
 		return nil
 	},
