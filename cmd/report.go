@@ -13,16 +13,16 @@ func init() {
 	// initialize reportCmd
 	reportCmd = basecli.NewReportCmd()
 	reportCmd.Example = `
-# Generate a text report for the most recent experiment started in Kubernetes
+# View a text report for the most recent experiment started in Kubernetes
 iter8 k report
 
-# Generate an html report for the most recent experiment
+# View an html report for the most recent experiment
 iter8 k report -o html
 
-# Generate an html report for the most recent experiment with app label $APP
+# View an html report for the most recent experiment with app label $APP
 iter8 k report -o html -a $APP
 
-# Generate an html report the experiment with identifier $ID
+# View an html report the experiment with identifier $ID
 iter8 k report -o html --id $ID`
 	reportCmd.SilenceErrors = true
 

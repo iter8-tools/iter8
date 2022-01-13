@@ -124,7 +124,7 @@ nav:
     - Request generation: tutorials/load-test/requests.md
     - HTTP POST with payload: tutorials/load-test/payload.md
     - Error codes, percentiles and SLOs: tutorials/load-test/percentilesandslos.md
-    - Community:
+    - Community examples:
       - Knative:
         - HTTP GET endpoint: tutorials/load-test/community/knative/loadtest.md
   - Other Experiment Types:

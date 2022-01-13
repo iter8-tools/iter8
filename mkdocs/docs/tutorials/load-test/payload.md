@@ -61,4 +61,4 @@ The target URL for our load test is http://127.0.0.1/post, which implements an H
               --set contentType="image/jpeg"
     ```
 
-You can assert experiment outcomes and generate report as described in the [quick start tutorial](../../getting-started/your-first-experiment.md).
+You can assert experiment outcomes and view report as described in the [quick start tutorial](../../getting-started/your-first-experiment.md).

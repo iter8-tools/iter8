@@ -2,9 +2,7 @@
 template: main.html
 ---
 
-# Load Testing with SLOs
-
-<!-- ![Load testing with SLOs]({% include ".icons/material/atom.svg" %}){ align=left } -->
+# Load Testing with SLOs: Overview
  
 > Load testing experiments generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics and validate SLOs. 
 
@@ -25,3 +23,13 @@ template: main.html
 [Specify error codes, latency percentiles and SLOs](percentilesandslos.md).
 : While running a load test, you can specify the range of HTTP status codes that are considered as errors, the latency percentile values that are computed and reported, and the SLOs that are evaluated.
 
+## Community examples
+
+These samples are contributed and maintained by members of the Iter8 community.
+
+> These samples might become outdated. If you find that something is not working, lend a helping hand and fix it in a PR. More examples from the community are very welcome. Please submit yours through a PR.
+
+### Knative
+
+[Load test a Knative HTTP service](../community/knative/loadtest.md)
+: Use an Iter8 to load test a Knative HTTP service and validate latency and error-related service level objectives (SLOs).
