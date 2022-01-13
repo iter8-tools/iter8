@@ -72,6 +72,14 @@ jobs:
         iter8 run --set url=http://127.0.0.1/get
         iter8 assert -c completed -c nofailure -c slos
 
+    - name: load test GET endpoint (percentiles and SLOs)
+      run: |
+        set -e
+        cd hub/load-test
+        cp ../../testdata/percentileandslos/values.yaml .
+        iter8 run --set url=http://127.0.0.1/get
+        iter8 assert -c completed -c nofailure -c slos
+
     - name: load test POST endpoint (application/octet-stream)
       run: |
         set -e
