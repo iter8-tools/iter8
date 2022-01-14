@@ -43,7 +43,10 @@
 - task: assess-app-versions
   with:
   {{- if .Values.SLOs }}
-    SLOs:
-{{ toYaml .Values.SLOs | indent 4 }}
-  {{- end }}
+  SLOs:
+  {{ range $key, $value := .Values.SLOs }}
+  - metric: "built-in/{{ $key }}"
+    upperLimit: $value
+  {{ end }}
+  {{ end }}
 {{ end }}
