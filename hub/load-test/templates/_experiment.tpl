@@ -45,8 +45,12 @@
     {{- if .Values.SLOs }}
     SLOs:
     {{- range $key, $value := .Values.SLOs }}
+    {{- if or (regexMatch "error-rate" $key) (regexMatch "error-count" $key) (regexMatch "mean-latency" $key) (regexMatch "^p\\d+(?:\\.\\d)?$" $key) }}
     - metric: "built-in/{{ $key }}"
       upperLimit: {{ $value }}
+    {{- else }}
+    {{- fail "Invalid SLO metric specified" }}
+    {{- end }}
     {{- end }}
     {{- end }}
 {{ end }}
