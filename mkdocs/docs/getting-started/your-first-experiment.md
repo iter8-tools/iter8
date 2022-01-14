@@ -32,10 +32,15 @@ cd load-test
 ```
 
 ## 3. Run experiment
-The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows. In this example, we are load testing the HTTP service whose URL is https://example.com.
+The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows. 
+
+In this example, we are load testing and validating the HTTP service whose URL is https://example.com. For validation, we are specifying that the error rate must be 0, the mean latency must be under 50 msec, and the 95th percentile latency must be under 100 sec.
 
 ```shell
-iter8 run --set url=https://example.com
+iter8 run --set url=https://example.com \
+          --set SLOs.error-rate=0 \
+          --set SLOs.mean-latency=50 \
+          --set SLOs.p'95\.0'=100
 ```
 
 ??? note "Look inside experiment.yaml"

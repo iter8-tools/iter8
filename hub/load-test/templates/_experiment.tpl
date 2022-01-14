@@ -59,11 +59,11 @@
 {{ toYaml .Values.headers | indent 6 }}
     {{- end }}
 
+{{- if .Values.SLOs }}
 # task 2: validate service level objectives for app using
 # the metrics collected in the above task
 - task: assess-app-versions
   with:
-    {{- if .Values.SLOs }}
     SLOs:
     {{- range $key, $value := .Values.SLOs }}
     {{- if or (regexMatch "error-rate" $key) (regexMatch "error-count" $key) (regexMatch "mean-latency" $key) (regexMatch "^p\\d+(?:\\.\\d)?$" $key) }}
@@ -73,5 +73,5 @@
     {{- fail "Invalid SLO metric specified" }}
     {{- end }}
     {{- end }}
-    {{- end }}
+{{- end }}
 {{ end }}
