@@ -170,10 +170,15 @@ func (t *collectTask) initializeDefaults() {
 	if t.With.ErrorRanges == nil {
 		t.With.ErrorRanges = defaultErrorRanges
 	}
-	if t.With.Percentiles == nil {
-		for _, p := range defaultPercentiles {
-			t.With.Percentiles = append(t.With.Percentiles, p)
-		}
+	// default percentiles are always computed
+	// if other percentiles are specified, they are computed as well
+	for _, p := range defaultPercentiles {
+		t.With.Percentiles = append(t.With.Percentiles, p)
+	}
+	tmp := uniq(t.With.Percentiles)
+	t.With.Percentiles = []float64{}
+	for _, val := range tmp {
+		t.With.Percentiles = append(t.With.Percentiles, val.(float64))
 	}
 }
 
