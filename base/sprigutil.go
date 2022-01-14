@@ -8,7 +8,9 @@ import (
 // Note: the following code snippets are from sprig library
 // https://github.com/Masterminds/sprig
 
-// The copyright notice for the sprig library is included below.
+// The following copyright notice is from the sprig library.
+// This copyright applies to the code in this file.
+// It is included as required by the MIT License under which sprig is released.
 
 /*
 Copyright (C) 2013-2020 Masterminds
@@ -32,6 +34,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+// uniq deduplicates a list
 func uniq(list interface{}) []interface{} {
 	l, err := mustUniq(list)
 	if err != nil {
@@ -41,6 +44,7 @@ func uniq(list interface{}) []interface{} {
 	return l
 }
 
+// mustUniq deduplicates a list and returns an error if the type doesn't permit equality checks
 func mustUniq(list interface{}) ([]interface{}, error) {
 	tp := reflect.TypeOf(list).Kind()
 	switch tp {
@@ -63,6 +67,7 @@ func mustUniq(list interface{}) ([]interface{}, error) {
 	}
 }
 
+// inList checks if needle is present in haystack
 func inList(haystack []interface{}, needle interface{}) bool {
 	for _, h := range haystack {
 		if reflect.DeepEqual(needle, h) {
