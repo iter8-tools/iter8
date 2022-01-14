@@ -57,24 +57,6 @@ func (e *Experiment) printState(w *tabwriter.Writer) {
 	w.Flush()
 }
 
-// ContainsInsight checks if the experiment contains insight
-func (e *Experiment) ContainsInsight(in base.InsightType) bool {
-	if e != nil {
-		if e.Result != nil {
-			if e.Result.Insights != nil {
-				if e.Result.Insights.InsightTypes != nil {
-					for _, v := range e.Result.Insights.InsightTypes {
-						if v == in {
-							return true
-						}
-					}
-				}
-			}
-		}
-	}
-	return false
-}
-
 // are SLOs in a printable condition in this experiment
 func (e *Experiment) printableSLOs() bool {
 	if e != nil {

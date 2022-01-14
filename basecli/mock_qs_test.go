@@ -6,20 +6,14 @@ import (
 	"path"
 	"testing"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMockQuickStart(t *testing.T) {
-	dir, _ := ioutil.TempDir("", "iter8-test")
-	defer os.RemoveAll(dir)
-
-	os.Chdir(dir)
-	os.Setenv("ITER8HUB", "github.com/iter8-tools/iter8.git?ref=master//hub/")
-	hubFolder = "load-test"
-	// hub
-	err := hubCmd.RunE(nil, nil)
-	assert.NoError(t, err)
+	// get into the experiment chart folder
+	os.Chdir(base.CompletePath("../", "hub/load-test"))
 
 	// mock the http endpoint
 	httpmock.Activate()
@@ -29,9 +23,8 @@ func TestMockQuickStart(t *testing.T) {
 		httpmock.NewStringResponder(200, `all good`))
 
 	// gen and run exp
-	os.Chdir(path.Join(dir, hubFolder))
 	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
-	err = runCmd.RunE(nil, nil)
+	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
 	// assert
