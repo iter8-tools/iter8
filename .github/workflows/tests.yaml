@@ -69,7 +69,10 @@ jobs:
       run: |
         set -e
         cd hub/load-test
-        iter8 run --set url=http://127.0.0.1/get --set SLOs.p50=100 --set SLOs.'p95\.0'=200
+        iter8 run --set url=http://127.0.0.1/get \
+                  --set SLOs.p25=80 \
+                  --set SLOs.p50=100 \
+                  --set SLOs.'p95\.0'=200
         cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
 
@@ -77,7 +80,8 @@ jobs:
       run: |
         set -e
         cd hub/load-test
-        iter8 run --set url=http://127.0.0.1/get -f ../../testdata/percentileandslos/values.yaml
+        iter8 run --set url=http://127.0.0.1/get \
+                  -f ../../testdata/percentileandslos/values.yaml
         cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
 
@@ -87,7 +91,8 @@ jobs:
         cd hub/load-test
         iter8 run --set url=http://127.0.0.1/post \
                   --set payloadStr="abc123" \
-                  --set contentType="text/plain"
+                  --set contentType="text/plain" \
+                  -f ../../testdata/percentileandslos/values.yaml
         cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
  
@@ -97,6 +102,7 @@ jobs:
         cd hub/load-test
         iter8 run --set url=http://127.0.0.1/post \
                   --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
-                  --set contentType="image/jpeg"
+                  --set contentType="image/jpeg" \
+                  -f ../../testdata/percentileandslos/values.yaml
         cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
