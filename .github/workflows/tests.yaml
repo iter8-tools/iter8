@@ -69,6 +69,14 @@ jobs:
       run: |
         set -e
         cd hub/load-test
+        iter8 run --set url=http://127.0.0.1/get
+        cat experiment.yaml
+        iter8 assert -c completed -c nofailure -c slos
+
+    - name: load test GET endpoint
+      run: |
+        set -e
+        cd hub/load-test
         iter8 run --set url=http://127.0.0.1/get \
                   --set SLOs.p25=80 \
                   --set SLOs.p50=100 \
