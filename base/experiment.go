@@ -64,6 +64,10 @@ type Insights struct {
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
 
+	// BuiltinLatencyPercentiles computed in this experiment
+	// this may be nil if there are no builtin metrics involved
+	BuiltinLatencyPercentiles []float64 `json:"builtinLatencyPercentiles,omitempty" yaml:"builtinLatencyPercentiles,omitempty"`
+
 	// SLOs involved in this experiment
 	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 
@@ -156,6 +160,24 @@ func (in *Insights) setInsightType(it InsightType) {
 	if !in.hasInsightType(it) {
 		in.InsightTypes = append(in.InsightTypes, it)
 	}
+}
+
+// setBuiltinLatencyPercentiles sets the BuiltinLatencyPercentiles field in insights
+// if this function is called multiple times (example, due to looping), then
+// it is intended to be called with the same argument each time
+func (in *Insights) setBuiltinLatencyPercentiles(p []float64) error {
+	if in.BuiltinLatencyPercentiles != nil {
+		if reflect.DeepEqual(in.BuiltinLatencyPercentiles, p) {
+			return nil
+		} else {
+			e := fmt.Errorf("old and new value of builtin latency percentiles conflict")
+			log.Logger.WithStackTrace(fmt.Sprint("old: ", in.BuiltinLatencyPercentiles, "new: ", p)).Error(e)
+			return e
+		}
+	}
+	// LHS will be nil
+	in.BuiltinLatencyPercentiles = p
+	return nil
 }
 
 // setSLOs sets the SLOs field in insights

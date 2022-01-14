@@ -4,6 +4,10 @@ package base
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base/log"
@@ -25,6 +29,12 @@ type assessTask struct {
 const (
 	// AssessTaskName is the name of the task this file implements
 	AssessTaskName = "assess-app-versions"
+
+	// percentilePrefix is the prefix for builtin percentile metrics
+	percentilePrefix = `built-in/p`
+
+	// the regular expression used to match builtin percentile metrics
+	builtinPrecentileRE = percentilePrefix + `.+`
 )
 
 // MakeAssess constructs an asessTask out of a task spec
@@ -159,6 +169,32 @@ func getMetricValue(e *Experiment, i int, m string) *float64 {
 		log.Logger.Warnf("metric values uninitialized for version %v", i)
 		return nil
 	}
+	// rename builtin metric
+	bpre := regexp.MustCompile(builtinPrecentileRE)
+
+	// match has the builtin percentile value in m
+	match := bpre.FindString(m)
+	if len(match) > 0 {
+		log.Logger.Trace("percentile match: ", match, " for string: ", m)
+		pStr := strings.TrimPrefix(match, percentilePrefix)
+		pFloat, err := strconv.ParseFloat(pStr, 32)
+		if err != nil {
+			log.Logger.Error("unable to parse metric", m)
+			return nil
+		}
+		tmp := []interface{}{}
+		for _, f := range e.Result.Insights.BuiltinLatencyPercentiles {
+			tmp = append(tmp, f)
+		}
+		if ok, ind := inList(tmp, pFloat); !ok {
+			log.Logger.Error("unable to find percentile value in list of built-in percentiles")
+			log.Logger.Error("value: ", pFloat, " built-in percentiles: ", e.Result.Insights.BuiltinLatencyPercentiles)
+			return nil
+		} else {
+			m = percentilePrefix + fmt.Sprintf("%v", e.Result.Insights.BuiltinLatencyPercentiles[ind])
+		}
+	}
+
 	vals := e.Result.Insights.MetricValues[i][m]
 	if len(vals) == 0 {
 		return nil

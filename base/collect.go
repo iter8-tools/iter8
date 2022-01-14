@@ -304,6 +304,12 @@ func (t *collectTask) Run(exp *Experiment) error {
 
 	in := exp.Result.Insights
 
+	// set builtinLatencyPercentiles (if needed)
+	err = in.setBuiltinLatencyPercentiles(t.With.Percentiles)
+	if err != nil {
+		return err
+	}
+
 	// set hist metrics insight type (if needed)
 	in.setInsightType(InsightTypeHistMetrics)
 
@@ -398,9 +404,9 @@ func (t *collectTask) Run(exp *Experiment) error {
 
 			// percentiles
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%0.1f", p.Percentile)
+				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%v", p.Percentile)
 				in.MetricsInfo[m] = MetricMeta{
-					Description: fmt.Sprintf("%0.1f-th percentile of observed latency values", p.Percentile),
+					Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
 					Type:        GaugeMetricType,
 					Units:       StringPointer("msec"),
 				}

@@ -45,6 +45,8 @@ func uniq(list interface{}) []interface{} {
 }
 
 // mustUniq deduplicates a list and returns an error if the type doesn't permit equality checks
+// this function has been modified from the sprig implementation, in order to use the
+// the two valued inList function
 func mustUniq(list interface{}) ([]interface{}, error) {
 	tp := reflect.TypeOf(list).Kind()
 	switch tp {
@@ -56,7 +58,7 @@ func mustUniq(list interface{}) ([]interface{}, error) {
 		var item interface{}
 		for i := 0; i < l; i++ {
 			item = l2.Index(i).Interface()
-			if !inList(dest, item) {
+			if ok, _ := inList(dest, item); !ok {
 				dest = append(dest, item)
 			}
 		}
@@ -68,11 +70,12 @@ func mustUniq(list interface{}) ([]interface{}, error) {
 }
 
 // inList checks if needle is present in haystack
-func inList(haystack []interface{}, needle interface{}) bool {
-	for _, h := range haystack {
+// this function has been modified from the sprig implementation, in order to return index also
+func inList(haystack []interface{}, needle interface{}) (bool, int) {
+	for i, h := range haystack {
 		if reflect.DeepEqual(needle, h) {
-			return true
+			return true, i
 		}
 	}
-	return false
+	return false, -1
 }
