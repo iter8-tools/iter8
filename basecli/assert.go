@@ -51,7 +51,7 @@ func NewAssertCmd() *cobra.Command {
 		Long: `
 Assert if experiment result satisfies the specified conditions. 
 If assert conditions are satisfied, exit with code 0. 
-Else, return with code 1.`,
+Else, exit with code 1. Assertions are especially useful within CI/CD/GitOps pipelines.`,
 		Example: `
 # assert that the experiment completed without failures, 
 # and SLOs were satisfied

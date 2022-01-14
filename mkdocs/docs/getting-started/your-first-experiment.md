@@ -82,6 +82,9 @@ Assert that the experiment completed without any failures and SLOs are satisfied
 iter8 assert -c completed -c nofailure -c slos
 ```
 
+The `iter8 assert` subcommand asserts if experiment result satisfies the specified conditions. 
+If assert conditions are satisfied, it exits with code `0`, and exits with code `1` otherwise. Assertions are especially useful within CI/CD/GitOps pipelines.
+
 ??? note "Sample output from `iter8 assert`"
 
     ```shell
@@ -91,8 +94,8 @@ iter8 assert -c completed -c nofailure -c slos
     INFO[2021-11-10 09:33:12] all conditions were satisfied
     ```
 
-## 5. Generate report
-Generate a report of the experiment in HTML or text formats as follows.
+## 5. View report
+View a report of the experiment in HTML or text formats as follows.
 
 === "HTML"
     ```shell
