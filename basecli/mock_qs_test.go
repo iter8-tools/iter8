@@ -22,9 +22,25 @@ func TestMockQuickStart(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://example.com",
 		httpmock.NewStringResponder(200, `all good`))
 
+	// without SLOs first
+
 	// gen and run exp
 	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
 	err := runCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// assert
+	AssertOptions = AssertOptionsType{
+		Conds:   []string{Completed, NoFailure, SLOs},
+		Timeout: 0,
+	}
+	err = assertCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// with SLOs next
+	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.mean-latency=100")
+	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/values.yaml"))
+	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
 	// assert
