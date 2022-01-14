@@ -42,11 +42,11 @@
 # the metrics collected in the above task
 - task: assess-app-versions
   with:
-  {{- if .Values.SLOs }}
-  SLOs:
-  {{ range $key, $value := .Values.SLOs }}
-  - metric: "built-in/{{ $key }}"
-    upperLimit: $value
-  {{ end }}
-  {{ end }}
+    {{- if .Values.SLOs }}
+    SLOs:
+    {{- range $key, $value := .Values.SLOs }}
+    - metric: "built-in/{{ $key }}"
+      upperLimit: {{ $value }}
+    {{- end }}
+    {{- end }}
 {{ end }}

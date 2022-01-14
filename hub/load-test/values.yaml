@@ -63,6 +63,6 @@ percentiles: [50.0, 75.0, 90.0, 95.0]
 # A list of service level objectives (SLOs) that the app needs to satisfy.
 # Metrics collected during the load test are used to verify if the app satisfies SLOs.
 SLOs:
-- "error-rate": 0 # error rate must be 0
-- "mean-latency": 50 # mean latency must be under 50 msec
-- "p95.0": 100 # 95th percentile latency must be under 100 msec
+  error-rate: 0 # error rate must be 0
+  mean-latency: 50 # mean latency must be under 50 msec
+  p95.0: 100 # 95th percentile latency must be under 100 msec
