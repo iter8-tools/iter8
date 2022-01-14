@@ -231,7 +231,7 @@ func (r *ExperimentResult) InitInsights(n int, it []InsightType) {
 // SLOsBy returns true if version satisfies SLOs
 func (exp *Experiment) SLOsBy(version int) bool {
 	if !exp.ContainsInsight(InsightTypeSLO) {
-		log.Logger.Info("experiment does not involve SLOs")
+		log.Logger.Warning("experiment does not involve SLOs")
 		return true
 	}
 
@@ -270,7 +270,7 @@ func (e *Experiment) ContainsInsight(in InsightType) bool {
 // SLOs returns true if all versions satisfy SLOs
 func (exp *Experiment) SLOs() bool {
 	if !exp.ContainsInsight(InsightTypeSLO) {
-		log.Logger.Info("experiment does not involve SLOs")
+		log.Logger.Warning("experiment does not involve SLOs")
 		return true
 	}
 
