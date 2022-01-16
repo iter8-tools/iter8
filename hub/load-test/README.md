@@ -28,7 +28,7 @@ iter8 run --set url=https://example.com \
           --set SLOs.p'97\.5'=200 \
           --set numQueries=200 \
           --set qps=10 \
-          --set connections= 5
+          --set connections=5
 ```
 
 ***
