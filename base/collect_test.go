@@ -39,6 +39,7 @@ func TestMakeCollect(t *testing.T) {
 			Task: StringPointer(CollectTaskName),
 		},
 		With: collectInputs{
+			Duration:    StringPointer("1s"),
 			VersionInfo: []*version{nil, nil},
 		},
 	}
@@ -55,6 +56,7 @@ func TestMakeCollect(t *testing.T) {
 			Task: StringPointer(CollectTaskName),
 		},
 		With: collectInputs{
+			Duration: StringPointer("1s"),
 			VersionInfo: []*version{nil, {
 				Headers: map[string]string{},
 				URL:     "https://something.com",
@@ -76,6 +78,7 @@ func TestRunCollect(t *testing.T) {
 			Task: StringPointer(CollectTaskName),
 		},
 		With: collectInputs{
+			Duration: StringPointer("1s"),
 			VersionInfo: []*version{{
 				Headers: map[string]string{},
 				URL:     "https://something.com",
@@ -104,4 +107,8 @@ func TestRunCollect(t *testing.T) {
 	err = ct.Run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+
+	// experiment should contain histogram metrics
+	assert.True(t, exp.ContainsInsight(InsightTypeHistMetrics))
+
 }
