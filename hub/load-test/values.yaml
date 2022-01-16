@@ -6,50 +6,50 @@
 
 ##################################
 
-### HTTP(S) URL where the app receives GET or POST requests.
+### url   HTTP(S) URL where the app receives GET or POST requests.
 ### This field is required.
 
 # url: https://example.com
 
-### HTTP headers to be used in requests sent to the app.
+### headers   HTTP headers to be used in requests sent to the app.
 ### Specified as a map with key being header names, and values being header values.
 
 # headers:
 #   hello: "mars"
 #   goodbye: "pluto"
 
-### Number of requests sent to the app. Default is 100
+### numQueries    Number of requests sent to the app. Default is 100
 
 # numQueries: 100
 
-### Duration for which requests are sent to the app.
+### duration    Duration for which requests are sent to the app.
 ### Value can be any Go duration string (https://pkg.go.dev/maze.io/x/duration#ParseDuration)
 ### This field is ignored if `numQueries` is specified.
 
 # duration: 10s
 
-### Number of requests per second sent to each version. Default is 8.0
+### qps   Number of requests per second sent to each version. Default is 8.0
 
 # qps: 8.0
 
-### Number of parallel connections used to send requests. Default is 4
+### connections   Number of parallel connections used to send requests. Default is 4
 
 ### connections: 4
 
-### String data to be sent as payload. 
+### payloadStr    String data to be sent as payload. 
 ### If this field is specified, Iter8 will send HTTP POST requests.
 ### with this string as the payload.
 ### This field is ignored if `payloadURL` is specified.
 
 # payloadStr: "abc123"
 
-### URL of payload. If this field is specified, 
+### payloadUrl    URL of payload. If this field is specified, 
 ### Iter8 will send HTTP POST requests to versions with 
 ### data downloaded from this URL as the payload.
 
 # payloadURL: "https://www.my.image.com/image.png"
 
-### The type of the payload. Indicated using the Content-Type HTTP header value. 
+### contentType   The type of the payload. Indicated using the Content-Type HTTP header value. 
 ### This is intended to be used in conjunction with one of the `payload*` fields above. 
 ### If this field is specified, Iter8 will send HTTP POST requests to versions 
 ### with this content type header value. If payload is supplied, and this field is omitted, 
@@ -57,7 +57,7 @@
 
 # contentType: "image/png"
 
-### A list of error ranges. 
+### errorRanges   A list of error ranges. 
 ### Each range specifies an upper and/or lower limit on HTTP status codes. 
 ### HTTP responses that fall within these error ranges are considered error.
 ### By default, status codes 400 and above are considered as errors.
@@ -66,13 +66,13 @@
 # errorRanges:
 # - lower: 500
 
-### A list of latency percentiles collected by this load-test.
+### percentiles   A list of latency percentiles collected by this load-test.
 ### The following precentiles are always collecteed: [50.0, 75.0, 90.0, 95.0, 99.0, 99.9] 
 ### Additional percentile values can be specified in the following list
 
 # percentiles: [25, 97.5]
 
-### A map of service level objectives (SLOs) that the app needs to satisfy.
+### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
 ### Each SLO has a key which is the metric name, 
 ### and a value which is the upper limit on the metric.
