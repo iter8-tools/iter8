@@ -122,11 +122,11 @@ nav:
   - Load test with SLOs:
     - Overview: tutorials/load-test/overview.md
     - Request generation: tutorials/load-test/requests.md
-    - HTTP POST with payload: tutorials/load-test/payload.md
-    - Error codes, percentiles and SLOs: tutorials/load-test/percentilesandslos.md
+    - Payload: tutorials/load-test/payload.md
+    - Metrics and SLOs: tutorials/load-test/metricsandslos.md
     - Community examples:
       - Knative:
-        - HTTP GET endpoint: tutorials/load-test/community/knative/loadtest.md
+        - HTTP Service: tutorials/load-test/community/knative/loadtest.md
   - Other Experiment Types:
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md

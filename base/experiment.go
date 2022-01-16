@@ -64,7 +64,7 @@ type Insights struct {
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
 
-	// BuiltinLatencyPercentiles computed in this experiment
+	// BuiltinLatencyPercentiles collected in this experiment
 	// this may be nil if there are no builtin metrics involved
 	BuiltinLatencyPercentiles []float64 `json:"builtinLatencyPercentiles,omitempty" yaml:"builtinLatencyPercentiles,omitempty"`
 

@@ -66,8 +66,8 @@
 # errorRanges:
 # - lower: 500
 
-### A list of latency percentiles computed by this load-test.
-### The following precentiles are always computed: [50.0, 75.0, 90.0, 95.0, 99.0, 99.9] 
+### A list of latency percentiles collected by this load-test.
+### The following precentiles are always collecteed: [50.0, 75.0, 90.0, 95.0, 99.0, 99.9] 
 ### Additional percentile values can be specified in the following list
 
 # percentiles: [25, 97.5]

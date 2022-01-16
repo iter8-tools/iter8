@@ -2,21 +2,23 @@
 template: main.html
 ---
 
-# HTTP POST with Payload
+# Payload
 
-!!! tip "Send a payload as part of the requests sent during the load-test"
-    While load testing an HTTP service with a POST endpoint, you may send any type of content as payload during the load test.
+!!! tip "Send various types of content as payload"
+    HTTP services with POST endpoints may accept payloads. Send various types of content as payload during the load test.
+
+***
 
 ???+ note "Before you begin"
     1. [Install Iter8](../../getting-started/install.md).
-    2. You may find it useful to try the [quick start tutorial](../../getting-started/your-first-experiment.md) first.
+    2. Complete the [quick start tutorial](../../getting-started/your-first-experiment.md).
 
 ## 1. Run sample app
-Run the [httpbin](https://httpbin.org) sample app from a separate terminal.
+Run the [httpbin](https://httpbin.org) sample app from a separate terminal. We will load test this app in this example.
 ```shell
 docker run -p 80:80 kennethreitz/httpbin
 ```
-In the above command, you may also use [Podman](https://podman.io) or other alternatives to Docker.
+You may also use [Podman](https://podman.io) or other alternatives to Docker in the above command.
 
 
 ## 2. Download experiment chart
@@ -26,39 +28,59 @@ cd load-test
 ```
 
 ## 3. Run experiment
-The target URL for our load test is http://127.0.0.1/post, which implements an HTTP POST endpoint. You can send any type of content as payload during the load test, either by setting it as a string, or by fetching it from a payload URL.
+We will load test and validate the HTTP service whose URL is http://127.0.0.1/post. 
 
-### Examples
+Iter8 enables you to send any type of content as payload during the load test, either by specifying the payload as a string (`payloadStr`), or by specifying a URL for Iter8 to fetch the payload from (`payloadURL`).
+
+### Payload examples
 
 === "string (application/octet-stream)"
-    Supply a string as payload. This sets the content type to `application/octet-stream` during the load test.
-    ```shell
-    iter8 run --set url=http://127.0.0.1/post \
-              --set payloadStr="abc123"
-    ```
-
-=== "string (text/plain)"
-    Supply a string as payload and explicitly set the content type to `text/plain` during the load test.
+    Supply a string as payload. This sets the content type to `application/octet-stream`.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadStr="abc123" \
-              --set contentType="text/plain"
+              --set SLOs.error-rate=0 \
+              --set SLOs.mean-latency=50 \
+              --set SLOs.p90=100 \
+              --set SLOs.p'97\.5'=200
+    ```
+
+=== "string (text/plain)"
+    Supply a string as payload and explicitly set the content type to `text/plain`.
+    ```shell
+    iter8 run --set url=http://127.0.0.1/post \
+              --set payloadStr="abc123" \
+              --set contentType="text/plain" \
+              --set SLOs.error-rate=0 \
+              --set SLOs.mean-latency=50 \
+              --set SLOs.p90=100 \
+              --set SLOs.p'97\.5'=200
     ```
 
 === "URL (application/json)"
-    Fetch JSON content from a payload URL. Use this JSON as payload and explicitly set the content type to `application/json` during the load test.
+    Fetch JSON content from a payload URL. Use this JSON as payload and explicitly set the content type to `application/json`.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadURL=https://json-generator.com/ \
-              --set contentType="application/json"
+              --set contentType="application/json" \
+              --set SLOs.error-rate=0 \
+              --set SLOs.mean-latency=50 \
+              --set SLOs.p90=100 \
+              --set SLOs.p'97\.5'=200
     ```
 
 === "URL (image/jpeg)"
-    Fetch jpeg image from a payload URL. Use this image as payload and explicitly set the content type to `image/jpeg` during the load test.
+    Fetch jpeg image from a payload URL. Use this image as payload and explicitly set the content type to `image/jpeg`.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
-              --set contentType="image/jpeg"
+              --set contentType="image/jpeg" \
+              --set SLOs.error-rate=0 \
+              --set SLOs.mean-latency=50 \
+              --set SLOs.p90=100 \
+              --set SLOs.p'97\.5'=200
     ```
 
-You can assert experiment outcomes and view report as described in the [quick start tutorial](../../getting-started/your-first-experiment.md).
+***
+
+Assert experiment outcomes and view reports as described in the [quick start tutorial](../../getting-started/your-first-experiment.md).
