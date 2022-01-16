@@ -61,7 +61,7 @@ View a report of the experiment in HTML or text formats as follows.
     iter8 report -o text
     ```
 
-Congratulations! :tada: You completed your Iter8 experiment with Knative.
+Congratulations! :tada: You completed your Iter8-Knative experiment.
 
 ***
 
