@@ -23,10 +23,10 @@ jobs:
       run: |
         export COVERAGE=$(go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
         echo "code coverage is at ${COVERAGE}"
-        if [ 1 -eq "$(echo "${COVERAGE} > 67.0" | bc)" ]; then \
-          echo "all good... coverage is above 67.0%"; 
+        if [ 1 -eq "$(echo "${COVERAGE} > 68.0" | bc)" ]; then \
+          echo "all good... coverage is above 68.0%"; 
         else \
-          echo "not good... coverage is not above 67.0%";
+          echo "not good... coverage is not above 68.0%";
           exit 1
         fi
     - name: Upload coverage to Codecov
@@ -70,22 +70,27 @@ jobs:
         set -e
         cd hub/load-test
         iter8 run --set url=http://127.0.0.1/get
+        cat experiment.yaml
+        iter8 assert -c completed -c nofailure -c slos
+
+    - name: load test GET endpoint
+      run: |
+        set -e
+        cd hub/load-test
+        iter8 run --set url=http://127.0.0.1/get \
+                  --set SLOs.p25=80 \
+                  --set SLOs.p50=100 \
+                  --set SLOs.'p95\.0'=200
+        cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
 
     - name: load test GET endpoint (percentiles and SLOs)
       run: |
         set -e
         cd hub/load-test
-        cp ../../testdata/percentileandslos/values.yaml .
-        iter8 run --set url=http://127.0.0.1/get
-        iter8 assert -c completed -c nofailure -c slos
-
-    - name: load test POST endpoint (application/octet-stream)
-      run: |
-        set -e
-        cd hub/load-test
-        iter8 run --set url=http://127.0.0.1/post \
-                  --set payloadStr="abc123"                  
+        iter8 run --set url=http://127.0.0.1/get \
+                  -f ../../testdata/percentileandslos/values.yaml
+        cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
 
     - name: load test POST endpoint (text/plain)
@@ -94,22 +99,18 @@ jobs:
         cd hub/load-test
         iter8 run --set url=http://127.0.0.1/post \
                   --set payloadStr="abc123" \
-                  --set contentType="text/plain"
- 
-    - name: load test POST endpoint (application/json)
-      run: |
-        set -e
-        cd hub/load-test
-        iter8 run --set url=http://127.0.0.1/post \
-                  --set payloadURL=https://json-generator.com/ \
-                  --set contentType="application/json"
+                  --set contentType="text/plain" \
+                  -f ../../testdata/percentileandslos/values.yaml
+        cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
-
+ 
     - name: load test POST endpoint (image/jpeg)
       run: |
         set -e
         cd hub/load-test
         iter8 run --set url=http://127.0.0.1/post \
                   --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
-                  --set contentType="image/jpeg"
+                  --set contentType="image/jpeg" \
+                  -f ../../testdata/percentileandslos/values.yaml
+        cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos

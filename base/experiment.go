@@ -64,6 +64,10 @@ type Insights struct {
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
 
+	// BuiltinLatencyPercentiles collected in this experiment
+	// this may be nil if there are no builtin metrics involved
+	BuiltinLatencyPercentiles []float64 `json:"builtinLatencyPercentiles,omitempty" yaml:"builtinLatencyPercentiles,omitempty"`
+
 	// SLOs involved in this experiment
 	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 
@@ -158,6 +162,24 @@ func (in *Insights) setInsightType(it InsightType) {
 	}
 }
 
+// setBuiltinLatencyPercentiles sets the BuiltinLatencyPercentiles field in insights
+// if this function is called multiple times (example, due to looping), then
+// it is intended to be called with the same argument each time
+func (in *Insights) setBuiltinLatencyPercentiles(p []float64) error {
+	if in.BuiltinLatencyPercentiles != nil {
+		if reflect.DeepEqual(in.BuiltinLatencyPercentiles, p) {
+			return nil
+		} else {
+			e := fmt.Errorf("old and new value of builtin latency percentiles conflict")
+			log.Logger.WithStackTrace(fmt.Sprint("old: ", in.BuiltinLatencyPercentiles, "new: ", p)).Error(e)
+			return e
+		}
+	}
+	// LHS will be nil
+	in.BuiltinLatencyPercentiles = p
+	return nil
+}
+
 // setSLOs sets the SLOs field in insights
 // if this function is called multiple times (example, due to looping), then
 // it is intended to be called with the same argument each time
@@ -230,6 +252,11 @@ func (r *ExperimentResult) InitInsights(n int, it []InsightType) {
 
 // SLOsBy returns true if version satisfies SLOs
 func (exp *Experiment) SLOsBy(version int) bool {
+	if !exp.ContainsInsight(InsightTypeSLO) {
+		log.Logger.Warning("experiment does not involve SLOs")
+		return true
+	}
+
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Insights != nil {
@@ -244,8 +271,31 @@ func (exp *Experiment) SLOsBy(version int) bool {
 	return false
 }
 
+// ContainsInsight checks if the experiment contains insight
+func (e *Experiment) ContainsInsight(in InsightType) bool {
+	if e != nil {
+		if e.Result != nil {
+			if e.Result.Insights != nil {
+				if e.Result.Insights.InsightTypes != nil {
+					for _, v := range e.Result.Insights.InsightTypes {
+						if v == in {
+							return true
+						}
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
 // SLOs returns true if all versions satisfy SLOs
 func (exp *Experiment) SLOs() bool {
+	if !exp.ContainsInsight(InsightTypeSLO) {
+		log.Logger.Warning("experiment does not involve SLOs")
+		return true
+	}
+
 	if exp != nil {
 		if exp.Result != nil {
 			if exp.Result.Insights != nil {

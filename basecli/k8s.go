@@ -134,7 +134,7 @@ func init() {
 	// support --id option to set identifier
 	k8sCmd.Flags().StringVarP(&id, "id", "i", "", "if not specified, a randomly generated identifier will be used")
 	// support --app option to set app
-	k8sCmd.Flags().StringVarP(&app, "app", "a", "default", "app to be associated with an experiment, default is 'default'")
+	k8sCmd.Flags().StringVarP(&app, "app", "a", "default", "app to be associated with an experiment")
 	// extend gen command with the k8s command
 	genCmd.AddCommand(k8sCmd)
 }

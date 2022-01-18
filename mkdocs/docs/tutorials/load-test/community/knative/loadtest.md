@@ -4,7 +4,7 @@ template: main.html
 
 # Load test a Knative HTTP service
 
-!!! tip "Load test a Knative HTTP Service with a GET endpoint and validate SLOs"
+!!! tip "Load test a Knative HTTP Service and validate SLOs"
     Use an [Iter8 experiment](../../../../getting-started/concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) HTTP service and validate latency and error-related [service level objectives (SLOs)](../../../../user-guide/topics/slos.md).
 
 ???+ note "Before you begin"
@@ -17,7 +17,8 @@ template: main.html
     ```
     Hello World!
     ```
-    3. This tutorial combines [this tutorial](../../../../getting-started/your-first-experiment.md) and [this tutorial](../../requests.md) in the context of Knative. Please refer to these tutorials for more details.
+    3. Complete the [Iter8 quick start tutorial](../../../../getting-started/your-first-experiment.md).
+
 
 ## 1. Download experiment chart
 Download the `load-test` [experiment chart](../../../../getting-started/concepts.md#experiment-chart) from [Iter8 hub](../../../../user-guide/topics/iter8hub.md) as follows.
@@ -28,10 +29,14 @@ cd load-test
 ```
 
 ## 2. Run experiment
-The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
+The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file.
 
 ```shell
-iter8 run --set url=http://hello.default.127.0.0.1.sslip.io
+iter8 run --set url=http://hello.default.127.0.0.1.sslip.io \
+          --set SLOs.error-rate=0 \
+          --set SLOs.mean-latency=50 \
+          --set SLOs.p90=100 \
+          --set SLOs.p'97\.5'=200
 ```
 
 ## 3. Assert outcomes
@@ -56,18 +61,17 @@ View a report of the experiment in HTML or text formats as follows.
     iter8 report -o text
     ```
 
-## 5. Control request generation
-While running a load test, you can set the total number of requests/the duration of the load test, the number of requests sent per second, and the number of parallel connections used to send requests. This provides fine-grained control over the request generation process.
+Congratulations! :tada: You completed your Iter8-Knative experiment.
 
-Re-run your experiment by setting the following parameters of the load test experiment.
+***
 
-```shell
-iter8 run --set url=http://hello.default.127.0.0.1.sslip.io \
-          --set numQueries=200 \
-          --set qps=10 \
-          --set connections= 5
-```
+???+ tip "Useful variations of this experiment"
 
-Assert outcomes and view reports as described above.
+    1. [Control the request generation process](../../requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
 
-Congratulations! :tada: You completed your Iter8 experiment with Knative.
+    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../../payload.md) during the load test.
+
+    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the load test](../../metricsandslos.md).
+    
+    4. The `values.yaml` file in the experiment chart folder documents all the values that can be supplied during the experiment.
+

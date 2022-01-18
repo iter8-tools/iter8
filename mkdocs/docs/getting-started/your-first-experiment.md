@@ -2,10 +2,12 @@
 template: main.html
 ---
 
-# Your First Experiment
+# Load Test with SLOs
 
 !!! tip "Load test an HTTP Service and validate SLOs" 
     Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
+
+***
 
 ## 1. Install Iter8
 === "Brew"
@@ -32,11 +34,19 @@ cd load-test
 ```
 
 ## 3. Run experiment
-The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows. In this example, we are load testing the HTTP service whose URL is https://example.com.
+We will load test and validate the HTTP service whose URL is https://example.com. We will specify that the error rate must be 0, the mean latency must be under 50 msec, the 90th percentile latency must be under 100 msec, and the 97.5th percentile latency must be under 200 msec. 
+
+Run the experiment as follows.
 
 ```shell
-iter8 run --set url=https://example.com
+iter8 run --set url=https://example.com \
+          --set SLOs.error-rate=0 \
+          --set SLOs.mean-latency=50 \
+          --set SLOs.p90=100 \
+          --set SLOs.p'97\.5'=200
 ```
+
+The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file.
 
 ??? note "Look inside experiment.yaml"
     This experiment contains the [`gen-load-and-collect-metrics` task](../user-guide/tasks/collect.md) for generating load and collecting metrics, and the [`assess-app-versions` task](../user-guide/tasks/assess.md) for validating SLOs.
@@ -46,19 +56,24 @@ iter8 run --set url=https://example.com
     # collect Iter8's built-in latency and error-related metrics
     - task: gen-load-and-collect-metrics
       with:
+        percentiles: 
+        - 90
+        - 97.5
         versionInfo:
         - url: https://example.com
     # task 2: validate service level objectives for app using
     # the metrics collected in the above task
     - task: assess-app-versions
       with:
-        SLOs: 
-        - metric: built-in/error-rate
+        SLOs:
+        - metric: "built-in/error-rate"
           upperLimit: 0
-        - metric: built-in/mean-latency
+        - metric: "built-in/mean-latency"
           upperLimit: 50
-        - metric: built-in/p95.0
-          upperLimit: 100  
+        - metric: "built-in/p90"
+          upperLimit: 100
+        - metric: "built-in/p97.5"
+          upperLimit: 200
     ```
 
 ??? note "Sample output from `iter8 run`"
@@ -171,12 +186,14 @@ View a report of the experiment in HTML or text formats as follows.
 
 Congratulations! :tada: You completed your first Iter8 experiment.
 
-???+ note "Useful extensions"
+***
 
-    1. It is possible to control the request generation process during the load test by setting the number of queries, the duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests. [This tutorial](../tutorials/load-test/requests.md) shows how.
+???+ tip "Useful variations of this experiment"
 
-    2. HTTP services with POST endpoints may accept payloads. [This tutorial](../tutorials/load-test/payload.md) shows how to send various types of content as payload during the load test.
+    1. [Control the request generation process](../tutorials/load-test/requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
 
-    3. [This tutorial](../tutorials/load-test/percentilesandslos.md) shows how to control the latency percentiles computed and SLOs evaluated during the load test.
+    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test/payload.md) during the load test.
+
+    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the load test](../tutorials/load-test/metricsandslos.md).
     
-    4. The `load-test/README.md` file documents all the values that can be supplied during the load test experiment.
+    4. The `values.yaml` file in the experiment chart folder documents all the values that can be supplied during the experiment.

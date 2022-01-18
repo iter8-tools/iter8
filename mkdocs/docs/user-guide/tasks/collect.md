@@ -48,8 +48,8 @@ Customize this task using various inputs.
     # The following setting says that HTTP status codes 500 or above are errors.
     errorRanges:
     - lower: 500
-    # A list of latency percentiles computed by this task.
-    # Percentiles have single digit precision.
+    # A list of additional latency percentiles collected by this task.
+    # By default, the following latency percentiles are collected: `[50.0, 75.0, 90.0, 95.0, 99.0, 99.9]`.
     percentiles: [50.0, 75.0, 90.0, 95.0]
     # Information about app versions.
     versionInfo:
@@ -83,7 +83,7 @@ The following inputs are supported by this task.
 | payloadURL | string | URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions with data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` are specified, the former is ignored. | No |
 | contentType | string | [ContentType](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type) is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions with this content type header value. | No |
 | errorRanges | [][ErrorRange](#error-range) | A list of [error ranges](#error-range). Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is `{{lower: 400},}`, i.e., HTTP status codes 400 and above are considered as error. | No |
-| percentiles | []float64 | Latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is `{50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}`. | No |
+| percentiles | []float64 | Latency percentiles collected by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is `{50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}`. | No |
 | versionInfo | [][Version](#version) | A non-empty list of [version](#version) values. | Yes |
 
 ### Error range
@@ -107,7 +107,7 @@ The following are the set of metrics collected by this task. All metrics collect
 | error-count | [Counter](../topics/metrics.md#counter) | Number of responses that are considered as error. The set of HTTP status codes that are considered as error is configurable using the `errorRanges` [input field](#inputs). By default, status codes 400 and above are considered as error. |
 | error-rate | [Gauge](../topics/metrics.md#gauge) | Fraction of responses that are considered as error. |
 | mean-latency | [Gauge](../topics/metrics.md#gaugee) | Mean response latency |
-| pX, where X is a single precision floating point number (e.g., p95.0) | [Gauge](../topics/metrics.md#gauge) | Xth (e.g., 95.0th) percentile response latency. The set of latency percentiles is configurable using the `percentiles` [input field](#inputs). The default latency percentiles computed are `{50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}`. |
+| pX, where X is a single precision floating point number (e.g., p95.0) | [Gauge](../topics/metrics.md#gauge) | Xth (e.g., 95.0th) percentile response latency. Additional latency percentiles can be configured using the `percentiles` [input field](#inputs). The default latency percentiles collected are `{50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}`. |
 
 ## Number of app versions
 

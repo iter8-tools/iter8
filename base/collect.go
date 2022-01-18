@@ -53,7 +53,7 @@ type collectInputs struct {
 	ContentType *string `json:"contentType" yaml:"contentType" validate:"required_with=PayloadURL"`
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
-	// Percentiles are the latency percentiles computed by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
+	// Percentiles are the latency percentiles collected by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
 	Percentiles []float64 `json:"percentiles" yaml:"percentiles" validate:"unique,dive,gte=0.0,lte=100.0"`
 	// VersionInfo is a non-empty list of version values.
 	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo" validate:"required,notallnil"`
@@ -170,10 +170,15 @@ func (t *collectTask) initializeDefaults() {
 	if t.With.ErrorRanges == nil {
 		t.With.ErrorRanges = defaultErrorRanges
 	}
-	if t.With.Percentiles == nil {
-		for _, p := range defaultPercentiles {
-			t.With.Percentiles = append(t.With.Percentiles, p)
-		}
+	// default percentiles are always collected
+	// if other percentiles are specified, they are collected as well
+	for _, p := range defaultPercentiles {
+		t.With.Percentiles = append(t.With.Percentiles, p)
+	}
+	tmp := uniq(t.With.Percentiles)
+	t.With.Percentiles = []float64{}
+	for _, val := range tmp {
+		t.With.Percentiles = append(t.With.Percentiles, val.(float64))
 	}
 }
 
@@ -299,6 +304,12 @@ func (t *collectTask) Run(exp *Experiment) error {
 
 	in := exp.Result.Insights
 
+	// set builtinLatencyPercentiles (if needed)
+	err = in.setBuiltinLatencyPercentiles(t.With.Percentiles)
+	if err != nil {
+		return err
+	}
+
 	// set hist metrics insight type (if needed)
 	in.setInsightType(InsightTypeHistMetrics)
 
@@ -393,9 +404,9 @@ func (t *collectTask) Run(exp *Experiment) error {
 
 			// percentiles
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%0.1f", p.Percentile)
+				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%v", p.Percentile)
 				in.MetricsInfo[m] = MetricMeta{
-					Description: fmt.Sprintf("%0.1f-th percentile of observed latency values", p.Percentile),
+					Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
 					Type:        GaugeMetricType,
 					Units:       StringPointer("msec"),
 				}

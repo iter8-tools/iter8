@@ -15,7 +15,7 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "Render templates with values",
 	Long: `
-	Render templates with values`,
+Render templates with values`,
 }
 
 func addGenOptions(f *pflag.FlagSet) {

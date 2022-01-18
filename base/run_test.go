@@ -50,6 +50,7 @@ func TestMakeRun(t *testing.T) {
 	task, err := MakeRun(ts)
 	assert.NoError(t, err)
 	assert.NotNil(t, task)
+	assert.Nil(t, GetIf(task))
 }
 
 func TestRunRun(t *testing.T) {
