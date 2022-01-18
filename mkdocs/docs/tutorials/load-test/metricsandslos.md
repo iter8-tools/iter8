@@ -19,7 +19,6 @@ Follow the [quick start tutorial](../../getting-started/your-first-experiment.md
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
           --set SLOs.mean-latency=50 \
-          --set 'percentiles={25.0, 75.0}'
           --set SLOs.p90=100 \
           --set SLOs.p'97\.5'=200
 ```
