@@ -1,0 +1,80 @@
+name: 'Run Iter8 Load Test'
+description: 'Run an Iter8 load test experiment'
+author: Iter8
+inputs:
+  url:
+    description: 'HTTP(S) URL where the app receives GET or POST requests.'
+    required: true
+    default: http://example.com
+  numQueries:
+    description: 'Number of requests sent to the app.' 
+    required: false
+  duration:
+    description: |-
+      Duration for which requests are sent to the app.
+      Value can be any Go duration string (https://pkg.go.dev/maze.io/x/duration#ParseDuration)
+      This field is ignored if `numQueries` is specified.'
+    required: false
+  qps:
+    description: 'Number of requests per second sent to each version. Default is 8.0'
+    required: false
+  connections:
+    description: 'Number of parallel connections used to send requests. Default is 4'
+    required: false
+  payloadStr:
+    description: |-
+      String data to be sent as payload. 
+      If this field is specified, Iter8 will send HTTP POST requests.
+      with this string as the payload.
+      This field is ignored if `payloadURL` is specified.
+    required: false
+  payloadUrl:
+    description: |-
+      URL of payload. If this field is specified, 
+      Iter8 will send HTTP POST requests to versions with 
+      data downloaded from this URL as the payload.
+    required: false
+  contentType:
+    description: |-
+      The type of the payload. Indicated using the Content-Type HTTP header value. 
+      This is intended to be used in conjunction with one of the `payload*` fields above. 
+      If this field is specified, Iter8 will send HTTP POST requests to versions 
+      with this content type header value. If payload is supplied, and this field is omitted, 
+      it will be defaulted to "application/octet-stream".
+    required: false
+  error_rate:
+    description: 'Error rate'
+    required: false
+  mean_latency:
+    description: 'Mean latency'
+    required: false
+  p25:
+    description: '25th percentile latency'
+    required: false
+  p50:
+    description: '50th percentile latency'
+    required: false
+  p75:
+    description: '75th percentile latency'
+    required: false
+  p90:
+    description: '90th percentile latency'
+    required: false
+  p95:
+    description: '95th percentile latency'
+    required: false
+  p97_5:
+    description: '97.5th percentile latency'
+    required: false
+  p99:
+    description: '99th percentile latency'
+    required: false
+  p99_9:
+    description: '99.9th percentile latency'
+    required: false
+  values:
+    description: 'Path to file of configuration values.'
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
