@@ -21,6 +21,7 @@ require (
 	fortio.org/fortio v1.20.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
+	github.com/bojand/ghz v0.105.0
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/hashicorp/go-getter v1.5.10
 	github.com/jarcoal/httpmock v1.1.0

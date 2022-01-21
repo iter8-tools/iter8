@@ -99,7 +99,7 @@ func (t *collectTask) errorCode(code int) bool {
 	return false
 }
 
-// collectTask enables collection of Iter8's built-in metrics.
+// collectTask enables load testing of HTTP services.
 type collectTask struct {
 	taskMeta
 	With collectInputs `json:"with" yaml:"with" validate:"required"`

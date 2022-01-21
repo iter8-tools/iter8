@@ -90,6 +90,9 @@ func (e *Experiment) buildTasks() error {
 			case base.CollectTaskName:
 				task, err = base.MakeCollect(&t)
 				e.tasks = append(e.tasks, task)
+			case base.CollectGPRCTaskName:
+				task, err = base.MakeCollectGRPC(&t)
+				e.tasks = append(e.tasks, task)
 			case base.AssessTaskName:
 				task, err = base.MakeAssess(&t)
 				e.tasks = append(e.tasks, task)
