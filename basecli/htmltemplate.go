@@ -154,45 +154,46 @@ func (e *Experiment) HTMLHistData() string {
 
 // HistData provides histogram data for all histogram metrics
 func (e *Experiment) HistData() []histograms {
-	gramsList := []histograms{}
-	for mname, minfo := range e.Result.Insights.MetricsInfo {
-		if minfo.Type == base.HistogramMetricType {
-			// figure out xAxisLabel
-			xAxisLabel := fmt.Sprintf("%v", mname)
-			if minfo.Units != nil {
-				xAxisLabel += " (" + *minfo.Units + ")"
-			}
+	return nil
+	// gramsList := []histograms{}
+	// for mname, minfo := range e.Result.Insights.MetricsInfo {
+	// 	if minfo.Type == base.HistogramMetricType {
+	// 		// figure out xAxisLabel
+	// 		xAxisLabel := fmt.Sprintf("%v", mname)
+	// 		if minfo.Units != nil {
+	// 			xAxisLabel += " (" + *minfo.Units + ")"
+	// 		}
 
-			grams := histograms{
-				XAxisLabel: xAxisLabel,
-				Datum:      []hist{},
-				Width:      (*minfo.XMax - *minfo.XMin) / float64(*minfo.NumBuckets),
-			}
-			for i := 0; i < e.Result.Insights.NumVersions; i++ {
-				key := fmt.Sprintf("Version %v", i)
-				if e.Result.Insights.NumVersions == 1 {
-					key = "count"
-				}
-				gram := hist{
-					Values: []histBar{},
-					Key:    key,
-				}
-				if counts, ok := e.Result.Insights.MetricValues[i][mname]; ok && len(counts) > 0 {
-					for j := 0; j < len(counts); j++ {
-						gram.Values = append(gram.Values, histBar{
-							X: *minfo.XMin + float64(j)*(*minfo.XMax-*minfo.XMin)/float64(*minfo.NumBuckets),
-							Y: counts[j],
-						})
-					}
-					grams.Datum = append(grams.Datum, gram)
-				}
-			}
-			if len(grams.Datum) > 0 {
-				gramsList = append(gramsList, grams)
-			}
-		}
-	}
-	return gramsList
+	// 		grams := histograms{
+	// 			XAxisLabel: xAxisLabel,
+	// 			Datum:      []hist{},
+	// 			Width:      (*minfo.XMax - *minfo.XMin) / float64(*minfo.NumBuckets),
+	// 		}
+	// 		for i := 0; i < e.Result.Insights.NumVersions; i++ {
+	// 			key := fmt.Sprintf("Version %v", i)
+	// 			if e.Result.Insights.NumVersions == 1 {
+	// 				key = "count"
+	// 			}
+	// 			gram := hist{
+	// 				Values: []histBar{},
+	// 				Key:    key,
+	// 			}
+	// 			if counts, ok := e.Result.Insights.MetricValues[i][mname]; ok && len(counts) > 0 {
+	// 				for j := 0; j < len(counts); j++ {
+	// 					gram.Values = append(gram.Values, histBar{
+	// 						X: *minfo.XMin + float64(j)*(*minfo.XMax-*minfo.XMin)/float64(*minfo.NumBuckets),
+	// 						Y: counts[j],
+	// 					})
+	// 				}
+	// 				grams.Datum = append(grams.Datum, gram)
+	// 			}
+	// 		}
+	// 		if len(grams.Datum) > 0 {
+	// 			gramsList = append(gramsList, grams)
+	// 		}
+	// 	}
+	// }
+	// return gramsList
 }
 
 // HTMLHistCharts returns histogram charts section in HTML report
@@ -306,14 +307,11 @@ func (e *Experiment) HTMLStatus() string {
 
 // HTMLSLOSection prints the SLO section in HTML report
 func (e *Experiment) HTMLSLOSection() string {
-	if e.ContainsInsight(base.InsightTypeSLO) {
-		if e.printableSLOs() {
-			return e.printHTMLSLOs()
-		} else {
-			return e.printHTMLNoSLOs()
-		}
+	if e.printableSLOs() {
+		return e.printHTMLSLOs()
+	} else {
+		return e.printHTMLNoSLOs()
 	}
-	return ""
 }
 
 func (e *Experiment) printHTMLSLOVersions() string {

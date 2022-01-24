@@ -130,3 +130,63 @@ func (exp *Experiment) NoFailure() bool {
 	}
 	return false
 }
+
+// getSLOsSatisfiedBy returns the set of versions which satisfy SLOs
+func (exp *Experiment) getSLOsSatisfiedBy() []int {
+	if exp == nil {
+		log.Logger.Error("nil experiment")
+		return nil
+	}
+	if exp.Result == nil {
+		log.Logger.Error("nil experiment result")
+		return nil
+	}
+	if exp.Result.Insights == nil {
+		log.Logger.Error("nil insights in experiment result")
+		return nil
+	}
+	if exp.Result.Insights.NumVersions == 0 {
+		log.Logger.Error("experiment does not involve any versions")
+		return nil
+	}
+	if exp.Result.Insights.SLOs == nil {
+		log.Logger.Info("experiment does not involve any SLOs")
+		sat := []int{}
+		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
+			sat = append(sat, j)
+		}
+		return sat
+	}
+	log.Logger.Trace("experiment involves at least one version and at least one SLO")
+	sat := []int{}
+	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
+		satThis := true
+		for i := 0; i < len(exp.Result.Insights.SLOs); i++ {
+			satThis = satThis && exp.Result.Insights.SLOsSatisfied[i][j]
+			if !satThis {
+				break
+			}
+		}
+		if satThis {
+			sat = append(sat, j)
+		}
+	}
+	return sat
+}
+
+// SLOsBy returns true if version satisfies SLOs
+func (exp *Experiment) slosBy(version int) bool {
+	sby := exp.getSLOsSatisfiedBy()
+	for _, v := range sby {
+		if v == version {
+			return true
+		}
+	}
+	return false
+}
+
+// SLOs returns true if all versions satisfy SLOs
+func (exp *Experiment) slos() bool {
+	sby := exp.getSLOsSatisfiedBy()
+	return exp.Result.Insights.NumVersions == len(sby)
+}

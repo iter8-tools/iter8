@@ -503,35 +503,3 @@ func (in *Insights) getMetricValue(i int, m string) *float64 {
 		return nil
 	}
 }
-
-// // SLOsBy returns true if version satisfies SLOs
-// func (exp *Experiment) SLOsBy(version int) bool {
-// 	if exp != nil {
-// 		if exp.Result != nil {
-// 			if exp.Result.Insights != nil {
-// 				for _, v := range exp.Result.Insights.SLOsSatisfiedBy {
-// 					if v == version {
-// 						return true
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return false
-// }
-
-// // SLOs returns true if all versions satisfy SLOs
-// func (exp *Experiment) SLOs() bool {
-// 	if exp != nil {
-// 		if exp.Result != nil {
-// 			if exp.Result.Insights != nil {
-// 				if exp.Result.Insights.SLOsSatisfiedBy != nil {
-// 					if exp.Result.Insights.NumVersions == len(exp.Result.Insights.SLOsSatisfiedBy) {
-// 						return true
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return false
-// }

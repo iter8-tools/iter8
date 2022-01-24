@@ -6,8 +6,6 @@ import (
 	"sort"
 	"strconv"
 	"text/tabwriter"
-
-	"github.com/iter8-tools/iter8/base"
 )
 
 // formatText provides a text description of the experiment
@@ -15,19 +13,15 @@ func formatText(e *Experiment) string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.AlignRight|tabwriter.Debug)
 	e.printState(w)
-	if e.ContainsInsight(base.InsightTypeSLO) {
-		if e.printableSLOs() {
-			e.printSLOs(w)
-		} else {
-			e.printNoSLOs(w)
-		}
+	if e.printableSLOs() {
+		e.printSLOs(w)
+	} else {
+		e.printNoSLOs(w)
 	}
-	if e.ContainsInsight(base.InsightTypeMetrics) {
-		if e.printableMetrics() {
-			e.printMetrics(w)
-		} else {
-			e.printNoMetrics(w)
-		}
+	if e.printableMetrics() {
+		e.printMetrics(w)
+	} else {
+		e.printNoMetrics(w)
 	}
 	return b.String()
 }
