@@ -80,13 +80,16 @@ if [[ ! -z "${INPUT_VALUES}" ]]; then
   OPTIONS="$OPTIONS -f ${INPUT_VALUES}"
 fi
 
+# set LOG_LEVEL for iter8 commands
+export LOG_LEVEL="${INPUT_LOG_LEVEL}"
+
 echo "Create experiment.yaml for inspection"
 echo "$ITER8 run --dry $OPTIONS"
 $ITER8 run --dry $OPTIONS
 cat experiment.yaml
 
 echo "Run Experiment"
-LOG_LEVEL=trace $ITER8 run $OPTIONS
+$ITER8 run $OPTIONS
 
 echo "Log result"
 $ITER8 report

@@ -75,6 +75,10 @@ inputs:
   values:
     description: 'Path to file of configuration values.'
     required: false
+  log_level:
+    description: 'Logging level; valid values are trace, debug, info (default), warning, error, fatal'
+    required: false
+    default: 'Info'
 runs:
   using: 'docker'
   image: 'Dockerfile'
