@@ -75,8 +75,8 @@ func (e *Experiment) Run(expio ExpIO) error {
 	if e.Result == nil {
 		e.InitResults()
 	}
-	for i, t := range e.tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : started")
+	for i, t := range e.Tasks {
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
 		if cond := base.GetIf(t); cond != nil {
@@ -96,15 +96,15 @@ func (e *Experiment) Run(expio ExpIO) error {
 			shouldRun = output.(bool)
 		}
 		if shouldRun {
-			err = t.Run(e.Experiment)
+			err = t.Run(&e.Experiment)
 			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "failure")
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : " + "failure")
 				e.failExperiment()
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "completed")
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : " + "skipped")
 		}
 
 		e.incrementNumCompletedTasks()

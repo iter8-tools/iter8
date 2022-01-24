@@ -1,8 +1,13 @@
 package base
 
 import (
+	"errors"
+	"io/ioutil"
+	"net/http"
+	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
 // int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
@@ -35,4 +40,32 @@ func StringPointer(s string) *string {
 func CompletePath(prefix string, suffix string) string {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
 	return filepath.Join(filepath.Dir(filename), prefix, suffix)
+}
+
+// GetPayloadBytes downloads payload from URL and returns a byte slice
+func GetPayloadBytes(url string) ([]byte, error) {
+	var myClient = &http.Client{Timeout: 10 * time.Second}
+	r, err := myClient.Get(url)
+	if err != nil || r.StatusCode >= 400 {
+		return nil, errors.New("error while fetching payload")
+	}
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	return body, err
+}
+
+// GetFileFromURL downloads contents from URL into the given file
+func GetFileFromURL(url string, fileName string) error {
+	var myClient = &http.Client{Timeout: 10 * time.Second}
+	r, err := myClient.Get(url)
+	if err != nil || r.StatusCode >= 400 {
+		return errors.New("error while fetching payload")
+	}
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(fileName, body, 0644)
+	return err
 }

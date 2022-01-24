@@ -1,21 +1,15 @@
 package base
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"math"
-	"math/rand"
-	"net/http"
 	"time"
 
 	"fortio.org/fortio/fhttp"
 	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
 	"fortio.org/fortio/stats"
-	"github.com/go-playground/validator/v10"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -24,15 +18,15 @@ type version struct {
 	// HTTP headers to use in the query for this version; optional
 	Headers map[string]string `json:"headers" yaml:"headers"`
 	// URL to use for querying this version
-	URL string `json:"url" yaml:"url" validate:"required,url"`
+	URL string `json:"url" yaml:"url"`
 }
 
 // errorRange has lower and upper limits for HTTP status codes. HTTP status code within this range is considered an error
 type errorRange struct {
 	// Lower end of the range
-	Lower *int `json:"lower" yaml:"lower" validate:"required_without=Upper"`
+	Lower *int `json:"lower" yaml:"lower"`
 	// Upper end of the range
-	Upper *int `json:"upper" yaml:"upper" validate:"required_without=Lower"`
+	Upper *int `json:"upper" yaml:"upper"`
 }
 
 // collectInputs contain the inputs to the metrics collection task to be executed.
@@ -50,29 +44,30 @@ type collectInputs struct {
 	// PayloadURL is the URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored.
 	PayloadURL *string `json:"payloadURL" yaml:"payloadURL"`
 	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions using this content type header value.
-	ContentType *string `json:"contentType" yaml:"contentType" validate:"required_with=PayloadURL"`
+	ContentType *string `json:"contentType" yaml:"contentType"`
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
 	// Percentiles are the latency percentiles collected by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
-	Percentiles []float64 `json:"percentiles" yaml:"percentiles" validate:"unique,dive,gte=0.0,lte=100.0"`
+	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
 	// VersionInfo is a non-empty list of version values.
-	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo" validate:"required,notallnil"`
+	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo"`
 }
 
 const (
 	// CollectTaskName is the name of this task which performs load generation and metrics collection.
-	CollectTaskName            = "gen-load-and-collect-metrics"
-	defaultQPS                 = float32(8)
-	defaultNumRequests         = int64(100)
-	defaultConnections         = 4
-	requestCountMetricName     = "request-count"
-	errorCountMetricName       = "error-count"
-	errorRateMetricName        = "error-rate"
-	meanLatencyMetricName      = "mean-latency"
-	stdDevMetricName           = "stddev-latency"
-	minLatencyMetricName       = "min-latency"
-	maxLatencyMetricName       = "max-latency"
-	latencyHistogramMetricName = "latency"
+	CollectTaskName                    = "gen-load-and-collect-metrics-http"
+	defaultQPS                         = float32(8)
+	defaultHTTPNumRequests             = int64(100)
+	defaultHTTPConnections             = 4
+	builtInHTTPRequestCountId          = "http-request-count"
+	builtInHTTPErrorCountId            = "http-error-count"
+	builtInHTTPErrorRateId             = "http-error-rate"
+	builtInHTTPLatencyMeanId           = "http-latency-mean"
+	builtInHTTPLatencyStdDevId         = "http-latency-stddev"
+	builtInHTTPLatencyMinId            = "http-latency-min"
+	builtInHTTPLatencyMaxId            = "http-latency-max"
+	builtInHTTPLatencyHistId           = "http-latency-hist"
+	builtInHTTPLatencyPercentilePrefix = "http-latency-p"
 )
 
 var (
@@ -102,70 +97,19 @@ func (t *collectTask) errorCode(code int) bool {
 // collectTask enables load testing of HTTP services.
 type collectTask struct {
 	taskMeta
-	With collectInputs `json:"with" yaml:"with" validate:"required"`
-}
-
-// notAllNil validates that not all entries in a slice are nil
-func notAllNil(fl validator.FieldLevel) bool {
-	slice, ok := fl.Field().Interface().([]*version)
-	if !ok {
-		log.Logger.WithStackTrace(fl.Field().String()).Error("unable to convert field to slice of version pointers")
-		return false
-	}
-	allnil := true
-	for _, s := range slice {
-		if s != nil {
-			allnil = false
-			break
-		}
-	}
-	return !allnil
-}
-
-// MakeCollect constructs a CollectTask out of a collect task spec
-func MakeCollect(t *TaskSpec) (Task, error) {
-	if *t.Task != CollectTaskName {
-		return nil, errors.New("task need to be " + CollectTaskName)
-	}
-	var err error
-	var jsonBytes []byte
-	var bt Task
-	// convert t to jsonBytes
-	jsonBytes, err = json.Marshal(t)
-	// convert jsonString to CollectTask
-	if err == nil {
-		ct := &collectTask{}
-		err = json.Unmarshal(jsonBytes, &ct)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("invalid collect task specification")
-			return nil, err
-		}
-
-		validate := validator.New()
-		// returns nil or ValidationErrors ( []FieldError )
-		validate.RegisterValidation("notallnil", notAllNil)
-
-		err = validate.Struct(ct)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("invalid collect task specification")
-			return nil, err
-		}
-
-		bt = ct
-	}
-	return bt, err
+	With collectInputs `json:"with" yaml:"with"`
 }
 
 // initializeDefaults sets default values for the collect task
 func (t *collectTask) initializeDefaults() {
 	if t.With.NumRequests == nil && t.With.Duration == nil {
-		t.With.NumRequests = int64Pointer(defaultNumRequests)
+		t.With.NumRequests = int64Pointer(defaultHTTPNumRequests)
 	}
 	if t.With.QPS == nil {
 		t.With.QPS = float32Pointer(defaultQPS)
 	}
 	if t.With.Connections == nil {
-		t.With.Connections = intPointer(defaultConnections)
+		t.With.Connections = intPointer(defaultHTTPConnections)
 	}
 	if t.With.ErrorRanges == nil {
 		t.With.ErrorRanges = defaultErrorRanges
@@ -180,6 +124,11 @@ func (t *collectTask) initializeDefaults() {
 	for _, val := range tmp {
 		t.With.Percentiles = append(t.With.Percentiles, val.(float64))
 	}
+}
+
+//validateInputs for this task
+func (t *collectTask) validateInputs() error {
+	return nil
 }
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
@@ -243,9 +192,7 @@ func (t *collectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) 
 
 // resultForVersion collects Fortio result for a given version
 func (t *collectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) {
-	// the main idea is to run Fortio shell command with proper args
-	// collect Fortio output as a file
-	// and extract the result from the file, and return the result
+	// the main idea is to run Fortio with proper options
 
 	fo, err := t.getFortioOptions(j)
 	if err != nil {
@@ -263,14 +210,13 @@ func (t *collectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) 
 	return ifr, err
 }
 
-// GetName returns the name of the collect task
-func (t *collectTask) GetName() string {
-	return CollectTaskName
-}
-
 // Run executes this task
 func (t *collectTask) Run(exp *Experiment) error {
-	var err error
+	err := t.validateInputs()
+	if err != nil {
+		return err
+	}
+
 	t.initializeDefaults()
 
 	if len(t.With.VersionInfo) == 0 {
@@ -297,43 +243,18 @@ func (t *collectTask) Run(exp *Experiment) error {
 		}
 	}
 
-	// initialize insights if required
-	if exp.Result.Insights == nil {
-		exp.Result.InitInsights(len(t.With.VersionInfo), []InsightType{InsightTypeMetrics})
+	// this task creates insights for different versions
+	// initialize num versions
+	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
+	if err != nil {
+		return err
 	}
-
 	in := exp.Result.Insights
-
-	// set builtinLatencyPercentiles (if needed)
-	err = in.setBuiltinLatencyPercentiles(t.With.Percentiles)
-	if err != nil {
-		return err
-	}
-
-	// set hist metrics insight type (if needed)
-	in.setInsightType(InsightTypeHistMetrics)
-
-	// initialize metric values (if needed)
-	err = in.initMetricValues(len(t.With.VersionInfo))
-	if err != nil {
-		return err
-	}
-
-	// compute min latency, max latency and bucket sizes needed for latency histograms
-	m := iter8BuiltInPrefix + "/" + latencyHistogramMetricName
-	var xMin float64 = 0   // msec
-	var xMax float64 = 200 // msec
-	if mi, ok := in.MetricsInfo[m]; ok {
-		xMin = *mi.XMin
-		xMax = *mi.XMax
-	}
-	xMin = aggregateLatencyBound(fm, xMin, true)
-	xMax = aggregateLatencyBound(fm, xMax, false)
 
 	for i := range t.With.VersionInfo {
 		if fm[i] != nil {
 			// request count
-			m := iter8BuiltInPrefix + "/" + requestCountMetricName
+			m := iter8BuiltInPrefix + "/" + builtInHTTPRequestCountId
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "number of requests sent",
 				Type:        CounterMetricType,
@@ -348,7 +269,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				}
 			}
 			// error count
-			m = iter8BuiltInPrefix + "/" + errorCountMetricName
+			m = iter8BuiltInPrefix + "/" + builtInHTTPErrorCountId
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "number of responses that were errors",
 				Type:        CounterMetricType,
@@ -356,7 +277,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], val)
 
 			// error-rate
-			m = iter8BuiltInPrefix + "/" + errorRateMetricName
+			m = iter8BuiltInPrefix + "/" + builtInHTTPErrorRateId
 			rc := float64(fm[i].DurationHistogram.Count)
 			if rc != 0 {
 				in.MetricsInfo[m] = MetricMeta{
@@ -367,7 +288,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			}
 
 			// mean-latency
-			m = iter8BuiltInPrefix + "/" + meanLatencyMetricName
+			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMeanId
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "mean of observed latency values",
 				Type:        GaugeMetricType,
@@ -376,7 +297,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Avg)
 
 			// stddev-latency
-			m = iter8BuiltInPrefix + "/" + stdDevMetricName
+			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyStdDevId
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "standard deviation of observed latency values",
 				Type:        GaugeMetricType,
@@ -385,7 +306,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.StdDev)
 
 			// min-latency
-			m = iter8BuiltInPrefix + "/" + minLatencyMetricName
+			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMinId
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "minimum of observed latency values",
 				Type:        GaugeMetricType,
@@ -394,7 +315,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
 
 			// max-latency
-			m = iter8BuiltInPrefix + "/" + maxLatencyMetricName
+			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMaxId
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "maximum of observed latency values",
 				Type:        GaugeMetricType,
@@ -404,7 +325,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 
 			// percentiles
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				m = iter8BuiltInPrefix + "/" + fmt.Sprintf("p%v", p.Percentile)
+				m = fmt.Sprintf("%v/%v%v", iter8BuiltInPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
 				in.MetricsInfo[m] = MetricMeta{
 					Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
 					Type:        GaugeMetricType,
@@ -414,104 +335,28 @@ func (t *collectTask) Run(exp *Experiment) error {
 			}
 
 			// latency histogram
-			m = iter8BuiltInPrefix + "/" + latencyHistogramMetricName
+			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyHistId
 			in.MetricsInfo[m] = MetricMeta{
 				Description: "Latency Histogram",
 				Type:        HistogramMetricType,
 				Units:       StringPointer("msec"),
-				XMin:        float64Pointer(xMin),
-				XMax:        float64Pointer(xMax),
-				NumBuckets:  intPointer(20),
 			}
-			lh := latencyHist(in.MetricsInfo[m], fm[i].DurationHistogram)
-			if in.MetricValues[i][m] == nil {
-				in.MetricValues[i][m] = lh
-			} else {
-				in.MetricValues[i][m], err = vectorSum(in.MetricValues[i][m], lh)
-				if err != nil {
-					return err
-				}
-			}
+			lh := latencyHist(fm[i].DurationHistogram)
+			in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], lh...)
 		}
 	}
 	return nil
 }
 
-// vectorSum produces the sum of two equi-length vectors
-func vectorSum(a []float64, b []float64) ([]float64, error) {
-	if len(a) != len(b) {
-		log.Logger.Error("vector lengths do not match: ", len(a), " != ", len(b))
-		return nil, fmt.Errorf("vector lengths do not match: %v != %v", len(a), len(b))
-	}
-	sum := make([]float64, len(a))
-	for i := 0; i < len(a); i++ {
-		sum[i] = a[i] + b[i]
-	}
-	return sum, nil
-}
-
-// GetPayloadBytes downloads payload from URL and returns a byte slice
-func GetPayloadBytes(url string) ([]byte, error) {
-	var myClient = &http.Client{Timeout: 10 * time.Second}
-	r, err := myClient.Get(url)
-	if err != nil || r.StatusCode >= 400 {
-		return nil, errors.New("error while fetching payload")
-	}
-	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
-	return body, err
-}
-
-// aggregateLatencyBound returns min or max latency value
-func aggregateLatencyBound(fm []*fhttp.HTTPRunnerResults, val float64, min bool) float64 {
-	extremeVal := val
-	for i := 0; i < len(fm); i++ {
-		if fm[i] != nil {
-			if fm[i].DurationHistogram != nil {
-				if min {
-					extremeVal = math.Min(extremeVal, 1000.0*fm[i].DurationHistogram.Min)
-				} else {
-					extremeVal = math.Max(extremeVal, 1000.0*fm[i].DurationHistogram.Max)
-				}
-			}
-		}
-	}
-	return extremeVal
-}
-
 // compute latency histogram by resampling
-func latencyHist(mm MetricMeta, hd *stats.HistogramData) []float64 {
-	rand.Seed(0) // we will make the random number generation deterministic
-	// initialize histogram
-	hist := make([]float64, *mm.NumBuckets)
-	if hd == nil {
-		return hist
+func latencyHist(hd *stats.HistogramData) []HistBucket {
+	buckets := []HistBucket{}
+	for _, v := range hd.Data {
+		buckets = append(buckets, HistBucket{
+			Lower: v.Start * 1000.0, // sec to msec
+			Upper: v.End * 1000.0,
+			Count: uint64(v.Count),
+		})
 	}
-
-	// create sample
-	var sample []float64
-	for i := 0; i < len(hd.Data); i++ {
-		bucket := hd.Data[i]
-		for j := 0; j < int(bucket.Count); j++ {
-			// get a point; convert to msec
-			point := 1000.0 * (bucket.Start + (bucket.End-bucket.Start)*rand.Float64())
-			sample = append(sample, point)
-		}
-	}
-
-	// update hist
-	for i := 0; i < len(sample); i++ {
-		width := (*mm.XMax - *mm.XMin) / float64(*mm.NumBuckets)
-		ind := int((sample[i] - (*mm.XMin)) / width)
-		if ind < 0 {
-			log.Logger.Warn("sample index out of range: ", ind)
-			ind = 0
-		}
-		if ind >= len(hist) {
-			log.Logger.Warn("sample index out of range: ", ind)
-			ind = len(hist) - 1
-		}
-		hist[ind]++
-	}
-	return hist
+	return buckets
 }

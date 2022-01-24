@@ -22,9 +22,9 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.105.0
-	github.com/go-playground/validator/v10 v10.10.0
 	github.com/hashicorp/go-getter v1.5.10
 	github.com/jarcoal/httpmock v1.1.0
+	github.com/montanaflynn/stats v0.6.6
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5

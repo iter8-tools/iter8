@@ -5,18 +5,40 @@ const (
 	iter8BuiltInPrefix = "built-in"
 )
 
+// HistBucket is a single bucket in a histogram
+type HistBucket struct {
+	Lower float64 `json:"lower" yaml:"lower"`
+	Upper float64 `json:"upper" yaml:"upper"`
+	Count uint64  `json:"count" yaml:"count"`
+}
+
 // MetricType identifies the type of the metric.
 type MetricType string
+
+// AggregationType identifies the type of the metric aggregator.
+type AggregationType string
 
 const (
 	// CounterMetricType corresponds to Prometheus Counter metric type
 	CounterMetricType MetricType = "Counter"
-
 	// GaugeMetricType corresponds to Prometheus Gauge metric type
 	GaugeMetricType MetricType = "Gauge"
-
 	// HistogramMetricType corresponds to a Histogram metric type
 	HistogramMetricType MetricType = "Histogram"
+	// SampleMetricType corresponds to a Sample metric type
+	SampleMetricType MetricType = "Sample"
+
+	// decimalRegex is the regex used to identify percentiles
+	decimalRegex = `^([\d]+(\.[\d]*)?|\.[\d]+)$`
+
+	// Mean aggregator corresponds to aggregation of type mean
+	MeanAggregator AggregationType = "mean"
+	// Stddev aggregator corresponds to aggregation of type stddev
+	StdDevAggregator AggregationType = "stddev"
+	// Min aggregator corresponds to aggregation of type min
+	MinAggregator AggregationType = "min"
+	// Max aggregator corresponds to aggregation of type max
+	MaxAggregator AggregationType = "max"
 )
 
 // // AuthType identifies the type of authentication used in the HTTP request

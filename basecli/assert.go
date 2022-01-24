@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
@@ -72,9 +71,6 @@ iter8 assert -c completed,nofailures,slosby=0 -t 5s
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// build experiment
-			exp := &Experiment{
-				Experiment: &base.Experiment{},
-			}
 			log.Logger.Trace("build started")
 			// replace FileExpIO with ClusterExpIO to build from cluster
 			fio := &FileExpIO{}

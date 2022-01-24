@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -12,17 +11,16 @@ import (
 
 // Experiment type that includes a list of runnable tasks derived from the experiment spec
 type Experiment struct {
-	tasks []base.Task
-	*base.Experiment
+	base.Experiment
 }
 
 // ExpIO enables interacting with experiment spec and result stored externally
 type ExpIO interface {
 	// ReadSpec reads the experiment spec
-	ReadSpec() ([]base.TaskSpec, error)
-	// ReadResult reads the experiment results
+	ReadSpec() (base.ExperimentSpec, error)
+	// ReadResult reads the experiment result
 	ReadResult() (*base.ExperimentResult, error)
-	// WriteResult writes the experimeent results
+	// WriteResult writes the experiment result
 	WriteResult(r *Experiment) error
 }
 
@@ -33,9 +31,7 @@ const (
 
 // Build an experiment
 func Build(withResult bool, expio ExpIO) (*Experiment, error) {
-	e := &Experiment{
-		Experiment: &base.Experiment{},
-	}
+	e := &Experiment{}
 	var err error
 	// read it in
 	log.Logger.Trace("build started")
@@ -50,71 +46,15 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 			return nil, err
 		}
 	}
-
-	err = e.buildTasks()
-	if err != nil {
-		return nil, err
-	}
-
 	return e, err
-}
-
-// build experiment tasks
-func (e *Experiment) buildTasks() error {
-	for _, t := range e.Tasks {
-		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
-			log.Logger.Error("invalid task found without a task name or a run command")
-			return errors.New("invalid task found without a task name or a run command")
-		}
-
-		var err error
-		var task base.Task
-
-		validate := validator.New()
-		err = validate.Struct(t)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("invalid task specification")
-			return err
-		}
-
-		// this is a run task
-		if t.Run != nil {
-			task, err = base.MakeRun(&t)
-			e.tasks = append(e.tasks, task)
-			if err != nil {
-				return err
-			}
-		} else {
-			// this is some other task
-			switch *t.Task {
-			case base.CollectTaskName:
-				task, err = base.MakeCollect(&t)
-				e.tasks = append(e.tasks, task)
-			case base.CollectGPRCTaskName:
-				task, err = base.MakeCollectGRPC(&t)
-				e.tasks = append(e.tasks, task)
-			case base.AssessTaskName:
-				task, err = base.MakeAssess(&t)
-				e.tasks = append(e.tasks, task)
-			default:
-				log.Logger.Error("unknown task: " + *t.Task)
-				return errors.New("unknown task: " + *t.Task)
-			}
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 //FileExpIO enables reading and writing experiment spec and result files
 type FileExpIO struct{}
 
 // SpecFromBytes reads experiment spec from bytes
-func SpecFromBytes(b []byte) ([]base.TaskSpec, error) {
-	e := []base.TaskSpec{}
+func SpecFromBytes(b []byte) (base.ExperimentSpec, error) {
+	e := base.ExperimentSpec{}
 	err := yaml.Unmarshal(b, &e)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment spec")
@@ -135,7 +75,7 @@ func ResultFromBytes(b []byte) (*base.ExperimentResult, error) {
 }
 
 // ReadSpec reads experiment spec from file
-func (f *FileExpIO) ReadSpec() ([]base.TaskSpec, error) {
+func (f *FileExpIO) ReadSpec() (base.ExperimentSpec, error) {
 	b, err := ioutil.ReadFile(experimentSpecPath)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")

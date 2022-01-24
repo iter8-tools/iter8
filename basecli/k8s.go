@@ -23,7 +23,7 @@ const (
 
 type k8sExperiment struct {
 	// Tasks are the set of tasks specifying the experiment
-	Tasks []base.TaskSpec
+	Tasks base.ExperimentSpec
 	// Values used to generate the experiment
 	Values chartutil.Values
 }

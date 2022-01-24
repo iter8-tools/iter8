@@ -2,15 +2,12 @@ package base
 
 import (
 	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	"github.com/go-playground/validator/v10"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -34,35 +31,12 @@ type runTask struct {
 	With runInputs `json:"with" yaml:"with"`
 }
 
-// MakeRun constructs a RunTask out of a run task spec
-func MakeRun(t *TaskSpec) (Task, error) {
-	if t.Run == nil {
-		return nil, errors.New("task need to have a run command")
-	}
-	var err error
-	var jsonBytes []byte
-	var bt Task
-	// convert t to jsonBytes
-	jsonBytes, err = json.Marshal(t)
-	// convert jsonString to RunTask
-	if err == nil {
-		rt := &runTask{}
-		err = json.Unmarshal(jsonBytes, &rt)
-		bt = rt
-	}
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("invalid run task specification")
-		return nil, err
-	}
+// initializeDefaults sets default values for task inputs
+func (t *runTask) initializeDefaults() {}
 
-	validate := validator.New()
-	err = validate.Struct(bt)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("invalid run task specification")
-		return nil, err
-	}
-
-	return bt, err
+//validateInputs for this task
+func (t *runTask) validateInputs() error {
+	return nil
 }
 
 // interpolate the script.
@@ -107,13 +81,15 @@ func (t *runTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-// GetName returns the name of the run task
-func (t *runTask) GetName() string {
-	return RunTaskName
-}
-
 // Run the command.
 func (t *runTask) Run(exp *Experiment) error {
+	err := t.validateInputs()
+	if err != nil {
+		return err
+	}
+
+	t.initializeDefaults()
+
 	cmd, err := t.getCommand(exp)
 	if err != nil {
 		return err
