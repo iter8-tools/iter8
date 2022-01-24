@@ -388,7 +388,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		if err == nil {
 			return float64Pointer(agg)
 		} else {
-			log.Logger.WithStackTrace(err.Error()).Error("aggregation error for version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error for version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 			return nil
 		}
 	case StdDevAggregator:
@@ -396,7 +396,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		if err == nil {
 			return float64Pointer(agg)
 		} else {
-			log.Logger.WithStackTrace(err.Error()).Error("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 			return nil
 		}
 	case MinAggregator:
@@ -404,7 +404,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		if err == nil {
 			return float64Pointer(agg)
 		} else {
-			log.Logger.WithStackTrace(err.Error()).Error("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 			return nil
 		}
 	case MaxAggregator:
@@ -412,7 +412,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		if err == nil {
 			return float64Pointer(agg)
 		} else {
-			log.Logger.WithStackTrace(err.Error()).Error("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 			return nil
 		}
 	default: // don't do anything
@@ -425,7 +425,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		if match, _ := regexp.MatchString(decimalRegex, b); match {
 			// extract percent
 			if percent, err := strconv.ParseFloat(b, 64); err != nil {
-				log.Logger.WithStackTrace(err.Error()).Error("error extracting percent from aggregation func %v", a)
+				log.Logger.WithStackTrace(err.Error()).Errorf("error extracting percent from aggregation func %v", a)
 				return nil
 			} else {
 				// compute percentile
@@ -433,7 +433,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 				if err == nil {
 					return float64Pointer(agg)
 				} else {
-					log.Logger.WithStackTrace(err.Error()).Error("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+					log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 					return nil
 				}
 			}
