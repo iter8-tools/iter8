@@ -34,17 +34,44 @@ func (hd *histograms) toJSON() string {
 	return string(jb)
 }
 
-// formatHTML is the HTML template of the experiment results
-var formatHTML = `
+// templateHTML is the HTML template for reporting experiment results
+var templateHTML = `
 	<!doctype html>
 	<html lang="en">
 
-		{{ headSection }}
+		<head>
+			<!-- Required meta tags -->
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+			<!-- Font Awesome -->
+			<script src="https://kit.fontawesome.com/db794f5235.js" crossorigin="anonymous"></script>
+
+			<!-- Bootstrap CSS -->
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+			<style>
+				html {
+					font-size: 18px;
+				}		
+			</style>
+
+			<title>Iter8 Experiment Report</title>
+		</head>
 
 		<body>
 
-			{{ dependencies }}
-
+			<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+		
+			<!-- NVD3 -->
+		  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
+			<!-- Include d3.js first -->
+			<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
+	
 			<div class="container">
 
 				<h1 class="display-4">Experiment Report</h1>
@@ -53,89 +80,90 @@ var formatHTML = `
 
 				{{ .HTMLStatus }}
 
-				{{ if .ContainsInsight "SLOs" }} 
-					{{ .HTMLSLOSection }}
-				{{- end }}
-
-				{{ if .ContainsInsight "HistMetrics" }}
-					{{ .HTMLHistMetricsSection }}
-				{{- end }}
-
-				{{ if .ContainsInsight "Metrics" }} 
-					{{ .HTMLMetricsSection }}
-				{{- end }}
-
 			</div>
-		
-			{{ if .ContainsInsight "HistMetrics" }}
-				{{ styleSection }}
-				{{ .HTMLHistData }}
-				{{ .HTMLHistCharts }}
-			{{- end }}
-
 		</body>
 	</html>
 	`
 
-// styleSection is the style section required for histogram charts
-func styleSection() string {
-	return `
-<style>
-.nvd3 text {
-	font-size: 16px;
-}
-svg {
-		display: block;
-		margin: 0px;
-		padding: 0px;
-		height: 100%;
-		width: 100%;
-}
-</style>
-`
-}
+// var templateHTML = `
+// 	<!doctype html>
+// 	<html lang="en">
 
-// headSection is the fixed head section for experiment report
-func headSection() string {
-	return `
-	<head>
-		<!-- Required meta tags -->
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+// 		<head>
+// 			<!-- Required meta tags -->
+// 			<meta charset="utf-8">
+// 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+// 			<!-- Font Awesome -->
+// 			<script src="https://kit.fontawesome.com/db794f5235.js" crossorigin="anonymous"></script>
 
-		<!-- Font Awesome -->
-		<script src="https://kit.fontawesome.com/db794f5235.js" crossorigin="anonymous"></script>
+// 			<!-- Bootstrap CSS -->
+// 			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+// 			<style>
+// 				html {
+// 					font-size: 18px;
+// 				}
+// 			</style>
 
-		<style>
-			html {
-				font-size: 18px;
-			}		
-		</style>
+// 			<title>Iter8 Experiment Report</title>
+// 		</head>
 
-		<title>Iter8 Experiment Report</title>
-	</head>
-`
-}
+// 		<body>
 
-// dependencies is the dependencies section for the HTML report
-func dependencies() string {
-	return `
-	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+// 			<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+// 			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+// 			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+// 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-	<!-- NVD3 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
-	<!-- Include d3.js first -->
-	<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
-`
-}
+// 			<!-- NVD3 -->
+// 		  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
+// 			<!-- Include d3.js first -->
+// 			<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
+// 			<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
+
+// 			<div class="container">
+
+// 				<h1 class="display-4">Experiment Report</h1>
+// 				<h3 class="display-6">Insights from Iter8 Experiment</h3>
+// 				<hr>
+
+// 				{{ .HTMLStatus }}
+
+// 				{{ if .ContainsInsight "SLOs" }}
+// 					{{ .HTMLSLOSection }}
+// 				{{- end }}
+
+// 				{{ if .ContainsInsight "HistMetrics" }}
+// 					{{ .HTMLHistMetricsSection }}
+// 				{{- end }}
+
+// 				{{ if .ContainsInsight "Metrics" }}
+// 					{{ .HTMLMetricsSection }}
+// 				{{- end }}
+
+// 			</div>
+
+// 			{{ if .ContainsInsight "HistMetrics" }}
+// 				<style>
+// 					.nvd3 text {
+// 						font-size: 16px;
+// 					}
+// 					svg {
+// 							display: block;
+// 							margin: 0px;
+// 							padding: 0px;
+// 							height: 100%;
+// 							width: 100%;
+// 					}
+// 				</style>
+// 				{{ .HTMLHistData }}
+// 				{{ .HTMLHistCharts }}
+// 			{{- end }}
+
+// 		</body>
+// 	</html>
+// 	`
 
 // HTMLHistData returns histogram data section in HTML report
 func (e *Experiment) HTMLHistData() string {

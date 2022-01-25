@@ -8,6 +8,21 @@ import (
 	"text/tabwriter"
 )
 
+// templateText is the text template for reporting experiment results
+var templateText = `
+Summary:
+	Experiment completed: {{ .Completed }}
+	No failed tasks: {{ .NoFailure }}
+	Total number of tasks: {{ len .Tasks }}
+	Number of completed tasks: {{ .Result.NumCompletedTasks }}
+---
+
+`
+
+// var templateText = `
+// {{ formatText . }}
+// `
+
 // formatText provides a text description of the experiment
 func formatText(e *Experiment) string {
 	var b bytes.Buffer

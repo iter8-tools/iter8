@@ -107,31 +107,25 @@ func ExecTemplate(t executable, exp *Experiment) error {
 
 func init() {
 	// create text template
-	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
+	ttpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
 		"formatText": formatText,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse("{{ formatText . }}")
+	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(templateText)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
 		os.Exit(1)
 	}
 	// register text template
-	RegisterTextTemplate(TextOutputFormatKey, tmpl)
+	RegisterTextTemplate(TextOutputFormatKey, ttpl)
 
-	// create HTML template (for now, this will still use the text templating functionality)
-	htmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
-		"styleSection": styleSection,
-		"headSection":  headSection,
-		"dependencies": dependencies,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(formatHTML)
+	// create HTML template
+	htpl, err := template.New(HTMLOutputFormatKey).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(templateHTML)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
 		os.Exit(1)
 	}
-
 	// register HTML template
-	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
+	RegisterTextTemplate(HTMLOutputFormatKey, htpl)
 
 	reportCmd = NewReportCmd()
-
 	RootCmd.AddCommand(reportCmd)
 }
