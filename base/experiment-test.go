@@ -9,13 +9,13 @@ import (
 
 func TestRunExperiment(t *testing.T) {
 	// valid collect task... should succeed
-	ct := &collectTask{
+	ct := &collectHTTPTask{
 		taskMeta: taskMeta{
-			Task: StringPointer(CollectTaskName),
+			Task: StringPointer(CollectHTTPTaskName),
 		},
-		With: collectInputs{
+		With: collectHTTPInputs{
 			Duration:    StringPointer("1s"),
-			VersionInfo: []*version{{Headers: map[string]string{}, URL: "https://something.com"}},
+			VersionInfo: []*versionHTTP{{Headers: map[string]string{}, URL: "https://something.com"}},
 		},
 	}
 

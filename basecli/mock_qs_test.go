@@ -51,7 +51,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		httpmock.NewStringResponder(200, `all good`))
 
 	// with SLOs next
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.mean-latency=100")
+	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.mean-latency=100", "duration=2s")
 	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/values.yaml"))
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)

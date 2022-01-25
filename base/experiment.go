@@ -104,6 +104,7 @@ type SLO struct {
 	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
 }
 
+// this is embedded within each task
 type taskMeta struct {
 	// Task is the name of the task
 	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
@@ -114,12 +115,21 @@ type taskMeta struct {
 	If *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
+// this is used during unmarshaling of tasks
+type taskMetaWith struct {
+	taskMeta
+	// raw representation of task inputs
+	With interface{} `json:"with,omitempty" yaml:"with,omitempty"`
+}
+
 // UnmarshallJSON will unmarshal an experiment spec from bytes
-func (s ExperimentSpec) UnmarshalJSON(data []byte) error {
-	var v []taskMeta
+func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
+	var v []taskMetaWith
 	if err := json.Unmarshal(data, &v); err != nil {
 		return err
 	}
+
+	log.Logger.Tracef("unmarshaled %v tasks into task meta", len(v))
 
 	for _, t := range v {
 		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
@@ -133,25 +143,34 @@ func (s ExperimentSpec) UnmarshalJSON(data []byte) error {
 		var tsk Task
 		// this is a run task
 		if t.Run != nil {
-			tsk = &runTask{}
+			rt := &runTask{}
+			json.Unmarshal(tBytes, rt)
+			tsk = rt
 		} else {
 			// this is some other task
 			switch *t.Task {
-			case CollectTaskName:
-				tsk = &collectTask{}
+			case CollectHTTPTaskName:
+				cht := &collectHTTPTask{}
+				json.Unmarshal(tBytes, cht)
+				tsk = cht
 			case CollectGPRCTaskName:
-				tsk = &collectGRPCTask{}
+				cgt := &collectGRPCTask{}
+				json.Unmarshal(tBytes, cgt)
+				tsk = cgt
 			case AssessTaskName:
-				tsk = &assessTask{}
+				at := &assessTask{}
+				json.Unmarshal(tBytes, at)
+				tsk = at
 			default:
 				log.Logger.Error("unknown task: " + *t.Task)
 				return errors.New("unknown task: " + *t.Task)
 			}
-			json.Unmarshal(tBytes, tsk)
-			s = append(s, tsk)
+			n := append(*s, tsk)
+			*s = n
+			log.Logger.Trace("appended to experiment spec")
 		}
 	}
-	log.Logger.Trace("constructed experiment spec of length: ", len(s))
+	log.Logger.Trace("constructed experiment spec of length: ", len(*s))
 	return nil
 }
 
@@ -183,7 +202,7 @@ func GetName(t Task) *string {
 	} else {
 		return tm.Task
 	}
-	log.Logger.Error("Task specification with no name or run value")
+	log.Logger.Error("task spec with no name or run value")
 	return nil
 }
 

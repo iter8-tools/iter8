@@ -7,15 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRunCollect(t *testing.T) {
-	// valid collect task... should succeed
-	ct := &collectTask{
+func TestRunCollectHTTP(t *testing.T) {
+	// valid collect HTTP task... should succeed
+	ct := &collectHTTPTask{
 		taskMeta: taskMeta{
-			Task: StringPointer(CollectTaskName),
+			Task: StringPointer(CollectHTTPTaskName),
 		},
-		With: collectInputs{
+		With: collectHTTPInputs{
 			Duration: StringPointer("1s"),
-			VersionInfo: []*version{{
+			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
 				URL:     "https://something.com",
 			}},

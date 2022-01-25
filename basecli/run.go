@@ -49,6 +49,7 @@ Render the file named "experiment.yaml" by combining an experiment chart with va
 				log.Logger.Info("starting experiment run")
 				err := exp.Run(fio)
 				if err != nil {
+					log.Logger.Error("exiting with code 1")
 					os.Exit(1)
 				} else {
 					log.Logger.Info("experiment completed successfully")
@@ -76,7 +77,7 @@ func (e *Experiment) Run(expio ExpIO) error {
 		e.InitResults()
 	}
 	for i, t := range e.Tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : started")
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
 		if cond := base.GetIf(t); cond != nil {
@@ -98,16 +99,19 @@ func (e *Experiment) Run(expio ExpIO) error {
 		if shouldRun {
 			err = t.Run(&e.Experiment)
 			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : " + "failure")
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "failure")
 				e.failExperiment()
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : " + "completed")
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, base.GetName(t)) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "skipped")
 		}
 
-		e.incrementNumCompletedTasks()
+		err = e.incrementNumCompletedTasks()
+		if err != nil {
+			return err
+		}
 		err = expio.WriteResult(e)
 		if err != nil {
 			return err

@@ -13,10 +13,10 @@ import (
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
-// version contains header and url information needed to send requests to each version.
-type version struct {
+// versionHTTP contains header and url information needed to send requests to each version.
+type versionHTTP struct {
 	// HTTP headers to use in the query for this version; optional
-	Headers map[string]string `json:"headers" yaml:"headers"`
+	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 	// URL to use for querying this version
 	URL string `json:"url" yaml:"url"`
 }
@@ -29,8 +29,8 @@ type errorRange struct {
 	Upper *int `json:"upper" yaml:"upper"`
 }
 
-// collectInputs contain the inputs to the metrics collection task to be executed.
-type collectInputs struct {
+// collectHTTPInputs contain the inputs to the metrics collection task to be executed.
+type collectHTTPInputs struct {
 	// NumRequests is the number of requests to be sent to each version. Default value is 100.
 	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
 	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
@@ -50,12 +50,12 @@ type collectInputs struct {
 	// Percentiles are the latency percentiles collected by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
 	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
 	// VersionInfo is a non-empty list of version values.
-	VersionInfo []*version `json:"versionInfo" yaml:"versionInfo"`
+	VersionInfo []*versionHTTP `json:"versionInfo" yaml:"versionInfo"`
 }
 
 const (
-	// CollectTaskName is the name of this task which performs load generation and metrics collection.
-	CollectTaskName                    = "gen-load-and-collect-metrics-http"
+	// CollectHTTPTaskName is the name of this task which performs load generation and metrics collection.
+	CollectHTTPTaskName                = "gen-load-and-collect-metrics-http"
 	defaultQPS                         = float32(8)
 	defaultHTTPNumRequests             = int64(100)
 	defaultHTTPConnections             = 4
@@ -76,7 +76,7 @@ var (
 )
 
 // errorCode checks if a given code is an error code
-func (t *collectTask) errorCode(code int) bool {
+func (t *collectHTTPTask) errorCode(code int) bool {
 	for _, lims := range t.With.ErrorRanges {
 		// if no lower limit (check upper)
 		if lims.Lower == nil && code <= *lims.Upper {
@@ -94,14 +94,14 @@ func (t *collectTask) errorCode(code int) bool {
 	return false
 }
 
-// collectTask enables load testing of HTTP services.
-type collectTask struct {
+// collectHTTPTask enables load testing of HTTP services.
+type collectHTTPTask struct {
 	taskMeta
-	With collectInputs `json:"with" yaml:"with"`
+	With collectHTTPInputs `json:"with" yaml:"with"`
 }
 
 // initializeDefaults sets default values for the collect task
-func (t *collectTask) initializeDefaults() {
+func (t *collectHTTPTask) initializeDefaults() {
 	if t.With.NumRequests == nil && t.With.Duration == nil {
 		t.With.NumRequests = int64Pointer(defaultHTTPNumRequests)
 	}
@@ -127,12 +127,12 @@ func (t *collectTask) initializeDefaults() {
 }
 
 //validateInputs for this task
-func (t *collectTask) validateInputs() error {
+func (t *collectHTTPTask) validateInputs() error {
 	return nil
 }
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
-func (t *collectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) {
+func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) {
 	fortioLog.SetOutput(io.Discard)
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
@@ -191,7 +191,7 @@ func (t *collectTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) 
 }
 
 // resultForVersion collects Fortio result for a given version
-func (t *collectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) {
+func (t *collectHTTPTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) {
 	// the main idea is to run Fortio with proper options
 
 	fo, err := t.getFortioOptions(j)
@@ -211,7 +211,7 @@ func (t *collectTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) 
 }
 
 // Run executes this task
-func (t *collectTask) Run(exp *Experiment) error {
+func (t *collectHTTPTask) Run(exp *Experiment) error {
 	err := t.validateInputs()
 	if err != nil {
 		return err
