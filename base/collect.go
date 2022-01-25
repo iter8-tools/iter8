@@ -259,7 +259,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				Description: "number of requests sent",
 				Type:        CounterMetricType,
 			}
-			in.MetricValues[i][m] = append(in.MetricValues[i][m], float64(fm[i].DurationHistogram.Count))
+			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], float64(fm[i].DurationHistogram.Count))
 
 			// error count & rate
 			val := float64(0)
@@ -274,7 +274,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				Description: "number of responses that were errors",
 				Type:        CounterMetricType,
 			}
-			in.MetricValues[i][m] = append(in.MetricValues[i][m], val)
+			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val)
 
 			// error-rate
 			m = iter8BuiltInPrefix + "/" + builtInHTTPErrorRateId
@@ -284,7 +284,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 					Description: "fraction of responses that were errors",
 					Type:        GaugeMetricType,
 				}
-				in.MetricValues[i][m] = append(in.MetricValues[i][m], val/rc)
+				in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val/rc)
 			}
 
 			// mean-latency
@@ -294,7 +294,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Avg)
+			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.Avg)
 
 			// stddev-latency
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyStdDevId
@@ -303,7 +303,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.StdDev)
+			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.StdDev)
 
 			// min-latency
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMinId
@@ -312,7 +312,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
+			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
 
 			// max-latency
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMaxId
@@ -321,7 +321,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*fm[i].DurationHistogram.Max)
+			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.Max)
 
 			// percentiles
 			for _, p := range fm[i].DurationHistogram.Percentiles {
@@ -331,7 +331,7 @@ func (t *collectTask) Run(exp *Experiment) error {
 					Type:        GaugeMetricType,
 					Units:       StringPointer("msec"),
 				}
-				in.MetricValues[i][m] = append(in.MetricValues[i][m], 1000.0*p.Value)
+				in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*p.Value)
 			}
 
 			// latency histogram

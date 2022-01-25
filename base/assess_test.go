@@ -20,6 +20,7 @@ func TestRunAssess(t *testing.T) {
 		Tasks: []Task{task},
 	}
 	exp.InitResults()
+	exp.Result.initInsightsWithNumVersions(1)
 	err := task.Run(exp)
 	assert.NoError(t, err)
 
@@ -27,15 +28,10 @@ func TestRunAssess(t *testing.T) {
 	// should succeed
 	task.With = assessInputs{
 		SLOs: []SLO{{
-			Metric:     "m",
+			Metric:     "a/b",
 			UpperLimit: float64Pointer(20.0),
 		}},
 	}
-	exp = &Experiment{
-		Tasks: []Task{task},
-	}
-	exp.InitResults()
-	exp.Result.initInsightsWithNumVersions(1)
 	task.Run(exp)
 	err = task.Run(exp)
 	assert.NoError(t, err)

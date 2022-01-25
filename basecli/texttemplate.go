@@ -122,8 +122,8 @@ func (e *Experiment) printableMetrics() bool {
 			if e.Result.Insights != nil {
 				if e.Result.Insights.MetricsInfo != nil && len(e.Result.Insights.MetricsInfo) > 0 {
 					if e.Result.Insights.NumVersions > 0 {
-						if len(e.Result.Insights.MetricValues) > 0 {
-							if e.Result.Insights.MetricValues[0] != nil {
+						if len(e.Result.Insights.NonHistMetricValues) > 0 {
+							if e.Result.Insights.NonHistMetricValues[0] != nil {
 								return true
 							}
 						}
@@ -168,7 +168,7 @@ func (e *Experiment) printMetrics(w *tabwriter.Writer) {
 
 		fmt.Fprint(w, keys[i], u)
 		for j := 0; j < in.NumVersions; j++ {
-			fmt.Fprintf(w, "\t%v", e.getMetricValue(keys[i], j))
+			fmt.Fprintf(w, "\t%v", e.Result.Insights.GetScalarMetricValue(j, keys[i]))
 			fmt.Fprintln(w)
 		}
 		fmt.Fprintln(w, "-----------------------------\t-----")
@@ -185,20 +185,4 @@ func (e *Experiment) printNoMetrics(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "-----------------------------\t-----")
 
 	w.Flush()
-}
-
-// get value of the metric
-func (e *Experiment) getMetricValue(m string, j int) string {
-	vals := e.Result.Insights.MetricValues[j][m]
-	if len(vals) == 0 {
-		return "unavailable"
-	}
-	// get the latest observed value for this metric/version pair
-	floatVal := vals[len(vals)-1]
-	val := fmt.Sprint(floatVal)
-	// if the floatVal is not integral, take two decimal places
-	if floatVal != float64(int(floatVal)) {
-		val = fmt.Sprintf("%0.2f", floatVal)
-	}
-	return val
 }

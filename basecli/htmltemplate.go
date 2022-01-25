@@ -504,7 +504,7 @@ func (e *Experiment) printHTMLMetricRows() string {
 				for j := 0; j < in.NumVersions; j++ {
 					out += fmt.Sprintf(`
 					<td>%v</td>
-					`, e.getMetricValue(keys[i], j))
+					`, e.Result.Insights.GetScalarMetricValue(j, keys[i]))
 				}
 			}
 		}

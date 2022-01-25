@@ -36,6 +36,84 @@ type Experiment struct {
 	Result *ExperimentResult
 }
 
+// ExperimentResult defines the current results from the experiment
+type ExperimentResult struct {
+	// StartTime is the time when the experiment run started
+	StartTime time.Time `json:"startTime" yaml:"startTime"`
+
+	// NumCompletedTasks is the number of completed tasks
+	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
+
+	// Failure is true if any of its tasks failed
+	Failure bool `json:"failure" yaml:"failure"`
+
+	// Insights produced in this experiment
+	Insights *Insights `json:"insights,omitempty" yaml:"insights,omitempty"`
+}
+
+// Insights records the number of versions in this experiment,
+// metric values and SLO indicators for each version,
+// metrics metadata for all metrics, and
+// SLO definitions for all SLOs
+type Insights struct {
+	// NumVersions is the number of app versions detected by Iter8
+	NumVersions int `json:"numVersions" yaml:"numVersions"`
+
+	// MetricsInfo identifies the metrics involved in this experiment
+	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
+
+	// NonHistMetricValues:
+	// the outer slice must be the same length as the number of app versions
+	// the map key must match name of a metric in MetricsInfo
+	// the inner slice contains the list of all observed metric values for given version and given metric; float value [i]["foo/bar"][k] is the [k]th observation for version [i] for the metric bar under backend foo.
+	// this struct is meant exclusively for metrics of type other than histogram
+	NonHistMetricValues []map[string][]float64 `json:"nonHistMetricValues,omitempty" yaml:"nonHistMetricValues,omitempty"`
+
+	// HistMetricValues:
+	// the outer slice must be the same length as the number of app versions
+	// the map key must match name of a histogram metric in MetricsInfo
+	// the inner slice contains the list of all observed histogram buckets for a given version and given metric; value [i]["foo/bar"][k] is the [k]th observed bucket for version [i] for the hist metric `bar` under backend `foo`.
+	HistMetricValues []map[string][]HistBucket `json:"histMetricValues,omitempty" yaml:"histMetricValues,omitempty"`
+
+	// SLOs involved in this experiment
+	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
+
+	// SLOsSatisfied:
+	// the outer slice must be of the same length as SLOs
+	// the length of the inner slice must be the number of app versions
+	// the boolean value at [i][j] indicate if SLO [i] is satisfied by version [j]
+	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
+}
+
+// MetricMeta describes a metric
+type MetricMeta struct {
+	Description string     `json:"description" yaml:"description"`
+	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
+	Type        MetricType `json:"type" yaml:"type"`
+}
+
+// SLO is a service level objective
+type SLO struct {
+	// Metric is the fully qualified metric name (i.e., in the backendName/metricName format)
+	Metric string `json:"metric" yaml:"metric"`
+
+	// UpperLimit is the maximum acceptable value of the metric.
+	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty"`
+
+	// LowerLimit is the minimum acceptable value of the metric.
+	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
+}
+
+type taskMeta struct {
+	// Task is the name of the task
+	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
+	// Run is the script used in a run task
+	// Specify either Task or Run but not both
+	Run *string `json:"run,omitempty" yaml:"run,omitempty"`
+	// If is the condition used to determine if this task needs to run.
+	If *string `json:"if,omitempty" yaml:"if,omitempty"`
+}
+
 // UnmarshallJSON will unmarshal an experiment spec from bytes
 func (s ExperimentSpec) UnmarshalJSON(data []byte) error {
 	var v []taskMeta
@@ -109,83 +187,6 @@ func GetName(t Task) *string {
 	return nil
 }
 
-// ExperimentResult defines the current results from the experiment
-type ExperimentResult struct {
-	// StartTime is the time when the experiment run started
-	StartTime time.Time `json:"startTime" yaml:"startTime"`
-
-	// NumCompletedTasks is the number of completed tasks
-	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
-
-	// Failure is true if any of its tasks failed
-	Failure bool `json:"failure" yaml:"failure"`
-
-	// Insights produced in this experiment
-	Insights *Insights `json:"insights,omitempty" yaml:"insights,omitempty"`
-}
-
-// Insights records the number of versions in this experiment,
-// metric values and SLO indicators for each version,
-// metrics metadata for all metrics, and
-// SLO definitions for all SLOs
-type Insights struct {
-	// NumVersions is the number of app versions detected by Iter8
-	NumVersions int `json:"numVersions" yaml:"numVersions"`
-
-	// MetricsInfo identifies the metrics involved in this experiment
-	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
-
-	// MetricValues:
-	// the outer slice must be the same length as the number of app versions
-	// the map key must match name of a metric in MetricsInfo
-	// the inner slice contains the list of all observed metric values for given version and given metric; float value [i]["foo/bar"][k] is the [k]th observation for version [i] for the metric bar under backend foo.
-	MetricValues []map[string][]float64 `json:"metricValues,omitempty" yaml:"metricValues,omitempty"`
-
-	// HistMetricValues:
-	// the outer slice must be the same length as the number of app versions
-	// the map key must match name of a histogram metric in MetricsInfo
-	// the inner slice contains the list of all observed histogram buckets for a given version and given metric; value [i]["foo/bar"][k] is the [k]th observed bucket for version [i] for the hist metric `bar` under backend `foo`.
-	HistMetricValues []map[string][]HistBucket `json:"histMetricValues,omitempty" yaml:"histMetricValues,omitempty"`
-
-	// SLOs involved in this experiment
-	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
-
-	// SLOsSatisfied:
-	// the outer slice must be of the same length as SLOs
-	// the length of the inner slice must be the number of app versions
-	// the boolean value at [i][j] indicate if SLO [i] is satisfied by version [j]
-	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
-}
-
-// MetricMeta describes a metric
-type MetricMeta struct {
-	Description string     `json:"description" yaml:"description"`
-	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
-	Type        MetricType `json:"type" yaml:"type"`
-}
-
-// SLO is a service level objective
-type SLO struct {
-	// Metric is the fully qualified metric name (i.e., in the backendName/metricName format)
-	Metric string `json:"metric" yaml:"metric"`
-
-	// UpperLimit is the maximum acceptable value of the metric.
-	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty"`
-
-	// LowerLimit is the minimum acceptable value of the metric.
-	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
-}
-
-type taskMeta struct {
-	// Task is the name of the task
-	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
-	// Run is the script used in a run task
-	// Specify either Task or Run but not both
-	Run *string `json:"run,omitempty" yaml:"run,omitempty"`
-	// If is the condition used to determine if this task needs to run.
-	If *string `json:"if,omitempty" yaml:"if,omitempty"`
-}
-
 // metricTypeMatch checks if metric value is a match for its type
 func metricTypeMatch(t MetricType, val interface{}) bool {
 	switch v := val.(type) {
@@ -196,7 +197,13 @@ func metricTypeMatch(t MetricType, val interface{}) bool {
 			return false
 		}
 	case []float64:
-		if t == SampleMetricType || t == HistogramMetricType {
+		if t == SampleMetricType {
+			return true
+		} else {
+			return false
+		}
+	case []HistBucket:
+		if t == HistogramMetricType {
 			return true
 		} else {
 			return false
@@ -207,20 +214,19 @@ func metricTypeMatch(t MetricType, val interface{}) bool {
 	}
 }
 
-// updateMetricValue update a metric value for a given version
-func (in *Insights) updateMetricValue(m string, i int, val interface{}) error {
-	switch v := val.(type) {
-	case float64:
-		in.MetricValues[i][m] = append(in.MetricValues[i][m], val.(float64))
-		return nil
-	case []float64:
-		in.MetricValues[i][m] = append(in.MetricValues[i][m], val.([]float64)...)
-		return nil
-	default:
-		err := fmt.Errorf("unsupported type for metric value: %s", v)
-		log.Logger.Error(err)
-		return err
-	}
+// updateMetricValueScalar update a scalar metric value for a given version
+func (in *Insights) updateMetricValueScalar(m string, i int, val float64) {
+	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val)
+}
+
+// updateMetricValueVector update a vector metric value for a given version
+func (in *Insights) updateMetricValueVector(m string, i int, val []float64) {
+	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val...)
+}
+
+// updateMetricValueHist update a histogram metric value for a given version
+func (in *Insights) updateMetricValueHist(m string, i int, val []HistBucket) {
+	in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], val...)
 }
 
 // registerMetric registers a new metric by adding its meta data
@@ -254,8 +260,18 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 		return err
 	}
 
-	// update metric value
-	return in.updateMetricValue(m, i, val)
+	switch mm.Type {
+	case CounterMetricType, GaugeMetricType:
+		in.updateMetricValueScalar(m, i, val.(float64))
+	case SampleMetricType:
+		in.updateMetricValueVector(m, i, val.([]float64))
+	case HistogramMetricType:
+		in.updateMetricValueHist(m, i, val.([]HistBucket))
+	default:
+		err := fmt.Errorf("unknown metric type %v", mm.Type)
+		log.Logger.Error(err)
+	}
+	return nil
 }
 
 // setSLOs sets the SLOs field in insights
@@ -318,48 +334,49 @@ func (r *ExperimentResult) initInsightsWithNumVersions(n int) error {
 
 // initMetrics initializes the data structes inside insights that will hold metrics
 func (in *Insights) initMetrics() error {
-	if len(in.MetricValues) != len(in.MetricsInfo) {
-		err := fmt.Errorf("inconsistent number for app versions in metric values (%v), metric info (%v)", len(in.MetricValues), len(in.MetricsInfo))
-		log.Logger.Error(err)
-		return err
-	}
-	if in.MetricValues != nil {
-		if len(in.MetricValues) != in.NumVersions {
-			err := fmt.Errorf("inconsistent number for app versions in metric values (%v), num versions (%v)", len(in.MetricValues), in.NumVersions)
+	if in.NonHistMetricValues != nil || in.HistMetricValues != nil {
+		if len(in.NonHistMetricValues) != in.NumVersions || len(in.HistMetricValues) != in.NumVersions {
+			err := fmt.Errorf("inconsistent number for app versions in non hist metric values (%v), hist metric values (%v), num versions (%v)", len(in.NonHistMetricValues), len(in.HistMetricValues), in.NumVersions)
 			log.Logger.Error(err)
 			return err
-		} else {
-			return nil
 		}
+		if len(in.NonHistMetricValues[0])+len(in.HistMetricValues[0]) != len(in.MetricsInfo) {
+			err := fmt.Errorf("inconsistent number for metrics in non hist metric values (%v), hist metric values (%v), metrics info (%v)", len(in.NonHistMetricValues[0]), len(in.HistMetricValues[0]), len(in.MetricsInfo))
+			log.Logger.Error(err)
+			return err
+		}
+		return nil
 	}
-	// at this point, there are no known metrics,
-	// but there are in.NumVersions versions
-	// Initialize metrics info
+	// at this point, there are no known metrics, but there are in.NumVersions
+	// initialize metrics info
 	in.MetricsInfo = make(map[string]MetricMeta)
-	// Initialize metric values for each version
-	in.MetricValues = make([]map[string][]float64, in.NumVersions)
+	// initialize non hist metric values for each version
+	in.NonHistMetricValues = make([]map[string][]float64, in.NumVersions)
+	// initialize hist metric values for each version
+	in.HistMetricValues = make([]map[string][]HistBucket, in.NumVersions)
 	for i := 0; i < in.NumVersions; i++ {
-		in.MetricValues[i] = make(map[string][]float64)
+		in.NonHistMetricValues[i] = make(map[string][]float64)
+		in.HistMetricValues[i] = make(map[string][]HistBucket)
 	}
 	return nil
 }
 
-// getMetricFromValuesMap gets the value of the given counter or gauge metric, for the given version, from metric values map
-func (in *Insights) getMetricFromValuesMap(i int, m string) *float64 {
+// getCounterOrGaugeMetricFromValuesMap gets the value of the given counter or gauge metric, for the given version, from metric values map
+func (in *Insights) getCounterOrGaugeMetricFromValuesMap(i int, m string) *float64 {
 	if mm, ok := in.MetricsInfo[m]; ok {
 		log.Logger.Tracef("found metric info for %v", m)
 		if (mm.Type != CounterMetricType) && (mm.Type != GaugeMetricType) {
 			log.Logger.Errorf("metric %v is not of type counter or gauge", m)
 			return nil
 		}
-		l := len(in.MetricValues)
+		l := len(in.NonHistMetricValues)
 		if l <= i {
 			log.Logger.Warnf("metric values not found for version %v; initialized for %v versions", i, l)
 			return nil
 		}
 		log.Logger.Tracef("metric values found for version %v", i)
 		// grab the metric value and return
-		if vals, ok := in.MetricValues[i][m]; ok {
+		if vals, ok := in.NonHistMetricValues[i][m]; ok {
 			log.Logger.Tracef("found metric value for version %v and metric %v", i, m)
 			if len(vals) > 0 {
 				return float64Pointer(vals[len(vals)-1])
@@ -374,7 +391,7 @@ func (in *Insights) getMetricFromValuesMap(i int, m string) *float64 {
 // getSampleAggregation aggregates the given base metric for the given version (i) with the given aggregation (a)
 func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *float64 {
 	at := AggregationType(a)
-	vals := in.MetricValues[i][baseMetric]
+	vals := in.NonHistMetricValues[i][baseMetric]
 	if len(vals) == 0 {
 		log.Logger.Infof("metric %v for version %v has no sample", baseMetric, i)
 	}
@@ -485,8 +502,8 @@ func normalizeMetricName(m string) (string, error) {
 	}
 }
 
-// getMetricValue gets the value of the given metric for the given version
-func (in *Insights) getMetricValue(i int, m string) *float64 {
+// GetScalarMetricValue gets the value of the given scalar metric for the given version
+func (in *Insights) GetScalarMetricValue(i int, m string) *float64 {
 	s := strings.Split(m, "/")
 	if len(s) == 3 {
 		log.Logger.Tracef("%v is an aggregated metric", m)
@@ -495,7 +512,7 @@ func (in *Insights) getMetricValue(i int, m string) *float64 {
 		if nm, err := normalizeMetricName(m); err != nil {
 			return nil
 		} else {
-			return in.getMetricFromValuesMap(i, nm)
+			return in.getCounterOrGaugeMetricFromValuesMap(i, nm)
 		}
 	} else {
 		log.Logger.Errorf("invalid metric name %v", m)

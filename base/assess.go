@@ -87,7 +87,7 @@ func evaluateSLOs(exp *Experiment, slos []SLO) [][]bool {
 
 // return true if SLO i satisfied by version j
 func sloSatisfied(e *Experiment, slos []SLO, i int, j int) bool {
-	val := e.Result.Insights.getMetricValue(j, slos[i].Metric)
+	val := e.Result.Insights.GetScalarMetricValue(j, slos[i].Metric)
 	// check if metric is available
 	if val == nil {
 		log.Logger.Warnf("unable to find value for version %v and metric %s", j, slos[i].Metric)
