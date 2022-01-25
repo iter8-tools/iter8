@@ -26,7 +26,7 @@ if [[ ! -z "${INPUT_VALUESFILE}" ]]; then
 fi
 
 # set LOG_LEVEL for iter8 commands
-export LOG_LEVEL="${INPUT_LOG_LEVEL}"
+export LOG_LEVEL="${INPUT_LOGLEVEL}"
 
 echo "Create experiment.yaml for inspection"
 echo "$ITER8 run --dry $OPTIONS"
