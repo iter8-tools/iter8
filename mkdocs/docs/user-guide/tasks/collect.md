@@ -2,13 +2,13 @@
 template: main.html
 ---
 
-# `gen-load-and-collect-metrics`
-The `gen-load-and-collect-metrics` task enables collection of [Iter8's built-in metrics](#built-in-metrics). It generates a stream of HTTP GET or POST requests to one or more app versions, and collects latency and error-related metrics.
+# `gen-load-and-collect-metrics-http`
+The `gen-load-and-collect-metrics-http` task enables collection of [Iter8's built-in metrics](#built-in-metrics). It generates a stream of HTTP GET or POST requests to one or more app versions, and collects latency and error-related metrics.
 
 ## Examples
 Generate load and collect built-in metrics for an app.
 ```yaml
-- task: gen-load-and-collect-metrics
+- task: gen-load-and-collect-metrics-http
   with:
     versionInfo:
     - url: https://example.com
@@ -16,7 +16,7 @@ Generate load and collect built-in metrics for an app.
 
 Customize this task using various inputs.
 ```yaml
-- task: gen-load-and-collect-metrics
+- task: gen-load-and-collect-metrics-http
   with:
     # Number of requests sent to each version.
     numQueries: 200
@@ -63,7 +63,7 @@ Customize this task using various inputs.
 
 Generate load and collect built-in metrics for two versions of an app.
 ```yaml
-- task: gen-load-and-collect-metrics
+- task: gen-load-and-collect-metrics-http
   with:
     versionInfo:
     - url: http://iter8-app.default.svc:8000

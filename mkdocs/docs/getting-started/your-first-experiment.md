@@ -49,12 +49,12 @@ iter8 run --set url=https://example.com \
 The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file.
 
 ??? note "Look inside experiment.yaml"
-    This experiment contains the [`gen-load-and-collect-metrics` task](../user-guide/tasks/collect.md) for generating load and collecting metrics, and the [`assess-app-versions` task](../user-guide/tasks/assess.md) for validating SLOs.
+    This experiment contains the [`gen-load-and-collect-metrics-http` task](../user-guide/tasks/collect.md) for generating load and collecting metrics, and the [`assess-app-versions` task](../user-guide/tasks/assess.md) for validating SLOs.
 
     ```yaml
     # task 1: generate HTTP requests for application URL
     # collect Iter8's built-in latency and error-related metrics
-    - task: gen-load-and-collect-metrics
+    - task: gen-load-and-collect-metrics-http
       with:
         percentiles: 
         - 90
@@ -80,8 +80,8 @@ The `iter8 run` command combines an experiment chart with the supplied values to
 
     ```shell
     INFO[2021-12-14 10:23:26] starting experiment run                      
-    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics : started 
-    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics : completed 
+    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics-http : started 
+    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics-http : completed 
     INFO[2021-12-14 10:23:39] task 2: assess-app-versions : started        
     INFO[2021-12-14 10:23:39] task 2: assess-app-versions : completed      
     INFO[2021-12-14 10:23:39] experiment completed successfully    
