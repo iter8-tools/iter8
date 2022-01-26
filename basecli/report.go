@@ -3,6 +3,7 @@ package basecli
 import (
 	"bytes"
 	"fmt"
+	htemplate "html/template"
 	"io"
 	"os"
 	"strings"
@@ -107,9 +108,7 @@ func ExecTemplate(t executable, exp *Experiment) error {
 
 func init() {
 	// create text template
-	ttpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
-		"formatText": formatText,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(templateText)
+	ttpl, err := template.New(TextOutputFormatKey).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(reportText)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
 		os.Exit(1)
@@ -118,13 +117,15 @@ func init() {
 	RegisterTextTemplate(TextOutputFormatKey, ttpl)
 
 	// create HTML template
-	htpl, err := template.New(HTMLOutputFormatKey).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(templateHTML)
+	htpl, err := htemplate.New(HTMLOutputFormatKey).Option("missingkey=error").Funcs(sprig.FuncMap()).Funcs(htemplate.FuncMap{
+		"htmlRenderStrVal": htmlRenderStrVal,
+	}).Parse(reportHTML)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
 		os.Exit(1)
 	}
 	// register HTML template
-	RegisterTextTemplate(HTMLOutputFormatKey, htpl)
+	RegisterHTMLTemplate(HTMLOutputFormatKey, htpl)
 
 	reportCmd = NewReportCmd()
 	RootCmd.AddCommand(reportCmd)

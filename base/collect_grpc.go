@@ -76,6 +76,9 @@ type collectGRPCTask struct {
 func (t *collectGRPCTask) initializeDefaults() {
 	// always count errors
 	t.With.Config.CountErrors = countErrorsDefault
+	// always insecure
+	// ToDo: document security credentials
+	t.With.Config.Insecure = true
 }
 
 // validate task inputs

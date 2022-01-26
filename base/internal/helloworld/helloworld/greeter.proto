@@ -1,0 +1,24 @@
+// Credit: This file is from https://github.com/bojand/ghz/
+// this file is used for test purposes
+syntax = "proto3";
+
+option go_package = "github.com/iter8-tools/iter8/base/internal/helloworld/helloworld";
+
+package helloworld;
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc SayHelloCS (stream HelloRequest) returns (HelloReply) {}
+  rpc SayHellos (HelloRequest) returns (stream HelloReply) {}
+  rpc SayHelloBidi (stream HelloRequest) returns (stream HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}

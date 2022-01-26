@@ -6,22 +6,13 @@ import (
 	"sort"
 	"strconv"
 	"text/tabwriter"
+
+	_ "embed"
 )
 
-// templateText is the text template for reporting experiment results
-var templateText = `
-Summary:
-	Experiment completed: {{ .Completed }}
-	No failed tasks: {{ .NoFailure }}
-	Total number of tasks: {{ len .Tasks }}
-	Number of completed tasks: {{ .Result.NumCompletedTasks }}
----
-
-`
-
-// var templateText = `
-// {{ formatText . }}
-// `
+// reportText is the text report template
+//go:embed textreport.tpl
+var reportText string
 
 // formatText provides a text description of the experiment
 func formatText(e *Experiment) string {
