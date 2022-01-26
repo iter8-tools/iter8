@@ -1,6 +1,5 @@
-name: 'Run Iter8 Load Test'
-description: 'Run an Iter8 load test experiment'
-author: Iter8
+name: 'Composite Load Test'
+descritpion: 'Run Iter8 load test using iter8-tools/iter8/run-experiment'
 inputs:
   valuesFile:
     description: 'Path to file of configuration values.'
@@ -10,5 +9,10 @@ inputs:
     required: false
     default: 'Info'
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: 'composite'
+  steps:
+    - uses: iter8-tools/iter8/run-experiment@pull/1150/head
+      with:
+        chart: load-test
+        valuesFile: ${{ inputs.valuesFile }}
+        logLevel: ${{ inputs.logLevel }}
