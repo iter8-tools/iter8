@@ -1,4 +1,4 @@
-FROM iter8/iter8
+FROM iter8/iter8:0.8
 
 COPY entrypoint.sh /entrypoint.sh
 
