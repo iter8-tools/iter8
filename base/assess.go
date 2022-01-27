@@ -15,7 +15,7 @@ type assessInputs struct {
 
 // assessTask enables assessment of versions
 type assessTask struct {
-	taskMeta
+	TaskMeta
 	// With contains the inputs for the assessTask
 	With assessInputs `json:"with" yaml:"with"`
 }

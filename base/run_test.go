@@ -9,7 +9,7 @@ import (
 func TestRunRun(t *testing.T) {
 	// valid run task... should succeed
 	rt := &runTask{
-		taskMeta: taskMeta{
+		TaskMeta: TaskMeta{
 			Run: StringPointer("echo hello"),
 		},
 	}

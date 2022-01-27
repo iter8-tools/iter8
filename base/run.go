@@ -27,7 +27,7 @@ type runInputs struct {
 
 // runTask enables running a shell script
 type runTask struct {
-	taskMeta
+	TaskMeta
 	With runInputs `json:"with" yaml:"with"`
 }
 
@@ -42,7 +42,7 @@ func (t *runTask) validateInputs() error {
 // interpolate the script.
 func (t *runTask) interpolate(exp *Experiment) (string, error) {
 	// ensure it is a valid template
-	tmpl, err := template.New("tpl").Funcs(sprig.TxtFuncMap()).Option("missingkey=error").Parse(*t.taskMeta.Run)
+	tmpl, err := template.New("tpl").Funcs(sprig.TxtFuncMap()).Option("missingkey=error").Parse(*t.TaskMeta.Run)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse templated run command")
 		return "", err
@@ -68,7 +68,7 @@ func (t *runTask) getCommand(exp *Experiment) (*exec.Cmd, error) {
 	if t.With.Template {
 		cmdStr, err = t.interpolate(exp)
 	} else {
-		cmdStr = *t.taskMeta.Run
+		cmdStr = *t.TaskMeta.Run
 	}
 	if err != nil {
 		return nil, err

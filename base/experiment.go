@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -106,7 +105,7 @@ type SLO struct {
 }
 
 // this is embedded within each task
-type taskMeta struct {
+type TaskMeta struct {
 	// Task is the name of the task
 	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
 	// Run is the script used in a run task
@@ -118,7 +117,7 @@ type taskMeta struct {
 
 // this is used during unmarshaling of tasks
 type taskMetaWith struct {
-	taskMeta
+	TaskMeta
 	// raw representation of task inputs
 	With interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
@@ -176,25 +175,13 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GetIf returns the condition (if any) which determine
-// whether of not if this task needs to run
-func GetIf(t Task) *string {
-	var jsonBytes []byte
-	var tm taskMeta
-	// convert t to jsonBytes
-	jsonBytes, _ = json.Marshal(t)
-	// convert jsonBytes to taskMeta
-	_ = json.Unmarshal(jsonBytes, &tm)
-	return tm.If
-}
-
 // GetName returns the name of this task
 func GetName(t Task) *string {
 	var jsonBytes []byte
-	var tm taskMeta
+	var tm TaskMeta
 	// convert t to jsonBytes
 	jsonBytes, _ = json.Marshal(t)
-	// convert jsonBytes to taskMeta
+	// convert jsonBytes to TaskMeta
 	_ = json.Unmarshal(jsonBytes, &tm)
 
 	if tm.Task == nil {
@@ -540,29 +527,4 @@ func (in *Insights) ScalarMetricValue(i int, m string) *float64 {
 		log.Logger.Error("metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function")
 		return nil
 	}
-}
-
-// sampleHist samples values from a histogram
-func sampleHist(h []HistBucket) []float64 {
-	vals := []float64{}
-	for _, b := range h {
-		for i := 0; i < int(b.Count); i++ {
-			vals = append(vals, b.Lower+(b.Upper-b.Lower)*rand.Float64())
-		}
-	}
-	return vals
-}
-
-// VectorMetricValue gets the value of the given vector metric for the given version
-// If it is a histogram metric, then its values are sampled from the histogram
-func (in *Insights) VectorMetricValue(i int, m string) []float64 {
-	mm, ok := in.MetricsInfo[m]
-	if !ok {
-		return nil
-	}
-	if mm.Type == SampleMetricType {
-		return in.NonHistMetricValues[i][m]
-	}
-	// this is a hist metric
-	return sampleHist(in.HistMetricValues[i][m])
 }

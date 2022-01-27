@@ -1,6 +1,7 @@
 package basecli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -80,7 +81,7 @@ func (e *Experiment) Run(expio ExpIO) error {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
-		if cond := base.GetIf(t); cond != nil {
+		if cond := GetIf(t); cond != nil {
 			// condition evaluates to false ... then shouldRun is false
 			program, err := expr.Compile(*cond, expr.Env(e), expr.AsBool())
 			if err != nil {
@@ -105,7 +106,7 @@ func (e *Experiment) Run(expio ExpIO) error {
 			}
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "skipped")
 		}
 
 		err = e.incrementNumCompletedTasks()
@@ -139,4 +140,16 @@ func (e *Experiment) incrementNumCompletedTasks() error {
 	}
 	e.Result.NumCompletedTasks++
 	return nil
+}
+
+// GetIf returns the condition (if any) which determine
+// whether of not if this task needs to run
+func GetIf(t base.Task) *string {
+	var jsonBytes []byte
+	var tm base.TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+	return tm.If
 }

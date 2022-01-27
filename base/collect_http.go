@@ -96,7 +96,7 @@ func (t *collectHTTPTask) errorCode(code int) bool {
 
 // collectHTTPTask enables load testing of HTTP services.
 type collectHTTPTask struct {
-	taskMeta
+	TaskMeta
 	With collectHTTPInputs `json:"with" yaml:"with"`
 }
 

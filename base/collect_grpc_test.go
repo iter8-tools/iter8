@@ -22,7 +22,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
-		taskMeta: taskMeta{
+		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGPRCTaskName),
 		},
 		With: collectGRPCInputs{

@@ -106,7 +106,7 @@
           var data = [];
           {{- range until $.Result.Insights.NumVersions }}
           data.push({
-            x: {{ $.Result.Insights.VectorMetricValue . $mn }},
+            x: {{ $.VectorMetricValue . $mn }},
             name: "Version {{ . }}",
             histnorm: "percent", 
             opacity: 0.5, 

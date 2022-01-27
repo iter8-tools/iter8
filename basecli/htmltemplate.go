@@ -3,6 +3,7 @@ package basecli
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"sort"
 	"strings"
 
@@ -335,26 +336,29 @@ func (e *Experiment) SortedVectorMetrics() []string {
 	return keys
 }
 
-// HTMLHistMetricsSection prints histogram metrics in the HTML report
-func (e *Experiment) HTMLHistMetricsSection() string {
-	hd := e.HistData()
-	if len(hd) > 0 {
-		divs := []string{}
-		for i := 0; i < len(hd); i++ {
-			divs = append(divs, fmt.Sprintf(`
-					<div class='with-3d-shadow with-transitions'>
-						<svg id="hist-chart-%v" style="height:500px"></svg>
-					</div>
-			</section>
-			`, i))
+// sampleHist samples values from a histogram
+func sampleHist(h []base.HistBucket) []float64 {
+	vals := []float64{}
+	for _, b := range h {
+		for i := 0; i < int(b.Count); i++ {
+			vals = append(vals, b.Lower+(b.Upper-b.Lower)*rand.Float64())
 		}
-		return `
-		<section class="mt-5">
-		<h3 class="display-6">Metric Histograms</h3>
-		<hr>
-
-		` + strings.Join(divs, "\n") +
-			`</section>`
 	}
-	return ``
+	return vals
+}
+
+// VectorMetricValue gets the value of the given vector metric for the given version
+// If it is a histogram metric, then its values are sampled from the histogram
+func (e *Experiment) VectorMetricValue(i int, m string) []float64 {
+	in := e.Result.Insights
+	mm, ok := in.MetricsInfo[m]
+	if !ok {
+		log.Logger.Error("could not find vector metric: ", m)
+		return nil
+	}
+	if mm.Type == base.SampleMetricType {
+		return in.NonHistMetricValues[i][m]
+	}
+	// this is a hist metric
+	return sampleHist(in.HistMetricValues[i][m])
 }

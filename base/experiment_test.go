@@ -27,7 +27,7 @@ func TestReadExperiment(t *testing.T) {
 func TestRunExperiment(t *testing.T) {
 	// valid collect task... should succeed
 	ct := &collectHTTPTask{
-		taskMeta: taskMeta{
+		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
@@ -38,7 +38,7 @@ func TestRunExperiment(t *testing.T) {
 
 	// valid assess task... should succeed
 	at := &assessTask{
-		taskMeta: taskMeta{
+		TaskMeta: TaskMeta{
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{

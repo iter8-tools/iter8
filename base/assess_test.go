@@ -11,7 +11,7 @@ func TestRunAssess(t *testing.T) {
 	// simple assess without any SLOs
 	// should succeed
 	task := &assessTask{
-		taskMeta: taskMeta{
+		TaskMeta: TaskMeta{
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{},

@@ -10,7 +10,7 @@ import (
 func TestRunCollectHTTP(t *testing.T) {
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
-		taskMeta: taskMeta{
+		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
