@@ -78,10 +78,10 @@ func (e *Experiment) Run(expio ExpIO) error {
 		e.InitResults()
 	}
 	for i, t := range e.Tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : started")
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
-		if cond := GetIf(t); cond != nil {
+		if cond := getIf(t); cond != nil {
 			// condition evaluates to false ... then shouldRun is false
 			program, err := expr.Compile(*cond, expr.Env(e), expr.AsBool())
 			if err != nil {
@@ -100,13 +100,13 @@ func (e *Experiment) Run(expio ExpIO) error {
 		if shouldRun {
 			err = t.Run(&e.Experiment)
 			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : " + "failure")
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
 				e.failExperiment()
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : " + "completed")
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "skipped")
 		}
 
 		err = e.incrementNumCompletedTasks()
@@ -142,9 +142,9 @@ func (e *Experiment) incrementNumCompletedTasks() error {
 	return nil
 }
 
-// GetIf returns the condition (if any) which determine
+// getIf returns the condition (if any) which determine
 // whether of not if this task needs to run
-func GetIf(t base.Task) *string {
+func getIf(t base.Task) *string {
 	var jsonBytes []byte
 	var tm base.TaskMeta
 	// convert t to jsonBytes
@@ -154,8 +154,8 @@ func GetIf(t base.Task) *string {
 	return tm.If
 }
 
-// GetName returns the name of this task
-func GetName(t base.Task) *string {
+// getName returns the name of this task
+func getName(t base.Task) *string {
 	var jsonBytes []byte
 	var tm base.TaskMeta
 	// convert t to jsonBytes
