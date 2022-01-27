@@ -134,4 +134,7 @@ iter8
 clibase/clibase
 result.yaml
 report.html
-ghz.proto
+**/ghz.proto
+**/ghz-call-data.json
+**/ghz-call-data.bin
+**/ghz-call-metadata.json
