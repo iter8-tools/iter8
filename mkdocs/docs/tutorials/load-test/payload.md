@@ -61,7 +61,7 @@ Iter8 enables you to send any type of content as payload during the load test, e
     Fetch JSON content from a payload URL. Use this JSON as payload and explicitly set the content type to `application/json`.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
-              --set payloadURL=https://httpbin.org/stream/1 \
+              --set payloadURL=https://data.police.uk/api/crimes-street-dates \
               --set contentType="application/json" \
               --set SLOs.error-rate=0 \
               --set SLOs.mean-latency=50 \

@@ -15,7 +15,7 @@ func TestRunCollectHTTP(t *testing.T) {
 		},
 		With: collectHTTPInputs{
 			Duration:   StringPointer("1s"),
-			PayloadURL: StringPointer("https://httpbin.org/stream/1"),
+			PayloadURL: StringPointer("https://data.police.uk/api/crimes-street-dates"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
 				URL:     "https://something.com",
@@ -30,7 +30,7 @@ func TestRunCollectHTTP(t *testing.T) {
 	httpmock.RegisterResponder("POST", "https://something.com",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
-	httpmock.RegisterResponder("GET", "https://httpbin.org/stream/1",
+	httpmock.RegisterResponder("GET", "https://data.police.uk/api/crimes-street-dates",
 		httpmock.NewStringResponder(200, `[{"my": 1, "great": "payload"}]`))
 
 	exp := &Experiment{
