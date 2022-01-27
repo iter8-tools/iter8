@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 // int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
@@ -47,7 +49,9 @@ func getPayloadBytes(url string) ([]byte, error) {
 	var myClient = &http.Client{Timeout: 10 * time.Second}
 	r, err := myClient.Get(url)
 	if err != nil || r.StatusCode >= 400 {
-		return nil, errors.New("error while fetching payload")
+		e := errors.New("error while fetching payload")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, e
 	}
 	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)

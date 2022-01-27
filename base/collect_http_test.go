@@ -30,6 +30,9 @@ func TestRunCollectHTTP(t *testing.T) {
 	httpmock.RegisterResponder("POST", "https://something.com",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
+	httpmock.RegisterResponder("GET", "https://httpbin.org/stream/1",
+		httpmock.NewStringResponder(200, `[{"my": 1, "great": "payload"}]`))
+
 	exp := &Experiment{
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
