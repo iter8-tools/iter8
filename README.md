@@ -1,72 +1,49 @@
 # Iter8
 
-<img alt="Iter8" src="mkdocs/docs/images/favicon.png" width="100" align="left">
+<img alt="Iter8" src="images/iter8.png" align="center">
 
-## Kubernetes Release Engineering
+***
 
-[![GitHub stars](https://img.shields.io/github/stars/iter8-tools/iter8?style=social)](https://github.com/iter8-tools/iter8/stargazers)
+[![Iter8 release (latest SemVer)](https://img.shields.io/github/v/release/iter8-tools/iter8?sort=semver)](https://github.com/iter8-tools/iter8/releases)
+[![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/iter8-tools/iter8)
+[![Test Status](https://github.com/iter8-tools/iter8/workflows/tests/badge.svg)](https://github.com/iter8-tools/iter8/actions?query=workflow%3Atests)
+[![Test Coverage](https://codecov.io/gh/iter8-tools/iter8/branch/master/graph/badge.svg)](https://codecov.io/gh/iter8-tools/iter8)
 [![Slack channel](https://img.shields.io/badge/Slack-Join-purple)](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
-[![GitHub issues](https://img.shields.io/github/issues/iter8-tools/iter8)](https://github.com/iter8tools/iter8/issues)
-
-> Safely rollout new versions of apps and ML models. Maximize business value with each release.
-
-
-## Use Cases
-
-1.  Load testing with SLOs
-2.  A/B(/n) testing for improving business value with each release of app/ML model
-3.  Safe rollout for multi-cluster and edge
-4.  Traffic mirroring experiments
-
-The traffic mirroring use-case is achieved by using Iter8 along with a Kubernetes service mesh or ingress that supports mirroring.
-
-## Quick Start
 
 ### 1. Install Iter8
-#### Using Brew
 ```shell
 brew tap iter8-tools/iter8
 brew install iter8
 ```
 
-#### Using Go 1.16+
-```shell
-go install github.com/iter8-tools/iter8@latest
-```
-You can now run `iter8` (from your gopath bin/ directory)
+You can also install Iter8 using [pre-compiled binaries](https://iter8.tools/latest/getting-started/install/) or [`go 1.16+`](https://iter8.tools/latest/getting-started/install/).
 
-#### Using pre-compiled binary
-Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
-
-## 2. Download experiment chart
-Download the `load-test` experiment chart from Iter8 hub as follows.
+## 2. Your first experiment
+Load test an HTTP service and validate its latency and error-related service level objectives (SLOs).
 
 ```shell
-iter8 hub -e load-test
+iter8 launch load-test-http --set url=https://example.com \
+                            --set numRequests=200 \
+                            --set rps=10.0 \
+                            --set SLOs.http-error-rate=0 \
+                            --set SLOs.http-latency/mean=30 \
+                            --set SLOs.http-latency/p95=100
 ```
 
-This creates a local folder called `load-test` containing the chart.
+The `iter8 launch` command shown above does the following.
+1.  Create a local folder called `load-test` containing the chart.
+2.  Generate an Iter8 experiment spec in a file named `experiment.yaml`, by combining the chart with the supplied values (`--set`).
+3.  Run the load test experiment, and output results to a file named `result.yaml`.
 
-## 3. Run experiment
-The `iter8 run` command generates the `experiment.yaml` file from an experiment chart, runs the experiment, and writes the results of the experiment into the `result.yaml` file. Run the load test experiment as follows.
-
-```shell
-cd load-test
-iter8 run --set url=https://example.com
-```
-
-## 4. Assert outcomes
+## 3. Assert outcomes
 Assert that the experiment completed without any failures and SLOs are satisfied.
 
 ```shell
 iter8 assert -c completed -c nofailure -c slos
 ```
 
-The `iter8 assert` subcommand asserts if experiment result satisfies the specified conditions. 
-If assert conditions are satisfied, it exits with code `0`, and exits with code `1` otherwise. Assertions are especially useful within CI/CD/GitOps pipelines.
-
-## 5. View report
+## 4. View report
 View a report of the experiment in HTML or text formats as follows.
 
 ### HTML Report
@@ -88,6 +65,8 @@ iter8 report -o text
 ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
+
+## More Examples
 
 ## Documentation
 Iter8 documentation is available at https://iter8.tools.
