@@ -119,69 +119,51 @@ View a report of the experiment in HTML or text formats as follows.
     # open report.html
     ```
 
-    ???+ note "The HTML report looks as follows"
+    ??? note "The HTML report looks as follows"
         ![HTML report](images/report.html.png)
 
 === "Text"
     ```shell
-    iter8 report -o text
+    iter8 report
     ```
 
-    ???+ note "The text report looks as follows."
+    ??? note "The text report looks as follows."
+        ```shell
+        Experiment summary:
+        *******************
 
-        ```
-        -----------------------------|-----
-                   Experiment summary|
-        -----------------------------|-----
-                Experiment completed |true
-        -----------------------------|-----
-                   Experiment failed |false
-        -----------------------------|-----
-           Number of completed tasks |4
-        -----------------------------|-----
+          Experiment completed: true
+          No failed tasks: true
+          Total number of tasks: 2
+          Number of completed tasks: 2
 
+        Whether or not service level objectives (SLOs) are satisfied:
+        *************************************************************
 
+          SLO Conditions                           |Satisfied
+          --------------                           |---------
+          built-in/http-latency-mean (msec) <= 100 |true
+          built-in/http-latency-p95 (msec) <= 150  |true
+          
 
-        -----------------------------|-----
-                                 SLOs|
-        -----------------------------|-----
-                  built-in/error-rate|true
-        -----------------------------|-----
-                built-in/p95.0 (msec)|true
-        -----------------------------|-----
+        Latest observed values for metrics:
+        ***********************************
 
-
-          -----------------------------|-----
-                                Metrics|
-          -----------------------------|-----
-                   built-in/error-count|0
-          -----------------------------|-----
-                    built-in/error-rate|0
-          -----------------------------|-----
-                built-in/latency (msec)|3
-          -----------------------------|-----
-            built-in/max-latency (msec)|213.21
-          -----------------------------|-----
-           built-in/mean-latency (msec)|17.47
-          -----------------------------|-----
-            built-in/min-latency (msec)|4.30
-          -----------------------------|-----
-                  built-in/p50.0 (msec)|10.80
-          -----------------------------|-----
-                  built-in/p75.0 (msec)|12.40
-          -----------------------------|-----
-                  built-in/p90.0 (msec)|13.60
-          -----------------------------|-----
-                  built-in/p95.0 (msec)|14
-          -----------------------------|-----
-                  built-in/p99.0 (msec)|209.91
-          -----------------------------|-----
-                  built-in/p99.9 (msec)|212.88
-          -----------------------------|-----
-                 built-in/request-count|100
-          -----------------------------|-----
-         built-in/stddev-latency (msec)|39.90
-          -----------------------------|-----
+          Metric                              |value
+          -------                             |-----
+          built-in/http-error-count           |0.00
+          built-in/http-error-rate            |0.00
+          built-in/http-latency-max (msec)    |186.56
+          built-in/http-latency-mean (msec)   |11.25
+          built-in/http-latency-min (msec)    |4.05
+          built-in/http-latency-p50 (msec)    |6.59
+          built-in/http-latency-p75 (msec)    |7.79
+          built-in/http-latency-p90 (msec)    |9.23
+          built-in/http-latency-p95 (msec)    |10.00
+          built-in/http-latency-p99 (msec)    |183.94
+          built-in/http-latency-p99.9 (msec)  |186.30
+          built-in/http-latency-stddev (msec) |28.01
+          built-in/http-request-count         |200.00
         ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.

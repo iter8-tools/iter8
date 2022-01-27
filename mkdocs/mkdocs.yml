@@ -119,7 +119,7 @@ nav:
   - v0.8 tech preview: getting-started/v0.8.md
   - Get help: getting-started/help.md
 - Tutorials:
-  - Load test with SLOs:
+  - Load test HTTP:
     - Overview: tutorials/load-test-http/overview.md
     - Request generation: tutorials/load-test-http/requests.md
     - Payload: tutorials/load-test-http/payload.md
@@ -127,6 +127,9 @@ nav:
     - Community examples:
       - Knative:
         - HTTP Service: tutorials/load-test-http/community/knative/loadtest.md
+  - Load test gRPC:
+    - Overview: tutorials/load-test-grpc/overview.md
+    - Unary RPC: tutorials/load-test-grpc/unary.md
   - Other Experiment Types:
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md
