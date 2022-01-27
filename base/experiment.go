@@ -144,6 +144,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 		var tsk Task
 		// this is a run task
 		if t.Run != nil {
+			log.Logger.Info("found run task: ", *t.Run)
 			rt := &runTask{}
 			json.Unmarshal(tBytes, rt)
 			tsk = rt
@@ -166,10 +167,10 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				log.Logger.Error("unknown task: " + *t.Task)
 				return errors.New("unknown task: " + *t.Task)
 			}
-			n := append(*s, tsk)
-			*s = n
-			log.Logger.Trace("appended to experiment spec")
 		}
+		n := append(*s, tsk)
+		*s = n
+		log.Logger.Trace("appended to experiment spec")
 	}
 	log.Logger.Trace("constructed experiment spec of length: ", len(*s))
 	return nil

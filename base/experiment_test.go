@@ -1,12 +1,29 @@
 package base
 
 import (
+	"io/ioutil"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"sigs.k8s.io/yaml"
 )
 
+func TestReadExperiment(t *testing.T) {
+	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
+	assert.NoError(t, err)
+	es := &ExperimentSpec{}
+	err = yaml.Unmarshal(b, es)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(*es))
+
+	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
+	assert.NoError(t, err)
+	es = &ExperimentSpec{}
+	err = yaml.Unmarshal(b, es)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(*es))
+}
 func TestRunExperiment(t *testing.T) {
 	// valid collect task... should succeed
 	ct := &collectHTTPTask{
