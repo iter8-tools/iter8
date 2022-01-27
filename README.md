@@ -44,27 +44,62 @@ iter8 assert -c completed -c nofailure -c slos
 ```
 
 ## 4. View report
-View a report of the experiment in HTML or text formats as follows.
+View a report of the experiment in HTML or text formats.
 
 ### HTML Report
-
 ```shell
 iter8 report -o html > report.html
-# open report.html with a browser. In MacOS, you can use the command:
-# open report.html
 ```
 
-The HTML report looks as follows.
+You can view `report.html` in any browser. A sample report is as follows.
 
-![HTML report](mkdocs/docs/getting-started/images/report.html.png)
+<img title="HTML report" src="mkdocs/docs/getting-started/images/report.html.png" width="200">
 
 ### Text Report
-
 ```shell
-iter8 report -o text
+iter8 report
 ```
 
-Congratulations! :tada: You completed your first Iter8 experiment.
+A sample text report is as follows.
+
+```shell
+
+Experiment summary:
+*******************
+
+  Experiment completed: true
+  No failed tasks: true
+  Total number of tasks: 2
+  Number of completed tasks: 2
+
+Whether or not service level objectives (SLOs) are satisfied:
+*************************************************************
+
+  SLO Conditions                           |Satisfied
+  --------------                           |---------
+  built-in/http-latency-mean (msec) <= 100 |true
+  built-in/http-latency-p95 (msec) <= 150  |true
+  
+
+Latest observed values for metrics:
+***********************************
+
+  Metric                              |value
+  -------                             |-----
+  built-in/http-error-count           |0.00
+  built-in/http-error-rate            |0.00
+  built-in/http-latency-max (msec)    |186.56
+  built-in/http-latency-mean (msec)   |11.25
+  built-in/http-latency-min (msec)    |4.05
+  built-in/http-latency-p50 (msec)    |6.59
+  built-in/http-latency-p75 (msec)    |7.79
+  built-in/http-latency-p90 (msec)    |9.23
+  built-in/http-latency-p95 (msec)    |10.00
+  built-in/http-latency-p99 (msec)    |183.94
+  built-in/http-latency-p99.9 (msec)  |186.30
+  built-in/http-latency-stddev (msec) |28.01
+  built-in/http-request-count         |200.00
+```
 
 ## More Examples
 
@@ -72,4 +107,4 @@ Congratulations! :tada: You completed your first Iter8 experiment.
 Iter8 documentation is available at https://iter8.tools.
 
 ## Contributing
-See [here](https://iter8.tools/latest/contributing/overview/) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.
+See [here](https://iter8.tools/0.8/contributing/) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.
