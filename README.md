@@ -44,16 +44,7 @@ iter8 assert -c completed -c nofailure -c slos
 ```
 
 ## 4. View report
-View a report of the experiment in HTML or text formats.
-
-### HTML Report
-```shell
-iter8 report -o html > report.html
-```
-
-You can view `report.html` in any browser. A sample report is as follows.
-
-<img title="HTML report" src="mkdocs/docs/getting-started/images/report.html.png" width="200">
+View a report of the experiment in text or HTML formats.
 
 ### Text Report
 ```shell
@@ -100,6 +91,14 @@ Latest observed values for metrics:
   built-in/http-latency-stddev (msec) |28.01
   built-in/http-request-count         |200.00
 ```
+
+### HTML Report
+```shell
+iter8 report -o html > report.html
+```
+
+You can view `report.html` in any browser. A sample report is [here](mkdocs/docs/getting-started/images/report.html.png).
+
 
 ## More Examples
 
