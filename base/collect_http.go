@@ -255,11 +255,11 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 		if fm[i] != nil {
 			// request count
 			m := iter8BuiltInPrefix + "/" + builtInHTTPRequestCountId
-			in.MetricsInfo[m] = MetricMeta{
+			mm := MetricMeta{
 				Description: "number of requests sent",
 				Type:        CounterMetricType,
 			}
-			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], float64(fm[i].DurationHistogram.Count))
+			in.updateMetric(m, mm, i, float64(fm[i].DurationHistogram.Count))
 
 			// error count & rate
 			val := float64(0)
@@ -270,79 +270,79 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 			}
 			// error count
 			m = iter8BuiltInPrefix + "/" + builtInHTTPErrorCountId
-			in.MetricsInfo[m] = MetricMeta{
+			mm = MetricMeta{
 				Description: "number of responses that were errors",
 				Type:        CounterMetricType,
 			}
-			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val)
+			in.updateMetric(m, mm, i, val)
 
 			// error-rate
 			m = iter8BuiltInPrefix + "/" + builtInHTTPErrorRateId
 			rc := float64(fm[i].DurationHistogram.Count)
 			if rc != 0 {
-				in.MetricsInfo[m] = MetricMeta{
+				mm = MetricMeta{
 					Description: "fraction of responses that were errors",
 					Type:        GaugeMetricType,
 				}
-				in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val/rc)
+				in.updateMetric(m, mm, i, val/rc)
 			}
 
 			// mean-latency
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMeanId
-			in.MetricsInfo[m] = MetricMeta{
+			mm = MetricMeta{
 				Description: "mean of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.Avg)
+			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Avg)
 
 			// stddev-latency
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyStdDevId
-			in.MetricsInfo[m] = MetricMeta{
+			mm = MetricMeta{
 				Description: "standard deviation of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.StdDev)
+			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.StdDev)
 
 			// min-latency
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMinId
-			in.MetricsInfo[m] = MetricMeta{
+			mm = MetricMeta{
 				Description: "minimum of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.Min)
+			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Min)
 
 			// max-latency
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMaxId
-			in.MetricsInfo[m] = MetricMeta{
+			mm = MetricMeta{
 				Description: "maximum of observed latency values",
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*fm[i].DurationHistogram.Max)
+			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Max)
 
 			// percentiles
 			for _, p := range fm[i].DurationHistogram.Percentiles {
 				m = fmt.Sprintf("%v/%v%v", iter8BuiltInPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
-				in.MetricsInfo[m] = MetricMeta{
+				mm = MetricMeta{
 					Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
 					Type:        GaugeMetricType,
 					Units:       StringPointer("msec"),
 				}
-				in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], 1000.0*p.Value)
+				in.updateMetric(m, mm, i, 1000.0*p.Value)
 			}
 
 			// latency histogram
 			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyHistId
-			in.MetricsInfo[m] = MetricMeta{
+			mm = MetricMeta{
 				Description: "Latency Histogram",
 				Type:        HistogramMetricType,
 				Units:       StringPointer("msec"),
 			}
 			lh := latencyHist(fm[i].DurationHistogram)
-			in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], lh...)
+			in.updateMetric(m, mm, i, lh)
 		}
 	}
 	return nil

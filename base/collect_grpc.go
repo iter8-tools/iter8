@@ -61,7 +61,7 @@ const (
 	// gRPCErrorRateMetricName is name of the gRPC error rate metric
 	gRPCErrorRateMetricName = "grpc-error-rate"
 	// gRPCLatencySampleMetricName is name of the gRPC latency sample metric
-	gRPCLatencySampleMetricName = "grpc-latency-sample"
+	gRPCLatencySampleMetricName = "grpc-latency"
 	// countErrorsDefault is the default value which indicates if errors are counted
 	countErrorsDefault = true
 )
@@ -161,7 +161,7 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 func latencySample(rd []runner.ResultDetail) []float64 {
 	f := make([]float64, len(rd))
 	for i := 0; i < len(rd); i++ {
-		f[i] = float64(rd[i].Latency)
+		f[i] = float64(rd[i].Latency.Milliseconds())
 	}
 	return f
 }

@@ -78,7 +78,7 @@ func (e *Experiment) Run(expio ExpIO) error {
 		e.InitResults()
 	}
 	for i, t := range e.Tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : started")
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
 		if cond := GetIf(t); cond != nil {
@@ -100,13 +100,13 @@ func (e *Experiment) Run(expio ExpIO) error {
 		if shouldRun {
 			err = t.Run(&e.Experiment)
 			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "failure")
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : " + "failure")
 				e.failExperiment()
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "completed")
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *base.GetName(t)) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *GetName(t)) + " : " + "skipped")
 		}
 
 		err = e.incrementNumCompletedTasks()
@@ -152,4 +152,24 @@ func GetIf(t base.Task) *string {
 	// convert jsonBytes to TaskMeta
 	_ = json.Unmarshal(jsonBytes, &tm)
 	return tm.If
+}
+
+// GetName returns the name of this task
+func GetName(t base.Task) *string {
+	var jsonBytes []byte
+	var tm base.TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+
+	if tm.Task == nil {
+		if tm.Run != nil {
+			return base.StringPointer(base.RunTaskName)
+		}
+	} else {
+		return tm.Task
+	}
+	log.Logger.Error("task spec with no name or run value")
+	return nil
 }

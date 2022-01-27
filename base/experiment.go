@@ -175,26 +175,6 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GetName returns the name of this task
-func GetName(t Task) *string {
-	var jsonBytes []byte
-	var tm TaskMeta
-	// convert t to jsonBytes
-	jsonBytes, _ = json.Marshal(t)
-	// convert jsonBytes to TaskMeta
-	_ = json.Unmarshal(jsonBytes, &tm)
-
-	if tm.Task == nil {
-		if tm.Run != nil {
-			return StringPointer(RunTaskName)
-		}
-	} else {
-		return tm.Task
-	}
-	log.Logger.Error("task spec with no name or run value")
-	return nil
-}
-
 // metricTypeMatch checks if metric value is a match for its type
 func metricTypeMatch(t MetricType, val interface{}) bool {
 	switch v := val.(type) {
