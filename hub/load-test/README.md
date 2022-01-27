@@ -50,7 +50,7 @@ Fetch JSON content from a payload URL. Use this JSON as payload and explicitly s
 
 ```shell
 iter8 run --set url=http://127.0.0.1/post \
-          --set payloadURL=https://json-generator.com/ \
+          --set payloadURL=https://httpbin.org/stream/1 \
           --set contentType="application/json" \
           --set SLOs.error-rate=0 \
           --set SLOs.mean-latency=50 \

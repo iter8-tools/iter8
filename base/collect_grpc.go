@@ -94,7 +94,7 @@ func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
 
 	// get proto file
 	if t.With.ProtoURL != nil {
-		err := GetFileFromURL(*t.With.ProtoURL, protoFileName)
+		err := getFileFromURL(*t.With.ProtoURL, protoFileName)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
 	}
 	// get JSON call data file
 	if t.With.DataURL != nil {
-		err := GetFileFromURL(*t.With.ProtoURL, callDataJSONFileName)
+		err := getFileFromURL(*t.With.ProtoURL, callDataJSONFileName)
 		if err != nil {
 			return nil, err
 		}
@@ -110,7 +110,7 @@ func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
 	}
 	// get binary data file
 	if t.With.BinaryDataURL != nil {
-		err := GetFileFromURL(*t.With.ProtoURL, callDataBinaryFileName)
+		err := getFileFromURL(*t.With.ProtoURL, callDataBinaryFileName)
 		if err != nil {
 			return nil, err
 		}
@@ -118,7 +118,7 @@ func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
 	}
 	// get metadata file
 	if t.With.MetadataURL != nil {
-		err := GetFileFromURL(*t.With.ProtoURL, callMetadataJSONFileName)
+		err := getFileFromURL(*t.With.ProtoURL, callMetadataJSONFileName)
 		if err != nil {
 			return nil, err
 		}

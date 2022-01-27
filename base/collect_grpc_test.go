@@ -7,7 +7,6 @@ import (
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/base/internal"
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -97,8 +96,21 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 				Metric:     "built-in/grpc-latency/p95.00",
 				UpperLimit: float64Pointer(200),
 			}, {
+				Metric:     "built-in/grpc-latency/stddev",
+				UpperLimit: float64Pointer(20),
+			}, {
+				Metric:     "built-in/grpc-latency/max",
+				UpperLimit: float64Pointer(200),
+			}, {
+				Metric:     "built-in/grpc-latency/min",
+				LowerLimit: float64Pointer(0),
+			}, {
 				Metric:     "built-in/grpc-error-count",
 				UpperLimit: float64Pointer(0),
+			}, {
+				Metric:     "built-in/grpc-request-count",
+				UpperLimit: float64Pointer(100),
+				LowerLimit: float64Pointer(100),
 			}},
 		},
 	}
@@ -113,10 +125,6 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	err = exp.Tasks[1].Run(exp)
 	assert.NoError(t, err)
 
-	// print metrics
-	log.Logger.Info("Metric info", exp.Result.Insights.MetricsInfo)
-	log.Logger.Info("Hist metric values", exp.Result.Insights.HistMetricValues)
-	log.Logger.Info("Non hist metric values", exp.Result.Insights.NonHistMetricValues)
 	// assert SLOs are satisfied
 	for _, v := range exp.Result.Insights.SLOsSatisfied {
 		for _, b := range v {

@@ -14,7 +14,8 @@ func TestRunCollectHTTP(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("1s"),
+			Duration:   StringPointer("1s"),
+			PayloadURL: StringPointer("https://httpbin.org/stream/1"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
 				URL:     "https://something.com",
@@ -26,7 +27,7 @@ func TestRunCollectHTTP(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://something.com",
+	httpmock.RegisterResponder("POST", "https://something.com",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
 	exp := &Experiment{

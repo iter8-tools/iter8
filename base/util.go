@@ -42,8 +42,8 @@ func CompletePath(prefix string, suffix string) string {
 	return filepath.Join(filepath.Dir(filename), prefix, suffix)
 }
 
-// GetPayloadBytes downloads payload from URL and returns a byte slice
-func GetPayloadBytes(url string) ([]byte, error) {
+// getPayloadBytes downloads payload from URL and returns a byte slice
+func getPayloadBytes(url string) ([]byte, error) {
 	var myClient = &http.Client{Timeout: 10 * time.Second}
 	r, err := myClient.Get(url)
 	if err != nil || r.StatusCode >= 400 {
@@ -54,8 +54,8 @@ func GetPayloadBytes(url string) ([]byte, error) {
 	return body, err
 }
 
-// GetFileFromURL downloads contents from URL into the given file
-func GetFileFromURL(url string, fileName string) error {
+// getFileFromURL downloads contents from URL into the given file
+func getFileFromURL(url string, fileName string) error {
 	var myClient = &http.Client{Timeout: 10 * time.Second}
 	r, err := myClient.Get(url)
 	if err != nil || r.StatusCode >= 400 {

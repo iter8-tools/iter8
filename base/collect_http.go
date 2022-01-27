@@ -174,7 +174,7 @@ func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, err
 		fo.Payload = []byte(*t.With.PayloadStr)
 	}
 	if t.With.PayloadURL != nil {
-		b, err := GetPayloadBytes(*t.With.PayloadURL)
+		b, err := getPayloadBytes(*t.With.PayloadURL)
 		if err != nil {
 			return nil, err
 		} else {
