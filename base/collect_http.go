@@ -35,8 +35,8 @@ type collectHTTPInputs struct {
 	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
 	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
 	Duration *string `json:"duration" yaml:"duration"`
-	// QPS is the number of queries per second sent to each version. Default value is 8.0.
-	QPS *float32 `json:"qps" yaml:"qps"`
+	// QPS is the number of requests per second sent to each version. Default value is 8.0.
+	RPS *float32 `json:"rps" yaml:"rps"`
 	// Connections is the number of number of parallel connections used to send load. Default value is 4.
 	Connections *int `json:"connections" yaml:"connections"`
 	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload.
@@ -56,7 +56,7 @@ type collectHTTPInputs struct {
 const (
 	// CollectHTTPTaskName is the name of this task which performs load generation and metrics collection.
 	CollectHTTPTaskName                = "gen-load-and-collect-metrics-http"
-	defaultQPS                         = float32(8)
+	defaultRPS                         = float32(8)
 	defaultHTTPNumRequests             = int64(100)
 	defaultHTTPConnections             = 4
 	builtInHTTPRequestCountId          = "http-request-count"
@@ -66,7 +66,7 @@ const (
 	builtInHTTPLatencyStdDevId         = "http-latency-stddev"
 	builtInHTTPLatencyMinId            = "http-latency-min"
 	builtInHTTPLatencyMaxId            = "http-latency-max"
-	builtInHTTPLatencyHistId           = "http-latency-hist"
+	builtInHTTPLatencyHistId           = "http-latency"
 	builtInHTTPLatencyPercentilePrefix = "http-latency-p"
 )
 
@@ -105,8 +105,8 @@ func (t *collectHTTPTask) initializeDefaults() {
 	if t.With.NumRequests == nil && t.With.Duration == nil {
 		t.With.NumRequests = int64Pointer(defaultHTTPNumRequests)
 	}
-	if t.With.QPS == nil {
-		t.With.QPS = float32Pointer(defaultQPS)
+	if t.With.RPS == nil {
+		t.With.RPS = float32Pointer(defaultRPS)
 	}
 	if t.With.Connections == nil {
 		t.With.Connections = intPointer(defaultHTTPConnections)
@@ -138,7 +138,7 @@ func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, err
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
 			RunType:     "Iter8 load test",
-			QPS:         float64(*t.With.QPS),
+			QPS:         float64(*t.With.RPS),
 			NumThreads:  *t.With.Connections,
 			Percentiles: t.With.Percentiles,
 			Out:         io.Discard,

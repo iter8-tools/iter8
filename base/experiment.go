@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -502,8 +503,8 @@ func (in *Insights) aggregateMetric(i int, m string) *float64 {
 	}
 }
 
-// normalizeMetricName normalizes percentile values in metric names
-func normalizeMetricName(m string) (string, error) {
+// NormalizeMetricName normalizes percentile values in metric names
+func NormalizeMetricName(m string) (string, error) {
 	pre := iter8BuiltInPrefix + "/" + builtInHTTPLatencyPercentilePrefix
 	if strings.HasPrefix(m, pre) { // built-in http percentile metric
 		remainder := strings.TrimPrefix(m, pre)
@@ -521,14 +522,14 @@ func normalizeMetricName(m string) (string, error) {
 	}
 }
 
-// GetScalarMetricValue gets the value of the given scalar metric for the given version
-func (in *Insights) GetScalarMetricValue(i int, m string) *float64 {
+// ScalarMetricValue gets the value of the given scalar metric for the given version
+func (in *Insights) ScalarMetricValue(i int, m string) *float64 {
 	s := strings.Split(m, "/")
 	if len(s) == 3 {
 		log.Logger.Tracef("%v is an aggregated metric", m)
 		return in.aggregateMetric(i, m)
 	} else if len(s) == 2 { // this appears to be a non-aggregated metric
-		if nm, err := normalizeMetricName(m); err != nil {
+		if nm, err := NormalizeMetricName(m); err != nil {
 			return nil
 		} else {
 			return in.getCounterOrGaugeMetricFromValuesMap(i, nm)
@@ -538,4 +539,29 @@ func (in *Insights) GetScalarMetricValue(i int, m string) *float64 {
 		log.Logger.Error("metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function")
 		return nil
 	}
+}
+
+// sampleHist samples values from a histogram
+func sampleHist(h []HistBucket) []float64 {
+	vals := []float64{}
+	for _, b := range h {
+		for i := 0; i < int(b.Count); i++ {
+			vals = append(vals, b.Lower+(b.Upper-b.Lower)*rand.Float64())
+		}
+	}
+	return vals
+}
+
+// VectorMetricValue gets the value of the given vector metric for the given version
+// If it is a histogram metric, then its values are sampled from the histogram
+func (in *Insights) VectorMetricValue(i int, m string) []float64 {
+	mm, ok := in.MetricsInfo[m]
+	if !ok {
+		return nil
+	}
+	if mm.Type == SampleMetricType {
+		return in.NonHistMetricValues[i][m]
+	}
+	// this is a hist metric
+	return sampleHist(in.HistMetricValues[i][m])
 }

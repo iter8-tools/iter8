@@ -230,27 +230,28 @@ func (e *Experiment) HTMLHistCharts() string {
 	`
 }
 
-// htmlRenderStrVal is a helper function for rendering strings in HTML template
-func htmlRenderStrVal(e *Experiment, what string) (string, error) {
+// RenderStrHTML is a helper method for rendering strings
+// Used in HTML template
+func (e *Experiment) RenderStr(what string) (string, error) {
 	var val string = ""
 	var err error = nil
 	switch what {
-	case "showClass":
+	case "showClassStatus":
 		val = "show"
 		if e.NoFailure() {
 			val = ""
 		}
-	case "textColor":
+	case "textColorStatus":
 		val = "text-danger"
 		if e.NoFailure() {
 			val = "text-success"
 		}
-	case "thumbs":
+	case "thumbsStatus":
 		val = "down"
 		if e.NoFailure() {
 			val = "up"
 		}
-	case "msg":
+	case "msgStatus":
 		val = ""
 		completionStatus := "Experiment completed."
 		if !e.Completed() {
@@ -261,148 +262,77 @@ func htmlRenderStrVal(e *Experiment, what string) (string, error) {
 			failureStatus = "Experiment has no failures."
 		}
 		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
-		val = fmt.Sprintln(completionStatus)
-		val += fmt.Sprintln(failureStatus)
-		val += fmt.Sprintln(taskStatus)
+		val = fmt.Sprint(completionStatus)
+		val += " "
+		val += fmt.Sprint(failureStatus)
+		val += " "
+		val += fmt.Sprint(taskStatus)
 	default:
 		err = fmt.Errorf("do not know how to render %v", what)
 	}
 	return val, err
 }
 
-// HTMLSLOSection prints the SLO section in HTML report
-func (e *Experiment) HTMLSLOSection() string {
-	if e.printableSLOs() {
-		return e.printHTMLSLOs()
-	} else {
-		return e.printHTMLNoSLOs()
-	}
-}
-
-func (e *Experiment) printHTMLSLOVersions() string {
+func (e *Experiment) MetricWithUnits(metricName string) (string, error) {
 	in := e.Result.Insights
-	out := ""
-	if in.NumVersions > 1 {
-		for i := 0; i < in.NumVersions; i++ {
-			out += fmt.Sprintf(`
-			<th scope="col">Version %v</th>
-			`, i)
-		}
-	} else {
-		out += `
-		<th scope="col" class="text-center">Satisfied</th>
-		`
-	}
-	return out
-}
-
-func getMetricWithUnitsAndDescription(in *base.Insights, metricName string) (string, string, error) {
-	m, ok := in.MetricsInfo[metricName]
-	if !ok {
-		e := fmt.Errorf("unknown metric name %v", metricName)
-		log.Logger.Error(e)
-		return "", "", e
-	}
-	str := metricName
-	if m.Units != nil {
-		str = fmt.Sprintf("%v (%v)", str, *m.Units)
-	}
-	return str, m.Description, nil
-}
-
-func getMetricWithUnitsAndDescriptionHTML(in *base.Insights, metricName string) (string, error) {
-	str, desc, err := getMetricWithUnitsAndDescription(in, metricName)
-	// TODO: Tooltip with description
-	str = fmt.Sprintf(`<a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="%v">%v</a>`, desc, str)
-	return str, err
-}
-
-func getSLOStrHTML(in *base.Insights, i int) (string, error) {
-	slo := in.SLOs[i]
-	// get metric with units and description
-	str, err := getMetricWithUnitsAndDescriptionHTML(in, slo.Metric)
+	nm, err := base.NormalizeMetricName(metricName)
 	if err != nil {
 		return "", err
 	}
-	// add lower limit if needed
-	if slo.LowerLimit != nil {
-		str = fmt.Sprintf("%0.2f &leq; %v", *slo.LowerLimit, str)
+	m, ok := in.MetricsInfo[nm]
+	if !ok {
+		e := fmt.Errorf("unknown metric name %v", nm)
+		log.Logger.Error(e)
+		return "", e
 	}
-	// add upper limit if needed
-	if slo.UpperLimit != nil {
-		str = fmt.Sprintf("%v &leq; %0.2f", str, *slo.UpperLimit)
+	str := nm
+	if m.Units != nil {
+		str = fmt.Sprintf("%v (%v)", str, *m.Units)
 	}
 	return str, nil
 }
 
-func getSLOSatisfiedHTML(in *base.Insights, i int, j int) string {
-	if in.SLOsSatisfied[i][j] {
-		return `<i class="far fa-check-circle"></i>`
+func (e *Experiment) MetricDescriptionHTML(metricName string) (string, error) {
+	in := e.Result.Insights
+	nm, err := base.NormalizeMetricName(metricName)
+	if err != nil {
+		return "", err
 	}
-	return `<i class="far fa-times-circle"></i>`
+	m, ok := in.MetricsInfo[nm]
+	if !ok {
+		e := fmt.Errorf("unknown metric name %v", nm)
+		log.Logger.Error(e)
+		return "", e
+	}
+	return m.Description, nil
 }
 
-func (e *Experiment) printHTMLSLORows() string {
-	in := e.Result.Insights
-	out := ""
-	for i := 0; i < len(in.SLOs); i++ {
-		str, err := getSLOStrHTML(in, i)
-		if err == nil {
-			out += `<tr scope="row">` + "\n"
-			out += fmt.Sprintf(`
-			<td>%v</td>
-			`, str)
+func renderSLOSatisfiedHTML(s bool) string {
+	if s {
+		return "fa-check-circle"
+	} else {
+		return "fa-times-circle"
+	}
+}
 
-			for j := 0; j < in.NumVersions; j++ {
-				cellClass := "text-success"
-				if !in.SLOsSatisfied[i][j] {
-					cellClass = "text-danger"
-				}
-				out += fmt.Sprintf(`
-				<td class="%v text-center">%v</td>
-				`, cellClass, getSLOSatisfiedHTML(in, i, j))
-			}
+func renderSLOSatisfiedCellClass(s bool) string {
+	if s {
+		return "text-success"
+	} else {
+		return "text-danger"
+	}
+}
+
+// SortedVectorMetrics extracts vector metric names from experiment in sorted order
+func (e *Experiment) SortedVectorMetrics() []string {
+	keys := []string{}
+	for k, mm := range e.Result.Insights.MetricsInfo {
+		if mm.Type == base.HistogramMetricType || mm.Type == base.SampleMetricType {
+			keys = append(keys, k)
 		}
 	}
-	return out
-}
-
-// print HTML SLO validation results
-func (e *Experiment) printHTMLSLOs() string {
-	sloStrs := `
-	<section class="mt-5">
-			<h3 class="display-6">Service level objectives (SLOs)</h3>
-			<h4 class="display-7 text-muted">Whether or not SLOs are satisfied</h4>
-			<hr>
-			<table class="table">
-			<thead class="thead-light">
-				<tr>
-					<th scope="col">SLO</th>
-	` +
-		e.printHTMLSLOVersions() +
-		`</tr>
-	</thead>
-	` +
-		`
-	<tbody>
-	` +
-		e.printHTMLSLORows() +
-		`
-		</tbody>
-		</table>
-		</section>
-		`
-
-	return sloStrs
-}
-
-// print HTML no SLOs
-func (e *Experiment) printHTMLNoSLOs() string {
-	return `
-	<section class="mt-5">
-		<h2>SLOs Unavailable</h2>
-	</section>
-	`
+	sort.Strings(keys)
+	return keys
 }
 
 // HTMLHistMetricsSection prints histogram metrics in the HTML report
@@ -427,81 +357,4 @@ func (e *Experiment) HTMLHistMetricsSection() string {
 			`</section>`
 	}
 	return ``
-}
-
-func (e *Experiment) printHTMLMetricVersions() string {
-	in := e.Result.Insights
-	out := ""
-	if in.NumVersions > 1 {
-		for i := 0; i < in.NumVersions; i++ {
-			out += fmt.Sprintf(`
-			<th scope="col">Version %v</th>
-			`, i)
-		}
-	} else {
-		out += `
-		<th scope="col">Metric values</th>
-		`
-	}
-	return out
-}
-
-func (e *Experiment) printHTMLMetricRows() string {
-	in := e.Result.Insights
-
-	// sort metrics
-	keys := []string{}
-	for k := range in.MetricsInfo {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	out := ""
-	for i := 0; i < len(keys); i++ {
-		if e.Result.Insights.MetricsInfo[keys[i]].Type != base.HistogramMetricType {
-			str, err := getMetricWithUnitsAndDescriptionHTML(in, keys[i])
-			if err == nil {
-				out += `<tr scope="row">` + "\n"
-				out += fmt.Sprintf(`
-				<td>%v</td>
-				`, str)
-
-				for j := 0; j < in.NumVersions; j++ {
-					out += fmt.Sprintf(`
-					<td>%v</td>
-					`, e.Result.Insights.GetScalarMetricValue(j, keys[i]))
-				}
-			}
-		}
-	}
-	return out
-}
-
-// HTMLMetricsSection prints metrics in the HTML report
-func (e *Experiment) HTMLMetricsSection() string {
-	metricStrs := `
-	<section class="mt-5">
-			<h3 class="display-6">Latest observed values for metrics</h3>
-			<hr>
-
-			<table class="table">
-			<thead class="thead-light">
-				<tr>
-					<th scope="col">Metrics</th>
-	` +
-		e.printHTMLMetricVersions() +
-		`</tr>
-	</thead>
-	` +
-		`
-	<tbody>
-	` +
-		e.printHTMLMetricRows() +
-		`
-		</tbody>
-		</table>
-		</section>
-		`
-
-	return metricStrs
 }

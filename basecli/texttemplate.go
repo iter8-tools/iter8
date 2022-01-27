@@ -3,192 +3,110 @@ package basecli
 import (
 	"bytes"
 	"fmt"
-	"sort"
-	"strconv"
 	"text/tabwriter"
 
 	_ "embed"
+
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 // reportText is the text report template
 //go:embed textreport.tpl
 var reportText string
 
-// formatText provides a text description of the experiment
-func formatText(e *Experiment) string {
+// PrintSLOsText returns SLOs in text report format
+func (e *Experiment) PrintSLOsText() string {
 	var b bytes.Buffer
-	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.AlignRight|tabwriter.Debug)
-	e.printState(w)
-	if e.printableSLOs() {
-		e.printSLOs(w)
-	} else {
-		e.printNoSLOs(w)
-	}
-	if e.printableMetrics() {
-		e.printMetrics(w)
-	} else {
-		e.printNoMetrics(w)
-	}
+	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)
+	e.printSLOsText(w)
 	return b.String()
 }
 
-// number of completed tasks in the experiment
-func (e *Experiment) numCompletedTasksString() string {
-	if e == nil || e.Result == nil {
-		return "unknown"
-	} else {
-		return fmt.Sprint(e.Result.NumCompletedTasks)
-	}
-}
-
-// print the current state of the experiment
-func (e *Experiment) printState(w *tabwriter.Writer) {
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprintln(w, "Experiment summary\t")
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprintln(w, "Experiment completed \t"+strconv.FormatBool(e.Completed()))
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprintln(w, "Experiment failed \t"+strconv.FormatBool(!e.NoFailure()))
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprintln(w, "Number of completed tasks \t"+e.numCompletedTasksString())
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprintln(w, "")
-	w.Flush()
-}
-
-// are SLOs in a printable condition in this experiment
-func (e *Experiment) printableSLOs() bool {
-	if e != nil {
-		if e.Result != nil {
-			if e.Result.Insights != nil {
-				if len(e.Result.Insights.SLOs) > 0 {
-					if e.Result.Insights.NumVersions > 0 {
-						if len(e.Result.Insights.SLOsSatisfied) == len(e.Result.Insights.SLOs) {
-							if e.Result.Insights.SLOsSatisfied[0] != nil {
-								if len(e.Result.Insights.SLOsSatisfied[0]) == e.Result.Insights.NumVersions {
-									return true
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return false
-}
-
-// print SLOs
-func (e *Experiment) printSLOs(w *tabwriter.Writer) {
+func (e *Experiment) getSLOStrText(i int) (string, error) {
 	in := e.Result.Insights
-	fmt.Fprint(w, "\n\n")
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprint(w, "SLOs")
+	slo := in.SLOs[i]
+	// get metric with units and description
+	str, err := e.MetricWithUnits(slo.Metric)
+	if err != nil {
+		return "", err
+	}
+	// add lower limit if needed
+	if slo.LowerLimit != nil {
+		str = fmt.Sprintf("%v <= %v", *slo.LowerLimit, str)
+	}
+	// add upper limit if needed
+	if slo.UpperLimit != nil {
+		str = fmt.Sprintf("%v <= %v", str, *slo.UpperLimit)
+	}
+	return str, nil
+}
+
+// printSLOsText prints SLOs into tab writer
+func (e *Experiment) printSLOsText(w *tabwriter.Writer) {
+	in := e.Result.Insights
+	fmt.Fprint(w, "SLO Conditions")
 	if in.NumVersions > 1 {
 		for i := 0; i < in.NumVersions; i++ {
 			fmt.Fprintf(w, "\t version %v", i)
 		}
 	} else {
-		fmt.Fprintf(w, "\t")
+		fmt.Fprintf(w, "\tSatisfied")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "-----------------------------\t-----")
+	fmt.Fprintln(w, "--------------\t---------")
 
 	for i := 0; i < len(in.SLOs); i++ {
-		str, _, err := getMetricWithUnitsAndDescription(in, in.SLOs[i].Metric)
+		str, err := e.getSLOStrText(i)
 		if err == nil {
 			fmt.Fprint(w, str)
 			for j := 0; j < in.NumVersions; j++ {
 				fmt.Fprintf(w, "\t%v", in.SLOsSatisfied[i][j])
 				fmt.Fprintln(w)
 			}
-			fmt.Fprintln(w, "-----------------------------\t-----")
 		}
 	}
 
 	w.Flush()
 }
 
-// print no SLOs
-func (e *Experiment) printNoSLOs(w *tabwriter.Writer) {
-	fmt.Fprint(w, "\n\n")
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprint(w, "SLOs\tunavailable")
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "-----------------------------\t-----")
-
-	w.Flush()
+// PrintMetricsText returns metrics in text report format
+func (e *Experiment) PrintMetricsText() string {
+	var b bytes.Buffer
+	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)
+	e.printMetricsText(w)
+	return b.String()
 }
 
-// are metrics in a printable condition in this experiment
-func (e *Experiment) printableMetrics() bool {
-	if e != nil {
-		if e.Result != nil {
-			if e.Result.Insights != nil {
-				if e.Result.Insights.MetricsInfo != nil && len(e.Result.Insights.MetricsInfo) > 0 {
-					if e.Result.Insights.NumVersions > 0 {
-						if len(e.Result.Insights.NonHistMetricValues) > 0 {
-							if e.Result.Insights.NonHistMetricValues[0] != nil {
-								return true
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return false
-}
-
-// print metrics collected
-func (e *Experiment) printMetrics(w *tabwriter.Writer) {
+// printMetricsText prints metrics into tab writer
+func (e *Experiment) printMetricsText(w *tabwriter.Writer) {
 	in := e.Result.Insights
-	fmt.Fprint(w, "\n\n")
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprint(w, "Metrics")
+	fmt.Fprint(w, "Metric")
 	if in.NumVersions > 1 {
 		for i := 0; i < in.NumVersions; i++ {
-			fmt.Fprintf(w, "\t version %v", i)
+			fmt.Fprintf(w, "\tversion %v", i)
 		}
 	} else {
-		fmt.Fprintf(w, "\t")
+		fmt.Fprintf(w, "\tvalue")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "-----------------------------\t-----")
+	fmt.Fprintln(w, "-------\t-----")
 
-	// sort metrics
-	keys := []string{}
-	for k := range in.MetricsInfo {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+	// keys contain normalized scalar metric names in sorted order
+	keys := e.SortedScalarMetrics()
 
-	for i := 0; i < len(keys); i++ {
-		u := ""
-		// add units if available
-		units := e.Result.Insights.MetricsInfo[keys[i]].Units
-		if units != nil {
-			u += " (" + *units + ")"
-		}
-
-		fmt.Fprint(w, keys[i], u)
-		for j := 0; j < in.NumVersions; j++ {
-			fmt.Fprintf(w, "\t%v", e.Result.Insights.GetScalarMetricValue(j, keys[i]))
+	for _, mn := range keys {
+		mwu, err := e.MetricWithUnits(mn)
+		if err == nil {
+			// add metric name with units
+			fmt.Fprint(w, mwu)
+			// add value
+			for j := 0; j < in.NumVersions; j++ {
+				fmt.Fprintf(w, "\t%v", e.ScalarMetricValueStr(j, mn))
+			}
 			fmt.Fprintln(w)
+		} else {
+			log.Logger.Error(err)
 		}
-		fmt.Fprintln(w, "-----------------------------\t-----")
 	}
-	w.Flush()
-}
-
-// print no metrics
-func (e *Experiment) printNoMetrics(w *tabwriter.Writer) {
-	fmt.Fprint(w, "\n\n")
-	fmt.Fprintln(w, "-----------------------------\t-----")
-	fmt.Fprint(w, "Metrics\tunavailable")
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "-----------------------------\t-----")
-
 	w.Flush()
 }

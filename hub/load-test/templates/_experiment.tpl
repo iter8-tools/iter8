@@ -5,7 +5,7 @@
   with:
 
     {{- if .Values.numQueries }}
-    numQueries: {{ .Values.numQueries}}
+    numRequests: {{ .Values.numQueries}}
     {{- end }}
 
     {{- if .Values.duration }}
@@ -13,7 +13,7 @@
     {{- end }}
 
     {{- if .Values.qps }}
-    qps: {{ .Values.qps}}
+    rps: {{ .Values.qps}}
     {{- end }}
 
     {{- if .Values.connections }}
