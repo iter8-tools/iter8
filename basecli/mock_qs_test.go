@@ -84,7 +84,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// assert
 	AssertOptions = AssertOptionsType{
-		Conds:   []string{Completed, NoFailure, SLOs},
+		Conds:   []string{Completed, NoFailure, SLOs, "slosby=0"},
 		Timeout: 0,
 	}
 	err = assertCmd.RunE(nil, nil)
