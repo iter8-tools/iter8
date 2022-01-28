@@ -20,7 +20,7 @@
 .feature-item h2 {
   color: #333;
   font-weight: 300;
-  font-size: 25px;
+  font-size: 28px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -31,7 +31,7 @@
 }
 
 .feature-item p {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.8em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -51,21 +51,10 @@
   }
 }
 
-@include break-from-device(tablet portrait) {
-  .feature-item {
-    width: 50%;        
-  }
-}
-
-@include break-from-device(tablet landscape) {
-  .feature-item {
-    width: 33%;   
-  }
-}
 
 @include break-from-device(screen small) {
   .feature-item {
-    width: 33%;   
+    width: 50%;   
   }
 }
 

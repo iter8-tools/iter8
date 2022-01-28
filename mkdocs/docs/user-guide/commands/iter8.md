@@ -7,7 +7,7 @@ hide:
 
 ## iter8
 
-Kubernetes release engineering
+Kubernetes release engineering made simple
 
 ### Synopsis
 

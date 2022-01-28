@@ -46,7 +46,7 @@ and run it in Kubernetes, do:
 
 ### SEE ALSO
 
-* [iter8](iter8.md)	 - Kubernetes release engineering
+* [iter8](iter8.md)	 - Kubernetes release engineering made simple
 * [iter8 k assert](iter8_k_assert.md)	 - Assert if experiment result satisfies the specified conditions
 * [iter8 k delete](iter8_k_delete.md)	 - Delete an experiment
 * [iter8 k get](iter8_k_get.md)	 - Get the list of experiments running in Kubernetes

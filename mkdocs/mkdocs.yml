@@ -55,7 +55,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Kubernetes Release Engineering
+  title: Kubernetes release engineering made simple
   version:
     provider: mike
   social:

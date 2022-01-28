@@ -11,7 +11,7 @@
 [![Slack channel](https://img.shields.io/badge/Slack-Join-purple)](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
 
-### 1. Install Iter8
+## 1. Install Iter8
 ```shell
 brew tap iter8-tools/iter8
 brew install iter8
