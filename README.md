@@ -14,14 +14,27 @@
 > Iter8 is a toolkit that simplifies Kubernetes release engineering. It is built for DevOps, MLOps, SRE and data science teams interested in safely rolling out new versions of apps and ML models, and/or maximizing business value with each release.
 
 ## 1. Install Iter8 CLI
+Install the latest stable release of the Iter8 CLI using `brew` as follows.
+
 ```shell
 brew tap iter8-tools/iter8
 brew install iter8
 ```
 
-You can also install Iter8 using [pre-compiled binaries](https://iter8.tools/latest/getting-started/install/) or [`go 1.16+`](https://iter8.tools/latest/getting-started/install/).
+You can also install Iter8 using:
+* [pre-compiled binaries](https://iter8.tools/latest/getting-started/install/)
+* [source](https://iter8.tools/latest/getting-started/install/)
+* [`go 1.16+`](https://iter8.tools/latest/getting-started/install/)
 
 ## 2. Usage Examples
+
+* Load test HTTP services with SLOs
+  1.  [Load test an HTTP service and validate SLOs](https://iter8.tools/0.8/getting-started/your-first-experiment/).
+  2.  [Control the request generation process during the load test](https://iter8.tools/0.8/tutorials/load-test/requests/).
+  3.  [Load test an HTTP POST endpoint with payload](https://iter8.tools/0.8/tutorials/load-test/payload/).
+  4.  [Learn more about built-in metrics and SLOs](https://iter8.tools/0.8/tutorials/load-test/metricsandslos/).
+  5.  [Load test a Knative HTTP service](https://iter8.tools/0.8/tutorials/load-test/community/knative/loadtest/).
+
 
 ## 3. Documentation
 Iter8 documentation is available at https://iter8.tools.
