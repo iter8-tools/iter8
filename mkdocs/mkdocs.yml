@@ -158,7 +158,7 @@ nav:
     - iter8 k logs: user-guide/commands/iter8_k_logs.md
     - iter8 k delete: user-guide/commands/iter8_k_delete.md
   - Tasks:
-    - gen-load-and-collect-metrics: user-guide/tasks/collect.md
+    - gen-load-and-collect-metrics-http: user-guide/tasks/collect.md
     - assess-app-versions: user-guide/tasks/assess.md
     - run (a bash script): user-guide/tasks/run.md
 - Contributing: contributing.md

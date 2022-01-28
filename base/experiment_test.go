@@ -1,49 +1,53 @@
 package base
 
 import (
-	"encoding/json"
+	"io/ioutil"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"sigs.k8s.io/yaml"
 )
 
+func TestReadExperiment(t *testing.T) {
+	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
+	assert.NoError(t, err)
+	es := &ExperimentSpec{}
+	err = yaml.Unmarshal(b, es)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(*es))
+
+	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
+	assert.NoError(t, err)
+	es = &ExperimentSpec{}
+	err = yaml.Unmarshal(b, es)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(*es))
+}
 func TestRunExperiment(t *testing.T) {
 	// valid collect task... should succeed
-	ct := &collectTask{
-		taskMeta: taskMeta{
-			Task: StringPointer(CollectTaskName),
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
 		},
-		With: collectInputs{
+		With: collectHTTPInputs{
 			Duration:    StringPointer("1s"),
-			VersionInfo: []*version{{Headers: map[string]string{}, URL: "https://something.com"}},
+			VersionInfo: []*versionHTTP{{Headers: map[string]string{}, URL: "https://something.com"}},
 		},
 	}
 
-	tsc := &TaskSpec{}
-	b, err := json.Marshal(ct)
-	assert.NoError(t, err)
-	err = json.Unmarshal(b, tsc)
-	assert.NoError(t, err)
-
 	// valid assess task... should succeed
 	at := &assessTask{
-		taskMeta: taskMeta{
+		TaskMeta: TaskMeta{
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
 			SLOs: []SLO{{
-				Metric:     iter8BuiltInPrefix + "/" + errorCountMetricName,
+				Metric:     iter8BuiltInPrefix + "/" + builtInHTTPErrorCountId,
 				UpperLimit: float64Pointer(0),
 			}},
 		},
 	}
-
-	tsa := &TaskSpec{}
-	b, err = json.Marshal(at)
-	assert.NoError(t, err)
-	err = json.Unmarshal(b, tsa)
-	assert.NoError(t, err)
 
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
@@ -53,17 +57,16 @@ func TestRunExperiment(t *testing.T) {
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
 	exp := &Experiment{
-		Tasks:  []TaskSpec{*tsc, *tsa},
+		Tasks:  []Task{ct, at},
 		Result: &ExperimentResult{},
 	}
 	exp.InitResults()
-	err = ct.Run(exp)
+	err := ct.Run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
-	// experiment should contain histogram metrics
-	assert.True(t, exp.ContainsInsight(InsightTypeHistMetrics))
-
 	// SLOs should be satisfied by app
-	assert.True(t, exp.SLOs())
+	for i := 0; i < len(exp.Result.Insights.SLOs); i++ { // i^th SLO
+		assert.True(t, exp.Result.Insights.SLOsSatisfied[i][0]) // satisfied by only version
+	}
 }

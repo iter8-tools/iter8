@@ -17,7 +17,7 @@ LDFLAGS    := -w -s
 GOFLAGS    :=
 
 # Rebuild the binary if any of these files change
-SRC := $(shell find . -type f -name '*.go' -print) go.mod go.sum
+SRC := $(shell find . -type f -name '*.(go|proto|tpl)' -print) go.mod go.sum
 
 # Required for globs to work correctly
 SHELL      = /usr/bin/env bash
@@ -121,7 +121,7 @@ staticcheck:
 
 .PHONY: test
 test: fmt vet ## Run tests.
-	go test ./... -race -coverprofile=coverage.out -covermode=atomic	
+	go test ./... -race -coverprofile=coverage.out -covermode=atomic
 
 .PHONY: coverage
 coverage: test

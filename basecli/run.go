@@ -1,6 +1,7 @@
 package basecli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -49,6 +50,7 @@ Render the file named "experiment.yaml" by combining an experiment chart with va
 				log.Logger.Info("starting experiment run")
 				err := exp.Run(fio)
 				if err != nil {
+					log.Logger.Error("exiting with code 1")
 					os.Exit(1)
 				} else {
 					log.Logger.Info("experiment completed successfully")
@@ -75,11 +77,11 @@ func (e *Experiment) Run(expio ExpIO) error {
 	if e.Result == nil {
 		e.InitResults()
 	}
-	for i, t := range e.tasks {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : started")
+	for i, t := range e.Tasks {
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
-		if cond := base.GetIf(t); cond != nil {
+		if cond := getIf(t); cond != nil {
 			// condition evaluates to false ... then shouldRun is false
 			program, err := expr.Compile(*cond, expr.Env(e), expr.AsBool())
 			if err != nil {
@@ -96,18 +98,21 @@ func (e *Experiment) Run(expio ExpIO) error {
 			shouldRun = output.(bool)
 		}
 		if shouldRun {
-			err = t.Run(e.Experiment)
+			err = t.Run(&e.Experiment)
 			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "failure")
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
 				e.failExperiment()
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "completed")
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *base.GetIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, t.GetName()) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "skipped")
 		}
 
-		e.incrementNumCompletedTasks()
+		err = e.incrementNumCompletedTasks()
+		if err != nil {
+			return err
+		}
 		err = expio.WriteResult(e)
 		if err != nil {
 			return err
@@ -134,5 +139,37 @@ func (e *Experiment) incrementNumCompletedTasks() error {
 		e.Experiment.InitResults()
 	}
 	e.Result.NumCompletedTasks++
+	return nil
+}
+
+// getIf returns the condition (if any) which determine
+// whether of not if this task needs to run
+func getIf(t base.Task) *string {
+	var jsonBytes []byte
+	var tm base.TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+	return tm.If
+}
+
+// getName returns the name of this task
+func getName(t base.Task) *string {
+	var jsonBytes []byte
+	var tm base.TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+
+	if tm.Task == nil {
+		if tm.Run != nil {
+			return base.StringPointer(base.RunTaskName)
+		}
+	} else {
+		return tm.Task
+	}
+	log.Logger.Error("task spec with no name or run value")
 	return nil
 }

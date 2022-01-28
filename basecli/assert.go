@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
@@ -72,9 +71,6 @@ iter8 assert -c completed,nofailures,slosby=0 -t 5s
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// build experiment
-			exp := &Experiment{
-				Experiment: &base.Experiment{},
-			}
 			log.Logger.Trace("build started")
 			// replace FileExpIO with ClusterExpIO to build from cluster
 			fio := &FileExpIO{}
@@ -125,7 +121,7 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 					log.Logger.Info("experiment failed")
 				}
 			} else if strings.ToLower(cond) == SLOs {
-				slos := exp.SLOs()
+				slos := exp.slos()
 				allGood = allGood && slos
 				if slos {
 					log.Logger.Info("SLOs are satisfied")
@@ -137,7 +133,7 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 				if err != nil {
 					return false, err
 				}
-				iv := exp.SLOsBy(version)
+				iv := exp.slosBy(version)
 				allGood = allGood && iv
 				if iv {
 					log.Logger.Info("version ", version, " satisfies objectives")

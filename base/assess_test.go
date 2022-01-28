@@ -6,85 +6,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMakeWrongTask(t *testing.T) {
-	ts := &TaskSpec{
-		taskMeta: taskMeta{
-			Task: StringPointer(CollectTaskName),
-		},
-		With: map[string]interface{}{
-			"hello": "world",
-		},
-	}
-	task, err := MakeAssess(ts)
-	assert.Error(t, err)
-	assert.Nil(t, task)
-}
-
-func TestMakeAssess(t *testing.T) {
-	// simple assess without any SLOs
-	// should succeed
-	ts := &TaskSpec{
-		taskMeta: taskMeta{
-			Task: StringPointer(AssessTaskName),
-		},
-	}
-	task, err := MakeAssess(ts)
-	assert.NoError(t, err)
-	assert.NotNil(t, task)
-
-	// incorrect with clause
-	// should fail
-	ts = &TaskSpec{
-		taskMeta: taskMeta{Task: StringPointer(AssessTaskName)},
-		With: map[string]interface{}{
-			"SLOs": "hello world",
-		},
-	}
-	task, err = MakeAssess(ts)
-	assert.Error(t, err)
-	assert.Nil(t, task)
-}
-
 // Test a runnable assert condition here
 func TestRunAssess(t *testing.T) {
 	// simple assess without any SLOs
 	// should succeed
-	ts := &TaskSpec{
-		taskMeta: taskMeta{
+	task := &assessTask{
+		TaskMeta: TaskMeta{
 			Task: StringPointer(AssessTaskName),
 		},
+		With: assessInputs{},
 	}
-	task, _ := MakeAssess(ts)
 	exp := &Experiment{
-		Tasks: []TaskSpec{},
+		Tasks: []Task{task},
 	}
 	exp.InitResults()
-	task.Run(exp)
-
-	// assess with an SLO
-	// should succeed
-	ts = &TaskSpec{
-		taskMeta: taskMeta{Task: StringPointer(AssessTaskName)},
-		With: map[string]interface{}{
-			"SLOs": []SLO{{
-				Metric:     "m",
-				UpperLimit: float64Pointer(20.0),
-			}},
-		},
-	}
-	task, _ = MakeAssess(ts)
-	exp = &Experiment{
-		Tasks:  []TaskSpec{},
-		Result: &ExperimentResult{},
-	}
-	exp.InitResults()
-	exp.Result.InitInsights(1, []InsightType{InsightTypeMetrics})
+	exp.Result.initInsightsWithNumVersions(1)
 	err := task.Run(exp)
 	assert.NoError(t, err)
 
-	// assess with an experiment where num versions is 1
-	exp.Result.Insights.NumVersions = 1
+	// assess with an SLO
+	// should succeed
+	task.With = assessInputs{
+		SLOs: []SLO{{
+			Metric:     "a/b",
+			UpperLimit: float64Pointer(20.0),
+		}},
+	}
+	task.Run(exp)
 	err = task.Run(exp)
 	assert.NoError(t, err)
-
 }

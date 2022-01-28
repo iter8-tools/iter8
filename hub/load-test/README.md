@@ -50,7 +50,7 @@ Fetch JSON content from a payload URL. Use this JSON as payload and explicitly s
 
 ```shell
 iter8 run --set url=http://127.0.0.1/post \
-          --set payloadURL=https://json-generator.com/ \
+          --set payloadURL=https://data.police.uk/api/crimes-street-dates \
           --set contentType="application/json" \
           --set SLOs.error-rate=0 \
           --set SLOs.mean-latency=50 \
@@ -67,7 +67,7 @@ Consider the following command.
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
           --set SLOs.mean-latency=50 \
-          --set 'percentiles={25.0, 75.0}'
+          --set 'percentiles={25.0, 75.0}' \
           --set SLOs.p90=100 \
           --set SLOs.p'97\.5'=200
 ```

@@ -15,7 +15,7 @@ func TestHubGoodFolder(t *testing.T) {
 
 	os.Chdir(dir)
 	// Todo: fix location below
-	os.Setenv("ITER8HUB", "github.com/iter8-tools/iter8.git?ref=master//hub/")
+	os.Setenv("ITER8HUB", "github.com/sriumcp/iter8.git?ref=grpc//hub/")
 	hubFolder = "load-test"
 	// make sure load test folder is present
 	err := hubCmd.RunE(nil, nil)

@@ -3,12 +3,15 @@ package basecli
 import (
 	"bytes"
 	"fmt"
+	htemplate "html/template"
 	"io"
 	"os"
+	"sort"
 	"strings"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
@@ -107,31 +110,50 @@ func ExecTemplate(t executable, exp *Experiment) error {
 
 func init() {
 	// create text template
-	tmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
-		"formatText": formatText,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse("{{ formatText . }}")
+	ttpl, err := template.New(TextOutputFormatKey).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(reportText)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse text template")
 		os.Exit(1)
 	}
 	// register text template
-	RegisterTextTemplate(TextOutputFormatKey, tmpl)
+	RegisterTextTemplate(TextOutputFormatKey, ttpl)
 
-	// create HTML template (for now, this will still use the text templating functionality)
-	htmpl, err := template.New(TextOutputFormatKey).Funcs(template.FuncMap{
-		"styleSection": styleSection,
-		"headSection":  headSection,
-		"dependencies": dependencies,
-	}).Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(formatHTML)
+	// create HTML template
+	htpl, err := htemplate.New(HTMLOutputFormatKey).Option("missingkey=error").Funcs(sprig.FuncMap()).Funcs(htemplate.FuncMap{
+		"renderSLOSatisfiedHTML":      renderSLOSatisfiedHTML,
+		"renderSLOSatisfiedCellClass": renderSLOSatisfiedCellClass,
+	}).Parse(reportHTML)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to parse html template")
 		os.Exit(1)
 	}
-
 	// register HTML template
-	RegisterTextTemplate(HTMLOutputFormatKey, htmpl)
+	RegisterHTMLTemplate(HTMLOutputFormatKey, htpl)
 
 	reportCmd = NewReportCmd()
-
 	RootCmd.AddCommand(reportCmd)
+}
+
+/* Following functions/methods are common to both text and html templates */
+
+// SortedScalarMetrics extracts scalar metric names from experiment in sorted order
+func (e *Experiment) SortedScalarMetrics() []string {
+	keys := []string{}
+	for k, mm := range e.Result.Insights.MetricsInfo {
+		if mm.Type == base.CounterMetricType || mm.Type == base.GaugeMetricType {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// ScalarMetricValueStr extracts metric value string for given version and scalar metric name
+func (e *Experiment) ScalarMetricValueStr(j int, mn string) string {
+	val := e.Result.Insights.ScalarMetricValue(j, mn)
+	if val != nil {
+		return fmt.Sprintf("%0.2f", *val)
+	} else {
+		return "unavailable"
+	}
 }

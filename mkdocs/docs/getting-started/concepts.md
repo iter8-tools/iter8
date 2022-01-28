@@ -38,7 +38,7 @@ Experiments are specified using an `experiment.yaml` file as shown below.
 # and validates error-rate and 95th percentile service level objectives (SLOs)
 # 
 # task 1: generate requests for the app and collect built-in metrics
-- task: gen-load-and-collect-metrics
+- task: gen-load-and-collect-metrics-http
   with:
     versionInfo:
     - url: https://example.com

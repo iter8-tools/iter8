@@ -180,7 +180,7 @@ type KubernetesExpIO struct {
 }
 
 // read experiment spec from secret in the Kubernetes context
-func (f *KubernetesExpIO) ReadSpec() ([]base.TaskSpec, error) {
+func (f *KubernetesExpIO) ReadSpec() (base.ExperimentSpec, error) {
 
 	s, err := getSecretWithRetry(f.Client, f.Namespace, f.Name)
 	if err != nil {

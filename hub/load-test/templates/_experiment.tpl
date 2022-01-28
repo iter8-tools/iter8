@@ -1,11 +1,11 @@
 {{ define "load-test.experiment" -}}
 # task 1: generate HTTP requests for application URL
-# collect Iter8's built-in latency and error-related metrics
-- task: gen-load-and-collect-metrics
+# collect Iter8's built-in HTTP latency and error-related metrics
+- task: gen-load-and-collect-metrics-http
   with:
 
     {{- if .Values.numQueries }}
-    numQueries: {{ .Values.numQueries}}
+    numRequests: {{ .Values.numQueries}}
     {{- end }}
 
     {{- if .Values.duration }}
@@ -13,7 +13,7 @@
     {{- end }}
 
     {{- if .Values.qps }}
-    qps: {{ .Values.qps}}
+    rps: {{ .Values.qps}}
     {{- end }}
 
     {{- if .Values.connections }}
@@ -66,8 +66,14 @@
   with:
     SLOs:
     {{- range $key, $value := .Values.SLOs }}
-    {{- if or (regexMatch "error-rate" $key) (regexMatch "error-count" $key) (regexMatch "mean-latency" $key) (regexMatch "^p\\d+(?:\\.\\d)?$" $key) }}
-    - metric: "built-in/{{ $key }}"
+    {{- if or (regexMatch "error-rate" $key) (regexMatch "error-count" $key) }}
+    - metric: "built-in/http-{{ $key }}"
+      upperLimit: {{ $value }}
+    {{- else if (regexMatch "mean-latency" $key) }}
+    - metric: "built-in/http-latency-mean"
+      upperLimit: {{ $value }}
+    {{- else if (regexMatch "^p\\d+(?:\\.\\d)?$" $key) }}
+    - metric: "built-in/http-latency-{{ $key }}"
       upperLimit: {{ $value }}
     {{- else }}
     {{- fail "Invalid SLO metric specified" }}

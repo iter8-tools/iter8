@@ -2,14 +2,8 @@
 package base
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"regexp"
-	"strconv"
-	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
@@ -21,7 +15,7 @@ type assessInputs struct {
 
 // assessTask enables assessment of versions
 type assessTask struct {
-	taskMeta
+	TaskMeta
 	// With contains the inputs for the assessTask
 	With assessInputs `json:"with" yaml:"with"`
 }
@@ -29,50 +23,25 @@ type assessTask struct {
 const (
 	// AssessTaskName is the name of the task this file implements
 	AssessTaskName = "assess-app-versions"
-
-	// percentilePrefix is the prefix for builtin percentile metrics
-	percentilePrefix = `built-in/p`
-
-	// the regular expression used to match builtin percentile metrics
-	builtinPrecentileRE = percentilePrefix + `.+`
 )
 
-// MakeAssess constructs an asessTask out of a task spec
-func MakeAssess(t *TaskSpec) (Task, error) {
-	if t == nil || t.Task == nil || *t.Task != AssessTaskName {
-		return nil, errors.New("task needs to be " + AssessTaskName)
-	}
-	var err error
-	var jsonBytes []byte
-	var bt Task
-	// convert t to jsonBytes
-	jsonBytes, _ = json.Marshal(t)
-	// convert jsonString to AssessTask
-	at := &assessTask{}
-	err = json.Unmarshal(jsonBytes, &at)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal assess task")
-		return nil, err
-	}
+// initializeDefaults sets default values for task inputs
+func (t *assessTask) initializeDefaults() {}
 
-	validate := validator.New()
-	err = validate.Struct(at)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("invalid assess task specification")
-		return nil, err
-	}
-
-	bt = at
-	return bt, nil
-}
-
-// GetName returns the name of the assess task
-func (t *assessTask) GetName() string {
-	return AssessTaskName
+//validateInputs for this task
+func (t *assessTask) validateInputs() error {
+	return nil
 }
 
 // Run executes the assess-app-versions task
 func (t *assessTask) Run(exp *Experiment) error {
+	err := t.validateInputs()
+	if err != nil {
+		return err
+	}
+
+	t.initializeDefaults()
+
 	if exp.Result.Insights == nil {
 		log.Logger.Error("uninitialized insights within experiment")
 		return errors.New("uninitialized insights within experiment")
@@ -86,11 +55,8 @@ func (t *assessTask) Run(exp *Experiment) error {
 		return nil
 	}
 
-	// set insight type (if needed)
-	exp.Result.Insights.setInsightType(InsightTypeSLO)
-
 	// set SLOs (if needed)
-	err := exp.Result.Insights.setSLOs(t.With.SLOs)
+	err = exp.Result.Insights.setSLOs(t.With.SLOs)
 	if err != nil {
 		return err
 	}
@@ -103,9 +69,6 @@ func (t *assessTask) Run(exp *Experiment) error {
 
 	// set SLOsSatisfied
 	exp.Result.Insights.SLOsSatisfied = evaluateSLOs(exp, t.With.SLOs)
-
-	// set SLOsSatisfiedBy
-	exp.Result.Insights.SLOsSatisfiedBy = computeSLOsSatisfiedBy(exp)
 
 	return err
 }
@@ -124,7 +87,7 @@ func evaluateSLOs(exp *Experiment, slos []SLO) [][]bool {
 
 // return true if SLO i satisfied by version j
 func sloSatisfied(e *Experiment, slos []SLO, i int, j int) bool {
-	val := getMetricValue(e, j, slos[i].Metric)
+	val := e.Result.Insights.ScalarMetricValue(j, slos[i].Metric)
 	// check if metric is available
 	if val == nil {
 		log.Logger.Warnf("unable to find value for version %v and metric %s", j, slos[i].Metric)
@@ -143,61 +106,4 @@ func sloSatisfied(e *Experiment, slos []SLO, i int, j int) bool {
 		}
 	}
 	return true
-}
-
-// computeSLOsSatisfiedBy computes the subset of versions that satisfy SLOs
-func computeSLOsSatisfiedBy(exp *Experiment) []int {
-	sats := []int{}
-	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
-		sat := true
-		for i := range exp.Result.Insights.SLOs {
-			sat = sat && exp.Result.Insights.SLOsSatisfied[i][j]
-		}
-		if sat {
-			sats = append(sats, j)
-		}
-	}
-	return sats
-}
-
-// get the value of the given metric for the given version
-func getMetricValue(e *Experiment, i int, m string) *float64 {
-	if e == nil ||
-		e.Result == nil ||
-		e.Result.Insights == nil ||
-		len(e.Result.Insights.MetricValues) <= i {
-		log.Logger.Warnf("metric values uninitialized for version %v", i)
-		return nil
-	}
-	// rename builtin metric
-	bpre := regexp.MustCompile(builtinPrecentileRE)
-
-	// match has the builtin percentile value in m
-	match := bpre.FindString(m)
-	if len(match) > 0 {
-		log.Logger.Trace("percentile match: ", match, " for string: ", m)
-		pStr := strings.TrimPrefix(match, percentilePrefix)
-		pFloat, err := strconv.ParseFloat(pStr, 32)
-		if err != nil {
-			log.Logger.Error("unable to parse metric", m)
-			return nil
-		}
-		tmp := []interface{}{}
-		for _, f := range e.Result.Insights.BuiltinLatencyPercentiles {
-			tmp = append(tmp, f)
-		}
-		if ok, ind := inList(tmp, pFloat); !ok {
-			log.Logger.Error("unable to find percentile value in list of built-in percentiles")
-			log.Logger.Error("value: ", pFloat, " built-in percentiles: ", e.Result.Insights.BuiltinLatencyPercentiles)
-			return nil
-		} else {
-			m = percentilePrefix + fmt.Sprintf("%v", e.Result.Insights.BuiltinLatencyPercentiles[ind])
-		}
-	}
-
-	vals := e.Result.Insights.MetricValues[i][m]
-	if len(vals) == 0 {
-		return nil
-	}
-	return float64Pointer(vals[len(vals)-1])
 }
