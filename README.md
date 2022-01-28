@@ -11,8 +11,6 @@
 [![Slack channel](https://img.shields.io/badge/Slack-Join-purple)](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
 
-> Iter8 simplifies Kubernetes release engineering. 
-
 > Iter8 is built for DevOps, MLOps, SRE and data science teams interested in safely rolling out new versions of apps and ML models, and/or maximizing business value with each release.
 
 ## 1. Install Iter8 CLI
