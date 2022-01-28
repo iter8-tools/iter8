@@ -15,7 +15,7 @@ func TestReadExperiment(t *testing.T) {
 	es := &ExperimentSpec{}
 	err = yaml.Unmarshal(b, es)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(*es))
+	assert.Equal(t, 4, len(*es))
 
 	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
 	assert.NoError(t, err)

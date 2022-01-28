@@ -121,7 +121,7 @@ func (exp *Experiment) Assert(conditions []string, to time.Duration) (bool, erro
 					log.Logger.Info("experiment failed")
 				}
 			} else if strings.ToLower(cond) == SLOs {
-				slos := exp.slos()
+				slos := exp.SLOs()
 				allGood = allGood && slos
 				if slos {
 					log.Logger.Info("SLOs are satisfied")

@@ -111,8 +111,6 @@ func TestDryRun(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	os.Chdir(dir)
-	// ToDo: Fix this location
-	os.Setenv("ITER8HUB", "github.com/sriumcp/iter8.git?ref=grpc//hub/")
 	hubFolder = "load-test"
 	// hub
 	err := hubCmd.RunE(nil, nil)
