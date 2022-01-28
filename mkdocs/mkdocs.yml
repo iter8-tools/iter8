@@ -127,9 +127,6 @@ nav:
     - Community examples:
       - Knative:
         - HTTP Service: tutorials/load-test-http/community/knative/loadtest.md
-  - Load test gRPC:
-    - Overview: tutorials/load-test-grpc/overview.md
-    - Unary RPC: tutorials/load-test-grpc/unary.md
   - Other Experiment Types:
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md
