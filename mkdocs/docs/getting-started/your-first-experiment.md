@@ -186,10 +186,10 @@ Congratulations! :tada: You completed your first Iter8 experiment.
 
 ???+ tip "Useful variations of this experiment"
 
-    1. [Control the request generation process](../tutorials/load-test-http/requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
+    1. [Control the load characteristics](../tutorials/load-test-http/loadcharacteristics.md) by setting the number of queries/duration of the HTTP load test experiment, the number of queries sent per second, and the number of parallel connections used to send requests.
 
-    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test-http/payload.md) during the load test.
+    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test-http/payload.md) during the HTTP load test experiment.
 
-    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the load test](../tutorials/load-test-http/metricsandslos.md).
+    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the HTTP load test experiment](../tutorials/load-test-http/metricsandslos.md).
     
     4. The `values.yaml` file in the experiment chart folder documents all the values that can be supplied during the experiment.

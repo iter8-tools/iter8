@@ -15,8 +15,8 @@ template: main.html
 
 : Use an Iter8 experiment to load test an HTTP service and validate latency and error-related service level objectives (SLOs).
 
-[Control the request generation process](requests.md).
-: Control the request generation process by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
+[Control the load characteristics](loadcharacteristics.md).
+: Control the load characteristics during the HTTP load test experiment by setting the number of queries/duration, the number of queries sent per second, and the number of parallel connections used to send requests.
 
 [HTTP POST endpoint accepting payload](payload.md).
 : While load testing an HTTP service with a POST endpoint, you may send any type of content as payload during the load test.

@@ -67,7 +67,7 @@ Congratulations! :tada: You completed your Iter8-Knative experiment.
 
 ???+ tip "Useful variations of this experiment"
 
-    1. [Control the request generation process](../../requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
+    1. [Control the load characteristics during the HTTP load test experiment](../../loadcharacteristics.md) by setting the number of queries/duration, the number of queries sent per second, and the number of parallel connections used to send requests.
 
     2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../../payload.md) during the load test.
 

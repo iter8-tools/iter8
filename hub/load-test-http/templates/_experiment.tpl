@@ -32,18 +32,15 @@
     contentType: {{ .Values.contentType}}
     {{- end }}
 
-    {{- if .Values.errorRanges }}
+    {{- if .Values.errorsAbove }}
     errorRanges:
-{{ toYaml .Values.errorRanges | indent 4 }}
+    - lower: {{ .Values.errorsAbove }}
     {{- end }}
 
     {{- $percentiles := list }}
-    {{- if .Values.percentiles }}
-    {{- $percentiles = concat $percentiles .Values.percentiles }}
-    {{- end }}
     {{- range $key, $value := .Values.SLOs }}
-    {{- if (regexMatch "^p\\d+(?:\\.\\d)?$" $key) }}
-    {{- $percentiles = append $percentiles (trimPrefix "p" $key | float64 ) }}    
+    {{- if (regexMatch "^latency-p\\d+(?:\\.\\d)?$" $key) }}
+    {{- $percentiles = append $percentiles (trimPrefix "latency-p" $key | float64 ) }}    
     {{- end }}
     {{- end }}
     {{- if $percentiles }}
@@ -69,11 +66,14 @@
     {{- if or (regexMatch "error-rate" $key) (regexMatch "error-count" $key) }}
     - metric: "built-in/http-{{ $key }}"
       upperLimit: {{ $value }}
-    {{- else if (regexMatch "mean-latency" $key) }}
+    {{- else if (regexMatch "latency-mean" $key) }}
     - metric: "built-in/http-latency-mean"
       upperLimit: {{ $value }}
-    {{- else if (regexMatch "^p\\d+(?:\\.\\d)?$" $key) }}
-    - metric: "built-in/http-latency-{{ $key }}"
+    {{- else if (regexMatch "latency-stddev" $key) }}
+    - metric: "built-in/http-latency-stddev"
+      upperLimit: {{ $value }}
+    {{- else if (regexMatch "^latency-p\\d+(?:\\.\\d)?$" $key) }}
+    - metric: "built-in/http-{{ $key }}"
       upperLimit: {{ $value }}
     {{- else }}
     {{- fail "Invalid SLO metric specified" }}

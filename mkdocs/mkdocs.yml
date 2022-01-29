@@ -121,8 +121,8 @@ nav:
 - Tutorials:
   - Load test HTTP:
     - Overview: tutorials/load-test-http/overview.md
-    - Request generation: tutorials/load-test-http/requests.md
-    - Payload: tutorials/load-test-http/payload.md
+    - Load characteristics: tutorials/load-test-http/loadcharacteristics.md
+    - Request payload: tutorials/load-test-http/payload.md
     - Metrics and SLOs: tutorials/load-test-http/metricsandslos.md
     - Community examples:
       - Knative:
