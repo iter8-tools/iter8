@@ -13,7 +13,7 @@
     {{- end }}
 
     {{- if .Values.qps }}
-    rps: {{ .Values.qps}}
+    qps: {{ .Values.qps}}
     {{- end }}
 
     {{- if .Values.connections }}
