@@ -102,12 +102,12 @@
     align-items: stretch;
   }
   .ix-hero__content {
-    max-width: 32rem;
+    max-width: 30rem;
     transform: translateX(2rem);
   }
   .ix-hero__image {
     order: 0;
-    width: 25rem;
+    width: 27rem;
   }
 }
 @media screen and (min-width: 76.25em) {

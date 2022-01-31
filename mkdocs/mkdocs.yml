@@ -47,7 +47,9 @@ plugins:
 - minify:
     minify_html: true
 - mike
-
+- redirects:
+    redirect_maps:
+        'tutorials/load-test/community/knative/loadtest.md': 'tutorials/load-test-http/community/knative/loadtest.md'
 # Customization
 extra:
   # Google Analytics
@@ -138,11 +140,7 @@ nav:
 - User guide:
   - Topics:
     - Iter8 hub: user-guide/topics/iter8hub.md
-    - Metrics: user-guide/topics/metrics.md
-    - SLOs: user-guide/topics/slos.md
-    - Version numbering: user-guide/topics/versionnumbering.md
-    - Conditional task execution: user-guide/topics/conditional.md
-  - Commands: 
+  - Commands:
     - iter8: user-guide/commands/iter8.md
     - iter8 hub: user-guide/commands/iter8_hub.md
     - iter8 run: user-guide/commands/iter8_run.md
@@ -157,10 +155,6 @@ nav:
     - iter8 k report: user-guide/commands/iter8_k_report.md
     - iter8 k logs: user-guide/commands/iter8_k_logs.md
     - iter8 k delete: user-guide/commands/iter8_k_delete.md
-  - Tasks:
-    - gen-load-and-collect-metrics-http: user-guide/tasks/collect.md
-    - assess-app-versions: user-guide/tasks/assess.md
-    - run (a bash script): user-guide/tasks/run.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
 - News: news.md
