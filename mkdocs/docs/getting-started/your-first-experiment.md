@@ -18,13 +18,6 @@ template: main.html
     brew install iter8
     ```
     
-    ??? note "Install a specific version"
-        You can install the latest stable release of the Iter8 CLI with specific major and minor version numbers. For example, the following command installs the latest stable release of the Iter8 CLI with major `0` and minor `8`.
-        ```shell
-        brew tap iter8-tools/iter8
-        brew install iter8@0.8
-        ```
-
 === "Binaries"
     Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
 
@@ -45,12 +38,6 @@ template: main.html
     go install github.com/iter8-tools/iter8@latest
     ```
     You can now run `iter8` (from your gopath bin/ directory)
-
-    ??? note "Install a specific version"
-        You can also install Iter8 CLI with a specific tag. For example, the following command installs version `0.8.29` of the Iter8 CLI.
-        ```shell
-        go install github.com/iter8-tools/iter8@v0.8.29
-        ```
 
 ## 2. Download experiment chart
 Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
