@@ -1,7 +1,5 @@
 # Iter8: Kubernetes Release Engineering made Simple
 
-***
-
 [![Iter8 release (latest SemVer)](https://img.shields.io/github/v/release/iter8-tools/iter8?sort=semver)](https://github.com/iter8-tools/iter8/releases)
 [![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/iter8-tools/iter8)
 [![Test Status](https://github.com/iter8-tools/iter8/workflows/tests/badge.svg)](https://github.com/iter8-tools/iter8/actions?query=workflow%3Atests)
@@ -13,7 +11,7 @@
 
 > Iter8 is a Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. 
 
-> Iter8 introduces the concept of an experiment. Iter8 experiments make it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout new versions, and maximize business value with each release.
+> Iter8 introduces the concept of an experiment, that makes it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout winning versions, and maximize business value with each release.
 
 ![Iter8 intro image](images/iter8-intro-dark.png)
 
