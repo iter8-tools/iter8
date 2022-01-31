@@ -18,8 +18,7 @@
 ## Highlights
 
 - **Load testing with SLOs** 
-
-      Iter8 experiments can generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics, and validate SLOs.
+    Iter8 experiments can generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics, and validate SLOs.
 
 - **A/B(/n) testing** 
       
