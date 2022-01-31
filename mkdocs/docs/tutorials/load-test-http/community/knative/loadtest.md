@@ -5,7 +5,7 @@ template: main.html
 # Load test a Knative HTTP service
 
 !!! tip "Load test a Knative HTTP Service and validate SLOs"
-    Use an [Iter8 experiment](../../../../getting-started/concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) HTTP service and validate latency and error-related [service level objectives (SLOs)](../../../../user-guide/topics/slos.md).
+    Use an [Iter8 experiment](../../../../getting-started/concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) HTTP service and validate latency and error-related service level objectives (SLOs).
 
 ???+ note "Before you begin"
     1. [Install Iter8](../../../../getting-started/install.md).

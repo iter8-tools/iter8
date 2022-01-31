@@ -102,12 +102,12 @@
     align-items: stretch;
   }
   .ix-hero__content {
-    max-width: 30rem;
+    max-width: 32rem;
     transform: translateX(2rem);
   }
   .ix-hero__image {
     order: 0;
-    width: 27rem;
+    width: 25rem;
   }
 }
 @media screen and (min-width: 76.25em) {
@@ -173,10 +173,6 @@
   color: #111;
   margin: 0 0 10px;
   display: block;
-}
-
-.feature-item h2 svg {
-  color: #a00101;
 }
 
 @media screen and (min-width: 13.75em) {
