@@ -51,10 +51,10 @@ You can also install Iter8 using:
 ### Load test HTTP services and validate SLOs
 
 1.  [Load test an HTTP service and validate SLOs](https://iter8.tools/0.8/getting-started/your-first-experiment/).
-2.  [Control the load characteristics during the HTTP load test experiment](https://iter8.tools/0.8/tutorials/load-test/requests/).
-3.  [Load test an HTTP POST endpoint with request payload](https://iter8.tools/0.8/tutorials/load-test/payload/).
-4.  [Learn more about built-in metrics and SLOs in an HTTP load test experiment](https://iter8.tools/0.8/tutorials/load-test/metricsandslos/).
-5.  [Load test a Knative HTTP service](https://iter8.tools/0.8/tutorials/load-test/community/knative/loadtest/).
+2.  [Control the load characteristics during the HTTP load test experiment](https://iter8.tools/0.8/tutorials/load-test-http/requests/).
+3.  [Load test an HTTP POST endpoint with request payload](https://iter8.tools/0.8/tutorials/load-test-http/payload/).
+4.  [Learn more about built-in metrics and SLOs in an HTTP load test experiment](https://iter8.tools/0.8/tutorials/load-test-http/metricsandslos/).
+5.  [Load test a Knative HTTP service](https://iter8.tools/0.8/tutorials/load-test-http/community/knative/loadtest/).
 
 
 ## Documentation
