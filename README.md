@@ -17,10 +17,21 @@
 
 ## Highlights
 
-- **Load testing with SLOs:** Iter8 experiments can generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics, and validate SLOs.
-- **A/B(/n) testing:** Grow your business with every release. Iter8 experiments can compare multiple versions based on business value and promote a winner.
-- **Simple to use:** Get started with Iter8 in seconds using pre-packaged experiment charts. Run Iter8 experiments locally, in a container, inside Kubernetes, or inside your CI/CD/GitOps pipelines.
-- **Awesome integrations:** Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulsets, Knative services, KServe/Seldon ML deployments, or custom Kubernetes resource types.
+- **Load testing with SLOs** 
+
+      Iter8 experiments can generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics, and validate SLOs.
+
+- **A/B(/n) testing** 
+      
+      Grow your business with every release. Iter8 experiments can compare multiple versions based on business value and promote a winner.
+
+- **Simple to use** 
+      
+      Get started with Iter8 in seconds using pre-packaged experiment charts. Run Iter8 experiments locally, in a container, inside Kubernetes, or inside your CI/CD/GitOps pipelines.
+
+- **Awesome integrations** 
+      
+      Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulsets, Knative services, KServe/Seldon ML deployments, or custom Kubernetes resource types.
 
 ## Install Iter8 CLI
 Install the latest stable release of the Iter8 CLI using `brew` as follows.
