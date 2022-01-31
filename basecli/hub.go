@@ -100,8 +100,8 @@ var hubCmd = &cobra.Command{
 	Short: "Download an experiment chart from Iter8 hub",
 	Long:  hubUsage,
 	Example: `
-# download load-test experiment chart from the public Iter8 hub
-iter8 hub -e load-test
+# download the load-test-http experiment chart from the public Iter8 hub
+iter8 hub -e load-test-http
 
 # custom Iter8 hubs are simply github repos that host Iter8 experiment charts
 # Suppose you forked github.com/iter8-tools/iter8 under the GitHub account $GHUSER,

@@ -23,8 +23,8 @@ You may also use [Podman](https://podman.io) or other alternatives to Docker in 
 
 ## 2. Download experiment chart
 ```shell
-iter8 hub -e load-test
-cd load-test
+iter8 hub -e load-test-http
+cd load-test-http
 ```
 
 ## 3. Run experiment
@@ -40,9 +40,9 @@ Iter8 enables you to send any type of content as payload during the load test, e
     iter8 run --set url=http://127.0.0.1/post \
               --set payloadStr="abc123" \
               --set SLOs.error-rate=0 \
-              --set SLOs.mean-latency=50 \
-              --set SLOs.p90=100 \
-              --set SLOs.p'97\.5'=200
+              --set SLOs.latency-mean=50 \
+              --set SLOs.latency-p90=100 \
+              --set SLOs.latency-p'97\.5'=200
     ```
 
 === "string (text/plain)"
@@ -52,9 +52,9 @@ Iter8 enables you to send any type of content as payload during the load test, e
               --set payloadStr="abc123" \
               --set contentType="text/plain" \
               --set SLOs.error-rate=0 \
-              --set SLOs.mean-latency=50 \
-              --set SLOs.p90=100 \
-              --set SLOs.p'97\.5'=200
+              --set SLOs.latency-mean=50 \
+              --set SLOs.latency-p90=100 \
+              --set SLOs.latency-p'97\.5'=200
     ```
 
 === "URL (application/json)"
@@ -64,9 +64,9 @@ Iter8 enables you to send any type of content as payload during the load test, e
               --set payloadURL=https://data.police.uk/api/crimes-street-dates \
               --set contentType="application/json" \
               --set SLOs.error-rate=0 \
-              --set SLOs.mean-latency=50 \
-              --set SLOs.p90=100 \
-              --set SLOs.p'97\.5'=200
+              --set SLOs.latency-mean=50 \
+              --set SLOs.latency-p90=100 \
+              --set SLOs.latency-p'97\.5'=200
     ```
 
 === "URL (image/jpeg)"
@@ -76,9 +76,9 @@ Iter8 enables you to send any type of content as payload during the load test, e
               --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
               --set contentType="image/jpeg" \
               --set SLOs.error-rate=0 \
-              --set SLOs.mean-latency=50 \
-              --set SLOs.p90=100 \
-              --set SLOs.p'97\.5'=200
+              --set SLOs.latency-mean=50 \
+              --set SLOs.latency-p90=100 \
+              --set SLOs.latency-p'97\.5'=200
     ```
 
 ***

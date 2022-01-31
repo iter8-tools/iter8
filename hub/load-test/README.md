@@ -2,8 +2,6 @@
 
 Iter8 experiment chart to load test an HTTP service and validate latency and error-related service level objectives (SLOs).
 
-**Note:** this chart is deprecated; migrate to the `load-test-http` chart.
-
 ***
 
 ## Examples

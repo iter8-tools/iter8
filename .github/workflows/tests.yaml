@@ -160,7 +160,7 @@ jobs:
     - name: load test POST endpoint (image/jpeg)
       run: |
         set -e
-        cd hub/load-test
+        cd hub/load-test-http
         iter8 run --set url=http://127.0.0.1/post \
                   --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
                   --set contentType="image/jpeg" \

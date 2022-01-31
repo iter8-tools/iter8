@@ -21,11 +21,11 @@ template: main.html
 
 
 ## 1. Download experiment chart
-Download the `load-test` [experiment chart](../../../../getting-started/concepts.md#experiment-chart) from [Iter8 hub](../../../../user-guide/topics/iter8hub.md) as follows.
+Download the `load-test-http` [experiment chart](../../../../getting-started/concepts.md#experiment-chart) from [Iter8 hub](../../../../user-guide/topics/iter8hub.md) as follows.
 
 ```shell
-iter8 hub -e load-test
-cd load-test
+iter8 hub -e load-test-http
+cd load-test-http
 ```
 
 ## 2. Run experiment
@@ -34,9 +34,9 @@ The `iter8 run` command combines an experiment chart with the supplied values to
 ```shell
 iter8 run --set url=http://hello.default.127.0.0.1.sslip.io \
           --set SLOs.error-rate=0 \
-          --set SLOs.mean-latency=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200
+          --set SLOs.latency-mean=50 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200
 ```
 
 ## 3. Assert outcomes

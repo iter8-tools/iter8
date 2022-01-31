@@ -7,8 +7,8 @@ template: main.html
 Iter8 hub is a GitHub location containing [Iter8 experiment charts](../../getting-started/concepts.md#experiment-chart). The public Iter8 hub is located at `github.com/iter8-tools/iter8//mkdocs/docs/hub`. The `iter8 hub` command can be used to download experiment charts from the hub.
 
 ```shell
-# download load-test experiment chart from the public Iter8 Hub
-iter8 hub -e load-test
+# download load-test-http experiment chart from the public Iter8 Hub
+iter8 hub -e load-test-http
 ```
 
 ## Custom Iter8 hub

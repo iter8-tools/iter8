@@ -44,11 +44,11 @@ template: main.html
     You can now run `iter8` (from your gopath bin/ directory)
 
 ## 2. Download experiment chart
-Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
+Download the `load-test-http` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
 
 ```shell
-iter8 hub -e load-test
-cd load-test
+iter8 hub -e load-test-http
+cd load-test-http
 ```
 
 ## 3. Run experiment
@@ -59,38 +59,12 @@ Run the experiment as follows.
 ```shell
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
-          --set SLOs.mean-latency=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200
+          --set SLOs.latency-mean=50 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200
 ```
 
 The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file.
-
-??? note "Look inside experiment.yaml"
-    ```yaml
-    # task 1: generate HTTP requests for application URL
-    # collect Iter8's built-in latency and error-related metrics
-    - task: gen-load-and-collect-metrics-http
-      with:
-        percentiles: 
-        - 90
-        - 97.5
-        versionInfo:
-        - url: https://example.com
-    # task 2: validate service level objectives for app using
-    # the metrics collected in the above task
-    - task: assess-app-versions
-      with:
-        SLOs:
-        - metric: "built-in/error-rate"
-          upperLimit: 0
-        - metric: "built-in/mean-latency"
-          upperLimit: 50
-        - metric: "built-in/p90"
-          upperLimit: 100
-        - metric: "built-in/p97.5"
-          upperLimit: 200
-    ```
 
 ??? note "Sample output from `iter8 run`"
 
