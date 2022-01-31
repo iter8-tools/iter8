@@ -1,6 +1,4 @@
-# Iter8
-
-<img alt="Iter8" src="images/iter8.png" align="center">
+# Iter8: Kubernetes Release Engineering made Simple
 
 ***
 
@@ -13,7 +11,9 @@
 
 ## Introduction
 
-Iter8 is a Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. Use Iter8 to assess and compare multiple versions of Kubernetes apps and ML models based on performance and business metrics, safely rollout new versions, and/or maximize business value with each release.
+> Iter8 is a Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. 
+
+> Iter8 introduces the concept of an experiment. Iter8 experiments make it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout new versions, and maximize business value with each release.
 
 ![Iter8 intro image](images/iter8-intro-dark.png)
 
