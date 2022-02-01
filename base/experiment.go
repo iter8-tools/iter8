@@ -508,3 +508,42 @@ func (in *Insights) ScalarMetricValue(i int, m string) *float64 {
 		return nil
 	}
 }
+
+// GetMetricsInfo gets metric meta for the given normalized metric name
+func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
+	s := strings.Split(nm, "/")
+
+	if len(s) == 3 {
+		log.Logger.Tracef("%v is an aggregated metric", nm)
+		vm := s[0] + "/" + s[1]
+		mm, ok := in.MetricsInfo[vm]
+		if !ok {
+			err := fmt.Errorf("unable to find info for vector metric: %v", vm)
+			log.Logger.Error(err)
+			return nil, err
+		}
+		aggType := CounterMetricType
+		if AggregationType(s[2]) != CountAggregator {
+			aggType = GaugeMetricType
+		}
+		return &MetricMeta{
+			Description: fmt.Sprintf("Aggregated %v with aggregation function %v", vm, s[2]),
+			Units:       mm.Units,
+			Type:        aggType,
+		}, nil
+	}
+
+	if len(s) == 2 { // this appears to be a non-aggregated metric
+		mm, ok := in.MetricsInfo[nm]
+		if !ok {
+			err := fmt.Errorf("unable to find info for scalar metric: %v", nm)
+			log.Logger.Error(err)
+			return nil, err
+		}
+		return &mm, nil
+	}
+
+	err := fmt.Errorf("invalid metric name %v; metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function", nm)
+	log.Logger.Error(err)
+	return nil, err
+}

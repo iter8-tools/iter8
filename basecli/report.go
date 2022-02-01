@@ -136,16 +136,30 @@ func init() {
 
 /* Following functions/methods are common to both text and html templates */
 
-// SortedScalarMetrics extracts scalar metric names from experiment in sorted order
-func (e *Experiment) SortedScalarMetrics() []string {
+// SortedScalarAndSLOMetrics extracts scalar and SLO metric names from experiment in sorted order
+func (e *Experiment) SortedScalarAndSLOMetrics() []string {
 	keys := []string{}
 	for k, mm := range e.Result.Insights.MetricsInfo {
 		if mm.Type == base.CounterMetricType || mm.Type == base.GaugeMetricType {
 			keys = append(keys, k)
 		}
 	}
-	sort.Strings(keys)
-	return keys
+	// also add SLO metric names
+	for _, v := range e.Result.Insights.SLOs {
+		nm, err := base.NormalizeMetricName(v.Metric)
+		if err == nil {
+			keys = append(keys, nm)
+		}
+	}
+	// remove duplicates
+	tmp := base.Uniq(keys)
+	uniqKeys := []string{}
+	for _, val := range tmp {
+		uniqKeys = append(uniqKeys, val.(string))
+	}
+
+	sort.Strings(uniqKeys)
+	return uniqKeys
 }
 
 // ScalarMetricValueStr extracts metric value string for given version and scalar metric name

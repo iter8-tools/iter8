@@ -119,7 +119,7 @@ func (t *collectHTTPTask) initializeDefaults() {
 	for _, p := range defaultPercentiles {
 		t.With.Percentiles = append(t.With.Percentiles, p)
 	}
-	tmp := uniq(t.With.Percentiles)
+	tmp := Uniq(t.With.Percentiles)
 	t.With.Percentiles = []float64{}
 	for _, val := range tmp {
 		t.With.Percentiles = append(t.With.Percentiles, val.(float64))

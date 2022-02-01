@@ -280,9 +280,10 @@ func (e *Experiment) MetricWithUnits(metricName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	m, ok := in.MetricsInfo[nm]
-	if !ok {
-		e := fmt.Errorf("unknown metric name %v", nm)
+
+	m, err := in.GetMetricsInfo(nm)
+	if err != nil {
+		e := fmt.Errorf("unable to get metrics info for %v", nm)
 		log.Logger.Error(e)
 		return "", e
 	}
@@ -299,9 +300,10 @@ func (e *Experiment) MetricDescriptionHTML(metricName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	m, ok := in.MetricsInfo[nm]
-	if !ok {
-		e := fmt.Errorf("unknown metric name %v", nm)
+
+	m, err := in.GetMetricsInfo(nm)
+	if err != nil {
+		e := fmt.Errorf("unable to get metrics info for %v", nm)
 		log.Logger.Error(e)
 		return "", e
 	}

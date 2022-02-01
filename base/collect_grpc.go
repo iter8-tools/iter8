@@ -155,9 +155,10 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 		runner.WithProtoFile(ghzc.Proto, nil),
 		runner.WithCountErrors(ghzc.CountErrors),
 		runner.WithInsecure(ghzc.Insecure),
+		runner.WithData(ghzc.Data),
 	)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("ghz failed")
+		log.Logger.WithStackTrace(err.Error()).Error("ghz run failed")
 		if igr == nil {
 			log.Logger.Error("failed to get results since ghz run was aborted")
 		}
