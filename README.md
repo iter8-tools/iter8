@@ -11,7 +11,7 @@
 
 > Iter8 is a Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. 
 
-Iter8 introduces the concept of an experiment, that makes it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout winning versions, and maximize business value with each release.
+Iter8 experiments make it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout winning versions, and maximize business value with each release.
 
 <p align='center'>
 <img src="images/iter8-intro-color.png" width="70%" />
@@ -36,7 +36,7 @@ Iter8 introduces the concept of an experiment, that makes it simple to collect p
       
     Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulsets, Knative services, KServe/Seldon ML deployments, or custom Kubernetes resource types.
 
-## Install Iter8 CLI
+## Installation
 Install the latest stable release of the Iter8 CLI using `brew` as follows.
 
 ```shell
