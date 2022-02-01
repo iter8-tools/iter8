@@ -1,4 +1,4 @@
-{{ define "experiment" -}}
+{{ define "load-test.experiment" -}}
 # task 1: generate HTTP requests for application URL
 # collect Iter8's built-in HTTP latency and error-related metrics
 - task: gen-load-and-collect-metrics-http

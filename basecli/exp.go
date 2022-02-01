@@ -1,6 +1,7 @@
 package basecli
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path"
 
@@ -33,7 +34,7 @@ iter8 gen exp --set url=https://example.com
 		}
 
 		// add in experiment.yaml template
-		eData := []byte(`{{- include "experiment" . }}`)
+		eData := []byte(fmt.Sprintf(`{{- include "%v.experiment" . }}`, c.Name()))
 		c.Templates = append(c.Templates, &chart.File{
 			Name: path.Join("templates", experimentSpecPath),
 			Data: eData,
