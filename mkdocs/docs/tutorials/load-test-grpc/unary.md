@@ -80,7 +80,38 @@ iter8 run --set host="127.0.0.1:50051" \
 Assert experiment outcomes and view reports as described in the [quick start tutorial](../../getting-started/your-first-experiment.md).
 
 ??? note "The HTML report looks as follows"
-    ![HTML report]()
+    ![HTML report](images/iter8.report.png)
 
 ??? note "The text report looks as follows"
-    ![HTML report]()
+    ```shell
+    Experiment summary:
+    *******************
+
+      Experiment completed: true
+      No failed tasks: true
+      Total number of tasks: 2
+      Number of completed tasks: 2
+
+    Whether or not service level objectives (SLOs) are satisfied:
+    *************************************************************
+
+      SLO Conditions                            |Satisfied
+      --------------                            |---------
+      built-in/grpc-error-rate <= 0             |true
+      built-in/grpc-latency/mean (msec) <= 50   |true
+      built-in/grpc-latency/p90 (msec) <= 100   |true
+      built-in/grpc-latency/p97.5 (msec) <= 200 |true
+      
+
+    Latest observed values for metrics:
+    ***********************************
+
+      Metric                             |value
+      -------                            |-----
+      built-in/grpc-error-count          |0.00
+      built-in/grpc-error-rate           |0.00
+      built-in/grpc-latency/mean (msec)  |1.51
+      built-in/grpc-latency/p90 (msec)   |3.00
+      built-in/grpc-latency/p97.5 (msec) |4.00
+      built-in/grpc-request-count        |200.00    
+    ```
