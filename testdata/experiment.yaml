@@ -32,3 +32,8 @@
       upperLimit: 250
     - metric: "built-in/http-latency-p97.5"
       upperLimit: 500
+# tasks 3 & 4: print if SLOs are satisfied or not
+- if: SLOs()
+  run: echo "SLOs satisfied"
+- if: not SLOs()
+  run: echo "SLOs not satisfied"

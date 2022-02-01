@@ -12,4 +12,4 @@ our project that we need help with including:
 If anything doesn't make sense, or doesn't work when you run it, please open a
 bug report and let us know!
 
-See [here](https://iter8.tools/latest/contributing/overview/) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more detailed instructions for contributing.
+See [here](https://iter8.tools/latest/contributing) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more detailed instructions for contributing.

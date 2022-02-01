@@ -42,10 +42,10 @@
     <div class="mdx-hero">
       <!-- Hero content -->
       <div class="mdx-hero__content">
-        <h1><strong>Kubernetes Release Engineering</strong></h1>
-        <h2>
+        <h2><strong>Kubernetes release engineering made simple</strong></h2>
+        <h3>
           Safely rollout new versions of apps and ML models. Maximize business value with each release.
-        </h2> 
+        </h3> 
 
         <a href="{{ base_url }}/getting-started/your-first-experiment" title="Quick start"
           class="md-button md-button--primary">
@@ -63,16 +63,16 @@
 
 <section class="tx-container">
   <div class="md-grid md-typeset text-center pad-margin">
-      <h1>
-        <span class="twemoji">
-          {% include ".icons/material/github.svg" %}
+      <h2>
+        Built with
+        <span class="twemoji heart">
+          {% include ".icons/material/heart.svg" %} 
         </span>
-        Open Source
-      </h1>
+        for DevOps, MLOps, SRE, and data science teams.
+      </h2>
 
       <h3>
-        Available under the <a
-          href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2 License</a>
+        100% open source, community driven, and Apache v2 licensed.
       </h3>
 
       <a href="https://github.com/iter8-tools/iter8" title="star"
@@ -80,19 +80,20 @@
         <span class="twemoji">
           {% include ".icons/material/star.svg" %}
         </span>
-        Star Iter8 on
+        Star Iter8 on GitHub
         <span class="twemoji">
           {% include ".icons/material/github.svg" %}
         </span>
       </a>
       
-      <p>Using Iter8? Please list yourself 
+      <p>Using Iter8? Please list yourself
         <a href="https://github.com/iter8-tools/iter8/blob/master/ADOPTERS.md">here.</a>
       </p>
     </div>
 </section>
 
 <section class="fx-container">
+
   <div class="md-grid md-typeset">
     <!-- Main site box descriptions -->
     <div class="top-hr">
@@ -102,7 +103,7 @@
           <span class="twemoji">
             {% include ".icons/material/atom.svg" %}
           </span>
-          Load testing/SLOs
+          Load testing with SLOs
         </h2>
         <p>Iter8 experiments can generate requests for <strong>HTTP</strong> and <strong>gRPC</strong> services, collect <strong>built-in</strong> latency and error-related metrics, and validate <strong>SLOs</strong>.</p>
       </div>
@@ -135,26 +136,6 @@
           Awesome integrations
         </h2>
         <p>Use with any <strong>app, serverless, or ML</strong> framework like <strong>Kubernetes deployments, statefulSets</strong>, <strong>Knative</strong> serverless, and <strong>KServe/Seldon ML</strong> deployments.</p>
-      </div>
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/webhook.svg" %}
-          </span>
-          Notifications
-        </h2>
-        <p>Iter8 experiments can automatically trigger <strong>GitHub Action workflows</strong>, notify <strong>Slack</strong>, <strong>webhook and cloudevent receivers</strong>.</p>
-      </div>
-
-      <div class="feature-item">
-        <h2>
-          <span class="twemoji">
-            {% include ".icons/material/chart-bar.svg" %}
-          </span>
-          Reporting
-        </h2>
-        <p>Iter8 can report results of the experiment in <strong>HTML format with D3 visualizations</strong>, or in <strong>plain text format</strong>.</p>
       </div>
 
     </div>

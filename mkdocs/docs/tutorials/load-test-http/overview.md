@@ -4,8 +4,8 @@ template: main.html
 
 # Overview
 
-!!! tip "Load Test with SLOs"
-    Iter8 experiments for load testing with SLOs generate requests for HTTP and gRPC services, collect built-in latency and error-related metrics, and validate service-level objectives (SLOs).
+!!! tip "Load Testing and SLO Validation for HTTP Services"
+    Iter8's HTTP load testing and SLO validation experiments can generate requests for HTTP services, collect built-in latency and error-related metrics, and validate service-level objectives (SLOs).
 
 ***
 

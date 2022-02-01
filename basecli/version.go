@@ -10,9 +10,9 @@ import (
 var short bool
 
 var (
-	// version is the semantic version of Iter8
-	// this variable is intended to be set using LDFLAGS at build time
-	version = "v0.8.27"
+	// Version is intended to be set using LDFLAGS at build time
+	// In the absence of complete semantic versioning info, the best we can do is major minor
+	version = "v0.8"
 	// version is the current major/minor version of Iter8
 	// set this manually whenever the major or minor version changes
 	majorMinor = "v0.8"

@@ -16,19 +16,61 @@ limitations under the License.
 package basecli
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"os"
 	"path"
+	"strings"
 
+	"github.com/google/go-github/v42/github"
 	"github.com/hashicorp/go-getter"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-const (
-	// Iter8Hub is the location of the public Iter8 Hub.
-	Iter8Hub = "github.com/iter8-tools/iter8.git//hub"
-)
+// latestStableVersion returns the latest stable version of Iter8
+func latestStableVersion() (string, error) {
+	// find all tags
+	client := github.NewClient(nil)
+	tags, _, err := client.Repositories.ListTags(context.Background(), "iter8-tools", "iter8", nil)
+	// something went wrong or found zero tags
+	if err != nil || len(tags) == 0 {
+		e := errors.New("unable to determine latest stable version for Iter8 hub")
+		var msg string
+		if len(tags) == 0 {
+			msg = "found 0 tags"
+		}
+		msg = e.Error()
+		log.Logger.WithStackTrace(msg).Error(e)
+	}
+	// found some tags
+	log.Logger.Infof("found %v tags", len(tags))
+	// found latest tag with the correct major minor prefix
+	if strings.HasPrefix(*tags[0].Name, majorMinor+".") {
+		return *tags[0].Name, nil
+	}
+	// ToDo: Fix the following error
+	err = fmt.Errorf("unable to find tags with major minor %v", majorMinor)
+	log.Logger.Error(err)
+	return "", err
+}
+
+// getIter8Hub gets the location of the Iter8Hub
+func getIter8Hub() (string, error) {
+	iter8HubTpl := "github.com/iter8-tools/iter8.git?ref=%v//hub"
+	viper.BindEnv("ITER8HUB")
+	iter8HubFromEnv := viper.GetString("ITER8HUB")
+	if len(iter8HubFromEnv) > 0 {
+		return iter8HubFromEnv, nil
+	}
+	tag, err := latestStableVersion()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf(iter8HubTpl, tag), nil
+}
 
 var hubFolder string
 
@@ -74,10 +116,11 @@ iter8 hub -e tensorflow
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// initialize the location of iter8hub
-		viper.BindEnv("ITER8HUB")
-		viper.SetDefault("ITER8HUB", Iter8Hub)
-		ifurl := path.Join(viper.GetString("ITER8HUB"), hubFolder)
+		hubRoot, err := getIter8Hub()
+		if err != nil {
+			return err
+		}
+		ifurl := path.Join(hubRoot, hubFolder)
 		log.Logger.Info("downloading ", ifurl)
 		if err := getter.Get(hubFolder, ifurl); err != nil {
 			log.Logger.WithStackTrace(err.Error()).Errorf("unable to get: %v", ifurl)

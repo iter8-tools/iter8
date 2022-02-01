@@ -2,28 +2,42 @@
 template: main.html
 ---
 
-# Load Test with SLOs
+# Your First Experiment: Load Test an HTTP Service with SLOs
 
-!!! tip "Load test an HTTP Service and validate SLOs" 
-    Use an [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) to load test an HTTP service and validate latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
+!!! tip "Load Test an HTTP Service with SLOs"
+    Get started with your first [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) by load testing an HTTP service and validating its latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
 
 ***
 
 ## 1. Install Iter8
 === "Brew"
+    Install the latest stable release of the Iter8 CLI using `brew` as follows.
+
     ```shell
     brew tap iter8-tools/iter8
     brew install iter8
     ```
+    
+=== "Binaries"
+    Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
+
+=== "Source"
+    Build Iter8 from source as follows. Go `1.16+` is a pre-requisite.
+    ```shell
+    # you can replace master with a specific tag such as v0.8.29
+    export REF=master
+    https://github.com/iter8-tools/iter8.git?ref=$REF
+    cd iter8
+    make install
+    ```
 
 === "Go 1.16+"
+    Install the latest stable release of the Iter8 CLI using `go 1.16+` as follows.
+
     ```shell
     go install github.com/iter8-tools/iter8@latest
     ```
     You can now run `iter8` (from your gopath bin/ directory)
-
-=== "Binaries"
-    Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
 
 ## 2. Download experiment chart
 Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
@@ -119,69 +133,51 @@ View a report of the experiment in HTML or text formats as follows.
     # open report.html
     ```
 
-    ???+ note "The HTML report looks as follows"
+    ??? note "The HTML report looks as follows"
         ![HTML report](images/report.html.png)
 
 === "Text"
     ```shell
-    iter8 report -o text
+    iter8 report
     ```
 
-    ???+ note "The text report looks as follows."
+    ??? note "The text report looks as follows."
+        ```shell
+        Experiment summary:
+        *******************
 
-        ```
-        -----------------------------|-----
-                   Experiment summary|
-        -----------------------------|-----
-                Experiment completed |true
-        -----------------------------|-----
-                   Experiment failed |false
-        -----------------------------|-----
-           Number of completed tasks |4
-        -----------------------------|-----
+          Experiment completed: true
+          No failed tasks: true
+          Total number of tasks: 2
+          Number of completed tasks: 2
 
+        Whether or not service level objectives (SLOs) are satisfied:
+        *************************************************************
 
+          SLO Conditions                           |Satisfied
+          --------------                           |---------
+          built-in/http-latency-mean (msec) <= 100 |true
+          built-in/http-latency-p95 (msec) <= 150  |true
+          
 
-        -----------------------------|-----
-                                 SLOs|
-        -----------------------------|-----
-                  built-in/error-rate|true
-        -----------------------------|-----
-                built-in/p95.0 (msec)|true
-        -----------------------------|-----
+        Latest observed values for metrics:
+        ***********************************
 
-
-          -----------------------------|-----
-                                Metrics|
-          -----------------------------|-----
-                   built-in/error-count|0
-          -----------------------------|-----
-                    built-in/error-rate|0
-          -----------------------------|-----
-                built-in/latency (msec)|3
-          -----------------------------|-----
-            built-in/max-latency (msec)|213.21
-          -----------------------------|-----
-           built-in/mean-latency (msec)|17.47
-          -----------------------------|-----
-            built-in/min-latency (msec)|4.30
-          -----------------------------|-----
-                  built-in/p50.0 (msec)|10.80
-          -----------------------------|-----
-                  built-in/p75.0 (msec)|12.40
-          -----------------------------|-----
-                  built-in/p90.0 (msec)|13.60
-          -----------------------------|-----
-                  built-in/p95.0 (msec)|14
-          -----------------------------|-----
-                  built-in/p99.0 (msec)|209.91
-          -----------------------------|-----
-                  built-in/p99.9 (msec)|212.88
-          -----------------------------|-----
-                 built-in/request-count|100
-          -----------------------------|-----
-         built-in/stddev-latency (msec)|39.90
-          -----------------------------|-----
+          Metric                              |value
+          -------                             |-----
+          built-in/http-error-count           |0.00
+          built-in/http-error-rate            |0.00
+          built-in/http-latency-max (msec)    |186.56
+          built-in/http-latency-mean (msec)   |11.25
+          built-in/http-latency-min (msec)    |4.05
+          built-in/http-latency-p50 (msec)    |6.59
+          built-in/http-latency-p75 (msec)    |7.79
+          built-in/http-latency-p90 (msec)    |9.23
+          built-in/http-latency-p95 (msec)    |10.00
+          built-in/http-latency-p99 (msec)    |183.94
+          built-in/http-latency-p99.9 (msec)  |186.30
+          built-in/http-latency-stddev (msec) |28.01
+          built-in/http-request-count         |200.00
         ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
@@ -190,10 +186,10 @@ Congratulations! :tada: You completed your first Iter8 experiment.
 
 ???+ tip "Useful variations of this experiment"
 
-    1. [Control the request generation process](../tutorials/load-test/requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
+    1. [Control the request generation process](../tutorials/load-test-http/requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
 
-    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test/payload.md) during the load test.
+    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test-http/payload.md) during the load test.
 
-    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the load test](../tutorials/load-test/metricsandslos.md).
+    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the load test](../tutorials/load-test-http/metricsandslos.md).
     
     4. The `values.yaml` file in the experiment chart folder documents all the values that can be supplied during the experiment.

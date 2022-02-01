@@ -186,7 +186,7 @@ func (exp *Experiment) slosBy(version int) bool {
 }
 
 // SLOs returns true if all versions satisfy SLOs
-func (exp *Experiment) slos() bool {
+func (exp *Experiment) SLOs() bool {
 	sby := exp.getSLOsSatisfiedBy()
 	return exp.Result.Insights.NumVersions == len(sby)
 }

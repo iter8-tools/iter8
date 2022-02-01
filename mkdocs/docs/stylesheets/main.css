@@ -64,6 +64,19 @@
   border-color: var(--md-primary-bg-color);
 }
 
+@keyframes heart {
+  0%, 40%, 80%, 100% {
+    transform: scale(1);
+  }
+  20%, 60% {
+    transform: scale(1.15);
+  }
+}
+.heart {
+  animation: heart 1000ms infinite;
+  color: #98002e;
+}
+
 .ix-container {
   padding-top: 1rem;
   background: whitesmoke;
@@ -142,7 +155,7 @@
 .feature-item h2 {
   color: #333;
   font-weight: 300;
-  font-size: 25px;
+  font-size: 28px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -153,7 +166,7 @@
 }
 
 .feature-item p {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.8em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -171,19 +184,9 @@
     width: 100%;
   }
 }
-@media screen and (min-width: 45em) {
-  .feature-item {
-    width: 50%;
-  }
-}
-@media screen and (min-width: 60em) {
-  .feature-item {
-    width: 33%;
-  }
-}
 @media screen and (min-width: 76.25em) {
   .feature-item {
-    width: 33%;
+    width: 50%;
   }
 }
 .feature-item:hover {
