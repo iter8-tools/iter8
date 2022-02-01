@@ -169,3 +169,40 @@ jobs:
                   --set SLOs.latency-'p95\.0'=200
         cat experiment.yaml
         iter8 assert -c completed -c nofailure -c slos
+
+  e2e-tests-grpc:
+    name: local grpc tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - run: make install
+
+    - name: run greeter
+      run: |
+        git clone -b v1.43.0 https://github.com/grpc/grpc-go
+        cd grpc-go/examples/helloworld
+        go run greeter_server/main.go &
+        sleep 1.0
+        
+    - name: load test grpc service method
+      run: |
+        set -e
+        cd hub/load-test-grpc
+        iter8 run --set host="127.0.0.1:50051" \
+                  --set call="helloworld.Greeter.SayHello" \
+                  --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+                  --set data='{"name":"goodness me"}' \
+                  --set SLOs.error-rate=0 \
+                  --set SLOs.latency/mean=50 \
+                  --set SLOs.latency/p90=100 \
+                  --set SLOs.latency/p'97\.5'=200
+        cat experiment.yaml
+        iter8 assert -c completed -c nofailure -c slos
+
