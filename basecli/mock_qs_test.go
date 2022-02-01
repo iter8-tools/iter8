@@ -66,6 +66,37 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestMockQuickStartWithBadSLOs(t *testing.T) {
+	// get into the experiment chart folder
+	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
+
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://example.com",
+		httpmock.NewStringResponder(200, `all good`))
+
+	// with bad SLOs
+	GenOptions = values.Options{
+		Values:     []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p95=0.00001", "duration=2s"},
+		ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
+	}
+	err := runCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// assert
+	AssertOptions = AssertOptionsType{
+		Conds:   []string{Completed, NoFailure, SLOs},
+		Timeout: 5,
+	}
+
+	exp, _ := Build(true, &FileExpIO{})
+	allGood, err := exp.Assert(AssertOptions.Conds, AssertOptions.Timeout)
+	assert.NoError(t, err)
+	assert.False(t, allGood)
+}
+
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
@@ -78,7 +109,10 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		httpmock.NewStringResponder(200, `all good`))
 
 	// with SLOs and percentiles also
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100")
+	GenOptions = values.Options{
+		Values: []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
+	}
+
 	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml"))
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
