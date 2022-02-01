@@ -156,6 +156,7 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 		runner.WithCountErrors(ghzc.CountErrors),
 		runner.WithInsecure(ghzc.Insecure),
 		runner.WithData(ghzc.Data),
+		runner.WithConnections(ghzc.Connections),
 		runner.WithConcurrency(ghzc.C),
 		runner.WithTotalRequests(ghzc.N),
 	)
