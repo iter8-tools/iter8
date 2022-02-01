@@ -513,6 +513,7 @@ func (in *Insights) ScalarMetricValue(i int, m string) *float64 {
 func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 	s := strings.Split(nm, "/")
 
+	// this is an aggregated metric
 	if len(s) == 3 {
 		log.Logger.Tracef("%v is an aggregated metric", nm)
 		vm := s[0] + "/" + s[1]
@@ -522,18 +523,27 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 			log.Logger.Error(err)
 			return nil, err
 		}
+		// determine type of aggregation
 		aggType := CounterMetricType
 		if AggregationType(s[2]) != CountAggregator {
 			aggType = GaugeMetricType
 		}
+		// format aggregator text
+		formattedAggregator := s[2] + " value"
+		if strings.HasPrefix(s[2], PercentileAggregatorPrefix) {
+			percent := strings.TrimPrefix(s[2], PercentileAggregatorPrefix)
+			formattedAggregator = fmt.Sprintf("%v-th percentile value", percent)
+		}
+		// return metrics meta
 		return &MetricMeta{
-			Description: fmt.Sprintf("Aggregated %v with aggregation function %v", vm, s[2]),
+			Description: fmt.Sprintf("%v of %v", formattedAggregator, vm),
 			Units:       mm.Units,
 			Type:        aggType,
 		}, nil
 	}
 
-	if len(s) == 2 { // this appears to be a non-aggregated metric
+	// this is a non-aggregated metric
+	if len(s) == 2 {
 		mm, ok := in.MetricsInfo[nm]
 		if !ok {
 			err := fmt.Errorf("unable to find info for scalar metric: %v", nm)
