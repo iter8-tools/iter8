@@ -25,6 +25,7 @@ require (
 	github.com/google/go-github/v42 v42.0.0
 	github.com/hashicorp/go-getter v1.5.10
 	github.com/jarcoal/httpmock v1.1.0
+	github.com/mcuadros/go-defaults v1.2.0
 	github.com/montanaflynn/stats v0.6.6
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0

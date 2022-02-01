@@ -6,6 +6,7 @@ import (
 
 	"github.com/bojand/ghz/runner"
 	log "github.com/iter8-tools/iter8/base/log"
+	gd "github.com/mcuadros/go-defaults"
 )
 
 /*
@@ -79,6 +80,8 @@ type collectGRPCTask struct {
 
 // initializeDefaults sets default values for the collect task
 func (t *collectGRPCTask) initializeDefaults() {
+	// set defaults
+	gd.SetDefaults(t.With.Config)
 	// always count errors
 	t.With.Config.CountErrors = countErrorsDefault
 	// always insecure
