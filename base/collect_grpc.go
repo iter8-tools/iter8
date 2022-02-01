@@ -81,7 +81,7 @@ type collectGRPCTask struct {
 // initializeDefaults sets default values for the collect task
 func (t *collectGRPCTask) initializeDefaults() {
 	// set defaults
-	gd.SetDefaults(t.With.Config)
+	gd.SetDefaults(&t.With.Config)
 	// always count errors
 	t.With.Config.CountErrors = countErrorsDefault
 	// always insecure
