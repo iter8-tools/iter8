@@ -15,7 +15,7 @@
 
 ![Iter8 intro image](images/iter8-intro-dark.png)
 
-## Highlights
+## Features at a glance
 
 - **Load testing with SLOs** 
     
