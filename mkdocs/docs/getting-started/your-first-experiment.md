@@ -74,7 +74,7 @@ The `iter8 run` command combines an experiment chart with the supplied values to
     ```
 
 ??? note "Iter8 and Helm"
-    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 run` command](../user-guide/commands/iter8_run.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
+    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test-http` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 run` command](../user-guide/commands/iter8_run.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
 
 ## 4. Assert outcomes
 Assert that the experiment completed without any failures and SLOs are satisfied.
