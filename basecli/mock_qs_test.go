@@ -117,7 +117,7 @@ func TestDryRunLocal(t *testing.T) {
 	// dry run
 	os.Chdir(base.CompletePath("../", "hub/load-test"))
 	Dry = true
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
+	GenOptions.Values = []string{"url=https://example.com"}
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 	assert.FileExists(t, "experiment.yaml")
