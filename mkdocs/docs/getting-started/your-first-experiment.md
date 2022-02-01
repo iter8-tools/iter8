@@ -7,10 +7,6 @@ template: main.html
 !!! tip "Load Test an HTTP Service with SLOs"
     Get started with your first [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) by load testing an HTTP service and validating its latency and error-related service level objectives (SLOs). 
     
-    **Scenario demonstrated in this tutorial**
-
-    ![Your first experiment](images/your-first-experiment.png)
-
 ***
 
 ## 1. Install Iter8

@@ -10,7 +10,7 @@ Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data sci
 Iter8 experiments make it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout winning versions, and maximize business value with each release.
 
 ### Example
-The following pictures illustrates an Iter8 experiment that performs load testing with SLO validation of a gRPC service.
+The following picture illustrates an Iter8 experiment that performs load testing with SLO validation of a gRPC service.
 
 ![Load testing gRPC](../tutorials/load-test-grpc/images/grpc-overview.png)
 

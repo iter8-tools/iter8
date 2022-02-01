@@ -7,16 +7,24 @@
 [![Slack channel](https://img.shields.io/badge/Slack-Join-purple)](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.7/getting-started/help/#iter8-community-meetings)
 
-## Introduction
+## What is Iter8?
 
-> Iter8 is a Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. 
+Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. 
 
+## What is an Iter8 experiment?
 Iter8 experiments make it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout winning versions, and maximize business value with each release.
 
+### Example
+The following picture illustrates an Iter8 experiment that performs load testing with SLO validation of a gRPC service.
+
 <p align='center'>
-<img src="images/iter8-intro-color.png" width="70%" />
+<img alt-text="Load testing gRPC" src="mkdocs/docs/tutorials/load-test-grpc/images/grpc-overview.png" width="70%" />
 </p>
 
+### Experiment chart
+In order to enable reuse, Iter8 experiments are templated and packaged as specialized [Helm charts](https://helm.sh/docs/topics/charts/). Experiment charts can be combined with values to generate `experiments.yaml` files that provide fully defined experiment specifications.
+
+Iter8 experiment charts enable to you to launch powerful release engineering experiments in a matter of seconds.
 
 ## Features at a glance
 
