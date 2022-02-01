@@ -105,7 +105,7 @@ View a report of the experiment in HTML or text formats as follows.
     # open report.html
     ```
 
-    ??? note "The HTML report looks as follows"
+    ??? note "The HTML report looks like this"
         ![HTML report](images/report.html.png)
 
 === "Text"
@@ -113,7 +113,7 @@ View a report of the experiment in HTML or text formats as follows.
     iter8 report
     ```
 
-    ??? note "The text report looks as follows."
+    ??? note "The text report looks like this"
         ```shell
         Experiment summary:
         *******************

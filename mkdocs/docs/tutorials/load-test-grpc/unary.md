@@ -79,10 +79,10 @@ iter8 run --set host="127.0.0.1:50051" \
 
 Assert experiment outcomes and view reports as described in the [quick start tutorial](../../getting-started/your-first-experiment.md).
 
-??? note "The HTML report looks as follows"
+??? note "The HTML report looks like this"
     ![HTML report](images/iter8.report.png)
 
-??? note "The text report looks as follows"
+??? note "The text report looks like this"
     ```shell
     Experiment summary:
     *******************
