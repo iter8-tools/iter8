@@ -59,7 +59,7 @@ You can also install Iter8 using:
 
 ## Usage Examples
 
-### Load test HTTP services and validate SLOs
+### HTTP load test with SLOs
 
 1.  [Load test an HTTP service and validate SLOs](https://iter8.tools/0.8/getting-started/your-first-experiment/).
 2.  [Control the load characteristics during the HTTP load test experiment](https://iter8.tools/0.8/tutorials/load-test-http/loadcharacteristics/).

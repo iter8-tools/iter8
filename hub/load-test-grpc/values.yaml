@@ -1,0 +1,38 @@
+### Defaults values and behaviors of various parameters that can be set
+### for this experiment chart.
+
+### The documentation follows Helm recommendations described in the URL below.
+### https://helm.sh/docs/chart_best_practices/values/#document-valuesyaml 
+
+### If a comment line starts with a single `#`, it denotes a setting for a value.
+### You can uncomment such lines and edit the value(s).
+### In contrast, general comment lines (like the current line) start with three or more `#`
+
+##################################
+
+### host  Host and port of the gRPC service
+### This field is required.
+
+# host: 127.0.0.1:50051
+
+### call  Fully-qualified method name.
+### Specified in 'package.Service/method' or 'package.Service.Method' format.
+
+# call: helloworld.Greeter.SayHello
+
+### protoURL  URL where the Protocol Buffer file that defines the gRPC service is located.
+
+# protoURL: https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto
+
+### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
+### Metrics collected during the load test are used to verify if the app satisfies SLOs.
+### Each SLO has a key which is the metric name, 
+### and a value which is the upper limit on the metric.
+### Valid metric names are error-rate, error-count, latency/max, latency/mean, 
+### latency/stddev, and latency/pX, where X is any latency percentile 
+### (i.e., any float value between 0 and 100).
+
+# SLOs:
+#   error-rate: 0 # error rate must be 0; every non-OK response is an error
+#   latency/mean: 50 # mean latency must be under 50 msec
+#   latency/p95.0: 200 # 95th percentile latency must be under 200 msec
