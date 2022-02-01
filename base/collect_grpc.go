@@ -156,6 +156,8 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 		runner.WithCountErrors(ghzc.CountErrors),
 		runner.WithInsecure(ghzc.Insecure),
 		runner.WithData(ghzc.Data),
+		runner.WithConcurrency(ghzc.C),
+		runner.WithTotalRequests(ghzc.N),
 	)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("ghz run failed")

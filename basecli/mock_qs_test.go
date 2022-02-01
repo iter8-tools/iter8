@@ -52,7 +52,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 
 	// with SLOs next
 	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "duration=2s")
-	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/values.yaml"))
+	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml"))
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -78,7 +78,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// with SLOs and percentiles also
 	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100")
-	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/values.yaml"))
+	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml"))
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -111,7 +111,7 @@ func TestDryRun(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	os.Chdir(dir)
-	hubFolder = "load-test-http"
+	hubFolder = "load-test"
 	// hub
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
