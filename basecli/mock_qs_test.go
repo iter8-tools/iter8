@@ -106,6 +106,23 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestDryRunLocal(t *testing.T) {
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://example.com",
+		httpmock.NewStringResponder(200, `all good`))
+
+	// dry run
+	os.Chdir(base.CompletePath("../", "hub/load-test"))
+	Dry = true
+	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
+	err := runCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+	assert.FileExists(t, "experiment.yaml")
+
+}
 func TestDryRun(t *testing.T) {
 	dir, _ := ioutil.TempDir("", "iter8-test")
 	defer os.RemoveAll(dir)
@@ -126,8 +143,9 @@ func TestDryRun(t *testing.T) {
 	// dry run
 	os.Chdir(path.Join(dir, hubFolder))
 	Dry = true
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
+	GenOptions.Values = []string{"url=https://example.com"}
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 	assert.FileExists(t, "experiment.yaml")
+
 }

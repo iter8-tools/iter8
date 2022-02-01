@@ -58,6 +58,7 @@ iter8 gen exp --set url=https://example.com
 		m, err := engine.Render(c, valuesToRender)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("unable to render chart")
+			log.Logger.Error("values: ", valuesToRender)
 			return err
 		}
 
