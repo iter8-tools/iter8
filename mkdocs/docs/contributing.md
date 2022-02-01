@@ -24,10 +24,10 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* Tutorials
+* [Tutorials](tutorials/load-test-http/overview.md)
 * Other documentation
 * Builds, CI
-* New features
+* [Tasks](https://github.com/iter8-tools/iter8/wiki/Creating-a-new-task-that-collects-metrics)
 * Bug fixes
 * Web design
 * Communication, social media, blog posts
