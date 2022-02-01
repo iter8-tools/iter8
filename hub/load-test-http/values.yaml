@@ -66,8 +66,9 @@
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
 ### Each SLO has a key which is the metric name, 
 ### and a value which is the upper limit on the metric.
-### Valid metric names are error-rate, error-count, latency-mean, latency-stddev, and 
-### latency-pX, where X is any latency percentile (float value between 0 and 100).
+### Valid metric names are error-rate, error-count, latency-max, 
+### latency-mean, latency-stddev, and latency-pX, where X is any latency percentile 
+### (i.e., any float value between 0 and 100).
 
 # SLOs:
 #   error-rate: 0 # error rate must be 0
