@@ -10,6 +10,7 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
@@ -117,7 +118,9 @@ func TestDryRunLocal(t *testing.T) {
 	// dry run
 	os.Chdir(base.CompletePath("../", "hub/load-test"))
 	Dry = true
-	GenOptions.Values = []string{"url=https://example.com"}
+	GenOptions = values.Options{
+		Values: []string{"url=https://example.com"},
+	}
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 	assert.FileExists(t, "experiment.yaml")
@@ -143,7 +146,9 @@ func TestDryRun(t *testing.T) {
 	// dry run
 	os.Chdir(path.Join(dir, hubFolder))
 	Dry = true
-	GenOptions.Values = []string{"url=https://example.com"}
+	GenOptions = values.Options{
+		Values: []string{"url=https://example.com"},
+	}
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 	assert.FileExists(t, "experiment.yaml")
