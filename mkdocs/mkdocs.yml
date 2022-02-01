@@ -118,7 +118,7 @@ nav:
   - Your first experiment: getting-started/your-first-experiment.md
   - Install Iter8: getting-started/install.md
   - Concepts: getting-started/concepts.md
-  - v0.8 tech preview: getting-started/v0.8.md
+  - Inspiration: getting-started/inspiration.md
   - Get help: getting-started/help.md
 - Tutorials:
   - Load test HTTP:
