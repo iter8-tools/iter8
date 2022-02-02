@@ -65,10 +65,10 @@ We will load test and validate the gRPC sample service with host `127.0.0.1:5005
 Run the experiment as follows.
 
 ```shell
-iter8 run --set host="127.0.0.1:50051" \
-          --set call="helloworld.Greeter.SayHello" \
-          --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-          --set data='{"name":"frodo"}' \
+iter8 run --set-string host="127.0.0.1:50051" \
+          --set-string call="helloworld.Greeter.SayHello" \
+          --set-string protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+          --set-string data='{"name":"frodo"}' \
           --set SLOs.error-rate=0 \
           --set SLOs.latency/mean=50 \
           --set SLOs.latency/p90=100 \
