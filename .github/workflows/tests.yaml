@@ -198,7 +198,7 @@ jobs:
         iter8 run --set host="127.0.0.1:50051" \
                   --set call="helloworld.Greeter.SayHello" \
                   --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-                  --set data='{"name":"goodness me"}' \
+                  --set data='{\"name\":\"goodness me\"}' \
                   --set SLOs.error-rate=0 \
                   --set SLOs.latency/mean=50 \
                   --set SLOs.latency/p90=100 \
