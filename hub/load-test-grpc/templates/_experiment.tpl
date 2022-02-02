@@ -8,6 +8,10 @@
     protoURL: "{{ .Values.protoURL}}"
     {{- end }}
 
+    {{- if .Values.data }}
+    data: {{ .Values.data | toString }}
+    {{- end }}
+
     {{- ""}}
     versionInfo:
     - host: "{{ required "A valid host is required!" .Values.host }}"
