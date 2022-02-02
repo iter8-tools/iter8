@@ -209,8 +209,6 @@ jobs:
         cat experiment.yaml
         echo "report ..."
         iter8 report
-        echo "greeter log"
-        cat ../../grpc-go/examples/helloworld/greeter.log
         echo "assert... "
         iter8 assert -c completed -c nofailure -c slos
 
