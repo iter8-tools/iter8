@@ -21,15 +21,15 @@
     {{- end }}
 
     {{- if .Values.payloadStr }}
-    payloadStr: {{ .Values.payloadStr}}
+    payloadStr: "{{ .Values.payloadStr}}"
     {{- end }}
 
     {{- if .Values.payloadURL }}
-    payloadURL: {{ .Values.payloadURL}}
+    payloadURL: "{{ .Values.payloadURL}}"
     {{- end }}
 
     {{- if .Values.contentType }}
-    contentType: {{ .Values.contentType}}
+    contentType: "{{ .Values.contentType}}"
     {{- end }}
 
     {{- if .Values.errorsAbove }}
