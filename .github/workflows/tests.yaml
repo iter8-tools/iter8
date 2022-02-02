@@ -186,8 +186,6 @@ jobs:
 
     - name: run greeter
       run: |
-        GOBIN=/usr/local/bin
-        go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
         git clone -b v1.43.0 https://github.com/grpc/grpc-go
         cd grpc-go/examples/helloworld
         go build greeter_server/main.go
