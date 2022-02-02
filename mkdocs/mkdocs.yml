@@ -140,8 +140,6 @@ nav:
     - Session affinity: tutorials/session-affinity.md
     - Gradual traffic shifting: tutorials/gradual-traffic-shifting.md
 - User guide:
-  - Topics:
-    - Iter8 hub: user-guide/topics/iter8hub.md
   - Commands:
     - iter8: user-guide/commands/iter8.md
     - iter8 hub: user-guide/commands/iter8_hub.md

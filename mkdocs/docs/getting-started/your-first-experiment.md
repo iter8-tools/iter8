@@ -40,7 +40,7 @@ template: main.html
     You can now run `iter8` (from your gopath bin/ directory)
 
 ## 2. Download experiment chart
-Download the `load-test-http` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
+Download the `load-test-http` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](concepts.md#iter8-hub) as follows.
 
 ```shell
 iter8 hub -e load-test-http

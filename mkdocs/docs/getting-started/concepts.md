@@ -17,7 +17,8 @@ The following picture illustrates an Iter8 experiment that performs load testing
 ### Experiment chart
 In order to enable reuse, Iter8 experiments are templated and packaged as specialized [Helm charts](https://helm.sh/docs/topics/charts/). Experiment charts can be combined with values to generate `experiments.yaml` files that provide fully defined experiment specifications.
 
-Iter8 experiment charts enable to you to launch powerful release engineering experiments in a matter of seconds.
+#### Iter8 Hub
+Iter8 Hub is a specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts. These charts enable to you to launch powerful release engineering experiments in a matter of seconds. Their usage is described in depth in various [Iter8 tutorials](../tutorials/load-test-http/overview.md).
 
 ## Features at a glance
 

@@ -21,7 +21,7 @@ template: main.html
 
 
 ## 1. Download experiment chart
-Download the `load-test-http` [experiment chart](../../../../getting-started/concepts.md#experiment-chart) from [Iter8 hub](../../../../user-guide/topics/iter8hub.md) as follows.
+Download the `load-test-http` [experiment chart](../../../../getting-started/concepts.md#experiment-chart) from [Iter8 hub](../../../../getting-started/concepts.md#iter8-hub) as follows.
 
 ```shell
 iter8 hub -e load-test-http
