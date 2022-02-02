@@ -186,10 +186,13 @@ jobs:
 
     - name: run greeter
       run: |
+        GOBIN=/usr/local/bin
+        go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
         git clone -b v1.43.0 https://github.com/grpc/grpc-go
         cd grpc-go/examples/helloworld
-        go run greeter_server/main.go > greeter.log 2>&1 &
-        sleep 1.0
+        go build greeter_server/main.go
+        ./main &
+        sleep 2
         
     - name: load test grpc service method
       run: |
