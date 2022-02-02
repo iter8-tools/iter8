@@ -100,6 +100,10 @@ markdown_extensions:
     repo: iter8
 - pymdownx.mark
 - pymdownx.smartsymbols
+- pymdownx.snippets: 
+    base_path:
+    - "../"
+    check_paths: true
 - pymdownx.superfences:
     custom_fences:
     - name: mermaid
