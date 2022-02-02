@@ -170,6 +170,7 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 		}
 	}
 	log.Logger.Trace("ran ghz gRPC test")
+	log.Logger.Trace(igr.ErrorDist)
 	return igr, err
 }
 
