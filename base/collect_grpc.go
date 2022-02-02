@@ -48,8 +48,8 @@ type collectGRPCInputs struct {
 }
 
 const (
-	// CollectGPRCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
-	CollectGPRCTaskName = "gen-load-and-collect-metrics-grpc"
+	// CollectGRPCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
+	CollectGRPCTaskName = "gen-load-and-collect-metrics-grpc"
 	// protoFileName is the proto buf file
 	protoFileName = "ghz.proto"
 	// protosetFileName is the protoset file

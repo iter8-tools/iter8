@@ -23,7 +23,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
 		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectGPRCTaskName),
+			Task: StringPointer(CollectGRPCTaskName),
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{
@@ -81,7 +81,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
 		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectGPRCTaskName),
+			Task: StringPointer(CollectGRPCTaskName),
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{

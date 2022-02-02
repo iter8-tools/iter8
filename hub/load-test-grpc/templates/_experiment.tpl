@@ -5,7 +5,7 @@
   with:
 
     {{- if .Values.protoURL }}
-    protoURL: "{{ .Values.protoURL}}"
+    protoURL: "{{ .Values.protoURL }}"
     {{- end }}
 
     {{- if .Values.data }}

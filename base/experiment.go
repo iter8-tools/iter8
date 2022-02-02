@@ -154,7 +154,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				cht := &collectHTTPTask{}
 				json.Unmarshal(tBytes, cht)
 				tsk = cht
-			case CollectGPRCTaskName:
+			case CollectGRPCTaskName:
 				cgt := &collectGRPCTask{}
 				json.Unmarshal(tBytes, cgt)
 				tsk = cgt
