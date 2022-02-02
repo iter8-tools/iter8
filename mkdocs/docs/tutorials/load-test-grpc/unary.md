@@ -60,7 +60,7 @@ cd load-test-grpc
 ```
 
 ## 3. Run experiment
-We will load test and validate the gRPC sample service with host `127.0.0.1:50051` (in the `host:port` format), fully-qualified method name `helloworld.Greeter.SayHello` (in the `package.service.method` format), and specified by the Protocol Buffer file located at [this URL](https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto). We will specify that the error rate must be 0, the mean latency must be under 50 msec, the 90th percentile latency must be under 100 msec, and the 97.5th percentile latency must be under 200 msec.
+We will load test and validate the gRPC sample service with host `127.0.0.1:50051`, fully-qualified method name `helloworld.Greeter.SayHello`, and defined by the Protocol Buffer file located at the `protoURL`. We will specify that the gRPC requests made by the Iter8 experiment will include `{'name': 'frodo'}` as the data, serialized in the protobuf format. We will also specify that the error rate must be 0, the mean latency must be under 50 msec, the 90th percentile latency must be under 100 msec, and the 97.5th percentile latency must be under 200 msec.
 
 Run the experiment as follows.
 

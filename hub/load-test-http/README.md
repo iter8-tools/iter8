@@ -1,6 +1,6 @@
 # Load test HTTP services with SLO validation
 
-Use this Iter8 experiment chart to load test an HTTP service and validate latency and error-related service level objectives (SLOs).
+Iter8 experiment chart that enables load testing and validation of latency and error-related service level objectives (SLOs) for HTTP services.
 
 ***
 
