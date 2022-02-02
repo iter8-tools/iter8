@@ -9,7 +9,8 @@
     {{- end }}
 
     {{- if .Values.data }}
-    data: {{ .Values.data }}
+    data:
+{{ toYaml .Values.data | indent 6 }}
     {{- end }}
 
     {{- ""}}
