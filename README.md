@@ -72,4 +72,4 @@ You can also install Iter8 using:
 Iter8 documentation is available at https://iter8.tools.
 
 ## Contributing
-See [here](https://iter8.tools/0.8/contributing/) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.
+See [here](CONTRIBUTING.md) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.
