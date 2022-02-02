@@ -9,7 +9,7 @@
     {{- end }}
 
     {{- if .Values.data }}
-    data: {{ .Values.data | toString }}
+    data: {{ .Values.data }}
     {{- end }}
 
     {{- ""}}
