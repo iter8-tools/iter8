@@ -5,13 +5,13 @@
   with:
 
     {{- if .Values.protoURL }}
-    protoURL: {{ .Values.protoURL}}
+    protoURL: "{{ .Values.protoURL}}"
     {{- end }}
 
     {{- ""}}
     versionInfo:
-    - host: {{ required "A valid host is required!" .Values.host }}
-      call: {{ required "A valid call is required!" .Values.call }}
+    - host: "{{ required "A valid host is required!" .Values.host }}"
+      call: "{{ required "A valid call is required!" .Values.call }}"
 
 {{- if .Values.SLOs }}
 # task 2: validate service level objectives for app using
