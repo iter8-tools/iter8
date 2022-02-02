@@ -203,6 +203,10 @@ jobs:
                   --set SLOs.latency/mean=50 \
                   --set SLOs.latency/p90=100 \
                   --set SLOs.latency/p'97\.5'=200
+        echo "experiment ... "
         cat experiment.yaml
+        echo "report ..."
+        iter8 report
+        echo "assert... "
         iter8 assert -c completed -c nofailure -c slos
 
