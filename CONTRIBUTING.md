@@ -18,10 +18,10 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* [Tutorials](tutorials/load-test-http/overview.md)
+* Tutorials
 * Other documentation
 * Builds, CI
-* [Tasks](https://github.com/iter8-tools/iter8/wiki/Creating-a-new-task-that-collects-metrics)
+* Tasks from which experiments are composed
 * Bug fixes
 * Web design
 * Communication, social media, blog posts
@@ -35,7 +35,7 @@ The best ways to reach us with a question is to ask...
 
 * On the original GitHub issue
 * In the `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
-* During our [community meetings](community.md#community-meetings)
+* During our [community meetings](https://iter8.tools/community/)
 
 ***
 
