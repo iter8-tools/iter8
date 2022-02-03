@@ -11,7 +11,6 @@ template: main.html
 
 ???+ note "Before you begin"
     1. [Install Iter8](../../getting-started/install.md).
-    2. Complete the [quick start tutorial](../../getting-started/your-first-experiment.md).
 
 ## 1. Run sample app
 Run the [httpbin](https://httpbin.org) sample app from a separate terminal. We will load test this app in this example.

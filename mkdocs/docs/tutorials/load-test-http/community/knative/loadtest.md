@@ -7,6 +7,13 @@ template: main.html
 !!! tip "Load test a Knative HTTP Service and validate SLOs"
     Use an [Iter8 experiment](../../../../getting-started/concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) HTTP service and validate latency and error-related service level objectives (SLOs).
 
+    **Use-case:** Continuous delivery (CD) of HTTP services is a motivating use-case for this experiment. If the HTTP service satisfies the SLOs specified in the experiment, it may be promoted (for example, from a test environment to a production environment).
+    
+    This experiment is illustrated in the figure below.
+
+    ![HTTP load test with SLOs](../../images/http-overview.png)
+
+
 ???+ note "Before you begin"
     1. [Install Iter8](../../../../getting-started/install.md).
     2. [Install Knative and deploy your first Knative Service](https://knative.dev/docs/getting-started/first-service/). As noted at the end of the Knative tutorial, when you curl the Knative service,
@@ -17,7 +24,6 @@ template: main.html
     ```
     Hello World!
     ```
-    3. Complete the [Iter8 quick start tutorial](../../../../getting-started/your-first-experiment.md).
 
 
 ## 1. Download experiment chart
