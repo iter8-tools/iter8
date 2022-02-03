@@ -1,7 +1,5 @@
 name: Build and push Iter8 latest Docker image
 on:
-  release:
-    types: [published]
   push:
     branches:
     - master # Publish `master` as Docker `latest` image.
