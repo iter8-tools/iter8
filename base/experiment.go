@@ -154,7 +154,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				cht := &collectHTTPTask{}
 				json.Unmarshal(tBytes, cht)
 				tsk = cht
-			case CollectGPRCTaskName:
+			case CollectGRPCTaskName:
 				cgt := &collectGRPCTask{}
 				json.Unmarshal(tBytes, cgt)
 				tsk = cgt
@@ -507,4 +507,53 @@ func (in *Insights) ScalarMetricValue(i int, m string) *float64 {
 		log.Logger.Error("metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function")
 		return nil
 	}
+}
+
+// GetMetricsInfo gets metric meta for the given normalized metric name
+func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
+	s := strings.Split(nm, "/")
+
+	// this is an aggregated metric
+	if len(s) == 3 {
+		log.Logger.Tracef("%v is an aggregated metric", nm)
+		vm := s[0] + "/" + s[1]
+		mm, ok := in.MetricsInfo[vm]
+		if !ok {
+			err := fmt.Errorf("unable to find info for vector metric: %v", vm)
+			log.Logger.Error(err)
+			return nil, err
+		}
+		// determine type of aggregation
+		aggType := CounterMetricType
+		if AggregationType(s[2]) != CountAggregator {
+			aggType = GaugeMetricType
+		}
+		// format aggregator text
+		formattedAggregator := s[2] + " value"
+		if strings.HasPrefix(s[2], PercentileAggregatorPrefix) {
+			percent := strings.TrimPrefix(s[2], PercentileAggregatorPrefix)
+			formattedAggregator = fmt.Sprintf("%v-th percentile value", percent)
+		}
+		// return metrics meta
+		return &MetricMeta{
+			Description: fmt.Sprintf("%v of %v", formattedAggregator, vm),
+			Units:       mm.Units,
+			Type:        aggType,
+		}, nil
+	}
+
+	// this is a non-aggregated metric
+	if len(s) == 2 {
+		mm, ok := in.MetricsInfo[nm]
+		if !ok {
+			err := fmt.Errorf("unable to find info for scalar metric: %v", nm)
+			log.Logger.Error(err)
+			return nil, err
+		}
+		return &mm, nil
+	}
+
+	err := fmt.Errorf("invalid metric name %v; metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function", nm)
+	log.Logger.Error(err)
+	return nil, err
 }

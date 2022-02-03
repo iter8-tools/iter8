@@ -10,11 +10,12 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	// get into the experiment chart folder
-	os.Chdir(base.CompletePath("../", "hub/load-test"))
+	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
 	// mock the http endpoint
 	httpmock.Activate()
@@ -41,7 +42,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
 	// get into the experiment chart folder
-	os.Chdir(base.CompletePath("../", "hub/load-test"))
+	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
 	// mock the http endpoint
 	httpmock.Activate()
@@ -51,8 +52,8 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		httpmock.NewStringResponder(200, `all good`))
 
 	// with SLOs next
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.mean-latency=100", "duration=2s")
-	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/values.yaml"))
+	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "duration=2s")
+	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml"))
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -65,9 +66,40 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestMockQuickStartWithBadSLOs(t *testing.T) {
+	// get into the experiment chart folder
+	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
+
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://example.com",
+		httpmock.NewStringResponder(200, `all good`))
+
+	// with bad SLOs
+	GenOptions = values.Options{
+		Values:     []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p95=0.00001", "duration=2s"},
+		ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
+	}
+	err := runCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+
+	// assert
+	AssertOptions = AssertOptionsType{
+		Conds:   []string{Completed, NoFailure, SLOs},
+		Timeout: 5,
+	}
+
+	exp, _ := Build(true, &FileExpIO{})
+	allGood, err := exp.Assert(AssertOptions.Conds, AssertOptions.Timeout)
+	assert.NoError(t, err)
+	assert.False(t, allGood)
+}
+
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	// get into the experiment chart folder
-	os.Chdir(base.CompletePath("../", "hub/load-test"))
+	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
 	// mock the http endpoint
 	httpmock.Activate()
@@ -77,8 +109,11 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		httpmock.NewStringResponder(200, `all good`))
 
 	// with SLOs and percentiles also
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.mean-latency=100", "SLOs.p50=100")
-	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/values.yaml"))
+	GenOptions = values.Options{
+		Values: []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
+	}
+
+	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml"))
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -106,6 +141,25 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestDryRunLocal(t *testing.T) {
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://example.com",
+		httpmock.NewStringResponder(200, `all good`))
+
+	// dry run
+	os.Chdir(base.CompletePath("../", "hub/load-test"))
+	Dry = true
+	GenOptions = values.Options{
+		Values: []string{"url=https://example.com"},
+	}
+	err := runCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+	assert.FileExists(t, "experiment.yaml")
+
+}
 func TestDryRun(t *testing.T) {
 	dir, _ := ioutil.TempDir("", "iter8-test")
 	defer os.RemoveAll(dir)
@@ -126,8 +180,11 @@ func TestDryRun(t *testing.T) {
 	// dry run
 	os.Chdir(path.Join(dir, hubFolder))
 	Dry = true
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
+	GenOptions = values.Options{
+		Values: []string{"url=https://example.com"},
+	}
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 	assert.FileExists(t, "experiment.yaml")
+
 }

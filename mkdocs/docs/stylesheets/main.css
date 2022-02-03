@@ -175,10 +175,6 @@
   display: block;
 }
 
-.feature-item h2 svg {
-  color: #a00101;
-}
-
 @media screen and (min-width: 13.75em) {
   .feature-item {
     width: 100%;

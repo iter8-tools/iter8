@@ -28,6 +28,7 @@ func (e *Experiment) getSLOStrText(i int) (string, error) {
 	// get metric with units and description
 	str, err := e.MetricWithUnits(slo.Metric)
 	if err != nil {
+		log.Logger.Error("unable to get slo metric with units")
 		return "", err
 	}
 	// add lower limit if needed
@@ -63,6 +64,8 @@ func (e *Experiment) printSLOsText(w *tabwriter.Writer) {
 				fmt.Fprintf(w, "\t%v", in.SLOsSatisfied[i][j])
 				fmt.Fprintln(w)
 			}
+		} else {
+			log.Logger.Error("unable to extract SLO text")
 		}
 	}
 
@@ -92,7 +95,7 @@ func (e *Experiment) printMetricsText(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "-------\t-----")
 
 	// keys contain normalized scalar metric names in sorted order
-	keys := e.SortedScalarMetrics()
+	keys := e.SortedScalarAndSLOMetrics()
 
 	for _, mn := range keys {
 		mwu, err := e.MetricWithUnits(mn)

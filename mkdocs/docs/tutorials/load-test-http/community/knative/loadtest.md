@@ -5,7 +5,7 @@ template: main.html
 # Load test a Knative HTTP service
 
 !!! tip "Load test a Knative HTTP Service and validate SLOs"
-    Use an [Iter8 experiment](../../../../getting-started/concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) HTTP service and validate latency and error-related [service level objectives (SLOs)](../../../../user-guide/topics/slos.md).
+    Use an [Iter8 experiment](../../../../getting-started/concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) HTTP service and validate latency and error-related service level objectives (SLOs).
 
 ???+ note "Before you begin"
     1. [Install Iter8](../../../../getting-started/install.md).
@@ -21,11 +21,11 @@ template: main.html
 
 
 ## 1. Download experiment chart
-Download the `load-test` [experiment chart](../../../../getting-started/concepts.md#experiment-chart) from [Iter8 hub](../../../../user-guide/topics/iter8hub.md) as follows.
+Download the `load-test-http` [experiment chart](../../../../getting-started/concepts.md#experiment-chart) from [Iter8 hub](../../../../getting-started/concepts.md#iter8-hub) as follows.
 
 ```shell
-iter8 hub -e load-test
-cd load-test
+iter8 hub -e load-test-http
+cd load-test-http
 ```
 
 ## 2. Run experiment
@@ -34,9 +34,9 @@ The `iter8 run` command combines an experiment chart with the supplied values to
 ```shell
 iter8 run --set url=http://hello.default.127.0.0.1.sslip.io \
           --set SLOs.error-rate=0 \
-          --set SLOs.mean-latency=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200
+          --set SLOs.latency-mean=50 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200
 ```
 
 ## 3. Assert outcomes
@@ -67,7 +67,7 @@ Congratulations! :tada: You completed your Iter8-Knative experiment.
 
 ???+ tip "Useful variations of this experiment"
 
-    1. [Control the request generation process](../../requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
+    1. [Control the load characteristics during the HTTP load test experiment](../../loadcharacteristics.md) by setting the number of queries/duration, the number of queries sent per second, and the number of parallel connections used to send requests.
 
     2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../../payload.md) during the load test.
 

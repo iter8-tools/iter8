@@ -1,10 +1,12 @@
 package base
 
 import (
+	"encoding/json"
 	"errors"
 
 	"github.com/bojand/ghz/runner"
 	log "github.com/iter8-tools/iter8/base/log"
+	gd "github.com/mcuadros/go-defaults"
 )
 
 /*
@@ -27,8 +29,10 @@ type collectGRPCInputs struct {
 	// Refer to iter8.tools documentation for supported fields.
 	runner.Config
 	// additional settings
-	// ProtoURL	URL pointing to the proto buf.
+	// ProtoURL	URL pointing to the Protocol Buffer file.
 	ProtoURL *string `json:"protoURL,omitempty" yaml:"protoURL,omitempty"`
+	// ProtosetURL	URL pointing to the protoset file.
+	ProtosetURL *string `json:"protosetURL,omitempty" yaml:"protosetURL,omitempty"`
 	// data and metadata settings
 	// DataURL	URL pointing to JSON data to be sent as part of the call.
 	// This takes precedence over Data.
@@ -44,10 +48,12 @@ type collectGRPCInputs struct {
 }
 
 const (
-	// CollectGPRCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
-	CollectGPRCTaskName = "gen-load-and-collect-metrics-grpc"
+	// CollectGRPCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
+	CollectGRPCTaskName = "gen-load-and-collect-metrics-grpc"
 	// protoFileName is the proto buf file
 	protoFileName = "ghz.proto"
+	// protosetFileName is the protoset file
+	protosetFileName = "ghz.protoset"
 	// callDataJSONFileName is the JSON call data file
 	callDataJSONFileName = "ghz-call-data.json"
 	// callDataBinaryFileName is the binary call data file
@@ -74,6 +80,8 @@ type collectGRPCTask struct {
 
 // initializeDefaults sets default values for the collect task
 func (t *collectGRPCTask) initializeDefaults() {
+	// set defaults
+	gd.SetDefaults(&t.With.Config)
 	// always count errors
 	t.With.Config.CountErrors = countErrorsDefault
 	// always insecure
@@ -99,6 +107,14 @@ func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
 			return nil, err
 		}
 		ghzc.Proto = protoFileName
+	}
+	// get protoset file
+	if t.With.ProtosetURL != nil {
+		err := getFileFromURL(*t.With.ProtosetURL, protosetFileName)
+		if err != nil {
+			return nil, err
+		}
+		ghzc.Protoset = protosetFileName
 	}
 	// get JSON call data file
 	if t.With.DataURL != nil {
@@ -128,32 +144,33 @@ func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
 	return &ghzc, nil
 }
 
-// getGhzOption constructs ghz's runner.Option based on task inputs
-func (t *collectGRPCTask) getGhzOption(j int) (runner.Option, error) {
+// resultForVersion collects gRPC test result for a given version
+func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
+	// the main idea is to run ghz with proper options
 	ghzc, err := t.getGhzConfig(j)
 	if err != nil {
 		return nil, err
 	}
-	return runner.WithConfig(ghzc), nil
-}
+	ghzcBytes, _ := json.MarshalIndent(ghzc, "", "	")
+	log.Logger.WithStackTrace(string(ghzcBytes)).Trace("runner config")
 
-// resultForVersion collects gRPC test result for a given version
-func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
-	// the main idea is to run ghz with proper options
-
-	ghzo, err := t.getGhzOption(j)
+	igr, err := runner.Run(t.With.VersionInfo[j].Call, t.With.VersionInfo[j].Host,
+		runner.WithProtoFile(ghzc.Proto, nil),
+		runner.WithCountErrors(ghzc.CountErrors),
+		runner.WithInsecure(ghzc.Insecure),
+		runner.WithData(ghzc.Data),
+		runner.WithConnections(ghzc.Connections),
+		runner.WithConcurrency(ghzc.C),
+		runner.WithTotalRequests(ghzc.N),
+	)
 	if err != nil {
-		return nil, err
-	}
-	log.Logger.Trace("got ghz options")
-	igr, err := runner.Run(t.With.VersionInfo[j].Call, t.With.VersionInfo[j].Host, ghzo)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("ghz failed")
+		log.Logger.WithStackTrace(err.Error()).Error("ghz run failed")
 		if igr == nil {
 			log.Logger.Error("failed to get results since ghz run was aborted")
 		}
 	}
 	log.Logger.Trace("ran ghz gRPC test")
+	log.Logger.Trace(igr.ErrorDist)
 	return igr, err
 }
 

@@ -31,14 +31,20 @@ const (
 	// decimalRegex is the regex used to identify percentiles
 	decimalRegex = `^([\d]+(\.[\d]*)?|\.[\d]+)$`
 
-	// Mean aggregator corresponds to aggregation of type mean
+	// CountAggregator corresponds to aggregation of type count
+	CountAggregator AggregationType = "count"
+	// MeanAggregator corresponds to aggregation of type mean
 	MeanAggregator AggregationType = "mean"
-	// Stddev aggregator corresponds to aggregation of type stddev
+	// StddevAggregator corresponds to aggregation of type stddev
 	StdDevAggregator AggregationType = "stddev"
-	// Min aggregator corresponds to aggregation of type min
+	// MinAggregator corresponds to aggregation of type min
 	MinAggregator AggregationType = "min"
-	// Max aggregator corresponds to aggregation of type max
+	// MaxAggregator corresponds to aggregation of type max
 	MaxAggregator AggregationType = "max"
+	// PercentileAggregator corresponds to aggregation of type max
+	PercentileAggregator AggregationType = "percentile"
+	// PercentileAggregatorPrefix corresponds to prefix for percentiles
+	PercentileAggregatorPrefix = "p"
 )
 
 // // AuthType identifies the type of authentication used in the HTTP request

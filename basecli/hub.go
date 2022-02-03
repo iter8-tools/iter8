@@ -78,7 +78,7 @@ var hubUsage = `
 Download an experiment chart from the Iter8 hub. 
 This is useful for fetching experiments to inspect, modify, run, or repackage. 
 By default, this command looks for the specified experiment chart in the public Iter8 hub. 
-It is also possible to use custom hubs by setting the ITER8HUB environment variable.
+It is also possible to use third party hubs by setting the ITER8HUB environment variable.
 
 Environment variables:
 
@@ -100,8 +100,8 @@ var hubCmd = &cobra.Command{
 	Short: "Download an experiment chart from Iter8 hub",
 	Long:  hubUsage,
 	Example: `
-# download load-test experiment chart from the public Iter8 hub
-iter8 hub -e load-test
+# download the load-test-http experiment chart from the public Iter8 hub
+iter8 hub -e load-test-http
 
 # custom Iter8 hubs are simply github repos that host Iter8 experiment charts
 # Suppose you forked github.com/iter8-tools/iter8 under the GitHub account $GHUSER,

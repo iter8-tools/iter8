@@ -23,7 +23,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
 		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectGPRCTaskName),
+			Task: StringPointer(CollectGRPCTaskName),
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{
@@ -52,6 +52,22 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, 1, count)
+
+	mm, err := exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCErrorCountMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCLatencySampleMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
 }
 
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
@@ -65,7 +81,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
 		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectGPRCTaskName),
+			Task: StringPointer(CollectGRPCTaskName),
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{

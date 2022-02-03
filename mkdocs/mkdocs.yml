@@ -47,7 +47,9 @@ plugins:
 - minify:
     minify_html: true
 - mike
-
+- redirects:
+    redirect_maps:
+        'tutorials/load-test/community/knative/loadtest.md': 'tutorials/load-test-http/community/knative/loadtest.md'
 # Customization
 extra:
   # Google Analytics
@@ -98,6 +100,10 @@ markdown_extensions:
     repo: iter8
 - pymdownx.mark
 - pymdownx.smartsymbols
+- pymdownx.snippets: 
+    base_path:
+    - "../"
+    check_paths: true
 - pymdownx.superfences:
     custom_fences:
     - name: mermaid
@@ -116,17 +122,19 @@ nav:
   - Your first experiment: getting-started/your-first-experiment.md
   - Install Iter8: getting-started/install.md
   - Concepts: getting-started/concepts.md
-  - v0.8 tech preview: getting-started/v0.8.md
   - Get help: getting-started/help.md
 - Tutorials:
   - Load test HTTP:
     - Overview: tutorials/load-test-http/overview.md
-    - Request generation: tutorials/load-test-http/requests.md
-    - Payload: tutorials/load-test-http/payload.md
+    - Load characteristics: tutorials/load-test-http/loadcharacteristics.md
+    - Request payload: tutorials/load-test-http/payload.md
     - Metrics and SLOs: tutorials/load-test-http/metricsandslos.md
     - Community examples:
       - Knative:
         - HTTP Service: tutorials/load-test-http/community/knative/loadtest.md
+  - Load test gRPC:
+    - Overview: tutorials/load-test-grpc/overview.md
+    - Unary: tutorials/load-test-grpc/unary.md
   - Other Experiment Types:
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md
@@ -136,13 +144,7 @@ nav:
     - Session affinity: tutorials/session-affinity.md
     - Gradual traffic shifting: tutorials/gradual-traffic-shifting.md
 - User guide:
-  - Topics:
-    - Iter8 hub: user-guide/topics/iter8hub.md
-    - Metrics: user-guide/topics/metrics.md
-    - SLOs: user-guide/topics/slos.md
-    - Version numbering: user-guide/topics/versionnumbering.md
-    - Conditional task execution: user-guide/topics/conditional.md
-  - Commands: 
+  - Commands:
     - iter8: user-guide/commands/iter8.md
     - iter8 hub: user-guide/commands/iter8_hub.md
     - iter8 run: user-guide/commands/iter8_run.md
@@ -157,10 +159,6 @@ nav:
     - iter8 k report: user-guide/commands/iter8_k_report.md
     - iter8 k logs: user-guide/commands/iter8_k_logs.md
     - iter8 k delete: user-guide/commands/iter8_k_delete.md
-  - Tasks:
-    - gen-load-and-collect-metrics-http: user-guide/tasks/collect.md
-    - assess-app-versions: user-guide/tasks/assess.md
-    - run (a bash script): user-guide/tasks/run.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
 - News: news.md

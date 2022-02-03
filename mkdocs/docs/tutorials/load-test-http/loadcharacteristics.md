@@ -2,10 +2,10 @@
 template: main.html
 ---
 
-# Request Generation
+# Load Characteristics
 
-!!! tip "Control the request generation process"
-    Control the request generation process by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
+!!! tip "Control the load characteristics during the HTTP load test experiment"
+    Control the load characteristics during the HTTP load test experiment by setting the number of queries/duration, the number of queries sent per second, and the number of parallel connections used to send requests.
 
 ***
 

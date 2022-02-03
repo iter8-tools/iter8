@@ -33,4 +33,4 @@ jobs:
         git config --global user.email iter8tools@gmail.com
         cd mkdocs
         pip install -r requirements.txt
-        mike deploy ${{ env.MAJOR_MINOR_VERSION }} latest -t ${{ env.MAJOR_MINOR_VERSION }}-preview  -p -u
+        mike deploy ${{ env.MAJOR_MINOR_VERSION }} latest -p -u

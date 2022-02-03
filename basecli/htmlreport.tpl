@@ -143,7 +143,7 @@
             </tr>
           </thead>
           <tbody>
-              {{- range $ind, $mn := .SortedScalarMetrics }}
+              {{- range $ind, $mn := .SortedScalarAndSLOMetrics }}
               <tr scope="row">
                 <td>
                   <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $mn }}">

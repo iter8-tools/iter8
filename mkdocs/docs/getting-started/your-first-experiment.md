@@ -2,11 +2,11 @@
 template: main.html
 ---
 
-# Your First Experiment: Load Test an HTTP Service with SLOs
+# Your First Experiment
 
 !!! tip "Load Test an HTTP Service with SLOs"
-    Get started with your first [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) by load testing an HTTP service and validating its latency and error-related [service level objectives (SLOs)](../user-guide/topics/slos.md).
-
+    Get started with your first [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) by load testing an HTTP service and validating its latency and error-related service level objectives (SLOs). 
+    
 ***
 
 ## 1. Install Iter8
@@ -40,11 +40,11 @@ template: main.html
     You can now run `iter8` (from your gopath bin/ directory)
 
 ## 2. Download experiment chart
-Download the `load-test` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](../user-guide/topics/iter8hub.md) as follows.
+Download the `load-test-http` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](concepts.md#iter8-hub) as follows.
 
 ```shell
-iter8 hub -e load-test
-cd load-test
+iter8 hub -e load-test-http
+cd load-test-http
 ```
 
 ## 3. Run experiment
@@ -55,40 +55,12 @@ Run the experiment as follows.
 ```shell
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
-          --set SLOs.mean-latency=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200
+          --set SLOs.latency-mean=50 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200
 ```
 
 The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file.
-
-??? note "Look inside experiment.yaml"
-    This experiment contains the [`gen-load-and-collect-metrics-http` task](../user-guide/tasks/collect.md) for generating load and collecting metrics, and the [`assess-app-versions` task](../user-guide/tasks/assess.md) for validating SLOs.
-
-    ```yaml
-    # task 1: generate HTTP requests for application URL
-    # collect Iter8's built-in latency and error-related metrics
-    - task: gen-load-and-collect-metrics-http
-      with:
-        percentiles: 
-        - 90
-        - 97.5
-        versionInfo:
-        - url: https://example.com
-    # task 2: validate service level objectives for app using
-    # the metrics collected in the above task
-    - task: assess-app-versions
-      with:
-        SLOs:
-        - metric: "built-in/error-rate"
-          upperLimit: 0
-        - metric: "built-in/mean-latency"
-          upperLimit: 50
-        - metric: "built-in/p90"
-          upperLimit: 100
-        - metric: "built-in/p97.5"
-          upperLimit: 200
-    ```
 
 ??? note "Sample output from `iter8 run`"
 
@@ -102,7 +74,7 @@ The `iter8 run` command combines an experiment chart with the supplied values to
     ```
 
 ??? note "Iter8 and Helm"
-    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 run` command](../user-guide/commands/iter8_run.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
+    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test-http` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 run` command](../user-guide/commands/iter8_run.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
 
 ## 4. Assert outcomes
 Assert that the experiment completed without any failures and SLOs are satisfied.
@@ -133,7 +105,7 @@ View a report of the experiment in HTML or text formats as follows.
     # open report.html
     ```
 
-    ??? note "The HTML report looks as follows"
+    ??? note "The HTML report looks like this"
         ![HTML report](images/report.html.png)
 
 === "Text"
@@ -141,7 +113,7 @@ View a report of the experiment in HTML or text formats as follows.
     iter8 report
     ```
 
-    ??? note "The text report looks as follows."
+    ??? note "The text report looks like this"
         ```shell
         Experiment summary:
         *******************
@@ -186,10 +158,10 @@ Congratulations! :tada: You completed your first Iter8 experiment.
 
 ???+ tip "Useful variations of this experiment"
 
-    1. [Control the request generation process](../tutorials/load-test-http/requests.md) by setting the number of queries/duration of the load test, the number of queries sent per second during the test, and the number of parallel connections used to send requests.
+    1. [Control the load characteristics](../tutorials/load-test-http/loadcharacteristics.md) by setting the number of queries/duration of the HTTP load test experiment, the number of queries sent per second, and the number of parallel connections used to send requests.
 
-    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test-http/payload.md) during the load test.
+    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test-http/payload.md) during the HTTP load test experiment.
 
-    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the load test](../tutorials/load-test-http/metricsandslos.md).
+    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the HTTP load test experiment](../tutorials/load-test-http/metricsandslos.md).
     
     4. The `values.yaml` file in the experiment chart folder documents all the values that can be supplied during the experiment.

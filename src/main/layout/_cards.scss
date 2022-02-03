@@ -40,9 +40,9 @@
   display: block;  
 }
 
-.feature-item h2 svg {
-  color: rgb(160, 1, 1);
-}
+// .feature-item h2 svg {
+//   color: rgb(160, 1, 1);
+// }
 
 
 @include break-from-device(mobile portrait) {

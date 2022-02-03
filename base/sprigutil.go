@@ -34,8 +34,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-// uniq deduplicates a list
-func uniq(list interface{}) []interface{} {
+// Uniq deduplicates a list
+// We have switched from uniq to Uniq, since we want to use it in other packages
+func Uniq(list interface{}) []interface{} {
 	l, err := mustUniq(list)
 	if err != nil {
 		panic(err)
