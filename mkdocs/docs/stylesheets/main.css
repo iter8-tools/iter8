@@ -185,11 +185,6 @@
     width: 50%;
   }
 }
-.feature-item:hover {
-  background-color: #fef5f5;
-  border-radius: 3px;
-}
-
 .text-center {
   text-align: center;
 }
