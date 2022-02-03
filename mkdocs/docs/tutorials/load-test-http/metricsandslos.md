@@ -9,7 +9,7 @@ template: main.html
 
 ***
 
-By default, the load test experiment collects the following built-in metrics: `error-count`, `error-rate`, `mean-latency`, and latency percentiles in the list `[50.0, 75.0, 90.0, 95.0, 99.0, 99.9]`. In addition, any other latency percentiles that are specified as part of SLOs are also collected.
+By default, the load test experiment collects the following built-in metrics: `error-count`, `error-rate`, `latency-mean`, and latency percentiles in the list `[50.0, 75.0, 90.0, 95.0, 99.0, 99.9]`. In addition, any other latency percentiles that are specified as part of SLOs are also collected.
 
 ***
 
@@ -18,9 +18,9 @@ Follow the [quick start tutorial](../../getting-started/your-first-experiment.md
 ```shell
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
-          --set SLOs.mean-latency=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200
+          --set SLOs.latency-mean=50 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200
 ```
 
 The above values ensure the following.
