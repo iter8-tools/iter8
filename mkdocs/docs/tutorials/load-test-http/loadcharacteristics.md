@@ -32,8 +32,8 @@ Set the duration of the load test to 20 sec, the number of requests per second t
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
           --set SLOs.latency-mean=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200 \
           --set duration=20s \
           --set qps=10 \
           --set connections=5
