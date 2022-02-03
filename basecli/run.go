@@ -27,9 +27,9 @@ Render the file named "experiment.yaml" by combining an experiment chart with va
 	# Render experiment.yaml and run the experiment
 	iter8 run --set url=https://example.com \
 	--set SLOs.error-rate=0 \
-	--set SLOs.mean-latency=50 \
-	--set SLOs.p90=100 \
-	--set SLOs.p'97\.5'=200
+	--set SLOs.latency-mean=50 \
+	--set SLOs.latency-p90=100 \
+	--set SLOs.latency-p'97\.5'=200
 	`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// generate experiment here ...

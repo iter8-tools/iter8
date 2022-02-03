@@ -17,9 +17,9 @@ Set the number of requests sent during the load-test to 200, the number of reque
 ```shell
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
-          --set SLOs.mean-latency=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200 \
+          --set SLOs.latency-mean=50 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200 \
           --set numQueries=200 \
           --set qps=10 \
           --set connections=5
@@ -31,9 +31,9 @@ Set the duration of the load test to 20 sec, the number of requests per second t
 ```shell
 iter8 run --set url=https://example.com \
           --set SLOs.error-rate=0 \
-          --set SLOs.mean-latency=50 \
-          --set SLOs.p90=100 \
-          --set SLOs.p'97\.5'=200 \
+          --set SLOs.latency-mean=50 \
+          --set SLOs.latency-p90=100 \
+          --set SLOs.latency-p'97\.5'=200 \
           --set duration=20s \
           --set qps=10 \
           --set connections=5
