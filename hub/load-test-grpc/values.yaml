@@ -65,6 +65,10 @@ metadata: null
 ### metadataURL URL pointing to a JSON file whose contents are to be used as call metadata.
 metadataURL: null
 
+### connect-timeout  Connection timeout duration for the initial connection dial. Default is 10s.
+
+# connect-timeout: 20s
+
 ### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
 ### Each SLO has a key which is the metric name, 
