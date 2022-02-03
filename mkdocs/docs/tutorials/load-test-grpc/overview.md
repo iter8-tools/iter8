@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Load Testing and SLO Validation for gRPC Services"
     Iter8's gRPC load testing and SLO validation experiments can generate requests for gRPC services, collect built-in latency and error-related metrics, and validate service-level objectives (SLOs). This experiment can work with all four kinds of gRPC service methods, namely, unary, server-streaming, client-streaming, and bidirectional streaming.
 
-    **Use-case:** Continuous delivery (CD) of gRPC services is a motivating use-case for this experiment. If the gRPC service satisfies the SLOs specified in the experiment, it may be promoted (for example, from a test environment to a production environment).
+    **Use-case:** Continuous delivery (CD) of gRPC services is a motivating use-case for this experiment. If the gRPC service satisfies the SLOs specified in the experiment, it may be safely rolled out (for example, from a test environment to a production environment).
     
     This experiment is illustrated in the figure below.
 
