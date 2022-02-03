@@ -9,7 +9,7 @@ template: main.html
 
 ***
 
-By default, the load test experiment collects the following built-in metrics: `error-count`, `error-rate`, `latency-mean`, and latency percentiles in the list `[50.0, 75.0, 90.0, 95.0, 99.0, 99.9]`. In addition, any other latency percentiles that are specified as part of SLOs are also collected.
+By default, the following metrics are collected by `load-test-http`: `error-count`, `error-rate`, `latency-mean`, `latency-max`, `latency-stddev`, `latency-min`, and latency percentiles in the list [50.0, 75.0, 90.0, 95.0, 99.0, 99.9]. In addition, any other latency percentiles that are specified as part of SLOs are also collected.
 
 ***
 
