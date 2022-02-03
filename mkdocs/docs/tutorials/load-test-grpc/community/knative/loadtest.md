@@ -7,7 +7,7 @@ template: main.html
 !!! tip "Load test a Knative gRPC Service and validate SLOs"
     Use an [Iter8 experiment](../../../../getting-started/concepts.md#what-is-an-iter8-experiment) to load test a [Knative](https://knative.dev/) gRPC service and validate latency and error-related service level objectives (SLOs).
 
-    **Use-case:** Continuous delivery (CD) of gRPC services is a motivating use-case for this experiment. If the gRPC service satisfies the SLOs specified in the experiment, it may be promoted (for example, from a test environment to a production environment).
+    **Use-case:** Continuous delivery (CD) of gRPC services is a motivating use-case for this experiment. If the gRPC service satisfies the SLOs specified in the experiment, it may be safely rolled out (for example, from a test environment to a production environment).
 
     This experiment is illustrated in the figure below.
 
