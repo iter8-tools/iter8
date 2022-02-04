@@ -48,15 +48,49 @@ cd load-test-http
 ```
 
 ## 3. Run experiment
-We will load test the HTTP service whose URL (`url`) is https://httpbin.org/get. 
+We will load test and validate the HTTP service whose URL (`url`) is https://example.com. For validation of SLOs, we will specify that the error rate (`SLOs.error-rate`) must be 0, the mean latency (`SLOs.latency-mean`) must be under 50 msec, the 90th percentile latency (`SLOs.latency-p90`) must be under 100 msec, and the 97.5th percentile latency (`SLOs.latency-p'97\.5'`) must be under 200 msec. 
 
-The `iter8 run` command combines an experiment chart with values, generates the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
+The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
 
 ```shell
 iter8 run --set url=https://httpbin.org/get
 ```
 
-## 4. View report
+
+??? note "Sample output from `iter8 run`"
+
+    ```shell
+    INFO[2021-12-14 10:23:26] starting experiment run                      
+    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics-http : started 
+    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics-http : completed 
+    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : started        
+    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : completed      
+    INFO[2021-12-14 10:23:39] experiment completed successfully    
+    ```
+
+??? note "Iter8 and Helm"
+    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test-http` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 run` command](../user-guide/commands/iter8_run.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
+
+## 4. Assert outcomes
+Assert that the experiment completed without any failures and SLOs are satisfied.
+
+```shell
+iter8 assert -c completed -c nofailure -c slos
+```
+
+The `iter8 assert` subcommand asserts if experiment result satisfies the specified conditions. 
+If assert conditions are satisfied, it exits with code `0`, and exits with code `1` otherwise. Assertions are especially useful within CI/CD/GitOps pipelines.
+
+??? note "Sample output from `iter8 assert`"
+
+    ```shell
+    INFO[2021-11-10 09:33:12] experiment completed
+    INFO[2021-11-10 09:33:12] experiment has no failure                    
+    INFO[2021-11-10 09:33:12] SLOs are satisfied                           
+    INFO[2021-11-10 09:33:12] all conditions were satisfied
+    ```
+
+## 5. View report
 View a report of the experiment in HTML or text formats as follows.
 
 === "HTML"

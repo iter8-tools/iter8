@@ -1,4 +1,4 @@
-### Defaults values for the load-test-http experiment chart.
+### Defaults values for this experiment chart.
 
 ### The documentation follows Helm recommendations described in the URL below.
 ### https://helm.sh/docs/chart_best_practices/values/#document-valuesyaml
