@@ -15,8 +15,16 @@ template: main.html
 
 
 ???+ note "Before you begin"
-    1. [Complete the load test with SLO validation tutorial for Knative HTTP service](../../../load-test-http/community/knative/loadtest.md).
-    2. Update the Knative HTTP service used in the above tutorial to a Knative gRPC service as follows.
+    1. [Install Iter8](../../../../getting-started/install.md).
+    2. [Install Knative and deploy your first Knative Service](https://knative.dev/docs/getting-started/first-service/). As noted at the end of the Knative tutorial, when you curl the Knative service,
+    ```shell
+    curl http://hello.default.127.0.0.1.sslip.io
+    ```
+    you should see the expected output as follows.
+    ```
+    Hello World!
+    ```
+    3. Update the Knative service deployed above to a gRPC service as follows.
     ```shell
     kn service update hello \
     --image docker.io/grpc/java-example-hostname:latest \
