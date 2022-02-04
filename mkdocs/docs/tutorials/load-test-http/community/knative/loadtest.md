@@ -35,7 +35,9 @@ cd load-test-http
 ```
 
 ## 2. Run experiment
-The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file.
+We will load test and validate the Knative HTTP service whose URL (`url`) is http://hello.default.127.0.0.1.sslip.io. For validation of SLOs, we will specify that the error rate (`SLOs.error-rate`) must be 0, the mean latency (`SLOs.latency-mean`) must be under 50 msec, the 90th percentile latency (`SLOs.latency-p90`) must be under 100 msec, and the 97.5th percentile latency (`SLOs.latency-p'97\.5'`) must be under 200 msec. 
+
+The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
 
 ```shell
 iter8 run --set url=http://hello.default.127.0.0.1.sslip.io \
@@ -67,7 +69,7 @@ View a report of the experiment in HTML or text formats as follows.
     iter8 report -o text
     ```
 
-Congratulations! :tada: You completed your Iter8-Knative experiment.
+Congratulations! :tada: You completed your Iter8 experiment with Knative.
 
 ***
 
