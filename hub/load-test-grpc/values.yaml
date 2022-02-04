@@ -24,6 +24,10 @@
 
 # protoURL: https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto
 
+### connect-timeout  Connection timeout duration for the initial connection dial. Default is 10s.
+
+# connect-timeout: 20s
+
 ### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
 ### Each SLO has a key which is the metric name, 
