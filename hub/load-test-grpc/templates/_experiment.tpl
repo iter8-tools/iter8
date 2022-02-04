@@ -4,8 +4,28 @@
 - task: gen-load-and-collect-metrics-grpc
   with:
 
+    {{- if .Values.total }}
+    total: {{ .Values.total | int }}
+    {{- end }}
+
+    {{- if .Values.rps }}
+    rps: {{ .Values.rps | int }}
+    {{- end }}
+
+    {{- if .Values.concurrency }}
+    concurrency: {{ .Values.concurrency | int }}
+    {{- end }}
+
+    {{- if .Values.connections }}
+    connections: {{ .Values.connections | int }}
+    {{- end }}
+
+    {{- if .Values.loadMaxDuration }}
+    load-max-duration: {{ .Values.loadMaxDuration | toString }}
+    {{- end }}
+
     {{- if .Values.protoURL }}
-    protoURL: "{{ .Values.protoURL }}"
+    protoURL: {{ .Values.protoURL | toString }}
     {{- end }}
 
     {{- if .Values.data }}
@@ -15,8 +35,8 @@
 
     {{- ""}}
     versionInfo:
-    - host: "{{ required "A valid host is required!" .Values.host }}"
-      call: "{{ required "A valid call is required!" .Values.call }}"
+    - host: {{ required "A valid host is required!" .Values.host | toString }}
+      call: {{ required "A valid call is required!" .Values.call | toString }}
 
 {{- if .Values.SLOs }}
 # task 2: validate service level objectives for app using
@@ -27,19 +47,19 @@
     {{- range $key, $value := .Values.SLOs }}
     {{- if or (regexMatch "error-rate" $key) (regexMatch "error-count" $key) }}
     - metric: "built-in/grpc-{{ $key }}"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else if (regexMatch "latency/max" $key) }}
     - metric: "built-in/grpc-latency/max"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else if (regexMatch "latency/stddev" $key) }}
     - metric: "built-in/grpc-latency/stddev"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else if (regexMatch "latency/mean" $key) }}
     - metric: "built-in/grpc-latency/mean"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else if (regexMatch "^latency/p\\d+(?:\\.\\d)?$" $key) }}
     - metric: "built-in/grpc-{{ $key }}"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else }}
     {{- fail "Invalid SLO metric specified" }}
     {{- end }}
