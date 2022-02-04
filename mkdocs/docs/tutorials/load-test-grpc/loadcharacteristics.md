@@ -49,5 +49,5 @@ iter8 run --set-string host="127.0.0.1:50051" \
 
 ***
 
-When you set the `total` and `qps` parameters, the duration of the load test is automatically determined. Similarly, when you set `loadMaxDuration` and `qps` parameters, the number of requests is automatically determined. If you set both `total` and `loadMaxDuration` parameters, the former will be ignored.
+When you set `total` and `qps`, the duration of the load test is automatically determined. Similarly, when you set `loadMaxDuration` and `qps`, the number of requests is automatically determined. If you set both `total` and `loadMaxDuration`, the former will be ignored.
 

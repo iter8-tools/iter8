@@ -5,14 +5,14 @@ template: main.html
 # Load Characteristics
 
 !!! tip "Control the load characteristics during the HTTP load test experiment"
-    Control the load characteristics during the HTTP load test experiment by setting the number of queries/duration, the number of queries sent per second, and the number of parallel connections used to send requests.
+    Control the load characteristics during the HTTP load test experiment by setting the number of queries/duration, the number of queries sent per second, and the number of parallel connections used to send queries.
 
 ***
 
 Follow the [quick start tutorial](../../getting-started/your-first-experiment.md). In the step where you run the experiment, replace the `iter8 run` command with either of the following commands.
 
 ### Number of queries
-Set the number of requests sent during the load-test to 200, the number of requests per second to 10, and the number of parallel connections used to send the requests to 5, as follows.
+Set the number of queries sent during the load test (`numQueries`) to 200, the number of queries per second (`qps`) to 10, and the number of parallel connections used to send queries (`connections`) to 5, as follows.
 
 ```shell
 iter8 run --set url=https://example.com \
@@ -26,7 +26,7 @@ iter8 run --set url=https://example.com \
 ```
 
 ### Duration
-Set the duration of the load test to 20 sec, the number of requests per second to 10, and the number of parallel connections used to send the requests to 5, as follows. The duration value may be any [Go duration string](https://pkg.go.dev/maze.io/x/duration#ParseDuration).
+Modify the above run command to set the duration of the load test (`duration`) to 20 sec. The duration value may be any [Go duration string](https://pkg.go.dev/maze.io/x/duration#ParseDuration).
 
 ```shell
 iter8 run --set url=https://example.com \
@@ -41,5 +41,5 @@ iter8 run --set url=https://example.com \
 
 ***
 
-When you set the `numQueries` and `qps` parameters, the duration of the load test is automatically determined. Similarly, when you set the `duration` and `qps` parameters, the number of requests is automatically determined. If you set both `numQueries` and `duration` parameters, the latter will be ignored.
+When you set `numQueries` and `qps`, the duration of the load test is automatically determined. Similarly, when you set the `duration` and `qps`, the number of queries to be sent is automatically determined. If you set both `numQueries` and `duration`, the latter will be ignored.
 

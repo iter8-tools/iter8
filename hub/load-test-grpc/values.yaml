@@ -1,5 +1,4 @@
-### Defaults values and behaviors of various parameters that can be set
-### for this experiment chart.
+### Defaults values for this experiment chart.
 
 ### The documentation follows Helm recommendations described in the URL below.
 ### https://helm.sh/docs/chart_best_practices/values/#document-valuesyaml 

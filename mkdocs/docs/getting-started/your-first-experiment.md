@@ -48,9 +48,9 @@ cd load-test-http
 ```
 
 ## 3. Run experiment
-We will load test and validate the HTTP service whose URL is https://example.com. We will specify that the error rate must be 0, the mean latency must be under 50 msec, the 90th percentile latency must be under 100 msec, and the 97.5th percentile latency must be under 200 msec. 
+We will load test and validate the HTTP service whose URL (`url`) is https://example.com. For validation of SLOs, we will specify that the error rate (`SLOs.error-rate`) must be 0, the mean latency (`SLOs.latency-mean`) must be under 50 msec, the 90th percentile latency (`SLOs.latency-p90`) must be under 100 msec, and the 97.5th percentile latency (`SLOs.latency-p'97\.5'`) must be under 200 msec. 
 
-Run the experiment as follows.
+The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
 
 ```shell
 iter8 run --set url=https://example.com \
@@ -60,7 +60,6 @@ iter8 run --set url=https://example.com \
           --set SLOs.latency-p'97\.5'=200
 ```
 
-The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file.
 
 ??? note "Sample output from `iter8 run`"
 
