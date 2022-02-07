@@ -15,7 +15,7 @@
 }
 
 .md-grid {
-  max-width: 66rem;
+  max-width: 70rem;
 }
 
 // Landing page hero
@@ -91,14 +91,10 @@
 }
 .heart {
   animation: heart 1000ms infinite;
-  color: #ffecf4;
+  color: #eed9e2;
 }
 .text-light {
   color: var(--md-primary-bg-color);
-
-  a {
-    color: #ffd0d0;
-  }
 }
 .text-center {
   text-align: center;

@@ -67,7 +67,7 @@ cmddocs:
 
 .PHONY: install
 install: build
-	@install "$(BINDIR)/$(BINNAME)" "$(INSTALL_PATH)/$(BINNAME)"
+	@cp -v "$(BINDIR)/$(BINNAME)" "$(INSTALL_PATH)/$(BINNAME)"
 
 # ------------------------------------------------------------------------------
 #  dependencies
