@@ -48,7 +48,7 @@ plugins:
 - mike
 - redirects:
     redirect_maps:
-        'tutorials/load-test/community/knative/loadtest.md': 'tutorials/load-test-http/community/knative/loadtest.md'
+      'tutorials/load-test/community/knative/loadtest.md': 'tutorials/load-test-http/appserverlessml.md'
 # Customization
 extra:
   # Google Analytics
@@ -124,9 +124,9 @@ nav:
   - Get help: getting-started/help.md
 - Tutorials:
   - Load test HTTP:
-    - Usage: tutorials/load-test-http/usage.md
-    - Default values: tutorials/load-test-http/usage.md
-    - K8s resource types: tutorials/load-test-http/usage.md
+    - Usage examples: tutorials/load-test-http/usage.md
+    - Default values: tutorials/load-test-http/defaultvalues.md
+    - App/serverless/ML: tutorials/load-test-http/appserverlessml.md
   - Load test gRPC:
     - Overview: tutorials/load-test-grpc/overview.md
     - Unary: tutorials/load-test-grpc/unary.md
