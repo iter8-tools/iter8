@@ -2,16 +2,16 @@
 template: main.html
 ---
 
-# Overview
+# Load Testing and SLO Validation for HTTP Services
 
-!!! tip "Load Testing and SLO Validation for HTTP Services"
-    Iter8's HTTP load testing and SLO validation experiments can generate requests for HTTP services, collect built-in latency and error-related metrics, and validate service-level objectives (SLOs).
+!!! tip "Overview"
+    Iter8's `load-test-http` experiment chart can be used to generate requests for HTTP services, collect built-in latency and error-related metrics, and validate service-level objectives (SLOs).
 
-    **Use-case:** Continuous delivery (CD) of HTTP services is a motivating use-case for this experiment. If the HTTP service satisfies the SLOs specified in the experiment, it may be safely rolled out (for example, from a test environment to a production environment).
-    
-    This experiment is illustrated in the figure below.
+    <p align='center'>
+      <img alt-text="load-test-http" src="../images/http-overview.png" width="70%" />
+    </p>
 
-    ![HTTP load test with SLOs](images/http-overview.png)
+    **Use-case:** Rapid testing, validation, safe rollouts, and continuous delivery (CD) of HTTP services are the motivating use-cases for this experiment type. If the HTTP service satisfies the SLOs, it may be safely rolled out, for example, from a test environment to a production environment.    
 
 ***
 

@@ -20,10 +20,10 @@ Iter8 experiments make it simple to collect performance and business metrics for
 </p>
 
 ### Experiment chart
-Specialized [Helm charts](https://helm.sh/docs/topics/charts/) that contain reusable experiment templates. Iter8 combines experiment charts with user supplied values to generate runnable `experiment.yaml` files.
+Experiment charts are specialized [Helm charts](https://helm.sh/docs/topics/charts/) that contain reusable experiment templates. Iter8 combines experiment charts with user supplied values to generate runnable `experiment.yaml` files.
 
 #### Iter8 Hub
-A specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts. These charts enable to you to launch powerful release optimization experiments in seconds. Their usage is described in depth in various [Iter8 tutorials](https://iter8.tools/latest/tutorials/load-test-http/overview/).
+Iter8 hub is a specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts. These charts enable to you to launch powerful release optimization experiments in seconds. Their usage is described in depth in various [Iter8 tutorials](https://iter8.tools/latest/tutorials/load-test-http/overview/).
 
 ## Features at a glance
 
@@ -37,7 +37,7 @@ A specific location within in the [Iter8 GitHub repo](https://github.com/iter8-t
 
 - **Simple to use** 
       
-    Get started with Iter8 in seconds using pre-packaged experiment charts. Run Iter8 experiments locally, in a container, inside Kubernetes, or inside your CI/CD/GitOps pipelines.
+    Get started with Iter8 in seconds using pre-packaged experiment charts. Run Iter8 experiments locally, inside Kubernetes, or inside your CI/CD/GitOps pipelines.
 
 - **Awesome integrations** 
       

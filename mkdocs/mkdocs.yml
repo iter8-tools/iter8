@@ -124,13 +124,9 @@ nav:
   - Get help: getting-started/help.md
 - Tutorials:
   - Load test HTTP:
-    - Overview: tutorials/load-test-http/overview.md
-    - Load characteristics: tutorials/load-test-http/loadcharacteristics.md
-    - Request payload: tutorials/load-test-http/payload.md
-    - Metrics and SLOs: tutorials/load-test-http/metricsandslos.md
-    - Community examples:
-      - Knative:
-        - HTTP Service: tutorials/load-test-http/community/knative/loadtest.md
+    - Usage: tutorials/load-test-http/usage.md
+    - Default values: tutorials/load-test-http/usage.md
+    - K8s resource types: tutorials/load-test-http/usage.md
   - Load test gRPC:
     - Overview: tutorials/load-test-grpc/overview.md
     - Unary: tutorials/load-test-grpc/unary.md
