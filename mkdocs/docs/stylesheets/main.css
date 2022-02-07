@@ -66,11 +66,14 @@
 }
 .heart {
   animation: heart 1000ms infinite;
-  color: #eed9e2;
+  color: #ffecf4;
 }
 
 .text-light {
   color: var(--md-primary-bg-color);
+}
+.text-light a {
+  color: #ffd0d0;
 }
 
 .text-center {

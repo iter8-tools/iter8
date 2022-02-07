@@ -39,7 +39,7 @@ Iter8 hub is a specific location within in the [Iter8 GitHub repo](https://githu
       
     Get started with Iter8 in seconds using pre-packaged experiment charts. Run Iter8 experiments locally, inside Kubernetes, or inside your CI/CD/GitOps pipelines.
 
-- **K8s app/serverless/ML frameworks** 
+- **App/serverless/ML frameworks** 
       
     Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulsets, Knative services, KServe/Seldon ML deployments, or custom Kubernetes resource types.
 
