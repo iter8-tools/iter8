@@ -2,9 +2,8 @@ site_name: Iter8
 site_url: https://iter8.tools/latest
 site_author: Srinivasan Parthasarathy
 site_description: >-
-  Safely rollout new versions of apps and ML models. Maximize business value with each release.
-  Load testing with SLO validation. A/B(/n) testing for business growth. Quick start in 2 mins.
-
+  Safely rollout new versions of apps and ML models. Maximize business value.
+  Setup in seconds.
 # Repository
 repo_name: iter8-tools/iter8
 repo_url: https://github.com/iter8-tools/iter8
@@ -57,7 +56,7 @@ extra:
     provider: google
     property: UA-152813895-1
 
-  title: Kubernetes release engineering made simple
+  title: Kubernetes Release Optimizer
   version:
     provider: mike
   social:
@@ -120,8 +119,8 @@ nav:
 - Home: index.md
 - Getting Started:
   - Your first experiment: getting-started/your-first-experiment.md
-  - Install Iter8: getting-started/install.md
   - Concepts: getting-started/concepts.md
+  - Install Iter8: getting-started/install.md
   - Get help: getting-started/help.md
 - Tutorials:
   - Load test HTTP:

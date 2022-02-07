@@ -4,8 +4,8 @@ template: main.html
 
 # Your First Experiment
 
-!!! tip "Load Test an HTTP Service with SLOs"
-    Get started with your first [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) by load testing an HTTP service and validating its latency and error-related service level objectives (SLOs). 
+!!! tip "Load Test an HTTP Service"
+    Get started with your first [Iter8 experiment](concepts.md#what-is-an-iter8-experiment) by load testing an HTTP service. 
     
 ***
 
@@ -48,53 +48,15 @@ cd load-test-http
 ```
 
 ## 3. Run experiment
-We will load test and validate the HTTP service whose URL (`url`) is https://example.com. For validation of SLOs, we will specify that the error rate (`SLOs.error-rate`) must be 0, the mean latency (`SLOs.latency-mean`) must be under 50 msec, the 90th percentile latency (`SLOs.latency-p90`) must be under 100 msec, and the 97.5th percentile latency (`SLOs.latency-p'97\.5'`) must be under 200 msec. 
+We will load test the HTTP service whose URL (`url`) is https://example.com. 
 
-The `iter8 run` command combines an experiment chart with the supplied values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
-
-```shell
-iter8 run --set url=https://example.com \
-          --set SLOs.error-rate=0 \
-          --set SLOs.latency-mean=50 \
-          --set SLOs.latency-p90=100 \
-          --set SLOs.latency-p'97\.5'=200
-```
-
-
-??? note "Sample output from `iter8 run`"
-
-    ```shell
-    INFO[2021-12-14 10:23:26] starting experiment run                      
-    INFO[2021-12-14 10:23:26] task 1: gen-load-and-collect-metrics-http : started 
-    INFO[2021-12-14 10:23:39] task 1: gen-load-and-collect-metrics-http : completed 
-    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : started        
-    INFO[2021-12-14 10:23:39] task 2: assess-app-versions : completed      
-    INFO[2021-12-14 10:23:39] experiment completed successfully    
-    ```
-
-??? note "Iter8 and Helm"
-    If you are familiar with [Helm](https://helm.sh), you probably noticed that the `load-test-http` folder resembles a Helm chart. This is because, Iter8 experiment charts *are* Helm charts under the covers. The [`iter8 run` command](../user-guide/commands/iter8_run.md) used above combines the experiment chart with values to generate the `experiments.yaml` file, much like how Helm charts can be combined with values to produce Kubernetes manifests.
-
-## 4. Assert outcomes
-Assert that the experiment completed without any failures and SLOs are satisfied.
+The `iter8 run` command combines an experiment chart with values, generates the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
 
 ```shell
-iter8 assert -c completed -c nofailure -c slos
+iter8 run --set url=https://example.com
 ```
 
-The `iter8 assert` subcommand asserts if experiment result satisfies the specified conditions. 
-If assert conditions are satisfied, it exits with code `0`, and exits with code `1` otherwise. Assertions are especially useful within CI/CD/GitOps pipelines.
-
-??? note "Sample output from `iter8 assert`"
-
-    ```shell
-    INFO[2021-11-10 09:33:12] experiment completed
-    INFO[2021-11-10 09:33:12] experiment has no failure                    
-    INFO[2021-11-10 09:33:12] SLOs are satisfied                           
-    INFO[2021-11-10 09:33:12] all conditions were satisfied
-    ```
-
-## 5. View report
+## 4. View report
 View a report of the experiment in HTML or text formats as follows.
 
 === "HTML"
@@ -118,18 +80,9 @@ View a report of the experiment in HTML or text formats as follows.
         *******************
 
           Experiment completed: true
-          No failed tasks: true
-          Total number of tasks: 2
-          Number of completed tasks: 2
-
-        Whether or not service level objectives (SLOs) are satisfied:
-        *************************************************************
-
-          SLO Conditions                           |Satisfied
-          --------------                           |---------
-          built-in/http-latency-mean (msec) <= 100 |true
-          built-in/http-latency-p95 (msec) <= 150  |true
-          
+          No task failures: true
+          Total number of tasks: 1
+          Number of completed tasks: 1
 
         Latest observed values for metrics:
         ***********************************
@@ -138,29 +91,17 @@ View a report of the experiment in HTML or text formats as follows.
           -------                             |-----
           built-in/http-error-count           |0.00
           built-in/http-error-rate            |0.00
-          built-in/http-latency-max (msec)    |186.56
-          built-in/http-latency-mean (msec)   |11.25
-          built-in/http-latency-min (msec)    |4.05
-          built-in/http-latency-p50 (msec)    |6.59
-          built-in/http-latency-p75 (msec)    |7.79
-          built-in/http-latency-p90 (msec)    |9.23
-          built-in/http-latency-p95 (msec)    |10.00
-          built-in/http-latency-p99 (msec)    |183.94
-          built-in/http-latency-p99.9 (msec)  |186.30
-          built-in/http-latency-stddev (msec) |28.01
-          built-in/http-request-count         |200.00
+          built-in/http-latency-max (msec)    |203.78
+          built-in/http-latency-mean (msec)   |17.00
+          built-in/http-latency-min (msec)    |4.20
+          built-in/http-latency-p50 (msec)    |10.67
+          built-in/http-latency-p75 (msec)    |12.33
+          built-in/http-latency-p90 (msec)    |14.00
+          built-in/http-latency-p95 (msec)    |15.67
+          built-in/http-latency-p99 (msec)    |202.84
+          built-in/http-latency-p99.9 (msec)  |203.69
+          built-in/http-latency-stddev (msec) |37.94
+          built-in/http-request-count         |100.00
         ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
-
-***
-
-???+ tip "Useful variations of this experiment"
-
-    1. [Control the load characteristics](../tutorials/load-test-http/loadcharacteristics.md) by setting the number of queries/duration of the HTTP load test experiment, the number of queries sent per second, and the number of parallel connections used to send requests.
-
-    2. HTTP services with POST endpoints may accept payloads. [Send various types of content as payload](../tutorials/load-test-http/payload.md) during the HTTP load test experiment.
-
-    3. [Learn more about the built-in metrics that are collected and the SLOs that are validated during the HTTP load test experiment](../tutorials/load-test-http/metricsandslos.md).
-    
-    4. The `values.yaml` file in the experiment chart folder documents all the values that can be supplied during the experiment.

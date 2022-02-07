@@ -4,21 +4,16 @@ template: main.html
 
 # What is Iter8?
 
-Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. 
+Kubernetes release optimizer built for DevOps and MLOps teams.
 
 ## What is an Iter8 experiment?
-Iter8 experiments make it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout winning versions, and maximize business value with each release.
-
-### Example
-The following picture illustrates an Iter8 experiment that performs load testing with SLO validation of a gRPC service.
-
-![Load testing gRPC](../tutorials/load-test-grpc/images/grpc-overview.png)
+Iter8 experiments make it simple to collect performance and business metrics for apps and ML models, assess, compare and validate multiple app/ML model versions, safely rollout winning version, and maximize business value in each release.
 
 ### Experiment chart
-In order to enable reuse, Iter8 experiments are templated and packaged as specialized [Helm charts](https://helm.sh/docs/topics/charts/). Experiment charts can be combined with values to generate `experiments.yaml` files that provide fully defined experiment specifications.
+Specialized [Helm charts](https://helm.sh/docs/topics/charts/) that contain reusable experiment templates. Iter8 combines experiment charts with user supplied values to generate runnable `experiment.yaml` files.
 
 #### Iter8 Hub
-Iter8 Hub is a specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts. These charts enable to you to launch powerful release engineering experiments in a matter of seconds. Their usage is described in depth in various [Iter8 tutorials](../tutorials/load-test-http/overview.md).
+A specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts. These charts enable to you to launch powerful release optimization experiments in seconds. Their usage is described in depth in various [Iter8 tutorials](https://iter8.tools/latest/tutorials/load-test-http/overview/).
 
 ## Features at a glance
 
@@ -39,5 +34,9 @@ Iter8 Hub is a specific location within in the [Iter8 GitHub repo](https://githu
     Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulsets, Knative services, KServe/Seldon ML deployments, or custom Kubernetes resource types.
 
 ## Implementation
+Iter8 is primarily written in `go` and builds on a few awesome open source projects including:
 
-Iter8 is implemented as a `go` module and comes with a command line interface (CLI) that enables rapid experimentation.
+- [Helm](https://helm.sh)
+- [Fortio](https://github.com/fortio/fortio)
+- [ghz](https://ghz.sh)
+- [plotly.js](https://github.com/plotly/plotly.js)

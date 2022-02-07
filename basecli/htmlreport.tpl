@@ -58,6 +58,7 @@
       });	
       </script>
 
+      {{- if not (empty .Result.Insights.SLOs) }}  
       <section class="mt-5">
         <h3 class="display-6">Service level objectives (SLOs)</h3>
         <h4 class="display-7 text-muted">Whether or not SLOs are satisfied</h4>
@@ -95,6 +96,7 @@
           </tbody>
         </table>
       </section>
+      {{- end }}
 
   		<section class="mt-5">
         <h3 class="display-6">Metric Histograms</h3>

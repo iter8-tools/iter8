@@ -1,4 +1,4 @@
-# Iter8: Kubernetes Release Engineering made Simple
+# Iter8: Kubernetes Release Optimizer
 
 [![Iter8 release (latest SemVer)](https://img.shields.io/github/v/release/iter8-tools/iter8?sort=semver)](https://github.com/iter8-tools/iter8/releases)
 [![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/iter8-tools/iter8)
@@ -7,24 +7,23 @@
 [![Slack channel](https://img.shields.io/badge/Slack-Join-purple)](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.8/getting-started/help/)
 
-## What is Iter8?
 
-Kubernetes release engineering toolkit built for DevOps, MLOps, SRE and data science teams. 
+# What is Iter8?
+
+Kubernetes release optimizer built for DevOps and MLOps teams.
 
 ## What is an Iter8 experiment?
-Iter8 experiments make it simple to collect performance and business metrics for Kubernetes apps and ML models, assess and compare multiple app/ML model versions, safely rollout winning versions, and maximize business value with each release.
-
-### Example
-The following picture illustrates an Iter8 experiment that performs load testing with SLO validation of a gRPC service.
+Iter8 experiments make it simple to collect performance and business metrics for apps and ML models, assess, compare and validate multiple app/ML model versions, safely rollout winning version, and maximize business value in each release.
 
 <p align='center'>
-<img alt-text="Load testing gRPC" src="mkdocs/docs/tutorials/load-test-grpc/images/grpc-overview.png" width="70%" />
+<img alt-text="Iter8 experiment" src="mkdocs/docs/images/iter8-intro-dark.png" width="70%" />
 </p>
 
 ### Experiment chart
-In order to enable reuse, Iter8 experiments are templated and packaged as specialized [Helm charts](https://helm.sh/docs/topics/charts/). Experiment charts can be combined with values to generate `experiments.yaml` files that provide fully defined experiment specifications.
+Specialized [Helm charts](https://helm.sh/docs/topics/charts/) that contain reusable experiment templates. Iter8 combines experiment charts with user supplied values to generate runnable `experiment.yaml` files.
 
-Iter8 experiment charts enable to you to launch powerful release engineering experiments in a matter of seconds.
+#### Iter8 Hub
+A specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts. These charts enable to you to launch powerful release optimization experiments in seconds. Their usage is described in depth in various [Iter8 tutorials](https://iter8.tools/latest/tutorials/load-test-http/overview/).
 
 ## Features at a glance
 
@@ -71,5 +70,15 @@ You can also install Iter8 using:
 ## Documentation
 Iter8 documentation is available at https://iter8.tools.
 
+## Implementation
+Iter8 is primarily written in `go` and builds on a few awesome open source projects including:
+
+- [Helm](https://helm.sh)
+- [Fortio](https://github.com/fortio/fortio)
+- [ghz](https://ghz.sh)
+- [plotly.js](https://github.com/plotly/plotly.js)
+
+
 ## Contributing
 See [here](CONTRIBUTING.md) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.
+

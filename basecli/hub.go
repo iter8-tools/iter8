@@ -44,11 +44,12 @@ func latestStableVersion() (string, error) {
 		}
 		msg = e.Error()
 		log.Logger.WithStackTrace(msg).Error(e)
+		return "", e
 	}
 	// found some tags
 	log.Logger.Infof("found %v tags", len(tags))
 	// found latest tag with the correct major minor prefix
-	if strings.HasPrefix(*tags[0].Name, majorMinor+".") {
+	if strings.HasPrefix(*(tags[0].Name), majorMinor+".") {
 		return *tags[0].Name, nil
 	}
 	// ToDo: Fix the following error
