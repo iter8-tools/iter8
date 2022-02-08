@@ -27,7 +27,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	// without SLOs first
 
 	// gen and run exp
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com")
+	GenOptions.Values = []string{"url=https://example.com"}
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -52,8 +52,8 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		httpmock.NewStringResponder(200, `all good`))
 
 	// with SLOs next
-	GenOptions.Values = append(GenOptions.Values, "url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "duration=2s")
-	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml"))
+	GenOptions.Values = []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "duration=2s"}
+	GenOptions.ValueFiles = []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")}
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -110,10 +110,10 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// with SLOs and percentiles also
 	GenOptions = values.Options{
-		Values: []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
+		Values:     []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
+		ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 	}
 
-	GenOptions.ValueFiles = append(GenOptions.ValueFiles, base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml"))
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -150,7 +150,7 @@ func TestDryRunLocal(t *testing.T) {
 		httpmock.NewStringResponder(200, `all good`))
 
 	// dry run
-	os.Chdir(base.CompletePath("../", "hub/load-test"))
+	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 	Dry = true
 	GenOptions = values.Options{
 		Values: []string{"url=https://example.com"},
@@ -165,7 +165,7 @@ func TestDryRun(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	os.Chdir(dir)
-	hubFolder = "load-test"
+	hubFolder = "load-test-http"
 	// hub
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
