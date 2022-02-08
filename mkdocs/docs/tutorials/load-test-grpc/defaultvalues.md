@@ -6,5 +6,79 @@ hide:
 
 # Default Values for `load-test-grpc`
 ```yaml
---8<-- "https://raw.githubusercontent.com/iter8-tools/hub/main/charts/load-test-grpc/values.yaml"
+### Defaults values for this experiment chart.
+
+### The documentation follows Helm recommendations described in the URL below.
+### https://helm.sh/docs/chart_best_practices/values/#document-valuesyaml 
+
+##################################
+
+### host  Host and port of the gRPC service
+### This field is required.
+host: null
+
+### call  Fully-qualified method name.
+### Specified in 'package.Service/method' or 'package.Service.Method' format.
+### This field is required.
+call: null
+
+### protoURL  URL where the Protocol Buffer file that defines the gRPC service is located.
+protoURL: null
+
+### connectTimeout  Connection timeout duration for the initial connection dial.
+connectTimeout: 10s
+
+### total Number of requests to run.
+total:  200
+
+### maxDuration Maximum duration for the experiment to send requests 
+### with 'total' setting respected. 
+### If duration is reached before 'total' requests are completed, 
+### experiment stops sending requests. Examples: 10s, 3m.
+maxDuration: null
+
+### duration Duration for the experiment to send requests. 
+### When duration is reached, experiment stops sending requests. 
+### If duration is specified, 'total' is ignored. Examples: 10s, 3m.
+duration: null
+
+### rps   Rate limit in how many requsts per second (RPS) we perform in total. 
+### Default is no rate limit. The total RPS will be distributed among all the workers 
+### as specified by concurrency options.
+rps:  null
+
+### concurrency Number of workers to run concurrently.
+concurrency:  50
+
+### connections Number of connections to use.
+### Concurrency is distributed evenly among all the connections.
+connections:  1
+
+### data  Call data in the map[string]interface{} format.
+### When data is specified, it takes precedence over dataURL and binaryDataURL.
+data: null
+
+### dataURL URL pointing to a JSON file whose contents are to be used as call data.
+### This takes precedence over binaryDataURL.
+dataURL: null
+
+### binaryDataURL URL pointing to a binary file containing serialized binary message 
+### or multiple count-prefixed messages, to be used as call data.
+binaryDataURL: null
+
+### metadata  Call metadata in the map[string]string format.
+### When metadata is specified, it takes precedence over metadataURL.
+metadata: null
+
+### metadataURL URL pointing to a JSON file whose contents are to be used as call metadata.
+metadataURL: null
+
+### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
+### Metrics collected during the load test are used to verify if the app satisfies SLOs.
+### Each SLO has a key which is the metric name, 
+### and a value which is the upper limit on the metric.
+### Valid metric names are error-rate, error-count, latency/max, latency/mean, 
+### latency/stddev, and latency/pX, where X is any latency percentile 
+### (i.e., any float value between 0 and 100).
+SLOs: null
 ```
