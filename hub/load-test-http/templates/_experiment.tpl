@@ -9,7 +9,7 @@
     {{- end }}
 
     {{- if .Values.duration }}
-    duration: {{ .Values.duration | toString | quote }}
+    duration: {{ .Values.duration | toString }}
     {{- end }}
 
     {{- if .Values.qps }}
@@ -21,15 +21,15 @@
     {{- end }}
 
     {{- if .Values.payloadStr }}
-    payloadStr: "{{ .Values.payloadStr | toString | quote }}"
+    payloadStr: "{{ .Values.payloadStr | toString }}"
     {{- end }}
 
     {{- if .Values.payloadURL }}
-    payloadURL: "{{ .Values.payloadURL | toString | quote }}"
+    payloadURL: "{{ .Values.payloadURL | toString }}"
     {{- end }}
 
     {{- if .Values.contentType }}
-    contentType: "{{ .Values.contentType | toString | quote }}"
+    contentType: "{{ .Values.contentType | toString }}"
     {{- end }}
 
     {{- if .Values.errorsAbove }}
@@ -50,7 +50,7 @@
 
     {{- ""}}
     versionInfo:
-    - url: {{ required "A valid url value is required!" .Values.url | toString | quote }}
+    - url: {{ required "A valid url value is required!" .Values.url | toString }}
     {{- if .Values.headers }}
     headers:
 {{ toYaml .Values.headers | indent 6 }}
