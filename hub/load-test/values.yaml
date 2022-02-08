@@ -12,7 +12,7 @@
 ### url   HTTP(S) URL where the app receives GET or POST requests.
 ### This field is required.
 
-# url: https://example.com
+# url: https://httpbin.org/get
 
 ### headers   HTTP headers to be used in requests sent to the app.
 ### Specified as a map with key being header names, and values being header values.

@@ -13,23 +13,29 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
+const (
+	testName    = "example"
+	testPort    = "8000"
+	testHost    = "localhost"
+	testAddress = testHost + ":" + testPort
+	testPath    = "/"
+	testURL     = "http://" + testHost + testPath
+)
+
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
-	// mock
 	httpmock.Activate()
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
+	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
 	defer httpmock.Deactivate()
 
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
-	// without SLOs first
-
 	// gen and run exp
 	GenOptions = values.Options{
 		ValueFiles:   []string{},
-		StringValues: []string{"url=https://example.com", "duration=2s"},
+		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{},
 		FileValues:   []string{},
 	}
@@ -46,10 +52,9 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
-	// mock
 	httpmock.Activate()
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
+	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
 	defer httpmock.Deactivate()
 
@@ -59,7 +64,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	// with SLOs next
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
-		StringValues: []string{"url=https://example.com", "duration=2s"},
+		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{"SLOs.error-rate=0", "SLOs.latency-mean=100"},
 		FileValues:   []string{},
 	}
@@ -76,10 +81,9 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithBadSLOs(t *testing.T) {
-	// mock
 	httpmock.Activate()
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
+	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
 	defer httpmock.Deactivate()
 
@@ -89,7 +93,7 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 	// with bad SLOs
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
-		StringValues: []string{"url=https://example.com", "duration=2s"},
+		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{"SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p95=0.00001"},
 	}
 	err := runCmd.RunE(nil, nil)
@@ -108,10 +112,9 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
-	// mock
 	httpmock.Activate()
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
+	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
 	defer httpmock.Deactivate()
 
@@ -121,7 +124,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	// with SLOs and percentiles also
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
-		StringValues: []string{"url=https://example.com", "duration=2s"},
+		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{"SLOs.error-count=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
 		FileValues:   []string{},
 	}
@@ -154,19 +157,12 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 }
 
 func TestDryRunLocal(t *testing.T) {
-	// mock
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
-		httpmock.NewStringResponder(200, `all good`))
-	defer httpmock.Deactivate()
-
 	// dry run
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 	Dry = true
 	GenOptions = values.Options{
 		ValueFiles:   []string{},
-		StringValues: []string{"url=https://example.com", "duration=2s"},
+		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{},
 		FileValues:   []string{},
 	}
@@ -175,13 +171,6 @@ func TestDryRunLocal(t *testing.T) {
 	assert.FileExists(t, "experiment.yaml")
 }
 func TestDryRun(t *testing.T) {
-	// mock
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
-		httpmock.NewStringResponder(200, `all good`))
-	defer httpmock.Deactivate()
-
 	dir, _ := ioutil.TempDir("", "iter8-test")
 	defer os.RemoveAll(dir)
 
@@ -196,7 +185,7 @@ func TestDryRun(t *testing.T) {
 	Dry = true
 	GenOptions = values.Options{
 		ValueFiles:   []string{},
-		StringValues: []string{"url=https://example.com", "duration=2s"},
+		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{},
 		FileValues:   []string{},
 	}

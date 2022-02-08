@@ -31,7 +31,7 @@ func TestRun(t *testing.T) {
 	// mock
 	httpmock.Activate()
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
+	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
 		httpmock.NewStringResponder(200, `all good`))
 	defer httpmock.Deactivate()
 

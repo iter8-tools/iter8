@@ -9,7 +9,7 @@
     {{- end }}
 
     {{- if .Values.duration }}
-    duration: {{ .Values.duration}}
+    duration: {{ .Values.duration | toString | quote }}
     {{- end }}
 
     {{- if .Values.qps }}
@@ -50,7 +50,7 @@
 
     {{- ""}}
     versionInfo:
-    - url: {{ required "A valid url value is required!" .Values.url }}
+    - url: {{ required "A valid url value is required!" .Values.url | toString | quote }}
     {{- if .Values.headers }}
     headers:
 {{ toYaml .Values.headers | indent 6 }}

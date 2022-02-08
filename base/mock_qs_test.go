@@ -7,12 +7,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	testName    = "example"
+	testPort    = "8000"
+	testHost    = "localhost"
+	testAddress = testHost + ":" + testPort
+	testPath    = "/"
+	testURL     = "http://" + testHost + testPath
+)
+
 func TestMockQuickStartWithSLOs(t *testing.T) {
 	// mock the http endpoint
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
+	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
 
 	// valid collect HTTP task... should succeed
@@ -24,7 +33,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 			Duration: StringPointer("1s"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
-				URL:     "https://example.com",
+				URL:     testURL,
 			}},
 		},
 	}
@@ -63,7 +72,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
+	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
 
 	// valid collect HTTP task... should succeed
@@ -75,7 +84,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			Duration: StringPointer("1s"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
-				URL:     "https://example.com",
+				URL:     testURL,
 			}},
 		},
 	}

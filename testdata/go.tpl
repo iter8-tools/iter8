@@ -34,13 +34,13 @@ metadata:
   name: {{ .Name }}-{{ $suffix }}
 stringData:
   experiment: |
-    # task 1: generate HTTP requests for https://example.com
+    # task 1: generate HTTP requests for https://httpbin.org/get
     # collect Iter8's built-in latency and error-related metrics
     - task: gen-load-and-collect-metrics-http
       with:
         versionInfo:
-        - url: https://example.com
-    # task 2: validate service level objectives for https://example.com using
+        - url: https://httpbin.org/get
+    # task 2: validate service level objectives for https://httpbin.org/get using
     # the metrics collected in the above task
     - task: assess-app-versions
       with:

@@ -23,7 +23,7 @@ iter8 run [flags]
 ```
 
 	# Render experiment.yaml and run the experiment
-	iter8 run --set url=https://example.com \
+	iter8 run --set url=https://httpbin.org/get \
 	--set SLOs.error-rate=0 \
 	--set SLOs.latency-mean=50 \
 	--set SLOs.latency-p90=100 \
