@@ -19,7 +19,7 @@ const (
 func TestMockQuickStartWithSLOs(t *testing.T) {
 	// mock the http endpoint
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
+	defer httpmock.Deactivate()
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
@@ -70,7 +70,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	// mock the http endpoint
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
+	defer httpmock.Deactivate()
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
