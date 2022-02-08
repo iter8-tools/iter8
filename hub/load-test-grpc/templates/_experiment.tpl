@@ -8,16 +8,16 @@
     protoURL: {{ .Values.protoURL | toString | quote }}
     {{- end }}
 
-    {{- if .Values.connect-timeout }}
-    connect-timeout: {{ .Values.connect-timeout | toString | quote }}
+    {{- if .Values.connectTimeout }}
+    connect-timeout: {{ .Values.connectTimeout | toString | quote }}
     {{- end }}
 
     {{- if .Values.total }}
     total: {{ .Values.total | int }}
     {{- end }}
 
-    {{- if .Values.max-duration }}
-    max-duration: {{ .Values.max-duration | toString | quote }}
+    {{- if .Values.maxDuration }}
+    max-duration: {{ .Values.maxDuration | toString | quote }}
     {{- end }}
 
     {{- if .Values.duration }}
