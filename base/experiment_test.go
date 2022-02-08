@@ -50,7 +50,7 @@ func TestRunExperiment(t *testing.T) {
 	}
 
 	httpmock.Activate()
-	defer httpmock.Deactivate()
+	// defer httpmock.Deactivate()
 
 	// Exact URL match
 	httpmock.RegisterResponder("GET", "https://something.com",
