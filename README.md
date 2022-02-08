@@ -54,7 +54,7 @@ brew install iter8
 You can also install Iter8 using:
 * [pre-compiled binaries](https://iter8.tools/latest/getting-started/install/)
 * [source](https://iter8.tools/latest/getting-started/install/)
-* [`go 1.16+`](https://iter8.tools/latest/getting-started/install/)
+* [`go 1.17+`](https://iter8.tools/latest/getting-started/install/)
 
 ## Usage
 
