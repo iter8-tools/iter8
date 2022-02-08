@@ -48,7 +48,15 @@ plugins:
 - mike
 - redirects:
     redirect_maps:
+      'tutorials/load-test-http/overview.md': 'tutorials/load-test-http/usage.md'
+      'tutorials/load-test-http/loadcharacteristics.md': 'tutorials/load-test-http/usage.md'
+      'tutorials/load-test-http/payload.md': 'tutorials/load-test-http/usage.md'
+      'tutorials/load-test-http/metricsandslos.md': 'tutorials/load-test-http/usage.md'
       'tutorials/load-test/community/knative/loadtest.md': 'tutorials/load-test-http/appserverlessml.md'
+      'tutorials/load-test-grpc/overview.md': 'tutorials/load-test-grpc/usage.md'
+      'tutorials/load-test-grpc/unary.md': 'tutorials/load-test-grpc/usage.md'
+      'tutorials/load-test-grpc/community/knative/loadtest.md': 'tutorials/load-test-grpc/appserverlessml.md'
+
 # Customization
 extra:
   # Google Analytics
@@ -126,15 +134,11 @@ nav:
   - Load test HTTP:
     - Usage examples: tutorials/load-test-http/usage.md
     - Default values: tutorials/load-test-http/defaultvalues.md
-    - App/serverless/ML: tutorials/load-test-http/appserverlessml.md
+    - K8s app/serverless/ML: tutorials/load-test-http/appserverlessml.md
   - Load test gRPC:
-    - Overview: tutorials/load-test-grpc/overview.md
-    - Unary: tutorials/load-test-grpc/unary.md
-    - Load characteristics: tutorials/load-test-grpc/loadcharacteristics.md
-    - Data and metadata: tutorials/load-test-grpc/dataandmetadata.md
-    - Community examples:
-      - Knative:
-        - gRPC Service: tutorials/load-test-grpc/community/knative/loadtest.md
+    - Usage examples: tutorials/load-test-grpc/usage.md
+    - Default values: tutorials/load-test-grpc/defaultvalues.md
+    - K8s app/serverless/ML: tutorials/load-test-grpc/appserverlessml.md
   - Other Experiment Types:
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md

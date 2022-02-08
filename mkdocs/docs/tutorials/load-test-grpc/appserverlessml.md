@@ -4,7 +4,7 @@ template: main.html
 
 # K8s App/serverless/ML Frameworks
 
-This tutorial provides examples of using the `load-test-http` experiment chart with various Kubernetes app/serverless/ML frameworks. Refer to [`load-test-http` usage](usage.md) to learn more about this chart.
+This tutorial provides examples of using the `load-test-grpc` experiment chart with various Kubernetes app/serverless/ML frameworks. Refer to [`load-test-grpc` usage](usage.md) to learn more about this chart.
 
 !!! tip "Dear Iter8 community" 
 
@@ -22,19 +22,29 @@ This tutorial provides examples of using the `load-test-http` experiment chart w
     ```
     Hello World!
     ```
-    3. Download experiment chart.
+    3. Update the Knative service deployed above to a gRPC service as follows.
     ```shell
-    iter8 hub -e load-test-http
-    cd load-test-http
+    kn service update hello \
+    --image docker.io/grpc/java-example-hostname:latest \
+    --port 50051 \
+    --revision-name=grpc
+    ```
+    4. Download experiment chart.
+    ```shell
+    iter8 hub -e load-test-grpc
+    cd load-test-grpc
     ```
 
 ### 1. Run experiment
 ```shell
-iter8 run --set url=http://hello.default.127.0.0.1.sslip.io \
+iter8 run --set-string host="hello.default.127.0.0.1.sslip.io:50051" \
+          --set-string call="helloworld.Greeter.SayHello" \
+          --set-string protoURL="https://raw.githubusercontent.com/grpc/grpc-java/master/examples/example-hostname/src/main/proto/helloworld/helloworld.proto"
+          --set data.name="frodo" \
           --set SLOs.error-rate=0 \
-          --set SLOs.latency-mean=50 \
-          --set SLOs.latency-p90=100 \
-          --set SLOs.latency-p'97\.5'=200
+          --set SLOs.latency/mean=400 \
+          --set SLOs.latency/p90=500 \
+          --set SLOs.latency/p'97\.5'=600
 ```
 
 ### 2. Assert outcomes

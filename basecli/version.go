@@ -48,7 +48,7 @@ Show the version for Iter8.
 
 	# The output will look like this:
 
-	# version.BuildInfo{Version:"v0.8.10", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GitTreeState:"clean", GoVersion:"go1.16.10"}
+	# version.BuildInfo{Version:"v0.8.32", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GitTreeState:"clean", GoVersion:"go1.16.10"}
 
 	# - Version is the semantic version of the release.
 	# - GitCommit is the SHA for the commit that this version was built from.
