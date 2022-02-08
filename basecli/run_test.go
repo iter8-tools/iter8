@@ -33,7 +33,7 @@ func TestRun(t *testing.T) {
 	// Exact URL match
 	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
 		httpmock.NewStringResponder(200, `all good`))
-	defer httpmock.Deactivate()
+	// defer httpmock.Deactivate()
 
 	b, err := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)

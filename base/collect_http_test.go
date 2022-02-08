@@ -33,7 +33,7 @@ func TestRunCollectHTTP(t *testing.T) {
 	}
 
 	httpmock.Activate()
-	defer httpmock.Deactivate()
+	// defer httpmock.Deactivate()
 
 	// Exact URL match
 	httpmock.RegisterResponder("POST", "https://something.com",
