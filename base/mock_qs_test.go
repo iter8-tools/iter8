@@ -10,11 +10,11 @@ import (
 
 const (
 	testName    = "example"
-	testPort    = "8000"
-	testHost    = "localhost"
+	testPort    = "9876"
+	testHost    = "127.0.0.1"
 	testAddress = testHost + ":" + testPort
 	testPath    = "/"
-	testURL     = "http://" + testHost + testPath
+	testURL     = "http://" + testAddress + testPath
 )
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
