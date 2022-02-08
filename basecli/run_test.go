@@ -28,12 +28,11 @@ func (n *MockIO) ReadSpec() (base.ExperimentSpec, error) {
 }
 
 func TestRun(t *testing.T) {
-	// mock
 	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
 		httpmock.NewStringResponder(200, `all good`))
-	// defer httpmock.Deactivate()
 
 	b, err := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)

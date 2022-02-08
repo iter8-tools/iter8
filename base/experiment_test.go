@@ -26,6 +26,7 @@ func TestReadExperiment(t *testing.T) {
 }
 func TestRunExperiment(t *testing.T) {
 	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
 
 	// Exact URL match
 	httpmock.RegisterResponder("GET", "https://something.com",
@@ -54,13 +55,6 @@ func TestRunExperiment(t *testing.T) {
 			}},
 		},
 	}
-
-	httpmock.Activate()
-	// defer httpmock.Deactivate()
-
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://something.com",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
 	exp := &Experiment{
 		Tasks:  []Task{ct, at},

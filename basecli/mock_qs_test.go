@@ -26,10 +26,10 @@ const (
 
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
-	// defer httpmock.Deactivate()
 
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
@@ -55,10 +55,10 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
 	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
-	// defer httpmock.Deactivate()
 
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
@@ -84,10 +84,10 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 
 func TestMockQuickStartWithBadSLOs(t *testing.T) {
 	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
-	// defer httpmock.Deactivate()
 
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
@@ -115,10 +115,10 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
-	// defer httpmock.Deactivate()
 
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
