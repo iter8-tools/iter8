@@ -36,10 +36,6 @@ This tutorial provides examples of using the `load-test-grpc` experiment chart w
     ```
 
 ### 1. Run experiment
-We will load test and validate SLOs for the Knative gRPC service using by running an Iter8 experiment.
-
-The `iter8 run` command combines an experiment chart with values, generates the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
-
 ```shell
 iter8 run --set-string host="hello.default.127.0.0.1.sslip.io:50051" \
           --set-string call="helloworld.Greeter.SayHello" \
@@ -50,12 +46,6 @@ iter8 run --set-string host="hello.default.127.0.0.1.sslip.io:50051" \
           --set SLOs.latency/p90=500 \
           --set SLOs.latency/p'97\.5'=600
 ```
-
-In the above experiment, the following SLOs are validated for the Knative service.
-- error rate is 0
-- mean latency is under 400 msec
-- 90th percentile latency is under 500 msec
-- 97.5th percentile latency is under 600 msec
 
 ### 2. Assert outcomes
 Assert that the experiment completed without any failures and SLOs are satisfied.

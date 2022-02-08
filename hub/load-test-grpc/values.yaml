@@ -17,17 +17,17 @@ call: null
 ### protoURL  URL where the Protocol Buffer file that defines the gRPC service is located.
 protoURL: null
 
-### connectTimeout  Connection timeout duration for the initial connection dial.
-connectTimeout: 10s
+### connect-timeout  Connection timeout duration for the initial connection dial.
+connect-timeout: 10s
 
 ### total Number of requests to run.
 total:  200
 
-### maxDuration Maximum duration for the experiment to send requests 
+### max-duration Maximum duration for the experiment to send requests 
 ### with 'total' setting respected. 
 ### If duration is reached before 'total' requests are completed, 
 ### experiment stops sending requests. Examples: 10s, 3m.
-maxDuration: null
+max-duration: null
 
 ### duration Duration for the experiment to send requests. 
 ### When duration is reached, experiment stops sending requests. 
@@ -64,10 +64,6 @@ metadata: null
 
 ### metadataURL URL pointing to a JSON file whose contents are to be used as call metadata.
 metadataURL: null
-
-### connect-timeout  Connection timeout duration for the initial connection dial. Default is 10s.
-
-# connect-timeout: 20s
 
 ### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.

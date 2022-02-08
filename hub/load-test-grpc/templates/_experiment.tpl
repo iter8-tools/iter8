@@ -4,8 +4,24 @@
 - task: gen-load-and-collect-metrics-grpc
   with:
 
+    {{- if .Values.protoURL }}
+    protoURL: {{ .Values.protoURL | toString }}
+    {{- end }}
+
+    {{- if .Values.connect-timeout }}
+    connect-timeout: {{ .Values.connect-timeout | toString }}
+    {{- end }}
+
     {{- if .Values.total }}
     total: {{ .Values.total | int }}
+    {{- end }}
+
+    {{- if .Values.max-duration }}
+    max-duration: {{ .Values.max-duration | toString }}
+    {{- end }}
+
+    {{- if .Values.duration }}
+    duration: {{ .Values.duration | toString }}
     {{- end }}
 
     {{- if .Values.rps }}
@@ -18,14 +34,6 @@
 
     {{- if .Values.connections }}
     connections: {{ .Values.connections | int }}
-    {{- end }}
-
-    {{- if .Values.loadMaxDuration }}
-    load-max-duration: {{ .Values.loadMaxDuration | toString }}
-    {{- end }}
-
-    {{- if .Values.protoURL }}
-    protoURL: {{ .Values.protoURL | toString }}
     {{- end }}
 
     {{- if .Values.data }}
