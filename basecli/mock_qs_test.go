@@ -29,7 +29,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	// without SLOs first
 
 	// gen and run exp
-	GenOptions.Values = []string{"url=https://example.com"}
+	GenOptions.Values = []string{"url=https://example.com", "duration=2s"}
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -115,8 +115,8 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// with SLOs and percentiles also
 	GenOptions = values.Options{
-		Values:     []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
-		ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
+		Values: []string{"url=https://example.com", "SLOs.error-count=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100", "duration=2s"},
+		// ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 	}
 
 	err := runCmd.RunE(nil, nil)
@@ -124,7 +124,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// assert
 	AssertOptions = AssertOptionsType{
-		Conds:   []string{Completed, NoFailure, SLOs, SLOsByPrefix + "=0"},
+		Conds:   []string{Completed, NoFailure, SLOsByPrefix + "=0"},
 		Timeout: 0,
 	}
 	err = assertCmd.RunE(nil, nil)
@@ -188,7 +188,7 @@ func TestDryRun(t *testing.T) {
 	os.Chdir(path.Join(dir, hubFolder))
 	Dry = true
 	GenOptions = values.Options{
-		Values: []string{"url=https://example.com"},
+		Values: []string{"url=https://example.com", "duration=2s"},
 	}
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)

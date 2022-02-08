@@ -1,5 +1,5 @@
 SLOs:
-  error-rate: 0 
+  error-count: 0 
   latency-mean: 100
   latency-p50.0: 100 
   latency-p95.0: 250
