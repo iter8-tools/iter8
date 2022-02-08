@@ -10,15 +10,14 @@ import (
 
 	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
-	mux, addr := fhttp.DynamicHTTPServer(false)
-	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
-	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
-
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -37,10 +36,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
-	mux, addr := fhttp.DynamicHTTPServer(false)
-	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
-	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
-
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -60,10 +56,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithBadSLOs(t *testing.T) {
-	mux, addr := fhttp.DynamicHTTPServer(false)
-	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
-	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
-
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -89,10 +82,7 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
-	mux, addr := fhttp.DynamicHTTPServer(false)
-	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
-	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
-
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -107,7 +97,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// assert
 	AssertOptions = AssertOptionsType{
-		Conds:   []string{Completed, NoFailure, SLOsByPrefix + "=0"},
+		Conds:   []string{Completed, NoFailure, SLOs, SLOsByPrefix + "=0"},
 		Timeout: 0,
 	}
 	err = assertCmd.RunE(nil, nil)
@@ -131,6 +121,14 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 }
 
 func TestDryRunLocal(t *testing.T) {
+	log.Logger.Info(t.Name())
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://example.com",
+		httpmock.NewStringResponder(200, `all good`))
+
 	// dry run
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 	Dry = true
@@ -145,6 +143,7 @@ func TestDryRunLocal(t *testing.T) {
 	assert.FileExists(t, "experiment.yaml")
 }
 func TestDryRun(t *testing.T) {
+	log.Logger.Info(t.Name())
 	dir, _ := ioutil.TempDir("", "iter8-test")
 	defer os.RemoveAll(dir)
 
