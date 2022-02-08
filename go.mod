@@ -18,7 +18,7 @@ retract (
 )
 
 require (
-	fortio.org/fortio v1.19.0
+	fortio.org/fortio v1.20.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.106.1
