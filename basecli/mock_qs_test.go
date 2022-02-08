@@ -8,12 +8,14 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -41,6 +43,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -67,6 +70,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithBadSLOs(t *testing.T) {
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -98,6 +102,7 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
+	log.Logger.Info(t.Name())
 	// get into the experiment chart folder
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
@@ -119,7 +124,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// assert
 	AssertOptions = AssertOptionsType{
-		Conds:   []string{Completed, NoFailure, SLOs, "slosby=0"},
+		Conds:   []string{Completed, NoFailure, SLOs, SLOsByPrefix + "=0"},
 		Timeout: 0,
 	}
 	err = assertCmd.RunE(nil, nil)
@@ -142,6 +147,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 }
 
 func TestDryRunLocal(t *testing.T) {
+	log.Logger.Info(t.Name())
 	// mock the http endpoint
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
@@ -161,6 +167,7 @@ func TestDryRunLocal(t *testing.T) {
 
 }
 func TestDryRun(t *testing.T) {
+	log.Logger.Info(t.Name())
 	dir, _ := ioutil.TempDir("", "iter8-test")
 	defer os.RemoveAll(dir)
 
