@@ -26,7 +26,6 @@ const (
 
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	httpmock.Activate()
-	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
@@ -51,11 +50,12 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	}
 	err = assertCmd.RunE(nil, nil)
 	assert.NoError(t, err)
+
+	httpmock.DeactivateAndReset()
 }
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
 	httpmock.Activate()
-	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
@@ -80,11 +80,12 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	}
 	err = assertCmd.RunE(nil, nil)
 	assert.NoError(t, err)
+
+	httpmock.DeactivateAndReset()
 }
 
 func TestMockQuickStartWithBadSLOs(t *testing.T) {
 	httpmock.Activate()
-	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
@@ -111,11 +112,12 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 	allGood, err := exp.Assert(AssertOptions.Conds, AssertOptions.Timeout)
 	assert.NoError(t, err)
 	assert.False(t, allGood)
+
+	httpmock.DeactivateAndReset()
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	httpmock.Activate()
-	t.Cleanup(httpmock.Deactivate)
 	// Exact URL match
 	httpmock.RegisterResponder("GET", testURL,
 		httpmock.NewStringResponder(200, `all good`))
@@ -157,6 +159,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	err = reportCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
+	httpmock.DeactivateAndReset()
 }
 
 func TestDryRunLocal(t *testing.T) {

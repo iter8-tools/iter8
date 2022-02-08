@@ -9,7 +9,6 @@ import (
 
 func TestRunCollectHTTP(t *testing.T) {
 	httpmock.Activate()
-	t.Cleanup(httpmock.Deactivate)
 
 	// Exact URL match
 	httpmock.RegisterResponder("POST", "https://something.com",

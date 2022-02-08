@@ -26,7 +26,6 @@ func TestReadExperiment(t *testing.T) {
 }
 func TestRunExperiment(t *testing.T) {
 	httpmock.Activate()
-	t.Cleanup(httpmock.Deactivate)
 
 	// Exact URL match
 	httpmock.RegisterResponder("GET", "https://something.com",
