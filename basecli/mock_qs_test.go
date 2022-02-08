@@ -115,8 +115,8 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// with SLOs and percentiles also
 	GenOptions = values.Options{
-		Values: []string{"url=https://example.com", "SLOs.error-count=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100", "duration=2s"},
-		// ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
+		Values:     []string{"url=https://example.com", "SLOs.error-count=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100", "duration=2s"},
+		ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 	}
 
 	err := runCmd.RunE(nil, nil)
