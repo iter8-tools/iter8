@@ -9,7 +9,6 @@ import (
 
 func TestRunCollectHTTP(t *testing.T) {
 	httpmock.Activate()
-	t.Cleanup(httpmock.Deactivate)
 
 	// Exact URL match
 	httpmock.RegisterResponder("POST", "https://something.com",
@@ -49,4 +48,6 @@ func TestRunCollectHTTP(t *testing.T) {
 	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + builtInHTTPLatencyPercentilePrefix + "50")
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
+
+	httpmock.DeactivateAndReset()
 }
