@@ -32,6 +32,16 @@ func TestRunCollectHTTP(t *testing.T) {
 		},
 	}
 
+	httpmock.Activate()
+	defer httpmock.Deactivate()
+
+	// Exact URL match
+	httpmock.RegisterResponder("POST", "https://something.com",
+		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
+
+	httpmock.RegisterResponder("GET", "https://data.police.uk/api/crimes-street-dates",
+		httpmock.NewStringResponder(200, `[{"my": 1, "great": "payload"}]`))
+
 	exp := &Experiment{
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
