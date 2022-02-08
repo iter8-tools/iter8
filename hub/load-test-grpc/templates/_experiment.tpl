@@ -5,11 +5,11 @@
   with:
 
     {{- if .Values.protoURL }}
-    protoURL: {{ .Values.protoURL | toString }}
+    protoURL: {{ .Values.protoURL | toString | quote }}
     {{- end }}
 
     {{- if .Values.connect-timeout }}
-    connect-timeout: {{ .Values.connect-timeout | toString }}
+    connect-timeout: {{ .Values.connect-timeout | toString | quote }}
     {{- end }}
 
     {{- if .Values.total }}
@@ -17,11 +17,11 @@
     {{- end }}
 
     {{- if .Values.max-duration }}
-    max-duration: {{ .Values.max-duration | toString }}
+    max-duration: {{ .Values.max-duration | toString | quote }}
     {{- end }}
 
     {{- if .Values.duration }}
-    duration: {{ .Values.duration | toString }}
+    duration: {{ .Values.duration | toString | quote }}
     {{- end }}
 
     {{- if .Values.rps }}
@@ -42,11 +42,11 @@
     {{- end }}
 
     {{- if .Values.dataURL }}
-    dataURL: {{ .Values.dataURL | toString }}
+    dataURL: {{ .Values.dataURL | toString | quote }}
     {{- end }}
 
     {{- if .Values.binaryDataURL }}
-    binaryDataURL: {{ .Values.binaryDataURL | toString }}
+    binaryDataURL: {{ .Values.binaryDataURL | toString | quote }}
     {{- end }}
 
     {{- if .Values.metadata }}
@@ -55,13 +55,13 @@
     {{- end }}
 
     {{- if .Values.metadataURL }}
-    metadataURL: {{ .Values.metadataURL | toString }}
+    metadataURL: {{ .Values.metadataURL | toString | quote }}
     {{- end }}
 
     {{- ""}}
     versionInfo:
-    - host: {{ required "A valid host is required!" .Values.host | toString }}
-      call: {{ required "A valid call is required!" .Values.call | toString }}
+    - host: {{ required "A valid host is required!" .Values.host | toString | quote }}
+      call: {{ required "A valid call is required!" .Values.call | toString | quote }}
 
 {{- if .Values.SLOs }}
 # task 2: validate service level objectives for app using

@@ -48,12 +48,12 @@ cd load-test-http
 ```
 
 ## 3. Run experiment
-We will load test the HTTP service whose URL (`url`) is https://example.com. 
+We will load test the HTTP service whose URL (`url`) is https://httpbin.org/get. 
 
 The `iter8 run` command combines an experiment chart with values, generates the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
 
 ```shell
-iter8 run --set url=https://example.com
+iter8 run --set url=https://httpbin.org/get
 ```
 
 ## 4. View report

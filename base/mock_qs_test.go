@@ -8,10 +8,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	testName    = "example"
+	testPort    = "8000"
+	testHost    = "localhost"
+	testAddress = testHost + ":" + testPort
+	testPath    = "/"
+	testURL     = "http://" + testHost + testPath
+)
+
 func TestMockQuickStartWithSLOs(t *testing.T) {
-	mux, addr := fhttp.DynamicHTTPServer(false)
-	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
-	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", testURL,
+		httpmock.NewStringResponder(200, `all good`))
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -57,9 +69,12 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
-	mux, addr := fhttp.DynamicHTTPServer(false)
-	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
-	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
+	// mock the http endpoint
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", testURL,
+		httpmock.NewStringResponder(200, `all good`))
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
