@@ -25,6 +25,13 @@ func TestReadExperiment(t *testing.T) {
 	assert.Equal(t, 3, len(*es))
 }
 func TestRunExperiment(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
+
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://something.com",
+		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
+
 	// valid collect task... should succeed
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
@@ -48,13 +55,6 @@ func TestRunExperiment(t *testing.T) {
 			}},
 		},
 	}
-
-	httpmock.Activate()
-	// defer httpmock.Deactivate()
-
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://something.com",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
 	exp := &Experiment{
 		Tasks:  []Task{ct, at},
