@@ -12,10 +12,10 @@ var short bool
 var (
 	// Version is intended to be set using LDFLAGS at build time
 	// In the absence of complete semantic versioning info, the best we can do is major minor
-	version = "v0.8"
+	version = "v0.9"
 	// version is the current major/minor version of Iter8
 	// set this manually whenever the major or minor version changes
-	majorMinor = "v0.8"
+	majorMinor = "v0.9"
 	// metadata is extra build time data
 	metadata = ""
 	// gitCommit is the git sha1
