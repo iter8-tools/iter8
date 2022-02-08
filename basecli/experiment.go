@@ -158,9 +158,9 @@ func (exp *Experiment) getSLOsSatisfiedBy() []int {
 		return sat
 	}
 	log.Logger.Info("experiment involves at least one version and at least one SLO")
-	log.Logger.Trace(exp.Result.Insights.SLOs)
-	log.Logger.Trace(exp.Result.Insights.SLOsSatisfied)
-	log.Logger.Trace(exp.Result.Insights.NonHistMetricValues)
+	log.Logger.Info(exp.Result.Insights.SLOs)
+	log.Logger.Info(exp.Result.Insights.SLOsSatisfied)
+	log.Logger.Info(exp.Result.Insights.NonHistMetricValues)
 	sat := []int{}
 	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 		satThis := true
