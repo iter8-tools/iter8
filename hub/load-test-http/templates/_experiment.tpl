@@ -21,15 +21,15 @@
     {{- end }}
 
     {{- if .Values.payloadStr }}
-    payloadStr: "{{ .Values.payloadStr | toString }}"
+    payloadStr: "{{ .Values.payloadStr | toString | quote }}"
     {{- end }}
 
     {{- if .Values.payloadURL }}
-    payloadURL: "{{ .Values.payloadURL | toString }}"
+    payloadURL: "{{ .Values.payloadURL | toString | quote }}"
     {{- end }}
 
     {{- if .Values.contentType }}
-    contentType: "{{ .Values.contentType | toString }}"
+    contentType: "{{ .Values.contentType | toString | quote }}"
     {{- end }}
 
     {{- if .Values.errorsAbove }}
