@@ -1,27 +1,17 @@
 package base
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/jarcoal/httpmock"
+	"fortio.org/fortio/fhttp"
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	testName    = "example"
-	testPort    = "9876"
-	testHost    = "127.0.0.1"
-	testAddress = testHost + ":" + testPort
-	testPath    = "/"
-	testURL     = "http://" + testAddress + testPath
-)
-
 func TestMockQuickStartWithSLOs(t *testing.T) {
-	// mock the http endpoint
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", testURL,
-		httpmock.NewStringResponder(200, `all good`))
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
+	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -64,16 +54,12 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 			assert.True(t, b)
 		}
 	}
-
-	httpmock.DeactivateAndReset()
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
-	// mock the http endpoint
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", testURL,
-		httpmock.NewStringResponder(200, `all good`))
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
+	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -119,6 +105,4 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			assert.True(t, b)
 		}
 	}
-
-	httpmock.DeactivateAndReset()
 }
