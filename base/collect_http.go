@@ -199,7 +199,7 @@ func (t *collectHTTPTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, err
 		return nil, err
 	}
 	log.Logger.Trace("got fortio options")
-	log.Logger.Info("URL: ", fo.URL)
+	log.Logger.Trace("URL: ", fo.URL)
 	ifr, err := fhttp.RunHTTPTest(fo)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
