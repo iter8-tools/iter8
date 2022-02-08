@@ -23,12 +23,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
 	// gen and run exp
-	GenOptions = values.Options{
-		ValueFiles:   []string{},
-		StringValues: []string{"url=" + testURL, "duration=2s"},
-		Values:       []string{},
-		FileValues:   []string{},
-	}
+	GenOptions.Values = []string{"url=https://example.com"}
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -50,12 +45,8 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
 
 	// with SLOs next
-	GenOptions = values.Options{
-		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
-		StringValues: []string{"url=" + testURL, "duration=2s"},
-		Values:       []string{"SLOs.error-rate=0", "SLOs.latency-mean=100"},
-		FileValues:   []string{},
-	}
+	GenOptions.Values = []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "duration=2s"}
+	GenOptions.ValueFiles = []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")}
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -107,10 +98,8 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 	// with SLOs and percentiles also
 	GenOptions = values.Options{
-		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
-		StringValues: []string{"url=" + testURL, "duration=2s"},
-		Values:       []string{"SLOs.error-count=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
-		FileValues:   []string{},
+		Values:     []string{"url=https://example.com", "SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
+		ValueFiles: []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 	}
 
 	err := runCmd.RunE(nil, nil)
