@@ -8,11 +8,11 @@
 [![Community meetups](https://img.shields.io/badge/meet-Iter8%20community%20meetups-brightgreen)](https://iter8.tools/0.8/getting-started/help/)
 
 
-# What is Iter8?
+# Iter8
 
 Kubernetes release optimizer built for DevOps, MLOps, SRE and data science teams.
 
-## What is an Iter8 experiment?
+## Iter8 experiment
 Iter8 experiments make it simple to collect performance and business metrics for apps and ML models, assess, compare and validate multiple app/ML model versions, safely rollout winning version, and maximize business value in each release.
 
 <p align='center'>
