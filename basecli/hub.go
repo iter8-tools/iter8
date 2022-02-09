@@ -16,115 +16,71 @@ limitations under the License.
 package basecli
 
 import (
-	"context"
-	"errors"
-	"fmt"
+	"io/ioutil"
 	"os"
-	"path"
-	"strings"
 
-	"github.com/google/go-github/v42/github"
-	"github.com/hashicorp/go-getter"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
-// latestStableVersion returns the latest stable version of Iter8
-func latestStableVersion() (string, error) {
-	// find all tags
-	client := github.NewClient(nil)
-	tags, _, err := client.Repositories.ListTags(context.Background(), "iter8-tools", "iter8", nil)
-	// something went wrong or found zero tags
-	if err != nil || len(tags) == 0 {
-		e := errors.New("unable to determine latest stable version for Iter8 hub")
-		var msg string
-		if len(tags) == 0 {
-			msg = "found 0 tags"
-		}
-		msg = e.Error()
-		log.Logger.WithStackTrace(msg).Error(e)
-		return "", e
-	}
-	// found some tags
-	log.Logger.Infof("found %v tags", len(tags))
-	// found latest tag with the correct major minor prefix
-	if strings.HasPrefix(*(tags[0].Name), majorMinor+".") {
-		return *tags[0].Name, nil
-	}
-	// ToDo: Fix the following error
-	err = fmt.Errorf("unable to find tags with major minor %v", majorMinor)
-	log.Logger.Error(err)
-	return "", err
-}
+const (
+	defaultIter8RepoURL = "https://iter8-tools.github.io/hub"
+	iter8TempDirPrefix  = "iter8-temp-dest-dir"
+)
 
-// getIter8Hub gets the location of the Iter8Hub
-func getIter8Hub() (string, error) {
-	iter8HubTpl := "github.com/iter8-tools/iter8.git?ref=%v//hub"
-	viper.BindEnv("ITER8HUB")
-	iter8HubFromEnv := viper.GetString("ITER8HUB")
-	if len(iter8HubFromEnv) > 0 {
-		return iter8HubFromEnv, nil
-	}
-	tag, err := latestStableVersion()
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf(iter8HubTpl, tag), nil
-}
-
-var hubFolder string
+var (
+	chartName    string
+	repoURL      string
+	iter8TempDir string
+)
 
 var hubUsage = `
-Download an experiment chart from the Iter8 hub. 
-This is useful for fetching experiments to inspect, modify, run, or repackage. 
-By default, this command looks for the specified experiment chart in the public Iter8 hub. 
-It is also possible to use third party hubs by setting the ITER8HUB environment variable.
+Download an experiment chart from an Iter8 experiment chart repo.
+This is useful for fetching experiments to inspect, modify, launch, or repackage. 
+By default, this command looks for the specified experiment chart in the default Iter8 experiment repo. You can use third party repos by supplying the repo URL flag.
 
-Environment variables:
-
-| Name               | Description |
-|--------------------| ------------|
-| $ITER8HUB          | Iter8 hub location. Default value: github.com/iter8-tools/iter8.git//hub |
-
-The Iter8 hub location follows the following syntax:
-
-HOST/OWNER/REPO[?ref=branch]//path-to-experiment-folder-relative-to-root-of-the-repo
-
-For example, the public Iter8 hub is located at:
-github.com/iter8-tools/iter8.git?ref=master//hub
+The default Iter8 experiment chart repo has the following URL:
+https://iter8-tools.github.io/hub
 `
 
 // hubCmd represents the hub command
 var hubCmd = &cobra.Command{
 	Use:   "hub",
-	Short: "Download an experiment chart from Iter8 hub",
+	Short: "Download an experiment chart from an Iter8 experiment chart repo",
 	Long:  hubUsage,
 	Example: `
-# download the load-test-http experiment chart from the public Iter8 hub
-iter8 hub -e load-test-http
+# download the load-test-http experiment chart from 
+# the default Iter8 experiment chart repo
+iter8 hub -c load-test-http
 
-# custom Iter8 hubs are simply github repos that host Iter8 experiment charts
-# Suppose you forked github.com/iter8-tools/iter8 under the GitHub account $GHUSER,
-# created a branch called 'ml', and pushed a new experiment chart 
-# called 'tensorflow' under the path 'my/path/to/hub'. 
-# It can now be downloaded as follows.
-
-export ITER8HUB=github.com/$GHUSER/iter8.git?ref=ml//my/path/to/hub
-iter8 hub -e tensorflow
+# download the great-expectations experiment chart from 
+# the custom Iter8 experiment chart repo whose URL is 
+# https://great.expectations.pip
+iter8 hub -c great-expectations -r https://great.expectations.pip
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		hubRoot, err := getIter8Hub()
-		if err != nil {
-			return err
+		// set up helm pull object
+		cfg := &action.Configuration{
+			Capabilities: chartutil.DefaultCapabilities,
 		}
-		ifurl := path.Join(hubRoot, hubFolder)
-		log.Logger.Info("downloading ", ifurl)
-		if err := getter.Get(hubFolder, ifurl); err != nil {
-			log.Logger.WithStackTrace(err.Error()).Errorf("unable to get: %v", ifurl)
+		pull := action.NewPullWithOpts(action.WithConfig(cfg))
+		pull.Settings = cli.New()
+		pull.Untar = true
+		pull.RepoURL = repoURL
+		iter8TempDir, _ = ioutil.TempDir("", iter8TempDirPrefix)
+		pull.DestDir = iter8TempDir
+		pull.UntarDir = iter8TempDir
+
+		log.Logger.Infof("pulling %v from %v into %v", chartName, pull.RepoURL, pull.DestDir)
+		_, err := pull.Run(chartName)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Errorf("unable to get %v", chartName)
 			os.Exit(1)
 		}
 		return nil
@@ -133,6 +89,7 @@ iter8 hub -e tensorflow
 
 func init() {
 	RootCmd.AddCommand(hubCmd)
-	hubCmd.Flags().StringVarP(&hubFolder, "experiment", "e", "", "valid experiment chart located under hub")
-	hubCmd.MarkFlagRequired("experiment")
+	hubCmd.Flags().StringVarP(&chartName, "chartName", "c", "", "name of the experiment chart")
+	hubCmd.MarkFlagRequired("chartName")
+	hubCmd.Flags().StringVarP(&repoURL, "repoURL", "r", defaultIter8RepoURL, "URL of repo containing Iter8 experiment chart")
 }

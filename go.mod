@@ -22,8 +22,6 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.106.1
-	github.com/google/go-github/v42 v42.0.0
-	github.com/hashicorp/go-getter v1.5.11
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/montanaflynn/stats v0.6.6

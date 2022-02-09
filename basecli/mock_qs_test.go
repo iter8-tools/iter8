@@ -160,13 +160,13 @@ func TestDryRun(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	os.Chdir(dir)
-	hubFolder = "load-test-http"
+	chartName = "load-test-http"
 	// hub
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
 	// dry run
-	os.Chdir(path.Join(dir, hubFolder))
+	os.Chdir(path.Join(dir, chartName))
 	Dry = true
 	GenOptions = values.Options{
 		ValueFiles:   []string{},

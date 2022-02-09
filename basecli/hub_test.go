@@ -1,7 +1,6 @@
 package basecli
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -10,14 +9,10 @@ import (
 )
 
 func TestHubGoodFolder(t *testing.T) {
-	dir, _ := ioutil.TempDir("", "iter8-test")
-	defer os.RemoveAll(dir)
-
-	os.Chdir(dir)
-	hubFolder = "load-test"
+	chartName = "load-test-http"
 	// make sure load test folder is present
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
-	_, err = os.Stat(path.Join(dir, hubFolder, "Chart.yaml"))
+	_, err = os.Stat(path.Join(iter8TempDir, chartName, "Chart.yaml"))
 	assert.False(t, os.IsNotExist(err))
 }
