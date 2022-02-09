@@ -135,11 +135,11 @@ nav:
   - Load test HTTP:
     - Usage examples: tutorials/load-test-http/usage.md
     - Default values: tutorials/load-test-http/defaultvalues.md
-    - K8s app/serverless/ML: tutorials/load-test-http/appserverlessml.md
+    - App/serverless/ML: tutorials/load-test-http/appserverlessml.md
   - Load test gRPC:
     - Usage examples: tutorials/load-test-grpc/usage.md
     - Default values: tutorials/load-test-grpc/defaultvalues.md
-    - K8s app/serverless/ML: tutorials/load-test-grpc/appserverlessml.md
+    - App/serverless/ML: tutorials/load-test-grpc/appserverlessml.md
   - Other Experiment Types:
     - SLOs with Prometheus: tutorials/slos-with-prometheus.md
     - A/B(/n) testing: tutorials/abn.md

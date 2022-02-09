@@ -39,6 +39,7 @@
 <!-- Hero for landing page -->
 <section class="mdx-container">
   <div class="md-grid md-typeset">
+
     <div class="mdx-hero">
       <!-- Hero content -->
       <div class="mdx-hero__content">
@@ -46,35 +47,34 @@
           <strong>Kubernetes Release Optimizer</strong>
         </h1>
 
-        <h2>
+        <h3>
           <span class="twemoji">
             {% include ".icons/material/progress-check.svg" %}
           </span>
           Safely rollout apps and ML models
-        </h2> 
-
-        <h2>
+          <br />
           <span class="twemoji">
             {% include ".icons/material/progress-check.svg" %}
           </span>
           Maximize business value
-        </h2> 
-
-        <h2>
+          <br />
+          <span class="twemoji">
+            {% include ".icons/material/progress-check.svg" %}
+          </span>
+          Use with any app/serverless/ML framework
+          <br />
           <span class="twemoji">
             {% include ".icons/material/progress-check.svg" %}
           </span>
           Setup in seconds
-        </h2> 
-        
+        </h3>
 
         <a href="{{ base_url }}/getting-started/your-first-experiment" title="Quick start"
           class="md-button md-button--primary">
           Get started
         </a>
 
-        <a href="https://github.com/iter8-tools/iter8" title="star"
-        class="md-button">
+        <a href="https://github.com/iter8-tools/iter8" title="star" class="md-button">
           <span class="twemoji">
             {% include ".icons/material/star.svg" %}
           </span>
@@ -83,30 +83,37 @@
             {% include ".icons/material/github.svg" %}
           </span>
         </a>
+
       </div>
 
       <!-- Hero image -->
       <div class="mdx-hero__image">
-        <img src="{{ base_url }}/images/iter8-intro-light.png" alt="Iter8 experiment"  draggable="false">
+        <img src="{{ base_url }}/images/iter8-intro-light.png" alt="Iter8 experiment" draggable="false">
       </div>
+
     </div>
 
     <div class="text-center">
-      <p class="text-light">
-        Built with
-        <span class="twemoji heart">
-          {% include ".icons/material/heart.svg" %} 
-        </span>
-        for DevOps and MLOps teams. Open Source. Apache v2 licensed.
-      <p>
 
-      <p class="text-light">Using Iter8? Please list yourself
-        <a href="https://github.com/iter8-tools/iter8/blob/master/ADOPTERS.md">here.</a>
-      </p>        
 
-    </div>
+    <h2 class="text-light">
+      Built with
+      <span class="twemoji heart">
+        {% include ".icons/material/heart.svg" %}
+      </span>
+      for DevOps and MLOps teams 
+    </h2>
+
+
+    <p class="text-light">Using Iter8? Please list yourself
+      <a href="https://github.com/iter8-tools/iter8/blob/master/ADOPTERS.md">here</a>.
+    </p>
 
   </div>
+
+
+  </div>
+
 </section>
 
 <!-- <section class="tx-container">

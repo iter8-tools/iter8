@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# K8s App/serverless/ML Frameworks
+# App/serverless/ML Frameworks
 
 This tutorial provides examples of using the `load-test-http` experiment chart with various Kubernetes app/serverless/ML frameworks. Refer to [`load-test-http` usage](usage.md) to learn more about this chart.
 

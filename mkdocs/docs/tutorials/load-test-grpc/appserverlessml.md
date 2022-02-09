@@ -2,7 +2,7 @@
 template: main.html
 ---
 
-# K8s App/serverless/ML Frameworks
+# App/serverless/ML Frameworks
 
 This tutorial provides examples of using the `load-test-grpc` experiment chart with various Kubernetes app/serverless/ML frameworks. Refer to [`load-test-grpc` usage](usage.md) to learn more about this chart.
 
