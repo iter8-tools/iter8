@@ -20,14 +20,13 @@ var expCmd = &cobra.Command{
 	Use:   "exp",
 	Short: "Render experiment.yaml file by combining an experiment chart with values.",
 	Long: `
-Render experiment.yaml file by combining an experiment chart with values.
-This command is intended to be run from the root of an Iter8 experiment chart. Values may be specified and are processed in the same manner as they are for Helm charts.`,
+Render experiment.yaml file by combining an experiment chart with values. Values may be specified and are processed in the same manner as they are for Helm charts.`,
 	Example: `
 iter8 gen exp --set url=https://httpbin.org/get
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// read in the experiment chart
-		c, err := loader.Load(".")
+		c, err := loader.Load(chartPath)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("unable to load experiment chart")
 			return err
@@ -84,5 +83,7 @@ iter8 gen exp --set url=https://httpbin.org/get
 }
 
 func init() {
+	expCmd.Flags().StringVarP(&chartPath, "chartPath", "c", "", "path to the experiment chart")
+	expCmd.MarkFlagRequired("chartPath")
 	genCmd.AddCommand(expCmd)
 }

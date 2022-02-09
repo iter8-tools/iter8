@@ -3,8 +3,6 @@ package basecli
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
 	"path"
 	"testing"
 
@@ -19,9 +17,6 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
-	// get into the experiment chart folder
-	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
-
 	// gen and run exp
 	GenOptions = values.Options{
 		ValueFiles:   []string{},
@@ -29,6 +24,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 		Values:       []string{},
 		FileValues:   []string{},
 	}
+	chartPath = base.CompletePath("../", "hub/load-test-http")
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -46,9 +42,6 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
-	// get into the experiment chart folder
-	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
-
 	// with SLOs next
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
@@ -56,6 +49,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		Values:       []string{"SLOs.error-rate=0", "SLOs.latency-mean=100"},
 		FileValues:   []string{},
 	}
+	chartPath = base.CompletePath("../", "hub/load-test-http")
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -73,15 +67,13 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
-	// get into the experiment chart folder
-	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
-
 	// with bad SLOs
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{"SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p95=0.00001"},
 	}
+	chartPath = base.CompletePath("../", "hub/load-test-http")
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -102,9 +94,6 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
-	// get into the experiment chart folder
-	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
-
 	// with SLOs and percentiles also
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
@@ -112,7 +101,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		Values:       []string{"SLOs.error-count=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
 		FileValues:   []string{},
 	}
-
+	chartPath = base.CompletePath("../", "hub/load-test-http")
 	err := runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
@@ -138,35 +127,14 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	}
 	err = reportCmd.RunE(nil, nil)
 	assert.NoError(t, err)
-
 }
 
-func TestDryRunLocal(t *testing.T) {
-	// dry run
-	os.Chdir(base.CompletePath("../", "hub/load-test-http"))
-	Dry = true
-	GenOptions = values.Options{
-		ValueFiles:   []string{},
-		StringValues: []string{"url=https://example.com", "duration=2s"},
-		Values:       []string{},
-		FileValues:   []string{},
-	}
-	err := runCmd.RunE(nil, nil)
-	assert.NoError(t, err)
-	assert.FileExists(t, "experiment.yaml")
-}
 func TestDryRun(t *testing.T) {
-	dir, _ := ioutil.TempDir("", "iter8-test")
-	defer os.RemoveAll(dir)
-
-	os.Chdir(dir)
 	chartName = "load-test-http"
 	// hub
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
-	// dry run
-	os.Chdir(path.Join(dir, chartName))
 	Dry = true
 	GenOptions = values.Options{
 		ValueFiles:   []string{},
@@ -174,6 +142,7 @@ func TestDryRun(t *testing.T) {
 		Values:       []string{},
 		FileValues:   []string{},
 	}
+	chartPath = path.Join(iter8TempDir, chartName)
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 	assert.FileExists(t, "experiment.yaml")
