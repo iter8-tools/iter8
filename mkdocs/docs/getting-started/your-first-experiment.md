@@ -39,24 +39,16 @@ template: main.html
     ```
     You can now run `iter8` (from your gopath bin/ directory)
 
-## 2. Download experiment chart
-Download the `load-test-http` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](concepts.md#iter8-hub) as follows.
-
-```shell
-iter8 hub -e load-test-http
-cd load-test-http
-```
-
-## 3. Run experiment
+## 2. Launch experiment
 We will load test the HTTP service whose URL (`url`) is https://httpbin.org/get. 
 
-The `iter8 run` command combines an experiment chart with values, generates the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Run the experiment as follows.
+The `iter8 launch` command downloads the `load-test-http` [experiment chart](concepts.md#experiment-chart) from [Iter8 hub](concepts.md#iter8-hub), combines the chart with values to generate the `experiment.yaml` file, runs the experiment, and writes results into the `result.yaml` file. Launch the experiment as follows.
 
 ```shell
-iter8 run --set url=https://httpbin.org/get
+iter8 launch -c load-test-http --set url=https://httpbin.org/get
 ```
 
-## 4. View report
+## 3. View report
 View a report of the experiment in HTML or text formats as follows.
 
 === "HTML"
