@@ -22,15 +22,11 @@ This tutorial provides examples of using the `load-test-http` experiment chart w
     ```
     Hello World!
     ```
-    3. Download experiment chart.
-    ```shell
-    iter8 hub -e load-test-http
-    cd load-test-http
-    ```
 
 ### 1. Run experiment
 ```shell
-iter8 run --set url=http://hello.default.127.0.0.1.sslip.io \
+iter8 launch -c load-test-http \
+          --set url=http://hello.default.127.0.0.1.sslip.io \
           --set SLOs.error-rate=0 \
           --set SLOs.latency-mean=50 \
           --set SLOs.latency-p90=100 \

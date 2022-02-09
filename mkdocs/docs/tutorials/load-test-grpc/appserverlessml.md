@@ -29,15 +29,11 @@ This tutorial provides examples of using the `load-test-grpc` experiment chart w
     --port 50051 \
     --revision-name=grpc
     ```
-    4. Download experiment chart.
-    ```shell
-    iter8 hub -e load-test-grpc
-    cd load-test-grpc
-    ```
 
 ### 1. Run experiment
 ```shell
-iter8 run --set-string host="hello.default.127.0.0.1.sslip.io:50051" \
+iter8 launch -c load-test-grpc \
+          --set-string host="hello.default.127.0.0.1.sslip.io:50051" \
           --set-string call="helloworld.Greeter.SayHello" \
           --set-string protoURL="https://raw.githubusercontent.com/grpc/grpc-java/master/examples/example-hostname/src/main/proto/helloworld/helloworld.proto"
           --set data.name="frodo" \
