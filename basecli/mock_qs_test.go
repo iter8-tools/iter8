@@ -135,14 +135,14 @@ func TestDryRun(t *testing.T) {
 	err := hubCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
-	Dry = true
+	dry = true
 	GenOptions = values.Options{
 		ValueFiles:   []string{},
 		StringValues: []string{"url=https://example.com", "duration=2s"},
 		Values:       []string{},
 		FileValues:   []string{},
 	}
-	chartPath = path.Join(iter8TempDir, chartName)
+	chartPath = path.Join(destDir, chartName)
 	err = runCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 	assert.FileExists(t, "experiment.yaml")

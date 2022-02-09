@@ -16,6 +16,7 @@ limitations under the License.
 package basecli
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 
@@ -32,9 +33,9 @@ const (
 )
 
 var (
-	chartName    string
-	repoURL      string
-	iter8TempDir string
+	chartName string
+	repoURL   string
+	destDir   string
 )
 
 var hubUsage = `
@@ -57,7 +58,7 @@ var hubCmd = &cobra.Command{
 iter8 hub -c load-test-http
 
 # download the great-expectations experiment chart from 
-# the custom Iter8 experiment chart repo whose URL is 
+# the third party experiment chart repo whose URL is 
 # https://great.expectations.pip
 iter8 hub -c great-expectations -r https://great.expectations.pip
 	`,
@@ -73,12 +74,20 @@ iter8 hub -c great-expectations -r https://great.expectations.pip
 		pull.Settings = cli.New()
 		pull.Untar = true
 		pull.RepoURL = repoURL
-		iter8TempDir, _ = ioutil.TempDir("", iter8TempDirPrefix)
-		pull.DestDir = iter8TempDir
-		pull.UntarDir = iter8TempDir
+		var err error
+		if len(destDir) == 0 {
+			destDir, err = ioutil.TempDir("", iter8TempDirPrefix)
+			if err != nil {
+				e := errors.New("unable to create temp dir to store chart")
+				log.Logger.WithStackTrace(err.Error()).Error(e)
+				return e
+			}
+		}
+		pull.DestDir = destDir
+		pull.UntarDir = destDir
 
 		log.Logger.Infof("pulling %v from %v into %v", chartName, pull.RepoURL, pull.DestDir)
-		_, err := pull.Run(chartName)
+		_, err = pull.Run(chartName)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Errorf("unable to get %v", chartName)
 			os.Exit(1)
@@ -88,8 +97,11 @@ iter8 hub -c great-expectations -r https://great.expectations.pip
 }
 
 func init() {
-	RootCmd.AddCommand(hubCmd)
 	hubCmd.Flags().StringVarP(&chartName, "chartName", "c", "", "name of the experiment chart")
 	hubCmd.MarkFlagRequired("chartName")
-	hubCmd.Flags().StringVarP(&repoURL, "repoURL", "r", defaultIter8RepoURL, "URL of repo containing Iter8 experiment chart")
+	hubCmd.Flags().StringVarP(&repoURL, "repoURL", "r", defaultIter8RepoURL, "URL of experiment chart repo")
+	hubCmd.Flags().StringVarP(&destDir, "destDir", "d", "", "destination folder where experiment chart is downloaded and unpacked; by default, Iter8 will create and use a temporary folder as destination")
+
+	RootCmd.AddCommand(hubCmd)
+
 }

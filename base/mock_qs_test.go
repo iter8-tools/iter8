@@ -67,7 +67,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("1s"),
+			Duration: StringPointer("2s"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
 				URL:     testURL,

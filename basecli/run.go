@@ -13,37 +13,14 @@ import (
 
 var runCmd *cobra.Command
 
-var (
-	Dry bool
-	// Dry indicates that run should be a dry run
-	chartPath string
-)
-
 // NewRunCmd creates a new run command
 func NewRunCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run",
-		Short: "Render `experiment.yaml` and run the experiment.",
+		Short: "Run experiment specified in experiment.yaml.",
 		Long: `
-Render the file named "experiment.yaml" by combining an experiment chart with values, and run the experiment. Values may be specified and are processed in the same manner as they are for Helm charts.`,
-		Example: `
-	# Render experiment.yaml and run the experiment
-	iter8 run path/to/load-test-http \
-	--set url=https://httpbin.org/get \
-	--set SLOs.error-rate=0 \
-	--set SLOs.latency-mean=50 \
-	--set SLOs.latency-p90=100 \
-	--set SLOs.latency-p'97\.5'=200
-	`,
+Run experiment specified in experiment.yaml.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// generate experiment here ...
-			err := expCmd.RunE(nil, nil)
-			if err != nil {
-				os.Exit(1)
-			}
-			if Dry {
-				return nil
-			}
 			log.Logger.Trace("build called")
 			fio := &FileExpIO{}
 			exp, err := Build(false, fio)
@@ -64,11 +41,6 @@ Render the file named "experiment.yaml" by combining an experiment chart with va
 		},
 	}
 
-	cmd.Flags().BoolVar(&Dry, "dry", false, "render experiment.yaml without running the experiment")
-	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
-	cmd.Flags().StringVarP(&chartPath, "chartPath", "c", "", "path to the experiment chart")
-	cmd.MarkFlagRequired("chartPath")
-	addGenOptions(cmd.Flags())
 	return cmd
 }
 

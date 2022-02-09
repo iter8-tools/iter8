@@ -1,19 +1,22 @@
 package base
 
 import (
+	"fmt"
 	"testing"
 
+	"fortio.org/fortio/fhttp"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunCollectHTTP(t *testing.T) {
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
+	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
+
 	httpmock.Activate()
-
+	defer httpmock.Deactivate()
 	// Exact URL match
-	httpmock.RegisterResponder("POST", "https://something.com",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
-
 	httpmock.RegisterResponder("GET", "https://data.police.uk/api/crimes-street-dates",
 		httpmock.NewStringResponder(200, `[{"my": 1, "great": "payload"}]`))
 
@@ -27,7 +30,7 @@ func TestRunCollectHTTP(t *testing.T) {
 			PayloadURL: StringPointer("https://data.police.uk/api/crimes-street-dates"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
-				URL:     "https://something.com",
+				URL:     testURL,
 			}},
 		},
 	}
@@ -49,5 +52,4 @@ func TestRunCollectHTTP(t *testing.T) {
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 
-	httpmock.DeactivateAndReset()
 }
