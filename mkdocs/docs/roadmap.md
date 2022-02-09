@@ -7,11 +7,13 @@ hide:
 
 # Roadmap
 
-1. Examples for experimenting inside K8s
-2. A/B(/n) testing example
-3. Ability to run Iter8 experiments as a step in CI/CD/GitOps pipelines
-4. Auto triggering experiments
-5. `read-external-metrics` task
-6. `recommend-traffic-split` task
-7. Ability to run multiple loops of an experiment
-8. Iter8 experiments & progressive delivery for multi-cluster and edge cloud
+1. Iter8 GitHub Action
+2. Iter8 Tekton task
+3. Examples of load testing with streaming gRPC
+4. Examples for experimenting inside K8s
+5. A/B(/n) testing example
+6. AutoX service for auto launching Iter8 experiments, app version tracking, and business telemetry
+7. `read-metrics-from-db` task
+8. `adjust-traffic-split` task
+9. Ability to run multiple loops of an experiment
+10. Iter8 experiments & progressive delivery for multi-cluster and edge cloud

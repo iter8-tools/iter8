@@ -20,11 +20,12 @@ We welcome many different types of contributions including:
 
 * Tutorials
 * Other documentation
+* Experiment charts/templates
 * Builds, CI
-* Tasks from which experiments are composed
 * Bug fixes
 * Web design
 * Communication, social media, blog posts
+* Tasks from which experiments are composed
 * Reviewing pull requests
 
 ***
