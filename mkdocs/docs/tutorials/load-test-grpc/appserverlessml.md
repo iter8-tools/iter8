@@ -30,7 +30,7 @@ This tutorial provides examples of using the `load-test-grpc` experiment chart w
     --revision-name=grpc
     ```
 
-### 1. Run experiment
+### 1. Launch experiment
 ```shell
 iter8 launch -c load-test-grpc \
           --set-string host="hello.default.127.0.0.1.sslip.io:50051" \

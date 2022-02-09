@@ -23,7 +23,7 @@ This tutorial provides examples of using the `load-test-http` experiment chart w
     Hello World!
     ```
 
-### 1. Run experiment
+### 1. Launch experiment
 ```shell
 iter8 launch -c load-test-http \
           --set url=http://hello.default.127.0.0.1.sslip.io \
