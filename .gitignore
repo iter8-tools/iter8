@@ -136,10 +136,6 @@ Chart.lock
 bin/
 _dist/
 iter8
-clibase/clibase
-**/experiment.yaml
-**/result.yaml
-**/report.html
 **/ghz.proto
 **/ghz-call-data.json
 **/ghz-call-data.bin

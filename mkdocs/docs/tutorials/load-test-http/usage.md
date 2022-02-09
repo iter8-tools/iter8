@@ -68,7 +68,7 @@ Send any type of content as payload during the load test of HTTP POST endpoints,
               --set payloadStr="abc123"
     ```
 
-=== "string"
+=== "string with contentType"
     Set content type to `text/plain`.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
@@ -84,7 +84,7 @@ Send any type of content as payload during the load test of HTTP POST endpoints,
               --set contentType="application/json"
     ```
 
-=== "Image from URL"
+=== "image from URL"
     Fetch jpeg image from a URL. Use this image as payload. Set content type to `image/jpeg`.
     ```shell
     iter8 run --set url=http://127.0.0.1/post \
@@ -95,20 +95,23 @@ Send any type of content as payload during the load test of HTTP POST endpoints,
 ***
 
 ## Metrics and SLOs
-
-### Default metrics
 By default, the following metrics are collected by `load-test-http`: 
 
-- Error count
-- Error rate
-- Mean latency
-- Standard deviation of latency
-- Min and max values of latency
-- Latency percentiles `[50.0, 75.0, 90.0, 95.0, 99.0, 99.9]`. 
+- `request-count`: total number of requests sent
+- `error-count`: number of error responses
+- `error-rate`: fraction of error responses
+- `latency-mean`: mean of observed latency values
+- `latency-stddev`: standard deviation of observed latency values
+- `latency-min`: min of observed latency values
+- `latency-max`: max of observed latency values
+- `latency-pX`: X^th^ percentile of observed latency values, for `X` in `[50.0, 75.0, 90.0, 95.0, 99.0, 99.9]`
 
 In addition, any other latency percentiles that are specified as part of SLOs are also collected. 
 
-### Example
+***
+
+### Example 
+
 ```shell
 iter8 run --set url=http://127.0.0.1/get \
           --set SLOs.error-rate=0 \
@@ -125,7 +128,8 @@ iter8 run --set url=http://127.0.0.1/get \
     - 90th percentile latency is under 100 msec
     - 97.5th percentile latency is under 200 msec
 
-### View report
+***
+
 The Iter8 experiment report contains metric values, and SLO validation results.
 
 === "HTML"
@@ -191,7 +195,7 @@ The Iter8 experiment report contains metric values, and SLO validation results.
 ## Assertions
 The `iter8 assert` subcommand asserts if experiment result satisfies the specified conditions. If assert conditions are satisfied, it exits with code `0`; else, it exits with code `1`. Assertions are especially useful within CI/CD/GitOps pipelines.
 
-Assert that the [above experiment](#example) completed without any failures and all the SLOs are satisfied.
+Assert that the [sample experiment](#example) completed without failures, and all SLOs are satisfied.
 ```shell
 iter8 assert -c completed -c nofailure -c slos
 ```
