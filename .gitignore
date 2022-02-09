@@ -128,12 +128,14 @@ site
 Chart.lock
 
 # Iter8 binary and yamls and reports
+**/experiment.yaml
+!testdata/experiment.yaml
+**/result.yaml
+**/report.html
+
 bin/
 _dist/
 iter8
-clibase/clibase
-result.yaml
-report.html
 **/ghz.proto
 **/ghz-call-data.json
 **/ghz-call-data.bin
