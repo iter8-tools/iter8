@@ -14,10 +14,10 @@ Iter8 experiments make it simple to collect performance and business metrics for
 </p>
 
 ### Experiment chart
-Experiment charts are specialized [Helm charts](https://helm.sh/docs/topics/charts/) that contain reusable experiment templates. Iter8 combines experiment charts with user supplied values to generate runnable `experiment.yaml` files.
+Experiment charts are [Helm charts](https://helm.sh/docs/topics/charts/) with a special structure that contain reusable experiment templates. Iter8 combines experiment charts with user supplied values to generate runnable `experiment.yaml` files. Iter8 experiment charts enable you to launch powerful release optimization experiments in seconds. Their usage is described in depth in various [Iter8 tutorials](https://iter8.tools/latest/tutorials/load-test-http/usage.md).
 
 #### Iter8 Hub
-Iter8 hub is a specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts. These charts enable to you to launch powerful release optimization experiments in seconds. Their usage is described in depth in various [Iter8 tutorials](https://iter8.tools/latest/tutorials/load-test-http/overview/).
+Iter8 hub is a specific location within in the [Iter8 GitHub repo](https://github.com/iter8-tools/iter8) that hosts several pre-packaged and reusable charts.
 
 ## Features at a glance
 
@@ -27,7 +27,7 @@ Iter8 hub is a specific location within in the [Iter8 GitHub repo](https://githu
 
 - **A/B(/n) testing** 
       
-    Grow your business with every release. Iter8 experiments can compare multiple versions based on business value and promote a winner.
+    Grow your business with every release. Iter8 experiments can compare multiple versions based on business value and identify a winner.
 
 - **Simple to use** 
       
@@ -38,7 +38,7 @@ Iter8 hub is a specific location within in the [Iter8 GitHub repo](https://githu
     Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulsets, Knative services, KServe/Seldon ML deployments, or custom Kubernetes resource types.
 
 ## Implementation
-Iter8 is primarily written in `go` and builds on a few awesome open source projects including:
+Iter8 is written in `go` and builds on a few awesome open source projects including:
 
 - [Helm](https://helm.sh)
 - [Fortio](https://github.com/fortio/fortio)
