@@ -8,7 +8,7 @@ template: main.html
     Iter8's `load-test-grpc` experiment chart can be used to generate call requests for gRPC services, collect built-in latency and error-related metrics, and validate service-level objectives (SLOs).
 
     <p align='center'>
-      <img alt-text="load-test-http" src="../images/grpc-overview.png" width="75%" />
+      <img alt-text="load-test-http" src="../images/grpc-overview.png" width="90%" />
     </p>
 
     **Use-cases:** Rapid testing, validation, safe rollouts, and continuous delivery (CD) of gRPC services are the motivating use-cases for this experiment type. If the gRPC service satisfies the SLOs, it may be safely rolled out, for example, from a test environment to a production environment.  

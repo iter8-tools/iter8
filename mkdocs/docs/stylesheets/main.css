@@ -55,6 +55,9 @@
   background-color: var(--md-primary-bg-color);
   border-color: var(--md-primary-bg-color);
 }
+.mdx-hero .text-large {
+  font-size: 1rem;
+}
 
 @keyframes heart {
   0%, 40%, 80%, 100% {

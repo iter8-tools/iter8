@@ -31,9 +31,9 @@ theme:
   - navigation.top
   - navigation.indexes
   palette:
-  - scheme: default
+  - scheme: primary
     primary: black
-    accent: deep purple
+    accent: red
   font:
     text: Roboto
     code: Roboto Mono
@@ -150,10 +150,11 @@ nav:
   - Commands:
     - iter8: user-guide/commands/iter8.md
     - iter8 hub: user-guide/commands/iter8_hub.md
+    - iter8 gen: user-guide/commands/iter8_gen.md
     - iter8 run: user-guide/commands/iter8_run.md
+    - iter8 launch: user-guide/commands/iter8_launch.md
     - iter8 assert: user-guide/commands/iter8_assert.md
     - iter8 report: user-guide/commands/iter8_report.md
-    - iter8 gen: user-guide/commands/iter8_gen.md
     - iter8 version: user-guide/commands/iter8_version.md
 - Contributing: contributing.md
 - Roadmap: roadmap.md
