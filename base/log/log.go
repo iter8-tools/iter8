@@ -6,8 +6,9 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
+
+var Level = logrus.InfoLevel
 
 // Iter8Logger inherits all methods from logrus logger.
 type Iter8Logger struct {
@@ -33,17 +34,7 @@ func init() {
 		DisableSorting:  true,
 	})
 
-	// initialize log level
-	viper.BindEnv("LOG_LEVEL")
-	viper.SetDefault("LOG_LEVEL", "info")
-	ll, _ := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
-	Logger.Debug("LOG_LEVEL ", ll)
-	SetLogLevel(ll)
-}
-
-// SetLogLevel to a given logrus log level.
-func SetLogLevel(ll logrus.Level) {
-	Logger.SetLevel(ll)
+	Logger.SetLevel(Level)
 }
 
 // WithStackTrace yields a log entry with a formatted stack trace field embedded in it.
