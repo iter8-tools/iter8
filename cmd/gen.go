@@ -38,6 +38,13 @@ Render experiment.yaml file by combining an experiment chart with values.`,
 			return err
 		}
 
+		// check version
+		if c.AppVersion() != majorMinor {
+			err = fmt.Errorf("chart's app version (%v) and Iter8 CLI version (%v) do not match", c.AppVersion(), majorMinor)
+			log.Logger.Error(err)
+			return err
+		}
+
 		// add in experiment.yaml template
 		eData := []byte(fmt.Sprintf(`{{- include "%v.experiment" . }}`, c.Name()))
 		c.Templates = append(c.Templates, &chart.File{
