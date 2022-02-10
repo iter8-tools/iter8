@@ -37,3 +37,38 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
     - uses: dominikh/staticcheck-action@v1.1.0
+
+  load-test-action:
+    name: test load-test action
+    runs-on: ubuntu-latest
+    steps:
+
+    # Build new version as docker image and push to registry
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: run httpbin
+      run: |
+        set -e
+        docker pull kennethreitz/httpbin
+        docker run -p 80:80 kennethreitz/httpbin &
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1/get)" != "200" ]]; do
+          sleep 5; 
+        done;
+
+    - name: Prepare values.yaml file
+      run: |
+        cat << EOF > values.yaml
+          url: http://127.0.0.1/get
+          SLOs:
+            error-rate: 0
+            latency-mean: 100
+        EOF
+        cat values.yaml
+
+    - name: Run load test
+      uses: ./load-test
+      with:
+        # chart: load-test-http
+        valuesFile: ../values.yaml
+        logLevel: trace
