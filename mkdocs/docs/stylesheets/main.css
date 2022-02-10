@@ -33,11 +33,11 @@
     align-items: stretch;
   }
   .mdx-hero__content {
-    min-width: 45%;
+    min-width: 50%;
   }
   .mdx-hero__image {
     order: 1;
-    min-width: 55%;
+    min-width: 50%;
   }
 }
 .mdx-hero .md-button {
