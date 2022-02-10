@@ -25,7 +25,7 @@ func NewRunCmd() *cobra.Command {
 Render the file named "experiment.yaml" by combining an experiment chart with values, and run the experiment. This command is intended to be executed from the root of an Iter8 experiment chart. Values may be specified and are processed in the same manner as they are for Helm charts.`,
 		Example: `
 	# Render experiment.yaml and run the experiment
-	iter8 run --set url=https://example.com \
+	iter8 run --set url=https://httpbin.org/get \
 	--set SLOs.error-rate=0 \
 	--set SLOs.latency-mean=50 \
 	--set SLOs.latency-p90=100 \

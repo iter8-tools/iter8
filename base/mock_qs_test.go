@@ -1,19 +1,17 @@
 package base
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/jarcoal/httpmock"
+	"fortio.org/fortio/fhttp"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
-	// mock the http endpoint
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
-		httpmock.NewStringResponder(200, `all good`))
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
+	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -21,10 +19,10 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("1s"),
+			Duration: StringPointer("2s"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
-				URL:     "https://example.com",
+				URL:     testURL,
 			}},
 		},
 	}
@@ -59,12 +57,9 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
-	// mock the http endpoint
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://example.com",
-		httpmock.NewStringResponder(200, `all good`))
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
+	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -75,7 +70,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			Duration: StringPointer("1s"),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
-				URL:     "https://example.com",
+				URL:     testURL,
 			}},
 		},
 	}

@@ -1,66 +1,53 @@
-### Defaults values and behaviors of various parameters that can be set
-### for this experiment chart.
+### Defaults values for the load-test-http experiment chart.
 
-### Lines where values can be set start with a single #
-### In contrast, description lines like this one start with ### 
+### The documentation follows Helm recommendations described in the URL below.
+### https://helm.sh/docs/chart_best_practices/values/#document-valuesyaml
 
 ##################################
 
 ### url   HTTP(S) URL where the app receives GET or POST requests.
 ### This field is required.
-
-# url: https://example.com
+url: null
 
 ### headers   HTTP headers to be used in requests sent to the app.
 ### Specified as a map with key being header names, and values being header values.
+headers: null
 
-# headers:
-#   hello: "mars"
-#   goodbye: "pluto"
-
-### numQueries    Number of requests sent to the app. Default is 100
-
-# numQueries: 100
+### numQueries    Number of requests sent to the app.
+numQueries: null
 
 ### duration    Duration for which requests are sent to the app.
 ### Value can be any Go duration string (https://pkg.go.dev/maze.io/x/duration#ParseDuration)
 ### This field is ignored if `numQueries` is specified.
+duration: null
 
-# duration: 10s
+### qps   Number of requests per second sent to each version.
+qps: 8.0
 
-### qps   Number of requests per second sent to each version. Default is 8.0
-
-# qps: 8.0
-
-### connections   Number of parallel connections used to send requests. Default is 4
-
-### connections: 4
+### connections   Number of parallel connections used to send requests.
+connections: 4
 
 ### payloadStr    String data to be sent as payload. 
 ### If this field is specified, Iter8 will send HTTP POST requests.
 ### with this string as the payload.
 ### This field is ignored if `payloadURL` is specified.
-
-# payloadStr: "abc123"
+payloadStr: null
 
 ### payloadUrl    URL of payload. If this field is specified, 
 ### Iter8 will send HTTP POST requests to versions with 
 ### data downloaded from this URL as the payload.
-
-# payloadURL: "https://www.my.image.com/image.png"
+payloadURL: null
 
 ### contentType   The type of the payload. Indicated using the Content-Type HTTP header value. 
 ### This is intended to be used in conjunction with one of the `payload*` fields above. 
 ### If this field is specified, Iter8 will send HTTP POST requests to versions 
 ### with this content type header value. If payload is supplied, and this field is omitted, 
 ### it will be defaulted to "application/octet-stream".
-
-# contentType: "image/png"
+contentType: null
 
 ### errorsAbove   Any HTTP response code above this value is considered an error.
 ### Default value is 400.
-
-# errorsAbove: 400
+errorsAbove: 400
 
 ### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
@@ -69,8 +56,4 @@
 ### Valid metric names are error-rate, error-count, latency-max, 
 ### latency-mean, latency-stddev, and latency-pX, where X is any latency percentile 
 ### (i.e., any float value between 0 and 100).
-
-# SLOs:
-#   error-rate: 0 # error rate must be 0
-#   latency-mean: 50 # mean latency must be under 50 msec
-#   latency-p95.0: 200 # 95th percentile latency must be under 200 msec
+SLOs: null

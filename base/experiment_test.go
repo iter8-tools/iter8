@@ -25,6 +25,12 @@ func TestReadExperiment(t *testing.T) {
 	assert.Equal(t, 3, len(*es))
 }
 func TestRunExperiment(t *testing.T) {
+	httpmock.Activate()
+
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://something.com",
+		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
+
 	// valid collect task... should succeed
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
@@ -49,13 +55,6 @@ func TestRunExperiment(t *testing.T) {
 		},
 	}
 
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://something.com",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
-
 	exp := &Experiment{
 		Tasks:  []Task{ct, at},
 		Result: &ExperimentResult{},
@@ -69,4 +68,6 @@ func TestRunExperiment(t *testing.T) {
 	for i := 0; i < len(exp.Result.Insights.SLOs); i++ { // i^th SLO
 		assert.True(t, exp.Result.Insights.SLOsSatisfied[i][0]) // satisfied by only version
 	}
+
+	httpmock.DeactivateAndReset()
 }

@@ -5,36 +5,36 @@
   with:
 
     {{- if .Values.numQueries }}
-    numRequests: {{ .Values.numQueries}}
+    numRequests: {{ .Values.numQueries | int }}
     {{- end }}
 
     {{- if .Values.duration }}
-    duration: {{ .Values.duration}}
+    duration: {{ .Values.duration | toString }}
     {{- end }}
 
     {{- if .Values.qps }}
-    qps: {{ .Values.qps}}
+    qps: {{ .Values.qps | float64 }}
     {{- end }}
 
     {{- if .Values.connections }}
-    connections: {{ .Values.connections}}
+    connections: {{ .Values.connections | int }}
     {{- end }}
 
     {{- if .Values.payloadStr }}
-    payloadStr: "{{ .Values.payloadStr}}"
+    payloadStr: "{{ .Values.payloadStr | toString }}"
     {{- end }}
 
     {{- if .Values.payloadURL }}
-    payloadURL: "{{ .Values.payloadURL}}"
+    payloadURL: "{{ .Values.payloadURL | toString }}"
     {{- end }}
 
     {{- if .Values.contentType }}
-    contentType: "{{ .Values.contentType}}"
+    contentType: "{{ .Values.contentType | toString }}"
     {{- end }}
 
     {{- if .Values.errorsAbove }}
     errorRanges:
-    - lower: {{ .Values.errorsAbove }}
+    - lower: {{ .Values.errorsAbove | int }}
     {{- end }}
 
     {{- $percentiles := list }}
@@ -50,7 +50,7 @@
 
     {{- ""}}
     versionInfo:
-    - url: {{ required "A valid url value is required!" .Values.url }}
+    - url: {{ required "A valid url value is required!" .Values.url | toString }}
     {{- if .Values.headers }}
     headers:
 {{ toYaml .Values.headers | indent 6 }}
@@ -65,16 +65,16 @@
     {{- range $key, $value := .Values.SLOs }}
     {{- if or (regexMatch "error-rate" $key) (regexMatch "error-count" $key) }}
     - metric: "built-in/http-{{ $key }}"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else if (regexMatch "latency-mean" $key) }}
     - metric: "built-in/http-latency-mean"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else if (regexMatch "latency-stddev" $key) }}
     - metric: "built-in/http-latency-stddev"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else if (regexMatch "^latency-p\\d+(?:\\.\\d)?$" $key) }}
     - metric: "built-in/http-{{ $key }}"
-      upperLimit: {{ $value }}
+      upperLimit: {{ $value | float64 }}
     {{- else }}
     {{- fail "Invalid SLO metric specified" }}
     {{- end }}

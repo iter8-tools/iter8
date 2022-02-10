@@ -26,7 +26,7 @@ hide:
     Pre-compiled Iter8 binaries for many platforms are available [here](https://github.com/iter8-tools/iter8/releases). Uncompress the iter8-X-Y.tar.gz archive for your platform, and move the `iter8` binary to any folder in your PATH.
 
 === "Source"
-    Build Iter8 from source as follows. Go `1.16+` is a pre-requisite.
+    Build Iter8 from source as follows. Go `1.17+` is a pre-requisite.
     ```shell
     # you can replace master with a specific tag such as v0.8.29
     export REF=master
@@ -35,8 +35,8 @@ hide:
     make install
     ```
 
-=== "Go 1.16+"
-    Install the latest stable release of the Iter8 CLI using `go 1.16+` as follows.
+=== "Go 1.17+"
+    Install the latest stable release of the Iter8 CLI using `go 1.17+` as follows.
 
     ```shell
     go install github.com/iter8-tools/iter8@latest

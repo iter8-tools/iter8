@@ -1,5 +1,5 @@
 # Build Iter8
-FROM golang:1.16-buster as builder
+FROM golang:1.17-buster as builder
 
 WORKDIR /workspace
 

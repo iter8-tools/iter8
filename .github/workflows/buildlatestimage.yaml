@@ -1,8 +1,7 @@
 name: Build and push Iter8 latest Docker image
 on:
-  push:
-    branches:
-    - master # Publish `master` as Docker `latest` image.
+  release:
+    types: [published]
 
 jobs:
   # Push ind image to dockerhub

@@ -7,11 +7,11 @@ hide:
 
 ## iter8
 
-Kubernetes release engineering made simple
+Kubernetes Release Optimizer
 
 ### Synopsis
 
-Safely rollout new versions of apps and ML models. Maximize business value with each release.
+Safely rollout new versions of apps and ML models. Maximize business value.
 
 Environment variables:
 

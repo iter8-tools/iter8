@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var globalUsage = `Safely rollout new versions of apps and ML models. Maximize business value with each release.
+var globalUsage = `Safely rollout new versions of apps and ML models. Maximize business value.
 
 Environment variables:
 
@@ -16,7 +16,7 @@ Environment variables:
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "iter8",
-	Short: "Kubernetes release engineering made simple",
+	Short: "Kubernetes Release Optimizer",
 	Long:  globalUsage,
 }
 

@@ -6,10 +6,10 @@ Iter8 experiment chart to load test an HTTP service and validate latency and err
 
 ## Examples
 
-The following `iter8 run` command will load test and validate the HTTP service whose URL is https://example.com. The command specifies that error rate must be 0, the mean latency must be under 50 msec, the 90th percentile latency must be under 100 msec, and the 97.5th percentile latency must be under 200 msec.
+The following `iter8 run` command will load test and validate the HTTP service whose URL is https://httpbin.org/get. The command specifies that error rate must be 0, the mean latency must be under 50 msec, the 90th percentile latency must be under 100 msec, and the 97.5th percentile latency must be under 200 msec.
 
 ```shell
-iter8 run --set url=https://example.com \
+iter8 run --set url=https://httpbin.org/get \
           --set SLOs.error-rate=0 \
           --set SLOs.mean-latency=50 \
           --set SLOs.p90=100 \
@@ -21,7 +21,7 @@ iter8 run --set url=https://example.com \
 Set the number of requests sent during the load-test to 200, the number of requests per second to 10, and the number of parallel connections used to send the requests to 5, as follows.
 
 ```shell
-iter8 run --set url=https://example.com \
+iter8 run --set url=https://httpbin.org/get \
           --set SLOs.error-rate=0 \
           --set SLOs.mean-latency=50 \
           --set SLOs.p90=100 \
@@ -64,7 +64,7 @@ By default, the load test experiment collects the following built-in metrics: `e
 
 Consider the following command.
 ```shell
-iter8 run --set url=https://example.com \
+iter8 run --set url=https://httpbin.org/get \
           --set SLOs.error-rate=0 \
           --set SLOs.mean-latency=50 \
           --set 'percentiles={25.0, 75.0}' \
