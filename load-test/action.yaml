@@ -13,6 +13,6 @@ runs:
   steps:
     - uses: iter8-tools/iter8/run-experiment@pull/1150/head
       with:
-        chart: load-test
+        chart: load-test-http
         valuesFile: ${{ inputs.valuesFile }}
         logLevel: ${{ inputs.logLevel }}
