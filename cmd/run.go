@@ -46,7 +46,7 @@ Run experiment specified in experiment.yaml.`,
 
 func init() {
 	runCmd = NewRunCmd()
-	RootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(runCmd)
 }
 
 // Run an experiment

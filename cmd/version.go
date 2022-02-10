@@ -92,7 +92,7 @@ func get() BuildInfo {
 }
 
 func init() {
-	RootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(versionCmd)
 	f := versionCmd.Flags()
 	f.BoolVar(&short, "short", false, "print the version number")
 }

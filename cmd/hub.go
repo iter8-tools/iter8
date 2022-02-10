@@ -112,6 +112,6 @@ func init() {
 	hubCmd.Flags().StringVarP(&repoURL, "repoURL", "r", defaultIter8RepoURL, "URL of experiment chart repo")
 	hubCmd.Flags().StringVarP(&destDir, "destDir", "d", ".", "destination folder where experiment chart is downloaded and unpacked; by default, Iter8 will create and use a temporary folder as destination")
 
-	RootCmd.AddCommand(hubCmd)
+	rootCmd.AddCommand(hubCmd)
 
 }

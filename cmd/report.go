@@ -131,7 +131,7 @@ func init() {
 	RegisterHTMLTemplate(HTMLOutputFormatKey, htpl)
 
 	reportCmd = NewReportCmd()
-	RootCmd.AddCommand(reportCmd)
+	rootCmd.AddCommand(reportCmd)
 }
 
 /* Following functions/methods are common to both text and html templates */

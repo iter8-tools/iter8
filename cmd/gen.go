@@ -99,5 +99,5 @@ func init() {
 	genCmd.Flags().StringVarP(&chartPath, "chartPath", "c", "", "path to experiment chart folder")
 	genCmd.MarkFlagRequired("chartPath")
 	addGenOptions(genCmd.Flags())
-	RootCmd.AddCommand(genCmd)
+	rootCmd.AddCommand(genCmd)
 }

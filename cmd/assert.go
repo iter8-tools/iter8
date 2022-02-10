@@ -183,5 +183,5 @@ func (exp *Experiment) extractVersion(cond string) (int, error) {
 
 func init() {
 	assertCmd = NewAssertCmd()
-	RootCmd.AddCommand(assertCmd)
+	rootCmd.AddCommand(assertCmd)
 }

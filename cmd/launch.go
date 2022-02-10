@@ -58,5 +58,5 @@ func init() {
 
 	addGenOptions(launchCmd.Flags())
 
-	RootCmd.AddCommand(launchCmd)
+	rootCmd.AddCommand(launchCmd)
 }
