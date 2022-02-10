@@ -1,35 +1,64 @@
 package base
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"fortio.org/fortio/fhttp"
 	fortioLog "fortio.org/fortio/log"
+	"fortio.org/fortio/periodic"
 	"fortio.org/fortio/stats"
 	log "github.com/iter8-tools/iter8/base/log"
-	"github.com/jinzhu/copier"
 )
+
+// versionHTTP contains header and url information needed to send requests to each version.
+type versionHTTP struct {
+	// HTTP headers to use in the query for this version; optional
+	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
+	// URL to use for querying this version
+	URL string `json:"url" yaml:"url"`
+}
+
+// errorRange has lower and upper limits for HTTP status codes. HTTP status code within this range is considered an error
+type errorRange struct {
+	// Lower end of the range
+	Lower *int `json:"lower" yaml:"lower"`
+	// Upper end of the range
+	Upper *int `json:"upper" yaml:"upper"`
+}
 
 // collectHTTPInputs contain the inputs to the metrics collection task to be executed.
 type collectHTTPInputs struct {
-	fhttp.HTTPRunnerOptions
-	// PayloadJSON is the JSON data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this data as the JSON payload.
-	PayloadJSON interface{} `json:"payloadJSON" yaml:"payloadJSON"`
+	// NumRequests is the number of requests to be sent to each version. Default value is 100.
+	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
+	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
+	Duration *string `json:"duration" yaml:"duration"`
+	// QPS is the number of requests per second sent to each version. Default value is 8.0.
+	QPS *float32 `json:"qps" yaml:"qps"`
+	// Connections is the number of number of parallel connections used to send load. Default value is 4.
+	Connections *int `json:"connections" yaml:"connections"`
+	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload.
+	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
 	// PayloadURL is the URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored.
 	PayloadURL *string `json:"payloadURL" yaml:"payloadURL"`
-	// ErrorsAbove is the value at or above which HTTP response codes are considered as errors.
-	ErrorsAbove *int `json:"errorsAbove" yaml:"errorsAbove"`
+	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions using this content type header value.
+	ContentType *string `json:"contentType" yaml:"contentType"`
+	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
+	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
+	// Percentiles are the latency percentiles collected by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
+	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
 	// VersionInfo is a non-empty list of version values.
-	VersionInfo []*fhttp.HTTPRunnerOptions `json:"versionInfo" yaml:"versionInfo"`
+	VersionInfo []*versionHTTP `json:"versionInfo" yaml:"versionInfo"`
 }
 
 const (
 	// CollectHTTPTaskName is the name of this task which performs load generation and metrics collection.
 	CollectHTTPTaskName                = "gen-load-and-collect-metrics-http"
-	defaultErrorsAbove                 = 400
+	defaultQPS                         = float32(8)
+	defaultHTTPNumRequests             = int64(100)
+	defaultHTTPConnections             = 4
 	builtInHTTPRequestCountId          = "http-request-count"
 	builtInHTTPErrorCountId            = "http-error-count"
 	builtInHTTPErrorRateId             = "http-error-rate"
@@ -39,16 +68,30 @@ const (
 	builtInHTTPLatencyMaxId            = "http-latency-max"
 	builtInHTTPLatencyHistId           = "http-latency"
 	builtInHTTPLatencyPercentilePrefix = "http-latency-p"
-	contentTypeJSON                    = "application/json"
 )
 
 var (
+	defaultErrorRanges = []errorRange{{Lower: intPointer(400)}}
 	defaultPercentiles = [...]float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9}
 )
 
 // errorCode checks if a given code is an error code
 func (t *collectHTTPTask) errorCode(code int) bool {
-	return code >= *t.With.ErrorsAbove
+	for _, lims := range t.With.ErrorRanges {
+		// if no lower limit (check upper)
+		if lims.Lower == nil && code <= *lims.Upper {
+			return true
+		}
+		// if no upper limit (check lower)
+		if lims.Upper == nil && code >= *lims.Lower {
+			return true
+		}
+		// if both limits are present (check both)
+		if lims.Upper != nil && lims.Lower != nil && code <= *lims.Upper && code >= *lims.Lower {
+			return true
+		}
+	}
+	return false
 }
 
 // collectHTTPTask enables load testing of HTTP services.
@@ -59,8 +102,17 @@ type collectHTTPTask struct {
 
 // initializeDefaults sets default values for the collect task
 func (t *collectHTTPTask) initializeDefaults() {
-	if t.With.ErrorsAbove == nil {
-		t.With.ErrorsAbove = intPointer(defaultErrorsAbove)
+	if t.With.NumRequests == nil && t.With.Duration == nil {
+		t.With.NumRequests = int64Pointer(defaultHTTPNumRequests)
+	}
+	if t.With.QPS == nil {
+		t.With.QPS = float32Pointer(defaultQPS)
+	}
+	if t.With.Connections == nil {
+		t.With.Connections = intPointer(defaultHTTPConnections)
+	}
+	if t.With.ErrorRanges == nil {
+		t.With.ErrorRanges = defaultErrorRanges
 	}
 	// default percentiles are always collected
 	// if other percentiles are specified, they are collected as well
@@ -82,12 +134,45 @@ func (t *collectHTTPTask) validateInputs() error {
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
 func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) {
 	fortioLog.SetOutput(io.Discard)
-	// base options
-	fo := &fhttp.HTTPRunnerOptions{}
-	copier.Copy(fo, &t.With.HTTPRunnerOptions)
-	fo.URL = t.With.VersionInfo[j].URL
+	// basic runner
+	fo := &fhttp.HTTPRunnerOptions{
+		RunnerOptions: periodic.RunnerOptions{
+			RunType:     "Iter8 load test",
+			QPS:         float64(*t.With.QPS),
+			NumThreads:  *t.With.Connections,
+			Percentiles: t.With.Percentiles,
+			Out:         io.Discard,
+		},
+		HTTPOptions: fhttp.HTTPOptions{
+			URL: t.With.VersionInfo[j].URL,
+		},
+	}
+
+	//num requests
+	if t.With.NumRequests != nil {
+		fo.RunnerOptions.Exactly = *t.With.NumRequests
+	}
+
+	// add duration
+	var duration time.Duration
+	var err error
+	if t.With.Duration != nil {
+		duration, err = time.ParseDuration(*t.With.Duration)
+		if err == nil {
+			fo.RunnerOptions.Duration = duration
+		} else {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to parse duration")
+			return nil, err
+		}
+	}
 
 	// content type & payload
+	if t.With.ContentType != nil {
+		fo.ContentType = *t.With.ContentType
+	}
+	if t.With.PayloadStr != nil {
+		fo.Payload = []byte(*t.With.PayloadStr)
+	}
 	if t.With.PayloadURL != nil {
 		b, err := getPayloadBytes(*t.With.PayloadURL)
 		if err != nil {
@@ -96,16 +181,10 @@ func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, err
 			fo.Payload = b
 		}
 	}
-	if t.With.PayloadJSON != nil {
-		payloadBytes, err := json.Marshal(t.With.PayloadJSON)
-		if err != nil {
-			e := errors.New("unable to marshal JSON payload")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			return nil, e
-		} else {
-			fo.Payload = payloadBytes
-			fo.ContentType = contentTypeJSON
-		}
+
+	// headers
+	for key, value := range t.With.VersionInfo[j].Headers {
+		fo.AddAndValidateExtraHeader(key + ":" + value)
 	}
 
 	return fo, nil
