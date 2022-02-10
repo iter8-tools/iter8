@@ -58,10 +58,6 @@ build: $(BINDIR)/$(BINNAME)
 $(BINDIR)/$(BINNAME): $(SRC)
 	GO111MODULE=on go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)'/$(BINNAME) ./
 
-.PHONY: cmddocs
-cmddocs:
-	go run cmd/docs/main.go	
-
 # ------------------------------------------------------------------------------
 #  install
 

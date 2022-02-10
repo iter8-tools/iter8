@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"io/ioutil"
@@ -8,17 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(t *testing.T) {
+func TestDocsCmd(t *testing.T) {
 	// set COMMAND_DOCS_DIR
 	dir, err := ioutil.TempDir("", "iter8docs")
 	assert.NoError(t, err)
 
-	os.Setenv(commandDocsDir, dir)
-	main()
-
-	os.Setenv(commandDocsDir, "that-strange-place-which-doesnt-exist")
-	main()
+	commandDocsDir = dir
+	err = docsCmd.RunE(nil, nil)
+	assert.NoError(t, err)
 
 	defer os.RemoveAll(dir)
-	// call main
 }
