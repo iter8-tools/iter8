@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -39,8 +40,8 @@ Render experiment.yaml file by combining an experiment chart with values.`,
 		}
 
 		// check version
-		if c.AppVersion() != majorMinor {
-			err = fmt.Errorf("chart's app version (%v) and Iter8 CLI version (%v) do not match", c.AppVersion(), majorMinor)
+		if c.AppVersion() != base.MajorMinor {
+			err = fmt.Errorf("chart's app version (%v) and Iter8 CLI version (%v) do not match", c.AppVersion(), base.MajorMinor)
 			log.Logger.Error(err)
 			return err
 		}

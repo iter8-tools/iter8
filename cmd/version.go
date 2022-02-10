@@ -13,9 +13,6 @@ var (
 	// Version is intended to be set using LDFLAGS at build time
 	// In the absence of complete semantic versioning info, the best we can do is major minor
 	version = "v0.9"
-	// majorMinor is the minor version
-	// set this manually whenever the major or minor version changes
-	majorMinor = "v0.9"
 	// metadata is extra build time data
 	metadata = ""
 	// gitCommit is the git sha1

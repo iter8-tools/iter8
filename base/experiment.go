@@ -49,6 +49,9 @@ type ExperimentResult struct {
 
 	// Insights produced in this experiment
 	Insights *Insights `json:"insights,omitempty" yaml:"insights,omitempty"`
+
+	// Iter8Version is the version of Iter8 CLI that created this result object
+	Iter8Version string `json:"iter8Version" yaml:"iter8Version"`
 }
 
 // Insights records the number of versions in this experiment,
@@ -298,6 +301,7 @@ func (e *Experiment) InitResults() {
 		StartTime:         time.Now(),
 		NumCompletedTasks: 0,
 		Failure:           false,
+		Iter8Version:      MajorMinor,
 	}
 }
 

@@ -12,6 +12,10 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
+// MajorMinor is the minor version of Iter8
+// set this manually whenever the major or minor version changes
+var MajorMinor = "v0.9"
+
 // int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
 func int64Pointer(i int64) *int64 {
 	return &i
