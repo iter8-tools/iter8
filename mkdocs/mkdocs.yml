@@ -33,7 +33,7 @@ theme:
   palette:
   - scheme: primary
     primary: black
-    accent: red
+    accent: deep orange
   font:
     text: Roboto
     code: Roboto Mono
