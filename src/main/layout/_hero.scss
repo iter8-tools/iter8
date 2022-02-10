@@ -66,7 +66,7 @@
     // Button on focus/hover
     &:focus,
     &:hover {
-      color: var(--md-default-bg-color);
+      color: var(--md-accent-bg-color);
       background-color: var(--md-accent-fg-color);
       border-color: var(--md-accent-fg-color);
     }
