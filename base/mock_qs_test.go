@@ -3,6 +3,7 @@ package base
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"fortio.org/fortio/fhttp"
 	"github.com/stretchr/testify/assert"
@@ -19,13 +20,11 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("2s"),
-			VersionInfo: []*versionHTTP{{
-				Headers: map[string]string{},
-				URL:     testURL,
-			}},
+			VersionInfo: []*fhttp.HTTPRunnerOptions{},
 		},
 	}
+	ct.With.Duration, _ = time.ParseDuration("1s")
+	ct.With.VersionInfo[0].URL = testURL
 
 	at := &assessTask{
 		TaskMeta: TaskMeta{
@@ -67,13 +66,11 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("2s"),
-			VersionInfo: []*versionHTTP{{
-				Headers: map[string]string{},
-				URL:     testURL,
-			}},
+			VersionInfo: []*fhttp.HTTPRunnerOptions{},
 		},
 	}
+	ct.With.Duration, _ = time.ParseDuration("1s")
+	ct.With.VersionInfo[0].URL = testURL
 
 	at := &assessTask{
 		TaskMeta: TaskMeta{

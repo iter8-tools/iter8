@@ -23,6 +23,7 @@ require (
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.106.1
 	github.com/jarcoal/httpmock v1.1.0
+	github.com/jinzhu/copier v0.3.5
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/montanaflynn/stats v0.6.6
 	github.com/sirupsen/logrus v1.8.1

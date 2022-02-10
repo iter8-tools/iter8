@@ -3,7 +3,9 @@ package base
 import (
 	"io/ioutil"
 	"testing"
+	"time"
 
+	"fortio.org/fortio/fhttp"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"sigs.k8s.io/yaml"
@@ -37,10 +39,11 @@ func TestRunExperiment(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration:    StringPointer("1s"),
-			VersionInfo: []*versionHTTP{{Headers: map[string]string{}, URL: "https://something.com"}},
+			VersionInfo: []*fhttp.HTTPRunnerOptions{},
 		},
 	}
+	ct.With.Duration, _ = time.ParseDuration("1s")
+	ct.With.VersionInfo[0].URL = "https://something.com"
 
 	// valid assess task... should succeed
 	at := &assessTask{

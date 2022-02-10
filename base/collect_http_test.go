@@ -3,6 +3,7 @@ package base
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"fortio.org/fortio/fhttp"
 	"github.com/jarcoal/httpmock"
@@ -26,14 +27,12 @@ func TestRunCollectHTTP(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration:   StringPointer("1s"),
-			PayloadURL: StringPointer("https://data.police.uk/api/crimes-street-dates"),
-			VersionInfo: []*versionHTTP{{
-				Headers: map[string]string{},
-				URL:     testURL,
-			}},
+			PayloadURL:  StringPointer("https://data.police.uk/api/crimes-street-dates"),
+			VersionInfo: []*fhttp.HTTPRunnerOptions{},
 		},
 	}
+	ct.With.Duration, _ = time.ParseDuration("1s")
+	ct.With.VersionInfo[0].URL = testURL
 
 	exp := &Experiment{
 		Tasks:  []Task{ct},
