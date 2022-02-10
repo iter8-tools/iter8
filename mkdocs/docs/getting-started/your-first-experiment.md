@@ -105,3 +105,10 @@ View a report of the experiment in HTML or text formats as follows.
         ```
 
 Congratulations! :tada: You completed your first Iter8 experiment.
+
+***
+
+???+ tip "Next steps"
+
+    1. Learn more about [load testing HTTP services with service-level objectives (SLOs)](../tutorials/load-test-http/usage.md).
+    2. Learn more about [load testing gRPC services with service-level objectives (SLOs)](../tutorials/load-test-grpc/usage.md).
