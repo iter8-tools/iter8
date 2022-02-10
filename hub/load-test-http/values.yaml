@@ -14,12 +14,12 @@ url: null
 headers: null
 
 ### numQueries    Number of requests sent to the app.
-numQueries: 100
+numQueries: null
 
 ### duration    Duration for which requests are sent to the app.
 ### Value can be any Go duration string (https://pkg.go.dev/maze.io/x/duration#ParseDuration)
 ### This field is ignored if `numQueries` is specified.
-duration: 20s
+duration: null
 
 ### qps   Number of requests per second sent to each version.
 qps: 8.0
