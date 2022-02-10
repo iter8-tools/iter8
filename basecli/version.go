@@ -10,9 +10,11 @@ import (
 var short bool
 
 var (
-	// Version is intended to be set using LDFLAGS at build time
+	// version is intended to be set using LDFLAGS at build time
 	// In the absence of complete semantic versioning info, the best we can do is major minor
 	version = "v0.8"
+	// lastKnownPatchVersion is the last known patch version for this minor release
+	lastKnownPatchVersion = "v0.8.33"
 	// version is the current major/minor version of Iter8
 	// set this manually whenever the major or minor version changes
 	majorMinor = "v0.8"
