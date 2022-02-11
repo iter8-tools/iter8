@@ -10,7 +10,7 @@ import (
 var short bool
 
 var (
-	// Version is intended to be set using LDFLAGS at build time
+	// version is intended to be set using LDFLAGS at build time
 	// In the absence of complete semantic versioning info, the best we can do is major minor
 	version = "v0.9"
 	// metadata is extra build time data
