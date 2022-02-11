@@ -70,6 +70,8 @@ const (
 	gRPCLatencySampleMetricName = "grpc-latency"
 	// countErrorsDefault is the default value which indicates if errors are counted
 	countErrorsDefault = true
+	// insucureDefault is the default value which indicates that plaintext and insecure connection should be used
+	insecureDefault = true
 )
 
 // collectGRPCTask enables load testing of gRPC services.
@@ -84,9 +86,9 @@ func (t *collectGRPCTask) initializeDefaults() {
 	gd.SetDefaults(&t.With.Config)
 	// always count errors
 	t.With.Config.CountErrors = countErrorsDefault
-	// always insecure
-	// ToDo: document security credentials
-	t.With.Config.Insecure = true
+	// todo: document how to use security credentials
+	// remove this default altogether after enabling secure
+	t.With.Config.Insecure = insecureDefault
 }
 
 // validate task inputs
@@ -154,6 +156,7 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 	ghzcBytes, _ := json.MarshalIndent(ghzc, "", "	")
 	log.Logger.WithStackTrace(string(ghzcBytes)).Trace("runner config")
 
+	// todo: supply all the allowed options
 	igr, err := runner.Run(t.With.VersionInfo[j].Call, t.With.VersionInfo[j].Host,
 		runner.WithProtoFile(ghzc.Proto, nil),
 		runner.WithCountErrors(ghzc.CountErrors),
@@ -240,7 +243,7 @@ func (t *collectGRPCTask) Run(exp *Experiment) error {
 	for i := range t.With.VersionInfo { // for each version
 		if gr[i] != nil { // assuming there is some raw ghz result to process for this version
 			// populate grpc request count
-			// ToDo: This logic breaks for looped experiments. Fix when we get to loops.
+			// todo: this logic breaks for looped experiments. Fix when we get to loops.
 			m := iter8BuiltInPrefix + "/" + gRPCRequestCountMetricName
 			mm := MetricMeta{
 				Description: "number of gRPC requests sent",
@@ -255,7 +258,7 @@ func (t *collectGRPCTask) Run(exp *Experiment) error {
 			}
 
 			// populate count
-			// ToDo: This logic breaks for looped experiments. Fix when we get to loops.
+			// todo: This logic breaks for looped experiments. Fix when we get to loops.
 			m = iter8BuiltInPrefix + "/" + gRPCErrorCountMetricName
 			mm = MetricMeta{
 				Description: "number of responses that were errors",
@@ -264,7 +267,7 @@ func (t *collectGRPCTask) Run(exp *Experiment) error {
 			in.updateMetric(m, mm, i, ec)
 
 			// populate rate
-			// ToDo: This logic breaks for looped experiments. Fix when we get to loops.
+			// todo: This logic breaks for looped experiments. Fix when we get to loops.
 			m = iter8BuiltInPrefix + "/" + gRPCErrorRateMetricName
 			rc := float64(gr[i].Count)
 			if rc != 0 {
