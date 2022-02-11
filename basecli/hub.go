@@ -30,8 +30,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// latestStableVersion returns the latest stable version of Iter8
-func latestStableVersion() (string, error) {
+// lastKnownPatch returns the last known patch version for this major.minor release
+func lastKnownPatch() (string, error) {
 	// find all tags
 	client := github.NewClient(nil)
 	tags, _, err := client.Repositories.ListTags(context.Background(), "iter8-tools", "iter8", nil)
@@ -47,15 +47,20 @@ func latestStableVersion() (string, error) {
 		return "", e
 	}
 	// found some tags
-	log.Logger.Infof("found %v tags", len(tags))
 	// found latest tag with the correct major minor prefix
-	if strings.HasPrefix(*(tags[0].Name), majorMinor+".") {
+	if strings.HasPrefix(*tags[0].Name, majorMinor+".") {
+		log.Logger.Info("using tag ", *tags[0].Name)
 		return *tags[0].Name, nil
+	} else {
+		if len(lastKnownPatchVersion) > 0 {
+			log.Logger.Info("using tag ", lastKnownPatchVersion)
+			return lastKnownPatchVersion, nil
+		} else {
+			e := errors.New("unable to determine last known patch version for " + majorMinor)
+			log.Logger.Error(e)
+			return "", e
+		}
 	}
-	// ToDo: Fix the following error
-	err = fmt.Errorf("unable to find tags with major minor %v", majorMinor)
-	log.Logger.Error(err)
-	return "", err
 }
 
 // getIter8Hub gets the location of the Iter8Hub
@@ -66,7 +71,7 @@ func getIter8Hub() (string, error) {
 	if len(iter8HubFromEnv) > 0 {
 		return iter8HubFromEnv, nil
 	}
-	tag, err := latestStableVersion()
+	tag, err := lastKnownPatch()
 	if err != nil {
 		return "", err
 	}
