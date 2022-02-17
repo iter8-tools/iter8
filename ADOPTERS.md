@@ -8,3 +8,5 @@ If you are using or in the process of using Iter8, please raise a PR with your o
 | IBM Research Cloud Innovation Lab | [Atin Sood](https://github.com/atinsood)|
 | IBM Cloud (Code Engine) | [Doug Davis](https://github.com/duglin) |
 | ChaosNative(LitmusChaos) | [Shubham Chaudhary](https://github.com/ispeakc0de) |
+| Seldon Core | [Clive Cox](https://github.com/cliveseldon) |
+
