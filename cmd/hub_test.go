@@ -10,7 +10,7 @@ import (
 
 func TestHubGoodFolder(t *testing.T) {
 	chartName = "load-test-http"
-	chartVersionConstraint = "0.1.1"
+	chartVersionConstraint = "0.1.0"
 	cleanChartArtifacts(destDir, chartName)
 	// make sure load test folder is present
 	err := hubCmd.RunE(nil, nil)

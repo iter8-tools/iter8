@@ -3,7 +3,6 @@ package base
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/bojand/ghz/runner"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -159,34 +158,18 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 	ghzcBytes, _ := json.MarshalIndent(ghzc, "", "	")
 	log.Logger.WithStackTrace(string(ghzcBytes)).Trace("runner config")
 
+	opts := runner.WithConfig(ghzc)
+
 	// todo: supply all the allowed options
-	igr, err := runner.Run(t.With.VersionInfo[j].Call, t.With.VersionInfo[j].Host,
-		runner.WithCountErrors(ghzc.CountErrors),
-		runner.WithInsecure(ghzc.Insecure),
-		runner.WithProtoFile(ghzc.Proto, nil),
-		runner.WithProtoset(ghzc.Protoset),
-		runner.WithTotalRequests(ghzc.N),
-		runner.WithRPS(ghzc.RPS),
-		runner.WithConcurrency(ghzc.C),
-		runner.WithConnections(ghzc.Connections),
-		runner.WithRunDuration(time.Duration(ghzc.Z)),
-		runner.WithStreamInterval(time.Duration(ghzc.SI)),
-		runner.WithStreamCallDuration(time.Duration(ghzc.StreamCallDuration)),
-		runner.WithStreamCallCount(ghzc.StreamCallCount),
-		runner.WithDialTimeout(time.Duration(ghzc.DialTimeout)),
-		runner.WithKeepalive(time.Duration(ghzc.KeepaliveTime)),
-		runner.WithData(ghzc.Data),
-		runner.WithDataFromFile(ghzc.DataPath),
-		runner.WithBinaryDataFromFile(ghzc.BinDataPath),
-		runner.WithMetadata(ghzc.Metadata),
-		runner.WithMetadataFromFile(ghzc.MetadataPath),
-		runner.WithReflectionMetadata(ghzc.ReflectMetadata),
-	)
+	igr, err := runner.Run(t.With.VersionInfo[j].Call, t.With.VersionInfo[j].Host, opts)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("ghz run failed")
+		e := errors.New("ghz run failed")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
 		if igr == nil {
-			log.Logger.Error("failed to get results since ghz run was aborted")
+			e = errors.New("failed to get results since ghz run was aborted")
+			log.Logger.Error(e)
 		}
+		return nil, e
 	}
 	log.Logger.Trace("ran ghz gRPC test")
 	log.Logger.Trace(igr.ErrorDist)

@@ -45,7 +45,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 		StringValues: []string{"url=" + testURL, "duration=2s"},
-		Values:       []string{"SLOs.error-rate=0", "SLOs.latency-mean=100"},
+		Values:       []string{"SLOs.http/error-rate=0", "SLOs.http/latency-mean=100"},
 		FileValues:   []string{},
 	}
 	chartName = "load-test-http"
@@ -70,7 +70,7 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 		StringValues: []string{"url=" + testURL, "duration=2s"},
-		Values:       []string{"SLOs.error-rate=0", "SLOs.latency-mean=100", "SLOs.latency-p95=0.00001"},
+		Values:       []string{"SLOs.http/error-rate=0", "SLOs.http/latency-mean=100", "SLOs.http/latency-p95=0.00001"},
 	}
 	chartName = "load-test-http"
 	err := launchCmd.RunE(nil, nil)
@@ -97,7 +97,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 		StringValues: []string{"url=" + testURL, "duration=2s"},
-		Values:       []string{"SLOs.error-count=0", "SLOs.latency-mean=100", "SLOs.latency-p50=100"},
+		Values:       []string{"SLOs.http/error-count=0", "SLOs.http/latency-mean=100", "SLOs.http/latency-p50=100"},
 		FileValues:   []string{},
 	}
 	chartName = "load-test-http"

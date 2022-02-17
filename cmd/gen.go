@@ -47,7 +47,7 @@ Render experiment.yaml file by combining an experiment chart with values.`,
 		}
 
 		// add in experiment.yaml template
-		eData := []byte(fmt.Sprintf(`{{- include "%v.experiment" . }}`, c.Name()))
+		eData := []byte(`{{- include "experiment" . }}`)
 		c.Templates = append(c.Templates, &chart.File{
 			Name: path.Join("templates", experimentSpecPath),
 			Data: eData,
