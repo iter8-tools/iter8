@@ -10,8 +10,8 @@
   with:
     SLOs:
       # error rate must be 0
-    - metric: built-in/error-rate
+    - metric: http/error-rate
       upperLimit: 0
       # 95th percentile latency must be under 100 msec
-    - metric: built-in/p95.0
+    - metric: http/latency-p95.0
       upperLimit: 100

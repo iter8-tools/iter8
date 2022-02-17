@@ -3,6 +3,7 @@ package base
 import (
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/bojand/ghz/runner"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -60,14 +61,16 @@ const (
 	callDataBinaryFileName = "ghz-call-data.bin"
 	// callMetadataJSONFileName is the JSON call metadata file
 	callMetadataJSONFileName = "ghz-call-metadata.json"
+	// gRPC metric prefix
+	gRPCMetricPrefix = "grpc"
 	// gRPCRequestCountMetricName is name of the gRPC request count metric
-	gRPCRequestCountMetricName = "grpc-request-count"
+	gRPCRequestCountMetricName = "request-count"
 	// gRPCErrorCountMetricName is name of the gRPC error count metric
-	gRPCErrorCountMetricName = "grpc-error-count"
+	gRPCErrorCountMetricName = "error-count"
 	// gRPCErrorRateMetricName is name of the gRPC error rate metric
-	gRPCErrorRateMetricName = "grpc-error-rate"
+	gRPCErrorRateMetricName = "error-rate"
 	// gRPCLatencySampleMetricName is name of the gRPC latency sample metric
-	gRPCLatencySampleMetricName = "grpc-latency"
+	gRPCLatencySampleMetricName = "latency"
 	// countErrorsDefault is the default value which indicates if errors are counted
 	countErrorsDefault = true
 	// insucureDefault is the default value which indicates that plaintext and insecure connection should be used
@@ -158,13 +161,26 @@ func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
 
 	// todo: supply all the allowed options
 	igr, err := runner.Run(t.With.VersionInfo[j].Call, t.With.VersionInfo[j].Host,
-		runner.WithProtoFile(ghzc.Proto, nil),
 		runner.WithCountErrors(ghzc.CountErrors),
 		runner.WithInsecure(ghzc.Insecure),
-		runner.WithData(ghzc.Data),
-		runner.WithConnections(ghzc.Connections),
-		runner.WithConcurrency(ghzc.C),
+		runner.WithProtoFile(ghzc.Proto, nil),
+		runner.WithProtoset(ghzc.Protoset),
 		runner.WithTotalRequests(ghzc.N),
+		runner.WithRPS(ghzc.RPS),
+		runner.WithConcurrency(ghzc.C),
+		runner.WithConnections(ghzc.Connections),
+		runner.WithRunDuration(time.Duration(ghzc.Z)),
+		runner.WithStreamInterval(time.Duration(ghzc.SI)),
+		runner.WithStreamCallDuration(time.Duration(ghzc.StreamCallDuration)),
+		runner.WithStreamCallCount(ghzc.StreamCallCount),
+		runner.WithDialTimeout(time.Duration(ghzc.DialTimeout)),
+		runner.WithKeepalive(time.Duration(ghzc.KeepaliveTime)),
+		runner.WithData(ghzc.Data),
+		runner.WithDataFromFile(ghzc.DataPath),
+		runner.WithBinaryDataFromFile(ghzc.BinDataPath),
+		runner.WithMetadata(ghzc.Metadata),
+		runner.WithMetadataFromFile(ghzc.MetadataPath),
+		runner.WithReflectionMetadata(ghzc.ReflectMetadata),
 	)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("ghz run failed")
@@ -244,7 +260,7 @@ func (t *collectGRPCTask) Run(exp *Experiment) error {
 		if gr[i] != nil { // assuming there is some raw ghz result to process for this version
 			// populate grpc request count
 			// todo: this logic breaks for looped experiments. Fix when we get to loops.
-			m := iter8BuiltInPrefix + "/" + gRPCRequestCountMetricName
+			m := gRPCMetricPrefix + "/" + gRPCRequestCountMetricName
 			mm := MetricMeta{
 				Description: "number of gRPC requests sent",
 				Type:        CounterMetricType,
@@ -259,7 +275,7 @@ func (t *collectGRPCTask) Run(exp *Experiment) error {
 
 			// populate count
 			// todo: This logic breaks for looped experiments. Fix when we get to loops.
-			m = iter8BuiltInPrefix + "/" + gRPCErrorCountMetricName
+			m = gRPCMetricPrefix + "/" + gRPCErrorCountMetricName
 			mm = MetricMeta{
 				Description: "number of responses that were errors",
 				Type:        CounterMetricType,
@@ -268,7 +284,7 @@ func (t *collectGRPCTask) Run(exp *Experiment) error {
 
 			// populate rate
 			// todo: This logic breaks for looped experiments. Fix when we get to loops.
-			m = iter8BuiltInPrefix + "/" + gRPCErrorRateMetricName
+			m = gRPCMetricPrefix + "/" + gRPCErrorRateMetricName
 			rc := float64(gr[i].Count)
 			if rc != 0 {
 				mm = MetricMeta{
@@ -279,7 +295,7 @@ func (t *collectGRPCTask) Run(exp *Experiment) error {
 			}
 
 			// populate latency sample
-			m = iter8BuiltInPrefix + "/" + gRPCLatencySampleMetricName
+			m = gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName
 			mm = MetricMeta{
 				Description: "gRPC Latency Sample",
 				Type:        SampleMetricType,

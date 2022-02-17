@@ -59,15 +59,16 @@ const (
 	defaultQPS                         = float32(8)
 	defaultHTTPNumRequests             = int64(100)
 	defaultHTTPConnections             = 4
-	builtInHTTPRequestCountId          = "http-request-count"
-	builtInHTTPErrorCountId            = "http-error-count"
-	builtInHTTPErrorRateId             = "http-error-rate"
-	builtInHTTPLatencyMeanId           = "http-latency-mean"
-	builtInHTTPLatencyStdDevId         = "http-latency-stddev"
-	builtInHTTPLatencyMinId            = "http-latency-min"
-	builtInHTTPLatencyMaxId            = "http-latency-max"
-	builtInHTTPLatencyHistId           = "http-latency"
-	builtInHTTPLatencyPercentilePrefix = "http-latency-p"
+	httpMetricPrefix                   = "http"
+	builtInHTTPRequestCountId          = "request-count"
+	builtInHTTPErrorCountId            = "error-count"
+	builtInHTTPErrorRateId             = "error-rate"
+	builtInHTTPLatencyMeanId           = "latency-mean"
+	builtInHTTPLatencyStdDevId         = "latency-stddev"
+	builtInHTTPLatencyMinId            = "latency-min"
+	builtInHTTPLatencyMaxId            = "latency-max"
+	builtInHTTPLatencyHistId           = "latency"
+	builtInHTTPLatencyPercentilePrefix = "latency-p"
 )
 
 var (
@@ -255,7 +256,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 	for i := range t.With.VersionInfo {
 		if fm[i] != nil {
 			// request count
-			m := iter8BuiltInPrefix + "/" + builtInHTTPRequestCountId
+			m := httpMetricPrefix + "/" + builtInHTTPRequestCountId
 			mm := MetricMeta{
 				Description: "number of requests sent",
 				Type:        CounterMetricType,
@@ -270,7 +271,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 				}
 			}
 			// error count
-			m = iter8BuiltInPrefix + "/" + builtInHTTPErrorCountId
+			m = httpMetricPrefix + "/" + builtInHTTPErrorCountId
 			mm = MetricMeta{
 				Description: "number of responses that were errors",
 				Type:        CounterMetricType,
@@ -278,7 +279,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 			in.updateMetric(m, mm, i, val)
 
 			// error-rate
-			m = iter8BuiltInPrefix + "/" + builtInHTTPErrorRateId
+			m = httpMetricPrefix + "/" + builtInHTTPErrorRateId
 			rc := float64(fm[i].DurationHistogram.Count)
 			if rc != 0 {
 				mm = MetricMeta{
@@ -289,7 +290,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 			}
 
 			// mean-latency
-			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMeanId
+			m = httpMetricPrefix + "/" + builtInHTTPLatencyMeanId
 			mm = MetricMeta{
 				Description: "mean of observed latency values",
 				Type:        GaugeMetricType,
@@ -298,7 +299,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Avg)
 
 			// stddev-latency
-			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyStdDevId
+			m = httpMetricPrefix + "/" + builtInHTTPLatencyStdDevId
 			mm = MetricMeta{
 				Description: "standard deviation of observed latency values",
 				Type:        GaugeMetricType,
@@ -307,7 +308,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.StdDev)
 
 			// min-latency
-			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMinId
+			m = httpMetricPrefix + "/" + builtInHTTPLatencyMinId
 			mm = MetricMeta{
 				Description: "minimum of observed latency values",
 				Type:        GaugeMetricType,
@@ -316,7 +317,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Min)
 
 			// max-latency
-			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyMaxId
+			m = httpMetricPrefix + "/" + builtInHTTPLatencyMaxId
 			mm = MetricMeta{
 				Description: "maximum of observed latency values",
 				Type:        GaugeMetricType,
@@ -326,7 +327,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 
 			// percentiles
 			for _, p := range fm[i].DurationHistogram.Percentiles {
-				m = fmt.Sprintf("%v/%v%v", iter8BuiltInPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
+				m = fmt.Sprintf("%v/%v%v", httpMetricPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
 				mm = MetricMeta{
 					Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
 					Type:        GaugeMetricType,
@@ -336,7 +337,7 @@ func (t *collectHTTPTask) Run(exp *Experiment) error {
 			}
 
 			// latency histogram
-			m = iter8BuiltInPrefix + "/" + builtInHTTPLatencyHistId
+			m = httpMetricPrefix + "/" + builtInHTTPLatencyHistId
 			mm = MetricMeta{
 				Description: "Latency Histogram",
 				Type:        HistogramMetricType,

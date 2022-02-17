@@ -20,17 +20,17 @@
 - task: assess-app-versions
   with:
     SLOs:
-    - metric: "built-in/http-error-rate"
+    - metric: "http/error-rate"
       upperLimit: 0
-    - metric: "built-in/http-latency-mean"
+    - metric: "http/latency-mean"
       upperLimit: 100
-    - metric: "built-in/http-latency-p50"
+    - metric: "http/latency-p50"
       upperLimit: 100
-    - metric: "built-in/http-latency-p50.0"
+    - metric: "http/latency-p50.0"
       upperLimit: 100
-    - metric: "built-in/http-latency-p95.0"
+    - metric: "http/latency-p95.0"
       upperLimit: 250
-    - metric: "built-in/http-latency-p97.5"
+    - metric: "http/latency-p97.5"
       upperLimit: 500
 # tasks 3 & 4: print if SLOs are satisfied or not
 - if: SLOs()

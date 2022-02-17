@@ -232,6 +232,7 @@ func (in *Insights) registerMetric(m string, mm MetricMeta) error {
 }
 
 // updateMetric registers a metric and adds a metric value for a given version
+// metric names will be normalized
 func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}) error {
 	var err error
 	if !metricTypeMatch(mm.Type, val) {
@@ -246,18 +247,23 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 		return err
 	}
 
-	err = in.registerMetric(m, mm)
+	nm, err := NormalizeMetricName(m)
+	if err != nil {
+		return err
+	}
+
+	err = in.registerMetric(nm, mm)
 	if err != nil {
 		return err
 	}
 
 	switch mm.Type {
 	case CounterMetricType, GaugeMetricType:
-		in.updateMetricValueScalar(m, i, val.(float64))
+		in.updateMetricValueScalar(nm, i, val.(float64))
 	case SampleMetricType:
-		in.updateMetricValueVector(m, i, val.([]float64))
+		in.updateMetricValueVector(nm, i, val.([]float64))
 	case HistogramMetricType:
-		in.updateMetricValueHist(m, i, val.([]HistBucket))
+		in.updateMetricValueHist(nm, i, val.([]HistBucket))
 	default:
 		err := fmt.Errorf("unknown metric type %v", mm.Type)
 		log.Logger.Error(err)
@@ -477,8 +483,15 @@ func (in *Insights) aggregateMetric(i int, m string) *float64 {
 
 // NormalizeMetricName normalizes percentile values in metric names
 func NormalizeMetricName(m string) (string, error) {
-	pre := iter8BuiltInPrefix + "/" + builtInHTTPLatencyPercentilePrefix
-	if strings.HasPrefix(m, pre) { // built-in http percentile metric
+	preHTTP := httpMetricPrefix + "/" + builtInHTTPLatencyPercentilePrefix
+	preGRPC := gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix
+	pre := ""
+	if strings.HasPrefix(m, preHTTP) { // built-in http percentile metric
+		pre = preHTTP
+	} else if strings.HasPrefix(m, preGRPC) { // built-in http percentile metric
+		pre = preGRPC
+	}
+	if len(pre) > 0 {
 		remainder := strings.TrimPrefix(m, pre)
 		if percent, e := strconv.ParseFloat(remainder, 64); e != nil {
 			err := fmt.Errorf("cannot extract percent from metric %v", m)
@@ -489,7 +502,7 @@ func NormalizeMetricName(m string) (string, error) {
 			return fmt.Sprintf("%v%v", pre, percent), nil
 		}
 	} else {
-		// not a built-in http percentile metric
+		// already normalized
 		return m, nil
 	}
 }

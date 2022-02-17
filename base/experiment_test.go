@@ -49,7 +49,7 @@ func TestRunExperiment(t *testing.T) {
 		},
 		With: assessInputs{
 			SLOs: []SLO{{
-				Metric:     iter8BuiltInPrefix + "/" + builtInHTTPErrorCountId,
+				Metric:     httpMetricPrefix + "/" + builtInHTTPErrorCountId,
 				UpperLimit: float64Pointer(0),
 			}},
 		},

@@ -33,7 +33,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		},
 		With: assessInputs{
 			SLOs: []SLO{{
-				Metric:     "built-in/http-latency-mean",
+				Metric:     "http/latency-mean",
 				UpperLimit: float64Pointer(100),
 			}},
 		},
@@ -81,10 +81,10 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		},
 		With: assessInputs{
 			SLOs: []SLO{{
-				Metric:     "built-in/http-latency-mean",
+				Metric:     "http/latency-mean",
 				UpperLimit: float64Pointer(100),
 			}, {
-				Metric:     "built-in/http-latency-p95.00",
+				Metric:     "http/latency-p95.00",
 				UpperLimit: float64Pointer(200),
 			}},
 		},
