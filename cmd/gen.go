@@ -93,6 +93,7 @@ Render experiment.yaml file by combining an experiment chart with values.`,
 
 		return err
 	},
+	Hidden: true,
 }
 
 func addGenOptions(f *pflag.FlagSet) {
