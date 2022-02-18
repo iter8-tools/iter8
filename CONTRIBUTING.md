@@ -67,6 +67,8 @@ The Iter8 project consists of three main repos.
 
 ### Iter8 CLI
 
+This is the source for the Iter8 CLI.
+
 #### Clone `iter8`
 
 ```shell
@@ -93,6 +95,8 @@ make htmlcov
 
 ### Iter8 hub
 
+This is the source for Iter8 experiment charts.
+
 #### Clone `hub`
 
 ```shell
@@ -104,7 +108,7 @@ Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
 
 
 ### Iter8 docs
-Iter8 documentation uses [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
+This is the source for Iter8 documentation. Uses [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
 
 #### Clone `docs`
 
