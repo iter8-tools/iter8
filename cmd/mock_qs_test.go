@@ -10,12 +10,31 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/repo/repotest"
 )
 
 func TestMockQuickStartWithoutSLOs(t *testing.T) {
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
+
+	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srv.Stop()
+	if err = srv.CreateIndex(); err != nil {
+		t.Fatal(err)
+	}
+	if err = srv.LinkIndices(); err != nil {
+		t.Fatal(err)
+	}
+
+	repoURL = srv.URL()
+	chartName = "load-test-http"
+	chartVersionConstraint = "0.1.0"
+
+	defer cleanChartArtifacts(destDir, chartName)
 
 	// gen and run exp
 	GenOptions = values.Options{
@@ -24,11 +43,7 @@ func TestMockQuickStartWithoutSLOs(t *testing.T) {
 		Values:       []string{},
 		FileValues:   []string{},
 	}
-	os.Chdir(base.CompletePath("../", "testdata/charts"))
-	chartPath = "load-test-http"
-	err := genCmd.RunE(nil, nil)
-	assert.NoError(t, err)
-	err = runCmd.RunE(nil, nil)
+	err = launchCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
 	// assert
@@ -45,6 +60,24 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
+	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srv.Stop()
+	if err = srv.CreateIndex(); err != nil {
+		t.Fatal(err)
+	}
+	if err = srv.LinkIndices(); err != nil {
+		t.Fatal(err)
+	}
+
+	repoURL = srv.URL()
+	chartName = "load-test-http"
+	chartVersionConstraint = "0.1.0"
+
+	defer cleanChartArtifacts(destDir, chartName)
+
 	// with SLOs next
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
@@ -52,11 +85,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		Values:       []string{"SLOs.http/error-rate=0", "SLOs.http/latency-mean=100"},
 		FileValues:   []string{},
 	}
-	os.Chdir(base.CompletePath("../", "testdata/charts"))
-	chartPath = "load-test-http"
-	err := genCmd.RunE(nil, nil)
-	assert.NoError(t, err)
-	err = runCmd.RunE(nil, nil)
+	err = launchCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
 	// assert
