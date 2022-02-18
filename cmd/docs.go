@@ -30,13 +30,12 @@ var docsCmd = &cobra.Command{
 			name := strings.TrimSuffix(base, path.Ext(base))
 			title := strings.Title(strings.Replace(name, "_", " ", -1))
 			tpl := `---
-	template: main.html
-	title: "%s"
-	hide:
-	- toc
-	---
-	
-	`
+template: main.html
+title: "%s"
+hide:
+- toc
+---
+`
 			return fmt.Sprintf(tpl, title)
 		}
 
