@@ -2,8 +2,7 @@
 
 Welcome! We are delighted that you want to contribute to Iter8! 💖
 
-As you get started, you are in the best position to give us feedback on areas of
-our project that we need help with including:
+As you get started, you are in the best position to give us feedback on key areas including:
 
 * Problems found during setup of Iter8
 * Gaps in our quick start tutorial and other documentation
@@ -14,23 +13,21 @@ bug report and let us know!
 
 ***
 
-## Ways to Contribute
+## Ways to contribute
 
 We welcome many different types of contributions including:
 
-* Tutorials
-* Other documentation
-* Experiment charts/templates
-* Builds, CI
-* Bug fixes
+* [Tutorials and other documentation](#iter8-docs)
+* Experiment charts
+* Iter8 CLI features
+* CI, builds, and tests
 * Web design
-* Communication, social media, blog posts
-* Tasks from which experiments are composed
 * Reviewing pull requests
+* Communication, social media, blog posts
 
 ***
 
-## Ask for Help
+## Ask for help
 
 The best ways to reach us with a question is to ask...
 
@@ -40,7 +37,7 @@ The best ways to reach us with a question is to ask...
 
 ***
 
-## Find an Issue
+## Find an issue
 
 Iter8 issues are managed [here](https://github.com/iter8-tools/iter8/issues).
 
@@ -57,7 +54,7 @@ that you want to work on it. Something like "I want to work on this" is fine.
 
 ***
 
-## Pull Request Lifecycle
+## Pull request lifecycle
 
 * Your PR is associated with one (and infrequently, with more than one) [GitHub issue](https://github.com/iter8-tools/iter8/issues). You can start the submission of your PR as soon as this issue has been created.
 * Follow the [standard GitHub fork and pull request process](https://gist.github.com/Chaser324/ce0505fbed06b947d962) when creating and submitting your PR.
@@ -67,31 +64,67 @@ that you want to work on it. Something like "I want to work on this" is fine.
 * Use the `#development` Slack channel of [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) to ping/bump when the pull request is ready for further review or if it appears stalled.
 * Iter8 releases happen frequently. Once your PR is merged, you can expect your contribution to show up *live* in a short amount of time at https://iter8.tools.
 
-<!-- ## Development Environment Setup
+## Development environment setup
 
-**TODO** -->
-<!-- Provide enough information so that someone can find your project on 
-the weekend and get set up, build the code, test it and submit a pull request 
-successfully without having to ask any questions. If there is a one-off tool
-they need to install, of common error people run into, or useful script they
-should run, document it here. 
+Iter8 project consists of three main repos.
 
-Document any necessary tools, for example VS Code and recommended extensions.
-You don’t have to document the beginner’s guide to these tools, but how they
-are used within the scope of your project.
+1. [CLI](https://github.com/iter8-tools/iter8): source for Iter8 CLI
+2. [Hub](https://github.com/iter8-tools/hub): source for Iter8 experiment charts
+3. [Docs](https://github.com/iter8-tools/docs): source for Iter8 docs
 
-* How to get the source code
-* How to get any dependencies
-* How to build the source code
-* How to run the project locally
-* How to test the source code, unit and "integration" or "end-to-end"
-* How to generate and preview the documentation locally
-* Links to new user documentation videos and examples to get people started and
-  understanding how to use the project
+### Iter8 CLI
+```shell
+git clone https://github.com/iter8-tools/iter8.git
+```
 
--->
+#### Build
+```shell
+make build
+```
 
-***
+#### Install locally
+```shell
+make clean install
+iter8 version
+```
+
+#### Tests and coverage
+```shell
+make tests
+make coverage
+make htmlcov
+```
+
+### Iter8 hub
+```shell
+git clone https://github.com/iter8-tools/hub.git
+```
+
+#### Tests
+Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
+
+
+### Iter8 docs
+Iter8 documentation uses [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
+
+```shell
+git clone https://github.com/iter8-tools/docs.git
+```
+
+#### Locally serve Iter8 docs
+From the root of this repo:
+
+```shell
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+mkdocs serve -s
+```
+
+You can now see your local docs at [http://localhost:8000](http://localhost:8000). You will also see live updates to [http://localhost:8000](http://localhost:8000) as you update the contents of the `docs` folder.
+
+#### Tests
+Add end-to-end tests for Iter8 docs in the `.github/workflows/tests.yaml` file.
 
 ## Sign Your Commits
 
@@ -141,30 +174,3 @@ Makefile target. Below is an example of a checklist:
   requests. We require that all tests succeed on a pull request before it is merged.
 
 -->
-
-***
-
-## `MkDocs`
-Iter8 documentation uses [Mkdocs](https://www.mkdocs.org/user-guide/writing-your-docs/). The section on [linking to pages and images](https://www.mkdocs.org/user-guide/writing-your-docs/#writing-with-markdown) is especially useful for Iter8 documentation authors.
-
-### Serve Iter8 docs
-**Pre-requisite:** Python 3+. 
-
-Use a Python 3 virtual environment to locally serve Iter8 docs. Run the following commands from the top-level directory of the Iter8 repo.
-
-```shell
-cd mkdocs
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-mkdocs serve -s
-```
-
-Browse [http://localhost:8000](http://localhost:8000) to view your local Iter8 docs.
-
-### View live changes
-1. The overall structure of the documentation, as reflected in the nav tabs of [https://iter8.tools](https://iter8.tools), is located in the `iter8/mkdocs/mkdocs.yml` file.
-
-2. The markdown files for Iter8 docs are located under the `iter8/mkdocs/docs` folder.
-
-You will see live updates to [http://localhost:8000](http://localhost:8000) as you update the above files.
