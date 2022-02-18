@@ -3,6 +3,7 @@ package base
 import (
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/bojand/ghz/runner"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -86,6 +87,11 @@ type collectGRPCTask struct {
 func (t *collectGRPCTask) initializeDefaults() {
 	// set defaults
 	gd.SetDefaults(&t.With.Config)
+	// if dial timeout is zero, then set a default...
+	if t.With.DialTimeout == 0 {
+		td, _ := time.ParseDuration("10s")
+		t.With.DialTimeout = runner.Duration(td)
+	}
 	// always count errors
 	t.With.Config.CountErrors = countErrorsDefault
 	// todo: document how to use security credentials

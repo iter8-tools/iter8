@@ -7,6 +7,7 @@ import (
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/base/internal"
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,8 +28,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{
-				Data:        map[string]interface{}{"name": "bob"},
-				DialTimeout: runner.Duration(20 * time.Second),
+				Data: map[string]interface{}{"name": "bob"},
 			},
 			ProtoURL: StringPointer("https://raw.githubusercontent.com/bojand/ghz/v0.105.0/testdata/greeter.proto"),
 			VersionInfo: []*versionGRPC{{
@@ -38,12 +38,17 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		},
 	}
 
+	log.Logger.Info("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
 	exp := &Experiment{
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
 	exp.InitResults()
 	err = ct.Run(exp)
+
+	log.Logger.Info("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
