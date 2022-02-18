@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"os"
 	"testing"
 
 	"fortio.org/fortio/fhttp"
@@ -102,17 +101,31 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
+	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srv.Stop()
+	if err = srv.CreateIndex(); err != nil {
+		t.Fatal(err)
+	}
+	if err = srv.LinkIndices(); err != nil {
+		t.Fatal(err)
+	}
+
+	repoURL = srv.URL()
+	chartName = "load-test-http"
+	chartVersionConstraint = "0.1.0"
+
+	defer cleanChartArtifacts(destDir, chartName)
+
 	// with bad SLOs
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
 		StringValues: []string{"url=" + testURL, "duration=2s"},
 		Values:       []string{"SLOs.http/error-rate=0", "SLOs.http/latency-mean=100", "SLOs.http/latency-p95=0.00001"},
 	}
-	os.Chdir(base.CompletePath("../", "testdata/charts"))
-	chartPath = "load-test-http"
-	err := genCmd.RunE(nil, nil)
-	assert.NoError(t, err)
-	err = runCmd.RunE(nil, nil)
+	err = launchCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
 	// assert
@@ -132,6 +145,24 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
+	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srv.Stop()
+	if err = srv.CreateIndex(); err != nil {
+		t.Fatal(err)
+	}
+	if err = srv.LinkIndices(); err != nil {
+		t.Fatal(err)
+	}
+
+	repoURL = srv.URL()
+	chartName = "load-test-http"
+	chartVersionConstraint = "0.1.0"
+
+	defer cleanChartArtifacts(destDir, chartName)
+
 	// with SLOs and percentiles also
 	GenOptions = values.Options{
 		ValueFiles:   []string{base.CompletePath("../", "testdata/percentileandslos/load-test-http-values.yaml")},
@@ -139,11 +170,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		Values:       []string{"SLOs.http/error-count=0", "SLOs.http/latency-mean=100", "SLOs.http/latency-p50=100"},
 		FileValues:   []string{},
 	}
-	os.Chdir(base.CompletePath("../", "testdata/charts"))
-	chartPath = "load-test-http"
-	err := genCmd.RunE(nil, nil)
-	assert.NoError(t, err)
-	err = runCmd.RunE(nil, nil)
+	err = launchCmd.RunE(nil, nil)
 	assert.NoError(t, err)
 
 	// assert
@@ -172,15 +199,32 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 
 // Needs a mock Helm repo
 func TestDryLaunch(t *testing.T) {
-	// chartName = "load-test-http"
-	// dry = true
-	// GenOptions = values.Options{
-	// 	ValueFiles:   []string{},
-	// 	StringValues: []string{"url=https://example.com", "duration=2s"},
-	// 	Values:       []string{},
-	// 	FileValues:   []string{},
-	// }
-	// err := launchCmd.RunE(nil, nil)
-	// assert.NoError(t, err)
-	// assert.FileExists(t, "experiment.yaml")
+	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srv.Stop()
+	if err = srv.CreateIndex(); err != nil {
+		t.Fatal(err)
+	}
+	if err = srv.LinkIndices(); err != nil {
+		t.Fatal(err)
+	}
+
+	repoURL = srv.URL()
+	chartName = "load-test-http"
+	chartVersionConstraint = "0.1.0"
+
+	defer cleanChartArtifacts(destDir, chartName)
+
+	dry = true
+	GenOptions = values.Options{
+		ValueFiles:   []string{},
+		StringValues: []string{"url=https://example.com", "duration=2s"},
+		Values:       []string{},
+		FileValues:   []string{},
+	}
+	err = launchCmd.RunE(nil, nil)
+	assert.NoError(t, err)
+	assert.FileExists(t, "experiment.yaml")
 }
