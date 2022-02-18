@@ -27,9 +27,6 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{
-				N:           1,
-				C:           1,
-				Timeout:     runner.Duration(20 * time.Second),
 				Data:        map[string]interface{}{"name": "bob"},
 				DialTimeout: runner.Duration(20 * time.Second),
 			},
@@ -51,7 +48,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
 	count := gs.GetCount(callType)
-	assert.Equal(t, 1, count)
+	assert.Equal(t, 200, count)
 
 	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCErrorCountMetricName)
 	assert.NotNil(t, mm)

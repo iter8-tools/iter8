@@ -10,7 +10,6 @@ import (
 	"helm.sh/helm/v3/pkg/repo/repotest"
 )
 
-// Needs a mock Helm repo
 func TestHubGoodFolder(t *testing.T) {
 	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
 	if err != nil {

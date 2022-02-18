@@ -197,7 +197,6 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// Needs a mock Helm repo
 func TestDryLaunch(t *testing.T) {
 	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
 	if err != nil {
