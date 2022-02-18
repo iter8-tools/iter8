@@ -11,21 +11,18 @@ As you get started, you are in the best position to give us feedback on key area
 If anything doesn't make sense, or doesn't work when you run it, please open a
 bug report and let us know!
 
-***
 
 ## Ways to contribute
 
 We welcome many different types of contributions including:
 
 * [Tutorials and other documentation](#iter8-docs)
-* Experiment charts
-* Iter8 CLI features
+* [Experiment charts](#iter8-hub)
+* [Iter8 CLI features](#iter8-cli)
 * CI, builds, and tests
-* Web design
+* [Web design](#iter8-docs)
 * Reviewing pull requests
 * Communication, social media, blog posts
-
-***
 
 ## Ask for help
 
@@ -34,8 +31,6 @@ The best ways to reach us with a question is to ask...
 * On the original GitHub issue
 * In the `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
 * During our [community meetings](https://iter8.tools/community/)
-
-***
 
 ## Find an issue
 
@@ -52,8 +47,6 @@ don’t know where to start or can't find a suitable issue, you can reach out to
 Once you see an issue that you'd like to work on, please post a comment saying
 that you want to work on it. Something like "I want to work on this" is fine.
 
-***
-
 ## Pull request lifecycle
 
 * Your PR is associated with one (and infrequently, with more than one) [GitHub issue](https://github.com/iter8-tools/iter8/issues). You can start the submission of your PR as soon as this issue has been created.
@@ -66,29 +59,32 @@ that you want to work on it. Something like "I want to work on this" is fine.
 
 ## Development environment setup
 
-Iter8 project consists of three main repos.
+The Iter8 project consists of three main repos.
 
-1. [CLI](https://github.com/iter8-tools/iter8): source for Iter8 CLI
+1. [Iter8](https://github.com/iter8-tools/iter8): source for Iter8 CLI
 2. [Hub](https://github.com/iter8-tools/hub): source for Iter8 experiment charts
 3. [Docs](https://github.com/iter8-tools/docs): source for Iter8 docs
 
 ### Iter8 CLI
+
+#### Clone `iter8`
+
 ```shell
 git clone https://github.com/iter8-tools/iter8.git
 ```
 
-#### Build
+#### Build Iter8
 ```shell
 make build
 ```
 
-#### Install locally
+#### Install Iter8 locally
 ```shell
 make clean install
 iter8 version
 ```
 
-#### Tests and coverage
+#### Run tests and see coverage for Iter8
 ```shell
 make tests
 make coverage
@@ -96,22 +92,27 @@ make htmlcov
 ```
 
 ### Iter8 hub
+
+#### Clone `hub`
+
 ```shell
 git clone https://github.com/iter8-tools/hub.git
 ```
 
-#### Tests
+#### Add tests
 Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
 
 
 ### Iter8 docs
 Iter8 documentation uses [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
 
+#### Clone `docs`
+
 ```shell
 git clone https://github.com/iter8-tools/docs.git
 ```
 
-#### Locally serve Iter8 docs
+#### Locally serve docs
 From the root of this repo:
 
 ```shell
@@ -123,7 +124,7 @@ mkdocs serve -s
 
 You can now see your local docs at [http://localhost:8000](http://localhost:8000). You will also see live updates to [http://localhost:8000](http://localhost:8000) as you update the contents of the `docs` folder.
 
-#### Tests
+#### Add tests
 Add end-to-end tests for Iter8 docs in the `.github/workflows/tests.yaml` file.
 
 ## Sign Your Commits
