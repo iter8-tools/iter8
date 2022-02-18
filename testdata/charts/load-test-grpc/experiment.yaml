@@ -1,0 +1,23 @@
+# task 1: generate gRPC requests for the given gRPC method
+# collect Iter8's built-in gRPC latency and error-related metrics
+- task: gen-load-and-collect-metrics-grpc
+  with:
+    protoURL: "https://raw.githubusercontent.com/grpc/grpc-java/master/examples/example-hostname/src/main/proto/helloworld/helloworld.proto"
+    data:
+      name: frodo
+    versionInfo:
+    - host: "127.0.0.1:50051"
+      call: "helloworld.Greeter.SayHello"
+# task 2: validate service level objectives for app using
+# the metrics collected in the above task
+- task: assess-app-versions
+  with:
+    SLOs:
+    - metric: "i/grpc-error-rate"
+      upperLimit: 0
+    - metric: "i/grpc-latency/mean"
+      upperLimit: 400
+    - metric: "i/grpc-latency/p90"
+      upperLimit: 500
+    - metric: "i/grpc-latency/p97.5"
+      upperLimit: 1000
