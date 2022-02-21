@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +13,7 @@ var short bool
 var (
 	// version is intended to be set using LDFLAGS at build time
 	// In the absence of complete semantic versioning info, the best we can do is major minor
-	version = "v0.9"
+	version = base.MajorMinor
 	// metadata is extra build time data
 	metadata = ""
 	// gitCommit is the git sha1
