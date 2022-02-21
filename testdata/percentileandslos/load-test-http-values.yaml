@@ -1,6 +1,6 @@
 SLOs:
-  error-count: 0 
-  latency-mean: 100
-  latency-p50.0: 100 
-  latency-p95.0: 250
-  latency-p97.5: 500
+  http/error-count: 0 
+  http/latency-mean: 100
+  http/latency-p50.0: 100 
+  http/latency-p95.0: 250
+  http/latency-p97.5: 500

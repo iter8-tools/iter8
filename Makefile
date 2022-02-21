@@ -33,7 +33,7 @@ BINARY_VERSION ?= ${GIT_TAG}
 
 # Only set Version if building a tag or VERSION is set
 ifneq ($(BINARY_VERSION),)
-	LDFLAGS += -X github.com/iter8-tools/iter8/basecli.version=${BINARY_VERSION}
+	LDFLAGS += -X github.com/iter8-tools/iter8/cmd.version=${BINARY_VERSION}
 endif
 
 VERSION_METADATA = unreleased
@@ -42,9 +42,9 @@ ifneq ($(GIT_TAG),)
 	VERSION_METADATA =
 endif
 
-LDFLAGS += -X github.com/iter8-tools/iter8/basecli.metadata=${VERSION_METADATA}
-LDFLAGS += -X github.com/iter8-tools/iter8/basecli.gitCommit=${GIT_COMMIT}
-LDFLAGS += -X github.com/iter8-tools/iter8/basecli.gitTreeState=${GIT_DIRTY}
+LDFLAGS += -X github.com/iter8-tools/iter8/cmd.metadata=${VERSION_METADATA}
+LDFLAGS += -X github.com/iter8-tools/iter8/cmd.gitCommit=${GIT_COMMIT}
+LDFLAGS += -X github.com/iter8-tools/iter8/cmd.gitTreeState=${GIT_DIRTY}
 
 .PHONY: all
 all: build
@@ -57,10 +57,6 @@ build: $(BINDIR)/$(BINNAME)
 
 $(BINDIR)/$(BINNAME): $(SRC)
 	GO111MODULE=on go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)'/$(BINNAME) ./
-
-.PHONY: cmddocs
-cmddocs:
-	go run cmd/docs/main.go	
 
 # ------------------------------------------------------------------------------
 #  install

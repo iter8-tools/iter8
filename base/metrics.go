@@ -1,10 +1,5 @@
 package base
 
-const (
-	// iter8BuiltInPrefix for built-in metric names
-	iter8BuiltInPrefix = "built-in"
-)
-
 // HistBucket is a single bucket in a histogram
 type HistBucket struct {
 	Lower float64 `json:"lower" yaml:"lower"`

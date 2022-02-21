@@ -41,11 +41,11 @@ func TestRunCollectHTTP(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
-	mm, err := exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + builtInHTTPLatencyMeanId)
+	mm, err := exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "/" + builtInHTTPLatencyMeanId)
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + builtInHTTPLatencyPercentilePrefix + "50")
+	mm, err = exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "/" + builtInHTTPLatencyPercentilePrefix + "50")
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 

@@ -7,6 +7,7 @@ import (
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/base/internal"
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,11 +28,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{
-				N:           1,
-				C:           1,
-				Timeout:     runner.Duration(20 * time.Second),
-				Data:        map[string]interface{}{"name": "bob"},
-				DialTimeout: runner.Duration(20 * time.Second),
+				Data: map[string]interface{}{"name": "bob"},
 			},
 			ProtoURL: StringPointer("https://raw.githubusercontent.com/bojand/ghz/v0.105.0/testdata/greeter.proto"),
 			VersionInfo: []*versionGRPC{{
@@ -41,31 +38,36 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		},
 	}
 
+	log.Logger.Info("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
 	exp := &Experiment{
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
 	exp.InitResults()
 	err = ct.Run(exp)
+
+	log.Logger.Info("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
 	count := gs.GetCount(callType)
-	assert.Equal(t, 1, count)
+	assert.Equal(t, 200, count)
 
-	mm, err := exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCErrorCountMetricName)
+	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCErrorCountMetricName)
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCLatencySampleMetricName)
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName)
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(iter8BuiltInPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 }
@@ -106,25 +108,25 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		},
 		With: assessInputs{
 			SLOs: []SLO{{
-				Metric:     "built-in/grpc-latency/mean",
+				Metric:     "grpc/latency/mean",
 				UpperLimit: float64Pointer(100),
 			}, {
-				Metric:     "built-in/grpc-latency/p95.00",
+				Metric:     "grpc/latency/p95.00",
 				UpperLimit: float64Pointer(200),
 			}, {
-				Metric:     "built-in/grpc-latency/stddev",
+				Metric:     "grpc/latency/stddev",
 				UpperLimit: float64Pointer(20),
 			}, {
-				Metric:     "built-in/grpc-latency/max",
+				Metric:     "grpc/latency/max",
 				UpperLimit: float64Pointer(200),
 			}, {
-				Metric:     "built-in/grpc-latency/min",
+				Metric:     "grpc/latency/min",
 				LowerLimit: float64Pointer(0),
 			}, {
-				Metric:     "built-in/grpc-error-count",
+				Metric:     "grpc/error-count",
 				UpperLimit: float64Pointer(0),
 			}, {
-				Metric:     "built-in/grpc-request-count",
+				Metric:     "grpc/request-count",
 				UpperLimit: float64Pointer(100),
 				LowerLimit: float64Pointer(100),
 			}},

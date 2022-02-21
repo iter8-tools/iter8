@@ -19,10 +19,10 @@ jobs:
       run: |
         export COVERAGE=$(go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
         echo "code coverage is at ${COVERAGE}"
-        if [ 1 -eq "$(echo "${COVERAGE} > 70.0" | bc)" ]; then \
-          echo "all good... coverage is above 70.0%"; 
+        if [ 1 -eq "$(echo "${COVERAGE} > 74.0" | bc)" ]; then \
+          echo "all good... coverage is above 74.0%"; 
         else \
-          echo "not good... coverage is not above 70.0%";
+          echo "not good... coverage is not above 74.0%";
           exit 1
         fi
     - name: Upload coverage to Codecov
@@ -37,101 +37,3 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
     - uses: dominikh/staticcheck-action@v1.1.0
-
-  e2e-load-test-http:
-    name: local httpbin tests
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - run: make install
-
-    - name: run httpbin
-      run: |
-        set -e
-        docker pull kennethreitz/httpbin
-        docker run -p 80:80 kennethreitz/httpbin &
-        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1/get)" != "200" ]]; do
-          sleep 5; 
-        done;
-
-    - name: load test GET endpoint
-      run: |
-        set -e
-        cd hub/load-test-http
-        iter8 run --set url=http://127.0.0.1/get
-        cat experiment.yaml
-        iter8 assert -c completed -c nofailure -c slos
-
-    - name: load test GET endpoint
-      run: |
-        set -e
-        cd hub/load-test-http
-        iter8 run --set url=http://127.0.0.1/get \
-                  --set SLOs.latency-p25=80 \
-                  --set SLOs.latency-p50=100 \
-                  --set SLOs.latency-'p95\.0'=200
-        cat experiment.yaml
-        iter8 assert -c completed -c nofailure -c slos
-
-    - name: load test POST endpoint (image/jpeg)
-      run: |
-        set -e
-        cd hub/load-test-http
-        iter8 run --set url=http://127.0.0.1/post \
-                  --set payloadURL=https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg \
-                  --set contentType="image/jpeg" \
-                  --set SLOs.latency-p25=80 \
-                  --set SLOs.latency-p50=100 \
-                  --set SLOs.latency-'p95\.0'=200
-        cat experiment.yaml
-        iter8 assert -c completed -c nofailure -c slos
-
-  e2e-load-test-grpc:
-    name: local grpc tests
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    
-    - run: make install
-
-    - name: run greeter
-      run: |
-        git clone -b v1.43.0 https://github.com/grpc/grpc-go
-        cd grpc-go/examples/helloworld
-        go build greeter_server/main.go
-        ./main &
-        sleep 2
-        
-    - name: load test grpc service method
-      run: |
-        set -e
-        cd hub/load-test-grpc
-        export LOG_LEVEL=trace
-        iter8 run --set-string host="127.0.0.1:50051" \
-                  --set-string call="helloworld.Greeter.SayHello" \
-                  --set-string protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-                  --set data.name="frodo" \
-                  --set SLOs.error-rate=0 \
-                  --set SLOs.latency/mean=50 \
-                  --set SLOs.latency/p90=100 \
-                  --set SLOs.latency/p'97\.5'=200
-        echo "experiment ... "
-        cat experiment.yaml
-        echo "report ..."
-        iter8 report
-        echo "assert... "
-        iter8 assert -c completed -c nofailure -c slos
-
