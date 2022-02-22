@@ -106,6 +106,9 @@ git clone https://github.com/iter8-tools/hub.git
 #### Add tests
 Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
 
+#### Versioning
+Iter8 experiment charts are Helm charts under the covers, and are semantically versioned as per [Helm chart versioning specifications](https://helm.sh/docs/topics/charts/#charts-and-versioning). Every change to the chart must be accompanied by an increment to the version number of the chart. For most changes, this would mean an increment to the patch version (for example, the `version` field in `Chart.yaml` might need to be incremented from `0.1.0` to `0.1.1`).
+
 
 ### Iter8 docs
 This is the source for Iter8 documentation. Uses [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
