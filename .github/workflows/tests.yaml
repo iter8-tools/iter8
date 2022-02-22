@@ -61,8 +61,8 @@ jobs:
         cat << EOF > experiment-config.yaml
           url: http://127.0.0.1/get
           SLOs:
-            error-rate: 0
-            latency-mean: 100
+            http/error-rate: 0
+            http/latency-mean: 100
         EOF
         cat experiment-config.yaml
 
