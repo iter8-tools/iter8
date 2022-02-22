@@ -16,9 +16,9 @@ Experiments are expressed as helm charts. Create a values file to define experim
             p90: 150
             p97.5: 200
         EOF
-    - uses: iter8-tools/iter8/load-test@v0.8
+    - uses: iter8-tools/iter8@v0.9
       with:
-        chart: load-test
+        chart: load-test-http
         valuesFile: ../values.yaml
 ```
 

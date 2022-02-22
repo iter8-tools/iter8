@@ -56,19 +56,18 @@ jobs:
           sleep 5; 
         done;
 
-    - name: Prepare values.yaml file
+    - name: Prepare experiment-config.yaml file
       run: |
-        cat << EOF > values.yaml
+        cat << EOF > experiment-config.yaml
           url: http://127.0.0.1/get
           SLOs:
             error-rate: 0
             latency-mean: 100
         EOF
-        cat values.yaml
+        cat experiment-config.yaml
 
     - name: Run load test
-      uses: ./load-test
+      uses: ./
       with:
-        # chart: load-test-http
-        valuesFile: ../values.yaml
-        logLevel: trace
+        chart: load-test-http
+        valuesFile: experiment-config.yaml

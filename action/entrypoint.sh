@@ -25,7 +25,7 @@ cd $(basename ${INPUT_CHART})
 echo "Identify values file"
 OPTIONS=""
 if [[ ! -z "${INPUT_VALUESFILE}" ]]; then
-  OPTIONS="$OPTIONS -f values.yaml -f ${INPUT_VALUESFILE}"
+  OPTIONS="$OPTIONS -f values.yaml -f ../${INPUT_VALUESFILE}"
 fi
 
 echo "Create experiment.yaml for inspection"

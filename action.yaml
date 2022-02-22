@@ -3,7 +3,7 @@ description: 'Run an Iter8 experiment'
 author: Iter8
 inputs:
   chart:
-    description: 'Location of experiment chart.'
+    description: 'Experiment chart.'
     required: true
   valuesFile:
     description: 'Path to file of configuration values.'
@@ -14,4 +14,4 @@ inputs:
     default: 'Info'
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'action/Dockerfile'
