@@ -57,6 +57,34 @@ that you want to work on it. Something like "I want to work on this" is fine.
 * Use the `#development` Slack channel of [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) to ping/bump when the pull request is ready for further review or if it appears stalled.
 * Iter8 releases happen frequently. Once your PR is merged, you can expect your contribution to show up *live* in a short amount of time at https://iter8.tools.
 
+## Sign Your Commits
+
+Licensing is important to open source projects. It provides some assurances that
+the software will continue to be available based under the terms that the
+author(s) desired. We require that contributors sign off on commits submitted to
+our project's repositories. The [Developer Certificate of Origin
+(DCO)](https://developercertificate.org/) is a way to certify that you wrote and
+have the right to contribute the code you are submitting to the project.
+
+Read [GitHub's documentation on signing your commits](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
+
+You sign-off by adding the following to your commit messages. Your sign-off must
+match the Git user and email associated with the commit.
+
+    This is my commit message
+
+    Signed-off-by: Your Name <your.name@example.com>
+
+Git has a `-s` command line option to do this automatically:
+
+    git commit -s -m 'This is my commit message'
+
+If you forgot to do this and have not yet pushed your changes to the remote
+repository, you can amend your commit with the sign-off by running:
+
+    git commit --amend -s 
+
+
 ## Development environment setup
 
 The Iter8 project consists of three main repos.
@@ -106,6 +134,9 @@ git clone https://github.com/iter8-tools/hub.git
 #### Add tests
 Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
 
+#### Versioning
+Iter8 experiment charts are Helm charts under the covers, and are semantically versioned as per [Helm chart versioning specifications](https://helm.sh/docs/topics/charts/#charts-and-versioning). Every change to the chart must be accompanied by an increment to the version number of the chart. For most changes, this would mean an increment to the patch version (for example, the `version` field in `Chart.yaml` might need to be incremented from `0.1.0` to `0.1.1`).
+
 
 ### Iter8 docs
 This is the source for Iter8 documentation. Uses [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
@@ -131,32 +162,6 @@ You can now see your local docs at [http://localhost:8000](http://localhost:8000
 #### Add tests
 Add end-to-end tests for Iter8 docs in the `.github/workflows/tests.yaml` file.
 
-## Sign Your Commits
-
-Licensing is important to open source projects. It provides some assurances that
-the software will continue to be available based under the terms that the
-author(s) desired. We require that contributors sign off on commits submitted to
-our project's repositories. The [Developer Certificate of Origin
-(DCO)](https://developercertificate.org/) is a way to certify that you wrote and
-have the right to contribute the code you are submitting to the project.
-
-Read [GitHub's documentation on signing your commits](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
-
-You sign-off by adding the following to your commit messages. Your sign-off must
-match the Git user and email associated with the commit.
-
-    This is my commit message
-
-    Signed-off-by: Your Name <your.name@example.com>
-
-Git has a `-s` command line option to do this automatically:
-
-    git commit -s -m 'This is my commit message'
-
-If you forgot to do this and have not yet pushed your changes to the remote
-repository, you can amend your commit with the sign-off by running:
-
-    git commit --amend -s 
 
 <!-- ## Pull Request Checklist
 
