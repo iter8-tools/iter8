@@ -18,7 +18,7 @@ fi
 # set LOG_LEVEL for iter8 commands
 export LOG_LEVEL="${INPUT_LOGLEVEL}"
 
-echo "Fetch load-test experiment"
+echo "Fetch experiment"
 $ITER8 hub -e ${INPUT_CHART}
 cd $(basename ${INPUT_CHART})
 
