@@ -41,6 +41,9 @@ $ITER8 launch -c ${INPUT_CHART} ${OPTIONS}
 echo "Log result"
 $ITER8 report
 
-echo "Run completed; verifying completeness"
+echo "Experiment completed"
 # return 0 if satisfied; else non-zero
-$ITER8 assert -c completed -c noFailure -c slos
+if [[ "${INPUT_VALIDATESLOS}" == "true" ]]; then
+  echo "Asserting SLOs satisfied"
+  $ITER8 assert -c completed -c noFailure -c slos
+fi
