@@ -22,12 +22,11 @@ Experiments are expressed as helm charts. Create a values file to define experim
         valuesFile: ../values.yaml
 ```
 
-For more options, see <https://iter8.tools>.
-
 ## Inputs
 
 | Input Name | Description | Default |
 | ---------- | ----------- | ------- |
 | `chart` | Location of experiment chart. Must be specified. | None |
 | `valuesFile` | Path to file of configuration values. | `values.yaml` |
+| `validateSLOs` | Validate any specified SLOs. | `true` |
 | `logLevel` | Logging level; valid values are `trace`, `debug`, `info`, `warning`, `error`, `fatal` | `info` |
