@@ -16,11 +16,11 @@ bug report and let us know!
 
 We welcome many different types of contributions including:
 
-* [Tutorials and other documentation](#iter8-docs)
-* [Experiment charts](#iter8-hub)
-* [Iter8 CLI features](#iter8-cli)
+* [Tutorials and other documentation](#iter8-toolsdocs)
+* [Experiment charts](#iter8-toolshub)
+* [CLI features, and experiment tasks](#iter8-toolsiter8)
 * CI, builds, and tests
-* [Web design](#iter8-docs)
+* [Web design](#iter8-toolsdocs)
 * Reviewing pull requests
 * Communication, social media, blog posts
 
@@ -87,15 +87,16 @@ repository, you can amend your commit with the sign-off by running:
 
 ## Development environment setup
 
-The Iter8 project consists of three main repos.
+The Iter8 project consists of the following repos.
 
-1. [Iter8](https://github.com/iter8-tools/iter8): source for Iter8 CLI
-2. [Hub](https://github.com/iter8-tools/hub): source for Iter8 experiment charts
-3. [Docs](https://github.com/iter8-tools/docs): source for Iter8 docs
+1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for Iter8 CLI
+2. [iter8-tools/hub](https://github.com/iter8-tools/hub): source for Iter8 experiment charts
+3. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
+4. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for installing Iter8 CLI
 
-### Iter8 CLI
+### iter8-tools/iter8
 
-This is the source for the Iter8 CLI.
+This is the source repo for Iter8 CLI.
 
 #### Clone `iter8`
 
@@ -114,16 +115,16 @@ make clean install
 iter8 version
 ```
 
-#### Run tests and see coverage for Iter8
+#### Run unit tests and see coverage information
 ```shell
 make tests
 make coverage
 make htmlcov
 ```
 
-### Iter8 hub
+### iter8-tools/hub
 
-This is the source for Iter8 experiment charts.
+This is the source repo for Iter8 experiment charts.
 
 #### Clone `hub`
 
@@ -135,11 +136,12 @@ git clone https://github.com/iter8-tools/hub.git
 Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
 
 #### Versioning
-Iter8 experiment charts are Helm charts under the covers, and are semantically versioned as per [Helm chart versioning specifications](https://helm.sh/docs/topics/charts/#charts-and-versioning). Every change to the chart must be accompanied by an increment to the version number of the chart. For most changes, this would mean an increment to the patch version (for example, the `version` field in `Chart.yaml` might need to be incremented from `0.1.0` to `0.1.1`).
+Iter8 experiment charts are Helm charts under the covers, and are semantically versioned as per [Helm chart versioning specifications](https://helm.sh/docs/topics/charts/#charts-and-versioning). Every change to the chart must be accompanied by an increment to the version number of the chart. For most changes, this would mean an increment to the patch version (for example, the `version` field in `Chart.yaml` may be incremented from `0.1.0` to `0.1.1`).
 
 
-### Iter8 docs
-This is the source for Iter8 documentation. Uses [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
+### iter8-tools/docs
+
+This is the source repo for Iter8 documentation.
 
 #### Clone `docs`
 
@@ -160,7 +162,7 @@ mkdocs serve -s
 You can now see your local docs at [http://localhost:8000](http://localhost:8000). You will also see live updates to [http://localhost:8000](http://localhost:8000) as you update the contents of the `docs` folder.
 
 #### Add tests
-Add end-to-end tests for Iter8 docs in the `.github/workflows/tests.yaml` file.
+Add end-to-end tests for Iter8 in the `.github/workflows/tests.yaml` file.
 
 
 <!-- ## Pull Request Checklist
