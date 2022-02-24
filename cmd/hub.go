@@ -20,6 +20,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/action"
@@ -75,6 +76,9 @@ iter8 hub -c great-expectations -r https://great.expectations.pip
 		pull.Untar = true
 		pull.RepoURL = repoURL
 		pull.Version = chartVersionConstraint
+		if pull.Version == "" {
+			pull.Version = string(base.MajorMinor) + ".x"
+		}
 
 		var err error
 		pull.DestDir = destDir

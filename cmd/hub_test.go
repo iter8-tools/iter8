@@ -25,7 +25,7 @@ func TestHubGoodFolder(t *testing.T) {
 
 	repoURL = srv.URL()
 	chartName = "load-test-http"
-	chartVersionConstraint = "0.1.0"
+	chartVersionConstraint = base.MajorMinor + ".x"
 
 	defer cleanChartArtifacts(destDir, chartName)
 
