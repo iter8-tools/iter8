@@ -27,6 +27,12 @@ if [[ ! -z "${INPUT_VALUESFILE}" ]]; then
   OPTIONS="$OPTIONS -f ${INPUT_VALUESFILE}"
 fi
 
+echo "Identify any chartVersionConstraint file"
+if [[ ! -z "${INPUT_CHARTVERSION}" ]]; then
+  OPTIONS="$OPTIONS -v ${INPUT_CHARTVERSION}"
+fi
+
+echo "Calling: $ITER8 launch -c ${INPUT_CHART} ${OPTIONS} ${LOGLEVEL}"
 $ITER8 launch -c ${INPUT_CHART} ${OPTIONS} ${LOGLEVEL}
 
 echo "Log benchmarks"

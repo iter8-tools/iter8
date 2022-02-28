@@ -12,6 +12,10 @@ inputs:
     description: 'Fail if SLOs fail'
     required: false
     default: 'true'
+  chartVersion:
+    description: 'Version constrain for chart'
+    required: false
+    default: ''
   logLevel:
     description: 'Logging level; valid values are trace, debug, info (default), warning, error, fatal'
     required: false
@@ -19,3 +23,6 @@ inputs:
 runs:
   using: 'docker'
   image: 'action/Dockerfile'
+branding:
+  icon: check-circle
+  color: green
