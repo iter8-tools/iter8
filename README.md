@@ -18,21 +18,52 @@
 
 ## :rocket: Getting started
 
-### Install Iter8 CLI
+### Using Iter8 Action
+
+Configure experiment with Helm values file and call:
+
+``` yaml
+    - run: |
+        cat << EOF > expConfig.yaml
+          url: https://httpbin.org/get
+          SLOs:
+            http/error-rate: 0
+            http/mean-latency: 100
+        EOF
+    - uses: iter8-tools/iter8@v0.9
+      with:
+        chart: load-test-http
+        valuesFile: expConfig.yaml
+        validateSLOs: true
+```
+
+#### Action Inputs
+
+| Input Name | Description | Default |
+| ---------- | ----------- | ------- |
+| `chart` | Location of experiment chart. Must be specified. | None |
+| `valuesFile` | Path to file of configuration values. | None |
+| `validateSLOs` | Validate any specified SLOs. | `true` |
+| `chartVersion` | Chart version constraint | None |
+| `logLevel` | Logging level; valid values are `trace`, `debug`, `info`, `warning`, `error`, `fatal` | `info` |
+
+### Using Iter8 CLI
+
+#### Install Iter8 CLI
 ```shell
 brew tap iter8-tools/iter8
 brew install iter8@0.9
 ```
 [See here](https://iter8.tools/latest/getting-started/install) for more ways to install.
 
-### Benchmark an HTTP service
+#### Benchmark an HTTP service
 Launch Iter8 experiment and view report.
 ```shell
 iter8 launch -c load-test-http --set url=https://httpbin.org/get
 iter8 report
 ```
 
-### Benchmark a gRPC service
+#### Benchmark a gRPC service
 Start a sample gRPC service in a separate terminal.
 
 ```shell
