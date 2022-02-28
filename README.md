@@ -6,9 +6,10 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/iter8-tools/iter8/tests?label=Unit%20tests)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/iter8-tools/hub/tests?label=Integration%20tests)
 
-> - Benchmark and validate HTTP and gRPC services with SLOs
-> - Maximize business value with each release
-> - Run locally, in Kubernetes, or inside CI/CD/GitOps pipelines
+> - Safely rollout apps
+> - Maximize business value
+> - Use with any app/serverless/ML framework
+> - Simplify CI/CD/GitOps
 > - Get started in seconds
 
 <p align='center'>
@@ -25,6 +26,7 @@ brew install iter8@0.9
 [See here](https://iter8.tools/latest/getting-started/install) for more ways to install.
 
 ### Benchmark an HTTP service
+Launch Iter8 experiment and view report.
 ```shell
 iter8 launch -c load-test-http --set url=https://httpbin.org/get
 iter8 report
@@ -37,7 +39,7 @@ Start a sample gRPC service in a separate terminal.
 docker run -p 50051:50051 docker.io/grpc/java-example-hostname:latest
 ```
 
-Launch Iter8 experiment.
+Launch Iter8 experiment and view report.
 ```shell
 iter8 launch -c load-test-grpc \
 --set host="127.0.0.1:50051" \
