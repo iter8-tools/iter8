@@ -1,6 +1,6 @@
 # Adopters
 
-If you are using or in the process of using Iter8, please raise a PR with your organization / project / company and contact information below. Please link your GitHub account to your name.
+If you are starting to use Iter8, we would love to see you in the list below. Please raise a PR to add yourself to this list.
 
 | Organization / Project / Company | Contact(s) |
 | --- | --- |
