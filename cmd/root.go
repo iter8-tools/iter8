@@ -8,14 +8,13 @@ import (
 
 var logLevel = "info"
 
-var globalUsage = `Safely rollout new versions of apps and ML models. Maximize business value.
-`
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "iter8",
-	Short: "Kubernetes Release Optimizer",
-	Long:  globalUsage,
+	Short: "Kubernetes release optimizer",
+	Long: `
+Kubernetes release optimizer built for DevOps, MLOps, SRE, and data science teams.
+`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		ll, err := logrus.ParseLevel(logLevel)
 		if err != nil {

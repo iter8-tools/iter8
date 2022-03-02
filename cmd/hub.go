@@ -39,23 +39,24 @@ var (
 	destDir                string
 )
 
-var hubUsage = `
-Download an experiment chart from an Iter8 experiment chart repo.
-This is useful for fetching experiments to inspect, modify, launch, or repackage. 
-By default, this command looks for the specified experiment chart in the default Iter8 experiment repo. You can use third party repos by supplying the repo URL flag.
-
-The default Iter8 experiment chart repo has the following URL:
-https://iter8-tools.github.io/hub
-`
-
 // hubCmd represents the hub command
 var hubCmd = &cobra.Command{
 	Use:   "hub",
 	Short: "Download an experiment chart from an Iter8 experiment chart repo",
-	Long:  hubUsage,
+	Long: `
+Download an experiment chart from an Iter8 experiment chart repo.
+This is useful for fetching experiment charts to inspect, modify, launch, or repackage. 
+The official Iter8 experiment chart repo is located at: https://iter8-tools.github.io/hub
+By default, the hub command looks for the specified chart in the official Iter8 chart repo. 
+You can use third party chart repos by supplying the repo URL flag.
+
+Note: 
+	The hub subcommand is primarily designed for Iter8 development use-cases.
+	End-users are expected to use the launch subcommand.
+`,
 	Example: `
 # download the load-test-http experiment chart from 
-# the default Iter8 experiment chart repo
+# the official Iter8 experiment chart repo
 iter8 hub -c load-test-http
 
 # download the great-expectations experiment chart from 
@@ -115,9 +116,9 @@ func cleanChartArtifacts(d string, c string) error {
 func init() {
 	hubCmd.Flags().StringVarP(&chartName, "chartName", "c", "", "name of the experiment chart")
 	hubCmd.MarkFlagRequired("chartName")
-	hubCmd.Flags().StringVarP(&chartVersionConstraint, "chartVersionConstraint", "v", "", "version constraint for chart (example 0.1.0)")
+	hubCmd.Flags().StringVarP(&chartVersionConstraint, "chartVersionConstraint", "v", "", "version constraint for chart (example 0.9.x)")
 	hubCmd.Flags().StringVarP(&repoURL, "repoURL", "r", defaultIter8RepoURL, "URL of experiment chart repo")
-	hubCmd.Flags().StringVarP(&destDir, "destDir", "d", ".", "destination folder where experiment chart is downloaded and unpacked; by default, Iter8 will create and use a temporary folder as destination")
+	hubCmd.Flags().StringVarP(&destDir, "destDir", "d", ".", "destination folder where experiment chart is downloaded and unpacked")
 
 	rootCmd.AddCommand(hubCmd)
 

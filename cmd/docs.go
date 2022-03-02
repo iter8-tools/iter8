@@ -20,7 +20,8 @@ var docsCmd = &cobra.Command{
 	Use:   "docs",
 	Short: "Generate markdown documentation for Iter8 CLI.",
 	Long: `
-	Generate markdown documentation for Iter8 CLI.`,
+Generate markdown documentation for Iter8 CLI.
+`,
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		standardLinks := func(s string) string { return s }

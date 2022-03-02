@@ -19,7 +19,12 @@ func NewRunCmd() *cobra.Command {
 		Use:   "run",
 		Short: "Run experiment specified in experiment.yaml.",
 		Long: `
-Run experiment specified in experiment.yaml.`,
+Run experiment specified in experiment.yaml.
+
+Note: 
+	The run subcommand is primarily designed for Iter8 development use-cases.
+	End-users are expected to use the launch subcommand.
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Logger.Trace("build called")
 			fio := &FileExpIO{}
