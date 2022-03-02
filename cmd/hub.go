@@ -39,7 +39,11 @@ var (
 	destDir                string
 )
 
-var hubUsage = `
+// hubCmd represents the hub command
+var hubCmd = &cobra.Command{
+	Use:   "hub",
+	Short: "Download an experiment chart from an Iter8 experiment chart repo",
+	Long: `
 Download an experiment chart from an Iter8 experiment chart repo.
 This is useful for fetching experiment charts to inspect, modify, launch, or repackage. 
 The official Iter8 experiment chart repo is located at: https://iter8-tools.github.io/hub
@@ -49,13 +53,7 @@ You can use third party chart repos by supplying the repo URL flag.
 Note: 
 	The hub subcommand is primarily designed for Iter8 development use-cases.
 	End-users are expected to use the launch subcommand.
-`
-
-// hubCmd represents the hub command
-var hubCmd = &cobra.Command{
-	Use:   "hub",
-	Short: "Download an experiment chart from an Iter8 experiment chart repo",
-	Long:  hubUsage,
+`,
 	Example: `
 # download the load-test-http experiment chart from 
 # the official Iter8 experiment chart repo

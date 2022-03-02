@@ -42,17 +42,17 @@ var versionCmd = &cobra.Command{
 Show the version for Iter8.
 `,
 	Example: `
-	iter8 version
+iter8 version
 
-	# The output will look like this:
+# The output will look like this:
 
-	# version.BuildInfo{Version:"v0.8.32", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GitTreeState:"clean", GoVersion:"go1.17.6"}
+# version.BuildInfo{Version:"v0.8.32", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GitTreeState:"clean", GoVersion:"go1.17.6"}
 
-	# - Version is the semantic version of the release.
-	# - GitCommit is the SHA for the commit that this version was built from.
-	# - GitTreeState is "clean" if there are no local code changes when this binary was
-	# 	built, and "dirty" if the binary was built from locally modified code.
-	# - GoVersion is the version of Go that was used to compile Iter8.
+# - Version is the semantic version of the release.
+# - GitCommit is the SHA for the commit that this version was built from.
+# - GitTreeState is "clean" if there are no local code changes when this binary was
+# 	built, and "dirty" if the binary was built from locally modified code.
+# - GoVersion is the version of Go that was used to compile Iter8.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		v := get()
