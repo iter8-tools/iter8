@@ -46,14 +46,16 @@ var reportCmd *cobra.Command
 func NewReportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "report",
-		Short: "View report from experiment result",
-		Long:  `View report from experiment result`,
+		Short: "Generate experiment report.",
+		Long: `
+Generate experiment report.
+`,
 		Example: `
-	# view text report
-	iter8 report
-	
-	# view html report
-	iter8 report -o html
+# generate text report
+iter8 report
+
+# generate html report
+iter8 report -o html > report.html # view with browser
 	`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Logger.Trace("build started")

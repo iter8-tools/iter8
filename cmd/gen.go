@@ -30,7 +30,12 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "Render experiment.yaml file by combining an experiment chart with values.",
 	Long: `
-Render experiment.yaml file by combining an experiment chart with values.`,
+Render experiment.yaml file by combining an experiment chart with values.
+
+Note: 
+	The gen subcommand is primarily designed for Iter8 development use-cases.
+	End-users are expected to use the launch subcommand.
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// read in the experiment chart
 		c, err := loader.Load(chartPath)
@@ -93,7 +98,6 @@ Render experiment.yaml file by combining an experiment chart with values.`,
 
 		return err
 	},
-	Hidden: true,
 }
 
 func addGenOptions(f *pflag.FlagSet) {

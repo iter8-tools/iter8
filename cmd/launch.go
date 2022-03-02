@@ -17,7 +17,8 @@ var launchCmd = &cobra.Command{
 	Use:   "launch",
 	Short: "Launch an Iter8 experiment.",
 	Long: `
-Launch an Iter8 experiment by downloading a chart from an Iter8 experiment chart repo, rendering an experiment.yaml file by combining the chart with values, running the experiment specified in experiment.yaml.`,
+Launch an Iter8 experiment by downloading a chart from an Iter8 experiment chart repo, rendering an experiment.yaml file by combining the chart with values, and running the experiment specified in experiment.yaml.
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// removing files and dirs matching chartname and dest dir
 		if err := cleanChartArtifacts(destDir, chartName); err != nil {
