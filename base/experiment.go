@@ -574,3 +574,89 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 	log.Logger.Error(err)
 	return nil, err
 }
+
+// ExpIO enables interacting with experiment result stored externally
+type ExpIO interface {
+	// ReadSpec reads the experiment spec
+	ReadSpec() (ExperimentSpec, error)
+	// ReadResult reads the experiment result
+	ReadResult() (*ExperimentResult, error)
+	// WriteResult writes the experiment result
+	WriteResult(r *ExperimentResult) error
+}
+
+// Completed returns true if the experiment is complete
+func (exp *Experiment) Completed() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// NoFailure returns true if no task in the experiment has failed
+func (exp *Experiment) NoFailure() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if !exp.Result.Failure {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// getSLOsSatisfiedBy returns the set of versions which satisfy SLOs
+func (exp *Experiment) getSLOsSatisfiedBy() []int {
+	if exp == nil {
+		log.Logger.Error("nil experiment")
+		return nil
+	}
+	if exp.Result == nil {
+		log.Logger.Error("nil experiment result")
+		return nil
+	}
+	if exp.Result.Insights == nil {
+		log.Logger.Error("nil insights in experiment result")
+		return nil
+	}
+	if exp.Result.Insights.NumVersions == 0 {
+		log.Logger.Error("experiment does not involve any versions")
+		return nil
+	}
+	if exp.Result.Insights.SLOs == nil {
+		log.Logger.Info("experiment does not involve any SLOs")
+		sat := []int{}
+		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
+			sat = append(sat, j)
+		}
+		return sat
+	}
+	log.Logger.Info("experiment involves at least one version and at least one SLO")
+	log.Logger.Trace(exp.Result.Insights.SLOs)
+	log.Logger.Trace(exp.Result.Insights.SLOsSatisfied)
+	log.Logger.Trace(exp.Result.Insights.NonHistMetricValues)
+	sat := []int{}
+	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
+		satThis := true
+		for i := 0; i < len(exp.Result.Insights.SLOs); i++ {
+			satThis = satThis && exp.Result.Insights.SLOsSatisfied[i][j]
+			if !satThis {
+				break
+			}
+		}
+		if satThis {
+			sat = append(sat, j)
+		}
+	}
+	return sat
+}
+
+// SLOs returns true if all versions satisfy SLOs
+func (exp *Experiment) SLOs() bool {
+	sby := exp.getSLOsSatisfiedBy()
+	return exp.Result.Insights.NumVersions == len(sby)
+}
