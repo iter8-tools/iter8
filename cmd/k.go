@@ -13,6 +13,13 @@ var kCmd = &cobra.Command{
 	Long:  "Work with Kubernetes experiments",
 }
 
+func addExperimentGroupFlag(cmd *cobra.Command, group *string, required bool) {
+	cmd.Flags().StringVarP(group, "group", "g", defaultExperimentGroup, "name of the experiment group")
+	if required {
+		cmd.MarkFlagRequired("group")
+	}
+}
+
 func init() {
 	rootCmd.AddCommand(kCmd)
 	flags := kCmd.PersistentFlags()

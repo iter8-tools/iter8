@@ -60,8 +60,8 @@ iter8 report -o html > report.html # view with browser
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Logger.Trace("build started")
 			// build experiment
-			// replace FileExpIO with ClusterExpIO to build from cluster
-			fio := &FileExpIO{}
+			// replace FileExpOps with ClusterExpOps to build from cluster
+			fio := &FileExpOps{}
 			exp, err := Build(true, fio)
 			log.Logger.Trace("build finished")
 			if err != nil {

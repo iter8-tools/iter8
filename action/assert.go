@@ -31,7 +31,7 @@ func NewAssert(cfg *action.Configuration) *Assert {
 }
 
 func (assert *Assert) RunKubernetes() (bool, error) {
-	if eio, err := assert.ExperimentResource.newKubeIO(); err == nil {
+	if eio, err := assert.ExperimentResource.newKubeOps(); err == nil {
 		return assert.Run(eio)
 	} else {
 		return false, err
@@ -39,11 +39,11 @@ func (assert *Assert) RunKubernetes() (bool, error) {
 }
 
 func (assert *Assert) RunLocal() (bool, error) {
-	return assert.Run(&fileIO{})
+	return assert.Run(&fileOps{})
 }
 
-func (assert *Assert) Run(eio base.ExpIO) (bool, error) {
-	e, err := Build(eio)
+func (assert *Assert) Run(eio base.ExpOps) (bool, error) {
+	e, err := build(true, eio)
 	if err != nil {
 		return false, err
 	}

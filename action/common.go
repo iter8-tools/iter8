@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"time"
 
 	// Import to initialize client auth plugins.
@@ -29,9 +30,6 @@ import (
 const (
 	experimentSpecPath   = "experiment.yaml"
 	experimentResultPath = "result.yaml"
-
-	specSecretSuffix   = "-spec"
-	resultSecretSuffix = "-result"
 
 	maxGetRetries    = 2
 	getRetryInterval = 1 * time.Second
@@ -55,23 +53,38 @@ const (
 // 	GetRetryInterval = 1 * time.Second
 // )
 
-// Build builds an experiment
-func Build(eio base.ExpIO) (*base.Experiment, error) {
+// build an experiment
+func build(withResult bool, eio base.ExpOps) (*base.Experiment, error) {
 	e := base.Experiment{}
 	var err error
 	e.Tasks, err = eio.ReadSpec()
 	if err != nil {
 		return nil, err
 	}
-	e.Result, err = eio.ReadResult()
-	if err != nil {
-		return nil, err
+	if withResult {
+		e.Result, err = eio.ReadResult()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		e.InitResults()
 	}
 	return &e, nil
 }
 
-//fileIO enables reading and writing experiment spec and result files
-type fileIO struct{}
+// runExperiment runs an experiment
+func runExperiment(eio base.ExpOps) error {
+	if exp, err := build(false, eio); err != nil {
+		return err
+	} else {
+		return exp.Run(eio)
+	}
+}
+
+//fileOps enables reading and writing experiment spec and result files
+type fileOps struct {
+	RunDir string
+}
 
 // SpecFromBytes reads experiment spec from bytes
 func SpecFromBytes(b []byte) (base.ExperimentSpec, error) {
@@ -96,8 +109,8 @@ func ResultFromBytes(b []byte) (*base.ExperimentResult, error) {
 }
 
 // ReadSpec reads experiment spec from file
-func (f *fileIO) ReadSpec() (base.ExperimentSpec, error) {
-	b, err := ioutil.ReadFile(experimentSpecPath)
+func (f *fileOps) ReadSpec() (base.ExperimentSpec, error) {
+	b, err := ioutil.ReadFile(path.Join(f.RunDir, experimentSpecPath))
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
 		return nil, errors.New("unable to read experiment spec")
@@ -106,8 +119,8 @@ func (f *fileIO) ReadSpec() (base.ExperimentSpec, error) {
 }
 
 // ReadResult reads experiment result from file
-func (f *fileIO) ReadResult() (*base.ExperimentResult, error) {
-	b, err := ioutil.ReadFile(experimentResultPath)
+func (f *fileOps) ReadResult() (*base.ExperimentResult, error) {
+	b, err := ioutil.ReadFile(path.Join(f.RunDir, experimentResultPath))
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
 		return nil, errors.New("unable to read experiment result")
@@ -116,9 +129,9 @@ func (f *fileIO) ReadResult() (*base.ExperimentResult, error) {
 }
 
 // WriteResult writes experiment result to file
-func (f *fileIO) WriteResult(res *base.ExperimentResult) error {
+func (f *fileOps) WriteResult(res *base.ExperimentResult) error {
 	rBytes, _ := yaml.Marshal(res)
-	err := ioutil.WriteFile(experimentResultPath, rBytes, 0664)
+	err := ioutil.WriteFile(path.Join(f.RunDir, experimentResultPath), rBytes, 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
 		return err
@@ -139,15 +152,15 @@ type ExperimentResource struct {
 	Group string
 }
 
-// KubeIO enables reading and writing experiment resources in Kubernetes
-type KubeIO struct {
+// KubeOps enables reading and writing experiment resources in Kubernetes
+type KubeOps struct {
 	*kubernetes.Clientset
 	Group     string
 	Revision  int
 	Namespace string
 }
 
-func (er *ExperimentResource) newKubeIO() (*KubeIO, error) {
+func (er *ExperimentResource) newKubeOps() (*KubeOps, error) {
 	// getting action config
 	actionConfig := new(action.Configuration)
 	helmDriver := os.Getenv("HELM_DRIVER")
@@ -174,7 +187,7 @@ func (er *ExperimentResource) newKubeIO() (*KubeIO, error) {
 		return nil, err
 	}
 
-	return &KubeIO{
+	return &KubeOps{
 		Clientset: clientset,
 		Group:     er.Group,
 		Revision:  rel.Version,
@@ -182,15 +195,15 @@ func (er *ExperimentResource) newKubeIO() (*KubeIO, error) {
 	}, nil
 }
 
-func (kio *KubeIO) getSpecSecretName() string {
+func (kio *KubeOps) getSpecSecretName() string {
 	return fmt.Sprintf("%v-%v-spec", kio.Group, kio.Revision)
 }
 
-func (kio *KubeIO) getResultSecretName() string {
+func (kio *KubeOps) getResultSecretName() string {
 	return fmt.Sprintf("%v-%v-result", kio.Group, kio.Revision)
 }
 
-func (kio *KubeIO) getSecretWithRetry(name string) (s *corev1.Secret, err error) {
+func (kio *KubeOps) getSecretWithRetry(name string) (s *corev1.Secret, err error) {
 
 	secretsClient := kio.CoreV1().Secrets(kio.Namespace)
 
@@ -210,16 +223,16 @@ func (kio *KubeIO) getSecretWithRetry(name string) (s *corev1.Secret, err error)
 	return nil, fmt.Errorf("experiment not found")
 }
 
-func (kio *KubeIO) getExperimentSpecSecret() (s *corev1.Secret, err error) {
+func (kio *KubeOps) getExperimentSpecSecret() (s *corev1.Secret, err error) {
 	return kio.getSecretWithRetry(kio.getSpecSecretName())
 }
 
-func (kio *KubeIO) getExperimentResultSecret() (s *corev1.Secret, err error) {
+func (kio *KubeOps) getExperimentResultSecret() (s *corev1.Secret, err error) {
 	return kio.getSecretWithRetry(kio.getResultSecretName())
 }
 
 // read experiment spec from secret in the Kubernetes context
-func (kio *KubeIO) ReadSpec() (base.ExperimentSpec, error) {
+func (kio *KubeOps) ReadSpec() (base.ExperimentSpec, error) {
 	s, err := kio.getExperimentSpecSecret()
 	if err != nil {
 		return nil, err
@@ -236,7 +249,7 @@ func (kio *KubeIO) ReadSpec() (base.ExperimentSpec, error) {
 }
 
 // read experiment result from Kubernetes context
-func (kio *KubeIO) ReadResult() (*base.ExperimentResult, error) {
+func (kio *KubeOps) ReadResult() (*base.ExperimentResult, error) {
 	s, err := kio.getExperimentResultSecret()
 	if err != nil {
 		return nil, err
@@ -259,7 +272,7 @@ type PayloadValue struct {
 }
 
 // write experiment result to secret in Kubernetes context
-func (kio *KubeIO) WriteResult(r *base.ExperimentResult) error {
+func (kio *KubeOps) WriteResult(r *base.ExperimentResult) error {
 	rBytes, _ := yaml.Marshal(r)
 
 	payload := []PayloadValue{{
@@ -268,8 +281,8 @@ func (kio *KubeIO) WriteResult(r *base.ExperimentResult) error {
 		Value: base64.StdEncoding.EncodeToString(rBytes),
 	}}
 	payloadBytes, _ := json.Marshal(payload)
-	secretsClient := kio.CoreV1().Secrets(kio.Namespace)
 
+	secretsClient := kio.CoreV1().Secrets(kio.Namespace)
 	_, err := secretsClient.Patch(context.Background(), kio.getResultSecretName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")

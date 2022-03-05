@@ -27,7 +27,7 @@ Note:
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Logger.Trace("build called")
-			fio := &FileExpIO{}
+			fio := &FileExpOps{}
 			exp, err := Build(false, fio)
 			log.Logger.Trace("build finished")
 			if err != nil {
@@ -55,7 +55,7 @@ func init() {
 }
 
 // Run an experiment
-func (e *Experiment) Run(expio ExpIO) error {
+func (e *Experiment) Run(ExpOps ExpOps) error {
 	var err error
 	if e.Result == nil {
 		e.InitResults()
@@ -96,7 +96,7 @@ func (e *Experiment) Run(expio ExpIO) error {
 		if err != nil {
 			return err
 		}
-		err = expio.WriteResult(e)
+		err = ExpOps.WriteResult(e)
 		if err != nil {
 			return err
 		}

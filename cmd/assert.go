@@ -66,8 +66,8 @@ iter8 assert -c completed,nofailures,slos -t 5s
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// build experiment
 			log.Logger.Trace("build started")
-			// replace FileExpIO with ClusterExpIO to build from cluster
-			fio := &FileExpIO{}
+			// replace FileExpOps with ClusterExpOps to build from cluster
+			fio := &FileExpOps{}
 			exp, err := Build(true, fio)
 			log.Logger.Trace("build finished")
 			if err != nil {

@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 const launchDesc = `
@@ -78,14 +77,13 @@ charts in a repository, use 'helm search'.
 
 func newLaunchCmd(cfg *action.Configuration) *cobra.Command {
 	actor := ia.NewLaunch(cfg)
-	valueOpts := &values.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "launch",
 		Short: "Launch an experiment",
 		Long:  launchDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.RunLocal(valueOpts)
+			err := actor.RunLocal()
 			if err != nil {
 				log.Logger.Error(err)
 				return err
@@ -93,14 +91,13 @@ func newLaunchCmd(cfg *action.Configuration) *cobra.Command {
 			return nil
 		},
 	}
-	addLaunchFlags(cmd, actor, valueOpts)
+	addLaunchFlags(cmd, actor)
 	return cmd
 }
 
-func addLaunchFlags(cmd *cobra.Command, actor *ia.Launch, valueOpts *values.Options) {
+func addLaunchFlags(cmd *cobra.Command, actor *ia.Launch) {
 	cmd.Flags().BoolVar(&actor.DryRun, "dry", false, "simulate an experiment launch")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
-
-	addValueFlags(cmd.Flags(), valueOpts)
 	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)
+	addValueFlags(cmd.Flags(), &actor.Options)
 }

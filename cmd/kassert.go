@@ -103,6 +103,6 @@ func newKAssertCmd(cfg *action.Configuration) *cobra.Command {
 }
 
 func addKAssertFlags(cmd *cobra.Command, f *pflag.FlagSet, actor *ia.Assert) {
-	addExperimentGroupFlag(cmd, &actor.ExperimentResource)
+	addExperimentGroupFlag(cmd, &actor.Group, false)
 	addAssertFlags(cmd, actor)
 }

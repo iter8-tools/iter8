@@ -134,7 +134,7 @@ func TestMockQuickStartWithBadSLOs(t *testing.T) {
 		Timeout: 5,
 	}
 
-	exp, _ := Build(true, &FileExpIO{})
+	exp, _ := Build(true, &FileExpOps{})
 	allGood, err := exp.Assert(AssertOptions.Conds, AssertOptions.Timeout)
 	assert.NoError(t, err)
 	assert.False(t, allGood)

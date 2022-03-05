@@ -69,9 +69,3 @@ func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartN
 	cmd.Flags().StringVar(&c.Version, "chartVersionConstraint", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 0.9.0) or it may reference a valid range (e.g. 0.9.x). If this is not specified, the latest compatible version is used")
 	cmd.Flags().StringVar(&c.RepoURL, "repoURL", defaultIter8RepoURL, "experiment chart repository url where to locate the requested experiment chart")
 }
-
-func addExperimentGroupFlag(cmd *cobra.Command, eg *ia.ExperimentGroup) {
-	// fill eg
-	cmd.Flags().StringVarP(&eg.Group, "group", "g", defaultExperimentGroup, "name of the experiment group")
-	cmd.MarkFlagRequired("group")
-}

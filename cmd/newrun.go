@@ -6,10 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/cli/values"
 )
 
-const kLaunchDesc = `
+const runDesc = `
 This command installs a chart archive.
 
 The install argument must be a chart reference, a path to a packaged chart,
@@ -76,16 +75,15 @@ To see the list of chart repositories, use 'helm repo list'. To search for
 charts in a repository, use 'helm search'.
 `
 
-func newKLaunchCmd(cfg *action.Configuration) *cobra.Command {
-	actor := ia.NewLaunch(cfg)
-	valueOpts := &values.Options{}
+func newRunCmd(cfg *action.Configuration) *cobra.Command {
+	actor := ia.NewRun()
 
 	cmd := &cobra.Command{
-		Use:   "launch",
-		Short: "launch an experiment in Kubernetes",
-		Long:  kLaunchDesc,
+		Use:   "run",
+		Short: "Run an experiment",
+		Long:  launchDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.RunKubernetes(valueOpts)
+			err := actor.RunLocal()
 			if err != nil {
 				log.Logger.Error(err)
 				return err
@@ -93,11 +91,10 @@ func newKLaunchCmd(cfg *action.Configuration) *cobra.Command {
 			return nil
 		},
 	}
-	addKLaunchFlags(cmd, actor, valueOpts)
+	addRunFlags(cmd, actor)
 	return cmd
 }
 
-func addKLaunchFlags(cmd *cobra.Command, actor *ia.Launch, valueOpts *values.Options) {
-	addExperimentGroupFlag(cmd, &actor.Group, false)
-	addLaunchFlags(cmd, actor)
+func addRunFlags(cmd *cobra.Command, actor *ia.Run) {
+	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; should contain experiment.yaml")
 }

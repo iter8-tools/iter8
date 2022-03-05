@@ -90,7 +90,7 @@ Note:
 		log.Logger.Info("Created the experiment.yaml file containing the experiment spec")
 
 		// build and validate experiment
-		fio := &FileExpIO{}
+		fio := &FileExpOps{}
 		_, err = Build(false, fio)
 		if err != nil {
 			return err

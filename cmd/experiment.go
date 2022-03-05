@@ -14,8 +14,8 @@ type Experiment struct {
 	base.Experiment
 }
 
-// ExpIO enables interacting with experiment spec and result stored externally
-type ExpIO interface {
+// ExpOps enables interacting with experiment spec and result stored externally
+type ExpOps interface {
 	// ReadSpec reads the experiment spec
 	ReadSpec() (base.ExperimentSpec, error)
 	// ReadResult reads the experiment result
@@ -30,18 +30,18 @@ const (
 )
 
 // Build an experiment
-func Build(withResult bool, expio ExpIO) (*Experiment, error) {
+func Build(withResult bool, ExpOps ExpOps) (*Experiment, error) {
 	e := &Experiment{}
 	var err error
 	// read it in
 	log.Logger.Trace("build started")
-	e.Tasks, err = expio.ReadSpec()
+	e.Tasks, err = ExpOps.ReadSpec()
 	if err != nil {
 		return nil, err
 	}
 	e.InitResults()
 	if withResult {
-		e.Result, err = expio.ReadResult()
+		e.Result, err = ExpOps.ReadResult()
 		if err != nil {
 			return nil, err
 		}
@@ -49,8 +49,8 @@ func Build(withResult bool, expio ExpIO) (*Experiment, error) {
 	return e, err
 }
 
-//FileExpIO enables reading and writing experiment spec and result files
-type FileExpIO struct{}
+//FileExpOps enables reading and writing experiment spec and result files
+type FileExpOps struct{}
 
 // SpecFromBytes reads experiment spec from bytes
 func SpecFromBytes(b []byte) (base.ExperimentSpec, error) {
@@ -75,7 +75,7 @@ func ResultFromBytes(b []byte) (*base.ExperimentResult, error) {
 }
 
 // ReadSpec reads experiment spec from file
-func (f *FileExpIO) ReadSpec() (base.ExperimentSpec, error) {
+func (f *FileExpOps) ReadSpec() (base.ExperimentSpec, error) {
 	b, err := ioutil.ReadFile(experimentSpecPath)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
@@ -85,7 +85,7 @@ func (f *FileExpIO) ReadSpec() (base.ExperimentSpec, error) {
 }
 
 // ReadResult reads experiment result from file
-func (f *FileExpIO) ReadResult() (*base.ExperimentResult, error) {
+func (f *FileExpOps) ReadResult() (*base.ExperimentResult, error) {
 	b, err := ioutil.ReadFile(experimentResultPath)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
@@ -95,7 +95,7 @@ func (f *FileExpIO) ReadResult() (*base.ExperimentResult, error) {
 }
 
 // WriteResult writes experiment result to file
-func (f *FileExpIO) WriteResult(r *Experiment) error {
+func (f *FileExpOps) WriteResult(r *Experiment) error {
 	rBytes, _ := yaml.Marshal(r.Result)
 	err := ioutil.WriteFile(experimentResultPath, rBytes, 0664)
 	if err != nil {

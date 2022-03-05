@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
 	"github.com/montanaflynn/stats"
 )
@@ -575,8 +576,8 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 	return nil, err
 }
 
-// ExpIO enables interacting with experiment result stored externally
-type ExpIO interface {
+// ExpOps enables interacting with experiment result stored externally
+type ExpOps interface {
 	// ReadSpec reads the experiment spec
 	ReadSpec() (ExperimentSpec, error)
 	// ReadResult reads the experiment result
@@ -659,4 +660,106 @@ func (exp *Experiment) getSLOsSatisfiedBy() []int {
 func (exp *Experiment) SLOs() bool {
 	sby := exp.getSLOsSatisfiedBy()
 	return exp.Result.Insights.NumVersions == len(sby)
+}
+
+// Run the experiment
+func (exp *Experiment) Run(ExpOps ExpOps) error {
+	var err error
+	if exp.Result == nil {
+		exp.InitResults()
+	}
+	for i, t := range exp.Tasks {
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
+		shouldRun := true
+		// if task has a condition
+		if cond := getIf(t); cond != nil {
+			// condition evaluates to false ... then shouldRun is false
+			program, err := expr.Compile(*cond, expr.Env(exp), expr.AsBool())
+			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("unable to compile if clause")
+				return err
+			}
+
+			output, err := expr.Run(program, exp)
+			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("unable to run if clause")
+				return err
+			}
+
+			shouldRun = output.(bool)
+		}
+		if shouldRun {
+			err = t.Run(exp)
+			if err != nil {
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
+				exp.failExperiment()
+				return err
+			}
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "completed")
+		} else {
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "skipped")
+		}
+
+		err = exp.incrementNumCompletedTasks()
+		if err != nil {
+			return err
+		}
+		err = ExpOps.WriteResult(exp.Result)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// failExperiment sets the experiment failure status to true
+func (e *Experiment) failExperiment() error {
+	if e.Result == nil {
+		log.Logger.Warn("failExperiment called on an experiment object without results")
+		e.InitResults()
+	}
+	e.Result.Failure = true
+	return nil
+}
+
+// incrementNumCompletedTasks increments the numbere of completed tasks in the experimeent
+func (e *Experiment) incrementNumCompletedTasks() error {
+	if e.Result == nil {
+		log.Logger.Warn("incrementNumCompletedTasks called on an experiment object without results")
+		e.InitResults()
+	}
+	e.Result.NumCompletedTasks++
+	return nil
+}
+
+// getIf returns the condition (if any) which determine
+// whether of not if this task needs to run
+func getIf(t Task) *string {
+	var jsonBytes []byte
+	var tm TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+	return tm.If
+}
+
+// getName returns the name of this task
+func getName(t Task) *string {
+	var jsonBytes []byte
+	var tm TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+
+	if tm.Task == nil {
+		if tm.Run != nil {
+			return StringPointer(RunTaskName)
+		}
+	} else {
+		return tm.Task
+	}
+	log.Logger.Error("task spec with no name or run value")
+	return nil
 }
