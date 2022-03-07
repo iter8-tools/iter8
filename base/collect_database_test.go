@@ -84,7 +84,6 @@ func TestCEOneVersion(t *testing.T) {
 		With: collectDatabaseInputs{
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
-				"StartingTime":         1000,
 			}},
 		},
 	}

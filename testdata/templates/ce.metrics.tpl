@@ -11,23 +11,24 @@ headers:
   IBMInstanceID: {{ .GUID }}
 provider: IBM Cloud Code Engine Sysdig
 method: GET
-# Possible selectors:
-#   ibm_codeengine_application_name
-#   ibm_codeengine_gateway_instance
-#   ibm_codeengine_namespace
-#   ibm_codeengine_project_name
-#   ibm_codeengine_revision_name
-#   ibm_codeengine_status
-#   ibm_ctype
-#   ibm_location
-#   ibm_scope
-#   ibm_service_instance
-#   ibm_service_name
-# 
-# Use ibm_service_instance in VersionInfo to define the different versions that
-# will be queried
-# 
-# Note: ElapsedTime is not intended to be set by the user.
+# Inputs for the template:
+#   ibm_codeengine_application_name string
+#   ibm_codeengine_gateway_instance string
+#   ibm_codeengine_namespace        string
+#   ibm_codeengine_project_name     string
+#   ibm_codeengine_revision_name    string
+#   ibm_codeengine_status           string
+#   ibm_ctype                       string
+#   ibm_location                    string
+#   ibm_scope                       string
+#   ibm_service_instance            string
+#   ibm_service_name                string
+#
+# Inputs for the metrics (output of template):
+#   ibm_codeengine_revision_name string
+#   StartingTime                 int64
+#
+# Note: ElapsedTime is produced by Iter8
 metrics:
 - name: request-count
   type: counter

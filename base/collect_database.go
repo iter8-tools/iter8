@@ -29,16 +29,16 @@ type CollectDatabaseTemplateInput struct {
 
 type CollectDatabaseTemplate struct {
 	Url      string            `json:"url" yaml:"url"`
-	Headers  map[string]string `json:"headers" yaml:"headers"` // TODO: headers can be anything?
+	Headers  map[string]string `json:"headers" yaml:"headers"` // TODO: should this be map[string]interface{} instead?
 	Provider string            `json:"provider" yaml:"provider"`
-	Method   string            `json:"method" yaml:"method"` // TODO: make enum
+	Method   string            `json:"method" yaml:"method"`
 	Metrics  []Metric          `json:"metrics" yaml:"metrics"`
 }
 
 type Metric struct {
 	Name         string   `json:"name" yaml:"name"`
 	Description  string   `json:"description" yaml:"description"`
-	Type         string   `json:"type" yaml:"type"` // TODO: make enum
+	Type         string   `json:"type" yaml:"type"`
 	Units        string   `json:"units" yaml:"units"`
 	Params       []Params `json:"params" yaml:"params"`
 	JqExpression string   `json:"jqExpression" yaml:"jqExpression"`
@@ -49,25 +49,29 @@ type Params struct {
 	Value string `json:"value" yaml:"value"`
 }
 
+const startingTimeString = "StartingTime"
+const elapsedTimeString = "ElapsedTime"
+
 // collectDatabaseInputs holds all the inputs for this task
 //
 // Inputs for the template:
-//   ibm_codeengine_application_name
-//   ibm_codeengine_gateway_instance
-//   ibm_codeengine_namespace
-//   ibm_codeengine_project_name
-//   ibm_codeengine_revision_name
-//   ibm_codeengine_status
-//   ibm_ctype
-//   ibm_location
-//   ibm_scope
-//   ibm_service_instance
-//   ibm_service_name
+//   ibm_codeengine_application_name string
+//   ibm_codeengine_gateway_instance string
+//   ibm_codeengine_namespace        string
+//   ibm_codeengine_project_name     string
+//   ibm_codeengine_revision_name    string
+//   ibm_codeengine_status           string
+//   ibm_ctype                       string
+//   ibm_location                    string
+//   ibm_scope                       string
+//   ibm_service_instance            string
+//   ibm_service_name                string
 //
-// Inputs for the metrics:
-//   ibm_codeengine_revision_name
-//   StartingTime
-//   ElapsedTime (produced by Iter8)
+// Inputs for the metrics (output of template):
+//   ibm_codeengine_revision_name string
+//   StartingTime                 int64
+//
+// Note: ElapsedTime is produced by Iter8
 type collectDatabaseInputs struct {
 	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
 }
@@ -99,18 +103,20 @@ func (t *collectDatabaseTask) validateInputs() error {
 // starting time in the Experiment
 func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
 	// ElapsedTime should not be provided by the user
-	if versionInfo["ElapsedTime"] != nil {
+	if versionInfo[elapsedTimeString] != nil {
 		return 0, errors.New("ElapsedTime should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 	}
 
 	// set StartingTime based on VersionInfo or start of the experiment
 	var startingTime int64
-	var err error
-	if versionInfo["StartingTime"] != nil {
-		startingTimeString := fmt.Sprintf("%v", versionInfo["StartingTime"])
-
-		startingTime, err = strconv.ParseInt(startingTimeString, 10, 64)
-		if err != nil {
+	if versionInfo[startingTimeString] != nil {
+		rawStartingTime := versionInfo[startingTimeString]
+		switch rawStartingTime := rawStartingTime.(type) {
+		case int64:
+			startingTime = rawStartingTime
+		case int:
+			startingTime = int64(rawStartingTime)
+		default:
 			return 0, errors.New("Cannot integer parse StartingTime from VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 		}
 	} else {
@@ -232,9 +238,7 @@ func (t *collectDatabaseTask) Run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
-			versionInfo["ElapsedTime"] = elapsedTime
-
-			fmt.Println(elapsedTime)
+			versionInfo[elapsedTimeString] = elapsedTime
 
 			// finalize metrics template
 			template, err := template.ParseFiles(metricFilePath)
@@ -297,7 +301,7 @@ func (t *collectDatabaseTask) Run(exp *Experiment) error {
 					continue
 				}
 
-				exp.Result.Insights.updateMetric(metricName, mm, 0, floatValue)
+				err = exp.Result.Insights.updateMetric(metricName, mm, 0, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)
