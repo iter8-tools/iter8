@@ -26,7 +26,7 @@ method: GET
 #
 # Inputs for the metrics (output of template):
 #   ibm_codeengine_revision_name string
-#   StartingTime                 int64
+#   StartingTime                 int64 (UNIX time stamp)
 #
 # Note: ElapsedTime is produced by Iter8
 metrics:
