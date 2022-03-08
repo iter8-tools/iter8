@@ -1,109 +1,55 @@
 package report
 
 import (
-	"encoding/json"
+	"bytes"
+	"errors"
 	"fmt"
 	"math/rand"
 	"sort"
-	"strings"
+
+	htmlT "html/template"
 
 	_ "embed"
 
+	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-type htmlReporter Reporter
-
-type histBar struct {
-	X float64 `json:"x" yaml:"x"`
-	Y float64 `json:"y" yaml:"y"`
+type HTMLReporter struct {
+	*Reporter
 }
 
-type hist struct {
-	Values []histBar `json:"values" yaml:"values"`
-	Key    string    `json:"key" yaml:"key"`
-}
+func (ht *HTMLReporter) Gen() error {
+	// reportHTML is the HTML report template
+	//go:embed htmlreport.tpl
+	var reportHTML string
 
-type histograms struct {
-	XAxisLabel string  `json:"xAxisLabel" yaml:"xAxisLabel"`
-	Datum      []hist  `json:"datum" yaml:"datum"`
-	Width      float64 `json:"width" yaml:"width"`
-}
-
-func (hd *histograms) toJSON() string {
-	if hd == nil {
-		return ``
+	// create HTML template
+	htpl, err := htmlT.New("report").Option("missingkey=error").Funcs(sprig.FuncMap()).Funcs(htmlT.FuncMap{
+		"renderSLOSatisfiedHTML":      renderSLOSatisfiedHTML,
+		"renderSLOSatisfiedCellClass": renderSLOSatisfiedCellClass,
+	}).Parse(reportHTML)
+	if err != nil {
+		e := errors.New("unable to parse HTML template")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
 	}
-	jb, _ := json.Marshal(hd)
-	return string(jb)
-}
 
-// reportHTML is the HTML report template
-//go:embed htmlreport.tpl
-var reportHTML string
-
-// HTMLHistData returns histogram data section in HTML report
-func (r *htmlReporter) HTMLHistData() string {
-	hds := r.HistData()
-	hdsJSONs := []string{}
-	for _, hd := range hds {
-		hdsJSONs = append(hdsJSONs, hd.toJSON())
+	var b bytes.Buffer
+	if err = htpl.Execute(&b, ht); err != nil {
+		e := errors.New("unable to execute template")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
 	}
-	htmlhd := fmt.Sprintf(`
-	<script>
-		chartData = [%v]
-	</script>
-	`, strings.Join(hdsJSONs, ", \n"))
-	return htmlhd
-}
 
-// HistData provides histogram data for all histogram metrics
-func (r *htmlReporter) HistData() []histograms {
+	// print output
+	fmt.Println(b.String())
 	return nil
-	// gramsList := []histograms{}
-	// for mname, minfo := range e.Result.Insights.MetricsInfo {
-	// 	if minfo.Type == base.HistogramMetricType {
-	// 		// figure out xAxisLabel
-	// 		xAxisLabel := fmt.Sprintf("%v", mname)
-	// 		if minfo.Units != nil {
-	// 			xAxisLabel += " (" + *minfo.Units + ")"
-	// 		}
-
-	// 		grams := histograms{
-	// 			XAxisLabel: xAxisLabel,
-	// 			Datum:      []hist{},
-	// 			Width:      (*minfo.XMax - *minfo.XMin) / float64(*minfo.NumBuckets),
-	// 		}
-	// 		for i := 0; i < e.Result.Insights.NumVersions; i++ {
-	// 			key := fmt.Sprintf("Version %v", i)
-	// 			if e.Result.Insights.NumVersions == 1 {
-	// 				key = "count"
-	// 			}
-	// 			gram := hist{
-	// 				Values: []histBar{},
-	// 				Key:    key,
-	// 			}
-	// 			if counts, ok := e.Result.Insights.MetricValues[i][mname]; ok && len(counts) > 0 {
-	// 				for j := 0; j < len(counts); j++ {
-	// 					gram.Values = append(gram.Values, histBar{
-	// 						X: *minfo.XMin + float64(j)*(*minfo.XMax-*minfo.XMin)/float64(*minfo.NumBuckets),
-	// 						Y: counts[j],
-	// 					})
-	// 				}
-	// 				grams.Datum = append(grams.Datum, gram)
-	// 			}
-	// 		}
-	// 		if len(grams.Datum) > 0 {
-	// 			gramsList = append(gramsList, grams)
-	// 		}
-	// 	}
-	// }
-	// return gramsList
 }
 
 // HTMLHistCharts returns histogram charts section in HTML report
-func (r *htmlReporter) HTMLHistCharts() string {
+func (r *HTMLReporter) HTMLHistCharts() string {
 	return `
 	<script>
 		var charts = [];
@@ -155,37 +101,36 @@ func (r *htmlReporter) HTMLHistCharts() string {
 
 // RenderStrHTML is a helper method for rendering strings
 // Used in HTML template
-func (r *htmlReporter) RenderStr(what string) (string, error) {
+func (r *HTMLReporter) RenderStr(what string) (string, error) {
 	var val string = ""
 	var err error = nil
 	switch what {
 	case "showClassStatus":
 		val = "show"
-		if e := base.Experiment(*r); e.NoFailure() {
+		if r.NoFailure() {
 			val = ""
 		}
 	case "textColorStatus":
 		val = "text-danger"
-		if e := base.Experiment(*r); e.NoFailure() {
+		if r.NoFailure() {
 			val = "text-success"
 		}
 	case "thumbsStatus":
 		val = "down"
-		if e := base.Experiment(*r); e.NoFailure() {
+		if r.NoFailure() {
 			val = "up"
 		}
 	case "msgStatus":
 		val = ""
 		completionStatus := "Experiment completed."
-		e := base.Experiment(*r)
-		if !e.Completed() {
+		if !r.Completed() {
 			completionStatus = "Experiment has not completed."
 		}
 		failureStatus := "Experiment has failures."
-		if e.NoFailure() {
+		if r.NoFailure() {
 			failureStatus = "Experiment has no failures."
 		}
-		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(e.Tasks), e.Result.NumCompletedTasks)
+		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(r.Tasks), r.Result.NumCompletedTasks)
 		val = fmt.Sprint(completionStatus)
 		val += " "
 		val += fmt.Sprint(failureStatus)
@@ -197,27 +142,7 @@ func (r *htmlReporter) RenderStr(what string) (string, error) {
 	return val, err
 }
 
-func (r *htmlReporter) MetricWithUnits(metricName string) (string, error) {
-	in := r.Result.Insights
-	nm, err := base.NormalizeMetricName(metricName)
-	if err != nil {
-		return "", err
-	}
-
-	m, err := in.GetMetricsInfo(nm)
-	if err != nil {
-		e := fmt.Errorf("unable to get metrics info for %v", nm)
-		log.Logger.Error(e)
-		return "", e
-	}
-	str := nm
-	if m.Units != nil {
-		str = fmt.Sprintf("%v (%v)", str, *m.Units)
-	}
-	return str, nil
-}
-
-func (r *htmlReporter) MetricDescriptionHTML(metricName string) (string, error) {
+func (r *HTMLReporter) MetricDescriptionHTML(metricName string) (string, error) {
 	in := r.Result.Insights
 	nm, err := base.NormalizeMetricName(metricName)
 	if err != nil {
@@ -250,7 +175,7 @@ func renderSLOSatisfiedCellClass(s bool) string {
 }
 
 // SortedVectorMetrics extracts vector metric names from experiment in sorted order
-func (r *htmlReporter) SortedVectorMetrics() []string {
+func (r *HTMLReporter) SortedVectorMetrics() []string {
 	keys := []string{}
 	for k, mm := range r.Result.Insights.MetricsInfo {
 		if mm.Type == base.HistogramMetricType || mm.Type == base.SampleMetricType {
@@ -274,7 +199,7 @@ func sampleHist(h []base.HistBucket) []float64 {
 
 // VectorMetricValue gets the value of the given vector metric for the given version
 // If it is a histogram metric, then its values are sampled from the histogram
-func (r *htmlReporter) VectorMetricValue(i int, m string) []float64 {
+func (r *HTMLReporter) VectorMetricValue(i int, m string) []float64 {
 	in := r.Result.Insights
 	mm, ok := in.MetricsInfo[m]
 	if !ok {

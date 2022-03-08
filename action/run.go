@@ -8,7 +8,7 @@ import (
 type RunOpts struct {
 	RunDir string
 	// applicable only for kubernetes experiments
-	Group string
+	driver.KubeDriver
 }
 
 func NewRunOpts() *RunOpts {
@@ -23,14 +23,9 @@ func (runner *RunOpts) LocalRun() error {
 	})
 }
 
-// # ---
-// # apiVersion: v1
-// # kind: Secret
-// # metadata:
-// #   name: {{ $name }}-result
-// # stringData:
-// #   result.yaml: |
-// #     startTime: {{ now }}
-// #     numCompletedTasks: 0
-// #     failure: false
-// #     iter8Version: {{ .Chart.AppVersion }}
+func (runner *RunOpts) KubeRun() error {
+	if err := runner.KubeDriver.Init(); err != nil {
+		return err
+	}
+	return base.RunExperiment(&runner.KubeDriver)
+}

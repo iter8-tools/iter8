@@ -35,7 +35,7 @@ func newRunCmd() *cobra.Command {
 }
 
 func addRunFlags(cmd *cobra.Command, actor *ia.RunOpts) {
-	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; should contain experiment.yaml")
+	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
 }
 
 func init() {

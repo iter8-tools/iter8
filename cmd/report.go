@@ -18,7 +18,7 @@ or
 `
 
 func newReportCmd() *cobra.Command {
-	actor := ia.NewReportOpts(nil)
+	actor := ia.NewReportOpts()
 
 	cmd := &cobra.Command{
 		Use:   "report",
@@ -33,6 +33,7 @@ func newReportCmd() *cobra.Command {
 		},
 	}
 	addReportFlags(cmd, actor)
+	addRunFlags(cmd, &actor.RunOpts)
 	return cmd
 }
 

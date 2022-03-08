@@ -13,10 +13,17 @@ var kCmd = &cobra.Command{
 	Long:  "Work with Kubernetes experiments",
 }
 
-func addExperimentGroupFlag(cmd *cobra.Command, group *string, required bool) {
-	cmd.Flags().StringVarP(group, "group", "g", defaultExperimentGroup, "name of the experiment group")
+func addExperimentGroupFlag(cmd *cobra.Command, groupP *string, required bool) {
+	cmd.Flags().StringVarP(groupP, "group", "g", defaultExperimentGroup, "name of the experiment group")
 	if required {
 		cmd.MarkFlagRequired("group")
+	}
+}
+
+func addExperimentRevisionFlag(cmd *cobra.Command, revisionP *int, required bool) {
+	cmd.Flags().IntVar(revisionP, "revision", 0, "experiment revision")
+	if required {
+		cmd.MarkFlagRequired("revision")
 	}
 }
 
