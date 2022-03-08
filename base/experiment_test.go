@@ -60,7 +60,7 @@ func TestRunExperiment(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.InitResults()
-	err := ct.Run(exp)
+	err := ct.run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 

@@ -7,33 +7,36 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
-type Launch struct {
+type LaunchOpts struct {
 	DryRun bool
-	Hub
-	Gen
-	Run
+	HubOpts
+	GenOpts
+	RunOpts
 	// applicable only for kubernetes experiments
 	Group string
 }
 
-func NewLaunch(cfg *action.Configuration) *Launch {
-	return &Launch{}
+func NewLaunch(cfg *action.Configuration) *LaunchOpts {
+	return &LaunchOpts{}
 }
 
-func (launch *Launch) RunLocal() error {
+func (launch *LaunchOpts) LocalRun() error {
 	// download chart from Iter8 hub
 	if err := launch.download(); err != nil {
 		return err
 	}
 	// gen experiment spec
+	launch.SourceDir = launch.DestDir
 	if err := launch.gen(); err != nil {
 		return err
 	}
-	if launch.DryRun { // all done
+	// all done if this is a dry run
+	if launch.DryRun {
 		return nil
 	}
 	// run experiment locally
-	return launch.RunLocal()
+	launch.RunDir = launch.DestDir
+	return launch.RunOpts.LocalRun()
 }
 
 /*******************
@@ -44,6 +47,6 @@ Kubernetes stuff below
 ********************
 ********************/
 
-func (launch *Launch) RunKubernetes(values *values.Options) error {
+func (launch *LaunchOpts) KubeRun(values *values.Options) error {
 	return errors.New("not implemented")
 }

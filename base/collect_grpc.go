@@ -192,7 +192,7 @@ func latencySample(rd []runner.ResultDetail) []float64 {
 }
 
 // Run executes this task
-func (t *collectGRPCTask) Run(exp *Experiment) error {
+func (t *collectGRPCTask) run(exp *Experiment) error {
 	// 1. initialize defaults
 	var err error
 

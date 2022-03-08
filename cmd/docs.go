@@ -12,46 +12,56 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// commandDocsDir is the location where command docs need to land
-var commandDocsDir string
+const docsDesc = `
+This command generates markdown documentation for other Iter8 CLI commands.
 
-// docsCmd represents the docsCmd command
-var docsCmd = &cobra.Command{
-	Use:   "docs",
-	Short: "Generate markdown documentation for Iter8 CLI.",
-	Long: `
-Generate markdown documentation for Iter8 CLI.
-`,
-	Hidden: true,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		standardLinks := func(s string) string { return s }
+The documentation is generated for all commands that are not hidden.
 
-		hdrFunc := func(filename string) string {
-			base := filepath.Base(filename)
-			name := strings.TrimSuffix(base, path.Ext(base))
-			title := strings.Title(strings.Replace(name, "_", " ", -1))
-			tpl := `---
+This command is primarily intended for Iter8 development and CI.
+`
+
+func newDocsCmd() *cobra.Command {
+	docsDir := ""
+	cmd := &cobra.Command{
+		Use:    "docs",
+		Short:  "Generate markdown documentation for Iter8 CLI.",
+		Long:   docsDesc,
+		Hidden: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			standardLinks := func(s string) string { return s }
+
+			hdrFunc := func(filename string) string {
+				base := filepath.Base(filename)
+				name := strings.TrimSuffix(base, path.Ext(base))
+				title := strings.Title(strings.Replace(name, "_", " ", -1))
+				tpl := `---
 template: main.html
 title: "%s"
 hide:
 - toc
 ---
 `
-			return fmt.Sprintf(tpl, title)
-		}
+				return fmt.Sprintf(tpl, title)
+			}
 
-		// automatically generate markdown documentation for all Iter8 commands
-		err := doc.GenMarkdownTreeCustom(rootCmd, commandDocsDir, hdrFunc, standardLinks)
-		if err != nil {
-			log.Logger.Error(err)
-			return err
-		}
-		return nil
-	},
+			// automatically generate markdown documentation for all Iter8 commands
+			err := doc.GenMarkdownTreeCustom(rootCmd, docsDir, hdrFunc, standardLinks)
+			if err != nil {
+				log.Logger.Error(err)
+				return err
+			}
+			return nil
+		},
+	}
+	addDocsFlags(cmd, &docsDir)
+	return cmd
+}
+
+func addDocsFlags(cmd *cobra.Command, docsDirPtr *string) {
+	cmd.Flags().StringVar(docsDirPtr, "commandDocsDir", "", "directory where Iter8 CLI documentation will be created")
+	cmd.MarkFlagRequired("commandDocsDir")
 }
 
 func init() {
-	docsCmd.Flags().StringVarP(&commandDocsDir, "commandDocsDir", "c", "", "directory where CLI documentation will be created")
-	docsCmd.MarkFlagRequired("commandDocsDir")
-	rootCmd.AddCommand(docsCmd)
+	rootCmd.AddCommand(newDocsCmd())
 }

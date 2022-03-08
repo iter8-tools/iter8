@@ -1,4 +1,4 @@
-package cmd
+package report
 
 import (
 	"encoding/json"
@@ -12,6 +12,8 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 )
+
+type htmlReporter Reporter
 
 type histBar struct {
 	X float64 `json:"x" yaml:"x"`
@@ -41,89 +43,9 @@ func (hd *histograms) toJSON() string {
 //go:embed htmlreport.tpl
 var reportHTML string
 
-// var templateHTML = `
-// 	<!doctype html>
-// 	<html lang="en">
-
-// 		<head>
-// 			<!-- Required meta tags -->
-// 			<meta charset="utf-8">
-// 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-// 			<!-- Font Awesome -->
-// 			<script src="https://kit.fontawesome.com/db794f5235.js" crossorigin="anonymous"></script>
-
-// 			<!-- Bootstrap CSS -->
-// 			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-// 			<style>
-// 				html {
-// 					font-size: 18px;
-// 				}
-// 			</style>
-
-// 			<title>Iter8 Experiment Report</title>
-// 		</head>
-
-// 		<body>
-
-// 			<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-// 			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-// 			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-// 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-// 			<!-- NVD3 -->
-// 		  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.css">
-// 			<!-- Include d3.js first -->
-// 			<script src="https://cdn.jsdelivr.net/npm/d3@3.5.3/d3.min.js"></script>
-// 			<script src="https://cdn.jsdelivr.net/npm/nvd3@1.8.6/build/nv.d3.js"></script>
-
-// 			<div class="container">
-
-// 				<h1 class="display-4">Experiment Report</h1>
-// 				<h3 class="display-6">Insights from Iter8 Experiment</h3>
-// 				<hr>
-
-// 				{{ .HTMLStatus }}
-
-// 				{{ if .ContainsInsight "SLOs" }}
-// 					{{ .HTMLSLOSection }}
-// 				{{- end }}
-
-// 				{{ if .ContainsInsight "HistMetrics" }}
-// 					{{ .HTMLHistMetricsSection }}
-// 				{{- end }}
-
-// 				{{ if .ContainsInsight "Metrics" }}
-// 					{{ .HTMLMetricsSection }}
-// 				{{- end }}
-
-// 			</div>
-
-// 			{{ if .ContainsInsight "HistMetrics" }}
-// 				<style>
-// 					.nvd3 text {
-// 						font-size: 16px;
-// 					}
-// 					svg {
-// 							display: block;
-// 							margin: 0px;
-// 							padding: 0px;
-// 							height: 100%;
-// 							width: 100%;
-// 					}
-// 				</style>
-// 				{{ .HTMLHistData }}
-// 				{{ .HTMLHistCharts }}
-// 			{{- end }}
-
-// 		</body>
-// 	</html>
-// 	`
-
 // HTMLHistData returns histogram data section in HTML report
-func (e *Experiment) HTMLHistData() string {
-	hds := e.HistData()
+func (r *htmlReporter) HTMLHistData() string {
+	hds := r.HistData()
 	hdsJSONs := []string{}
 	for _, hd := range hds {
 		hdsJSONs = append(hdsJSONs, hd.toJSON())
@@ -137,7 +59,7 @@ func (e *Experiment) HTMLHistData() string {
 }
 
 // HistData provides histogram data for all histogram metrics
-func (e *Experiment) HistData() []histograms {
+func (r *htmlReporter) HistData() []histograms {
 	return nil
 	// gramsList := []histograms{}
 	// for mname, minfo := range e.Result.Insights.MetricsInfo {
@@ -181,7 +103,7 @@ func (e *Experiment) HistData() []histograms {
 }
 
 // HTMLHistCharts returns histogram charts section in HTML report
-func (e *Experiment) HTMLHistCharts() string {
+func (r *htmlReporter) HTMLHistCharts() string {
 	return `
 	<script>
 		var charts = [];
@@ -233,28 +155,29 @@ func (e *Experiment) HTMLHistCharts() string {
 
 // RenderStrHTML is a helper method for rendering strings
 // Used in HTML template
-func (e *Experiment) RenderStr(what string) (string, error) {
+func (r *htmlReporter) RenderStr(what string) (string, error) {
 	var val string = ""
 	var err error = nil
 	switch what {
 	case "showClassStatus":
 		val = "show"
-		if e.NoFailure() {
+		if e := base.Experiment(*r); e.NoFailure() {
 			val = ""
 		}
 	case "textColorStatus":
 		val = "text-danger"
-		if e.NoFailure() {
+		if e := base.Experiment(*r); e.NoFailure() {
 			val = "text-success"
 		}
 	case "thumbsStatus":
 		val = "down"
-		if e.NoFailure() {
+		if e := base.Experiment(*r); e.NoFailure() {
 			val = "up"
 		}
 	case "msgStatus":
 		val = ""
 		completionStatus := "Experiment completed."
+		e := base.Experiment(*r)
 		if !e.Completed() {
 			completionStatus = "Experiment has not completed."
 		}
@@ -274,8 +197,8 @@ func (e *Experiment) RenderStr(what string) (string, error) {
 	return val, err
 }
 
-func (e *Experiment) MetricWithUnits(metricName string) (string, error) {
-	in := e.Result.Insights
+func (r *htmlReporter) MetricWithUnits(metricName string) (string, error) {
+	in := r.Result.Insights
 	nm, err := base.NormalizeMetricName(metricName)
 	if err != nil {
 		return "", err
@@ -294,8 +217,8 @@ func (e *Experiment) MetricWithUnits(metricName string) (string, error) {
 	return str, nil
 }
 
-func (e *Experiment) MetricDescriptionHTML(metricName string) (string, error) {
-	in := e.Result.Insights
+func (r *htmlReporter) MetricDescriptionHTML(metricName string) (string, error) {
+	in := r.Result.Insights
 	nm, err := base.NormalizeMetricName(metricName)
 	if err != nil {
 		return "", err
@@ -327,9 +250,9 @@ func renderSLOSatisfiedCellClass(s bool) string {
 }
 
 // SortedVectorMetrics extracts vector metric names from experiment in sorted order
-func (e *Experiment) SortedVectorMetrics() []string {
+func (r *htmlReporter) SortedVectorMetrics() []string {
 	keys := []string{}
-	for k, mm := range e.Result.Insights.MetricsInfo {
+	for k, mm := range r.Result.Insights.MetricsInfo {
 		if mm.Type == base.HistogramMetricType || mm.Type == base.SampleMetricType {
 			keys = append(keys, k)
 		}
@@ -351,8 +274,8 @@ func sampleHist(h []base.HistBucket) []float64 {
 
 // VectorMetricValue gets the value of the given vector metric for the given version
 // If it is a histogram metric, then its values are sampled from the histogram
-func (e *Experiment) VectorMetricValue(i int, m string) []float64 {
-	in := e.Result.Insights
+func (r *htmlReporter) VectorMetricValue(i int, m string) []float64 {
+	in := r.Result.Insights
 	mm, ok := in.MetricsInfo[m]
 	if !ok {
 		log.Logger.Error("could not find vector metric: ", m)

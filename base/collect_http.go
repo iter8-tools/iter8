@@ -212,8 +212,8 @@ func (t *collectHTTPTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, err
 	return ifr, err
 }
 
-// Run executes this task
-func (t *collectHTTPTask) Run(exp *Experiment) error {
+// run executes this task
+func (t *collectHTTPTask) run(exp *Experiment) error {
 	err := t.validateInputs()
 	if err != nil {
 		return err

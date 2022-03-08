@@ -83,7 +83,7 @@ func newLaunchCmd(cfg *action.Configuration) *cobra.Command {
 		Short: "Launch an experiment",
 		Long:  launchDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.RunLocal()
+			err := actor.LocalRun()
 			if err != nil {
 				log.Logger.Error(err)
 				return err
@@ -95,7 +95,7 @@ func newLaunchCmd(cfg *action.Configuration) *cobra.Command {
 	return cmd
 }
 
-func addLaunchFlags(cmd *cobra.Command, actor *ia.Launch) {
+func addLaunchFlags(cmd *cobra.Command, actor *ia.LaunchOpts) {
 	cmd.Flags().BoolVar(&actor.DryRun, "dry", false, "simulate an experiment launch")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
 	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)

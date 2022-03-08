@@ -1,7 +1,6 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -10,7 +9,6 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/cli"
 )
 
 type ChartNameAndDestOptions struct {
@@ -18,18 +16,18 @@ type ChartNameAndDestOptions struct {
 	DestDir   string
 }
 
-type Hub struct {
+type HubOpts struct {
 	ChartNameAndDestOptions
 	action.ChartPathOptions
-	cli.EnvSettings
+	// cli.EnvSettings
 }
 
-func NewHub() *Hub {
-	return &Hub{}
+func NewHubOpts() *HubOpts {
+	return &HubOpts{}
 }
 
 // clean pre-existing chart artifacts in destination dir
-func (hub *Hub) cleanChartArtifacts() error {
+func (hub *HubOpts) cleanChartArtifacts() error {
 	// removing any pre-existing files and dirs matching the glob
 	files, err := filepath.Glob(path.Join(hub.DestDir, hub.ChartName+"*"))
 	if err != nil {
@@ -46,26 +44,28 @@ func (hub *Hub) cleanChartArtifacts() error {
 	return nil
 }
 
-// download an experiment chart
-func (hub *Hub) download() error {
+// Run downloads an experiment chart
+func (hub *HubOpts) Run() error {
 	// removing any pre-existing files and dirs matching the glob
 	if err := hub.cleanChartArtifacts(); err != nil {
 		return err
 	}
 
+	log.Logger.Info("cleaned up any existing chart artifacts")
+
 	actionConfig := new(action.Configuration)
 
 	// run when each command's execute method is called
-	helmDriver := os.Getenv("HELM_DRIVER")
-	if err := actionConfig.Init(hub.RESTClientGetter(), hub.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
-		e := errors.New("unable to initialize helm config")
-		log.Logger.Error(e)
-		return e
-	}
+	// helmDriver := os.Getenv("HELM_DRIVER")
+	// if err := actionConfig.Init(hub.RESTClientGetter(), hub.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
+	// 	e := errors.New("unable to initialize helm config")
+	// 	log.Logger.Error(e)
+	// 	return e
+	// }
 
 	// set up helm pull object
 	pull := action.NewPullWithOpts(action.WithConfig(actionConfig))
-	pull.Settings = &hub.EnvSettings
+	// pull.Settings = &hub.EnvSettings
 	pull.Untar = true
 	pull.RepoURL = hub.RepoURL
 	pull.Version = hub.Version

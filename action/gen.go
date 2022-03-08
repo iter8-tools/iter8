@@ -7,6 +7,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/driver"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/chartutil"
@@ -16,16 +17,16 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-type Gen struct {
+type GenOpts struct {
 	SourceDir string
 	values.Options
 }
 
-func NewGen() *Gen {
-	return &Gen{}
+func NewGenOpts() *GenOpts {
+	return &GenOpts{}
 }
 
-func (gen *Gen) gen() error {
+func (gen *GenOpts) LocalGen() error {
 	// read in the experiment chart
 	c, err := loader.Load(gen.SourceDir)
 	if err != nil {
@@ -43,7 +44,7 @@ func (gen *Gen) gen() error {
 	// add in experiment.yaml template
 	eData := []byte(`{{- include "experiment" . }}`)
 	c.Templates = append(c.Templates, &chart.File{
-		Name: path.Join("templates", experimentSpecPath),
+		Name: path.Join("templates", driver.ExperimentSpecPath),
 		Data: eData,
 	})
 
@@ -70,8 +71,8 @@ func (gen *Gen) gen() error {
 	}
 
 	// write experiment spec file
-	specBytes := []byte(m[path.Join(c.Name(), "templates", experimentSpecPath)])
-	err = ioutil.WriteFile(experimentSpecPath, specBytes, 0664)
+	specBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentSpecPath)])
+	err = ioutil.WriteFile(driver.ExperimentSpecPath, specBytes, 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
 		return err
@@ -79,8 +80,8 @@ func (gen *Gen) gen() error {
 	log.Logger.Info("Created the experiment.yaml file containing the experiment spec")
 
 	// build and validate experiment
-	fio := &fileOps{}
-	_, err = build(false, fio)
+	fio := &driver.FileDriver{}
+	_, err = base.BuildExperiment(false, fio)
 	if err != nil {
 		return err
 	}

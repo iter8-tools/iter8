@@ -22,7 +22,7 @@ type Task interface {
 	// initializeDefault values for inputs to this task
 	initializeDefaults()
 	// Run this task
-	Run(exp *Experiment) error
+	run(exp *Experiment) error
 }
 
 // ExperimentSpec is the experiment spec
@@ -576,8 +576,8 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 	return nil, err
 }
 
-// ExpOps enables interacting with experiment result stored externally
-type ExpOps interface {
+// Driver enables interacting with experiment result stored externally
+type Driver interface {
 	// ReadSpec reads the experiment spec
 	ReadSpec() (ExperimentSpec, error)
 	// ReadResult reads the experiment result
@@ -663,7 +663,7 @@ func (exp *Experiment) SLOs() bool {
 }
 
 // Run the experiment
-func (exp *Experiment) Run(ExpOps ExpOps) error {
+func (exp *Experiment) run(driver Driver) error {
 	var err error
 	if exp.Result == nil {
 		exp.InitResults()
@@ -689,7 +689,7 @@ func (exp *Experiment) Run(ExpOps ExpOps) error {
 			shouldRun = output.(bool)
 		}
 		if shouldRun {
-			err = t.Run(exp)
+			err = t.run(exp)
 			if err != nil {
 				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
 				exp.failExperiment()
@@ -704,7 +704,7 @@ func (exp *Experiment) Run(ExpOps ExpOps) error {
 		if err != nil {
 			return err
 		}
-		err = ExpOps.WriteResult(exp.Result)
+		err = driver.WriteResult(exp.Result)
 		if err != nil {
 			return err
 		}
@@ -762,4 +762,32 @@ func getName(t Task) *string {
 	}
 	log.Logger.Error("task spec with no name or run value")
 	return nil
+}
+
+// BuildExperiment builds an experiment
+func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
+	e := Experiment{}
+	var err error
+	e.Tasks, err = driver.ReadSpec()
+	if err != nil {
+		return nil, err
+	}
+	if withResult {
+		e.Result, err = driver.ReadResult()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		e.InitResults()
+	}
+	return &e, nil
+}
+
+// RunExperiment runs an experiment
+func RunExperiment(driver Driver) error {
+	if exp, err := BuildExperiment(false, driver); err != nil {
+		return err
+	} else {
+		return exp.run(driver)
+	}
 }

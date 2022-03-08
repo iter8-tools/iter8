@@ -19,6 +19,6 @@ func TestRunRun(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.InitResults()
-	err := rt.Run(exp)
+	err := rt.run(exp)
 	assert.NoError(t, err)
 }

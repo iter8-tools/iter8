@@ -7,7 +7,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	"helm.sh/helm/v3/pkg/action"
+	"github.com/iter8-tools/iter8/driver"
 )
 
 const (
@@ -19,31 +19,31 @@ const (
 	SLOs = "slos"
 )
 
-type Assert struct {
+type AssertOpts struct {
 	Timeout    time.Duration
 	Conditions []string
 	// applicable only for kubernetes experiments
-	ExperimentResource
+	driver.ExperimentResource
 }
 
-func NewAssert(cfg *action.Configuration) *Assert {
-	return &Assert{}
+func NewAssertOpts() *AssertOpts {
+	return &AssertOpts{}
 }
 
-func (assert *Assert) RunKubernetes() (bool, error) {
-	if eio, err := assert.ExperimentResource.newKubeOps(); err == nil {
+func (assert *AssertOpts) KubeRun() (bool, error) {
+	if eio, err := assert.ExperimentResource.NewKubeOps(); err == nil {
 		return assert.Run(eio)
 	} else {
 		return false, err
 	}
 }
 
-func (assert *Assert) RunLocal() (bool, error) {
-	return assert.Run(&fileOps{})
+func (assert *AssertOpts) LocalRun() (bool, error) {
+	return assert.Run(&driver.FileDriver{})
 }
 
-func (assert *Assert) Run(eio base.ExpOps) (bool, error) {
-	e, err := build(true, eio)
+func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {
+	e, err := base.BuildExperiment(true, eio)
 	if err != nil {
 		return false, err
 	}
@@ -59,7 +59,7 @@ func (assert *Assert) Run(eio base.ExpOps) (bool, error) {
 	return true, nil
 }
 
-func (assert *Assert) verify(exp *base.Experiment) (bool, error) {
+func (assert *AssertOpts) verify(exp *base.Experiment) (bool, error) {
 	// timeSpent tracks how much time has been spent so far in assert attempts
 	var timeSpent, _ = time.ParseDuration("0s")
 

@@ -85,7 +85,7 @@ func newKLaunchCmd(cfg *action.Configuration) *cobra.Command {
 		Short: "launch an experiment in Kubernetes",
 		Long:  kLaunchDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.RunKubernetes(valueOpts)
+			err := actor.KubeRun(valueOpts)
 			if err != nil {
 				log.Logger.Error(err)
 				return err
@@ -93,11 +93,7 @@ func newKLaunchCmd(cfg *action.Configuration) *cobra.Command {
 			return nil
 		},
 	}
-	addKLaunchFlags(cmd, actor, valueOpts)
-	return cmd
-}
-
-func addKLaunchFlags(cmd *cobra.Command, actor *ia.Launch, valueOpts *values.Options) {
 	addExperimentGroupFlag(cmd, &actor.Group, false)
 	addLaunchFlags(cmd, actor)
+	return cmd
 }

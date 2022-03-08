@@ -34,7 +34,7 @@ func (t *assessTask) validateInputs() error {
 }
 
 // Run executes the assess-app-versions task
-func (t *assessTask) Run(exp *Experiment) error {
+func (t *assessTask) run(exp *Experiment) error {
 	err := t.validateInputs()
 	if err != nil {
 		return err

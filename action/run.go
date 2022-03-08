@@ -1,21 +1,36 @@
 package action
 
-type Run struct {
+import (
+	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/driver"
+)
+
+type RunOpts struct {
 	RunDir string
+	// applicable only for kubernetes experiments
+	Group string
 }
 
-func NewRun() *Run {
-	return &Run{
+func NewRunOpts() *RunOpts {
+	return &RunOpts{
 		RunDir: ".",
 	}
 }
 
-func (runner *Run) getFileOps() *fileOps {
-	return &fileOps{
+func (runner *RunOpts) LocalRun() error {
+	return base.RunExperiment(&driver.FileDriver{
 		RunDir: runner.RunDir,
-	}
+	})
 }
 
-func (runner *Run) RunLocal() error {
-	return runExperiment(runner.getFileOps())
-}
+// # ---
+// # apiVersion: v1
+// # kind: Secret
+// # metadata:
+// #   name: {{ $name }}-result
+// # stringData:
+// #   result.yaml: |
+// #     startTime: {{ now }}
+// #     numCompletedTasks: 0
+// #     failure: false
+// #     iter8Version: {{ .Chart.AppVersion }}
