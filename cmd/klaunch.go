@@ -4,8 +4,6 @@ import (
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
-
-	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 const kLaunchDesc = `
@@ -40,14 +38,13 @@ By default, the launch command downloads charts from the official Iter8 chart re
 
 func newKLaunchCmd() *cobra.Command {
 	actor := ia.NewLaunchOpts()
-	valueOpts := &values.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "launch",
 		Short: "launch an experiment in Kubernetes",
 		Long:  kLaunchDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.KubeRun(valueOpts)
+			err := actor.KubeRun()
 			if err != nil {
 				log.Logger.Error(err)
 				return err

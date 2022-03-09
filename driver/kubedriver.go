@@ -1,21 +1,32 @@
 package driver
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 	"time"
 
 	// Import to initialize client auth plugins.
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/downloader"
+	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/yaml"
@@ -38,28 +49,43 @@ type KubeDriver struct {
 	Revision int
 }
 
+func (driver *KubeDriver) getKubeConfig() (*action.Configuration, error) {
+	// getting kube config
+	actionConfig := new(action.Configuration)
+	helmDriver := os.Getenv("HELM_DRIVER")
+	if err := actionConfig.Init(driver.RESTClientGetter(), driver.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
+		e := errors.New("unable to get kubernetes client config")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, e
+	}
+	return actionConfig, nil
+}
+
+func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
+	log.Logger.Infof("fetching latest revision for experiment group %v", driver.Group)
+	// get kube config
+	actionConfig, err := driver.getKubeConfig()
+	if err != nil {
+		return nil, err
+	}
+	// getting last revision
+	rel, err := actionConfig.Releases.Last(driver.Group)
+	if err != nil {
+		e := fmt.Errorf("unable to get latest revision for experiment group %v", driver.Group)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, e
+	}
+	return rel, nil
+}
+
 func (driver *KubeDriver) Init() error {
-	// update revision if need be
+	// update revision to latest, if none is specified
 	if driver.Revision <= 0 {
-		log.Logger.Infof("fetching latest revision for experiment group %v", driver.Group)
-		// getting action config
-		actionConfig := new(action.Configuration)
-		helmDriver := os.Getenv("HELM_DRIVER")
-		if err := actionConfig.Init(driver.RESTClientGetter(), driver.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
-			e := errors.New("unable to get kubernetes client config")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			return e
+		if rel, err := driver.getLastRelease(); err == nil {
+			driver.Revision = rel.Version
+		} else {
+			return err
 		}
-
-		// getting last revision
-		rel, err := actionConfig.Releases.Last(driver.Group)
-		if err != nil {
-			e := fmt.Errorf("unable to get latest revision for experiment group %v", driver.Group)
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			return e
-		}
-
-		driver.Revision = rel.Version
 	}
 
 	// get REST config
@@ -69,7 +95,7 @@ func (driver *KubeDriver) Init() error {
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
-	// gete clientset
+	// get clientset
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		e := errors.New("unable to get Kubernetes clientset")
@@ -255,26 +281,214 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	return err
 }
 
-// func GetExperimentLogs(client *kubernetes.Clientset, ns string, id string) (err error) {
-// 	ctx := context.Background()
-// 	podList, err := client.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s", IdLabel, id)})
-// 	if err != nil {
-// 		return err
-// 	}
+// Credit: the logic for this function is sourced from Helm
+// https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
+func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
+	cfg, err := driver.getKubeConfig()
+	if err != nil {
+		return err
+	}
+	client := action.NewUpgrade(cfg)
+	client.Namespace = driver.Namespace()
+	client.Version = version
+	client.DryRun = dry
+	client.ChartPathOptions = *cpo
 
-// 	if len(podList.Items) == 0 {
-// 		return errors.New("logs not available")
-// 	}
+	ch, vals, err := getChartAndVals(cpo, chartName, driver.EnvSettings, valueOpts)
+	if err != nil {
+		e := fmt.Errorf("unable to get chart and vals for %v", chartName)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
 
-// 	for _, pod := range podList.Items {
-// 		req := client.CoreV1().Pods(ns).GetLogs(pod.Name, &corev1.PodLogOptions{})
-// 		logs, err := req.Stream(ctx)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		buf := new(bytes.Buffer)
-// 		buf.ReadFrom(logs)
-// 		fmt.Println(buf.String())
-// 	}
-// 	return nil
-// }
+	// Create context and prepare the handle of SIGTERM
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	// Set up channel on which to send signal notifications.
+	// We must use a buffered channel or risk missing the signal
+	// if we're not ready to receive when the signal is sent.
+	cSignal := make(chan os.Signal, 2)
+	signal.Notify(cSignal, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-cSignal
+		fmt.Printf("experiment for group %s has been cancelled.\n", group)
+		cancel()
+	}()
+
+	_, err = client.RunWithContext(ctx, group, ch, vals)
+	if err != nil {
+		e := fmt.Errorf("experiment launch failed")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	log.Logger.Info("Experiment launched. Happy Iter8ing!")
+
+	return nil
+}
+
+// Credit: the logic for this function is sourced from Helm
+// https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
+func (driver *KubeDriver) Install(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
+	cfg, err := driver.getKubeConfig()
+	if err != nil {
+		return err
+	}
+	client := action.NewInstall(cfg)
+	client.Namespace = driver.Namespace()
+	client.Version = version
+	client.DryRun = dry
+	client.ChartPathOptions = *cpo
+	client.ReleaseName = group
+
+	ch, vals, err := getChartAndVals(cpo, chartName, driver.EnvSettings, valueOpts)
+	if err != nil {
+		e := fmt.Errorf("unable to get chart and vals for %v", chartName)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	// Create context and prepare the handle of SIGTERM
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	// Set up channel on which to send signal notifications.
+	// We must use a buffered channel or risk missing the signal
+	// if we're not ready to receive when the signal is sent.
+	cSignal := make(chan os.Signal, 2)
+	signal.Notify(cSignal, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-cSignal
+		fmt.Printf("experiment for group %s has been cancelled.\n", group)
+		cancel()
+	}()
+
+	_, err = client.RunWithContext(ctx, ch, vals)
+	if err != nil {
+		e := fmt.Errorf("experiment launch failed")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	log.Logger.Info("Experiment launched. Happy Iter8ing!")
+
+	return nil
+}
+
+// Credit: the logic for this function is sourced from Helm
+// https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
+func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *cli.EnvSettings, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
+	chartPath, err := cpo.LocateChart(chartName, settings)
+	if err != nil {
+		e := fmt.Errorf("unable to locate chart %v", chartName)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, nil, e
+	}
+
+	p := getter.All(settings)
+	vals, err := valueOpts.MergeValues(p)
+	if err != nil {
+		e := fmt.Errorf("unable to merge chart values")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, nil, e
+	}
+
+	// attempt to load the chart
+	ch, err := loader.Load(chartPath)
+	if err != nil {
+		e := fmt.Errorf("unable to load chart")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, nil, e
+	}
+
+	out := os.Stdout
+
+	if err := checkIfInstallable(ch); err != nil {
+		return nil, nil, err
+	}
+
+	if req := ch.Metadata.Dependencies; req != nil {
+		if err := action.CheckDependencies(ch, req); err != nil {
+			man := &downloader.Manager{
+				Out:              out,
+				ChartPath:        chartPath,
+				Keyring:          cpo.Keyring,
+				SkipUpdate:       false,
+				Getters:          p,
+				RepositoryConfig: settings.RepositoryConfig,
+				RepositoryCache:  settings.RepositoryCache,
+				Debug:            settings.Debug,
+			}
+			if err := man.Update(); err != nil {
+				e := fmt.Errorf("unable to update dependencies")
+				log.Logger.WithStackTrace(err.Error()).Error(e)
+				return nil, nil, e
+			}
+			// Reload the chart with the updated Chart.lock file.
+			if ch, err = loader.Load(chartPath); err != nil {
+				e := fmt.Errorf("failed reloading chart after dependency update")
+				log.Logger.WithStackTrace(err.Error()).Error(e)
+				return nil, nil, e
+			}
+		}
+	}
+
+	if ch.Metadata.Deprecated {
+		log.Logger.Warning("this chart is deprecated")
+	}
+	return ch, vals, nil
+}
+
+// Credit: this function is sourced from Helm
+// https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L270
+//
+// checkIfInstallable validates if a chart can be installed
+// Only application chart type is installable
+func checkIfInstallable(ch *chart.Chart) error {
+	switch ch.Metadata.Type {
+	case "", "application":
+		return nil
+	}
+	e := fmt.Errorf("%s charts are not installable", ch.Metadata.Type)
+	log.Logger.Error(e)
+	return e
+}
+
+func (driver *KubeDriver) getExperimentId() string {
+	return fmt.Sprintf("%v-%v", driver.Group, driver.Revision)
+}
+
+func (driver *KubeDriver) GetExperimentLogs() (string, error) {
+	podsClient := driver.CoreV1().Pods(driver.Namespace())
+	pods, err := podsClient.List(context.TODO(), metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("iter8.tools/id=%v", driver.getExperimentId()),
+	})
+	if err != nil {
+		e := errors.New("unable to get experiment pod(s)")
+		log.Logger.Error(e)
+		return "", e
+	}
+	lgs := make([]string, len(pods.Items))
+	for i, p := range pods.Items {
+		req := podsClient.GetLogs(p.Name, &corev1.PodLogOptions{})
+		podLogs, err := req.Stream(context.TODO())
+		if err != nil {
+			e := errors.New("error in opening log stream")
+			log.Logger.Error(e)
+			return "", e
+		}
+
+		defer podLogs.Close()
+		buf := new(bytes.Buffer)
+		_, err = io.Copy(buf, podLogs)
+		if err != nil {
+			e := errors.New("error in copy information from podLogs to buf")
+			log.Logger.Error(e)
+			return "", e
+		}
+		str := buf.String()
+		lgs[i] = str
+	}
+	return strings.Join(lgs, "\n***\n"), nil
+}

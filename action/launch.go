@@ -3,8 +3,8 @@ package action
 import (
 	"errors"
 
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
-	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 type LaunchOpts struct {
@@ -40,14 +40,17 @@ func (launch *LaunchOpts) LocalRun() error {
 	return launch.RunOpts.LocalRun()
 }
 
-/*******************
-********************
+func (lOpts *LaunchOpts) KubeRun() error {
+	// initialize kube driver
+	if err := lOpts.KubeDriver.Init(); err != nil {
+		e := errors.New("unable to initialize KubeDriver")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
 
-Kubernetes stuff below
-
-********************
-********************/
-
-func (lOpts *LaunchOpts) KubeRun(values *values.Options) error {
-	return errors.New("not implemented")
+	if lOpts.Revision > 0 { // last release found; setup upgrade
+		return lOpts.KubeDriver.Upgrade(lOpts.Version, lOpts.ChartName, lOpts.Options, lOpts.Group, lOpts.DryRun, &lOpts.ChartPathOptions)
+	} else { // no release found; setup install
+		return lOpts.KubeDriver.Install(lOpts.Version, lOpts.ChartName, lOpts.Options, lOpts.Group, lOpts.DryRun, &lOpts.ChartPathOptions)
+	}
 }
