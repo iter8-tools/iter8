@@ -1,6 +1,7 @@
 package base
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 	"text/template"
@@ -67,13 +68,21 @@ func TestGetElapsedTime(t *testing.T) {
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
 	// create metrics file from template
-	inputs := map[string]interface{}{
-		"MonitoringEndpoint": "test-database.com",
-		"IAMToken":           "test-token",
-		"GUID":               "test-guid",
+	input := &CollectDatabaseTemplateInput{
+		MonitoringEndpoint: "test-database.com",
+		IAMToken:           "test-token",
+		GUID:               "test-guid",
 	}
-	err := executeTemplate(inputs, templatePath, tempMetricsPath)
 
+	// convert input to map[string]interface{}
+	var templateInput map[string]interface{}
+	inrec, err := json.Marshal(input)
+	assert.NoError(t, err)
+
+	json.Unmarshal(inrec, &templateInput)
+
+	// create metrics file from template
+	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
 	assert.NoError(t, err)
 
 	// valid collect database task... should succeed
@@ -170,13 +179,21 @@ func TestCEOneVersion(t *testing.T) {
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
 	// create metrics file from template
-	inputs := map[string]interface{}{
-		"MonitoringEndpoint": "test-database.com",
-		"IAMToken":           "test-token",
-		"GUID":               "test-guid",
+	input := &CollectDatabaseTemplateInput{
+		MonitoringEndpoint: "test-database.com",
+		IAMToken:           "test-token",
+		GUID:               "test-guid",
 	}
-	err := executeTemplate(inputs, templatePath, tempMetricsPath)
 
+	// convert input to map[string]interface{}
+	var templateInput map[string]interface{}
+	inrec, err := json.Marshal(input)
+	assert.NoError(t, err)
+
+	json.Unmarshal(inrec, &templateInput)
+
+	// create metrics file from template
+	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
 	assert.NoError(t, err)
 
 	ct := &collectDatabaseTask{
@@ -228,13 +245,21 @@ func TestCEUnauthorized(t *testing.T) {
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
 	// create metrics file from template
-	inputs := map[string]interface{}{
-		"MonitoringEndpoint": "test-database.com",
-		"IAMToken":           "test-token",
-		"GUID":               "test-guid",
+	input := &CollectDatabaseTemplateInput{
+		MonitoringEndpoint: "test-database.com",
+		IAMToken:           "test-token",
+		GUID:               "test-guid",
 	}
-	err := executeTemplate(inputs, templatePath, tempMetricsPath)
 
+	// convert input to map[string]interface{}
+	var templateInput map[string]interface{}
+	inrec, err := json.Marshal(input)
+	assert.NoError(t, err)
+
+	json.Unmarshal(inrec, &templateInput)
+
+	// create metrics file from template
+	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
 	assert.NoError(t, err)
 
 	ct := &collectDatabaseTask{
@@ -325,13 +350,21 @@ func TestCESomeValues(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
 	// create metrics file from template
-	inputs := map[string]interface{}{
-		"MonitoringEndpoint": "test-database.com",
-		"IAMToken":           "test-token",
-		"GUID":               "test-guid",
+	input := &CollectDatabaseTemplateInput{
+		MonitoringEndpoint: "test-database.com",
+		IAMToken:           "test-token",
+		GUID:               "test-guid",
 	}
-	err := executeTemplate(inputs, templatePath, tempMetricsPath)
 
+	// convert input to map[string]interface{}
+	var templateInput map[string]interface{}
+	inrec, err := json.Marshal(input)
+	assert.NoError(t, err)
+
+	json.Unmarshal(inrec, &templateInput)
+
+	// create metrics file from template
+	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
 	assert.NoError(t, err)
 
 	ct := &collectDatabaseTask{
@@ -426,13 +459,21 @@ func TestCEMultipleVersions(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	// create metrics file from template
-	inputs := map[string]interface{}{
-		"MonitoringEndpoint": "test-database.com",
-		"IAMToken":           "test-token",
-		"GUID":               "test-guid",
+	input := &CollectDatabaseTemplateInput{
+		MonitoringEndpoint: "test-database.com",
+		IAMToken:           "test-token",
+		GUID:               "test-guid",
 	}
-	err := executeTemplate(inputs, templatePath, tempMetricsPath)
 
+	// convert input to map[string]interface{}
+	var templateInput map[string]interface{}
+	inrec, err := json.Marshal(input)
+	assert.NoError(t, err)
+
+	json.Unmarshal(inrec, &templateInput)
+
+	// create metrics file from template
+	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
 	assert.NoError(t, err)
 
 	ct := &collectDatabaseTask{

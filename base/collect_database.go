@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -22,7 +23,7 @@ import (
 )
 
 type CollectDatabaseTemplateInput struct {
-	MonitoringEndpoint string `json:"monitoringEndpoint" yaml:"monitoringEndpoint"`
+	MonitoringEndpoint string `json:"MonitoringEndpoint" yaml:"MonitoringEndpoint"`
 	IAMToken           string `json:"IAMToken" yaml:"IAMToken"`
 	GUID               string `json:"GUID" yaml:"GUID"`
 }
@@ -36,12 +37,13 @@ type CollectDatabaseTemplate struct {
 }
 
 type Metric struct {
-	Name         string   `json:"name" yaml:"name"`
-	Description  string   `json:"description" yaml:"description"`
-	Type         string   `json:"type" yaml:"type"`
-	Units        string   `json:"units" yaml:"units"`
-	Params       []Params `json:"params" yaml:"params"`
-	JqExpression string   `json:"jqExpression" yaml:"jqExpression"`
+	Name         string    `json:"name" yaml:"name"`
+	Description  *string   `json:"description,omitempty" yaml:"description,omitempty"`
+	Type         string    `json:"type" yaml:"type"`
+	Units        *string   `json:"units,omitempty" yaml:"units,omitempty"`
+	Params       *[]Params `json:"params,omitempty" yaml:"params,omitempty"`
+	Body         *string   `json:"body,omitempty" yaml:"body,omitempty"`
+	JqExpression string    `json:"jqExpression" yaml:"jqExpression"`
 }
 
 type Params struct {
@@ -133,8 +135,15 @@ func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64,
 // bool return value represents whether the pipeline was able to run to
 // completion (prevents double error statement)
 func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (interface{}, bool) {
+	var requestBody io.Reader
+	if metric.Body != nil {
+		requestBody = strings.NewReader(*metric.Body)
+	} else {
+		requestBody = nil
+	}
+
 	// create a new HTTP request
-	req, err := http.NewRequest(template.Method, template.Url, nil)
+	req, err := http.NewRequest(template.Method, template.Url, requestBody)
 	if err != nil {
 		log.Logger.Error("could not create new request for metric ", metric.Name, ": ", err)
 		return nil, false
@@ -149,7 +158,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	// add query params
 	q := req.URL.Query()
 	params := metric.Params
-	for _, param := range params {
+	for _, param := range *params {
 		q.Add(param.Name, param.Value)
 	}
 	req.URL.RawQuery = q.Encode()
@@ -163,8 +172,8 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	}
 	defer resp.Body.Close()
 
-	// read response body
-	body, err := ioutil.ReadAll(resp.Body)
+	// read response responseBody
+	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Logger.Error("could not read response body for metric ", metric.Name, ": ", err)
 		return nil, false
@@ -172,7 +181,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 
 	// JSON parse response body
 	var jsonBody interface{}
-	err = json.Unmarshal([]byte(body), &jsonBody)
+	err = json.Unmarshal([]byte(responseBody), &jsonBody)
 	if err != nil {
 		log.Logger.Error("could not JSON parse response body for metric ", metric.Name, ": ", err)
 		return nil, false
@@ -230,9 +239,16 @@ func (t *collectDatabaseTask) Run(exp *Experiment) error {
 		return err
 	}
 
+	// inputs for this task determine the number of versions participating in the
+	// experiment. Initiate insights with num versions.
+	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
+	if err != nil {
+		return err
+	}
+
 	// collect metrics for all metric files and versionInfos
 	for _, metricFilePath := range metricFilePaths {
-		for _, versionInfo := range t.With.VersionInfo {
+		for i, versionInfo := range t.With.VersionInfo {
 			// add ElapsedTime
 			elapsedTime, err := getElapsedTime(versionInfo, exp)
 			if err != nil {
@@ -288,9 +304,9 @@ func (t *collectDatabaseTask) Run(exp *Experiment) error {
 
 				// finalize metric data
 				mm := MetricMeta{
-					Description: metric.Description,
+					Description: *metric.Description,
 					Type:        metricType,
-					Units:       &metric.Units,
+					Units:       metric.Units,
 				}
 
 				// convert value to float
@@ -301,7 +317,7 @@ func (t *collectDatabaseTask) Run(exp *Experiment) error {
 					continue
 				}
 
-				err = exp.Result.Insights.updateMetric(metricName, mm, 0, floatValue)
+				err = exp.Result.Insights.updateMetric(metricName, mm, i, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)
