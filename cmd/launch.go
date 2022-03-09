@@ -4,8 +4,6 @@ import (
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
-
-	"helm.sh/helm/v3/pkg/action"
 )
 
 const launchDesc = `
@@ -32,8 +30,8 @@ By default, the launch command downloads charts from the official Iter8 chart re
 			--set url=https://httpbin.org/get
 `
 
-func newLaunchCmd(cfg *action.Configuration) *cobra.Command {
-	actor := ia.NewLaunch(cfg)
+func newLaunchCmd() *cobra.Command {
+	actor := ia.NewLaunchOpts()
 
 	cmd := &cobra.Command{
 		Use:   "launch",
@@ -57,4 +55,8 @@ func newLaunchCmd(cfg *action.Configuration) *cobra.Command {
 func addLaunchFlags(cmd *cobra.Command, actor *ia.LaunchOpts) {
 	cmd.Flags().BoolVar(&actor.DryRun, "dry", false, "simulate an experiment launch")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
+}
+
+func init() {
+	rootCmd.AddCommand(newLaunchCmd())
 }

@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/iter8-tools/iter8/driver"
-	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
@@ -18,7 +17,7 @@ type LaunchOpts struct {
 	driver.KubeDriver
 }
 
-func NewLaunch(cfg *action.Configuration) *LaunchOpts {
+func NewLaunchOpts() *LaunchOpts {
 	return &LaunchOpts{}
 }
 

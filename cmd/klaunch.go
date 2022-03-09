@@ -5,7 +5,6 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 
-	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
@@ -39,8 +38,8 @@ By default, the launch command downloads charts from the official Iter8 chart re
 			--set url=https://httpbin.org/get
 `
 
-func newKLaunchCmd(cfg *action.Configuration) *cobra.Command {
-	actor := ia.NewLaunch(cfg)
+func newKLaunchCmd() *cobra.Command {
+	actor := ia.NewLaunchOpts()
 	valueOpts := &values.Options{}
 
 	cmd := &cobra.Command{
@@ -62,4 +61,8 @@ func newKLaunchCmd(cfg *action.Configuration) *cobra.Command {
 	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	return cmd
+}
+
+func init() {
+	kCmd.AddCommand(newKLaunchCmd())
 }
