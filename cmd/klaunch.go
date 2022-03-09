@@ -20,6 +20,12 @@ $	iter8 k launch -c load-test-http \
 	--set url=https://httpbin.org/get \
 	--dry
 
+By default, experiments belong to the 'default' experiment group. To explicitly set the group, use the --group or -g option.
+
+		$	iter8 k launch -c load-test-http \
+		--set url=https://httpbin.org/get \
+		-g hello
+
 By default, the current directory is used to download and unpack the experiment chart. Control this using the destDir option.
 
 	$	iter8 k launch -c load-test-http \
@@ -51,6 +57,9 @@ func newKLaunchCmd(cfg *action.Configuration) *cobra.Command {
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, false)
+	actor.EnvSettings = settings
 	addLaunchFlags(cmd, actor)
+	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)
+	addValueFlags(cmd.Flags(), &actor.Options)
 	return cmd
 }
