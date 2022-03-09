@@ -434,7 +434,7 @@ func TestCEMultipleVersions(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.InitResults()
-	exp.Result.initInsightsWithNumVersions(1)
+	exp.Result.initInsightsWithNumVersions(2)
 
 	err = ct.Run(exp)
 
@@ -443,9 +443,9 @@ func TestCEMultipleVersions(t *testing.T) {
 
 	// two metrics should exist and have values
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][1], float64(6))
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-count"][0], float64(6))
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][1], 0.13953488372093023)
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-rate"][0], 0.13953488372093023)
 
 	// request-count should not exist because there was no value from response
 	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
@@ -552,9 +552,9 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 
 	// two metrics should exist and have values
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][1], float64(6))
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-count"][0], float64(6))
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][1], 0.13953488372093023)
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-rate"][0], 0.13953488372093023)
 
 	// request-count should not exist because there was no value from response
 	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
