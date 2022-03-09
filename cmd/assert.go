@@ -31,7 +31,7 @@ You can optionally specify a timeout, which is the maximum amount of time Iter8 
 `
 
 func newAssertCmd() *cobra.Command {
-	actor := ia.NewAssertOpts(nil)
+	actor := ia.NewAssertOpts()
 
 	cmd := &cobra.Command{
 		Use:   "assert",
@@ -51,17 +51,16 @@ func newAssertCmd() *cobra.Command {
 		},
 	}
 	addAssertFlags(cmd, actor)
+	addRunFlags(cmd, &actor.RunOpts)
 	return cmd
 }
 
 func addAssertFlags(cmd *cobra.Command, actor *ia.AssertOpts) {
-	// add flags
 	cmd.Flags().StringSliceVarP(&actor.Conditions, "condition", "c", nil, fmt.Sprintf("%v | %v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure, ia.SLOs))
 	cmd.MarkFlagRequired("condition")
 	cmd.Flags().DurationVar(&actor.Timeout, "timeout", 0, "timeout duration (e.g., 5s)")
 }
 
 func init() {
-	cmd := newAssertCmd()
-	rootCmd.AddCommand(cmd)
+	rootCmd.AddCommand(newAssertCmd())
 }

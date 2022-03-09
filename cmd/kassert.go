@@ -6,7 +6,6 @@ import (
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 const kAssertDesc = `
@@ -45,14 +44,11 @@ func newKAssertCmd() *cobra.Command {
 			return nil
 		},
 	}
-	addKAssertFlags(cmd, cmd.Flags(), actor)
-	return cmd
-}
-
-func addKAssertFlags(cmd *cobra.Command, f *pflag.FlagSet, actor *ia.AssertOpts) {
-	addExperimentGroupFlag(cmd, &actor.Group, false)
+	addExperimentGroupFlag(cmd, &actor.Group, true)
+	actor.EnvSettings = settings
+	cmd.MarkFlagRequired("namespace")
 	addAssertFlags(cmd, actor)
-	actor.EnvSettings = &settings
+	return cmd
 }
 
 func init() {

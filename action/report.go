@@ -41,6 +41,13 @@ func (rOpts *ReportOpts) LocalRun() error {
 	})
 }
 
+func (rOpts *ReportOpts) KubeRun() error {
+	if err := rOpts.KubeDriver.Init(); err != nil {
+		return err
+	}
+	return rOpts.Run(rOpts)
+}
+
 func (rOpts *ReportOpts) Run(eio base.Driver) error {
 	if e, err := base.BuildExperiment(true, eio); err != nil {
 		return err
@@ -48,12 +55,16 @@ func (rOpts *ReportOpts) Run(eio base.Driver) error {
 		switch strings.ToLower(rOpts.OutputFormat) {
 		case TextOutputFormatKey:
 			reporter := report.TextReporter{
-				&report.Reporter{e},
+				Reporter: &report.Reporter{
+					Experiment: e,
+				},
 			}
 			return reporter.Gen()
 		case HTMLOutputFormatKey:
 			reporter := report.HTMLReporter{
-				&report.Reporter{e},
+				Reporter: &report.Reporter{
+					Experiment: e,
+				},
 			}
 			return reporter.Gen()
 		default:

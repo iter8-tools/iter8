@@ -17,7 +17,6 @@ This command is primarily intended for use within the Iter8 Docker image that is
 
 func newKRunCmd() *cobra.Command {
 	actor := ia.NewRunOpts()
-	actor.EnvSettings = settings
 
 	cmd := &cobra.Command{
 		Use:   "run",
@@ -35,6 +34,7 @@ func newKRunCmd() *cobra.Command {
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, true)
 	addExperimentRevisionFlag(cmd, &actor.Revision, true)
+	actor.EnvSettings = settings
 	cmd.MarkFlagRequired("namespace")
 	return cmd
 }

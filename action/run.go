@@ -27,5 +27,5 @@ func (runner *RunOpts) KubeRun() error {
 	if err := runner.KubeDriver.Init(); err != nil {
 		return err
 	}
-	return base.RunExperiment(&runner.KubeDriver)
+	return base.RunExperiment(runner)
 }

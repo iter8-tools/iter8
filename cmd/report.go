@@ -8,7 +8,7 @@ import (
 )
 
 const reportDesc = `
-This command generates a text or HTML report of the experiment.
+This command generates a text or HTML report of an experiment.
 
     $ iter8 report
 

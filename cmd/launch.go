@@ -1,63 +1,60 @@
 package cmd
 
 import (
-	"os"
-	"path"
-
+	ia "github.com/iter8-tools/iter8/action"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
+
+	"helm.sh/helm/v3/pkg/action"
 )
 
-var (
-	// dry indicates that experiment.yaml should be genereated but not run
-	dry bool
-)
+const launchDesc = `
+This command launches an Iter8 experiment. 
 
-// launchCmd represents the launch command
-var launchCmd = &cobra.Command{
-	Use:   "launch",
-	Short: "Launch an Iter8 experiment.",
-	Long: `
-Launch an Iter8 experiment by downloading a chart from an Iter8 experiment chart repo, rendering an experiment.yaml file by combining the chart with values, and running the experiment specified in experiment.yaml.
-`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		// removing files and dirs matching chartname and dest dir
-		if err := cleanChartArtifacts(destDir, chartName); err != nil {
-			os.Exit(1)
-		}
+		$ iter8 launch -c load-test-http --set url=https://httpbin.org/get
 
-		// download
-		err := hubCmd.RunE(cmd, args)
-		if err != nil {
-			os.Exit(1)
-		}
+To create the experiment.yaml file without running the experiment, use the dry option.
 
-		// render
-		chartPath = path.Join(destDir, chartName)
-		err = genCmd.RunE(cmd, args)
-		if err != nil {
-			os.Exit(1)
-		}
-		if dry {
+$	iter8 launch -c load-test-http \
+	--set url=https://httpbin.org/get \
+	--dry
+
+By default, the current directory is used to download and unpack the experiment chart, and run the experiment. Control this using the destDir option.
+
+	$	iter8 launch -c load-test-http \
+		--set url=https://httpbin.org/get \
+		--destDir /tmp
+	
+By default, the launch command downloads charts from the official Iter8 chart repo. It is also possible to use third party (helm) repos to host Iter8 experiment charts.
+
+		$	iter8 launch -c load-test-http \
+			--repoURL https://great.expectations.pip \
+			--set url=https://httpbin.org/get
+`
+
+func newLaunchCmd(cfg *action.Configuration) *cobra.Command {
+	actor := ia.NewLaunch(cfg)
+
+	cmd := &cobra.Command{
+		Use:   "launch",
+		Short: "Launch an experiment",
+		Long:  launchDesc,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			err := actor.LocalRun()
+			if err != nil {
+				log.Logger.Error(err)
+				return err
+			}
 			return nil
-		}
-
-		// run
-		err = runCmd.RunE(cmd, args)
-		if err != nil {
-			os.Exit(1)
-		}
-		return err
-	},
+		},
+	}
+	addLaunchFlags(cmd, actor)
+	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)
+	addValueFlags(cmd.Flags(), &actor.Options)
+	return cmd
 }
 
-func init() {
-	launchCmd.Flags().AddFlagSet(hubCmd.Flags())
-	launchCmd.MarkFlagRequired("chartName")
-
-	launchCmd.Flags().BoolVar(&dry, "dry", false, "render experiment.yaml without running the experiment")
-	launchCmd.Flags().Lookup("dry").NoOptDefVal = "true"
-
-	addGenOptions(launchCmd.Flags())
-
-	rootCmd.AddCommand(launchCmd)
+func addLaunchFlags(cmd *cobra.Command, actor *ia.LaunchOpts) {
+	cmd.Flags().BoolVar(&actor.DryRun, "dry", false, "simulate an experiment launch")
+	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
 }

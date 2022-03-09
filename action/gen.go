@@ -18,15 +18,15 @@ import (
 )
 
 type GenOpts struct {
-	SourceDir string
 	values.Options
+	SourceDir string
 }
 
 func NewGenOpts() *GenOpts {
 	return &GenOpts{}
 }
 
-func (gen *GenOpts) LocalGen() error {
+func (gen *GenOpts) LocalRun() error {
 	// read in the experiment chart
 	c, err := loader.Load(gen.SourceDir)
 	if err != nil {
@@ -87,5 +87,4 @@ func (gen *GenOpts) LocalGen() error {
 	}
 
 	return err
-
 }
