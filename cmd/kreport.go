@@ -28,12 +28,10 @@ func newKReportCmd() *cobra.Command {
 		Use:   "report",
 		Short: "Generate report for Kubernetes experiment",
 		Long:  kReportDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			if err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
-				return err
 			}
-			return nil
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, true)
@@ -44,5 +42,5 @@ func newKReportCmd() *cobra.Command {
 }
 
 func init() {
-	rootCmd.AddCommand(newReportCmd())
+	kCmd.AddCommand(newKReportCmd())
 }

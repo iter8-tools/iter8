@@ -49,12 +49,12 @@ type KubeDriver struct {
 	Revision int
 }
 
-func (driver *KubeDriver) getKubeConfig() (*action.Configuration, error) {
+func (driver *KubeDriver) getHelmConfig() (*action.Configuration, error) {
 	// getting kube config
 	actionConfig := new(action.Configuration)
 	helmDriver := os.Getenv("HELM_DRIVER")
 	if err := actionConfig.Init(driver.RESTClientGetter(), driver.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
-		e := errors.New("unable to get kubernetes client config")
+		e := errors.New("unable to get Helm client config")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return nil, e
 	}
@@ -64,7 +64,7 @@ func (driver *KubeDriver) getKubeConfig() (*action.Configuration, error) {
 func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
 	log.Logger.Infof("fetching latest revision for experiment group %v", driver.Group)
 	// get kube config
-	actionConfig, err := driver.getKubeConfig()
+	actionConfig, err := driver.getHelmConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +284,7 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
-	cfg, err := driver.getKubeConfig()
+	cfg, err := driver.getHelmConfig()
 	if err != nil {
 		return err
 	}
@@ -331,7 +331,7 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
 func (driver *KubeDriver) Install(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
-	cfg, err := driver.getKubeConfig()
+	cfg, err := driver.getHelmConfig()
 	if err != nil {
 		return err
 	}

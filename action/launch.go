@@ -2,6 +2,7 @@ package action
 
 import (
 	"errors"
+	"path"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
@@ -21,23 +22,25 @@ func NewLaunchOpts() *LaunchOpts {
 	return &LaunchOpts{}
 }
 
-func (launch *LaunchOpts) LocalRun() error {
+func (lOpts *LaunchOpts) LocalRun() error {
 	// download chart from Iter8 hub
-	if err := launch.HubOpts.Run(); err != nil {
+	if err := lOpts.HubOpts.Run(); err != nil {
 		return err
 	}
 	// gen experiment spec
-	launch.SourceDir = launch.DestDir
-	if err := launch.GenOpts.LocalRun(); err != nil {
+	lOpts.GenOpts.SourceDir = path.Join(lOpts.HubOpts.DestDir, lOpts.ChartName)
+	log.Logger.Trace("experiment dir: ", lOpts.HubOpts.DestDir)
+	log.Logger.Trace("experiment chart dir: ", lOpts.GenOpts.SourceDir)
+	if err := lOpts.GenOpts.LocalRun(); err != nil {
 		return err
 	}
 	// all done if this is a dry run
-	if launch.DryRun {
+	if lOpts.DryRun {
 		return nil
 	}
 	// run experiment locally
-	launch.RunDir = launch.DestDir
-	return launch.RunOpts.LocalRun()
+	lOpts.RunDir = lOpts.DestDir
+	return lOpts.RunOpts.LocalRun()
 }
 
 func (lOpts *LaunchOpts) KubeRun() error {

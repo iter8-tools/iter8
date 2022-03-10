@@ -22,13 +22,10 @@ func newKRunCmd() *cobra.Command {
 		Use:   "run",
 		Short: "run a Kubernetes experiment",
 		Long:  kRunDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.KubeRun()
-			if err != nil {
+		Run: func(_ *cobra.Command, _ []string) {
+			if err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
-				return err
 			}
-			return nil
 		},
 		Hidden: true,
 	}

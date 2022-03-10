@@ -21,13 +21,10 @@ func newRunCmd() *cobra.Command {
 		Use:   "run",
 		Short: "Run an experiment",
 		Long:  runDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.LocalRun()
-			if err != nil {
+		Run: func(_ *cobra.Command, _ []string) {
+			if err := actor.LocalRun(); err != nil {
 				log.Logger.Error(err)
-				return err
 			}
-			return nil
 		},
 	}
 	addRunFlags(cmd, actor)

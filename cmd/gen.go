@@ -22,12 +22,10 @@ func newGenCmd() *cobra.Command {
 		Use:   "gen",
 		Short: "Generate experiment.yaml file by combining an experiment chart with values",
 		Long:  genDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.LocalRun()
-			if err != nil {
+		Run: func(_ *cobra.Command, _ []string) {
+			if err := actor.LocalRun(); err != nil {
 				log.Logger.Error(err)
 			}
-			return err
 		},
 	}
 	addSourceDirFlag(cmd, &actor.SourceDir, true)

@@ -37,13 +37,10 @@ func newLaunchCmd() *cobra.Command {
 		Use:   "launch",
 		Short: "Launch an experiment",
 		Long:  launchDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.LocalRun()
-			if err != nil {
+		Run: func(_ *cobra.Command, _ []string) {
+			if err := actor.LocalRun(); err != nil {
 				log.Logger.Error(err)
-				return err
 			}
-			return nil
 		},
 	}
 	addLaunchFlags(cmd, actor)

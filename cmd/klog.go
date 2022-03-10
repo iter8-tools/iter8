@@ -25,15 +25,13 @@ func newKLogCmd() *cobra.Command {
 		Use:   "log",
 		Short: "get logs for a Kubernetes experiment",
 		Long:  kLogDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			lg, err := actor.KubeRun()
-			if err != nil {
+		Run: func(_ *cobra.Command, _ []string) {
+			if lg, err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
-				return err
+			} else {
+				fmt.Println("experiment logs...")
+				fmt.Println(lg)
 			}
-			fmt.Println("experiment logs...")
-			fmt.Println(lg)
-			return nil
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, false)

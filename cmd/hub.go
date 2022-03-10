@@ -41,12 +41,10 @@ func newHubCmd() *cobra.Command {
 		Use:   "hub",
 		Short: "Download Iter8 experiment",
 		Long:  hubDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			err := actor.Run()
-			if err != nil {
+		Run: func(_ *cobra.Command, _ []string) {
+			if err := actor.Run(); err != nil {
 				log.Logger.Error(err)
 			}
-			return err
 		},
 	}
 	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)

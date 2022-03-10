@@ -27,7 +27,7 @@ func newDocsCmd() *cobra.Command {
 		Short:  "Generate markdown documentation for Iter8 CLI.",
 		Long:   docsDesc,
 		Hidden: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			standardLinks := func(s string) string { return s }
 
 			hdrFunc := func(filename string) string {
@@ -45,12 +45,9 @@ hide:
 			}
 
 			// automatically generate markdown documentation for all Iter8 commands
-			err := doc.GenMarkdownTreeCustom(rootCmd, docsDir, hdrFunc, standardLinks)
-			if err != nil {
+			if err := doc.GenMarkdownTreeCustom(rootCmd, docsDir, hdrFunc, standardLinks); err != nil {
 				log.Logger.Error(err)
-				return err
 			}
-			return nil
 		},
 	}
 	addDocsFlags(cmd, &docsDir)

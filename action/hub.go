@@ -9,6 +9,8 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 type ChartNameAndDestOptions struct {
@@ -19,7 +21,6 @@ type ChartNameAndDestOptions struct {
 type HubOpts struct {
 	ChartNameAndDestOptions
 	action.ChartPathOptions
-	// cli.EnvSettings
 }
 
 func NewHubOpts() *HubOpts {
@@ -50,22 +51,14 @@ func (hub *HubOpts) Run() error {
 	if err := hub.cleanChartArtifacts(); err != nil {
 		return err
 	}
-
 	log.Logger.Info("cleaned up any existing chart artifacts")
 
-	actionConfig := new(action.Configuration)
-
-	// run when each command's execute method is called
-	// helmDriver := os.Getenv("HELM_DRIVER")
-	// if err := actionConfig.Init(hub.RESTClientGetter(), hub.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
-	// 	e := errors.New("unable to initialize helm config")
-	// 	log.Logger.Error(e)
-	// 	return e
-	// }
-
 	// set up helm pull object
-	pull := action.NewPullWithOpts(action.WithConfig(actionConfig))
-	// pull.Settings = &hub.EnvSettings
+	cfg := &action.Configuration{
+		Capabilities: chartutil.DefaultCapabilities,
+	}
+	pull := action.NewPullWithOpts(action.WithConfig(cfg))
+	pull.Settings = cli.New()
 	pull.Untar = true
 	pull.RepoURL = hub.RepoURL
 	pull.Version = hub.Version

@@ -37,17 +37,15 @@ func newAssertCmd() *cobra.Command {
 		Use:   "assert",
 		Short: "Assert if experiment result satisfies conditions",
 		Long:  assertDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			allGood, err := actor.LocalRun()
 			if err != nil {
 				log.Logger.Error(err)
-				return err
 			}
 			if !allGood {
 				log.Logger.Error("assert conditions failed")
 				os.Exit(1)
 			}
-			return nil
 		},
 	}
 	addAssertFlags(cmd, actor)

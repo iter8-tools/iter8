@@ -24,12 +24,10 @@ func newReportCmd() *cobra.Command {
 		Use:   "report",
 		Short: "Generate experiment report",
 		Long:  reportDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			if err := actor.LocalRun(); err != nil {
 				log.Logger.Error(err)
-				return err
 			}
-			return nil
 		},
 	}
 	addReportFlags(cmd, actor)

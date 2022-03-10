@@ -31,17 +31,15 @@ func newKAssertCmd() *cobra.Command {
 		Use:   "assert",
 		Short: "Assert if Kubernetes experiment result satisfies conditions",
 		Long:  kAssertDesc,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			allGood, err := actor.KubeRun()
 			if err != nil {
 				log.Logger.Error(err)
-				return err
 			}
 			if !allGood {
 				log.Logger.Error("assert conditions failed")
 				os.Exit(1)
 			}
-			return nil
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, true)
