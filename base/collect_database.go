@@ -22,12 +22,6 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type CollectDatabaseTemplateInput struct {
-	MonitoringEndpoint string `json:"MonitoringEndpoint" yaml:"MonitoringEndpoint"`
-	IAMToken           string `json:"IAMToken" yaml:"IAMToken"`
-	GUID               string `json:"GUID" yaml:"GUID"`
-}
-
 type CollectDatabaseTemplate struct {
 	Url      string            `json:"url" yaml:"url"`
 	Headers  map[string]string `json:"headers" yaml:"headers"` // TODO: should this be map[string]interface{} instead?

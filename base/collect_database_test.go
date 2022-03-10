@@ -13,6 +13,12 @@ import (
 var templatePath string = "../testdata/templates/ce.metrics.tpl"
 var tempMetricsPath string = "test-ce.metrics.yaml"
 
+type collectDatabaseTemplateInput struct {
+	MonitoringEndpoint string `json:"MonitoringEndpoint" yaml:"MonitoringEndpoint"`
+	IAMToken           string `json:"IAMToken" yaml:"IAMToken"`
+	GUID               string `json:"GUID" yaml:"GUID"`
+}
+
 // has to be a map[string]string in order to do input checks in template
 // func executeTemplate(inputs interface{}, templatePath string, writePath string) error {
 func executeTemplate(inputs map[string]interface{}, templatePath string, writePath string) error {
@@ -68,7 +74,7 @@ func TestGetElapsedTime(t *testing.T) {
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
 	// create metrics file from template
-	input := &CollectDatabaseTemplateInput{
+	input := &collectDatabaseTemplateInput{
 		MonitoringEndpoint: "test-database.com",
 		IAMToken:           "test-token",
 		GUID:               "test-guid",
@@ -179,7 +185,7 @@ func TestCEOneVersion(t *testing.T) {
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
 	// create metrics file from template
-	input := &CollectDatabaseTemplateInput{
+	input := &collectDatabaseTemplateInput{
 		MonitoringEndpoint: "test-database.com",
 		IAMToken:           "test-token",
 		GUID:               "test-guid",
@@ -245,7 +251,7 @@ func TestCEUnauthorized(t *testing.T) {
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
 	// create metrics file from template
-	input := &CollectDatabaseTemplateInput{
+	input := &collectDatabaseTemplateInput{
 		MonitoringEndpoint: "test-database.com",
 		IAMToken:           "test-token",
 		GUID:               "test-guid",
@@ -350,7 +356,7 @@ func TestCESomeValues(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
 	// create metrics file from template
-	input := &CollectDatabaseTemplateInput{
+	input := &collectDatabaseTemplateInput{
 		MonitoringEndpoint: "test-database.com",
 		IAMToken:           "test-token",
 		GUID:               "test-guid",
@@ -459,7 +465,7 @@ func TestCEMultipleVersions(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	// create metrics file from template
-	input := &CollectDatabaseTemplateInput{
+	input := &collectDatabaseTemplateInput{
 		MonitoringEndpoint: "test-database.com",
 		IAMToken:           "test-token",
 		GUID:               "test-guid",
