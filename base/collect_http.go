@@ -127,7 +127,7 @@ func (t *collectHTTPTask) initializeDefaults() {
 	}
 }
 
-//validateInputs for this task
+// validateInputs for this task
 func (t *collectHTTPTask) validateInputs() error {
 	return nil
 }
@@ -149,7 +149,7 @@ func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, err
 		},
 	}
 
-	//num requests
+	// num requests
 	if t.With.NumRequests != nil {
 		fo.RunnerOptions.Exactly = *t.With.NumRequests
 	}
