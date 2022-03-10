@@ -17,11 +17,11 @@ type TextReporter struct {
 	*Reporter
 }
 
-func (tr *TextReporter) Gen() error {
-	// reportText is the text report template
-	//go:embed textreport.tpl
-	var reportText string
+// reportText is the text report template
+//go:embed textreport.tpl
+var reportText string
 
+func (tr *TextReporter) Gen() error {
 	// create text template
 	ttpl, err := textT.New("report").Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(reportText)
 	if err != nil {

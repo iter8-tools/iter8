@@ -20,10 +20,11 @@ type HTMLReporter struct {
 	*Reporter
 }
 
+// reportHTML is the HTML report template
+//go:embed htmlreport.tpl
+var reportHTML string
+
 func (ht *HTMLReporter) Gen() error {
-	// reportHTML is the HTML report template
-	//go:embed htmlreport.tpl
-	var reportHTML string
 
 	// create HTML template
 	htpl, err := htmlT.New("report").Option("missingkey=error").Funcs(sprig.FuncMap()).Funcs(htmlT.FuncMap{
