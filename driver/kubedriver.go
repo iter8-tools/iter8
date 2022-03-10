@@ -455,14 +455,14 @@ func checkIfInstallable(ch *chart.Chart) error {
 	return e
 }
 
-func (driver *KubeDriver) getExperimentId() string {
-	return fmt.Sprintf("%v-%v", driver.Group, driver.Revision)
+func (driver *KubeDriver) getJobName() string {
+	return fmt.Sprintf("%v-%v-job", driver.Group, driver.Revision)
 }
 
 func (driver *KubeDriver) GetExperimentLogs() (string, error) {
 	podsClient := driver.CoreV1().Pods(driver.Namespace())
 	pods, err := podsClient.List(context.TODO(), metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("iter8.tools/id=%v", driver.getExperimentId()),
+		LabelSelector: fmt.Sprintf("job-name=%v", driver.getJobName()),
 	})
 	if err != nil {
 		e := errors.New("unable to get experiment pod(s)")

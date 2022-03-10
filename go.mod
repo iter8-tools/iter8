@@ -22,7 +22,7 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.106.1
-	github.com/itchyny/gojq v0.12.7 // indirect
+	github.com/itchyny/gojq v0.12.7
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/montanaflynn/stats v0.6.6

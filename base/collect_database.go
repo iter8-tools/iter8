@@ -199,7 +199,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 }
 
 // run executes this task
-func (t *collectDatabaseTask) Run(exp *Experiment) error {
+func (t *collectDatabaseTask) run(exp *Experiment) error {
 	// validate inputs
 	var err error
 

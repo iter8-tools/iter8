@@ -167,7 +167,7 @@ func TestCEOneVersion(t *testing.T) {
 	exp.InitResults()
 	exp.Result.initInsightsWithNumVersions(1)
 
-	err = ct.Run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -235,7 +235,7 @@ func TestCEUnauthorized(t *testing.T) {
 	exp.InitResults()
 	exp.Result.initInsightsWithNumVersions(1)
 
-	err = ct.Run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -335,7 +335,7 @@ func TestCESomeValues(t *testing.T) {
 	exp.InitResults()
 	exp.Result.initInsightsWithNumVersions(1)
 
-	err = ct.Run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -442,7 +442,7 @@ func TestCEMultipleVersions(t *testing.T) {
 	exp.InitResults()
 	exp.Result.initInsightsWithNumVersions(2)
 
-	err = ct.Run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -551,7 +551,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	exp.InitResults()
 	exp.Result.initInsightsWithNumVersions(2)
 
-	err = ct.Run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
