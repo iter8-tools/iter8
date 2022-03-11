@@ -36,7 +36,7 @@ func TestRunCollectHTTP(t *testing.T) {
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	err := ct.run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)

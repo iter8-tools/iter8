@@ -44,7 +44,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	err = ct.run(exp)
 
 	log.Logger.Info("dial timeout after defaulting... ", ct.With.DialTimeout.String())
@@ -136,7 +136,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		Tasks: []Task{ct, at},
 	}
 
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
 	err = exp.Tasks[0].run(exp)
 	assert.NoError(t, err)

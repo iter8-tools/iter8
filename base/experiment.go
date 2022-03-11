@@ -303,7 +303,7 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 	return nil
 }
 
-func (e *Experiment) InitResults() {
+func (e *Experiment) initResults() {
 	e.Result = &ExperimentResult{
 		StartTime:         time.Now(),
 		NumCompletedTasks: 0,
@@ -613,19 +613,19 @@ func (exp *Experiment) NoFailure() bool {
 // getSLOsSatisfiedBy returns the set of versions which satisfy SLOs
 func (exp *Experiment) getSLOsSatisfiedBy() []int {
 	if exp == nil {
-		log.Logger.Error("nil experiment")
+		log.Logger.Warning("nil experiment")
 		return nil
 	}
 	if exp.Result == nil {
-		log.Logger.Error("nil experiment result")
+		log.Logger.Warning("nil experiment result")
 		return nil
 	}
 	if exp.Result.Insights == nil {
-		log.Logger.Error("nil insights in experiment result")
+		log.Logger.Warning("nil insights in experiment result")
 		return nil
 	}
 	if exp.Result.Insights.NumVersions == 0 {
-		log.Logger.Error("experiment does not involve any versions")
+		log.Logger.Warning("experiment does not involve any versions")
 		return nil
 	}
 	if exp.Result.Insights.SLOs == nil {
@@ -658,16 +658,27 @@ func (exp *Experiment) getSLOsSatisfiedBy() []int {
 
 // SLOs returns true if all versions satisfy SLOs
 func (exp *Experiment) SLOs() bool {
+	if exp == nil || exp.Result == nil || exp.Result.Insights == nil {
+		log.Logger.Warning("experiment, or result, or insights is nil")
+		return false
+	}
 	sby := exp.getSLOsSatisfiedBy()
 	return exp.Result.Insights.NumVersions == len(sby)
 }
 
 // Run the experiment
 func (exp *Experiment) run(driver Driver) error {
+	log.Logger.Info("experiment run started ...")
 	var err error
 	if exp.Result == nil {
-		exp.InitResults()
+		exp.initResults()
+		err = driver.WriteResult(exp.Result)
+		if err != nil {
+			return err
+		}
 	}
+	log.Logger.Info("exp result exists now ... ")
+	log.Logger.Infof("attempting to execute %v tasks", len(exp.Tasks))
 	for i, t := range exp.Tasks {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
 		shouldRun := true
@@ -693,6 +704,10 @@ func (exp *Experiment) run(driver Driver) error {
 			if err != nil {
 				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
 				exp.failExperiment()
+				e := driver.WriteResult(exp.Result)
+				if e != nil {
+					return e
+				}
 				return err
 			}
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "completed")
@@ -700,10 +715,7 @@ func (exp *Experiment) run(driver Driver) error {
 			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "skipped")
 		}
 
-		err = exp.incrementNumCompletedTasks()
-		if err != nil {
-			return err
-		}
+		exp.incrementNumCompletedTasks()
 		err = driver.WriteResult(exp.Result)
 		if err != nil {
 			return err
@@ -714,21 +726,12 @@ func (exp *Experiment) run(driver Driver) error {
 
 // failExperiment sets the experiment failure status to true
 func (e *Experiment) failExperiment() {
-	if e.Result == nil {
-		log.Logger.Warn("failExperiment called on an experiment object without results")
-		e.InitResults()
-	}
 	e.Result.Failure = true
 }
 
 // incrementNumCompletedTasks increments the numbere of completed tasks in the experimeent
-func (e *Experiment) incrementNumCompletedTasks() error {
-	if e.Result == nil {
-		log.Logger.Warn("incrementNumCompletedTasks called on an experiment object without results")
-		e.InitResults()
-	}
+func (e *Experiment) incrementNumCompletedTasks() {
 	e.Result.NumCompletedTasks++
-	return nil
 }
 
 // getIf returns the condition (if any) which determine
@@ -776,8 +779,6 @@ func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		e.InitResults()
 	}
 	return &e, nil
 }

@@ -6,6 +6,7 @@ import (
 )
 
 type RunOpts struct {
+	// applicable only for local experiments
 	RunDir string
 	// applicable only for kubernetes experiments
 	driver.KubeDriver

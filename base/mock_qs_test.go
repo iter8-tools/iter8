@@ -42,7 +42,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		Tasks: []Task{ct, at},
 	}
 
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
 	err := exp.Tasks[0].run(exp)
 	assert.NoError(t, err)
@@ -93,7 +93,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		Tasks: []Task{ct, at},
 	}
 
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
 	err := exp.Tasks[0].run(exp)
 	assert.NoError(t, err)

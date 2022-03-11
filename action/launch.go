@@ -8,6 +8,8 @@ import (
 	"github.com/iter8-tools/iter8/driver"
 )
 
+const DefaultIter8RepoURL = "https://iter8-tools.github.io/hub"
+
 type LaunchOpts struct {
 	DryRun bool
 	HubOpts
@@ -19,7 +21,9 @@ type LaunchOpts struct {
 }
 
 func NewLaunchOpts() *LaunchOpts {
-	return &LaunchOpts{}
+	return &LaunchOpts{
+		RunOpts: *NewRunOpts(),
+	}
 }
 
 func (lOpts *LaunchOpts) LocalRun() error {

@@ -59,7 +59,7 @@ func TestGetElapsedTime(t *testing.T) {
 
 	// this should add a startingTime that will be overwritten by the one in
 	// versionInfo
-	exp.InitResults()
+	exp.initResults()
 
 	elapsedTime, _ := getElapsedTime(versionInfo, exp)
 
@@ -164,7 +164,7 @@ func TestCEOneVersion(t *testing.T) {
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
 
 	err = ct.run(exp)
@@ -232,7 +232,7 @@ func TestCEUnauthorized(t *testing.T) {
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
 
 	err = ct.run(exp)
@@ -332,7 +332,7 @@ func TestCESomeValues(t *testing.T) {
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
 
 	err = ct.run(exp)
@@ -439,7 +439,7 @@ func TestCEMultipleVersions(t *testing.T) {
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(2)
 
 	err = ct.run(exp)
@@ -548,7 +548,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(2)
 
 	err = ct.run(exp)

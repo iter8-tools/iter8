@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	defaultIter8RepoURL    = "https://iter8-tools.github.io/hub"
 	defaultExperimentGroup = "default"
 )
 
@@ -68,5 +67,5 @@ func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartN
 
 	// fill c
 	cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 0.9.0) or it may reference a valid range (e.g. 0.9.x). If this is not specified, the latest compatible version is used")
-	cmd.Flags().StringVar(&c.RepoURL, "repoURL", defaultIter8RepoURL, "experiment chart repository url where to locate the requested experiment chart")
+	cmd.Flags().StringVar(&c.RepoURL, "repoURL", ia.DefaultIter8RepoURL, "experiment chart repository url where to locate the requested experiment chart")
 }

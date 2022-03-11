@@ -44,9 +44,9 @@ const (
 
 type KubeDriver struct {
 	*cli.EnvSettings
-	*kubernetes.Clientset
-	Group    string
-	Revision int
+	Clientset kubernetes.Interface
+	Group     string
+	Revision  int
 }
 
 func (driver *KubeDriver) getHelmConfig() (*action.Configuration, error) {
@@ -88,21 +88,23 @@ func (driver *KubeDriver) Init() error {
 		}
 	}
 
-	// get REST config
-	restConfig, err := driver.RESTClientGetter().ToRESTConfig()
-	if err != nil {
-		e := errors.New("unable to get Kubernetes REST config")
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return e
+	if driver.Clientset == nil { // initialize
+		// get REST config
+		restConfig, err := driver.RESTClientGetter().ToRESTConfig()
+		if err != nil {
+			e := errors.New("unable to get Kubernetes REST config")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return e
+		}
+		// get clientset
+		clientset, err := kubernetes.NewForConfig(restConfig)
+		if err != nil {
+			e := errors.New("unable to get Kubernetes clientset")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return e
+		}
+		driver.Clientset = clientset
 	}
-	// get clientset
-	clientset, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		e := errors.New("unable to get Kubernetes clientset")
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return e
-	}
-	driver.Clientset = clientset
 
 	return nil
 }
@@ -120,7 +122,7 @@ func (driver *KubeDriver) getExperimentJobName() string {
 }
 
 func (driver *KubeDriver) getSecretWithRetry(name string) (s *corev1.Secret, err error) {
-	secretsClient := driver.CoreV1().Secrets(driver.Namespace())
+	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 	for i := 0; i < maxGetRetries; i++ {
 		s, err = secretsClient.Get(context.Background(), name, metav1.GetOptions{})
 		if err == nil {
@@ -138,7 +140,7 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (s *corev1.Secret, err
 
 func (driver *KubeDriver) getJobWithRetry(name string) (*batchv1.Job, error) {
 
-	jobsClient := driver.BatchV1().Jobs(driver.Namespace())
+	jobsClient := driver.Clientset.BatchV1().Jobs(driver.Namespace())
 
 	for i := 0; i < maxGetRetries; i++ {
 		j, err := jobsClient.Get(context.Background(), name, metav1.GetOptions{})
@@ -227,7 +229,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 	}
 	// get job ...
 
-	secretsClient := driver.CoreV1().Secrets(driver.Namespace())
+	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 	rYaml, _ := yaml.Marshal(r)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -243,11 +245,15 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 	}
 	// formed result secret ...
 
-	_, err = secretsClient.Create(context.Background(), &sec, metav1.CreateOptions{})
+	s, err := secretsClient.Create(context.Background(), &sec, metav1.CreateOptions{})
 	if err != nil {
 		e := errors.New("unable to create result secret")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
 	}
+
+	log.Logger.Info("secret data... ", s.Data)
+	log.Logger.Info("secret string data... ", s.StringData)
 
 	// created result secret ...
 	return nil
@@ -257,6 +263,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	// create result secret if need be
 	if sec, _ := driver.getExperimentResultSecret(); sec == nil {
+		log.Logger.Info("creating experiment result secret")
 		if err := driver.createExperimentResultSecret(r); err != nil {
 			return err
 		}
@@ -272,7 +279,7 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	}}
 	payloadBytes, _ := json.Marshal(payload)
 
-	secretsClient := driver.CoreV1().Secrets(driver.Namespace())
+	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 	_, err := secretsClient.Patch(context.Background(), driver.getResultSecretName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
@@ -460,7 +467,7 @@ func (driver *KubeDriver) getJobName() string {
 }
 
 func (driver *KubeDriver) GetExperimentLogs() (string, error) {
-	podsClient := driver.CoreV1().Pods(driver.Namespace())
+	podsClient := driver.Clientset.CoreV1().Pods(driver.Namespace())
 	pods, err := podsClient.List(context.TODO(), metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("job-name=%v", driver.getJobName()),
 	})

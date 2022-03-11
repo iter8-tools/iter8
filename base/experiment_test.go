@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"sigs.k8s.io/yaml"
@@ -26,7 +27,7 @@ func TestReadExperiment(t *testing.T) {
 }
 func TestRunTask(t *testing.T) {
 	httpmock.Activate()
-
+	defer httpmock.DeactivateAndReset()
 	// Exact URL match
 	httpmock.RegisterResponder("GET", "https://something.com",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
@@ -59,7 +60,7 @@ func TestRunTask(t *testing.T) {
 		Tasks:  []Task{ct, at},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
+	exp.initResults()
 	err := ct.run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
@@ -69,7 +70,6 @@ func TestRunTask(t *testing.T) {
 		assert.True(t, exp.Result.Insights.SLOsSatisfied[i][0]) // satisfied by only version
 	}
 
-	httpmock.DeactivateAndReset()
 }
 
 type mockDriver struct {
@@ -90,6 +90,11 @@ func (m *mockDriver) ReadSpec() (ExperimentSpec, error) {
 }
 
 func TestRunExperiment(t *testing.T) {
+	httpmock.Activate()
+	// Exact URL match
+	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
+		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
+
 	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)
 	es := &ExperimentSpec{}
@@ -103,15 +108,21 @@ func TestRunExperiment(t *testing.T) {
 
 	err = RunExperiment(&mockDriver{&exp})
 	assert.NoError(t, err)
+
+	yamlBytes, _ := yaml.Marshal(exp.Result)
+	log.Logger.WithStackTrace(string(yamlBytes)).Debug("results")
 	assert.True(t, exp.Completed())
 	assert.True(t, exp.NoFailure())
 	assert.True(t, exp.SLOs())
+
+	httpmock.DeactivateAndReset()
 }
 
 func TestFailExperiment(t *testing.T) {
 	exp := Experiment{
 		Tasks: ExperimentSpec{},
 	}
+	exp.initResults()
 
 	exp.failExperiment()
 	assert.False(t, exp.NoFailure())
