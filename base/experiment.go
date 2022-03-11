@@ -713,13 +713,12 @@ func (exp *Experiment) run(driver Driver) error {
 }
 
 // failExperiment sets the experiment failure status to true
-func (e *Experiment) failExperiment() error {
+func (e *Experiment) failExperiment() {
 	if e.Result == nil {
 		log.Logger.Warn("failExperiment called on an experiment object without results")
 		e.InitResults()
 	}
 	e.Result.Failure = true
-	return nil
 }
 
 // incrementNumCompletedTasks increments the numbere of completed tasks in the experimeent

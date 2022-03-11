@@ -24,7 +24,7 @@ func TestReadExperiment(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(*es))
 }
-func TestRunExperiment(t *testing.T) {
+func TestRunTask(t *testing.T) {
 	httpmock.Activate()
 
 	// Exact URL match
@@ -70,4 +70,49 @@ func TestRunExperiment(t *testing.T) {
 	}
 
 	httpmock.DeactivateAndReset()
+}
+
+type mockDriver struct {
+	*Experiment
+}
+
+func (m *mockDriver) ReadResult() (*ExperimentResult, error) {
+	return m.Experiment.Result, nil
+}
+
+func (m *mockDriver) WriteResult(r *ExperimentResult) error {
+	m.Experiment.Result = r
+	return nil
+}
+
+func (m *mockDriver) ReadSpec() (ExperimentSpec, error) {
+	return m.Experiment.Tasks, nil
+}
+
+func TestRunExperiment(t *testing.T) {
+	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
+	assert.NoError(t, err)
+	es := &ExperimentSpec{}
+	err = yaml.Unmarshal(b, es)
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(*es))
+
+	exp := Experiment{
+		Tasks: *es,
+	}
+
+	err = RunExperiment(&mockDriver{&exp})
+	assert.NoError(t, err)
+	assert.True(t, exp.Completed())
+	assert.True(t, exp.NoFailure())
+	assert.True(t, exp.SLOs())
+}
+
+func TestFailExperiment(t *testing.T) {
+	exp := Experiment{
+		Tasks: ExperimentSpec{},
+	}
+
+	exp.failExperiment()
+	assert.False(t, exp.NoFailure())
 }
