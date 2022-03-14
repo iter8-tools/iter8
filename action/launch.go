@@ -1,28 +1,25 @@
 package action
 
 import (
-	"errors"
 	"path"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 )
 
-const DefaultIter8RepoURL = "https://iter8-tools.github.io/hub"
-
 type LaunchOpts struct {
 	DryRun bool
 	HubOpts
 	GenOpts
-	// applicable only for local experiments
 	RunOpts
-	// applicable only for Kubernetes experiments
-	driver.KubeDriver
 }
 
-func NewLaunchOpts() *LaunchOpts {
+func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
+	hOpts := NewHubOpts()
+	rOpts := NewRunOpts(kd)
 	return &LaunchOpts{
-		RunOpts: *NewRunOpts(),
+		HubOpts: *hOpts,
+		RunOpts: *rOpts,
 	}
 }
 
@@ -43,16 +40,13 @@ func (lOpts *LaunchOpts) LocalRun() error {
 		return nil
 	}
 	// run experiment locally
-	lOpts.RunDir = lOpts.DestDir
 	return lOpts.RunOpts.LocalRun()
 }
 
 func (lOpts *LaunchOpts) KubeRun() error {
 	// initialize kube driver
 	if err := lOpts.KubeDriver.Init(); err != nil {
-		e := errors.New("unable to initialize KubeDriver")
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return e
+		return err
 	}
 
 	if lOpts.Revision > 0 { // last release found; setup upgrade

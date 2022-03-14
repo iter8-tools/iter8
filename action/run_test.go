@@ -11,10 +11,10 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestLocalRun(t *testing.T) {
@@ -23,7 +23,8 @@ func TestLocalRun(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
-	rOpts := NewRunOpts()
+	// fix rOpts
+	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata")
 	err := rOpts.LocalRun()
 	assert.NoError(t, err)
@@ -37,13 +38,12 @@ func TestKubeRun(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
-	rOpts := NewRunOpts()
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
-	rOpts.Group = "default"
+	// fix rOpts
+	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.Revision = 1
-	fClientset := fake.NewSimpleClientset()
-	fClientset.PrependReactor("create", "secrets", secretDataReactor)
-	fClientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
+	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-spec",
 			Namespace: "default",
@@ -52,19 +52,17 @@ func TestKubeRun(t *testing.T) {
 			"experiment.yaml": byteArray,
 		},
 	}, metav1.CreateOptions{})
-	fClientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
+	rOpts.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job",
 			Namespace: "default",
 		},
 	}, metav1.CreateOptions{})
-	rOpts.Clientset = fClientset
-	rOpts.EnvSettings = cli.New()
 	err := rOpts.KubeRun()
 	assert.NoError(t, err)
 
 	// check results
-	exp, err := base.BuildExperiment(true, &rOpts.KubeDriver)
+	exp, err := base.BuildExperiment(true, rOpts.KubeDriver)
 	assert.NoError(t, err)
 	assert.True(t, exp.Completed())
 	assert.True(t, exp.NoFailure())

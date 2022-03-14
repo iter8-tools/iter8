@@ -1,7 +1,7 @@
 package internal
 
 /*
-Credit: This file is sourced from https://github.com/bojand/ghz and modified for reuse in Iter8
+Credits: This file is sourced from https://github.com/bojand/ghz and modified for reuse in Iter8
 */
 
 import (

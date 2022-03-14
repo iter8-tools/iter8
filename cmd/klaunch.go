@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"io"
+	"os"
+
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
 
@@ -36,14 +40,22 @@ By default, the launch command downloads charts from the official Iter8 chart re
 			--set url=https://httpbin.org/get
 `
 
-func newKLaunchCmd() *cobra.Command {
-	actor := ia.NewLaunchOpts()
+func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
+	actor := ia.NewLaunchOpts(kd)
 
 	cmd := &cobra.Command{
 		Use:   "launch",
 		Short: "launch an experiment in Kubernetes",
 		Long:  kLaunchDesc,
 		Run: func(_ *cobra.Command, _ []string) {
+			if err := actor.Init(); err != nil {
+				log.Logger.Error(err)
+				os.Exit(1)
+			}
+			if err := actor.Init(); err != nil {
+				log.Logger.Error(err)
+				os.Exit(1)
+			}
 			if err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
 			}
@@ -58,5 +70,6 @@ func newKLaunchCmd() *cobra.Command {
 }
 
 func init() {
-	kCmd.AddCommand(newKLaunchCmd())
+	kd := driver.NewKubeDriver(settings)
+	kCmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
 }

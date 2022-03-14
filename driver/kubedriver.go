@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
@@ -17,7 +18,16 @@ import (
 	// Import to initialize client auth plugins.
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/registry"
+	"helm.sh/helm/v3/pkg/storage"
+	"k8s.io/client-go/kubernetes/fake"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+
+	helmfake "helm.sh/helm/v3/pkg/kube/fake"
+
+	helmerrors "github.com/pkg/errors"
+	helmdriver "helm.sh/helm/v3/pkg/storage/driver"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -27,9 +37,12 @@ import (
 	"helm.sh/helm/v3/pkg/downloader"
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/yaml"
+
+	ktesting "k8s.io/client-go/testing"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -42,71 +55,159 @@ const (
 	getRetryInterval = 1 * time.Second
 )
 
+// KubeDriver embeds Helm and Kube configuration, and
+// enables interaction with a Kubernetes cluster through Kube APIs and Helm APIs
 type KubeDriver struct {
 	*cli.EnvSettings
 	Clientset kubernetes.Interface
-	Group     string
-	Revision  int
+	*action.Configuration
+	Group    string
+	Revision int
 }
 
-func (driver *KubeDriver) getHelmConfig() (*action.Configuration, error) {
-	// getting kube config
-	actionConfig := new(action.Configuration)
-	helmDriver := os.Getenv("HELM_DRIVER")
-	if err := actionConfig.Init(driver.RESTClientGetter(), driver.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
-		e := errors.New("unable to get Helm client config")
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return nil, e
+// NewKubeDriver creates and returns a new KubeDriver
+func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
+	return &KubeDriver{
+		EnvSettings: s,
 	}
-	return actionConfig, nil
 }
 
-func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
-	log.Logger.Infof("fetching latest revision for experiment group %v", driver.Group)
-	// get kube config
-	actionConfig, err := driver.getHelmConfig()
-	if err != nil {
-		return nil, err
-	}
-	// getting last revision
-	rel, err := actionConfig.Releases.Last(driver.Group)
-	if err != nil {
-		e := fmt.Errorf("unable to get latest revision for experiment group %v", driver.Group)
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return nil, e
-	}
-	return rel, nil
-}
-
-func (driver *KubeDriver) Init() error {
-	// update revision to latest, if none is specified
-	if driver.Revision <= 0 {
-		if rel, err := driver.getLastRelease(); err == nil {
-			driver.Revision = rel.Version
-		} else {
-			return err
-		}
-	}
-
-	if driver.Clientset == nil { // initialize
+// initKube initializes the Kube clientset
+func (kd *KubeDriver) initKube() error {
+	if kd.Clientset == nil {
 		// get REST config
-		restConfig, err := driver.RESTClientGetter().ToRESTConfig()
+		restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
 		if err != nil {
 			e := errors.New("unable to get Kubernetes REST config")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
 		// get clientset
-		clientset, err := kubernetes.NewForConfig(restConfig)
+		kd.Clientset, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes clientset")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
-		driver.Clientset = clientset
+	}
+	return nil
+}
+
+// initHelm initializes the Helm config
+func (kd *KubeDriver) initHelm() error {
+	if kd.Configuration == nil {
+		// getting kube config
+		kd.Configuration = new(action.Configuration)
+		helmDriver := os.Getenv("HELM_DRIVER")
+		if err := kd.Configuration.Init(kd.EnvSettings.RESTClientGetter(), kd.EnvSettings.Namespace(), helmDriver, log.Logger.Debugf); err != nil {
+			e := errors.New("unable to get Helm client config")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return e
+		}
+	}
+	return nil
+}
+
+// initRevision initializes the latest revision
+func (driver *KubeDriver) initRevision() error {
+	// update revision to latest, if none is specified
+	if driver.Revision <= 0 {
+		if rel, err := driver.getLastRelease(); err == nil && rel != nil {
+			driver.Revision = rel.Version
+		} else {
+			return err
+		}
+	}
+	return nil
+}
+
+func (driver *KubeDriver) Init() error {
+	if err := driver.initKube(); err != nil {
+		return err
+	}
+	if err := driver.initHelm(); err != nil {
+		return err
+	}
+	if err := driver.initRevision(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// initKube initialize the Kube clientset with a fake
+func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
+	// secretDataReactor sets the secret.Data field based on the values from secret.StringData
+	// Credits: this function is adapted from https://github.com/creydr/go-k8s-utils
+	var secretDataReactor = func(action ktesting.Action) (bool, runtime.Object, error) {
+		secret, _ := action.(ktesting.CreateAction).GetObject().(*corev1.Secret)
+
+		if secret.Data == nil {
+			secret.Data = make(map[string][]byte)
+		}
+
+		for k, v := range secret.StringData {
+			sEnc := base64.StdEncoding.EncodeToString([]byte(v))
+			secret.Data[k] = []byte(sEnc)
+		}
+
+		return false, nil, nil
 	}
 
+	fc := fake.NewSimpleClientset(objects...)
+	fc.PrependReactor("create", "secrets", secretDataReactor)
+	kd.Clientset = fc
+}
+
+// initHelmFake initializes the Helm config with a fake
+// Credits: this function is adapted from helm
+// https://github.com/helm/helm/blob/e9abdc5efe11cdc23576c20c97011d452201cd92/pkg/action/action_test.go#L37
+func (kd *KubeDriver) initHelmFake() {
+	registryClient, err := registry.NewClient()
+	if err != nil {
+		log.Logger.Error(err)
+		return
+	}
+
+	kd.Configuration = &action.Configuration{
+		Releases:       storage.Init(helmdriver.NewMemory()),
+		KubeClient:     &helmfake.FailingKubeClient{PrintingKubeClient: helmfake.PrintingKubeClient{Out: ioutil.Discard}},
+		Capabilities:   chartutil.DefaultCapabilities,
+		RegistryClient: registryClient,
+		Log:            log.Logger.Debugf,
+	}
+}
+
+// initFake initializes fake Kubernetes and Helm clients
+func (driver *KubeDriver) initFake(objects ...runtime.Object) error {
+	driver.initKubeFake(objects...)
+	driver.initHelmFake()
 	return nil
+}
+
+// NewFakeKubeDriver creates and returns a new KubeDriver with fake clients
+func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDriver {
+	kd := &KubeDriver{
+		EnvSettings: s,
+	}
+	kd.initFake(objects...)
+	return kd
+}
+
+func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
+	log.Logger.Infof("fetching latest revision for experiment group %v", driver.Group)
+	// getting last revision
+	rel, err := driver.Configuration.Releases.Last(driver.Group)
+	if err != nil {
+		if helmerrors.Is(err, helmdriver.ErrReleaseNotFound) {
+			log.Logger.Info("experiment release not found")
+			return nil, nil
+		} else {
+			e := fmt.Errorf("unable to get latest revision for experiment group %v", driver.Group)
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return nil, e
+		}
+	}
+	return rel, nil
 }
 
 func (driver *KubeDriver) getSpecSecretName() string {
@@ -288,14 +389,10 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	return err
 }
 
-// Credit: the logic for this function is sourced from Helm
+// Credits: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
-	cfg, err := driver.getHelmConfig()
-	if err != nil {
-		return err
-	}
-	client := action.NewUpgrade(cfg)
+	client := action.NewUpgrade(driver.Configuration)
 	client.Namespace = driver.Namespace()
 	client.Version = version
 	client.DryRun = dry
@@ -335,14 +432,10 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 	return nil
 }
 
-// Credit: the logic for this function is sourced from Helm
+// Credits: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
 func (driver *KubeDriver) Install(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
-	cfg, err := driver.getHelmConfig()
-	if err != nil {
-		return err
-	}
-	client := action.NewInstall(cfg)
+	client := action.NewInstall(driver.Configuration)
 	client.Namespace = driver.Namespace()
 	client.Version = version
 	client.DryRun = dry
@@ -383,7 +476,7 @@ func (driver *KubeDriver) Install(version string, chartName string, valueOpts va
 	return nil
 }
 
-// Credit: the logic for this function is sourced from Helm
+// Credits: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
 func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *cli.EnvSettings, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
 	chartPath, err := cpo.LocateChart(chartName, settings)
@@ -447,7 +540,7 @@ func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *c
 	return ch, vals, nil
 }
 
-// Credit: this function is sourced from Helm
+// Credits: this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L270
 //
 // checkIfInstallable validates if a chart can be installed

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Credit: Several of the tests in this file are based on
+// Credits: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
 	callType := helloworld.Unary

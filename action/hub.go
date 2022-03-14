@@ -8,6 +8,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/driver"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
@@ -24,7 +25,11 @@ type HubOpts struct {
 }
 
 func NewHubOpts() *HubOpts {
-	return &HubOpts{}
+	return &HubOpts{
+		ChartPathOptions: action.ChartPathOptions{
+			RepoURL: driver.DefaultIter8RepoURL,
+		},
+	}
 }
 
 // clean pre-existing chart artifacts in destination dir

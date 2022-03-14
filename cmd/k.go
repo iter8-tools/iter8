@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/cli"
 )
 
-var settings = cli.New()
+var (
+	settings = cli.New()
+)
 
 var kCmd = &cobra.Command{
 	Use:   "k",
@@ -14,7 +17,7 @@ var kCmd = &cobra.Command{
 }
 
 func addExperimentGroupFlag(cmd *cobra.Command, groupP *string, required bool) {
-	cmd.Flags().StringVarP(groupP, "group", "g", defaultExperimentGroup, "name of the experiment group")
+	cmd.Flags().StringVarP(groupP, "group", "g", driver.DefaultExperimentGroup, "name of the experiment group")
 	if required {
 		cmd.MarkFlagRequired("group")
 	}
@@ -28,7 +31,6 @@ func addExperimentRevisionFlag(cmd *cobra.Command, revisionP *int, required bool
 }
 
 func init() {
+	settings.AddFlags(kCmd.PersistentFlags())
 	rootCmd.AddCommand(kCmd)
-	flags := kCmd.PersistentFlags()
-	settings.AddFlags(flags)
 }

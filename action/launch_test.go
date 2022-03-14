@@ -1,11 +1,12 @@
 package action
 
 import (
-	"os"
 	"testing"
 
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 // import (
@@ -31,59 +32,30 @@ func TestLocalLaunch(t *testing.T) {
 	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
-	lOpts := NewLaunchOpts()
-	lOpts.HubOpts.DestDir = t.TempDir()
-	lOpts.HubOpts.ChartName = "load-test-http"
-	lOpts.HubOpts.RepoURL = DefaultIter8RepoURL
-	lOpts.GenOpts.Values = []string{"url=https://httpbin.org/get"}
-	os.Chdir(lOpts.HubOpts.DestDir)
+	// fix lOpts
+	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
+	lOpts.DestDir = t.TempDir()
+	lOpts.ChartName = "load-test-http"
+	lOpts.Values = []string{"url=https://httpbin.org/get"}
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
 
 	httpmock.DeactivateAndReset()
 }
 
-// func TestKubeRun(t *testing.T) {
-// 	httpmock.Activate()
-// 	// Exact URL match
-// 	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
-// 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
+func TestKubeLaunch(t *testing.T) {
+	var err error
 
-// 	rOpts := NewRunOpts()
-// 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
-// 	rOpts.Group = "default"
-// 	rOpts.Revision = 1
-// 	fClientset := fake.NewSimpleClientset()
-// 	fClientset.PrependReactor("create", "secrets", secretDataReactor)
-// 	fClientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Name:      "default-1-spec",
-// 			Namespace: "default",
-// 		},
-// 		Data: map[string][]byte{
-// 			"experiment.yaml": byteArray,
-// 		},
-// 	}, metav1.CreateOptions{})
-// 	fClientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Name:      "default-1-job",
-// 			Namespace: "default",
-// 		},
-// 	}, metav1.CreateOptions{})
-// 	rOpts.Clientset = fClientset
-// 	rOpts.EnvSettings = cli.New()
-// 	err := rOpts.KubeRun()
-// 	assert.NoError(t, err)
+	// fix lOpts
+	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
+	lOpts.ChartName = "load-test-http"
+	lOpts.DestDir = t.TempDir()
+	lOpts.Values = []string{"url=https://iter8.tools"}
 
-// 	// check results
-// 	exp, err := base.BuildExperiment(true, &rOpts.KubeDriver)
-// 	assert.NoError(t, err)
-// 	assert.True(t, exp.Completed())
-// 	assert.True(t, exp.NoFailure())
-// 	assert.True(t, exp.SLOs())
-// 	assert.Equal(t, 4, exp.Result.NumCompletedTasks)
+	err = lOpts.KubeRun()
+	assert.NoError(t, err)
 
-// 	log.Logger.Info(exp.Result)
-
-// 	httpmock.DeactivateAndReset()
-// }
+	rel, err := lOpts.Releases.Last(lOpts.Group)
+	assert.NotNil(t, rel)
+	assert.NoError(t, err)
+}

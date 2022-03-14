@@ -2,6 +2,7 @@ package cmd
 
 import (
 	ia "github.com/iter8-tools/iter8/action"
+	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/sirupsen/logrus"
@@ -11,11 +12,9 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
-const (
-	defaultExperimentGroup = "default"
+var (
+	logLevel = "info"
 )
-
-var logLevel = "info"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -47,7 +46,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
 }
 
-// Credit: the following function is from Helm. Please see:
+// Credits: the following function is from Helm. Please see:
 // https://github.com/helm/helm/blob/main/cmd/helm/flags.go
 func addValueFlags(f *pflag.FlagSet, v *values.Options) {
 	f.StringSliceVarP(&v.ValueFiles, "values", "f", []string{}, "specify values in a YAML file or a URL (can specify multiple)")
@@ -56,7 +55,7 @@ func addValueFlags(f *pflag.FlagSet, v *values.Options) {
 	f.StringArrayVar(&v.FileValues, "set-file", []string{}, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
 }
 
-// Credit: the following function is modified from Helm.
+// Credits: the following function is modified from Helm.
 // Please see addChartPathFlags below:
 // https://github.com/helm/helm/blob/main/cmd/helm/flags.go
 func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartNameAndDestOptions) {
@@ -67,5 +66,5 @@ func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartN
 
 	// fill c
 	cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 0.9.0) or it may reference a valid range (e.g. 0.9.x). If this is not specified, the latest compatible version is used")
-	cmd.Flags().StringVar(&c.RepoURL, "repoURL", ia.DefaultIter8RepoURL, "experiment chart repository url where to locate the requested experiment chart")
+	cmd.Flags().StringVar(&c.RepoURL, "repoURL", driver.DefaultIter8RepoURL, "experiment chart repository url where to locate the requested experiment chart")
 }

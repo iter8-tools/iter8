@@ -9,24 +9,22 @@ type RunOpts struct {
 	// applicable only for local experiments
 	RunDir string
 	// applicable only for kubernetes experiments
-	driver.KubeDriver
+	*driver.KubeDriver
 }
 
-func NewRunOpts() *RunOpts {
+func NewRunOpts(kd *driver.KubeDriver) *RunOpts {
 	return &RunOpts{
-		RunDir: ".",
+		RunDir:     ".",
+		KubeDriver: kd,
 	}
 }
 
-func (runner *RunOpts) LocalRun() error {
+func (rOpts *RunOpts) LocalRun() error {
 	return base.RunExperiment(&driver.FileDriver{
-		RunDir: runner.RunDir,
+		RunDir: rOpts.RunDir,
 	})
 }
 
-func (runner *RunOpts) KubeRun() error {
-	if err := runner.KubeDriver.Init(); err != nil {
-		return err
-	}
-	return base.RunExperiment(runner)
+func (rOpts *RunOpts) KubeRun() error {
+	return base.RunExperiment(rOpts)
 }
