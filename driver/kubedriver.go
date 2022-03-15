@@ -69,6 +69,7 @@ type KubeDriver struct {
 func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
 	return &KubeDriver{
 		EnvSettings: s,
+		Group:       DefaultExperimentGroup,
 	}
 }
 
@@ -188,6 +189,7 @@ func (driver *KubeDriver) initFake(objects ...runtime.Object) error {
 func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDriver {
 	kd := &KubeDriver{
 		EnvSettings: s,
+		Group:       DefaultExperimentGroup,
 	}
 	kd.initFake(objects...)
 	return kd

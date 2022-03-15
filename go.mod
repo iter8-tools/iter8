@@ -24,6 +24,7 @@ require (
 	github.com/bojand/ghz v0.106.1
 	github.com/itchyny/gojq v0.12.7
 	github.com/jarcoal/httpmock v1.1.0
+	github.com/mattn/go-shellwords v1.0.12
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/montanaflynn/stats v0.6.6
 	github.com/pkg/errors v0.9.1

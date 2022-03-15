@@ -27,7 +27,6 @@ func TestReadExperiment(t *testing.T) {
 }
 func TestRunTask(t *testing.T) {
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 	// Exact URL match
 	httpmock.RegisterResponder("GET", "https://something.com",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
@@ -69,6 +68,8 @@ func TestRunTask(t *testing.T) {
 	for i := 0; i < len(exp.Result.Insights.SLOs); i++ { // i^th SLO
 		assert.True(t, exp.Result.Insights.SLOsSatisfied[i][0]) // satisfied by only version
 	}
+
+	httpmock.DeactivateAndReset()
 
 }
 
@@ -113,6 +114,8 @@ func TestRunExperiment(t *testing.T) {
 	log.Logger.WithStackTrace(string(yamlBytes)).Debug("results")
 	assert.True(t, exp.Completed())
 	assert.True(t, exp.NoFailure())
+	expRes, _ := yaml.Marshal(exp.Result)
+	log.Logger.Info(string(expRes))
 	assert.True(t, exp.SLOs())
 
 	httpmock.DeactivateAndReset()

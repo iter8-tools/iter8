@@ -70,6 +70,5 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 }
 
 func init() {
-	kd := driver.NewKubeDriver(settings)
 	kCmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
 }

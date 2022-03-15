@@ -3,11 +3,6 @@ package cmd
 import (
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
-	"helm.sh/helm/v3/pkg/cli"
-)
-
-var (
-	settings = cli.New()
 )
 
 var kCmd = &cobra.Command{

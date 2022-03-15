@@ -64,6 +64,5 @@ func addLaunchFlags(cmd *cobra.Command, actor *ia.LaunchOpts) {
 }
 
 func init() {
-	kd := driver.NewKubeDriver(settings)
 	rootCmd.AddCommand(newLaunchCmd(kd, os.Stdout))
 }

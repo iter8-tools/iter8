@@ -44,6 +44,5 @@ func addRunFlags(cmd *cobra.Command, actor *ia.RunOpts) {
 }
 
 func init() {
-	kd := driver.NewKubeDriver(settings)
 	rootCmd.AddCommand(newRunCmd(kd, os.Stdout))
 }

@@ -49,6 +49,5 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 }
 
 func init() {
-	kd := driver.NewKubeDriver(settings)
 	kCmd.AddCommand(newKRunCmd(kd, os.Stdout))
 }

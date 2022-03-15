@@ -36,7 +36,7 @@ func TestLocalLaunch(t *testing.T) {
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.DestDir = t.TempDir()
 	lOpts.ChartName = "load-test-http"
-	lOpts.Values = []string{"url=https://httpbin.org/get"}
+	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
 
@@ -50,7 +50,7 @@ func TestKubeLaunch(t *testing.T) {
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.ChartName = "load-test-http"
 	lOpts.DestDir = t.TempDir()
-	lOpts.Values = []string{"url=https://iter8.tools"}
+	lOpts.Values = []string{"url=https://iter8.tools", "duration=2s"}
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

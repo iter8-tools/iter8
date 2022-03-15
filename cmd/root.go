@@ -9,11 +9,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 var (
 	logLevel = "info"
+	settings = cli.New()
+	kd       = driver.NewKubeDriver(settings)
 )
 
 // rootCmd represents the base command when called without any subcommands

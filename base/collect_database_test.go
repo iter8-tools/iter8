@@ -104,7 +104,6 @@ func TestCEOneVersion(t *testing.T) {
 	}
 
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	// request-count
 	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
@@ -179,6 +178,7 @@ func TestCEOneVersion(t *testing.T) {
 
 	// delete metrics file
 	os.Remove(tempMetricsPath)
+	httpmock.DeactivateAndReset()
 }
 
 // test with one version and improper authorization, mimicking Code Engine
@@ -214,7 +214,6 @@ func TestCEUnauthorized(t *testing.T) {
 	}
 
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	// request-count
 	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
@@ -245,6 +244,7 @@ func TestCEUnauthorized(t *testing.T) {
 
 	// delete metrics file
 	os.Remove(tempMetricsPath)
+	httpmock.DeactivateAndReset()
 }
 
 // test with one version with some values, mimicking Code Engine
@@ -280,7 +280,6 @@ func TestCESomeValues(t *testing.T) {
 	}
 
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	// request-count
 	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
@@ -350,6 +349,7 @@ func TestCESomeValues(t *testing.T) {
 
 	// delete metrics file
 	os.Remove(tempMetricsPath)
+	httpmock.DeactivateAndReset()
 }
 
 // test with two version with some values, mimicking Code Engine
@@ -387,7 +387,6 @@ func TestCEMultipleVersions(t *testing.T) {
 	}
 
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	// request-count
 	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
@@ -459,6 +458,7 @@ func TestCEMultipleVersions(t *testing.T) {
 
 	// delete metrics file
 	os.Remove(tempMetricsPath)
+	httpmock.DeactivateAndReset()
 }
 
 // test with two version with some values, mimicking Code Engine
@@ -496,7 +496,6 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	}
 
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
 
 	// request-count
 	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
@@ -568,4 +567,5 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 
 	// delete metrics file
 	os.Remove(tempMetricsPath)
+	httpmock.DeactivateAndReset()
 }
