@@ -1,0 +1,130 @@
+failure: false
+insights:
+  SLOs:
+  - metric: http/error-rate
+    upperLimit: 0
+  - metric: http/latency-mean
+    upperLimit: 100
+  - metric: http/latency-p50
+    upperLimit: 100
+  - metric: http/latency-p50.0
+    upperLimit: 100
+  - metric: http/latency-p95.0
+    upperLimit: 250
+  - metric: http/latency-p97.5
+    upperLimit: 500
+  SLOsSatisfied:
+  - - true
+  - - true
+  - - true
+  - - true
+  - - true
+  - - true
+  histMetricValues:
+  - http/latency:
+    - count: 1
+      lower: 11.144915
+      upper: 12
+    - count: 5
+      lower: 12
+      upper: 14
+    - count: 6
+      lower: 14
+      upper: 16
+    - count: 2
+      lower: 18.000000000000004
+      upper: 20
+    - count: 2
+      lower: 200
+      upper: 227.555079
+  metricsInfo:
+    http/error-count:
+      description: number of responses that were errors
+      type: Counter
+    http/error-rate:
+      description: fraction of responses that were errors
+      type: Gauge
+    http/latency:
+      description: Latency Histogram
+      type: Histogram
+      units: msec
+    http/latency-max:
+      description: maximum of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-mean:
+      description: mean of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-min:
+      description: minimum of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-p50:
+      description: 50-th percentile of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-p75:
+      description: 75-th percentile of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-p90:
+      description: 90-th percentile of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-p95:
+      description: 95-th percentile of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-p97.5:
+      description: 97.5-th percentile of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-p99:
+      description: 99-th percentile of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-p99.9:
+      description: 99.9-th percentile of observed latency values
+      type: Gauge
+      units: msec
+    http/latency-stddev:
+      description: standard deviation of observed latency values
+      type: Gauge
+      units: msec
+    http/request-count:
+      description: number of requests sent
+      type: Counter
+  nonHistMetricValues:
+  - http/error-count:
+    - 0
+    http/error-rate:
+    - 0
+    http/latency-max:
+    - 227.555079
+    http/latency-mean:
+    - 40.953892062499996
+    http/latency-min:
+    - 11.144915
+    http/latency-p50:
+    - 14.666666666666666
+    http/latency-p75:
+    - 16
+    http/latency-p90:
+    - 205.5110158
+    http/latency-p95:
+    - 216.53304740000002
+    http/latency-p97.5:
+    - 222.0440632
+    http/latency-p99:
+    - 225.35067268
+    http/latency-p99.9:
+    - 227.334638368
+    http/latency-stddev:
+    - 69.46925164701437
+    http/request-count:
+    - 16
+  numVersions: 1
+iter8Version: v0.9
+numCompletedTasks: 4
+startTime: "2022-03-15T18:10:50.101539-04:00"

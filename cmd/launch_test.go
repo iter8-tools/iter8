@@ -5,24 +5,15 @@ import (
 	"os"
 	"testing"
 
+	ia "github.com/iter8-tools/iter8/action"
+
 	"github.com/iter8-tools/iter8/base"
-	"helm.sh/helm/v3/pkg/repo/repotest"
 )
 
 // Credit: this test structure is inspired by
 // https://github.com/helm/helm/blob/main/cmd/helm/install_test.go
 func TestLaunch(t *testing.T) {
-	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer srv.Stop()
-
-	if err := srv.LinkIndices(); err != nil {
-		t.Fatal(err)
-	}
-
-	os.Chdir(t.TempDir())
+	srv := ia.SetupWithRepo(t)
 
 	tests := []cmdTestCase{
 		// Launch, base case, values from CLI
@@ -45,5 +36,8 @@ func TestLaunch(t *testing.T) {
 		},
 	}
 
+	os.Chdir(t.TempDir())
+	ia.SetupWithMock(t)
 	runTestActionCmd(t, tests)
+
 }

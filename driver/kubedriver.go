@@ -434,7 +434,7 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 		return e
 	}
 
-	log.Logger.Info("Experiment launched. Happy Iter8ing!")
+	log.Logger.Info("experiment launched. Happy Iter8ing!")
 
 	return nil
 }
@@ -478,7 +478,7 @@ func (driver *KubeDriver) Install(version string, chartName string, valueOpts va
 		return e
 	}
 
-	log.Logger.Info("Experiment launched. Happy Iter8ing!")
+	log.Logger.Info("experiment launched. Happy Iter8ing!")
 
 	return nil
 }

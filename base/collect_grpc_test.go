@@ -19,7 +19,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	if err != nil {
 		assert.FailNow(t, err.Error())
 	}
-	defer s.Stop()
+	t.Cleanup(s.Stop)
 
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
@@ -78,7 +78,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	if err != nil {
 		assert.FailNow(t, err.Error())
 	}
-	defer s.Stop()
+	t.Cleanup(s.Stop)
 
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{

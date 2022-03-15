@@ -96,7 +96,6 @@ func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
 				store.Create(rel)
 			}
 			_, out, err := executeActionCommandC(store, tt.cmd)
-			// ioutil.WriteFile(tt.golden, []byte(out), 0644)
 			if (err != nil) != tt.wantError {
 				t.Errorf("expected error, got '%v'", err)
 			}

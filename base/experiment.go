@@ -147,7 +147,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 		var tsk Task
 		// this is a run task
 		if t.Run != nil {
-			log.Logger.Info("found run task: ", *t.Run)
+			log.Logger.Debug("found run task: ", *t.Run)
 			rt := &runTask{}
 			json.Unmarshal(tBytes, rt)
 			tsk = rt
@@ -636,7 +636,7 @@ func (exp *Experiment) getSLOsSatisfiedBy() []int {
 		}
 		return sat
 	}
-	log.Logger.Info("experiment involves at least one version and at least one SLO")
+	log.Logger.Debug("experiment involves at least one version and at least one SLO")
 	log.Logger.Trace(exp.Result.Insights.SLOs)
 	log.Logger.Trace(exp.Result.Insights.SLOsSatisfied)
 	log.Logger.Trace(exp.Result.Insights.NonHistMetricValues)
