@@ -52,10 +52,6 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 				log.Logger.Error(err)
 				os.Exit(1)
 			}
-			if err := actor.Init(); err != nil {
-				log.Logger.Error(err)
-				os.Exit(1)
-			}
 			if err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
 			}

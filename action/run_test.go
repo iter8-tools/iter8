@@ -12,32 +12,21 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
-	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 )
 
 func TestLocalRun(t *testing.T) {
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
-
+	SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata")
 	err := rOpts.LocalRun()
 	assert.NoError(t, err)
-
-	httpmock.DeactivateAndReset()
 }
 
 func TestKubeRun(t *testing.T) {
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
-
+	SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.Revision = 1
@@ -69,7 +58,5 @@ func TestKubeRun(t *testing.T) {
 	assert.True(t, exp.SLOs())
 	assert.Equal(t, 4, exp.Result.NumCompletedTasks)
 
-	log.Logger.Info(exp.Result)
-
-	httpmock.DeactivateAndReset()
+	log.Logger.Debug(exp.Result)
 }
