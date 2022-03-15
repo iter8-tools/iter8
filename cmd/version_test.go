@@ -13,6 +13,11 @@ func TestVersion(t *testing.T) {
 			name: "version",
 			cmd:  "version",
 		},
+		// version
+		{
+			name: "version short",
+			cmd:  "version --short",
+		},
 	}
 
 	runTestActionCmd(t, tests)
