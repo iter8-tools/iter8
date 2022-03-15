@@ -668,7 +668,7 @@ func (exp *Experiment) SLOs() bool {
 
 // Run the experiment
 func (exp *Experiment) run(driver Driver) error {
-	log.Logger.Info("experiment run started ...")
+	log.Logger.Debug("experiment run started ...")
 	var err error
 	if exp.Result == nil {
 		exp.initResults()
@@ -677,8 +677,8 @@ func (exp *Experiment) run(driver Driver) error {
 			return err
 		}
 	}
-	log.Logger.Info("exp result exists now ... ")
-	log.Logger.Infof("attempting to execute %v tasks", len(exp.Tasks))
+	log.Logger.Debug("exp result exists now ... ")
+	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Tasks))
 	for i, t := range exp.Tasks {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
 		shouldRun := true

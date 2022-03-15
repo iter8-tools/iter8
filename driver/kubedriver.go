@@ -67,10 +67,13 @@ type KubeDriver struct {
 
 // NewKubeDriver creates and returns a new KubeDriver
 func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
-	return &KubeDriver{
-		EnvSettings: s,
-		Group:       DefaultExperimentGroup,
+	kd := &KubeDriver{
+		EnvSettings:   s,
+		Group:         DefaultExperimentGroup,
+		Configuration: nil,
+		Clientset:     nil,
 	}
+	return kd
 }
 
 // initKube initializes the Kube clientset
@@ -105,6 +108,7 @@ func (kd *KubeDriver) initHelm() error {
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
+		log.Logger.Info("inited Helm config")
 	}
 	return nil
 }
@@ -130,6 +134,7 @@ func (driver *KubeDriver) Init() error {
 		return err
 	}
 	if err := driver.initRevision(); err != nil {
+		log.Logger.Error("error in initing revision")
 		return err
 	}
 	return nil
@@ -196,12 +201,12 @@ func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDrive
 }
 
 func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
-	log.Logger.Infof("fetching latest revision for experiment group %v", driver.Group)
+	log.Logger.Debugf("fetching latest revision for experiment group %v", driver.Group)
 	// getting last revision
 	rel, err := driver.Configuration.Releases.Last(driver.Group)
 	if err != nil {
 		if helmerrors.Is(err, helmdriver.ErrReleaseNotFound) {
-			log.Logger.Info("experiment release not found")
+			log.Logger.Debugf("experiment release not found")
 			return nil, nil
 		} else {
 			e := fmt.Errorf("unable to get latest revision for experiment group %v", driver.Group)

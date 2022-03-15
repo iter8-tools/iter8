@@ -30,24 +30,31 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
+	id "github.com/iter8-tools/iter8/driver"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage"
 	"helm.sh/helm/v3/pkg/storage/driver"
-	"helm.sh/helm/v3/pkg/time"
 )
 
 func testTimestamper() time.Time { return time.Unix(242085845, 0).UTC() }
 
-func init() {
-	action.Timestamper = testTimestamper
+type testFormatter struct {
+	logrus.Formatter
+}
+
+func (u testFormatter) Format(e *logrus.Entry) ([]byte, error) {
+	e.Time = testTimestamper()
+	return u.Formatter.Format(e)
 }
 
 // func runTestCmd(t *testing.T, tests []cmdTestCase) {
@@ -77,6 +84,8 @@ func init() {
 // }
 
 func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
+	// fixed time
+	log.Logger.SetFormatter(testFormatter{log.Logger.Formatter})
 	t.Helper()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -87,6 +96,7 @@ func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
 				store.Create(rel)
 			}
 			_, out, err := executeActionCommandC(store, tt.cmd)
+			// ioutil.WriteFile(tt.golden, []byte(out), 0644)
 			if (err != nil) != tt.wantError {
 				t.Errorf("expected error, got '%v'", err)
 			}
@@ -116,6 +126,7 @@ func executeActionCommandStdinC(store *storage.Storage, in *os.File, cmd string)
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs(args)
+	log.Logger.Out = buf
 
 	oldStdin := os.Stdin
 	if in != nil {
@@ -126,6 +137,7 @@ func executeActionCommandStdinC(store *storage.Storage, in *os.File, cmd string)
 	if mem, ok := store.Driver.(*driver.Memory); ok {
 		mem.SetNamespace(settings.Namespace())
 	}
+	*kd = *id.NewFakeKubeDriver(settings)
 	c, err := rootCmd.ExecuteC()
 
 	result := buf.String()
@@ -160,7 +172,10 @@ func resetEnv() func() {
 			kv := strings.SplitN(pair, "=", 2)
 			os.Setenv(kv[0], kv[1])
 		}
-		settings = cli.New()
+		logLevel = "info"
+		*settings = *cli.New()
+		*kd = *id.NewKubeDriver(settings)
+		log.Logger.Out = os.Stderr
 	}
 }
 

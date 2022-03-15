@@ -24,10 +24,12 @@ func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 }
 
 func (lOpts *LaunchOpts) LocalRun() error {
+	log.Logger.Debug("launch local run started...")
 	// download chart from Iter8 hub
 	if err := lOpts.HubOpts.Run(); err != nil {
 		return err
 	}
+	log.Logger.Debug("hub complete")
 	// gen experiment spec
 	lOpts.GenOpts.SourceDir = path.Join(lOpts.HubOpts.DestDir, lOpts.ChartName)
 	log.Logger.Trace("experiment dir: ", lOpts.HubOpts.DestDir)
@@ -35,10 +37,12 @@ func (lOpts *LaunchOpts) LocalRun() error {
 	if err := lOpts.GenOpts.LocalRun(); err != nil {
 		return err
 	}
+	log.Logger.Debug("gen complete")
 	// all done if this is a dry run
 	if lOpts.DryRun {
 		return nil
 	}
+	log.Logger.Info("starting local experiment")
 	// run experiment locally
 	return lOpts.RunOpts.LocalRun()
 }
