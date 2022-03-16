@@ -77,7 +77,7 @@ func (gen *GenOpts) LocalRun() error {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
 		return err
 	}
-	log.Logger.Info("Created the experiment.yaml file containing the experiment spec")
+	log.Logger.Info("created experiment.yaml file")
 
 	// build and validate experiment
 	fio := &driver.FileDriver{}
