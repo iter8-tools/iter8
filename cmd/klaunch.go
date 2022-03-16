@@ -48,10 +48,6 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		Short: "launch an experiment in Kubernetes",
 		Long:  kLaunchDesc,
 		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.Init(); err != nil {
-				log.Logger.Error(err)
-				os.Exit(1)
-			}
 			if err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
 			}

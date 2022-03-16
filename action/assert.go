@@ -22,27 +22,27 @@ const (
 type AssertOpts struct {
 	Timeout    time.Duration
 	Conditions []string
-	// applicable only for local experiments
 	RunOpts
-	// applicable only for Kubernetes experiments
-	*driver.KubeDriver
 }
 
 func NewAssertOpts(kd *driver.KubeDriver) *AssertOpts {
 	return &AssertOpts{
-		KubeDriver: kd,
+		RunOpts: *NewRunOpts(kd),
 	}
+}
+
+func (aOpts *AssertOpts) LocalRun() (bool, error) {
+	return aOpts.Run(&driver.FileDriver{
+		RunDir: aOpts.RunDir,
+	})
 }
 
 func (aOpts *AssertOpts) KubeRun() (bool, error) {
 	if err := aOpts.KubeDriver.Init(); err != nil {
 		return false, err
 	}
-	return aOpts.Run(aOpts)
-}
 
-func (assert *AssertOpts) LocalRun() (bool, error) {
-	return assert.Run(&driver.FileDriver{})
+	return aOpts.Run(aOpts)
 }
 
 func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {

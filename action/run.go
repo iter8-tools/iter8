@@ -26,5 +26,9 @@ func (rOpts *RunOpts) LocalRun() error {
 }
 
 func (rOpts *RunOpts) KubeRun() error {
+	// initialize kube driver
+	if err := rOpts.KubeDriver.Init(); err != nil {
+		return err
+	}
 	return base.RunExperiment(rOpts)
 }

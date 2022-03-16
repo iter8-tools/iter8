@@ -41,10 +41,6 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 		Short: "Launch an experiment",
 		Long:  launchDesc,
 		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.Init(); err != nil {
-				log.Logger.Error(err)
-				os.Exit(1)
-			}
 			if err := actor.LocalRun(); err != nil {
 				log.Logger.Error(err)
 				os.Exit(1)

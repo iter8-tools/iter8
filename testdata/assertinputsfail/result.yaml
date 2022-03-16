@@ -14,7 +14,7 @@ insights:
   - metric: http/latency-p97.5
     upperLimit: 5000
   SLOsSatisfied:
-  - - true
+  - - false
   - - true
   - - true
   - - true
@@ -22,21 +22,27 @@ insights:
   - - true
   histMetricValues:
   - http/latency:
-    - count: 3
-      lower: 11.388804
+    - count: 1
+      lower: 11.428256
       upper: 12
-    - count: 7
+    - count: 4
       lower: 12
       upper: 14
-    - count: 4
+    - count: 2
       lower: 14
       upper: 16
-    - count: 1
+    - count: 2
       lower: 16
       upper: 18.000000000000004
+    - count: 2
+      lower: 18.000000000000004
+      upper: 20
+    - count: 4
+      lower: 20
+      upper: 25
     - count: 1
-      lower: 250
-      upper: 272.838867
+      lower: 40
+      upper: 44.370259000000004
   metricsInfo:
     http/error-count:
       description: number of responses that were errors
@@ -97,34 +103,34 @@ insights:
       type: Counter
   nonHistMetricValues:
   - http/error-count:
-    - 0
+    - 100
     http/error-rate:
-    - 0
+    - 0.5
     http/latency-max:
-    - 272.838867
+    - 44.370259000000004
     http/latency-mean:
-    - 29.624432499999998
+    - 18.566804500000003
     http/latency-min:
-    - 11.388804
+    - 11.428256
     http/latency-p50:
-    - 13.428571428571429
+    - 17
     http/latency-p75:
-    - 15
+    - 21.25
     http/latency-p90:
-    - 16.8
+    - 24.25
     http/latency-p95:
-    - 254.56777339999996
+    - 40.8740518
     http/latency-p97.5:
-    - 263.7033202
+    - 42.6221554
     http/latency-p99:
-    - 269.18464828
+    - 43.67101756
     http/latency-p99.9:
-    - 272.473445128
+    - 44.300334856000006
     http/latency-stddev:
-    - 62.81583554772398
+    - 7.580938294068043
     http/request-count:
     - 16
   numVersions: 1
 iter8Version: v0.9
 numCompletedTasks: 4
-startTime: "2022-03-16T10:22:58.540897-04:00"
+startTime: "2022-03-16T10:22:37.110424-04:00"

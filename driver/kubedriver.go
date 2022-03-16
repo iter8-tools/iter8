@@ -113,7 +113,7 @@ func (kd *KubeDriver) initHelm() error {
 	return nil
 }
 
-// initRevision initializes the latest revision
+// InitRevision initializes the latest revision
 func (driver *KubeDriver) initRevision() error {
 	// update revision to latest, if none is specified
 	if driver.Revision <= 0 {
@@ -134,7 +134,6 @@ func (driver *KubeDriver) Init() error {
 		return err
 	}
 	if err := driver.initRevision(); err != nil {
-		log.Logger.Error("error in initing revision")
 		return err
 	}
 	return nil
