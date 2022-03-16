@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <script src="https://kit.fontawesome.com/db794f5235.js" crossorigin="anonymous"></script>
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+      html {
+        font-size: 18px;
+      }		
+    </style>
+    <title>Iter8 Experiment Report</title>
+  </head>
+
+  <body>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  
+    
+    <script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+
+    <div class="container">
+      <h1 class="display-4"><a href="https://iter8.tools">Iter8</a> Experiment Report</h1>
+      <hr>
+      
+      <div class="toast fade  mw-100" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header text-success">
+          <strong class="mr-auto">
+            Experiment Status
+            &nbsp;&nbsp;
+            <i class="fas fa-thumbs-up"></i>
+          </strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body text-success">
+          Experiment completed. Experiment has no failures. 4 out of 4 tasks are complete.
+        </div>
+      </div>
+    
+      <script>
+      $(document).ready(function(){
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        });	
+
+        $(".toast").toast({
+          autohide: false,
+          delay: 10000
+        }).toast('show');
+      });	
+      </script>  
+      <section class="mt-5">
+        <h3 class="display-6">Service level objectives (SLOs)</h3>
+        <h4 class="display-7 text-muted">Whether or not SLOs are satisfied</h4>
+        <hr>
+        <table class="table">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">SLO Conditions</th> 
+              <th scope="col" class="text-center">Satisfied</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="fraction of responses that were errors">
+                    http/error-rate
+                  </a>
+                   &leq; 0
+                </td>
+                <td class="text-success text-center">
+                  <i class="far fa-check-circle"></i>                
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="mean of observed latency values">
+                    http/latency-mean (msec)
+                  </a>
+                   &leq; 100
+                </td>
+                <td class="text-success text-center">
+                  <i class="far fa-check-circle"></i>                
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="50-th percentile of observed latency values">
+                    http/latency-p50 (msec)
+                  </a>
+                   &leq; 100
+                </td>
+                <td class="text-success text-center">
+                  <i class="far fa-check-circle"></i>                
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="50-th percentile of observed latency values">
+                    http/latency-p50 (msec)
+                  </a>
+                   &leq; 100
+                </td>
+                <td class="text-success text-center">
+                  <i class="far fa-check-circle"></i>                
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="95-th percentile of observed latency values">
+                    http/latency-p95 (msec)
+                  </a>
+                   &leq; 250
+                </td>
+                <td class="text-success text-center">
+                  <i class="far fa-check-circle"></i>                
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="97.5-th percentile of observed latency values">
+                    http/latency-p97.5 (msec)
+                  </a>
+                   &leq; 500
+                </td>
+                <td class="text-success text-center">
+                  <i class="far fa-check-circle"></i>                
+                </td>
+              </tr>          
+          </tbody>
+        </table>
+      </section>
+
+  		<section class="mt-5">
+        <h3 class="display-6">Metric Histograms</h3>
+        <hr>
+        <div id="vm-http/latency"></div>
+        <script>
+          var data = [];
+          data.push({
+            x: [11.85994532703905,13.969436564705234,12.248407211387667,13.025013259399186,12.446965992536972,12.582594209784007,14.695012416382008,15.585208541688793,15.604363124325618,15.668414931732048,14.919053034663799,14.33419318888413,19.095370959981945,19.90485864794945,204.20130566308086,205.1373523506934],
+            name: "Version 0",
+            histnorm: "percent", 
+            opacity: 0.5, 
+            type: "histogram"
+          })
+
+          var layout = {
+            bargroupgap: 0.2, 
+            barmode: "overlay", 
+            title: "Histogram of http\/latency (msec)", 
+            xaxis: {title: "http\/latency (msec)"}, 
+            yaxis: {title: "% of observations"}
+          };
+          Plotly.newPlot("vm-http\/latency", data, layout);
+        </script>
+			</section>
+
+  	  <section class="mt-5">
+        <h3 class="display-6">Latest observed values for metrics</h3>
+        <hr>
+        <table class="table">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">Metric</th> 
+              <th scope="col" class="text-center">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="number of responses that were errors">
+                    http/error-count
+                  </a>
+                </td>
+                <td class="text-center">
+                0.00
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="fraction of responses that were errors">
+                    http/error-rate
+                  </a>
+                </td>
+                <td class="text-center">
+                0.00
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="maximum of observed latency values">
+                    http/latency-max (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                227.56
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="mean of observed latency values">
+                    http/latency-mean (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                40.95
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="minimum of observed latency values">
+                    http/latency-min (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                11.14
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="50-th percentile of observed latency values">
+                    http/latency-p50 (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                14.67
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="75-th percentile of observed latency values">
+                    http/latency-p75 (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                16.00
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="90-th percentile of observed latency values">
+                    http/latency-p90 (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                205.51
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="95-th percentile of observed latency values">
+                    http/latency-p95 (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                216.53
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="97.5-th percentile of observed latency values">
+                    http/latency-p97.5 (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                222.04
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="99-th percentile of observed latency values">
+                    http/latency-p99 (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                225.35
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="99.9-th percentile of observed latency values">
+                    http/latency-p99.9 (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                227.33
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="standard deviation of observed latency values">
+                    http/latency-stddev (msec)
+                  </a>
+                </td>
+                <td class="text-center">
+                69.47
+                </td>
+              </tr>
+              <tr scope="row">
+                <td>
+                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="number of requests sent">
+                    http/request-count
+                  </a>
+                </td>
+                <td class="text-center">
+                16.00
+                </td>
+              </tr>          
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </body>
+</html>
+

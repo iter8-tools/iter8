@@ -1,0 +1,42 @@
+
+Experiment summary:
+*******************
+
+  Experiment completed: true
+  No task failures: true
+  Total number of tasks: 4
+  Number of completed tasks: 4
+
+Whether or not service level objectives (SLOs) are satisfied:
+*************************************************************
+
+  SLO Conditions                   |Satisfied
+  --------------                   |---------
+  http/error-rate <= 0             |true
+  http/latency-mean (msec) <= 100  |true
+  http/latency-p50 (msec) <= 100   |true
+  http/latency-p50 (msec) <= 100   |true
+  http/latency-p95 (msec) <= 250   |true
+  http/latency-p97.5 (msec) <= 500 |true
+  
+
+Latest observed values for metrics:
+***********************************
+
+  Metric                     |value
+  -------                    |-----
+  http/error-count           |0.00
+  http/error-rate            |0.00
+  http/latency-max (msec)    |227.56
+  http/latency-mean (msec)   |40.95
+  http/latency-min (msec)    |11.14
+  http/latency-p50 (msec)    |14.67
+  http/latency-p75 (msec)    |16.00
+  http/latency-p90 (msec)    |205.51
+  http/latency-p95 (msec)    |216.53
+  http/latency-p97.5 (msec)  |222.04
+  http/latency-p99 (msec)    |225.35
+  http/latency-p99.9 (msec)  |227.33
+  http/latency-stddev (msec) |69.47
+  http/request-count         |16.00
+  
