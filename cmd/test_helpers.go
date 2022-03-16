@@ -41,7 +41,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage"
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
@@ -57,32 +56,6 @@ func (u testFormatter) Format(e *logrus.Entry) ([]byte, error) {
 	return u.Formatter.Format(e)
 }
 
-// func runTestCmd(t *testing.T, tests []cmdTestCase) {
-// 	t.Helper()
-// 	for _, tt := range tests {
-// 		for i := 0; i <= tt.repeat; i++ {
-// 			t.Run(tt.name, func(t *testing.T) {
-// 				defer resetEnv()()
-
-// 				storage := storageFixture()
-// 				for _, rel := range tt.rels {
-// 					if err := storage.Create(rel); err != nil {
-// 						t.Fatal(err)
-// 					}
-// 				}
-// 				t.Logf("running cmd (attempt %d): %s", i+1, tt.cmd)
-// 				_, out, err := executeActionCommandC(storage, tt.cmd)
-// 				if (err != nil) != tt.wantError {
-// 					t.Errorf("expected error, got '%v'", err)
-// 				}
-// 				if tt.golden != "" {
-// 					AssertGoldenString(t, out, tt.golden)
-// 				}
-// 			})
-// 		}
-// 	}
-// }
-
 func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
 	// fixed time
 	log.Logger.SetFormatter(testFormatter{log.Logger.Formatter})
@@ -92,9 +65,6 @@ func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
 			defer resetEnv()()
 
 			store := storageFixture()
-			for _, rel := range tt.rels {
-				store.Create(rel)
-			}
 			_, out, err := executeActionCommandC(store, tt.cmd)
 			if (err != nil) != tt.wantError {
 				t.Errorf("expected error, got '%v'", err)
@@ -153,11 +123,6 @@ type cmdTestCase struct {
 	cmd       string
 	golden    string
 	wantError bool
-	// Rels are the available releases at the start of the test.
-	rels []*release.Release
-	// // Number of repeats (in case a feature was previously flaky and the test checks
-	// // it's now stably producing identical results). 0 means test is run exactly once.
-	// repeat int
 }
 
 // func executeActionCommand(cmd string) (*cobra.Command, string, error) {
@@ -178,18 +143,6 @@ func resetEnv() func() {
 		log.Logger.Out = os.Stderr
 	}
 }
-
-// func testChdir(t *testing.T, dir string) func() {
-// 	t.Helper()
-// 	old, err := os.Getwd()
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if err := os.Chdir(dir); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	return func() { os.Chdir(old) }
-// }
 
 func TestPluginExitCode(t *testing.T) {
 	if os.Getenv("RUN_MAIN_FOR_TESTING") == "1" {
