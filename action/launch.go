@@ -26,7 +26,7 @@ func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 func (lOpts *LaunchOpts) LocalRun() error {
 	log.Logger.Debug("launch local run started...")
 	// download chart from Iter8 hub
-	if err := lOpts.HubOpts.Run(); err != nil {
+	if err := lOpts.HubOpts.LocalRun(); err != nil {
 		return err
 	}
 	log.Logger.Debug("hub complete")

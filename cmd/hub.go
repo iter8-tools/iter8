@@ -42,7 +42,7 @@ func newHubCmd() *cobra.Command {
 		Short: "Download Iter8 experiment",
 		Long:  hubDesc,
 		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.Run(); err != nil {
+			if err := actor.LocalRun(); err != nil {
 				log.Logger.Error(err)
 			}
 		},

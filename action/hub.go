@@ -50,8 +50,8 @@ func (hub *HubOpts) cleanChartArtifacts() error {
 	return nil
 }
 
-// Run downloads an experiment chart
-func (hub *HubOpts) Run() error {
+// LocalRun downloads an experiment chart
+func (hub *HubOpts) LocalRun() error {
 	// removing any pre-existing files and dirs matching the glob
 	if err := hub.cleanChartArtifacts(); err != nil {
 		return err
