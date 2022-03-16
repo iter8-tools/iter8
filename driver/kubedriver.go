@@ -237,12 +237,12 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (s *corev1.Secret, err
 			return s, err
 		}
 		if !k8serrors.IsNotFound(err) {
-			log.Logger.Errorf("unable to get secret: %s; %s\n", name, err.Error())
+			log.Logger.Warningf("unable to get secret: %s; %s\n", name, err.Error())
 		}
 		time.Sleep(getRetryInterval)
 	}
 	e := fmt.Errorf("unable to get secret %v", name)
-	log.Logger.Error(e)
+	log.Logger.Warning(e)
 	return nil, e
 }
 
@@ -360,8 +360,8 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 		return e
 	}
 
-	log.Logger.Info("secret data... ", s.Data)
-	log.Logger.Info("secret string data... ", s.StringData)
+	log.Logger.Debug("secret data... ", s.Data)
+	log.Logger.Debug("secret string data... ", s.StringData)
 
 	// created result secret ...
 	return nil
