@@ -5,11 +5,13 @@ import (
 )
 
 type LogOpts struct {
-	driver.KubeDriver
+	*driver.KubeDriver
 }
 
-func NewLogOpts() *LogOpts {
-	return &LogOpts{}
+func NewLogOpts(kd *driver.KubeDriver) *LogOpts {
+	return &LogOpts{
+		KubeDriver: kd,
+	}
 }
 
 func (lOpts *LogOpts) KubeRun() (string, error) {

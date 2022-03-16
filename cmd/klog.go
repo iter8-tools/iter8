@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +17,8 @@ or
 		$	iter8 k log --group hello
 `
 
-func newKLogCmd() *cobra.Command {
-	actor := ia.NewLogOpts()
+func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
+	actor := ia.NewLogOpts(kd)
 
 	cmd := &cobra.Command{
 		Use:   "log",
@@ -29,8 +28,7 @@ func newKLogCmd() *cobra.Command {
 			if lg, err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
 			} else {
-				fmt.Println("experiment logs...")
-				fmt.Println(lg)
+				log.Logger.WithStackTrace(lg).Info("experiment logs...")
 			}
 		},
 	}
@@ -40,5 +38,5 @@ func newKLogCmd() *cobra.Command {
 }
 
 func init() {
-	kCmd.AddCommand(newKLogCmd())
+	kCmd.AddCommand(newKLogCmd(kd))
 }
