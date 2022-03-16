@@ -115,7 +115,7 @@ func TestRunExperiment(t *testing.T) {
 	assert.True(t, exp.Completed())
 	assert.True(t, exp.NoFailure())
 	expRes, _ := yaml.Marshal(exp.Result)
-	log.Logger.Info(string(expRes))
+	log.Logger.Debug(string(expRes))
 	assert.True(t, exp.SLOs())
 
 	httpmock.DeactivateAndReset()

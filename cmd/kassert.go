@@ -5,6 +5,7 @@ import (
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
 
@@ -24,8 +25,8 @@ You can optionally specify the group to which the Kubernetes experiment belongs.
 		$ iter8 k assert -c completed,nofailures,slos -t 5s -g hello
 `
 
-func newKAssertCmd() *cobra.Command {
-	actor := ia.NewAssertOpts()
+func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
+	actor := ia.NewAssertOpts(kd)
 
 	cmd := &cobra.Command{
 		Use:   "assert",
@@ -42,13 +43,12 @@ func newKAssertCmd() *cobra.Command {
 			}
 		},
 	}
-	addExperimentGroupFlag(cmd, &actor.Group, true)
+	addExperimentGroupFlag(cmd, &actor.Group, false)
 	actor.EnvSettings = settings
-	cmd.MarkFlagRequired("namespace")
 	addAssertFlags(cmd, actor)
 	return cmd
 }
 
 func init() {
-	kCmd.AddCommand(newKAssertCmd())
+	kCmd.AddCommand(newKAssertCmd(kd))
 }

@@ -8,8 +8,8 @@ type LogOpts struct {
 	driver.KubeDriver
 }
 
-func NewLogOpts() *AssertOpts {
-	return &AssertOpts{}
+func NewLogOpts() *LogOpts {
+	return &LogOpts{}
 }
 
 func (lOpts *LogOpts) KubeRun() (string, error) {

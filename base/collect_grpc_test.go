@@ -38,7 +38,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		},
 	}
 
-	log.Logger.Info("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
 
 	exp := &Experiment{
 		Tasks:  []Task{ct},
@@ -47,7 +47,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	exp.initResults()
 	err = ct.run(exp)
 
-	log.Logger.Info("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
 
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)

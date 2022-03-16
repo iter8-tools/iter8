@@ -5,6 +5,7 @@ import (
 	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
+	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
@@ -30,8 +31,8 @@ You can optionally specify a timeout, which is the maximum amount of time Iter8 
 		$ iter8 assert -c completed,nofailures,slos -t 5s
 `
 
-func newAssertCmd() *cobra.Command {
-	actor := ia.NewAssertOpts()
+func newAssertCmd(kd *driver.KubeDriver) *cobra.Command {
+	actor := ia.NewAssertOpts(kd)
 
 	cmd := &cobra.Command{
 		Use:   "assert",
@@ -60,5 +61,5 @@ func addAssertFlags(cmd *cobra.Command, actor *ia.AssertOpts) {
 }
 
 func init() {
-	rootCmd.AddCommand(newAssertCmd())
+	rootCmd.AddCommand(newAssertCmd(kd))
 }

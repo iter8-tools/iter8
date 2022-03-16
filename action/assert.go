@@ -25,11 +25,13 @@ type AssertOpts struct {
 	// applicable only for local experiments
 	RunOpts
 	// applicable only for Kubernetes experiments
-	driver.KubeDriver
+	*driver.KubeDriver
 }
 
-func NewAssertOpts() *AssertOpts {
-	return &AssertOpts{}
+func NewAssertOpts(kd *driver.KubeDriver) *AssertOpts {
+	return &AssertOpts{
+		KubeDriver: kd,
+	}
 }
 
 func (aOpts *AssertOpts) KubeRun() (bool, error) {

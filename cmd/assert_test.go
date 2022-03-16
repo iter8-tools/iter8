@@ -5,9 +5,13 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
+	id "github.com/iter8-tools/iter8/driver"
 )
 
 func TestAssert(t *testing.T) {
+	// fake kube cluster
+	*kd = *id.NewFakeKubeDriver(settings)
+
 	tests := []cmdTestCase{
 		// assert, SLOs
 		{

@@ -136,7 +136,7 @@ func executeActionCommandStdinC(store *storage.Storage, in *os.File, cmd string)
 	if mem, ok := store.Driver.(*driver.Memory); ok {
 		mem.SetNamespace(settings.Namespace())
 	}
-	*kd = *id.NewFakeKubeDriver(settings)
+
 	c, err := rootCmd.ExecuteC()
 
 	result := buf.String()
@@ -173,7 +173,7 @@ func resetEnv() func() {
 		}
 		logLevel = "info"
 		*settings = *cli.New()
-		*kd = *id.NewKubeDriver(settings)
+		*kd = *id.NewFakeKubeDriver(settings)
 		log.Logger.Out = os.Stderr
 	}
 }
