@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"io"
+	"os"
+
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
 
@@ -14,9 +17,10 @@ import (
 )
 
 var (
-	logLevel = "info"
-	settings = cli.New()
-	kd       = driver.NewKubeDriver(settings)
+	logLevel            = "info"
+	settings            = cli.New()
+	kd                  = driver.NewKubeDriver(settings)
+	outStream io.Writer = os.Stdout
 )
 
 // rootCmd represents the base command when called without any subcommands

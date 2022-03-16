@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"text/tabwriter"
 	textT "text/template"
 
@@ -21,7 +22,7 @@ type TextReporter struct {
 //go:embed textreport.tpl
 var reportText string
 
-func (tr *TextReporter) Gen() error {
+func (tr *TextReporter) Gen(out io.Writer) error {
 	// create text template
 	ttpl, err := textT.New("report").Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(reportText)
 	if err != nil {
@@ -38,7 +39,7 @@ func (tr *TextReporter) Gen() error {
 	}
 
 	// print output
-	fmt.Println(b.String())
+	fmt.Fprintln(out, b.String())
 	return nil
 }
 

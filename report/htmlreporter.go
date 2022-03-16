@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"sort"
 
@@ -24,7 +25,7 @@ type HTMLReporter struct {
 //go:embed htmlreport.tpl
 var reportHTML string
 
-func (ht *HTMLReporter) Gen() error {
+func (ht *HTMLReporter) Gen(out io.Writer) error {
 
 	// create HTML template
 	htpl, err := htmlT.New("report").Option("missingkey=error").Funcs(sprig.FuncMap()).Funcs(htmlT.FuncMap{
@@ -45,7 +46,7 @@ func (ht *HTMLReporter) Gen() error {
 	}
 
 	// print output
-	fmt.Println(b.String())
+	fmt.Fprintln(out, b.String())
 	return nil
 }
 

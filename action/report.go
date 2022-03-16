@@ -2,6 +2,7 @@ package action
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/iter8-tools/iter8/base"
@@ -24,31 +25,32 @@ type ReportOpts struct {
 	// applicable only for local experiments
 	RunOpts
 	// applicable only for Kubernetes experiments
-	driver.KubeDriver
+	*driver.KubeDriver
 }
 
-func NewReportOpts() *ReportOpts {
+func NewReportOpts(kd *driver.KubeDriver) *ReportOpts {
 	return &ReportOpts{
 		RunOpts: RunOpts{
 			RunDir: ".",
 		},
+		KubeDriver: kd,
 	}
 }
 
-func (rOpts *ReportOpts) LocalRun() error {
+func (rOpts *ReportOpts) LocalRun(out io.Writer) error {
 	return rOpts.Run(&driver.FileDriver{
 		RunDir: rOpts.RunDir,
-	})
+	}, out)
 }
 
-func (rOpts *ReportOpts) KubeRun() error {
+func (rOpts *ReportOpts) KubeRun(out io.Writer) error {
 	if err := rOpts.KubeDriver.Init(); err != nil {
 		return err
 	}
-	return rOpts.Run(rOpts)
+	return rOpts.Run(rOpts, out)
 }
 
-func (rOpts *ReportOpts) Run(eio base.Driver) error {
+func (rOpts *ReportOpts) Run(eio base.Driver, out io.Writer) error {
 	if e, err := base.BuildExperiment(true, eio); err != nil {
 		return err
 	} else {
@@ -59,14 +61,14 @@ func (rOpts *ReportOpts) Run(eio base.Driver) error {
 					Experiment: e,
 				},
 			}
-			return reporter.Gen()
+			return reporter.Gen(out)
 		case HTMLOutputFormatKey:
 			reporter := report.HTMLReporter{
 				Reporter: &report.Reporter{
 					Experiment: e,
 				},
 			}
-			return reporter.Gen()
+			return reporter.Gen(out)
 		default:
 			e := fmt.Errorf("unsupported report format %v", rOpts.OutputFormat)
 			log.Logger.Error(e)

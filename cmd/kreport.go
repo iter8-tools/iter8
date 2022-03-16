@@ -2,6 +2,7 @@ package cmd
 
 import (
 	ia "github.com/iter8-tools/iter8/action"
+	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
@@ -21,26 +22,25 @@ You can optionally specify the group to which the Kubernetes experiment belongs.
 		$ iter8 k report -g hello
 `
 
-func newKReportCmd() *cobra.Command {
-	actor := ia.NewReportOpts()
+func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
+	actor := ia.NewReportOpts(kd)
 
 	cmd := &cobra.Command{
 		Use:   "report",
 		Short: "Generate report for Kubernetes experiment",
 		Long:  kReportDesc,
 		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.KubeRun(); err != nil {
+			if err := actor.KubeRun(outStream); err != nil {
 				log.Logger.Error(err)
 			}
 		},
 	}
-	addExperimentGroupFlag(cmd, &actor.Group, true)
+	addExperimentGroupFlag(cmd, &actor.Group, false)
 	actor.EnvSettings = settings
-	cmd.MarkFlagRequired("namespace")
 	addReportFlags(cmd, actor)
 	return cmd
 }
 
 func init() {
-	kCmd.AddCommand(newKReportCmd())
+	kCmd.AddCommand(newKReportCmd(kd))
 }

@@ -126,6 +126,7 @@ func executeActionCommandStdinC(store *storage.Storage, in *os.File, cmd string)
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs(args)
 	log.Logger.Out = buf
+	outStream = buf
 
 	oldStdin := os.Stdin
 	if in != nil {

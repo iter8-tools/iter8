@@ -2,6 +2,7 @@ package cmd
 
 import (
 	ia "github.com/iter8-tools/iter8/action"
+	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
@@ -17,15 +18,15 @@ or
     $ iter8 report -o html > report.html # view with browser
 `
 
-func newReportCmd() *cobra.Command {
-	actor := ia.NewReportOpts()
+func newReportCmd(kd *driver.KubeDriver) *cobra.Command {
+	actor := ia.NewReportOpts(kd)
 
 	cmd := &cobra.Command{
 		Use:   "report",
 		Short: "Generate experiment report",
 		Long:  reportDesc,
 		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.LocalRun(); err != nil {
+			if err := actor.LocalRun(outStream); err != nil {
 				log.Logger.Error(err)
 			}
 		},
@@ -40,5 +41,5 @@ func addReportFlags(cmd *cobra.Command, actor *ia.ReportOpts) {
 }
 
 func init() {
-	rootCmd.AddCommand(newReportCmd())
+	rootCmd.AddCommand(newReportCmd(kd))
 }
