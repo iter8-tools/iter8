@@ -143,7 +143,7 @@ func (driver *KubeDriver) Init() error {
 // initKube initialize the Kube clientset with a fake
 func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
 	// secretDataReactor sets the secret.Data field based on the values from secret.StringData
-	// Credits: this function is adapted from https://github.com/creydr/go-k8s-utils
+	// Credit: this function is adapted from https://github.com/creydr/go-k8s-utils
 	var secretDataReactor = func(action ktesting.Action) (bool, runtime.Object, error) {
 		secret, _ := action.(ktesting.CreateAction).GetObject().(*corev1.Secret)
 
@@ -165,7 +165,7 @@ func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
 }
 
 // initHelmFake initializes the Helm config with a fake
-// Credits: this function is adapted from helm
+// Credit: this function is adapted from helm
 // https://github.com/helm/helm/blob/e9abdc5efe11cdc23576c20c97011d452201cd92/pkg/action/action_test.go#L37
 func (kd *KubeDriver) initHelmFake() {
 	registryClient, err := registry.NewClient()
@@ -396,7 +396,7 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	return err
 }
 
-// Credits: the logic for this function is sourced from Helm
+// Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
 	client := action.NewUpgrade(driver.Configuration)
@@ -439,7 +439,7 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 	return nil
 }
 
-// Credits: the logic for this function is sourced from Helm
+// Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
 func (driver *KubeDriver) Install(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
 	client := action.NewInstall(driver.Configuration)
@@ -483,7 +483,7 @@ func (driver *KubeDriver) Install(version string, chartName string, valueOpts va
 	return nil
 }
 
-// Credits: the logic for this function is sourced from Helm
+// Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
 func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *cli.EnvSettings, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
 	chartPath, err := cpo.LocateChart(chartName, settings)
@@ -547,7 +547,7 @@ func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *c
 	return ch, vals, nil
 }
 
-// Credits: this function is sourced from Helm
+// Credit: this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L270
 //
 // checkIfInstallable validates if a chart can be installed

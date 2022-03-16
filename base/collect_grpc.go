@@ -11,7 +11,7 @@ import (
 )
 
 /*
-Credits: The inputs for this task, including their JSON/YAML tags and go doc comments are derived from https://github.com/bojand/ghz.
+Credit: The inputs for this task, including their JSON/YAML tags and go doc comments are derived from https://github.com/bojand/ghz.
 */
 
 // versionGRPC contains call and host information needed to send gRPC requests to each version.

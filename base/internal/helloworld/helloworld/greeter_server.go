@@ -1,4 +1,4 @@
-// Credits: This file is sourced from https://github.com/bojand/ghz/
+// Credit: This file is sourced from https://github.com/bojand/ghz/
 // this file is used for test purposes
 
 package helloworld

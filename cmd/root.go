@@ -53,7 +53,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
 }
 
-// Credits: the following function is from Helm. Please see:
+// Credit: the following function is from Helm. Please see:
 // https://github.com/helm/helm/blob/main/cmd/helm/flags.go
 func addValueFlags(f *pflag.FlagSet, v *values.Options) {
 	f.StringSliceVarP(&v.ValueFiles, "values", "f", []string{}, "specify values in a YAML file or a URL (can specify multiple)")
@@ -62,7 +62,7 @@ func addValueFlags(f *pflag.FlagSet, v *values.Options) {
 	f.StringArrayVar(&v.FileValues, "set-file", []string{}, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
 }
 
-// Credits: the following function is modified from Helm.
+// Credit: the following function is modified from Helm.
 // Please see addChartPathFlags below:
 // https://github.com/helm/helm/blob/main/cmd/helm/flags.go
 func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartNameAndDestOptions) {
