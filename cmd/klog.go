@@ -28,7 +28,7 @@ func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 			if lg, err := actor.KubeRun(); err != nil {
 				log.Logger.Error(err)
 			} else {
-				log.Logger.WithStackTrace(lg).Info("experiment logs...")
+				log.Logger.WithStackTrace(lg).Info("experiment logs from Kubernetes cluster")
 			}
 		},
 	}
