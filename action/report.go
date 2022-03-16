@@ -33,7 +33,8 @@ func NewReportOpts(kd *driver.KubeDriver) *ReportOpts {
 		RunOpts: RunOpts{
 			RunDir: ".",
 		},
-		KubeDriver: kd,
+		OutputFormat: TextOutputFormatKey,
+		KubeDriver:   kd,
 	}
 }
 

@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
@@ -25,26 +24,23 @@ func TestLocalReportText(t *testing.T) {
 }
 
 func TestLocalReportHTML(t *testing.T) {
-	// fix aOpts
-	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.RunDir = base.CompletePath("../", "testdata/assertinputsfail")
-	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
-	aOpts.Timeout = 5 * time.Second
+	// fix rOpts
+	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
+	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs")
+	rOpts.OutputFormat = HTMLOutputFormatKey
 
-	ok, err := aOpts.LocalRun()
-	assert.False(t, ok)
+	err := rOpts.LocalRun(os.Stdout)
 	assert.NoError(t, err)
 }
 
 func TestKubeReportText(t *testing.T) {
 	SetupWithMock(t)
-	// fix aOpts
-	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.Revision = 1
-	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
+	// fix rOpts
+	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
+	rOpts.Revision = 1
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "experiment.yaml"))
-	aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-spec",
 			Namespace: "default",
@@ -55,7 +51,7 @@ func TestKubeReportText(t *testing.T) {
 	}, metav1.CreateOptions{})
 
 	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
-	aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-result",
 			Namespace: "default",
@@ -65,7 +61,6 @@ func TestKubeReportText(t *testing.T) {
 		},
 	}, metav1.CreateOptions{})
 
-	ok, err := aOpts.KubeRun()
-	assert.True(t, ok)
+	err := rOpts.KubeRun(os.Stdout)
 	assert.NoError(t, err)
 }
