@@ -11,7 +11,7 @@ import (
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
-//TBD are RFC 1123 names sufficient?
+//TBD Are RFC 1123 names sufficient?
 
 const (
 	// task name
@@ -34,8 +34,21 @@ const (
 // regex object
 var labelRegexp = regexp.MustCompile("^" + labelFmt + "$")
 
-// ObjRef contains details about a specific K8s object whose existence and readiness will be checked
-type ObjRef struct {
+// ReadinessInputs contains a list of K8s object references along with
+// optional readiness conditions for them. The inputs also specify the delays
+// and retries involved in the existence and readiness checks.
+// This task will also check for existence of objects specified
+// in the VersionInfo field of the experiment.
+type ReadinessInputs struct {
+	// DealySeconds is the time in seconds before the first check is made.
+	// Optional; default is 5 seconds.
+	Delay *int `json:"delay,omitempty" yaml:"delay,omitempty"`
+	// Retries the number of attempts to check waitfor condition.
+	// Optional; default is 12.
+	Retries *int `json:"retries,omitempty" yaml:"retries,omitempty"`
+	// RetryIntervalSeconds time in seconds between retries.
+	// Optional; default is 5 seconds.
+	RetryInterval *int `json:"retryInterval,omitempty" yaml:"retryInterval,omitempty"`
 	// Kind of the object. Specified in the TYPE[.VERSION][.GROUP] format used by `kubectl`
 	// See https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#get
 	Kind string `json:"kind" yaml:"kind"`
@@ -49,25 +62,6 @@ type ObjRef struct {
 	WaitFor *string `json:"waitFor,omitempty" yaml:"waitFor,omitempty"`
 }
 
-// ReadinessInputs contains a list of K8s object references along with
-// optional readiness conditions for them. The inputs also specify the delays
-// and retries involved in the existence and readiness checks.
-// This task will also check for existence of objects specified
-// in the VersionInfo field of the experiment.
-type ReadinessInputs struct {
-	// DealySeconds is the time in seconds before the first check is made.
-	// Optional; default is 5 seconds.
-	DelaySeconds *int `json:"delay,omitempty" yaml:"delay,omitempty"`
-	// Retries the number of attempts to check waitfor condition.
-	// Optional; default is 12.
-	Retries *int `json:"retries,omitempty" yaml:"retries,omitempty"`
-	// RetryIntervalSeconds time in seconds between retries.
-	// Optional; default is 5 seconds.
-	RetryIntervalSeconds *int `json:"retryInterval,omitempty" yaml:"retryInterval,omitempty"`
-	// ObjRefs is a list of Kubernetes objects and an optional readiness conditions
-	Objects []ObjRef `json:"objects,omitempty" yaml:"objects,omitempty"`
-}
-
 // ReadinessTask checks existence and readiness of specified resources
 type ReadinessTask struct {
 	TaskMeta
@@ -76,28 +70,24 @@ type ReadinessTask struct {
 
 // initializeDefaults sets default values for the readiness task
 func (t *ReadinessTask) initializeDefaults() {
-	log.Logger.Info("initailizing defaults")
 	// get value from With or default values
-	if t.With.DelaySeconds == nil {
-		t.With.DelaySeconds = intPointer(defaultDelaySeconds)
+	if t.With.Delay == nil {
+		t.With.Delay = intPointer(defaultDelaySeconds)
 	}
 	if t.With.Retries == nil {
 		t.With.Retries = intPointer(defaultRetries)
 	}
-	if t.With.RetryIntervalSeconds == nil {
-		t.With.RetryIntervalSeconds = intPointer(defaultRetryIntervalSeconds)
+	if t.With.RetryInterval == nil {
+		t.With.RetryInterval = intPointer(defaultRetryIntervalSeconds)
 	}
 }
 
 // validate task inputs
 func (t *ReadinessTask) validateInputs() error {
-	log.Logger.Info("validating inputs")
-	for _, obj := range t.With.Objects {
-		if len(obj.Name) > maxLabelLength || !labelRegexp.MatchString(obj.Name) {
-			return errors.New("invalid object name; It must be a valid DNS label")
-		}
+	name := t.With.Name
+	if len(name) > maxLabelLength || !labelRegexp.MatchString(name) {
+		return errors.New("invalid object name; It must be a valid DNS label")
 	}
-
 	return nil
 }
 
@@ -110,53 +100,43 @@ func (t *ReadinessTask) Run(exp *Experiment) error {
 
 	t.initializeDefaults()
 
-	time.Sleep(time.Duration(*t.With.DelaySeconds) * time.Second)
+	time.Sleep(time.Duration(*t.With.Delay) * time.Second)
 
-	successfullyVerified := 0
+	// TODO use context to determine this
+	ns := "default"
+	if t.With.Namespace != nil {
+		ns = *t.With.Namespace
+	}
+
+	successfullyVerified := false
 	for attempt := 0; attempt < *t.With.Retries; attempt++ {
-		successfullyVerified = 0
-		for _, obj := range t.With.Objects {
-			var ns string
-			if obj.Namespace == nil {
-				ns = "default"
-				// TODO use context to determine this
-			} else {
-				ns = *obj.Namespace
+		getCmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("kubectl get %s/%s -n %s", t.With.Kind, t.With.Name, ns))
+		getCmd.Stdout = os.Stdout
+		getCmd.Stderr = os.Stderr
+		log.Logger.Info("Executing command: " + getCmd.String())
+		err := getCmd.Run()
+		if err == nil {
+			if t.With.WaitFor != nil {
+				waitCmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("kubectl wait %s/%s -n %s --for=%s --timeout=0s", t.With.Kind, t.With.Name, ns, *t.With.WaitFor))
+				waitCmd.Stdout = os.Stdout
+				waitCmd.Stderr = os.Stderr
+				log.Logger.Info("Executing command: " + waitCmd.String())
+				err = waitCmd.Run()
 			}
-			script := fmt.Sprintf("kubectl get %s/%s -n %s", obj.Kind, obj.Name, ns)
-			cmd := exec.Command("/bin/bash", "-c", script)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			log.Logger.Info("Executing command: " + cmd.String())
-			err := cmd.Run()
-			if err != nil {
-				continue
-			}
-			if obj.WaitFor != nil {
-				script := fmt.Sprintf("kubectl wait %s/%s -n %s --for=%s --timeout=0s", obj.Kind, obj.Name, ns, *obj.WaitFor)
-				cmd := exec.Command("/bin/bash", "-c", script)
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-				log.Logger.Info("Executing command: " + cmd.String())
-				err = cmd.Run()
-
-			}
-			if err == nil {
-				successfullyVerified++
-			}
-		} // for _, obj := range
-
-		// if found all objecgts OR completed last attempt (in this case skip the sleep)
-		if successfullyVerified == len(t.With.Objects) || attempt == *t.With.Retries {
+		}
+		if err == nil {
+			successfullyVerified = true
 			break
 		}
 
-		time.Sleep(time.Duration(*t.With.RetryIntervalSeconds) * time.Second)
+		// if not verified and not final attempt; sleep for retryInterval
+		if !successfullyVerified && attempt != *t.With.Retries {
+			time.Sleep(time.Duration(*t.With.RetryInterval) * time.Second)
+		}
 	} // for attempt
 
-	if successfullyVerified != len(t.With.Objects) {
-		return errors.New("some objects not ready")
-		// TODO would it be helpful to know which objects?
+	if !successfullyVerified {
+		return errors.New("object not ready")
 	}
 	return nil
 }
