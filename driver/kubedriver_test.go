@@ -17,7 +17,9 @@ import (
 
 func TestHelm(t *testing.T) {
 	srv := SetupWithRepo(t)
-	kd := NewFakeKubeDriver(cli.New())
+	kd := NewKubeDriver(cli.New()) // we will ignore this value
+	assert.NotNil(t, kd)
+	kd = NewFakeKubeDriver(cli.New())
 	err := kd.Init()
 	assert.NoError(t, err)
 
