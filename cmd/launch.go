@@ -10,27 +10,27 @@ import (
 )
 
 const launchDesc = `
-This command launches an Iter8 experiment. 
+Launch an Iter8 experiment. 
 
-		$ iter8 launch -c load-test-http --set url=https://httpbin.org/get
+	$ iter8 launch -c load-test-http --set url=https://httpbin.org/get
 
-To create the experiment.yaml file without running the experiment, use the dry option.
+To create the experiment.yaml file without actually running it, use the dry option.
 
-$	iter8 launch -c load-test-http \
-	--set url=https://httpbin.org/get \
-	--dry
+	$ iter8 launch -c load-test-http \
+	  --set url=https://httpbin.org/get \
+	  --dry
 
-By default, the current directory is used to download and unpack the experiment chart, and run the experiment. Control this using the destDir option.
+By default, the current directory is used to download and unpack the experiment chart. Set this location using the destDir option.
 
-	$	iter8 launch -c load-test-http \
-		--set url=https://httpbin.org/get \
-		--destDir /tmp
+	$ iter8 launch -c load-test-http \
+	  --set url=https://httpbin.org/get \
+	  --destDir /tmp
 	
-By default, the launch command downloads charts from the official Iter8 chart repo. It is also possible to use third party (helm) repos to host Iter8 experiment charts.
+By default, the charts are downloaded from the official Iter8 chart repo. Specify third party experiment chart repos using the repoURL option.
 
-		$	iter8 launch -c load-test-http \
-			--repoURL https://great.expectations.pip \
-			--set url=https://httpbin.org/get
+	$ iter8 launch -c load-test-http \
+	  --repoURL https://great.expectations.pip \
+	  --set url=https://httpbin.org/get
 `
 
 func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {

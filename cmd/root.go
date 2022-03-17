@@ -69,9 +69,10 @@ func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartN
 	// fill nd
 	cmd.Flags().StringVarP(&nd.ChartName, "chartName", "c", "", "name of the experiment chart")
 	cmd.MarkFlagRequired("chartName")
-	cmd.Flags().StringVar(&nd.DestDir, "destDir", ".", "destination folder where experiment chart is downloaded and unpacked")
+	cmd.Flags().StringVar(&nd.DestDir, "destDir", ".", "destination directory where experiment chart is downloaded and unpacked")
 
 	// fill c
 	cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 0.9.0) or it may reference a valid range (e.g. 0.9.x). If this is not specified, the latest compatible version is used")
-	cmd.Flags().StringVar(&c.RepoURL, "repoURL", driver.DefaultIter8RepoURL, "experiment chart repository url where to locate the requested experiment chart")
+	cmd.Flags().MarkHidden("version")
+	cmd.Flags().StringVar(&c.RepoURL, "repoURL", driver.DefaultIter8RepoURL, "chart repo from which experiment charts are downloaded")
 }
