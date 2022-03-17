@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"sigs.k8s.io/yaml"
 )
@@ -26,10 +25,7 @@ func TestReadExperiment(t *testing.T) {
 	assert.Equal(t, 3, len(*es))
 }
 func TestRunTask(t *testing.T) {
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://something.com",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
+	SetupWithMock(t)
 
 	// valid collect task... should succeed
 	ct := &collectHTTPTask{
@@ -38,7 +34,7 @@ func TestRunTask(t *testing.T) {
 		},
 		With: collectHTTPInputs{
 			Duration:    StringPointer("1s"),
-			VersionInfo: []*versionHTTP{{Headers: map[string]string{}, URL: "https://something.com"}},
+			VersionInfo: []*versionHTTP{{Headers: map[string]string{}, URL: "https://httpbin.org/get"}},
 		},
 	}
 
@@ -69,33 +65,10 @@ func TestRunTask(t *testing.T) {
 		assert.True(t, exp.Result.Insights.SLOsSatisfied[i][0]) // satisfied by only version
 	}
 
-	httpmock.DeactivateAndReset()
-
-}
-
-type mockDriver struct {
-	*Experiment
-}
-
-func (m *mockDriver) ReadResult() (*ExperimentResult, error) {
-	return m.Experiment.Result, nil
-}
-
-func (m *mockDriver) WriteResult(r *ExperimentResult) error {
-	m.Experiment.Result = r
-	return nil
-}
-
-func (m *mockDriver) ReadSpec() (ExperimentSpec, error) {
-	return m.Experiment.Tasks, nil
 }
 
 func TestRunExperiment(t *testing.T) {
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
-
+	SetupWithMock(t)
 	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)
 	es := &ExperimentSpec{}
@@ -118,7 +91,6 @@ func TestRunExperiment(t *testing.T) {
 	log.Logger.Debug(string(expRes))
 	assert.True(t, exp.SLOs())
 
-	httpmock.DeactivateAndReset()
 }
 
 func TestFailExperiment(t *testing.T) {
