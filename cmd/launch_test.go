@@ -35,7 +35,7 @@ func TestLaunch(t *testing.T) {
 	}
 
 	os.Chdir(t.TempDir())
-	ia.SetupWithMock(t)
+	base.SetupWithMock(t)
 	runTestActionCmd(t, tests)
 
 }

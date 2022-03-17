@@ -4,14 +4,13 @@ import (
 	"os"
 	"testing"
 
-	ia "github.com/iter8-tools/iter8/action"
 	id "github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base"
 )
 
 func TestRun(t *testing.T) {
-	ia.SetupWithMock(t)
+	base.SetupWithMock(t)
 
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
