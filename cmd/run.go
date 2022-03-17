@@ -11,7 +11,7 @@ import (
 )
 
 var runDesc = `
-Run an experiment specified in experiment.yaml output result to the result.yaml.
+Run an experiment specified in experiment.yaml output result to result.yaml.
 
 	$ iter8 run
 
@@ -36,7 +36,7 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 }
 
 func addRunFlags(cmd *cobra.Command, actor *ia.RunOpts) {
-	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; must contain experiment.yaml; will be used to create result.yaml")
+	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
 }
 
 func init() {

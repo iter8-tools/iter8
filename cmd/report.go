@@ -9,13 +9,13 @@ import (
 )
 
 const reportDesc = `
-This command generates a text or HTML report of an experiment.
+Generate a text or HTML report of an experiment.
 
-    $ iter8 report
+	$ iter8 report # same as iter8 report -o text
 
 or
 
-    $ iter8 report -o html > report.html # view with browser
+	$ iter8 report -o html > report.html # view with browser
 `
 
 func newReportCmd(kd *driver.KubeDriver) *cobra.Command {

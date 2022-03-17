@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 	Use:   "iter8",
 	Short: "Kubernetes release optimizer",
 	Long: `
-Kubernetes release optimizer built for DevOps, MLOps, SRE, and data science teams.
+Kubernetes release optimizer.
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		ll, err := logrus.ParseLevel(logLevel)
