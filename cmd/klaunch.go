@@ -11,27 +11,21 @@ import (
 )
 
 const kLaunchDesc = `
-This command launches an Iter8 experiment in Kubernetes. 
+Launch an Iter8 experiment in Kubernetes. 
 
-		$ iter8 k launch -c load-test-http --set url=https://httpbin.org/get
+	$ iter8 k launch -c load-test-http --set url=https://httpbin.org/get
 
-To locally render the Kubernetes experiment manifest without running the experiment, use the dry option.
+To locally render the Kubernetes experiment, use the dry option.
 
-$	iter8 k launch -c load-test-http \
-	--set url=https://httpbin.org/get \
-	--dry
+	$ iter8 k launch -c load-test-http \
+	  --set url=https://httpbin.org/get \
+	  --dry
 
-By default, experiments belong to the 'default' experiment group. To explicitly set the group, use the --group or -g option.
+By default, the current directory is used to download and unpack the experiment chart. Change this location using the destDir option.
 
-		$	iter8 k launch -c load-test-http \
-		--set url=https://httpbin.org/get \
-		-g hello
-
-By default, the current directory is used to download and unpack the experiment chart. Control this using the destDir option.
-
-	$	iter8 k launch -c load-test-http \
-		--set url=https://httpbin.org/get \
-		--destDir /tmp
+	$ iter8 k launch -c load-test-http \
+	  --set url=https://httpbin.org/get \
+	  --destDir /tmp
 `
 
 func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {

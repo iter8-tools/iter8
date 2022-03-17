@@ -20,7 +20,7 @@ To create the experiment.yaml file without actually running it, use the dry opti
 	  --set url=https://httpbin.org/get \
 	  --dry
 
-By default, the current directory is used to download and unpack the experiment chart. Set this location using the destDir option.
+By default, the current directory is used to download and unpack the experiment chart. Change this location using the destDir option.
 
 	$ iter8 launch -c load-test-http \
 	  --set url=https://httpbin.org/get \
