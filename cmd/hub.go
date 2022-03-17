@@ -23,11 +23,11 @@ import (
 )
 
 const hubDesc = `
-This command downloads an experiment chart to a local directory.
+Download an experiment chart to a local directory.
 
 		$	iter8 hub -c load-test-http
 
-This command is primarily intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
+This command is intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
 `
 
 func newHubCmd() *cobra.Command {

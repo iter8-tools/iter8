@@ -8,11 +8,11 @@ import (
 )
 
 const genDesc = `
-This command generates an experiment.yaml file by combining an experiment chart with values.
+Generate an experiment.yaml file by combining an experiment chart with values.
 
     $ iter8 gen --sourceDir /path/to/load-test-http --set url=https://httpbin.org/get
 
-This command is primarily intended for development and testing of experiment charts. For production usage, the launch subcommand is recommended.
+This command is intended for development and testing of experiment charts. For production usage, the launch subcommand is recommended.
 `
 
 func newGenCmd() *cobra.Command {
@@ -34,7 +34,7 @@ func newGenCmd() *cobra.Command {
 }
 
 func addSourceDirFlag(cmd *cobra.Command, sourceDirPtr *string, required bool) {
-	cmd.Flags().StringVar(sourceDirPtr, "sourceDir", "", "directory where experiment chart resides")
+	cmd.Flags().StringVar(sourceDirPtr, "sourceDir", "", "path to experiment chart directory")
 	if required {
 		cmd.MarkFlagRequired("sourceDir")
 	}
