@@ -25,7 +25,7 @@ import (
 const hubDesc = `
 Download an experiment chart to a local directory.
 
-		$	iter8 hub -c load-test-http
+	$ iter8 hub -c load-test-http
 
 This command is intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
 `
