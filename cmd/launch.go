@@ -10,7 +10,7 @@ import (
 )
 
 const launchDesc = `
-Launch an Iter8 experiment. 
+Launch an experiment. 
 
 	$ iter8 launch -c load-test-http --set url=https://httpbin.org/get
 

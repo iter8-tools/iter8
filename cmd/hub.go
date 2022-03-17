@@ -23,11 +23,11 @@ import (
 )
 
 const hubDesc = `
-This command downloads an Iter8 experiment chart to a local directory.
+This command downloads an experiment chart to a local directory.
 
 		$	iter8 hub -c load-test-http
 
-This command is primarily intended for development and testing of Iter8 experiment charts. For production usage, the iter8 launch command is recommended.
+This command is primarily intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
 `
 
 func newHubCmd() *cobra.Command {
@@ -35,7 +35,7 @@ func newHubCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "hub",
-		Short: "Download Iter8 experiment",
+		Short: "Download experiment chart",
 		Long:  hubDesc,
 		Run: func(_ *cobra.Command, _ []string) {
 			if err := actor.LocalRun(); err != nil {

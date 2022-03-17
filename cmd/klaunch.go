@@ -11,7 +11,7 @@ import (
 )
 
 const kLaunchDesc = `
-Launch an Iter8 experiment in Kubernetes. 
+Launch an experiment in Kubernetes. 
 
 	$ iter8 k launch -c load-test-http --set url=https://httpbin.org/get
 
@@ -33,7 +33,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "launch",
-		Short: "launch an experiment in Kubernetes",
+		Short: "Launch an experiment in Kubernetes",
 		Long:  kLaunchDesc,
 		Run: func(_ *cobra.Command, _ []string) {
 			if err := actor.KubeRun(); err != nil {

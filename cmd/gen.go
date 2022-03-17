@@ -12,7 +12,7 @@ This command generates an experiment.yaml file by combining an experiment chart 
 
     $ iter8 gen --sourceDir /path/to/load-test-http --set url=https://httpbin.org/get
 
-This command is primarily intended for development and testing of Iter8 experiment charts. For production usage, the launch subcommand is recommended.
+This command is primarily intended for development and testing of experiment charts. For production usage, the launch subcommand is recommended.
 `
 
 func newGenCmd() *cobra.Command {

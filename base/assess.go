@@ -1,4 +1,4 @@
-// Package base provides the core definitions and primitives for Iter8 experiment and experimeent tasks.
+// Package base provides the core definitions and primitives for experiment and experiment tasks.
 package base
 
 import (

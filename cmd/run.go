@@ -15,7 +15,7 @@ Run an experiment specified in experiment.yaml output result to result.yaml.
 
 	$ iter8 run
 
-This command is intended for development and testing of Iter8 experiment charts and tasks. For production usage, the iter8 launch command is recommended.
+This command is intended for development and testing of experiment charts and tasks. For production usage, the iter8 launch command is recommended.
 `
 
 func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
