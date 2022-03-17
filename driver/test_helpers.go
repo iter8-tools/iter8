@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"encoding/base64"
 	"io/ioutil"
 	"testing"
 
@@ -33,8 +32,7 @@ func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
 		}
 
 		for k, v := range secret.StringData {
-			sEnc := base64.StdEncoding.EncodeToString([]byte(v))
-			secret.Data[k] = []byte(sEnc)
+			secret.Data[k] = []byte(v)
 		}
 
 		return false, nil, nil

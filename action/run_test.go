@@ -37,9 +37,7 @@ func TestKubeRun(t *testing.T) {
 			Name:      "default-1-spec",
 			Namespace: "default",
 		},
-		Data: map[string][]byte{
-			"experiment.yaml": byteArray,
-		},
+		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 	rOpts.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{

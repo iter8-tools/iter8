@@ -71,9 +71,7 @@ func TestKubeRun(t *testing.T) {
 			Name:      "default-1-spec",
 			Namespace: "default",
 		},
-		Data: map[string][]byte{
-			"experiment.yaml": byteArray,
-		},
+		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -103,9 +101,7 @@ func TestLogs(t *testing.T) {
 			Name:      "default-1-spec",
 			Namespace: "default",
 		},
-		Data: map[string][]byte{
-			"experiment.yaml": byteArray,
-		},
+		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{

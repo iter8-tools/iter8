@@ -49,9 +49,7 @@ func TestKubeAssert(t *testing.T) {
 			Name:      "default-1-spec",
 			Namespace: "default",
 		},
-		Data: map[string][]byte{
-			"experiment.yaml": byteArray,
-		},
+		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
@@ -60,9 +58,7 @@ func TestKubeAssert(t *testing.T) {
 			Name:      "default-1-result",
 			Namespace: "default",
 		},
-		Data: map[string][]byte{
-			"result.yaml": byteArray,
-		},
+		StringData: map[string]string{"result.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	ok, err := aOpts.KubeRun()

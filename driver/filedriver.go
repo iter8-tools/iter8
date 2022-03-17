@@ -5,9 +5,6 @@ import (
 	"io/ioutil"
 	"path"
 
-	// Import to initialize client auth plugins.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -16,28 +13,6 @@ import (
 //FileDriver enables reading and writing experiment spec and result files
 type FileDriver struct {
 	RunDir string
-}
-
-// SpecFromBytes reads experiment spec from bytes
-func SpecFromBytes(b []byte) (base.ExperimentSpec, error) {
-	e := base.ExperimentSpec{}
-	err := yaml.Unmarshal(b, &e)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment spec")
-		return nil, err
-	}
-	return e, err
-}
-
-// ResultFromBytes reads experiment result from bytes
-func ResultFromBytes(b []byte) (*base.ExperimentResult, error) {
-	r := &base.ExperimentResult{}
-	err := yaml.Unmarshal(b, r)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment result")
-		return nil, err
-	}
-	return r, err
 }
 
 // ReadSpec reads experiment spec from file

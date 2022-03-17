@@ -285,7 +285,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 	// got job ...
 
 	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-	rYaml, _ := yaml.Marshal(r)
+	byteArray, _ := yaml.Marshal(r)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: driver.getResultSecretName(),
@@ -296,7 +296,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 				UID:        job.UID,
 			}},
 		},
-		StringData: map[string]string{"result.yaml": string(rYaml)},
+		StringData: map[string]string{"result.yaml": string(byteArray)},
 	}
 	// formed result secret ...
 
