@@ -9,28 +9,30 @@ import (
 )
 
 const (
-	// RunTaskName is the name of the run task which performs running of a shell script.
+	// RunTaskName is the name of the run task which performs running of a shell script
 	RunTaskName = "run"
 )
 
 var (
+	// tempDirEnv is a temporary directory
 	tempDirEnv string = fmt.Sprintf("TEMP_DIR=%v", os.TempDir())
 )
 
 // runTask enables running a shell script
 type runTask struct {
+	// TaskMeta has fields common to all tasks
 	TaskMeta
 }
 
 // initializeDefaults sets default values for task inputs
 func (t *runTask) initializeDefaults() {}
 
-//validateInputs for this task
+// validateInputs for this task
 func (t *runTask) validateInputs() error {
 	return nil
 }
 
-// get the command
+// getCommand gets the executable command
 func (t *runTask) getCommand() *exec.Cmd {
 	cmdStr := *t.TaskMeta.Run
 	// create command to be executed
@@ -40,7 +42,7 @@ func (t *runTask) getCommand() *exec.Cmd {
 	return cmd
 }
 
-// run the command.
+// run the command
 func (t *runTask) run(exp *Experiment) error {
 	err := t.validateInputs()
 	if err != nil {

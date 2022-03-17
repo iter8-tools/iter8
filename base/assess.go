@@ -1,4 +1,3 @@
-// Package base provides the core definitions and primitives for experiment and experiment tasks.
 package base
 
 import (
@@ -15,8 +14,9 @@ type assessInputs struct {
 
 // assessTask enables assessment of versions
 type assessTask struct {
+	// TaskMeta has fields common to all tasks
 	TaskMeta
-	// With contains the inputs for the assessTask
+	// With contains the inputs to this task
 	With assessInputs `json:"with" yaml:"with"`
 }
 
@@ -73,7 +73,7 @@ func (t *assessTask) run(exp *Experiment) error {
 	return err
 }
 
-// evaluate SLOs
+// evaluate SLOs and output the boolean SLO X version matrix
 func evaluateSLOs(exp *Experiment, slos []SLO) [][]bool {
 	slosSatisfied := make([][]bool, len(slos))
 	for i := 0; i < len(slos); i++ {
@@ -85,7 +85,7 @@ func evaluateSLOs(exp *Experiment, slos []SLO) [][]bool {
 	return slosSatisfied
 }
 
-// return true if SLO i satisfied by version j
+// sloSatisfied returns true if SLO i satisfied by version j
 func sloSatisfied(e *Experiment, slos []SLO, i int, j int) bool {
 	val := e.Result.Insights.ScalarMetricValue(j, slos[i].Metric)
 	// check if metric is available

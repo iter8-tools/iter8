@@ -41,7 +41,9 @@ import (
 )
 
 const (
-	maxGetRetries    = 2
+	// maxGetRetries is the number of tries to retry while fetching Kubernetes objects
+	maxGetRetries = 2
+	// getRetryInterval is the duration between retrials
 	getRetryInterval = 1 * time.Second
 )
 
@@ -66,7 +68,7 @@ func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
 	return kd
 }
 
-// initKube initializes the Kube clientset
+// initKube initializes the Kubernetes clientset
 func (kd *KubeDriver) initKube() error {
 	if kd.Clientset == nil {
 		// get REST config
@@ -87,7 +89,7 @@ func (kd *KubeDriver) initKube() error {
 	return nil
 }
 
-// initHelm initializes the Helm config
+// initHelm initializes the Helm configuration
 func (kd *KubeDriver) initHelm() error {
 	if kd.Configuration == nil {
 		// getting kube config
@@ -103,7 +105,7 @@ func (kd *KubeDriver) initHelm() error {
 	return nil
 }
 
-// InitRevision initializes the latest revision
+// initRevision initializes the latest revision
 func (driver *KubeDriver) initRevision() error {
 	// update revision to latest, if none is specified
 	if driver.Revision <= 0 {
@@ -116,6 +118,7 @@ func (driver *KubeDriver) initRevision() error {
 	return nil
 }
 
+// Init initializes the KubeDriver
 func (driver *KubeDriver) Init() error {
 	if err := driver.initKube(); err != nil {
 		return err
@@ -129,6 +132,7 @@ func (driver *KubeDriver) Init() error {
 	return nil
 }
 
+// getLastRelease fetches the last release of an Iter8 experiment
 func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
 	log.Logger.Debugf("fetching latest revision for experiment group %v", driver.Group)
 	// getting last revision
@@ -146,18 +150,22 @@ func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
 	return rel, nil
 }
 
+// getSpecSecretName yields the name of the experiment spec secret
 func (driver *KubeDriver) getSpecSecretName() string {
 	return fmt.Sprintf("%v-%v-spec", driver.Group, driver.Revision)
 }
 
+// getResultSecretName yields the name of the experiment result secret
 func (driver *KubeDriver) getResultSecretName() string {
 	return fmt.Sprintf("%v-%v-result", driver.Group, driver.Revision)
 }
 
+// getExperimentJobName yields the name of the experiment job
 func (driver *KubeDriver) getExperimentJobName() string {
 	return fmt.Sprintf("%v-%v-job", driver.Group, driver.Revision)
 }
 
+// getSecretWithRetry attempts to get a Kubernetes secret with retry
 func (driver *KubeDriver) getSecretWithRetry(name string) (s *corev1.Secret, err error) {
 	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 	for i := 0; i < maxGetRetries; i++ {
@@ -175,6 +183,7 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (s *corev1.Secret, err
 	return nil, e
 }
 
+// getJobWithRetry attempts to get a Kubernetes job with retry
 func (driver *KubeDriver) getJobWithRetry(name string) (*batchv1.Job, error) {
 
 	jobsClient := driver.Clientset.BatchV1().Jobs(driver.Namespace())
@@ -194,19 +203,22 @@ func (driver *KubeDriver) getJobWithRetry(name string) (*batchv1.Job, error) {
 	return nil, e
 }
 
+// getExperimentSpecSecret gets the Kubernetes experiment spec secret
 func (driver *KubeDriver) getExperimentSpecSecret() (s *corev1.Secret, err error) {
 	return driver.getSecretWithRetry(driver.getSpecSecretName())
 }
 
+// getExperimentResultSecret gets the Kubernetes experiment result secret
 func (driver *KubeDriver) getExperimentResultSecret() (s *corev1.Secret, err error) {
 	return driver.getSecretWithRetry(driver.getResultSecretName())
 }
 
+// getExperimentJob gets the Kubernetes experiment job
 func (driver *KubeDriver) getExperimentJob() (j *batchv1.Job, err error) {
 	return driver.getJobWithRetry(driver.getExperimentJobName())
 }
 
-// read experiment spec from secret in the Kubernetes context
+// ReadSpec creates an ExperimentSpec struct for a Kubernetes experiment
 func (driver *KubeDriver) ReadSpec() (base.ExperimentSpec, error) {
 	s, err := driver.getExperimentSpecSecret()
 	if err != nil {
@@ -223,7 +235,7 @@ func (driver *KubeDriver) ReadSpec() (base.ExperimentSpec, error) {
 	return SpecFromBytes(spec)
 }
 
-// read experiment result from Kubernetes context
+// ReadResult creates an ExperimentResult struct for a Kubernetes experiment
 func (driver *KubeDriver) ReadResult() (*base.ExperimentResult, error) {
 	s, err := driver.getExperimentResultSecret()
 	if err != nil {
@@ -240,9 +252,13 @@ func (driver *KubeDriver) ReadResult() (*base.ExperimentResult, error) {
 	return ResultFromBytes(res)
 }
 
+// PayloadValue is used to patch Kubernetes resources
 type PayloadValue struct {
-	Op    string `json:"op"`
-	Path  string `json:"path"`
+	// Op indicates the type of patch
+	Op string `json:"op"`
+	// Path is the JSON field path
+	Path string `json:"path"`
+	// Value is the value of the field
 	Value string `json:"value"`
 }
 
@@ -259,12 +275,14 @@ type PayloadValue struct {
 // #     failure: false
 // #     iter8Version: {{ .Chart.AppVersion }}
 */
+
+// createExperimentResultSecret creates the experiment result secret
 func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
 	job, err := driver.getExperimentJob()
 	if err != nil {
 		return err
 	}
-	// get job ...
+	// got job ...
 
 	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 	rYaml, _ := yaml.Marshal(r)
@@ -296,7 +314,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 	return nil
 }
 
-// write experiment result to secret in Kubernetes context
+// WriteResult writes results for a Kubernetes experiment
 func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	// create result secret if need be
 	if sec, _ := driver.getExperimentResultSecret(); sec == nil {
@@ -327,6 +345,7 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
+// Upgrade a Kubernetes experiment to the next release
 func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
 	client := action.NewUpgrade(driver.Configuration)
 	client.Namespace = driver.Namespace()
@@ -373,6 +392,7 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
+// Install a Kubernetes experiment
 func (driver *KubeDriver) Install(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
 	client := action.NewInstall(driver.Configuration)
 	client.Namespace = driver.Namespace()
@@ -420,6 +440,7 @@ func (driver *KubeDriver) Install(version string, chartName string, valueOpts va
 
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
+// getChartAndVals gets experiment chart and its values
 func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *cli.EnvSettings, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
 	chartPath, err := cpo.LocateChart(chartName, settings)
 	if err != nil {
@@ -495,14 +516,11 @@ func checkIfInstallable(ch *chart.Chart) error {
 	return e
 }
 
-func (driver *KubeDriver) getJobName() string {
-	return fmt.Sprintf("%v-%v-job", driver.Group, driver.Revision)
-}
-
+// GetExperimentLogs gets logs for a Kubernetes experiment
 func (driver *KubeDriver) GetExperimentLogs() (string, error) {
 	podsClient := driver.Clientset.CoreV1().Pods(driver.Namespace())
 	pods, err := podsClient.List(context.TODO(), metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("job-name=%v", driver.getJobName()),
+		LabelSelector: fmt.Sprintf("job-name=%v", driver.getExperimentJobName()),
 	})
 	if err != nil {
 		e := errors.New("unable to get experiment pod(s)")

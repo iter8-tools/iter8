@@ -22,9 +22,11 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// ToDo: Go Doc is needed in this file
+
 type CollectDatabaseTemplate struct {
 	Url      string            `json:"url" yaml:"url"`
-	Headers  map[string]string `json:"headers" yaml:"headers"` // TODO: should this be map[string]interface{} instead?
+	Headers  map[string]string `json:"headers" yaml:"headers"`
 	Provider string            `json:"provider" yaml:"provider"`
 	Method   string            `json:"method" yaml:"method"`
 	Metrics  []Metric          `json:"metrics" yaml:"metrics"`
@@ -47,6 +49,8 @@ type Params struct {
 
 const startingTimeString = "StartingTime"
 const elapsedTimeString = "ElapsedTime"
+
+// ToDo: Iter8 wiki is a great place to document the following (whichs seems IBM Code Engine specific) ... move it there
 
 // collectDatabaseInputs holds all the inputs for this task
 //

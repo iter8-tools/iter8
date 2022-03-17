@@ -55,24 +55,33 @@ type collectHTTPInputs struct {
 
 const (
 	// CollectHTTPTaskName is the name of this task which performs load generation and metrics collection.
-	CollectHTTPTaskName                = "gen-load-and-collect-metrics-http"
-	defaultQPS                         = float32(8)
-	defaultHTTPNumRequests             = int64(100)
-	defaultHTTPConnections             = 4
-	httpMetricPrefix                   = "http"
-	builtInHTTPRequestCountId          = "request-count"
-	builtInHTTPErrorCountId            = "error-count"
-	builtInHTTPErrorRateId             = "error-rate"
-	builtInHTTPLatencyMeanId           = "latency-mean"
-	builtInHTTPLatencyStdDevId         = "latency-stddev"
-	builtInHTTPLatencyMinId            = "latency-min"
-	builtInHTTPLatencyMaxId            = "latency-max"
-	builtInHTTPLatencyHistId           = "latency"
+	CollectHTTPTaskName = "gen-load-and-collect-metrics-http"
+	// defaultQPS is the default number of queries per second
+	defaultQPS = float32(8)
+	// defaultHTTPNumRequests is the default number of queries (in total)
+	defaultHTTPNumRequests = int64(100)
+	// defaultHTTPConnections is the default number of connections (parallel go routines)
+	defaultHTTPConnections = 4
+	// httpMetricPrefix is the prefix for all metrics collected by this task
+	httpMetricPrefix = "http"
+	// the following are a list of names for metrics collected by this task
+	builtInHTTPRequestCountId  = "request-count"
+	builtInHTTPErrorCountId    = "error-count"
+	builtInHTTPErrorRateId     = "error-rate"
+	builtInHTTPLatencyMeanId   = "latency-mean"
+	builtInHTTPLatencyStdDevId = "latency-stddev"
+	builtInHTTPLatencyMinId    = "latency-min"
+	builtInHTTPLatencyMaxId    = "latency-max"
+	builtInHTTPLatencyHistId   = "latency"
+	// prefix used in latency percentile metric names
+	// example: latency-p75.0 is the 75th percentile latency
 	builtInHTTPLatencyPercentilePrefix = "latency-p"
 )
 
 var (
+	// defaultErrorRanges is set so that status codes 400 and above are considered errors
 	defaultErrorRanges = []errorRange{{Lower: intPointer(400)}}
+	// defaultPercentiles are the default latency percentiles computed by this task
 	defaultPercentiles = [...]float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9}
 )
 
@@ -97,7 +106,9 @@ func (t *collectHTTPTask) errorCode(code int) bool {
 
 // collectHTTPTask enables load testing of HTTP services.
 type collectHTTPTask struct {
+	// TaskMeta has fields common to all tasks
 	TaskMeta
+	// With contains the inputs to this task
 	With collectHTTPInputs `json:"with" yaml:"with"`
 }
 

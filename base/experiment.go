@@ -17,18 +17,18 @@ import (
 
 // Task is an object that can be run
 type Task interface {
-	// validate inputs for this task
+	// validateInputs for this task
 	validateInputs() error
-	// initializeDefault values for inputs to this task
+	// initializeDefaults of the input values to this task
 	initializeDefaults()
-	// Run this task
+	// run this task
 	run(exp *Experiment) error
 }
 
-// ExperimentSpec is the experiment spec
+// ExperimentSpec specifies the set of tasks in this experiment
 type ExperimentSpec []Task
 
-// Experiment specification and result
+// Experiment struct containing spec and result
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
 	Tasks ExperimentSpec
@@ -91,42 +91,49 @@ type Insights struct {
 
 // MetricMeta describes a metric
 type MetricMeta struct {
-	Description string     `json:"description" yaml:"description"`
-	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
-	Type        MetricType `json:"type" yaml:"type"`
+	// Description is a human readable description of the metric
+	Description string `json:"description" yaml:"description"`
+	// Units for this metric (if any)
+	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
+	// Type of the metric. Example: counter
+	Type MetricType `json:"type" yaml:"type"`
 }
 
 // SLO is a service level objective
 type SLO struct {
-	// Metric is the fully qualified metric name (i.e., in the backendName/metricName format)
+	// Metric is the fully qualified metric name in the backendName/metricName format
 	Metric string `json:"metric" yaml:"metric"`
 
-	// UpperLimit is the maximum acceptable value of the metric.
+	// UpperLimit is the maximum acceptable value of the metric
 	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty"`
 
-	// LowerLimit is the minimum acceptable value of the metric.
+	// LowerLimit is the minimum acceptable value of the metric
 	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
 }
 
-// this is embedded within each task
+// TaskMeta provides common fields used across all tasks
 type TaskMeta struct {
 	// Task is the name of the task
 	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
 	// Run is the script used in a run task
 	// Specify either Task or Run but not both
 	Run *string `json:"run,omitempty" yaml:"run,omitempty"`
-	// If is the condition used to determine if this task needs to run.
+	// If is the condition used to determine if this task needs to run
+	// If the condition is not satisfied, then it is skipped in an experiment
+	// Example: SLOs()
 	If *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
-// this is used during unmarshaling of tasks
+// taskMetaWith enables unmarshaling of tasks
 type taskMetaWith struct {
+	// TaskMeta has fields common to all tasks
 	TaskMeta
 	// raw representation of task inputs
 	With interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
 // UnmarshallJSON will unmarshal an experiment spec from bytes
+// This is a custom JSON unmarshaler
 func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 	var v []taskMetaWith
 	if err := json.Unmarshal(data, &v); err != nil {
@@ -206,17 +213,17 @@ func metricTypeMatch(t MetricType, val interface{}) bool {
 	}
 }
 
-// updateMetricValueScalar update a scalar metric value for a given version
+// updateMetricValueScalar updates a scalar metric value for a given version
 func (in *Insights) updateMetricValueScalar(m string, i int, val float64) {
 	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val)
 }
 
-// updateMetricValueVector update a vector metric value for a given version
+// updateMetricValueVector updates a vector metric value for a given version
 func (in *Insights) updateMetricValueVector(m string, i int, val []float64) {
 	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val...)
 }
 
-// updateMetricValueHist update a histogram metric value for a given version
+// updateMetricValueHist updates a histogram metric value for a given version
 func (in *Insights) updateMetricValueHist(m string, i int, val []HistBucket) {
 	in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], val...)
 }
@@ -303,6 +310,7 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 	return nil
 }
 
+// initResults initializes the results section of an experiment
 func (e *Experiment) initResults() {
 	e.Result = &ExperimentResult{
 		StartTime:         time.Now(),

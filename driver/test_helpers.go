@@ -21,7 +21,7 @@ import (
 	ktesting "k8s.io/client-go/testing"
 )
 
-// initKube initialize the Kube clientset with a fake
+// initKubeFake initialize the Kube clientset with a fake
 func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
 	// secretDataReactor sets the secret.Data field based on the values from secret.StringData
 	// Credit: this function is adapted from https://github.com/creydr/go-k8s-utils
@@ -81,7 +81,7 @@ func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDrive
 	return kd
 }
 
-// Set up Iter8 hub repo
+// SetupWithRepo creates a local experiment chart repo and cleans up after test
 func SetupWithRepo(t *testing.T) *repotest.Server {
 	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
 	if err != nil {

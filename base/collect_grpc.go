@@ -79,7 +79,9 @@ const (
 
 // collectGRPCTask enables load testing of gRPC services.
 type collectGRPCTask struct {
+	// TaskMeta has fields common to all tasks
 	TaskMeta
+	// With contains the inputs to this task
 	With collectGRPCInputs `json:"with" yaml:"with"`
 }
 
