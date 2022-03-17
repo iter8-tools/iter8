@@ -9,17 +9,13 @@ import (
 )
 
 const kReportDesc = `
-This command generates a text or HTML report for a Kubernetes experiment.
+Generate a text or HTML report of a Kubernetes experiment.
 
-    $ iter8 k report
+	$ iter8 k report # same as iter8 k report -o text
 
 or
 
-    $ iter8 k report -o html > report.html # view with browser
-
-You can optionally specify the group to which the Kubernetes experiment belongs.
-
-		$ iter8 k report -g hello
+	$ iter8 k report -o html > report.html # view with browser
 `
 
 func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
