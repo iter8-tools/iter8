@@ -489,7 +489,7 @@ func NormalizeMetricName(m string) (string, error) {
 	pre := ""
 	if strings.HasPrefix(m, preHTTP) { // built-in http percentile metric
 		pre = preHTTP
-	} else if strings.HasPrefix(m, preGRPC) { // built-in http percentile metric
+	} else if strings.HasPrefix(m, preGRPC) { // built-in gRPC percentile metric
 		pre = preGRPC
 	}
 	if len(pre) > 0 {
