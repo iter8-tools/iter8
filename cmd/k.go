@@ -27,7 +27,8 @@ func addExperimentRevisionFlag(cmd *cobra.Command, revisionP *int, required bool
 
 func init() {
 	settings.AddFlags(kCmd.PersistentFlags())
-	// hiding Helm flags for now
+	// hiding these Helm flags for now
+	kCmd.PersistentFlags().MarkHidden("debug")
 	kCmd.PersistentFlags().MarkHidden("registry-config")
 	kCmd.PersistentFlags().MarkHidden("repository-config")
 	kCmd.PersistentFlags().MarkHidden("repository-cache")
