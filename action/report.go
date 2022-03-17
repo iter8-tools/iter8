@@ -19,15 +19,17 @@ const (
 	HTMLOutputFormatKey = "html"
 )
 
+// ReportOpts are the options used for generating reports from experiment result
 type ReportOpts struct {
 	// OutputFormat holds the output format to be used by report
 	OutputFormat string
-	// applicable only for local experiments
+	// RunOpts enables fetching local experiment spec and result
 	RunOpts
-	// applicable only for Kubernetes experiments
+	// KubeDriver enables fetching Kubernetes experiment spec and result
 	*driver.KubeDriver
 }
 
+// NewReportOpts initializes and returns report opts
 func NewReportOpts(kd *driver.KubeDriver) *ReportOpts {
 	return &ReportOpts{
 		RunOpts: RunOpts{
@@ -38,12 +40,14 @@ func NewReportOpts(kd *driver.KubeDriver) *ReportOpts {
 	}
 }
 
+// LocalRun generates report for a local experiment
 func (rOpts *ReportOpts) LocalRun(out io.Writer) error {
 	return rOpts.Run(&driver.FileDriver{
 		RunDir: rOpts.RunDir,
 	}, out)
 }
 
+// KubeRun generates report for a Kubernetes experiment
 func (rOpts *ReportOpts) KubeRun(out io.Writer) error {
 	if err := rOpts.KubeDriver.Init(); err != nil {
 		return err
@@ -51,6 +55,7 @@ func (rOpts *ReportOpts) KubeRun(out io.Writer) error {
 	return rOpts.Run(rOpts, out)
 }
 
+// Run generates the text or HTML report
 func (rOpts *ReportOpts) Run(eio base.Driver, out io.Writer) error {
 	if e, err := base.BuildExperiment(true, eio); err != nil {
 		return err
