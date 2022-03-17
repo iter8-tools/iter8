@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base"
+	id "github.com/iter8-tools/iter8/driver"
 )
 
 func TestHub(t *testing.T) {
-	srv := ia.SetupWithRepo(t)
+	srv := id.SetupWithRepo(t)
 	os.Chdir(t.TempDir())
 
 	tests := []cmdTestCase{

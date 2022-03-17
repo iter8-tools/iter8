@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	ia "github.com/iter8-tools/iter8/action"
-
 	"github.com/iter8-tools/iter8/base"
+	id "github.com/iter8-tools/iter8/driver"
 )
 
 func TestKLaunch(t *testing.T) {
-	srv := ia.SetupWithRepo(t)
+	srv := id.SetupWithRepo(t)
 
 	tests := []cmdTestCase{
 		// Launch, base case, values from CLI

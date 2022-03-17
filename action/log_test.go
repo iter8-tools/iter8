@@ -12,7 +12,7 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	srv := SetupWithRepo(t)
+	srv := driver.SetupWithRepo(t)
 
 	var err error
 

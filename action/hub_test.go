@@ -3,11 +3,12 @@ package action
 import (
 	"testing"
 
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHub(t *testing.T) {
-	srv := SetupWithRepo(t)
+	srv := driver.SetupWithRepo(t)
 
 	// fix hOpts
 	hOpts := NewHubOpts()

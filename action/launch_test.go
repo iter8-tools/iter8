@@ -12,7 +12,7 @@ import (
 
 func TestLocalLaunch(t *testing.T) {
 	base.SetupWithMock(t)
-	srv := SetupWithRepo(t)
+	srv := driver.SetupWithRepo(t)
 	os.Chdir(t.TempDir())
 
 	// fix lOpts
@@ -26,7 +26,7 @@ func TestLocalLaunch(t *testing.T) {
 }
 
 func TestKubeLaunch(t *testing.T) {
-	srv := SetupWithRepo(t)
+	srv := driver.SetupWithRepo(t)
 
 	var err error
 

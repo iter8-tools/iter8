@@ -5,13 +5,12 @@ import (
 	"os"
 	"testing"
 
-	ia "github.com/iter8-tools/iter8/action"
-
 	"github.com/iter8-tools/iter8/base"
+	id "github.com/iter8-tools/iter8/driver"
 )
 
 func TestLaunch(t *testing.T) {
-	srv := ia.SetupWithRepo(t)
+	srv := id.SetupWithRepo(t)
 
 	tests := []cmdTestCase{
 		// launch, values from CLI
@@ -37,5 +36,4 @@ func TestLaunch(t *testing.T) {
 	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 	runTestActionCmd(t, tests)
-
 }
