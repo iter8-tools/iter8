@@ -7,13 +7,19 @@ import (
 	"github.com/iter8-tools/iter8/driver"
 )
 
+// LaunchOpts are the options used for launching experiments
 type LaunchOpts struct {
+	// DryRun enables simulating a launch
 	DryRun bool
+	// HubOpts determines which chart is used and how
 	HubOpts
+	// GenOpts enables values
 	GenOpts
+	// RunOpts determines how the experiment is run
 	RunOpts
 }
 
+// NewHubOpts initializes and returns launch opts
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	hOpts := NewHubOpts()
 	rOpts := NewRunOpts(kd)
@@ -23,6 +29,7 @@ func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	}
 }
 
+// LocalRun launches a local experiment
 func (lOpts *LaunchOpts) LocalRun() error {
 	log.Logger.Debug("launch local run started...")
 	// download chart from Iter8 hub
@@ -47,6 +54,7 @@ func (lOpts *LaunchOpts) LocalRun() error {
 	return lOpts.RunOpts.LocalRun()
 }
 
+// KubeRun launches a Kubernetes experiment
 func (lOpts *LaunchOpts) KubeRun() error {
 	// initialize kube driver
 	if err := lOpts.KubeDriver.Init(); err != nil {
