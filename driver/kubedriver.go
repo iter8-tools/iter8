@@ -17,6 +17,7 @@ import (
 	// Import to initialize client auth plugins.
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/downloader"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	helmerrors "github.com/pkg/errors"
@@ -447,31 +448,31 @@ func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *c
 		return nil, nil, err
 	}
 
-	// if req := ch.Metadata.Dependencies; req != nil {
-	// 	if err := action.CheckDependencies(ch, req); err != nil {
-	// 		man := &downloader.Manager{
-	// 			Out:              out,
-	// 			ChartPath:        chartPath,
-	// 			Keyring:          cpo.Keyring,
-	// 			SkipUpdate:       false,
-	// 			Getters:          p,
-	// 			RepositoryConfig: settings.RepositoryConfig,
-	// 			RepositoryCache:  settings.RepositoryCache,
-	// 			Debug:            settings.Debug,
-	// 		}
-	// 		if err := man.Update(); err != nil {
-	// 			e := fmt.Errorf("unable to update dependencies")
-	// 			log.Logger.WithStackTrace(err.Error()).Error(e)
-	// 			return nil, nil, e
-	// 		}
-	// 		// Reload the chart with the updated Chart.lock file.
-	// 		if ch, err = loader.Load(chartPath); err != nil {
-	// 			e := fmt.Errorf("failed reloading chart after dependency update")
-	// 			log.Logger.WithStackTrace(err.Error()).Error(e)
-	// 			return nil, nil, e
-	// 		}
-	// 	}
-	// }
+	if req := ch.Metadata.Dependencies; req != nil {
+		if err := action.CheckDependencies(ch, req); err != nil {
+			man := &downloader.Manager{
+				Out:              os.Stdout,
+				ChartPath:        chartPath,
+				Keyring:          cpo.Keyring,
+				SkipUpdate:       false,
+				Getters:          p,
+				RepositoryConfig: settings.RepositoryConfig,
+				RepositoryCache:  settings.RepositoryCache,
+				Debug:            settings.Debug,
+			}
+			if err := man.Update(); err != nil {
+				e := fmt.Errorf("unable to update dependencies")
+				log.Logger.WithStackTrace(err.Error()).Error(e)
+				return nil, nil, e
+			}
+			// Reload the chart with the updated Chart.lock file.
+			if ch, err = loader.Load(chartPath); err != nil {
+				e := fmt.Errorf("failed reloading chart after dependency update")
+				log.Logger.WithStackTrace(err.Error()).Error(e)
+				return nil, nil, e
+			}
+		}
+	}
 
 	if ch.Metadata.Deprecated {
 		log.Logger.Warning("this chart is deprecated")
