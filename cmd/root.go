@@ -50,7 +50,7 @@ func Execute() {
 func init() {
 	// disable completion command for now
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "trace, debug, info, warning, error, fatal, panic")
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
 }
 
 // Credit: the following function is from Helm. Please see:
