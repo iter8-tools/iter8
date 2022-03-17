@@ -8,13 +8,15 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
+// Reporter is a type that supports methods used for text and html reporting.
 type Reporter struct {
 	*base.Experiment
 }
 
 /* Following functions/methods are common to both text and html templates */
 
-// SortedScalarAndSLOMetrics extracts scalar and SLO metric names from experiment in sorted order
+// SortedScalarAndSLOMetrics extracts and sorts metric names from experiment.
+// It looks for available metrics in the results, and also for metrics specified in SLOs.
 func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 	keys := []string{}
 	for k, mm := range r.Result.Insights.MetricsInfo {
@@ -40,7 +42,7 @@ func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 	return uniqKeys
 }
 
-// ScalarMetricValueStr extracts metric value string for given version and scalar metric name
+// ScalarMetricValueStr extracts the metric value string for the given version and given scalar metric name
 func (r *Reporter) ScalarMetricValueStr(j int, mn string) string {
 	val := r.Result.Insights.ScalarMetricValue(j, mn)
 	if val != nil {

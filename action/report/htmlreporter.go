@@ -17,6 +17,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
+// HTMLReporter is a type that supports generation of HTML reports from experiments.
 type HTMLReporter struct {
 	*Reporter
 }
@@ -25,6 +26,7 @@ type HTMLReporter struct {
 //go:embed htmlreport.tpl
 var reportHTML string
 
+// Gen creates an HTML report for a given experiment
 func (ht *HTMLReporter) Gen(out io.Writer) error {
 
 	// create HTML template
@@ -101,7 +103,7 @@ func (r *HTMLReporter) HTMLHistCharts() string {
 	`
 }
 
-// RenderStrHTML is a helper method for rendering strings
+// RenderStr is a helper method for rendering strings
 // Used in HTML template
 func (r *HTMLReporter) RenderStr(what string) (string, error) {
 	var val string = ""
@@ -144,6 +146,7 @@ func (r *HTMLReporter) RenderStr(what string) (string, error) {
 	return val, err
 }
 
+// MetricDescriptionHTML is used to described metrics in the metrics and SLO section of the HTML report
 func (r *HTMLReporter) MetricDescriptionHTML(metricName string) (string, error) {
 	in := r.Result.Insights
 	nm, err := base.NormalizeMetricName(metricName)
@@ -201,6 +204,7 @@ func sampleHist(h []base.HistBucket) []float64 {
 
 // VectorMetricValue gets the value of the given vector metric for the given version
 // If it is a histogram metric, then its values are sampled from the histogram
+// Recall: VectorMetric can be a histogram metric or a sample metric.
 func (r *HTMLReporter) VectorMetricValue(i int, m string) []float64 {
 	in := r.Result.Insights
 	mm, ok := in.MetricsInfo[m]

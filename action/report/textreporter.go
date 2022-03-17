@@ -14,6 +14,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
+// HTMLReporter is a type that supports generation of text reports from experiments.
 type TextReporter struct {
 	*Reporter
 }
@@ -22,6 +23,7 @@ type TextReporter struct {
 //go:embed textreport.tpl
 var reportText string
 
+// Gen creates a text report for a given experiment
 func (tr *TextReporter) Gen(out io.Writer) error {
 	// create text template
 	ttpl, err := textT.New("report").Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(reportText)
@@ -51,6 +53,7 @@ func (r *TextReporter) PrintSLOsText() string {
 	return b.String()
 }
 
+// getSLOStrText gets the text for an SLO
 func (r *TextReporter) getSLOStrText(i int) (string, error) {
 	in := r.Result.Insights
 	slo := in.SLOs[i]
