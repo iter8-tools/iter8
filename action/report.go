@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 
+	"github.com/iter8-tools/iter8/action/report"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
-	"github.com/iter8-tools/iter8/report"
 )
 
 const (
