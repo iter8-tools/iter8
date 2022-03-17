@@ -13,18 +13,16 @@ import (
 )
 
 const docsDesc = `
-This command generates markdown documentation for other Iter8 CLI commands.
+Generate markdown documentation for Iter8 CLI commands. Documentation will be generated for all commands that are not hidden.
 
-The documentation is generated for all commands that are not hidden.
-
-This command is primarily intended for Iter8 development and CI.
+This command is intended for Iter8 documentation and CI.
 `
 
 func newDocsCmd() *cobra.Command {
 	docsDir := ""
 	cmd := &cobra.Command{
 		Use:    "docs",
-		Short:  "Generate markdown documentation for Iter8 CLI.",
+		Short:  "Generate markdown documentation for Iter8 CLI",
 		Long:   docsDesc,
 		Hidden: true,
 		Run: func(cmd *cobra.Command, args []string) {
