@@ -4,13 +4,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 )
 
 func TestLocalLaunch(t *testing.T) {
-	SetupWithMock(t)
+	base.SetupWithMock(t)
 	srv := SetupWithRepo(t)
 	os.Chdir(t.TempDir())
 

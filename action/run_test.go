@@ -17,7 +17,7 @@ import (
 )
 
 func TestLocalRun(t *testing.T) {
-	SetupWithMock(t)
+	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata")
@@ -26,7 +26,7 @@ func TestLocalRun(t *testing.T) {
 }
 
 func TestKubeRun(t *testing.T) {
-	SetupWithMock(t)
+	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.Revision = 1

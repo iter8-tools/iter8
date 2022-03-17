@@ -34,7 +34,7 @@ func TestLocalReportHTML(t *testing.T) {
 }
 
 func TestKubeReportText(t *testing.T) {
-	SetupWithMock(t)
+	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.Revision = 1
