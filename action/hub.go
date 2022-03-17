@@ -14,16 +14,19 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 )
 
+// ChartNameAndDestOptions provides the name of the chart and where it needs to be downloaded
 type ChartNameAndDestOptions struct {
 	ChartName string
 	DestDir   string
 }
 
+// HubOpts are the options used for downloading an experiment chart
 type HubOpts struct {
 	ChartNameAndDestOptions
 	action.ChartPathOptions
 }
 
+// NewHubOpts initializes and returns hub opts
 func NewHubOpts() *HubOpts {
 	return &HubOpts{
 		ChartNameAndDestOptions: ChartNameAndDestOptions{
@@ -35,7 +38,7 @@ func NewHubOpts() *HubOpts {
 	}
 }
 
-// clean pre-existing chart artifacts in destination dir
+// cleanChartArtifacts cleans any pre-existing chart artifacts in DestDir
 func (hub *HubOpts) cleanChartArtifacts() error {
 	// removing any pre-existing files and dirs matching the glob
 	files, err := filepath.Glob(path.Join(hub.DestDir, hub.ChartName+"*"))
@@ -53,7 +56,7 @@ func (hub *HubOpts) cleanChartArtifacts() error {
 	return nil
 }
 
-// LocalRun downloads an experiment chart
+// LocalRun downloads an experiment chart to DestDir
 func (hub *HubOpts) LocalRun() error {
 	// removing any pre-existing files and dirs matching the glob
 	if err := hub.cleanChartArtifacts(); err != nil {

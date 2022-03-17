@@ -19,24 +19,31 @@ const (
 	SLOs = "slos"
 )
 
+// AssertOpts are the options used for asserting experiment results
 type AssertOpts struct {
-	Timeout    time.Duration
+	// Timeout is the duration to wait for conditions to be satisfied
+	Timeout time.Duration
+	// Conditions are checked by assert
 	Conditions []string
+	// RunOpts provides options relating to experiment resources
 	RunOpts
 }
 
+// NewAssertOpts initializes and returns assert opts
 func NewAssertOpts(kd *driver.KubeDriver) *AssertOpts {
 	return &AssertOpts{
 		RunOpts: *NewRunOpts(kd),
 	}
 }
 
+// LocalRun asserts conditions for a local experiment
 func (aOpts *AssertOpts) LocalRun() (bool, error) {
 	return aOpts.Run(&driver.FileDriver{
 		RunDir: aOpts.RunDir,
 	})
 }
 
+// LocalRun asserts conditions for a Kubernetes experiment
 func (aOpts *AssertOpts) KubeRun() (bool, error) {
 	if err := aOpts.KubeDriver.Init(); err != nil {
 		return false, err
@@ -45,6 +52,7 @@ func (aOpts *AssertOpts) KubeRun() (bool, error) {
 	return aOpts.Run(aOpts)
 }
 
+// Run builds the experiment and verifies assert conditions
 func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {
 	e, err := base.BuildExperiment(true, eio)
 	if err != nil {
@@ -62,6 +70,7 @@ func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {
 	return true, nil
 }
 
+// verify implements the core logic of assert
 func (assert *AssertOpts) verify(exp *base.Experiment) (bool, error) {
 	// timeSpent tracks how much time has been spent so far in assert attempts
 	var timeSpent, _ = time.ParseDuration("0s")

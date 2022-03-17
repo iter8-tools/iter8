@@ -17,17 +17,22 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
+// AssertOpts are the options used for generating experiment.yaml
 type GenOpts struct {
+	// Options provides the values to be combined with the experiment chart
 	values.Options
+	// SourceDir is the path to the experiment chart
 	SourceDir string
 }
 
+// NewGenOpts initializes and returns gen opts
 func NewGenOpts() *GenOpts {
 	return &GenOpts{
 		SourceDir: ".",
 	}
 }
 
+// LocalRun generates a local experiment.yaml file
 func (gen *GenOpts) LocalRun() error {
 	// read in the experiment chart
 	c, err := loader.Load(gen.SourceDir)
