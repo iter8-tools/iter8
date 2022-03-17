@@ -426,12 +426,15 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 		cancel()
 	}()
 
-	_, err = client.RunWithContext(ctx, group, ch, vals)
+	rel, err := client.RunWithContext(ctx, group, ch, vals)
 	if err != nil {
 		e := fmt.Errorf("experiment launch failed")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
+
+	// upgrading revision info
+	driver.Revision = rel.Version
 
 	log.Logger.Info("experiment launched. Happy Iter8ing!")
 
@@ -470,12 +473,15 @@ func (driver *KubeDriver) Install(version string, chartName string, valueOpts va
 		cancel()
 	}()
 
-	_, err = client.RunWithContext(ctx, ch, vals)
+	rel, err := client.RunWithContext(ctx, ch, vals)
 	if err != nil {
 		e := fmt.Errorf("experiment launch failed")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
+
+	// upgrading revision info
+	driver.Revision = rel.Version
 
 	log.Logger.Info("experiment launched. Happy Iter8ing!")
 

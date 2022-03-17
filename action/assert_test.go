@@ -38,7 +38,6 @@ func TestLocalAssertFailing(t *testing.T) {
 }
 
 func TestKubeAssert(t *testing.T) {
-	SetupWithMock(t)
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Revision = 1

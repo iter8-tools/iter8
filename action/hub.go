@@ -26,6 +26,9 @@ type HubOpts struct {
 
 func NewHubOpts() *HubOpts {
 	return &HubOpts{
+		ChartNameAndDestOptions: ChartNameAndDestOptions{
+			DestDir: ".",
+		},
 		ChartPathOptions: action.ChartPathOptions{
 			RepoURL: driver.DefaultIter8RepoURL,
 		},

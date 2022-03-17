@@ -23,7 +23,9 @@ type GenOpts struct {
 }
 
 func NewGenOpts() *GenOpts {
-	return &GenOpts{}
+	return &GenOpts{
+		SourceDir: ".",
+	}
 }
 
 func (gen *GenOpts) LocalRun() error {

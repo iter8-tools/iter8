@@ -1,6 +1,7 @@
 package action
 
 import (
+	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/driver"
@@ -11,10 +12,11 @@ import (
 func TestLocalLaunch(t *testing.T) {
 	SetupWithMock(t)
 	srv := SetupWithRepo(t)
+	os.Chdir(t.TempDir())
+
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.ChartName = "load-test-http"
-	lOpts.DestDir = t.TempDir()
 	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
 	lOpts.RepoURL = srv.URL()
 
@@ -23,7 +25,6 @@ func TestLocalLaunch(t *testing.T) {
 }
 
 func TestKubeLaunch(t *testing.T) {
-	SetupWithMock(t)
 	srv := SetupWithRepo(t)
 
 	var err error
@@ -40,5 +41,6 @@ func TestKubeLaunch(t *testing.T) {
 
 	rel, err := lOpts.Releases.Last(lOpts.Group)
 	assert.NotNil(t, rel)
+	assert.Equal(t, 1, rel.Version)
 	assert.NoError(t, err)
 }
