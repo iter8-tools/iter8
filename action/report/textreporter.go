@@ -14,7 +14,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// HTMLReporter is a type that supports generation of text reports from experiments.
+// TextReporter is a type that supports generation of text reports from experiments.
 type TextReporter struct {
 	*Reporter
 }
