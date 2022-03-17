@@ -75,4 +75,5 @@ func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartN
 	cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 0.9.0) or it may reference a valid range (e.g. 0.9.x). If this is not specified, the latest compatible version is used")
 	cmd.Flags().MarkHidden("version")
 	cmd.Flags().StringVar(&c.RepoURL, "repoURL", driver.DefaultIter8RepoURL, "chart repo from which experiment charts are downloaded")
+	cmd.Flags().MarkHidden("repoURL")
 }

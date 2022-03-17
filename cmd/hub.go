@@ -27,10 +27,6 @@ This command downloads an Iter8 experiment chart to a local directory.
 
 		$	iter8 hub -c load-test-http
 
-By default, the hub command downloads charts from the official Iter8 chart repo. It is also possible to use third party (helm) repos to host Iter8 experiment charts.
-
-		$	iter8 hub -c great-expectations --repoURL https://great.expectations.pip --destDir /tmp
-
 This command is primarily intended for development and testing of Iter8 experiment charts. For production usage, the iter8 launch command is recommended.
 `
 

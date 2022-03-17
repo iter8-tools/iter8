@@ -25,12 +25,6 @@ By default, the current directory is used to download and unpack the experiment 
 	$ iter8 launch -c load-test-http \
 	  --set url=https://httpbin.org/get \
 	  --destDir /tmp
-	
-By default, the charts are downloaded from the official Iter8 chart repo. Specify third party experiment chart repos using the repoURL option.
-
-	$ iter8 launch -c load-test-http \
-	  --repoURL https://great.expectations.pip \
-	  --set url=https://httpbin.org/get
 `
 
 func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
