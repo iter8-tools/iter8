@@ -11,11 +11,11 @@ import (
 )
 
 var runDesc = `
-This command runs an experiment specified in the experiment.yaml file and outputs the result of the experiment in the results.yaml file.
+Run an experiment specified in experiment.yaml output result to the result.yaml.
 
-		$	iter8 run
+	$ iter8 run
 
-This command is primarily intended for development and testing of Iter8 experiment charts and tasks. For production usage, the iter8 launch command is recommended.
+This command is intended for development and testing of Iter8 experiment charts and tasks. For production usage, the iter8 launch command is recommended.
 `
 
 func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
@@ -36,7 +36,7 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 }
 
 func addRunFlags(cmd *cobra.Command, actor *ia.RunOpts) {
-	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
+	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; must contain experiment.yaml; will be used to create result.yaml")
 }
 
 func init() {
