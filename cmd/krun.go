@@ -11,12 +11,11 @@ import (
 )
 
 const kRunDesc = `
-This command runs a Kubernetes experiment. It reads an experiment specified in the experiment.yaml file and outputs the result to a Kubernetes secret.
+Run a Kubernetes experiment. This command reads an experiment specified in a secret and writes the the result to another secret.
 
-		$ cd /folder/with/experiment.yaml
-		$	iter8 k run --namespace {{ .Experiment.Namespace }} --group {{ .Experiment.group }} --revision {{ .Experiment.Revision }}
+	$ iter8 k run --namespace {{ .Experiment.Namespace }} --group {{ .Experiment.group }} --revision {{ .Experiment.Revision }}
 
-This command is primarily intended for use within the Iter8 Docker image that is used to execute Kubernetes experiments.
+This command is intended for use within the Iter8 Docker image that is used to execute Kubernetes experiments.
 `
 
 func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
@@ -24,7 +23,7 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "run",
-		Short: "run a Kubernetes experiment",
+		Short: "Run a Kubernetes experiment",
 		Long:  kRunDesc,
 		Run: func(_ *cobra.Command, _ []string) {
 			if err := actor.KubeRun(); err != nil {
