@@ -8,13 +8,9 @@ import (
 )
 
 const kLogDesc = `
-This command fetches the logs for a Kubernetes experiment.
+Fetch logs for a Kubernetes experiment.
 
-		$	iter8 k log
-
-or 
-
-		$	iter8 k log --group hello
+	$ iter8 k log
 `
 
 func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
@@ -22,7 +18,7 @@ func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "log",
-		Short: "get logs for a Kubernetes experiment",
+		Short: "Fetch logs for a Kubernetes experiment",
 		Long:  kLogDesc,
 		Run: func(_ *cobra.Command, _ []string) {
 			if lg, err := actor.KubeRun(); err != nil {
