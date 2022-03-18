@@ -42,6 +42,10 @@
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
+## :octocat: Issues
+
+Iter8 issues are tracked [here](https://github.com/iter8-tools/iter8/issues).
+
 ## :tada: Contributing
 We welcome PRs!
 

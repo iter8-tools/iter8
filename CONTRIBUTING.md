@@ -35,7 +35,7 @@ The best ways to reach us with a question is to ask...
 
 ## Find an issue
 
-Iter8 issues are managed [here](https://github.com/iter8-tools/iter8/issues).
+Iter8 issues are tracked [here](https://github.com/iter8-tools/iter8/issues).
 
 Issued labeled **good first issue** have extra information to
 help you make your first contribution. Issues labeled **help wanted** are issues
