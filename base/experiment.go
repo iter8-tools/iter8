@@ -608,14 +608,7 @@ func (exp *Experiment) Completed() bool {
 
 // NoFailure returns true if no task in the experiment has failed
 func (exp *Experiment) NoFailure() bool {
-	if exp != nil {
-		if exp.Result != nil {
-			if !exp.Result.Failure {
-				return true
-			}
-		}
-	}
-	return false
+	return exp != nil && exp.Result != nil && !exp.Result.Failure
 }
 
 // getSLOsSatisfiedBy returns the set of versions which satisfy SLOs
