@@ -90,10 +90,11 @@ repository, you can amend your commit with the sign-off by running:
 
 The Iter8 project consists of the following repos.
 
-1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for Iter8 CLI
+1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI
 2. [iter8-tools/hub](https://github.com/iter8-tools/hub): source for Iter8 experiment charts
 3. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
-4. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for installing Iter8 CLI
+4. [iter8-tools/iter8-action](https://github.com/iter8-tools/iter8-action): source for the Iter8 GitHub Action
+5. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for the Iter8 CLI
 
 ### iter8-tools/iter8
 

@@ -37,12 +37,12 @@
 ## :rocket: Usage examples
 1.  [Load test, benchmark and validate HTTP services with SLOs](https://iter8.tools/0.9/tutorials/load-test-http/usage/).
 2.  [Load test, benchmark and validate gRPC services with SLOs](https://iter8.tools/0.9/tutorials/load-test-grpc/usage/).
-3.  Performance testing and SLO validation using Iter8 GitHub Action: [HTTP](http://localhost:8000/latest/tutorials/load-test-http/ghaction/) and [gRPC](http://localhost:8000/latest/tutorials/load-test-grpc/ghaction/)
+3.  Performance testing and SLO validation using Iter8 GitHub Action: [HTTP](https://iter8.tools/0.9/tutorials/load-test-http/ghaction/) and [gRPC](https://iter8.tools/0.9/tutorials/load-test-grpc/ghaction/).
 4.  Performance testing and SLO validation for Knative services: [HTTP](https://iter8.tools/0.9/tutorials/integrations/knative/load-test-http/) and [gRPC](https://iter8.tools/0.9/tutorials/integrations/knative/load-test-grpc/).
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
-## :wrench: Developing Iter8
+## :tada: Contributing
 We welcome PRs!
 
 See [here](CONTRIBUTING.md) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.
