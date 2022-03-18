@@ -1,4 +1,4 @@
-# :zap: Iter8: Kubernetes Release Optimizer
+# :rocket: Iter8: Kubernetes Release Optimizer
 
 [![Iter8 release](https://img.shields.io/github/v/release/iter8-tools/iter8?sort=semver)](https://github.com/iter8-tools/iter8/releases)
 [![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/iter8-tools/iter8)
@@ -16,7 +16,7 @@
 <img alt-text="Iter8 experiment" src="https://iter8-tools.github.io/docs/0.9/images/iter8-intro-dark.png" width="70%" />
 </p>
 
-## :rocket: Features at a glance
+## :dart: Features at a glance
 
 **Load testing with SLOs**
 
@@ -34,7 +34,7 @@
 
   > Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulSets, Knative services, KServe/Seldon ML deployments, or other custom Kubernetes resource types.
 
-## :dart: Usage examples
+## :zap: Usage examples
 1.  [Load test, benchmark and validate HTTP services with SLOs](https://iter8.tools/0.9/tutorials/load-test-http/usage/).
 2.  [Load test, benchmark and validate gRPC services with SLOs](https://iter8.tools/0.9/tutorials/load-test-grpc/usage/).
 3.  Performance testing and SLO validation using Iter8 GitHub Action: [HTTP](http://localhost:8000/latest/tutorials/load-test-http/ghaction/) and [gRPC](http://localhost:8000/latest/tutorials/load-test-grpc/ghaction/)
