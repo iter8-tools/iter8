@@ -32,7 +32,7 @@
 
 **App frameworks**
 
-  > Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulsets, Knative services, KServe/Seldon ML deployments, or other custom Kubernetes resource types.
+  > Use with any app, serverless, or ML framework. Iter8 works with Kubernetes deployments, statefulSets, Knative services, KServe/Seldon ML deployments, or other custom Kubernetes resource types.
 
 ## :dart: Usage examples
 1.  [Load test, benchmark and validate HTTP services with SLOs](https://iter8.tools/0.9/tutorials/load-test-http/usage/).
