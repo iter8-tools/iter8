@@ -19,6 +19,7 @@ We welcome many different types of contributions including:
 * [Tutorials and other documentation](#iter8-toolsdocs)
 * [Experiment charts](#iter8-toolshub)
 * [CLI features, and experiment tasks](#iter8-toolsiter8)
+* [Iter8 GitHub Action](#iter8-toolsiter8-action)
 * CI, builds, and tests
 * [Web design](#iter8-toolsdocs)
 * Reviewing pull requests
@@ -137,6 +138,19 @@ Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
 
 #### Versioning
 Iter8 experiment charts are Helm charts under the covers, and are semantically versioned as per [Helm chart versioning specifications](https://helm.sh/docs/topics/charts/#charts-and-versioning). Every change to the chart must be accompanied by an increment to the version number of the chart. For most changes, this would mean an increment to the patch version (for example, the `version` field in `Chart.yaml` may be incremented from `0.1.0` to `0.1.1`).
+
+### iter8-tools/iter8-action
+
+This is the source repo for the Iter8 GitHub Action.
+
+#### Clone `iter8-action`
+
+```shell
+git clone https://github.com/iter8-tools/iter8-action.git
+```
+
+#### Add tests
+Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file. You can run these tests by manually triggering the `tests` GitHub Actions workflow.
 
 
 ### iter8-tools/docs
