@@ -40,7 +40,7 @@
 3.  Performance testing and SLO validation using Iter8 GitHub Action: [HTTP](http://localhost:8000/latest/tutorials/load-test-http/ghaction/) and [gRPC](http://localhost:8000/latest/tutorials/load-test-grpc/ghaction/)
 4.  Performance testing and SLO validation for Knative services: [HTTP](https://iter8.tools/0.9/tutorials/integrations/knative/load-test-http/) and [gRPC](https://iter8.tools/0.9/tutorials/integrations/knative/load-test-grpc/).
 
-Please see https://iter8.tools for complete documentation.
+Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
 ## :wrench: Developing Iter8
 We welcome PRs!
