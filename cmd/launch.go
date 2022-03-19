@@ -27,6 +27,7 @@ By default, the current directory is used to download and unpack the experiment 
 	  --destDir /tmp
 `
 
+// newLaunchCmd creates the launch command
 func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewLaunchOpts(kd)
 
@@ -47,6 +48,7 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 	return cmd
 }
 
+// addLaunchFlags adds flags to the launch command
 func addLaunchFlags(cmd *cobra.Command, actor *ia.LaunchOpts) {
 	cmd.Flags().BoolVar(&actor.DryRun, "dry", false, "simulate an experiment launch")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"

@@ -28,6 +28,7 @@ By default, the current directory is used to download and unpack the experiment 
 	  --destDir /tmp
 `
 
+// newKLaunchCmd creates the Kubernetes launch command
 func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	actor := ia.NewLaunchOpts(kd)
 

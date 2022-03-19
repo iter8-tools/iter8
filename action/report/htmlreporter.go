@@ -17,8 +17,9 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// HTMLReporter is a type that supports generation of HTML reports from experiments.
+// HTMLReporter supports generation of HTML reports from experiments.
 type HTMLReporter struct {
+	// Reporter enables access to all reporter data and methods
 	*Reporter
 }
 
@@ -163,6 +164,7 @@ func (r *HTMLReporter) MetricDescriptionHTML(metricName string) (string, error) 
 	return m.Description, nil
 }
 
+// renderSLOSatisfiedHTML provides the HTML icon indicating if the SLO is satisfied
 func renderSLOSatisfiedHTML(s bool) string {
 	if s {
 		return "fa-check-circle"
@@ -171,6 +173,7 @@ func renderSLOSatisfiedHTML(s bool) string {
 	}
 }
 
+// renderSLOSatisfiedCellClass dictates the cell color indicating if the SLO is satisfied
 func renderSLOSatisfiedCellClass(s bool) string {
 	if s {
 		return "text-success"

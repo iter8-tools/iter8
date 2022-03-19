@@ -18,6 +18,7 @@ or
 	$ iter8 report -o html > report.html # view with browser
 `
 
+// newReportCmd creates the report command
 func newReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewReportOpts(kd)
 
@@ -36,6 +37,7 @@ func newReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	return cmd
 }
 
+// addReportFlags adds flags to the report command
 func addReportFlags(cmd *cobra.Command, actor *ia.ReportOpts) {
 	cmd.Flags().StringVarP(&actor.OutputFormat, "outputFormat", "o", "text", "text | html")
 }

@@ -28,7 +28,7 @@ func (rOpts *RunOpts) LocalRun() error {
 	})
 }
 
-// LocalRun runs a Kubernetes experiment
+// KubeRun runs a Kubernetes experiment
 func (rOpts *RunOpts) KubeRun() error {
 	// initialize kube driver
 	if err := rOpts.KubeDriver.Init(); err != nil {

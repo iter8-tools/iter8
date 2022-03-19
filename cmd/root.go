@@ -53,6 +53,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
 }
 
+// addValueFlags adds flags that enable supplying values to the given command
 // Credit: the following function is from Helm. Please see:
 // https://github.com/helm/helm/blob/main/cmd/helm/flags.go
 func addValueFlags(f *pflag.FlagSet, v *values.Options) {
@@ -62,6 +63,7 @@ func addValueFlags(f *pflag.FlagSet, v *values.Options) {
 	f.StringArrayVar(&v.FileValues, "set-file", []string{}, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
 }
 
+// addChartFlags adds Iter8 experiment chart related flags to a command
 // Credit: the following function is modified from Helm.
 // Please see addChartPathFlags below:
 // https://github.com/helm/helm/blob/main/cmd/helm/flags.go

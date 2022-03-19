@@ -11,11 +11,11 @@ import (
 type LaunchOpts struct {
 	// DryRun enables simulating a launch
 	DryRun bool
-	// HubOpts determines which chart is used and how
+	// HubOpts contains the options for downloading the chart
 	HubOpts
-	// GenOpts enables values
+	// GenOpts contains the options for generating the experiment including values
 	GenOpts
-	// RunOpts determines how the experiment is run
+	// RunOpts enables local and Kubernetes runs
 	RunOpts
 }
 

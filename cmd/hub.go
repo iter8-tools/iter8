@@ -30,6 +30,7 @@ Download an experiment chart to a local directory.
 This command is intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
 `
 
+// newHubCmd creates the hub command
 func newHubCmd() *cobra.Command {
 	actor := ia.NewHubOpts()
 

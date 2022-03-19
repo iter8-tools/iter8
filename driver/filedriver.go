@@ -12,6 +12,7 @@ import (
 
 //FileDriver enables reading and writing experiment spec and result files
 type FileDriver struct {
+	// RunDir is the directory where the experiment.yaml file is to be found
 	RunDir string
 }
 

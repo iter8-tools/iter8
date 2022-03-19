@@ -18,6 +18,7 @@ Run an experiment specified in experiment.yaml output result to result.yaml.
 This command is intended for development and testing of experiment charts and tasks. For production usage, the iter8 launch command is recommended.
 `
 
+// newRunCmd creates the run command
 func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	actor := ia.NewRunOpts(kd)
 
@@ -35,6 +36,7 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	return cmd
 }
 
+// addRunFlags adds flags to the run command
 func addRunFlags(cmd *cobra.Command, actor *ia.RunOpts) {
 	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
 }

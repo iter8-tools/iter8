@@ -18,6 +18,7 @@ or
 	$ iter8 k report -o html > report.html # view with browser
 `
 
+// newKReportCmd creates the Kubernetes report command
 func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewReportOpts(kd)
 

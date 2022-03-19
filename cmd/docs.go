@@ -18,6 +18,7 @@ Generate markdown documentation for Iter8 CLI commands. Documentation will be ge
 This command is intended for Iter8 documentation and CI.
 `
 
+// newDocsCmd creates the docs command
 func newDocsCmd() *cobra.Command {
 	docsDir := ""
 	cmd := &cobra.Command{
@@ -52,6 +53,7 @@ hide:
 	return cmd
 }
 
+// addDocsFlags defines the flags for the docs command
 func addDocsFlags(cmd *cobra.Command, docsDirPtr *string) {
 	cmd.Flags().StringVar(docsDirPtr, "commandDocsDir", "", "directory where Iter8 CLI documentation will be created")
 	cmd.MarkFlagRequired("commandDocsDir")

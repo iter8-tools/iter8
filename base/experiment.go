@@ -15,7 +15,8 @@ import (
 	"github.com/montanaflynn/stats"
 )
 
-// Task is an object that can be run
+// Task is the building block of an experiment spec
+// An experiment spec is a sequence of tasks
 type Task interface {
 	// validateInputs for this task
 	validateInputs() error
@@ -128,7 +129,7 @@ type TaskMeta struct {
 type taskMetaWith struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
-	// raw representation of task inputs
+	// With is the raw representation of task inputs
 	With interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
@@ -667,7 +668,7 @@ func (exp *Experiment) SLOs() bool {
 	return exp.Result.Insights.NumVersions == len(sby)
 }
 
-// Run the experiment
+// run the experiment
 func (exp *Experiment) run(driver Driver) error {
 	log.Logger.Debug("experiment run started ...")
 	var err error

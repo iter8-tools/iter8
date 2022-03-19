@@ -17,7 +17,7 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-// AssertOpts are the options used for generating experiment.yaml
+// GenOpts are the options used for generating experiment.yaml
 type GenOpts struct {
 	// Options provides the values to be combined with the experiment chart
 	values.Options

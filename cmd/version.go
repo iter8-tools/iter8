@@ -49,6 +49,7 @@ type BuildInfo struct {
 	GoVersion string `json:"go_version,omitempty"`
 }
 
+// newVersionCmd creates the version command
 func newVersionCmd() *cobra.Command {
 	var short bool
 	// versionCmd represents the version command
@@ -94,6 +95,7 @@ func getBuildInfo() BuildInfo {
 	return v
 }
 
+// addVersionFlags adds flags to the version command
 func addVersionFlags(cmd *cobra.Command, shortPtr *bool) {
 	cmd.Flags().BoolVar(shortPtr, "short", false, "print abbreviated version info")
 	cmd.Flags().Lookup("short").NoOptDefVal = "true"

@@ -21,7 +21,7 @@ const (
 
 // ReportOpts are the options used for generating reports from experiment result
 type ReportOpts struct {
-	// OutputFormat holds the output format to be used by report
+	// OutputFormat specifies the output format to be used by report
 	OutputFormat string
 	// RunOpts enables fetching local experiment spec and result
 	RunOpts

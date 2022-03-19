@@ -10,6 +10,7 @@ import (
 
 // Reporter is a type that supports methods used for text and html reporting.
 type Reporter struct {
+	// Experiment enables access to all experiment data and methods
 	*base.Experiment
 }
 

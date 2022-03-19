@@ -15,6 +15,7 @@ Generate an experiment.yaml file by combining an experiment chart with values.
 This command is intended for development and testing of experiment charts. For production usage, the launch subcommand is recommended.
 `
 
+// newGenCmd creates the gen command
 func newGenCmd() *cobra.Command {
 	actor := ia.NewGenOpts()
 
@@ -33,6 +34,7 @@ func newGenCmd() *cobra.Command {
 	return cmd
 }
 
+// addSourceDirFlag adds the source directory flag to the gen command
 func addSourceDirFlag(cmd *cobra.Command, sourceDirPtr *string, required bool) {
 	cmd.Flags().StringVar(sourceDirPtr, "sourceDir", "", "path to experiment chart directory")
 	if required {

@@ -50,10 +50,15 @@ const (
 // KubeDriver embeds Helm and Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs and Helm APIs
 type KubeDriver struct {
+	// EnvSettings provides generic Kubernetes and Helm options
 	*cli.EnvSettings
+	// Clientset enables interaction with a Kubernetes cluster
 	Clientset kubernetes.Interface
+	// Configuration enables Helm-based interaction with a Kubernetes cluster
 	*action.Configuration
-	Group    string
+	// Group is the experiment group
+	Group string
+	// Revision is the revision of the experiment
 	Revision int
 }
 
@@ -390,9 +395,9 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 	return nil
 }
 
+// Install a Kubernetes experiment
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-// Install a Kubernetes experiment
 func (driver *KubeDriver) Install(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
 	client := action.NewInstall(driver.Configuration)
 	client.Namespace = driver.Namespace()
@@ -438,9 +443,9 @@ func (driver *KubeDriver) Install(version string, chartName string, valueOpts va
 	return nil
 }
 
+// getChartAndVals gets experiment chart and its values
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-// getChartAndVals gets experiment chart and its values
 func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *cli.EnvSettings, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
 	chartPath, err := cpo.LocateChart(chartName, settings)
 	if err != nil {
@@ -501,11 +506,10 @@ func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *c
 	return ch, vals, nil
 }
 
-// Credit: this function is sourced from Helm
-// https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L270
-//
 // checkIfInstallable validates if a chart can be installed
 // Only application chart type is installable
+// Credit: this function is sourced from Helm
+// https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L270
 func checkIfInstallable(ch *chart.Chart) error {
 	switch ch.Metadata.Type {
 	case "", "application":

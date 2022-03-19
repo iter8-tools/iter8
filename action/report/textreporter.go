@@ -14,8 +14,9 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// TextReporter is a type that supports generation of text reports from experiments.
+// TextReporter supports generation of text reports from experiments.
 type TextReporter struct {
+	// Reporter enables access to all reporter data and methods
 	*Reporter
 }
 

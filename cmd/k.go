@@ -5,12 +5,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// kCmd is the root command that enables Kubernetes experiments
 var kCmd = &cobra.Command{
 	Use:   "k",
 	Short: "Work with Kubernetes experiments",
 	Long:  "Work with Kubernetes experiments",
 }
 
+// addExperimentGroupFlag adds the experiment group flag and marks it as required or optional
 func addExperimentGroupFlag(cmd *cobra.Command, groupP *string, required bool) {
 	cmd.Flags().StringVarP(groupP, "group", "g", driver.DefaultExperimentGroup, "name of the experiment group")
 	if required {
@@ -18,6 +20,7 @@ func addExperimentGroupFlag(cmd *cobra.Command, groupP *string, required bool) {
 	}
 }
 
+// addExperimentRevisionFlag adds the experiment revision flag and marks it as required or optional
 func addExperimentRevisionFlag(cmd *cobra.Command, revisionP *int, required bool) {
 	cmd.Flags().IntVar(revisionP, "revision", 0, "experiment revision")
 	if required {

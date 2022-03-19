@@ -24,6 +24,7 @@ You can optionally specify a timeout, which is the maximum amount of time to wai
 	$ iter8 k assert -c completed,nofailures,slos -t 5s
 `
 
+// newAssertCmd creates the Kubernetes assert command
 func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewAssertOpts(kd)
 

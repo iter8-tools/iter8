@@ -14,15 +14,19 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 )
 
-// ChartNameAndDestOptions provides the name of the chart and where it needs to be downloaded
+// ChartNameAndDestOptions specifies which chart needs to be downloaded and where
 type ChartNameAndDestOptions struct {
+	// ChartName is the name of the chart
 	ChartName string
-	DestDir   string
+	// DestDir is the directory where it is to be downloaded
+	DestDir string
 }
 
 // HubOpts are the options used for downloading an experiment chart
 type HubOpts struct {
+	// ChartNameAndDestOptions contains ChartName and DestDir options
 	ChartNameAndDestOptions
+	// ChartPathOptions contains RepoURL and (chart) Version (constraint) options
 	action.ChartPathOptions
 }
 

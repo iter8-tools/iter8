@@ -18,6 +18,7 @@ Run a Kubernetes experiment. This command reads an experiment specified in a sec
 This command is intended for use within the Iter8 Docker image that is used to execute Kubernetes experiments.
 `
 
+// newKRunCmd creates the Kubernetes run command
 func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	actor := ia.NewRunOpts(kd)
 

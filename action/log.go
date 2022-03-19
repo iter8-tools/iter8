@@ -4,7 +4,7 @@ import (
 	"github.com/iter8-tools/iter8/driver"
 )
 
-// LaunchOpts are the options used for launching experiments
+// LogOpts enables fetching logs from Kubernetes
 type LogOpts struct {
 	// KubeDriver enables interaction with Kubernetes cluster
 	*driver.KubeDriver

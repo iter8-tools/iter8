@@ -26,6 +26,7 @@ You can optionally specify a timeout, which is the maximum amount of time to wai
 	$ iter8 assert -c completed,nofailures,slos -t 5s
 `
 
+// newAssertCmd creates the assert command
 func newAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewAssertOpts(kd)
 
@@ -49,6 +50,7 @@ func newAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	return cmd
 }
 
+// addAssertFlags defines the flags for the assert command
 func addAssertFlags(cmd *cobra.Command, actor *ia.AssertOpts) {
 	cmd.Flags().StringSliceVarP(&actor.Conditions, "condition", "c", nil, fmt.Sprintf("%v | %v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure, ia.SLOs))
 	cmd.MarkFlagRequired("condition")
