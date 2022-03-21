@@ -278,15 +278,14 @@ type PayloadValue struct {
 // #     iter8Version: {{ .Chart.AppVersion }}
 */
 
-// createExperimentResultSecret creates the experiment result secret
-func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
+// formResultSecret creates the result secret using the result
+func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Secret, error) {
 	job, err := driver.getExperimentJob()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// got job ...
 
-	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 	byteArray, _ := yaml.Marshal(r)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -301,57 +300,41 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 		StringData: map[string]string{"result.yaml": string(byteArray)},
 	}
 	// formed result secret ...
+	return &sec, nil
+}
 
-	s, err := secretsClient.Create(context.Background(), &sec, metav1.CreateOptions{})
-	if err != nil {
-		e := errors.New("unable to create result secret")
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return e
+// createExperimentResultSecret creates the experiment result secret
+func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
+	if sec, err := driver.formResultSecret(r); err == nil {
+		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+		_, e := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
+		if e != nil {
+			e := errors.New("unable to create result secret")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return e
+		} else {
+			return nil
+		}
+	} else {
+		return err
 	}
-
-	log.Logger.Debug("secret data... ", s.Data)
-	log.Logger.Debug("secret string data... ", s.StringData)
-
-	// created result secret ...
-	return nil
 }
 
 // updateExperimentResultSecret updates the experiment result secret
 func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
-	job, err := driver.getExperimentJob()
-	if err != nil {
+	if sec, err := driver.formResultSecret(r); err == nil {
+		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+		_, e := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
+		if e != nil {
+			e := errors.New("unable to update result secret")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return e
+		} else {
+			return nil
+		}
+	} else {
 		return err
 	}
-	// got job ...
-
-	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-	byteArray, _ := yaml.Marshal(r)
-	sec := corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: driver.getResultSecretName(),
-			OwnerReferences: []metav1.OwnerReference{{
-				APIVersion: job.APIVersion,
-				Kind:       job.Kind,
-				Name:       job.Name,
-				UID:        job.UID,
-			}},
-		},
-		StringData: map[string]string{"result.yaml": string(byteArray)},
-	}
-	// formed result secret ...
-
-	s, err := secretsClient.Update(context.Background(), &sec, metav1.UpdateOptions{})
-	if err != nil {
-		e := errors.New("unable to update result secret")
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return e
-	}
-
-	log.Logger.Debug("secret data... ", s.Data)
-	log.Logger.Debug("secret string data... ", s.StringData)
-
-	// updated result secret ...
-	return nil
 }
 
 // WriteResult writes results for a Kubernetes experiment
