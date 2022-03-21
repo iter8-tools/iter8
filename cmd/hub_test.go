@@ -1,37 +1,32 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
-	"path"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
-	"github.com/stretchr/testify/assert"
-	"helm.sh/helm/v3/pkg/repo/repotest"
+	id "github.com/iter8-tools/iter8/driver"
 )
 
-func TestHubGoodFolder(t *testing.T) {
-	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer srv.Stop()
-	if err = srv.CreateIndex(); err != nil {
-		t.Fatal(err)
-	}
-	if err = srv.LinkIndices(); err != nil {
-		t.Fatal(err)
+func TestHub(t *testing.T) {
+	srv := id.SetupWithRepo(t)
+	os.Chdir(t.TempDir())
+
+	tests := []cmdTestCase{
+		// hub
+		{
+			name:   "basic hub",
+			cmd:    fmt.Sprintf("hub -c load-test-http --repoURL %v", srv.URL()),
+			golden: base.CompletePath("../testdata", "output/hub.txt"),
+		},
+		// hub, destDir
+		{
+			name:   "hub with destDir",
+			cmd:    fmt.Sprintf("hub -c load-test-http --destDir %v --repoURL %v", t.TempDir(), srv.URL()),
+			golden: base.CompletePath("../testdata", "output/hub-with-destdir.txt"),
+		},
 	}
 
-	repoURL = srv.URL()
-	chartName = "load-test-http"
-	chartVersionConstraint = base.MajorMinor + ".x"
-
-	defer cleanChartArtifacts(destDir, chartName)
-
-	// make sure load test folder is present
-	err = hubCmd.RunE(nil, nil)
-	assert.NoError(t, err)
-	_, err = os.Stat(path.Join(destDir, chartName, "Chart.yaml"))
-	assert.False(t, os.IsNotExist(err))
+	runTestActionCmd(t, tests)
 }

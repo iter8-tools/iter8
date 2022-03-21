@@ -1,0 +1,5 @@
+time=1977-09-02 22:04:05 level=info msg=pulling load-test-http
+time=1977-09-02 22:04:05 level=info msg=created experiment.yaml file
+time=1977-09-02 22:04:05 level=info msg=starting local experiment
+time=1977-09-02 22:04:05 level=info msg=task 1: gen-load-and-collect-metrics-http : started
+time=1977-09-02 22:04:05 level=info msg=task 1: gen-load-and-collect-metrics-http : completed

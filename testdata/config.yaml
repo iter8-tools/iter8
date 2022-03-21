@@ -1,0 +1,3 @@
+url: "https://httpbin.org/get"
+SLOs:
+  http/latency-mean: 500

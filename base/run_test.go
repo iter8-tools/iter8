@@ -18,7 +18,7 @@ func TestRunRun(t *testing.T) {
 		Tasks:  []Task{rt},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
-	err := rt.Run(exp)
+	exp.initResults()
+	err := rt.run(exp)
 	assert.NoError(t, err)
 }

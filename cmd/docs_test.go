@@ -1,21 +1,19 @@
 package cmd
 
 import (
-	"io/ioutil"
-	"os"
+	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestDocsCmd(t *testing.T) {
-	// set COMMAND_DOCS_DIR
-	dir, err := ioutil.TempDir("", "iter8docs")
-	assert.NoError(t, err)
+func TestDocs(t *testing.T) {
+	tests := []cmdTestCase{
+		// assert, SLOs
+		{
+			name: "create",
+			cmd:  fmt.Sprintf("docs --commandDocsDir %v", t.TempDir()),
+		},
+	}
 
-	commandDocsDir = dir
-	err = docsCmd.RunE(nil, nil)
-	assert.NoError(t, err)
+	runTestActionCmd(t, tests)
 
-	defer os.RemoveAll(dir)
 }

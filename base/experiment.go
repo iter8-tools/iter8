@@ -10,24 +10,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
 	"github.com/montanaflynn/stats"
 )
 
-// Task is an object that can be run
+// Task is the building block of an experiment spec
+// An experiment spec is a sequence of tasks
 type Task interface {
-	// validate inputs for this task
+	// validateInputs for this task
 	validateInputs() error
-	// initializeDefault values for inputs to this task
+	// initializeDefaults of the input values to this task
 	initializeDefaults()
-	// Run this task
-	Run(exp *Experiment) error
+	// run this task
+	run(exp *Experiment) error
 }
 
-// ExperimentSpec is the experiment spec
+// ExperimentSpec specifies the set of tasks in this experiment
 type ExperimentSpec []Task
 
-// Experiment specification and result
+// Experiment struct containing spec and result
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
 	Tasks ExperimentSpec
@@ -90,42 +92,49 @@ type Insights struct {
 
 // MetricMeta describes a metric
 type MetricMeta struct {
-	Description string     `json:"description" yaml:"description"`
-	Units       *string    `json:"units,omitempty" yaml:"units,omitempty"`
-	Type        MetricType `json:"type" yaml:"type"`
+	// Description is a human readable description of the metric
+	Description string `json:"description" yaml:"description"`
+	// Units for this metric (if any)
+	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
+	// Type of the metric. Example: counter
+	Type MetricType `json:"type" yaml:"type"`
 }
 
 // SLO is a service level objective
 type SLO struct {
-	// Metric is the fully qualified metric name (i.e., in the backendName/metricName format)
+	// Metric is the fully qualified metric name in the backendName/metricName format
 	Metric string `json:"metric" yaml:"metric"`
 
-	// UpperLimit is the maximum acceptable value of the metric.
+	// UpperLimit is the maximum acceptable value of the metric
 	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty"`
 
-	// LowerLimit is the minimum acceptable value of the metric.
+	// LowerLimit is the minimum acceptable value of the metric
 	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
 }
 
-// this is embedded within each task
+// TaskMeta provides common fields used across all tasks
 type TaskMeta struct {
 	// Task is the name of the task
 	Task *string `json:"task,omitempty" yaml:"task,omitempty"`
 	// Run is the script used in a run task
 	// Specify either Task or Run but not both
 	Run *string `json:"run,omitempty" yaml:"run,omitempty"`
-	// If is the condition used to determine if this task needs to run.
+	// If is the condition used to determine if this task needs to run
+	// If the condition is not satisfied, then it is skipped in an experiment
+	// Example: SLOs()
 	If *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
-// this is used during unmarshaling of tasks
+// taskMetaWith enables unmarshaling of tasks
 type taskMetaWith struct {
+	// TaskMeta has fields common to all tasks
 	TaskMeta
-	// raw representation of task inputs
+	// With is the raw representation of task inputs
 	With interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
 // UnmarshallJSON will unmarshal an experiment spec from bytes
+// This is a custom JSON unmarshaler
 func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 	var v []taskMetaWith
 	if err := json.Unmarshal(data, &v); err != nil {
@@ -146,7 +155,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 		var tsk Task
 		// this is a run task
 		if t.Run != nil {
-			log.Logger.Info("found run task: ", *t.Run)
+			log.Logger.Debug("found run task: ", *t.Run)
 			rt := &runTask{}
 			json.Unmarshal(tBytes, rt)
 			tsk = rt
@@ -205,17 +214,17 @@ func metricTypeMatch(t MetricType, val interface{}) bool {
 	}
 }
 
-// updateMetricValueScalar update a scalar metric value for a given version
+// updateMetricValueScalar updates a scalar metric value for a given version
 func (in *Insights) updateMetricValueScalar(m string, i int, val float64) {
 	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val)
 }
 
-// updateMetricValueVector update a vector metric value for a given version
+// updateMetricValueVector updates a vector metric value for a given version
 func (in *Insights) updateMetricValueVector(m string, i int, val []float64) {
 	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val...)
 }
 
-// updateMetricValueHist update a histogram metric value for a given version
+// updateMetricValueHist updates a histogram metric value for a given version
 func (in *Insights) updateMetricValueHist(m string, i int, val []HistBucket) {
 	in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], val...)
 }
@@ -302,7 +311,8 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 	return nil
 }
 
-func (e *Experiment) InitResults() {
+// initResults initializes the results section of an experiment
+func (e *Experiment) initResults() {
 	e.Result = &ExperimentResult{
 		StartTime:         time.Now(),
 		NumCompletedTasks: 0,
@@ -488,7 +498,7 @@ func NormalizeMetricName(m string) (string, error) {
 	pre := ""
 	if strings.HasPrefix(m, preHTTP) { // built-in http percentile metric
 		pre = preHTTP
-	} else if strings.HasPrefix(m, preGRPC) { // built-in http percentile metric
+	} else if strings.HasPrefix(m, preGRPC) { // built-in gRPC percentile metric
 		pre = preGRPC
 	}
 	if len(pre) > 0 {
@@ -573,4 +583,213 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 	err := fmt.Errorf("invalid metric name %v; metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function", nm)
 	log.Logger.Error(err)
 	return nil, err
+}
+
+// Driver enables interacting with experiment result stored externally
+type Driver interface {
+	// ReadSpec reads the experiment spec
+	ReadSpec() (ExperimentSpec, error)
+	// ReadResult reads the experiment result
+	ReadResult() (*ExperimentResult, error)
+	// WriteResult writes the experiment result
+	WriteResult(r *ExperimentResult) error
+}
+
+// Completed returns true if the experiment is complete
+func (exp *Experiment) Completed() bool {
+	if exp != nil {
+		if exp.Result != nil {
+			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// NoFailure returns true if no task in the experiment has failed
+func (exp *Experiment) NoFailure() bool {
+	return exp != nil && exp.Result != nil && !exp.Result.Failure
+}
+
+// getSLOsSatisfiedBy returns the set of versions which satisfy SLOs
+func (exp *Experiment) getSLOsSatisfiedBy() []int {
+	if exp == nil {
+		log.Logger.Warning("nil experiment")
+		return nil
+	}
+	if exp.Result == nil {
+		log.Logger.Warning("nil experiment result")
+		return nil
+	}
+	if exp.Result.Insights == nil {
+		log.Logger.Warning("nil insights in experiment result")
+		return nil
+	}
+	if exp.Result.Insights.NumVersions == 0 {
+		log.Logger.Warning("experiment does not involve any versions")
+		return nil
+	}
+	if exp.Result.Insights.SLOs == nil {
+		log.Logger.Info("experiment does not involve any SLOs")
+		sat := []int{}
+		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
+			sat = append(sat, j)
+		}
+		return sat
+	}
+	log.Logger.Debug("experiment involves at least one version and at least one SLO")
+	log.Logger.Trace(exp.Result.Insights.SLOs)
+	log.Logger.Trace(exp.Result.Insights.SLOsSatisfied)
+	log.Logger.Trace(exp.Result.Insights.NonHistMetricValues)
+	sat := []int{}
+	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
+		satThis := true
+		for i := 0; i < len(exp.Result.Insights.SLOs); i++ {
+			satThis = satThis && exp.Result.Insights.SLOsSatisfied[i][j]
+			if !satThis {
+				break
+			}
+		}
+		if satThis {
+			sat = append(sat, j)
+		}
+	}
+	return sat
+}
+
+// SLOs returns true if all versions satisfy SLOs
+func (exp *Experiment) SLOs() bool {
+	if exp == nil || exp.Result == nil || exp.Result.Insights == nil {
+		log.Logger.Warning("experiment, or result, or insights is nil")
+		return false
+	}
+	sby := exp.getSLOsSatisfiedBy()
+	return exp.Result.Insights.NumVersions == len(sby)
+}
+
+// run the experiment
+func (exp *Experiment) run(driver Driver) error {
+	log.Logger.Debug("experiment run started ...")
+	var err error
+	if exp.Result == nil {
+		exp.initResults()
+		err = driver.WriteResult(exp.Result)
+		if err != nil {
+			return err
+		}
+	}
+	log.Logger.Debug("exp result exists now ... ")
+	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Tasks))
+	for i, t := range exp.Tasks {
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
+		shouldRun := true
+		// if task has a condition
+		if cond := getIf(t); cond != nil {
+			// condition evaluates to false ... then shouldRun is false
+			program, err := expr.Compile(*cond, expr.Env(exp), expr.AsBool())
+			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("unable to compile if clause")
+				return err
+			}
+
+			output, err := expr.Run(program, exp)
+			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("unable to run if clause")
+				return err
+			}
+
+			shouldRun = output.(bool)
+		}
+		if shouldRun {
+			err = t.run(exp)
+			if err != nil {
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
+				exp.failExperiment()
+				e := driver.WriteResult(exp.Result)
+				if e != nil {
+					return e
+				}
+				return err
+			}
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "completed")
+		} else {
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "skipped")
+		}
+
+		exp.incrementNumCompletedTasks()
+		err = driver.WriteResult(exp.Result)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// failExperiment sets the experiment failure status to true
+func (e *Experiment) failExperiment() {
+	e.Result.Failure = true
+}
+
+// incrementNumCompletedTasks increments the numbere of completed tasks in the experimeent
+func (e *Experiment) incrementNumCompletedTasks() {
+	e.Result.NumCompletedTasks++
+}
+
+// getIf returns the condition (if any) which determine
+// whether of not if this task needs to run
+func getIf(t Task) *string {
+	var jsonBytes []byte
+	var tm TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+	return tm.If
+}
+
+// getName returns the name of this task
+func getName(t Task) *string {
+	var jsonBytes []byte
+	var tm TaskMeta
+	// convert t to jsonBytes
+	jsonBytes, _ = json.Marshal(t)
+	// convert jsonBytes to TaskMeta
+	_ = json.Unmarshal(jsonBytes, &tm)
+
+	if tm.Task == nil {
+		if tm.Run != nil {
+			return StringPointer(RunTaskName)
+		}
+	} else {
+		return tm.Task
+	}
+	log.Logger.Error("task spec with no name or run value")
+	return nil
+}
+
+// BuildExperiment builds an experiment
+func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
+	e := Experiment{}
+	var err error
+	e.Tasks, err = driver.ReadSpec()
+	if err != nil {
+		return nil, err
+	}
+	if withResult {
+		e.Result, err = driver.ReadResult()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &e, nil
+}
+
+// RunExperiment runs an experiment
+func RunExperiment(driver Driver) error {
+	if exp, err := BuildExperiment(false, driver); err != nil {
+		return err
+	} else {
+		return exp.run(driver)
+	}
 }

@@ -19,9 +19,9 @@ func TestRunAssess(t *testing.T) {
 	exp := &Experiment{
 		Tasks: []Task{task},
 	}
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
-	err := task.Run(exp)
+	err := task.run(exp)
 	assert.NoError(t, err)
 
 	// assess with an SLO
@@ -32,7 +32,6 @@ func TestRunAssess(t *testing.T) {
 			UpperLimit: float64Pointer(20.0),
 		}},
 	}
-	task.Run(exp)
-	err = task.Run(exp)
+	err = task.run(exp)
 	assert.NoError(t, err)
 }

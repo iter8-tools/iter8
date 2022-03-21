@@ -8,7 +8,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var short bool
+var versionDesc = `
+Print the version of Iter8 CLI.
+
+	$ iter8 version
+
+The output may look as follows:
+
+	$ version.BuildInfo{Version:"v0.8.32", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GitTreeState:"clean", GoVersion:"go1.17.6"}
+
+In the sample output shown above:
+
+- Version is the semantic version of the Iter8 CLI.
+- GitCommit is the SHA hash for the commit that this version was built from.
+- GitTreeState is "clean" if there are no local code changes when this binary was built, and "dirty" if the binary was built from locally modified code.
+- GoVersion is the version of Go that was used to compile Iter8 CLI.
+`
 
 var (
 	// version is intended to be set using LDFLAGS at build time
@@ -34,40 +49,31 @@ type BuildInfo struct {
 	GoVersion string `json:"go_version,omitempty"`
 }
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print Iter8 version information",
-	Long: `
-Show the version for Iter8.
-`,
-	Example: `
-iter8 version
-
-# The output will look like this:
-
-# version.BuildInfo{Version:"v0.8.32", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GitTreeState:"clean", GoVersion:"go1.17.6"}
-
-# - Version is the semantic version of the release.
-# - GitCommit is the SHA for the commit that this version was built from.
-# - GitTreeState is "clean" if there are no local code changes when this binary was
-# 	built, and "dirty" if the binary was built from locally modified code.
-# - GoVersion is the version of Go that was used to compile Iter8.
-`,
-	Run: func(cmd *cobra.Command, args []string) {
-		v := get()
-		if short {
-			if len(v.GitCommit) >= 7 {
-				fmt.Printf("%s+g%s", v.Version, v.GitCommit[:7])
-				fmt.Println()
+// newVersionCmd creates the version command
+func newVersionCmd() *cobra.Command {
+	var short bool
+	// versionCmd represents the version command
+	cmd := &cobra.Command{
+		Use:   "version",
+		Short: "Print Iter8 CLI version",
+		Long:  versionDesc,
+		Run: func(_ *cobra.Command, _ []string) {
+			v := getBuildInfo()
+			if short {
+				if len(v.GitCommit) >= 7 {
+					fmt.Printf("%s+g%s", v.Version, v.GitCommit[:7])
+					fmt.Println()
+					return
+				}
+				fmt.Println(getVersion())
 				return
 			}
-			fmt.Println(getVersion())
-			return
-		}
-		fmt.Printf("%#v", v)
-		fmt.Println()
-	},
+			fmt.Printf("%#v", v)
+			fmt.Println()
+		},
+	}
+	addVersionFlags(cmd, &short)
+	return cmd
 }
 
 // getVersion returns the semver string of the version
@@ -79,7 +85,7 @@ func getVersion() string {
 }
 
 // get returns build info
-func get() BuildInfo {
+func getBuildInfo() BuildInfo {
 	v := BuildInfo{
 		Version:      getVersion(),
 		GitCommit:    gitCommit,
@@ -89,8 +95,13 @@ func get() BuildInfo {
 	return v
 }
 
+// addVersionFlags adds flags to the version command
+func addVersionFlags(cmd *cobra.Command, shortPtr *bool) {
+	cmd.Flags().BoolVar(shortPtr, "short", false, "print abbreviated version info")
+	cmd.Flags().Lookup("short").NoOptDefVal = "true"
+}
+
 func init() {
-	rootCmd.AddCommand(versionCmd)
-	f := versionCmd.Flags()
-	f.BoolVar(&short, "short", false, "print the version number")
+	vCmd := newVersionCmd()
+	rootCmd.AddCommand(vCmd)
 }

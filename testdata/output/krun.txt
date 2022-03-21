@@ -1,0 +1,11 @@
+time=1977-09-02 22:04:05 level=warning msg=unable to get secret default-1-result
+time=1977-09-02 22:04:05 level=info msg=creating experiment result secret
+time=1977-09-02 22:04:05 level=info msg=task 1: gen-load-and-collect-metrics-http : started
+time=1977-09-02 22:04:05 level=info msg=task 1: gen-load-and-collect-metrics-http : completed
+time=1977-09-02 22:04:05 level=info msg=task 2: assess-app-versions : started
+time=1977-09-02 22:04:05 level=info msg=task 2: assess-app-versions : completed
+time=1977-09-02 22:04:05 level=info msg=task 3: run : started
+time=1977-09-02 22:04:05 level=info msg=task 3: run : completed
+time=1977-09-02 22:04:05 level=info msg=task 4: run : started
+time=1977-09-02 22:04:05 level=info msg=task 4: run : skipped stack-trace=below ... 
+::Trace:: false condition: not SLOs()

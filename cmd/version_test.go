@@ -5,7 +5,19 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	versionCmd.Run(nil, nil)
-	short = true
-	versionCmd.Run(nil, nil)
+	tests := []cmdTestCase{
+		// version
+		{
+			name: "version",
+			cmd:  "version",
+		},
+		// version
+		{
+			name: "version short",
+			cmd:  "version --short",
+		},
+	}
+
+	runTestActionCmd(t, tests)
+
 }

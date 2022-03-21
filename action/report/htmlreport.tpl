@@ -13,7 +13,7 @@
         font-size: 18px;
       }		
     </style>
-    <title>Iter8 Experiment Report</title>
+    <title>Experiment Report</title>
   </head>
 
   <body>

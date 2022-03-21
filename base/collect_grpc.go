@@ -79,7 +79,9 @@ const (
 
 // collectGRPCTask enables load testing of gRPC services.
 type collectGRPCTask struct {
+	// TaskMeta has fields common to all tasks
 	TaskMeta
+	// With contains the inputs to this task
 	With collectGRPCInputs `json:"with" yaml:"with"`
 }
 
@@ -192,7 +194,7 @@ func latencySample(rd []runner.ResultDetail) []float64 {
 }
 
 // Run executes this task
-func (t *collectGRPCTask) Run(exp *Experiment) error {
+func (t *collectGRPCTask) run(exp *Experiment) error {
 	// 1. initialize defaults
 	var err error
 

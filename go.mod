@@ -22,10 +22,12 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.106.1
-	github.com/itchyny/gojq v0.12.7 // indirect
+	github.com/itchyny/gojq v0.12.7
 	github.com/jarcoal/httpmock v1.1.0
+	github.com/mattn/go-shellwords v1.0.12
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/montanaflynn/stats v0.6.6
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
@@ -34,6 +36,8 @@ require (
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 	helm.sh/helm/v3 v3.8.0
+	k8s.io/api v0.23.3
+	k8s.io/apimachinery v0.23.3
 	k8s.io/cli-runtime v0.23.3 // indirect
 	k8s.io/client-go v0.23.3
 	sigs.k8s.io/yaml v1.3.0

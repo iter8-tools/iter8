@@ -19,7 +19,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	if err != nil {
 		assert.FailNow(t, err.Error())
 	}
-	defer s.Stop()
+	t.Cleanup(s.Stop)
 
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
@@ -38,16 +38,16 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		},
 	}
 
-	log.Logger.Info("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
 
 	exp := &Experiment{
 		Tasks:  []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.InitResults()
-	err = ct.Run(exp)
+	exp.initResults()
+	err = ct.run(exp)
 
-	log.Logger.Info("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
 
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
@@ -78,7 +78,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	if err != nil {
 		assert.FailNow(t, err.Error())
 	}
-	defer s.Stop()
+	t.Cleanup(s.Stop)
 
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
@@ -136,11 +136,11 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		Tasks: []Task{ct, at},
 	}
 
-	exp.InitResults()
+	exp.initResults()
 	exp.Result.initInsightsWithNumVersions(1)
-	err = exp.Tasks[0].Run(exp)
+	err = exp.Tasks[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Tasks[1].Run(exp)
+	err = exp.Tasks[1].run(exp)
 	assert.NoError(t, err)
 
 	// assert SLOs are satisfied
