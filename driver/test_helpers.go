@@ -40,6 +40,7 @@ func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
 
 	fc := fake.NewSimpleClientset(objects...)
 	fc.PrependReactor("create", "secrets", secretDataReactor)
+	fc.PrependReactor("update", "secrets", secretDataReactor)
 	kd.Clientset = fc
 }
 
