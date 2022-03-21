@@ -321,6 +321,9 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 }
 
 // updateExperimentResultSecret updates the experiment result secret
+// as opposed to patch, update is an atomic operation
+// eventually, this code will leverage conflict management like the following:
+// https://github.com/kubernetes/client-go/blob/3ac142e26bc61901240b68cc2c39561d2e6f672a/examples/create-update-delete-deployment/main.go#L118
 func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
 	if sec, err := driver.formResultSecret(r); err == nil {
 		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
