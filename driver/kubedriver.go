@@ -3,8 +3,6 @@ package driver
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -30,7 +28,6 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/yaml"
 
@@ -319,6 +316,44 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 	return nil
 }
 
+// updateExperimentResultSecret updates the experiment result secret
+func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
+	job, err := driver.getExperimentJob()
+	if err != nil {
+		return err
+	}
+	// got job ...
+
+	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+	byteArray, _ := yaml.Marshal(r)
+	sec := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: driver.getResultSecretName(),
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion: job.APIVersion,
+				Kind:       job.Kind,
+				Name:       job.Name,
+				UID:        job.UID,
+			}},
+		},
+		StringData: map[string]string{"result.yaml": string(byteArray)},
+	}
+	// formed result secret ...
+
+	s, err := secretsClient.Update(context.Background(), &sec, metav1.UpdateOptions{})
+	if err != nil {
+		e := errors.New("unable to update result secret")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	log.Logger.Debug("secret data... ", s.Data)
+	log.Logger.Debug("secret string data... ", s.StringData)
+
+	// updated result secret ...
+	return nil
+}
+
 // WriteResult writes results for a Kubernetes experiment
 func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	// create result secret if need be
@@ -328,24 +363,10 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 			return err
 		}
 	}
-	// result secret exists at this point ...
-
-	rBytes, _ := yaml.Marshal(r)
-
-	payload := []PayloadValue{{
-		Op:    "replace",
-		Path:  "/data/" + ExperimentResultPath,
-		Value: base64.StdEncoding.EncodeToString(rBytes),
-	}}
-	payloadBytes, _ := json.Marshal(payload)
-
-	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-	_, err := secretsClient.Patch(context.Background(), driver.getResultSecretName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
+	if err := driver.updateExperimentResultSecret(r); err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
 // Credit: the logic for this function is sourced from Helm
