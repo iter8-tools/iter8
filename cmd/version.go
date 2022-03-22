@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 
@@ -98,5 +97,4 @@ func addShortFlag(cmd *cobra.Command, shortPtr *bool) {
 func init() {
 	vCmd := newVersionCmd()
 	rootCmd.AddCommand(vCmd)
-	log.Logger.Infof("version is %v; ", version)
 }
