@@ -36,10 +36,10 @@ ifneq ($(BINARY_VERSION),)
 	LDFLAGS += -X github.com/iter8-tools/iter8/cmd.version=${BINARY_VERSION}
 endif
 
-VERSION_METADATA = unreleased
+VERSION_METADATA=unreleased
 # Clear the "unreleased" string in BuildMetadata
 ifneq ($(GIT_TAG),)
-	VERSION_METADATA =
+	VERSION_METADATA=
 endif
 
 LDFLAGS += -X github.com/iter8-tools/iter8/cmd.metadata=${VERSION_METADATA}
