@@ -76,8 +76,7 @@ func (hub *HubOpts) LocalRun() error {
 	pull := action.NewPullWithOpts(action.WithConfig(cfg))
 	pull.Settings = cli.New()
 	pull.Untar = true
-	pull.RepoURL = hub.RepoURL
-	pull.Version = hub.Version
+	pull.ChartPathOptions = hub.ChartPathOptions
 	if pull.Version == "" {
 		pull.Version = base.MajorMinor + ".x"
 	}
