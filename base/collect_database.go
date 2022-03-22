@@ -115,6 +115,7 @@ func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64,
 		case int64:
 			startingTime = rawStartingTime
 		case int:
+		case float64: // parsing the metrics file gives float64
 			startingTime = int64(rawStartingTime)
 		default:
 			return 0, errors.New("Cannot integer parse StartingTime from VersionInfo: " + fmt.Sprintf("%v", versionInfo))
