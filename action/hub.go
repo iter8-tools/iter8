@@ -37,7 +37,8 @@ func NewHubOpts() *HubOpts {
 			DestDir: ".",
 		},
 		ChartPathOptions: action.ChartPathOptions{
-			RepoURL: driver.DefaultIter8RepoURL,
+			RepoURL:               driver.DefaultIter8RepoURL,
+			InsecureSkipTLSverify: true,
 		},
 	}
 }
