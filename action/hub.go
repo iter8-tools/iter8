@@ -78,7 +78,7 @@ func (hub *HubOpts) LocalRun() error {
 	pull.RepoURL = hub.RepoURL
 	pull.Version = hub.Version
 	if pull.Version == "" {
-		pull.Version = string(base.MajorMinor) + ".x"
+		pull.Version = base.MajorMinor + ".x"
 	}
 
 	var err error

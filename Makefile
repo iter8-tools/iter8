@@ -2,7 +2,7 @@ BINDIR      := $(CURDIR)/bin
 INSTALL_PATH ?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
 # TARGETS     := darwin/amd64 linux/amd64 linux/386 windows/amd64
-TARGETS     := darwin/amd64 # linux/amd64 linux/386 windows/amd64
+TARGETS     := darwin/amd64# linux/amd64 linux/386 windows/amd64
 BINNAME     ?= iter8
 ITER8_IMG ?= iter8/iter8:latest
 
@@ -24,8 +24,7 @@ SRC := $(shell find . -type f -name '*.(go|proto|tpl)' -print) go.mod go.sum
 SHELL      = /usr/bin/env bash
 
 GIT_COMMIT = $(shell git rev-parse HEAD)
-GIT_TAG    = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
-GIT_DIRTY  = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "clean")
+GIT_TAG    = $(shell git describe --tags --dirty)
 
 ifdef VERSION
 	BINARY_VERSION = $(VERSION)
@@ -37,7 +36,7 @@ ifneq ($(BINARY_VERSION),)
 	LDFLAGS += -X github.com/iter8-tools/iter8/cmd.version=${BINARY_VERSION}
 endif
 
-VERSION_METADATA=unreleased
+VERSION_METADATA = unreleased
 # Clear the "unreleased" string in BuildMetadata
 ifneq ($(GIT_TAG),)
 	VERSION_METADATA=
@@ -45,7 +44,6 @@ endif
 
 LDFLAGS += -X github.com/iter8-tools/iter8/cmd.metadata=${VERSION_METADATA}
 LDFLAGS += -X github.com/iter8-tools/iter8/cmd.gitCommit=${GIT_COMMIT}
-LDFLAGS += -X github.com/iter8-tools/iter8/cmd.gitTreeState=${GIT_DIRTY}
 
 .PHONY: all
 all: build
