@@ -58,9 +58,10 @@ func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
 	// fixed time
 	log.Logger.SetFormatter(testFormatter{log.Logger.Formatter})
 	t.Helper()
+	resetEnv()()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer resetEnv()()
 
 			store := storageFixture()
 			_, out, err := executeActionCommandC(store, tt.cmd)
