@@ -15,7 +15,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestHelm(t *testing.T) {
+func TestKOps(t *testing.T) {
 	srv := SetupWithRepo(t)
 	kd := NewKubeDriver(cli.New()) // we will ignore this value
 	assert.NotNil(t, kd)
@@ -57,6 +57,13 @@ func TestHelm(t *testing.T) {
 	err = kd.Init()
 	assert.NoError(t, err)
 
+	// delete
+	err = kd.Delete()
+	assert.NoError(t, err)
+
+	// delete
+	err = kd.Delete()
+	assert.Error(t, err)
 }
 
 func TestKubeRun(t *testing.T) {
