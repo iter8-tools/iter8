@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	// "regexp"
 	"strings"
 	"time"
 
@@ -17,8 +15,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	// "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/discovery"
 	memory "k8s.io/client-go/discovery/cached"
@@ -29,27 +25,13 @@ import (
 	"k8s.io/client-go/util/retry"
 )
 
-// TBD Are RFC 1123 names sufficient? It seems like different objects have different rewquirements
-// see https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-
 const (
 	// ReadinessTaskName is the task name
 	ReadinessTaskName = "k8s-objects-ready"
 
-	// // labelFmt is a regular expression to be used to validate RFC 1123 labels (object names)
-	// // see: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-	// labelFmt string = "[a-z0-9]([-a-z0-9]*[a-z0-9])?"
-
-	// // maxLabelLength is the maximum length of RFC 1123 labels (object names)
-	// // see: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-	// maxLabelLength int = 63
-
 	// defaultTimeout is default timeout for readiness command
 	defaultTimeout = "10s"
 )
-
-// // regex object
-// var labelRegexp = regexp.MustCompile("^" + labelFmt + "$")
 
 // ReadinessInputs identifies the K8s object to test for existence and
 // the (optional) condition that should be tested (succeeds if true).
@@ -82,12 +64,6 @@ func (t *readinessTask) initializeDefaults() {
 
 // validateInputs validates task inputs
 func (t *readinessTask) validateInputs() error {
-	// // validate that name is a RFC 1123 label
-	// errs := validation.IsDNS1123Label(t.With.Name)
-	// if len(errs) > 0 {
-	// 	return errors.New(errs[0])
-	// }
-
 	// validate that timeout is parsable
 	if t.With.Timeout != nil {
 		_, err := time.ParseDuration(*t.With.Timeout)
