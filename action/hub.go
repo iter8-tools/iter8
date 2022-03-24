@@ -37,7 +37,8 @@ func NewHubOpts() *HubOpts {
 			DestDir: ".",
 		},
 		ChartPathOptions: action.ChartPathOptions{
-			RepoURL: driver.DefaultIter8RepoURL,
+			RepoURL:               driver.DefaultIter8RepoURL,
+			InsecureSkipTLSverify: true,
 		},
 	}
 }
@@ -75,10 +76,9 @@ func (hub *HubOpts) LocalRun() error {
 	pull := action.NewPullWithOpts(action.WithConfig(cfg))
 	pull.Settings = cli.New()
 	pull.Untar = true
-	pull.RepoURL = hub.RepoURL
-	pull.Version = hub.Version
+	pull.ChartPathOptions = hub.ChartPathOptions
 	if pull.Version == "" {
-		pull.Version = string(base.MajorMinor) + ".x"
+		pull.Version = base.MajorMinor + ".x"
 	}
 
 	var err error
