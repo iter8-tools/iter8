@@ -14,7 +14,6 @@ import (
 )
 
 func TestKAssert(t *testing.T) {
-
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
 	kd.Revision = 1
