@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra/doc"
 
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 
@@ -22,11 +21,12 @@ This command is intended for Iter8 documentation and CI.
 func newDocsCmd() *cobra.Command {
 	docsDir := ""
 	cmd := &cobra.Command{
-		Use:    "docs",
-		Short:  "Generate markdown documentation for Iter8 CLI",
-		Long:   docsDesc,
-		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
+		Use:          "docs",
+		Short:        "Generate markdown documentation for Iter8 CLI",
+		Long:         docsDesc,
+		Hidden:       true,
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
 			standardLinks := func(s string) string { return s }
 
 			hdrFunc := func(filename string) string {
@@ -44,9 +44,7 @@ hide:
 			}
 
 			// automatically generate markdown documentation for all Iter8 commands
-			if err := doc.GenMarkdownTreeCustom(rootCmd, docsDir, hdrFunc, standardLinks); err != nil {
-				log.Logger.Error(err)
-			}
+			return doc.GenMarkdownTreeCustom(rootCmd, docsDir, hdrFunc, standardLinks)
 		},
 	}
 	addDocsFlags(cmd, &docsDir)

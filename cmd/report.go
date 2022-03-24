@@ -4,7 +4,6 @@ import (
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
 
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 
@@ -23,13 +22,12 @@ func newReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewReportOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "report",
-		Short: "Generate experiment report",
-		Long:  reportDesc,
-		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.LocalRun(outStream); err != nil {
-				log.Logger.Error(err)
-			}
+		Use:          "report",
+		Short:        "Generate experiment report",
+		Long:         reportDesc,
+		SilenceUsage: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return actor.LocalRun(outStream)
 		},
 	}
 	addReportFlags(cmd, actor)

@@ -29,9 +29,10 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewAssertOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "assert",
-		Short: "Assert if Kubernetes experiment result satisfies conditions",
-		Long:  kAssertDesc,
+		Use:          "assert",
+		Short:        "Assert if Kubernetes experiment result satisfies conditions",
+		Long:         kAssertDesc,
+		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			allGood, err := actor.KubeRun()
 			if err != nil {

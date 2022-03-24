@@ -29,9 +29,10 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewLaunchOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "launch",
-		Short: "Launch an experiment",
-		Long:  launchDesc,
+		Use:          "launch",
+		Short:        "Launch an experiment",
+		Long:         launchDesc,
+		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.LocalRun()
 		},

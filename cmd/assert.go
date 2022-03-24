@@ -46,6 +46,7 @@ func newAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 			}
 			return nil
 		},
+		SilenceUsage: true,
 	}
 	addAssertFlags(cmd, actor)
 	addRunFlags(cmd, &actor.RunOpts)

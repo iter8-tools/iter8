@@ -5,7 +5,6 @@ import (
 	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
@@ -23,13 +22,12 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	actor := ia.NewRunOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "run",
-		Short: "Run an experiment",
-		Long:  runDesc,
-		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.LocalRun(); err != nil {
-				log.Logger.Error(err)
-			}
+		Use:          "run",
+		Short:        "Run an experiment",
+		Long:         runDesc,
+		SilenceUsage: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return actor.LocalRun()
 		},
 	}
 	addRunFlags(cmd, actor)

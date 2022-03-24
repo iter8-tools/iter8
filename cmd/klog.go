@@ -18,14 +18,16 @@ func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewLogOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "log",
-		Short: "Fetch logs for a Kubernetes experiment",
-		Long:  kLogDesc,
-		Run: func(_ *cobra.Command, _ []string) {
+		Use:          "log",
+		Short:        "Fetch logs for a Kubernetes experiment",
+		Long:         kLogDesc,
+		SilenceUsage: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if lg, err := actor.KubeRun(); err != nil {
-				log.Logger.Error(err)
+				return err
 			} else {
 				log.Logger.WithStackTrace(lg).Info("experiment logs from Kubernetes cluster")
+				return nil
 			}
 		},
 	}
