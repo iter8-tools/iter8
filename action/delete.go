@@ -10,7 +10,7 @@ type DeleteOpts struct {
 	*driver.KubeDriver
 }
 
-// NewHubOpts initializes and returns launch opts
+// NewDeleteOpts initializes and returns launch opts
 func NewDeleteOpts(kd *driver.KubeDriver) *DeleteOpts {
 	return &DeleteOpts{
 		KubeDriver: kd,
