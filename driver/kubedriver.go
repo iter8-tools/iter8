@@ -459,6 +459,7 @@ func (driver *KubeDriver) Delete() error {
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
+	log.Logger.Infof("experiment group %v deleted", driver.Group)
 	return nil
 }
 
