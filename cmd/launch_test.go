@@ -11,6 +11,7 @@ import (
 
 func TestLaunch(t *testing.T) {
 	srv := id.SetupWithRepo(t)
+	base.SetupWithMock(t)
 
 	tests := []cmdTestCase{
 		// launch, values from CLI
