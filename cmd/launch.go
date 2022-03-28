@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"os"
-
 	ia "github.com/iter8-tools/iter8/action"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
@@ -32,14 +29,12 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewLaunchOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "launch",
-		Short: "Launch an experiment",
-		Long:  launchDesc,
-		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.LocalRun(); err != nil {
-				log.Logger.Error(err)
-				os.Exit(1)
-			}
+		Use:          "launch",
+		Short:        "Launch an experiment",
+		Long:         launchDesc,
+		SilenceUsage: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return actor.LocalRun()
 		},
 	}
 	addLaunchFlags(cmd, actor)

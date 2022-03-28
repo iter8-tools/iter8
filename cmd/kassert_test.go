@@ -2,23 +2,24 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"testing"
 
+	id "github.com/iter8-tools/iter8/driver"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	id "github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base"
 )
 
 func TestKAssert(t *testing.T) {
-
+	srv := id.SetupWithRepo(t)
+	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	kd.Revision = 1
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "experiment.yaml"))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-spec",
@@ -27,16 +28,25 @@ func TestKAssert(t *testing.T) {
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-result",
+			Name:      "default-1-job",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"result.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	tests := []cmdTestCase{
+		// k launch
+		{
+			name:   "init: k launch",
+			cmd:    fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s", srv.URL()),
+			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
+		},
+		// k run
+		{
+			name: "init: k run",
+			cmd:  "k run -g default --revision 1 --namespace default",
+		},
 		// k assert
 		{
 			name:   "k assert",

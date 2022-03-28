@@ -32,13 +32,11 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	id "github.com/iter8-tools/iter8/driver"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/storage"
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
@@ -58,14 +56,15 @@ func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
 	// fixed time
 	log.Logger.SetFormatter(testFormatter{log.Logger.Formatter})
 	t.Helper()
+	defer resetEnv()()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer resetEnv()()
 
 			store := storageFixture()
 			_, out, err := executeActionCommandC(store, tt.cmd)
 			if (err != nil) != tt.wantError {
-				t.Errorf("expected error, got '%v'", err)
+				t.Errorf("want error = %v, got '%v'", tt.wantError, err)
 			}
 			if tt.golden != "" {
 				AssertGoldenString(t, out, tt.golden)
@@ -136,8 +135,6 @@ func resetEnv() func() {
 			os.Setenv(kv[0], kv[1])
 		}
 		logLevel = "info"
-		*settings = *cli.New()
-		*kd = *id.NewFakeKubeDriver(settings)
 		log.Logger.Out = os.Stderr
 	}
 }

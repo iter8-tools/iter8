@@ -450,6 +450,19 @@ func (driver *KubeDriver) Install(version string, chartName string, valueOpts va
 	return nil
 }
 
+// Delete a Kubernetes experiment group
+func (driver *KubeDriver) Delete() error {
+	client := action.NewUninstall(driver.Configuration)
+	_, err := client.Run(driver.Group)
+	if err != nil {
+		e := fmt.Errorf("deletion of experiment group %v failed", driver.Group)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+	log.Logger.Infof("experiment group %v deleted", driver.Group)
+	return nil
+}
+
 // getChartAndVals gets experiment chart and its values
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177

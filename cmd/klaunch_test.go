@@ -10,6 +10,8 @@ import (
 
 func TestKLaunch(t *testing.T) {
 	srv := id.SetupWithRepo(t)
+	// fake kube cluster
+	*kd = *id.NewFakeKubeDriver(settings)
 
 	tests := []cmdTestCase{
 		// Launch, base case, values from CLI

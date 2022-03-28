@@ -3,7 +3,6 @@ package cmd
 import (
 	ia "github.com/iter8-tools/iter8/action"
 
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 
@@ -20,13 +19,12 @@ func newGenCmd() *cobra.Command {
 	actor := ia.NewGenOpts()
 
 	cmd := &cobra.Command{
-		Use:   "gen",
-		Short: "Generate experiment.yaml file by combining an experiment chart with values",
-		Long:  genDesc,
-		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.LocalRun(); err != nil {
-				log.Logger.Error(err)
-			}
+		Use:          "gen",
+		Short:        "Generate experiment.yaml file by combining an experiment chart with values",
+		Long:         genDesc,
+		SilenceUsage: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return actor.LocalRun()
 		},
 	}
 	addSourceDirFlag(cmd, &actor.SourceDir, true)

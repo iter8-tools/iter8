@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
@@ -34,16 +34,19 @@ func newAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 		Use:   "assert",
 		Short: "Assert if experiment result satisfies conditions",
 		Long:  assertDesc,
-		Run: func(_ *cobra.Command, _ []string) {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			allGood, err := actor.LocalRun()
 			if err != nil {
-				log.Logger.Error(err)
+				return err
 			}
 			if !allGood {
-				log.Logger.Error("assert conditions failed")
-				os.Exit(1)
+				e := errors.New("assert conditions failed")
+				log.Logger.Error(e)
+				return e
 			}
+			return nil
 		},
+		SilenceUsage: true,
 	}
 	addAssertFlags(cmd, actor)
 	addRunFlags(cmd, &actor.RunOpts)

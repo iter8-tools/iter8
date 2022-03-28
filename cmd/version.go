@@ -48,22 +48,24 @@ func newVersionCmd() *cobra.Command {
 	var short bool
 	// versionCmd represents the version command
 	cmd := &cobra.Command{
-		Use:   "version",
-		Short: "Print Iter8 CLI version",
-		Long:  versionDesc,
-		Run: func(_ *cobra.Command, _ []string) {
+		Use:           "version",
+		Short:         "Print Iter8 CLI version",
+		Long:          versionDesc,
+		SilenceErrors: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
 			v := getBuildInfo()
 			if short {
 				if len(v.GitCommit) >= 7 {
 					fmt.Printf("%s+g%s", v.Version, v.GitCommit[:7])
 					fmt.Println()
-					return
+					return nil
 				}
 				fmt.Println(getVersion())
-				return
+				return nil
 			}
 			fmt.Printf("%#v", v)
 			fmt.Println()
+			return nil
 		},
 	}
 	addShortFlag(cmd, &short)

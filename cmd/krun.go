@@ -5,7 +5,6 @@ import (
 	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
@@ -23,15 +22,14 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	actor := ia.NewRunOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "run",
-		Short: "Run a Kubernetes experiment",
-		Long:  kRunDesc,
-		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.KubeRun(); err != nil {
-				log.Logger.Error(err)
-			}
+		Use:          "run",
+		Short:        "Run a Kubernetes experiment",
+		Long:         kRunDesc,
+		SilenceUsage: true,
+		Hidden:       true,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return actor.KubeRun()
 		},
-		Hidden: true,
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, true)
 	addExperimentRevisionFlag(cmd, &actor.Revision, true)

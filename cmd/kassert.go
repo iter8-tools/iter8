@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"os"
+	"errors"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
@@ -29,18 +29,21 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewAssertOpts(kd)
 
 	cmd := &cobra.Command{
-		Use:   "assert",
-		Short: "Assert if Kubernetes experiment result satisfies conditions",
-		Long:  kAssertDesc,
-		Run: func(_ *cobra.Command, _ []string) {
+		Use:          "assert",
+		Short:        "Assert if Kubernetes experiment result satisfies conditions",
+		Long:         kAssertDesc,
+		SilenceUsage: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
 			allGood, err := actor.KubeRun()
 			if err != nil {
-				log.Logger.Error(err)
+				return err
 			}
 			if !allGood {
-				log.Logger.Error("assert conditions failed")
-				os.Exit(1)
+				e := errors.New("assert conditions failed")
+				log.Logger.Error(e)
+				return e
 			}
+			return nil
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, false)

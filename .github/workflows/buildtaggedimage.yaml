@@ -13,10 +13,10 @@ jobs:
         fetch-depth: 0
     - name: Get version
       run: |
-        tarref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        tagref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
         # Strip "v" prefix from tagref
-        echo "VERSION=$(echo $tarref | sed -e 's/^v//')" >> $GITHUB_ENV
-        echo "MAJOR_MINOR_VERSION=$(echo $tarref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
+        echo "VERSION=$(echo $tagref | sed -e 's/^v//')" >> $GITHUB_ENV
+        echo "MAJOR_MINOR_VERSION=$(echo $tagref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
     - name: Get owner
       run: |
         ownerrepo=${{ github.repository }}
@@ -32,9 +32,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_SECRET }}
     - uses: docker/build-push-action@v2
       with:
-        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }}
+        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest
         push: true
-    - uses: docker/build-push-action@v2
-      with:
-        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.VERSION }}
-        push: true
+        build-args: |
+          TAG=v${{ env.VERSION }}

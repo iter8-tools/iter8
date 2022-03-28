@@ -18,7 +18,6 @@ package cmd
 import (
 	ia "github.com/iter8-tools/iter8/action"
 
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/spf13/cobra"
 )
 
@@ -35,13 +34,12 @@ func newHubCmd() *cobra.Command {
 	actor := ia.NewHubOpts()
 
 	cmd := &cobra.Command{
-		Use:   "hub",
-		Short: "Download experiment chart",
-		Long:  hubDesc,
-		Run: func(_ *cobra.Command, _ []string) {
-			if err := actor.LocalRun(); err != nil {
-				log.Logger.Error(err)
-			}
+		Use:          "hub",
+		Short:        "Download experiment chart",
+		Long:         hubDesc,
+		SilenceUsage: true,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return actor.LocalRun()
 		},
 	}
 	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)
