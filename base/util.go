@@ -1,6 +1,7 @@
 package base
 
 import (
+	"crypto/tls"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -55,7 +56,12 @@ func CompletePath(prefix string, suffix string) string {
 
 // getPayloadBytes downloads payload from URL and returns a byte slice
 func getPayloadBytes(url string) ([]byte, error) {
-	var myClient = &http.Client{Timeout: 10 * time.Second}
+	var myClient = &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	myClient = &http.Client{Transport: tr, Timeout: 10 * time.Second}
+
 	r, err := myClient.Get(url)
 	if err != nil || r.StatusCode >= 400 {
 		e := errors.New("error while fetching payload")
