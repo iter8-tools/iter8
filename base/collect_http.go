@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"time"
 
 	"fortio.org/fortio/fhttp"
@@ -41,8 +42,8 @@ type collectHTTPInputs struct {
 	Connections *int `json:"connections" yaml:"connections"`
 	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload.
 	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
-	// PayloadURL is the URL of payload. If this field is specified, Iter8 will send HTTP POST requests to versions using data downloaded from this URL as the payload. If both `payloadStr` and `payloadURL` is specified, the former is ignored.
-	PayloadURL *string `json:"payloadURL" yaml:"payloadURL"`
+	// PayloadFile is payload file. If this field is specified, Iter8 will send HTTP POST requests to versions using data in this file. If both `payloadStr` and `payloadFile` are specified, the former is ignored.
+	PayloadFile *string `json:"payloadFile" yaml:"payloadFile"`
 	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions using this content type header value.
 	ContentType *string `json:"contentType" yaml:"contentType"`
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
@@ -185,8 +186,8 @@ func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, err
 	if t.With.PayloadStr != nil {
 		fo.Payload = []byte(*t.With.PayloadStr)
 	}
-	if t.With.PayloadURL != nil {
-		b, err := getPayloadBytes(*t.With.PayloadURL)
+	if t.With.PayloadFile != nil {
+		b, err := ioutil.ReadFile(*t.With.PayloadFile)
 		if err != nil {
 			return nil, err
 		} else {

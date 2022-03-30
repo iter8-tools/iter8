@@ -30,7 +30,6 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 			Config: runner.Config{
 				Data: map[string]interface{}{"name": "bob"},
 			},
-			ProtoURL: StringPointer("https://raw.githubusercontent.com/bojand/ghz/v0.105.0/testdata/greeter.proto"),
 			VersionInfo: []*versionGRPC{{
 				Call: "helloworld.Greeter.SayHello",
 				Host: internal.TestLocalhost,
@@ -94,7 +93,6 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 				Data:        map[string]interface{}{"name": "bob"},
 				DialTimeout: runner.Duration(20 * time.Second),
 			},
-			ProtoURL: StringPointer("https://raw.githubusercontent.com/bojand/ghz/v0.105.0/testdata/greeter.proto"),
 			VersionInfo: []*versionGRPC{{
 				Call: "helloworld.Greeter.SayHello",
 				Host: internal.TestLocalhost,

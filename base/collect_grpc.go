@@ -29,21 +29,6 @@ type collectGRPCInputs struct {
 	// many of the fields in runner.Config will not be supported.
 	// Refer to iter8.tools documentation for supported fields.
 	runner.Config
-	// additional settings
-	// ProtoURL	URL pointing to the Protocol Buffer file.
-	ProtoURL *string `json:"protoURL,omitempty" yaml:"protoURL,omitempty"`
-	// ProtosetURL	URL pointing to the protoset file.
-	ProtosetURL *string `json:"protosetURL,omitempty" yaml:"protosetURL,omitempty"`
-	// data and metadata settings
-	// DataURL	URL pointing to JSON data to be sent as part of the call.
-	// This takes precedence over Data.
-	DataURL *string `json:"JSONDataURL,omitempty" yaml:"JSONDataURL,omitempty"`
-	// BinaryDataURL	URL pointing to call data as serialized binary message or multiple count-prefixed messages.
-	BinaryDataURL *string `json:"BinaryDataURL,omitempty" yaml:"BinaryDataURL,omitempty"`
-	// MetadataURL	URL pointing to call metadata in JSON format.
-	// This takes precedence over Metadata.
-	MetadataURL *string `json:"MetadataURL,omitempty" yaml:"MetadataURL,omitempty"`
-
 	// VersionInfo is a non-empty list of versionGRPC values.
 	VersionInfo []*versionGRPC `json:"versionInfo" yaml:"versionInfo"`
 }
@@ -51,16 +36,6 @@ type collectGRPCInputs struct {
 const (
 	// CollectGRPCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
 	CollectGRPCTaskName = "gen-load-and-collect-metrics-grpc"
-	// protoFileName is the proto buf file
-	protoFileName = "ghz.proto"
-	// protosetFileName is the protoset file
-	protosetFileName = "ghz.protoset"
-	// callDataJSONFileName is the JSON call data file
-	callDataJSONFileName = "ghz-call-data.json"
-	// callDataBinaryFileName is the binary call data file
-	callDataBinaryFileName = "ghz-call-data.bin"
-	// callMetadataJSONFileName is the JSON call metadata file
-	callMetadataJSONFileName = "ghz-call-metadata.json"
 	// gRPC metric prefix
 	gRPCMetricPrefix = "grpc"
 	// gRPCRequestCountMetricName is name of the gRPC request count metric
@@ -111,47 +86,6 @@ func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
 	ghzc := t.With.Config
 	ghzc.Call = t.With.VersionInfo[j].Call
 	ghzc.Host = t.With.VersionInfo[j].Host
-
-	// get proto file
-	if t.With.ProtoURL != nil {
-		err := getFileFromURL(*t.With.ProtoURL, protoFileName)
-		if err != nil {
-			return nil, err
-		}
-		ghzc.Proto = protoFileName
-	}
-	// get protoset file
-	if t.With.ProtosetURL != nil {
-		err := getFileFromURL(*t.With.ProtosetURL, protosetFileName)
-		if err != nil {
-			return nil, err
-		}
-		ghzc.Protoset = protosetFileName
-	}
-	// get JSON call data file
-	if t.With.DataURL != nil {
-		err := getFileFromURL(*t.With.ProtoURL, callDataJSONFileName)
-		if err != nil {
-			return nil, err
-		}
-		ghzc.DataPath = callDataJSONFileName
-	}
-	// get binary data file
-	if t.With.BinaryDataURL != nil {
-		err := getFileFromURL(*t.With.ProtoURL, callDataBinaryFileName)
-		if err != nil {
-			return nil, err
-		}
-		ghzc.BinDataPath = callDataBinaryFileName
-	}
-	// get metadata file
-	if t.With.MetadataURL != nil {
-		err := getFileFromURL(*t.With.ProtoURL, callMetadataJSONFileName)
-		if err != nil {
-			return nil, err
-		}
-		ghzc.MetadataPath = callMetadataJSONFileName
-	}
 
 	return &ghzc, nil
 }
