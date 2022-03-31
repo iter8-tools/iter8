@@ -21,7 +21,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/retry"
 )
 
@@ -84,26 +83,34 @@ func (t *readinessTask) run(exp *Experiment) error {
 
 	t.initializeDefaults()
 
+	kd.initKube()
+
 	// get kubeconfig from whatever is available
 	// works if in cluster or out of cluster
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		clientcmd.NewDefaultClientConfigLoadingRules(),
-		&clientcmd.ConfigOverrides{},
-	)
+	// kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+	// 	clientcmd.NewDefaultClientConfigLoadingRules(),
+	// 	&clientcmd.ConfigOverrides{},
+	// )
+	// kubeconfig := kd.kubeconfig
 
-	// get client config (*rest.Config)
-	restConfig, err := kubeconfig.ClientConfig()
+	// // get client config (*rest.Config)
+	// restConfig, err := kubeconfig.ClientConfig()
+	// if err != nil {
+	// 	return err
+	// }
+	restConfig, err := kd.MyEnvSettings.RESTClientGetter().ToRESTConfig()
 	if err != nil {
 		return err
 	}
 
 	// set Namespace (from context) if not already set
 	if t.With.Namespace == nil {
-		ns, _, err := kubeconfig.Namespace()
-		if err != nil {
-			return err
-		}
-		t.With.Namespace = StringPointer(ns)
+		// ns, _, err := kubeconfig.Namespace()
+		// if err != nil {
+		// 	return err
+		// }
+		// t.With.Namespace = StringPointer(ns)
+		t.With.Namespace = StringPointer("default")
 	}
 
 	timeout, err := time.ParseDuration(*t.With.Timeout)
@@ -136,7 +143,6 @@ func (t *readinessTask) run(exp *Experiment) error {
 
 // checkObjectExistsAndConditionTrue determines if the object exists
 // if so, it further checks if the requested condition is "True"
-// based on https://ymmt2005.hatenablog.com/entry/2020/04/14/An_example_of_using_dynamic_client_of_k8s.io/client-go
 func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
 	log.Logger.Trace("looking for object ", t.With.Kind, "/", t.With.Name, " in namespace ", *t.With.Namespace)
 
@@ -173,7 +179,52 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 
 // getObject finds the object referenced by objRef using the client config restConfig
 // uses the dynamic client; ie, retuns an unstructured object
+// based on https://ymmt2005.hatenablog.com/entry/2020/04/14/An_example_of_using_dynamic_client_of_k8s.io/client-go
 func getObject(objRef *corev1.ObjectReference, restConfig *rest.Config) (*unstructured.Unstructured, error) {
+	// // 1. Prepare a RESTMapper to find GVR
+	// dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
+
+	// // 2. Prepare the dynamic client
+	// dyn, err := dynamic.NewForConfig(restConfig)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	gvk := schema.FromAPIVersionAndKind(objRef.APIVersion, objRef.Kind)
+
+	// 3. Find GVR
+	mapping, err := kd.Mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. Obtain REST interface for the GVR
+	namespace := objRef.Namespace // recall that we always set this
+	var dr dynamic.ResourceInterface
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		// namespaced resources should specify the namespace
+		dr = kd.DynamicClient.Resource(mapping.Resource).Namespace(namespace)
+	} else {
+		// for cluster-wide resources
+		dr = kd.DynamicClient.Resource(mapping.Resource)
+	}
+
+	obj, err := dr.Get(context.Background(), objRef.Name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return obj, nil
+}
+
+// getObjectOld finds the object referenced by objRef using the client config restConfig
+// uses the dynamic client; ie, retuns an unstructured object
+// based on https://ymmt2005.hatenablog.com/entry/2020/04/14/An_example_of_using_dynamic_client_of_k8s.io/client-go
+func getObjectOld(objRef *corev1.ObjectReference, restConfig *rest.Config) (*unstructured.Unstructured, error) {
 	// dr, err := getDynamicResourceInterface(restConfig, objRef, objRef.Namespace)
 	// 1. Prepare a RESTMapper to find GVR
 	dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
