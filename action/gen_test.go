@@ -12,7 +12,8 @@ func TestGen(t *testing.T) {
 	// fix gOpts
 	os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
-	gOpts.SourceDir = base.CompletePath("../", "testdata/charts/load-test-http")
+	gOpts.SourceDir = base.CompletePath("../", "")
+	gOpts.ChartName = "load-test-http"
 	gOpts.Values = []string{"url=https://httpbin.org/get"}
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)

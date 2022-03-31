@@ -264,20 +264,6 @@ type PayloadValue struct {
 	Value string `json:"value"`
 }
 
-// create the experiment result secret
-/* Example:
-// # apiVersion: v1
-// # kind: Secret
-// # metadata:
-// #   name: {{ $name }}-result
-// # stringData:
-// #   result.yaml: |
-// #     startTime: {{ now }}
-// #     numCompletedTasks: 0
-// #     failure: false
-// #     iter8Version: {{ .Chart.AppVersion }}
-*/
-
 // formResultSecret creates the result secret using the result
 func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Secret, error) {
 	job, err := driver.getExperimentJob()
