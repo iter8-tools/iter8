@@ -23,8 +23,8 @@ func TestRunCollectHTTP(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration:   StringPointer("1s"),
-			PayloadURL: StringPointer("https://data.police.uk/api/crimes-street-dates"),
+			Duration:    StringPointer("1s"),
+			PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
 			VersionInfo: []*versionHTTP{{
 				Headers: map[string]string{},
 				URL:     "https://something.com",
