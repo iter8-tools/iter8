@@ -17,6 +17,7 @@ import (
 func TestKOps(t *testing.T) {
 	kd := NewKubeDriver(cli.New()) // we will ignore this value
 	assert.NotNil(t, kd)
+
 	kd = NewFakeKubeDriver(cli.New())
 	err := kd.Init()
 	assert.NoError(t, err)
