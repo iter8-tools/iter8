@@ -115,7 +115,7 @@ staticcheck:
 
 .PHONY: test
 test: fmt vet ## Run tests.
-	go test -v ./... -race -coverprofile=coverage.out -covermode=atomic
+	go test -v ./... -coverprofile=coverage.out
 
 .PHONY: coverage
 coverage: test
