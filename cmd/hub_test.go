@@ -9,22 +9,21 @@ import (
 )
 
 func TestHub(t *testing.T) {
-	os.Chdir(t.TempDir())
-
 	tests := []cmdTestCase{
-		// hub
+		// basic hub
 		{
 			name:   "basic hub",
-			cmd:    fmt.Sprintf("hub -c load-test-http --repoURL %v"),
+			cmd:    "hub --gitFolder github.com/iter8-tools/iter8.git//chart",
 			golden: base.CompletePath("../testdata", "output/hub.txt"),
 		},
-		// hub, destDir
+		// hub, chartsParentDir
 		{
-			name:   "hub with destDir",
-			cmd:    fmt.Sprintf("hub -c load-test-http --destDir %v --repoURL %v", t.TempDir()),
+			name:   "hub with chartsParentDir",
+			cmd:    fmt.Sprintf("hub --gitFolder github.com/iter8-tools/iter8.git//chart --chartsParentDir %v", t.TempDir()),
 			golden: base.CompletePath("../testdata", "output/hub-with-destdir.txt"),
 		},
 	}
 
+	os.Chdir(t.TempDir())
 	runTestActionCmd(t, tests)
 }

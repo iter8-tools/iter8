@@ -27,15 +27,15 @@ func newGenCmd() *cobra.Command {
 			return actor.LocalRun()
 		},
 	}
-	addChartParentDirFlag(cmd, &actor.ChartsParentDir)
+	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	return cmd
 }
 
-// addChartParentDirFlag
-func addChartParentDirFlag(cmd *cobra.Command, chartParentDirPtr *string) {
-	cmd.Flags().StringVar(chartParentDirPtr, "chartParentDirPtr", ".", "path to experiment chart directory")
+// addChartsParentDirFlag
+func addChartsParentDirFlag(cmd *cobra.Command, chartsParentDirPtr *string) {
+	cmd.Flags().StringVar(chartsParentDirPtr, "chartsParentDir", ".", "path to experiment chart directory")
 }
 
 // addChartNameFlag

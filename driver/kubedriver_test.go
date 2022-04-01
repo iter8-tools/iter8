@@ -28,10 +28,10 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	rel, err := kd.Releases.Last(kd.Group)
+	assert.NoError(t, err)
 	assert.NotNil(t, rel)
 	assert.Equal(t, 1, rel.Version)
 	assert.Equal(t, 1, kd.Revision)
-	assert.NoError(t, err)
 
 	err = kd.Init()
 	assert.NoError(t, err)

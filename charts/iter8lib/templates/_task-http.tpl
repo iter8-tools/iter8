@@ -21,15 +21,11 @@
     {{- end }}
 
     {{- if .Values.payloadStr }}
-    payloadStr: {{ .Values.payloadStr | toString }}
-    {{- end }}
-
-    {{- if .Values.payloadURL }}
-    payloadURL: {{ .Values.payloadURL | toString }}
+    payloadStr: {{ .Values.payloadStr | quote }}
     {{- end }}
 
     {{- if .Values.contentType }}
-    contentType: {{ .Values.contentType | toString }}
+    contentType: {{ .Values.contentType | quote }}
     {{- end }}
 
     {{- if .Values.errorsAbove }}
@@ -55,5 +51,5 @@
       headers:
 {{ toYaml .Values.headers | indent 8 }}
     {{- end }}
-{{- end -}}    
+{{- end }}    
 

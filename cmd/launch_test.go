@@ -9,26 +9,24 @@ import (
 )
 
 func TestLaunch(t *testing.T) {
-	base.SetupWithMock(t)
-
 	tests := []cmdTestCase{
 		// launch, values from CLI
 		{
 			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s"),
+			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
 			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
 		// launch, destDir
 		{
 			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --destDir %v --repoURL %v --set url=https://httpbin.org/get --set duration=2s", t.TempDir()),
-			golden: base.CompletePath("../testdata", "output/launch-with-destdir.txt"),
+			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --runDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", ""), t.TempDir()),
+			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
 		// launch, values file
 		{
-			name:   "launch with values file",
-			cmd:    fmt.Sprintf("launch -c load-test-http --repoURL %v --set duration=2s -f %v", base.CompletePath("../testdata", "config.yaml")),
-			golden: base.CompletePath("../testdata", "output/launch-with-values-file.txt"),
+			name:   "basic launch",
+			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --set duration=2s -f %v", base.CompletePath("../", ""), base.CompletePath("../testdata", "config.yaml")),
+			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
 	}
 

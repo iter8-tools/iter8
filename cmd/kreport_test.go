@@ -14,7 +14,16 @@ import (
 )
 
 func TestKReport(t *testing.T) {
+	tests := []cmdTestCase{
+		// k report
+		{
+			name:   "k report",
+			cmd:    "k report",
+			golden: base.CompletePath("../testdata", "output/kreport.txt"),
+		},
+	}
 
+	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
 	kd.Revision = 1
@@ -35,15 +44,6 @@ func TestKReport(t *testing.T) {
 		},
 		StringData: map[string]string{"result.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
-
-	tests := []cmdTestCase{
-		// k report
-		{
-			name:   "k report",
-			cmd:    "k report",
-			golden: base.CompletePath("../testdata", "output/kreport.txt"),
-		},
-	}
 
 	runTestActionCmd(t, tests)
 }

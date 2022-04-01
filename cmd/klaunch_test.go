@@ -9,18 +9,17 @@ import (
 )
 
 func TestKLaunch(t *testing.T) {
-	// fake kube cluster
-	*kd = *id.NewFakeKubeDriver(settings)
-
 	tests := []cmdTestCase{
 		// Launch, base case, values from CLI
 		{
 			name:   "basic k launch",
-			cmd:    fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s"),
+			cmd:    fmt.Sprintf("k launch -c load-test-http --chartsParentDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 	}
 
-	runTestActionCmd(t, tests)
+	// fake kube cluster
+	*kd = *id.NewFakeKubeDriver(settings)
 
+	runTestActionCmd(t, tests)
 }

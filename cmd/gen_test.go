@@ -9,9 +9,8 @@ import (
 )
 
 func TestGen(t *testing.T) {
-	os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
-		// Launch, values from CLI
+		// gen, with CLI values
 		{
 			name:   "gen with CLI values",
 			cmd:    fmt.Sprintf("gen --sourceDir %v --set url=https://httpbin.org", base.CompletePath("../testdata", "charts/load-test-http")),
@@ -25,5 +24,6 @@ func TestGen(t *testing.T) {
 		},
 	}
 
+	os.Chdir(t.TempDir())
 	runTestActionCmd(t, tests)
 }

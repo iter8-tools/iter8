@@ -10,5 +10,5 @@
       upperLimit: {{ $value | float64 }}
     {{- end }}
 {{- end }}
-{{- end -}}
+{{- end }}
 

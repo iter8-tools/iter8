@@ -1,4 +1,4 @@
 {{ define "experiment" -}}
-{{- include "task.http" . -}}
-{{- include "task.assess" . -}}
+{{- include "task.http" . }}
+{{- include "task.assess" . }}
 {{ end }}

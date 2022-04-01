@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
@@ -16,10 +17,11 @@ func TestLog(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.GitFolder = "github.com/iter8-tools/iter8.git//charts"
+	lOpts.ChartsParentDir = base.CompletePath("../", "")
 	lOpts.ChartName = "load-test-http"
-	lOpts.ChartsParentDir = t.TempDir()
-	lOpts.Values = []string{"url=https://iter8.tools", "duration=2s"}
+	lOpts.NoDownload = true
+	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
+	lOpts.RunDir = t.TempDir()
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

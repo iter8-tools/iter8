@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	// Import to initialize client auth plugins.
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/downloader"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	helmerrors "github.com/pkg/errors"
@@ -340,6 +342,31 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	return nil
 }
 
+// updateChartDependencies for an Iter8 experiment chart
+// for now this function has one purpose ...
+// bring iter8lib dependency into other experiment charts like load-test-http
+func (driver *KubeDriver) updateChartDependencies(chartDir string) error {
+	// client, settings, cfg are not really initialized with proper values
+	// should be ok considering iter8lib is a local file dependency
+	client := action.NewDependency()
+	man := &downloader.Manager{
+		Out:              ioutil.Discard,
+		ChartPath:        chartDir,
+		Keyring:          client.Keyring,
+		SkipUpdate:       client.SkipRefresh,
+		Getters:          getter.All(driver.EnvSettings),
+		RepositoryConfig: driver.EnvSettings.RepositoryConfig,
+		RepositoryCache:  driver.EnvSettings.RepositoryCache,
+		Debug:            driver.EnvSettings.Debug,
+	}
+	log.Logger.Info("updating chart ", chartDir)
+	if err := man.Update(); err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to update chart dependencies")
+		return err
+	}
+	return nil
+}
+
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 // Upgrade a Kubernetes experiment to the next release
@@ -348,7 +375,7 @@ func (driver *KubeDriver) Upgrade(chartDir string, valueOpts values.Options, gro
 	client.Namespace = driver.Namespace()
 	client.DryRun = dry
 
-	ch, vals, err := getChartAndVals(chartDir, driver.EnvSettings, valueOpts)
+	ch, vals, err := driver.getChartAndVals(chartDir, valueOpts)
 	if err != nil {
 		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -394,7 +421,7 @@ func (driver *KubeDriver) Install(chartDir string, valueOpts values.Options, gro
 	client.DryRun = dry
 	client.ReleaseName = group
 
-	ch, vals, err := getChartAndVals(chartDir, driver.EnvSettings, valueOpts)
+	ch, vals, err := driver.getChartAndVals(chartDir, valueOpts)
 	if err != nil {
 		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -447,8 +474,14 @@ func (driver *KubeDriver) Delete() error {
 // getChartAndVals gets experiment chart and its values
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-func getChartAndVals(chartDir string, settings *cli.EnvSettings, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
-	p := getter.All(settings)
+func (driver *KubeDriver) getChartAndVals(chartDir string, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
+	// update dependencies for the chart
+	if err := driver.updateChartDependencies(chartDir); err != nil {
+		return nil, nil, err
+	}
+
+	// form chart values
+	p := getter.All(driver.EnvSettings)
 	vals, err := valueOpts.MergeValues(p)
 	if err != nil {
 		e := fmt.Errorf("unable to merge chart values")

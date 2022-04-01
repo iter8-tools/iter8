@@ -5,19 +5,11 @@
   with:
 
     {{- if .Values.protoFile }}
-    proto: {{ .Values.protoFile | toString }}
-    {{- end }}
-
-    {{- if .Values.protoURL }}
-    protoURL: {{ .Values.protoURL | toString }}
+    proto: {{ .Values.protoFile | quote }}
     {{- end }}
 
     {{- if .Values.protosetFile }}
-    protoset: {{ .Values.protosetFile | toString }}
-    {{- end }}
-
-    {{- if .Values.protosetURL }}
-    protosetURL: {{ .Values.protosetURL | toString }}
+    protoset: {{ .Values.protosetFile | quote }}
     {{- end }}
 
     {{- if .Values.total }}
@@ -37,19 +29,19 @@
     {{- end }}
 
     {{- if .Values.duration }}
-    duration: {{ .Values.duration | toString }}
+    duration: {{ .Values.duration | quote }}
     {{- end }}
 
     {{- if .Values.maxDuration }}
-    max-duration: {{ .Values.maxDuration | toString }}
+    max-duration: {{ .Values.maxDuration | quote }}
     {{- end }}
 
     {{- if .Values.streamInterval }}
-    stream-interval: {{ .Values.streamInterval | toString }}
+    stream-interval: {{ .Values.streamInterval | quote }}
     {{- end }}
 
     {{- if .Values.streamCallDuration }}
-    stream-call-duration: {{ .Values.streamCallDuration | toString }}
+    stream-call-duration: {{ .Values.streamCallDuration | quote }}
     {{- end }}
 
     {{- if .Values.streamCallCount }}
@@ -57,11 +49,11 @@
     {{- end }}
 
     {{- if .Values.connectTimeout }}
-    connect-timeout: {{ .Values.connectTimeout | toString }}
+    connect-timeout: {{ .Values.connectTimeout | quote }}
     {{- end }}
 
     {{- if .Values.keepalive }}
-    keepalive: {{ .Values.keepalive | toString }}
+    keepalive: {{ .Values.keepalive | quote }}
     {{- end }}
 
     {{- if .Values.data }}
@@ -70,19 +62,11 @@
     {{- end }}
 
     {{- if .Values.dataFile }}
-    data-file: {{ .Values.dataFile | toString }}
-    {{- end }}
-
-    {{- if .Values.dataURL }}
-    dataURL: {{ .Values.dataURL | toString }}
+    data-file: {{ .Values.dataFile | quote }}
     {{- end }}
 
     {{- if .Values.binaryDataFile }}
-    binary-file: {{ .Values.binaryDataFile | toString }}
-    {{- end }}
-
-    {{- if .Values.binaryDataURL }}
-    binaryDataURL: {{ .Values.binaryDataURL | toString }}
+    binary-file: {{ .Values.binaryDataFile | quote }}
     {{- end }}
 
     {{- if .Values.metadata }}
@@ -91,11 +75,7 @@
     {{- end }}
 
     {{- if .Values.metadataFile }}
-    metadata-file: {{ .Values.metadataFile | toString }}
-    {{- end }}
-
-    {{- if .Values.metadataURL }}
-    metadataURL: {{ .Values.metadataURL | toString }}
+    metadata-file: {{ .Values.metadataFile | quote }}
     {{- end }}
 
     {{- if .Values.reflectMetadata }}
@@ -105,7 +85,7 @@
 
     {{- ""}}
     versionInfo:
-    - host: {{ required "A valid host is required!" .Values.host | toString }}
-      call: {{ required "A valid call is required!" .Values.call | toString }}
-{{- end -}}    
+    - host: {{ required "A valid host is required!" .Values.host | quote }}
+      call: {{ required "A valid call is required!" .Values.call | quote }}
+{{- end }}    
 

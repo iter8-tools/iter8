@@ -38,7 +38,7 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 		},
 	}
 	addDryRunFlag(cmd, &actor.DryRun)
-	addChartParentDirFlag(cmd, &actor.ChartsParentDir)
+	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
 	addGitFolderFlag(cmd, &actor.GitFolder)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)

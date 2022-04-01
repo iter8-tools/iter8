@@ -13,7 +13,16 @@ import (
 )
 
 func TestKLog(t *testing.T) {
+	tests := []cmdTestCase{
+		// k assert
+		{
+			name:   "k log",
+			cmd:    "k log",
+			golden: base.CompletePath("../testdata", "output/klog.txt"),
+		},
+	}
 
+	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
 	kd.Revision = 1
@@ -26,15 +35,6 @@ func TestKLog(t *testing.T) {
 			},
 		},
 	}, metav1.CreateOptions{})
-
-	tests := []cmdTestCase{
-		// k assert
-		{
-			name:   "k log",
-			cmd:    "k log",
-			golden: base.CompletePath("../testdata", "output/klog.txt"),
-		},
-	}
 
 	runTestActionCmd(t, tests)
 }

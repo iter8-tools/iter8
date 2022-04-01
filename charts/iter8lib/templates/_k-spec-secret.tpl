@@ -7,4 +7,4 @@ metadata:
 stringData:
   experiment.yaml: |
 {{ include "experiment" . | indent 4 }}
-{{- end -}}
+{{- end }}

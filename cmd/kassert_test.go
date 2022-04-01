@@ -15,6 +15,27 @@ import (
 )
 
 func TestKAssert(t *testing.T) {
+	tests := []cmdTestCase{
+		// k launch
+		{
+			name:   "k launch",
+			cmd:    fmt.Sprintf("k launch -c load-test-http --chartsParentDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
+			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
+		},
+		// k run
+		{
+			name: "k run",
+			cmd:  "k run -g default --revision 1 --namespace default",
+		},
+		// k assert
+		{
+			name:   "k assert",
+			cmd:    "k assert -c completed -c nofailure -c slos",
+			golden: base.CompletePath("../testdata", "output/kassert.txt"),
+		},
+	}
+
+	// mock the environment
 	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
@@ -33,26 +54,6 @@ func TestKAssert(t *testing.T) {
 			Namespace: "default",
 		},
 	}, metav1.CreateOptions{})
-
-	tests := []cmdTestCase{
-		// k launch
-		{
-			name:   "init: k launch",
-			cmd:    fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s"),
-			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
-		},
-		// k run
-		{
-			name: "init: k run",
-			cmd:  "k run -g default --revision 1 --namespace default",
-		},
-		// k assert
-		{
-			name:   "k assert",
-			cmd:    "k assert -c completed -c nofailure -c slos",
-			golden: base.CompletePath("../testdata", "output/kassert.txt"),
-		},
-	}
 
 	runTestActionCmd(t, tests)
 }
