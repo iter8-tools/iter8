@@ -1,6 +1,8 @@
 package action
 
 import (
+	"path"
+
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -47,15 +49,15 @@ func (lOpts *LaunchOpts) LocalRun() error {
 	if !lOpts.NoDownload {
 		// download chart from Iter8 hub
 		hOpts := &HubOpts{
-			GitFolder:       lOpts.GitFolder,
-			ChartsParentDir: lOpts.ChartsParentDir,
+			GitFolder: lOpts.GitFolder,
+			ChartsDir: path.Join(lOpts.ChartsParentDir, chartsFolderName),
 		}
 		if err := hOpts.LocalRun(); err != nil {
 			return err
 		}
 		log.Logger.Debug("hub complete")
 	} else {
-		log.Logger.Info("using `charts` under ", lOpts.ChartsParentDir)
+		log.Logger.Debug("using `charts` under ", lOpts.ChartsParentDir)
 	}
 
 	// gen experiment spec

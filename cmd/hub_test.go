@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -13,14 +12,8 @@ func TestHub(t *testing.T) {
 		// basic hub
 		{
 			name:   "basic hub",
-			cmd:    "hub --gitFolder github.com/iter8-tools/iter8.git//chart",
+			cmd:    "hub --gitFolder github.com/iter8-tools/iter8.git//charts",
 			golden: base.CompletePath("../testdata", "output/hub.txt"),
-		},
-		// hub, chartsParentDir
-		{
-			name:   "hub with chartsParentDir",
-			cmd:    fmt.Sprintf("hub --gitFolder github.com/iter8-tools/iter8.git//chart --chartsParentDir %v", t.TempDir()),
-			golden: base.CompletePath("../testdata", "output/hub-with-destdir.txt"),
 		},
 	}
 

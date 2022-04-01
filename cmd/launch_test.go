@@ -13,20 +13,20 @@ func TestLaunch(t *testing.T) {
 		// launch, values from CLI
 		{
 			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
+			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --noDownload --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
 			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
-		// launch, destDir
+		// launch, chartsParentDir
 		{
 			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --runDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", ""), t.TempDir()),
+			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --noDownload --runDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", ""), t.TempDir()),
 			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
 		// launch, values file
 		{
 			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --set duration=2s -f %v", base.CompletePath("../", ""), base.CompletePath("../testdata", "config.yaml")),
-			golden: base.CompletePath("../testdata", "output/launch.txt"),
+			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --noDownload --set duration=2s -f %v", base.CompletePath("../", ""), base.CompletePath("../testdata", "config.yaml")),
+			golden: base.CompletePath("../testdata", "output/launch-with-slos.txt"),
 		},
 	}
 

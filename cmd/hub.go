@@ -27,7 +27,6 @@ func newHubCmd() *cobra.Command {
 			return actor.LocalRun()
 		},
 	}
-	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
 	addGitFolderFlag(cmd, &actor.GitFolder)
 	return cmd
 }
