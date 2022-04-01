@@ -6,13 +6,11 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
-	helmaction "helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/downloader"
 	"helm.sh/helm/v3/pkg/engine"
 	"helm.sh/helm/v3/pkg/getter"
 )
@@ -44,42 +42,15 @@ func (gen *GenOpts) chartDir() string {
 	return path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
 }
 
-// updateChartDependencies for an Iter8 experiment chart
-// for now this function has one purpose ...
-// bring iter8lib dependency into other experiment charts like load-test-http
-func (gen *GenOpts) updateChartDependencies() error {
-	// client, settings, cfg are not really initialized with proper values
-	// should be ok considering iter8lib is a local file dependency
-	client := helmaction.NewDependency()
-	settings := cli.New()
-	man := &downloader.Manager{
-		Out:              ioutil.Discard,
-		ChartPath:        gen.chartDir(),
-		Keyring:          client.Keyring,
-		SkipUpdate:       client.SkipRefresh,
-		Getters:          getter.All(settings),
-		RepositoryConfig: settings.RepositoryConfig,
-		RepositoryCache:  settings.RepositoryCache,
-		Debug:            settings.Debug,
-	}
-	log.Logger.Info("updating chart ", gen.chartDir())
-	if err := man.Update(); err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to update chart dependencies")
-		return err
-	}
-	return nil
-}
-
 // LocalRun generates a local experiment.yaml file
 func (gen *GenOpts) LocalRun() error {
-	// chartPath
-	if err := gen.updateChartDependencies(); err != nil {
+	// update dependencies
+	if err := driver.UpdateChartDependencies(gen.chartDir(), nil); err != nil {
 		return err
 	}
 
-	chartPath := path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
 	// read in the experiment chart
-	c, err := loader.Load(chartPath)
+	c, err := loader.Load(gen.chartDir())
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to load experiment chart")
 		return err

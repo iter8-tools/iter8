@@ -97,7 +97,7 @@ func (lOpts *LaunchOpts) KubeRun() error {
 		GenDir:          lOpts.RunDir,
 		ChartName:       lOpts.ChartName,
 	}
-	gOpts.updateChartDependencies()
+	driver.UpdateChartDependencies(gOpts.chartDir(), lOpts.EnvSettings)
 
 	if lOpts.Revision > 0 { // last release found; setup upgrade
 		return lOpts.KubeDriver.Upgrade(gOpts.chartDir(), lOpts.Options, lOpts.Group, lOpts.DryRun)

@@ -342,24 +342,27 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	return nil
 }
 
-// updateChartDependencies for an Iter8 experiment chart
+// UpdateChartDependencies for an Iter8 experiment chart
 // for now this function has one purpose ...
 // bring iter8lib dependency into other experiment charts like load-test-http
-func (driver *KubeDriver) updateChartDependencies(chartDir string) error {
-	// client, settings, cfg are not really initialized with proper values
+func UpdateChartDependencies(chartDir string, settings *cli.EnvSettings) error {
+	// client and settings may not really be initialized with proper values
 	// should be ok considering iter8lib is a local file dependency
+	if settings == nil {
+		settings = cli.New()
+	}
 	client := action.NewDependency()
 	man := &downloader.Manager{
 		Out:              ioutil.Discard,
 		ChartPath:        chartDir,
 		Keyring:          client.Keyring,
 		SkipUpdate:       client.SkipRefresh,
-		Getters:          getter.All(driver.EnvSettings),
-		RepositoryConfig: driver.EnvSettings.RepositoryConfig,
-		RepositoryCache:  driver.EnvSettings.RepositoryCache,
-		Debug:            driver.EnvSettings.Debug,
+		Getters:          getter.All(settings),
+		RepositoryConfig: settings.RepositoryConfig,
+		RepositoryCache:  settings.RepositoryCache,
+		Debug:            settings.Debug,
 	}
-	log.Logger.Info("updating chart ", chartDir)
+	log.Logger.Debug("updating chart ", chartDir)
 	if err := man.Update(); err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to update chart dependencies")
 		return err
@@ -476,7 +479,7 @@ func (driver *KubeDriver) Delete() error {
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
 func (driver *KubeDriver) getChartAndVals(chartDir string, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
 	// update dependencies for the chart
-	if err := driver.updateChartDependencies(chartDir); err != nil {
+	if err := UpdateChartDependencies(chartDir, driver.EnvSettings); err != nil {
 		return nil, nil, err
 	}
 
