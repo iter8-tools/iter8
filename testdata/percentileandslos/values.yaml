@@ -1,9 +1,0 @@
-errorRanges:
-- lower: 500
-percentiles: [50.0, 75.0, 90.0, 95.0, 97.5, 99.0, 99.9]
-SLOs:
-  error-rate: 0 
-  mean-latency: 100
-  p50.0: 100 
-  p95.0: 250
-  p97.5: 500
