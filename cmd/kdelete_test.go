@@ -9,7 +9,6 @@ import (
 )
 
 func TestKDelete(t *testing.T) {
-	srv := id.SetupWithRepo(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
 
@@ -17,12 +16,12 @@ func TestKDelete(t *testing.T) {
 		// Launch, base case, values from CLI
 		{
 			name: "basic k launch",
-			cmd:  fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s", srv.URL()),
+			cmd:  fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s"),
 		},
 		// Launch again, values from CLI
 		{
 			name: "launch again",
-			cmd:  fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s", srv.URL()),
+			cmd:  fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s"),
 		},
 		// Delete
 		{

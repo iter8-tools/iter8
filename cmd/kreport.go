@@ -30,9 +30,12 @@ func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
 			return actor.KubeRun(outStream)
 		},
 	}
+	// options specific to k report
 	addExperimentGroupFlag(cmd, &actor.Group, false)
 	actor.EnvSettings = settings
-	addReportFlags(cmd, actor)
+
+	// options shared with report
+	addOutputFormatFlag(cmd, &actor.OutputFormat)
 	return cmd
 }
 

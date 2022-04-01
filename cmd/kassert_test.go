@@ -15,7 +15,6 @@ import (
 )
 
 func TestKAssert(t *testing.T) {
-	srv := id.SetupWithRepo(t)
 	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
@@ -39,7 +38,7 @@ func TestKAssert(t *testing.T) {
 		// k launch
 		{
 			name:   "init: k launch",
-			cmd:    fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s", srv.URL()),
+			cmd:    fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s"),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 		// k run

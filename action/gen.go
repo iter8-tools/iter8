@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	helmaction "helm.sh/helm/v3/pkg/action"
@@ -18,12 +17,16 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
+const chartsFolderName = "charts"
+
 // GenOpts are the options used for generating experiment.yaml
 type GenOpts struct {
 	// Options provides the values to be combined with the experiment chart
 	values.Options
-	// SourceDir is the directory containing the Iter8 'charts' folder
-	SourceDir string
+	// ChartsParentDir is the directory where `charts` directory is located
+	ChartsParentDir string
+	// GenDir is the directory where the chart templates are rendered
+	GenDir string
 	// ChartName is the name of the chart
 	ChartName string
 }
@@ -31,21 +34,27 @@ type GenOpts struct {
 // NewGenOpts initializes and returns gen opts
 func NewGenOpts() *GenOpts {
 	return &GenOpts{
-		SourceDir: ".",
+		ChartsParentDir: ".",
+		GenDir:          ".",
 	}
+}
+
+// chartDir returns the path to chart directory
+func (gen *GenOpts) chartDir() string {
+	return path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
 }
 
 // updateChartDependencies for an Iter8 experiment chart
 // for now this function has one purpose ...
 // bring iter8lib dependency into other experiment charts like load-test-http
-func (gen *GenOpts) updateChartDependencies(chartPath string) error {
+func (gen *GenOpts) updateChartDependencies() error {
 	// client, settings, cfg are not really initialized with proper values
 	// should be ok considering iter8lib is a local file dependency
 	client := helmaction.NewDependency()
 	settings := cli.New()
 	man := &downloader.Manager{
 		Out:              ioutil.Discard,
-		ChartPath:        chartPath,
+		ChartPath:        gen.chartDir(),
 		Keyring:          client.Keyring,
 		SkipUpdate:       client.SkipRefresh,
 		Getters:          getter.All(settings),
@@ -53,7 +62,7 @@ func (gen *GenOpts) updateChartDependencies(chartPath string) error {
 		RepositoryCache:  settings.RepositoryCache,
 		Debug:            settings.Debug,
 	}
-	log.Logger.Info("updating chart ", chartPath)
+	log.Logger.Info("updating chart ", gen.chartDir())
 	if err := man.Update(); err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to update chart dependencies")
 		return err
@@ -64,11 +73,11 @@ func (gen *GenOpts) updateChartDependencies(chartPath string) error {
 // LocalRun generates a local experiment.yaml file
 func (gen *GenOpts) LocalRun() error {
 	// chartPath
-	chartPath := path.Join(gen.SourceDir, "charts", gen.ChartName)
-	if err := gen.updateChartDependencies(chartPath); err != nil {
+	if err := gen.updateChartDependencies(); err != nil {
 		return err
 	}
 
+	chartPath := path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
 	// read in the experiment chart
 	c, err := loader.Load(chartPath)
 	if err != nil {
@@ -107,19 +116,12 @@ func (gen *GenOpts) LocalRun() error {
 
 	// write experiment spec file
 	specBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentSpecPath)])
-	err = ioutil.WriteFile(driver.ExperimentSpecPath, specBytes, 0664)
+	err = ioutil.WriteFile(path.Join(gen.GenDir, driver.ExperimentSpecPath), specBytes, 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
 		return err
 	}
 	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
-
-	// build and validate experiment
-	fio := &driver.FileDriver{}
-	_, err = base.BuildExperiment(false, fio)
-	if err != nil {
-		return err
-	}
 
 	return err
 }

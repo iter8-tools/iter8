@@ -12,28 +12,26 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	srv := driver.SetupWithRepo(t)
-
 	var err error
 
-	// fix launchOpts
-	launchOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	launchOpts.ChartName = "load-test-http"
-	launchOpts.DestDir = t.TempDir()
-	launchOpts.Values = []string{"url=https://iter8.tools", "duration=2s"}
-	launchOpts.RepoURL = srv.URL()
+	// fix lOpts
+	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
+	lOpts.GitFolder = "github.com/iter8-tools/iter8.git//charts"
+	lOpts.ChartName = "load-test-http"
+	lOpts.ChartsParentDir = t.TempDir()
+	lOpts.Values = []string{"url=https://iter8.tools", "duration=2s"}
 
-	err = launchOpts.KubeRun()
+	err = lOpts.KubeRun()
 	assert.NoError(t, err)
 
-	rel, err := launchOpts.Releases.Last(launchOpts.Group)
+	rel, err := lOpts.Releases.Last(lOpts.Group)
 	assert.NotNil(t, rel)
 	assert.Equal(t, 1, rel.Version)
 	assert.NoError(t, err)
 
 	// fix lOpts
-	lOpts := NewLogOpts(launchOpts.KubeDriver)
-	lOpts.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
+	logOpts := NewLogOpts(lOpts.KubeDriver)
+	logOpts.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job-8218s",
 			Namespace: "default",
@@ -43,7 +41,7 @@ func TestLog(t *testing.T) {
 		},
 	}, metav1.CreateOptions{})
 
-	str, err := lOpts.KubeRun()
+	str, err := logOpts.KubeRun()
 	assert.NoError(t, err)
 	assert.Equal(t, "fake logs", str)
 }

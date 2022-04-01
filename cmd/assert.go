@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
@@ -48,16 +49,21 @@ func newAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 		},
 		SilenceUsage: true,
 	}
-	addAssertFlags(cmd, actor)
-	addRunFlags(cmd, &actor.RunOpts)
+	addConditionFlag(cmd, &actor.Conditions)
+	addTimeoutFlag(cmd, &actor.Timeout)
+	addRunDirFlag(cmd, &actor.RunDir)
 	return cmd
 }
 
-// addAssertFlags defines the flags for the assert command
-func addAssertFlags(cmd *cobra.Command, actor *ia.AssertOpts) {
-	cmd.Flags().StringSliceVarP(&actor.Conditions, "condition", "c", nil, fmt.Sprintf("%v | %v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure, ia.SLOs))
+// addConditionFlag adds the condition flag to the assert command
+func addConditionFlag(cmd *cobra.Command, conditionPtr *[]string) {
+	cmd.Flags().StringSliceVarP(conditionPtr, "condition", "c", nil, fmt.Sprintf("%v | %v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure, ia.SLOs))
 	cmd.MarkFlagRequired("condition")
-	cmd.Flags().DurationVar(&actor.Timeout, "timeout", 0, "timeout duration (e.g., 5s)")
+}
+
+// addTimeoutFlag adds timeout flag to command
+func addTimeoutFlag(cmd *cobra.Command, timeoutPtr *time.Duration) {
+	cmd.Flags().DurationVar(timeoutPtr, "timeout", 0, "timeout duration (e.g., 5s)")
 }
 
 func init() {

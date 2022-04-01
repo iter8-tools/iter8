@@ -37,16 +37,27 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 			return actor.LocalRun()
 		},
 	}
-	addLaunchFlags(cmd, actor)
-	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)
+	addDryRunFlag(cmd, &actor.DryRun)
+	addChartParentDirFlag(cmd, &actor.ChartsParentDir)
+	addGitFolderFlag(cmd, &actor.GitFolder)
+	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
+	addRunDirFlag(cmd, &actor.RunDir)
+	addNoDownloadFlag(cmd, &actor.NoDownload)
+
 	return cmd
 }
 
-// addLaunchFlags adds flags to the launch command
-func addLaunchFlags(cmd *cobra.Command, actor *ia.LaunchOpts) {
-	cmd.Flags().BoolVar(&actor.DryRun, "dry", false, "simulate an experiment launch")
+// addDryRunFlag adds dry run flag to the launch command
+func addDryRunFlag(cmd *cobra.Command, dryRunPtr *bool) {
+	cmd.Flags().BoolVar(dryRunPtr, "dry", false, "simulate an experiment launch")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
+}
+
+// addNoDownloadFlag adds noDownload flag to the launch command
+func addNoDownloadFlag(cmd *cobra.Command, noDownloadPtr *bool) {
+	cmd.Flags().BoolVar(noDownloadPtr, "noDownload", false, "reuse local charts dir; do not download from Git")
+	cmd.Flags().Lookup("noDownload").NoOptDefVal = "true"
 }
 
 func init() {

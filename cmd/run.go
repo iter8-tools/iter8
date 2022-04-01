@@ -30,13 +30,13 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 			return actor.LocalRun()
 		},
 	}
-	addRunFlags(cmd, actor)
+	addRunDirFlag(cmd, &actor.RunDir)
 	return cmd
 }
 
-// addRunFlags adds flags to the run command
-func addRunFlags(cmd *cobra.Command, actor *ia.RunOpts) {
-	cmd.Flags().StringVar(&actor.RunDir, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
+// addRunDirFlag adds run dir flag to the command
+func addRunDirFlag(cmd *cobra.Command, runDirPtr *string) {
+	cmd.Flags().StringVar(runDirPtr, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
 }
 
 func init() {

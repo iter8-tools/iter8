@@ -1,7 +1,6 @@
 package action
 
 import (
-	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
@@ -12,30 +11,29 @@ import (
 
 func TestLocalLaunch(t *testing.T) {
 	base.SetupWithMock(t)
-	srv := driver.SetupWithRepo(t)
-	os.Chdir(t.TempDir())
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
+	lOpts.ChartsParentDir = base.CompletePath("../", "")
 	lOpts.ChartName = "load-test-http"
+	lOpts.NoDownload = true
 	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
-	lOpts.RepoURL = srv.URL()
+	lOpts.RunDir = t.TempDir()
 
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
 }
 
 func TestKubeLaunch(t *testing.T) {
-	srv := driver.SetupWithRepo(t)
-
 	var err error
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
+	lOpts.ChartsParentDir = base.CompletePath("../", "")
 	lOpts.ChartName = "load-test-http"
-	lOpts.DestDir = t.TempDir()
-	lOpts.Values = []string{"url=https://iter8.tools", "duration=2s"}
-	lOpts.RepoURL = srv.URL()
+	lOpts.NoDownload = true
+	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
+	lOpts.RunDir = t.TempDir()
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

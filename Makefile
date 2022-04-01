@@ -32,7 +32,7 @@ BINARY_VERSION ?= ${GIT_TAG}
 
 # Only set Version if building a tag or VERSION is set
 ifneq ($(BINARY_VERSION),)
-	LDFLAGS += -X github.com/iter8-tools/iter8/cmd.version=${BINARY_VERSION}
+	LDFLAGS += -X github.com/iter8-tools/iter8/base.Version=${BINARY_VERSION}
 endif
 
 VERSION_METADATA = unreleased

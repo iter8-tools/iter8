@@ -9,7 +9,6 @@ import (
 )
 
 func TestKLaunch(t *testing.T) {
-	srv := id.SetupWithRepo(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
 
@@ -17,7 +16,7 @@ func TestKLaunch(t *testing.T) {
 		// Launch, base case, values from CLI
 		{
 			name:   "basic k launch",
-			cmd:    fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s", srv.URL()),
+			cmd:    fmt.Sprintf("k launch -c load-test-http --repoURL %v --set url=https://httpbin.org/get --set duration=2s"),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 	}

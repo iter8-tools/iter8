@@ -40,11 +40,18 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 			return actor.KubeRun()
 		},
 	}
+	// flags specific to k launch
 	addExperimentGroupFlag(cmd, &actor.Group, false)
 	actor.EnvSettings = settings
-	addLaunchFlags(cmd, actor)
-	addChartFlags(cmd, &actor.ChartPathOptions, &actor.ChartNameAndDestOptions)
+
+	// flags shared with launch
+	addDryRunFlag(cmd, &actor.DryRun)
+	addChartParentDirFlag(cmd, &actor.ChartsParentDir)
+	addGitFolderFlag(cmd, &actor.GitFolder)
+	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
+	addNoDownloadFlag(cmd, &actor.NoDownload)
+
 	return cmd
 }
 

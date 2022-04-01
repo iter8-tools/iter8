@@ -30,14 +30,14 @@ func newReportCmd(kd *driver.KubeDriver) *cobra.Command {
 			return actor.LocalRun(outStream)
 		},
 	}
-	addReportFlags(cmd, actor)
-	addRunFlags(cmd, &actor.RunOpts)
+	addOutputFormatFlag(cmd, &actor.OutputFormat)
+	addRunDirFlag(cmd, &actor.RunDir)
 	return cmd
 }
 
-// addReportFlags adds flags to the report command
-func addReportFlags(cmd *cobra.Command, actor *ia.ReportOpts) {
-	cmd.Flags().StringVarP(&actor.OutputFormat, "outputFormat", "o", "text", "text | html")
+// addOutputFormatFlag adds output format flag to the report command
+func addOutputFormatFlag(cmd *cobra.Command, outputFormat *string) {
+	cmd.Flags().StringVarP(outputFormat, "outputFormat", "o", "text", "text | html")
 }
 
 func init() {
