@@ -1,7 +1,7 @@
 package action
 
 import (
-	"path"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +10,7 @@ import (
 func TestHub(t *testing.T) {
 	// fix hOpts
 	hOpts := NewHubOpts()
-	hOpts.ChartsDir = path.Join(t.TempDir(), chartsFolderName)
+	os.Chdir(t.TempDir())
 	hOpts.GitFolder = "github.com/iter8-tools/iter8.git//charts"
 
 	err := hOpts.LocalRun()
