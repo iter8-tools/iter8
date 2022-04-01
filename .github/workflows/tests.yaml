@@ -25,11 +25,6 @@ jobs:
           echo "not good... coverage is not above 74.0%";
           exit 1
         fi
-    - name: Upload coverage to Codecov
-      if: github.event_name == 'push'
-      uses: codecov/codecov-action@v2
-      with:
-        files: ./coverage.out
 
   static-check:
     runs-on: ubuntu-latest
