@@ -3,22 +3,21 @@ package action
 import (
 	"testing"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 )
 
 func TestKubeDelete(t *testing.T) {
-	srv := driver.SetupWithRepo(t)
-
 	var err error
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
+	lOpts.ChartsParentDir = base.CompletePath("../", "")
 	lOpts.ChartName = "load-test-http"
-	lOpts.DestDir = t.TempDir()
+	lOpts.NoDownload = true
 	lOpts.Values = []string{"url=https://iter8.tools", "duration=2s"}
-	lOpts.RepoURL = srv.URL()
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

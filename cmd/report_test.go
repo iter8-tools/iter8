@@ -10,9 +10,6 @@ import (
 )
 
 func TestReport(t *testing.T) {
-
-	// fake kube cluster
-	*kd = *id.NewFakeKubeDriver(settings)
 	tests := []cmdTestCase{
 		// report text
 		{
@@ -22,6 +19,8 @@ func TestReport(t *testing.T) {
 		},
 	}
 
+	// fake kube cluster
+	*kd = *id.NewFakeKubeDriver(settings)
 	os.Chdir(base.CompletePath("../testdata", "assertinputs"))
 	runTestActionCmd(t, tests)
 }

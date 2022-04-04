@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/spf13/cobra"
 )
 
@@ -24,9 +25,6 @@ In the sample output shown above:
 `
 
 var (
-	// version is intended to be set using LDFLAGS at build time
-	// In the absence of complete semantic versioning info, the best we can do is major minor
-	version string = "v0.9"
 	// metadata is extra build time data
 	metadata = ""
 	// gitCommit is the git sha1
@@ -35,7 +33,7 @@ var (
 
 // BuildInfo describes the compile time information.
 type BuildInfo struct {
-	// Version is the current semver.
+	// Version is the semantic version
 	Version string `json:"version,omitempty"`
 	// GitCommit is the git sha1.
 	GitCommit string `json:"git_commit,omitempty"`
@@ -56,7 +54,7 @@ func newVersionCmd() *cobra.Command {
 			v := getBuildInfo()
 			if short {
 				if len(v.GitCommit) >= 7 {
-					fmt.Printf("%s+g%s", v.Version, v.GitCommit[:7])
+					fmt.Printf("%s+g%s", base.Version, v.GitCommit[:7])
 					fmt.Println()
 					return nil
 				}
@@ -75,9 +73,9 @@ func newVersionCmd() *cobra.Command {
 // getVersion returns the semver string of the version
 func getVersion() string {
 	if metadata == "" {
-		return version
+		return base.Version
 	}
-	return version + "+" + metadata
+	return base.Version + "+" + metadata
 }
 
 // get returns build info

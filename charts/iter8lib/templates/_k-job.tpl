@@ -18,4 +18,4 @@ spec:
           iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} --revision {{ .Release.Revision }}
       restartPolicy: Never
   backoffLimit: 0
-{{- end -}}
+{{- end }}

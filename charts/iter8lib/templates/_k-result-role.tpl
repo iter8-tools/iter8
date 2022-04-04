@@ -9,4 +9,4 @@ rules:
   resources: ["secrets"]
   resourceNames: ["{{ $name }}-result"]
   verbs: ["create", "get", "update"]
-{{- end -}}
+{{- end }}

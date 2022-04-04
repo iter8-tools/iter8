@@ -2,16 +2,13 @@ package driver
 
 import (
 	"io/ioutil"
-	"testing"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
 	helmfake "helm.sh/helm/v3/pkg/kube/fake"
 	"helm.sh/helm/v3/pkg/registry"
-	"helm.sh/helm/v3/pkg/repo/repotest"
 	"helm.sh/helm/v3/pkg/storage"
 	helmdriver "helm.sh/helm/v3/pkg/storage/driver"
 	corev1 "k8s.io/api/core/v1"
@@ -78,18 +75,4 @@ func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDrive
 	}
 	kd.initFake(objects...)
 	return kd
-}
-
-// SetupWithRepo creates a local experiment chart repo and cleans up after test
-func SetupWithRepo(t *testing.T) *repotest.Server {
-	srv, err := repotest.NewTempServerWithCleanup(t, base.CompletePath("../", "testdata/charts/*.tgz*"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(srv.Stop)
-
-	if err := srv.LinkIndices(); err != nil {
-		t.Fatal(err)
-	}
-	return srv
 }

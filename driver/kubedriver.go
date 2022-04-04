@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
@@ -264,20 +265,6 @@ type PayloadValue struct {
 	Value string `json:"value"`
 }
 
-// create the experiment result secret
-/* Example:
-// # apiVersion: v1
-// # kind: Secret
-// # metadata:
-// #   name: {{ $name }}-result
-// # stringData:
-// #   result.yaml: |
-// #     startTime: {{ now }}
-// #     numCompletedTasks: 0
-// #     failure: false
-// #     iter8Version: {{ .Chart.AppVersion }}
-*/
-
 // formResultSecret creates the result secret using the result
 func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Secret, error) {
 	job, err := driver.getExperimentJob()
@@ -355,19 +342,45 @@ func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	return nil
 }
 
+// UpdateChartDependencies for an Iter8 experiment chart
+// for now this function has one purpose ...
+// bring iter8lib dependency into other experiment charts like load-test-http
+func UpdateChartDependencies(chartDir string, settings *cli.EnvSettings) error {
+	// client and settings may not really be initialized with proper values
+	// should be ok considering iter8lib is a local file dependency
+	if settings == nil {
+		settings = cli.New()
+	}
+	client := action.NewDependency()
+	man := &downloader.Manager{
+		Out:              ioutil.Discard,
+		ChartPath:        chartDir,
+		Keyring:          client.Keyring,
+		SkipUpdate:       client.SkipRefresh,
+		Getters:          getter.All(settings),
+		RepositoryConfig: settings.RepositoryConfig,
+		RepositoryCache:  settings.RepositoryCache,
+		Debug:            settings.Debug,
+	}
+	log.Logger.Debug("updating chart ", chartDir)
+	if err := man.Update(); err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to update chart dependencies")
+		return err
+	}
+	return nil
+}
+
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 // Upgrade a Kubernetes experiment to the next release
-func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
+func (driver *KubeDriver) Upgrade(chartDir string, valueOpts values.Options, group string, dry bool) error {
 	client := action.NewUpgrade(driver.Configuration)
 	client.Namespace = driver.Namespace()
-	client.Version = version
 	client.DryRun = dry
-	client.ChartPathOptions = *cpo
 
-	ch, vals, err := getChartAndVals(cpo, chartName, driver.EnvSettings, valueOpts)
+	ch, vals, err := driver.getChartAndVals(chartDir, valueOpts)
 	if err != nil {
-		e := fmt.Errorf("unable to get chart and vals for %v", chartName)
+		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
@@ -405,17 +418,15 @@ func (driver *KubeDriver) Upgrade(version string, chartName string, valueOpts va
 // Install a Kubernetes experiment
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-func (driver *KubeDriver) Install(version string, chartName string, valueOpts values.Options, group string, dry bool, cpo *action.ChartPathOptions) error {
+func (driver *KubeDriver) Install(chartDir string, valueOpts values.Options, group string, dry bool) error {
 	client := action.NewInstall(driver.Configuration)
 	client.Namespace = driver.Namespace()
-	client.Version = version
 	client.DryRun = dry
-	client.ChartPathOptions = *cpo
 	client.ReleaseName = group
 
-	ch, vals, err := getChartAndVals(cpo, chartName, driver.EnvSettings, valueOpts)
+	ch, vals, err := driver.getChartAndVals(chartDir, valueOpts)
 	if err != nil {
-		e := fmt.Errorf("unable to get chart and vals for %v", chartName)
+		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
@@ -466,15 +477,14 @@ func (driver *KubeDriver) Delete() error {
 // getChartAndVals gets experiment chart and its values
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *cli.EnvSettings, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
-	chartPath, err := cpo.LocateChart(chartName, settings)
-	if err != nil {
-		e := fmt.Errorf("unable to locate chart %v", chartName)
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return nil, nil, e
+func (driver *KubeDriver) getChartAndVals(chartDir string, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
+	// update dependencies for the chart
+	if err := UpdateChartDependencies(chartDir, driver.EnvSettings); err != nil {
+		return nil, nil, err
 	}
 
-	p := getter.All(settings)
+	// form chart values
+	p := getter.All(driver.EnvSettings)
 	vals, err := valueOpts.MergeValues(p)
 	if err != nil {
 		e := fmt.Errorf("unable to merge chart values")
@@ -483,7 +493,7 @@ func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *c
 	}
 
 	// attempt to load the chart
-	ch, err := loader.Load(chartPath)
+	ch, err := loader.Load(chartDir)
 	if err != nil {
 		e := fmt.Errorf("unable to load chart")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -492,32 +502,6 @@ func getChartAndVals(cpo *action.ChartPathOptions, chartName string, settings *c
 
 	if err := checkIfInstallable(ch); err != nil {
 		return nil, nil, err
-	}
-
-	if req := ch.Metadata.Dependencies; req != nil {
-		if err := action.CheckDependencies(ch, req); err != nil {
-			man := &downloader.Manager{
-				Out:              os.Stdout,
-				ChartPath:        chartPath,
-				Keyring:          cpo.Keyring,
-				SkipUpdate:       false,
-				Getters:          p,
-				RepositoryConfig: settings.RepositoryConfig,
-				RepositoryCache:  settings.RepositoryCache,
-				Debug:            settings.Debug,
-			}
-			if err := man.Update(); err != nil {
-				e := fmt.Errorf("unable to update dependencies")
-				log.Logger.WithStackTrace(err.Error()).Error(e)
-				return nil, nil, e
-			}
-			// Reload the chart with the updated Chart.lock file.
-			if ch, err = loader.Load(chartPath); err != nil {
-				e := fmt.Errorf("failed reloading chart after dependency update")
-				log.Logger.WithStackTrace(err.Error()).Error(e)
-				return nil, nil, e
-			}
-		}
 	}
 
 	if ch.Metadata.Deprecated {

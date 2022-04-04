@@ -9,7 +9,7 @@ keywords:
 - load test
 - benchmark
 - validation
-- SLOs 
+- SLOs
 - metrics
 - experiment
 home: https://iter8.tools
@@ -23,5 +23,5 @@ icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon
 dependencies:
 - name: iter8lib
   version: 0.9.x
-  repository: file://../
+  repository: file://../iter8lib
 appVersion: v0.9

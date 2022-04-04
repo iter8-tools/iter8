@@ -11,4 +11,4 @@ roleRef:
   kind: Role
   name: {{ $name }}-result-role
   apiGroup: rbac.authorization.k8s.io
-{{- end -}}
+{{- end }}

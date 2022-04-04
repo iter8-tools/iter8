@@ -1,11 +1,9 @@
 package action
 
 import (
-	"fmt"
 	"io/ioutil"
 	"path"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"helm.sh/helm/v3/pkg/chart"
@@ -17,34 +15,44 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
+const chartsFolderName = "charts"
+
 // GenOpts are the options used for generating experiment.yaml
 type GenOpts struct {
 	// Options provides the values to be combined with the experiment chart
 	values.Options
-	// SourceDir is the path to the experiment chart
-	SourceDir string
+	// ChartsParentDir is the directory where `charts` directory is located
+	ChartsParentDir string
+	// GenDir is the directory where the chart templates are rendered
+	GenDir string
+	// ChartName is the name of the chart
+	ChartName string
 }
 
 // NewGenOpts initializes and returns gen opts
 func NewGenOpts() *GenOpts {
 	return &GenOpts{
-		SourceDir: ".",
+		ChartsParentDir: ".",
+		GenDir:          ".",
 	}
+}
+
+// chartDir returns the path to chart directory
+func (gen *GenOpts) chartDir() string {
+	return path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
 }
 
 // LocalRun generates a local experiment.yaml file
 func (gen *GenOpts) LocalRun() error {
-	// read in the experiment chart
-	c, err := loader.Load(gen.SourceDir)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to load experiment chart")
+	// update dependencies
+	if err := driver.UpdateChartDependencies(gen.chartDir(), nil); err != nil {
 		return err
 	}
 
-	// check version
-	if c.AppVersion() != base.MajorMinor {
-		err = fmt.Errorf("chart's app version (%v) and Iter8 CLI version (%v) do not match", c.AppVersion(), base.MajorMinor)
-		log.Logger.Error(err)
+	// read in the experiment chart
+	c, err := loader.Load(gen.chartDir())
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to load experiment chart")
 		return err
 	}
 
@@ -72,26 +80,19 @@ func (gen *GenOpts) LocalRun() error {
 	// render experiment.yaml
 	m, err := engine.Render(c, valuesToRender)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to render chart")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to render chart templates")
 		log.Logger.Debug("values: ", valuesToRender)
 		return err
 	}
 
 	// write experiment spec file
 	specBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentSpecPath)])
-	err = ioutil.WriteFile(driver.ExperimentSpecPath, specBytes, 0664)
+	err = ioutil.WriteFile(path.Join(gen.GenDir, driver.ExperimentSpecPath), specBytes, 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
 		return err
 	}
-	log.Logger.Info("created experiment.yaml file")
-
-	// build and validate experiment
-	fio := &driver.FileDriver{}
-	_, err = base.BuildExperiment(false, fio)
-	if err != nil {
-		return err
-	}
+	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
 
 	return err
 }

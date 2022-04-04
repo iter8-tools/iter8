@@ -15,8 +15,17 @@ import (
 )
 
 func TestKRun(t *testing.T) {
-	base.SetupWithMock(t)
+	tests := []cmdTestCase{
+		// k report
+		{
+			name:   "k run",
+			cmd:    "k run -g default --revision 1 --namespace default",
+			golden: base.CompletePath("../testdata", "output/krun.txt"),
+		},
+	}
 
+	// mock the environment
+	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
 	kd.Revision = 1
@@ -35,15 +44,6 @@ func TestKRun(t *testing.T) {
 			Namespace: "default",
 		},
 	}, metav1.CreateOptions{})
-
-	tests := []cmdTestCase{
-		// k report
-		{
-			name:   "k run",
-			cmd:    "k run -g default --revision 1 --namespace default",
-			golden: base.CompletePath("../testdata", "output/krun.txt"),
-		},
-	}
 
 	runTestActionCmd(t, tests)
 }

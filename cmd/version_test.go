@@ -1,11 +1,7 @@
 package cmd
 
 import (
-	"strings"
 	"testing"
-
-	"github.com/iter8-tools/iter8/base"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestVersion(t *testing.T) {
@@ -24,8 +20,4 @@ func TestVersion(t *testing.T) {
 
 	runTestActionCmd(t, tests)
 
-}
-
-func TestVersionPrefix(t *testing.T) {
-	assert.True(t, strings.HasPrefix(version, base.MajorMinor))
 }

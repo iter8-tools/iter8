@@ -7,7 +7,6 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
-	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 	batchv1 "k8s.io/api/batch/v1"
@@ -16,36 +15,32 @@ import (
 )
 
 func TestKOps(t *testing.T) {
-	srv := SetupWithRepo(t)
 	kd := NewKubeDriver(cli.New()) // we will ignore this value
 	assert.NotNil(t, kd)
+
 	kd = NewFakeKubeDriver(cli.New())
 	err := kd.Init()
 	assert.NoError(t, err)
 
 	// install
-	err = kd.Install(">=0.0.0", "load-test-http", values.Options{
+	err = kd.Install(base.CompletePath("../", "charts/load-test-http"), values.Options{
 		Values: []string{"url=https://httpbin.org/get"},
-	}, kd.Group, false, &action.ChartPathOptions{
-		RepoURL: srv.URL(),
-	})
+	}, kd.Group, false)
 	assert.NoError(t, err)
 
 	rel, err := kd.Releases.Last(kd.Group)
+	assert.NoError(t, err)
 	assert.NotNil(t, rel)
 	assert.Equal(t, 1, rel.Version)
 	assert.Equal(t, 1, kd.Revision)
-	assert.NoError(t, err)
 
 	err = kd.Init()
 	assert.NoError(t, err)
 
 	// upgrade
-	err = kd.Upgrade(">=0.0.0", "load-test-http", values.Options{
+	err = kd.Upgrade(base.CompletePath("../", "charts/load-test-http"), values.Options{
 		Values: []string{"url=https://httpbin.org/get"},
-	}, kd.Group, false, &action.ChartPathOptions{
-		RepoURL: srv.URL(),
-	})
+	}, kd.Group, false)
 	assert.NoError(t, err)
 
 	rel, err = kd.Releases.Last(kd.Group)

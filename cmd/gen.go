@@ -27,17 +27,21 @@ func newGenCmd() *cobra.Command {
 			return actor.LocalRun()
 		},
 	}
-	addSourceDirFlag(cmd, &actor.SourceDir, true)
+	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
+	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	return cmd
 }
 
-// addSourceDirFlag adds the source directory flag to the gen command
-func addSourceDirFlag(cmd *cobra.Command, sourceDirPtr *string, required bool) {
-	cmd.Flags().StringVar(sourceDirPtr, "sourceDir", "", "path to experiment chart directory")
-	if required {
-		cmd.MarkFlagRequired("sourceDir")
-	}
+// addChartsParentDirFlag
+func addChartsParentDirFlag(cmd *cobra.Command, chartsParentDirPtr *string) {
+	cmd.Flags().StringVar(chartsParentDirPtr, "chartsParentDir", ".", "path to experiment chart directory")
+}
+
+// addChartNameFlag
+func addChartNameFlag(cmd *cobra.Command, chartNamePtr *string) {
+	cmd.Flags().StringVarP(chartNamePtr, "chartName", "c", "", "path to experiment chart directory")
+	cmd.MarkFlagRequired("chartName")
 }
 
 func init() {

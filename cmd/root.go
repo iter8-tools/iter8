@@ -4,14 +4,12 @@ import (
 	"io"
 	"os"
 
-	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 )
@@ -61,21 +59,4 @@ func addValueFlags(f *pflag.FlagSet, v *values.Options) {
 	f.StringArrayVar(&v.Values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 	f.StringArrayVar(&v.StringValues, "set-string", []string{}, "set STRING values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 	f.StringArrayVar(&v.FileValues, "set-file", []string{}, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
-}
-
-// addChartFlags adds Iter8 experiment chart related flags to a command
-// Credit: the following function is modified from Helm.
-// Please see addChartPathFlags below:
-// https://github.com/helm/helm/blob/main/cmd/helm/flags.go
-func addChartFlags(cmd *cobra.Command, c *action.ChartPathOptions, nd *ia.ChartNameAndDestOptions) {
-	// fill nd
-	cmd.Flags().StringVarP(&nd.ChartName, "chartName", "c", "", "name of the experiment chart")
-	cmd.MarkFlagRequired("chartName")
-	cmd.Flags().StringVar(&nd.DestDir, "destDir", ".", "destination directory where experiment chart is downloaded and unpacked")
-
-	// fill c
-	cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 0.9.0) or it may reference a valid range (e.g. 0.9.x). If this is not specified, the latest compatible version is used")
-	cmd.Flags().MarkHidden("version")
-	cmd.Flags().StringVar(&c.RepoURL, "repoURL", driver.DefaultIter8RepoURL, "chart repo from which experiment charts are downloaded")
-	cmd.Flags().MarkHidden("repoURL")
 }
