@@ -8,9 +8,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Level is the log level for Iter8 CLI
 var Level = logrus.InfoLevel
 
 // Iter8Logger inherits all methods from logrus logger.
+// Provides additional methods for standardized Iter8 logging.
 type Iter8Logger struct {
 	*logrus.Logger
 }
@@ -44,7 +46,7 @@ func (l *Iter8Logger) WithStackTrace(t string) *logrus.Entry {
 	})
 }
 
-// String processes the stack trace by prefixing each line of the trace with ::Trace::.
+// String processes stack traces by prefixing each line of the trace with ::Trace::.
 // This enables other tools like grep to easily filter out these traces if needed.
 func (st *StackTrace) String() string {
 	out := "below ... \n"

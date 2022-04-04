@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// kLogDesc is the description of the k log cmd
 const kLogDesc = `
 Fetch logs for a Kubernetes experiment.
 
@@ -36,6 +37,7 @@ func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 	return cmd
 }
 
+// initialize with k log cmd
 func init() {
 	kCmd.AddCommand(newKLogCmd(kd))
 }

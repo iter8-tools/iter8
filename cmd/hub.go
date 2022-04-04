@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// hubDesc is the description of the hub command
 const hubDesc = `
 Download an experiment chart to a local directory.
 
@@ -36,6 +37,7 @@ func addGitFolderFlag(cmd *cobra.Command, gitFolderPtr *string) {
 	cmd.Flags().StringVar(gitFolderPtr, "gitFolder", ia.DefaultGitFolder, "Git folder containing iter8 charts")
 }
 
+// initialize with the hub command
 func init() {
 	rootCmd.AddCommand(newHubCmd())
 }

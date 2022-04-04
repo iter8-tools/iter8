@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// kRunDesc is the description of the k run command
 const kRunDesc = `
 Run a Kubernetes experiment. This command reads an experiment specified in a secret and writes the result to another secret.
 
@@ -38,6 +39,7 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	return cmd
 }
 
+// initialize with k run cmd
 func init() {
 	kCmd.AddCommand(newKRunCmd(kd, os.Stdout))
 }

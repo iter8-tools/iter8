@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// versionDesc is the description of the version command
 var versionDesc = `
 Print the version of Iter8 CLI.
 
@@ -94,6 +95,7 @@ func addShortFlag(cmd *cobra.Command, shortPtr *bool) {
 	cmd.Flags().Lookup("short").NoOptDefVal = "true"
 }
 
+// initialize with version cmd
 func init() {
 	vCmd := newVersionCmd()
 	rootCmd.AddCommand(vCmd)

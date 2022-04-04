@@ -8,24 +8,25 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// Reporter is a type that supports methods used for text and html reporting.
+// Reporter implements methods that are common to text and HTML reporting.
 type Reporter struct {
-	// Experiment enables access to all experiment data and methods
+	// Experiment enables access to all base.Experiment data and methods
 	*base.Experiment
 }
 
-/* Following functions/methods are common to both text and html templates */
-
 // SortedScalarAndSLOMetrics extracts and sorts metric names from experiment.
-// It looks for available metrics in the results, and also for metrics specified in SLOs.
+// It looks for scalar metrics referenced in the MetricsInfo section,
+// and also for scalar metrics referenced in SLOs.
 func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 	keys := []string{}
+	// add scalar metrics referenced in MetricsInfo
 	for k, mm := range r.Result.Insights.MetricsInfo {
 		if mm.Type == base.CounterMetricType || mm.Type == base.GaugeMetricType {
 			keys = append(keys, k)
 		}
 	}
-	// also add SLO metric names
+	// also add metrics referenced in SLOs
+	// only scalar metrics can feature in SLOs (for now)
 	for _, v := range r.Result.Insights.SLOs {
 		nm, err := base.NormalizeMetricName(v.Metric)
 		if err == nil {
@@ -38,12 +39,13 @@ func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 	for _, val := range tmp {
 		uniqKeys = append(uniqKeys, val.(string))
 	}
-
+	// return sorted metrics
 	sort.Strings(uniqKeys)
 	return uniqKeys
 }
 
-// ScalarMetricValueStr extracts the metric value string for the given version and given scalar metric name
+// ScalarMetricValueStr extracts value of a scalar metric (mn) for the given app version (j)
+// Value is converted to string so that it can be printed in text and HTML reports.
 func (r *Reporter) ScalarMetricValueStr(j int, mn string) string {
 	val := r.Result.Insights.ScalarMetricValue(j, mn)
 	if val != nil {
@@ -53,7 +55,7 @@ func (r *Reporter) ScalarMetricValueStr(j int, mn string) string {
 	}
 }
 
-// MetricWithUnits provides the string representation of metric name and with units
+// MetricWithUnits provides the string representation of a metric name with units
 func (r *Reporter) MetricWithUnits(metricName string) (string, error) {
 	in := r.Result.Insights
 	nm, err := base.NormalizeMetricName(metricName)

@@ -1,2 +1,2 @@
-// Package log enables logging for all packages in this module.
+// Package log enables logging for Iter8.
 package log

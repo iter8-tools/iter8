@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// runDesc is the description of the run command
 var runDesc = `
 Run an experiment specified in experiment.yaml output result to result.yaml.
 
@@ -39,6 +40,7 @@ func addRunDirFlag(cmd *cobra.Command, runDirPtr *string) {
 	cmd.Flags().StringVar(runDirPtr, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
 }
 
+// initialize with run cmd
 func init() {
 	rootCmd.AddCommand(newRunCmd(kd, os.Stdout))
 }
