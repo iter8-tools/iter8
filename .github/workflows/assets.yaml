@@ -1,12 +1,12 @@
-name: Publish binaries and brew formula
+name: Publish binaries, Brew formula, and Docker image
 
 on:
   release:
     types: [published]
 
 jobs:
-  binwchecksum:
-    name: Publish binaries
+  assets:
+    name: Publish binaries and Brew formula
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
@@ -58,3 +58,37 @@ jobs:
         repository: iter8-tools/homebrew-iter8
         event-type: release
         client-payload: '{"ref": "${{ env.VERSION }}", "sha": "${{ github.sha }}", "shaformac": "${{ env.SHAFORMAC }}"}'
+
+  # Push Iter8 image to dockerhub
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: assets
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Get version
+      run: |
+        tagref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        # Strip "v" prefix from tagref
+        echo "VERSION=$(echo $tagref | sed -e 's/^v//')" >> $GITHUB_ENV
+        echo "MAJOR_MINOR_VERSION=$(echo $tagref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
+    - name: Get owner
+      run: |
+        ownerrepo=${{ github.repository }}
+        owner=$(echo $ownerrepo | cut -f1 -d/)
+        if [[ "$owner" == "iter8-tools" ]]; then
+          owner=iter8
+        fi
+        echo "OWNER=$owner" >> $GITHUB_ENV
+    - uses: docker/setup-buildx-action@v1
+    - uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_SECRET }}
+    - uses: docker/build-push-action@v2
+      with:
+        tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest
+        push: true
+        build-args: |
+          TAG=v${{ env.VERSION }}
