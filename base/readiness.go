@@ -1,7 +1,6 @@
 package base
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,16 +10,9 @@ import (
 	log "github.com/iter8-tools/iter8/base/log"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/discovery"
-	memory "k8s.io/client-go/discovery/cached"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/util/retry"
 )
 
@@ -98,7 +90,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 	// if err != nil {
 	// 	return err
 	// }
-	restConfig, err := kd.MyEnvSettings.RESTClientGetter().ToRESTConfig()
+	restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
 	if err != nil {
 		return err
 	}
@@ -147,13 +139,12 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 	log.Logger.Trace("looking for object ", t.With.Kind, "/", t.With.Name, " in namespace ", *t.With.Namespace)
 
 	// get object from cluster
-	obj, err := getObject(
+	obj, err := kd.GetObjectFunc(kd,
 		&corev1.ObjectReference{
 			Kind:      t.With.Kind,
 			Name:      t.With.Name,
 			Namespace: *t.With.Namespace,
 		},
-		restCfg,
 	)
 	if err != nil {
 		return err
@@ -177,97 +168,6 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 	return errors.New("condition status not True")
 }
 
-// getObject finds the object referenced by objRef using the client config restConfig
-// uses the dynamic client; ie, retuns an unstructured object
-// based on https://ymmt2005.hatenablog.com/entry/2020/04/14/An_example_of_using_dynamic_client_of_k8s.io/client-go
-func getObject(objRef *corev1.ObjectReference, restConfig *rest.Config) (*unstructured.Unstructured, error) {
-	// // 1. Prepare a RESTMapper to find GVR
-	// dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-
-	// // 2. Prepare the dynamic client
-	// dyn, err := dynamic.NewForConfig(restConfig)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	gvk := schema.FromAPIVersionAndKind(objRef.APIVersion, objRef.Kind)
-
-	// 3. Find GVR
-	mapping, err := kd.Mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-	if err != nil {
-		return nil, err
-	}
-
-	// 4. Obtain REST interface for the GVR
-	namespace := objRef.Namespace // recall that we always set this
-	var dr dynamic.ResourceInterface
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		// namespaced resources should specify the namespace
-		dr = kd.DynamicClient.Resource(mapping.Resource).Namespace(namespace)
-	} else {
-		// for cluster-wide resources
-		dr = kd.DynamicClient.Resource(mapping.Resource)
-	}
-
-	obj, err := dr.Get(context.Background(), objRef.Name, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return obj, nil
-}
-
-// getObjectOld finds the object referenced by objRef using the client config restConfig
-// uses the dynamic client; ie, retuns an unstructured object
-// based on https://ymmt2005.hatenablog.com/entry/2020/04/14/An_example_of_using_dynamic_client_of_k8s.io/client-go
-func getObjectOld(objRef *corev1.ObjectReference, restConfig *rest.Config) (*unstructured.Unstructured, error) {
-	// dr, err := getDynamicResourceInterface(restConfig, objRef, objRef.Namespace)
-	// 1. Prepare a RESTMapper to find GVR
-	dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
-	if err != nil {
-		return nil, err
-	}
-	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-
-	// 2. Prepare the dynamic client
-	dyn, err := dynamic.NewForConfig(restConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	gvk := schema.FromAPIVersionAndKind(objRef.APIVersion, objRef.Kind)
-
-	// 3. Find GVR
-	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-	if err != nil {
-		return nil, err
-	}
-
-	// 4. Obtain REST interface for the GVR
-	namespace := objRef.Namespace // recall that we always set this
-	var dr dynamic.ResourceInterface
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		// namespaced resources should specify the namespace
-		dr = dyn.Resource(mapping.Resource).Namespace(namespace)
-	} else {
-		// for cluster-wide resources
-		dr = dyn.Resource(mapping.Resource)
-	}
-
-	obj, err := dr.Get(context.Background(), objRef.Name, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return obj, nil
-}
-
-// getCondition looks for a condition with type conditionType
-// This works for objects that follow the recommendation
 func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*string, error) {
 	if obj == nil {
 		return nil, errors.New("no object")
