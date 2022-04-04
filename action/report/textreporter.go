@@ -16,7 +16,7 @@ import (
 
 // TextReporter supports generation of text reports from experiments.
 type TextReporter struct {
-	// Reporter enables access to all reporter data and methods
+	// Reporter is embedded and enables access to all reporter data and methods
 	*Reporter
 }
 
@@ -24,7 +24,7 @@ type TextReporter struct {
 //go:embed textreport.tpl
 var reportText string
 
-// Gen creates a text report for a given experiment
+// Gen writes the text report for a given experiment into the given writer
 func (tr *TextReporter) Gen(out io.Writer) error {
 	// create text template
 	ttpl, err := textT.New("report").Option("missingkey=error").Funcs(sprig.TxtFuncMap()).Parse(reportText)
@@ -46,7 +46,7 @@ func (tr *TextReporter) Gen(out io.Writer) error {
 	return nil
 }
 
-// PrintSLOsText returns SLOs in text report format
+// PrintSLOsText returns SLOs section of the text report as a string
 func (r *TextReporter) PrintSLOsText() string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)
@@ -75,7 +75,7 @@ func (r *TextReporter) getSLOStrText(i int) (string, error) {
 	return str, nil
 }
 
-// printSLOsText prints SLOs into tab writer
+// printSLOsText prints all SLOs into tab writer
 func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 	in := r.Result.Insights
 	fmt.Fprint(w, "SLO Conditions")
@@ -105,7 +105,7 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 	w.Flush()
 }
 
-// PrintMetricsText returns metrics in text report format
+// PrintMetricsText returns metrics section of the text report as a string
 func (r *TextReporter) PrintMetricsText() string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)

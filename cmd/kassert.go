@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// kAssertDesc is the description of the k assert cmd
 const kAssertDesc = `
 Assert if the result of a Kubernetes experiment satisfies a given set of conditions. If all conditions are satisfied, the command exits with code 0. Else, the command exits with code 1. 
 
@@ -56,6 +57,7 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	return cmd
 }
 
+// initialize with k assert cmd
 func init() {
 	kCmd.AddCommand(newKAssertCmd(kd))
 }

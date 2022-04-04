@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// assertDesc is the description of assert cmd
 const assertDesc = `
 Assert if the result of an experiment satisfies a given set of conditions. If all conditions are satisfied, the command exits with code 0. Else, the command exits with code 1. 
 
@@ -55,7 +56,7 @@ func newAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	return cmd
 }
 
-// addConditionFlag adds the condition flag to the assert command
+// addConditionFlag adds the condition flag to command
 func addConditionFlag(cmd *cobra.Command, conditionPtr *[]string) {
 	cmd.Flags().StringSliceVarP(conditionPtr, "condition", "c", nil, fmt.Sprintf("%v | %v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure, ia.SLOs))
 	cmd.MarkFlagRequired("condition")
@@ -66,6 +67,7 @@ func addTimeoutFlag(cmd *cobra.Command, timeoutPtr *time.Duration) {
 	cmd.Flags().DurationVar(timeoutPtr, "timeout", 0, "timeout duration (e.g., 5s)")
 }
 
+// initialize with assert
 func init() {
 	rootCmd.AddCommand(newAssertCmd(kd))
 }

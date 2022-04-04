@@ -15,9 +15,13 @@ import (
 )
 
 var (
-	logLevel            = "info"
-	settings            = cli.New()
-	kd                  = driver.NewKubeDriver(settings)
+	// default log level for Iter8 CLI
+	logLevel = "info"
+	// Default Helm and Kubernetes settings
+	settings = cli.New()
+	// Kuberdriver used by Helm and Kubernetes clients
+	kd = driver.NewKubeDriver(settings)
+	// output stream where log messages are printed
 	outStream io.Writer = os.Stdout
 )
 
@@ -45,6 +49,7 @@ func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
 
+// initialize Iter8 CLI root command
 func init() {
 	// disable completion command for now
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
