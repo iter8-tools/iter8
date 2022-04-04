@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// reportDesc is the description of the report cmd
 const reportDesc = `
 Generate a text or HTML report of an experiment.
 
@@ -40,6 +41,7 @@ func addOutputFormatFlag(cmd *cobra.Command, outputFormat *string) {
 	cmd.Flags().StringVarP(outputFormat, "outputFormat", "o", "text", "text | html")
 }
 
+// initialize with the report cmd
 func init() {
 	rootCmd.AddCommand(newReportCmd(kd))
 }

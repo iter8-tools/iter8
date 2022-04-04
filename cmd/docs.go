@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// docsDesc is the description for the docs command
 const docsDesc = `
 Generate markdown documentation for Iter8 CLI commands. Documentation will be generated for all commands that are not hidden.
 
@@ -57,6 +58,7 @@ func addDocsFlags(cmd *cobra.Command, docsDirPtr *string) {
 	cmd.MarkFlagRequired("commandDocsDir")
 }
 
+// initialize with docs command
 func init() {
 	rootCmd.AddCommand(newDocsCmd())
 }

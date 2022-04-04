@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// kLaunchDesc is the description of the k launch cmd
 const kLaunchDesc = `
 Launch an experiment in Kubernetes. 
 
@@ -55,6 +56,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	return cmd
 }
 
+// initialize with the k launch cmd
 func init() {
 	kCmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
 }

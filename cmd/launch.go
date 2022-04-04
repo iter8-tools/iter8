@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// launchDesc is the description of the launch command
 const launchDesc = `
 Launch an experiment. 
 
@@ -60,6 +61,7 @@ func addNoDownloadFlag(cmd *cobra.Command, noDownloadPtr *bool) {
 	cmd.Flags().Lookup("noDownload").NoOptDefVal = "true"
 }
 
+// initialize with the launch cmd
 func init() {
 	rootCmd.AddCommand(newLaunchCmd(kd))
 }

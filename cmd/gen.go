@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// genDesc is the description for the gen command
 const genDesc = `
 Generate an experiment.yaml file by combining an experiment chart with values.
 
@@ -33,17 +34,18 @@ func newGenCmd() *cobra.Command {
 	return cmd
 }
 
-// addChartsParentDirFlag
+// addChartsParentDirFlag to the command
 func addChartsParentDirFlag(cmd *cobra.Command, chartsParentDirPtr *string) {
 	cmd.Flags().StringVar(chartsParentDirPtr, "chartsParentDir", ".", "path to experiment chart directory")
 }
 
-// addChartNameFlag
+// addChartNameFlag to the command
 func addChartNameFlag(cmd *cobra.Command, chartNamePtr *string) {
 	cmd.Flags().StringVarP(chartNamePtr, "chartName", "c", "", "path to experiment chart directory")
 	cmd.MarkFlagRequired("chartName")
 }
 
+// initialize with gen command
 func init() {
 	rootCmd.AddCommand(newGenCmd())
 }

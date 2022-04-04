@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// kReportDesc is the description of the k report cmd
 const kReportDesc = `
 Generate a text or HTML report of a Kubernetes experiment.
 
@@ -39,6 +40,7 @@ func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	return cmd
 }
 
+// initialize with the k report cmd
 func init() {
 	kCmd.AddCommand(newKReportCmd(kd))
 }
