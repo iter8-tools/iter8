@@ -77,19 +77,6 @@ func (t *readinessTask) run(exp *Experiment) error {
 
 	kd.initKube()
 
-	// get kubeconfig from whatever is available
-	// works if in cluster or out of cluster
-	// kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-	// 	clientcmd.NewDefaultClientConfigLoadingRules(),
-	// 	&clientcmd.ConfigOverrides{},
-	// )
-	// kubeconfig := kd.kubeconfig
-
-	// // get client config (*rest.Config)
-	// restConfig, err := kubeconfig.ClientConfig()
-	// if err != nil {
-	// 	return err
-	// }
 	restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
 	if err != nil {
 		return err
@@ -193,7 +180,7 @@ func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*
 
 	conditionsInterface, ok := objStatus["conditions"]
 	if !ok {
-		return nil, errors.New("object status does not contain coditions")
+		return nil, errors.New("object status does not contain conditions")
 	}
 	conditions := conditionsInterface.([]interface{})
 	for _, conditionInterface := range conditions {
