@@ -8,7 +8,7 @@ import (
 
 	// "io"
 	"strings"
-	"time"
+	// "time"
 
 	// Import to initialize client auth plugins.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -33,12 +33,12 @@ import (
 	"k8s.io/client-go/restmapper"
 )
 
-const (
-	// maxGetRetries is the number of tries to retry while fetching Kubernetes objects
-	maxGetRetries = 2
-	// getRetryInterval is the duration between retrials
-	getRetryInterval = 1 * time.Second
-)
+// const (
+// 	// maxGetRetries is the number of tries to retry while fetching Kubernetes objects
+// 	maxGetRetries = 2
+// 	// getRetryInterval is the duration between retrials
+// 	getRetryInterval = 1 * time.Second
+// )
 
 // KubeDriver embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
@@ -160,10 +160,10 @@ func (driver *KubeDriver) Init() error {
 	return nil
 }
 
-// getSpecSecretName yields the name of the experiment spec secret
-func (driver *KubeDriver) getSpecSecretName() string {
-	return fmt.Sprintf("%v-%v-spec", driver.Group, driver.Revision)
-}
+// // getSpecSecretName yields the name of the experiment spec secret
+// func (driver *KubeDriver) getSpecSecretName() string {
+// 	return fmt.Sprintf("%v-%v-spec", driver.Group, driver.Revision)
+// }
 
 // // getResultSecretName yields the name of the experiment result secret
 // func (driver *KubeDriver) getResultSecretName() string {
