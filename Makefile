@@ -3,6 +3,7 @@ INSTALL_PATH ?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
 TARGETS     := darwin/amd64 linux/amd64 linux/386 windows/amd64
 BINNAME     ?= iter8
+ITER8_IMG ?= iter8/iter8:edge
 
 GOBIN         = $(shell go env GOBIN)
 ifeq ($(GOBIN),)
@@ -82,6 +83,17 @@ dist: build-cross
 .PHONY: clean
 clean:
 	@rm -rf '$(BINDIR)' ./_dist
+
+# ------------------------------------------------------------------------------
+#	 Docker
+
+.PHONY: docker-build
+ docker-build:
+ 	docker build -f Dockerfile -t $(ITER8_IMG) .
+
+ .PHONY: docker-push
+ docker-push:
+ 	docker push $(ITER8_IMG)
 
 # ------------------------------------------------------------------------------
 #  test
