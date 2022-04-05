@@ -1,7 +1,6 @@
 package base
 
 import (
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -10,28 +9,11 @@ import (
 	gd "github.com/mcuadros/go-defaults"
 )
 
-/*
-Credit: The inputs for this task, including their JSON/YAML tags and go doc comments are derived from https://github.com/bojand/ghz.
-*/
-
-// versionGRPC contains call and host information needed to send gRPC requests to each version.
-// this struct holds inputs that is specific to each version
-type versionGRPC struct {
-	// Call A fully-qualified method name in 'package.Service/method' or 'package.Service.Method' format.
-	Call string `json:"call" yaml:"call"`
-	// Host gRPC host in the hostname[:port] format.
-	Host string `json:"host" yaml:"host"`
-}
-
-// collectGRPCInputs holds all the inputs for this task
-type collectGRPCInputs struct {
-	// even though runner.Config is embedded,
-	// many of the fields in runner.Config will not be supported.
-	// Refer to iter8.tools documentation for supported fields.
-	runner.Config
-	// VersionInfo is a non-empty list of versionGRPC values.
-	VersionInfo []*versionGRPC `json:"versionInfo" yaml:"versionInfo"`
-}
+// // collectGRPCInputs holds all the inputs for this task
+// type collectGRPCInputs struct {
+// 	// Config is the ghz runner.Config object embedded in the input
+// 	runner.Config
+// }
 
 const (
 	// CollectGRPCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
@@ -57,23 +39,23 @@ type collectGRPCTask struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
 	// With contains the inputs to this task
-	With collectGRPCInputs `json:"with" yaml:"with"`
+	With runner.Config `json:"with" yaml:"with"`
 }
 
 // initializeDefaults sets default values for the collect task
 func (t *collectGRPCTask) initializeDefaults() {
 	// set defaults
-	gd.SetDefaults(&t.With.Config)
+	gd.SetDefaults(&t.With)
 	// if dial timeout is zero, then set a default...
 	if t.With.DialTimeout == 0 {
 		td, _ := time.ParseDuration("10s")
 		t.With.DialTimeout = runner.Duration(td)
 	}
 	// always count errors
-	t.With.Config.CountErrors = countErrorsDefault
+	t.With.CountErrors = countErrorsDefault
 	// todo: document how to use security credentials
 	// remove this default altogether after enabling secure
-	t.With.Config.Insecure = insecureDefault
+	t.With.Insecure = insecureDefault
 }
 
 // validate task inputs
@@ -81,29 +63,14 @@ func (t *collectGRPCTask) validateInputs() error {
 	return nil
 }
 
-// getGhzConfig constructs ghz's runner.Config for version j based on task inputs
-func (t *collectGRPCTask) getGhzConfig(j int) (*runner.Config, error) {
-	ghzc := t.With.Config
-	ghzc.Call = t.With.VersionInfo[j].Call
-	ghzc.Host = t.With.VersionInfo[j].Host
-
-	return &ghzc, nil
-}
-
 // resultForVersion collects gRPC test result for a given version
-func (t *collectGRPCTask) resultForVersion(j int) (*runner.Report, error) {
+func (t *collectGRPCTask) resultForVersion() (*runner.Report, error) {
 	// the main idea is to run ghz with proper options
-	ghzc, err := t.getGhzConfig(j)
-	if err != nil {
-		return nil, err
-	}
-	ghzcBytes, _ := json.MarshalIndent(ghzc, "", "	")
-	log.Logger.WithStackTrace(string(ghzcBytes)).Trace("runner config")
 
-	opts := runner.WithConfig(ghzc)
+	opts := runner.WithConfig(&t.With)
 
 	// todo: supply all the allowed options
-	igr, err := runner.Run(t.With.VersionInfo[j].Call, t.With.VersionInfo[j].Host, opts)
+	igr, err := runner.Run(t.With.Call, t.With.Host, opts)
 	if err != nil {
 		e := errors.New("ghz run failed")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -139,96 +106,70 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 
 	t.initializeDefaults()
 
-	// 2. validate input (without going crazy in terms of rules)
-	// idea is to check for the most obvious errors here
-	// validation also happens at the chart/values level
-	if len(t.With.VersionInfo) == 0 {
-		log.Logger.Error("collect task must specify info for at least one version")
-		return errors.New("collect task must specify info for at least one version")
-	}
+	// 2. collect raw results from ghz
 
-	// 3. collect raw results from ghz for each version
-
-	// initialize a slice to hold reports from the ghz tests
-	gr := make([]*runner.Report, len(t.With.VersionInfo))
-
-	// run ghz test for each version sequentially
-	// collect ghz report for each version
+	// run ghz test
+	// collect ghz report
 	// ghz reports will be further processed to populate metrics
-	for j := range t.With.VersionInfo {
-		log.Logger.Trace("initiating ghz for version ", j)
-		var data *runner.Report
-		var err error
-		if t.With.VersionInfo[j] == nil { // nothing to do for this version
-			data = nil
-		} else {
-			// this is where we get the raw ghz data for version j
-			data, err = t.resultForVersion(j)
-			if err == nil {
-				gr[j] = data
-			} else {
-				return err
-			}
-		}
+	data, err := t.resultForVersion()
+	if err != nil {
+		return err
 	}
 
-	// 4. The inputs for this task determine the number of versions participating in the experiment.
-	// Hence, init insights with num versions
-	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
+	// 3. Init insights with num versions: always 1 in this task
+	err = exp.Result.initInsightsWithNumVersions(1)
 	if err != nil {
 		return err
 	}
 	in := exp.Result.Insights
 
-	// 5. Populate all metrics collected by this task
-	for i := range t.With.VersionInfo { // for each version
-		if gr[i] != nil { // assuming there is some raw ghz result to process for this version
-			// populate grpc request count
-			// todo: this logic breaks for looped experiments. Fix when we get to loops.
-			m := gRPCMetricPrefix + "/" + gRPCRequestCountMetricName
-			mm := MetricMeta{
-				Description: "number of gRPC requests sent",
-				Type:        CounterMetricType,
-			}
-			in.updateMetric(m, mm, i, float64(gr[i].Count))
-
-			// populate error count & rate
-			ec := float64(0)
-			for _, count := range gr[i].ErrorDist {
-				ec += float64(count)
-			}
-
-			// populate count
-			// todo: This logic breaks for looped experiments. Fix when we get to loops.
-			m = gRPCMetricPrefix + "/" + gRPCErrorCountMetricName
-			mm = MetricMeta{
-				Description: "number of responses that were errors",
-				Type:        CounterMetricType,
-			}
-			in.updateMetric(m, mm, i, ec)
-
-			// populate rate
-			// todo: This logic breaks for looped experiments. Fix when we get to loops.
-			m = gRPCMetricPrefix + "/" + gRPCErrorRateMetricName
-			rc := float64(gr[i].Count)
-			if rc != 0 {
-				mm = MetricMeta{
-					Description: "fraction of responses that were errors",
-					Type:        GaugeMetricType,
-				}
-				in.updateMetric(m, mm, i, ec/rc)
-			}
-
-			// populate latency sample
-			m = gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName
-			mm = MetricMeta{
-				Description: "gRPC Latency Sample",
-				Type:        SampleMetricType,
-				Units:       StringPointer("msec"),
-			}
-			lh := latencySample(gr[i].Details)
-			in.updateMetric(m, mm, i, lh)
+	// 4. Populate all metrics collected by this task
+	if data != nil { // assuming there is some raw ghz result to process
+		// populate grpc request count
+		// todo: this logic breaks for looped experiments. Fix when we get to loops.
+		m := gRPCMetricPrefix + "/" + gRPCRequestCountMetricName
+		mm := MetricMeta{
+			Description: "number of gRPC requests sent",
+			Type:        CounterMetricType,
 		}
+		in.updateMetric(m, mm, 0, float64(data.Count))
+
+		// populate error count & rate
+		ec := float64(0)
+		for _, count := range data.ErrorDist {
+			ec += float64(count)
+		}
+
+		// populate count
+		// todo: This logic breaks for looped experiments. Fix when we get to loops.
+		m = gRPCMetricPrefix + "/" + gRPCErrorCountMetricName
+		mm = MetricMeta{
+			Description: "number of responses that were errors",
+			Type:        CounterMetricType,
+		}
+		in.updateMetric(m, mm, 0, ec)
+
+		// populate rate
+		// todo: This logic breaks for looped experiments. Fix when we get to loops.
+		m = gRPCMetricPrefix + "/" + gRPCErrorRateMetricName
+		rc := float64(data.Count)
+		if rc != 0 {
+			mm = MetricMeta{
+				Description: "fraction of responses that were errors",
+				Type:        GaugeMetricType,
+			}
+			in.updateMetric(m, mm, 0, ec/rc)
+		}
+
+		// populate latency sample
+		m = gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName
+		mm = MetricMeta{
+			Description: "gRPC Latency Sample",
+			Type:        SampleMetricType,
+			Units:       StringPointer("msec"),
+		}
+		lh := latencySample(data.Details)
+		in.updateMetric(m, mm, 0, lh)
 	}
 	return nil
 }

@@ -130,7 +130,7 @@ type taskMetaWith struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
 	// With is the raw representation of task inputs
-	With interface{} `json:"with,omitempty" yaml:"with,omitempty"`
+	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
 // UnmarshallJSON will unmarshal an experiment spec from bytes
@@ -164,15 +164,30 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 			switch *t.Task {
 			case CollectHTTPTaskName:
 				cht := &collectHTTPTask{}
-				json.Unmarshal(tBytes, cht)
+				err := json.Unmarshal(tBytes, cht)
+				if err != nil {
+					e := errors.New("json unmarshal error")
+					log.Logger.WithStackTrace(err.Error()).Error(e)
+					return e
+				}
 				tsk = cht
 			case CollectGRPCTaskName:
 				cgt := &collectGRPCTask{}
-				json.Unmarshal(tBytes, cgt)
+				err := json.Unmarshal(tBytes, cgt)
+				if err != nil {
+					e := errors.New("json unmarshal error")
+					log.Logger.WithStackTrace(err.Error()).Error(e)
+					return e
+				}
 				tsk = cgt
 			case AssessTaskName:
 				at := &assessTask{}
-				json.Unmarshal(tBytes, at)
+				err := json.Unmarshal(tBytes, at)
+				if err != nil {
+					e := errors.New("json unmarshal error")
+					log.Logger.WithStackTrace(err.Error()).Error(e)
+					return e
+				}
 				tsk = at
 			default:
 				log.Logger.Error("unknown task: " + *t.Task)
