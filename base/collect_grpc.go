@@ -62,15 +62,8 @@ type collectGRPCTask struct {
 
 // initializeDefaults sets default values for the collect task
 func (t *collectGRPCTask) initializeDefaults() {
-	ghzcBytes, _ := json.MarshalIndent(t.With.Config, "", "	")
-	log.Logger.WithStackTrace(string(ghzcBytes)).Trace("runner config before defaulting")
-
 	// set defaults
 	gd.SetDefaults(&t.With.Config)
-
-	ghzcBytes, _ = json.MarshalIndent(t.With.Config, "", "	")
-	log.Logger.WithStackTrace(string(ghzcBytes)).Trace("runner config after defaulting")
-
 	// if dial timeout is zero, then set a default...
 	if t.With.DialTimeout == 0 {
 		td, _ := time.ParseDuration("10s")
