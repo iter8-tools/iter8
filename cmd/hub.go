@@ -34,7 +34,7 @@ func newHubCmd() *cobra.Command {
 
 // addGitFolderFlag
 func addGitFolderFlag(cmd *cobra.Command, gitFolderPtr *string) {
-	cmd.Flags().StringVar(gitFolderPtr, "gitFolder", ia.DefaultGitFolder, "Git folder containing iter8 charts")
+	cmd.Flags().StringVar(gitFolderPtr, "gitFolder", ia.DefaultGitFolder(), "Git folder containing iter8 charts")
 }
 
 // initialize with the hub command

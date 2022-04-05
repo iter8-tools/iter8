@@ -16,7 +16,7 @@ Print the version of Iter8 CLI.
 
 The output may look as follows:
 
-	$ version.BuildInfo{Version:"v0.8.32", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GoVersion:"go1.17.6"}
+	$ version.BuildInfo{Version:"v0.10.1", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GoVersion:"go1.17.6"}
 
 In the sample output shown above:
 
@@ -26,8 +26,6 @@ In the sample output shown above:
 `
 
 var (
-	// metadata is extra build time data
-	metadata = ""
 	// gitCommit is the git sha1
 	gitCommit = ""
 )
@@ -59,7 +57,7 @@ func newVersionCmd() *cobra.Command {
 					fmt.Println()
 					return nil
 				}
-				fmt.Println(getVersion())
+				fmt.Println(base.Version)
 				return nil
 			}
 			fmt.Printf("%#v", v)
@@ -71,18 +69,10 @@ func newVersionCmd() *cobra.Command {
 	return cmd
 }
 
-// getVersion returns the semver string of the version
-func getVersion() string {
-	if metadata == "" {
-		return base.Version
-	}
-	return base.Version + "+" + metadata
-}
-
 // get returns build info
 func getBuildInfo() BuildInfo {
 	v := BuildInfo{
-		Version:   getVersion(),
+		Version:   base.Version,
 		GitCommit: gitCommit,
 		GoVersion: runtime.Version(),
 	}

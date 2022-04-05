@@ -2,13 +2,14 @@ package action
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/hashicorp/go-getter"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-var DefaultGitFolder = "github.com/iter8-tools/iter8.git?ref=" + base.Version + "//" + chartsFolderName
+const defaultIter8Repo = "github.com/iter8-tools/iter8.git"
 
 // HubOpts are the options used for downloading Iter8 experiment charts
 type HubOpts struct {
@@ -18,11 +19,18 @@ type HubOpts struct {
 	ChartsDir string
 }
 
+func DefaultGitFolder() string {
+	// parse version
+	v := strings.Split(base.Version, "-")
+	ref := v[0]
+	return defaultIter8Repo + "?ref=" + ref + "//" + chartsFolderName
+}
+
 // NewHubOpts initializes and returns hub opts
 func NewHubOpts() *HubOpts {
 
 	return &HubOpts{
-		GitFolder: DefaultGitFolder,
+		GitFolder: DefaultGitFolder(),
 		ChartsDir: chartsFolderName,
 	}
 }

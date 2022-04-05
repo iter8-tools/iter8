@@ -33,7 +33,7 @@ type LaunchOpts struct {
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	return &LaunchOpts{
 		DryRun:          false,
-		GitFolder:       DefaultGitFolder,
+		GitFolder:       DefaultGitFolder(),
 		ChartsParentDir: ".",
 		NoDownload:      false,
 		ChartName:       "",
