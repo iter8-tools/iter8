@@ -3,7 +3,6 @@ INSTALL_PATH ?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
 TARGETS     := darwin/amd64 linux/amd64 linux/386 windows/amd64
 BINNAME     ?= iter8
-ITER8_IMG ?= iter8/iter8:latest
 
 GOBIN         = $(shell go env GOBIN)
 ifeq ($(GOBIN),)
@@ -30,18 +29,12 @@ ifdef VERSION
 endif
 BINARY_VERSION ?= ${GIT_TAG}
 
-# Only set Version if building a tag or VERSION is set
+# Only set Version if GIT_TAG or VERSION is set
 ifneq ($(BINARY_VERSION),)
 	LDFLAGS += -X github.com/iter8-tools/iter8/base.Version=${BINARY_VERSION}
 endif
 
-VERSION_METADATA = unreleased
-# Clear the "unreleased" string in BuildMetadata
-ifneq ($(GIT_TAG),)
-	VERSION_METADATA=
-endif
 
-LDFLAGS += -X github.com/iter8-tools/iter8/cmd.metadata=${VERSION_METADATA}
 LDFLAGS += -X github.com/iter8-tools/iter8/cmd.gitCommit=${GIT_COMMIT}
 
 .PHONY: all
@@ -89,14 +82,6 @@ dist: build-cross
 .PHONY: clean
 clean:
 	@rm -rf '$(BINDIR)' ./_dist
-
-.PHONY: docker-build
-docker-build:
-	docker build -f Dockerfile -t $(ITER8_IMG) .
-
-.PHONY: docker-push
-docker-push:
-	docker push $(ITER8_IMG)
 
 # ------------------------------------------------------------------------------
 #  test

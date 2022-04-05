@@ -26,8 +26,6 @@ In the sample output shown above:
 `
 
 var (
-	// metadata is extra build time data
-	metadata = ""
 	// gitCommit is the git sha1
 	gitCommit = ""
 )
@@ -59,7 +57,7 @@ func newVersionCmd() *cobra.Command {
 					fmt.Println()
 					return nil
 				}
-				fmt.Println(getVersion())
+				fmt.Println(base.Version)
 				return nil
 			}
 			fmt.Printf("%#v", v)
@@ -71,18 +69,10 @@ func newVersionCmd() *cobra.Command {
 	return cmd
 }
 
-// getVersion returns the semver string of the version
-func getVersion() string {
-	if metadata == "" {
-		return base.Version
-	}
-	return base.Version + "+" + metadata
-}
-
 // get returns build info
 func getBuildInfo() BuildInfo {
 	v := BuildInfo{
-		Version:   getVersion(),
+		Version:   base.Version,
 		GitCommit: gitCommit,
 		GoVersion: runtime.Version(),
 	}
