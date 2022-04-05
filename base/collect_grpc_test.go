@@ -26,14 +26,10 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: collectGRPCInputs{
-			Config: runner.Config{
-				Data: map[string]interface{}{"name": "bob"},
-			},
-			VersionInfo: []*versionGRPC{{
-				Call: "helloworld.Greeter.SayHello",
-				Host: internal.TestLocalhost,
-			}},
+		With: runner.Config{
+			Data: map[string]interface{}{"name": "bob"},
+			Call: "helloworld.Greeter.SayHello",
+			Host: internal.TestLocalhost,
 		},
 	}
 
@@ -84,19 +80,15 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: collectGRPCInputs{
-			Config: runner.Config{
-				N:           100,
-				RPS:         20,
-				C:           1,
-				Timeout:     runner.Duration(20 * time.Second),
-				Data:        map[string]interface{}{"name": "bob"},
-				DialTimeout: runner.Duration(20 * time.Second),
-			},
-			VersionInfo: []*versionGRPC{{
-				Call: "helloworld.Greeter.SayHello",
-				Host: internal.TestLocalhost,
-			}},
+		With: runner.Config{
+			N:           100,
+			RPS:         20,
+			C:           1,
+			Timeout:     runner.Duration(20 * time.Second),
+			Data:        map[string]interface{}{"name": "bob"},
+			DialTimeout: runner.Duration(20 * time.Second),
+			Call:        "helloworld.Greeter.SayHello",
+			Host:        internal.TestLocalhost,
 		},
 	}
 
@@ -150,5 +142,4 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, int(ct.With.N), count)
-
 }

@@ -27,7 +27,7 @@ func TestGenGRPC(t *testing.T) {
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
 	gOpts.ChartName = "load-test-grpc"
-	gOpts.Values = []string{"host=localhost:50051", "call=helloworld.Greeter.SayHello", "proto=helloworld.proto", "data.name=frodo", "SLOs.grpc/error-rate=0", "grpc/latency/mean=150"}
+	gOpts.Values = []string{"host=localhost:50051", "call=helloworld.Greeter.SayHello", "proto=helloworld.proto", "protoset=helloworld.protoset", "data.name=frodo", "SLOs.grpc/error-rate=0", "SLOs.grpc/latency/mean=150"}
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)
 
@@ -44,4 +44,5 @@ func TestGenGRPC(t *testing.T) {
 	m = m["with"].(map[string]interface{})
 	s := m["proto"].(string)
 	assert.Equal(t, "helloworld.proto", s)
+
 }
