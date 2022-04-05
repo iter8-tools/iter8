@@ -13,10 +13,8 @@ import (
 )
 
 func TestNoCondition(t *testing.T) {
-
 	// fake kube cluster
 	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	// kd.Revision = 1
 	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-pod",
@@ -55,7 +53,6 @@ func TestConditionPresent(t *testing.T) {
 
 	// fake kube cluster
 	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	// kd.Revision = 1
 	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-pod",
@@ -101,7 +98,6 @@ func TestConditionNotPresent(t *testing.T) {
 
 	// fake kube cluster
 	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	// kd.Revision = 1
 	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-pod",
@@ -144,6 +140,51 @@ func TestConditionNotPresent(t *testing.T) {
 	assert.Equal(t, "expected condition not found", err.Error())
 }
 
+func TestNoObject(t *testing.T) {
+
+	// fake kube cluster
+	*kd = *NewFakeKubeDriver(NewEnvSettings())
+	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-pod",
+			Namespace: "default",
+		},
+		Status: corev1.PodStatus{
+			Conditions: []corev1.PodCondition{{
+				Type:   corev1.PodConditionType("Ready"),
+				Status: corev1.ConditionTrue,
+			}},
+		},
+	}, metav1.CreateOptions{})
+	assert.NoError(t, err, "create failed")
+
+	_, err = kd.Clientset.CoreV1().Pods("default").Get(context.Background(), "test-pod", metav1.GetOptions{})
+	assert.NoError(t, err, "get failed")
+
+	// create task
+	rTask := &readinessTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(ReadinessTaskName),
+		},
+		With: readinessInputs{
+			Kind:      "pod",
+			Name:      "non-existant-pod",
+			Namespace: StringPointer("default"),
+			Condition: StringPointer("Ready"),
+		},
+	}
+
+	// create experiment
+	exp := &Experiment{
+		Tasks:  []Task{rTask},
+		Result: &ExperimentResult{},
+	}
+
+	// run task
+	err = rTask.run(exp)
+	assert.Error(t, err)
+}
+
 func TestValidation(t *testing.T) {
 	// create task
 	rTask := &readinessTask{
@@ -167,34 +208,76 @@ func TestValidation(t *testing.T) {
 }
 
 func TestGetConditionStatus(t *testing.T) {
-	pod := corev1.Pod{
-		Status: corev1.PodStatus{
-			Conditions: []corev1.PodCondition{{
-				Type:   corev1.PodConditionType("false"),
-				Status: corev1.ConditionFalse,
-			}, {
-				Type:   corev1.PodConditionType("true"),
-				Status: corev1.ConditionTrue,
-			}, {
-				Type:   corev1.PodConditionType("unknown"),
-				Status: corev1.ConditionUnknown,
-			}},
+	pods := []corev1.Pod{
+		{    // no status
+		}, { // no conditions
+			Status: corev1.PodStatus{},
+		}, { // empty list of conditions
+			Status: corev1.PodStatus{ //
+				Conditions: []corev1.PodCondition{},
+			},
+		}, { // not matched condition
+			Status: corev1.PodStatus{
+				Conditions: []corev1.PodCondition{{
+					Type:   corev1.PodConditionType("unmatched-condition"),
+					Status: corev1.ConditionTrue,
+				}},
+			},
+		}, { // no condition value
+			Status: corev1.PodStatus{
+				Conditions: []corev1.PodCondition{{
+					Type: corev1.PodConditionType("no-status"),
+				}},
+			},
+		}, { // no condition type
+			Status: corev1.PodStatus{
+				Conditions: []corev1.PodCondition{{
+					// Type: corev1.PodConditionType("no-type"),
+					Status: corev1.ConditionTrue,
+				}},
+			},
+		}, { // matched condition but wrong value
+			Status: corev1.PodStatus{
+				Conditions: []corev1.PodCondition{{
+					Type:   corev1.PodConditionType("matched-condition"),
+					Status: corev1.ConditionFalse,
+				}},
+			},
+		}, { // matched condition - success !
+			Status: corev1.PodStatus{
+				Conditions: []corev1.PodCondition{{
+					Type:   corev1.PodConditionType("matched-condition"),
+					Status: corev1.ConditionTrue,
+				}},
+			},
 		},
 	}
 
-	o, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&pod)
-	obj := unstructured.Unstructured{Object: o}
+	check(t, &pods[0], false, "matched-condition", string(corev1.ConditionTrue))
+	check(t, &pods[1], false, "matched-condition", string(corev1.ConditionTrue))
+	check(t, &pods[2], false, "matched-condition", string(corev1.ConditionTrue))
+	check(t, &pods[3], false, "matched-condition", string(corev1.ConditionTrue))
+	check(t, &pods[4], false, "matched-condition", string(corev1.ConditionTrue))
+	check(t, &pods[5], false, "matched-condition", string(corev1.ConditionTrue))
+	check(t, &pods[6], false, "matched-condition", string(corev1.ConditionTrue))
+	check(t, &pods[7], true, "matched-condition", string(corev1.ConditionTrue))
+}
+
+func check(t *testing.T, kObj *corev1.Pod, expectSuccess bool, condition string, value string) {
+	o, err := runtime.DefaultUnstructuredConverter.ToUnstructured(kObj)
+	unstructuredObj := unstructured.Unstructured{Object: o}
 	assert.NoError(t, err)
 
-	status, err := getConditionStatus(&obj, "true")
-	assert.NoError(t, err)
-	assert.Equal(t, "True", *status)
+	conditionStatus, err := getConditionStatus(&unstructuredObj, condition)
+	if expectSuccess {
+		assert.NoError(t, err)
+		assert.Equal(t, value, *conditionStatus)
+	}
 
-	status, err = getConditionStatus(&obj, "false")
-	assert.NoError(t, err)
-	assert.Equal(t, "False", *status)
+}
 
-	_, err = getConditionStatus(&obj, "invalid")
-	assert.Error(t, err)
-	assert.Equal(t, "expected condition not found", err.Error())
+func TestKube(t *testing.T) {
+	assert.NoError(t, kd.initKube())
+	settings = NewEnvSettings()
+	assert.Equal(t, "default", settings.Namespace())
 }

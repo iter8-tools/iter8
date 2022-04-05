@@ -44,7 +44,6 @@ func (driver *KubeDriver) initFake(objects ...runtime.Object) error {
 func NewFakeKubeDriver(s *EnvSettings, objects ...runtime.Object) *KubeDriver {
 	kd := &KubeDriver{
 		EnvSettings: s,
-		Group:       DefaultExperimentGroup,
 	}
 	kd.initFake(objects...)
 	return kd
@@ -70,11 +69,6 @@ func (s *EnvSettings) Namespace() string {
 		return ns
 	}
 	return "default"
-}
-
-// SetNamespace sets the namespace in the configuration
-func (s *EnvSettings) SetNamespace(namespace string) {
-	s.namespace = namespace
 }
 
 // RESTClientGetter gets the kubeconfig from EnvSettings
