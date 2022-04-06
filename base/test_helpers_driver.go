@@ -5,6 +5,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
 )
@@ -31,7 +33,24 @@ func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
 	fc.PrependReactor("create", "secrets", secretDataReactor)
 	fc.PrependReactor("update", "secrets", secretDataReactor)
 	kd.Clientset = fc
-	kd.GetObjectFunc = GetFakeObject
+	kd.DynamicClient = dynamicfake.NewSimpleDynamicClient(runtime.NewScheme()) //, newUnstructured("v1", "Pod", "default", "name-foo"))
+	// dc kd.GetObjectFunc = GetFakeObject
+	kd.Mapping = &FakeKubernetesObjectMapping{}
+}
+
+type FakeKubernetesObjectMapping struct{}
+
+func (om *FakeKubernetesObjectMapping) toGVK(objRef *corev1.ObjectReference) schema.GroupVersionKind {
+	return schema.FromAPIVersionAndKind(objRef.APIVersion, objRef.Kind)
+}
+
+func (om *FakeKubernetesObjectMapping) toGVR(objRef *corev1.ObjectReference) (schema.GroupVersionResource, error) {
+	gvk := om.toGVK(objRef)
+	return schema.GroupVersionResource{
+		Group:    gvk.Group,
+		Version:  gvk.Version,
+		Resource: gvk.Kind + "s", // THIS IS WRONG  Kind is "pod", Resource is "pods"
+	}, nil
 }
 
 // initFake initializes fake Kubernetes and Helm clients
@@ -50,14 +69,12 @@ func NewFakeKubeDriver(s *EnvSettings, objects ...runtime.Object) *KubeDriver {
 }
 
 type EnvSettings struct {
-	namespace string
-	config    *genericclioptions.ConfigFlags
+	config *genericclioptions.ConfigFlags
 }
 
 func NewEnvSettings() *EnvSettings {
 	env := &EnvSettings{
-		namespace: "",
-		config:    &genericclioptions.ConfigFlags{},
+		config: &genericclioptions.ConfigFlags{},
 	}
 
 	return env

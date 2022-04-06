@@ -10,20 +10,27 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestNoCondition(t *testing.T) {
 	// fake kube cluster
 	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-pod",
-			Namespace: "default",
-		},
-	}, metav1.CreateOptions{})
-	assert.NoError(t, err, "create failed")
+	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
 
-	_, err = kd.Clientset.CoreV1().Pods("default").Get(context.Background(), "test-pod", metav1.GetOptions{})
+	ns, nm := "default", "test-pod"
+	uPod := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "/",
+			"kind":       "pod",
+			"metadata": map[string]interface{}{
+				"namespace": ns,
+				"name":      nm,
+			},
+		},
+	}
+
+	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
 	assert.NoError(t, err, "get failed")
 
 	// create task
@@ -33,8 +40,8 @@ func TestNoCondition(t *testing.T) {
 		},
 		With: readinessInputs{
 			Kind:      "pod",
-			Name:      "test-pod",
-			Namespace: StringPointer("default"),
+			Name:      nm,
+			Namespace: StringPointer(ns),
 		},
 	}
 
@@ -53,21 +60,29 @@ func TestConditionPresent(t *testing.T) {
 
 	// fake kube cluster
 	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-pod",
-			Namespace: "default",
-		},
-		Status: corev1.PodStatus{
-			Conditions: []corev1.PodCondition{{
-				Type:   corev1.PodConditionType("Ready"),
-				Status: corev1.ConditionTrue,
-			}},
-		},
-	}, metav1.CreateOptions{})
-	assert.NoError(t, err, "create failed")
+	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
 
-	_, err = kd.Clientset.CoreV1().Pods("default").Get(context.Background(), "test-pod", metav1.GetOptions{})
+	ns, nm := "default", "test-pod"
+	uPod := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "/",
+			"kind":       "pod",
+			"metadata": map[string]interface{}{
+				"namespace": ns,
+				"name":      nm,
+			},
+			"status": map[string]interface{}{
+				"conditions": []interface{}{
+					map[string]interface{}{
+						"type":   "Ready",
+						"status": "True",
+					},
+				},
+			},
+		},
+	}
+
+	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
 	assert.NoError(t, err, "get failed")
 
 	// create task
@@ -77,8 +92,8 @@ func TestConditionPresent(t *testing.T) {
 		},
 		With: readinessInputs{
 			Kind:      "pod",
-			Name:      "test-pod",
-			Namespace: StringPointer("default"),
+			Name:      nm,
+			Namespace: StringPointer(ns),
 			Condition: StringPointer("Ready"),
 		},
 	}
@@ -98,22 +113,31 @@ func TestConditionNotPresent(t *testing.T) {
 
 	// fake kube cluster
 	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-pod",
-			Namespace: "default",
-		},
-		Status: corev1.PodStatus{
-			Conditions: []corev1.PodCondition{{
-				Type:   corev1.PodConditionType("Ready"),
-				Status: corev1.ConditionTrue,
-			}},
-		},
-	}, metav1.CreateOptions{})
-	assert.NoError(t, err, "create failed")
 
-	_, err = kd.Clientset.CoreV1().Pods("default").Get(context.Background(), "test-pod", metav1.GetOptions{})
-	assert.NoError(t, err, "get failed")
+	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
+
+	ns, nm := "default", "test-pod"
+	uPod := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "/",
+			"kind":       "pod",
+			"metadata": map[string]interface{}{
+				"namespace": ns,
+				"name":      nm,
+			},
+			"status": map[string]interface{}{
+				"conditions": []interface{}{
+					map[string]interface{}{
+						"type":   "Ready",
+						"status": "True",
+					},
+				},
+			},
+		},
+	}
+
+	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
+	assert.NoError(t, err, "create failed")
 
 	// create task
 	rTask := &readinessTask{
@@ -122,8 +146,8 @@ func TestConditionNotPresent(t *testing.T) {
 		},
 		With: readinessInputs{
 			Kind:      "pod",
-			Name:      "test-pod",
-			Namespace: StringPointer("default"),
+			Name:      nm,
+			Namespace: StringPointer(ns),
 			Condition: StringPointer("NotPresent"),
 		},
 	}
@@ -144,21 +168,29 @@ func TestNoObject(t *testing.T) {
 
 	// fake kube cluster
 	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	_, err := kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-pod",
-			Namespace: "default",
-		},
-		Status: corev1.PodStatus{
-			Conditions: []corev1.PodCondition{{
-				Type:   corev1.PodConditionType("Ready"),
-				Status: corev1.ConditionTrue,
-			}},
-		},
-	}, metav1.CreateOptions{})
-	assert.NoError(t, err, "create failed")
+	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
 
-	_, err = kd.Clientset.CoreV1().Pods("default").Get(context.Background(), "test-pod", metav1.GetOptions{})
+	ns, nm := "default", "test-pod"
+	uPod := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "/",
+			"kind":       "pod",
+			"metadata": map[string]interface{}{
+				"namespace": ns,
+				"name":      nm,
+			},
+			"status": map[string]interface{}{
+				"conditions": []interface{}{
+					map[string]interface{}{
+						"type":   "Ready",
+						"status": "True",
+					},
+				},
+			},
+		},
+	}
+
+	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
 	assert.NoError(t, err, "get failed")
 
 	// create task
@@ -169,7 +201,7 @@ func TestNoObject(t *testing.T) {
 		With: readinessInputs{
 			Kind:      "pod",
 			Name:      "non-existant-pod",
-			Namespace: StringPointer("default"),
+			Namespace: StringPointer(ns),
 			Condition: StringPointer("Ready"),
 		},
 	}

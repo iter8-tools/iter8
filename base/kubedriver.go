@@ -1,10 +1,7 @@
 package base
 
 import (
-	"context"
 	"errors"
-	"fmt"
-	"strings"
 
 	// Import to initialize client auth plugins.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -12,10 +9,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	memory "k8s.io/client-go/discovery/cached"
@@ -31,9 +25,13 @@ type KubeDriver struct {
 	// EnvSettings provides generic Kubernetes options
 	*EnvSettings
 	// Clientset enables interaction with a Kubernetes cluster
-	Clientset     kubernetes.Interface
-	RestConfig    *rest.Config
-	GetObjectFunc GetObjectFuncType
+	Clientset kubernetes.Interface
+	// RestConfig is REST configuration of a Kubernetes cluster
+	RestConfig *rest.Config
+	// DynamicClient enables unstructured interaction with a Kubernetes cluster
+	DynamicClient dynamic.Interface
+	// Mapping enables Object to Resource
+	Mapping ObjectMapping
 }
 
 type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured.Unstructured, error)
@@ -41,11 +39,11 @@ type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured
 // NewKubeDriver creates and returns a new KubeDriver
 func NewKubeDriver(s *EnvSettings) *KubeDriver {
 	kd := &KubeDriver{
-		EnvSettings: s,
-		// Group:         DefaultExperimentGroup,
+		EnvSettings:   s,
 		Clientset:     nil,
 		RestConfig:    nil,
-		GetObjectFunc: GetRealObject,
+		DynamicClient: nil,
+		Mapping:       nil,
 	}
 	return kd
 }
@@ -67,71 +65,40 @@ func (kd *KubeDriver) initKube() (err error) {
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
+		kd.DynamicClient, err = dynamic.NewForConfig(kd.RestConfig)
+		if err != nil {
+			e := errors.New("unable to get Kubernetes dynamic client")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return e
+		}
+		kd.Mapping = &KubernetesObjectMapping{}
 	}
 
 	return nil
 }
 
-func GetFakeObject(kd *KubeDriver, objRef *corev1.ObjectReference) (*unstructured.Unstructured, error) {
-	if strings.EqualFold("pod", objRef.Kind) {
-		pod, err := kd.Clientset.CoreV1().Pods(objRef.Namespace).Get(context.Background(), objRef.Name, metav1.GetOptions{})
-		if err != nil {
-			return nil, err
-		}
-		obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
-		if err != nil {
-			return nil, err
-		}
-		return &unstructured.Unstructured{Object: obj}, nil
-
-	}
-	return nil, fmt.Errorf("resource %s not supported", objRef.Kind)
+type ObjectMapping interface {
+	toGVK(*corev1.ObjectReference) schema.GroupVersionKind
+	toGVR(*corev1.ObjectReference) (schema.GroupVersionResource, error)
 }
 
-// getObject finds the object referenced by objRef using the client config restConfig
-// uses the dynamic client; ie, retuns an unstructured object
-// based on https://ymmt2005.hatenablog.com/entry/2020/04/14/An_example_of_using_dynamic_client_of_k8s.io/client-go
-func GetRealObject(kd *KubeDriver, objRef *corev1.ObjectReference) (*unstructured.Unstructured, error) {
-	if objRef == nil {
-		return nil, errors.New("nil object reference")
-	}
+type KubernetesObjectMapping struct{}
 
-	// 1. Prepare a RESTMapper to find GVR
+func (om *KubernetesObjectMapping) toGVK(objRef *corev1.ObjectReference) schema.GroupVersionKind {
+	return schema.FromAPIVersionAndKind(objRef.APIVersion, objRef.Kind)
+}
+
+// TODO error handling
+func (om *KubernetesObjectMapping) toGVR(objRef *corev1.ObjectReference) (schema.GroupVersionResource, error) {
+	gvk := om.toGVK(objRef)
 	dc, err := discovery.NewDiscoveryClientForConfig(kd.RestConfig)
 	if err != nil {
-		return nil, err
+		return schema.GroupVersionResource{}, err
 	}
 	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-
-	// 2. Prepare the dynamic client
-	dyn, err := dynamic.NewForConfig(kd.RestConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	gvk := schema.FromAPIVersionAndKind(objRef.APIVersion, objRef.Kind)
-
-	// 3. Find GVR
 	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 	if err != nil {
-		return nil, err
+		return schema.GroupVersionResource{}, err
 	}
-
-	// 4. Obtain REST interface for the GVR
-	namespace := objRef.Namespace // recall that we always set this
-	var dr dynamic.ResourceInterface
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		// namespaced resources should specify the namespace
-		dr = dyn.Resource(mapping.Resource).Namespace(namespace)
-	} else {
-		// for cluster-wide resources
-		dr = dyn.Resource(mapping.Resource)
-	}
-
-	obj, err := dr.Get(context.Background(), objRef.Name, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return obj, nil
+	return mapping.Resource, nil // This has the rigth resoruce field
 }

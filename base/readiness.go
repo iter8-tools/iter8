@@ -1,6 +1,7 @@
 package base
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	log "github.com/iter8-tools/iter8/base/log"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/rest"
@@ -27,6 +29,8 @@ const (
 // ReadinessInputs identifies the K8s object to test for existence and
 // the (optional) condition that should be tested (succeeds if true).
 type readinessInputs struct {
+	// APIVersion of the object. Optional. If unspecified it will be defaulted to ""
+	APIVersion string `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
 	// Kind of the object. Specified in the TYPE[.VERSION][.GROUP] format used by `kubectl`
 	// See https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#get
 	Kind string `json:"kind" yaml:"kind"`
@@ -125,14 +129,15 @@ func (t *readinessTask) run(exp *Experiment) error {
 func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
 	log.Logger.Trace("looking for object ", t.With.Kind, "/", t.With.Name, " in namespace ", *t.With.Namespace)
 
-	// get object from cluster
-	obj, err := kd.GetObjectFunc(kd,
+	obj, err := GetObject(
 		&corev1.ObjectReference{
-			Kind:      t.With.Kind,
-			Name:      t.With.Name,
-			Namespace: *t.With.Namespace,
+			APIVersion: t.With.APIVersion,
+			Kind:       t.With.Kind,
+			Name:       t.With.Name,
+			Namespace:  *t.With.Namespace,
 		},
 	)
+
 	if err != nil {
 		return err
 	}
@@ -153,6 +158,17 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 		return nil
 	}
 	return errors.New("condition status not True")
+}
+
+func GetObject(objRef *corev1.ObjectReference) (*unstructured.Unstructured, error) {
+	// Get schema.GroupVersionResource object from objRef
+	gvr, err := kd.Mapping.toGVR(objRef)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get object
+	return kd.DynamicClient.Resource(gvr).Namespace(objRef.Namespace).Get(context.Background(), objRef.Name, metav1.GetOptions{})
 }
 
 func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*string, error) {
