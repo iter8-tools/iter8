@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,230 +14,144 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func TestNoCondition(t *testing.T) {
-	// fake kube cluster
-	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
+type podBuilder corev1.Pod
 
-	ns, nm := "default", "test-pod"
-	uPod := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "/",
-			"kind":       "pod",
-			"metadata": map[string]interface{}{
-				"namespace": ns,
-				"name":      nm,
-			},
+func newPod(ns string, nm string) *podBuilder {
+	pod := &corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Pod",
 		},
-	}
-
-	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
-	assert.NoError(t, err, "get failed")
-
-	// create task
-	rTask := &readinessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(ReadinessTaskName),
-		},
-		With: readinessInputs{
-			Kind:      "pod",
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      nm,
-			Namespace: StringPointer(ns),
+			Namespace: ns,
 		},
 	}
-
-	// create experiment
-	exp := &Experiment{
-		Tasks:  []Task{rTask},
-		Result: &ExperimentResult{},
-	}
-
-	// run task
-	err = rTask.run(exp)
-	assert.NoError(t, err)
+	return (*podBuilder)(pod)
 }
 
-func TestConditionPresent(t *testing.T) {
-
-	// fake kube cluster
-	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
-
-	ns, nm := "default", "test-pod"
-	uPod := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "/",
-			"kind":       "pod",
-			"metadata": map[string]interface{}{
-				"namespace": ns,
-				"name":      nm,
-			},
-			"status": map[string]interface{}{
-				"conditions": []interface{}{
-					map[string]interface{}{
-						"type":   "Ready",
-						"status": "True",
-					},
-				},
-			},
-		},
+func (p *podBuilder) Build() *unstructured.Unstructured {
+	o, err := runtime.DefaultUnstructuredConverter.ToUnstructured((*corev1.Pod)(p))
+	if err != nil {
+		return nil
 	}
+	return &unstructured.Unstructured{Object: o}
+}
 
-	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
-	assert.NoError(t, err, "get failed")
+func (p *podBuilder) WithCondition(typ string, value string) *podBuilder {
+	c := corev1.PodCondition{Type: (corev1.PodConditionType(typ))}
+	switch strings.ToLower(value) {
+	case "true":
+		c.Status = corev1.ConditionTrue
+	case "false":
+		c.Status = corev1.ConditionFalse
+	default:
+		c.Status = corev1.ConditionUnknown
+	}
+	p.Status.Conditions = append(p.Status.Conditions, c)
 
-	// create task
+	return p
+}
+
+type readinessTaskBuilder readinessTask
+
+func NewReadinessTask(name string) *readinessTaskBuilder {
 	rTask := &readinessTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(ReadinessTaskName),
 		},
 		With: readinessInputs{
-			Kind:      "pod",
-			Name:      nm,
-			Namespace: StringPointer(ns),
-			Condition: StringPointer("Ready"),
+			Name: name,
 		},
 	}
 
-	// create experiment
-	exp := &Experiment{
-		Tasks:  []Task{rTask},
-		Result: &ExperimentResult{},
-	}
+	return (*readinessTaskBuilder)(rTask)
+}
 
-	// run task
-	err = rTask.run(exp)
-	assert.NoError(t, err)
+func (t *readinessTaskBuilder) WithResource(resource string) *readinessTaskBuilder {
+	t.With.Resource = resource
+	return t
+}
+
+func (t *readinessTaskBuilder) WithNamespace(ns string) *readinessTaskBuilder {
+	t.With.Namespace = StringPointer(ns)
+	return t
+}
+
+func (t *readinessTaskBuilder) WithTimeout(timeout string) *readinessTaskBuilder {
+	t.With.Timeout = StringPointer(timeout)
+	return t
+}
+
+func (t *readinessTaskBuilder) WithCondition(condition string) *readinessTaskBuilder {
+	t.With.Condition = &condition
+	return t
+}
+
+func (t *readinessTaskBuilder) Build() *readinessTask {
+	return (*readinessTask)(t)
+}
+
+// also validates parsing of timeout
+// also validates setting of default namespace
+func TestWithoutConditions(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithTimeout("20s").Build()
+	runTaskTest(t, rTask, true, ns, pod)
+}
+
+func TestWithCondition(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	runTaskTest(t, rTask, true, ns, pod)
+}
+
+func TestWithFalseCondition(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).WithCondition("Ready", "False").Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	runTaskTest(t, rTask, false, ns, pod)
 }
 
 func TestConditionNotPresent(t *testing.T) {
-
-	// fake kube cluster
-	*kd = *NewFakeKubeDriver(NewEnvSettings())
-
-	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
-
 	ns, nm := "default", "test-pod"
-	uPod := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "/",
-			"kind":       "pod",
-			"metadata": map[string]interface{}{
-				"namespace": ns,
-				"name":      nm,
-			},
-			"status": map[string]interface{}{
-				"conditions": []interface{}{
-					map[string]interface{}{
-						"type":   "Ready",
-						"status": "True",
-					},
-				},
-			},
-		},
-	}
-
-	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
-	assert.NoError(t, err, "create failed")
-
-	// create task
-	rTask := &readinessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(ReadinessTaskName),
-		},
-		With: readinessInputs{
-			Kind:      "pod",
-			Name:      nm,
-			Namespace: StringPointer(ns),
-			Condition: StringPointer("NotPresent"),
-		},
-	}
-
-	// create experiment
-	exp := &Experiment{
-		Tasks:  []Task{rTask},
-		Result: &ExperimentResult{},
-	}
-
-	// run task
-	err = rTask.run(exp)
-	assert.Error(t, err)
-	assert.Equal(t, "expected condition not found", err.Error())
+	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("NotPresent").Build()
+	runTaskTest(t, rTask, false, ns, pod)
 }
 
 func TestNoObject(t *testing.T) {
-
-	// fake kube cluster
-	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	rs := schema.GroupVersionResource{Group: "", Version: "", Resource: "pods"}
-
 	ns, nm := "default", "test-pod"
-	uPod := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "/",
-			"kind":       "pod",
-			"metadata": map[string]interface{}{
-				"namespace": ns,
-				"name":      nm,
-			},
-			"status": map[string]interface{}{
-				"conditions": []interface{}{
-					map[string]interface{}{
-						"type":   "Ready",
-						"status": "True",
-					},
-				},
-			},
-		},
-	}
-
-	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), uPod, metav1.CreateOptions{})
-	assert.NoError(t, err, "get failed")
-
-	// create task
-	rTask := &readinessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(ReadinessTaskName),
-		},
-		With: readinessInputs{
-			Kind:      "pod",
-			Name:      "non-existant-pod",
-			Namespace: StringPointer(ns),
-			Condition: StringPointer("Ready"),
-		},
-	}
-
-	// create experiment
-	exp := &Experiment{
-		Tasks:  []Task{rTask},
-		Result: &ExperimentResult{},
-	}
-
-	// run task
-	err = rTask.run(exp)
-	assert.Error(t, err)
+	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
+	rTask := NewReadinessTask("non-existant-pod").WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	runTaskTest(t, rTask, false, ns, pod)
 }
 
-func TestValidation(t *testing.T) {
-	// create task
-	rTask := &readinessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(ReadinessTaskName),
-		},
-		With: readinessInputs{
-			Kind:      "pod",
-			Name:      "test-pod",
-			Namespace: StringPointer("default"),
-		},
+func TestInvalidTimeout(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithTimeout("timeout").Build()
+	runTaskTest(t, rTask, false, ns, pod)
+}
+
+// runTaskTest creates fake cluster with pod and runs rTask
+func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, pod *unstructured.Unstructured) {
+	*kd = *NewFakeKubeDriver(NewEnvSettings())
+	rs := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
+	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
+	assert.NoError(t, err, "get failed")
+
+	err = rTask.run(&Experiment{
+		Tasks:  []Task{rTask},
+		Result: &ExperimentResult{},
+	})
+	if success {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
 	}
-
-	// invalid timeout
-	rTask.With.Timeout = StringPointer("invalid")
-	assert.Error(t, rTask.validateInputs())
-
-	// valid timeout
-	rTask.With.Timeout = StringPointer("3m5s")
-	assert.NoError(t, rTask.validateInputs())
 }
 
 func TestGetConditionStatus(t *testing.T) {
@@ -306,10 +221,4 @@ func check(t *testing.T, kObj *corev1.Pod, expectSuccess bool, condition string,
 		assert.Equal(t, value, *conditionStatus)
 	}
 
-}
-
-func TestKube(t *testing.T) {
-	assert.NoError(t, kd.initKube())
-	settings = NewEnvSettings()
-	assert.Equal(t, "default", settings.Namespace())
 }

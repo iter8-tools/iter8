@@ -13,6 +13,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/retry"
@@ -31,9 +32,8 @@ const (
 type readinessInputs struct {
 	// APIVersion of the object. Optional. If unspecified it will be defaulted to ""
 	APIVersion string `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
-	// Kind of the object. Specified in the TYPE[.VERSION][.GROUP] format used by `kubectl`
-	// See https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#get
-	Kind string `json:"kind" yaml:"kind"`
+	// Resource type of the object.
+	Resource string `json:"resource" yaml:"resource"`
 	// Namespace of the object. Optional. If left unspecified, this will be defaulted to the namespace of the experiment
 	Namespace *string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 	// Name of the object
@@ -58,51 +58,35 @@ func (t *readinessTask) initializeDefaults() {
 }
 
 // validateInputs validates task inputs
+// at present all validation at initialization
 func (t *readinessTask) validateInputs() error {
-	// validate that timeout is parsable
-	if t.With.Timeout != nil {
-		_, err := time.ParseDuration(*t.With.Timeout)
-		if err != nil {
-			return errors.New("invalid format for timeout")
-		}
-	}
-
 	return nil
 }
 
 // run executes the task
 func (t *readinessTask) run(exp *Experiment) error {
+	// validation
 	err := t.validateInputs()
 	if err != nil {
 		return err
 	}
 
+	// initialization
 	t.initializeDefaults()
-
 	kd.initKube()
-
-	restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
-	if err != nil {
-		return err
-	}
-
 	// set Namespace (from context) if not already set
 	if t.With.Namespace == nil {
-		// ns, _, err := kubeconfig.Namespace()
-		// if err != nil {
-		// 	return err
-		// }
-		// t.With.Namespace = StringPointer(ns)
-		t.With.Namespace = StringPointer("default")
+		t.With.Namespace = kd.Namespace
 	}
-
 	timeout, err := time.ParseDuration(*t.With.Timeout)
 	if err != nil {
-		return err
+		e := errors.New("invalid format for timeout")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
 	}
 	log.Logger.Trace("duration is ", timeout)
 
-	// check for object and condition
+	// do the work: check for object and condition
 	// repeat until time out
 	interval := 1 * time.Second
 	err = retry.OnError(
@@ -118,7 +102,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 			return true
 		}, // retry on all failures
 		func() error {
-			return checkObjectExistsAndConditionTrue(t, restConfig)
+			return checkObjectExistsAndConditionTrue(t, kd.RestConfig)
 		},
 	)
 	return err
@@ -127,17 +111,9 @@ func (t *readinessTask) run(exp *Experiment) error {
 // checkObjectExistsAndConditionTrue determines if the object exists
 // if so, it further checks if the requested condition is "True"
 func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
-	log.Logger.Trace("looking for object ", t.With.Kind, "/", t.With.Name, " in namespace ", *t.With.Namespace)
+	log.Logger.Trace("looking for ", t.With.Resource, " resource: ", t.With.Name, " in namespace ", *t.With.Namespace)
 
-	obj, err := GetObject(
-		&corev1.ObjectReference{
-			APIVersion: t.With.APIVersion,
-			Kind:       t.With.Kind,
-			Name:       t.With.Name,
-			Namespace:  *t.With.Namespace,
-		},
-	)
-
+	obj, err := kd.DynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -160,15 +136,17 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 	return errors.New("condition status not True")
 }
 
-func GetObject(objRef *corev1.ObjectReference) (*unstructured.Unstructured, error) {
-	// Get schema.GroupVersionResource object from objRef
-	gvr, err := kd.Mapping.toGVR(objRef)
-	if err != nil {
-		return nil, err
+func gvr(objRef *readinessInputs) schema.GroupVersionResource {
+	if gv, err := schema.ParseGroupVersion(objRef.APIVersion); err == nil {
+		if gv.Group == "core" {
+			gv.Group = ""
+		}
+		if gv.Version == "" {
+			gv.Version = "v1"
+		}
+		return schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: objRef.Resource}
 	}
-
-	// Get object
-	return kd.DynamicClient.Resource(gvr).Namespace(objRef.Namespace).Get(context.Background(), objRef.Name, metav1.GetOptions{})
+	return schema.GroupVersionResource{Resource: objRef.Resource}
 }
 
 func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*string, error) {

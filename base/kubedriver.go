@@ -10,13 +10,10 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/discovery"
-	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/restmapper"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // KubeDriver embeds Kube configuration, and
@@ -30,8 +27,8 @@ type KubeDriver struct {
 	RestConfig *rest.Config
 	// DynamicClient enables unstructured interaction with a Kubernetes cluster
 	DynamicClient dynamic.Interface
-	// Mapping enables Object to Resource
-	Mapping ObjectMapping
+	// Namespace
+	Namespace *string
 }
 
 type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured.Unstructured, error)
@@ -43,7 +40,7 @@ func NewKubeDriver(s *EnvSettings) *KubeDriver {
 		Clientset:     nil,
 		RestConfig:    nil,
 		DynamicClient: nil,
-		Mapping:       nil,
+		Namespace:     nil,
 	}
 	return kd
 }
@@ -71,34 +68,19 @@ func (kd *KubeDriver) initKube() (err error) {
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
-		kd.Mapping = &KubernetesObjectMapping{}
+
+		if kd.Namespace == nil {
+			kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+				clientcmd.NewDefaultClientConfigLoadingRules(),
+				&clientcmd.ConfigOverrides{},
+			)
+			ns, _, err := kubeconfig.Namespace()
+			if err != nil {
+				ns = "default"
+			}
+			kd.Namespace = StringPointer(ns)
+		}
 	}
 
 	return nil
-}
-
-type ObjectMapping interface {
-	toGVK(*corev1.ObjectReference) schema.GroupVersionKind
-	toGVR(*corev1.ObjectReference) (schema.GroupVersionResource, error)
-}
-
-type KubernetesObjectMapping struct{}
-
-func (om *KubernetesObjectMapping) toGVK(objRef *corev1.ObjectReference) schema.GroupVersionKind {
-	return schema.FromAPIVersionAndKind(objRef.APIVersion, objRef.Kind)
-}
-
-// TODO error handling
-func (om *KubernetesObjectMapping) toGVR(objRef *corev1.ObjectReference) (schema.GroupVersionResource, error) {
-	gvk := om.toGVK(objRef)
-	dc, err := discovery.NewDiscoveryClientForConfig(kd.RestConfig)
-	if err != nil {
-		return schema.GroupVersionResource{}, err
-	}
-	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-	if err != nil {
-		return schema.GroupVersionResource{}, err
-	}
-	return mapping.Resource, nil // This has the rigth resoruce field
 }
