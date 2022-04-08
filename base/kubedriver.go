@@ -8,6 +8,8 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 
+	"helm.sh/helm/v3/pkg/cli"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
@@ -18,7 +20,7 @@ import (
 // enables interaction with a Kubernetes cluster through Kube APIs
 type KubeDriver struct {
 	// EnvSettings provides generic Kubernetes options
-	*EnvSettings
+	*cli.EnvSettings
 	// RestConfig is REST configuration of a Kubernetes cluster
 	RestConfig *rest.Config
 	// DynamicClient enables unstructured interaction with a Kubernetes cluster
@@ -30,7 +32,7 @@ type KubeDriver struct {
 type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured.Unstructured, error)
 
 // NewKubeDriver creates and returns a new KubeDriver
-func NewKubeDriver(s *EnvSettings) *KubeDriver {
+func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
 	kd := &KubeDriver{
 		EnvSettings:   s,
 		RestConfig:    nil,

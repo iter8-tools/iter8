@@ -7,6 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"helm.sh/helm/v3/pkg/cli"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -69,7 +71,7 @@ func TestInvalidTimeout(t *testing.T) {
 
 // runTaskTest creates fake cluster with pod and runs rTask
 func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, pod *unstructured.Unstructured) {
-	*kd = *NewFakeKubeDriver(NewEnvSettings())
+	*kd = *NewFakeKubeDriver(cli.New())
 	rs := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
 	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
 	assert.NoError(t, err, "get failed")
