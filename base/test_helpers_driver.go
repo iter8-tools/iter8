@@ -8,13 +8,13 @@ import (
 )
 
 // initKubeFake initialize the Kube clientset with a fake
-func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
-	kd.dynamicClient = dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
+func initKubeFake(driver *KubeDriver, objects ...runtime.Object) {
+	driver.dynamicClient = dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
 }
 
 // initFake initializes fake Kubernetes and Helm clients
-func (driver *KubeDriver) initFake(objects ...runtime.Object) error {
-	driver.initKubeFake(objects...)
+func initFake(driver *KubeDriver, objects ...runtime.Object) error {
+	initKubeFake(driver, objects...)
 	return nil
 }
 
@@ -23,6 +23,6 @@ func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDrive
 	kd := &KubeDriver{
 		EnvSettings: s,
 	}
-	kd.initFake(objects...)
+	initFake(kd, objects...)
 	return kd
 }

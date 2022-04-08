@@ -18,7 +18,7 @@ import (
 )
 
 // initKubeFake initialize the Kube clientset with a fake
-func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
+func initKubeFake(driver *KubeDriver, objects ...runtime.Object) {
 	// secretDataReactor sets the secret.Data field based on the values from secret.StringData
 	// Credit: this function is adapted from https://github.com/creydr/go-k8s-utils
 	var secretDataReactor = func(action ktesting.Action) (bool, runtime.Object, error) {
@@ -38,20 +38,20 @@ func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
 	fc := fake.NewSimpleClientset(objects...)
 	fc.PrependReactor("create", "secrets", secretDataReactor)
 	fc.PrependReactor("update", "secrets", secretDataReactor)
-	kd.Clientset = fc
+	driver.Clientset = fc
 }
 
 // initHelmFake initializes the Helm config with a fake
 // Credit: this function is adapted from helm
 // https://github.com/helm/helm/blob/e9abdc5efe11cdc23576c20c97011d452201cd92/pkg/action/action_test.go#L37
-func (kd *KubeDriver) initHelmFake() {
+func initHelmFake(driver *KubeDriver) {
 	registryClient, err := registry.NewClient()
 	if err != nil {
 		log.Logger.Error(err)
 		return
 	}
 
-	kd.Configuration = &action.Configuration{
+	driver.Configuration = &action.Configuration{
 		Releases:       storage.Init(helmdriver.NewMemory()),
 		KubeClient:     &helmfake.FailingKubeClient{PrintingKubeClient: helmfake.PrintingKubeClient{Out: ioutil.Discard}},
 		Capabilities:   chartutil.DefaultCapabilities,
@@ -61,9 +61,9 @@ func (kd *KubeDriver) initHelmFake() {
 }
 
 // initFake initializes fake Kubernetes and Helm clients
-func (driver *KubeDriver) initFake(objects ...runtime.Object) error {
-	driver.initKubeFake(objects...)
-	driver.initHelmFake()
+func initFake(driver *KubeDriver, objects ...runtime.Object) error {
+	initKubeFake(driver, objects...)
+	initHelmFake(driver)
 	return nil
 }
 
@@ -73,6 +73,6 @@ func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDrive
 		EnvSettings: s,
 		Group:       DefaultExperimentGroup,
 	}
-	kd.initFake(objects...)
+	initFake(kd, objects...)
 	return kd
 }
