@@ -55,6 +55,12 @@ func (t *readinessTask) initializeDefaults() {
 	if t.With.Timeout == nil {
 		t.With.Timeout = StringPointer(defaultTimeout)
 	}
+
+	kd.initKube()
+	// set Namespace (from context) if not already set
+	if t.With.Namespace == nil {
+		t.With.Namespace = StringPointer(kd.Namespace())
+	}
 }
 
 // validateInputs validates task inputs
@@ -73,11 +79,8 @@ func (t *readinessTask) run(exp *Experiment) error {
 
 	// initialization
 	t.initializeDefaults()
-	kd.initKube()
-	// set Namespace (from context) if not already set
-	if t.With.Namespace == nil {
-		t.With.Namespace = StringPointer(kd.Namespace())
-	}
+
+	// parse timeout
 	timeout, err := time.ParseDuration(*t.With.Timeout)
 	if err != nil {
 		e := errors.New("invalid format for timeout")

@@ -15,6 +15,10 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
+var (
+	kd = NewKubeDriver(cli.New())
+)
+
 // KubeDriver embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
 type KubeDriver struct {
