@@ -14,6 +14,77 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+// TestNoObject tests that task fails if the object is not present
+func TestNoObject(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
+	rTask := NewReadinessTask("non-existant-pod").WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	runTaskTest(t, rTask, false, ns, pod)
+}
+
+// TestWithoutCondition tests the task succeeds when there are no conditions on the object
+// It should be successful
+// Also validates parsing of timeout
+// Also validates setting of default namespace
+func TestWithoutConditions(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithTimeout("20s").Build()
+	runTaskTest(t, rTask, true, ns, pod)
+}
+
+// TestWithCondition tests that the task succeeds when the condition is present and True
+func TestWithCondition(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	runTaskTest(t, rTask, true, ns, pod)
+}
+
+// TestWithFalseCondition tests that the task fails when the condition is present and not True
+func TestWithFalseCondition(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).WithCondition("Ready", "False").Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	runTaskTest(t, rTask, false, ns, pod)
+}
+
+// TestConditionNotPresent tests that the task fails when the condition is not present (but others are)
+func TestConditionNotPresent(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("NotPresent").Build()
+	runTaskTest(t, rTask, false, ns, pod)
+}
+
+// TestInvalidTimeout tests that the task fails when the specified timeout is invalid (not parseable)
+func TestInvalidTimeout(t *testing.T) {
+	ns, nm := "default", "test-pod"
+	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
+	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithTimeout("timeout").Build()
+	runTaskTest(t, rTask, false, ns, pod)
+}
+
+// UTILITY METHODS for all tests
+
+// runTaskTest creates fake cluster with pod and runs rTask
+func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, pod *unstructured.Unstructured) {
+	*kd = *NewFakeKubeDriver(NewEnvSettings())
+	rs := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
+	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
+	assert.NoError(t, err, "get failed")
+
+	err = rTask.run(&Experiment{
+		Tasks:  []Task{rTask},
+		Result: &ExperimentResult{},
+	})
+	if success {
+		assert.NoError(t, err)
+	} else {
+		assert.Error(t, err)
+	}
+}
+
 type podBuilder corev1.Pod
 
 func newPod(ns string, nm string) *podBuilder {
@@ -90,135 +161,4 @@ func (t *readinessTaskBuilder) WithCondition(condition string) *readinessTaskBui
 
 func (t *readinessTaskBuilder) Build() *readinessTask {
 	return (*readinessTask)(t)
-}
-
-// also validates parsing of timeout
-// also validates setting of default namespace
-func TestWithoutConditions(t *testing.T) {
-	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithTimeout("20s").Build()
-	runTaskTest(t, rTask, true, ns, pod)
-}
-
-func TestWithCondition(t *testing.T) {
-	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
-	runTaskTest(t, rTask, true, ns, pod)
-}
-
-func TestWithFalseCondition(t *testing.T) {
-	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "False").Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
-	runTaskTest(t, rTask, false, ns, pod)
-}
-
-func TestConditionNotPresent(t *testing.T) {
-	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("NotPresent").Build()
-	runTaskTest(t, rTask, false, ns, pod)
-}
-
-func TestNoObject(t *testing.T) {
-	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
-	rTask := NewReadinessTask("non-existant-pod").WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
-	runTaskTest(t, rTask, false, ns, pod)
-}
-
-func TestInvalidTimeout(t *testing.T) {
-	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithTimeout("timeout").Build()
-	runTaskTest(t, rTask, false, ns, pod)
-}
-
-// runTaskTest creates fake cluster with pod and runs rTask
-func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, pod *unstructured.Unstructured) {
-	*kd = *NewFakeKubeDriver(NewEnvSettings())
-	rs := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
-	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
-	assert.NoError(t, err, "get failed")
-
-	err = rTask.run(&Experiment{
-		Tasks:  []Task{rTask},
-		Result: &ExperimentResult{},
-	})
-	if success {
-		assert.NoError(t, err)
-	} else {
-		assert.Error(t, err)
-	}
-}
-
-func TestGetConditionStatus(t *testing.T) {
-	pods := []corev1.Pod{
-		{    // no status
-		}, { // no conditions
-			Status: corev1.PodStatus{},
-		}, { // empty list of conditions
-			Status: corev1.PodStatus{ //
-				Conditions: []corev1.PodCondition{},
-			},
-		}, { // not matched condition
-			Status: corev1.PodStatus{
-				Conditions: []corev1.PodCondition{{
-					Type:   corev1.PodConditionType("unmatched-condition"),
-					Status: corev1.ConditionTrue,
-				}},
-			},
-		}, { // no condition value
-			Status: corev1.PodStatus{
-				Conditions: []corev1.PodCondition{{
-					Type: corev1.PodConditionType("no-status"),
-				}},
-			},
-		}, { // no condition type
-			Status: corev1.PodStatus{
-				Conditions: []corev1.PodCondition{{
-					// Type: corev1.PodConditionType("no-type"),
-					Status: corev1.ConditionTrue,
-				}},
-			},
-		}, { // matched condition but wrong value
-			Status: corev1.PodStatus{
-				Conditions: []corev1.PodCondition{{
-					Type:   corev1.PodConditionType("matched-condition"),
-					Status: corev1.ConditionFalse,
-				}},
-			},
-		}, { // matched condition - success !
-			Status: corev1.PodStatus{
-				Conditions: []corev1.PodCondition{{
-					Type:   corev1.PodConditionType("matched-condition"),
-					Status: corev1.ConditionTrue,
-				}},
-			},
-		},
-	}
-
-	check(t, &pods[0], false, "matched-condition", string(corev1.ConditionTrue))
-	check(t, &pods[1], false, "matched-condition", string(corev1.ConditionTrue))
-	check(t, &pods[2], false, "matched-condition", string(corev1.ConditionTrue))
-	check(t, &pods[3], false, "matched-condition", string(corev1.ConditionTrue))
-	check(t, &pods[4], false, "matched-condition", string(corev1.ConditionTrue))
-	check(t, &pods[5], false, "matched-condition", string(corev1.ConditionTrue))
-	check(t, &pods[6], false, "matched-condition", string(corev1.ConditionTrue))
-	check(t, &pods[7], true, "matched-condition", string(corev1.ConditionTrue))
-}
-
-func check(t *testing.T, kObj *corev1.Pod, expectSuccess bool, condition string, value string) {
-	o, err := runtime.DefaultUnstructuredConverter.ToUnstructured(kObj)
-	unstructuredObj := unstructured.Unstructured{Object: o}
-	assert.NoError(t, err)
-
-	conditionStatus, err := getConditionStatus(&unstructuredObj, condition)
-	if expectSuccess {
-		assert.NoError(t, err)
-		assert.Equal(t, value, *conditionStatus)
-	}
-
 }
