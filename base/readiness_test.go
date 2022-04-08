@@ -19,8 +19,8 @@ import (
 // TestNoObject tests that task fails if the object is not present
 func TestNoObject(t *testing.T) {
 	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
-	rTask := NewReadinessTask("non-existant-pod").WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	pod := newPod(ns, nm).withCondition("Ready", "True").build()
+	rTask := newReadinessTask("non-existant-pod").withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
@@ -30,40 +30,40 @@ func TestNoObject(t *testing.T) {
 // Also validates setting of default namespace
 func TestWithoutConditions(t *testing.T) {
 	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithTimeout("20s").Build()
+	pod := newPod(ns, nm).build()
+	rTask := newReadinessTask(nm).withResource("pods").withTimeout("20s").build()
 	runTaskTest(t, rTask, true, ns, pod)
 }
 
 // TestWithCondition tests that the task succeeds when the condition is present and True
 func TestWithCondition(t *testing.T) {
 	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	pod := newPod(ns, nm).withCondition("Ready", "True").build()
+	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, true, ns, pod)
 }
 
 // TestWithFalseCondition tests that the task fails when the condition is present and not True
 func TestWithFalseCondition(t *testing.T) {
 	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "False").Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("Ready").Build()
+	pod := newPod(ns, nm).withCondition("Ready", "False").build()
+	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
 // TestConditionNotPresent tests that the task fails when the condition is not present (but others are)
 func TestConditionNotPresent(t *testing.T) {
 	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithCondition("NotPresent").Build()
+	pod := newPod(ns, nm).build()
+	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withCondition("NotPresent").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
 // TestInvalidTimeout tests that the task fails when the specified timeout is invalid (not parseable)
 func TestInvalidTimeout(t *testing.T) {
 	ns, nm := "default", "test-pod"
-	pod := newPod(ns, nm).WithCondition("Ready", "True").Build()
-	rTask := NewReadinessTask(nm).WithResource("pods").WithNamespace(ns).WithTimeout("timeout").Build()
+	pod := newPod(ns, nm).withCondition("Ready", "True").build()
+	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withTimeout("timeout").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
@@ -103,7 +103,7 @@ func newPod(ns string, nm string) *podBuilder {
 	return (*podBuilder)(pod)
 }
 
-func (p *podBuilder) Build() *unstructured.Unstructured {
+func (p *podBuilder) build() *unstructured.Unstructured {
 	o, err := runtime.DefaultUnstructuredConverter.ToUnstructured((*corev1.Pod)(p))
 	if err != nil {
 		return nil
@@ -111,7 +111,7 @@ func (p *podBuilder) Build() *unstructured.Unstructured {
 	return &unstructured.Unstructured{Object: o}
 }
 
-func (p *podBuilder) WithCondition(typ string, value string) *podBuilder {
+func (p *podBuilder) withCondition(typ string, value string) *podBuilder {
 	c := corev1.PodCondition{Type: (corev1.PodConditionType(typ))}
 	switch strings.ToLower(value) {
 	case "true":
@@ -128,7 +128,7 @@ func (p *podBuilder) WithCondition(typ string, value string) *podBuilder {
 
 type readinessTaskBuilder readinessTask
 
-func NewReadinessTask(name string) *readinessTaskBuilder {
+func newReadinessTask(name string) *readinessTaskBuilder {
 	rTask := &readinessTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(ReadinessTaskName),
@@ -141,26 +141,26 @@ func NewReadinessTask(name string) *readinessTaskBuilder {
 	return (*readinessTaskBuilder)(rTask)
 }
 
-func (t *readinessTaskBuilder) WithResource(resource string) *readinessTaskBuilder {
+func (t *readinessTaskBuilder) withResource(resource string) *readinessTaskBuilder {
 	t.With.Resource = resource
 	return t
 }
 
-func (t *readinessTaskBuilder) WithNamespace(ns string) *readinessTaskBuilder {
+func (t *readinessTaskBuilder) withNamespace(ns string) *readinessTaskBuilder {
 	t.With.Namespace = StringPointer(ns)
 	return t
 }
 
-func (t *readinessTaskBuilder) WithTimeout(timeout string) *readinessTaskBuilder {
+func (t *readinessTaskBuilder) withTimeout(timeout string) *readinessTaskBuilder {
 	t.With.Timeout = StringPointer(timeout)
 	return t
 }
 
-func (t *readinessTaskBuilder) WithCondition(condition string) *readinessTaskBuilder {
+func (t *readinessTaskBuilder) withCondition(condition string) *readinessTaskBuilder {
 	t.With.Condition = &condition
 	return t
 }
 
-func (t *readinessTaskBuilder) Build() *readinessTask {
+func (t *readinessTaskBuilder) build() *readinessTask {
 	return (*readinessTask)(t)
 }
