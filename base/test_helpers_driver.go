@@ -5,13 +5,10 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 // initKubeFake initialize the Kube clientset with a fake
 func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
-	fc := fake.NewSimpleClientset(objects...)
-	kd.Clientset = fc
 	kd.DynamicClient = dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
 	kd.Namespace = StringPointer("default")
 }

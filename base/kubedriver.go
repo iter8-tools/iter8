@@ -11,9 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 // KubeDriver embeds Kube configuration, and
@@ -21,8 +19,6 @@ import (
 type KubeDriver struct {
 	// EnvSettings provides generic Kubernetes options
 	*EnvSettings
-	// Clientset enables interaction with a Kubernetes cluster
-	Clientset kubernetes.Interface
 	// RestConfig is REST configuration of a Kubernetes cluster
 	RestConfig *rest.Config
 	// DynamicClient enables unstructured interaction with a Kubernetes cluster
@@ -37,7 +33,6 @@ type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured
 func NewKubeDriver(s *EnvSettings) *KubeDriver {
 	kd := &KubeDriver{
 		EnvSettings:   s,
-		Clientset:     nil,
 		RestConfig:    nil,
 		DynamicClient: nil,
 		Namespace:     nil,
@@ -47,18 +42,11 @@ func NewKubeDriver(s *EnvSettings) *KubeDriver {
 
 // initKube initializes the Kubernetes clientset
 func (kd *KubeDriver) initKube() (err error) {
-	if kd.Clientset == nil {
+	if kd.DynamicClient == nil {
 		// get REST config
 		kd.RestConfig, err = kd.EnvSettings.RESTClientGetter().ToRESTConfig()
 		if err != nil {
 			e := errors.New("unable to get Kubernetes REST config")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			return e
-		}
-		// get clientset
-		kd.Clientset, err = kubernetes.NewForConfig(kd.RestConfig)
-		if err != nil {
-			e := errors.New("unable to get Kubernetes clientset")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
@@ -70,15 +58,7 @@ func (kd *KubeDriver) initKube() (err error) {
 		}
 
 		if kd.Namespace == nil {
-			kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-				clientcmd.NewDefaultClientConfigLoadingRules(),
-				&clientcmd.ConfigOverrides{},
-			)
-			ns, _, err := kubeconfig.Namespace()
-			if err != nil {
-				ns = "default"
-			}
-			kd.Namespace = StringPointer(ns)
+			kd.Namespace = StringPointer(kd.EnvSettings.Namespace())
 		}
 	}
 
