@@ -76,7 +76,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 	kd.initKube()
 	// set Namespace (from context) if not already set
 	if t.With.Namespace == nil {
-		t.With.Namespace = kd.Namespace
+		t.With.Namespace = StringPointer(kd.Namespace())
 	}
 	timeout, err := time.ParseDuration(*t.With.Timeout)
 	if err != nil {
@@ -84,7 +84,14 @@ func (t *readinessTask) run(exp *Experiment) error {
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
-	log.Logger.Trace("duration is ", timeout)
+
+	// get rest config
+	restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
+	if err != nil {
+		e := errors.New("unable to get Kubernetes REST config")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
 
 	// do the work: check for object and condition
 	// repeat until time out
@@ -102,7 +109,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 			return true
 		}, // retry on all failures
 		func() error {
-			return checkObjectExistsAndConditionTrue(t, kd.RestConfig)
+			return checkObjectExistsAndConditionTrue(t, restConfig)
 		},
 	)
 	return err
@@ -113,7 +120,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
 	log.Logger.Trace("looking for ", t.With.Resource, " resource: ", t.With.Name, " in namespace ", *t.With.Namespace)
 
-	obj, err := kd.DynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
+	obj, err := kd.dynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}

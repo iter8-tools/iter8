@@ -13,7 +13,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
 )
 
 // KubeDriver embeds Kube configuration, and
@@ -21,12 +20,8 @@ import (
 type KubeDriver struct {
 	// EnvSettings provides generic Kubernetes options
 	*cli.EnvSettings
-	// RestConfig is REST configuration of a Kubernetes cluster
-	RestConfig *rest.Config
-	// DynamicClient enables unstructured interaction with a Kubernetes cluster
-	DynamicClient dynamic.Interface
-	// Namespace
-	Namespace *string
+	// dynamicClient enables unstructured interaction with a Kubernetes cluster
+	dynamicClient dynamic.Interface
 }
 
 type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured.Unstructured, error)
@@ -35,32 +30,26 @@ type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured
 func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
 	kd := &KubeDriver{
 		EnvSettings:   s,
-		RestConfig:    nil,
-		DynamicClient: nil,
-		Namespace:     nil,
+		dynamicClient: nil,
 	}
 	return kd
 }
 
 // initKube initializes the Kubernetes clientset
 func (kd *KubeDriver) initKube() (err error) {
-	if kd.DynamicClient == nil {
+	if kd.dynamicClient == nil {
 		// get REST config
-		kd.RestConfig, err = kd.EnvSettings.RESTClientGetter().ToRESTConfig()
+		restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
 		if err != nil {
 			e := errors.New("unable to get Kubernetes REST config")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
-		kd.DynamicClient, err = dynamic.NewForConfig(kd.RestConfig)
+		kd.dynamicClient, err = dynamic.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes dynamic client")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
-		}
-
-		if kd.Namespace == nil {
-			kd.Namespace = StringPointer(kd.EnvSettings.Namespace())
 		}
 	}
 

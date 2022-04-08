@@ -9,8 +9,7 @@ import (
 
 // initKubeFake initialize the Kube clientset with a fake
 func (kd *KubeDriver) initKubeFake(objects ...runtime.Object) {
-	kd.DynamicClient = dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
-	kd.Namespace = StringPointer("default")
+	kd.dynamicClient = dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
 }
 
 // initFake initializes fake Kubernetes and Helm clients
