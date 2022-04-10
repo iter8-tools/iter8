@@ -1,9 +1,14 @@
 BINDIR      := $(CURDIR)/bin
-INSTALL_PATH ?= /usr/local/bin
+INSTALL_PATH		?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
 TARGETS     := darwin/amd64 linux/amd64 linux/386 windows/amd64
 BINNAME     ?= iter8
-ITER8_IMG ?= iter8/iter8:edge
+
+# Adding a colon followed by a tag for ITER8_IMG causes problems in the rest of the makefile
+# export ITER8_IMG as an env variable before invoking make docker-build/push
+# For example, export ITER8_IMG=iter8/iter8:edge
+
+ITER8_IMG		?= iter8/iter8#:edge
 
 GOBIN         = $(shell go env GOBIN)
 ifeq ($(GOBIN),)
@@ -26,15 +31,14 @@ GIT_COMMIT = $(shell git rev-parse HEAD)
 GIT_TAG    = $(shell git describe --tags --dirty)
 
 ifdef VERSION
-	BINARY_VERSION = $(VERSION)
+	BINARY_VERSION	=$(VERSION)
 endif
-BINARY_VERSION ?= ${GIT_TAG}
+BINARY_VERSION	?=${GIT_TAG}
 
 # Only set Version if GIT_TAG or VERSION is set
 ifneq ($(BINARY_VERSION),)
 	LDFLAGS += -X github.com/iter8-tools/iter8/base.Version=${BINARY_VERSION}
 endif
-
 
 LDFLAGS += -X github.com/iter8-tools/iter8/cmd.gitCommit=${GIT_COMMIT}
 
@@ -88,12 +92,12 @@ clean:
 #	 Docker
 
 .PHONY: docker-build
- docker-build:
- 	docker build -f Dockerfile -t $(ITER8_IMG) .
+docker-build:
+	docker build -f Dockerfile -t $(ITER8_IMG) .
 
- .PHONY: docker-push
- docker-push:
- 	docker push $(ITER8_IMG)
+.PHONY: docker-push
+docker-push: docker-build
+	docker push $(ITER8_IMG)
 
 # ------------------------------------------------------------------------------
 #  test
