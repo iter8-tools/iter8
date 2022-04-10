@@ -27,47 +27,6 @@ jobs:
         fi
 
   load-test-http:
-    - name: load test GET endpoint
-      run: | 
-        cat << EOF > experiment-config.yaml
-          url: http://$HOST_IP/get
-        EOF
-    - uses: iter8-tools/iter8-action@v1
-      with:
-        chart: load-test-http
-        valuesFile: experiment-config.yaml
-
-    - name: load test GET endpoint
-      run: | 
-        cat << EOF > experiment-config.yaml
-          url: http://$HOST_IP/get
-          SLOs:
-            http/latency-p25: 80
-            http/latency-p50: 100
-            http/latency-p95.0: 200
-        EOF
-    - uses: iter8-tools/iter8-action@v1
-      with:
-        chart: load-test-http
-        valuesFile: experiment-config.yaml
-
-    - name: load test POST endpoint
-      run: | 
-        cat << EOF > experiment-config.yaml
-          url: http://$HOST_IP/post
-          payloadURL: https://cdn.pixabay.com/photo/2021/09/08/17/58/poppy-6607526_1280.jpg
-          contentType: "image/jpeg"
-          SLOs:
-            http/latency-p25: 80
-            http/latency-p50: 100
-            http/latency-p95.0: 200
-        EOF
-    - uses: iter8-tools/iter8-action@v1
-      with:
-        chart: load-test-http
-        valuesFile: experiment-config.yaml
-
-  load-test-http:
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
@@ -91,7 +50,7 @@ jobs:
     - name: launch load-test-http
       run: |
         iter8 launch -c load-test-http --chartsParentDir ../ \
-        --set url="http://$HOST_IP/get" \
+        --set url="http://$HOST_IP/post" \
         --payloadURL= "https://httpbin.org/stream/1"
     - name: assert experiment completed without failures
       run: |
