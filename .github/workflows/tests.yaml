@@ -27,6 +27,7 @@ jobs:
         fi
 
   load-test-http:
+    name: http load test with payloadURL
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
@@ -55,6 +56,46 @@ jobs:
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure
+
+  load-test-grpc:
+    name: gRPC load test with various URLs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Build and install Iter8
+      run: make install
+    - name: run greeter
+      run: |
+        git clone -b v1.43.0 https://github.com/grpc/grpc-go
+        cd grpc-go/examples/helloworld
+        go build greeter_server/main.go
+        ./main &
+    - name: load test grpc service method
+      run: |
+        set -e
+        cd charts/load-test-grpc
+        export LOG_LEVEL=trace
+        iter8 launch -c load-test-http --chartsParentDir ../ \
+          --set host="127.0.0.1:50051" \
+          --set call="helloworld.Greeter.SayHello" \
+          --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+          --set data.name="frodo" \
+          --set SLOs.grpc/error-rate=0 \
+          --set SLOs.grpc/latency/mean=50 \
+          --set SLOs.grpc/latency/p90=100 \
+          --set SLOs.grpc/latency/p'97\.5'=200
+        # echo "experiment ... "
+        # cat experiment.yaml
+        # iter8 run
+        # echo "report ..."
+        # iter8 report
+        # echo "assert... "
+        iter8 assert -c completed -c nofailure -c slos
 
   static-check:
     runs-on: ubuntu-latest
