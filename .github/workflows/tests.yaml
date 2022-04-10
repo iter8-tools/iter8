@@ -51,7 +51,7 @@ jobs:
       run: |
         iter8 launch -c load-test-http --chartsParentDir ../ \
         --set url="http://$HOST_IP/post" \
-        --payloadURL= "https://httpbin.org/stream/1"
+        --set payloadURL= "https://httpbin.org/stream/1"
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure
