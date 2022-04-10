@@ -80,7 +80,7 @@ jobs:
         set -e
         cd charts/load-test-grpc
         export LOG_LEVEL=trace
-        iter8 launch -c load-test-http --chartsParentDir ../ \
+        iter8 launch -c load-test-grpc --chartsParentDir ../ \
           --set host="127.0.0.1:50051" \
           --set call="helloworld.Greeter.SayHello" \
           --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
