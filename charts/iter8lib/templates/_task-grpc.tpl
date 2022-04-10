@@ -40,6 +40,6 @@
 # task: generate gRPC requests for app
 # collect Iter8's built-in gRPC latency and error-related metrics
 - task: gen-load-and-collect-metrics-grpc
-with:
+  with:
 {{ toYaml $vals | indent 4 }}
 {{- end }}
