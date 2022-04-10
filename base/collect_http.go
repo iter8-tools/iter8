@@ -1,7 +1,6 @@
 package base
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,14 +13,6 @@ import (
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
-// versionHTTP contains header and url information needed to send requests to each version.
-type versionHTTP struct {
-	// HTTP headers to use in the query for this version; optional
-	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
-	// URL to use for querying this version
-	URL string `json:"url" yaml:"url"`
-}
-
 // errorRange has lower and upper limits for HTTP status codes. HTTP status code within this range is considered an error
 type errorRange struct {
 	// Lower end of the range
@@ -32,26 +23,28 @@ type errorRange struct {
 
 // collectHTTPInputs contain the inputs to the metrics collection task to be executed.
 type collectHTTPInputs struct {
-	// NumRequests is the number of requests to be sent to each version. Default value is 100.
+	// NumRequests is the number of requests to be sent to the app. Default value is 100.
 	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
 	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
 	Duration *string `json:"duration" yaml:"duration"`
-	// QPS is the number of requests per second sent to each version. Default value is 8.0.
+	// QPS is the number of requests per second sent to the app. Default value is 8.0.
 	QPS *float32 `json:"qps" yaml:"qps"`
 	// Connections is the number of number of parallel connections used to send load. Default value is 4.
 	Connections *int `json:"connections" yaml:"connections"`
-	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to versions using this string as the payload.
+	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to the app using this string as the payload.
 	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
-	// PayloadFile is payload file. If this field is specified, Iter8 will send HTTP POST requests to versions using data in this file. If both `payloadStr` and `payloadFile` are specified, the former is ignored.
+	// PayloadFile is payload file. If this field is specified, Iter8 will send HTTP POST requests to the app using data in this file. If both `payloadStr` and `payloadFile` are specified, the former is ignored.
 	PayloadFile *string `json:"payloadFile" yaml:"payloadFile"`
-	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to versions using this content type header value.
+	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to the app using this content type header value.
 	ContentType *string `json:"contentType" yaml:"contentType"`
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
 	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
 	// Percentiles are the latency percentiles collected by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
 	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
-	// VersionInfo is a non-empty list of version values.
-	VersionInfo []*versionHTTP `json:"versionInfo" yaml:"versionInfo"`
+	// HTTP headers to use in the query; optional
+	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
+	// URL to use for querying the app
+	URL string `json:"url" yaml:"url"`
 }
 
 const (
@@ -145,7 +138,7 @@ func (t *collectHTTPTask) validateInputs() error {
 }
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
-func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, error) {
+func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
 	fortioLog.SetOutput(io.Discard)
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
@@ -157,7 +150,7 @@ func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, err
 			Out:         io.Discard,
 		},
 		HTTPOptions: fhttp.HTTPOptions{
-			URL: t.With.VersionInfo[j].URL,
+			URL: t.With.URL,
 		},
 	}
 
@@ -196,18 +189,18 @@ func (t *collectHTTPTask) getFortioOptions(j int) (*fhttp.HTTPRunnerOptions, err
 	}
 
 	// headers
-	for key, value := range t.With.VersionInfo[j].Headers {
+	for key, value := range t.With.Headers {
 		fo.AddAndValidateExtraHeader(key + ":" + value)
 	}
 
 	return fo, nil
 }
 
-// resultForVersion collects Fortio result for a given version
-func (t *collectHTTPTask) resultForVersion(j int) (*fhttp.HTTPRunnerResults, error) {
+// getFortioResults collects Fortio run results
+func (t *collectHTTPTask) getFortioResults() (*fhttp.HTTPRunnerResults, error) {
 	// the main idea is to run Fortio with proper options
 
-	fo, err := t.getFortioOptions(j)
+	fo, err := t.getFortioOptions()
 	if err != nil {
 		return nil, err
 	}
@@ -233,131 +226,111 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 
 	t.initializeDefaults()
 
-	if len(t.With.VersionInfo) == 0 {
-		log.Logger.Error("collect task must specify info for at least one version")
-		return errors.New("collect task must specify info for at least one version")
+	// run fortio
+	data, err := t.getFortioResults()
+	if err != nil {
+		return err
 	}
 
-	fm := make([]*fhttp.HTTPRunnerResults, len(t.With.VersionInfo))
-
-	// run fortio queries for each version sequentially
-	for j := range t.With.VersionInfo {
-		log.Logger.Trace("initiating fortio for version ", j)
-		var data *fhttp.HTTPRunnerResults
-		var err error
-		if t.With.VersionInfo[j] == nil {
-			data = nil
-		} else {
-			data, err = t.resultForVersion(j)
-			if err == nil {
-				fm[j] = data
-			} else {
-				return err
-			}
-		}
-	}
-
-	// this task creates insights for different versions
-	// initialize num versions
-	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
+	// this task populates insights in the experiment
+	// hence, initialize insights with num versions (= 1)
+	err = exp.Result.initInsightsWithNumVersions(1)
 	if err != nil {
 		return err
 	}
 	in := exp.Result.Insights
 
-	for i := range t.With.VersionInfo {
-		if fm[i] != nil {
-			// request count
-			m := httpMetricPrefix + "/" + builtInHTTPRequestCountId
-			mm := MetricMeta{
-				Description: "number of requests sent",
-				Type:        CounterMetricType,
-			}
-			in.updateMetric(m, mm, i, float64(fm[i].DurationHistogram.Count))
-
-			// error count & rate
-			val := float64(0)
-			for code, count := range fm[i].RetCodes {
-				if t.errorCode(code) {
-					val += float64(count)
-				}
-			}
-			// error count
-			m = httpMetricPrefix + "/" + builtInHTTPErrorCountId
-			mm = MetricMeta{
-				Description: "number of responses that were errors",
-				Type:        CounterMetricType,
-			}
-			in.updateMetric(m, mm, i, val)
-
-			// error-rate
-			m = httpMetricPrefix + "/" + builtInHTTPErrorRateId
-			rc := float64(fm[i].DurationHistogram.Count)
-			if rc != 0 {
-				mm = MetricMeta{
-					Description: "fraction of responses that were errors",
-					Type:        GaugeMetricType,
-				}
-				in.updateMetric(m, mm, i, val/rc)
-			}
-
-			// mean-latency
-			m = httpMetricPrefix + "/" + builtInHTTPLatencyMeanId
-			mm = MetricMeta{
-				Description: "mean of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Avg)
-
-			// stddev-latency
-			m = httpMetricPrefix + "/" + builtInHTTPLatencyStdDevId
-			mm = MetricMeta{
-				Description: "standard deviation of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.StdDev)
-
-			// min-latency
-			m = httpMetricPrefix + "/" + builtInHTTPLatencyMinId
-			mm = MetricMeta{
-				Description: "minimum of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Min)
-
-			// max-latency
-			m = httpMetricPrefix + "/" + builtInHTTPLatencyMaxId
-			mm = MetricMeta{
-				Description: "maximum of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			in.updateMetric(m, mm, i, 1000.0*fm[i].DurationHistogram.Max)
-
-			// percentiles
-			for _, p := range fm[i].DurationHistogram.Percentiles {
-				m = fmt.Sprintf("%v/%v%v", httpMetricPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
-				mm = MetricMeta{
-					Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
-					Type:        GaugeMetricType,
-					Units:       StringPointer("msec"),
-				}
-				in.updateMetric(m, mm, i, 1000.0*p.Value)
-			}
-
-			// latency histogram
-			m = httpMetricPrefix + "/" + builtInHTTPLatencyHistId
-			mm = MetricMeta{
-				Description: "Latency Histogram",
-				Type:        HistogramMetricType,
-				Units:       StringPointer("msec"),
-			}
-			lh := latencyHist(fm[i].DurationHistogram)
-			in.updateMetric(m, mm, i, lh)
+	if data != nil {
+		// request count
+		m := httpMetricPrefix + "/" + builtInHTTPRequestCountId
+		mm := MetricMeta{
+			Description: "number of requests sent",
+			Type:        CounterMetricType,
 		}
+		in.updateMetric(m, mm, 0, float64(data.DurationHistogram.Count))
+
+		// error count & rate
+		val := float64(0)
+		for code, count := range data.RetCodes {
+			if t.errorCode(code) {
+				val += float64(count)
+			}
+		}
+		// error count
+		m = httpMetricPrefix + "/" + builtInHTTPErrorCountId
+		mm = MetricMeta{
+			Description: "number of responses that were errors",
+			Type:        CounterMetricType,
+		}
+		in.updateMetric(m, mm, 0, val)
+
+		// error-rate
+		m = httpMetricPrefix + "/" + builtInHTTPErrorRateId
+		rc := float64(data.DurationHistogram.Count)
+		if rc != 0 {
+			mm = MetricMeta{
+				Description: "fraction of responses that were errors",
+				Type:        GaugeMetricType,
+			}
+			in.updateMetric(m, mm, 0, val/rc)
+		}
+
+		// mean-latency
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyMeanId
+		mm = MetricMeta{
+			Description: "mean of observed latency values",
+			Type:        GaugeMetricType,
+			Units:       StringPointer("msec"),
+		}
+		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Avg)
+
+		// stddev-latency
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyStdDevId
+		mm = MetricMeta{
+			Description: "standard deviation of observed latency values",
+			Type:        GaugeMetricType,
+			Units:       StringPointer("msec"),
+		}
+		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.StdDev)
+
+		// min-latency
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyMinId
+		mm = MetricMeta{
+			Description: "minimum of observed latency values",
+			Type:        GaugeMetricType,
+			Units:       StringPointer("msec"),
+		}
+		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Min)
+
+		// max-latency
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyMaxId
+		mm = MetricMeta{
+			Description: "maximum of observed latency values",
+			Type:        GaugeMetricType,
+			Units:       StringPointer("msec"),
+		}
+		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Max)
+
+		// percentiles
+		for _, p := range data.DurationHistogram.Percentiles {
+			m = fmt.Sprintf("%v/%v%v", httpMetricPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
+			mm = MetricMeta{
+				Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
+				Type:        GaugeMetricType,
+				Units:       StringPointer("msec"),
+			}
+			in.updateMetric(m, mm, 0, 1000.0*p.Value)
+		}
+
+		// latency histogram
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyHistId
+		mm = MetricMeta{
+			Description: "Latency Histogram",
+			Type:        HistogramMetricType,
+			Units:       StringPointer("msec"),
+		}
+		lh := latencyHist(data.DurationHistogram)
+		in.updateMetric(m, mm, 0, lh)
 	}
 	return nil
 }

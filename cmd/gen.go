@@ -12,7 +12,7 @@ Generate an experiment.yaml file by combining an experiment chart with values.
 
     $ iter8 gen --sourceDir /path/to/load-test-http --set url=https://httpbin.org/get
 
-This command is intended for development and testing of experiment charts. For production usage, the launch subcommand is recommended.
+This command is intended for development and testing of experiment charts. For production usage, the launch command is recommended.
 `
 
 // newGenCmd creates the gen command
@@ -36,12 +36,12 @@ func newGenCmd() *cobra.Command {
 
 // addChartsParentDirFlag to the command
 func addChartsParentDirFlag(cmd *cobra.Command, chartsParentDirPtr *string) {
-	cmd.Flags().StringVar(chartsParentDirPtr, "chartsParentDir", ".", "path to experiment chart directory")
+	cmd.Flags().StringVar(chartsParentDirPtr, "chartsParentDir", ".", "directory under which the charts folder is located")
 }
 
 // addChartNameFlag to the command
 func addChartNameFlag(cmd *cobra.Command, chartNamePtr *string) {
-	cmd.Flags().StringVarP(chartNamePtr, "chartName", "c", "", "path to experiment chart directory")
+	cmd.Flags().StringVarP(chartNamePtr, "chartName", "c", "", "name of the experiment chart")
 	cmd.MarkFlagRequired("chartName")
 }
 

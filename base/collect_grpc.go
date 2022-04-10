@@ -9,12 +9,6 @@ import (
 	gd "github.com/mcuadros/go-defaults"
 )
 
-// // collectGRPCInputs holds all the inputs for this task
-// type collectGRPCInputs struct {
-// 	// Config is the ghz runner.Config object embedded in the input
-// 	runner.Config
-// }
-
 const (
 	// CollectGRPCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
 	CollectGRPCTaskName = "gen-load-and-collect-metrics-grpc"
