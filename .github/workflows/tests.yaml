@@ -127,16 +127,18 @@ jobs:
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
 
-    - name: launch load-test-http
+    - name: iter8 k launch
       run: |
         iter8 k launch -c load-test-http --noDownload \
         --set url="http://httpbin.default/get" \
         --set payloadURL="https://httpbin.org/stream/1"
 
-    - name: assert experiment completed without failures
+    - name: try other iter8 k commands
       run: |
         iter8 k assert -c completed -c nofailure -t 60s
-
+        iter8 k report
+        iter8 k log
+        iter8 k delete
 
   static-check:
     runs-on: ubuntu-latest
