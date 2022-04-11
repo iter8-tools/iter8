@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: iter8
-        image: iter8-tools/iter8:{{  trimPrefix "v" .Chart.AppVersion }}
+        image: {{  .Values.iter8lib.global.iter8Image }}
         imagePullPolicy: Always
         command:
         - "/bin/sh"

@@ -9,4 +9,8 @@ rules:
   resources: ["secrets"]
   resourceNames: ["{{ $name }}-result"]
   verbs: ["create", "get", "update"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["{{ $name }}-job"]
+  verbs: ["get"]
 {{- end }}
