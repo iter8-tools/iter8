@@ -141,10 +141,10 @@ func newReadinessTask(name string) *readinessTaskBuilder {
 	return (*readinessTaskBuilder)(rTask)
 }
 
-func (t *readinessTaskBuilder) withGroup(group string) *readinessTaskBuilder {
-	t.With.Group = group
-	return t
-}
+// func (t *readinessTaskBuilder) withGroup(group string) *readinessTaskBuilder {
+// 	t.With.Group = group
+// 	return t
+// }
 func (t *readinessTaskBuilder) withVersion(version string) *readinessTaskBuilder {
 	t.With.Version = version
 	return t
