@@ -292,9 +292,13 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 
 // createExperimentResultSecret creates the experiment result secret
 func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
+	log.Logger.Info("forming result secret...")
 	if sec, err := driver.formResultSecret(r); err == nil {
+		log.Logger.Info("result secret formed")
 		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+		log.Logger.Info("creating result secret")
 		_, e := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
+		log.Logger.Info("create result secret returned")
 		if e != nil {
 			e := errors.New("unable to create result secret")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
