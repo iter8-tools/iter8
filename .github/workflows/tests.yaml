@@ -50,7 +50,7 @@ jobs:
         done;
     - name: launch load-test-http
       run: |
-        iter8 launch -c load-test-http --chartsParentDir ../ \
+        iter8 launch -c load-test-http --noDownload \
         --set url="http://$HOST_IP/post" \
         --set payloadURL="https://httpbin.org/stream/1"
     - name: assert experiment completed without failures
@@ -78,9 +78,8 @@ jobs:
     - name: load test grpc service method
       run: |
         set -e
-        cd charts/load-test-grpc
         export LOG_LEVEL=trace
-        iter8 launch -c load-test-grpc --chartsParentDir ../ \
+        iter8 launch -c load-test-grpc --noDownload \
           --set host="127.0.0.1:50051" \
           --set call="helloworld.Greeter.SayHello" \
           --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
