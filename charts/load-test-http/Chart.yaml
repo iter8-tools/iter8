@@ -24,4 +24,3 @@ dependencies:
 - name: iter8lib
   version: 0.10.x
   repository: file://../iter8lib
-appVersion: v0.10
