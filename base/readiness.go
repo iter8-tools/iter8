@@ -30,9 +30,11 @@ const (
 // ReadinessInputs identifies the K8s object to test for existence and
 // the (optional) condition that should be tested (succeeds if true).
 type readinessInputs struct {
-	// APIVersion of the object. Optional. If unspecified it will be defaulted to ""
-	APIVersion string `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
-	// Resource type of the object.
+	// Group of the object. Optional. If unspecified it will be defaulted to ""
+	Group string `json:"group,omitempty" yaml:"group,omitempty"`
+	// Version of the object. Optional. If unspecified it will be defaulted to ""
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
+	// Resource type of the object. Required.
 	Resource string `json:"resource" yaml:"resource"`
 	// Namespace of the object. Optional. If left unspecified, this will be defaulted to the namespace of the experiment
 	Namespace *string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
@@ -121,7 +123,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 // checkObjectExistsAndConditionTrue determines if the object exists
 // if so, it further checks if the requested condition is "True"
 func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
-	log.Logger.Trace("looking for ", t.With.Resource, " resource: ", t.With.Name, " in namespace ", *t.With.Namespace)
+	log.Logger.Trace("looking for resource (", t.With.Group, "/", t.With.Version, ") ", t.With.Resource, ": ", t.With.Name, " in namespace ", *t.With.Namespace)
 
 	obj, err := kd.dynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
 	if err != nil {
@@ -147,16 +149,11 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 }
 
 func gvr(objRef *readinessInputs) schema.GroupVersionResource {
-	if gv, err := schema.ParseGroupVersion(objRef.APIVersion); err == nil {
-		if gv.Group == "core" {
-			gv.Group = ""
-		}
-		if gv.Version == "" {
-			gv.Version = "v1"
-		}
-		return schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: objRef.Resource}
+	return schema.GroupVersionResource{
+		Group:    objRef.Group,
+		Version:  objRef.Version,
+		Resource: objRef.Resource,
 	}
-	return schema.GroupVersionResource{Resource: objRef.Resource}
 }
 
 func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*string, error) {

@@ -20,7 +20,7 @@ import (
 func TestNoObject(t *testing.T) {
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
-	rTask := newReadinessTask("non-existant-pod").withResource("pods").withNamespace(ns).withCondition("Ready").build()
+	rTask := newReadinessTask("non-existant-pod").withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
@@ -31,7 +31,7 @@ func TestNoObject(t *testing.T) {
 func TestWithoutConditions(t *testing.T) {
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).build()
-	rTask := newReadinessTask(nm).withResource("pods").withTimeout("20s").build()
+	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withTimeout("20s").build()
 	runTaskTest(t, rTask, true, ns, pod)
 }
 
@@ -39,7 +39,7 @@ func TestWithoutConditions(t *testing.T) {
 func TestWithCondition(t *testing.T) {
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
-	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withCondition("Ready").build()
+	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, true, ns, pod)
 }
 
@@ -47,7 +47,7 @@ func TestWithCondition(t *testing.T) {
 func TestWithFalseCondition(t *testing.T) {
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "False").build()
-	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withCondition("Ready").build()
+	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
@@ -55,7 +55,7 @@ func TestWithFalseCondition(t *testing.T) {
 func TestConditionNotPresent(t *testing.T) {
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).build()
-	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withCondition("NotPresent").build()
+	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withCondition("NotPresent").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
@@ -63,7 +63,7 @@ func TestConditionNotPresent(t *testing.T) {
 func TestInvalidTimeout(t *testing.T) {
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
-	rTask := newReadinessTask(nm).withResource("pods").withNamespace(ns).withTimeout("timeout").build()
+	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withTimeout("timeout").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
@@ -139,6 +139,15 @@ func newReadinessTask(name string) *readinessTaskBuilder {
 	}
 
 	return (*readinessTaskBuilder)(rTask)
+}
+
+func (t *readinessTaskBuilder) withGroup(group string) *readinessTaskBuilder {
+	t.With.Group = group
+	return t
+}
+func (t *readinessTaskBuilder) withVersion(version string) *readinessTaskBuilder {
+	t.With.Version = version
+	return t
 }
 
 func (t *readinessTaskBuilder) withResource(resource string) *readinessTaskBuilder {
