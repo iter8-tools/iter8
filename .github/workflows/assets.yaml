@@ -116,7 +116,6 @@ jobs:
         --set payloadURL="https://httpbin.org/stream/1"
     - name: try other iter8 k commands
       run: |
-        sleep 30
         iter8 k assert -c completed -c nofailure --timeout 60s
         iter8 k report
         iter8 k log
