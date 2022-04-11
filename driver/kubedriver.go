@@ -121,14 +121,14 @@ func (driver *KubeDriver) initRevision() error {
 }
 
 // Init initializes the KubeDriver
-func (driver *KubeDriver) Init() error {
-	if err := driver.initKube(); err != nil {
+func (kd *KubeDriver) Init() error {
+	if err := kd.initKube(); err != nil {
 		return err
 	}
-	if err := driver.initHelm(); err != nil {
+	if err := kd.initHelm(); err != nil {
 		return err
 	}
-	if err := driver.initRevision(); err != nil {
+	if err := kd.initRevision(); err != nil {
 		return err
 	}
 	return nil
