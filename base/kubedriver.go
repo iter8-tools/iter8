@@ -10,8 +10,6 @@ import (
 
 	"helm.sh/helm/v3/pkg/cli"
 
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 )
 
@@ -27,8 +25,6 @@ type KubeDriver struct {
 	// dynamicClient enables unstructured interaction with a Kubernetes cluster
 	dynamicClient dynamic.Interface
 }
-
-type GetObjectFuncType func(*KubeDriver, *corev1.ObjectReference) (*unstructured.Unstructured, error)
 
 // NewKubeDriver creates and returns a new KubeDriver
 func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
