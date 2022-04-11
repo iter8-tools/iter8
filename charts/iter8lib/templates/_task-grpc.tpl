@@ -1,12 +1,12 @@
 {{- define "task.grpc" -}}
-{{- /* Validate values */ -}}
+{{/* Validate values */}}
 {{- if not .Values.host }}
 {{- fail "Please set a value for the host parameter." }}
 {{- end }}
 {{- if not .Values.call }}
 {{- fail "Please set a value for the call parameter." }}
 {{- end }}
-{{- /* Perform the various setup steps before the main task */ -}}
+{{/* Perform the various setup steps before the main task */}}
 {{- $vals := mustDeepCopy .Values }}
 {{- if .Values.protoURL }}
 # task: download proto file from URL
@@ -36,7 +36,7 @@
 {{- $pf := dict "metadata-file" "metadata.json" }}
 {{- $vals = mustMerge $pf $vals }}
 {{- end }}
-{{- /* Write the main task */ -}}
+{{/* Write the main task */}}
 # task: generate gRPC requests for app
 # collect Iter8's built-in gRPC latency and error-related metrics
 - task: gen-load-and-collect-metrics-grpc
