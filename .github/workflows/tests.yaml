@@ -75,7 +75,8 @@ jobs:
         cd grpc-go/examples/helloworld
         go build greeter_server/main.go
         ./main &
-    - name: load test grpc service method
+
+    - name: load test grpc service with protoURL
       run: |
         set -e
         export LOG_LEVEL=trace
@@ -88,12 +89,22 @@ jobs:
           --set SLOs.grpc/latency/mean=50 \
           --set SLOs.grpc/latency/p90=100 \
           --set SLOs.grpc/latency/p'97\.5'=200
-        # echo "experiment ... "
-        # cat experiment.yaml
-        # iter8 run
-        # echo "report ..."
-        # iter8 report
-        # echo "assert... "
+        iter8 assert -c completed -c nofailure -c slos
+        
+    - name: load test grpc service with protoURL and dataURL
+      run: |
+        set -e
+        export LOG_LEVEL=trace
+        iter8 launch -c load-test-grpc --noDownload \
+          --set host="127.0.0.1:50051" \
+          --set call="helloworld.Greeter.SayHello" \
+          --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+          --set dataURL="https://httpbin.org/stream/1" \
+          --set data.name="frodo" \
+          --set SLOs.grpc/error-rate=0 \
+          --set SLOs.grpc/latency/mean=50 \
+          --set SLOs.grpc/latency/p90=100 \
+          --set SLOs.grpc/latency/p'97\.5'=200
         iter8 assert -c completed -c nofailure -c slos
 
   static-check:
