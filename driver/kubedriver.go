@@ -246,14 +246,15 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 		return nil, err
 	}
 	// got spec secret ...
+	log.Logger.Trace("spec secret typemeta", spec.TypeMeta)
 
 	byteArray, _ := yaml.Marshal(r)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: driver.getResultSecretName(),
 			OwnerReferences: []metav1.OwnerReference{{
-				APIVersion: spec.APIVersion,
-				Kind:       spec.Kind,
+				APIVersion: "v1",
+				Kind:       "secret",
 				Name:       spec.Name,
 				UID:        spec.UID,
 			}},
@@ -271,11 +272,11 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 		log.Logger.Trace("result secret formed")
 		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 		log.Logger.Trace("creating result secret using client and sec", secretsClient, sec)
-		_, e := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
+		_, err2 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
 		log.Logger.Trace("create result secret returned")
-		if e != nil {
+		if err2 != nil {
 			e := errors.New("unable to create result secret")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
+			log.Logger.WithStackTrace(err2.Error()).Error(e)
 			return e
 		} else {
 			return nil
