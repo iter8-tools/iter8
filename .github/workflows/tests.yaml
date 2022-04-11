@@ -99,8 +99,8 @@ jobs:
           --set host="127.0.0.1:50051" \
           --set call="helloworld.Greeter.SayHello" \
           --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-          --set dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/ae3b9b1c8244c8ebb1552035967544bebdafc1d2/name.json" \
-          --set metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/ae3b9b1c8244c8ebb1552035967544bebdafc1d2/name.json" \
+          --set dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
+          --set metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
           --set SLOs.grpc/error-rate=0 \
           --set SLOs.grpc/latency/mean=50 \
           --set SLOs.grpc/latency/p90=100 \
