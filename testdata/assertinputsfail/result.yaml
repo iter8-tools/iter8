@@ -131,6 +131,6 @@ insights:
     http/request-count:
     - 16
   numVersions: 1
-iter8Version: v0.9
+iter8Version: v0.10
 numCompletedTasks: 4
 startTime: "2022-03-16T10:22:37.110424-04:00"
