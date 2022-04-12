@@ -57,6 +57,19 @@ jobs:
       run: |
         iter8 assert -c completed -c nofailure
 
+    - name: launch load-test-http with percentiles, duration, and SLOs
+      run: |
+        iter8 launch -c load-test-http --noDownload \
+        --set url="http://$HOST_IP/post" \
+        --set payloadURL="https://httpbin.org/stream/1" \
+        --set duration="3s" \
+        --set percentiles={45.6,97.5} \
+        --set SLOs.http/latency-'45\.6'=500 \
+        --set SLOs.http/error-count=0
+    - name: assert experiment completed without failures
+      run: |
+        iter8 assert -c completed -c nofailure -c slos
+
   load-test-grpc:
     name: gRPC load test with various URLs
     runs-on: ubuntu-latest
