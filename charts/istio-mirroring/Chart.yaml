@@ -1,0 +1,27 @@
+apiVersion: v2
+name: istio-mirroring
+version: 0.9.1
+description: Load test, benchmark, and validate HTTP services
+type: application
+keywords:
+- Iter8
+- HTTP
+- load test
+- benchmark
+- validation
+- SLOs 
+- metrics
+- experiment
+home: https://iter8.tools
+sources:
+- https://github.com/iter8-tools/iter8
+maintainers:
+- name: Srinivasan Parthasarathy
+  email: spartha@us.ibm.com
+  url: https://researcher.watson.ibm.com/researcher/view.php?person=us-spartha
+icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+dependencies:
+- name: iter8lib
+  version: 0.9.x
+  repository: file://../iter8lib
+appVersion: v0.9
