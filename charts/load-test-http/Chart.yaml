@@ -1,6 +1,6 @@
 apiVersion: v2
 name: load-test-http
-version: 0.9.1
+version: 0.10.0
 description: Load test, benchmark, and validate HTTP services
 type: application
 keywords:
@@ -22,6 +22,5 @@ maintainers:
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
 dependencies:
 - name: iter8lib
-  version: 0.9.x
+  version: 0.10.x
   repository: file://../iter8lib
-appVersion: v0.9

@@ -32,7 +32,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/yaml"
 
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -186,26 +185,6 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (s *corev1.Secret, err
 	return nil, e
 }
 
-// getJobWithRetry attempts to get a Kubernetes job with retry
-func (driver *KubeDriver) getJobWithRetry(name string) (*batchv1.Job, error) {
-
-	jobsClient := driver.Clientset.BatchV1().Jobs(driver.Namespace())
-
-	for i := 0; i < maxGetRetries; i++ {
-		j, err := jobsClient.Get(context.Background(), name, metav1.GetOptions{})
-		if err == nil {
-			return j, err
-		}
-		if !k8serrors.IsNotFound(err) {
-			log.Logger.Warningf("unable to get job: %s; %s\n", name, err.Error())
-		}
-		time.Sleep(getRetryInterval)
-	}
-	e := fmt.Errorf("unable to get job %v", name)
-	log.Logger.Error(e)
-	return nil, e
-}
-
 // getExperimentSpecSecret gets the Kubernetes experiment spec secret
 func (driver *KubeDriver) getExperimentSpecSecret() (s *corev1.Secret, err error) {
 	return driver.getSecretWithRetry(driver.getSpecSecretName())
@@ -214,11 +193,6 @@ func (driver *KubeDriver) getExperimentSpecSecret() (s *corev1.Secret, err error
 // getExperimentResultSecret gets the Kubernetes experiment result secret
 func (driver *KubeDriver) getExperimentResultSecret() (s *corev1.Secret, err error) {
 	return driver.getSecretWithRetry(driver.getResultSecretName())
-}
-
-// getExperimentJob gets the Kubernetes experiment job
-func (driver *KubeDriver) getExperimentJob() (j *batchv1.Job, err error) {
-	return driver.getJobWithRetry(driver.getExperimentJobName())
 }
 
 // ReadSpec creates an ExperimentSpec struct for a Kubernetes experiment
@@ -267,21 +241,22 @@ type PayloadValue struct {
 
 // formResultSecret creates the result secret using the result
 func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Secret, error) {
-	job, err := driver.getExperimentJob()
+	spec, err := driver.getExperimentSpecSecret()
 	if err != nil {
 		return nil, err
 	}
-	// got job ...
+	// got spec secret ...
+	log.Logger.Trace("spec secret typemeta", spec.TypeMeta)
 
 	byteArray, _ := yaml.Marshal(r)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: driver.getResultSecretName(),
 			OwnerReferences: []metav1.OwnerReference{{
-				APIVersion: job.APIVersion,
-				Kind:       job.Kind,
-				Name:       job.Name,
-				UID:        job.UID,
+				APIVersion: "v1",
+				Kind:       "secret",
+				Name:       spec.Name,
+				UID:        spec.UID,
 			}},
 		},
 		StringData: map[string]string{"result.yaml": string(byteArray)},
@@ -292,12 +267,16 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 
 // createExperimentResultSecret creates the experiment result secret
 func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
+	log.Logger.Trace("forming result secret...")
 	if sec, err := driver.formResultSecret(r); err == nil {
+		log.Logger.Trace("result secret formed")
 		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-		_, e := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
-		if e != nil {
+		log.Logger.Trace("creating result secret using client and sec", secretsClient, sec)
+		_, err2 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
+		log.Logger.Trace("create result secret returned")
+		if err2 != nil {
 			e := errors.New("unable to create result secret")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
+			log.Logger.WithStackTrace(err2.Error()).Error(e)
 			return e
 		} else {
 			return nil

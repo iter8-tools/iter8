@@ -13,8 +13,7 @@
     - 97.5
     - 99
     - 99.9
-    versionInfo:
-    - url: https://httpbin.org/get
+    url: https://httpbin.org/get
 # task 2: validate service level objectives for app using
 # the metrics collected in the above task
 - task: assess-app-versions

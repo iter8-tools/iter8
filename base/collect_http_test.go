@@ -25,10 +25,8 @@ func TestRunCollectHTTP(t *testing.T) {
 		With: collectHTTPInputs{
 			Duration:    StringPointer("1s"),
 			PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
-			VersionInfo: []*versionHTTP{{
-				Headers: map[string]string{},
-				URL:     "https://something.com",
-			}},
+			Headers:     map[string]string{},
+			URL:         "https://something.com",
 		},
 	}
 

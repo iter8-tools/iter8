@@ -44,5 +44,4 @@ func TestGenGRPC(t *testing.T) {
 	m = m["with"].(map[string]interface{})
 	s := m["proto"].(string)
 	assert.Equal(t, "helloworld.proto", s)
-
 }

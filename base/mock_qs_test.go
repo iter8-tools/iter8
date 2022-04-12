@@ -20,10 +20,8 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		},
 		With: collectHTTPInputs{
 			Duration: StringPointer("2s"),
-			VersionInfo: []*versionHTTP{{
-				Headers: map[string]string{},
-				URL:     testURL,
-			}},
+			Headers:  map[string]string{},
+			URL:      testURL,
 		},
 	}
 
@@ -68,10 +66,8 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		},
 		With: collectHTTPInputs{
 			Duration: StringPointer("1s"),
-			VersionInfo: []*versionHTTP{{
-				Headers: map[string]string{},
-				URL:     testURL,
-			}},
+			Headers:  map[string]string{},
+			URL:      testURL,
 		},
 	}
 

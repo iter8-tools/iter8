@@ -26,6 +26,87 @@ jobs:
           exit 1
         fi
 
+  load-test-http:
+    name: http load test with payloadURL
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Build and install Iter8
+      run: make install
+    - name: run httpbin
+      run: |
+        set -e
+        docker pull kennethreitz/httpbin
+        docker run -p 80:80 kennethreitz/httpbin &
+        HOST_IP=$(ip -f inet addr show docker0 | grep -Po 'inet \K[\d.]+')
+        echo "HOST_IP=$HOST_IP" >> $GITHUB_ENV
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
+          sleep 5; 
+        done;
+    - name: launch load-test-http
+      run: |
+        iter8 launch -c load-test-http --noDownload \
+        --set url="http://$HOST_IP/post" \
+        --set payloadURL="https://httpbin.org/stream/1"
+    - name: assert experiment completed without failures
+      run: |
+        iter8 assert -c completed -c nofailure
+
+  load-test-grpc:
+    name: gRPC load test with various URLs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Build and install Iter8
+      run: make install
+    - name: run greeter
+      run: |
+        git clone -b v1.43.0 https://github.com/grpc/grpc-go
+        cd grpc-go/examples/helloworld
+        go build greeter_server/main.go
+        ./main &
+
+    - name: load test grpc service with protoURL
+      run: |
+        set -e
+        export LOG_LEVEL=trace
+        iter8 launch -c load-test-grpc --noDownload \
+          --set host="127.0.0.1:50051" \
+          --set call="helloworld.Greeter.SayHello" \
+          --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+          --set data.name="frodo" \
+          --set SLOs.grpc/error-rate=0 \
+          --set SLOs.grpc/latency/mean=50 \
+          --set SLOs.grpc/latency/p90=100 \
+          --set SLOs.grpc/latency/p'97\.5'=200
+        iter8 assert -c completed -c nofailure -c slos
+        
+    - name: load test grpc service with proto/data/metadata URLs
+      run: |
+        set -e
+        export LOG_LEVEL=trace
+        iter8 launch -c load-test-grpc --noDownload \
+          --set host="127.0.0.1:50051" \
+          --set call="helloworld.Greeter.SayHello" \
+          --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+          --set dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
+          --set metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
+          --set SLOs.grpc/error-rate=0 \
+          --set SLOs.grpc/latency/mean=50 \
+          --set SLOs.grpc/latency/p90=100 \
+          --set SLOs.grpc/latency/p'97\.5'=200
+        iter8 assert -c completed -c nofailure -c slos
+
   static-check:
     runs-on: ubuntu-latest
     steps:
