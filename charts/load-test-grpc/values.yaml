@@ -1,12 +1,34 @@
-### Defaults values for this experiment chart.
-
-### The documentation follows Helm recommendations described in the URL below.
-### https://helm.sh/docs/chart_best_practices/values/#document-valuesyaml 
+### Parameters of the the load-test-grpc experiment chart and the default values.
 
 ##################################
 
-### All parameters accepted by this chart (with the exception of SLOs), and their default values are documented here. In particular, please refer to the json/yaml tags of the fields:
+### This chart accepts all parameters that are part of ghz's runner.Config struct.
 ### https://github.com/bojand/ghz/blob/983a3bf8085b4e6146241df559a91e3a8399071d/runner/config.go#L60
+### In particular, the json tags of the struct fields correspond to chart parameter names.
+### For example, call, host, and proto.
+### The default values of the parameters are also documented in the link above.
+
+### In addition, this chart supports the following parameters.
+
+### protoURL    URL of the protobuf file. If this field is specified, 
+### Iter8 will download the protobuf file and use it for the gRPC load test.
+# protoURL: null
+
+### protosetURL    URL of the protoset file. If this field is specified, 
+### Iter8 will download the protoset file and use it for the gRPC load test.
+# protosetURL: null
+
+### dataURL    URL of the data file. If this field is specified, 
+### Iter8 will download the JSON data file and use it for the gRPC load test.
+# dataURL: null
+
+### binaryDataURL    URL of the binary data file. If this field is specified, 
+### Iter8 will download the binary data file and use it for the gRPC load test.
+# binaryDataURL: null
+
+### metadataURL    URL of the metadata file. If this field is specified, 
+### Iter8 will download the JSON metadata file and use it for the gRPC load test.
+# metadataURL: null
 
 ### SLOs  A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Keys are metric names. Values are acceptable upper limits for the metric.
@@ -18,4 +40,4 @@
 ###   grpc/error-rate: 0
 ###   grpc/latency/mean: 50
 ###   grpc/latency/p99: 200
-SLOs: null
+# SLOs: null

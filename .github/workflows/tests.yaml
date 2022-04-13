@@ -48,6 +48,7 @@ jobs:
         while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
           sleep 5; 
         done;
+        
     - name: launch load-test-http
       run: |
         iter8 launch -c load-test-http --noDownload \
@@ -56,6 +57,21 @@ jobs:
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure
+
+    - name: launch load-test-http with percentiles, duration, and SLOs
+      run: |
+        iter8 launch -c load-test-http --noDownload \
+        --set url="https://httpbin.org/post" \
+        --set payloadURL="https://httpbin.org/stream/1" \
+        --set duration="3s" \
+        --set percentiles[0]=45.6 \
+        --set percentiles[1]=97.5 \
+        --set SLOs.http/latency-p'45\.6'=200 \
+        --set SLOs.http/latency-p95=500 \
+        --set SLOs.http/error-count=0
+    - name: assert experiment completed without failures
+      run: |
+        iter8 assert -c completed -c nofailure -c slos
 
   load-test-grpc:
     name: gRPC load test with various URLs

@@ -3,13 +3,11 @@
 [![Iter8 release](https://img.shields.io/github/v/release/iter8-tools/iter8?sort=semver)](https://github.com/iter8-tools/iter8/releases)
 [![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/iter8-tools/iter8)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/iter8-tools/iter8/tests?label=Unit%20tests)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/iter8-tools/hub/tests?label=Integration%20tests)
 
-> - Safely rollout apps
-> - Maximize business value
-> - Use with any app/serverless/ML framework
-> - Simplify CI/CD/GitOps
-> - Get started in seconds
+> - Benchmark and validate HTTP and gRPC services
+> - Compare app/ML model versions using metrics
+> - Safely promote winning version
+> - Maximize business value in each release
 
 <p align='center'>
 <img alt-text="Iter8 experiment" src="https://iter8-tools.github.io/docs/0.9/images/iter8-intro-dark.png" width="70%" />

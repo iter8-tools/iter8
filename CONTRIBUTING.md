@@ -17,9 +17,7 @@ bug report and let us know!
 We welcome many different types of contributions including:
 
 * [Tutorials and other documentation](#iter8-toolsdocs)
-* [Experiment charts](#iter8-toolshub)
-* [CLI features, and experiment tasks](#iter8-toolsiter8)
-* [Iter8 GitHub Action](#iter8-toolsiter8-action)
+* [Core Iter8 module with experiment charts](#iter8-toolsiter8)
 * CI, builds, and tests
 * [Web design](#iter8-toolsdocs)
 * Reviewing pull requests
@@ -90,11 +88,9 @@ repository, you can amend your commit with the sign-off by running:
 
 The Iter8 project consists of the following repos.
 
-1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI
-2. [iter8-tools/hub](https://github.com/iter8-tools/hub): source for Iter8 experiment charts
-3. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
-4. [iter8-tools/iter8-action](https://github.com/iter8-tools/iter8-action): source for the Iter8 GitHub Action
-5. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for the Iter8 CLI
+1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI and experiment charts
+2. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
+3. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for the Iter8 CLI
 
 ### iter8-tools/iter8
 
@@ -124,35 +120,6 @@ make coverage
 make htmlcov
 ```
 
-### iter8-tools/hub
-
-This is the source repo for Iter8 experiment charts.
-
-#### Clone `hub`
-
-```shell
-git clone https://github.com/iter8-tools/hub.git
-```
-
-#### Add tests
-Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file.
-
-#### Versioning
-Iter8 experiment charts are Helm charts under the covers, and are semantically versioned as per [Helm chart versioning specifications](https://helm.sh/docs/topics/charts/#charts-and-versioning). Every change to the chart must be accompanied by an increment to the version number of the chart. For most changes, this would mean an increment to the patch version (for example, the `version` field in `Chart.yaml` may be incremented from `0.1.0` to `0.1.1`).
-
-### iter8-tools/iter8-action
-
-This is the source repo for the Iter8 GitHub Action.
-
-#### Clone `iter8-action`
-
-```shell
-git clone https://github.com/iter8-tools/iter8-action.git
-```
-
-#### Add tests
-Add integration tests for Iter8 hub in the `.github/workflows/tests.yaml` file. You can run these tests by manually triggering the `tests` GitHub Actions workflow.
-
 
 ### iter8-tools/docs
 
@@ -175,10 +142,6 @@ mkdocs serve -s
 ```
 
 You can now see your local docs at [http://localhost:8000](http://localhost:8000). You will also see live updates to [http://localhost:8000](http://localhost:8000) as you update the contents of the `docs` folder.
-
-#### Add tests
-Add end-to-end tests for Iter8 in the `.github/workflows/tests.yaml` file.
-
 
 <!-- ## Pull Request Checklist
 
