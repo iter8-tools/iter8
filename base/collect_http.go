@@ -21,8 +21,8 @@ type errorRange struct {
 	Upper *int `json:"upper" yaml:"upper"`
 }
 
-// collectHTTPInputs contain the inputs to the metrics collection task to be executed.
-type collectHTTPInputs struct {
+// CollectHTTPInputs contain the inputs to the metrics collection task to be executed.
+type CollectHTTPInputs struct {
 	// NumRequests is the number of requests to be sent to the app. Default value is 100.
 	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
 	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
@@ -103,7 +103,7 @@ type collectHTTPTask struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
 	// With contains the inputs to this task
-	With collectHTTPInputs `json:"with" yaml:"with"`
+	With CollectHTTPInputs `json:"with" yaml:"with"`
 }
 
 // initializeDefaults sets default values for the collect task

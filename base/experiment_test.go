@@ -32,7 +32,7 @@ func TestRunTask(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
-		With: collectHTTPInputs{
+		With: CollectHTTPInputs{
 			Duration: StringPointer("1s"),
 			Headers:  map[string]string{},
 			URL:      "https://httpbin.org/get",
