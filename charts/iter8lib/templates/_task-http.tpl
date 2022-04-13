@@ -10,7 +10,7 @@
   {{- range $pval := $vals.percentiles }}
     {{- $percentiles = append $percentiles ( $pval | float64 ) }}
   {{- end }}
-  {{ $_ = set $vals "percentiles" $percentiles }}
+  {{ $_ := set $vals "percentiles" $percentiles }}
 {{- end }}
 {{- if $vals.payloadURL }}
 # task: download payload from payload URL
