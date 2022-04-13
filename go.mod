@@ -18,10 +18,10 @@ retract (
 )
 
 require (
-	fortio.org/fortio v1.23.0
+	fortio.org/fortio v1.25.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
-	github.com/bojand/ghz v0.106.1
+	github.com/bojand/ghz v0.108.0
 	github.com/hashicorp/go-getter v1.5.11
 	github.com/itchyny/gojq v0.12.7
 	github.com/jarcoal/httpmock v1.1.0
@@ -33,7 +33,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.1
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
+	golang.org/x/net v0.0.0-20220412020605-290c469a71a5
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
 	helm.sh/helm/v3 v3.8.1
