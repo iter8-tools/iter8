@@ -22,7 +22,7 @@ func TestRunCollectHTTP(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
-		With: CollectHTTPInputs{
+		With: collectHTTPInputs{
 			Duration:    StringPointer("1s"),
 			PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
 			Headers:     map[string]string{},
