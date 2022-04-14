@@ -23,7 +23,7 @@ jobs:
         done;
  
     - name: install Iter8 CLI
-      uses: .
+      uses: ./
     - name: version
       run: | 
         iter8 version
