@@ -1,0 +1,38 @@
+name: GitHub action test
+
+on:
+  push:
+    branches:
+    - ghaction
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: run httpbin
+      run: |
+        set -e
+        docker pull kennethreitz/httpbin
+        docker run -p 80:80 kennethreitz/httpbin &
+        HOST_IP=$(ip -f inet addr show docker0 | grep -Po 'inet \K[\d.]+')
+        echo "HOST_IP=$HOST_IP" >> $GITHUB_ENV
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
+          sleep 5; 
+        done;
+ 
+    - name: install Iter8 CLI
+      uses: .
+    - name: version
+      run: | 
+        iter8 version
+    - name: launch
+      run: |
+        iter8 launch -c load-test-http --noDownload \
+        --set url="https://httpbin.org/get"
+    - name: assert
+      run: |
+        iter8 assert -c completed -c nofailure
+
+ 
