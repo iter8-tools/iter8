@@ -24,8 +24,6 @@ jobs:
  
     - name: install Iter8 CLI
       uses: ./
-      with:
-        version: v0.10.5
     - name: version
       run: | 
         iter8 version
