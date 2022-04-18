@@ -51,7 +51,9 @@ jobs:
         
     - name: launch load-test-http
       run: |
-         --set payloadURL="https://httpbin.org/stream/1"
+        iter8 launch -c load-test-http --noDownload \
+        --set url="http://$HOST_IP/post" \
+        --set payloadURL="https://httpbin.org/stream/1"
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure
@@ -126,6 +128,17 @@ jobs:
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+    - name: run httpbin
+      run: |
+        set -e
+        docker pull kennethreitz/httpbin
+        docker run -p 80:80 kennethreitz/httpbin &
+        HOST_IP=$(ip -f inet addr show docker0 | grep -Po 'inet \K[\d.]+')
+        echo "HOST_IP=$HOST_IP" >> $GITHUB_ENV
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
+          sleep 5; 
+        done;
+
     - name: install Iter8 CLI
       uses: ./
     - name: version
@@ -134,7 +147,7 @@ jobs:
     - name: launch
       run: |
         iter8 launch -c load-test-http --noDownload \
-        --set url="https://httpbin.org/get"
+        --set url="http://$HOST_IP/get" \
     - name: assert
       run: |
         iter8 assert -c completed -c nofailure
