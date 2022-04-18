@@ -22,7 +22,6 @@ runs:
         tar -xvf iter8-$OS-$ARCH.tar.gz
         mv $OS-$ARCH/iter8 /usr/local/bin
         cd ..
-        # go install github.com/iter8-tools/iter8@${{inputs.version}}
       shell: bash
 branding:
   icon: check-circle
