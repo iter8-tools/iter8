@@ -16,8 +16,7 @@ runs:
       run: | 
         OS=$(uname -s | tr '[:upper:]' '[:lower:]')
         ARCH=$(uname -m | sed 's/i386/386/' | sed 's/x86_64/amd64/')
-        echo "GITHUB_REF = ${{ github.ref }}"
-        echo "GITHUB_REF_NAME = ${{ github.ref_name }}"
+        echo "github.action_ref = ${{ github.action_ref }}"
         wget https://github.com/iter8-tools/iter8/releases/download/${{inputs.version}}/iter8-$OS-$ARCH.tar.gz
         tar -xvf iter8-$OS-$ARCH.tar.gz
         mv $OS-$ARCH/iter8 /usr/local/bin
