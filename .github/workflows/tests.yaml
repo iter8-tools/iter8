@@ -147,7 +147,7 @@ jobs:
     - name: launch
       run: |
         iter8 launch -c load-test-http --noDownload \
-        --set url="http://$HOST_IP/get" \
+        --set url="http://$HOST_IP/get"
     - name: assert
       run: |
         iter8 assert -c completed -c nofailure
