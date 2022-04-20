@@ -106,7 +106,7 @@ func TestCEOneVersion(t *testing.T) {
 	httpmock.Activate()
 
 	// request-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+or+on%28%29+vector%280%29+%0A`,
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -124,7 +124,7 @@ func TestCEOneVersion(t *testing.T) {
 		}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29++%0A`,
+	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29+or+on%28%29+vector%280%29++%0A`,
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -142,7 +142,7 @@ func TestCEOneVersion(t *testing.T) {
 		}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29%2Fsum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29+or+on%28%29+vector%280%29%2Fsum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+or+on%28%29+vector%280%29+%0A`,
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
