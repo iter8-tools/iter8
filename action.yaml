@@ -4,7 +4,6 @@ inputs:
   version:
     description: "Version of iter8 to install"
     required: false
-    default: v0.10.5
 runs:
   using: 'composite'
   steps:
@@ -14,14 +13,14 @@ runs:
         go-version: 1.17
     - name: Install latest version of Iter8 CLI
       run: | 
-        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-        ARCH=$(uname -m | sed 's/i386/386/' | sed 's/x86_64/amd64/')
-        echo "github.action = ${{ github.action }}"
-        echo "github.action_path = ${{ github.action_path }}"
-        echo "github.action_ref = ${{ github.action_ref }}"
-        echo "github.action_repository = ${{ github.action_repository }}"
-        echo "github.action_status = ${{ github.action_status }}"
-        wget https://github.com/iter8-tools/iter8/releases/download/${{inputs.version}}/iter8-$OS-$ARCH.tar.gz
+        OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')
+        ARCH=$(echo ${{ runner.arch }} | sed 's/X86/386/' | sed 's/X64/amd64/')
+        RELEASE="${{ inputs.version }}"
+        if [ -z $RELEASE ]; then
+          RELEASE=$(curl --silent "https://api.github.com/repos/iter8-tools/iter8/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        fi
+        echo "Installing Iter8 version $RELEASE"
+        wget https://github.com/iter8-tools/iter8/releases/download/$RELEASE/iter8-$OS-$ARCH.tar.gz
         tar -xvf iter8-$OS-$ARCH.tar.gz
         mv $OS-$ARCH/iter8 /usr/local/bin
       shell: bash
