@@ -20,7 +20,7 @@ runs:
           RELEASE=$(curl --silent "https://api.github.com/repos/iter8-tools/iter8/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         fi
         echo "Installing Iter8 version $RELEASE"
-        wget https://github.com/iter8-tools/iter8/releases/download/$RELEASE/iter8-$OS-$ARCH.tar.gz
+        wget -q https://github.com/iter8-tools/iter8/releases/download/$RELEASE/iter8-$OS-$ARCH.tar.gz
         tar -xvf iter8-$OS-$ARCH.tar.gz
         mv $OS-$ARCH/iter8 /usr/local/bin
       shell: bash
