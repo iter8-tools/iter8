@@ -1,11 +1,10 @@
 apiVersion: v2
-name: istio-mirroring
-version: 0.9.1
+name: istio-slo-validation
+version: 0.10.0
 description: Load test, benchmark, and validate HTTP services
 type: application
 keywords:
 - Iter8
-- HTTP
 - load test
 - benchmark
 - validation
@@ -22,6 +21,5 @@ maintainers:
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
 dependencies:
 - name: iter8lib
-  version: 0.9.x
+  version: 0.10.x
   repository: file://../iter8lib
-appVersion: v0.9

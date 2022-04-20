@@ -1,8 +1,10 @@
 package action
 
 import (
+	"errors"
 	"io/ioutil"
 	"path"
+	"regexp"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
@@ -42,6 +44,45 @@ func (gen *GenOpts) chartDir() string {
 	return path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
 }
 
+/*
+	containsMetricsTemplate checks if for a metrics template and identifies
+	the source of the metrics.
+
+	For example, given "_istio.metrics.tpl", return "istio" or given
+	"_ce.metrics.tpl", return "ce". Otherwise, return empty string.
+*/
+func (gen *GenOpts) getMetricSourceFromTemplate() (string, error) {
+	templatesPath := path.Join(gen.chartDir(), "templates")
+
+	fileInfo, err := ioutil.ReadDir(templatesPath)
+	if err != nil {
+		log.Logger.Error("could not read directory ", templatesPath)
+		return "", err
+	}
+
+	re := regexp.MustCompile(`^_(\w+)\.metrics\.tpl$`)
+
+	for _, file := range fileInfo {
+		fileName := file.Name()
+
+		match := re.FindStringSubmatch(fileName)
+
+		/*
+			Given "_istio.metrics.tpl", FindStringSubmatch should return
+			["_istio.metrics.tpl", "istio"]
+		*/
+		if len(match) > 0 {
+			if len(match) == 2 {
+				return match[1], nil
+			} else {
+				return "", errors.New("could not properly identify metrics source from " + fileName)
+			}
+		}
+	}
+
+	return "", nil
+}
+
 // LocalRun generates a local experiment.yaml file
 func (gen *GenOpts) LocalRun() error {
 	// update dependencies
@@ -62,6 +103,21 @@ func (gen *GenOpts) LocalRun() error {
 		Name: path.Join("templates", driver.ExperimentSpecPath),
 		Data: eData,
 	})
+
+	// check for a metrics template and get its source
+	metricSource, err := gen.getMetricSourceFromTemplate()
+	if err != nil {
+		return err
+	}
+
+	// add in metrics.tpl template
+	if metricSource != "" {
+		mData := []byte(`{{- include "metrics" . }}`)
+		c.Templates = append(c.Templates, &chart.File{
+			Name: path.Join("templates", driver.ExperimentMetricsPath),
+			Data: mData,
+		})
+	}
 
 	// get values
 	p := getter.All(cli.New())
@@ -93,6 +149,18 @@ func (gen *GenOpts) LocalRun() error {
 		return err
 	}
 	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
+
+	// write metric spec file
+	if metricSource != "" {
+		metricsBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentMetricsPath)])
+		metricsFileName := metricSource + ".metrics.yaml"
+		err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
+			return err
+		}
+		log.Logger.Infof("created %v file", metricsFileName)
+	}
 
 	return err
 }

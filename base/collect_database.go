@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -151,6 +150,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	// iterate through headers
 	for headerName, headerValue := range template.Headers {
 		req.Header.Add(headerName, headerValue)
+		log.Logger.Debug("add header: ", headerName, ", value: ", headerValue)
 	}
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 
@@ -159,6 +159,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	params := metric.Params
 	for _, param := range *params {
 		q.Add(param.Name, param.Value)
+		log.Logger.Debug("add param: ", param.Name, ", value: ", param.Value)
 	}
 	req.URL.RawQuery = q.Encode()
 
@@ -177,6 +178,8 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 		log.Logger.Error("could not read response body for metric ", metric.Name, ": ", err)
 		return nil, false
 	}
+
+	log.Logger.Debug("response body: ", string(responseBody))
 
 	// JSON parse response body
 	var jsonBody interface{}
@@ -224,18 +227,17 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 
 	// collect all files paths in current directory that ends with metrics.yaml
 	metricFilePaths := []string{}
-	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && strings.HasSuffix(path, "metrics.yaml") {
-			metricFilePaths = append(metricFilePaths, path)
-		}
-		return nil
-	})
+	fileInfo, err := ioutil.ReadDir(path)
 	if err != nil {
+		log.Logger.Error("could not read directory ", path)
 		return err
+	}
+
+	for _, file := range fileInfo {
+		fileName := file.Name()
+		if strings.HasSuffix(fileName, "metrics.yaml") {
+			metricFilePaths = append(metricFilePaths, fileName)
+		}
 	}
 
 	// inputs for this task determine the number of versions participating in the
@@ -272,6 +274,8 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			}
 
 			for _, metric := range metrics.Metrics {
+				log.Logger.Debug("query for metric ", metric.Name)
+
 				// perform database query and extract metric value
 				value, ok := queryDatabaseAndGetValue(metrics, metric)
 

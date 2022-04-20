@@ -9,7 +9,9 @@ import (
 const (
 	// ExperimentSpecPath is the name of the experiment spec file
 	ExperimentSpecPath = "experiment.yaml"
-	// ExperimentResultPath is the name of the experiment result file
+	// ExperimentMetricsPath is the name of the experiment spec file
+	ExperimentMetricsPath = "metrics.yaml"
+	// ExperimentSpecPath is the name of the experiment result file
 	ExperimentResultPath = "result.yaml"
 	// DefaultExperimentGroup is the name of the default experiment chart
 	DefaultExperimentGroup = "default"

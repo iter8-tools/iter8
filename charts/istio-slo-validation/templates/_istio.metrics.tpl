@@ -1,5 +1,5 @@
-{{- define "istio.metrics" -}}
-url: {{ .Values.endpoint }}/api/v1/query
+{{- define "metrics" -}}
+url: {{ .Values.Endpoint }}/api/v1/query
 provider: Istio
 method: GET
 # Inputs for the template:

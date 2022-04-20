@@ -1,19 +1,5 @@
-### Defaults values for the istio-mirroring experiment chart.
-
-### The documentation follows Helm recommendations described in the URL below.
-### https://helm.sh/docs/chart_best_practices/values/#document-valuesyaml
-
-##################################
-
-baselineEndpoint: null
-
-candidateEndpoint: null
-
-mirroringWeight: 100
-
-prometheusUrl: null
-
-promLabels: null
+# Prometheus URL
+Endpoint: http://127.0.0.1:9090
 
 ### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
@@ -29,17 +15,8 @@ promLabels: null
 ###   http/latency-p99: 200
 SLOs:
   istio/error-rate: 0
-
-loops: 3
-
-### Every minute
-schedule: "*/1 * * * *"
-
 ##################################
 # Used by the template
-
-# Prometheus URL
-endpoint: prom-url.xyz
 
 # PromQL selectors
 app: null

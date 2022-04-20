@@ -132,6 +132,7 @@ Chart.lock
 !testdata/experiment.yaml
 **/result.yaml
 **/report.html
+**/*.metrics.yaml
 
 bin/
 _dist/

@@ -1,5 +1,5 @@
-{{- define "k.manifest-cronjob" -}}
-{{ include "k.cronjob" . }}
+{{- define "k.manifest-istio" -}}
+{{ include "k.job" . }}
 ---
 {{ include "k.spec.secret-istio" . }}
 ---
