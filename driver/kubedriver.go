@@ -18,6 +18,7 @@ import (
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/downloader"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/util/retry"
 
 	helmerrors "github.com/pkg/errors"
 	helmdriver "helm.sh/helm/v3/pkg/storage/driver"
@@ -33,13 +34,13 @@ import (
 	"sigs.k8s.io/yaml"
 
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const (
-	// maxGetRetries is the number of tries to retry while fetching Kubernetes objects
-	maxGetRetries = 2
+	// secretRetrievalTimeout is max time to wait for secret retrievals
+	secretRetrievalTimeout = 60 * time.Second
 	// getRetryInterval is the duration between retrials
 	getRetryInterval = 1 * time.Second
 )
@@ -167,22 +168,31 @@ func (driver *KubeDriver) getExperimentJobName() string {
 	return fmt.Sprintf("%v-%v-job", driver.Group, driver.Revision)
 }
 
-// getSecretWithRetry attempts to get a Kubernetes secret with retry
-func (driver *KubeDriver) getSecretWithRetry(name string) (s *corev1.Secret, err error) {
-	secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-	for i := 0; i < maxGetRetries; i++ {
-		s, err = secretsClient.Get(context.Background(), name, metav1.GetOptions{})
-		if err == nil {
-			return s, err
-		}
-		if !k8serrors.IsNotFound(err) {
-			log.Logger.Warningf("unable to get secret: %s; %s\n", name, err.Error())
-		}
-		time.Sleep(getRetryInterval)
+// getSecretWithRetry attempts to get a Kubernetes secret with retries
+func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, err error) {
+	err = retry.OnError(
+		wait.Backoff{
+			Steps:    int(secretRetrievalTimeout / getRetryInterval),
+			Cap:      secretRetrievalTimeout,
+			Duration: getRetryInterval,
+			Factor:   1.0,
+			Jitter:   0.1,
+		},
+		func(err2 error) bool {
+			log.Logger.Error(err2)
+			return true
+		}, // retry on all failures
+		func() (err3 error) {
+			secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+			sec, err3 = secretsClient.Get(context.Background(), name, metav1.GetOptions{})
+			return err3
+		},
+	)
+	if err != nil {
+		e := fmt.Errorf("unable to get secret %v", name)
+		log.Logger.Warning(e)
 	}
-	e := fmt.Errorf("unable to get secret %v", name)
-	log.Logger.Warning(e)
-	return nil, e
+	return sec, nil
 }
 
 // getExperimentSpecSecret gets the Kubernetes experiment spec secret
@@ -267,20 +277,30 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 
 // createExperimentResultSecret creates the experiment result secret
 func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
-	log.Logger.Trace("forming result secret...")
 	if sec, err := driver.formResultSecret(r); err == nil {
-		log.Logger.Trace("result secret formed")
-		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-		log.Logger.Trace("creating result secret using client and sec", secretsClient, sec)
-		_, err2 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
-		log.Logger.Trace("create result secret returned")
-		if err2 != nil {
-			e := errors.New("unable to create result secret")
-			log.Logger.WithStackTrace(err2.Error()).Error(e)
-			return e
-		} else {
-			return nil
+		err = retry.OnError(
+			wait.Backoff{
+				Steps:    int(secretRetrievalTimeout / getRetryInterval),
+				Cap:      secretRetrievalTimeout,
+				Duration: getRetryInterval,
+				Factor:   1.0,
+				Jitter:   0.1,
+			},
+			func(err2 error) bool {
+				log.Logger.Error(err2)
+				return true
+			}, // retry on all failures
+			func() error {
+				secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+				_, err3 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
+				return err3
+			},
+		)
+		if err != nil {
+			e := fmt.Errorf("unable to create secret %v", sec.Name)
+			log.Logger.Warning(e)
 		}
+		return err
 	} else {
 		return err
 	}
@@ -288,19 +308,31 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 
 // updateExperimentResultSecret updates the experiment result secret
 // as opposed to patch, update is an atomic operation
-// eventually, this code will leverage conflict management like the following:
-// https://github.com/kubernetes/client-go/blob/3ac142e26bc61901240b68cc2c39561d2e6f672a/examples/create-update-delete-deployment/main.go#L118
 func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
 	if sec, err := driver.formResultSecret(r); err == nil {
-		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-		_, e := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
-		if e != nil {
-			e := errors.New("unable to update result secret")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			return e
-		} else {
-			return nil
+		err = retry.OnError(
+			wait.Backoff{
+				Steps:    int(secretRetrievalTimeout / getRetryInterval),
+				Cap:      secretRetrievalTimeout,
+				Duration: getRetryInterval,
+				Factor:   1.0,
+				Jitter:   0.1,
+			},
+			func(err2 error) bool {
+				log.Logger.Error(err2)
+				return true
+			}, // retry on all failures
+			func() error {
+				secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+				_, err3 := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
+				return err3
+			},
+		)
+		if err != nil {
+			e := fmt.Errorf("unable to update secret %v", sec.Name)
+			log.Logger.Warning(e)
 		}
+		return err
 	} else {
 		return err
 	}
