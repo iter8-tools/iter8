@@ -179,7 +179,6 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 			Jitter:   0.1,
 		},
 		func(err2 error) bool {
-			log.Logger.Error(err2)
 			return true
 		}, // retry on all failures
 		func() (err3 error) {
@@ -190,7 +189,7 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 	)
 	if err != nil {
 		e := fmt.Errorf("unable to get secret %v", name)
-		log.Logger.Warning(e)
+		log.Logger.Debug(e)
 	}
 	return sec, nil
 }
@@ -287,7 +286,6 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 				Jitter:   0.1,
 			},
 			func(err2 error) bool {
-				log.Logger.Error(err2)
 				return true
 			}, // retry on all failures
 			func() error {
@@ -298,7 +296,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 		)
 		if err != nil {
 			e := fmt.Errorf("unable to create secret %v", sec.Name)
-			log.Logger.Warning(e)
+			log.Logger.Debug(e)
 		}
 		return err
 	} else {
@@ -318,10 +316,9 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 				Factor:   1.0,
 				Jitter:   0.1,
 			},
-			func(err2 error) bool {
-				log.Logger.Error(err2)
+			func(err2 error) bool { // retry on all failures
 				return true
-			}, // retry on all failures
+			},
 			func() error {
 				secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 				_, err3 := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
@@ -330,7 +327,7 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 		)
 		if err != nil {
 			e := fmt.Errorf("unable to update secret %v", sec.Name)
-			log.Logger.Warning(e)
+			log.Logger.Debug(e)
 		}
 		return err
 	} else {
