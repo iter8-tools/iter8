@@ -295,8 +295,8 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 			},
 		)
 		if err != nil {
-			e := fmt.Errorf("unable to create secret %v", sec.Name)
-			log.Logger.Warning(e)
+			err = fmt.Errorf("unable to create secret %v", sec.Name)
+			log.Logger.Warning(err)
 		}
 		return err
 	} else {
@@ -326,8 +326,8 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 			},
 		)
 		if err != nil {
-			e := fmt.Errorf("unable to update secret %v", sec.Name)
-			log.Logger.Warning(e)
+			err = fmt.Errorf("unable to update secret %v", sec.Name)
+			log.Logger.Warning(err)
 		}
 		return err
 	} else {
