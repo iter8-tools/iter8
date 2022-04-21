@@ -188,10 +188,10 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 		},
 	)
 	if err != nil {
-		e := fmt.Errorf("unable to get secret %v", name)
-		log.Logger.Debug(e)
+		err = fmt.Errorf("unable to get secret %v", name)
+		log.Logger.Warning(err)
 	}
-	return sec, nil
+	return sec, err
 }
 
 // getExperimentSpecSecret gets the Kubernetes experiment spec secret
@@ -296,7 +296,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 		)
 		if err != nil {
 			e := fmt.Errorf("unable to create secret %v", sec.Name)
-			log.Logger.Debug(e)
+			log.Logger.Warning(e)
 		}
 		return err
 	} else {
@@ -327,7 +327,7 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 		)
 		if err != nil {
 			e := fmt.Errorf("unable to update secret %v", sec.Name)
-			log.Logger.Debug(e)
+			log.Logger.Warning(e)
 		}
 		return err
 	} else {
