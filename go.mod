@@ -18,7 +18,7 @@ retract (
 )
 
 require (
-	fortio.org/fortio v1.25.0
+	fortio.org/fortio v1.27.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.108.0
@@ -33,12 +33,12 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.1
-	golang.org/x/net v0.0.0-20220412020605-290c469a71a5
+	golang.org/x/net v0.0.0-20220420153159-1850ba15e1be
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
-	helm.sh/helm/v3 v3.8.1
-	k8s.io/api v0.23.5
-	k8s.io/apimachinery v0.23.5
-	k8s.io/client-go v0.23.5
+	helm.sh/helm/v3 v3.8.2
+	k8s.io/api v0.23.6
+	k8s.io/apimachinery v0.23.6
+	k8s.io/client-go v0.23.6
 	sigs.k8s.io/yaml v1.3.0
 )
