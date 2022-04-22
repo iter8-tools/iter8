@@ -74,6 +74,7 @@ func (lOpts *LaunchOpts) LocalRun() error {
 
 	// all done if this is a dry run
 	if lOpts.DryRun {
+		log.Logger.Info("dry run complete")
 		return nil
 	}
 

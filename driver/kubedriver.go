@@ -44,6 +44,8 @@ const (
 	secretTimeout = 60 * time.Second
 	// retryInterval is the duration between retries
 	retryInterval = 1 * time.Second
+	// ManifestFile is the name of the Kubernetes manifest file
+	ManifestFile = "manifest.yaml"
 )
 
 // KubeDriver embeds Helm and Kube configuration, and
@@ -360,6 +362,17 @@ func UpdateChartDependencies(chartDir string, settings *cli.EnvSettings) error {
 	return nil
 }
 
+// writeManifest writes the Kubernetes experiment manifest to a local file
+func writeManifest(rel *release.Release) error {
+	err := ioutil.WriteFile(ManifestFile, []byte(rel.Manifest), 0664)
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to write kubernetes manifest into ", ManifestFile)
+		return err
+	}
+	log.Logger.Info("wrote kubernetes manifest into ", ManifestFile)
+	return nil
+}
+
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 // Upgrade a Kubernetes experiment to the next release
@@ -400,7 +413,16 @@ func (driver *KubeDriver) Upgrade(chartDir string, valueOpts values.Options, gro
 	// upgrading revision info
 	driver.Revision = rel.Version
 
-	log.Logger.Info("experiment launched. Happy Iter8ing!")
+	// write manifest if dry
+	if dry {
+		err := writeManifest(rel)
+		if err != nil {
+			return err
+		}
+		log.Logger.Info("dry run complete")
+	} else {
+		log.Logger.Info("experiment launched. Happy Iter8ing!")
+	}
 
 	return nil
 }
@@ -446,7 +468,16 @@ func (driver *KubeDriver) Install(chartDir string, valueOpts values.Options, gro
 	// upgrading revision info
 	driver.Revision = rel.Version
 
-	log.Logger.Info("experiment launched. Happy Iter8ing!")
+	// write manifest if dry
+	if dry {
+		err := writeManifest(rel)
+		if err != nil {
+			return err
+		}
+		log.Logger.Info("dry run complete")
+	} else {
+		log.Logger.Info("experiment launched. Happy Iter8ing!")
+	}
 
 	return nil
 }
