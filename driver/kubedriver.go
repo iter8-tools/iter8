@@ -285,9 +285,9 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 		// Probably not. A get call precedes creation,
 		// and is retried if there are permission issues.
 		if err1 != nil {
-			err4 := fmt.Errorf("unable to create secret %v", sec.Name)
-			log.Logger.WithStackTrace(err1.Error()).Error(err4)
-			return err4
+			err2 := fmt.Errorf("unable to create secret %v", sec.Name)
+			log.Logger.WithStackTrace(err1.Error()).Error(err2)
+			return err2
 		}
 	} else {
 		return err
@@ -304,9 +304,9 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 		// TODO: Evaluate if result secret update requires retries.
 		// Probably not. Conflicts will be avoided if cronjob avoids parallel jobs.
 		if err1 != nil {
-			err4 := fmt.Errorf("unable to update secret %v", sec.Name)
-			log.Logger.WithStackTrace(err1.Error()).Error(err4)
-			return err4
+			err2 := fmt.Errorf("unable to update secret %v", sec.Name)
+			log.Logger.WithStackTrace(err1.Error()).Error(err2)
+			return err2
 		}
 	} else {
 		return err
