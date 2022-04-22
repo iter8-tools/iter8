@@ -32,6 +32,8 @@ func TestKubeLaunch(t *testing.T) {
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.ChartName = "load-test-http"
 	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
+	// fixing git ref forever
+	lOpts.GitFolder = defaultIter8Repo + "?ref=v0.10.6" + "//" + chartsFolderName
 
 	os.Chdir(t.TempDir())
 	err = lOpts.KubeRun()

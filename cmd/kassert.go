@@ -11,7 +11,7 @@ import (
 
 // kAssertDesc is the description of the k assert cmd
 const kAssertDesc = `
-Assert if the result of a Kubernetes experiment satisfies a given set of conditions. If all conditions are satisfied, the command exits with code 0. Else, the command exits with code 1. 
+Assert if the result of a Kubernetes experiment satisfies the specified conditions. If all conditions are satisfied, the command exits with code 0. Else, the command exits with code 1. 
 
 Assertions are especially useful for automation inside CI/CD/GitOps pipelines.
 

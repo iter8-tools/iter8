@@ -39,7 +39,7 @@ func NewHubOpts() *HubOpts {
 func (hub *HubOpts) LocalRun() error {
 	log.Logger.Infof("downloading %v into %v", hub.GitFolder, hub.ChartsDir)
 	if err := getter.Get(hub.ChartsDir, hub.GitFolder); err != nil {
-		e := errors.New("unable to download chart")
+		e := errors.New("unable to download charts")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}

@@ -12,17 +12,16 @@ Launch an experiment.
 
 	$ iter8 launch -c load-test-http --set url=https://httpbin.org/get
 
-To create the experiment.yaml file without actually running it, use the dry option.
+Use the dry option to simulate an experiment. This creates experiment.yaml and *.metrics.yaml files.
 
 	$ iter8 launch -c load-test-http \
 	  --set url=https://httpbin.org/get \
 	  --dry
 
-By default, the current directory is used to download and unpack the experiment chart. Change this location using the destDir option.
-
-	$ iter8 launch -c load-test-http \
-	  --set url=https://httpbin.org/get \
-	  --destDir /tmp
+Launching an experiment requires the Iter8 experiment charts folder. You can use various launch flags to control:
+	1. Whether Iter8 should download the experiment charts folder from Git or reuse local charts.
+	2. The parent directory of the charts folder.
+	3. The Git folder from which charts are downloaded.
 `
 
 // newLaunchCmd creates the launch command
@@ -51,7 +50,7 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 
 // addDryRunFlag adds dry run flag to the launch command
 func addDryRunFlag(cmd *cobra.Command, dryRunPtr *bool) {
-	cmd.Flags().BoolVar(dryRunPtr, "dry", false, "simulate an experiment launch")
+	cmd.Flags().BoolVar(dryRunPtr, "dry", false, "simulate an experiment launch; outputs experiment.yaml and *.metrics.yaml files")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
 }
 

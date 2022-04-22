@@ -8,9 +8,9 @@ import (
 
 // hubDesc is the description of the hub command
 const hubDesc = `
-Download an experiment chart to a local directory.
+Download Iter8 experiment charts from a Git repo.
 
-	$ iter8 hub -c load-test-http
+	$ iter8 hub
 
 This command is intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
 `
@@ -21,7 +21,7 @@ func newHubCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "hub",
-		Short:        "Download experiment chart",
+		Short:        "Download experiment charts",
 		Long:         hubDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {

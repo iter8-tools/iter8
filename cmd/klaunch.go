@@ -15,17 +15,17 @@ Launch an experiment in Kubernetes.
 
 	$ iter8 k launch -c load-test-http --set url=https://httpbin.org/get
 
-To locally render the Kubernetes experiment, use the dry option.
+Use the dry option to simulate a Kubernetes experiment. This creates the manifest.yaml file.
 
 	$ iter8 k launch -c load-test-http \
 	  --set url=https://httpbin.org/get \
 	  --dry
 
-By default, the current directory is used to download and unpack the experiment chart. Change this location using the destDir option.
 
-	$ iter8 k launch -c load-test-http \
-	  --set url=https://httpbin.org/get \
-	  --destDir /tmp
+Launching an experiment requires the Iter8 experiment charts folder. You can use various launch flags to control:
+	1. Whether Iter8 should download the experiment charts folder from Git or reuse local charts.
+	2. The parent directory of the charts folder.
+	3. The Git folder from which charts are downloaded.
 `
 
 // newKLaunchCmd creates the Kubernetes launch command
@@ -43,10 +43,10 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	}
 	// flags specific to k launch
 	addExperimentGroupFlag(cmd, &actor.Group, false)
+	addDryRunForKFlag(cmd, &actor.DryRun)
 	actor.EnvSettings = settings
 
 	// flags shared with launch
-	addDryRunFlag(cmd, &actor.DryRun)
 	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
 	addGitFolderFlag(cmd, &actor.GitFolder)
 	addChartNameFlag(cmd, &actor.ChartName)
@@ -54,6 +54,12 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	addNoDownloadFlag(cmd, &actor.NoDownload)
 
 	return cmd
+}
+
+// addDryRunForKFlag adds dry run flag to the k launch command
+func addDryRunForKFlag(cmd *cobra.Command, dryRunPtr *bool) {
+	cmd.Flags().BoolVar(dryRunPtr, "dry", false, "simulate an experiment launch; outputs manifest.yaml file")
+	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
 }
 
 // initialize with the k launch cmd
