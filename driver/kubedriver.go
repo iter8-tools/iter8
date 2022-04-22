@@ -279,23 +279,11 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 // createExperimentResultSecret creates the experiment result secret
 func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
 	if sec, err := driver.formResultSecret(r); err == nil {
-		err1 := retry.OnError(
-			wait.Backoff{
-				Steps:    int(secretTimeout / retryInterval),
-				Cap:      secretTimeout,
-				Duration: retryInterval,
-				Factor:   1.0,
-				Jitter:   0.1,
-			},
-			func(err2 error) bool { // retry on all failures
-				return true
-			},
-			func() error {
-				secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-				_, err3 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
-				return err3
-			},
-		)
+		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+		_, err1 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
+		// TODO: Evaluate if result secret creation requires retries.
+		// Probably not. A get call precedes creation,
+		// and is retried if there are permission issues.
 		if err1 != nil {
 			err4 := fmt.Errorf("unable to create secret %v", sec.Name)
 			log.Logger.WithStackTrace(err1.Error()).Error(err4)
@@ -311,23 +299,10 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 // as opposed to patch, update is an atomic operation
 func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
 	if sec, err := driver.formResultSecret(r); err == nil {
-		err1 := retry.OnError(
-			wait.Backoff{
-				Steps:    int(secretTimeout / retryInterval),
-				Cap:      secretTimeout,
-				Duration: retryInterval,
-				Factor:   1.0,
-				Jitter:   0.1,
-			},
-			func(err2 error) bool { // retry on all failures
-				return true
-			},
-			func() error {
-				secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-				_, err3 := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
-				return err3
-			},
-		)
+		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+		_, err1 := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
+		// TODO: Evaluate if result secret update requires retries.
+		// Probably not. Conflicts will be avoided if cronjob avoids parallel jobs.
 		if err1 != nil {
 			err4 := fmt.Errorf("unable to update secret %v", sec.Name)
 			log.Logger.WithStackTrace(err1.Error()).Error(err4)
