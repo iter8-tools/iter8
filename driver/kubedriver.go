@@ -39,10 +39,10 @@ import (
 )
 
 const (
-	// secretRetrievalTimeout is max time to wait for secret retrievals
-	secretRetrievalTimeout = 60 * time.Second
-	// getRetryInterval is the duration between retrials
-	getRetryInterval = 1 * time.Second
+	// secretTimeout is max time to wait for secret ops
+	secretTimeout = 60 * time.Second
+	// retryInterval is the duration between retries
+	retryInterval = 1 * time.Second
 )
 
 // KubeDriver embeds Helm and Kube configuration, and
@@ -172,9 +172,9 @@ func (driver *KubeDriver) getExperimentJobName() string {
 func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, err error) {
 	err1 := retry.OnError(
 		wait.Backoff{
-			Steps:    int(secretRetrievalTimeout / getRetryInterval),
-			Cap:      secretRetrievalTimeout,
-			Duration: getRetryInterval,
+			Steps:    int(secretTimeout / retryInterval),
+			Cap:      secretTimeout,
+			Duration: retryInterval,
 			Factor:   1.0,
 			Jitter:   0.1,
 		},
@@ -190,8 +190,9 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 	if err1 != nil {
 		err = fmt.Errorf("unable to get secret %v", name)
 		log.Logger.WithStackTrace(err1.Error()).Error(err)
+		return nil, err
 	}
-	return sec, err
+	return sec, nil
 }
 
 // getExperimentSpecSecret gets the Kubernetes experiment spec secret
@@ -279,9 +280,9 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 	if sec, err := driver.formResultSecret(r); err == nil {
 		err1 := retry.OnError(
 			wait.Backoff{
-				Steps:    int(secretRetrievalTimeout / getRetryInterval),
-				Cap:      secretRetrievalTimeout,
-				Duration: getRetryInterval,
+				Steps:    int(secretTimeout / retryInterval),
+				Cap:      secretTimeout,
+				Duration: retryInterval,
 				Factor:   1.0,
 				Jitter:   0.1,
 			},
@@ -296,7 +297,7 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 		)
 		if err1 != nil {
 			err4 := fmt.Errorf("unable to create secret %v", sec.Name)
-			log.Logger.Error(err4)
+			log.Logger.WithStackTrace(err1.Error()).Error(err4)
 			return err4
 		}
 	} else {
@@ -311,9 +312,9 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 	if sec, err := driver.formResultSecret(r); err == nil {
 		err1 := retry.OnError(
 			wait.Backoff{
-				Steps:    int(secretRetrievalTimeout / getRetryInterval),
-				Cap:      secretRetrievalTimeout,
-				Duration: getRetryInterval,
+				Steps:    int(secretTimeout / retryInterval),
+				Cap:      secretTimeout,
+				Duration: retryInterval,
 				Factor:   1.0,
 				Jitter:   0.1,
 			},
@@ -328,7 +329,7 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 		)
 		if err1 != nil {
 			err4 := fmt.Errorf("unable to update secret %v", sec.Name)
-			log.Logger.Error(err4)
+			log.Logger.WithStackTrace(err1.Error()).Error(err4)
 			return err4
 		}
 	} else {
@@ -340,11 +341,14 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 // WriteResult writes results for a Kubernetes experiment
 func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
 	// create result secret if need be
+	log.Logger.Debug("Write result called ... ")
 	if sec, _ := driver.getExperimentResultSecret(); sec == nil {
 		log.Logger.Info("creating experiment result secret")
 		if err := driver.createExperimentResultSecret(r); err != nil {
 			return err
 		}
+	} else {
+		log.Logger.Debug("Secret exists ... ", sec.Name)
 	}
 	if err := driver.updateExperimentResultSecret(r); err != nil {
 		return err

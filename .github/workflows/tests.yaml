@@ -123,35 +123,6 @@ jobs:
           --set SLOs.grpc/latency/p'97\.5'=200
         iter8 assert -c completed -c nofailure -c slos
 
-  kubernetes-experiment:
-    name: Kubernetes http load test    
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Build and install Iter8
-      run: make install
-    - uses: engineerd/setup-kind@v0.5.0
-    - name: create app
-      run: |
-        kubectl create deployment httpbin --image=kennethreitz/httpbin
-        kubectl expose deployment httpbin --type=ClusterIP --port=80
-    - name: iter8 k launch
-      run: |
-        iter8 k launch -c load-test-http --noDownload \
-        --set url="http://httpbin.default/get" \
-        --set payloadURL="https://httpbin.org/stream/1"
-    - name: try other iter8 k commands
-      run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
-        iter8 k report
-        iter8 k log
-        iter8 k delete        
-
   static-check:
     runs-on: ubuntu-latest
     steps:
