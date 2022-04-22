@@ -93,6 +93,21 @@ func (lOpts *LaunchOpts) KubeRun() error {
 	if err := lOpts.KubeDriver.Init(); err != nil {
 		return err
 	}
+
+	if !lOpts.NoDownload {
+		// download chart from Iter8 hub
+		hOpts := &HubOpts{
+			GitFolder: lOpts.GitFolder,
+			ChartsDir: path.Join(lOpts.ChartsParentDir, chartsFolderName),
+		}
+		if err := hOpts.LocalRun(); err != nil {
+			return err
+		}
+		log.Logger.Debug("hub complete")
+	} else {
+		log.Logger.Debug("using `charts` under ", lOpts.ChartsParentDir)
+	}
+
 	// update dependencies
 	gOpts := GenOpts{
 		Options:         lOpts.Options,
