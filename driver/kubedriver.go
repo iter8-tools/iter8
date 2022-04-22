@@ -170,7 +170,7 @@ func (driver *KubeDriver) getExperimentJobName() string {
 
 // getSecretWithRetry attempts to get a Kubernetes secret with retries
 func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, err error) {
-	err = retry.OnError(
+	err1 := retry.OnError(
 		wait.Backoff{
 			Steps:    int(secretRetrievalTimeout / getRetryInterval),
 			Cap:      secretRetrievalTimeout,
@@ -178,18 +178,18 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 			Factor:   1.0,
 			Jitter:   0.1,
 		},
-		func(err2 error) bool {
+		func(err2 error) bool { // retry on all failures
 			return true
-		}, // retry on all failures
+		},
 		func() (err3 error) {
 			secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 			sec, err3 = secretsClient.Get(context.Background(), name, metav1.GetOptions{})
 			return err3
 		},
 	)
-	if err != nil {
+	if err1 != nil {
 		err = fmt.Errorf("unable to get secret %v", name)
-		log.Logger.Warning(err)
+		log.Logger.WithStackTrace(err1.Error()).Error(err)
 	}
 	return sec, err
 }
@@ -277,7 +277,7 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 // createExperimentResultSecret creates the experiment result secret
 func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
 	if sec, err := driver.formResultSecret(r); err == nil {
-		err = retry.OnError(
+		err1 := retry.OnError(
 			wait.Backoff{
 				Steps:    int(secretRetrievalTimeout / getRetryInterval),
 				Cap:      secretRetrievalTimeout,
@@ -294,21 +294,22 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 				return err3
 			},
 		)
-		if err != nil {
-			err = fmt.Errorf("unable to create secret %v", sec.Name)
-			log.Logger.Warning(err)
+		if err1 != nil {
+			err4 := fmt.Errorf("unable to create secret %v", sec.Name)
+			log.Logger.Error(err4)
+			return err4
 		}
-		return err
 	} else {
 		return err
 	}
+	return nil
 }
 
 // updateExperimentResultSecret updates the experiment result secret
 // as opposed to patch, update is an atomic operation
 func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
 	if sec, err := driver.formResultSecret(r); err == nil {
-		err = retry.OnError(
+		err1 := retry.OnError(
 			wait.Backoff{
 				Steps:    int(secretRetrievalTimeout / getRetryInterval),
 				Cap:      secretRetrievalTimeout,
@@ -325,14 +326,15 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 				return err3
 			},
 		)
-		if err != nil {
-			err = fmt.Errorf("unable to update secret %v", sec.Name)
-			log.Logger.Warning(err)
+		if err1 != nil {
+			err4 := fmt.Errorf("unable to update secret %v", sec.Name)
+			log.Logger.Error(err4)
+			return err4
 		}
-		return err
 	} else {
 		return err
 	}
+	return nil
 }
 
 // WriteResult writes results for a Kubernetes experiment
