@@ -11,9 +11,9 @@ import (
 
 // kDeleteDesc is the description of the delete cmd
 const kDeleteDesc = `
-Delete an experiment group in Kubernetes.
+Delete an experiment (group) in Kubernetes.
 
-	$ iter8 k delete -g hello
+	$ iter8 k delete
 `
 
 // newKDeleteCmd deletes an experiment group in Kubernetes.
@@ -22,7 +22,7 @@ func newKDeleteCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "delete",
-		Short:        "Delete an experiment group in Kubernetes",
+		Short:        "Delete an experiment (group) in Kubernetes",
 		Long:         kDeleteDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
