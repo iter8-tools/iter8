@@ -34,6 +34,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	corev1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -178,8 +179,8 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 			Factor:   1.0,
 			Jitter:   0.1,
 		},
-		func(err2 error) bool { // retry on all failures
-			return true
+		func(err2 error) bool { // retry on specific failures
+			return kerrors.ReasonForError(err2) == metav1.StatusReasonForbidden
 		},
 		func() (err3 error) {
 			secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
@@ -286,9 +287,9 @@ func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult)
 				Factor:   1.0,
 				Jitter:   0.1,
 			},
-			func(err2 error) bool {
+			func(err2 error) bool { // retry on all failures
 				return true
-			}, // retry on all failures
+			},
 			func() error {
 				secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 				_, err3 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
