@@ -11,7 +11,7 @@ import (
 
 // runDesc is the description of the run command
 var runDesc = `
-Run an experiment specified in experiment.yaml output result to result.yaml.
+Run an experiment specified in experiment.yaml. Output results to result.yaml.
 
 	$ iter8 run
 
