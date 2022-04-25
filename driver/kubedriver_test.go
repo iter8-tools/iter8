@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
@@ -12,6 +13,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 func TestKOps(t *testing.T) {
@@ -23,7 +25,7 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	// install
-	err = kd.Install(base.CompletePath("../", "charts/load-test-http"), values.Options{
+	err = kd.install(base.CompletePath("../", "charts/load-test-http"), values.Options{
 		Values: []string{"url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
@@ -32,13 +34,13 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, rel)
 	assert.Equal(t, 1, rel.Version)
-	assert.Equal(t, 1, kd.Revision)
+	assert.Equal(t, 1, kd.revision)
 
 	err = kd.Init()
 	assert.NoError(t, err)
 
 	// upgrade
-	err = kd.Upgrade(base.CompletePath("../", "charts/load-test-http"), values.Options{
+	err = kd.upgrade(base.CompletePath("../", "charts/load-test-http"), values.Options{
 		Values: []string{"url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
@@ -46,7 +48,7 @@ func TestKOps(t *testing.T) {
 	rel, err = kd.Releases.Last(kd.Group)
 	assert.NotNil(t, rel)
 	assert.Equal(t, 2, rel.Version)
-	assert.Equal(t, 2, kd.Revision)
+	assert.Equal(t, 2, kd.revision)
 	assert.NoError(t, err)
 
 	err = kd.Init()
@@ -65,19 +67,33 @@ func TestKubeRun(t *testing.T) {
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
-	kd.Revision = 1
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-spec",
+			Name:      "default-spec",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
+
+	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
+		StartTime:         time.Now(),
+		NumCompletedTasks: 0,
+		Failure:           false,
+		Iter8Version:      base.MajorMinor,
+	})
+	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "default-result",
+			Namespace: "default",
+		},
+		StringData: map[string]string{"result.yaml": string(resultBytes)},
+	}, metav1.CreateOptions{})
+
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-job",
+			Name:      "default-job",
 			Namespace: "default",
 		},
 	}, metav1.CreateOptions{})
@@ -95,22 +111,21 @@ func TestLogs(t *testing.T) {
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
-	kd.Revision = 1
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-spec",
+			Name:      "default-spec",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-job-1831a",
+			Name:      "default-job-1831a",
 			Namespace: "default",
 			Labels: map[string]string{
-				"job-name": "default-1-job",
+				"job-name": "default-job",
 			},
 		},
 	}, metav1.CreateOptions{})

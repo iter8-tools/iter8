@@ -40,13 +40,12 @@ func TestLocalAssertFailing(t *testing.T) {
 func TestKubeAssert(t *testing.T) {
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.Revision = 1
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "experiment.yaml"))
 	aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-spec",
+			Name:      "default-spec",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
@@ -55,7 +54,7 @@ func TestKubeAssert(t *testing.T) {
 	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
 	aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-result",
+			Name:      "default-result",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"result.yaml": string(byteArray)},

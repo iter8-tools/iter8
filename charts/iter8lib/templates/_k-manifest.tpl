@@ -7,6 +7,8 @@
 ---
 {{ include "k.spec.rolebinding" . }}
 ---
+{{ include "k.result.secret" . }}
+---
 {{ include "k.result.role" . }}
 ---
 {{ include "k.result.rolebinding" . }}

@@ -1,21 +1,22 @@
 {{- define "k.job" -}}
-{{- $name := printf "%v-%v" .Release.Name .Release.Revision -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $name }}-job
+  name: {{ .Release.Name }}-job
+  annotations:
+    iter8.tools/revision: {{ .Release.Revision }}
 spec:
   template:
     spec:
       containers:
       - name: iter8
-        image: {{  .Values.iter8lib.global.iter8Image }}
+        image: {{  .Values.iter8lib.iter8Image }}
         imagePullPolicy: Always
         command:
         - "/bin/sh"
         - "-c"
         - |
-          iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} --revision {{ .Release.Revision }}
+          iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }}
       restartPolicy: Never
   backoffLimit: 0
 {{- end }}

@@ -119,10 +119,5 @@ func (lOpts *LaunchOpts) KubeRun() error {
 	}
 	driver.UpdateChartDependencies(gOpts.chartDir(), lOpts.EnvSettings)
 
-	if lOpts.Revision > 0 { // last release found; setup upgrade
-		return lOpts.KubeDriver.Upgrade(gOpts.chartDir(), lOpts.Options, lOpts.Group, lOpts.DryRun)
-	} else {
-		// no release found; setup install
-		return lOpts.KubeDriver.Install(gOpts.chartDir(), lOpts.Options, lOpts.Group, lOpts.DryRun)
-	}
+	return lOpts.KubeDriver.Launch(gOpts.chartDir(), lOpts.Options, lOpts.Group, lOpts.DryRun)
 }

@@ -25,13 +25,12 @@ func TestKLog(t *testing.T) {
 	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	kd.Revision = 1
 	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-job-8218s",
+			Name:      "default-job-8218s",
 			Namespace: "default",
 			Labels: map[string]string{
-				"job-name": "default-1-job",
+				"job-name": "default-job",
 			},
 		},
 	}, metav1.CreateOptions{})
