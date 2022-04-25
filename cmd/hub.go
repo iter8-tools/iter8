@@ -34,7 +34,7 @@ func newHubCmd() *cobra.Command {
 
 // addFolderFlag
 func addFolderFlag(cmd *cobra.Command, folderPtr *string) {
-	cmd.Flags().StringVar(folderPtr, "folder", ia.DefaultFolder(), "URL of the folder containing Iter8 experiment charts. Accepts any URL supported by go-getter - https://github.com/hashicorp/go-getter")
+	cmd.Flags().StringVar(folderPtr, "folder", ia.DefaultFolder(), "URL of the folder containing Iter8 experiment charts. Accepts any URL supported https://github.com/hashicorp/go-getter")
 }
 
 // initialize with the hub command
