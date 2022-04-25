@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
@@ -55,12 +54,6 @@ func TestKubeRun(t *testing.T) {
 		StringData: map[string]string{"result.yaml": string(resultBytes)},
 	}, metav1.CreateOptions{})
 
-	rOpts.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-job",
-			Namespace: "default",
-		},
-	}, metav1.CreateOptions{})
 	err := rOpts.KubeRun()
 	assert.NoError(t, err)
 

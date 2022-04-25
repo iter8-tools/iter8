@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -14,6 +15,12 @@ import (
 
 func TestKLog(t *testing.T) {
 	tests := []cmdTestCase{
+		// k launch
+		{
+			name:   "k launch",
+			cmd:    fmt.Sprintf("k launch -c load-test-http --chartsParentDir %v --noDownload --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
+			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
+		},
 		// k assert
 		{
 			name:   "k log",
@@ -27,10 +34,10 @@ func TestKLog(t *testing.T) {
 	*kd = *id.NewFakeKubeDriver(settings)
 	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-job-8218s",
+			Name:      "default-1-job-8218s",
 			Namespace: "default",
 			Labels: map[string]string{
-				"job-name": "default-job",
+				"job-name": "default-1-job",
 			},
 		},
 	}, metav1.CreateOptions{})

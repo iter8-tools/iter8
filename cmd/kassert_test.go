@@ -66,7 +66,7 @@ func TestKAssert(t *testing.T) {
 
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-job",
+			Name:      "default-1-job",
 			Namespace: "default",
 		},
 	}, metav1.CreateOptions{})

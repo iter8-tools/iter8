@@ -67,6 +67,7 @@ func TestKubeRun(t *testing.T) {
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
+	kd.revision = 1
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
@@ -93,7 +94,7 @@ func TestKubeRun(t *testing.T) {
 
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-job",
+			Name:      "default-1-job",
 			Namespace: "default",
 		},
 	}, metav1.CreateOptions{})
@@ -111,6 +112,7 @@ func TestLogs(t *testing.T) {
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
+	kd.revision = 1
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
@@ -122,10 +124,10 @@ func TestLogs(t *testing.T) {
 	}, metav1.CreateOptions{})
 	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-job-1831a",
+			Name:      "default-1-job-1831a",
 			Namespace: "default",
 			Labels: map[string]string{
-				"job-name": "default-job",
+				"job-name": "default-1-job",
 			},
 		},
 	}, metav1.CreateOptions{})

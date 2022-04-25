@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-job
+  name: {{ .Release.Name }}-{{ .Release.Revision }}-job
   annotations:
     iter8.tools/revision: {{ .Release.Revision }}
 spec:
