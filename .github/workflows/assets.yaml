@@ -117,7 +117,7 @@ jobs:
         --set payloadURL="https://httpbin.org/stream/1"
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
+        iter8 k assert -c completed -c nofailure --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -147,7 +147,7 @@ jobs:
         --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
+        iter8 k assert -c completed -c nofailure --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete        

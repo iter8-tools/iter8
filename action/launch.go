@@ -12,8 +12,10 @@ import (
 type LaunchOpts struct {
 	// DryRun enables simulating a launch
 	DryRun bool
-	// Folder is the full path to the Iter8 experiment charts folder
-	Folder string
+	// RemoteFolderURL is the URL of the remote Iter8 experiment charts folder
+	// Remote URLs can be any go-getter URLs like GitHub or GitLab URLs
+	// https://github.com/hashicorp/go-getter
+	RemoteFolderURL string
 	// ChartsParentDir is the directory where `charts` is to be downloaded or is located
 	ChartsParentDir string
 	// NoDownload disables charts download.
@@ -33,7 +35,7 @@ type LaunchOpts struct {
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	return &LaunchOpts{
 		DryRun:          false,
-		Folder:          DefaultFolder(),
+		RemoteFolderURL: DefaultRemoteFolderURL(),
 		ChartsParentDir: ".",
 		NoDownload:      false,
 		ChartName:       "",
@@ -49,8 +51,8 @@ func (lOpts *LaunchOpts) LocalRun() error {
 	if !lOpts.NoDownload {
 		// download chart from Iter8 hub
 		hOpts := &HubOpts{
-			Folder:    lOpts.Folder,
-			ChartsDir: path.Join(lOpts.ChartsParentDir, chartsFolderName),
+			RemoteFolderURL: lOpts.RemoteFolderURL,
+			ChartsDir:       path.Join(lOpts.ChartsParentDir, chartsFolderName),
 		}
 		if err := hOpts.LocalRun(); err != nil {
 			return err
@@ -97,8 +99,8 @@ func (lOpts *LaunchOpts) KubeRun() error {
 	if !lOpts.NoDownload {
 		// download chart from Iter8 hub
 		hOpts := &HubOpts{
-			Folder:    lOpts.Folder,
-			ChartsDir: path.Join(lOpts.ChartsParentDir, chartsFolderName),
+			RemoteFolderURL: lOpts.RemoteFolderURL,
+			ChartsDir:       path.Join(lOpts.ChartsParentDir, chartsFolderName),
 		}
 		if err := hOpts.LocalRun(); err != nil {
 			return err
