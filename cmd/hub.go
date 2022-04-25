@@ -8,9 +8,9 @@ import (
 
 // hubDesc is the description of the hub command
 const hubDesc = `
-Download an experiment chart to a local directory.
+Download Iter8 experiment charts from a Git repo or other sources.
 
-	$ iter8 hub -c load-test-http
+	$ iter8 hub
 
 This command is intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
 `
@@ -21,20 +21,20 @@ func newHubCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "hub",
-		Short:        "Download experiment chart",
+		Short:        "Download experiment charts",
 		Long:         hubDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.LocalRun()
 		},
 	}
-	addGitFolderFlag(cmd, &actor.GitFolder)
+	addFolderFlag(cmd, &actor.Folder)
 	return cmd
 }
 
-// addGitFolderFlag
-func addGitFolderFlag(cmd *cobra.Command, gitFolderPtr *string) {
-	cmd.Flags().StringVar(gitFolderPtr, "gitFolder", ia.DefaultGitFolder(), "Git folder containing iter8 charts")
+// addFolderFlag
+func addFolderFlag(cmd *cobra.Command, folderPtr *string) {
+	cmd.Flags().StringVar(folderPtr, "folder", ia.DefaultFolder(), "URL of the folder containing Iter8 experiment charts. Accepts any URL supported https://github.com/hashicorp/go-getter")
 }
 
 // initialize with the hub command

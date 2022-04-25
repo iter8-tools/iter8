@@ -11,7 +11,7 @@ func TestHub(t *testing.T) {
 	// fix hOpts
 	hOpts := NewHubOpts()
 	os.Chdir(t.TempDir())
-	hOpts.GitFolder = "github.com/iter8-tools/iter8.git//charts"
+	hOpts.Folder = "github.com/iter8-tools/iter8.git//charts"
 
 	err := hOpts.LocalRun()
 	assert.NoError(t, err)

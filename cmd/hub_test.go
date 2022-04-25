@@ -12,7 +12,7 @@ func TestHub(t *testing.T) {
 		// basic hub
 		{
 			name:   "basic hub",
-			cmd:    "hub --gitFolder github.com/iter8-tools/iter8.git//charts",
+			cmd:    "hub --folder github.com/iter8-tools/iter8.git//charts",
 			golden: base.CompletePath("../testdata", "output/hub.txt"),
 		},
 	}

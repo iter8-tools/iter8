@@ -12,8 +12,8 @@ import (
 type LaunchOpts struct {
 	// DryRun enables simulating a launch
 	DryRun bool
-	// GitFolder is the full path to the GitHub Iter8 experiment charts folder
-	GitFolder string
+	// Folder is the full path to the Iter8 experiment charts folder
+	Folder string
 	// ChartsParentDir is the directory where `charts` is to be downloaded or is located
 	ChartsParentDir string
 	// NoDownload disables charts download.
@@ -33,7 +33,7 @@ type LaunchOpts struct {
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	return &LaunchOpts{
 		DryRun:          false,
-		GitFolder:       DefaultGitFolder(),
+		Folder:          DefaultFolder(),
 		ChartsParentDir: ".",
 		NoDownload:      false,
 		ChartName:       "",
@@ -49,7 +49,7 @@ func (lOpts *LaunchOpts) LocalRun() error {
 	if !lOpts.NoDownload {
 		// download chart from Iter8 hub
 		hOpts := &HubOpts{
-			GitFolder: lOpts.GitFolder,
+			Folder:    lOpts.Folder,
 			ChartsDir: path.Join(lOpts.ChartsParentDir, chartsFolderName),
 		}
 		if err := hOpts.LocalRun(); err != nil {
@@ -93,6 +93,21 @@ func (lOpts *LaunchOpts) KubeRun() error {
 	if err := lOpts.KubeDriver.Init(); err != nil {
 		return err
 	}
+
+	if !lOpts.NoDownload {
+		// download chart from Iter8 hub
+		hOpts := &HubOpts{
+			Folder:    lOpts.Folder,
+			ChartsDir: path.Join(lOpts.ChartsParentDir, chartsFolderName),
+		}
+		if err := hOpts.LocalRun(); err != nil {
+			return err
+		}
+		log.Logger.Debug("hub complete")
+	} else {
+		log.Logger.Debug("using `charts` under ", lOpts.ChartsParentDir)
+	}
+
 	// update dependencies
 	gOpts := GenOpts{
 		Options:         lOpts.Options,

@@ -93,7 +93,7 @@ jobs:
         build-args: |
           TAG=v${{ env.VERSION }}
 
-  kubernetes-experiment:
+  kubernetes-http-experiment:
     name: Kubernetes http load test    
     runs-on: ubuntu-latest
     needs: build-and-push
@@ -109,6 +109,7 @@ jobs:
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
+        kubectl wait --for=condition=available --timeout=60s deployment/httpbin
     - name: iter8 k launch
       run: |
         iter8 k launch -c load-test-http \
@@ -120,3 +121,33 @@ jobs:
         iter8 k report
         iter8 k log
         iter8 k delete
+
+  kubernetes-grpc-experiment:
+    name: Kubernetes gRPC load test    
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+    - name: Install Iter8
+      run: |
+        tagref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        wget https://github.com/iter8-tools/iter8/releases/download/$tagref/iter8-linux-amd64.tar.gz
+        tar -xvf iter8-linux-amd64.tar.gz
+        mv linux-amd64/iter8 /usr/local/bin
+    - uses: engineerd/setup-kind@v0.5.0
+    - name: create app
+      run: |
+        kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
+        kubectl expose deploy hello --port=50051
+        kubectl wait --for=condition=available --timeout=60s deployment/hello
+    - name: iter8 k launch
+      run: |
+        iter8 k launch -c load-test-grpc \
+        --set host="hello.default:50051" \
+        --set call="helloworld.Greeter.SayHello" \
+        --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
+    - name: try other iter8 k commands
+      run: |
+        iter8 k assert -c completed -c nofailure --timeout 60s
+        iter8 k report
+        iter8 k log
+        iter8 k delete        

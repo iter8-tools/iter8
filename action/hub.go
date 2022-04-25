@@ -13,13 +13,13 @@ const defaultIter8Repo = "github.com/iter8-tools/iter8.git"
 
 // HubOpts are the options used for downloading Iter8 experiment charts
 type HubOpts struct {
-	// GitFolder is the full path to the GitHub Iter8 experiment charts folder
-	GitFolder string
+	// Folder is the full path to the Iter8 experiment charts folder
+	Folder string
 	// ChartsDir is the full path to the `charts` dir
 	ChartsDir string
 }
 
-func DefaultGitFolder() string {
+func DefaultFolder() string {
 	// parse version
 	v := strings.Split(base.Version, "-")
 	ref := v[0]
@@ -30,16 +30,16 @@ func DefaultGitFolder() string {
 func NewHubOpts() *HubOpts {
 
 	return &HubOpts{
-		GitFolder: DefaultGitFolder(),
+		Folder:    DefaultFolder(),
 		ChartsDir: chartsFolderName,
 	}
 }
 
 // LocalRun downloads an experiment chart to DestDir
 func (hub *HubOpts) LocalRun() error {
-	log.Logger.Infof("downloading %v into %v", hub.GitFolder, hub.ChartsDir)
-	if err := getter.Get(hub.ChartsDir, hub.GitFolder); err != nil {
-		e := errors.New("unable to download chart")
+	log.Logger.Infof("downloading %v into %v", hub.Folder, hub.ChartsDir)
+	if err := getter.Get(hub.ChartsDir, hub.Folder); err != nil {
+		e := errors.New("unable to download charts")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}

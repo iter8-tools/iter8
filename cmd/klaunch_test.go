@@ -13,7 +13,7 @@ func TestKLaunch(t *testing.T) {
 		// Launch, base case, values from CLI
 		{
 			name:   "basic k launch",
-			cmd:    fmt.Sprintf("k launch -c load-test-http --chartsParentDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
+			cmd:    fmt.Sprintf("k launch -c load-test-http --noDownload --chartsParentDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 	}
