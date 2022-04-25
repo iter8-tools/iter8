@@ -15,7 +15,7 @@ Launch an experiment in Kubernetes.
 
 	$ iter8 k launch -c load-test-http --set url=https://httpbin.org/get
 
-Use the dry option to simulate a Kubernetes experiment. This creates the manifest.yaml file.
+Use the dry option to simulate a Kubernetes experiment. This creates the manifest.yaml file, and does not deploy any resource in the cluster.
 
 	$ iter8 k launch -c load-test-http \
 	  --set url=https://httpbin.org/get \
