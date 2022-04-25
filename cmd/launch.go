@@ -19,9 +19,9 @@ Use the dry option to simulate an experiment. This creates experiment.yaml and *
 	  --dry
 
 Launching an experiment requires the Iter8 experiment charts folder. You can use various launch flags to control:
-	1. Whether Iter8 should download the experiment charts folder a remote source (example, a Git folder), or reuse local charts.
-	2. The parent directory of the charts folder.
-	3. The remote source (example, a Git folder) from which charts are downloaded.
+		1. Whether Iter8 should download the experiment charts folder from a remote URL (example, a GitHub URL), or reuse local charts.
+		2. The parent directory of the charts folder.
+		3. The remote URL (example, a GitHub URL) from which charts are downloaded.
 `
 
 // newLaunchCmd creates the launch command
@@ -39,7 +39,7 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 	}
 	addDryRunFlag(cmd, &actor.DryRun)
 	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
-	addFolderFlag(cmd, &actor.Folder)
+	addRemoteFolderURLFlag(cmd, &actor.RemoteFolderURL)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	addRunDirFlag(cmd, &actor.RunDir)

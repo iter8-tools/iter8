@@ -23,9 +23,9 @@ Use the dry option to simulate a Kubernetes experiment. This creates the manifes
 
 
 Launching an experiment requires the Iter8 experiment charts folder. You can use various launch flags to control:
-	1. Whether Iter8 should download the experiment charts folder a remote source (example, a Git folder), or reuse local charts.
+	1. Whether Iter8 should download the experiment charts folder from a remote URL (example, a GitHub URL), or reuse local charts.
 	2. The parent directory of the charts folder.
-	3. The remote source (example, a Git folder) from which charts are downloaded.
+	3. The remote URL (example, a GitHub URL) from which charts are downloaded.
 `
 
 // newKLaunchCmd creates the Kubernetes launch command
@@ -48,7 +48,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 
 	// flags shared with launch
 	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
-	addFolderFlag(cmd, &actor.Folder)
+	addRemoteFolderURLFlag(cmd, &actor.RemoteFolderURL)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	addNoDownloadFlag(cmd, &actor.NoDownload)
