@@ -1,0 +1,43 @@
+name: 'Iter8 Install'
+description: 'Install Iter8 CLI'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install latest version of Iter8 CLI
+      env:
+        VERSION: ${{ github.action_ref }}
+      run: | 
+        # For details on context variables runner.os and runner.arch, see:
+        #    https://docs.github.com/en/actions/learn-github-actions/contexts#runner-context
+        # The returned values do not match those used by the build artifacts. 
+        # See https://github.com/iter8-tools/iter8/blob/master/Makefile#L4 (and for other valid combinations: https://github.com/mitchellh/gox/blob/master/platform.go#L28-L101)
+        # Therefore, this code trasforms the context variables as follows:
+        #   os: Linux -> linux, Windows -> windows, macOS -> darwin
+        #   arch: X86 -> 386 amd X64 -> amd64
+        OS=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]' | sed 's/macos/darwin/')
+        ARCH=$(echo ${{ runner.arch }} | sed 's/X86/386/' | sed 's/X64/amd64/')
+        
+        RELEASE="${{ env.VERSION }}"
+        if [ -z $RELEASE ] || [ $RELEASE = "stable" ]; then
+          RELEASE=$(curl --silent "https://api.github.com/repos/iter8-tools/iter8/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        else
+          RELEASE=$(curl -s "https://api.github.com/repos/iter8-tools/iter8/releases" | jq -r '.[] | .tag_name' | grep $RELEASE | sort -Vr | head -1)
+        fi
+        echo "Installing Iter8 version $RELEASE"
+
+        ASSET="iter8-$OS-$ARCH.tar.gz"
+        ASSET_URL="https://github.com/iter8-tools/iter8/releases/download/$RELEASE/$ASSET"
+        echo "Downloading $ASSET_URL"
+        wget -q $ASSET_URL && rc=$? || rc=$?
+        if [ $rc -eq 0 ]; then
+          # echo "SUCCESS: downloaded $ASSET from $ASSET_URL"
+          tar -xvf $ASSET
+          mv $OS-$ARCH/iter8 /usr/local/bin
+        else
+          echo "ERROR: unable to download $ASSET from $ASSET_URL"
+          exit 1
+        fi
+      shell: bash
+branding:
+  icon: check-circle
+  color: green
