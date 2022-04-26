@@ -8,7 +8,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/iter8-tools/iter8/driver"
 	id "github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base"
@@ -27,22 +26,22 @@ func TestKReport(t *testing.T) {
 	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentSpecPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",
 			Namespace: "default",
 		},
-		StringData: map[string]string{driver.ExperimentSpecPath: string(byteArray)},
+		StringData: map[string]string{id.ExperimentSpecPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentResultPath))
+	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentResultPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-result",
 			Namespace: "default",
 		},
-		StringData: map[string]string{driver.ExperimentResultPath: string(byteArray)},
+		StringData: map[string]string{id.ExperimentResultPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	runTestActionCmd(t, tests)

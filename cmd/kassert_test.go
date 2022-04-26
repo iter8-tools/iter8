@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iter8-tools/iter8/driver"
 	id "github.com/iter8-tools/iter8/driver"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -42,13 +41,13 @@ func TestKAssert(t *testing.T) {
 	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", driver.ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", id.ExperimentSpecPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",
 			Namespace: "default",
 		},
-		StringData: map[string]string{driver.ExperimentSpecPath: string(byteArray)},
+		StringData: map[string]string{id.ExperimentSpecPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
@@ -62,7 +61,7 @@ func TestKAssert(t *testing.T) {
 			Name:      "default-result",
 			Namespace: "default",
 		},
-		StringData: map[string]string{driver.ExperimentResultPath: string(resultBytes)},
+		StringData: map[string]string{id.ExperimentResultPath: string(resultBytes)},
 	}, metav1.CreateOptions{})
 
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
