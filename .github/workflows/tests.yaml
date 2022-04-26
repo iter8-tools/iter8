@@ -182,6 +182,29 @@ jobs:
         iter8 k report
         iter8 k delete
 
+  readiness:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Start kind cluster
+      uses: helm/kind-action@v1.2.0
+      with:
+        wait: 300s
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: deploy resources to cluster
+      run: |
+        kubectl apply -f testdata/manifests/readiness.yaml
+    - name: Install Iter8
+      uses: iter8-tools/iter8@v0.10
+    - name: launch load-test-http with readiness checks
+      run: |
+        iter8 launch -c load-test-http --noDownload \
+        --set ready.deploy="test-deployment" \
+        --set url="https://httpbin.org/get"
+    - name: assert experiment completed without failures
+      run: |
+        iter8 assert -c completed -c nofailure
+
   static-check:
     runs-on: ubuntu-latest
     steps:
