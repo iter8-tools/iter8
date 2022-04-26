@@ -194,6 +194,8 @@ jobs:
     - name: deploy resources to cluster
       run: |
         kubectl apply -f testdata/manifests/readiness.yaml
+        sleep 5
+        kubectl get deploy
     - name: Install Iter8
       uses: iter8-tools/iter8@v0.10
     - name: launch load-test-http with readiness checks
