@@ -29,13 +29,13 @@ func TestKRun(t *testing.T) {
 	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", id.ExperimentSpecPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"experiment.yaml": string(byteArray)},
+		StringData: map[string]string{id.ExperimentSpecPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
@@ -49,7 +49,7 @@ func TestKRun(t *testing.T) {
 			Name:      "default-result",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"result.yaml": string(resultBytes)},
+		StringData: map[string]string{id.ExperimentResultPath: string(resultBytes)},
 	}, metav1.CreateOptions{})
 
 	runTestActionCmd(t, tests)

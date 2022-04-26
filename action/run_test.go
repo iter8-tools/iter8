@@ -31,13 +31,13 @@ func TestKubeRun(t *testing.T) {
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", driver.ExperimentSpecPath))
 	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"experiment.yaml": string(byteArray)},
+		StringData: map[string]string{driver.ExperimentSpecPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
@@ -51,7 +51,7 @@ func TestKubeRun(t *testing.T) {
 			Name:      "default-result",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"result.yaml": string(resultBytes)},
+		StringData: map[string]string{driver.ExperimentResultPath: string(resultBytes)},
 	}, metav1.CreateOptions{})
 
 	err := rOpts.KubeRun()

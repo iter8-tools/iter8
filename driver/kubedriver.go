@@ -272,7 +272,7 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 				UID:        spec.UID,
 			}},
 		},
-		StringData: map[string]string{"result.yaml": string(byteArray)},
+		StringData: map[string]string{ExperimentResultPath: string(byteArray)},
 	}
 	// formed result secret ...
 	return &sec, nil

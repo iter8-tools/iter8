@@ -42,22 +42,22 @@ func TestKubeAssert(t *testing.T) {
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "experiment.yaml"))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentSpecPath))
 	aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"experiment.yaml": string(byteArray)},
+		StringData: map[string]string{driver.ExperimentSpecPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
+	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentResultPath))
 	aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-result",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"result.yaml": string(byteArray)},
+		StringData: map[string]string{driver.ExperimentResultPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	ok, err := aOpts.KubeRun()

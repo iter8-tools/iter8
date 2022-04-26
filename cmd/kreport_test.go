@@ -26,22 +26,22 @@ func TestKReport(t *testing.T) {
 	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "experiment.yaml"))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentSpecPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"experiment.yaml": string(byteArray)},
+		StringData: map[string]string{id.ExperimentSpecPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
+	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentResultPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-result",
 			Namespace: "default",
 		},
-		StringData: map[string]string{"result.yaml": string(byteArray)},
+		StringData: map[string]string{id.ExperimentResultPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	runTestActionCmd(t, tests)
