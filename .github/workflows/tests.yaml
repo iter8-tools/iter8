@@ -178,7 +178,7 @@ jobs:
         iter8 k run --namespace default --group default
     - name: assert experiment completed without failures
       run: |
-        iter8 assert -c completed -c nofailure --timeout 300s
+        iter8 k assert -c completed -c nofailure --timeout 300s
         iter8 k report
         iter8 k delete
 
