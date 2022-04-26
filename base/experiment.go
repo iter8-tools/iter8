@@ -8,11 +8,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
 	"github.com/montanaflynn/stats"
+	"helm.sh/helm/v3/pkg/time"
 )
 
 // Task is the building block of an experiment spec
