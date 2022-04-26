@@ -171,7 +171,7 @@ jobs:
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=Available --timeout=60s deployment/httpbin
+        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
     - name: k launch load-test-http
       run: |
         iter8 k launch -c load-test-http --noDownload \
