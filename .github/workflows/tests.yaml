@@ -175,7 +175,7 @@ jobs:
     - name: k launch load-test-http
       run: |
         iter8 k launch -c load-test-http --noDownload \
-        --set url="http://$HOST_IP/post" \
+        --set url="http://httpbin.default/post" \
         --set payloadURL="https://httpbin.org/stream/1" \
         --set disable.job=true
     - name: k run
