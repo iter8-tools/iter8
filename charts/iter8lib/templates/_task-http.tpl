@@ -1,9 +1,9 @@
 {{- define "task.http" -}}
-{{/* Validate values */}}
+{{- /* Validate values */ -}}
 {{- if not .Values.url }}
   {{- fail "Please set a value for the url parameter." }}
 {{- end }}
-{{/* Perform the various setup steps before the main task */}}
+{{- /* Perform the various setup steps before the main task */ -}}
 {{- $vals := mustDeepCopy .Values }}
 {{- if $vals.percentiles }}
   {{- $percentiles := list }}

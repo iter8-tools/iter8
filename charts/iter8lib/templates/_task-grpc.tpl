@@ -1,12 +1,12 @@
-{{- define "task.grpc" -}}
-{{/* Validate values */}}
+{{- define "task.grpc" }}
+{{- /* Validate values */ -}}
 {{- if not .Values.host }}
 {{- fail "Please set a value for the host parameter." }}
 {{- end }}
 {{- if not .Values.call }}
 {{- fail "Please set a value for the call parameter." }}
 {{- end }}
-{{/* Perform the various setup steps before the main task */}}
+{{- /* Perform the various setup steps before the main task */ -}}
 {{- $vals := mustDeepCopy .Values }}
 {{- if $vals.protoURL }}
 # task: download proto file from URL
