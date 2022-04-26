@@ -59,8 +59,8 @@ type KubeDriver struct {
 	*action.Configuration
 	// Group is the experiment group
 	Group string
-	// Revision is the revision of the experiment
-	Revision int
+	// revision is the revision of the experiment
+	revision int
 }
 
 // NewKubeDriver creates and returns a new KubeDriver
@@ -114,9 +114,9 @@ func (kd *KubeDriver) initHelm() error {
 // initRevision initializes the latest revision
 func (driver *KubeDriver) initRevision() error {
 	// update revision to latest, if none is specified
-	if driver.Revision <= 0 {
+	if driver.revision <= 0 {
 		if rel, err := driver.getLastRelease(); err == nil && rel != nil {
-			driver.Revision = rel.Version
+			driver.revision = rel.Version
 		} else {
 			return err
 		}
@@ -158,17 +158,17 @@ func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
 
 // getSpecSecretName yields the name of the experiment spec secret
 func (driver *KubeDriver) getSpecSecretName() string {
-	return fmt.Sprintf("%v-%v-spec", driver.Group, driver.Revision)
+	return fmt.Sprintf("%v-spec", driver.Group)
 }
 
 // getResultSecretName yields the name of the experiment result secret
 func (driver *KubeDriver) getResultSecretName() string {
-	return fmt.Sprintf("%v-%v-result", driver.Group, driver.Revision)
+	return fmt.Sprintf("%v-result", driver.Group)
 }
 
 // getExperimentJobName yields the name of the experiment job
 func (driver *KubeDriver) getExperimentJobName() string {
-	return fmt.Sprintf("%v-%v-job", driver.Group, driver.Revision)
+	return fmt.Sprintf("%v-%v-job", driver.Group, driver.revision)
 }
 
 // getSecretWithRetry attempts to get a Kubernetes secret with retries
@@ -278,37 +278,6 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 	return &sec, nil
 }
 
-// createExperimentResultSecret creates the experiment result secret
-func (driver *KubeDriver) createExperimentResultSecret(r *base.ExperimentResult) error {
-	if sec, err := driver.formResultSecret(r); err == nil {
-		err1 := retry.OnError(
-			wait.Backoff{
-				Steps:    int(secretTimeout / retryInterval),
-				Cap:      secretTimeout,
-				Duration: retryInterval,
-				Factor:   1.0,
-				Jitter:   0.1,
-			},
-			func(err2 error) bool { // retry on specific failures
-				return kerrors.ReasonForError(err2) == metav1.StatusReasonForbidden
-			},
-			func() error {
-				secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
-				_, err3 := secretsClient.Create(context.Background(), sec, metav1.CreateOptions{})
-				return err3
-			},
-		)
-		if err1 != nil {
-			err4 := fmt.Errorf("unable to create secret %v", sec.Name)
-			log.Logger.WithStackTrace(err1.Error()).Error(err4)
-			return err4
-		}
-		return nil
-	} else {
-		return err
-	}
-}
-
 // updateExperimentResultSecret updates the experiment result secret
 // as opposed to patch, update is an atomic operation
 func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
@@ -330,16 +299,6 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 
 // WriteResult writes results for a Kubernetes experiment
 func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
-	// create result secret if need be
-	log.Logger.Debug("Write result called ... ")
-	if sec, _ := driver.getExperimentResultSecret(); sec == nil {
-		log.Logger.Info("creating experiment result secret")
-		if err := driver.createExperimentResultSecret(r); err != nil {
-			return err
-		}
-	} else {
-		log.Logger.Debug("Secret exists ... ", sec.Name)
-	}
 	if err := driver.updateExperimentResultSecret(r); err != nil {
 		return err
 	}
@@ -388,7 +347,7 @@ func writeManifest(rel *release.Release) error {
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 // Upgrade a Kubernetes experiment to the next release
-func (driver *KubeDriver) Upgrade(chartDir string, valueOpts values.Options, group string, dry bool) error {
+func (driver *KubeDriver) upgrade(chartDir string, valueOpts values.Options, group string, dry bool) error {
 	client := action.NewUpgrade(driver.Configuration)
 	client.Namespace = driver.Namespace()
 	client.DryRun = dry
@@ -423,7 +382,7 @@ func (driver *KubeDriver) Upgrade(chartDir string, valueOpts values.Options, gro
 	}
 
 	// upgrading revision info
-	driver.Revision = rel.Version
+	driver.revision = rel.Version
 
 	// write manifest if dry
 	if dry {
@@ -439,10 +398,10 @@ func (driver *KubeDriver) Upgrade(chartDir string, valueOpts values.Options, gro
 	return nil
 }
 
-// Install a Kubernetes experiment
+// install a Kubernetes experiment
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-func (driver *KubeDriver) Install(chartDir string, valueOpts values.Options, group string, dry bool) error {
+func (driver *KubeDriver) install(chartDir string, valueOpts values.Options, group string, dry bool) error {
 	client := action.NewInstall(driver.Configuration)
 	client.Namespace = driver.Namespace()
 	client.DryRun = dry
@@ -478,7 +437,7 @@ func (driver *KubeDriver) Install(chartDir string, valueOpts values.Options, gro
 	}
 
 	// upgrading revision info
-	driver.Revision = rel.Version
+	driver.revision = rel.Version
 
 	// write manifest if dry
 	if dry {
@@ -492,6 +451,15 @@ func (driver *KubeDriver) Install(chartDir string, valueOpts values.Options, gro
 	}
 
 	return nil
+}
+
+// Launch a Kubernetes experiment
+func (driver *KubeDriver) Launch(chartDir string, valueOpts values.Options, group string, dry bool) error {
+	if driver.revision <= 0 {
+		return driver.install(chartDir, valueOpts, group, dry)
+	} else {
+		return driver.upgrade(chartDir, valueOpts, group, dry)
+	}
 }
 
 // Delete a Kubernetes experiment group

@@ -1,10 +1,11 @@
 {{- define "k.spec.secret" -}}
-{{- $name := printf "%v-%v" .Release.Name .Release.Revision -}}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ $name }}-spec
+  name: {{ .Release.Name }}-spec
+  annotations:
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 stringData:
   experiment.yaml: |
-{{ include "experiment" . | indent 4 }}
+{{- include "experiment" . | indent 4 }}
 {{- end }}

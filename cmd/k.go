@@ -20,14 +20,6 @@ func addExperimentGroupFlag(cmd *cobra.Command, groupP *string, required bool) {
 	}
 }
 
-// addExperimentRevisionFlag adds the experiment revision flag and marks it as required or optional
-func addExperimentRevisionFlag(cmd *cobra.Command, revisionP *int, required bool) {
-	cmd.Flags().IntVar(revisionP, "revision", 0, "experiment revision")
-	if required {
-		cmd.MarkFlagRequired("revision")
-	}
-}
-
 func init() {
 	settings.AddFlags(kCmd.PersistentFlags())
 	// hiding these Helm flags for now

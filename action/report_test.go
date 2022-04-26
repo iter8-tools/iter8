@@ -37,12 +37,11 @@ func TestKubeReportText(t *testing.T) {
 	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
-	rOpts.Revision = 1
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "experiment.yaml"))
 	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-spec",
+			Name:      "default-spec",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
@@ -51,7 +50,7 @@ func TestKubeReportText(t *testing.T) {
 	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
 	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-result",
+			Name:      "default-result",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"result.yaml": string(byteArray)},

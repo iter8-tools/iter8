@@ -1,14 +1,16 @@
 {{- define "k.result.rolebinding" -}}
-{{- $name := printf "%v-%v" .Release.Name .Release.Revision -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ $name }}-result-rolebinding
+  name: {{ .Release.Name }}-result-rolebinding
+  annotations:
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 subjects:
 - kind: ServiceAccount
   name: default
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ $name }}-result-role
+  name: {{ .Release.Name }}-result-role
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
