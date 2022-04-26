@@ -1,9 +1,9 @@
 {{- define "task.http" -}}
-{{/* Validate values */}}
+{{- /* Validate values */ -}}
 {{- if not .Values.url }}
   {{- fail "Please set a value for the url parameter." }}
 {{- end }}
-{{/* Perform the various setup steps before the main task */}}
+{{- /* Perform the various setup steps before the main task */ -}}
 {{- $vals := mustDeepCopy .Values }}
 {{- if $vals.percentiles }}
   {{- $percentiles := list }}
@@ -19,7 +19,9 @@
 {{- $pf := dict "payloadFile" "payload.dat" }}
 {{- $vals = mustMerge $pf $vals }}
 {{- end }}
-{{/* Write the main task */}}
+{{- /* Remove "ready" from values to be displayed */ -}}
+{{- $_ := unset $vals "ready" }}
+{{- /* Write the main task */ -}}
 # task: generate HTTP requests for app
 # collect Iter8's built-in HTTP latency and error-related metrics
 - task: gen-load-and-collect-metrics-http

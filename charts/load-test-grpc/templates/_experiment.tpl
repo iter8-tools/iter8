@@ -1,5 +1,5 @@
-{{ define "experiment" -}}
-{{- include "task.readiness" . }}
+{{- define "experiment" -}}
+{{- include "task.ready" . -}}
 {{- include "task.grpc" . -}}
 {{- include "task.assess" . -}}
-{{ end }}
+{{- end }}
