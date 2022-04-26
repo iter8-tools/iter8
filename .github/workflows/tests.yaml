@@ -61,7 +61,7 @@ jobs:
     - name: launch load-test-http with percentiles, duration, and SLOs
       run: |
         iter8 launch -c load-test-http --noDownload \
-        --set url="https://httpbin.org/post" \
+        --set url="http://$HOST_IP/post" \
         --set payloadURL="https://httpbin.org/stream/1" \
         --set duration="3s" \
         --set percentiles[0]=45.6 \
@@ -214,7 +214,7 @@ jobs:
       run: |
         iter8 launch -c load-test-http --noDownload \
         --set ready.deploy="test-deployment" \
-        --set url="https://httpbin.org/get"
+        --set url="https://example.com"
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure
