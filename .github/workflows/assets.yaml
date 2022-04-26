@@ -104,7 +104,7 @@ jobs:
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=available --timeout=300s deployment/httpbin
+        kubectl wait --for=condition=Available --timeout=300s deployment/httpbin
     - name: iter8 k launch
       run: |
         iter8 k launch -c load-test-http \
@@ -133,7 +133,7 @@ jobs:
       run: |
         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
         kubectl expose deploy hello --port=50051
-        kubectl wait --for=condition=available --timeout=300s deployment/hello
+        kubectl wait --for=condition=Available --timeout=300s deployment/hello
     - name: iter8 k launch
       run: |
         iter8 k launch -c load-test-grpc \
