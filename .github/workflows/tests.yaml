@@ -172,7 +172,7 @@ jobs:
         iter8 k launch -c load-test-http --noDownload \
         --set url="https://httpbin.org/post" \
         --set payloadURL="https://httpbin.org/stream/1" \
-        --set disable.job=true
+        --set iter8lib.disable.job=true
     - name: k run
       run: |
         iter8 k run --namespace default --group default
