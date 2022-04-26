@@ -4,10 +4,11 @@ import (
 	"context"
 	"io/ioutil"
 	"testing"
+	"time"
 
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -29,22 +30,30 @@ func TestKubeRun(t *testing.T) {
 	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
-	rOpts.Revision = 1
 
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
 	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-spec",
+			Name:      "default-spec",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
-	rOpts.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
+
+	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
+		StartTime:         time.Now(),
+		NumCompletedTasks: 0,
+		Failure:           false,
+		Iter8Version:      base.MajorMinor,
+	})
+	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-job",
+			Name:      "default-result",
 			Namespace: "default",
 		},
+		StringData: map[string]string{"result.yaml": string(resultBytes)},
 	}, metav1.CreateOptions{})
+
 	err := rOpts.KubeRun()
 	assert.NoError(t, err)
 

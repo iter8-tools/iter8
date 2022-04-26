@@ -10,7 +10,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 )
 
-func TestLocalLaunch(t *testing.T) {
+func TestLocalLaunchNoDownload(t *testing.T) {
 	base.SetupWithMock(t)
 
 	// fix lOpts
@@ -23,6 +23,23 @@ func TestLocalLaunch(t *testing.T) {
 
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
+}
+
+func TestLocalLaunch(t *testing.T) {
+	base.SetupWithMock(t)
+
+	// fix lOpts
+	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
+	lOpts.ChartName = "load-test-http"
+	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
+	// fixing git ref forever
+	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.10.6" + "//" + chartsFolderName
+
+	os.Chdir(t.TempDir())
+	err := lOpts.LocalRun()
+	assert.NoError(t, err)
+
+	assert.DirExists(t, chartsFolderName)
 }
 
 func TestKubeLaunch(t *testing.T) {

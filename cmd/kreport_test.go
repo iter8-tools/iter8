@@ -26,11 +26,10 @@ func TestKReport(t *testing.T) {
 	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	kd.Revision = 1
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "experiment.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-spec",
+			Name:      "default-spec",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
@@ -39,7 +38,7 @@ func TestKReport(t *testing.T) {
 	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", "result.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-result",
+			Name:      "default-result",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"result.yaml": string(byteArray)},

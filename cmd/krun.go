@@ -13,7 +13,7 @@ import (
 const kRunDesc = `
 Run a Kubernetes experiment. This command reads an experiment specified in a secret and writes the result to another secret.
 
-	$ iter8 k run --namespace {{ .Experiment.Namespace }} --group {{ .Experiment.group }} --revision {{ .Experiment.Revision }}
+	$ iter8 k run --namespace {{ .Experiment.Namespace }} --group {{ .Experiment.group }}
 
 This command is intended for use within the Iter8 Docker image that is used to execute Kubernetes experiments.
 `
@@ -33,7 +33,6 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, true)
-	addExperimentRevisionFlag(cmd, &actor.Revision, true)
 	actor.EnvSettings = settings
 	cmd.MarkFlagRequired("namespace")
 	return cmd

@@ -1,4 +1,5 @@
-### global values under global are available for charts that use iter8lib as a dependency
-global:
-  ### iter8Image default iter8 image used for running Kubernetes experiments
-  iter8Image: iter8/iter8:0.10
+### iter8Image default iter8 image used for running Kubernetes experiments
+iter8Image: iter8/iter8:0.10
+
+### majorMinor is the minor version of Iter8
+majorMinor: v0.10

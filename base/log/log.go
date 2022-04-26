@@ -19,6 +19,8 @@ type Iter8Logger struct {
 
 // StackTrace is the trace from external components like a shell scripts run by an Iter8 task.
 type StackTrace struct {
+	// prefix is the string with which external traces are prefixed
+	prefix string
 	// Trace is the raw trace
 	Trace string
 }
@@ -42,17 +44,26 @@ func init() {
 // WithStackTrace yields a log entry with a formatted stack trace field embedded in it.
 func (l *Iter8Logger) WithStackTrace(t string) *logrus.Entry {
 	return l.WithField("stack-trace", &StackTrace{
-		Trace: t,
+		prefix: "::Trace:: ",
+		Trace:  t,
 	})
 }
 
-// String processes stack traces by prefixing each line of the trace with ::Trace::.
+// WithSpaces yields a log entry with a formatted indent embedded in it.
+func (l *Iter8Logger) WithIndentedTrace(t string) *logrus.Entry {
+	return l.WithField("indented-trace", &StackTrace{
+		prefix: "  ",
+		Trace:  t,
+	})
+}
+
+// String processes stack traces by prefixing each line of the trace with prefix.
 // This enables other tools like grep to easily filter out these traces if needed.
 func (st *StackTrace) String() string {
 	out := "below ... \n"
 	scanner := bufio.NewScanner(strings.NewReader(st.Trace))
 	for scanner.Scan() {
-		out += "::Trace:: " + scanner.Text() + "\n"
+		out += st.prefix + scanner.Text() + "\n"
 	}
 	out = strings.TrimSuffix(out, "\n")
 	return out

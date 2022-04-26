@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	id "github.com/iter8-tools/iter8/driver"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 
 	"github.com/iter8-tools/iter8/base"
 )
@@ -25,7 +27,7 @@ func TestKAssert(t *testing.T) {
 		// k run
 		{
 			name: "k run",
-			cmd:  "k run -g default --revision 1 --namespace default",
+			cmd:  "k run -g default --namespace default",
 		},
 		// k assert
 		{
@@ -42,10 +44,24 @@ func TestKAssert(t *testing.T) {
 	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", "experiment.yaml"))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-spec",
+			Name:      "default-spec",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"experiment.yaml": string(byteArray)},
+	}, metav1.CreateOptions{})
+
+	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
+		StartTime:         time.Now(),
+		NumCompletedTasks: 0,
+		Failure:           false,
+		Iter8Version:      base.MajorMinor,
+	})
+	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "default-result",
+			Namespace: "default",
+		},
+		StringData: map[string]string{"result.yaml": string(resultBytes)},
 	}, metav1.CreateOptions{})
 
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
