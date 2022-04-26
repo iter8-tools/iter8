@@ -15,11 +15,12 @@ timeout: {{ .Values.ready.timeout }}
 {{- if $namespace }}
 namespace: {{ $namespace }}
 {{- end }}
-{{- end }}
+{{ end }}
 
 {{- define "task.ready" }}
 {{- /* If user has specified a check for readiesss of a Kubernetes Service */ -}}
 {{- if .Values.ready.service }}
+# task: determine if Kubernetes Service exists
 - task: k8s-object-ready
   with:
     name: {{ .Values.ready.service }}
@@ -29,6 +30,7 @@ namespace: {{ $namespace }}
 {{- end }}
 {{- /* If user has specified a check for readiesss of a Kubernetes Deployment */ -}}
 {{- if .Values.ready.deploy }}
+# task: determine if Kubernetes Deployment is Available
 - task: k8s-object-ready
   with:
     name: {{ .Values.ready.deploy }}
@@ -36,5 +38,5 @@ namespace: {{ $namespace }}
     resource: deployments
     condition: Available
 {{- include "task.ready.tn" . | indent 4 }}
-{{- end }}
+{{ end }}
 {{- end }}
