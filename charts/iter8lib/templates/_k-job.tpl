@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-{{ .Release.Revision | toString }}-job
+  name: {{ .Release.Name }}-{{ .Release.Revision }}-job
   annotations:
-    iter8.tools/revision: {{ .Release.Revision | toString }}
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 spec:
   template:
     spec:

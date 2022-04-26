@@ -4,7 +4,7 @@ kind: Secret
 metadata:
   name: {{ .Release.Name }}-result
   annotations:
-    iter8.tools/revision: {{ .Release.Revision | toString }}
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 stringData:
   experiment.yaml: |
     startTime:         {{ now | toString }}

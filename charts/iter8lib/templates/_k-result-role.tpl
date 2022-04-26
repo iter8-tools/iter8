@@ -4,7 +4,7 @@ kind: Role
 metadata:
   name: {{ .Release.Name }}-result-role
   annotations:
-    iter8.tools/revision: {{ .Release.Revision | toString }}
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 rules:
 - apiGroups: [""]
   resourceNames: ["{{ .Release.Name }}-result"]
