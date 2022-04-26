@@ -5,15 +5,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"testing"
-	"time"
 
+	"github.com/iter8-tools/iter8/base"
 	id "github.com/iter8-tools/iter8/driver"
+	"helm.sh/helm/v3/pkg/time"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
-
-	"github.com/iter8-tools/iter8/base"
 )
 
 func TestKAssert(t *testing.T) {

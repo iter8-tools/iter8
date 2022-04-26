@@ -4,15 +4,13 @@ import (
 	"context"
 	"io/ioutil"
 	"testing"
-	"time"
 
+	"github.com/iter8-tools/iter8/base"
+	id "github.com/iter8-tools/iter8/driver"
+	"helm.sh/helm/v3/pkg/time"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
-
-	id "github.com/iter8-tools/iter8/driver"
-
-	"github.com/iter8-tools/iter8/base"
 )
 
 func TestKRun(t *testing.T) {

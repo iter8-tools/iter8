@@ -265,12 +265,6 @@ func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Se
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: driver.getResultSecretName(),
-			OwnerReferences: []metav1.OwnerReference{{
-				APIVersion: "v1",
-				Kind:       "secret",
-				Name:       spec.Name,
-				UID:        spec.UID,
-			}},
 		},
 		StringData: map[string]string{ExperimentResultPath: string(byteArray)},
 	}
