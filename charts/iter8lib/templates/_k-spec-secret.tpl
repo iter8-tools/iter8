@@ -4,7 +4,7 @@ kind: Secret
 metadata:
   name: {{ .Release.Name }}-spec
   annotations:
-    iter8.tools/revision: {{ .Release.Revision }}
+    iter8.tools/revision: {{ .Release.Revision | toString }}
 stringData:
   experiment.yaml: |
 {{- include "experiment" . | indent 4 }}
