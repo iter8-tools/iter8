@@ -4,7 +4,7 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}-{{ .Release.Revision }}-job
   annotations:
-    iter8.tools/revision: {{ .Release.Revision }}
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 spec:
   template:
     spec:

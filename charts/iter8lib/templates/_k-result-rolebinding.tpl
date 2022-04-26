@@ -4,7 +4,7 @@ kind: RoleBinding
 metadata:
   name: {{ .Release.Name }}-result-rolebinding
   annotations:
-    iter8.tools/revision: {{ .Release.Revision }}
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 subjects:
 - kind: ServiceAccount
   name: default

@@ -4,11 +4,11 @@ kind: Secret
 metadata:
   name: {{ .Release.Name }}-result
   annotations:
-    iter8.tools/revision: {{ .Release.Revision }}
+    iter8.tools/revision: {{ .Release.Revision | quote }}
 stringData:
   experiment.yaml: |
-    startTime:         {{ now }},
-    numCompletedTasks: 0,
-    failure:           false,
-    iter8Version:      {{ .Values.iter8lib.majorMinor }},
+    startTime:         {{ now | toString }}
+    numCompletedTasks: 0
+    failure:           false
+    iter8Version:      {{ .Values.iter8lib.majorMinor }}
 {{- end }}
