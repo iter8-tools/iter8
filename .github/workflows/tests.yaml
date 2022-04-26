@@ -164,6 +164,16 @@ jobs:
       uses: actions/checkout@v2
     - name: Build and install Iter8
       run: make install
+    - name: run httpbin
+      run: |
+        set -e
+        docker pull kennethreitz/httpbin
+        docker run -p 80:80 kennethreitz/httpbin &
+        HOST_IP=$(ip -f inet addr show docker0 | grep -Po 'inet \K[\d.]+')
+        echo "HOST_IP=$HOST_IP" >> $GITHUB_ENV
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
+          sleep 5; 
+        done;
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -171,8 +181,7 @@ jobs:
     - name: k launch load-test-http
       run: |
         iter8 k launch -c load-test-http --noDownload \
-        --set url="https://httpbin.org/get" \
-        --set payloadURL="https://httpbin.org/stream/1" \
+        --set url="http://$HOST_IP/get" \
         --set iter8lib.disable.job=true \
         --set duration="3s" \
         --set SLOs.http/latency-p50=200 \
