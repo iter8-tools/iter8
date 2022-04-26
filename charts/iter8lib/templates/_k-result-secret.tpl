@@ -6,7 +6,7 @@ metadata:
   annotations:
     iter8.tools/revision: {{ .Release.Revision | quote }}
 stringData:
-  experiment.yaml: |
+  result.yaml: |
     startTime:         {{ now | toString }}
     numCompletedTasks: 0
     failure:           false
