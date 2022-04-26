@@ -19,7 +19,7 @@
 {{- $pf := dict "payloadFile" "payload.dat" }}
 {{- $vals = mustMerge $pf $vals }}
 {{- end }}
-{{- /* Write the main task */ -}}
+{{/* Write the main task */}}
 # task: generate HTTP requests for app
 # collect Iter8's built-in HTTP latency and error-related metrics
 - task: gen-load-and-collect-metrics-http
