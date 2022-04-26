@@ -194,15 +194,13 @@ jobs:
     - name: deploy resources to cluster
       run: |
         kubectl apply -f testdata/manifests/readiness.yaml
-        sleep 5
-        kubectl get deploy
     - name: Install Iter8
       uses: iter8-tools/iter8@v0.10
     - name: launch load-test-http with readiness checks
       run: |
         iter8 launch -c load-test-http --noDownload \
         --set ready.deploy="test-deployment" \
-        --set url="https://httpbin.org/get" \
+        --set url="https://httpbin.org/get"
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure

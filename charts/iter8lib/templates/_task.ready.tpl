@@ -41,6 +41,7 @@ namespace: {{ $namespace }}
 - task: k8s-object-ready
   with:
     name: {{ .Values.ready.deploy }}
+    group: apps
     version: v1
     resource: deployments
     condition: Available
