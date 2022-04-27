@@ -216,9 +216,9 @@ jobs:
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=20s
-    - name: assert experiment completed without failures
+    - name: k assert experiment completed without failures
       run: |
-        iter8 assert -c completed -c nofailure
+        iter8 k assert -c completed -c nofailure
 
   static-check:
     runs-on: ubuntu-latest
