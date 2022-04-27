@@ -107,15 +107,14 @@ jobs:
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=available --timeout=300s deploy/httpbin
+        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
     - name: iter8 k launch
       run: |
         iter8 k launch -c load-test-http \
-        --set url="http://httpbin.default/get" \
-        --set payloadURL="https://httpbin.org/stream/1"
+        --set url="http://httpbin.default/get"
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 300s
+        iter8 k assert -c completed -c nofailure --timeout 60s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -139,7 +138,7 @@ jobs:
       run: |
         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
         kubectl expose deploy hello --port=50051
-        kubectl wait --for=condition=available --timeout=300s deploy/hello
+        kubectl wait --for=condition=available --timeout=60s deploy/hello
     - name: iter8 k launch
       run: |
         iter8 k launch -c load-test-grpc \
@@ -148,7 +147,7 @@ jobs:
         --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 300s
+        iter8 k assert -c completed -c nofailure --timeout 60s
         iter8 k report
         iter8 k log
-        iter8 k delete        
+        iter8 k delete

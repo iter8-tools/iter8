@@ -192,7 +192,7 @@ jobs:
         iter8 k run --namespace default --group default &
     - name: assert experiment completed without failures and SLOs are satisfied
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
         iter8 k report
         iter8 k delete
 
