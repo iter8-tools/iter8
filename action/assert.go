@@ -38,9 +38,7 @@ func NewAssertOpts(kd *driver.KubeDriver) *AssertOpts {
 
 // LocalRun asserts conditions for a local experiment
 func (aOpts *AssertOpts) LocalRun() (bool, error) {
-	return aOpts.Run(&driver.FileDriver{
-		RunDir: aOpts.RunDir,
-	})
+	return aOpts.Run(aOpts)
 }
 
 // LocalRun asserts conditions for a Kubernetes experiment
@@ -54,12 +52,7 @@ func (aOpts *AssertOpts) KubeRun() (bool, error) {
 
 // Run builds the experiment and verifies assert conditions
 func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {
-	e, err := base.BuildExperiment(true, eio)
-	if err != nil {
-		return false, err
-	}
-
-	allGood, err := assert.verify(e)
+	allGood, err := assert.verify(eio)
 	if err != nil {
 		return false, err
 	}
@@ -71,7 +64,7 @@ func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {
 }
 
 // verify implements the core logic of assert
-func (assert *AssertOpts) verify(exp *base.Experiment) (bool, error) {
+func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 	// timeSpent tracks how much time has been spent so far in assert attempts
 	var timeSpent, _ = time.ParseDuration("0s")
 
@@ -81,6 +74,11 @@ func (assert *AssertOpts) verify(exp *base.Experiment) (bool, error) {
 	// check assert conditions
 	allGood := true
 	for {
+		exp, err := base.BuildExperiment(true, eio)
+		if err != nil {
+			return false, err
+		}
+
 		for _, cond := range assert.Conditions {
 			if strings.ToLower(cond) == Completed {
 				c := exp.Completed()
