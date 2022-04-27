@@ -49,7 +49,7 @@ func (aOpts *AssertOpts) KubeRun() (bool, error) {
 		return false, err
 	}
 
-	return aOpts.Run(aOpts)
+	return aOpts.Run(aOpts.KubeDriver)
 }
 
 // Run builds the experiment and verifies assert conditions
@@ -74,12 +74,13 @@ func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 	var sleepTime, _ = time.ParseDuration("3s")
 
 	// check assert conditions
-	allGood := true
 	for {
 		exp, err := base.BuildExperiment(true, eio)
 		if err != nil {
 			return false, err
 		}
+
+		allGood := true
 
 		for _, cond := range assert.Conditions {
 			if strings.ToLower(cond) == Completed {
@@ -111,6 +112,7 @@ func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 				return false, fmt.Errorf("unsupported assert condition detected; %v", cond)
 			}
 		}
+
 		if allGood {
 			log.Logger.Info("all conditions were satisfied")
 			return true, nil
