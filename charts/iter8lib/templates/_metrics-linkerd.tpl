@@ -21,12 +21,7 @@ metrics:
       sum(last_over_time(request_total{
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 - name: error-count
@@ -40,12 +35,7 @@ metrics:
         response_code=~'5..',
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 - name: error-rate
@@ -59,21 +49,11 @@ metrics:
         response_code=~'5..',
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(response_total{
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result.[0].value.[1]
 - name: le500ms-latency-percentile
@@ -87,22 +67,12 @@ metrics:
         le='500',
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(response_latency_ms_bucket{
         le='+Inf',
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 - name: mean-latency
@@ -115,21 +85,11 @@ metrics:
       sum(last_over_time(response_latency_ms_sum{
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(request_total{
         direction='inbound',
         tls='true',
-        {{"{{"}}- if .Values.deployment {{"}}"}}
-          deployment="{{"{{"}}.deployment{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
-        {{"{{"}}- if .Values.namespace {{"}}"}}
-          namespace="{{"{{"}}.namespace{{"}}"}}",
-        {{"{{"}}- end {{"}}"}}
+        {{- include "metrics.common.linkerd" . }}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 {{- end }}
