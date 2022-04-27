@@ -10,16 +10,17 @@
 <img alt-text="Iter8 experiment" src="https://iter8-tools.github.io/docs/0.9/images/iter8-intro-dark.png" width="70%" />
 </p>
 
-## :rocket: Usage examples
-1.  [Load test, benchmark and validate HTTP services with SLOs](https://iter8.tools/0.9/tutorials/load-test-http/usage/).
-2.  [Load test, benchmark and validate gRPC services with SLOs](https://iter8.tools/0.9/tutorials/load-test-grpc/usage/).
-3.  Performance testing and SLO validation using Iter8 GitHub Action: [HTTP](https://iter8.tools/0.9/tutorials/load-test-http/ghaction/) and [gRPC](https://iter8.tools/0.9/tutorials/load-test-grpc/ghaction/).
-4.  Performance testing and SLO validation for Knative services: [HTTP](https://iter8.tools/0.9/tutorials/integrations/knative/load-test-http/) and [gRPC](https://iter8.tools/0.9/tutorials/integrations/knative/load-test-grpc/).
+## :rocket: Features at a glance
+1. **Load test, benchmark and validate HTTP services with SLOs**
+  * [In your local environment](https://iter8.tools/0.10/tutorials/load-test-http/basicusage/)
+  * [Inside a Kubernetes cluster](https://iter8.tools/0.10/tutorials/load-test-http/kubernetesusage/)
+2. **Load test, benchmark and validate gRPC services with SLOs**
+  * [In your local environment](https://iter8.tools/0.10/tutorials/load-test-grpc/basicusage/)
+  * [Inside a Kubernetes cluster](https://iter8.tools/0.10/tutorials/load-test-grpc/kubernetesusage/)
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
 ## :maple_leaf: Issues
-
 Iter8 issues are tracked [here](https://github.com/iter8-tools/iter8/issues).
 
 ## :tada: Contributing
