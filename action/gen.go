@@ -1,11 +1,9 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"path"
-	"regexp"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
@@ -43,45 +41,6 @@ func NewGenOpts() *GenOpts {
 // chartDir returns the path to chart directory
 func (gen *GenOpts) chartDir() string {
 	return path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
-}
-
-/*
-	containsMetricsTemplate checks if for a metrics template and identifies
-	the source of the metrics.
-
-	For example, given "_istio.metrics.tpl", return "istio" or given
-	"_ce.metrics.tpl", return "ce". Otherwise, return empty string.
-*/
-func (gen *GenOpts) getMetricSourceFromTemplate() (string, error) {
-	templatesPath := path.Join(gen.chartDir(), "templates")
-
-	fileInfo, err := ioutil.ReadDir(templatesPath)
-	if err != nil {
-		log.Logger.Error("could not read directory ", templatesPath)
-		return "", err
-	}
-
-	re := regexp.MustCompile(`^_(\w+)\.metrics\.tpl$`)
-
-	for _, file := range fileInfo {
-		fileName := file.Name()
-
-		match := re.FindStringSubmatch(fileName)
-
-		/*
-			Given "_istio.metrics.tpl", FindStringSubmatch should return
-			["_istio.metrics.tpl", "istio"]
-		*/
-		if len(match) > 0 {
-			if len(match) == 2 {
-				return match[1], nil
-			} else {
-				return "", errors.New("could not properly identify metrics source from " + fileName)
-			}
-		}
-	}
-
-	return "", nil
 }
 
 // LocalRun generates a local experiment.yaml file
@@ -123,15 +82,13 @@ func (gen *GenOpts) LocalRun() error {
 	}
 
 	// add in metrics.yaml template
-	if providers != nil {
-		for _, provider := range providers {
-			// NOTE: This pattern must be documented
-			mData := []byte(`{{- include "metrics.` + provider + `" . }}`)
-			c.Templates = append(c.Templates, &chart.File{
-				Name: path.Join("templates", provider, driver.ExperimentMetricsPath),
-				Data: mData,
-			})
-		}
+	for _, provider := range providers {
+		// NOTE: This pattern must be documented
+		mData := []byte(`{{- include "metrics.` + provider + `" . }}`)
+		c.Templates = append(c.Templates, &chart.File{
+			Name: path.Join("templates", provider, driver.ExperimentMetricsPath),
+			Data: mData,
+		})
 	}
 
 	// get values
@@ -166,17 +123,15 @@ func (gen *GenOpts) LocalRun() error {
 	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
 
 	// write metric spec files
-	if providers != nil {
-		for _, provider := range providers {
-			metricsBytes := []byte(m[path.Join(c.Name(), "templates", provider, driver.ExperimentMetricsPath)])
-			metricsFileName := provider + ".metrics.yaml"
-			err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
-			if err != nil {
-				log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
-				return err
-			}
-			log.Logger.Infof("created %v file", metricsFileName)
+	for _, provider := range providers {
+		metricsBytes := []byte(m[path.Join(c.Name(), "templates", provider, driver.ExperimentMetricsPath)])
+		metricsFileName := provider + ".metrics.yaml"
+		err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
+			return err
 		}
+		log.Logger.Infof("created %v file", metricsFileName)
 	}
 
 	return err
