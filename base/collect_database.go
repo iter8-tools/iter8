@@ -260,6 +260,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 
 				// check if there were any issues querying database and extracting value
 				if !ok {
+					log.Logger.Error("could not query for metric ", metric.Name, ": ", err)
 					continue
 				}
 
