@@ -14,7 +14,4 @@
       {{- if .Values.StartingTime }}
       StartingTime: {{ .Values.StartingTime | int }}
       {{- end }}
-
-      # TODO: Should we make this more generic using the below?
-      # {{ toYaml .Values.versionInfo | indent 8 }}
 {{- end }}
