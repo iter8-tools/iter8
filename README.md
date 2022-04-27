@@ -12,11 +12,11 @@
 
 ## :rocket: Features at a glance
 1. **Load test, benchmark and validate HTTP services with SLOs**
-  * [In your local environment](https://iter8.tools/0.10/tutorials/load-test-http/basicusage/)
-  * [Inside a Kubernetes cluster](https://iter8.tools/0.10/tutorials/load-test-http/kubernetesusage/)
+    * [In your local environment](https://iter8.tools/0.10/tutorials/load-test-http/basicusage/)
+    * [Inside a Kubernetes cluster](https://iter8.tools/0.10/tutorials/load-test-http/kubernetesusage/)
 2. **Load test, benchmark and validate gRPC services with SLOs**
-  * [In your local environment](https://iter8.tools/0.10/tutorials/load-test-grpc/basicusage/)
-  * [Inside a Kubernetes cluster](https://iter8.tools/0.10/tutorials/load-test-grpc/kubernetesusage/)
+    * [In your local environment](https://iter8.tools/0.10/tutorials/load-test-grpc/basicusage/)
+    * [Inside a Kubernetes cluster](https://iter8.tools/0.10/tutorials/load-test-grpc/kubernetesusage/)
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
