@@ -7,7 +7,7 @@ metadata:
     iter8.tools/revision: {{ .Release.Revision | quote }}
 stringData:
   result.yaml: |
-    startTime:         {{ now }}
+    startTime:         {{ now | toJson }}
     numCompletedTasks: 0
     failure:           false
     iter8Version:      {{ .Values.iter8lib.majorMinor }}
