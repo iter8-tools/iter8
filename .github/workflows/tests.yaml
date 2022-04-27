@@ -204,17 +204,21 @@ jobs:
       uses: actions/checkout@v2
     - name: deploy resources to cluster
       run: |
-        kubectl apply -f testdata/manifests/readiness.yaml
+        kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
+        kubectl expose deploy httpbin --port=80
     - name: Install Iter8
       uses: iter8-tools/iter8@v0.10
-    - name: launch load-test-http with readiness checks
+    - name: k launch load-test-http with readiness checks
       run: |
-        iter8 launch -c load-test-http --noDownload \
-        --set ready.deploy="test-deployment" \
-        --set url="https://example.com"
-    - name: assert experiment completed without failures
+        iter8 k launch -c load-test-http --noDownload \
+        --set url=http://httpbin.default \
+        --set SLOs.http/latency-mean=50 \
+        --set ready.deploy="httpbin" \
+        --set ready.service="httpbin" \
+        --set ready.timeout=60s
+    - name: k assert experiment completed without failures
       run: |
-        iter8 assert -c completed -c nofailure
+        iter8 k assert -c completed -c nofailure --timeout 60s
 
   static-check:
     runs-on: ubuntu-latest

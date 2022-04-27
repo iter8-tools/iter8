@@ -14,4 +14,5 @@
 ---
 {{ include "k.job" . }}
 {{- end }}
+{{ include "task.ready.rbac" . }}
 {{- end }}
