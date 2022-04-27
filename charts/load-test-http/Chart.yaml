@@ -1,6 +1,6 @@
 apiVersion: v2
 name: load-test-http
-version: 0.10.0
+version: 0.10.1
 description: Load test, benchmark, and validate HTTP services
 type: application
 keywords:

@@ -11,7 +11,7 @@ insights:
     upperLimit: 1000
   - metric: http/latency-p95.0
     upperLimit: 2500
-  - metric: http/latency-p97.5
+  - metric: http/latency-p99
     upperLimit: 5000
   SLOsSatisfied:
   - - false
@@ -82,10 +82,6 @@ insights:
       description: 95-th percentile of observed latency values
       type: Gauge
       units: msec
-    http/latency-p97.5:
-      description: 97.5-th percentile of observed latency values
-      type: Gauge
-      units: msec
     http/latency-p99:
       description: 99-th percentile of observed latency values
       type: Gauge
@@ -120,8 +116,6 @@ insights:
     - 24.25
     http/latency-p95:
     - 40.8740518
-    http/latency-p97.5:
-    - 42.6221554
     http/latency-p99:
     - 43.67101756
     http/latency-p99.9:

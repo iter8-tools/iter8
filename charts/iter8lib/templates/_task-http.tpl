@@ -5,13 +5,6 @@
 {{- end }}
 {{- /* Perform the various setup steps before the main task */ -}}
 {{- $vals := mustDeepCopy .Values }}
-{{- if $vals.percentiles }}
-  {{- $percentiles := list }}
-  {{- range $pval := $vals.percentiles }}
-    {{- $percentiles = append $percentiles ( $pval | float64 ) }}
-  {{- end }}
-  {{ $_ := set $vals "percentiles" $percentiles }}
-{{- end }}
 {{- if $vals.payloadURL }}
 # task: download payload from payload URL
 - run: |

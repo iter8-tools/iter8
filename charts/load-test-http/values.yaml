@@ -21,7 +21,7 @@
 ### and a value which is the upper limit on the metric.
 ### Valid metric names are error-rate, error-count, latency-max, 
 ### latency-mean, latency-stddev, and latency-pX, where X is any latency percentile 
-### (i.e., any float value between 0 and 100).
+### (i.e., any float value between 0 and 100) in the set {50.0, 75.0, 90.0, 95.0, 99.0, 99.9}.
 ### Unit of latency is msec.
 ### Example:
 ###   http/error-rate: 0
