@@ -150,4 +150,4 @@ jobs:
         iter8 k assert -c completed -c nofailure --timeout 60s
         iter8 k report
         iter8 k log
-        iter8 k delete        
+        iter8 k delete
