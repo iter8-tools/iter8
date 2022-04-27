@@ -56,6 +56,9 @@ metrics:
   - name: query
     value: |
       sum(last_over_time(istio_requests_total{
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}
@@ -184,6 +187,9 @@ metrics:
     value: |
       sum(last_over_time(istio_requests_total{
         response_code=~'5..',
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}
@@ -309,6 +315,9 @@ metrics:
     value: |
       sum(last_over_time(istio_requests_total{
         response_code=~'5..',
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}
@@ -424,6 +433,9 @@ metrics:
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}
@@ -552,6 +564,9 @@ metrics:
     value: |
       sum(last_over_time(istio_request_duration_milliseconds_bucket{
         le='500',
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}
@@ -671,6 +686,9 @@ metrics:
         {{"{{"}}- end {{"}}"}}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_request_duration_milliseconds_bucket{
         le='+Inf',
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}
@@ -798,6 +816,9 @@ metrics:
   - name: query
     value: |
       sum(last_over_time(istio_request_duration_milliseconds_sum{
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}
@@ -916,6 +937,9 @@ metrics:
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
       }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
+        {{- if .Values.reporter }}
+          reporter="{{.Values.reporter}}",
+        {{- end }}
         {{- if .Values.app }}
           app="{{.Values.app}}",
         {{- end }}

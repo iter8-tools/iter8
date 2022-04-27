@@ -23,6 +23,8 @@ providers:
 # Used by the template
 
 # PromQL selectors
+reporter: source
+
 app: null
 chart: null
 connection_security_policy: null
