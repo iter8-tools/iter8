@@ -189,7 +189,7 @@ jobs:
         --set SLOs.http/error-count=0
     - name: k run
       run: |
-        iter8 k run --namespace default --group default
+        iter8 k run --namespace default --group default &
     - name: assert experiment completed without failures and SLOs are satisfied
       run: |
         iter8 k assert -c completed -c nofailure -c slos --timeout 300s
