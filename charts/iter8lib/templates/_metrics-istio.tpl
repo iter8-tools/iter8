@@ -1,4 +1,4 @@
-{{- define "metrics" -}}
+{{- define "metrics.istio" -}}
 url: {{ .Values.Endpoint }}/api/v1/query
 provider: Istio
 method: GET

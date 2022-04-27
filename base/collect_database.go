@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
@@ -72,6 +71,7 @@ const elapsedTimeString = "ElapsedTime"
 //
 // Note: ElapsedTime is produced by Iter8
 type collectDatabaseInputs struct {
+	Providers   []string                 `json:"providers" yaml:"providers"`
 	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
 }
 
@@ -219,27 +219,6 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 	// initialize defaults
 	t.initializeDefaults()
 
-	// get current directory path
-	path, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	// collect all files paths in current directory that ends with metrics.yaml
-	metricFilePaths := []string{}
-	fileInfo, err := ioutil.ReadDir(path)
-	if err != nil {
-		log.Logger.Error("could not read directory ", path)
-		return err
-	}
-
-	for _, file := range fileInfo {
-		fileName := file.Name()
-		if strings.HasSuffix(fileName, "metrics.yaml") {
-			metricFilePaths = append(metricFilePaths, fileName)
-		}
-	}
-
 	// inputs for this task determine the number of versions participating in the
 	// experiment. Initiate insights with num versions.
 	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
@@ -248,7 +227,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 	}
 
 	// collect metrics for all metric files and versionInfos
-	for _, metricFilePath := range metricFilePaths {
+	for _, provider := range t.With.Providers {
 		for i, versionInfo := range t.With.VersionInfo {
 			// add ElapsedTime
 			elapsedTime, err := getElapsedTime(versionInfo, exp)
@@ -258,7 +237,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			versionInfo[elapsedTimeString] = elapsedTime
 
 			// finalize metrics template
-			template, err := template.ParseFiles(metricFilePath)
+			template, err := template.ParseFiles(provider + ".metrics.yaml")
 			if err != nil {
 				return err
 			}
@@ -290,13 +269,6 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 					continue
 				}
 
-				// determine metric name
-				pathTokens := strings.Split(metricFilePath, "/")
-				fileNameWithExtension := pathTokens[len(pathTokens)-1]
-				fileNameTokens := strings.Split(fileNameWithExtension, ".metrics.yaml")
-				fileName := fileNameTokens[0]
-				metricName := fileName + "/" + metric.Name
-
 				// determine metric type
 				var metricType MetricType
 				if metric.Type == "gauge" {
@@ -320,7 +292,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 					continue
 				}
 
-				err = exp.Result.Insights.updateMetric(metricName, mm, i, floatValue)
+				err = exp.Result.Insights.updateMetric(provider+"/"+metric.Name, mm, i, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)

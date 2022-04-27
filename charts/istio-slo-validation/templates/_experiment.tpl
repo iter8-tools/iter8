@@ -1,4 +1,4 @@
 {{ define "experiment" -}}
-{{- include "task.istio" . }}
+{{- include "task.database" . }}
 {{- include "task.assess" . }}
 {{ end }}

@@ -1,6 +1,12 @@
-{{- define "task.istio" -}}
+{{- define "task.database" -}}
 - task: collect-metrics-database
   with:
+    {{- if .Values.providers }}
+    providers:
+    {{- range .Values.providers }}
+      - {{ . }}
+    {{- end }}
+    {{- end }}
     versionInfo:
     - Endpoint: {{ required "A valid Endpoint value is required!" .Values.Endpoint | toString }}
       destination_workload: {{ required "A valid destination_workload value is required!" .Values.destination_workload | toString }}

@@ -2,6 +2,7 @@ package action
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"path"
 	"regexp"
@@ -104,19 +105,33 @@ func (gen *GenOpts) LocalRun() error {
 		Data: eData,
 	})
 
-	// check for a metrics template and get its source
-	metricSource, err := gen.getMetricSourceFromTemplate()
-	if err != nil {
-		return err
+	/*
+		attempt to extract providers from valuesToRender
+
+		if providers are available, create the respective metrics files from the
+		templates
+	*/
+	var providers []string
+	if rawProviders, ok := c.Values["providers"]; ok {
+		// convert iterface to interface array
+		convertedRawProviders := rawProviders.([]interface{})
+
+		providers = make([]string, len(convertedRawProviders))
+		for i, v := range convertedRawProviders {
+			providers[i] = fmt.Sprint(v)
+		}
 	}
 
-	// add in metrics.tpl template
-	if metricSource != "" {
-		mData := []byte(`{{- include "metrics" . }}`)
-		c.Templates = append(c.Templates, &chart.File{
-			Name: path.Join("templates", driver.ExperimentMetricsPath),
-			Data: mData,
-		})
+	// add in metrics.yaml template
+	if providers != nil {
+		for _, provider := range providers {
+			// NOTE: This pattern must be documented
+			mData := []byte(`{{- include "metrics.` + provider + `" . }}`)
+			c.Templates = append(c.Templates, &chart.File{
+				Name: path.Join("templates", provider, driver.ExperimentMetricsPath),
+				Data: mData,
+			})
+		}
 	}
 
 	// get values
@@ -150,16 +165,18 @@ func (gen *GenOpts) LocalRun() error {
 	}
 	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
 
-	// write metric spec file
-	if metricSource != "" {
-		metricsBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentMetricsPath)])
-		metricsFileName := metricSource + ".metrics.yaml"
-		err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
-			return err
+	// write metric spec files
+	if providers != nil {
+		for _, provider := range providers {
+			metricsBytes := []byte(m[path.Join(c.Name(), "templates", provider, driver.ExperimentMetricsPath)])
+			metricsFileName := provider + ".metrics.yaml"
+			err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
+			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
+				return err
+			}
+			log.Logger.Infof("created %v file", metricsFileName)
 		}
-		log.Logger.Infof("created %v file", metricsFileName)
 	}
 
 	return err
