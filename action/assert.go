@@ -74,12 +74,13 @@ func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 	var sleepTime, _ = time.ParseDuration("3s")
 
 	// check assert conditions
-	allGood := true
 	for {
 		exp, err := base.BuildExperiment(true, eio)
 		if err != nil {
 			return false, err
 		}
+
+		allGood := true
 
 		for _, cond := range assert.Conditions {
 			if strings.ToLower(cond) == Completed {
@@ -125,7 +126,6 @@ func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 				timeSpent += sleepTime
 			}
 		}
-
 	}
 
 }
