@@ -74,8 +74,8 @@ func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
 	return kd
 }
 
-// initKube initializes the Kubernetes clientset
-func (kd *KubeDriver) initKube() error {
+// InitKube initializes the Kubernetes clientset
+func (kd *KubeDriver) InitKube() error {
 	if kd.Clientset == nil {
 		// get REST config
 		restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
@@ -126,7 +126,7 @@ func (driver *KubeDriver) initRevision() error {
 
 // Init initializes the KubeDriver
 func (kd *KubeDriver) Init() error {
-	if err := kd.initKube(); err != nil {
+	if err := kd.InitKube(); err != nil {
 		return err
 	}
 	if err := kd.initHelm(); err != nil {
@@ -254,13 +254,6 @@ type PayloadValue struct {
 
 // formResultSecret creates the result secret using the result
 func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Secret, error) {
-	spec, err := driver.getExperimentSpecSecret()
-	if err != nil {
-		return nil, err
-	}
-	// got spec secret ...
-	log.Logger.Trace("spec secret typemeta", spec.TypeMeta)
-
 	byteArray, _ := yaml.Marshal(r)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

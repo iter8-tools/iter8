@@ -31,7 +31,7 @@ func (rOpts *RunOpts) LocalRun() error {
 // KubeRun runs a Kubernetes experiment
 func (rOpts *RunOpts) KubeRun() error {
 	// initialize kube driver
-	if err := rOpts.KubeDriver.Init(); err != nil {
+	if err := rOpts.KubeDriver.InitKube(); err != nil {
 		return err
 	}
 	return base.RunExperiment(rOpts)
