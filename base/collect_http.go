@@ -16,31 +16,31 @@ import (
 // errorRange has lower and upper limits for HTTP status codes. HTTP status code within this range is considered an error
 type errorRange struct {
 	// Lower end of the range
-	Lower *int `json:"lower" yaml:"lower"`
+	Lower *int `json:"lower,omitempty" yaml:"lower,omitempty"`
 	// Upper end of the range
-	Upper *int `json:"upper" yaml:"upper"`
+	Upper *int `json:"upper,omitempty" yaml:"upper,omitempty"`
 }
 
 // collectHTTPInputs contain the inputs to the metrics collection task to be executed.
 type collectHTTPInputs struct {
 	// NumRequests is the number of requests to be sent to the app. Default value is 100.
-	NumRequests *int64 `json:"numRequests" yaml:"numRequests"`
+	NumRequests *int64 `json:"numRequests,omitempty" yaml:"numRequests,omitempty"`
 	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
-	Duration *string `json:"duration" yaml:"duration"`
+	Duration *string `json:"duration,omitempty" yaml:"duration,omitempty"`
 	// QPS is the number of requests per second sent to the app. Default value is 8.0.
-	QPS *float32 `json:"qps" yaml:"qps"`
+	QPS *float32 `json:"qps,omitempty" yaml:"qps,omitempty"`
 	// Connections is the number of number of parallel connections used to send load. Default value is 4.
-	Connections *int `json:"connections" yaml:"connections"`
+	Connections *int `json:"connections,omitempty" yaml:"connections,omitempty"`
 	// PayloadStr is the string data to be sent as payload. If this field is specified, Iter8 will send HTTP POST requests to the app using this string as the payload.
-	PayloadStr *string `json:"payloadStr" yaml:"payloadStr"`
+	PayloadStr *string `json:"payloadStr,omitempty" yaml:"payloadStr,omitempty"`
 	// PayloadFile is payload file. If this field is specified, Iter8 will send HTTP POST requests to the app using data in this file. If both `payloadStr` and `payloadFile` are specified, the former is ignored.
-	PayloadFile *string `json:"payloadFile" yaml:"payloadFile"`
+	PayloadFile *string `json:"payloadFile,omitempty" yaml:"payloadFile,omitempty"`
 	// ContentType is the type of the payload. Indicated using the Content-Type HTTP header value. This is intended to be used in conjunction with one of the `payload*` fields above. If this field is specified, Iter8 will send HTTP POST requests to the app using this content type header value.
-	ContentType *string `json:"contentType" yaml:"contentType"`
+	ContentType *string `json:"contentType,omitempty" yaml:"contentType,omitempty"`
 	// ErrorRanges is a list of errorRange values. Each range specifies an upper and/or lower limit on HTTP status codes. HTTP responses that fall within these error ranges are considered error. Default value is {{lower: 400},} - i.e., HTTP status codes >= 400 are considered as error.
-	ErrorRanges []errorRange `json:"errorRanges" yaml:"errorRanges"`
+	ErrorRanges []errorRange `json:"errorRanges,omitempty" yaml:"errorRanges,omitempty"`
 	// Percentiles are the latency percentiles collected by this task. Percentile values have a single digit precision (i.e., rounded to one decimal place). Default value is {50.0, 75.0, 90.0, 95.0, 99.0, 99.9,}.
-	Percentiles []float64 `json:"percentiles" yaml:"percentiles"`
+	Percentiles []float64 `json:"percentiles,omitempty" yaml:"percentiles,omitempty"`
 	// HTTP headers to use in the query; optional
 	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 	// URL to use for querying the app

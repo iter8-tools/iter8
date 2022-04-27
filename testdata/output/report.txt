@@ -10,14 +10,14 @@ Experiment summary:
 Whether or not service level objectives (SLOs) are satisfied:
 *************************************************************
 
-  SLO Conditions                    |Satisfied
-  --------------                    |---------
-  http/error-rate <= 0              |true
-  http/latency-mean (msec) <= 500   |true
-  http/latency-p50 (msec) <= 1000   |true
-  http/latency-p50 (msec) <= 1000   |true
-  http/latency-p95 (msec) <= 2500   |true
-  http/latency-p97.5 (msec) <= 5000 |true
+  SLO Conditions                  |Satisfied
+  --------------                  |---------
+  http/error-rate <= 0            |true
+  http/latency-mean (msec) <= 500 |true
+  http/latency-p50 (msec) <= 1000 |true
+  http/latency-p50 (msec) <= 1000 |true
+  http/latency-p95 (msec) <= 2500 |true
+  http/latency-p99 (msec) <= 5000 |true
   
 
 Latest observed values for metrics:
@@ -34,7 +34,6 @@ Latest observed values for metrics:
   http/latency-p75 (msec)    |15.00
   http/latency-p90 (msec)    |16.80
   http/latency-p95 (msec)    |254.57
-  http/latency-p97.5 (msec)  |263.70
   http/latency-p99 (msec)    |269.18
   http/latency-p99.9 (msec)  |272.47
   http/latency-stddev (msec) |62.82
