@@ -8,8 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -73,6 +71,7 @@ const elapsedTimeString = "ElapsedTime"
 //
 // Note: ElapsedTime is produced by Iter8
 type collectDatabaseInputs struct {
+	Providers   []string                 `json:"providers" yaml:"providers"`
 	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
 }
 
@@ -115,6 +114,7 @@ func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64,
 		case int64:
 			startingTime = rawStartingTime
 		case int:
+		case float64: // parsing the metrics file gives float64
 			startingTime = int64(rawStartingTime)
 		default:
 			return 0, errors.New("Cannot integer parse StartingTime from VersionInfo: " + fmt.Sprintf("%v", versionInfo))
@@ -150,6 +150,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	// iterate through headers
 	for headerName, headerValue := range template.Headers {
 		req.Header.Add(headerName, headerValue)
+		log.Logger.Debug("add header: ", headerName, ", value: ", headerValue)
 	}
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 
@@ -158,6 +159,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	params := metric.Params
 	for _, param := range *params {
 		q.Add(param.Name, param.Value)
+		log.Logger.Debug("add param: ", param.Name, ", value: ", param.Value)
 	}
 	req.URL.RawQuery = q.Encode()
 
@@ -176,6 +178,8 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 		log.Logger.Error("could not read response body for metric ", metric.Name, ": ", err)
 		return nil, false
 	}
+
+	log.Logger.Debug("response body: ", string(responseBody))
 
 	// JSON parse response body
 	var jsonBody interface{}
@@ -215,28 +219,6 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 	// initialize defaults
 	t.initializeDefaults()
 
-	// get current directory path
-	path, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	// collect all files paths in current directory that ends with metrics.yaml
-	metricFilePaths := []string{}
-	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && strings.HasSuffix(path, "metrics.yaml") {
-			metricFilePaths = append(metricFilePaths, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
 	// inputs for this task determine the number of versions participating in the
 	// experiment. Initiate insights with num versions.
 	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
@@ -245,7 +227,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 	}
 
 	// collect metrics for all metric files and versionInfos
-	for _, metricFilePath := range metricFilePaths {
+	for _, provider := range t.With.Providers {
 		for i, versionInfo := range t.With.VersionInfo {
 			// add ElapsedTime
 			elapsedTime, err := getElapsedTime(versionInfo, exp)
@@ -255,7 +237,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			versionInfo[elapsedTimeString] = elapsedTime
 
 			// finalize metrics template
-			template, err := template.ParseFiles(metricFilePath)
+			template, err := template.ParseFiles(provider + ".metrics.yaml")
 			if err != nil {
 				return err
 			}
@@ -271,11 +253,14 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			}
 
 			for _, metric := range metrics.Metrics {
+				log.Logger.Debug("query for metric ", metric.Name)
+
 				// perform database query and extract metric value
 				value, ok := queryDatabaseAndGetValue(metrics, metric)
 
 				// check if there were any issues querying database and extracting value
 				if !ok {
+					log.Logger.Error("could not query for metric ", metric.Name, ": ", err)
 					continue
 				}
 
@@ -284,13 +269,6 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 					log.Logger.Error("could not extract non-nil value for metric ", metric.Name, ": ", err)
 					continue
 				}
-
-				// determine metric name
-				pathTokens := strings.Split(metricFilePath, "/")
-				fileNameWithExtension := pathTokens[len(pathTokens)-1]
-				fileNameTokens := strings.Split(fileNameWithExtension, ".metrics.yaml")
-				fileName := fileNameTokens[0]
-				metricName := fileName + "/" + metric.Name
 
 				// determine metric type
 				var metricType MetricType
@@ -315,7 +293,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 					continue
 				}
 
-				err = exp.Result.Insights.updateMetric(metricName, mm, i, floatValue)
+				err = exp.Result.Insights.updateMetric(provider+"/"+metric.Name, mm, i, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)
