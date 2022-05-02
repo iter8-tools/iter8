@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	templatePath      string = "../testdata/templates/ce.metrics.tpl"
-	tempMetricsPath   string = "test-ce.metrics.yaml"
-	testPromURL              = `test-database.com/prometheus/api/v1/query?query=`
-	requestCountQuery        = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+	templatePath      = "../testdata/templates/ce.metrics.tpl"
+	tempMetricsPath   = "test-ce.metrics.yaml"
+	TestCe            = "test-ce"
+	testPromURL       = `test-database.com/prometheus/api/v1/query?query=`
+	requestCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
 		"}[0s])) or on() vector(0)\n"
 	errorCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
 		"  ibm_codeengine_status!=\"200\",\n" +
@@ -110,7 +111,7 @@ func TestCEOneVersion(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
-			Providers: []string{"test-ce"},
+			Providers: []string{TestCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}},
@@ -221,7 +222,7 @@ func TestCEUnauthorized(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
-			Providers: []string{"test-ce"},
+			Providers: []string{TestCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}},
@@ -288,7 +289,7 @@ func TestCESomeValues(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
-			Providers: []string{"test-ce"},
+			Providers: []string{TestCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}},
@@ -393,7 +394,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
-			Providers: []string{"test-ce"},
+			Providers: []string{TestCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}, {
@@ -502,7 +503,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
-			Providers: []string{"test-ce"},
+			Providers: []string{TestCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}, {
