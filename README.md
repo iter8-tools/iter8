@@ -17,6 +17,8 @@
 2. **Load test, benchmark and validate gRPC services with SLOs**
     * [In your local environment](https://iter8.tools/0.10/tutorials/load-test-grpc/basicusage/)
     * [Inside a Kubernetes cluster](https://iter8.tools/0.10/tutorials/load-test-grpc/kubernetesusage/)
+3. **[Use in GitHub Action workflows](https://iter8.tools/0.10/tutorials/integrations/ghactions/)**
+    
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
