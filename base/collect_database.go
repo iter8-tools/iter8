@@ -46,9 +46,9 @@ type Params struct {
 }
 
 const (
-	StartingTime = "StartingTime"
-	ElapsedTime  = "ElapsedTime"
-	TimeLayout   = "Jan 2, 2006 at 3:04pm (MST)"
+	startingTimeStr = "StartingTime"
+	elapsedTimeStr  = "ElapsedTime"
+	timeLayout      = "Jan 2, 2006 at 3:04pm (MST)"
 )
 
 type collectDatabaseInputs struct {
@@ -83,17 +83,17 @@ func (t *collectDatabaseTask) validateInputs() error {
 // starting time in the Experiment
 func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
 	// ElapsedTime should not be provided by the user
-	if versionInfo[ElapsedTime] != nil {
+	if versionInfo[elapsedTimeStr] != nil {
 		return 0, errors.New("ElapsedTime should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 	}
 
 	startingTime := exp.Result.StartTime.Unix()
-	if versionInfo[StartingTime] != nil {
+	if versionInfo[startingTimeStr] != nil {
 		// Calling Parse() method with its parameters
-		temp, err := time.Parse(TimeLayout, fmt.Sprintf("%v", versionInfo[StartingTime]))
+		temp, err := time.Parse(timeLayout, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
 
 		if err != nil {
-			return 0, errors.New("Cannot parse startingTime")
+			return 0, errors.New("cannot parse startingTime")
 		} else {
 			startingTime = temp.Unix()
 		}
@@ -210,7 +210,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
-			versionInfo[ElapsedTime] = elapsedTime
+			versionInfo[elapsedTimeStr] = elapsedTime
 
 			// finalize metrics template
 			template, err := template.ParseFiles(provider + ".metrics.yaml")
