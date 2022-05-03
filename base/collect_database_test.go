@@ -63,7 +63,7 @@ func executeTemplate(inputs map[string]interface{}, templatePath string, writePa
 func TestGetElapsedTime(t *testing.T) {
 	versionInfo := map[string]interface{}{
 		"ibm_service_instance": "version1",
-		"StartingTime":         1000,
+		"StartingTime":         "Feb 4, 2014 at 6:05pm (PST)",
 	}
 
 	exp := &Experiment{

@@ -23,7 +23,7 @@ import (
 // ToDo: Go Doc is needed in this file
 
 type CollectDatabaseTemplate struct {
-	Url      string            `json:"url" yaml:"url"`
+	URL      string            `json:"url" yaml:"url"`
 	Headers  map[string]string `json:"headers" yaml:"headers"`
 	Provider string            `json:"provider" yaml:"provider"`
 	Method   string            `json:"method" yaml:"method"`
@@ -45,31 +45,12 @@ type Params struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-const startingTimeString = "StartingTime"
-const elapsedTimeString = "ElapsedTime"
+const (
+	StartingTime = "StartingTime"
+	ElapsedTime  = "ElapsedTime"
+	TimeLayout   = "Jan 2, 2006 at 3:04pm (MST)"
+)
 
-// ToDo: Iter8 wiki is a great place to document the following (whichs seems IBM Code Engine specific) ... move it there
-
-// collectDatabaseInputs holds all the inputs for this task
-//
-// Inputs for the template:
-//   ibm_codeengine_application_name string
-//   ibm_codeengine_gateway_instance string
-//   ibm_codeengine_namespace        string
-//   ibm_codeengine_project_name     string
-//   ibm_codeengine_revision_name    string
-//   ibm_codeengine_status           string
-//   ibm_ctype                       string
-//   ibm_location                    string
-//   ibm_scope                       string
-//   ibm_service_instance            string
-//   ibm_service_name                string
-//
-// Inputs for the metrics (output of template):
-//   ibm_codeengine_revision_name string
-//   StartingTime                 int64 (UNIX time stamp)
-//
-// Note: ElapsedTime is produced by Iter8
 type collectDatabaseInputs struct {
 	Providers   []string                 `json:"providers" yaml:"providers"`
 	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
@@ -102,25 +83,20 @@ func (t *collectDatabaseTask) validateInputs() error {
 // starting time in the Experiment
 func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
 	// ElapsedTime should not be provided by the user
-	if versionInfo[elapsedTimeString] != nil {
+	if versionInfo[ElapsedTime] != nil {
 		return 0, errors.New("ElapsedTime should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 	}
 
-	// set StartingTime based on VersionInfo or start of the experiment
-	var startingTime int64
-	if versionInfo[startingTimeString] != nil {
-		rawStartingTime := versionInfo[startingTimeString]
-		switch rawStartingTime := rawStartingTime.(type) {
-		case int64:
-			startingTime = rawStartingTime
-		case int:
-		case float64: // parsing the metrics file gives float64
-			startingTime = int64(rawStartingTime)
-		default:
-			return 0, errors.New("Cannot integer parse StartingTime from VersionInfo: " + fmt.Sprintf("%v", versionInfo))
+	startingTime := exp.Result.StartTime.Unix()
+	if versionInfo[StartingTime] != nil {
+		// Calling Parse() method with its parameters
+		temp, err := time.Parse(TimeLayout, fmt.Sprintf("%v", versionInfo[StartingTime]))
+
+		if err != nil {
+			return 0, errors.New("Cannot parse startingTime")
+		} else {
+			startingTime = temp.Unix()
 		}
-	} else {
-		startingTime = exp.Result.StartTime.Unix()
 	}
 
 	// calculate the ElapsedTime based on the StartingTime if it has been provided
@@ -141,7 +117,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	}
 
 	// create a new HTTP request
-	req, err := http.NewRequest(template.Method, template.Url, requestBody)
+	req, err := http.NewRequest(template.Method, template.URL, requestBody)
 	if err != nil {
 		log.Logger.Error("could not create new request for metric ", metric.Name, ": ", err)
 		return nil, false
@@ -234,7 +210,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
-			versionInfo[elapsedTimeString] = elapsedTime
+			versionInfo[ElapsedTime] = elapsedTime
 
 			// finalize metrics template
 			template, err := template.ParseFiles(provider + ".metrics.yaml")
