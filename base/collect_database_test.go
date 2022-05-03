@@ -2,6 +2,7 @@ package base
 
 import (
 	"encoding/json"
+	"net/url"
 	"os"
 	"testing"
 	"text/template"
@@ -10,13 +11,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var templatePath string = "../testdata/templates/ce.metrics.tpl"
-var tempMetricsPath string = "test-ce.metrics.yaml"
+const (
+	templatePath      = "../testdata/templates/ce.metrics.tpl"
+	tempMetricsPath   = "test-ce.metrics.yaml"
+	testCe            = "test-ce"
+	testPromURL       = `test-database.com/prometheus/api/v1/query?query=`
+	requestCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"}[0s])) or on() vector(0)\n"
+	errorCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"}[0s])) or on() vector(0)\n"
+	errorRateQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"}[0s])) or on() vector(0)\n"
+)
 
 type collectDatabaseTemplateInput struct {
-	MonitoringEndpoint string `json:"MonitoringEndpoint" yaml:"MonitoringEndpoint"`
-	IAMToken           string `json:"IAMToken" yaml:"IAMToken"`
-	GUID               string `json:"GUID" yaml:"GUID"`
+	Endpoint string `json:"endpoint" yaml:"endpoint"`
+	IAMToken string `json:"IAMToken" yaml:"IAMToken"`
+	GUID     string `json:"GUID" yaml:"GUID"`
 }
 
 // has to be a map[string]string in order to do input checks in template
@@ -49,7 +63,7 @@ func executeTemplate(inputs map[string]interface{}, templatePath string, writePa
 func TestGetElapsedTime(t *testing.T) {
 	versionInfo := map[string]interface{}{
 		"ibm_service_instance": "version1",
-		"StartingTime":         1000,
+		"StartingTime":         "Feb 4, 2014 at 6:05pm (PST)",
 	}
 
 	exp := &Experiment{
@@ -75,9 +89,9 @@ func TestGetElapsedTime(t *testing.T) {
 func TestCEOneVersion(t *testing.T) {
 	// create metrics file from template
 	input := &collectDatabaseTemplateInput{
-		MonitoringEndpoint: "test-database.com",
-		IAMToken:           "test-token",
-		GUID:               "test-guid",
+		Endpoint: "test-database.com",
+		IAMToken: "test-token",
+		GUID:     "test-guid",
 	}
 
 	// convert input to map[string]interface{}
@@ -97,6 +111,7 @@ func TestCEOneVersion(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
+			Providers: []string{testCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}},
@@ -106,7 +121,7 @@ func TestCEOneVersion(t *testing.T) {
 	httpmock.Activate()
 
 	// request-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -124,7 +139,7 @@ func TestCEOneVersion(t *testing.T) {
 		}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29++%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -142,7 +157,7 @@ func TestCEOneVersion(t *testing.T) {
 		}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29%2Fsum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -186,9 +201,9 @@ func TestCEOneVersion(t *testing.T) {
 func TestCEUnauthorized(t *testing.T) {
 	// create metrics file from template
 	input := &collectDatabaseTemplateInput{
-		MonitoringEndpoint: "test-database.com",
-		IAMToken:           "test-token",
-		GUID:               "test-guid",
+		Endpoint: "test-database.com",
+		IAMToken: "test-token",
+		GUID:     "test-guid",
 	}
 
 	// convert input to map[string]interface{}
@@ -207,6 +222,7 @@ func TestCEUnauthorized(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
+			Providers: []string{testCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}},
@@ -216,15 +232,15 @@ func TestCEUnauthorized(t *testing.T) {
 	httpmock.Activate()
 
 	// request-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29++%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29%2Fsum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	exp := &Experiment{
@@ -252,9 +268,9 @@ func TestCEUnauthorized(t *testing.T) {
 func TestCESomeValues(t *testing.T) {
 	// create metrics file from template
 	input := &collectDatabaseTemplateInput{
-		MonitoringEndpoint: "test-database.com",
-		IAMToken:           "test-token",
-		GUID:               "test-guid",
+		Endpoint: "test-database.com",
+		IAMToken: "test-token",
+		GUID:     "test-guid",
 	}
 
 	// convert input to map[string]interface{}
@@ -273,6 +289,7 @@ func TestCESomeValues(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
+			Providers: []string{testCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}},
@@ -282,8 +299,7 @@ func TestCESomeValues(t *testing.T) {
 	httpmock.Activate()
 
 	// request-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
-		httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
 				"resultType": "vector",
@@ -292,7 +308,7 @@ func TestCESomeValues(t *testing.T) {
 		}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29++%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -310,7 +326,7 @@ func TestCESomeValues(t *testing.T) {
 		}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29%2Fsum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -357,9 +373,9 @@ func TestCESomeValues(t *testing.T) {
 func TestCEMultipleVersions(t *testing.T) {
 	// create metrics file from template
 	input := &collectDatabaseTemplateInput{
-		MonitoringEndpoint: "test-database.com",
-		IAMToken:           "test-token",
-		GUID:               "test-guid",
+		Endpoint: "test-database.com",
+		IAMToken: "test-token",
+		GUID:     "test-guid",
 	}
 
 	// convert input to map[string]interface{}
@@ -378,6 +394,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
+			Providers: []string{testCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}, {
@@ -389,8 +406,7 @@ func TestCEMultipleVersions(t *testing.T) {
 	httpmock.Activate()
 
 	// request-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
-		httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
 				"resultType": "vector",
@@ -399,7 +415,7 @@ func TestCEMultipleVersions(t *testing.T) {
 		}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29++%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -417,7 +433,7 @@ func TestCEMultipleVersions(t *testing.T) {
 		}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29%2Fsum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -466,9 +482,9 @@ func TestCEMultipleVersions(t *testing.T) {
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	// create metrics file from template
 	input := &collectDatabaseTemplateInput{
-		MonitoringEndpoint: "test-database.com",
-		IAMToken:           "test-token",
-		GUID:               "test-guid",
+		Endpoint: "test-database.com",
+		IAMToken: "test-token",
+		GUID:     "test-guid",
 	}
 
 	// convert input to map[string]interface{}
@@ -487,6 +503,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			Task: StringPointer(CollectDatabaseTaskName),
 		},
 		With: collectDatabaseInputs{
+			Providers: []string{testCe},
 			VersionInfo: []map[string]interface{}{{
 				"ibm_service_instance": "version1",
 			}, {
@@ -498,8 +515,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	httpmock.Activate()
 
 	// request-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
-		httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
 				"resultType": "vector",
@@ -508,7 +524,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 		}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29++%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
@@ -526,7 +542,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 		}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", `test-database.com/prometheus/api/v1/query?query=sum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A++ibm_codeengine_status%21%3D%22200%22%2C%0A%7D%5B0s%5D%29%29%2Fsum%28last_over_time%28ibm_codeengine_application_requests_total%7B%0A%7D%5B0s%5D%29%29+%0A`,
+	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 		httpmock.NewStringResponder(200, `{
 			"status": "success",
 			"data": {
