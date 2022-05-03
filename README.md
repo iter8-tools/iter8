@@ -20,6 +20,19 @@
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
+## :white_check_mark: Installing Iter8 using GitHub Actions
+
+Install the latest version of Iter8 using the GitHub Action `iter8/iter8@v0.10`. A specific version can be installed using the version as the action reference. For example, to install version v0.10.15, use `iter8/iter8@v0.10.15`.
+
+Once Iter8 is installed, it can be used as documented (see [https://iter8.tools](https://iter8.tools)) in `run` actions. For example:
+
+```yaml
+- uses: iter8/iter8@v0.10 # install Iter8
+- run: |
+    iter8 version
+    iter8 launch -c load-test-http --set url=http://httpbin.org/get
+```
+
 ## :maple_leaf: Issues
 Iter8 issues are tracked [here](https://github.com/iter8-tools/iter8/issues).
 
