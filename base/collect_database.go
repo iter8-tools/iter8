@@ -8,8 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -25,7 +23,7 @@ import (
 // ToDo: Go Doc is needed in this file
 
 type CollectDatabaseTemplate struct {
-	Url      string            `json:"url" yaml:"url"`
+	URL      string            `json:"url" yaml:"url"`
 	Headers  map[string]string `json:"headers" yaml:"headers"`
 	Provider string            `json:"provider" yaml:"provider"`
 	Method   string            `json:"method" yaml:"method"`
@@ -47,32 +45,14 @@ type Params struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-const startingTimeString = "StartingTime"
-const elapsedTimeString = "ElapsedTime"
+const (
+	startingTimeStr = "StartingTime"
+	elapsedTimeStr  = "ElapsedTime"
+	timeLayout      = "Jan 2, 2006 at 3:04pm (MST)"
+)
 
-// ToDo: Iter8 wiki is a great place to document the following (whichs seems IBM Code Engine specific) ... move it there
-
-// collectDatabaseInputs holds all the inputs for this task
-//
-// Inputs for the template:
-//   ibm_codeengine_application_name string
-//   ibm_codeengine_gateway_instance string
-//   ibm_codeengine_namespace        string
-//   ibm_codeengine_project_name     string
-//   ibm_codeengine_revision_name    string
-//   ibm_codeengine_status           string
-//   ibm_ctype                       string
-//   ibm_location                    string
-//   ibm_scope                       string
-//   ibm_service_instance            string
-//   ibm_service_name                string
-//
-// Inputs for the metrics (output of template):
-//   ibm_codeengine_revision_name string
-//   StartingTime                 int64 (UNIX time stamp)
-//
-// Note: ElapsedTime is produced by Iter8
 type collectDatabaseInputs struct {
+	Providers   []string                 `json:"providers" yaml:"providers"`
 	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
 }
 
@@ -103,24 +83,20 @@ func (t *collectDatabaseTask) validateInputs() error {
 // starting time in the Experiment
 func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
 	// ElapsedTime should not be provided by the user
-	if versionInfo[elapsedTimeString] != nil {
+	if versionInfo[elapsedTimeStr] != nil {
 		return 0, errors.New("ElapsedTime should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 	}
 
-	// set StartingTime based on VersionInfo or start of the experiment
-	var startingTime int64
-	if versionInfo[startingTimeString] != nil {
-		rawStartingTime := versionInfo[startingTimeString]
-		switch rawStartingTime := rawStartingTime.(type) {
-		case int64:
-			startingTime = rawStartingTime
-		case int:
-			startingTime = int64(rawStartingTime)
-		default:
-			return 0, errors.New("Cannot integer parse StartingTime from VersionInfo: " + fmt.Sprintf("%v", versionInfo))
+	startingTime := exp.Result.StartTime.Unix()
+	if versionInfo[startingTimeStr] != nil {
+		// Calling Parse() method with its parameters
+		temp, err := time.Parse(timeLayout, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
+
+		if err != nil {
+			return 0, errors.New("cannot parse startingTime")
+		} else {
+			startingTime = temp.Unix()
 		}
-	} else {
-		startingTime = exp.Result.StartTime.Unix()
 	}
 
 	// calculate the ElapsedTime based on the StartingTime if it has been provided
@@ -141,7 +117,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	}
 
 	// create a new HTTP request
-	req, err := http.NewRequest(template.Method, template.Url, requestBody)
+	req, err := http.NewRequest(template.Method, template.URL, requestBody)
 	if err != nil {
 		log.Logger.Error("could not create new request for metric ", metric.Name, ": ", err)
 		return nil, false
@@ -150,6 +126,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	// iterate through headers
 	for headerName, headerValue := range template.Headers {
 		req.Header.Add(headerName, headerValue)
+		log.Logger.Debug("add header: ", headerName, ", value: ", headerValue)
 	}
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 
@@ -158,6 +135,7 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 	params := metric.Params
 	for _, param := range *params {
 		q.Add(param.Name, param.Value)
+		log.Logger.Debug("add param: ", param.Name, ", value: ", param.Value)
 	}
 	req.URL.RawQuery = q.Encode()
 
@@ -176,6 +154,8 @@ func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (
 		log.Logger.Error("could not read response body for metric ", metric.Name, ": ", err)
 		return nil, false
 	}
+
+	log.Logger.Debug("response body: ", string(responseBody))
 
 	// JSON parse response body
 	var jsonBody interface{}
@@ -215,28 +195,6 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 	// initialize defaults
 	t.initializeDefaults()
 
-	// get current directory path
-	path, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	// collect all files paths in current directory that ends with metrics.yaml
-	metricFilePaths := []string{}
-	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && strings.HasSuffix(path, "metrics.yaml") {
-			metricFilePaths = append(metricFilePaths, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
 	// inputs for this task determine the number of versions participating in the
 	// experiment. Initiate insights with num versions.
 	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
@@ -245,17 +203,17 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 	}
 
 	// collect metrics for all metric files and versionInfos
-	for _, metricFilePath := range metricFilePaths {
+	for _, provider := range t.With.Providers {
 		for i, versionInfo := range t.With.VersionInfo {
 			// add ElapsedTime
 			elapsedTime, err := getElapsedTime(versionInfo, exp)
 			if err != nil {
 				return err
 			}
-			versionInfo[elapsedTimeString] = elapsedTime
+			versionInfo[elapsedTimeStr] = elapsedTime
 
 			// finalize metrics template
-			template, err := template.ParseFiles(metricFilePath)
+			template, err := template.ParseFiles(provider + ".metrics.yaml")
 			if err != nil {
 				return err
 			}
@@ -271,11 +229,14 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			}
 
 			for _, metric := range metrics.Metrics {
+				log.Logger.Debug("query for metric ", metric.Name)
+
 				// perform database query and extract metric value
 				value, ok := queryDatabaseAndGetValue(metrics, metric)
 
 				// check if there were any issues querying database and extracting value
 				if !ok {
+					log.Logger.Error("could not query for metric ", metric.Name, ": ", err)
 					continue
 				}
 
@@ -284,13 +245,6 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 					log.Logger.Error("could not extract non-nil value for metric ", metric.Name, ": ", err)
 					continue
 				}
-
-				// determine metric name
-				pathTokens := strings.Split(metricFilePath, "/")
-				fileNameWithExtension := pathTokens[len(pathTokens)-1]
-				fileNameTokens := strings.Split(fileNameWithExtension, ".metrics.yaml")
-				fileName := fileNameTokens[0]
-				metricName := fileName + "/" + metric.Name
 
 				// determine metric type
 				var metricType MetricType
@@ -315,7 +269,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 					continue
 				}
 
-				err = exp.Result.Insights.updateMetric(metricName, mm, i, floatValue)
+				err = exp.Result.Insights.updateMetric(provider+"/"+metric.Name, mm, i, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)

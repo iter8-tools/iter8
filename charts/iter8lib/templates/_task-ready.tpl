@@ -28,19 +28,17 @@ namespace: {{ $namespace }}
 # task: determine if Kubernetes Service exists
 - task: k8s-object-ready
   with:
-    name: {{ .Values.ready.service }}
+    name: {{ .Values.ready.service | quote }}
     version: v1
     resource: services
 {{- include "task.ready.tn" . | indent 4 }}
 {{ end }}
-{{- end }}
 {{- /* If user has specified a check for readiesss of a Kubernetes Deployment */ -}}
-{{- if .Values.ready }}
 {{- if .Values.ready.deploy }}
 # task: determine if Kubernetes Deployment is Available
 - task: k8s-object-ready
   with:
-    name: {{ .Values.ready.deploy }}
+    name: {{ .Values.ready.deploy | quote }}
     group: apps
     version: v1
     resource: deployments

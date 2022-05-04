@@ -10,7 +10,7 @@
 
 ### In addition, this chart supports the following parameters.
 
-### payloadUrl    URL of payload. If this field is specified, 
+### payloadURL    URL of payload. If this field is specified, 
 ### Iter8 will send HTTP POST requests to versions with 
 ### data downloaded from this URL as the payload.
 # payloadURL: null

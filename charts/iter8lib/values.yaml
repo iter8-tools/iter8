@@ -7,6 +7,8 @@ majorMinor: v0.10
 ### disable Manifests that should be disabled. This is useful for testing purposes.
 ### By default, no manifest is disabled.
 ### To disable the job manifest, uncomment the next two lines and delete the line after that.
-### disable
+### disable:
 ###   job: true
+### To disable rbac role and rolebinding for readiness, uncomment the next line
+###   readinessrbac: true
 disable: {}
