@@ -1,0 +1,70 @@
+# Prometheus URL
+endpoint: http://127.0.0.1:9090
+
+### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
+### Metrics collected during the load test are used to verify if the app satisfies SLOs.
+### Each SLO has a key which is the metric name, 
+### and a value which is the upper limit on the metric.
+### Valid metric names are error-rate, error-count, latency-max, 
+### latency-mean, latency-stddev, and latency-pX, where X is any latency percentile 
+### (i.e., any float value between 0 and 100).
+### Unit of latency is msec.
+### Example:
+###   http/error-rate: 0
+###   http/latency-mean: 50
+###   http/latency-p99: 200
+SLOs:
+  istio/error-rate: 0
+
+providers:
+  - istio
+
+##################################
+# Used by the template
+
+# PromQL selectors
+reporter: source
+
+app: null
+chart: null
+connection_security_policy: null
+destination_app: null
+destination_canonical_revision: null
+destination_canonical_service: null
+destination_cluster: null
+destination_principal: null
+destination_service: null
+destination_service_name: null
+destination_service_namespace: null
+destination_version: null
+heritage: null
+install_operator_istio_io_owning_resource: null
+instance: null
+istio: null
+istio_io_rev: null
+job: null
+namespace: null
+operator_istio_io_component: null
+pod: null
+pod_template_hash: null
+release: null
+request_protocol: null
+response_flags: null
+service_istio_io_canonical_name: null
+service_istio_io_canonical_revision: null
+sidecar_istio_io_inject: null
+source_app: null
+source_canonical_revision: null
+source_canonical_service: null
+source_cluster: null
+source_principal: null
+source_version: null
+source_workload: null
+source_workload_namespace: null
+
+##################################
+# Used by metrics
+
+destination_workload: null
+destination_workload_namespace: null
+StartingTime: null

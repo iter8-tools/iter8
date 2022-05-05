@@ -33,13 +33,13 @@ func TestLocalLaunch(t *testing.T) {
 	lOpts.ChartName = "load-test-http"
 	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
 	// fixing git ref forever
-	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.10.15" + "//" + chartsFolderName
+	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.10.15" + "//" + charts
 
 	os.Chdir(t.TempDir())
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
 
-	assert.DirExists(t, chartsFolderName)
+	assert.DirExists(t, charts)
 }
 
 func TestKubeLaunch(t *testing.T) {
@@ -50,7 +50,7 @@ func TestKubeLaunch(t *testing.T) {
 	lOpts.ChartName = "load-test-http"
 	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
 	// fixing git ref forever
-	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.10.15" + "//" + chartsFolderName
+	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.10.15" + "//" + charts
 
 	os.Chdir(t.TempDir())
 	err = lOpts.KubeRun()
@@ -60,7 +60,7 @@ func TestKubeLaunch(t *testing.T) {
 	assert.NotNil(t, rel)
 	assert.Equal(t, 1, rel.Version)
 	assert.NoError(t, err)
-	assert.DirExists(t, chartsFolderName)
+	assert.DirExists(t, charts)
 }
 
 func TestKubeLaunchNoDownload(t *testing.T) {

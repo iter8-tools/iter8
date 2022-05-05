@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path"
 
@@ -15,7 +16,10 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-const chartsFolderName = "charts"
+const (
+	charts       = "charts"
+	providersStr = "providers"
+)
 
 // GenOpts are the options used for generating experiment.yaml
 type GenOpts struct {
@@ -39,7 +43,7 @@ func NewGenOpts() *GenOpts {
 
 // chartDir returns the path to chart directory
 func (gen *GenOpts) chartDir() string {
-	return path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
+	return path.Join(gen.ChartsParentDir, charts, gen.ChartName)
 }
 
 // LocalRun generates a local experiment.yaml file
@@ -62,6 +66,33 @@ func (gen *GenOpts) LocalRun() error {
 		Name: path.Join("templates", driver.ExperimentSpecPath),
 		Data: eData,
 	})
+
+	/*
+		attempt to extract providers from valuesToRender
+
+		if providers are available, create the respective metrics files from the
+		templates
+	*/
+	var providers []string
+	if rawProviders, ok := c.Values[providersStr]; ok {
+		// convert iterface to interface array
+		convertedRawProviders := rawProviders.([]interface{})
+
+		providers = make([]string, len(convertedRawProviders))
+		for i, v := range convertedRawProviders {
+			providers[i] = fmt.Sprint(v)
+		}
+	}
+
+	// add in metrics.yaml template
+	for _, provider := range providers {
+		// NOTE: This pattern must be documented
+		mData := []byte(`{{- include "metrics.` + provider + `" . }}`)
+		c.Templates = append(c.Templates, &chart.File{
+			Name: path.Join("templates", provider, driver.ExperimentMetricsPath),
+			Data: mData,
+		})
+	}
 
 	// get values
 	p := getter.All(cli.New())
@@ -93,6 +124,18 @@ func (gen *GenOpts) LocalRun() error {
 		return err
 	}
 	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
+
+	// write metric spec files
+	for _, provider := range providers {
+		metricsBytes := []byte(m[path.Join(c.Name(), "templates", provider, driver.ExperimentMetricsPath)])
+		metricsFileName := provider + ".metrics.yaml"
+		err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
+			return err
+		}
+		log.Logger.Infof("created %v file", metricsFileName)
+	}
 
 	return err
 }
