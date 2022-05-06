@@ -132,6 +132,8 @@ Chart.lock
 !testdata/experiment.yaml
 **/result.yaml
 **/report.html
+**/*.metrics.yaml
+!base/test-ce.metrics.yaml
 
 bin/
 _dist/

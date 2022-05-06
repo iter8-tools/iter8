@@ -11,11 +11,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/itchyny/gojq"
-	log "github.com/iter8-tools/iter8/base/log"
-
 	"text/template"
 	"time"
+
+	"github.com/itchyny/gojq"
+	log "github.com/iter8-tools/iter8/base/log"
 
 	"sigs.k8s.io/yaml"
 )
@@ -57,8 +57,10 @@ type collectDatabaseInputs struct {
 }
 
 const (
-	// collectDatabaseTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
+	// CollectDatabaseTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
 	CollectDatabaseTaskName = "collect-metrics-database"
+	// experimentMetricsPathSuffix is the name of the metrics spec file
+	experimentMetricsPathSuffix = ".metrics.yaml"
 )
 
 // collectDatabaseTask enables load testing of gRPC services.
@@ -213,7 +215,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			versionInfo[elapsedTimeStr] = elapsedTime
 
 			// finalize metrics template
-			template, err := template.ParseFiles(provider + ".metrics.yaml")
+			template, err := template.ParseFiles(provider + experimentMetricsPathSuffix)
 			if err != nil {
 				return err
 			}

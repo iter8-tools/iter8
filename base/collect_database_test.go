@@ -3,17 +3,13 @@ package base
 import (
 	"encoding/json"
 	"net/url"
-	"os"
 	"testing"
-	"text/template"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	templatePath      = "../testdata/templates/ce.metrics.tpl"
-	tempMetricsPath   = "test-ce.metrics.yaml"
 	testCe            = "test-ce"
 	testPromURL       = `test-database.com/prometheus/api/v1/query?query=`
 	requestCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
@@ -31,32 +27,6 @@ type collectDatabaseTemplateInput struct {
 	Endpoint string `json:"endpoint" yaml:"endpoint"`
 	IAMToken string `json:"IAMToken" yaml:"IAMToken"`
 	GUID     string `json:"GUID" yaml:"GUID"`
-}
-
-// has to be a map[string]string in order to do input checks in template
-// func executeTemplate(inputs interface{}, templatePath string, writePath string) error {
-func executeTemplate(inputs map[string]interface{}, templatePath string, writePath string) error {
-	template, err := template.ParseFiles(templatePath)
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(writePath)
-	if err != nil {
-		return err
-	}
-
-	err = template.Execute(file, inputs)
-	if err != nil {
-		return err
-	}
-
-	err = file.Close()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // test getElapsedTime()
@@ -100,10 +70,6 @@ func TestCEOneVersion(t *testing.T) {
 	assert.NoError(t, err)
 
 	json.Unmarshal(inrec, &templateInput)
-
-	// create metrics file from template
-	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
-	assert.NoError(t, err)
 
 	// valid collect database task... should succeed
 	ct := &collectDatabaseTask{
@@ -191,8 +157,6 @@ func TestCEOneVersion(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
 
-	// delete metrics file
-	os.Remove(tempMetricsPath)
 	httpmock.DeactivateAndReset()
 }
 
@@ -212,10 +176,6 @@ func TestCEUnauthorized(t *testing.T) {
 	assert.NoError(t, err)
 
 	json.Unmarshal(inrec, &templateInput)
-
-	// create metrics file from template
-	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
-	assert.NoError(t, err)
 
 	ct := &collectDatabaseTask{
 		TaskMeta: TaskMeta{
@@ -258,8 +218,6 @@ func TestCEUnauthorized(t *testing.T) {
 	// no values should be collected because of unauthorized requests
 	assert.Equal(t, len(exp.Result.Insights.NonHistMetricValues[0]), 0)
 
-	// delete metrics file
-	os.Remove(tempMetricsPath)
 	httpmock.DeactivateAndReset()
 }
 
@@ -279,10 +237,6 @@ func TestCESomeValues(t *testing.T) {
 	assert.NoError(t, err)
 
 	json.Unmarshal(inrec, &templateInput)
-
-	// create metrics file from template
-	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
-	assert.NoError(t, err)
 
 	ct := &collectDatabaseTask{
 		TaskMeta: TaskMeta{
@@ -363,8 +317,6 @@ func TestCESomeValues(t *testing.T) {
 	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
 	assert.Equal(t, ok, false)
 
-	// delete metrics file
-	os.Remove(tempMetricsPath)
 	httpmock.DeactivateAndReset()
 }
 
@@ -385,10 +337,6 @@ func TestCEMultipleVersions(t *testing.T) {
 
 	json.Unmarshal(inrec, &templateInput)
 
-	// create metrics file from template
-	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
-	assert.NoError(t, err)
-
 	ct := &collectDatabaseTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectDatabaseTaskName),
@@ -472,8 +420,6 @@ func TestCEMultipleVersions(t *testing.T) {
 	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
 	assert.Equal(t, ok, false)
 
-	// delete metrics file
-	os.Remove(tempMetricsPath)
 	httpmock.DeactivateAndReset()
 }
 
@@ -494,10 +440,6 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 
 	json.Unmarshal(inrec, &templateInput)
 
-	// create metrics file from template
-	err = executeTemplate(templateInput, templatePath, tempMetricsPath)
-	assert.NoError(t, err)
-
 	ct := &collectDatabaseTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectDatabaseTaskName),
@@ -581,7 +523,5 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
 	assert.Equal(t, ok, false)
 
-	// delete metrics file
-	os.Remove(tempMetricsPath)
 	httpmock.DeactivateAndReset()
 }
