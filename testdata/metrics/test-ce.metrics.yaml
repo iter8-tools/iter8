@@ -9,7 +9,7 @@ headers:
   # to get the GUID, run: ibmcloud resource service-instance <NAME> --output json | jq -r '.[].guid'
   # https://cloud.ibm.com/docs/monitoring?topic=monitoring-mon-curl
   IBMInstanceID: test-guid
-provider: IBM Cloud Code Engine Sysdig
+provider: ce
 method: GET
 # Inputs for the template:
 #   ibm_codeengine_application_name string
