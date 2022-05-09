@@ -133,7 +133,7 @@ Chart.lock
 **/result.yaml
 **/report.html
 **/*.metrics.yaml
-!base/test-ce.metrics.yaml
+!testdata/metrics/test-ce.metrics.yaml
 
 bin/
 _dist/

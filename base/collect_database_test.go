@@ -2,7 +2,10 @@ package base
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -10,6 +13,7 @@ import (
 )
 
 const (
+	metricsDirectory  = "../testdata/metrics/"
 	testCe            = "test-ce"
 	testPromURL       = `test-database.com/prometheus/api/v1/query?query=`
 	requestCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
@@ -27,6 +31,40 @@ type collectDatabaseTemplateInput struct {
 	Endpoint string `json:"endpoint" yaml:"endpoint"`
 	IAMToken string `json:"IAMToken" yaml:"IAMToken"`
 	GUID     string `json:"GUID" yaml:"GUID"`
+}
+
+/*
+	The collect database task checks for metric files in the current directory.
+
+	The test metrics files are stored in ../testdata/ so in order for the tests
+	to run, the metrics files are copied to a temprorary directory and the current
+	working directory is changed to the temporary directory
+*/
+func GoToTempDirectoryAndCopyMetricsFile(t *testing.T) error {
+	metricsFileName := testCe + experimentMetricsPathSuffix
+
+	// get metrics file
+	srcFile, err := os.Open(metricsDirectory + metricsFileName)
+	if err != nil {
+		return errors.New("could not open open metrics file.")
+	}
+
+	defer srcFile.Close()
+
+	// go to temp directory
+	destDir := t.TempDir()
+	os.Chdir(destDir)
+
+	// create copy of metrics file in temp directory
+	destFile, err := os.Create(metricsFileName)
+	if err != nil {
+		return errors.New("could not create copy of metrics file in temp directory.")
+	}
+	defer destFile.Close()
+
+	io.Copy(destFile, srcFile)
+
+	return nil
 }
 
 // test getElapsedTime()
@@ -57,7 +95,8 @@ func TestGetElapsedTime(t *testing.T) {
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
-	// create metrics file from template
+	GoToTempDirectoryAndCopyMetricsFile(t)
+
 	input := &collectDatabaseTemplateInput{
 		Endpoint: "test-database.com",
 		IAMToken: "test-token",
@@ -163,7 +202,8 @@ func TestCEOneVersion(t *testing.T) {
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
-	// create metrics file from template
+	GoToTempDirectoryAndCopyMetricsFile(t)
+
 	input := &collectDatabaseTemplateInput{
 		Endpoint: "test-database.com",
 		IAMToken: "test-token",
@@ -224,7 +264,8 @@ func TestCEUnauthorized(t *testing.T) {
 // test with one version with some values, mimicking Code Engine
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
-	// create metrics file from template
+	GoToTempDirectoryAndCopyMetricsFile(t)
+
 	input := &collectDatabaseTemplateInput{
 		Endpoint: "test-database.com",
 		IAMToken: "test-token",
@@ -323,7 +364,8 @@ func TestCESomeValues(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
-	// create metrics file from template
+	GoToTempDirectoryAndCopyMetricsFile(t)
+
 	input := &collectDatabaseTemplateInput{
 		Endpoint: "test-database.com",
 		IAMToken: "test-token",
@@ -426,7 +468,8 @@ func TestCEMultipleVersions(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
-	// create metrics file from template
+	GoToTempDirectoryAndCopyMetricsFile(t)
+
 	input := &collectDatabaseTemplateInput{
 		Endpoint: "test-database.com",
 		IAMToken: "test-token",
