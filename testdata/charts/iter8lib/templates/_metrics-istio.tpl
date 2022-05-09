@@ -44,7 +44,7 @@ method: GET
 # Inputs for the metrics (output of template):
 #   destination_workload                      string
 #   destination_workload_namespace            string
-#   StartingTime                              string
+#   startingTime                              string
 #
 # Note: ElapsedTime is produced by Iter8
 metrics:

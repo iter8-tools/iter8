@@ -46,7 +46,7 @@ type Params struct {
 }
 
 const (
-	startingTimeStr = "StartingTime"
+	startingTimeStr = "startingTime"
 	elapsedTimeStr  = "ElapsedTime"
 	timeLayout      = "Jan 2, 2006 at 3:04pm (MST)"
 )
@@ -101,7 +101,7 @@ func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64,
 		}
 	}
 
-	// calculate the ElapsedTime based on the StartingTime if it has been provided
+	// calculate the ElapsedTime based on the startingTime if it has been provided
 	currentTime := time.Now().Unix()
 	return currentTime - startingTime, nil
 }
