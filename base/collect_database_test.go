@@ -40,13 +40,23 @@ type collectDatabaseTemplateInput struct {
 	to run, the metrics files are copied to a temprorary directory and the current
 	working directory is changed to the temporary directory
 */
-func GoToTempDirectoryAndCopyMetricsFile(t *testing.T) error {
+func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	metricsFileName := testCe + experimentMetricsPathSuffix
+
+	originalPath, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	// return to original path
+	defer func() {
+		os.Chdir(originalPath)
+	}()
 
 	// get metrics file
 	srcFile, err := os.Open(metricsDirectory + metricsFileName)
 	if err != nil {
-		return errors.New("could not open open metrics file.")
+		return errors.New("could not open metrics file.")
 	}
 
 	defer srcFile.Close()
@@ -61,8 +71,10 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T) error {
 		return errors.New("could not create copy of metrics file in temp directory.")
 	}
 	defer destFile.Close()
-
 	io.Copy(destFile, srcFile)
+
+	// run test
+	test()
 
 	return nil
 }
@@ -95,476 +107,487 @@ func TestGetElapsedTime(t *testing.T) {
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
-	GoToTempDirectoryAndCopyMetricsFile(t)
+	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+		input := &collectDatabaseTemplateInput{
+			Endpoint: "test-database.com",
+			IAMToken: "test-token",
+			GUID:     "test-guid",
+		}
 
-	input := &collectDatabaseTemplateInput{
-		Endpoint: "test-database.com",
-		IAMToken: "test-token",
-		GUID:     "test-guid",
-	}
+		// convert input to map[string]interface{}
+		var templateInput map[string]interface{}
+		inrec, err := json.Marshal(input)
+		assert.NoError(t, err)
 
-	// convert input to map[string]interface{}
-	var templateInput map[string]interface{}
-	inrec, err := json.Marshal(input)
+		json.Unmarshal(inrec, &templateInput)
+
+		// valid collect database task... should succeed
+		ct := &collectDatabaseTask{
+			TaskMeta: TaskMeta{
+				Task: StringPointer(CollectDatabaseTaskName),
+			},
+			With: collectDatabaseInputs{
+				Providers: []string{testCe},
+				VersionInfo: []map[string]interface{}{{
+					"ibm_service_instance": "version1",
+				}},
+			},
+		}
+
+		httpmock.Activate()
+
+		// request-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645602108.839,
+								"43"
+							]
+						}
+					]
+				}
+			}`))
+
+		// error-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645648760.725,
+								"6"
+							]
+						}
+					]
+				}
+			}`))
+
+		// error-rate
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645043851.825,
+								"0.13953488372093023"
+							]
+						}
+					]
+				}
+			}`))
+
+		exp := &Experiment{
+			Tasks:  []Task{ct},
+			Result: &ExperimentResult{},
+		}
+		exp.initResults()
+		exp.Result.initInsightsWithNumVersions(1)
+
+		err = ct.run(exp)
+
+		// test should not fail
+		assert.NoError(t, err)
+
+		// all three metrics should exist and have values
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"][0], float64(43))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
+
+		httpmock.DeactivateAndReset()
+	})
+
 	assert.NoError(t, err)
 
-	json.Unmarshal(inrec, &templateInput)
-
-	// valid collect database task... should succeed
-	ct := &collectDatabaseTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectDatabaseTaskName),
-		},
-		With: collectDatabaseInputs{
-			Providers: []string{testCe},
-			VersionInfo: []map[string]interface{}{{
-				"ibm_service_instance": "version1",
-			}},
-		},
-	}
-
-	httpmock.Activate()
-
-	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645602108.839,
-							"43"
-						]
-					}
-				]
-			}
-		}`))
-
-	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645648760.725,
-							"6"
-						]
-					}
-				]
-			}
-		}`))
-
-	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645043851.825,
-							"0.13953488372093023"
-						]
-					}
-				]
-			}
-		}`))
-
-	exp := &Experiment{
-		Tasks:  []Task{ct},
-		Result: &ExperimentResult{},
-	}
-	exp.initResults()
-	exp.Result.initInsightsWithNumVersions(1)
-
-	err = ct.run(exp)
-
-	// test should not fail
-	assert.NoError(t, err)
-
-	// all three metrics should exist and have values
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"][0], float64(43))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
-
-	httpmock.DeactivateAndReset()
 }
 
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
-	GoToTempDirectoryAndCopyMetricsFile(t)
+	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+		input := &collectDatabaseTemplateInput{
+			Endpoint: "test-database.com",
+			IAMToken: "test-token",
+			GUID:     "test-guid",
+		}
 
-	input := &collectDatabaseTemplateInput{
-		Endpoint: "test-database.com",
-		IAMToken: "test-token",
-		GUID:     "test-guid",
-	}
+		// convert input to map[string]interface{}
+		var templateInput map[string]interface{}
+		inrec, err := json.Marshal(input)
+		assert.NoError(t, err)
 
-	// convert input to map[string]interface{}
-	var templateInput map[string]interface{}
-	inrec, err := json.Marshal(input)
+		json.Unmarshal(inrec, &templateInput)
+
+		ct := &collectDatabaseTask{
+			TaskMeta: TaskMeta{
+				Task: StringPointer(CollectDatabaseTaskName),
+			},
+			With: collectDatabaseInputs{
+				Providers: []string{testCe},
+				VersionInfo: []map[string]interface{}{{
+					"ibm_service_instance": "version1",
+				}},
+			},
+		}
+
+		httpmock.Activate()
+
+		// request-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
+			httpmock.NewStringResponder(401, `Unauthorized`))
+
+		// error-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+			httpmock.NewStringResponder(401, `Unauthorized`))
+
+		// error-rate
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+			httpmock.NewStringResponder(401, `Unauthorized`))
+
+		exp := &Experiment{
+			Tasks:  []Task{ct},
+			Result: &ExperimentResult{},
+		}
+		exp.initResults()
+		exp.Result.initInsightsWithNumVersions(1)
+
+		err = ct.run(exp)
+
+		// test should not fail
+		assert.NoError(t, err)
+
+		// no values should be collected because of unauthorized requests
+		assert.Equal(t, len(exp.Result.Insights.NonHistMetricValues[0]), 0)
+
+		httpmock.DeactivateAndReset()
+	})
+
 	assert.NoError(t, err)
-
-	json.Unmarshal(inrec, &templateInput)
-
-	ct := &collectDatabaseTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectDatabaseTaskName),
-		},
-		With: collectDatabaseInputs{
-			Providers: []string{testCe},
-			VersionInfo: []map[string]interface{}{{
-				"ibm_service_instance": "version1",
-			}},
-		},
-	}
-
-	httpmock.Activate()
-
-	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
-		httpmock.NewStringResponder(401, `Unauthorized`))
-
-	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
-		httpmock.NewStringResponder(401, `Unauthorized`))
-
-	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
-		httpmock.NewStringResponder(401, `Unauthorized`))
-
-	exp := &Experiment{
-		Tasks:  []Task{ct},
-		Result: &ExperimentResult{},
-	}
-	exp.initResults()
-	exp.Result.initInsightsWithNumVersions(1)
-
-	err = ct.run(exp)
-
-	// test should not fail
-	assert.NoError(t, err)
-
-	// no values should be collected because of unauthorized requests
-	assert.Equal(t, len(exp.Result.Insights.NonHistMetricValues[0]), 0)
-
-	httpmock.DeactivateAndReset()
 }
 
 // test with one version with some values, mimicking Code Engine
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
-	GoToTempDirectoryAndCopyMetricsFile(t)
+	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+		input := &collectDatabaseTemplateInput{
+			Endpoint: "test-database.com",
+			IAMToken: "test-token",
+			GUID:     "test-guid",
+		}
 
-	input := &collectDatabaseTemplateInput{
-		Endpoint: "test-database.com",
-		IAMToken: "test-token",
-		GUID:     "test-guid",
-	}
+		// convert input to map[string]interface{}
+		var templateInput map[string]interface{}
+		inrec, err := json.Marshal(input)
+		assert.NoError(t, err)
 
-	// convert input to map[string]interface{}
-	var templateInput map[string]interface{}
-	inrec, err := json.Marshal(input)
+		json.Unmarshal(inrec, &templateInput)
+
+		ct := &collectDatabaseTask{
+			TaskMeta: TaskMeta{
+				Task: StringPointer(CollectDatabaseTaskName),
+			},
+			With: collectDatabaseInputs{
+				Providers: []string{testCe},
+				VersionInfo: []map[string]interface{}{{
+					"ibm_service_instance": "version1",
+				}},
+			},
+		}
+
+		httpmock.Activate()
+
+		// request-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": []
+				}
+			}`))
+
+		// error-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645648760.725,
+								"6"
+							]
+						}
+					]
+				}
+			}`))
+
+		// error-rate
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645043851.825,
+								"0.13953488372093023"
+							]
+						}
+					]
+				}
+			}`))
+
+		exp := &Experiment{
+			Tasks:  []Task{ct},
+			Result: &ExperimentResult{},
+		}
+		exp.initResults()
+		exp.Result.initInsightsWithNumVersions(1)
+
+		err = ct.run(exp)
+
+		// test should not fail
+		assert.NoError(t, err)
+
+		// two metrics should exist and have values
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
+
+		// request-count should not exist because there was no value from response
+		_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
+		assert.Equal(t, ok, false)
+
+		httpmock.DeactivateAndReset()
+	})
+
 	assert.NoError(t, err)
-
-	json.Unmarshal(inrec, &templateInput)
-
-	ct := &collectDatabaseTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectDatabaseTaskName),
-		},
-		With: collectDatabaseInputs{
-			Providers: []string{testCe},
-			VersionInfo: []map[string]interface{}{{
-				"ibm_service_instance": "version1",
-			}},
-		},
-	}
-
-	httpmock.Activate()
-
-	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": []
-			}
-		}`))
-
-	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645648760.725,
-							"6"
-						]
-					}
-				]
-			}
-		}`))
-
-	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645043851.825,
-							"0.13953488372093023"
-						]
-					}
-				]
-			}
-		}`))
-
-	exp := &Experiment{
-		Tasks:  []Task{ct},
-		Result: &ExperimentResult{},
-	}
-	exp.initResults()
-	exp.Result.initInsightsWithNumVersions(1)
-
-	err = ct.run(exp)
-
-	// test should not fail
-	assert.NoError(t, err)
-
-	// two metrics should exist and have values
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
-
-	// request-count should not exist because there was no value from response
-	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
-	assert.Equal(t, ok, false)
-
-	httpmock.DeactivateAndReset()
 }
 
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
-	GoToTempDirectoryAndCopyMetricsFile(t)
+	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+		input := &collectDatabaseTemplateInput{
+			Endpoint: "test-database.com",
+			IAMToken: "test-token",
+			GUID:     "test-guid",
+		}
 
-	input := &collectDatabaseTemplateInput{
-		Endpoint: "test-database.com",
-		IAMToken: "test-token",
-		GUID:     "test-guid",
-	}
+		// convert input to map[string]interface{}
+		var templateInput map[string]interface{}
+		inrec, err := json.Marshal(input)
+		assert.NoError(t, err)
 
-	// convert input to map[string]interface{}
-	var templateInput map[string]interface{}
-	inrec, err := json.Marshal(input)
+		json.Unmarshal(inrec, &templateInput)
+
+		ct := &collectDatabaseTask{
+			TaskMeta: TaskMeta{
+				Task: StringPointer(CollectDatabaseTaskName),
+			},
+			With: collectDatabaseInputs{
+				Providers: []string{testCe},
+				VersionInfo: []map[string]interface{}{{
+					"ibm_service_instance": "version1",
+				}, {
+					"ibm_service_instance": "version2",
+				}},
+			},
+		}
+
+		httpmock.Activate()
+
+		// request-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": []
+				}
+			}`))
+
+		// error-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645648760.725,
+								"6"
+							]
+						}
+					]
+				}
+			}`))
+
+		// error-rate
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645043851.825,
+								"0.13953488372093023"
+							]
+						}
+					]
+				}
+			}`))
+
+		exp := &Experiment{
+			Tasks:  []Task{ct},
+			Result: &ExperimentResult{},
+		}
+		exp.initResults()
+		exp.Result.initInsightsWithNumVersions(2)
+
+		err = ct.run(exp)
+
+		// test should not fail
+		assert.NoError(t, err)
+
+		// two metrics should exist and have values
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-count"][0], float64(6))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-rate"][0], 0.13953488372093023)
+
+		// request-count should not exist because there was no value from response
+		_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
+		assert.Equal(t, ok, false)
+
+		httpmock.DeactivateAndReset()
+	})
+
 	assert.NoError(t, err)
-
-	json.Unmarshal(inrec, &templateInput)
-
-	ct := &collectDatabaseTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectDatabaseTaskName),
-		},
-		With: collectDatabaseInputs{
-			Providers: []string{testCe},
-			VersionInfo: []map[string]interface{}{{
-				"ibm_service_instance": "version1",
-			}, {
-				"ibm_service_instance": "version2",
-			}},
-		},
-	}
-
-	httpmock.Activate()
-
-	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": []
-			}
-		}`))
-
-	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645648760.725,
-							"6"
-						]
-					}
-				]
-			}
-		}`))
-
-	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645043851.825,
-							"0.13953488372093023"
-						]
-					}
-				]
-			}
-		}`))
-
-	exp := &Experiment{
-		Tasks:  []Task{ct},
-		Result: &ExperimentResult{},
-	}
-	exp.initResults()
-	exp.Result.initInsightsWithNumVersions(2)
-
-	err = ct.run(exp)
-
-	// test should not fail
-	assert.NoError(t, err)
-
-	// two metrics should exist and have values
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-rate"][0], 0.13953488372093023)
-
-	// request-count should not exist because there was no value from response
-	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
-	assert.Equal(t, ok, false)
-
-	httpmock.DeactivateAndReset()
 }
 
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
-	GoToTempDirectoryAndCopyMetricsFile(t)
+	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+		input := &collectDatabaseTemplateInput{
+			Endpoint: "test-database.com",
+			IAMToken: "test-token",
+			GUID:     "test-guid",
+		}
 
-	input := &collectDatabaseTemplateInput{
-		Endpoint: "test-database.com",
-		IAMToken: "test-token",
-		GUID:     "test-guid",
-	}
+		// convert input to map[string]interface{}
+		var templateInput map[string]interface{}
+		inrec, err := json.Marshal(input)
+		assert.NoError(t, err)
 
-	// convert input to map[string]interface{}
-	var templateInput map[string]interface{}
-	inrec, err := json.Marshal(input)
+		json.Unmarshal(inrec, &templateInput)
+
+		ct := &collectDatabaseTask{
+			TaskMeta: TaskMeta{
+				Task: StringPointer(CollectDatabaseTaskName),
+			},
+			With: collectDatabaseInputs{
+				Providers: []string{testCe},
+				VersionInfo: []map[string]interface{}{{
+					"ibm_service_instance": "version1",
+				}, {
+					"ibm_service_instance": "version2",
+				}},
+			},
+		}
+
+		httpmock.Activate()
+
+		// request-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": []
+				}
+			}`))
+
+		// error-count
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645648760.725,
+								"6"
+							]
+						}
+					]
+				}
+			}`))
+
+		// error-rate
+		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645043851.825,
+								"0.13953488372093023"
+							]
+						}
+					]
+				}
+			}`))
+
+		exp := &Experiment{
+			Tasks:  []Task{ct},
+			Result: &ExperimentResult{},
+		}
+		exp.initResults()
+		exp.Result.initInsightsWithNumVersions(2)
+
+		err = ct.run(exp)
+
+		// test should not fail
+		assert.NoError(t, err)
+
+		// two metrics should exist and have values
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-count"][0], float64(6))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-rate"][0], 0.13953488372093023)
+
+		// request-count should not exist because there was no value from response
+		_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
+		assert.Equal(t, ok, false)
+
+		httpmock.DeactivateAndReset()
+	})
+
 	assert.NoError(t, err)
-
-	json.Unmarshal(inrec, &templateInput)
-
-	ct := &collectDatabaseTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectDatabaseTaskName),
-		},
-		With: collectDatabaseInputs{
-			Providers: []string{testCe},
-			VersionInfo: []map[string]interface{}{{
-				"ibm_service_instance": "version1",
-			}, {
-				"ibm_service_instance": "version2",
-			}},
-		},
-	}
-
-	httpmock.Activate()
-
-	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": []
-			}
-		}`))
-
-	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645648760.725,
-							"6"
-						]
-					}
-				]
-			}
-		}`))
-
-	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
-		httpmock.NewStringResponder(200, `{
-			"status": "success",
-			"data": {
-				"resultType": "vector",
-				"result": [
-					{
-						"metric": {},
-						"value": [
-							1645043851.825,
-							"0.13953488372093023"
-						]
-					}
-				]
-			}
-		}`))
-
-	exp := &Experiment{
-		Tasks:  []Task{ct},
-		Result: &ExperimentResult{},
-	}
-	exp.initResults()
-	exp.Result.initInsightsWithNumVersions(2)
-
-	err = ct.run(exp)
-
-	// test should not fail
-	assert.NoError(t, err)
-
-	// two metrics should exist and have values
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-count"][0], float64(6))
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
-	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[1]["test-ce/error-rate"][0], 0.13953488372093023)
-
-	// request-count should not exist because there was no value from response
-	_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
-	assert.Equal(t, ok, false)
-
-	httpmock.DeactivateAndReset()
 }
