@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path"
 
@@ -15,7 +16,10 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-const chartsFolderName = "charts"
+const (
+	chartsFolderName = "charts"
+	providersStr     = "providers"
+)
 
 // GenOpts are the options used for generating experiment.yaml
 type GenOpts struct {
@@ -63,6 +67,33 @@ func (gen *GenOpts) LocalRun() error {
 		Data: eData,
 	})
 
+	/*
+		attempt to extract providers from valuesToRender
+
+		if providers are available, create the respective metrics files from the
+		templates
+	*/
+	var providers []string
+	if rawProviders, ok := c.Values[providersStr]; ok {
+		// convert iterface to interface array
+		convertedRawProviders := rawProviders.([]interface{})
+
+		providers = make([]string, len(convertedRawProviders))
+		for i, v := range convertedRawProviders {
+			providers[i] = fmt.Sprint(v)
+		}
+	}
+
+	// add in metrics.yaml template
+	for _, provider := range providers {
+		// NOTE: This pattern must be documented
+		mData := []byte(`{{- include "metrics.` + provider + `" . }}`)
+		c.Templates = append(c.Templates, &chart.File{
+			Name: path.Join("templates", provider+driver.ExperimentMetricsPathSuffix),
+			Data: mData,
+		})
+	}
+
 	// get values
 	p := getter.All(cli.New())
 	v, err := gen.MergeValues(p)
@@ -93,6 +124,18 @@ func (gen *GenOpts) LocalRun() error {
 		return err
 	}
 	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
+
+	// write metric spec files
+	for _, provider := range providers {
+		metricsFileName := provider + driver.ExperimentMetricsPathSuffix
+		metricsBytes := []byte(m[path.Join(c.Name(), "templates", metricsFileName)])
+		err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
+			return err
+		}
+		log.Logger.Infof("created %v file", metricsFileName)
+	}
 
 	return err
 }
