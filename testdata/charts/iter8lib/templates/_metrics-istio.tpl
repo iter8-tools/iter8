@@ -46,7 +46,7 @@ method: GET
 #   destination_workload_namespace            string
 #   startingTime                              string
 #
-# Note: ElapsedTime is produced by Iter8
+# Note: elapsedTimeSeconds is produced by Iter8
 metrics:
 - name: request-count
   type: counter
@@ -69,7 +69,7 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 - name: error-count
   type: counter
@@ -90,7 +90,7 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 - name: error-rate
   type: gauge
@@ -111,7 +111,7 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
         {{- if .Values.response_code }}
           response_code="{{.Values.response_code}}",
         {{- end }}
@@ -125,7 +125,7 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result.[0].value.[1]
 - name: le500ms-latency-percentile
   type: gauge
@@ -149,7 +149,7 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_request_duration_milliseconds_bucket{
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_request_duration_milliseconds_bucket{
         le='+Inf',
         {{- if .Values.response_code }}
           response_code="{{.Values.response_code}}",
@@ -164,7 +164,7 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 - name: mean-latency
   type: gauge
@@ -187,7 +187,7 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
         {{- if .Values.response_code }}
           response_code="{{.Values.response_code}}",
         {{- end }}
@@ -201,6 +201,6 @@ metrics:
         {{"{{"}}- if .destination_workload_namespace {{"}}"}}
           destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
         {{"{{"}}- end {{"}}"}}
-      }[{{"{{"}}.ElapsedTime{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1]
 {{- end }}

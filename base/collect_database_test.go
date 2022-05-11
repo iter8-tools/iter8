@@ -79,8 +79,8 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	return nil
 }
 
-// test getElapsedTime()
-func TestGetElapsedTime(t *testing.T) {
+// test getElapsedTimeSeconds()
+func TestGetElapsedTimeSeconds(t *testing.T) {
 	versionInfo := map[string]interface{}{
 		"ibm_service_instance": "version1",
 		"startingTime":         "Feb 4, 2014 at 6:05pm (PST)",
@@ -95,13 +95,13 @@ func TestGetElapsedTime(t *testing.T) {
 	// versionInfo
 	exp.initResults()
 
-	elapsedTime, _ := getElapsedTime(versionInfo, exp)
+	elapsedTimeSeconds, _ := getElapsedTimeSeconds(versionInfo, exp)
 
-	// elapsedTime should be a large number
+	// elapsedTimeSeconds should be a large number
 	//
-	// if getElapsedTime() used the starting time from the experiment instead of
+	// if getElapsedTimeSeconds() used the starting time from the experiment instead of
 	// the one from versionInfo, the elapsed time would be 0 or close to 0
-	assert.Equal(t, elapsedTime > 1000000, true)
+	assert.Equal(t, elapsedTimeSeconds > 1000000, true)
 }
 
 // basic test with one version, mimicking Code Engine

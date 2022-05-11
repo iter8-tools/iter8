@@ -46,9 +46,9 @@ type Params struct {
 }
 
 const (
-	startingTimeStr = "startingTime"
-	elapsedTimeStr  = "ElapsedTime"
-	timeLayout      = "Jan 2, 2006 at 3:04pm (MST)"
+	startingTimeStr       = "startingTime"
+	elapsedTimeSecondsStr = "elapsedTimeSeconds"
+	timeLayout            = "Jan 2, 2006 at 3:04pm (MST)"
 )
 
 type collectDatabaseInputs struct {
@@ -83,10 +83,10 @@ func (t *collectDatabaseTask) validateInputs() error {
 //
 // elapsed time is based on the StartingTime in the version info or the
 // starting time in the Experiment
-func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
-	// ElapsedTime should not be provided by the user
-	if versionInfo[elapsedTimeStr] != nil {
-		return 0, errors.New("ElapsedTime should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
+func getElapsedTimeSeconds(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
+	// elapsedTimeSeconds should not be provided by the user
+	if versionInfo[elapsedTimeSecondsStr] != nil {
+		return 0, errors.New("elapsedTimeSeconds should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 	}
 
 	startingTime := exp.Result.StartTime.Unix()
@@ -101,7 +101,7 @@ func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64,
 		}
 	}
 
-	// calculate the ElapsedTime based on the startingTime if it has been provided
+	// calculate the elapsedTimeSeconds based on the startingTime if it has been provided
 	currentTime := time.Now().Unix()
 	return currentTime - startingTime, nil
 }
@@ -207,12 +207,12 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 	// collect metrics for all metric files and versionInfos
 	for _, provider := range t.With.Providers {
 		for i, versionInfo := range t.With.VersionInfo {
-			// add ElapsedTime
-			elapsedTime, err := getElapsedTime(versionInfo, exp)
+			// add elapsedTimeSeconds
+			elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
 			if err != nil {
 				return err
 			}
-			versionInfo[elapsedTimeStr] = elapsedTime
+			versionInfo[elapsedTimeSecondsStr] = elapsedTimeSeconds
 
 			// finalize metrics template
 			template, err := template.ParseFiles(provider + experimentMetricsPathSuffix)
