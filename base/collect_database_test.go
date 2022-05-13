@@ -257,9 +257,17 @@ func TestCEUnauthorized(t *testing.T) {
 		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(401, `Unauthorized`))
 
+		// fd := driver.FileDriver{
+		// 	RunDir: "../templates",
+		// }
+
+		// kd := NewFakeKubeDriver(cli.New())
+
+		// ReadMetricsSpec
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			// driver: &fd,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(1)

@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"text/template"
 	"time"
 
 	// Import to initialize client auth plugins.
@@ -232,7 +233,7 @@ func (driver *KubeDriver) getMetricsSpecSecret() (s *corev1.Secret, err error) {
 }
 
 // ReadMetricsSpec creates a MetricsSpec struct for a Kubernetes experiment
-func (driver *KubeDriver) ReadMetricsSpec(provider string) (*base.MetricsSpec, error) {
+func (driver *KubeDriver) ReadMetricsSpec(provider string) (*template.Template, error) {
 	s, err := driver.getMetricsSpecSecret()
 	if err != nil {
 		return nil, err

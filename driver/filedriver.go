@@ -26,15 +26,17 @@ func (f *FileDriver) ReadSpec() (base.ExperimentSpec, error) {
 	return SpecFromBytes(b)
 }
 
-// ReadMetricsSpec reads metrics spec from file
-func (f *FileDriver) ReadMetricsSpec(provider string) (*base.MetricsSpec, error) {
-	b, err := ioutil.ReadFile(path.Join(f.RunDir, provider, ExperimentMetricsPathSuffix))
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read metrics spec")
-		return nil, errors.New("unable to read metrics spec")
-	}
-	return MetricsSpecFromBytes(b)
-}
+// // ReadMetricsSpec reads metrics spec from file
+// func (f *FileDriver) ReadMetricsSpec(provider string) (*template.Template, error) {
+// 	// b, err := ioutil.ReadFile(path.Join(f.RunDir, provider, ExperimentMetricsPathSuffix))
+// 	// if err != nil {
+// 	// 	log.Logger.WithStackTrace(err.Error()).Error("unable to read metrics spec")
+// 	// 	return nil, errors.New("unable to read metrics spec")
+// 	// }
+// 	// return MetricsSpecFromBytes(b)
+
+// 	return nil, nil
+// }
 
 // ReadResult reads experiment result from file
 func (f *FileDriver) ReadResult() (*base.ExperimentResult, error) {

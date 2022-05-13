@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"text/template"
+
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -29,14 +31,16 @@ func SpecFromBytes(b []byte) (base.ExperimentSpec, error) {
 }
 
 // MetricsSpecFromBytes reads metrics spec from bytes
-func MetricsSpecFromBytes(b []byte) (*base.MetricsSpec, error) {
-	r := &base.MetricsSpec{}
-	err := yaml.Unmarshal(b, r)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment result")
-		return nil, err
-	}
-	return r, err
+func MetricsSpecFromBytes(b []byte) (*template.Template, error) {
+	return template.Must(template.New("metrics-spec").Parse(string(b))), nil
+
+	// r := &template.Template{}
+	// err := yaml.Unmarshal(b, r)
+	// if err != nil {
+	// 	log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal metrics spec")
+	// 	return nil, err
+	// }
+	// return r, err
 }
 
 // ResultFromBytes reads experiment result from bytes

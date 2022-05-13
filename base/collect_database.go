@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
 	"text/template"
+
 	"time"
 
 	"github.com/itchyny/gojq"
@@ -20,47 +20,80 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// ToDo: Go Doc is needed in this file
+// MetricsSpec specifies the set of metrics that can be obtained from a provider
+type MetricsSpec struct {
+	// Provider is the label/name of the data source
+	Provider string `json:"provider" yaml:"provider"`
 
-type CollectDatabaseTemplate struct {
-	URL      string            `json:"url" yaml:"url"`
-	Headers  map[string]string `json:"headers" yaml:"headers"`
-	Provider string            `json:"provider" yaml:"provider"`
-	Method   string            `json:"method" yaml:"method"`
-	Metrics  []Metric          `json:"metrics" yaml:"metrics"`
+	// URL is the database endpoint
+	URL string `json:"url" yaml:"url"`
+
+	// Method is the HTTP method that needs to be used
+	Method string `json:"method" yaml:"method"`
+
+	// Headers is the set of HTTP headers that need to be sent
+	Headers map[string]string `json:"headers" yaml:"headers"`
+
+	// Metrics is the set of metrics that can be obtained
+	Metrics []Metric `json:"metrics" yaml:"metrics"`
 }
 
+// Metric defines how to obtain a metric
 type Metric struct {
-	Name         string    `json:"name" yaml:"name"`
-	Description  *string   `json:"description,omitempty" yaml:"description,omitempty"`
-	Type         string    `json:"type" yaml:"type"`
-	Units        *string   `json:"units,omitempty" yaml:"units,omitempty"`
-	Params       *[]Params `json:"params,omitempty" yaml:"params,omitempty"`
-	Body         *string   `json:"body,omitempty" yaml:"body,omitempty"`
-	JqExpression string    `json:"jqExpression" yaml:"jqExpression"`
+	// Name is the name of the metric
+	Name string `json:"name" yaml:"name"`
+
+	// Description is the description of the metric
+	Description *string `json:"description,omitempty" yaml:"description,omitempty"`
+
+	// Type is the type of the metric, either gauge or counter
+	Type string `json:"type" yaml:"type"`
+
+	// Units is the unit of the metric, which can be omitted for unitless metrics
+	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
+
+	// Params is the set of HTTP parameters that need to be sent
+	Params *[]Params `json:"params,omitempty" yaml:"params,omitempty"`
+
+	// Body is the HTTP request body that needs to be sent
+	Body *string `json:"body,omitempty" yaml:"body,omitempty"`
+
+	// JqExpression is the jq expression that can extract the value from the HTTP
+	// response
+	JqExpression string `json:"jqExpression" yaml:"jqExpression"`
 }
 
+// Params defines an HTTP parameter
 type Params struct {
-	Name  string `json:"name" yaml:"name"`
+	// Name is the name of the HTTP parameter
+	Name string `json:"name" yaml:"name"`
+
+	// Value is the value of the HTTP parameter
 	Value string `json:"value" yaml:"value"`
 }
 
-const (
-	startingTimeStr = "startingTime"
-	elapsedTimeStr  = "ElapsedTime"
-	timeLayout      = "Jan 2, 2006 at 3:04pm (MST)"
-)
-
+// collectDatabaseInputs is the input to the collect-metrics-database task
 type collectDatabaseInputs struct {
-	Providers   []string                 `json:"providers" yaml:"providers"`
+	// Providers is the set of labels/names of the data sources
+	Providers []string `json:"providers" yaml:"providers"`
+
+	// VersionInfo
 	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
 }
 
 const (
 	// CollectDatabaseTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
 	CollectDatabaseTaskName = "collect-metrics-database"
+
 	// experimentMetricsPathSuffix is the name of the metrics spec file
 	experimentMetricsPathSuffix = ".metrics.yaml"
+
+	startingTimeStr = "startingTime"
+
+	elapsedTimeSecondsStr = "elapsedTimeSeconds"
+
+	// timeLayout is an example time layout for startingTime
+	timeLayout = "Jan 2, 2006 at 3:04pm (MST)"
 )
 
 // collectDatabaseTask enables load testing of gRPC services.
@@ -85,7 +118,7 @@ func (t *collectDatabaseTask) validateInputs() error {
 // starting time in the Experiment
 func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
 	// ElapsedTime should not be provided by the user
-	if versionInfo[elapsedTimeStr] != nil {
+	if versionInfo[elapsedTimeSecondsStr] != nil {
 		return 0, errors.New("ElapsedTime should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 	}
 
@@ -110,7 +143,7 @@ func getElapsedTime(versionInfo map[string]interface{}, exp *Experiment) (int64,
 //
 // bool return value represents whether the pipeline was able to run to
 // completion (prevents double error statement)
-func queryDatabaseAndGetValue(template CollectDatabaseTemplate, metric Metric) (interface{}, bool) {
+func queryDatabaseAndGetValue(template MetricsSpec, metric Metric) (interface{}, bool) {
 	var requestBody io.Reader
 	if metric.Body != nil {
 		requestBody = strings.NewReader(*metric.Body)
@@ -212,10 +245,12 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
-			versionInfo[elapsedTimeStr] = elapsedTime
+			versionInfo[elapsedTimeSecondsStr] = elapsedTime
 
-			// finalize metrics template
-			template, err := template.ParseFiles(provider + experimentMetricsPathSuffix)
+			// finalize metrics spec
+			// template, err := exp.driver.ReadMetricsSpec(provider)
+
+			var template *template.Template
 			if err != nil {
 				return err
 			}
@@ -224,7 +259,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
-			var metrics CollectDatabaseTemplate
+			var metrics MetricsSpec
 			err = yaml.Unmarshal(buf.Bytes(), &metrics)
 			if err != nil {
 				return err

@@ -33,9 +33,13 @@ type ExperimentSpec []Task
 type Experiment struct {
 	// Tasks is the sequence of tasks that constitute this experiment
 	Tasks ExperimentSpec
+
 	// Result is the current results from this experiment.
 	// The experiment may not have completed in which case results may be partial.
 	Result *ExperimentResult
+
+	// driver enables interacting with experiment result stored externally
+	driver Driver
 }
 
 // ExperimentResult defines the current results from the experiment
@@ -612,10 +616,15 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 type Driver interface {
 	// ReadSpec reads the experiment spec
 	ReadSpec() (ExperimentSpec, error)
+
 	// ReadResult reads the experiment result
 	ReadResult() (*ExperimentResult, error)
+
 	// WriteResult writes the experiment result
 	WriteResult(r *ExperimentResult) error
+
+	// // ReadMetricsSpec reads the metrics spec
+	// ReadMetricsSpec(provider string) (*template.Template, error)
 }
 
 // Completed returns true if the experiment is complete
@@ -694,6 +703,7 @@ func (exp *Experiment) SLOs() bool {
 // run the experiment
 func (exp *Experiment) run(driver Driver) error {
 	log.Logger.Debug("experiment run started ...")
+	exp.driver = driver
 	var err error
 	if exp.Result == nil {
 		exp.initResults()

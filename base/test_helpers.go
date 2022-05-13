@@ -2,6 +2,7 @@ package base
 
 import (
 	"testing"
+	"text/template"
 
 	"github.com/jarcoal/httpmock"
 )
@@ -18,6 +19,18 @@ func SetupWithMock(t *testing.T) {
 // mockDriver is a mock driver that can be used to run experiments
 type mockDriver struct {
 	*Experiment
+
+	metricsTemplate *template.Template
+}
+
+// ReadSpec enables spec to be read from the mock secret
+func (m *mockDriver) ReadSpec() (ExperimentSpec, error) {
+	return m.Experiment.Tasks, nil
+}
+
+// ReadMetricsSpec enables metrics spec to be read from the mock driver
+func (m *mockDriver) ReadMetricsSpec(provider string) (*template.Template, error) {
+	return m.metricsTemplate, nil
 }
 
 // ReadResult enables results to be read from the mock driver
@@ -29,9 +42,4 @@ func (m *mockDriver) ReadResult() (*ExperimentResult, error) {
 func (m *mockDriver) WriteResult(r *ExperimentResult) error {
 	m.Experiment.Result = r
 	return nil
-}
-
-// ReadSpec enables spec to be read from the mock secret
-func (m *mockDriver) ReadSpec() (ExperimentSpec, error) {
-	return m.Experiment.Tasks, nil
 }
