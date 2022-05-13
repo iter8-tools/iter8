@@ -161,6 +161,12 @@ func (driver *KubeDriver) getSpecSecretName() string {
 	return fmt.Sprintf("%v-spec", driver.Group)
 }
 
+// getMetricsSpecSecretName yields the name of the experiment metrics spec
+// secret
+func (driver *KubeDriver) getMetricsSpecSecretName() string {
+	return fmt.Sprintf("%v-metrics-spec", driver.Group)
+}
+
 // getResultSecretName yields the name of the experiment result secret
 func (driver *KubeDriver) getResultSecretName() string {
 	return fmt.Sprintf("%v-result", driver.Group)
@@ -203,11 +209,6 @@ func (driver *KubeDriver) getExperimentSpecSecret() (s *corev1.Secret, err error
 	return driver.getSecretWithRetry(driver.getSpecSecretName())
 }
 
-// getExperimentResultSecret gets the Kubernetes experiment result secret
-func (driver *KubeDriver) getExperimentResultSecret() (s *corev1.Secret, err error) {
-	return driver.getSecretWithRetry(driver.getResultSecretName())
-}
-
 // ReadSpec creates an ExperimentSpec struct for a Kubernetes experiment
 func (driver *KubeDriver) ReadSpec() (base.ExperimentSpec, error) {
 	s, err := driver.getExperimentSpecSecret()
@@ -223,6 +224,34 @@ func (driver *KubeDriver) ReadSpec() (base.ExperimentSpec, error) {
 	}
 
 	return SpecFromBytes(spec)
+}
+
+// getMetricsSpecSecret gets the Kubernetes metrics spec secret
+func (driver *KubeDriver) getMetricsSpecSecret() (s *corev1.Secret, err error) {
+	return driver.getSecretWithRetry(driver.getMetricsSpecSecretName())
+}
+
+// ReadMetricsSpec creates a MetricsSpec struct for a Kubernetes experiment
+func (driver *KubeDriver) ReadMetricsSpec(provider string) (*base.MetricsSpec, error) {
+	s, err := driver.getMetricsSpecSecret()
+	if err != nil {
+		return nil, err
+	}
+
+	metricsSpecPath := provider + ExperimentMetricsPathSuffix
+	res, ok := s.Data[metricsSpecPath]
+	if !ok {
+		err = fmt.Errorf("unable to extract metrics sepc; spec secret has no %v field", metricsSpecPath)
+		log.Logger.Error(err)
+		return nil, err
+	}
+
+	return MetricsSpecFromBytes(res)
+}
+
+// getExperimentResultSecret gets the Kubernetes experiment result secret
+func (driver *KubeDriver) getExperimentResultSecret() (s *corev1.Secret, err error) {
+	return driver.getSecretWithRetry(driver.getResultSecretName())
 }
 
 // ReadResult creates an ExperimentResult struct for a Kubernetes experiment
