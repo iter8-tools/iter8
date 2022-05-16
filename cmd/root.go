@@ -54,6 +54,7 @@ func init() {
 	// disable completion command for now
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
+	rootCmd.SilenceErrors = true // will get printed in Execute() (by cobra.CheckErr())
 }
 
 // addValueFlags adds flags that enable supplying values to the given command
