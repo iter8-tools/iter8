@@ -1,11 +1,10 @@
-package driver
+package base
 
 import (
 	"context"
 	"io/ioutil"
 	"testing"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -25,7 +24,7 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	// install
-	err = kd.install(base.CompletePath("../", "charts/load-test-http"), values.Options{
+	err = kd.install(CompletePath("../", "charts/load-test-http"), values.Options{
 		Values: []string{"url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
@@ -40,7 +39,7 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	// upgrade
-	err = kd.upgrade(base.CompletePath("../", "charts/load-test-http"), values.Options{
+	err = kd.upgrade(CompletePath("../", "charts/load-test-http"), values.Options{
 		Values: []string{"url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
@@ -64,12 +63,12 @@ func TestKOps(t *testing.T) {
 }
 
 func TestKubeRun(t *testing.T) {
-	base.SetupWithMock(t)
+	SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(CompletePath("../testdata/drivertests", ExperimentSpecPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",
@@ -78,11 +77,11 @@ func TestKubeRun(t *testing.T) {
 		StringData: map[string]string{ExperimentSpecPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
+	resultBytes, _ := yaml.Marshal(ExperimentResult{
 		StartTime:         time.Now(),
 		NumCompletedTasks: 0,
 		Failure:           false,
-		Iter8Version:      base.MajorMinor,
+		Iter8Version:      MajorMinor,
 	})
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -99,22 +98,22 @@ func TestKubeRun(t *testing.T) {
 		},
 	}, metav1.CreateOptions{})
 
-	err := base.RunExperiment(kd)
+	err := RunExperiment(kd)
 	assert.NoError(t, err)
 
 	// check results
-	exp, err := base.BuildExperiment(true, kd)
+	exp, err := BuildExperiment(true, kd)
 	assert.NoError(t, err)
 	assert.True(t, exp.Completed() && exp.NoFailure() && exp.SLOs())
 }
 
 func TestLogs(t *testing.T) {
-	base.SetupWithMock(t)
+	SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(CompletePath("../testdata/drivertests", ExperimentSpecPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-spec",

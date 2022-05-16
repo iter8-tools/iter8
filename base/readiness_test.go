@@ -71,7 +71,7 @@ func TestInvalidTimeout(t *testing.T) {
 
 // runTaskTest creates fake cluster with pod and runs rTask
 func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, pod *unstructured.Unstructured) {
-	*kd = *NewFakeKubeDriver(cli.New())
+	*kd = *NewDynamicFakeKubeDriver(cli.New())
 	rs := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
 	_, err := kd.dynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
 	assert.NoError(t, err, "get failed")

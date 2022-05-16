@@ -1,21 +1,20 @@
-package driver
+package base
 
 import (
 	"testing"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLocalRun(t *testing.T) {
-	base.SetupWithMock(t)
+	SetupWithMock(t)
 
 	fd := FileDriver{
-		RunDir: base.CompletePath("../", "testdata/drivertests"),
+		RunDir: CompletePath("../", "testdata/drivertests"),
 	}
-	err := base.RunExperiment(&fd)
+	err := RunExperiment(&fd)
 	assert.NoError(t, err)
-	exp, err := base.BuildExperiment(true, &fd)
+	exp, err := BuildExperiment(true, &fd)
 	assert.NoError(t, err)
 	assert.True(t, exp.Completed() && exp.NoFailure() && exp.SLOs())
 }

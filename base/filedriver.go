@@ -1,11 +1,10 @@
-package driver
+package base
 
 import (
 	"errors"
 	"io/ioutil"
 	"path"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
 )
@@ -17,7 +16,7 @@ type FileDriver struct {
 }
 
 // ReadSpec reads experiment spec from file
-func (f *FileDriver) ReadSpec() (base.ExperimentSpec, error) {
+func (f *FileDriver) ReadSpec() (ExperimentSpec, error) {
 	b, err := ioutil.ReadFile(path.Join(f.RunDir, ExperimentSpecPath))
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
@@ -39,7 +38,7 @@ func (f *FileDriver) ReadSpec() (base.ExperimentSpec, error) {
 // }
 
 // ReadResult reads experiment result from file
-func (f *FileDriver) ReadResult() (*base.ExperimentResult, error) {
+func (f *FileDriver) ReadResult() (*ExperimentResult, error) {
 	b, err := ioutil.ReadFile(path.Join(f.RunDir, ExperimentResultPath))
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
@@ -49,7 +48,7 @@ func (f *FileDriver) ReadResult() (*base.ExperimentResult, error) {
 }
 
 // WriteResult writes experiment result to file
-func (f *FileDriver) WriteResult(res *base.ExperimentResult) error {
+func (f *FileDriver) WriteResult(res *ExperimentResult) error {
 	rBytes, _ := yaml.Marshal(res)
 	err := ioutil.WriteFile(path.Join(f.RunDir, ExperimentResultPath), rBytes, 0664)
 	if err != nil {
