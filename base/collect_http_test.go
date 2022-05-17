@@ -14,9 +14,6 @@ func TestRunCollectHTTP(t *testing.T) {
 	httpmock.RegisterResponder("POST", "https://something.com",
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
-	httpmock.RegisterResponder("GET", "https://data.police.uk/api/crimes-street-dates",
-		httpmock.NewStringResponder(200, `[{"my": 1, "great": "payload"}]`))
-
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{

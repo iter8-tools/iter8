@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"testing"
+	"text/template"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
@@ -190,9 +191,18 @@ func TestCEOneVersion(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(1)
@@ -257,9 +267,18 @@ func TestCEUnauthorized(t *testing.T) {
 		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(401, `Unauthorized`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(1)
@@ -354,9 +373,18 @@ func TestCESomeValues(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(1)
@@ -458,9 +486,18 @@ func TestCEMultipleVersions(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(2)
@@ -564,9 +601,18 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(2)

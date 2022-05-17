@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"text/template"
 	"time"
 
 	// Import to initialize client auth plugins.
@@ -203,11 +204,6 @@ func (driver *KubeDriver) getExperimentSpecSecret() (s *corev1.Secret, err error
 	return driver.getSecretWithRetry(driver.getSpecSecretName())
 }
 
-// getExperimentResultSecret gets the Kubernetes experiment result secret
-func (driver *KubeDriver) getExperimentResultSecret() (s *corev1.Secret, err error) {
-	return driver.getSecretWithRetry(driver.getResultSecretName())
-}
-
 // ReadSpec creates an ExperimentSpec struct for a Kubernetes experiment
 func (driver *KubeDriver) ReadSpec() (base.ExperimentSpec, error) {
 	s, err := driver.getExperimentSpecSecret()
@@ -223,6 +219,28 @@ func (driver *KubeDriver) ReadSpec() (base.ExperimentSpec, error) {
 	}
 
 	return SpecFromBytes(spec)
+}
+
+// ReadMetricsSpec creates a metrics Template struct for a Kubernetes experiment
+func (driver *KubeDriver) ReadMetricsSpec(provider string) (*template.Template, error) {
+	s, err := driver.getExperimentSpecSecret()
+	if err != nil {
+		return nil, err
+	}
+
+	res, ok := s.Data[provider+ExperimentMetricsPathSuffix]
+	if !ok {
+		err = fmt.Errorf("unable to extract %v metrics spec; result secret has no %v field", provider, provider+ExperimentMetricsPathSuffix)
+		log.Logger.Error(err)
+		return nil, err
+	}
+
+	return MetricsSpecFromBytes(res)
+}
+
+// getExperimentResultSecret gets the Kubernetes experiment result secret
+func (driver *KubeDriver) getExperimentResultSecret() (s *corev1.Secret, err error) {
+	return driver.getSecretWithRetry(driver.getResultSecretName())
 }
 
 // ReadResult creates an ExperimentResult struct for a Kubernetes experiment

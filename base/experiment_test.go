@@ -3,6 +3,7 @@ package base
 import (
 	"io/ioutil"
 	"testing"
+	"text/template"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
@@ -80,7 +81,9 @@ func TestRunExperiment(t *testing.T) {
 		Tasks: *es,
 	}
 
-	err = RunExperiment(&mockDriver{&exp})
+	metricsTemplate := template.Template{}
+
+	err = RunExperiment(&mockDriver{&exp, &metricsTemplate})
 	assert.NoError(t, err)
 
 	yamlBytes, _ := yaml.Marshal(exp.Result)

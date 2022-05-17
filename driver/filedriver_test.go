@@ -19,3 +19,16 @@ func TestLocalRun(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, exp.Completed() && exp.NoFailure() && exp.SLOs())
 }
+
+func TestFileDriverReadMetricsSpec(t *testing.T) {
+	base.SetupWithMock(t)
+
+	fd := FileDriver{
+		RunDir: base.CompletePath("../", "testdata/metrics"),
+	}
+
+	metrics, err := fd.ReadMetricsSpec("test-ce")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, metrics)
+}
