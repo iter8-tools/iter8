@@ -65,7 +65,6 @@ func TestRunTask(t *testing.T) {
 	for i := 0; i < len(exp.Result.Insights.SLOs); i++ { // i^th SLO
 		assert.True(t, exp.Result.Insights.SLOsSatisfied[i][0]) // satisfied by only version
 	}
-
 }
 
 func TestRunExperiment(t *testing.T) {
