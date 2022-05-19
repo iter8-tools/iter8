@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"path"
+	"text/template"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -24,6 +25,16 @@ func (f *FileDriver) ReadSpec() (base.ExperimentSpec, error) {
 		return nil, errors.New("unable to read experiment spec")
 	}
 	return SpecFromBytes(b)
+}
+
+// ReadMetricsSpec reads metrics spec from file
+func (f *FileDriver) ReadMetricsSpec(provider string) (*template.Template, error) {
+	b, err := ioutil.ReadFile(path.Join(f.RunDir, provider+ExperimentMetricsPathSuffix))
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read metrics spec")
+		return nil, errors.New("unable to read metrics spec")
+	}
+	return MetricsSpecFromBytes(b)
 }
 
 // ReadResult reads experiment result from file

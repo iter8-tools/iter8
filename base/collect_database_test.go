@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"testing"
+	"text/template"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
@@ -49,17 +50,18 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	}
 
 	// return to original path
-	defer func() {
+	t.Cleanup(func() {
 		os.Chdir(originalPath)
-	}()
+	})
 
 	// get metrics file
 	srcFile, err := os.Open(metricsDirectory + metricsFileName)
 	if err != nil {
 		return errors.New("could not open metrics file.")
 	}
-
-	defer srcFile.Close()
+	t.Cleanup(func() {
+		srcFile.Close()
+	})
 
 	// go to temp directory
 	destDir := t.TempDir()
@@ -70,7 +72,9 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	if err != nil {
 		return errors.New("could not create copy of metrics file in temp directory.")
 	}
-	defer destFile.Close()
+	t.Cleanup(func() {
+		destFile.Close()
+	})
 	io.Copy(destFile, srcFile)
 
 	// run test
@@ -102,6 +106,51 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 	// if getElapsedTimeSeconds() used the starting time from the experiment instead of
 	// the one from versionInfo, the elapsed time would be 0 or close to 0
 	assert.Equal(t, elapsedTimeSeconds > 1000000, true)
+}
+
+// test if a user sets elapsedTimeSeconds getElapsedTimeSeconds()
+func TestSetElapsedTimeSecondsError(t *testing.T) {
+	versionInfo := map[string]interface{}{
+		"ibm_service_instance": "version1",
+		"startingTime":         "Feb 4, 2014 at 6:05pm (PST)",
+		"elapsedTimeSeconds":   "Feb 5, 2014 at 6:05pm (PST)",
+	}
+
+	exp := &Experiment{
+		Tasks:  []Task{},
+		Result: &ExperimentResult{},
+	}
+
+	// this should add a startingTime that will be overwritten by the one in
+	// versionInfo
+	exp.initResults()
+
+	elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
+
+	assert.Error(t, err)
+	assert.Equal(t, elapsedTimeSeconds, int64(0))
+}
+
+// test if a user sets startingTime incorrectly getElapsedTimeSeconds()
+func TestStartingTimeFormatError(t *testing.T) {
+	versionInfo := map[string]interface{}{
+		"ibm_service_instance": "version1",
+		"startingTime":         "1652935205",
+	}
+
+	exp := &Experiment{
+		Tasks:  []Task{},
+		Result: &ExperimentResult{},
+	}
+
+	// this should add a startingTime that will be overwritten by the one in
+	// versionInfo
+	exp.initResults()
+
+	elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
+
+	assert.Error(t, err)
+	assert.Equal(t, elapsedTimeSeconds, int64(0))
 }
 
 // basic test with one version, mimicking Code Engine
@@ -190,9 +239,18 @@ func TestCEOneVersion(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(1)
@@ -211,7 +269,6 @@ func TestCEOneVersion(t *testing.T) {
 	})
 
 	assert.NoError(t, err)
-
 }
 
 // test with one version and improper authorization, mimicking Code Engine
@@ -257,9 +314,18 @@ func TestCEUnauthorized(t *testing.T) {
 		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(401, `Unauthorized`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(1)
@@ -354,9 +420,18 @@ func TestCESomeValues(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(1)
@@ -458,9 +533,18 @@ func TestCEMultipleVersions(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(2)
@@ -564,9 +648,18 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 				}
 			}`))
 
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
 		exp := &Experiment{
 			Tasks:  []Task{ct},
 			Result: &ExperimentResult{},
+			driver: &md,
 		}
 		exp.initResults()
 		exp.Result.initInsightsWithNumVersions(2)

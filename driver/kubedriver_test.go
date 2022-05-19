@@ -16,6 +16,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	testCe = "test-ce"
+)
+
 func TestKOps(t *testing.T) {
 	kd := NewKubeDriver(cli.New()) // we will ignore this value
 	assert.NotNil(t, kd)
@@ -136,4 +140,26 @@ func TestLogs(t *testing.T) {
 	str, err := kd.GetExperimentLogs()
 	assert.NoError(t, err)
 	assert.Equal(t, "fake logs", str)
+}
+
+func TestKubeDriverReadMetricsSpec(t *testing.T) {
+	base.SetupWithMock(t)
+
+	kd := NewFakeKubeDriver(cli.New())
+	kd.revision = 1
+	metricsSpecPath := testCe + ExperimentMetricsPathSuffix
+
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/metrics", metricsSpecPath))
+	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "default-spec",
+			Namespace: "default",
+		},
+		StringData: map[string]string{metricsSpecPath: string(byteArray)},
+	}, metav1.CreateOptions{})
+
+	metricsSpec, err := kd.ReadMetricsSpec(testCe)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, metricsSpec)
 }

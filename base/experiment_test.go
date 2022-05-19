@@ -3,6 +3,7 @@ package base
 import (
 	"io/ioutil"
 	"testing"
+	"text/template"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
@@ -23,6 +24,13 @@ func TestReadExperiment(t *testing.T) {
 	err = yaml.Unmarshal(b, es)
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(*es))
+
+	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_db.yaml"))
+	assert.NoError(t, err)
+	es = &ExperimentSpec{}
+	err = yaml.Unmarshal(b, es)
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(*es))
 }
 func TestRunTask(t *testing.T) {
 	SetupWithMock(t)
@@ -80,7 +88,9 @@ func TestRunExperiment(t *testing.T) {
 		Tasks: *es,
 	}
 
-	err = RunExperiment(&mockDriver{&exp})
+	metricsTemplate := template.Template{}
+
+	err = RunExperiment(&mockDriver{&exp, &metricsTemplate})
 	assert.NoError(t, err)
 
 	yamlBytes, _ := yaml.Marshal(exp.Result)
