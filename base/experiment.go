@@ -175,7 +175,12 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				tsk = rt
 			case CollectDatabaseTaskName:
 				cdt := &collectDatabaseTask{}
-				json.Unmarshal(tBytes, cdt)
+				err := json.Unmarshal(tBytes, cdt)
+				if err != nil {
+					e := errors.New("json unmarshal error")
+					log.Logger.WithStackTrace(err.Error()).Error(e)
+					return e
+				}
 				tsk = cdt
 			case CollectHTTPTaskName:
 				cht := &collectHTTPTask{}

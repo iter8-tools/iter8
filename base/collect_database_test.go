@@ -108,6 +108,51 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 	assert.Equal(t, elapsedTimeSeconds > 1000000, true)
 }
 
+// test if a user sets elapsedTimeSeconds getElapsedTimeSeconds()
+func TestSetElapsedTimeSecondsError(t *testing.T) {
+	versionInfo := map[string]interface{}{
+		"ibm_service_instance": "version1",
+		"startingTime":         "Feb 4, 2014 at 6:05pm (PST)",
+		"elapsedTimeSeconds":   "Feb 5, 2014 at 6:05pm (PST)",
+	}
+
+	exp := &Experiment{
+		Tasks:  []Task{},
+		Result: &ExperimentResult{},
+	}
+
+	// this should add a startingTime that will be overwritten by the one in
+	// versionInfo
+	exp.initResults()
+
+	elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
+
+	assert.Error(t, err)
+	assert.Equal(t, elapsedTimeSeconds, int64(0))
+}
+
+// test if a user sets startingTime incorrectly getElapsedTimeSeconds()
+func TestStartingTimeFormatError(t *testing.T) {
+	versionInfo := map[string]interface{}{
+		"ibm_service_instance": "version1",
+		"startingTime":         "1652935205",
+	}
+
+	exp := &Experiment{
+		Tasks:  []Task{},
+		Result: &ExperimentResult{},
+	}
+
+	// this should add a startingTime that will be overwritten by the one in
+	// versionInfo
+	exp.initResults()
+
+	elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
+
+	assert.Error(t, err)
+	assert.Equal(t, elapsedTimeSeconds, int64(0))
+}
+
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {

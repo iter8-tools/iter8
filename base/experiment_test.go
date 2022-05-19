@@ -24,6 +24,13 @@ func TestReadExperiment(t *testing.T) {
 	err = yaml.Unmarshal(b, es)
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(*es))
+
+	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_db.yaml"))
+	assert.NoError(t, err)
+	es = &ExperimentSpec{}
+	err = yaml.Unmarshal(b, es)
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(*es))
 }
 func TestRunTask(t *testing.T) {
 	SetupWithMock(t)

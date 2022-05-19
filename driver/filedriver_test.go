@@ -32,3 +32,23 @@ func TestFileDriverReadMetricsSpec(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, metrics)
 }
+
+func TestFileDriverReadError(t *testing.T) {
+	base.SetupWithMock(t)
+
+	fd := FileDriver{
+		RunDir: ".",
+	}
+
+	spec, err := fd.ReadSpec()
+	assert.Error(t, err)
+	assert.Nil(t, spec)
+
+	metrics, err := fd.ReadMetricsSpec("test-ce")
+	assert.Error(t, err)
+	assert.Nil(t, metrics)
+
+	result, err := fd.ReadResult()
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
