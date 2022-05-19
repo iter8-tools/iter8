@@ -50,17 +50,18 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	}
 
 	// return to original path
-	defer func() {
+	t.Cleanup(func() {
 		os.Chdir(originalPath)
-	}()
+	})
 
 	// get metrics file
 	srcFile, err := os.Open(metricsDirectory + metricsFileName)
 	if err != nil {
 		return errors.New("could not open metrics file.")
 	}
-
-	defer srcFile.Close()
+	t.Cleanup(func() {
+		srcFile.Close()
+	})
 
 	// go to temp directory
 	destDir := t.TempDir()
@@ -71,7 +72,9 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	if err != nil {
 		return errors.New("could not create copy of metrics file in temp directory.")
 	}
-	defer destFile.Close()
+	t.Cleanup(func() {
+		destFile.Close()
+	})
 	io.Copy(destFile, srcFile)
 
 	// run test
@@ -221,7 +224,6 @@ func TestCEOneVersion(t *testing.T) {
 	})
 
 	assert.NoError(t, err)
-
 }
 
 // test with one version and improper authorization, mimicking Code Engine
