@@ -23,6 +23,15 @@ func TestLocalReportText(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestLocalReportTextNoInsights(t *testing.T) {
+	// fix rOpts
+	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
+	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs/noinsights")
+
+	err := rOpts.LocalRun(os.Stdout)
+	assert.NoError(t, err)
+}
+
 func TestLocalReportHTML(t *testing.T) {
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
@@ -57,5 +66,14 @@ func TestKubeReportText(t *testing.T) {
 	}, metav1.CreateOptions{})
 
 	err := rOpts.KubeRun(os.Stdout)
+	assert.NoError(t, err)
+}
+
+func TestLocalReportHTMLNoInsights(t *testing.T) {
+	// fix rOpts
+	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
+	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs/noinsights")
+	rOpts.OutputFormat = HTMLOutputFormatKey
+	err := rOpts.LocalRun(os.Stdout)
 	assert.NoError(t, err)
 }
