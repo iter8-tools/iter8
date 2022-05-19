@@ -58,111 +58,119 @@
       });	
       </script>
 
-      {{- if not (empty .Result.Insights.SLOs) }}  
-      <section class="mt-5">
-        <h3 class="display-6">Service level objectives (SLOs)</h3>
-        <h4 class="display-7 text-muted">Whether or not SLOs are satisfied</h4>
-        <hr>
-        <table class="table">
-          <thead class="thead-light">
-            <tr>
-              <th scope="col">SLO Conditions</th>
-              {{- if ge .Result.Insights.NumVersions 2 }}
-              {{- range until .Result.Insights.NumVersions }}
-              <th scope="col" class="text-center">Version {{ . }} </th>
-              {{- end}}              
-              {{- else }} 
-              <th scope="col" class="text-center">Satisfied</th>
-              {{- end }}
-            </tr>
-          </thead>
-          <tbody>
-              {{- range $ind, $slo := .Result.Insights.SLOs }}
-              <tr scope="row">
-                <td>
-                  {{ if $slo.LowerLimit }} {{- $slo.LowerLimit }} &leq; {{ end -}}
-                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $slo.Metric }}">
-                    {{ $.MetricWithUnits $slo.Metric }}
-                  </a>
-                  {{ if $slo.UpperLimit }} &leq; {{ $slo.UpperLimit -}} {{- end }}
-                </td>
-                {{- range (index $.Result.Insights.SLOsSatisfied $ind) }}
-                <td class="{{ renderSLOSatisfiedCellClass .  }} text-center">
-                  <i class="far {{ renderSLOSatisfiedHTML . }}"></i>                
-                </td>
+      {{- if .Result.Insights }}
+        {{- if not (empty .Result.Insights.SLOs) }}  
+        <section class="mt-5">
+          <h3 class="display-6">Service level objectives (SLOs)</h3>
+          <h4 class="display-7 text-muted">Whether or not SLOs are satisfied</h4>
+          <hr>
+          <table class="table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">SLO Conditions</th>
+                {{- if ge .Result.Insights.NumVersions 2 }}
+                {{- range until .Result.Insights.NumVersions }}
+                <th scope="col" class="text-center">Version {{ . }} </th>
+                {{- end}}              
+                {{- else }} 
+                <th scope="col" class="text-center">Satisfied</th>
                 {{- end }}
               </tr>
-              {{- end}}          
-          </tbody>
-        </table>
-      </section>
-      {{- end }}
-
-  		<section class="mt-5">
-        <h3 class="display-6">Metric Histograms</h3>
-        <hr>
-
-        {{- range $ind, $mn := .SortedVectorMetrics }}
-        <div id="vm-{{ $mn }}"></div>
-        <script>
-          var data = [];
-          {{- range until $.Result.Insights.NumVersions }}
-          data.push({
-            x: {{ $.VectorMetricValue . $mn }},
-            name: "Version {{ . }}",
-            histnorm: "percent", 
-            opacity: 0.5, 
-            type: "histogram"
-          })
-          {{- end }}
-
-          var layout = {
-            bargroupgap: 0.2, 
-            barmode: "overlay", 
-            title: "Histogram of {{ $.MetricWithUnits $mn }}", 
-            xaxis: {title: "{{ $.MetricWithUnits $mn }}"}, 
-            yaxis: {title: "% of observations"}
-          };
-          Plotly.newPlot("vm-{{ $mn }}", data, layout);
-        </script>
+            </thead>
+            <tbody>
+                {{- range $ind, $slo := .Result.Insights.SLOs }}
+                <tr scope="row">
+                  <td>
+                    {{ if $slo.LowerLimit }} {{- $slo.LowerLimit }} &leq; {{ end -}}
+                    <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $slo.Metric }}">
+                      {{ $.MetricWithUnits $slo.Metric }}
+                    </a>
+                    {{ if $slo.UpperLimit }} &leq; {{ $slo.UpperLimit -}} {{- end }}
+                  </td>
+                  {{- range (index $.Result.Insights.SLOsSatisfied $ind) }}
+                  <td class="{{ renderSLOSatisfiedCellClass .  }} text-center">
+                    <i class="far {{ renderSLOSatisfiedHTML . }}"></i>                
+                  </td>
+                  {{- end }}
+                </tr>
+                {{- end}}          
+            </tbody>
+          </table>
+        </section>
         {{- end }}
-			</section>
 
-  	  <section class="mt-5">
-        <h3 class="display-6">Latest observed values for metrics</h3>
-        <hr>
-        <table class="table">
-          <thead class="thead-light">
-            <tr>
-              <th scope="col">Metric</th>
-              {{- if ge .Result.Insights.NumVersions 2 }}
-              {{- range until .Result.Insights.NumVersions }}
-              <th scope="col" class="text-center">Version {{ . }} </th>
-              {{- end}}              
-              {{- else }} 
-              <th scope="col" class="text-center">Value</th>
-              {{- end }}
-            </tr>
-          </thead>
-          <tbody>
-              {{- range $ind, $mn := .SortedScalarAndSLOMetrics }}
-              <tr scope="row">
-                <td>
-                  <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $mn }}">
-                    {{ $.MetricWithUnits $mn }}
-                  </a>
-                </td>
-                {{- range until $.Result.Insights.NumVersions }}
-                <td class="text-center">
-                {{ $.ScalarMetricValueStr . $mn }}
-                </td>
+        <section class="mt-5">
+          <h3 class="display-6">Metric Histograms</h3>
+          <hr>
+
+          {{- range $ind, $mn := .SortedVectorMetrics }}
+          <div id="vm-{{ $mn }}"></div>
+          <script>
+            var data = [];
+            {{- range until $.Result.Insights.NumVersions }}
+            data.push({
+              x: {{ $.VectorMetricValue . $mn }},
+              name: "Version {{ . }}",
+              histnorm: "percent", 
+              opacity: 0.5, 
+              type: "histogram"
+            })
+            {{- end }}
+
+            var layout = {
+              bargroupgap: 0.2, 
+              barmode: "overlay", 
+              title: "Histogram of {{ $.MetricWithUnits $mn }}", 
+              xaxis: {title: "{{ $.MetricWithUnits $mn }}"}, 
+              yaxis: {title: "% of observations"}
+            };
+            Plotly.newPlot("vm-{{ $mn }}", data, layout);
+          </script>
+          {{- end }}
+        </section>
+
+        <section class="mt-5">
+          <h3 class="display-6">Latest observed values for metrics</h3>
+          <hr>
+          <table class="table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Metric</th>
+                {{- if ge .Result.Insights.NumVersions 2 }}
+                {{- range until .Result.Insights.NumVersions }}
+                <th scope="col" class="text-center">Version {{ . }} </th>
+                {{- end}}              
+                {{- else }} 
+                <th scope="col" class="text-center">Value</th>
                 {{- end }}
               </tr>
-              {{- end}}          
-          </tbody>
-        </table>
-      </section>
-
+            </thead>
+            <tbody>
+                {{- range $ind, $mn := .SortedScalarAndSLOMetrics }}
+                <tr scope="row">
+                  <td>
+                    <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $mn }}">
+                      {{ $.MetricWithUnits $mn }}
+                    </a>
+                  </td>
+                  {{- range until $.Result.Insights.NumVersions }}
+                  <td class="text-center">
+                  {{ $.ScalarMetricValueStr . $mn }}
+                  </td>
+                  {{- end }}
+                </tr>
+                {{- end}}          
+            </tbody>
+          </table>
+        </section>
+      {{- else }}
+        <section class="mt-5">
+          <h3 class="display-6">Metrics-based Insights</h3>
+          <hr>
+          <p> Insights not found in experiment results. You may need to retry this report at a later time. </p>
+        </section>
+      {{- end }}
+      
     </div>
   </body>
 </html>
