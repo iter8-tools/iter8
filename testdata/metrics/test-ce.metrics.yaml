@@ -42,7 +42,7 @@ metrics:
           ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
       }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
-  jqExpression: .data.result[0].value[1]
+  jqExpression: .data.result[0].value[1] | tonumber
 - name: error-count
   type: counter
   description: |
@@ -56,7 +56,7 @@ metrics:
           ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
       }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
-  jqExpression: .data.result[0].value[1]
+  jqExpression: .data.result[0].value[1] | tonumber
 - name: error-rate
   type: gauge
   description: |

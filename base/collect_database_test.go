@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"testing"
@@ -16,7 +18,9 @@ import (
 const (
 	metricsDirectory  = "../testdata/metrics/"
 	testCe            = "test-ce"
-	testPromURL       = `test-database.com/prometheus/api/v1/query?query=`
+	testRequestBody   = "test-request-body"
+	testPromURL       = `test-database.com/prometheus/api/v1/query`
+	queryString       = "?query="
 	requestCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
 		"}[0s])) or on() vector(0)\n"
 	errorCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
@@ -26,6 +30,8 @@ const (
 		"  ibm_codeengine_status!=\"200\",\n" +
 		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
 		"}[0s])) or on() vector(0)\n"
+	exampleQueryParameter = "example query parameter\n"
+	exampleRequestBody    = "example request body\n"
 )
 
 type collectDatabaseTemplateInput struct {
@@ -41,9 +47,7 @@ type collectDatabaseTemplateInput struct {
 	to run, the metrics files are copied to a temprorary directory and the current
 	working directory is changed to the temporary directory
 */
-func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
-	metricsFileName := testCe + experimentMetricsPathSuffix
-
+func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, metricFileName string, test func()) error {
 	originalPath, err := os.Getwd()
 	if err != nil {
 		return err
@@ -55,7 +59,7 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	})
 
 	// get metrics file
-	srcFile, err := os.Open(metricsDirectory + metricsFileName)
+	srcFile, err := os.Open(metricsDirectory + metricFileName)
 	if err != nil {
 		return errors.New("could not open metrics file.")
 	}
@@ -68,7 +72,7 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, test func()) error {
 	os.Chdir(destDir)
 
 	// create copy of metrics file in temp directory
-	destFile, err := os.Create(metricsFileName)
+	destFile, err := os.Create(metricFileName)
 	if err != nil {
 		return errors.New("could not create copy of metrics file in temp directory.")
 	}
@@ -156,7 +160,7 @@ func TestStartingTimeFormatError(t *testing.T) {
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
-	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
 			Endpoint: "test-database.com",
 			IAMToken: "test-token",
@@ -186,7 +190,7 @@ func TestCEOneVersion(t *testing.T) {
 		httpmock.Activate()
 
 		// request-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -204,7 +208,7 @@ func TestCEOneVersion(t *testing.T) {
 			}`))
 
 		// error-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -222,7 +226,7 @@ func TestCEOneVersion(t *testing.T) {
 			}`))
 
 		// error-rate
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -274,7 +278,7 @@ func TestCEOneVersion(t *testing.T) {
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
-	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
 			Endpoint: "test-database.com",
 			IAMToken: "test-token",
@@ -303,15 +307,15 @@ func TestCEUnauthorized(t *testing.T) {
 		httpmock.Activate()
 
 		// request-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
 			httpmock.NewStringResponder(401, `Unauthorized`))
 
 		// error-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
 			httpmock.NewStringResponder(401, `Unauthorized`))
 
 		// error-rate
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(401, `Unauthorized`))
 
 		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
@@ -347,7 +351,7 @@ func TestCEUnauthorized(t *testing.T) {
 // test with one version with some values, mimicking Code Engine
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
-	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
 			Endpoint: "test-database.com",
 			IAMToken: "test-token",
@@ -376,7 +380,7 @@ func TestCESomeValues(t *testing.T) {
 		httpmock.Activate()
 
 		// request-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -385,7 +389,7 @@ func TestCESomeValues(t *testing.T) {
 			}`))
 
 		// error-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -403,7 +407,7 @@ func TestCESomeValues(t *testing.T) {
 			}`))
 
 		// error-rate
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -458,7 +462,7 @@ func TestCESomeValues(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
-	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
 			Endpoint: "test-database.com",
 			IAMToken: "test-token",
@@ -489,7 +493,7 @@ func TestCEMultipleVersions(t *testing.T) {
 		httpmock.Activate()
 
 		// request-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -498,7 +502,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			}`))
 
 		// error-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -516,7 +520,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			}`))
 
 		// error-rate
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -573,7 +577,7 @@ func TestCEMultipleVersions(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
-	err := GoToTempDirectoryAndCopyMetricsFile(t, func() {
+	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
 			Endpoint: "test-database.com",
 			IAMToken: "test-token",
@@ -604,7 +608,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 		httpmock.Activate()
 
 		// request-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -613,7 +617,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			}`))
 
 		// error-count
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorCountQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -631,7 +635,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			}`))
 
 		// error-rate
-		httpmock.RegisterResponder("GET", testPromURL+url.QueryEscape(errorRateQuery),
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
 			httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -678,6 +682,95 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 		// request-count should not exist because there was no value from response
 		_, ok := exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"]
 		assert.Equal(t, ok, false)
+
+		httpmock.DeactivateAndReset()
+	})
+
+	assert.NoError(t, err)
+}
+
+// basic test with a request body
+func TestRequestBody(t *testing.T) {
+	err := GoToTempDirectoryAndCopyMetricsFile(t, testRequestBody+experimentMetricsPathSuffix, func() {
+		input := &collectDatabaseTemplateInput{
+			Endpoint: "test-database.com",
+		}
+
+		// convert input to map[string]interface{}
+		var templateInput map[string]interface{}
+		inrec, err := json.Marshal(input)
+		assert.NoError(t, err)
+
+		json.Unmarshal(inrec, &templateInput)
+
+		// valid collect database task... should succeed
+		ct := &collectDatabaseTask{
+			TaskMeta: TaskMeta{
+				Task: StringPointer(CollectDatabaseTaskName),
+			},
+			With: collectDatabaseInputs{
+				Providers: []string{testRequestBody},
+				VersionInfo: []map[string]interface{}{{
+					"ibm_service_instance": "version1",
+				}},
+			},
+		}
+
+		httpmock.Activate()
+
+		// request-count
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(exampleQueryParameter),
+			func(req *http.Request) (*http.Response, error) {
+				if req.Body != nil {
+					b, err := ioutil.ReadAll(req.Body)
+					if err != nil {
+						panic(err)
+					}
+
+					if string(b) == exampleRequestBody {
+						return httpmock.NewStringResponse(200, `{
+							"status": "success",
+							"data": {
+								"resultType": "vector",
+								"result": [
+									{
+										"metric": {},
+										"value": [
+											1645602108.839,
+											"43"
+										]
+									}
+								]
+							}
+						}`), nil
+					}
+				}
+
+				return nil, errors.New("")
+			})
+
+		template, err := template.ParseFiles(testRequestBody + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
+		exp := &Experiment{
+			Tasks:  []Task{ct},
+			Result: &ExperimentResult{},
+			driver: &md,
+		}
+		exp.initResults()
+		exp.Result.initInsightsWithNumVersions(1)
+
+		err = ct.run(exp)
+
+		// test should not fail
+		assert.NoError(t, err)
+
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0][testRequestBody+"/request-count"][0], float64(43))
 
 		httpmock.DeactivateAndReset()
 	})
