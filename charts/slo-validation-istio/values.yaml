@@ -1,5 +1,5 @@
 # Prometheus URL
-endpoint: http://127.0.0.1:9090
+endpoint: null
 
 ### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
@@ -20,7 +20,7 @@ providers:
   - istio
 
 ##################################
-# Used by the template
+# Used by the metrics template
 
 # PromQL selectors
 reporter: source
@@ -63,7 +63,7 @@ source_workload: null
 source_workload_namespace: null
 
 ##################################
-# Used by metrics
+# Used by metrics spec
 
 destination_workload: null
 destination_workload_namespace: null

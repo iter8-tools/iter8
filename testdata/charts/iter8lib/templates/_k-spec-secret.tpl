@@ -10,9 +10,9 @@ stringData:
   experiment.yaml: |
 {{ include "experiment" . | indent 4 }}
 {{- if .Values.providers }}
-  metrics.yaml: |
 {{- range .Values.providers }}
 {{- if eq . "istio"}}
+  istio.metrics.yaml: |
 {{ include "metrics.istio" $globalContext | indent 4 }}
 {{- end }}
 {{- end }}

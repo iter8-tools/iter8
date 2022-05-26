@@ -1,7 +1,7 @@
 apiVersion: v2
 name: slo-validation-istio
 version: 0.10.0
-description: Load test, benchmark, and validate HTTP services
+description: SLO validation for Istio applications
 type: application
 keywords:
 - Iter8
