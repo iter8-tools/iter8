@@ -47,7 +47,7 @@ type collectDatabaseTemplateInput struct {
 	to run, the metrics files are copied to a temprorary directory and the current
 	working directory is changed to the temporary directory
 */
-func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, metricFileName string, test func()) error {
+func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, metricsFileName string, test func()) error {
 	originalPath, err := os.Getwd()
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, metricFileName string, te
 	})
 
 	// get metrics file
-	srcFile, err := os.Open(metricsDirectory + metricFileName)
+	srcFile, err := os.Open(metricsDirectory + metricsFileName)
 	if err != nil {
 		return errors.New("could not open metrics file.")
 	}
@@ -72,7 +72,7 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, metricFileName string, te
 	os.Chdir(destDir)
 
 	// create copy of metrics file in temp directory
-	destFile, err := os.Create(metricFileName)
+	destFile, err := os.Create(metricsFileName)
 	if err != nil {
 		return errors.New("could not create copy of metrics file in temp directory.")
 	}
