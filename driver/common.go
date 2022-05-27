@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"text/template"
+
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -26,6 +28,11 @@ func SpecFromBytes(b []byte) (base.ExperimentSpec, error) {
 		return nil, err
 	}
 	return e, err
+}
+
+// MetricsSpecFromBytes reads metrics spec from bytes
+func MetricsSpecFromBytes(b []byte) (*template.Template, error) {
+	return template.New("metrics-spec").Parse(string(b))
 }
 
 // ResultFromBytes reads experiment result from bytes
