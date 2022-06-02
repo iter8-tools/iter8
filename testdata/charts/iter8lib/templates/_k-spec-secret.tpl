@@ -1,5 +1,4 @@
 {{- define "k.spec.secret" -}}
-{{ $globalContext := . }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -13,7 +12,7 @@ stringData:
 {{- range .Values.providers }}
 {{- if eq . "istio"}}
   istio.metrics.yaml: |
-{{ include "metrics.istio" $globalContext | indent 4 }}
+{{ include "metrics.istio" $ | indent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}

@@ -30,6 +30,19 @@ const (
 		"  ibm_codeengine_status!=\"200\",\n" +
 		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
 		"}[0s])) or on() vector(0)\n"
+	requestCountWithRevisionNameQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)\n"
+	errorCountWithRevisionNameQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)\n"
+	errorRateWithRevisionNameQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)\n"
 	exampleQueryParameter = "example query parameter\n"
 	exampleRequestBody    = "example request body\n"
 )
@@ -90,8 +103,7 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, metricsFileName string, t
 // test getElapsedTimeSeconds()
 func TestGetElapsedTimeSeconds(t *testing.T) {
 	versionInfo := map[string]interface{}{
-		"ibm_service_instance": "version1",
-		"startingTime":         "Feb 4, 2014 at 6:05pm (PST)",
+		"startingTime": "Feb 4, 2014 at 6:05pm (PST)",
 	}
 
 	exp := &Experiment{
@@ -115,9 +127,8 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 // test if a user sets elapsedTimeSeconds getElapsedTimeSeconds()
 func TestSetElapsedTimeSecondsError(t *testing.T) {
 	versionInfo := map[string]interface{}{
-		"ibm_service_instance": "version1",
-		"startingTime":         "Feb 4, 2014 at 6:05pm (PST)",
-		"elapsedTimeSeconds":   "Feb 5, 2014 at 6:05pm (PST)",
+		"startingTime":       "Feb 4, 2014 at 6:05pm (PST)",
+		"elapsedTimeSeconds": "Feb 5, 2014 at 6:05pm (PST)",
 	}
 
 	exp := &Experiment{
@@ -138,8 +149,7 @@ func TestSetElapsedTimeSecondsError(t *testing.T) {
 // test if a user sets startingTime incorrectly getElapsedTimeSeconds()
 func TestStartingTimeFormatError(t *testing.T) {
 	versionInfo := map[string]interface{}{
-		"ibm_service_instance": "version1",
-		"startingTime":         "1652935205",
+		"startingTime": "1652935205",
 	}
 
 	exp := &Experiment{
@@ -180,10 +190,8 @@ func TestCEOneVersion(t *testing.T) {
 				Task: StringPointer(CollectDatabaseTaskName),
 			},
 			With: collectDatabaseInputs{
-				Providers: []string{testCe},
-				VersionInfo: []map[string]interface{}{{
-					"ibm_service_instance": "version1",
-				}},
+				Providers:   []string{testCe},
+				VersionInfo: []map[string]interface{}{{}},
 			},
 		}
 
@@ -275,6 +283,124 @@ func TestCEOneVersion(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// basic test with versionInfo, mimicking Code Engine
+// one version, three successful metrics
+func TestCEVersionInfo(t *testing.T) {
+	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
+		input := &collectDatabaseTemplateInput{
+			Endpoint: "test-database.com",
+			IAMToken: "test-token",
+			GUID:     "test-guid",
+		}
+
+		// convert input to map[string]interface{}
+		var templateInput map[string]interface{}
+		inrec, err := json.Marshal(input)
+		assert.NoError(t, err)
+
+		json.Unmarshal(inrec, &templateInput)
+
+		// valid collect database task... should succeed
+		ct := &collectDatabaseTask{
+			TaskMeta: TaskMeta{
+				Task: StringPointer(CollectDatabaseTaskName),
+			},
+			With: collectDatabaseInputs{
+				Providers: []string{testCe},
+				VersionInfo: []map[string]interface{}{{
+					"ibm_codeengine_revision_name": "v1",
+				}},
+			},
+		}
+
+		httpmock.Activate()
+
+		// request-count
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountWithRevisionNameQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645602108.839,
+								"43"
+							]
+						}
+					]
+				}
+			}`))
+
+		// error-count
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountWithRevisionNameQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645648760.725,
+								"6"
+							]
+						}
+					]
+				}
+			}`))
+
+		// error-rate
+		httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateWithRevisionNameQuery),
+			httpmock.NewStringResponder(200, `{
+				"status": "success",
+				"data": {
+					"resultType": "vector",
+					"result": [
+						{
+							"metric": {},
+							"value": [
+								1645043851.825,
+								"0.13953488372093023"
+							]
+						}
+					]
+				}
+			}`))
+
+		template, err := template.ParseFiles(testCe + experimentMetricsPathSuffix)
+
+		assert.NoError(t, err)
+
+		md := mockDriver{
+			metricsTemplate: template,
+		}
+
+		exp := &Experiment{
+			Tasks:  []Task{ct},
+			Result: &ExperimentResult{},
+			driver: &md,
+		}
+		exp.initResults()
+		exp.Result.initInsightsWithNumVersions(1)
+
+		err = ct.run(exp)
+
+		// test should not fail
+		assert.NoError(t, err)
+
+		// all three metrics should exist and have values
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"][0], float64(43))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
+		assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
+
+		httpmock.DeactivateAndReset()
+	})
+
+	assert.NoError(t, err)
+}
+
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
@@ -297,10 +423,8 @@ func TestCEUnauthorized(t *testing.T) {
 				Task: StringPointer(CollectDatabaseTaskName),
 			},
 			With: collectDatabaseInputs{
-				Providers: []string{testCe},
-				VersionInfo: []map[string]interface{}{{
-					"ibm_service_instance": "version1",
-				}},
+				Providers:   []string{testCe},
+				VersionInfo: []map[string]interface{}{{}},
 			},
 		}
 
@@ -370,10 +494,8 @@ func TestCESomeValues(t *testing.T) {
 				Task: StringPointer(CollectDatabaseTaskName),
 			},
 			With: collectDatabaseInputs{
-				Providers: []string{testCe},
-				VersionInfo: []map[string]interface{}{{
-					"ibm_service_instance": "version1",
-				}},
+				Providers:   []string{testCe},
+				VersionInfo: []map[string]interface{}{{}},
 			},
 		}
 
@@ -481,12 +603,8 @@ func TestCEMultipleVersions(t *testing.T) {
 				Task: StringPointer(CollectDatabaseTaskName),
 			},
 			With: collectDatabaseInputs{
-				Providers: []string{testCe},
-				VersionInfo: []map[string]interface{}{{
-					"ibm_service_instance": "version1",
-				}, {
-					"ibm_service_instance": "version2",
-				}},
+				Providers:   []string{testCe},
+				VersionInfo: []map[string]interface{}{{}, {}},
 			},
 		}
 
@@ -596,12 +714,8 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 				Task: StringPointer(CollectDatabaseTaskName),
 			},
 			With: collectDatabaseInputs{
-				Providers: []string{testCe},
-				VersionInfo: []map[string]interface{}{{
-					"ibm_service_instance": "version1",
-				}, {
-					"ibm_service_instance": "version2",
-				}},
+				Providers:   []string{testCe},
+				VersionInfo: []map[string]interface{}{{}, {}},
 			},
 		}
 
@@ -709,10 +823,8 @@ func TestRequestBody(t *testing.T) {
 				Task: StringPointer(CollectDatabaseTaskName),
 			},
 			With: collectDatabaseInputs{
-				Providers: []string{testRequestBody},
-				VersionInfo: []map[string]interface{}{{
-					"ibm_service_instance": "version1",
-				}},
+				Providers:   []string{testRequestBody},
+				VersionInfo: []map[string]interface{}{{}},
 			},
 		}
 

@@ -39,7 +39,7 @@ metrics:
     value: |
       sum(last_over_time(ibm_codeengine_application_requests_total{
         {{- if .ibm_codeengine_revision_name }}
-          ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
+        ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
       }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
@@ -53,7 +53,7 @@ metrics:
       sum(last_over_time(ibm_codeengine_application_requests_total{
         ibm_codeengine_status!="200",
         {{- if .ibm_codeengine_revision_name }}
-          ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
+        ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
       }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
@@ -67,11 +67,11 @@ metrics:
       sum(last_over_time(ibm_codeengine_application_requests_total{
         ibm_codeengine_status!="200",
         {{- if .ibm_codeengine_revision_name }}
-          ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
+        ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
       }[{{.elapsedTimeSeconds}}s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{
         {{- if .ibm_codeengine_revision_name }}
-          ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
+        ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
       }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
   jqExpression: .data.result.[0].value.[1]

@@ -248,6 +248,10 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
+
+			if versionInfo == nil {
+				versionInfo = make(map[string]interface{})
+			}
 			versionInfo[elapsedTimeSecondsStr] = elapsedTimeSeconds
 
 			// finalize metrics spec
