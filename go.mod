@@ -42,4 +42,5 @@ require (
 	k8s.io/apimachinery v0.23.6
 	k8s.io/client-go v0.23.6
 	sigs.k8s.io/yaml v1.3.0
+	stathat.com/c/consistent v1.0.0
 )
