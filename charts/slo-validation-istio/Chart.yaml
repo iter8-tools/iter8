@@ -1,8 +1,16 @@
 apiVersion: v2
-name: iter8lib
-version: 0.10.1
-description: Iter8 library chart
-type: library
+name: slo-validation-istio
+version: 0.10.0
+description: SLO validation for Istio applications
+type: application
+keywords:
+- Iter8
+- load test
+- benchmark
+- validation
+- SLOs 
+- metrics
+- experiment
 home: https://iter8.tools
 sources:
 - https://github.com/iter8-tools/iter8
@@ -11,3 +19,7 @@ maintainers:
   email: spartha@us.ibm.com
   url: https://researcher.watson.ibm.com/researcher/view.php?person=us-spartha
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+dependencies:
+- name: iter8lib
+  version: 0.10.x
+  repository: file://../iter8lib
