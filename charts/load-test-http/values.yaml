@@ -28,3 +28,6 @@
 ###   http/latency-mean: 50
 ###   http/latency-p99: 200
 # SLOs: null
+
+iter8lib:
+  runner: job
