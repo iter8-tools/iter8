@@ -4,11 +4,15 @@ iter8Image: iter8/iter8:0.10
 ### majorMinor is the minor version of Iter8
 majorMinor: v0.10
 
-### disable Manifests that should be disabled. This is useful for testing purposes.
+### disable manifests that should be disabled. This is useful for testing purposes.
 ### By default, no manifest is disabled.
-### To disable the job manifest, uncomment the next two lines and delete the line after that.
-### disable:
-###   job: true
 ### To disable rbac role and rolebinding for readiness, uncomment the next line
 ###   readinessrbac: true
 disable: {}
+
+### enable to use job or a cronjob
+### For example:
+###   runner: job
+### Or:
+###   runner: cronjob
+runner: none
