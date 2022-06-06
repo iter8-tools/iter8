@@ -179,6 +179,7 @@ jobs:
       run: |
         iter8 k launch -c load-test-http --noDownload \
         --set url="http://$HOST_IP/get" \
+        --set iter8lib.runner=none \
         --set duration="3s" \
         --set SLOs.http/latency-p50=200 \
         --set SLOs.http/latency-p90=500 \
@@ -211,7 +212,6 @@ jobs:
       run: |
         iter8 k launch -c load-test-http --noDownload \
         --set url=http://httpbin.default \
-        --set iter8lib.runner=job \
         --set SLOs.http/latency-mean=50 \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
