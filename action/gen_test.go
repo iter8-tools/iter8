@@ -51,7 +51,7 @@ func TestGenDB(t *testing.T) {
 	// fix gOpts
 	os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
-	gOpts.ChartsParentDir = base.CompletePath("../testdata/", "")
+	gOpts.ChartsParentDir = base.CompletePath("../", "")
 	gOpts.ChartName = "slo-validation-istio"
 	gOpts.Values = []string{"endpoint=http://127.0.0.1:9090/graph", "destination_workload=httpbin-v2", "destination_workload_namespace=default", `startingTime="Feb 4\, 2014 at 6:05pm (PST)"`, "istio/error-rate=0"}
 
