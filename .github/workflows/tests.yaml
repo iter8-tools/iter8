@@ -212,7 +212,6 @@ jobs:
       run: |
         iter8 k launch -c load-test-http --noDownload \
         --set url=http://httpbin.default \
-        --set iter8lib.runner=job \
         --set SLOs.http/latency-mean=50 \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
