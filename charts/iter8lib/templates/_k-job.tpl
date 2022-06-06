@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: iter8
-        image: {{  .Values.iter8lib.iter8Image }}
+        image: {{ .Values.iter8lib.iter8Image }}
         imagePullPolicy: Always
         command:
         - "/bin/sh"
