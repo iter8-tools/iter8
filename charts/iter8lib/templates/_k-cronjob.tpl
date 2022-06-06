@@ -1,8 +1,8 @@
-{{- define "k.job" -}}
+{{- define "k.cronjob" -}}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Release.Name }}-{{ .Release.Revision }}-job
+  name: {{ .Release.Name }}-{{ .Release.Revision }}-cronjob
   annotations:
     iter8.tools/revision: {{ .Release.Revision | quote }}
 spec:
