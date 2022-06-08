@@ -19,6 +19,9 @@ SLOs:
 providers:
   - istio
 
+iter8lib:
+  runner: cronjob
+
 ##################################
 # Used by the metrics template
 

@@ -41,3 +41,6 @@
 ###   grpc/latency/mean: 50
 ###   grpc/latency/p99: 200
 # SLOs: null
+
+iter8lib:
+  runner: job
