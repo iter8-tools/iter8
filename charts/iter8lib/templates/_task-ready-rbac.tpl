@@ -1,7 +1,5 @@
 {{- define "task.ready.rbac" -}}
-{{- if not .Values.iter8lib.disable.readinessrbac }}
 {{- if .Values.ready }}
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -36,6 +34,5 @@ roleRef:
   kind: Role
   name: {{ .Release.Name }}-readiness-role
   apiGroup: rbac.authorization.k8s.io
-{{- end }}
 {{- end }}
 {{- end }}
