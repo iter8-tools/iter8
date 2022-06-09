@@ -838,8 +838,8 @@ func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
 }
 
 // RunExperiment runs an experiment
-func RunExperiment(driver Driver) error {
-	if exp, err := BuildExperiment(false, driver); err != nil {
+func RunExperiment(driver Driver, reuseResult bool) error {
+	if exp, err := BuildExperiment(reuseResult, driver); err != nil {
 		return err
 	} else {
 		return exp.run(driver)

@@ -9,8 +9,13 @@ import (
 type RunOpts struct {
 	// Rundir is the directory of the local experiment.yaml file
 	RunDir string
+
 	// KubeDriver enables Kubernetes experiment run
 	*driver.KubeDriver
+
+	// ReuseResult configures Iter8 to reuse the experiment report instead of
+	// creating a new one for looping experiments.
+	ReuseResult bool
 }
 
 // NewRunOpts initializes and returns run opts
@@ -25,7 +30,7 @@ func NewRunOpts(kd *driver.KubeDriver) *RunOpts {
 func (rOpts *RunOpts) LocalRun() error {
 	return base.RunExperiment(&driver.FileDriver{
 		RunDir: rOpts.RunDir,
-	})
+	}, rOpts.ReuseResult)
 }
 
 // KubeRun runs a Kubernetes experiment
@@ -34,5 +39,5 @@ func (rOpts *RunOpts) KubeRun() error {
 	if err := rOpts.KubeDriver.InitKube(); err != nil {
 		return err
 	}
-	return base.RunExperiment(rOpts)
+	return base.RunExperiment(rOpts.KubeDriver, rOpts.ReuseResult)
 }
