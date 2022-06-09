@@ -23,7 +23,7 @@ spec:
             - "/bin/sh"
             - "-c"
             - |
-              iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} -l {{ .Values.iter8lib.logLevel }} --reuseResult
+              iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} --reuseResult -l {{ .Values.iter8lib.logLevel }}
           restartPolicy: Never
       backoffLimit: 0
 {{- end }}

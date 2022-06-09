@@ -713,16 +713,19 @@ func (exp *Experiment) SLOs() bool {
 
 // run the experiment
 func (exp *Experiment) run(driver Driver) error {
+	exp.incrementNumLoops()
+	err := driver.WriteResult(exp.Result)
+	if err != nil {
+		return err
+	}
 	if exp.numLoops == 1 {
 		log.Logger.Debug("experiment run started ...")
 	} else {
 		temp := fmt.Sprintf("experiment loop %d started ...", exp.numLoops)
 		log.Logger.Debug(temp)
 	}
-	exp.numLoops++
 
 	exp.driver = driver
-	var err error
 	if exp.Result == nil {
 		exp.initResults()
 		err = driver.WriteResult(exp.Result)
@@ -730,6 +733,7 @@ func (exp *Experiment) run(driver Driver) error {
 			return err
 		}
 	}
+
 	log.Logger.Debug("exp result exists now ... ")
 	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Tasks))
 	for i, t := range exp.Tasks {
@@ -782,9 +786,14 @@ func (e *Experiment) failExperiment() {
 	e.Result.Failure = true
 }
 
-// incrementNumCompletedTasks increments the numbere of completed tasks in the experimeent
+// incrementNumCompletedTasks increments the number of completed tasks in the experimeent
 func (e *Experiment) incrementNumCompletedTasks() {
 	e.Result.NumCompletedTasks++
+}
+
+// incrementNumLoops increments the number of loops (experiment iterations)
+func (e *Experiment) incrementNumLoops() {
+	e.numLoops++
 }
 
 // getIf returns the condition (if any) which determine
@@ -833,12 +842,11 @@ func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
 			return nil, err
 		}
 	}
-	e.numLoops = 1
 	return &e, nil
 }
 
 // RunExperiment runs an experiment
-func RunExperiment(driver Driver, reuseResult bool) error {
+func RunExperiment(reuseResult bool, driver Driver) error {
 	if exp, err := BuildExperiment(reuseResult, driver); err != nil {
 		return err
 	} else {

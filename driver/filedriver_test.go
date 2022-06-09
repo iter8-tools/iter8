@@ -13,7 +13,7 @@ func TestLocalRun(t *testing.T) {
 	fd := FileDriver{
 		RunDir: base.CompletePath("../", "testdata/drivertests"),
 	}
-	err := base.RunExperiment(&fd, false)
+	err := base.RunExperiment(false, &fd)
 	assert.NoError(t, err)
 	exp, err := base.BuildExperiment(true, &fd)
 	assert.NoError(t, err)

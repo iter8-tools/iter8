@@ -103,7 +103,7 @@ func TestKubeRun(t *testing.T) {
 		},
 	}, metav1.CreateOptions{})
 
-	err := base.RunExperiment(kd, false)
+	err := base.RunExperiment(false, kd)
 	assert.NoError(t, err)
 
 	// check results

@@ -28,9 +28,9 @@ func NewRunOpts(kd *driver.KubeDriver) *RunOpts {
 
 // LocalRun runs a local experiment
 func (rOpts *RunOpts) LocalRun() error {
-	return base.RunExperiment(&driver.FileDriver{
+	return base.RunExperiment(rOpts.ReuseResult, &driver.FileDriver{
 		RunDir: rOpts.RunDir,
-	}, rOpts.ReuseResult)
+	})
 }
 
 // KubeRun runs a Kubernetes experiment
@@ -39,5 +39,5 @@ func (rOpts *RunOpts) KubeRun() error {
 	if err := rOpts.KubeDriver.InitKube(); err != nil {
 		return err
 	}
-	return base.RunExperiment(rOpts.KubeDriver, rOpts.ReuseResult)
+	return base.RunExperiment(rOpts.ReuseResult, rOpts.KubeDriver)
 }

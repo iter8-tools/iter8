@@ -90,7 +90,7 @@ func TestRunExperiment(t *testing.T) {
 
 	metricsTemplate := template.Template{}
 
-	err = RunExperiment(&mockDriver{&exp, &metricsTemplate}, false)
+	err = RunExperiment(false, &mockDriver{&exp, &metricsTemplate})
 	assert.NoError(t, err)
 
 	yamlBytes, _ := yaml.Marshal(exp.Result)
