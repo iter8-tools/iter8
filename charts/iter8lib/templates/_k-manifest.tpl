@@ -10,13 +10,14 @@
 {{ include "k.result.role" . }}
 ---
 {{ include "k.result.rolebinding" . }}
-{{- if eq "job" .Values.iter8lib.runner }}
 ---
+{{- if eq "job" .Values.iter8lib.runner }}
 {{ include "k.job" . }}
+---
 {{- end }}
 {{- if eq "cronjob" .Values.iter8lib.runner }}
----
 {{ include "k.cronjob" . }}
+---
 {{- end }}
-{{ include "task.ready.rbac" . }}
+{{ include "k.task.ready.rbac" . }}
 {{- end }}
