@@ -43,6 +43,9 @@ type Experiment struct {
 
 	// driver enables interacting with experiment result stored externally
 	driver Driver
+
+	// numLoops is the number of iterations this experiment has been running for
+	numLoops int
 }
 
 // ExperimentResult defines the current results from the experiment
@@ -710,7 +713,14 @@ func (exp *Experiment) SLOs() bool {
 
 // run the experiment
 func (exp *Experiment) run(driver Driver) error {
-	log.Logger.Debug("experiment run started ...")
+	if exp.numLoops == 1 {
+		log.Logger.Debug("experiment run started ...")
+	} else {
+		temp := fmt.Sprintf("experiment loop %d started ..", exp.numLoops)
+		log.Logger.Debug(temp)
+	}
+	exp.numLoops++
+
 	exp.driver = driver
 	var err error
 	if exp.Result == nil {
@@ -823,6 +833,7 @@ func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
 			return nil, err
 		}
 	}
+	e.numLoops = 1
 	return &e, nil
 }
 
