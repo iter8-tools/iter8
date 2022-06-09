@@ -50,6 +50,9 @@ type ExperimentResult struct {
 	// StartTime is the time when the experiment run started
 	StartTime time.Time `json:"startTime" yaml:"startTime"`
 
+	// NumLoops is the number of iterations this experiment has been running for
+	NumLoops int `json:"numLoops" yaml:"numLoops"`
+
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
 
@@ -350,6 +353,7 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 func (e *Experiment) initResults() {
 	e.Result = &ExperimentResult{
 		StartTime:         time.Now(),
+		NumLoops:          0,
 		NumCompletedTasks: 0,
 		Failure:           false,
 		Iter8Version:      MajorMinor,
@@ -710,9 +714,8 @@ func (exp *Experiment) SLOs() bool {
 
 // run the experiment
 func (exp *Experiment) run(driver Driver) error {
-	log.Logger.Debug("experiment run started ...")
-	exp.driver = driver
 	var err error
+	exp.driver = driver
 	if exp.Result == nil {
 		exp.initResults()
 		err = driver.WriteResult(exp.Result)
@@ -720,7 +723,16 @@ func (exp *Experiment) run(driver Driver) error {
 			return err
 		}
 	}
+
 	log.Logger.Debug("exp result exists now ... ")
+
+	exp.incrementNumLoops()
+	log.Logger.Debugf("experiment loop %d started ...", exp.Result.NumLoops)
+	err = driver.WriteResult(exp.Result)
+	if err != nil {
+		return err
+	}
+
 	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Tasks))
 	for i, t := range exp.Tasks {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
@@ -772,9 +784,14 @@ func (e *Experiment) failExperiment() {
 	e.Result.Failure = true
 }
 
-// incrementNumCompletedTasks increments the numbere of completed tasks in the experimeent
+// incrementNumCompletedTasks increments the number of completed tasks in the experimeent
 func (e *Experiment) incrementNumCompletedTasks() {
 	e.Result.NumCompletedTasks++
+}
+
+// incrementNumLoops increments the number of loops (experiment iterations)
+func (e *Experiment) incrementNumLoops() {
+	e.Result.NumLoops++
 }
 
 // getIf returns the condition (if any) which determine
@@ -827,8 +844,8 @@ func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
 }
 
 // RunExperiment runs an experiment
-func RunExperiment(driver Driver) error {
-	if exp, err := BuildExperiment(false, driver); err != nil {
+func RunExperiment(reuseResult bool, driver Driver) error {
+	if exp, err := BuildExperiment(reuseResult, driver); err != nil {
 		return err
 	} else {
 		return exp.run(driver)

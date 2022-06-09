@@ -33,6 +33,7 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group, true)
+	addReuseResult(cmd, &actor.ReuseResult)
 	actor.EnvSettings = settings
 	cmd.MarkFlagRequired("namespace")
 	return cmd

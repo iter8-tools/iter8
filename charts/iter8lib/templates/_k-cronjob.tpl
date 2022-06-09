@@ -7,10 +7,13 @@ metadata:
     iter8.tools/revision: {{ .Release.Revision | quote }}
 spec:
   schedule: "{{ .Values.cronjobSchedule }}"
-  concurrencyPolicy: forbid
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
         spec:
           containers:
           - name: iter8
@@ -20,7 +23,7 @@ spec:
             - "/bin/sh"
             - "-c"
             - |
-              iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }}
+              iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} --reuseResult -l {{ .Values.iter8lib.logLevel }}
           restartPolicy: Never
       backoffLimit: 0
 {{- end }}

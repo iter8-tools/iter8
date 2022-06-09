@@ -32,12 +32,19 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		},
 	}
 	addRunDirFlag(cmd, &actor.RunDir)
+	addReuseResult(cmd, &actor.ReuseResult)
 	return cmd
 }
 
 // addRunDirFlag adds run dir flag to the command
 func addRunDirFlag(cmd *cobra.Command, runDirPtr *string) {
 	cmd.Flags().StringVar(runDirPtr, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
+}
+
+// addReuseResult allows the experiment to reuse the experiment result for
+// looping experiments
+func addReuseResult(cmd *cobra.Command, reuseResultPtr *bool) {
+	cmd.Flags().BoolVar(reuseResultPtr, "reuseResult", false, "reuse experiment result for looping experiment")
 }
 
 // initialize with run cmd
