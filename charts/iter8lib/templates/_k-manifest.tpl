@@ -19,5 +19,5 @@
 {{ include "k.cronjob" . }}
 ---
 {{- end }}
-{{ include "task.ready.rbac" . }}
+{{ include "k.task.ready.rbac" . }}
 {{- end }}

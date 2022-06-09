@@ -1,4 +1,4 @@
-{{- define "task.ready.rbac" -}}
+{{- define "k.task.ready.rbac" -}}
 {{- if .Values.ready }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
