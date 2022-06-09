@@ -7,7 +7,7 @@ metadata:
     iter8.tools/revision: {{ .Release.Revision | quote }}
 spec:
   schedule: "{{ .Values.cronjobSchedule }}"
-  concurrencyPolicy: forbid
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
