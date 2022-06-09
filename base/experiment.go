@@ -717,16 +717,19 @@ func (exp *Experiment) SLOs() bool {
 
 // run the experiment
 func (exp *Experiment) run(driver Driver) error {
+	exp.incrementNumLoops()
+	err := driver.WriteResult(exp.Result)
+	if err != nil {
+		return err
+	}
 	if exp.numLoops == 1 {
 		log.Logger.Debug("experiment run started ...")
 	} else {
 		temp := fmt.Sprintf("experiment loop %d started ...", exp.numLoops)
 		log.Logger.Debug(temp)
 	}
-	exp.numLoops++
 
 	exp.driver = driver
-	var err error
 	if exp.Result == nil {
 		exp.initResults()
 		err = driver.WriteResult(exp.Result)
@@ -851,7 +854,6 @@ func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
 			return nil, err
 		}
 	}
-	e.numLoops = 1
 	return &e, nil
 }
 
