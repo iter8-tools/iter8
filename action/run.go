@@ -13,7 +13,7 @@ type RunOpts struct {
 	// KubeDriver enables Kubernetes experiment run
 	*driver.KubeDriver
 
-	// ReuseResult configures Iter8 to reuse the experiment report instead of
+	// ReuseResult configures Iter8 to reuse the experiment result instead of
 	// creating a new one for looping experiments.
 	ReuseResult bool
 }

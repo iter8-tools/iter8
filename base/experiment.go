@@ -716,7 +716,7 @@ func (exp *Experiment) run(driver Driver) error {
 	if exp.numLoops == 1 {
 		log.Logger.Debug("experiment run started ...")
 	} else {
-		temp := fmt.Sprintf("experiment loop %d started ..", exp.numLoops)
+		temp := fmt.Sprintf("experiment loop %d started ...", exp.numLoops)
 		log.Logger.Debug(temp)
 	}
 	exp.numLoops++
