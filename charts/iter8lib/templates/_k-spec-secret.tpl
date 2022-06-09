@@ -10,10 +10,8 @@ stringData:
 {{ include "experiment" . | indent 4 }}
 {{- if .Values.providers }}
 {{- range .Values.providers }}
-{{- if eq . "istio"}}
-  istio.metrics.yaml: |
-{{ include "metrics.istio" $ | indent 4 }}
-{{- end }}
+  {{ print . ".metrics.yaml" }}: |
+{{ include (print "metrics." .) $ | indent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}
