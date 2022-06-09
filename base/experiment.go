@@ -43,15 +43,15 @@ type Experiment struct {
 
 	// driver enables interacting with experiment result stored externally
 	driver Driver
-
-	// numLoops is the number of iterations this experiment has been running for
-	numLoops int
 }
 
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
 	// StartTime is the time when the experiment run started
 	StartTime time.Time `json:"startTime" yaml:"startTime"`
+
+	// NumLoops is the number of iterations this experiment has been running for
+	NumLoops int `json:"numLoops" yaml:"numLoops"`
 
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
@@ -353,6 +353,7 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 func (e *Experiment) initResults() {
 	e.Result = &ExperimentResult{
 		StartTime:         time.Now(),
+		NumLoops:          0,
 		NumCompletedTasks: 0,
 		Failure:           false,
 		Iter8Version:      MajorMinor,
@@ -713,18 +714,7 @@ func (exp *Experiment) SLOs() bool {
 
 // run the experiment
 func (exp *Experiment) run(driver Driver) error {
-	exp.incrementNumLoops()
-	err := driver.WriteResult(exp.Result)
-	if err != nil {
-		return err
-	}
-	if exp.numLoops == 1 {
-		log.Logger.Debug("experiment run started ...")
-	} else {
-		temp := fmt.Sprintf("experiment loop %d started ...", exp.numLoops)
-		log.Logger.Debug(temp)
-	}
-
+	var err error
 	exp.driver = driver
 	if exp.Result == nil {
 		exp.initResults()
@@ -735,6 +725,14 @@ func (exp *Experiment) run(driver Driver) error {
 	}
 
 	log.Logger.Debug("exp result exists now ... ")
+
+	exp.incrementNumLoops()
+	log.Logger.Debugf("experiment loop %d started ...", exp.Result.NumLoops)
+	err = driver.WriteResult(exp.Result)
+	if err != nil {
+		return err
+	}
+
 	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Tasks))
 	for i, t := range exp.Tasks {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
@@ -793,7 +791,7 @@ func (e *Experiment) incrementNumCompletedTasks() {
 
 // incrementNumLoops increments the number of loops (experiment iterations)
 func (e *Experiment) incrementNumLoops() {
-	e.numLoops++
+	e.Result.NumLoops++
 }
 
 // getIf returns the condition (if any) which determine
