@@ -1,5 +1,5 @@
 {{- define "metrics.istio" -}}
-url: {{ .Values.endpoint }}/api/v1/query
+url: {{ .Values.providerURL }}
 provider: istio
 method: GET
 # Inputs for the metrics (output of template):
@@ -47,14 +47,14 @@ metrics:
   params:
   - name: query
     value: |
-      sum(last_over_time(istio_requests_total{
+      (sum(last_over_time(istio_requests_total{
         response_code=~'5..',
         {{- if .Values.reporter }}
         reporter="{{.Values.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
-      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
         {{- if .Values.response_code }}
         response_code="{{.Values.response_code}}",
         {{- end }}
@@ -63,7 +63,7 @@ metrics:
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
-      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))
   jqExpression: .data.result.[0].value.[1]
 - name: le500ms-latency-percentile
   type: gauge
@@ -72,7 +72,7 @@ metrics:
   params:
   - name: query
     value: |
-      sum(last_over_time(istio_request_duration_milliseconds_bucket{
+      (sum(last_over_time(istio_request_duration_milliseconds_bucket{
         le='500',
         {{- if .Values.response_code }}
         response_code="{{.Values.response_code}}",
@@ -82,7 +82,7 @@ metrics:
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
-      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_request_duration_milliseconds_bucket{
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))/(sum(last_over_time(istio_request_duration_milliseconds_bucket{
         le='+Inf',
         {{- if .Values.response_code }}
         response_code="{{.Values.response_code}}",
@@ -92,7 +92,7 @@ metrics:
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
-      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))
   jqExpression: .data.result[0].value[1] | tonumber
 - name: latency-mean
   type: gauge
@@ -101,7 +101,13 @@ metrics:
   params:
   - name: query
     value: |
-      sum(last_over_time(istio_request_duration_milliseconds_sum{
+      (sum(last_over_time(istio_request_duration_milliseconds_sum{
+        {{- if .Values.reporter }}
+        reporter="{{.Values.reporter}}",
+        {{- end }}
+        destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
+        destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
         {{- if .Values.response_code }}
         response_code="{{.Values.response_code}}",
         {{- end }}
@@ -110,15 +116,6 @@ metrics:
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
-      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)/sum(last_over_time(istio_requests_total{
-        {{- if .Values.response_code }}
-        response_code="{{.Values.response_code}}",
-        {{- end }}
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
-        {{- end }}
-        destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
-        destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
-      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0)
+      }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- end }}
