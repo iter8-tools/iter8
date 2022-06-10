@@ -10,3 +10,5 @@ majorMinor: v0.10
 ### Or:
 ###   runner: cronjob
 runner: none
+
+logLevel: info
