@@ -131,7 +131,7 @@ func TestLogs(t *testing.T) {
 			Name:      "default-1-job-1831a",
 			Namespace: "default",
 			Labels: map[string]string{
-				"job-name": "default-1-job",
+				"iter8.tools/group": "default",
 			},
 		},
 	}, metav1.CreateOptions{})

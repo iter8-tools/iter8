@@ -1,5 +1,7 @@
-# Prometheus URL
-endpoint: null
+# Used by the metrics template
+
+# The URL of the metrics provider, in this case Prometheus endpoint
+providerURL: http://prometheus.istio-system:9090/api/v1/query
 
 ### SLOs    A map of service level objectives (SLOs) that the app needs to satisfy.
 ### Metrics collected during the load test are used to verify if the app satisfies SLOs.
@@ -22,14 +24,10 @@ providers:
 iter8lib:
   runner: cronjob
 
-##################################
-# Used by the metrics template
-
-# PromQL selectors
 reporter: source
 
 ##################################
-# Used by metrics spec
+# Used by the metrics spec
 
 destination_workload: null
 destination_workload_namespace: null

@@ -48,9 +48,9 @@ const (
 )
 
 type collectDatabaseTemplateInput struct {
-	Endpoint string `json:"endpoint" yaml:"endpoint"`
-	IAMToken string `json:"IAMToken" yaml:"IAMToken"`
-	GUID     string `json:"GUID" yaml:"GUID"`
+	ProviderURL string `json:"providerURL" yaml:"providerURL"`
+	IAMToken    string `json:"IAMToken" yaml:"IAMToken"`
+	GUID        string `json:"GUID" yaml:"GUID"`
 }
 
 /*
@@ -172,9 +172,9 @@ func TestStartingTimeFormatError(t *testing.T) {
 func TestCEOneVersion(t *testing.T) {
 	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
-			Endpoint: "test-database.com",
-			IAMToken: "test-token",
-			GUID:     "test-guid",
+			ProviderURL: "http://prometheus.istio-system:9090/api/v1/query",
+			IAMToken:    "test-token",
+			GUID:        "test-guid",
 		}
 
 		// convert input to map[string]interface{}
@@ -288,9 +288,9 @@ func TestCEOneVersion(t *testing.T) {
 func TestCEVersionInfo(t *testing.T) {
 	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
-			Endpoint: "test-database.com",
-			IAMToken: "test-token",
-			GUID:     "test-guid",
+			ProviderURL: "http://prometheus.istio-system:9090/api/v1/query",
+			IAMToken:    "test-token",
+			GUID:        "test-guid",
 		}
 
 		// convert input to map[string]interface{}
@@ -406,9 +406,9 @@ func TestCEVersionInfo(t *testing.T) {
 func TestCEUnauthorized(t *testing.T) {
 	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
-			Endpoint: "test-database.com",
-			IAMToken: "test-token",
-			GUID:     "test-guid",
+			ProviderURL: "http://prometheus.istio-system:9090/api/v1/query",
+			IAMToken:    "test-token",
+			GUID:        "test-guid",
 		}
 
 		// convert input to map[string]interface{}
@@ -477,9 +477,9 @@ func TestCEUnauthorized(t *testing.T) {
 func TestCESomeValues(t *testing.T) {
 	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
-			Endpoint: "test-database.com",
-			IAMToken: "test-token",
-			GUID:     "test-guid",
+			ProviderURL: "http://prometheus.istio-system:9090/api/v1/query",
+			IAMToken:    "test-token",
+			GUID:        "test-guid",
 		}
 
 		// convert input to map[string]interface{}
@@ -586,9 +586,9 @@ func TestCESomeValues(t *testing.T) {
 func TestCEMultipleVersions(t *testing.T) {
 	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
-			Endpoint: "test-database.com",
-			IAMToken: "test-token",
-			GUID:     "test-guid",
+			ProviderURL: "http://prometheus.istio-system:9090/api/v1/query",
+			IAMToken:    "test-token",
+			GUID:        "test-guid",
 		}
 
 		// convert input to map[string]interface{}
@@ -697,9 +697,9 @@ func TestCEMultipleVersions(t *testing.T) {
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	err := GoToTempDirectoryAndCopyMetricsFile(t, testCe+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
-			Endpoint: "test-database.com",
-			IAMToken: "test-token",
-			GUID:     "test-guid",
+			ProviderURL: "http://prometheus.istio-system:9090/api/v1/query",
+			IAMToken:    "test-token",
+			GUID:        "test-guid",
 		}
 
 		// convert input to map[string]interface{}
@@ -807,7 +807,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 func TestRequestBody(t *testing.T) {
 	err := GoToTempDirectoryAndCopyMetricsFile(t, testRequestBody+experimentMetricsPathSuffix, func() {
 		input := &collectDatabaseTemplateInput{
-			Endpoint: "test-database.com",
+			ProviderURL: "http://prometheus.istio-system:9090/api/v1/query",
 		}
 
 		// convert input to map[string]interface{}
