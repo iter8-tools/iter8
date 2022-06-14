@@ -167,11 +167,6 @@ func (driver *KubeDriver) getResultSecretName() string {
 	return fmt.Sprintf("%v-result", driver.Group)
 }
 
-// getExperimentJobName yields the name of the experiment job
-func (driver *KubeDriver) getExperimentJobName() string {
-	return fmt.Sprintf("%v-%v-job", driver.Group, driver.revision)
-}
-
 // getSecretWithRetry attempts to get a Kubernetes secret with retries
 func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, err error) {
 	err1 := retry.OnError(
