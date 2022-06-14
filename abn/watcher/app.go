@@ -1,8 +1,6 @@
 package watcher
 
 import (
-	"fmt"
-
 	"github.com/iter8-tools/iter8/base/log"
 
 	"stathat.com/c/consistent"
@@ -29,6 +27,8 @@ type Version struct {
 var apps map[string]Application = map[string]Application{}
 
 func Add(watched WatchedObject) {
+	log.Logger.Trace("Add called")
+	defer log.Logger.Trace("Add completed")
 	// Assume applications are namespace scoped; use name in form: "namespace/name"
 	// where name is the value of the label app.kubernetes.io/name
 	name, ok := watched.getNamespacedName()
@@ -88,11 +88,16 @@ func Add(watched WatchedObject) {
 }
 
 func Update(watched WatchedObject) {
+	log.Logger.Trace("Update called")
+	defer log.Logger.Trace("Update completed")
+
 	Add(watched)
 }
 
 func Delete(watched WatchedObject) {
-	log.Logger.Trace("delete object event")
+	log.Logger.Trace("Delete called")
+	defer log.Logger.Trace("Delete called")
+
 	name, ok := watched.getNamespacedName()
 	if !ok {
 		return // no app.kubernetes.io/name label
@@ -128,13 +133,13 @@ func Delete(watched WatchedObject) {
 // for debug only
 func dump() {
 	for name, app := range apps {
-		fmt.Printf("application: %s\n", name)
+		log.Logger.Tracef("application: %s\n", name)
 		for version, v := range app.versions {
 			readyMsg := "ready"
 			if !v.Ready {
 				readyMsg = "not " + readyMsg
 			}
-			fmt.Printf("   version: %s (%s): %s\n", version, v.Track, readyMsg)
+			log.Logger.Tracef("   version: %s (%s): %s\n", version, v.Track, readyMsg)
 		}
 	}
 }

@@ -7,10 +7,12 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"time"
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/sirupsen/logrus"
 
 	"google.golang.org/grpc"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -19,6 +21,13 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
+
+// Currently, the track is not updated if a second object with a different track is identified
+// Is this the right approach?  Should it be updated to the latest track?
+// Should an error be registered?
+// Currently, if the version (or track) is modified, the old value is not removed.
+// In particular, a version will remain listed even if it is no longer relevant
+// this means data loss
 
 const (
 	WATCHER_CONFIG_ENV = "WATCHER_CONFIG"
@@ -30,6 +39,7 @@ var (
 
 func main() {
 	flag.Parse()
+	log.Logger.SetLevel(logrus.TraceLevel)
 
 	// abn config
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
@@ -100,16 +110,46 @@ func (server *abnServer) Lookup(ctx context.Context, a *pb.Application) (*pb.Ses
 	}
 	return &pb.Session{
 		Track: track,
-	}, nil
+	}, err
+}
+
+type MetricEntry struct {
+	name        string
+	value       string
+	application string
+	user        string
+	track       string
+	version     string
+	time        string
 }
 
 func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*emptypb.Empty, error) {
-	return nil, nil
+	v, err := watcher.Lookup(m.GetApplication(), m.GetUser())
+	if err != nil {
+		return &emptypb.Empty{}, err
+	}
+	track := v.Track
+	if track == "" {
+		track = v.Name
+	}
+
+	me := MetricEntry{
+		name:        m.GetName(),
+		value:       m.GetValue(),
+		application: m.GetApplication(),
+		user:        m.GetUser(),
+		track:       track,
+		version:     v.Name,
+		time:        time.Now().UTC().Format("2006-01-02 15:04:05"),
+	}
+
+	log.Logger.Info("WriteMetric: ", me)
+	return &emptypb.Empty{}, nil
 }
 
 func launchServer(opts []grpc.ServerOption) {
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {
 		log.Logger.WithError(err).Fatal("failed to listen")
 	}
