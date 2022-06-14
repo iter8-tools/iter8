@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     steps:
-    - uses: iter8-tools/iter8@v0.10
+    - uses: iter8-tools/iter8@v0.11
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -110,8 +110,10 @@ jobs:
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
     - name: iter8 k launch
       run: |
-        iter8 k launch -c load-test-http \
-        --set url="http://httpbin.default/get"
+        iter8 k launch \
+        --set tasks={http} \
+        --set http.url="http://httpbin.default/get" \
+        --set runner=job
     - name: try other iter8 k commands
       run: |
         iter8 k assert -c completed -c nofailure --timeout 60s
@@ -141,10 +143,12 @@ jobs:
         kubectl wait --for=condition=available --timeout=60s deploy/hello
     - name: iter8 k launch
       run: |
-        iter8 k launch -c load-test-grpc \
-        --set host="hello.default:50051" \
-        --set call="helloworld.Greeter.SayHello" \
-        --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
+        iter8 k launch \
+        --set tasks={grpc} \
+        --set grpc.host="hello.default:50051" \
+        --set grpc.call="helloworld.Greeter.SayHello" \
+        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+        --set runner=job
     - name: try other iter8 k commands
       run: |
         iter8 k assert -c completed -c nofailure --timeout 60s

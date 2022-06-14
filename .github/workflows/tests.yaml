@@ -51,21 +51,23 @@ jobs:
         
     - name: launch load-test-http
       run: |
-        iter8 launch -c load-test-http --noDownload \
-        --set url="http://$HOST_IP/post" \
-        --set payloadURL="https://httpbin.org/stream/1"
+        iter8 launch --noDownload \
+        --set tasks={http} \
+        --set http.url="http://$HOST_IP/post" \
+        --set http.payloadURL="https://httpbin.org/stream/1"
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure
 
     - name: launch load-test-http with percentiles, duration, and SLOs
       run: |
-        iter8 launch -c load-test-http --noDownload \
-        --set url="http://$HOST_IP/post" \
-        --set payloadURL="https://httpbin.org/stream/1" \
-        --set duration="3s" \
-        --set SLOs.http/latency-p95=500 \
-        --set SLOs.http/error-count=0
+        iter8 launch --noDownload \
+        --set tasks={http,assess} \
+        --set http.url="http://$HOST_IP/post" \
+        --set http.payloadURL="https://httpbin.org/stream/1" \
+        --set http.duration="3s" \
+        --set assess.SLOs.upper.http/latency-p95=500 \
+        --set assess.SLOs.upper.http/error-count=0
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure -c slos
@@ -93,31 +95,33 @@ jobs:
       run: |
         set -e
         export LOG_LEVEL=trace
-        iter8 launch -c load-test-grpc --noDownload \
-          --set host="127.0.0.1:50051" \
-          --set call="helloworld.Greeter.SayHello" \
-          --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-          --set data.name="frodo" \
-          --set SLOs.grpc/error-rate=0 \
-          --set SLOs.grpc/latency/mean=50 \
-          --set SLOs.grpc/latency/p90=100 \
-          --set SLOs.grpc/latency/p'97\.5'=200
+        iter8 launch --noDownload \
+          --set tasks={grpc,assess} \
+          --set grpc.host="127.0.0.1:50051" \
+          --set grpc.call="helloworld.Greeter.SayHello" \
+          --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+          --set grpc.data.name="frodo" \
+          --set assess.SLOs.upper.grpc/error-rate=0 \
+          --set assess.SLOs.upper.grpc/latency/mean=50 \
+          --set assess.SLOs.upper.grpc/latency/p90=100 \
+          --set assess.SLOs.upper.grpc/latency/p'97\.5'=200
         iter8 assert -c completed -c nofailure -c slos
         
     - name: load test grpc service with proto/data/metadata URLs
       run: |
         set -e
         export LOG_LEVEL=trace
-        iter8 launch -c load-test-grpc --noDownload \
-          --set host="127.0.0.1:50051" \
-          --set call="helloworld.Greeter.SayHello" \
-          --set protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-          --set dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
-          --set metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
-          --set SLOs.grpc/error-rate=0 \
-          --set SLOs.grpc/latency/mean=50 \
-          --set SLOs.grpc/latency/p90=100 \
-          --set SLOs.grpc/latency/p'97\.5'=200
+        iter8 launch --noDownload \
+          --set tasks={grpc,assess} \
+          --set grpc.host="127.0.0.1:50051" \
+          --set grpc.call="helloworld.Greeter.SayHello" \
+          --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+          --set grpc.dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
+          --set grpc.metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
+          --set assess.SLOs.upper.grpc/error-rate=0 \
+          --set assess.SLOs.upper.grpc/latency/mean=50 \
+          --set assess.SLOs.upper.grpc/latency/p90=100 \
+          --set assess.SLOs.upper.grpc/latency/p'97\.5'=200
         iter8 assert -c completed -c nofailure -c slos
 
   gh-action:
@@ -143,8 +147,9 @@ jobs:
         iter8 version
     - name: launch
       run: |
-        iter8 launch -c load-test-http --noDownload \
-        --set url="http://$HOST_IP/get"
+        iter8 launch --noDownload \
+        --set tasks={http} \
+        --set http.url="http://$HOST_IP/get"
     - name: assert
       run: |
         iter8 assert -c completed -c nofailure
@@ -177,16 +182,17 @@ jobs:
         wait: 300s
     - name: k launch load-test-http
       run: |
-        iter8 k launch -c load-test-http --noDownload \
-        --set url="http://$HOST_IP/get" \
-        --set iter8lib.runner=none \
-        --set duration="3s" \
-        --set SLOs.http/latency-p50=200 \
-        --set SLOs.http/latency-p90=500 \
-        --set SLOs.http/error-count=0
+        iter8 k launch --noDownload \
+        --set tasks={http,assess} \
+        --set http.url="http://$HOST_IP/get" \
+        --set http.duration="3s" \
+        --set assess.SLOs.upper.http/latency-p50=200 \
+        --set assess.SLOs.upper.http/latency-p90=500 \
+        --set assess.SLOs.upper.http/error-count=0 \
+        --set runner=none
     - name: k run
       run: |
-        iter8 k run --namespace default --group default &
+        iter8 k run --namespace default --group default --revision 1 &
     - name: assert experiment completed without failures and SLOs are satisfied
       run: |
         iter8 k assert -c completed -c nofailure -c slos --timeout 60s
@@ -207,15 +213,17 @@ jobs:
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
     - name: Install Iter8
-      uses: iter8-tools/iter8@v0.10
+      uses: iter8-tools/iter8@v0.11
     - name: k launch load-test-http with readiness checks
       run: |
-        iter8 k launch -c load-test-http --noDownload \
-        --set url=http://httpbin.default \
-        --set SLOs.http/latency-mean=50 \
+        iter8 k launch --noDownload \
+        --set tasks={ready,http,assess} \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
-        --set ready.timeout=60s
+        --set ready.timeout=60s \
+        --set http.url=http://httpbin.default \
+        --set assess.SLOs.upper.http/latency-mean=50 \
+        --set runner=job
     - name: k assert experiment completed without failures
       run: |
         iter8 k assert -c completed -c nofailure --timeout 60s

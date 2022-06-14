@@ -33,7 +33,7 @@ func TestLocalLaunch(t *testing.T) {
 	lOpts.ChartName = "load-test-http"
 	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
 	// fixing git ref forever
-	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.10.15" + "//" + chartsFolderName
+	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + chartsFolderName
 
 	os.Chdir(t.TempDir())
 	err := lOpts.LocalRun()
@@ -50,7 +50,7 @@ func TestKubeLaunch(t *testing.T) {
 	lOpts.ChartName = "load-test-http"
 	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
 	// fixing git ref forever
-	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.10.15" + "//" + chartsFolderName
+	lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + chartsFolderName
 
 	os.Chdir(t.TempDir())
 	err = lOpts.KubeRun()

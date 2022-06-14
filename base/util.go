@@ -7,11 +7,11 @@ import (
 
 // MajorMinor is the minor version of Iter8
 // set this manually whenever the major or minor version changes
-var MajorMinor = "v0.10"
+var MajorMinor = "v0.11"
 
 // Version is the semantic version of Iter8 (with the `v` prefix)
 // Version is intended to be set using LDFLAGS at build time
-var Version = "v0.10.15"
+var Version = "v0.11.0"
 
 // int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
 func int64Pointer(i int64) *int64 {
