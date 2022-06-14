@@ -12,6 +12,8 @@ spec:
     spec:
       template:
         metadata:
+          labels:
+            iter8.tools/group: {{ .Release.Name }}
           annotations:
             sidecar.istio.io/inject: "false"
         spec:
