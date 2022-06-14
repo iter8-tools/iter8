@@ -167,11 +167,6 @@ func (driver *KubeDriver) getResultSecretName() string {
 	return fmt.Sprintf("%v-result", driver.Group)
 }
 
-// getExperimentJobName yields the name of the experiment job
-func (driver *KubeDriver) getExperimentJobName() string {
-	return fmt.Sprintf("%v-%v-job", driver.Group, driver.revision)
-}
-
 // getSecretWithRetry attempts to get a Kubernetes secret with retries
 func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, err error) {
 	err1 := retry.OnError(
@@ -534,7 +529,7 @@ func checkIfInstallable(ch *chart.Chart) error {
 func (driver *KubeDriver) GetExperimentLogs() (string, error) {
 	podsClient := driver.Clientset.CoreV1().Pods(driver.Namespace())
 	pods, err := podsClient.List(context.TODO(), metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("job-name=%v", driver.getExperimentJobName()),
+		LabelSelector: fmt.Sprintf("iter8.tools/group=%v", driver.Group),
 	})
 	if err != nil {
 		e := errors.New("unable to get experiment pod(s)")

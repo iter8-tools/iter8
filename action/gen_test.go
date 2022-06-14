@@ -53,7 +53,7 @@ func TestGenDB(t *testing.T) {
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
 	gOpts.ChartName = "slo-validation-istio"
-	gOpts.Values = []string{"endpoint=http://127.0.0.1:9090/graph", "destination_workload=httpbin-v2", "destination_workload_namespace=default", `startingTime="Feb 4\, 2014 at 6:05pm (PST)"`, "istio/error-rate=0"}
+	gOpts.Values = []string{"providerURL=http://prometheus.istio-system:9090/api/v1/query", "destination_workload=httpbin-v2", "destination_workload_namespace=default", `startingTime="Feb 4\, 2014 at 6:05pm (PST)"`, "istio/error-rate=0"}
 
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)
