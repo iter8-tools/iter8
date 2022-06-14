@@ -1,6 +1,8 @@
 package watcher
 
 import (
+	"github.com/iter8-tools/iter8/base/log"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -29,6 +31,7 @@ func NewInformer(client *InformerClient, types []schema.GroupVersionResource, na
 	for _, ns := range namespaces {
 		informer.informerFactroyByNamespace[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(client.DC, 0, ns, nil)
 		for _, gvr := range types {
+			log.Logger.Debugf("Configured watcher for <%s> in namespace %s", gvr.String(), ns)
 			informer.addInformer(ns, gvr)
 		}
 	}
