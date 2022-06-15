@@ -47,22 +47,13 @@ func TestKubeReportText(t *testing.T) {
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentPath))
 	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-spec",
+			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{driver.ExperimentSpecPath: string(byteArray)},
-	}, metav1.CreateOptions{})
-
-	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentResultPath))
-	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-result",
-			Namespace: "default",
-		},
-		StringData: map[string]string{driver.ExperimentResultPath: string(byteArray)},
+		StringData: map[string]string{driver.ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	err := rOpts.KubeRun(os.Stdout)

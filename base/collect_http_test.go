@@ -28,10 +28,10 @@ func TestRunCollectHTTP(t *testing.T) {
 	}
 
 	exp := &Experiment{
-		Tasks:  []Task{ct},
+		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.initResults()
+	exp.initResults(1)
 	err := ct.run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)

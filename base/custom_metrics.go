@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"time"
 
@@ -71,42 +72,45 @@ type Params struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-// collectDatabaseInputs is the input to the collect-metrics-database task
-type collectDatabaseInputs struct {
-	// Providers is the set of labels/names of the data sources
-	Providers []string `json:"providers" yaml:"providers"`
+// customMetricsInputs is the input to the custommetrics task
+type customMetricsInputs struct {
+	// ProviderURLs a slice of URLs for metric templates
+	ProviderURLs []string `json:"providerURLs" yaml:"providerURLs"`
 
-	// VersionInfo
+	// Common	values that are common across versions
+	Common map[string]interface{} `json:"common" yaml:"common"`
+
+	// VersionInfo values that are specific to each version
 	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
 }
 
 const (
-	// CollectDatabaseTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
-	CollectDatabaseTaskName = "collect-metrics-database"
+	// CustomMetricsTaskName is the name of this task which fetches metrics templates, constructs metric specs, and then fetches metrics for each version from metric provider databases
+	CustomMetricsTaskName = "custommetrics"
 
-	// experimentMetricsPathSuffix is the name of the metrics spec file
-	experimentMetricsPathSuffix = ".metrics.yaml"
-
+	// startingTime specifies how far back to go in time for a specific version
+	// startingTimeStr is starting time placeholder
 	startingTimeStr = "startingTime"
 
+	// how much time has elapsed between startingTime and now
 	elapsedTimeSecondsStr = "elapsedTimeSeconds"
 
 	// timeLayout is an example time layout for startingTime
 	timeLayout = "Jan 2, 2006 at 3:04pm (MST)"
 )
 
-// collectDatabaseTask enables load testing of gRPC services.
-type collectDatabaseTask struct {
+// customMetricsTask enables collection of custom metrics from databases
+type customMetricsTask struct {
 	TaskMeta
-	With collectDatabaseInputs `json:"with" yaml:"with"`
+	With customMetricsInputs `json:"with" yaml:"with"`
 }
 
-// initializeDefaults sets default values for the collect task
-func (t *collectDatabaseTask) initializeDefaults() {
+// initializeDefaults sets default values for the custom metrics task
+func (t *customMetricsTask) initializeDefaults() {
 }
 
 // validate task inputs
-func (t *collectDatabaseTask) validateInputs() error {
+func (t *customMetricsTask) validateInputs() error {
 	return nil
 }
 
@@ -121,21 +125,20 @@ func getElapsedTimeSeconds(versionInfo map[string]interface{}, exp *Experiment) 
 		return 0, errors.New("elapsedTimeSeconds should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
 	}
 
-	startingTime := exp.Result.StartTime.Unix()
+	startingTime := exp.Result.StartTime.Time
 	if versionInfo[startingTimeStr] != nil {
+		var err error
 		// Calling Parse() method with its parameters
-		temp, err := time.Parse(timeLayout, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
+		startingTime, err = time.Parse(timeLayout, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
 
 		if err != nil {
 			return 0, errors.New("cannot parse startingTime")
-		} else {
-			startingTime = temp.Unix()
 		}
 	}
 
 	// calculate the elapsedTimeSeconds based on the startingTime if it has been provided
-	currentTime := time.Now().Unix()
-	return currentTime - startingTime, nil
+	currentTime := time.Now()
+	return int64(currentTime.Sub(startingTime).Seconds()), nil
 }
 
 // construct request to database and return extracted metric value
@@ -216,8 +219,47 @@ func queryDatabaseAndGetValue(template MetricsSpec, metric Metric) (interface{},
 	return value, true
 }
 
+// get provider template from URL
+func getProviderTemplate(url string, commonValues map[string]interface{}) (*template.Template, error) {
+	// fetch b from url
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Logger.Error(err)
+		return nil, err
+	}
+
+	// read responseBody
+	// get the doubly templated metrics spec
+	defer resp.Body.Close()
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	dt, err := template.New("doubly-templated").Parse(string(responseBody))
+	if err != nil {
+		log.Logger.Error(err)
+		return nil, err
+	}
+
+	// execute template with commonValues
+	// get the singly templated metrics spec
+	var buf bytes.Buffer
+	err = dt.Execute(&buf, commonValues)
+	if err != nil {
+		log.Logger.Error(err)
+		return nil, err
+	}
+	st, err := template.New("singly-templated").Parse(string(responseBody))
+	if err != nil {
+		log.Logger.Error(err)
+		return nil, err
+	}
+
+	return st, nil
+}
+
 // run executes this task
-func (t *collectDatabaseTask) run(exp *Experiment) error {
+func (t *customMetricsTask) run(exp *Experiment) error {
 	// validate inputs
 	var err error
 
@@ -240,25 +282,25 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 		return err
 	}
 
-	// collect metrics for all metric files and versionInfos
-	for _, provider := range t.With.Providers {
+	// collect metrics from all providers and for all versions
+	for _, providerURL := range t.With.ProviderURLs {
+		// finalize metrics spec
+		template, err := getProviderTemplate(providerURL, t.With.Common)
+		if err != nil {
+			return err
+		}
 		for i, versionInfo := range t.With.VersionInfo {
 			// add elapsedTimeSeconds
 			elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
 			if err != nil {
 				return err
 			}
-
 			if versionInfo == nil {
 				versionInfo = make(map[string]interface{})
 			}
 			versionInfo[elapsedTimeSecondsStr] = elapsedTimeSeconds
 
-			// finalize metrics spec
-			template, err := exp.driver.ReadMetricsSpec(provider)
-			if err != nil {
-				return err
-			}
+			// get the metrics spec
 			var buf bytes.Buffer
 			err = template.Execute(&buf, versionInfo)
 			if err != nil {
@@ -270,6 +312,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 				return err
 			}
 
+			// get each metric
 			for _, metric := range metrics.Metrics {
 				log.Logger.Debug("query for metric ", metric.Name)
 
@@ -311,7 +354,7 @@ func (t *collectDatabaseTask) run(exp *Experiment) error {
 					continue
 				}
 
-				err = exp.Result.Insights.updateMetric(provider+"/"+metric.Name, mm, i, floatValue)
+				err = exp.Result.Insights.updateMetric(metrics.Provider+"/"+metric.Name, mm, i, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)

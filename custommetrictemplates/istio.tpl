@@ -1,5 +1,4 @@
-{{- define "metrics.istio" -}}
-url: {{ .Values.providerURL }}
+url: {{ .providerURL }}
 provider: istio
 method: GET
 # Inputs for the metrics (output of template):
@@ -17,8 +16,8 @@ metrics:
   - name: query
     value: |
       sum(last_over_time(istio_requests_total{
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
@@ -33,8 +32,8 @@ metrics:
     value: |
       sum(last_over_time(istio_requests_total{
         response_code=~'5..',
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
@@ -49,17 +48,17 @@ metrics:
     value: |
       (sum(last_over_time(istio_requests_total{
         response_code=~'5..',
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
       }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
-        {{- if .Values.response_code }}
-        response_code="{{.Values.response_code}}",
+        {{- if .response_code }}
+        response_code="{{.response_code}}",
         {{- end }}
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
@@ -74,21 +73,21 @@ metrics:
     value: |
       (sum(last_over_time(istio_request_duration_milliseconds_bucket{
         le='500',
-        {{- if .Values.response_code }}
-        response_code="{{.Values.response_code}}",
+        {{- if .response_code }}
+        response_code="{{.response_code}}",
         {{- end }}
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
       }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))/(sum(last_over_time(istio_request_duration_milliseconds_bucket{
         le='+Inf',
-        {{- if .Values.response_code }}
-        response_code="{{.Values.response_code}}",
+        {{- if .response_code }}
+        response_code="{{.response_code}}",
         {{- end }}
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
@@ -102,20 +101,19 @@ metrics:
   - name: query
     value: |
       (sum(last_over_time(istio_request_duration_milliseconds_sum{
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
       }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
-        {{- if .Values.response_code }}
-        response_code="{{.Values.response_code}}",
+        {{- if .response_code }}
+        response_code="{{.response_code}}",
         {{- end }}
-        {{- if .Values.reporter }}
-        reporter="{{.Values.reporter}}",
+        {{- if .reporter }}
+        reporter="{{.reporter}}",
         {{- end }}
         destination_workload="{{"{{"}}.destination_workload{{"}}"}}",
         destination_workload_namespace="{{"{{"}}.destination_workload_namespace{{"}}"}}",
       }[{{"{{"}}.elapsedTimeSeconds{{"}}"}}s])) or on() vector(0))
   jqExpression: .data.result[0].value[1] | tonumber
-{{- end }}

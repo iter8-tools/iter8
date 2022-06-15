@@ -36,10 +36,10 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
 
 	exp := &Experiment{
-		Tasks:  []Task{ct},
+		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.initResults()
+	exp.initResults(1)
 	err = ct.run(exp)
 
 	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
@@ -123,14 +123,14 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		},
 	}
 	exp := &Experiment{
-		Tasks: []Task{ct, at},
+		Spec: []Task{ct, at},
 	}
 
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
-	err = exp.Tasks[0].run(exp)
+	err = exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Tasks[1].run(exp)
+	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 
 	// assert SLOs are satisfied

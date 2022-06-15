@@ -14,7 +14,7 @@ func TestReportText(t *testing.T) {
 	fd := driver.FileDriver{
 		RunDir: base.CompletePath("../../", "testdata/assertinputs"),
 	}
-	exp, err := base.BuildExperiment(true, &fd)
+	exp, err := base.BuildExperiment(&fd)
 	assert.NoError(t, err)
 	reporter := TextReporter{
 		Reporter: &Reporter{
@@ -30,7 +30,7 @@ func TestReportHTML(t *testing.T) {
 	fd := driver.FileDriver{
 		RunDir: base.CompletePath("../../", "testdata/assertinputs"),
 	}
-	exp, err := base.BuildExperiment(true, &fd)
+	exp, err := base.BuildExperiment(&fd)
 	assert.NoError(t, err)
 	reporter := HTMLReporter{
 		Reporter: &Reporter{

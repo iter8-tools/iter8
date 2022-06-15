@@ -15,10 +15,10 @@ func TestRunRun(t *testing.T) {
 	}
 
 	exp := &Experiment{
-		Tasks:  []Task{rt},
+		Spec:   []Task{rt},
 		Result: &ExperimentResult{},
 	}
-	exp.initResults()
+	exp.initResults(1)
 	err := rt.run(exp)
 	assert.NoError(t, err)
 }

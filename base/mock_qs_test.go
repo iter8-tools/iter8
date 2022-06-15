@@ -37,14 +37,14 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		},
 	}
 	exp := &Experiment{
-		Tasks: []Task{ct, at},
+		Spec: []Task{ct, at},
 	}
 
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
-	err := exp.Tasks[0].run(exp)
+	err := exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Tasks[1].run(exp)
+	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 	// assert SLOs are satisfied
 	for _, v := range exp.Result.Insights.SLOsSatisfied {
@@ -86,14 +86,14 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		},
 	}
 	exp := &Experiment{
-		Tasks: []Task{ct, at},
+		Spec: []Task{ct, at},
 	}
 
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
-	err := exp.Tasks[0].run(exp)
+	err := exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Tasks[1].run(exp)
+	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 	// assert SLOs are satisfied
 	for _, v := range exp.Result.Insights.SLOsSatisfied {

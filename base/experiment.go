@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -34,12 +33,12 @@ type ExperimentSpec []Task
 
 // Experiment struct containing spec and result
 type Experiment struct {
-	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks ExperimentSpec
+	// Spec is the sequence of tasks that constitute this experiment
+	Spec ExperimentSpec `json:"spec" yaml:"spec"`
 
 	// Result is the current results from this experiment.
 	// The experiment may not have completed in which case results may be partial.
-	Result *ExperimentResult
+	Result *ExperimentResult `json:"result" yaml:"result"`
 
 	// driver enables interacting with experiment result stored externally
 	driver Driver
@@ -47,6 +46,9 @@ type Experiment struct {
 
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
+	// Revision of this experiment
+	Revision int `json:"revision,omitempty" yaml:"revision,omitempty"`
+
 	// StartTime is the time when the experiment run started
 	StartTime time.Time `json:"startTime" yaml:"startTime"`
 
@@ -176,8 +178,8 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				rt := &readinessTask{}
 				json.Unmarshal(tBytes, rt)
 				tsk = rt
-			case CollectDatabaseTaskName:
-				cdt := &collectDatabaseTask{}
+			case CustomMetricsTaskName:
+				cdt := &customMetricsTask{}
 				err := json.Unmarshal(tBytes, cdt)
 				if err != nil {
 					e := errors.New("json unmarshal error")
@@ -350,8 +352,9 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 }
 
 // initResults initializes the results section of an experiment
-func (e *Experiment) initResults() {
+func (e *Experiment) initResults(revision int) {
 	e.Result = &ExperimentResult{
+		Revision:          revision,
 		StartTime:         time.Now(),
 		NumLoops:          0,
 		NumCompletedTasks: 0,
@@ -626,24 +629,21 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 
 // Driver enables interacting with experiment result stored externally
 type Driver interface {
-	// ReadSpec reads the experiment spec
-	ReadSpec() (ExperimentSpec, error)
+	// Read the experiment
+	Read() (*Experiment, error)
 
-	// ReadResult reads the experiment result
-	ReadResult() (*ExperimentResult, error)
+	// Write the experiment
+	Write(e *Experiment) error
 
-	// WriteResult writes the experiment result
-	WriteResult(r *ExperimentResult) error
-
-	// ReadMetricsSpec reads the metrics spec
-	ReadMetricsSpec(provider string) (*template.Template, error)
+	// GetRevision returns the experiment revision
+	GetRevision() int
 }
 
 // Completed returns true if the experiment is complete
 func (exp *Experiment) Completed() bool {
 	if exp != nil {
 		if exp.Result != nil {
-			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
+			if exp.Result.NumCompletedTasks == len(exp.Spec) {
 				return true
 			}
 		}
@@ -717,24 +717,22 @@ func (exp *Experiment) run(driver Driver) error {
 	var err error
 	exp.driver = driver
 	if exp.Result == nil {
-		exp.initResults()
-		err = driver.WriteResult(exp.Result)
-		if err != nil {
-			return err
-		}
+		err = errors.New("experiment with nil result section cannot be run")
+		log.Logger.Error(err)
+		return err
 	}
 
 	log.Logger.Debug("exp result exists now ... ")
 
 	exp.incrementNumLoops()
 	log.Logger.Debugf("experiment loop %d started ...", exp.Result.NumLoops)
-	err = driver.WriteResult(exp.Result)
+	err = driver.Write(exp)
 	if err != nil {
 		return err
 	}
 
-	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Tasks))
-	for i, t := range exp.Tasks {
+	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Spec))
+	for i, t := range exp.Spec {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
@@ -759,7 +757,7 @@ func (exp *Experiment) run(driver Driver) error {
 			if err != nil {
 				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
 				exp.failExperiment()
-				e := driver.WriteResult(exp.Result)
+				e := driver.Write(exp)
 				if e != nil {
 					return e
 				}
@@ -771,7 +769,7 @@ func (exp *Experiment) run(driver Driver) error {
 		}
 
 		exp.incrementNumCompletedTasks()
-		err = driver.WriteResult(exp.Result)
+		err = driver.Write(exp)
 		if err != nil {
 			return err
 		}
@@ -827,27 +825,22 @@ func getName(t Task) *string {
 }
 
 // BuildExperiment builds an experiment
-func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
-	e := Experiment{}
-	var err error
-	e.Tasks, err = driver.ReadSpec()
+func BuildExperiment(driver Driver) (*Experiment, error) {
+	e, err := driver.Read()
 	if err != nil {
 		return nil, err
 	}
-	if withResult {
-		e.Result, err = driver.ReadResult()
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &e, nil
+	return e, nil
 }
 
 // RunExperiment runs an experiment
 func RunExperiment(reuseResult bool, driver Driver) error {
-	if exp, err := BuildExperiment(reuseResult, driver); err != nil {
+	if exp, err := BuildExperiment(driver); err != nil {
 		return err
 	} else {
+		if !reuseResult {
+			exp.initResults(driver.GetRevision())
+		}
 		return exp.run(driver)
 	}
 }

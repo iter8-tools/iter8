@@ -15,22 +15,9 @@ func TestLocalRun(t *testing.T) {
 	}
 	err := base.RunExperiment(false, &fd)
 	assert.NoError(t, err)
-	exp, err := base.BuildExperiment(true, &fd)
+	exp, err := base.BuildExperiment(&fd)
 	assert.NoError(t, err)
 	assert.True(t, exp.Completed() && exp.NoFailure() && exp.SLOs())
-}
-
-func TestFileDriverReadMetricsSpec(t *testing.T) {
-	base.SetupWithMock(t)
-
-	fd := FileDriver{
-		RunDir: base.CompletePath("../", "testdata/metrics"),
-	}
-
-	metrics, err := fd.ReadMetricsSpec("test-ce")
-
-	assert.NoError(t, err)
-	assert.NotNil(t, metrics)
 }
 
 func TestFileDriverReadError(t *testing.T) {
@@ -40,15 +27,7 @@ func TestFileDriverReadError(t *testing.T) {
 		RunDir: ".",
 	}
 
-	spec, err := fd.ReadSpec()
+	exp, err := fd.Read()
 	assert.Error(t, err)
-	assert.Nil(t, spec)
-
-	metrics, err := fd.ReadMetricsSpec("test-ce")
-	assert.Error(t, err)
-	assert.Nil(t, metrics)
-
-	result, err := fd.ReadResult()
-	assert.Error(t, err)
-	assert.Nil(t, result)
+	assert.Nil(t, exp)
 }

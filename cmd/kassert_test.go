@@ -8,11 +8,9 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	id "github.com/iter8-tools/iter8/driver"
-	"helm.sh/helm/v3/pkg/time"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 func TestKAssert(t *testing.T) {
@@ -40,27 +38,13 @@ func TestKAssert(t *testing.T) {
 	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", id.ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", id.ExperimentPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-spec",
+			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{id.ExperimentSpecPath: string(byteArray)},
-	}, metav1.CreateOptions{})
-
-	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
-		StartTime:         time.Now(),
-		NumCompletedTasks: 0,
-		Failure:           false,
-		Iter8Version:      base.MajorMinor,
-	})
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-result",
-			Namespace: "default",
-		},
-		StringData: map[string]string{id.ExperimentResultPath: string(resultBytes)},
+		StringData: map[string]string{id.ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{

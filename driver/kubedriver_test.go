@@ -9,11 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/time"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -73,33 +71,23 @@ func TestKubeRun(t *testing.T) {
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-spec",
+			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{ExperimentSpecPath: string(byteArray)},
-	}, metav1.CreateOptions{})
-
-	resultBytes, _ := yaml.Marshal(base.ExperimentResult{
-		StartTime:         time.Now(),
-		NumCompletedTasks: 0,
-		Failure:           false,
-		Iter8Version:      base.MajorMinor,
-	})
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-result",
-			Namespace: "default",
-		},
-		StringData: map[string]string{ExperimentResultPath: string(resultBytes)},
+		StringData: map[string]string{ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job",
 			Namespace: "default",
+			Annotations: map[string]string{
+				"iter8.tools/group":    "default",
+				"iter8.tools/revision": "1",
+			},
 		},
 	}, metav1.CreateOptions{})
 
@@ -107,7 +95,7 @@ func TestKubeRun(t *testing.T) {
 	assert.NoError(t, err)
 
 	// check results
-	exp, err := base.BuildExperiment(true, kd)
+	exp, err := base.BuildExperiment(kd)
 	assert.NoError(t, err)
 	assert.True(t, exp.Completed() && exp.NoFailure() && exp.SLOs())
 }
@@ -118,13 +106,13 @@ func TestLogs(t *testing.T) {
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-spec",
+			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{ExperimentSpecPath: string(byteArray)},
+		StringData: map[string]string{ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -140,26 +128,4 @@ func TestLogs(t *testing.T) {
 	str, err := kd.GetExperimentLogs()
 	assert.NoError(t, err)
 	assert.Equal(t, "fake logs", str)
-}
-
-func TestKubeDriverReadMetricsSpec(t *testing.T) {
-	base.SetupWithMock(t)
-
-	kd := NewFakeKubeDriver(cli.New())
-	kd.revision = 1
-	metricsSpecPath := testCe + ExperimentMetricsPathSuffix
-
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/metrics", metricsSpecPath))
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-spec",
-			Namespace: "default",
-		},
-		StringData: map[string]string{metricsSpecPath: string(byteArray)},
-	}, metav1.CreateOptions{})
-
-	metricsSpec, err := kd.ReadMetricsSpec(testCe)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, metricsSpec)
 }

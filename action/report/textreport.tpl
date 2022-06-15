@@ -4,7 +4,7 @@ Experiment summary:
 
   Experiment completed: {{ .Completed }}
   No task failures: {{ .NoFailure }}
-  Total number of tasks: {{ len .Tasks }}
+  Total number of tasks: {{ len .Spec }}
   Number of completed tasks: {{ .Result.NumCompletedTasks }}
 
 {{- if .Result.Insights }}

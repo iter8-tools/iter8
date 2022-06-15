@@ -35,12 +35,12 @@ func TestGenGRPC(t *testing.T) {
 	fd := &driver.FileDriver{
 		RunDir: "./",
 	}
-	exp, err := base.BuildExperiment(false, fd)
+	exp, err := base.BuildExperiment(fd)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(exp.Tasks))
+	assert.Equal(t, 2, len(exp.Spec))
 
 	m := make(map[string]interface{}, 0)
-	b, _ := json.Marshal(exp.Tasks[0])
+	b, _ := json.Marshal(exp.Spec[0])
 	json.Unmarshal(b, &m)
 	m = m["with"].(map[string]interface{})
 	s := m["proto"].(string)
@@ -61,12 +61,12 @@ func TestGenDB(t *testing.T) {
 	fd := &driver.FileDriver{
 		RunDir: "./",
 	}
-	exp, err := base.BuildExperiment(false, fd)
+	exp, err := base.BuildExperiment(fd)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(exp.Tasks))
+	assert.Equal(t, 2, len(exp.Spec))
 
 	m := make(map[string]interface{}, 0)
-	b, _ := json.Marshal(exp.Tasks[0])
+	b, _ := json.Marshal(exp.Spec[0])
 	fmt.Println(string(b))
 	json.Unmarshal(b, &m)
 	m = m["with"].(map[string]interface{})

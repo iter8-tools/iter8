@@ -77,7 +77,7 @@ func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, po
 	assert.NoError(t, err, "get failed")
 
 	err = rTask.run(&Experiment{
-		Tasks:  []Task{rTask},
+		Spec:   []Task{rTask},
 		Result: &ExperimentResult{},
 	})
 	if success {

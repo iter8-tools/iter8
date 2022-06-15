@@ -3,7 +3,6 @@ package base
 import (
 	"io/ioutil"
 	"testing"
-	"text/template"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
@@ -61,10 +60,10 @@ func TestRunTask(t *testing.T) {
 	}
 
 	exp := &Experiment{
-		Tasks:  []Task{ct, at},
+		Spec:   []Task{ct, at},
 		Result: &ExperimentResult{},
 	}
-	exp.initResults()
+	exp.initResults(1)
 	err := ct.run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
@@ -85,12 +84,10 @@ func TestRunExperiment(t *testing.T) {
 	assert.Equal(t, 4, len(*es))
 
 	exp := Experiment{
-		Tasks: *es,
+		Spec: *es,
 	}
 
-	metricsTemplate := template.Template{}
-
-	err = RunExperiment(false, &mockDriver{&exp, &metricsTemplate})
+	err = RunExperiment(false, &mockDriver{&exp})
 	assert.NoError(t, err)
 
 	yamlBytes, _ := yaml.Marshal(exp.Result)
@@ -105,9 +102,9 @@ func TestRunExperiment(t *testing.T) {
 
 func TestFailExperiment(t *testing.T) {
 	exp := Experiment{
-		Tasks: ExperimentSpec{},
+		Spec: ExperimentSpec{},
 	}
-	exp.initResults()
+	exp.initResults(1)
 
 	exp.failExperiment()
 	assert.False(t, exp.NoFailure())

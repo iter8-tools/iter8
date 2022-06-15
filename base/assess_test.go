@@ -17,9 +17,9 @@ func TestRunAssess(t *testing.T) {
 		With: assessInputs{},
 	}
 	exp := &Experiment{
-		Tasks: []Task{task},
+		Spec: []Task{task},
 	}
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
 	err := task.run(exp)
 	assert.NoError(t, err)

@@ -22,7 +22,7 @@ type assessTask struct {
 
 const (
 	// AssessTaskName is the name of the task this file implements
-	AssessTaskName = "assess-app-versions"
+	AssessTaskName = "assess"
 )
 
 // initializeDefaults sets default values for task inputs
