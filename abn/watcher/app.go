@@ -1,5 +1,7 @@
 package watcher
 
+// app.go - methods to track applications and their versions
+
 import (
 	"github.com/iter8-tools/iter8/base/log"
 
@@ -24,8 +26,10 @@ type Version struct {
 	Track string
 }
 
+// apps is map of app name to Application
 var apps map[string]Application = map[string]Application{}
 
+// Add updates the apps map using information from a newly added object
 func Add(watched WatchedObject) {
 	log.Logger.Trace("Add called")
 	defer log.Logger.Trace("Add completed")
@@ -87,6 +91,7 @@ func Add(watched WatchedObject) {
 	app.versions[version] = v
 }
 
+// Update updates the apps map using information from a modified object
 func Update(watched WatchedObject) {
 	log.Logger.Trace("Update called")
 	defer log.Logger.Trace("Update completed")
@@ -94,6 +99,7 @@ func Update(watched WatchedObject) {
 	Add(watched)
 }
 
+// Delete updates the apps map using information from a deleted object
 func Delete(watched WatchedObject) {
 	log.Logger.Trace("Delete called")
 	defer log.Logger.Trace("Delete called")
@@ -130,7 +136,8 @@ func Delete(watched WatchedObject) {
 	}
 }
 
-// for debug only
+// dump logs the apps map
+// used for debug only
 func dump() {
 	for name, app := range apps {
 		log.Logger.Tracef("application: %s\n", name)

@@ -1,5 +1,7 @@
 package watcher
 
+// watchedobject.go - methods to read fields from an unstructured Kubernetes object
+
 import (
 	"strings"
 

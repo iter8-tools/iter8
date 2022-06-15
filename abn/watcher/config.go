@@ -1,5 +1,7 @@
 package watcher
 
+// config.go - reading of configurtion (list of resources/namespaces to watch)
+
 import (
 	"io/ioutil"
 

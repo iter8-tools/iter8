@@ -1,5 +1,7 @@
 package watcher
 
+// lookup.go -(internal) implementation of gRPC Lookup method
+
 import (
 	"errors"
 
