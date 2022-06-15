@@ -30,10 +30,12 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
-			SLOs: []SLO{{
-				Metric:     "http/latency-mean",
-				UpperLimit: float64Pointer(100),
-			}},
+			SLOs: &SLOLimits{
+				Upper: []SLO{{
+					Metric: "http/latency-mean",
+					Limit:  100,
+				}},
+			},
 		},
 	}
 	exp := &Experiment{
@@ -47,7 +49,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied {
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
 		for _, b := range v {
 			assert.True(t, b)
 		}
@@ -76,13 +78,15 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
-			SLOs: []SLO{{
-				Metric:     "http/latency-mean",
-				UpperLimit: float64Pointer(100),
-			}, {
-				Metric:     "http/latency-p95.00",
-				UpperLimit: float64Pointer(200),
-			}},
+			SLOs: &SLOLimits{
+				Upper: []SLO{{
+					Metric: "http/latency-mean",
+					Limit:  100,
+				}, {
+					Metric: "http/latency-p95.00",
+					Limit:  200,
+				}},
+			},
 		},
 	}
 	exp := &Experiment{
@@ -96,7 +100,7 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied {
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
 		for _, b := range v {
 			assert.True(t, b)
 		}

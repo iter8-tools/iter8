@@ -97,29 +97,34 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
-			SLOs: []SLO{{
-				Metric:     "grpc/latency/mean",
-				UpperLimit: float64Pointer(100),
-			}, {
-				Metric:     "grpc/latency/p95.00",
-				UpperLimit: float64Pointer(200),
-			}, {
-				Metric:     "grpc/latency/stddev",
-				UpperLimit: float64Pointer(20),
-			}, {
-				Metric:     "grpc/latency/max",
-				UpperLimit: float64Pointer(200),
-			}, {
-				Metric:     "grpc/latency/min",
-				LowerLimit: float64Pointer(0),
-			}, {
-				Metric:     "grpc/error-count",
-				UpperLimit: float64Pointer(0),
-			}, {
-				Metric:     "grpc/request-count",
-				UpperLimit: float64Pointer(100),
-				LowerLimit: float64Pointer(100),
-			}},
+			SLOs: &SLOLimits{
+				Lower: []SLO{{
+					Metric: "grpc/request-count",
+					Limit:  100,
+				}},
+				Upper: []SLO{{
+					Metric: "grpc/latency/mean",
+					Limit:  100,
+				}, {
+					Metric: "grpc/latency/p95.00",
+					Limit:  200,
+				}, {
+					Metric: "grpc/latency/stddev",
+					Limit:  20,
+				}, {
+					Metric: "grpc/latency/max",
+					Limit:  200,
+				}, {
+					Metric: "grpc/latency/min",
+					Limit:  0,
+				}, {
+					Metric: "grpc/error-count",
+					Limit:  0,
+				}, {
+					Metric: "grpc/request-count",
+					Limit:  100,
+				}},
+			},
 		},
 	}
 	exp := &Experiment{
@@ -134,7 +139,12 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	assert.NoError(t, err)
 
 	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied {
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
+		for _, b := range v {
+			assert.True(t, b)
+		}
+	}
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Lower {
 		for _, b := range v {
 			assert.True(t, b)
 		}

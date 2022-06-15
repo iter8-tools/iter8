@@ -52,10 +52,12 @@ func TestRunTask(t *testing.T) {
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
-			SLOs: []SLO{{
-				Metric:     httpMetricPrefix + "/" + builtInHTTPErrorCountId,
-				UpperLimit: float64Pointer(0),
-			}},
+			SLOs: &SLOLimits{
+				Upper: []SLO{{
+					Metric: httpMetricPrefix + "/" + builtInHTTPErrorCountId,
+					Limit:  0,
+				}},
+			},
 		},
 	}
 
@@ -69,8 +71,8 @@ func TestRunTask(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
 	// SLOs should be satisfied by app
-	for i := 0; i < len(exp.Result.Insights.SLOs); i++ { // i^th SLO
-		assert.True(t, exp.Result.Insights.SLOsSatisfied[i][0]) // satisfied by only version
+	for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ { // i^th SLO
+		assert.True(t, exp.Result.Insights.SLOsSatisfied.Upper[i][0]) // satisfied by only version
 	}
 }
 

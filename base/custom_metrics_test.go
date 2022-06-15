@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	metricsDirectory   = "../testdata/metrics/"
 	testCEURL          = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-ce.metrics.yaml"
 	testRequestBodyURL = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-request-body.metrics.yaml"
 	testRequestBody    = "test-request-body"
@@ -557,7 +556,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 
 // basic test with a request body
 func TestRequestBody(t *testing.T) {
-	ct := headForTests(t, testCEURL)
+	ct := headForTests(t, testRequestBodyURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(exampleQueryParameter),

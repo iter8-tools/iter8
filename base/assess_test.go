@@ -27,10 +27,12 @@ func TestRunAssess(t *testing.T) {
 	// assess with an SLO
 	// should succeed
 	task.With = assessInputs{
-		SLOs: []SLO{{
-			Metric:     "a/b",
-			UpperLimit: float64Pointer(20.0),
-		}},
+		SLOs: &SLOLimits{
+			Upper: []SLO{{
+				Metric: "a/b",
+				Limit:  20.0,
+			}},
+		},
 	}
 	err = task.run(exp)
 	assert.NoError(t, err)

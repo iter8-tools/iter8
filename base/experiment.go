@@ -93,13 +93,10 @@ type Insights struct {
 	HistMetricValues []map[string][]HistBucket `json:"histMetricValues,omitempty" yaml:"histMetricValues,omitempty"`
 
 	// SLOs involved in this experiment
-	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
+	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 
-	// SLOsSatisfied:
-	// the outer slice must be of the same length as SLOs
-	// the length of the inner slice must be the number of app versions
-	// the boolean value at [i][j] indicate if SLO [i] is satisfied by version [j]
-	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
+	// SLOsSatisfied indicator matrices that show if upper and lower SLO limits are satisfied
+	SLOsSatisfied *SLOResults `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
 }
 
 // MetricMeta describes a metric
@@ -117,11 +114,28 @@ type SLO struct {
 	// Metric is the fully qualified metric name in the backendName/metricName format
 	Metric string `json:"metric" yaml:"metric"`
 
-	// UpperLimit is the maximum acceptable value of the metric
-	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty"`
+	// Limit is the acceptable limit for this metric
+	Limit float64 `json:"limit" yaml:"limit"`
+}
 
-	// LowerLimit is the minimum acceptable value of the metric
-	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
+// SLOLimits specify upper or lower limits for metrics
+type SLOLimits struct {
+	// Upper limits for metrics
+	Upper []SLO `json:"upper,omitempty" yaml:"upper,omitempty"`
+
+	// Lower limits for metrics
+	Lower []SLO `json:"lower,omitempty" yaml:"lower,omitempty"`
+}
+
+// SLOResults specify the results of SLO evaluations
+type SLOResults struct {
+	// Upper limits for metrics
+	// Upper[i][j] specifies if upper SLO i is satisfied by version j
+	Upper [][]bool `json:"upper,omitempty" yaml:"upper,omitempty"`
+
+	// Lower limits for metrics
+	// Lower[i][j] specifies if lower SLO i is satisfied by version j
+	Lower [][]bool `json:"lower,omitempty" yaml:"lower,omitempty"`
 }
 
 // TaskMeta provides common fields used across all tasks
@@ -323,7 +337,7 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 // setSLOs sets the SLOs field in insights
 // if this function is called multiple times (example, due to looping), then
 // it is intended to be called with the same argument each time
-func (in *Insights) setSLOs(slos []SLO) error {
+func (in *Insights) setSLOs(slos *SLOLimits) error {
 	if in.SLOs != nil {
 		if reflect.DeepEqual(in.SLOs, slos) {
 			return nil
@@ -344,9 +358,19 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 		return nil // already initialized
 	}
 	// LHS will be nil
-	e.Result.Insights.SLOsSatisfied = make([][]bool, len(e.Result.Insights.SLOs))
-	for i := 0; i < len(e.Result.Insights.SLOs); i++ {
-		e.Result.Insights.SLOsSatisfied[i] = make([]bool, e.Result.Insights.NumVersions)
+	e.Result.Insights.SLOsSatisfied = &SLOResults{
+		Upper: make([][]bool, 0),
+		Lower: make([][]bool, 0),
+	}
+	if e.Result.Insights.SLOs != nil {
+		e.Result.Insights.SLOsSatisfied.Upper = make([][]bool, len(e.Result.Insights.SLOs.Upper))
+		for i := 0; i < len(e.Result.Insights.SLOs.Upper); i++ {
+			e.Result.Insights.SLOsSatisfied.Upper[i] = make([]bool, e.Result.Insights.NumVersions)
+		}
+		e.Result.Insights.SLOsSatisfied.Lower = make([][]bool, len(e.Result.Insights.SLOs.Lower))
+		for i := 0; i < len(e.Result.Insights.SLOs.Lower); i++ {
+			e.Result.Insights.SLOsSatisfied.Lower[i] = make([]bool, e.Result.Insights.NumVersions)
+		}
 	}
 	return nil
 }
@@ -689,8 +713,14 @@ func (exp *Experiment) getSLOsSatisfiedBy() []int {
 	sat := []int{}
 	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 		satThis := true
-		for i := 0; i < len(exp.Result.Insights.SLOs); i++ {
-			satThis = satThis && exp.Result.Insights.SLOsSatisfied[i][j]
+		for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ {
+			satThis = satThis && exp.Result.Insights.SLOsSatisfied.Upper[i][j]
+			if !satThis {
+				break
+			}
+		}
+		for i := 0; i < len(exp.Result.Insights.SLOs.Lower); i++ {
+			satThis = satThis && exp.Result.Insights.SLOsSatisfied.Lower[i][j]
 			if !satThis {
 				break
 			}
