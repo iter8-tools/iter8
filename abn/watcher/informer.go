@@ -1,5 +1,7 @@
 package watcher
 
+// informer.go - informer(s) to watch desired resources/namespaces
+
 import (
 	"github.com/iter8-tools/iter8/base/log"
 

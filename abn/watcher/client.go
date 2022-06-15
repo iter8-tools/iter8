@@ -1,5 +1,7 @@
 package watcher
 
+// client.go - Kubernetes client
+
 import (
 	"github.com/iter8-tools/iter8/base/log"
 

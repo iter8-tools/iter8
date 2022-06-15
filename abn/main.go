@@ -30,10 +30,12 @@ import (
 // this means data loss
 
 const (
+	// Name of environment variable with file path to resources/namespaces to watch
 	WATCHER_CONFIG_ENV = "WATCHER_CONFIG"
 )
 
 var (
+	// Port the service listens on
 	port = flag.Int("port", 50051, "The server port")
 )
 
@@ -41,15 +43,18 @@ func main() {
 	flag.Parse()
 	log.Logger.SetLevel(logrus.TraceLevel)
 
-	// abn config
+	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
 	if !ok {
 		log.Logger.Fatal("ABn configuation file is required")
 	}
 
 	stopCh := make(chan struct{})
+
+	// set up watching
 	go newInformer(watcher.ReadConfig(abnConfigFile)).Start(stopCh)
 
+	// launch gRPC server to respond to frontend requests
 	go launchServer([]grpc.ServerOption{})
 
 	sigCh := make(chan os.Signal, 1)
@@ -72,6 +77,7 @@ func restConfig() (*rest.Config, error) {
 	return kubeCfg, nil
 }
 
+// newInformer creates a new informer watching the identified resources in the identified namespaces
 func newInformer(abnConfig *watcher.Config) *watcher.MultiInformer {
 	cfg, err := restConfig()
 	if err != nil {
@@ -90,6 +96,7 @@ func newInformer(abnConfig *watcher.Config) *watcher.MultiInformer {
 	)
 }
 
+// newServer returns a new gRPC server
 func newServer() *abnServer {
 	s := &abnServer{}
 	return s
@@ -99,6 +106,8 @@ type abnServer struct {
 	pb.UnimplementedABNServer
 }
 
+// Lookup identifies a version that should be used for a given user
+// This method is exposed to gRPC clients
 func (server *abnServer) Lookup(ctx context.Context, a *pb.Application) (*pb.Session, error) {
 	v, err := watcher.Lookup(a.GetName(), a.GetUser())
 	if err != nil {
@@ -123,6 +132,9 @@ type MetricEntry struct {
 	time        string
 }
 
+// WriteMetric writes a metric
+// This implmementation writes the metric to the log
+// This method is exposed to gRPC clients
 func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*emptypb.Empty, error) {
 	v, err := watcher.Lookup(m.GetApplication(), m.GetUser())
 	if err != nil {
@@ -147,6 +159,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*e
 	return &emptypb.Empty{}, nil
 }
 
+// launchServer starts gRPC server
 func launchServer(opts []grpc.ServerOption) {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
