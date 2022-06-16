@@ -52,7 +52,7 @@ jobs:
     - name: launch load-test-http
       run: |
         iter8 launch --noDownload \
-        --set tasks={http} \
+        --set "tasks={http}" \
         --set http.url="http://$HOST_IP/post" \
         --set http.payloadURL="https://httpbin.org/stream/1"
     - name: assert experiment completed without failures
@@ -62,7 +62,7 @@ jobs:
     - name: launch load-test-http with percentiles, duration, and SLOs
       run: |
         iter8 launch --noDownload \
-        --set tasks={http,assess} \
+        --set "tasks={http,assess}" \
         --set http.url="http://$HOST_IP/post" \
         --set http.payloadURL="https://httpbin.org/stream/1" \
         --set http.duration="3s" \
@@ -96,7 +96,7 @@ jobs:
         set -e
         export LOG_LEVEL=trace
         iter8 launch --noDownload \
-          --set tasks={grpc,assess} \
+          --set "tasks={grpc,assess}" \
           --set grpc.host="127.0.0.1:50051" \
           --set grpc.call="helloworld.Greeter.SayHello" \
           --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
@@ -112,7 +112,7 @@ jobs:
         set -e
         export LOG_LEVEL=trace
         iter8 launch --noDownload \
-          --set tasks={grpc,assess} \
+          --set "tasks={grpc,assess}" \
           --set grpc.host="127.0.0.1:50051" \
           --set grpc.call="helloworld.Greeter.SayHello" \
           --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
@@ -148,7 +148,7 @@ jobs:
     - name: launch
       run: |
         iter8 launch --noDownload \
-        --set tasks={http} \
+        --set "tasks={http}" \
         --set http.url="http://$HOST_IP/get"
     - name: assert
       run: |
@@ -183,7 +183,7 @@ jobs:
     - name: k launch load-test-http
       run: |
         iter8 k launch --noDownload \
-        --set tasks={http,assess} \
+        --set "tasks={http,assess}" \
         --set http.url="http://$HOST_IP/get" \
         --set http.duration="3s" \
         --set assess.SLOs.upper.http/latency-p50=200 \
@@ -217,7 +217,7 @@ jobs:
     - name: k launch load-test-http with readiness checks
       run: |
         iter8 k launch --noDownload \
-        --set tasks={ready,http,assess} \
+        --set "tasks={ready,http,assess}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
