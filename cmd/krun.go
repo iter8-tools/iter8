@@ -11,7 +11,7 @@ import (
 
 // kRunDesc is the description of the k run command
 const kRunDesc = `
-Run a Kubernetes experiment. This command reads an experiment specified in a secret and writes the result to another secret.
+Run a Kubernetes experiment. This command reads an experiment specified in a secret and writes the result back to the secret.
 
 	$ iter8 k run --namespace {{ .Experiment.Namespace }} --group {{ .Experiment.group }}
 

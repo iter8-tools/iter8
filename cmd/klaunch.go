@@ -13,19 +13,21 @@ import (
 const kLaunchDesc = `
 Launch an experiment in Kubernetes. 
 
-	$ iter8 k launch -c load-test-http --set url=https://httpbin.org/get
+	$ iter8 k launch --set "tasks={http}" --set http.url=https://httpbin.org/get \
+		--set runner=job
 
-Use the dry option to simulate a Kubernetes experiment. This creates the manifest.yaml file, and does not deploy any resource in the cluster.
+Use the dry option to simulate a Kubernetes experiment. This creates the manifest.yaml file, and does not deploy any resources in the cluster.
 
-	$ iter8 k launch -c load-test-http \
-	  --set url=https://httpbin.org/get \
-	  --dry
+	$ iter8 k launch \
+	  --set http.url=https://httpbin.org/get \
+		--set runner=job \
+		--dry
 
 
-Launching an experiment requires the Iter8 experiment charts folder. You can use various launch flags to control:
-	1. Whether Iter8 should download the experiment charts folder from a remote URL (example, a GitHub URL), or reuse local charts.
-	2. The parent directory of the charts folder.
-	3. The remote URL (example, a GitHub URL) from which charts are downloaded.
+You can use various launch flags to control the following:
+	1. Whether Iter8 should download the Iter8 experiment chart from a remote URL or reuse local chart.
+	2. The remote URL (example, a GitHub URL) from which the Iter8 experiment chart is downloaded.
+	3. The local (parent) directory under which the Iter8 experiment chart is nested.
 `
 
 // newKLaunchCmd creates the Kubernetes launch command

@@ -8,9 +8,9 @@ import (
 
 // genDesc is the description for the gen command
 const genDesc = `
-Generate an experiment.yaml file by combining an experiment chart with values.
+Generate an experiment.yaml file by combining the Iter8 experiment chart with values.
 
-    $ iter8 gen -c load-test-http --set url=https://httpbin.org/get
+    $ iter8 gen --set "tasks={http}" --set http.url=https://httpbin.org/get
 
 This command is intended for development and testing of experiment charts. For production usage, the launch command is recommended.
 `
