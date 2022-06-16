@@ -7,7 +7,7 @@ metadata:
     iter8.tools/group: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}
+  name: {{ .Release.Name }}-iter8-sa
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role

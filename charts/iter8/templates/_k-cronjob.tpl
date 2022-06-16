@@ -18,7 +18,7 @@ spec:
           annotations:
             sidecar.istio.io/inject: "false"
         spec:
-          serviceAccountName: {{ .Release.Name }}
+          serviceAccountName: {{ .Release.Name }}-iter8-sa
           containers:
           - name: iter8
             image: {{ .Values.iter8Image }}
