@@ -14,6 +14,12 @@ func TestLaunch(t *testing.T) {
 		// launch, chartsParentDir
 		{
 			name:   "basic launch",
+			cmd:    "launch -c iter8 --remoteFolderURL github.com/sriumcp/iter8.git?ref=ic//charts --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s",
+			golden: base.CompletePath("../testdata", "output/launch.txt"),
+		},
+		// launch, chartsParentDir, noDownload
+		{
+			name:   "basic launch",
 			cmd:    fmt.Sprintf("launch -c iter8 --chartsParentDir %v --noDownload --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../", "")),
 			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
