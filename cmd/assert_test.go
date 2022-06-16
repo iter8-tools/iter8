@@ -10,7 +10,7 @@ import (
 
 func TestAssert(t *testing.T) {
 	os.Chdir(t.TempDir())
-	base.CopyFileToPwd(t, base.CompletePath("../testdata", "assertinputs/experiment.yaml"))
+	id.CopyFileToPwd(t, base.CompletePath("../testdata", "assertinputs/experiment.yaml"))
 	tests := []cmdTestCase{
 		// assert, SLOs
 		{

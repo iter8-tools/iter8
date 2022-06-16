@@ -129,3 +129,18 @@ func TestLogs(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "fake logs", str)
 }
+
+func TestDryInstall(t *testing.T) {
+	os.Chdir(t.TempDir())
+	kd := NewFakeKubeDriver(cli.New())
+
+	err := kd.Launch(base.CompletePath("../", "charts/iter8"), values.Options{
+		ValueFiles:   []string{},
+		StringValues: []string{},
+		Values:       []string{"tasks={http}", "http.url=https://localhost:12345"},
+		FileValues:   []string{},
+	}, "default", true)
+
+	assert.NoError(t, err)
+	assert.FileExists(t, ManifestFile)
+}

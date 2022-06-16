@@ -11,7 +11,7 @@ import (
 func TestLocalRun(t *testing.T) {
 	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
-	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
+	CopyFileToPwd(t, base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
 
 	fd := FileDriver{
 		RunDir: ".",

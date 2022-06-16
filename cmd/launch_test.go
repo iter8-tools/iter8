@@ -11,12 +11,6 @@ import (
 func TestLaunch(t *testing.T) {
 	os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
-		// launch, chartsParentDir
-		{
-			name:   "basic launch",
-			cmd:    "launch -c iter8 --remoteFolderURL github.com/sriumcp/iter8.git?ref=ic//charts --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s",
-			golden: base.CompletePath("../testdata", "output/launch.txt"),
-		},
 		// launch, chartsParentDir, noDownload
 		{
 			name:   "basic launch",

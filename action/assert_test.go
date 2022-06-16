@@ -17,7 +17,7 @@ import (
 
 func TestLocalAssert(t *testing.T) {
 	os.Chdir(t.TempDir())
-	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputs/experiment.yaml"))
+	driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputs/experiment.yaml"))
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
@@ -29,7 +29,7 @@ func TestLocalAssert(t *testing.T) {
 
 func TestLocalAssertFailing(t *testing.T) {
 	os.Chdir(t.TempDir())
-	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputsfail/experiment.yaml"))
+	driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputsfail/experiment.yaml"))
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}

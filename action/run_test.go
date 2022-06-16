@@ -16,7 +16,7 @@ import (
 
 func TestLocalRun(t *testing.T) {
 	os.Chdir(t.TempDir())
-	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
+	driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
 
 	base.SetupWithMock(t)
 	// fix rOpts
