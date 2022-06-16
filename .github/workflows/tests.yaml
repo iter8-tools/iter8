@@ -160,7 +160,7 @@ jobs:
         --set runner=none
     - name: k run
       run: |
-        iter8 k run --namespace default --group default --revision 1 &
+        iter8 k run --namespace default --group default &
     - name: assert experiment completed without failures and SLOs are satisfied
       run: |
         iter8 k assert -c completed -c nofailure -c slos --timeout 60s
