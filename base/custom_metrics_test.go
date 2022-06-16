@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -45,6 +46,7 @@ const (
 
 // test getElapsedTimeSeconds()
 func TestGetElapsedTimeSeconds(t *testing.T) {
+	os.Chdir(t.TempDir())
 	versionInfo := map[string]interface{}{
 		"startingTime": "Feb 4, 2014 at 6:05pm (PST)",
 	}
@@ -69,6 +71,7 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 
 // test if a user sets elapsedTimeSeconds getElapsedTimeSeconds()
 func TestSetElapsedTimeSecondsError(t *testing.T) {
+	os.Chdir(t.TempDir())
 	versionInfo := map[string]interface{}{
 		"startingTime":       "Feb 4, 2014 at 6:05pm (PST)",
 		"elapsedTimeSeconds": "Feb 5, 2014 at 6:05pm (PST)",
@@ -91,6 +94,7 @@ func TestSetElapsedTimeSecondsError(t *testing.T) {
 
 // test if a user sets startingTime incorrectly getElapsedTimeSeconds()
 func TestStartingTimeFormatError(t *testing.T) {
+	os.Chdir(t.TempDir())
 	versionInfo := map[string]interface{}{
 		"startingTime": "1652935205",
 	}
@@ -139,6 +143,7 @@ func headForTests(t *testing.T, providerURL string) *customMetricsTask {
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
+	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 
 	// request-count
@@ -218,6 +223,7 @@ func TestCEOneVersion(t *testing.T) {
 // basic test with versionInfo, mimicking Code Engine
 // one version, three successful metrics
 func TestCEVersionInfo(t *testing.T) {
+	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 	ct.With.VersionInfo = []map[string]interface{}{{
 		"ibm_codeengine_revision_name": "v1",
@@ -299,6 +305,7 @@ func TestCEVersionInfo(t *testing.T) {
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
+	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 
 	// request-count
@@ -334,6 +341,7 @@ func TestCEUnauthorized(t *testing.T) {
 // test with one version with some values, mimicking Code Engine
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
+	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 
 	// request-count
@@ -406,6 +414,7 @@ func TestCESomeValues(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
+	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 
 	ct.With.VersionInfo = []map[string]interface{}{{}, {}}
@@ -482,6 +491,7 @@ func TestCEMultipleVersions(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
+	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 	ct.With.VersionInfo = []map[string]interface{}{{}, {}}
 
@@ -556,6 +566,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 
 // basic test with a request body
 func TestRequestBody(t *testing.T) {
+	os.Chdir(t.TempDir())
 	ct := headForTests(t, testRequestBodyURL)
 
 	// request-count

@@ -1,6 +1,7 @@
 package base
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,6 +9,7 @@ import (
 
 // Test a runnable assert condition here
 func TestRunAssess(t *testing.T) {
+	os.Chdir(t.TempDir())
 	// simple assess without any SLOs
 	// should succeed
 	task := &assessTask{

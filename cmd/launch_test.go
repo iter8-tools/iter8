@@ -9,28 +9,22 @@ import (
 )
 
 func TestLaunch(t *testing.T) {
+	os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
-		// launch, values from CLI
-		{
-			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --noDownload --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
-			golden: base.CompletePath("../testdata", "output/launch.txt"),
-		},
 		// launch, chartsParentDir
 		{
 			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --noDownload --runDir %v --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", ""), t.TempDir()),
+			cmd:    fmt.Sprintf("launch -c iter8 --chartsParentDir %v --noDownload --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../", "")),
 			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
 		// launch, values file
 		{
-			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c load-test-http --chartsParentDir %v --noDownload --set duration=2s -f %v", base.CompletePath("../", ""), base.CompletePath("../testdata", "config.yaml")),
+			name:   "launch with values file",
+			cmd:    fmt.Sprintf("launch -c iter8 --chartsParentDir %v --noDownload --set tasks={http,assess} --set http.duration=2s -f %v", base.CompletePath("../", ""), base.CompletePath("../testdata", "config.yaml")),
 			golden: base.CompletePath("../testdata", "output/launch-with-slos.txt"),
 		},
 	}
 
-	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 	runTestActionCmd(t, tests)
 }

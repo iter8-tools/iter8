@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
@@ -14,11 +15,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	testCe = "test-ce"
-)
-
 func TestKOps(t *testing.T) {
+	os.Chdir(t.TempDir())
 	kd := NewKubeDriver(cli.New()) // we will ignore this value
 	assert.NotNil(t, kd)
 
@@ -27,8 +25,8 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	// install
-	err = kd.install(base.CompletePath("../", "charts/load-test-http"), values.Options{
-		Values: []string{"url=https://httpbin.org/get"},
+	err = kd.install(base.CompletePath("../", "charts/iter8"), values.Options{
+		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
 
@@ -42,8 +40,8 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	// upgrade
-	err = kd.upgrade(base.CompletePath("../", "charts/load-test-http"), values.Options{
-		Values: []string{"url=https://httpbin.org/get"},
+	err = kd.upgrade(base.CompletePath("../", "charts/iter8"), values.Options{
+		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
 
@@ -66,6 +64,7 @@ func TestKOps(t *testing.T) {
 }
 
 func TestKubeRun(t *testing.T) {
+	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
@@ -101,6 +100,7 @@ func TestKubeRun(t *testing.T) {
 }
 
 func TestLogs(t *testing.T) {
+	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())

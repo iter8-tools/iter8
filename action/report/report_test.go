@@ -10,9 +10,11 @@ import (
 )
 
 func TestReportText(t *testing.T) {
+	os.Chdir(t.TempDir())
+	base.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experiment.yaml"))
 
 	fd := driver.FileDriver{
-		RunDir: base.CompletePath("../../", "testdata/assertinputs"),
+		RunDir: ".",
 	}
 	exp, err := base.BuildExperiment(&fd)
 	assert.NoError(t, err)
@@ -26,9 +28,11 @@ func TestReportText(t *testing.T) {
 }
 
 func TestReportHTML(t *testing.T) {
+	os.Chdir(t.TempDir())
+	base.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experiment.yaml"))
 
 	fd := driver.FileDriver{
-		RunDir: base.CompletePath("../../", "testdata/assertinputs"),
+		RunDir: ".",
 	}
 	exp, err := base.BuildExperiment(&fd)
 	assert.NoError(t, err)

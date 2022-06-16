@@ -13,12 +13,18 @@ spec:
     with:
       SLOs:
         upper:
-          "http/error-rate": 0
-          "http/latency-mean": 500
-          "http/latency-p50": 1000
-          "http/latency-p50.0": 100
-          "http/latency-p95.0": 2500
-          "http/latency-p99": 5000
+        - metric: "http/error-rate"
+          limit: 0
+        - metric: "http/latency-mean"
+          limit: 500
+        - metric: "http/latency-p50"
+          limit: 1000
+        - metric: "http/latency-p50.0"
+          limit: 100
+        - metric: "http/latency-p95.0"
+          limit: 2500
+        - metric: "http/latency-p99"
+          limit: 5000
   # tasks 3 & 4: print if SLOs are satisfied or not
   - if: SLOs()
     run: echo "SLOs satisfied"

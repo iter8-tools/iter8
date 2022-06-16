@@ -2,12 +2,14 @@ package action
 
 import (
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,10 +18,22 @@ func TestGen(t *testing.T) {
 	os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
-	gOpts.ChartName = "load-test-http"
-	gOpts.Values = []string{"url=https://httpbin.org/get"}
+	gOpts.ChartName = "iter8"
+	gOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get"}
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)
+}
+
+func dumpExperiment(t *testing.T) {
+	file, err := os.Open("experiment.yaml")
+	assert.NoError(t, err)
+	b, err := ioutil.ReadAll(file)
+	assert.NoError(t, err)
+	file.Close()
+	l := log.Logger.GetLevel()
+	log.Logger.SetLevel(logrus.DebugLevel)
+	log.Logger.Debug("\n" + string(b))
+	log.Logger.SetLevel(l)
 }
 
 func TestGenGRPC(t *testing.T) {
@@ -27,8 +41,8 @@ func TestGenGRPC(t *testing.T) {
 	os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
-	gOpts.ChartName = "load-test-grpc"
-	gOpts.Values = []string{"host=localhost:50051", "call=helloworld.Greeter.SayHello", "proto=helloworld.proto", "protoset=helloworld.protoset", "data.name=frodo", "SLOs.grpc/error-rate=0", "SLOs.grpc/latency/mean=150"}
+	gOpts.ChartName = "iter8"
+	gOpts.Values = []string{"tasks={grpc,assess}", "grpc.host=localhost:50051", "grpc.call=helloworld.Greeter.SayHello", "grpc.proto=helloworld.proto", "grpc.protoset=helloworld.protoset", "grpc.data.name=frodo", "assess.SLOs.upper.grpc/error-rate=0", "assess.SLOs.upper.grpc/latency/mean=150"}
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)
 
@@ -52,11 +66,13 @@ func TestGenDB(t *testing.T) {
 	os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
-	gOpts.ChartName = "slo-validation-istio"
-	gOpts.Values = []string{"providerURL=http://prometheus.istio-system:9090/api/v1/query", "destination_workload=httpbin-v2", "destination_workload_namespace=default", `startingTime="Feb 4\, 2014 at 6:05pm (PST)"`, "istio/error-rate=0"}
+	gOpts.ChartName = "iter8"
+	gOpts.Values = []string{"tasks={custommetrics,assess}", "custommetrics.providerURLs[0]=https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl", "custommetrics.common.providerURL=http://prometheus.istio-system:9090/api/v1/query", "custommetrics.versionInfo[0].destination_workload=httpbin-v2", "custommetrics.versionInfo[0].destination_workload_namespace=default", `custommetrics.versionInfo[0].startingTime="Feb 4\, 2014 at 6:05pm (PST)"`, "assess.SLOs.upper.istio/error-rate=0"}
 
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)
+
+	dumpExperiment(t)
 
 	fd := &driver.FileDriver{
 		RunDir: "./",
@@ -67,9 +83,8 @@ func TestGenDB(t *testing.T) {
 
 	m := make(map[string]interface{}, 0)
 	b, _ := json.Marshal(exp.Spec[0])
-	fmt.Println(string(b))
 	json.Unmarshal(b, &m)
 	m = m["with"].(map[string]interface{})
-	s := m["providers"].([]interface{})
-	assert.Equal(t, []interface{}{"istio"}, s)
+	s := m["providerURLs"].([]interface{})
+	assert.Equal(t, []interface{}{"https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl"}, s)
 }

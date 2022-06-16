@@ -1,34 +1,36 @@
-# task 1: generate gRPC requests for application
-# collect Iter8's built-in gRPC latency and error-related metrics
-- task: gen-load-and-collect-metrics-grpc
-  with:
-    total: 200
-    concurrency: 5
-    data:
-      name: bob
-    timeout: 10s
-    connect-timeeout: 5s
-    protoURL: "https://raw.githubusercontent.com/bojand/ghz/v0.105.0/testdata/greeter.proto"
-    versionInfo:
-    - call: "helloworld.Greeter.SayHello"
-      host: "127.0.0.1"
-# task 2: validate service level objectives for app using
-# the metrics collected in the above task
-- task: assess-app-versions
-  with:
-    SLOs:
-    - metric: "grpc/error-rate"
-      upperLimit: 0
-    - metric: "grpc/latency/mean"
-      upperLimit: 100
-    - metric: "grpc/latency/p50"
-      upperLimit: 100
-    - metric: "grpc/latency/p50.0"
-      upperLimit: 100
-    - metric: "grpc/latency/p95.0"
-      upperLimit: 250
-    - metric: "grpc/latency/p97.5"
-      upperLimit: 500
-# task 3: conditional run task
-- if: SLOs()
-  run: echo "all good"
+spec:
+  # task 1: generate gRPC requests for application
+  # collect Iter8's built-in gRPC latency and error-related metrics
+  - task: grpc
+    with:
+      total: 200
+      concurrency: 5
+      data:
+        name: bob
+      timeout: 10s
+      connect-timeeout: 5s
+      protoURL: "https://raw.githubusercontent.com/bojand/ghz/v0.105.0/testdata/greeter.proto"
+      versionInfo:
+      - call: "helloworld.Greeter.SayHello"
+        host: "127.0.0.1"
+  # task 2: validate service level objectives for app using
+  # the metrics collected in the above task
+  - task: assess
+    with:
+      SLOs:
+        Upper:
+        - metric: "grpc/error-rate"
+          limit: 0
+        - metric: "grpc/latency/mean"
+          limit: 100
+        - metric: "grpc/latency/p50"
+          limit: 100
+        - metric: "grpc/latency/p50.0"
+          limit: 100
+        - metric: "grpc/latency/p95.0"
+          limit: 250
+        - metric: "grpc/latency/p97.5"
+          limit: 500
+  # task 3: conditional run task
+  - if: SLOs()
+    run: echo "all good"

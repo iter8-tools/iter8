@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
@@ -8,10 +9,12 @@ import (
 )
 
 func TestLocalRun(t *testing.T) {
+	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
+	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
 
 	fd := FileDriver{
-		RunDir: base.CompletePath("../", "testdata/drivertests"),
+		RunDir: ".",
 	}
 	err := base.RunExperiment(false, &fd)
 	assert.NoError(t, err)
@@ -21,12 +24,12 @@ func TestLocalRun(t *testing.T) {
 }
 
 func TestFileDriverReadError(t *testing.T) {
+	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	fd := FileDriver{
 		RunDir: ".",
 	}
-
 	exp, err := fd.Read()
 	assert.Error(t, err)
 	assert.Nil(t, exp)

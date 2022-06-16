@@ -2,6 +2,7 @@ package base
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base/log"
@@ -10,28 +11,32 @@ import (
 )
 
 func TestReadExperiment(t *testing.T) {
+	os.Chdir(t.TempDir())
+
 	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)
-	es := &ExperimentSpec{}
-	err = yaml.Unmarshal(b, es)
+	e := &Experiment{}
+	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 4, len(*es))
+	assert.Equal(t, 4, len(e.Spec))
 
 	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
 	assert.NoError(t, err)
-	es = &ExperimentSpec{}
-	err = yaml.Unmarshal(b, es)
+	e = &Experiment{}
+	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 3, len(*es))
+	assert.Equal(t, 3, len(e.Spec))
 
 	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_db.yaml"))
 	assert.NoError(t, err)
-	es = &ExperimentSpec{}
-	err = yaml.Unmarshal(b, es)
+	e = &Experiment{}
+	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 4, len(*es))
+	assert.Equal(t, 4, len(e.Spec))
 }
-func TestRunTask(t *testing.T) {
+
+func TestRunningTasks(t *testing.T) {
+	os.Chdir(t.TempDir())
 	SetupWithMock(t)
 
 	// valid collect task... should succeed
@@ -70,6 +75,9 @@ func TestRunTask(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
+	err = at.run(exp)
+	assert.NoError(t, err)
+
 	// SLOs should be satisfied by app
 	for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ { // i^th SLO
 		assert.True(t, exp.Result.Insights.SLOsSatisfied.Upper[i][0]) // satisfied by only version
@@ -77,32 +85,28 @@ func TestRunTask(t *testing.T) {
 }
 
 func TestRunExperiment(t *testing.T) {
+	os.Chdir(t.TempDir())
 	SetupWithMock(t)
+
 	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)
-	es := &ExperimentSpec{}
-	err = yaml.Unmarshal(b, es)
+	e := &Experiment{}
+	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 4, len(*es))
+	assert.Equal(t, 4, len(e.Spec))
 
-	exp := Experiment{
-		Spec: *es,
-	}
-
-	err = RunExperiment(false, &mockDriver{&exp})
+	err = RunExperiment(false, &mockDriver{e})
 	assert.NoError(t, err)
 
-	yamlBytes, _ := yaml.Marshal(exp.Result)
-	log.Logger.WithStackTrace(string(yamlBytes)).Debug("results")
-	assert.True(t, exp.Completed())
-	assert.True(t, exp.NoFailure())
-	expRes, _ := yaml.Marshal(exp.Result)
-	log.Logger.Debug(string(expRes))
-	assert.True(t, exp.SLOs())
-
+	assert.True(t, e.Completed())
+	assert.True(t, e.NoFailure())
+	expBytes, _ := yaml.Marshal(e)
+	log.Logger.Debug("\n" + string(expBytes))
+	assert.True(t, e.SLOs())
 }
 
 func TestFailExperiment(t *testing.T) {
+	os.Chdir(t.TempDir())
 	exp := Experiment{
 		Spec: ExperimentSpec{},
 	}

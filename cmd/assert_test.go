@@ -9,6 +9,8 @@ import (
 )
 
 func TestAssert(t *testing.T) {
+	os.Chdir(t.TempDir())
+	base.CopyFileToPwd(t, base.CompletePath("../testdata", "assertinputs/experiment.yaml"))
 	tests := []cmdTestCase{
 		// assert, SLOs
 		{
@@ -20,6 +22,5 @@ func TestAssert(t *testing.T) {
 
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	os.Chdir(base.CompletePath("../testdata", "assertinputs"))
 	runTestActionCmd(t, tests)
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -14,6 +15,7 @@ import (
 )
 
 func TestKReport(t *testing.T) {
+	os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k report
 		{

@@ -3,6 +3,7 @@ package action
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -15,9 +16,10 @@ import (
 )
 
 func TestLocalAssert(t *testing.T) {
+	os.Chdir(t.TempDir())
+	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputs/experiment.yaml"))
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.RunDir = base.CompletePath("../", "testdata/assertinputs")
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
 
 	ok, err := aOpts.LocalRun()
@@ -26,9 +28,10 @@ func TestLocalAssert(t *testing.T) {
 }
 
 func TestLocalAssertFailing(t *testing.T) {
+	os.Chdir(t.TempDir())
+	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputsfail/experiment.yaml"))
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.RunDir = base.CompletePath("../", "testdata/assertinputsfail")
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
 	aOpts.Timeout = 5 * time.Second
 
@@ -38,6 +41,7 @@ func TestLocalAssertFailing(t *testing.T) {
 }
 
 func TestKubeAssert(t *testing.T) {
+	os.Chdir(t.TempDir())
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}

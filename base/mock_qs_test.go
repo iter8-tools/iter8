@@ -2,6 +2,7 @@ package base
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"fortio.org/fortio/fhttp"
@@ -9,6 +10,7 @@ import (
 )
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
+	os.Chdir(t.TempDir())
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
@@ -57,6 +59,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
+	os.Chdir(t.TempDir())
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)

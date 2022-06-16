@@ -105,11 +105,11 @@ func sloSatisfied(e *Experiment, slos []SLO, i int, j int, upper bool) bool {
 		if *val > slos[i].Limit {
 			return false
 		}
-	}
-
-	// check lower limit
-	if *val < slos[i].Limit {
-		return false
+	} else {
+		// check lower limit
+		if *val < slos[i].Limit {
+			return false
+		}
 	}
 
 	return true

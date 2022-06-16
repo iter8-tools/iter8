@@ -1,6 +1,7 @@
 package base
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -9,11 +10,13 @@ import (
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
+	"sigs.k8s.io/yaml"
 )
 
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
+	os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
 	if err != nil {
@@ -68,6 +71,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 }
 
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
+	os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
 	if err != nil {
@@ -115,9 +119,6 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 					Metric: "grpc/latency/max",
 					Limit:  200,
 				}, {
-					Metric: "grpc/latency/min",
-					Limit:  0,
-				}, {
 					Metric: "grpc/error-count",
 					Limit:  0,
 				}, {
@@ -149,6 +150,9 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 			assert.True(t, b)
 		}
 	}
+
+	expBytes, _ := yaml.Marshal(exp)
+	log.Logger.Debug("\n" + string(expBytes))
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, int(ct.With.N), count)

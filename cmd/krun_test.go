@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
@@ -12,6 +13,7 @@ import (
 )
 
 func TestKRun(t *testing.T) {
+	os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k report
 		{

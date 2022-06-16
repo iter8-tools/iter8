@@ -3,10 +3,10 @@ package action
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
@@ -15,15 +15,18 @@ import (
 )
 
 func TestLocalRun(t *testing.T) {
+	os.Chdir(t.TempDir())
+	base.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
+
 	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
-	rOpts.RunDir = base.CompletePath("../", "testdata")
 	err := rOpts.LocalRun()
 	assert.NoError(t, err)
 }
 
 func TestKubeRun(t *testing.T) {
+	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
@@ -47,6 +50,4 @@ func TestKubeRun(t *testing.T) {
 	assert.True(t, exp.NoFailure())
 	assert.True(t, exp.SLOs())
 	assert.Equal(t, 4, exp.Result.NumCompletedTasks)
-
-	log.Logger.Debug(exp.Result)
 }
