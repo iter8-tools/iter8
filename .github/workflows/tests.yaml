@@ -47,9 +47,8 @@ jobs:
         echo "HOST_IP=$HOST_IP" >> $GITHUB_ENV
         while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
           sleep 5; 
-        done;
-        
-    - name: launch load-test-http
+        done;        
+    - name: launch experiment
       run: |
         iter8 launch --noDownload \
         --set "tasks={http}" \
@@ -58,8 +57,7 @@ jobs:
     - name: assert experiment completed without failures
       run: |
         iter8 assert -c completed -c nofailure
-
-    - name: launch load-test-http with percentiles, duration, and SLOs
+    - name: launch experiment
       run: |
         iter8 launch --noDownload \
         --set "tasks={http,assess}" \
@@ -150,7 +148,7 @@ jobs:
       uses: helm/kind-action@v1.2.0
       with:
         wait: 300s
-    - name: k launch load-test-http
+    - name: load-test-http in Kubernetes
       run: |
         iter8 k launch --noDownload \
         --set "tasks={http,assess}" \
