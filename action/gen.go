@@ -17,7 +17,7 @@ import (
 
 const (
 	chartsFolderName = "charts"
-	providersStr     = "providers"
+	DefaultChartName = "iter8"
 )
 
 // GenOpts are the options used for generating experiment.yaml
@@ -37,6 +37,7 @@ func NewGenOpts() *GenOpts {
 	return &GenOpts{
 		ChartsParentDir: ".",
 		GenDir:          ".",
+		ChartName:       DefaultChartName,
 	}
 }
 
