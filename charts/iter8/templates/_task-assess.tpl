@@ -4,10 +4,6 @@
 # the metrics collected in an earlier task
 - task: assess
   with:
-{{- if .metrics }}
-    metrics:
-{{ .metrics | toYaml | indent 6 }}
-{{- end }}
 {{- if .SLOs }}
     SLOs:
 {{- if .SLOs.upper }}

@@ -8,9 +8,6 @@ import (
 
 // assessInputs contain the inputs to the assess-app-versions task to be executed.
 type assessInputs struct {
-	// Metrics are intended to capture additional metrics not featured as part of SLOs
-	Metrics []string `json:"metrics,omitempty" yaml:"metrics,omitempty"`
-
 	// SLOs are the SLO limits
 	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 }
