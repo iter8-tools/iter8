@@ -93,10 +93,44 @@ jobs:
         build-args: |
           TAG=v${{ env.VERSION }}
 
+  gh-action:
+    runs-on: ubuntu-latest
+    needs: assets
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: run httpbin
+      run: |
+        set -e
+        docker pull kennethreitz/httpbin
+        docker run -p 80:80 kennethreitz/httpbin &
+        HOST_IP=$(ip -f inet addr show docker0 | grep -Po 'inet \K[\d.]+')
+        echo "HOST_IP=$HOST_IP" >> $GITHUB_ENV
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
+          sleep 5; 
+        done;
+
+    - name: install Iter8 CLI
+      uses: ./
+    - name: version
+      run: | 
+        iter8 version
+    - name: launch
+      run: |
+        iter8 launch --noDownload \
+        --set "tasks={http}" \
+        --set http.url="http://$HOST_IP/get"
+    - name: assert
+      run: |
+        iter8 assert -c completed -c nofailure
+
+
   kubernetes-http-experiment:
     name: Kubernetes http load test    
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: 
+    - build-and-push
+    - assets
     steps:
     - uses: iter8-tools/iter8@v0.11
     - name: Start kind cluster
@@ -122,16 +156,13 @@ jobs:
         iter8 k delete
 
   kubernetes-grpc-experiment:
-    name: Kubernetes gRPC load test    
+    name: Kubernetes gRPC load test
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: 
+    - build-and-push
+    - assets
     steps:
-    - name: Install Iter8
-      run: |
-        tagref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        wget https://github.com/iter8-tools/iter8/releases/download/$tagref/iter8-linux-amd64.tar.gz
-        tar -xvf iter8-linux-amd64.tar.gz
-        mv linux-amd64/iter8 /usr/local/bin
+    - uses: iter8-tools/iter8@v0.11
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -155,3 +186,33 @@ jobs:
         iter8 k report
         iter8 k log
         iter8 k delete
+
+  readiness:
+    name: Kubernetes readiness test
+    runs-on: ubuntu-latest
+    needs: 
+    - build-and-push
+    - assets
+    steps:
+    - uses: iter8-tools/iter8@v0.11
+    - name: Start kind cluster
+      uses: helm/kind-action@v1.2.0
+      with:
+        wait: 300s
+    - name: deploy resources to cluster
+      run: |
+        kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
+        kubectl expose deploy httpbin --port=80
+    - name: k launch with readiness checks
+      run: |
+        iter8 k launch \
+        --set "tasks={ready,http,assess}" \
+        --set ready.deploy="httpbin" \
+        --set ready.service="httpbin" \
+        --set ready.timeout=60s \
+        --set http.url=http://httpbin.default \
+        --set assess.SLOs.upper.http/latency-mean=50 \
+        --set runner=job
+    - name: k assert experiment completed without failures
+      run: |
+        iter8 k assert -c completed -c nofailure --timeout 60s
