@@ -48,7 +48,7 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 		},
 	}
 	// options specific to k assert
-	addExperimentGroupFlag(cmd, &actor.Group, false)
+	addExperimentGroupFlag(cmd, &actor.Group)
 	actor.EnvSettings = settings
 
 	// options shared with assert

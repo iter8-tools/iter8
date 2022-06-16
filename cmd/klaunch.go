@@ -44,7 +44,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		},
 	}
 	// flags specific to k launch
-	addExperimentGroupFlag(cmd, &actor.Group, false)
+	addExperimentGroupFlag(cmd, &actor.Group)
 	addDryRunForKFlag(cmd, &actor.DryRun)
 	actor.EnvSettings = settings
 
