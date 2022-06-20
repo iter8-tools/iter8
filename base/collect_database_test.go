@@ -103,7 +103,7 @@ func GoToTempDirectoryAndCopyMetricsFile(t *testing.T, metricsFileName string, t
 // test getElapsedTimeSeconds()
 func TestGetElapsedTimeSeconds(t *testing.T) {
 	versionInfo := map[string]interface{}{
-		"startingTime": "Feb 4, 2014 at 6:05pm (PST)",
+		"startingTime": "2020-02-01T09:44:40Z",
 	}
 
 	exp := &Experiment{
@@ -127,8 +127,8 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 // test if a user sets elapsedTimeSeconds getElapsedTimeSeconds()
 func TestSetElapsedTimeSecondsError(t *testing.T) {
 	versionInfo := map[string]interface{}{
-		"startingTime":       "Feb 4, 2014 at 6:05pm (PST)",
-		"elapsedTimeSeconds": "Feb 5, 2014 at 6:05pm (PST)",
+		"startingTime":       "2020-02-01T09:44:40Z",
+		"elapsedTimeSeconds": "2020-02-01T09:44:40Z",
 	}
 
 	exp := &Experiment{

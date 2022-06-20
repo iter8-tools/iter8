@@ -90,9 +90,6 @@ const (
 	startingTimeStr = "startingTime"
 
 	elapsedTimeSecondsStr = "elapsedTimeSeconds"
-
-	// timeLayout is an example time layout for startingTime
-	timeLayout = "Jan 2, 2006 at 3:04pm (MST)"
 )
 
 // collectDatabaseTask enables load testing of gRPC services.
@@ -124,7 +121,7 @@ func getElapsedTimeSeconds(versionInfo map[string]interface{}, exp *Experiment) 
 	startingTime := exp.Result.StartTime.Unix()
 	if versionInfo[startingTimeStr] != nil {
 		// Calling Parse() method with its parameters
-		temp, err := time.Parse(timeLayout, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
+		temp, err := time.Parse(time.RFC3339, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
 
 		if err != nil {
 			return 0, errors.New("cannot parse startingTime")
