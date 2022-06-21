@@ -67,7 +67,7 @@ func TestGenDB(t *testing.T) {
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
 	gOpts.ChartName = "iter8"
-	gOpts.Values = []string{"tasks={custommetrics,assess}", "custommetrics.providerURLs[0]=https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl", "custommetrics.common.providerURL=http://prometheus.istio-system:9090/api/v1/query", "custommetrics.versionInfo[0].destination_workload=httpbin-v2", "custommetrics.versionInfo[0].destination_workload_namespace=default", `custommetrics.versionInfo[0].startingTime="Feb 4\, 2014 at 6:05pm (PST)"`, "assess.SLOs.upper.istio/error-rate=0"}
+	gOpts.Values = []string{"tasks={custommetrics,assess}", "custommetrics.providerURLs[0]=https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl", "custommetrics.common.providerURL=http://prometheus.istio-system:9090/api/v1/query", "custommetrics.versionInfo[0].destination_workload=httpbin-v2", "custommetrics.versionInfo[0].destination_workload_namespace=default", `custommetrics.versionInfo[0].startingTime="2020-02-01T09:44:40Z"`, "assess.SLOs.upper.istio/error-rate=0"}
 
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)

@@ -94,9 +94,6 @@ const (
 
 	// how much time has elapsed between startingTime and now
 	elapsedTimeSecondsStr = "elapsedTimeSeconds"
-
-	// timeLayout is an example time layout for startingTime
-	timeLayout = "Jan 2, 2006 at 3:04pm (MST)"
 )
 
 // customMetricsTask enables collection of custom metrics from databases
@@ -129,7 +126,7 @@ func getElapsedTimeSeconds(versionInfo map[string]interface{}, exp *Experiment) 
 	if versionInfo[startingTimeStr] != nil {
 		var err error
 		// Calling Parse() method with its parameters
-		startingTime, err = time.Parse(timeLayout, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
+		startingTime, err = time.Parse(time.RFC3339, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
 
 		if err != nil {
 			return 0, errors.New("cannot parse startingTime")
