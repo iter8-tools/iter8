@@ -1,19 +1,19 @@
 {{- define "task.ready.tn" }}
 {{- /* Optional timeout from .Values.ready.timeout */ -}}
-{{- if . }}
-{{- if .timeout }}
-timeout: {{ .timeout }}
+{{- if .Values.ready }}
+{{- if .Values.ready.timeout }}
+timeout: {{ .Values.ready.timeout }}
 {{- end }}
 {{- end }}
 {{- /* Optional timeout from .Values.ready.namespace (non-Kubernetes experiment) or .Release.Namespace (Kubernetes experiment) */ -}}
 {{ $namespace := "" }}
-{{- if . }}
-{{- if .namespace }}
-{{ $namespace = .namespace }}
+{{- if .Values.ready }}
+{{- if .Values.ready.namespace }}
+{{ $namespace = .Values.ready.namespace }}
 {{- end }}
 {{- end }}
-{{- if $.Release.Namespace }}
-{{ $namespace = $.Release.Namespace }}
+{{- if .Release.Namespace }}
+{{ $namespace = .Release.Namespace }}
 {{- end }}
 {{- /* if one of .Values.ready.namespace or .Release.Namespace */ -}}
 {{- if $namespace }}
@@ -23,27 +23,27 @@ namespace: {{ $namespace }}
 
 {{- define "task.ready" }}
 {{- /* If user has specified a check for readiness of a Kubernetes Service */ -}}
-{{- if . }}
-{{- if .service }}
+{{- if .Values.ready }}
+{{- if .Values.ready.service }}
 # task: determine if Kubernetes Service exists
 - task: ready
   with:
-    name: {{ .service | quote }}
+    name: {{ .Values.ready.service | quote }}
     version: v1
     resource: services
 {{- include "task.ready.tn" . | indent 4 }}
 {{ end }}
 {{- /* If user has specified a check for readiness of a Kubernetes Deployment */ -}}
-{{- if .deploy }}
+{{- if .Values.ready.deploy }}
 # task: determine if Kubernetes Deployment is Available
 - task: ready
   with:
-    name: {{ .deploy | quote }}
+    name: {{ .Values.ready.deploy | quote }}
     group: apps
     version: v1
     resource: deployments
     condition: Available
-{{- include "task.ready.tn" . | indent 4 }}
+{{- include "task.ready.tn" $ | indent 4 }}
 {{ end }}
 {{- end }}
 {{- end }}
