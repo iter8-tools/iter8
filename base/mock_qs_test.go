@@ -2,6 +2,7 @@ package base
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"fortio.org/fortio/fhttp"
@@ -9,6 +10,7 @@ import (
 )
 
 func TestMockQuickStartWithSLOs(t *testing.T) {
+	os.Chdir(t.TempDir())
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
@@ -30,24 +32,26 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
-			SLOs: []SLO{{
-				Metric:     "http/latency-mean",
-				UpperLimit: float64Pointer(100),
-			}},
+			SLOs: &SLOLimits{
+				Upper: []SLO{{
+					Metric: "http/latency-mean",
+					Limit:  100,
+				}},
+			},
 		},
 	}
 	exp := &Experiment{
-		Tasks: []Task{ct, at},
+		Spec: []Task{ct, at},
 	}
 
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
-	err := exp.Tasks[0].run(exp)
+	err := exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Tasks[1].run(exp)
+	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied {
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
 		for _, b := range v {
 			assert.True(t, b)
 		}
@@ -55,6 +59,7 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
+	os.Chdir(t.TempDir())
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	mux.HandleFunc("/echo1/", fhttp.EchoHandler)
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
@@ -76,27 +81,29 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
-			SLOs: []SLO{{
-				Metric:     "http/latency-mean",
-				UpperLimit: float64Pointer(100),
-			}, {
-				Metric:     "http/latency-p95.00",
-				UpperLimit: float64Pointer(200),
-			}},
+			SLOs: &SLOLimits{
+				Upper: []SLO{{
+					Metric: "http/latency-mean",
+					Limit:  100,
+				}, {
+					Metric: "http/latency-p95.00",
+					Limit:  200,
+				}},
+			},
 		},
 	}
 	exp := &Experiment{
-		Tasks: []Task{ct, at},
+		Spec: []Task{ct, at},
 	}
 
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
-	err := exp.Tasks[0].run(exp)
+	err := exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Tasks[1].run(exp)
+	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied {
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
 		for _, b := range v {
 			assert.True(t, b)
 		}

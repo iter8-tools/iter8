@@ -29,7 +29,7 @@ func newKDeleteCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 			return actor.KubeRun()
 		},
 	}
-	addExperimentGroupFlag(cmd, &actor.Group, false)
+	addExperimentGroupFlag(cmd, &actor.Group)
 	actor.EnvSettings = settings
 	return cmd
 }

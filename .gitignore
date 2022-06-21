@@ -143,6 +143,9 @@ iter8
 **/ghz-call-data.bin
 **/ghz-call-metadata.json
 
+!charts
+!charts/iter8
+
 # iter8lib tgz
 iter8lib*.tgz
 

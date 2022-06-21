@@ -11,7 +11,7 @@ import (
 
 const (
 	// CollectGRPCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
-	CollectGRPCTaskName = "gen-load-and-collect-metrics-grpc"
+	CollectGRPCTaskName = "grpc"
 	// gRPC metric prefix
 	gRPCMetricPrefix = "grpc"
 	// gRPCRequestCountMetricName is name of the gRPC request count metric

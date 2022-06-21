@@ -11,6 +11,7 @@ import (
 	_ "embed"
 
 	"github.com/Masterminds/sprig"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
@@ -55,22 +56,26 @@ func (r *TextReporter) PrintSLOsText() string {
 }
 
 // getSLOStrText gets the text for an SLO
-func (r *TextReporter) getSLOStrText(i int) (string, error) {
+func (r *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
 	in := r.Result.Insights
-	slo := in.SLOs[i]
+	var slo base.SLO
+	if upper {
+		slo = in.SLOs.Upper[i]
+	} else {
+		slo = in.SLOs.Lower[i]
+	}
 	// get metric with units and description
 	str, err := r.MetricWithUnits(slo.Metric)
 	if err != nil {
 		log.Logger.Error("unable to get slo metric with units")
 		return "", err
 	}
-	// add lower limit if needed
-	if slo.LowerLimit != nil {
-		str = fmt.Sprintf("%v <= %v", *slo.LowerLimit, str)
-	}
-	// add upper limit if needed
-	if slo.UpperLimit != nil {
-		str = fmt.Sprintf("%v <= %v", str, *slo.UpperLimit)
+	// add upper limit
+	if upper {
+		str = fmt.Sprintf("%v <= %v", str, slo.Limit)
+	} else {
+		// add lower limit
+		str = fmt.Sprintf("%v <= %v", slo.Limit, str)
 	}
 	return str, nil
 }
@@ -89,16 +94,30 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "--------------\t---------")
 
-	for i := 0; i < len(in.SLOs); i++ {
-		str, err := r.getSLOStrText(i)
-		if err == nil {
-			fmt.Fprint(w, str)
-			for j := 0; j < in.NumVersions; j++ {
-				fmt.Fprintf(w, "\t%v", in.SLOsSatisfied[i][j])
-				fmt.Fprintln(w)
+	if in.SLOs != nil {
+		for i := 0; i < len(in.SLOs.Upper); i++ {
+			str, err := r.getSLOStrText(i, true)
+			if err == nil {
+				fmt.Fprint(w, str)
+				for j := 0; j < in.NumVersions; j++ {
+					fmt.Fprintf(w, "\t%v", in.SLOsSatisfied.Upper[i][j])
+					fmt.Fprintln(w)
+				}
+			} else {
+				log.Logger.Error("unable to extract SLO text")
 			}
-		} else {
-			log.Logger.Error("unable to extract SLO text")
+		}
+		for i := 0; i < len(in.SLOs.Lower); i++ {
+			str, err := r.getSLOStrText(i, false)
+			if err == nil {
+				fmt.Fprint(w, str)
+				for j := 0; j < in.NumVersions; j++ {
+					fmt.Fprintf(w, "\t%v", in.SLOsSatisfied.Lower[i][j])
+					fmt.Fprintln(w)
+				}
+			} else {
+				log.Logger.Error("unable to extract SLO text")
+			}
 		}
 	}
 

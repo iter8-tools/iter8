@@ -1,0 +1,16 @@
+{{ include "k.secret" . }}
+---
+{{ include "k.role" . }}
+---
+{{ include "k.serviceaccount" . }}
+---
+{{ include "k.rolebinding" . }}
+---
+{{- if eq "job" .Values.runner }}
+{{ include "k.job" . }}
+{{- else if eq "cronjob" .Values.runner }}
+{{ include "k.cronjob" . }}
+{{- else if eq "none" .Values.runner }}
+{{- else }}
+{{- fail "runner must be one of job, cronjob, or none" }}
+{{- end }}

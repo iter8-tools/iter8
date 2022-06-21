@@ -27,10 +27,24 @@ func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 	}
 	// also add metrics referenced in SLOs
 	// only scalar metrics can feature in SLOs (for now)
-	for _, v := range r.Result.Insights.SLOs {
-		nm, err := base.NormalizeMetricName(v.Metric)
-		if err == nil {
-			keys = append(keys, nm)
+	if r.Result.Insights.SLOs != nil {
+		for _, v := range r.Result.Insights.SLOs.Upper {
+			nm, err := base.NormalizeMetricName(v.Metric)
+			if err == nil {
+				keys = append(keys, nm)
+			}
+		}
+		for _, v := range r.Result.Insights.SLOs.Lower {
+			nm, err := base.NormalizeMetricName(v.Metric)
+			if err == nil {
+				keys = append(keys, nm)
+			}
+		}
+		for _, v := range r.Result.Insights.SLOs.Lower {
+			nm, err := base.NormalizeMetricName(v.Metric)
+			if err == nil {
+				keys = append(keys, nm)
+			}
 		}
 	}
 	// remove duplicates

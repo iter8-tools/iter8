@@ -15,6 +15,7 @@ import (
 )
 
 func TestLocalReportText(t *testing.T) {
+	os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs")
@@ -24,6 +25,7 @@ func TestLocalReportText(t *testing.T) {
 }
 
 func TestLocalReportTextNoInsights(t *testing.T) {
+	os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs/noinsights")
@@ -33,6 +35,7 @@ func TestLocalReportTextNoInsights(t *testing.T) {
 }
 
 func TestLocalReportHTML(t *testing.T) {
+	os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs")
@@ -43,26 +46,18 @@ func TestLocalReportHTML(t *testing.T) {
 }
 
 func TestKubeReportText(t *testing.T) {
+	os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentPath))
 	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-spec",
+			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{driver.ExperimentSpecPath: string(byteArray)},
-	}, metav1.CreateOptions{})
-
-	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentResultPath))
-	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-result",
-			Namespace: "default",
-		},
-		StringData: map[string]string{driver.ExperimentResultPath: string(byteArray)},
+		StringData: map[string]string{driver.ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	err := rOpts.KubeRun(os.Stdout)
@@ -70,6 +65,7 @@ func TestKubeReportText(t *testing.T) {
 }
 
 func TestLocalReportHTMLNoInsights(t *testing.T) {
+	os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs/noinsights")

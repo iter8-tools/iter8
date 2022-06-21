@@ -1,7 +1,6 @@
 package action
 
 import (
-	"fmt"
 	"io/ioutil"
 	"path"
 
@@ -18,7 +17,7 @@ import (
 
 const (
 	chartsFolderName = "charts"
-	providersStr     = "providers"
+	DefaultChartName = "iter8"
 )
 
 // GenOpts are the options used for generating experiment.yaml
@@ -38,6 +37,7 @@ func NewGenOpts() *GenOpts {
 	return &GenOpts{
 		ChartsParentDir: ".",
 		GenDir:          ".",
+		ChartName:       DefaultChartName,
 	}
 }
 
@@ -63,36 +63,9 @@ func (gen *GenOpts) LocalRun() error {
 	// add in experiment.yaml template
 	eData := []byte(`{{- include "experiment" . }}`)
 	c.Templates = append(c.Templates, &chart.File{
-		Name: path.Join("templates", driver.ExperimentSpecPath),
+		Name: path.Join("templates", driver.ExperimentPath),
 		Data: eData,
 	})
-
-	/*
-		attempt to extract providers from valuesToRender
-
-		if providers are available, create the respective metrics files from the
-		templates
-	*/
-	var providers []string
-	if rawProviders, ok := c.Values[providersStr]; ok {
-		// convert iterface to interface array
-		convertedRawProviders := rawProviders.([]interface{})
-
-		providers = make([]string, len(convertedRawProviders))
-		for i, v := range convertedRawProviders {
-			providers[i] = fmt.Sprint(v)
-		}
-	}
-
-	// add in metrics.yaml template
-	for _, provider := range providers {
-		// NOTE: This pattern must be documented
-		mData := []byte(`{{- include "metrics.` + provider + `" . }}`)
-		c.Templates = append(c.Templates, &chart.File{
-			Name: path.Join("templates", provider+driver.ExperimentMetricsPathSuffix),
-			Data: mData,
-		})
-	}
 
 	// get values
 	p := getter.All(cli.New())
@@ -116,26 +89,14 @@ func (gen *GenOpts) LocalRun() error {
 		return err
 	}
 
-	// write experiment spec file
-	specBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentSpecPath)])
-	err = ioutil.WriteFile(path.Join(gen.GenDir, driver.ExperimentSpecPath), specBytes, 0664)
+	// write experiment
+	expBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentPath)])
+	err = ioutil.WriteFile(path.Join(gen.GenDir, driver.ExperimentPath), expBytes, 0664)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
 		return err
 	}
-	log.Logger.Infof("created %v file", driver.ExperimentSpecPath)
-
-	// write metric spec files
-	for _, provider := range providers {
-		metricsFileName := provider + driver.ExperimentMetricsPathSuffix
-		metricsBytes := []byte(m[path.Join(c.Name(), "templates", metricsFileName)])
-		err = ioutil.WriteFile(path.Join(gen.GenDir, metricsFileName), metricsBytes, 0664)
-		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment spec")
-			return err
-		}
-		log.Logger.Infof("created %v file", metricsFileName)
-	}
+	log.Logger.Infof("created %v file", driver.ExperimentPath)
 
 	return err
 }

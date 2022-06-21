@@ -8,7 +8,7 @@ import (
 
 // hubDesc is the description of the hub command
 const hubDesc = `
-Download Iter8 experiment charts from a Git repo or other sources.
+Download the Iter8 experiment chart from a URL.
 
 	$ iter8 hub
 
@@ -21,7 +21,7 @@ func newHubCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "hub",
-		Short:        "Download experiment charts",
+		Short:        "Download Iter8 experiment chart",
 		Long:         hubDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
@@ -34,7 +34,7 @@ func newHubCmd() *cobra.Command {
 
 // add the remoteFolderURL flag to the command
 func addRemoteFolderURLFlag(cmd *cobra.Command, remoteFolderURLPtr *string) {
-	cmd.Flags().StringVar(remoteFolderURLPtr, "remoteFolderURL", ia.DefaultRemoteFolderURL(), "URL of the remote folder containing Iter8 experiment charts. Accepts any URL supported by https://github.com/hashicorp/go-getter")
+	cmd.Flags().StringVar(remoteFolderURLPtr, "remoteFolderURL", ia.DefaultRemoteFolderURL(), "URL of the remote folder containing the Iter8 experiment chart. Accepts any URL supported by https://github.com/hashicorp/go-getter")
 }
 
 // initialize with the hub command

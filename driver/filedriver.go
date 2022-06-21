@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"path"
-	"text/template"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -17,43 +16,28 @@ type FileDriver struct {
 	RunDir string
 }
 
-// ReadSpec reads experiment spec from file
-func (f *FileDriver) ReadSpec() (base.ExperimentSpec, error) {
-	b, err := ioutil.ReadFile(path.Join(f.RunDir, ExperimentSpecPath))
+// Read the experiment
+func (f *FileDriver) Read() (*base.Experiment, error) {
+	b, err := ioutil.ReadFile(path.Join(f.RunDir, ExperimentPath))
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment spec")
-		return nil, errors.New("unable to read experiment spec")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment")
+		return nil, errors.New("unable to read experiment")
 	}
-	return SpecFromBytes(b)
+	return ExperimentFromBytes(b)
 }
 
-// ReadMetricsSpec reads metrics spec from file
-func (f *FileDriver) ReadMetricsSpec(provider string) (*template.Template, error) {
-	b, err := ioutil.ReadFile(path.Join(f.RunDir, provider+ExperimentMetricsPathSuffix))
+// Write the experiment
+func (f *FileDriver) Write(exp *base.Experiment) error {
+	b, _ := yaml.Marshal(exp)
+	err := ioutil.WriteFile(path.Join(f.RunDir, ExperimentPath), b, 0664)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read metrics spec")
-		return nil, errors.New("unable to read metrics spec")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
+		return errors.New("unable to write experiment")
 	}
-	return MetricsSpecFromBytes(b)
+	return nil
 }
 
-// ReadResult reads experiment result from file
-func (f *FileDriver) ReadResult() (*base.ExperimentResult, error) {
-	b, err := ioutil.ReadFile(path.Join(f.RunDir, ExperimentResultPath))
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment result")
-		return nil, errors.New("unable to read experiment result")
-	}
-	return ResultFromBytes(b)
-}
-
-// WriteResult writes experiment result to file
-func (f *FileDriver) WriteResult(res *base.ExperimentResult) error {
-	rBytes, _ := yaml.Marshal(res)
-	err := ioutil.WriteFile(path.Join(f.RunDir, ExperimentResultPath), rBytes, 0664)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment result")
-		return err
-	}
-	return err
+// GetRevision is undefined for file drivers
+func (f *FileDriver) GetRevision() int {
+	return 0
 }
