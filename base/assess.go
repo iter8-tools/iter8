@@ -8,8 +8,8 @@ import (
 
 // assessInputs contain the inputs to the assess-app-versions task to be executed.
 type assessInputs struct {
-	// SLOs is a list of service level objectives
-	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
+	// SLOs are the SLO limits
+	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 }
 
 // assessTask enables assessment of versions
@@ -22,7 +22,7 @@ type assessTask struct {
 
 const (
 	// AssessTaskName is the name of the task this file implements
-	AssessTaskName = "assess-app-versions"
+	AssessTaskName = "assess"
 )
 
 // initializeDefaults sets default values for task inputs
@@ -46,7 +46,7 @@ func (t *assessTask) run(exp *Experiment) error {
 		log.Logger.Error("uninitialized insights within experiment")
 		return errors.New("uninitialized insights within experiment")
 	}
-	if len(t.With.SLOs) == 0 ||
+	if t.With.SLOs == nil ||
 		exp.Result.Insights.NumVersions == 0 {
 		// do nothing for now
 		// todo: fix when rewards are introduced
@@ -68,42 +68,46 @@ func (t *assessTask) run(exp *Experiment) error {
 	}
 
 	// set SLOsSatisfied
-	exp.Result.Insights.SLOsSatisfied = evaluateSLOs(exp, t.With.SLOs)
+	exp.Result.Insights.SLOsSatisfied = &SLOResults{
+		Upper: evaluateSLOs(exp, t.With.SLOs.Upper, true),
+		Lower: evaluateSLOs(exp, t.With.SLOs.Lower, false),
+	}
 
 	return err
 }
 
 // evaluate SLOs and output the boolean SLO X version matrix
-func evaluateSLOs(exp *Experiment, slos []SLO) [][]bool {
+func evaluateSLOs(exp *Experiment, slos []SLO, upper bool) [][]bool {
 	slosSatisfied := make([][]bool, len(slos))
 	for i := 0; i < len(slos); i++ {
 		slosSatisfied[i] = make([]bool, exp.Result.Insights.NumVersions)
 		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
-			slosSatisfied[i][j] = sloSatisfied(exp, slos, i, j)
+			slosSatisfied[i][j] = sloSatisfied(exp, slos, i, j, upper)
 		}
 	}
 	return slosSatisfied
 }
 
 // sloSatisfied returns true if SLO i satisfied by version j
-func sloSatisfied(e *Experiment, slos []SLO, i int, j int) bool {
+func sloSatisfied(e *Experiment, slos []SLO, i int, j int, upper bool) bool {
 	val := e.Result.Insights.ScalarMetricValue(j, slos[i].Metric)
 	// check if metric is available
 	if val == nil {
 		log.Logger.Warnf("unable to find value for version %v and metric %s", j, slos[i].Metric)
 		return false
 	}
-	// check lower limit
-	if slos[i].LowerLimit != nil {
-		if *val < *slos[i].LowerLimit {
+
+	if upper {
+		// check upper limit
+		if *val > slos[i].Limit {
+			return false
+		}
+	} else {
+		// check lower limit
+		if *val < slos[i].Limit {
 			return false
 		}
 	}
-	// check upper limit
-	if slos[i].UpperLimit != nil {
-		if *val > *slos[i].UpperLimit {
-			return false
-		}
-	}
+
 	return true
 }

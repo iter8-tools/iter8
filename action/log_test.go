@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
@@ -13,15 +14,15 @@ import (
 )
 
 func TestLog(t *testing.T) {
+	os.Chdir(t.TempDir())
 	var err error
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.ChartsParentDir = base.CompletePath("../", "")
-	lOpts.ChartName = "load-test-http"
+	lOpts.ChartName = "iter8"
 	lOpts.NoDownload = true
-	lOpts.Values = []string{"url=https://httpbin.org/get", "duration=2s"}
-	lOpts.RunDir = t.TempDir()
+	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

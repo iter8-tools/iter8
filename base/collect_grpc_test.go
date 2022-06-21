@@ -1,6 +1,7 @@
 package base
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -9,11 +10,13 @@ import (
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
+	"sigs.k8s.io/yaml"
 )
 
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
+	os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
 	if err != nil {
@@ -36,10 +39,10 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
 
 	exp := &Experiment{
-		Tasks:  []Task{ct},
+		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
 	}
-	exp.initResults()
+	exp.initResults(1)
 	err = ct.run(exp)
 
 	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
@@ -68,6 +71,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 }
 
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
+	os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
 	if err != nil {
@@ -97,48 +101,58 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 			Task: StringPointer(AssessTaskName),
 		},
 		With: assessInputs{
-			SLOs: []SLO{{
-				Metric:     "grpc/latency/mean",
-				UpperLimit: float64Pointer(100),
-			}, {
-				Metric:     "grpc/latency/p95.00",
-				UpperLimit: float64Pointer(200),
-			}, {
-				Metric:     "grpc/latency/stddev",
-				UpperLimit: float64Pointer(20),
-			}, {
-				Metric:     "grpc/latency/max",
-				UpperLimit: float64Pointer(200),
-			}, {
-				Metric:     "grpc/latency/min",
-				LowerLimit: float64Pointer(0),
-			}, {
-				Metric:     "grpc/error-count",
-				UpperLimit: float64Pointer(0),
-			}, {
-				Metric:     "grpc/request-count",
-				UpperLimit: float64Pointer(100),
-				LowerLimit: float64Pointer(100),
-			}},
+			SLOs: &SLOLimits{
+				Lower: []SLO{{
+					Metric: "grpc/request-count",
+					Limit:  100,
+				}},
+				Upper: []SLO{{
+					Metric: "grpc/latency/mean",
+					Limit:  100,
+				}, {
+					Metric: "grpc/latency/p95.00",
+					Limit:  200,
+				}, {
+					Metric: "grpc/latency/stddev",
+					Limit:  20,
+				}, {
+					Metric: "grpc/latency/max",
+					Limit:  200,
+				}, {
+					Metric: "grpc/error-count",
+					Limit:  0,
+				}, {
+					Metric: "grpc/request-count",
+					Limit:  100,
+				}},
+			},
 		},
 	}
 	exp := &Experiment{
-		Tasks: []Task{ct, at},
+		Spec: []Task{ct, at},
 	}
 
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
-	err = exp.Tasks[0].run(exp)
+	err = exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Tasks[1].run(exp)
+	err = exp.Spec[1].run(exp)
 	assert.NoError(t, err)
 
 	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied {
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
 		for _, b := range v {
 			assert.True(t, b)
 		}
 	}
+	for _, v := range exp.Result.Insights.SLOsSatisfied.Lower {
+		for _, b := range v {
+			assert.True(t, b)
+		}
+	}
+
+	expBytes, _ := yaml.Marshal(exp)
+	log.Logger.Debug("\n" + string(expBytes))
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, int(ct.With.N), count)

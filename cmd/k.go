@@ -12,12 +12,9 @@ var kCmd = &cobra.Command{
 	Long:  "Work with Kubernetes experiments",
 }
 
-// addExperimentGroupFlag adds the experiment group flag and marks it as required or optional
-func addExperimentGroupFlag(cmd *cobra.Command, groupP *string, required bool) {
+// addExperimentGroupFlag adds the experiment group flag
+func addExperimentGroupFlag(cmd *cobra.Command, groupP *string) {
 	cmd.Flags().StringVarP(groupP, "group", "g", driver.DefaultExperimentGroup, "name of the experiment group")
-	if required {
-		cmd.MarkFlagRequired("group")
-	}
 }
 
 func init() {

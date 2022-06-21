@@ -135,7 +135,7 @@ func (r *HTMLReporter) RenderStr(what string) (string, error) {
 		if r.NoFailure() {
 			failureStatus = "Experiment has no failures."
 		}
-		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(r.Tasks), r.Result.NumCompletedTasks)
+		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(r.Spec), r.Result.NumCompletedTasks)
 		val = fmt.Sprint(completionStatus)
 		val += " "
 		val += fmt.Sprint(failureStatus)

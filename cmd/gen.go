@@ -8,9 +8,9 @@ import (
 
 // genDesc is the description for the gen command
 const genDesc = `
-Generate an experiment.yaml file by combining an experiment chart with values.
+Generate an experiment.yaml file by combining the Iter8 experiment chart with values.
 
-    $ iter8 gen -c load-test-http --set url=https://httpbin.org/get
+    $ iter8 gen --set "tasks={http}" --set http.url=https://httpbin.org/get
 
 This command is intended for development and testing of experiment charts. For production usage, the launch command is recommended.
 `
@@ -41,8 +41,7 @@ func addChartsParentDirFlag(cmd *cobra.Command, chartsParentDirPtr *string) {
 
 // addChartNameFlag to the command
 func addChartNameFlag(cmd *cobra.Command, chartNamePtr *string) {
-	cmd.Flags().StringVarP(chartNamePtr, "chartName", "c", "", "name of the experiment chart")
-	cmd.MarkFlagRequired("chartName")
+	cmd.Flags().StringVarP(chartNamePtr, "chartName", "c", ia.DefaultChartName, "name of the experiment chart")
 }
 
 // initialize with gen command

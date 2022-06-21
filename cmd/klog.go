@@ -32,7 +32,7 @@ func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 			}
 		},
 	}
-	addExperimentGroupFlag(cmd, &actor.Group, false)
+	addExperimentGroupFlag(cmd, &actor.Group)
 	actor.EnvSettings = settings
 	return cmd
 }

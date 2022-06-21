@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -34,12 +33,12 @@ type ExperimentSpec []Task
 
 // Experiment struct containing spec and result
 type Experiment struct {
-	// Tasks is the sequence of tasks that constitute this experiment
-	Tasks ExperimentSpec
+	// Spec is the sequence of tasks that constitute this experiment
+	Spec ExperimentSpec `json:"spec" yaml:"spec"`
 
 	// Result is the current results from this experiment.
 	// The experiment may not have completed in which case results may be partial.
-	Result *ExperimentResult
+	Result *ExperimentResult `json:"result" yaml:"result"`
 
 	// driver enables interacting with experiment result stored externally
 	driver Driver
@@ -47,6 +46,9 @@ type Experiment struct {
 
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
+	// Revision of this experiment
+	Revision int `json:"revision,omitempty" yaml:"revision,omitempty"`
+
 	// StartTime is the time when the experiment run started
 	StartTime time.Time `json:"startTime" yaml:"startTime"`
 
@@ -91,13 +93,10 @@ type Insights struct {
 	HistMetricValues []map[string][]HistBucket `json:"histMetricValues,omitempty" yaml:"histMetricValues,omitempty"`
 
 	// SLOs involved in this experiment
-	SLOs []SLO `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
+	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 
-	// SLOsSatisfied:
-	// the outer slice must be of the same length as SLOs
-	// the length of the inner slice must be the number of app versions
-	// the boolean value at [i][j] indicate if SLO [i] is satisfied by version [j]
-	SLOsSatisfied [][]bool `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
+	// SLOsSatisfied indicator matrices that show if upper and lower SLO limits are satisfied
+	SLOsSatisfied *SLOResults `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
 }
 
 // MetricMeta describes a metric
@@ -115,11 +114,28 @@ type SLO struct {
 	// Metric is the fully qualified metric name in the backendName/metricName format
 	Metric string `json:"metric" yaml:"metric"`
 
-	// UpperLimit is the maximum acceptable value of the metric
-	UpperLimit *float64 `json:"upperLimit,omitempty" yaml:"upperLimit,omitempty"`
+	// Limit is the acceptable limit for this metric
+	Limit float64 `json:"limit" yaml:"limit"`
+}
 
-	// LowerLimit is the minimum acceptable value of the metric
-	LowerLimit *float64 `json:"lowerLimit,omitempty" yaml:"lowerLimit,omitempty"`
+// SLOLimits specify upper or lower limits for metrics
+type SLOLimits struct {
+	// Upper limits for metrics
+	Upper []SLO `json:"upper,omitempty" yaml:"upper,omitempty"`
+
+	// Lower limits for metrics
+	Lower []SLO `json:"lower,omitempty" yaml:"lower,omitempty"`
+}
+
+// SLOResults specify the results of SLO evaluations
+type SLOResults struct {
+	// Upper limits for metrics
+	// Upper[i][j] specifies if upper SLO i is satisfied by version j
+	Upper [][]bool `json:"upper,omitempty" yaml:"upper,omitempty"`
+
+	// Lower limits for metrics
+	// Lower[i][j] specifies if lower SLO i is satisfied by version j
+	Lower [][]bool `json:"lower,omitempty" yaml:"lower,omitempty"`
 }
 
 // TaskMeta provides common fields used across all tasks
@@ -176,8 +192,8 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				rt := &readinessTask{}
 				json.Unmarshal(tBytes, rt)
 				tsk = rt
-			case CollectDatabaseTaskName:
-				cdt := &collectDatabaseTask{}
+			case CustomMetricsTaskName:
+				cdt := &customMetricsTask{}
 				err := json.Unmarshal(tBytes, cdt)
 				if err != nil {
 					e := errors.New("json unmarshal error")
@@ -321,7 +337,7 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 // setSLOs sets the SLOs field in insights
 // if this function is called multiple times (example, due to looping), then
 // it is intended to be called with the same argument each time
-func (in *Insights) setSLOs(slos []SLO) error {
+func (in *Insights) setSLOs(slos *SLOLimits) error {
 	if in.SLOs != nil {
 		if reflect.DeepEqual(in.SLOs, slos) {
 			return nil
@@ -342,16 +358,27 @@ func (e *Experiment) initializeSLOsSatisfied() error {
 		return nil // already initialized
 	}
 	// LHS will be nil
-	e.Result.Insights.SLOsSatisfied = make([][]bool, len(e.Result.Insights.SLOs))
-	for i := 0; i < len(e.Result.Insights.SLOs); i++ {
-		e.Result.Insights.SLOsSatisfied[i] = make([]bool, e.Result.Insights.NumVersions)
+	e.Result.Insights.SLOsSatisfied = &SLOResults{
+		Upper: make([][]bool, 0),
+		Lower: make([][]bool, 0),
+	}
+	if e.Result.Insights.SLOs != nil {
+		e.Result.Insights.SLOsSatisfied.Upper = make([][]bool, len(e.Result.Insights.SLOs.Upper))
+		for i := 0; i < len(e.Result.Insights.SLOs.Upper); i++ {
+			e.Result.Insights.SLOsSatisfied.Upper[i] = make([]bool, e.Result.Insights.NumVersions)
+		}
+		e.Result.Insights.SLOsSatisfied.Lower = make([][]bool, len(e.Result.Insights.SLOs.Lower))
+		for i := 0; i < len(e.Result.Insights.SLOs.Lower); i++ {
+			e.Result.Insights.SLOsSatisfied.Lower[i] = make([]bool, e.Result.Insights.NumVersions)
+		}
 	}
 	return nil
 }
 
 // initResults initializes the results section of an experiment
-func (e *Experiment) initResults() {
+func (e *Experiment) initResults(revision int) {
 	e.Result = &ExperimentResult{
+		Revision:          revision,
 		StartTime:         time.Now(),
 		NumLoops:          0,
 		NumCompletedTasks: 0,
@@ -626,24 +653,21 @@ func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
 
 // Driver enables interacting with experiment result stored externally
 type Driver interface {
-	// ReadSpec reads the experiment spec
-	ReadSpec() (ExperimentSpec, error)
+	// Read the experiment
+	Read() (*Experiment, error)
 
-	// ReadResult reads the experiment result
-	ReadResult() (*ExperimentResult, error)
+	// Write the experiment
+	Write(e *Experiment) error
 
-	// WriteResult writes the experiment result
-	WriteResult(r *ExperimentResult) error
-
-	// ReadMetricsSpec reads the metrics spec
-	ReadMetricsSpec(provider string) (*template.Template, error)
+	// GetRevision returns the experiment revision
+	GetRevision() int
 }
 
 // Completed returns true if the experiment is complete
 func (exp *Experiment) Completed() bool {
 	if exp != nil {
 		if exp.Result != nil {
-			if exp.Result.NumCompletedTasks == len(exp.Tasks) {
+			if exp.Result.NumCompletedTasks == len(exp.Spec) {
 				return true
 			}
 		}
@@ -689,8 +713,14 @@ func (exp *Experiment) getSLOsSatisfiedBy() []int {
 	sat := []int{}
 	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
 		satThis := true
-		for i := 0; i < len(exp.Result.Insights.SLOs); i++ {
-			satThis = satThis && exp.Result.Insights.SLOsSatisfied[i][j]
+		for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ {
+			satThis = satThis && exp.Result.Insights.SLOsSatisfied.Upper[i][j]
+			if !satThis {
+				break
+			}
+		}
+		for i := 0; i < len(exp.Result.Insights.SLOs.Lower); i++ {
+			satThis = satThis && exp.Result.Insights.SLOsSatisfied.Lower[i][j]
 			if !satThis {
 				break
 			}
@@ -717,24 +747,22 @@ func (exp *Experiment) run(driver Driver) error {
 	var err error
 	exp.driver = driver
 	if exp.Result == nil {
-		exp.initResults()
-		err = driver.WriteResult(exp.Result)
-		if err != nil {
-			return err
-		}
+		err = errors.New("experiment with nil result section cannot be run")
+		log.Logger.Error(err)
+		return err
 	}
 
 	log.Logger.Debug("exp result exists now ... ")
 
 	exp.incrementNumLoops()
 	log.Logger.Debugf("experiment loop %d started ...", exp.Result.NumLoops)
-	err = driver.WriteResult(exp.Result)
+	err = driver.Write(exp)
 	if err != nil {
 		return err
 	}
 
-	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Tasks))
-	for i, t := range exp.Tasks {
+	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Spec))
+	for i, t := range exp.Spec {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
 		shouldRun := true
 		// if task has a condition
@@ -759,7 +787,7 @@ func (exp *Experiment) run(driver Driver) error {
 			if err != nil {
 				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
 				exp.failExperiment()
-				e := driver.WriteResult(exp.Result)
+				e := driver.Write(exp)
 				if e != nil {
 					return e
 				}
@@ -771,7 +799,7 @@ func (exp *Experiment) run(driver Driver) error {
 		}
 
 		exp.incrementNumCompletedTasks()
-		err = driver.WriteResult(exp.Result)
+		err = driver.Write(exp)
 		if err != nil {
 			return err
 		}
@@ -827,27 +855,22 @@ func getName(t Task) *string {
 }
 
 // BuildExperiment builds an experiment
-func BuildExperiment(withResult bool, driver Driver) (*Experiment, error) {
-	e := Experiment{}
-	var err error
-	e.Tasks, err = driver.ReadSpec()
+func BuildExperiment(driver Driver) (*Experiment, error) {
+	e, err := driver.Read()
 	if err != nil {
 		return nil, err
 	}
-	if withResult {
-		e.Result, err = driver.ReadResult()
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &e, nil
+	return e, nil
 }
 
 // RunExperiment runs an experiment
 func RunExperiment(reuseResult bool, driver Driver) error {
-	if exp, err := BuildExperiment(reuseResult, driver); err != nil {
+	if exp, err := BuildExperiment(driver); err != nil {
 		return err
 	} else {
+		if !reuseResult {
+			exp.initResults(driver.GetRevision())
+		}
 		return exp.run(driver)
 	}
 }

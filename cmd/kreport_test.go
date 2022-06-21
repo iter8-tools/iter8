@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -14,6 +15,7 @@ import (
 )
 
 func TestKReport(t *testing.T) {
+	os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k report
 		{
@@ -26,22 +28,13 @@ func TestKReport(t *testing.T) {
 	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentSpecPath))
+	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentPath))
 	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-spec",
+			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{id.ExperimentSpecPath: string(byteArray)},
-	}, metav1.CreateOptions{})
-
-	byteArray, _ = ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentResultPath))
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-result",
-			Namespace: "default",
-		},
-		StringData: map[string]string{id.ExperimentResultPath: string(byteArray)},
+		StringData: map[string]string{id.ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	runTestActionCmd(t, tests)

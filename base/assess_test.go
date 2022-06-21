@@ -1,6 +1,7 @@
 package base
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,6 +9,7 @@ import (
 
 // Test a runnable assert condition here
 func TestRunAssess(t *testing.T) {
+	os.Chdir(t.TempDir())
 	// simple assess without any SLOs
 	// should succeed
 	task := &assessTask{
@@ -17,9 +19,9 @@ func TestRunAssess(t *testing.T) {
 		With: assessInputs{},
 	}
 	exp := &Experiment{
-		Tasks: []Task{task},
+		Spec: []Task{task},
 	}
-	exp.initResults()
+	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
 	err := task.run(exp)
 	assert.NoError(t, err)
@@ -27,10 +29,12 @@ func TestRunAssess(t *testing.T) {
 	// assess with an SLO
 	// should succeed
 	task.With = assessInputs{
-		SLOs: []SLO{{
-			Metric:     "a/b",
-			UpperLimit: float64Pointer(20.0),
-		}},
+		SLOs: &SLOLimits{
+			Upper: []SLO{{
+				Metric: "a/b",
+				Limit:  20.0,
+			}},
+		},
 	}
 	err = task.run(exp)
 	assert.NoError(t, err)

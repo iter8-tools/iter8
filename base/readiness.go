@@ -21,7 +21,7 @@ import (
 
 const (
 	// ReadinessTaskName is the task name
-	ReadinessTaskName = "k8s-object-ready"
+	ReadinessTaskName = "ready"
 
 	// defaultTimeout is default timeout for readiness command
 	defaultTimeout = "10s"

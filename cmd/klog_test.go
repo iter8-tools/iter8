@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -14,11 +15,12 @@ import (
 )
 
 func TestKLog(t *testing.T) {
+	os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k launch
 		{
 			name:   "k launch",
-			cmd:    fmt.Sprintf("k launch -c load-test-http --chartsParentDir %v --noDownload --set url=https://httpbin.org/get --set duration=2s", base.CompletePath("../", "")),
+			cmd:    fmt.Sprintf("k launch -c iter8 --noDownload --chartsParentDir %v --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../", "")),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 		// k assert

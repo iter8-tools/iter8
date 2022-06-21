@@ -11,7 +11,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"text/template"
 	"time"
 
 	// Import to initialize client auth plugins.
@@ -157,14 +156,9 @@ func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
 	return rel, nil
 }
 
-// getSpecSecretName yields the name of the experiment spec secret
-func (driver *KubeDriver) getSpecSecretName() string {
-	return fmt.Sprintf("%v-spec", driver.Group)
-}
-
-// getResultSecretName yields the name of the experiment result secret
-func (driver *KubeDriver) getResultSecretName() string {
-	return fmt.Sprintf("%v-result", driver.Group)
+// getExperimentSecretName yields the name of the experiment secret
+func (driver *KubeDriver) getExperimentSecretName() string {
+	return fmt.Sprintf("%v", driver.Group)
 }
 
 // getSecretWithRetry attempts to get a Kubernetes secret with retries
@@ -194,94 +188,48 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 	return sec, nil
 }
 
-// getExperimentSpecSecret gets the Kubernetes experiment spec secret
-func (driver *KubeDriver) getExperimentSpecSecret() (s *corev1.Secret, err error) {
-	return driver.getSecretWithRetry(driver.getSpecSecretName())
+// getExperimentSecret gets the Kubernetes experiment secret
+func (driver *KubeDriver) getExperimentSecret() (s *corev1.Secret, err error) {
+	return driver.getSecretWithRetry(driver.getExperimentSecretName())
 }
 
-// ReadSpec creates an ExperimentSpec struct for a Kubernetes experiment
-func (driver *KubeDriver) ReadSpec() (base.ExperimentSpec, error) {
-	s, err := driver.getExperimentSpecSecret()
+// Read experiment from secret
+func (driver *KubeDriver) Read() (*base.Experiment, error) {
+	s, err := driver.getExperimentSecret()
 	if err != nil {
 		return nil, err
 	}
 
-	spec, ok := s.Data[ExperimentSpecPath]
+	b, ok := s.Data[ExperimentPath]
 	if !ok {
-		err = fmt.Errorf("unable to extract experiment spec; spec secret has no %v field", ExperimentSpecPath)
+		err = fmt.Errorf("unable to extract experiment; spec secret has no %v field", ExperimentPath)
 		log.Logger.Error(err)
 		return nil, err
 	}
 
-	return SpecFromBytes(spec)
+	return ExperimentFromBytes(b)
 }
 
-// ReadMetricsSpec creates a metrics Template struct for a Kubernetes experiment
-func (driver *KubeDriver) ReadMetricsSpec(provider string) (*template.Template, error) {
-	s, err := driver.getExperimentSpecSecret()
-	if err != nil {
-		return nil, err
-	}
-
-	res, ok := s.Data[provider+ExperimentMetricsPathSuffix]
-	if !ok {
-		err = fmt.Errorf("unable to extract %v metrics spec; result secret has no %v field", provider, provider+ExperimentMetricsPathSuffix)
-		log.Logger.Error(err)
-		return nil, err
-	}
-
-	return MetricsSpecFromBytes(res)
-}
-
-// getExperimentResultSecret gets the Kubernetes experiment result secret
-func (driver *KubeDriver) getExperimentResultSecret() (s *corev1.Secret, err error) {
-	return driver.getSecretWithRetry(driver.getResultSecretName())
-}
-
-// ReadResult creates an ExperimentResult struct for a Kubernetes experiment
-func (driver *KubeDriver) ReadResult() (*base.ExperimentResult, error) {
-	s, err := driver.getExperimentResultSecret()
-	if err != nil {
-		return nil, err
-	}
-
-	res, ok := s.Data[ExperimentResultPath]
-	if !ok {
-		err = fmt.Errorf("unable to extract experiment result; result secret has no %v field", ExperimentResultPath)
-		log.Logger.Error(err)
-		return nil, err
-	}
-
-	return ResultFromBytes(res)
-}
-
-// PayloadValue is used to patch Kubernetes resources
-type PayloadValue struct {
-	// Op indicates the type of patch
-	Op string `json:"op"`
-	// Path is the JSON field path
-	Path string `json:"path"`
-	// Value is the value of the field
-	Value string `json:"value"`
-}
-
-// formResultSecret creates the result secret using the result
-func (driver *KubeDriver) formResultSecret(r *base.ExperimentResult) (*corev1.Secret, error) {
-	byteArray, _ := yaml.Marshal(r)
+// formExperimentSecret creates the experiment secret using the experiment
+func (driver *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secret, error) {
+	byteArray, _ := yaml.Marshal(e)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: driver.getResultSecretName(),
+			Name: driver.getExperimentSecretName(),
+			Annotations: map[string]string{
+				"iter8.tools/group": driver.Group,
+			},
 		},
-		StringData: map[string]string{ExperimentResultPath: string(byteArray)},
+		StringData: map[string]string{ExperimentPath: string(byteArray)},
 	}
-	// formed result secret ...
+	// formed experiment secret ...
 	return &sec, nil
 }
 
-// updateExperimentResultSecret updates the experiment result secret
+// updateExperimentSecret updates the experiment secret
 // as opposed to patch, update is an atomic operation
-func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult) error {
-	if sec, err := driver.formResultSecret(r); err == nil {
+func (driver *KubeDriver) updateExperimentSecret(e *base.Experiment) error {
+	if sec, err := driver.formExperimentSecret(e); err == nil {
 		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
 		_, err1 := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
 		// TODO: Evaluate if result secret update requires retries.
@@ -297,12 +245,17 @@ func (driver *KubeDriver) updateExperimentResultSecret(r *base.ExperimentResult)
 	return nil
 }
 
-// WriteResult writes results for a Kubernetes experiment
-func (driver *KubeDriver) WriteResult(r *base.ExperimentResult) error {
-	if err := driver.updateExperimentResultSecret(r); err != nil {
+// Write writes a Kubernetes experiment
+func (driver *KubeDriver) Write(e *base.Experiment) error {
+	if err := driver.updateExperimentSecret(e); err != nil {
 		return err
 	}
 	return nil
+}
+
+// GetRevision gets the experiment revision
+func (driver *KubeDriver) GetRevision() int {
+	return driver.revision
 }
 
 // UpdateChartDependencies for an Iter8 experiment chart

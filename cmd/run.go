@@ -11,7 +11,7 @@ import (
 
 // runDesc is the description of the run command
 var runDesc = `
-Run an experiment specified in experiment.yaml. Output results to result.yaml.
+Run an experiment specified in experiment.yaml. This command will modify the experiment.yaml as part of the run.
 
 	$ iter8 run
 
@@ -38,13 +38,13 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 
 // addRunDirFlag adds run dir flag to the command
 func addRunDirFlag(cmd *cobra.Command, runDirPtr *string) {
-	cmd.Flags().StringVar(runDirPtr, "runDir", ".", "directory where experiment is run; contains experiment.yaml and result.yaml")
+	cmd.Flags().StringVar(runDirPtr, "runDir", ".", "directory where experiment is run; contains experiment.yaml")
 }
 
 // addReuseResult allows the experiment to reuse the experiment result for
 // looping experiments
 func addReuseResult(cmd *cobra.Command, reuseResultPtr *bool) {
-	cmd.Flags().BoolVar(reuseResultPtr, "reuseResult", false, "reuse experiment result for looping experiment")
+	cmd.Flags().BoolVar(reuseResultPtr, "reuseResult", false, "reuse experiment result; useful for experiments with multiple loops")
 }
 
 // initialize with run cmd

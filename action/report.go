@@ -57,7 +57,7 @@ func (rOpts *ReportOpts) KubeRun(out io.Writer) error {
 
 // Run generates the text or HTML report
 func (rOpts *ReportOpts) Run(eio base.Driver, out io.Writer) error {
-	if e, err := base.BuildExperiment(true, eio); err != nil {
+	if e, err := base.BuildExperiment(eio); err != nil {
 		return err
 	} else {
 		switch strings.ToLower(rOpts.OutputFormat) {

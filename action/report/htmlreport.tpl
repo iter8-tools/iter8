@@ -78,27 +78,42 @@
               </tr>
             </thead>
             <tbody>
-                {{- range $ind, $slo := .Result.Insights.SLOs }}
+                {{- range $ind, $slo := .Result.Insights.SLOs.Upper }}
                 <tr scope="row">
                   <td>
-                    {{ if $slo.LowerLimit }} {{- $slo.LowerLimit }} &leq; {{ end -}}
                     <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $slo.Metric }}">
                       {{ $.MetricWithUnits $slo.Metric }}
                     </a>
-                    {{ if $slo.UpperLimit }} &leq; {{ $slo.UpperLimit -}} {{- end }}
+                    &leq; {{ $slo.Limit -}}
                   </td>
-                  {{- range (index $.Result.Insights.SLOsSatisfied $ind) }}
+                  {{- range (index $.Result.Insights.SLOsSatisfied.Upper $ind) }}
                   <td class="{{ renderSLOSatisfiedCellClass .  }} text-center">
                     <i class="far {{ renderSLOSatisfiedHTML . }}"></i>                
                   </td>
                   {{- end }}
                 </tr>
-                {{- end}}          
+                {{- end}}
+                {{- range $ind, $slo := .Result.Insights.SLOs.Lower }}
+                <tr scope="row">
+                  <td>
+                    {{- $slo.Limit }} &leq;
+                    <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $slo.Metric }}">
+                      {{ $.MetricWithUnits $slo.Metric }}
+                    </a>
+                  </td>
+                  {{- range (index $.Result.Insights.SLOsSatisfied.Lower $ind) }}
+                  <td class="{{ renderSLOSatisfiedCellClass .  }} text-center">
+                    <i class="far {{ renderSLOSatisfiedHTML . }}"></i>                
+                  </td>
+                  {{- end }}
+                </tr>
+                {{- end}}                 
             </tbody>
           </table>
         </section>
         {{- end }}
 
+        {{ if (.SortedVectorMetrics) }}
         <section class="mt-5">
           <h3 class="display-6">Metric Histograms</h3>
           <hr>
@@ -128,6 +143,7 @@
           </script>
           {{- end }}
         </section>
+        {{- end }}
 
         <section class="mt-5">
           <h3 class="display-6">Latest observed values for metrics</h3>

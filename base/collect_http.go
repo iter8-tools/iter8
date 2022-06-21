@@ -49,7 +49,7 @@ type collectHTTPInputs struct {
 
 const (
 	// CollectHTTPTaskName is the name of this task which performs load generation and metrics collection.
-	CollectHTTPTaskName = "gen-load-and-collect-metrics-http"
+	CollectHTTPTaskName = "http"
 	// defaultQPS is the default number of queries per second
 	defaultQPS = float32(8)
 	// defaultHTTPNumRequests is the default number of queries (in total)

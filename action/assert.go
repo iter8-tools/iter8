@@ -75,7 +75,7 @@ func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 
 	// check assert conditions
 	for {
-		exp, err := base.BuildExperiment(true, eio)
+		exp, err := base.BuildExperiment(eio)
 		if err != nil {
 			return false, err
 		}

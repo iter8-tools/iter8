@@ -15,9 +15,9 @@ func TestKubeDelete(t *testing.T) {
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.ChartsParentDir = base.CompletePath("../", "")
-	lOpts.ChartName = "load-test-http"
+	lOpts.ChartName = "iter8"
 	lOpts.NoDownload = true
-	lOpts.Values = []string{"url=https://iter8.tools", "duration=2s"}
+	lOpts.Values = []string{"tasks={http}", "http.url=https://iter8.tools", "http.duration=2s"}
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

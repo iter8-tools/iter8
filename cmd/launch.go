@@ -10,18 +10,19 @@ import (
 const launchDesc = `
 Launch an experiment. 
 
-	$ iter8 launch -c load-test-http --set url=https://httpbin.org/get
+	$ iter8 launch --set "tasks={http}" \
+		--set http.url=https://httpbin.org/get
 
-Use the dry option to simulate an experiment. This creates experiment.yaml and *.metrics.yaml files.
+Use the dry option to simulate an experiment. This creates the experiment.yaml file.
 
-	$ iter8 launch -c load-test-http \
-	  --set url=https://httpbin.org/get \
-	  --dry
+	$ iter8 launch \
+	--set http.url=https://httpbin.org/get \
+	--dry
 
-Launching an experiment requires the Iter8 experiment charts folder. You can use various launch flags to control:
-		1. Whether Iter8 should download the experiment charts folder from a remote URL (example, a GitHub URL), or reuse local charts.
-		2. The parent directory of the charts folder.
-		3. The remote URL (example, a GitHub URL) from which charts are downloaded.
+You can use various launch flags to control the following:
+	1. Whether Iter8 should download the Iter8 experiment chart from a remote URL or reuse local chart.
+	2. The remote URL (example, a GitHub URL) from which the Iter8 experiment chart is downloaded.
+	3. The local (parent) directory under which the Iter8 experiment chart is nested.
 `
 
 // newLaunchCmd creates the launch command
@@ -50,7 +51,7 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 
 // addDryRunFlag adds dry run flag to the launch command
 func addDryRunFlag(cmd *cobra.Command, dryRunPtr *bool) {
-	cmd.Flags().BoolVar(dryRunPtr, "dry", false, "simulate an experiment launch; outputs experiment.yaml and *.metrics.yaml files")
+	cmd.Flags().BoolVar(dryRunPtr, "dry", false, "simulate an experiment launch; outputs experiment.yaml file")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
 }
 
