@@ -10,7 +10,7 @@
 
 {{- define "task.ready" }}
 {{- if .Values.ready }}
-{{- include "task.ready.namespace" . }}
+{{- template "task.ready.namespace" . }}
 {{- if .Values.ready.service }}
 # task: determine if Kubernetes Service exists
 - task: ready

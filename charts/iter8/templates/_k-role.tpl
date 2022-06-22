@@ -12,7 +12,7 @@ rules:
   verbs: ["get", "update"]
 {{- if .Values.ready }}
 ---
-{{- include "task.ready.namespace" . }}
+{{- template "task.ready.namespace" . }}
 {{- if $namespace }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
