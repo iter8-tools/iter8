@@ -216,3 +216,35 @@ jobs:
     - name: k assert experiment completed without failures
       run: |
         iter8 k assert -c completed -c nofailure --timeout 60s
+
+  readiness-with-namespace:
+    name: Kubernetes readiness test with namespace
+    runs-on: ubuntu-latest
+    needs: 
+    - build-and-push
+    - assets
+    steps:
+    - uses: iter8-tools/iter8@v0.11
+    - name: Start kind cluster
+      uses: helm/kind-action@v1.2.0
+      with:
+        wait: 300s
+    - name: deploy resources to cluster
+      run: |
+        kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
+        kubectl expose deploy httpbin --port=80
+        kubectl create namespace experiments
+    - name: k launch with readiness checks
+      run: |
+        iter8 k launch -n experiments \
+        --set "tasks={ready,http,assess}" \
+        --set ready.deploy="httpbin" \
+        --set ready.service="httpbin" \
+        --set ready.timeout=60s \
+        --set ready.namespace=default \
+        --set http.url=http://httpbin.default/get \
+        --set assess.SLOs.upper.http/latency-mean=50 \
+        --set runner=job
+    - name: k assert experiment completed without failures
+      run: |
+        iter8 k assert -n experiments -c completed -c nofailure --timeout 60s
