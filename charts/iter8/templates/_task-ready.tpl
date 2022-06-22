@@ -6,6 +6,7 @@
 {{- else if .Release.Namespace }}
 {{- $namespace = .Release.Namespace }}
 {{- end }}
+{{- end }}
 
 {{- define "task.ready" }}
 {{- if .Values.ready }}
