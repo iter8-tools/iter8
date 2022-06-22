@@ -15,7 +15,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{- if .Values.ready }}
 ---
-{{- template "task.ready.namespace" . }}
+{{- $namespace := coalesce .Values.ready.namespace .Release.Namespace }}
 {{- if $namespace }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

@@ -1,16 +1,6 @@
-{{- define "task.ready.namespace" }}
-{{- /* Optional namespace value */ -}}
-{{- $namespace := "" }}
-{{- if .Values.ready.namespace }}
-{{- $namespace = .Values.ready.namespace }}
-{{- else if .Release.Namespace }}
-{{- $namespace = .Release.Namespace }}
-{{- end }}
-{{- end }}
-
 {{- define "task.ready" }}
 {{- if .Values.ready }}
-{{- template "task.ready.namespace" . }}
+{{- $namespace := coalesce .Values.ready.namespace .Release.Namespace }}
 {{- if .Values.ready.service }}
 # task: determine if Kubernetes Service exists
 - task: ready
