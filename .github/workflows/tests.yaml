@@ -97,7 +97,7 @@ jobs:
         --set "tasks={ready,http,assess}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
-        --set ready.timeout=60s 
+        --set ready.timeout=60s \
         --set http.url=http://localhost:8080/get \
         --set http.duration="3s" \
         --set assess.SLOs.upper.http/latency-p95=500 \
