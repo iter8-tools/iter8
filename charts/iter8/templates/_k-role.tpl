@@ -11,6 +11,17 @@ rules:
   resources: ["secrets"]
   verbs: ["get", "update"]
 {{- if .Values.ready }}
+---
+{{- include "task.ready.namespace" . }}
+{{- if $namespace }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-ready
+  namespace: {{ $namespace }}
+  annotations:
+    iter8.tools/group: {{ .Release.Name }}
+rules:
 {{- if .Values.ready.service }}
 - apiGroups: [""]
   resourceNames: [{{ .Values.ready.service | quote }}]
@@ -22,6 +33,7 @@ rules:
   resourceNames: [{{ .Values.ready.deploy | quote }}]
   resources: ["deployments"]
   verbs: ["get"]
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
