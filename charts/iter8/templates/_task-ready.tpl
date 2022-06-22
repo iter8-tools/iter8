@@ -1,28 +1,14 @@
-{{- define "task.ready.tn" }}
-{{- /* Optional timeout from .Values.ready.timeout */ -}}
-{{- if .Values.ready }}
-{{- if .Values.ready.timeout }}
-timeout: {{ .Values.ready.timeout }}
-{{- end }}
-{{- end }}
-{{- /* Optional timeout from .Values.ready.namespace (non-Kubernetes experiment) or .Release.Namespace (Kubernetes experiment) */ -}}
-{{ $namespace := "" }}
-{{- if .Values.ready }}
+{{- define "task.ready.namespace" }}
+{{- /* Optional namespace value */ -}}
+{{- $namespace := "" }}
 {{- if .Values.ready.namespace }}
-{{ $namespace = .Values.ready.namespace }}
+{{- $namespace = .Values.ready.namespace }}
+{{- else if .Release.Namespace }}
+{{- $namespace = .Release.Namespace }}
 {{- end }}
-{{- end }}
-{{- if .Release.Namespace }}
-{{ $namespace = .Release.Namespace }}
-{{- end }}
-{{- /* if one of .Values.ready.namespace or .Release.Namespace */ -}}
-{{- if $namespace }}
-namespace: {{ $namespace }}
-{{- end }}
-{{ end }}
 
 {{- define "task.ready" }}
-{{- /* If user has specified a check for readiness of a Kubernetes Service */ -}}
+{{- include "task.ready.namespace" . }}
 {{- if .Values.ready }}
 {{- if .Values.ready.service }}
 # task: determine if Kubernetes Service exists
@@ -31,11 +17,15 @@ namespace: {{ $namespace }}
     name: {{ .Values.ready.service | quote }}
     version: v1
     resource: services
-{{- include "task.ready.tn" . | indent 4 }}
-{{ end }}
-{{- /* If user has specified a check for readiness of a Kubernetes Deployment */ -}}
+{{- if $namespace }}
+    namespace: {{ $namespace }}
+{{- end }}
+{{- if .Values.ready.timeout }}
+    timeout: {{ .Values.ready.timeout }}
+{{- end }}
+{{- end }}
 {{- if .Values.ready.deploy }}
-# task: determine if Kubernetes Deployment is Available
+# task: determine if Kubernetes Deployment exists and is Available
 - task: ready
   with:
     name: {{ .Values.ready.deploy | quote }}
@@ -43,7 +33,12 @@ namespace: {{ $namespace }}
     version: v1
     resource: deployments
     condition: Available
-{{- include "task.ready.tn" $ | indent 4 }}
-{{ end }}
+{{- if $namespace }}
+    namespace: {{ $namespace }}
+{{- end }}
+{{- if .Values.ready.timeout }}
+    timeout: {{ .Values.ready.timeout }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
