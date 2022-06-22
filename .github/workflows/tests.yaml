@@ -90,6 +90,15 @@ jobs:
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
+    - name: wait for the app to come up
+      run: |
+        iter8 launch --noDownload \
+        --set "tasks={ready}" \
+        --set ready.deploy=httpbin \
+        --set ready.service=httpbin \
+        --set ready.timeout=60s
+    - name: port forward
+      run: |
         kubectl port-forward service/httpbin 8080:80 &
     - name: launch experiment
       run: |
