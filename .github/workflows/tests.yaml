@@ -70,8 +70,8 @@ jobs:
       run: |
         iter8 assert -c completed -c nofailure -c slos
 
-  load test HTTP (local) with readiness:
-    name: http load test (local) with readiness
+  readiness-check-in-a-local-experiment:
+    name: http load test local experiment with readiness check
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
