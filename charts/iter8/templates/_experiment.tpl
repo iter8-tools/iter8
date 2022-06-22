@@ -13,7 +13,7 @@ spec:
   {{- else if eq "http" . }}
   {{- include "task.http" $.Values.http -}}
   {{- else if eq "ready" . }}
-  {{- include "task.ready" $.Values.ready -}}
+  {{- include "task.ready" $ -}}
   {{- else }}
   {{- fail "task name must be one of assess, custommetrics, grpc, http, or ready" -}}
   {{- end }}
