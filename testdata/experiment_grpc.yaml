@@ -10,9 +10,8 @@ spec:
       timeout: 10s
       connect-timeeout: 5s
       protoURL: "https://raw.githubusercontent.com/bojand/ghz/v0.105.0/testdata/greeter.proto"
-      versionInfo:
-      - call: "helloworld.Greeter.SayHello"
-        host: "127.0.0.1"
+      call: "helloworld.Greeter.SayHello"
+      host: "127.0.0.1"
   # task 2: validate service level objectives for app using
   # the metrics collected in the above task
   - task: assess
