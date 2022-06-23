@@ -47,7 +47,7 @@ const (
 // test getElapsedTimeSeconds()
 func TestGetElapsedTimeSeconds(t *testing.T) {
 	os.Chdir(t.TempDir())
-	versionInfo := map[string]interface{}{
+	versionValues := map[string]interface{}{
 		"startingTime": "2020-02-01T09:44:40Z",
 	}
 
@@ -57,22 +57,22 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 	}
 
 	// this should add a startingTime that will be overwritten by the one in
-	// versionInfo
+	// versionValues
 	exp.initResults(1)
 
-	elapsedTimeSeconds, _ := getElapsedTimeSeconds(versionInfo, exp)
+	elapsedTimeSeconds, _ := getElapsedTimeSeconds(versionValues, exp)
 
 	// elapsedTimeSeconds should be a large number
 	//
 	// if getElapsedTimeSeconds() used the starting time from the experiment instead of
-	// the one from versionInfo, the elapsed time would be 0 or close to 0
+	// the one from versionValues, the elapsed time would be 0 or close to 0
 	assert.Equal(t, elapsedTimeSeconds > 1000000, true)
 }
 
 // test if a user sets startingTime incorrectly getElapsedTimeSeconds()
 func TestStartingTimeFormatError(t *testing.T) {
 	os.Chdir(t.TempDir())
-	versionInfo := map[string]interface{}{
+	versionValues := map[string]interface{}{
 		"startingTime": "1652935205",
 	}
 
@@ -82,9 +82,9 @@ func TestStartingTimeFormatError(t *testing.T) {
 	}
 
 	// this should add a startingTime that will be overwritten by the one in
-	// versionInfo
+	// versionValues
 	exp.initResults(1)
-	_, err := getElapsedTimeSeconds(versionInfo, exp)
+	_, err := getElapsedTimeSeconds(versionValues, exp)
 	assert.Error(t, err)
 }
 
@@ -193,9 +193,9 @@ func TestCEOneVersion(t *testing.T) {
 
 }
 
-// basic test with versionInfo, mimicking Code Engine
+// basic test with versionValues, mimicking Code Engine
 // one version, three successful metrics
-func TestCEVersionInfo(t *testing.T) {
+func TestCEVersionValues(t *testing.T) {
 	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 	ct.With.VersionValues = []map[string]interface{}{{
