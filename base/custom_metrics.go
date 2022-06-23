@@ -267,7 +267,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 	}
 
 	// collect metrics from all providers and for all versions
-	for _, providerURL := range t.With.ProviderURLs {
+	for j, providerURL := range t.With.ProviderURLs {
 		// finalize metrics spec
 		template, err := getProviderTemplate(providerURL)
 		if err != nil {
@@ -297,11 +297,15 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
+			bytes, _ := ioutil.ReadAll(&buf)
 			var provider ProviderSpec
-			err = yaml.Unmarshal(buf.Bytes(), &provider)
+			err = yaml.Unmarshal(bytes, &provider)
 			if err != nil {
 				return err
 			}
+			log.Logger.Debugf("provider spec %v for version %v\n", j, i)
+			log.Logger.Debug("--------------------------------")
+			log.Logger.Debug(string(bytes))
 
 			// get each metric
 			for _, metric := range provider.Metrics {
