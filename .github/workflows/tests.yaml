@@ -70,6 +70,48 @@ jobs:
       run: |
         iter8 assert -c completed -c nofailure -c slos
 
+  readiness-check-in-a-local-experiment:
+    name: http load test local experiment with readiness check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Build and install Iter8
+      run: make install
+    - name: Start kind cluster
+      uses: helm/kind-action@v1.2.0
+      with:
+        wait: 300s
+    - name: run application
+      run: |
+        kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
+        kubectl expose deploy httpbin --port=80
+    - name: wait for the app to come up
+      run: |
+        iter8 launch --noDownload \
+        --set "tasks={ready}" \
+        --set ready.deploy=httpbin \
+        --set ready.service=httpbin \
+        --set ready.timeout=60s
+    - name: port forward
+      run: |
+        kubectl port-forward service/httpbin 8080:80 &
+    - name: launch experiment
+      run: |
+        iter8 launch --noDownload \
+        --set "tasks={ready,http,assess}" \
+        --set ready.deploy=httpbin \
+        --set ready.service=httpbin \
+        --set ready.timeout=60s \
+        --set http.url=http://localhost:8080/get \
+        --set http.duration="3s" \
+        --set assess.SLOs.upper.http/latency-p95=500 \
+        --set assess.SLOs.upper.http/error-count=0
+
   load-test-grpc:
     name: gRPC load test with various URLs
     runs-on: ubuntu-latest
