@@ -281,6 +281,9 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 				return err
 			}
 			values := vals.(map[string]interface{})
+			if len(values) == 0 {
+				values = make(map[string]interface{})
+			}
 			// add elapsedTimeSeconds
 			elapsedTimeSeconds, err := getElapsedTimeSeconds(values, exp)
 			if err != nil {

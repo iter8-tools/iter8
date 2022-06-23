@@ -69,29 +69,6 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 	assert.Equal(t, elapsedTimeSeconds > 1000000, true)
 }
 
-// test if a user sets elapsedTimeSeconds getElapsedTimeSeconds()
-func TestSetElapsedTimeSecondsError(t *testing.T) {
-	os.Chdir(t.TempDir())
-	versionInfo := map[string]interface{}{
-		"startingTime":       "2020-02-01T09:44:40Z",
-		"elapsedTimeSeconds": "2020-02-01T09:44:40Z",
-	}
-
-	exp := &Experiment{
-		Spec:   []Task{},
-		Result: &ExperimentResult{},
-	}
-
-	// this should add a startingTime that will be overwritten by the one in
-	// versionInfo
-	exp.initResults(1)
-
-	elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
-
-	assert.Error(t, err)
-	assert.Equal(t, elapsedTimeSeconds, int64(0))
-}
-
 // test if a user sets startingTime incorrectly getElapsedTimeSeconds()
 func TestStartingTimeFormatError(t *testing.T) {
 	os.Chdir(t.TempDir())
@@ -107,20 +84,17 @@ func TestStartingTimeFormatError(t *testing.T) {
 	// this should add a startingTime that will be overwritten by the one in
 	// versionInfo
 	exp.initResults(1)
-
-	elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
-
+	_, err := getElapsedTimeSeconds(versionInfo, exp)
 	assert.Error(t, err)
-	assert.Equal(t, elapsedTimeSeconds, int64(0))
 }
 
 // some reusable test code
 func headForTests(t *testing.T, providerURL string) *customMetricsTask {
-	common := map[string]interface{}{
-		"providerURL": "http://prometheus.istio-system:9090/api/v1/query",
-		"IAMToken":    "test-token",
-		"GUID":        "test-guid",
-	}
+	// values := map[string]interface{}{
+	// 	"providerURL": "http://prometheus.istio-system:9090/api/v1/query",
+	// 	"IAMToken":    "test-token",
+	// 	"GUID":        "test-guid",
+	// }
 
 	// valid collect database task... should succeed
 	ct := &customMetricsTask{
@@ -129,8 +103,7 @@ func headForTests(t *testing.T, providerURL string) *customMetricsTask {
 		},
 		With: customMetricsInputs{
 			ProviderURLs: []string{providerURL},
-			Common:       common,
-			VersionInfo:  []map[string]interface{}{{}},
+			// Values:       values,
 		},
 	}
 
@@ -225,7 +198,7 @@ func TestCEOneVersion(t *testing.T) {
 func TestCEVersionInfo(t *testing.T) {
 	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
-	ct.With.VersionInfo = []map[string]interface{}{{
+	ct.With.VersionValues = []map[string]interface{}{{
 		"ibm_codeengine_revision_name": "v1",
 	}}
 
@@ -417,7 +390,7 @@ func TestCEMultipleVersions(t *testing.T) {
 	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
 
-	ct.With.VersionInfo = []map[string]interface{}{{}, {}}
+	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
@@ -493,7 +466,7 @@ func TestCEMultipleVersions(t *testing.T) {
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	os.Chdir(t.TempDir())
 	ct := headForTests(t, testCEURL)
-	ct.With.VersionInfo = []map[string]interface{}{{}, {}}
+	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
