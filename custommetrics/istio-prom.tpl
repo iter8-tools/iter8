@@ -42,7 +42,10 @@ destination_workload="{{ .destinationWorkload }}",
 destination_workload_namespace="{{ .destinationWorkloadNamespace }}"
 {{- end }}
 
-url: {{ .istioPromURL }}
+# url is the HTTP endpoint where the Prometheus service installed by Istio's Prom add-on
+# can be queried for metrics
+
+url: {{ default .istioPromURL "http://prometheus.istio-system:9090/api/v1/query" }}
 provider: istio-prom
 method: GET
 metrics:

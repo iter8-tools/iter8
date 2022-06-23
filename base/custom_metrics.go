@@ -14,15 +14,15 @@ import (
 
 	"time"
 
+	"github.com/Masterminds/sprig"
 	"github.com/itchyny/gojq"
 	log "github.com/iter8-tools/iter8/base/log"
-
 	"sigs.k8s.io/yaml"
 )
 
-// MetricsSpec specifies the set of metrics that can be obtained from a provider
-type MetricsSpec struct {
-	// Provider is the label/name of the data source
+// ProviderSpec specifies how to get metrics from a provider
+type ProviderSpec struct {
+	// Provider is the name of the metrics provider
 	Provider string `json:"provider" yaml:"provider"`
 
 	// URL is the database endpoint
@@ -38,7 +38,9 @@ type MetricsSpec struct {
 	Metrics []Metric `json:"metrics" yaml:"metrics"`
 }
 
-// Metric defines how to obtain a metric
+// Metric defines how to construct HTTP requests and parse HTTP responses
+// when querying a database for a metric. Metric struct also includes metadata
+// such as the name and description of the metric.
 type Metric struct {
 	// Name is the name of the metric
 	Name string `json:"name" yaml:"name"`
@@ -53,7 +55,7 @@ type Metric struct {
 	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
 
 	// Params is the set of HTTP parameters that need to be sent
-	Params *[]Params `json:"params,omitempty" yaml:"params,omitempty"`
+	Params *[]HTTPParam `json:"params,omitempty" yaml:"params,omitempty"`
 
 	// Body is the HTTP request body that needs to be sent
 	Body *string `json:"body,omitempty" yaml:"body,omitempty"`
@@ -63,8 +65,8 @@ type Metric struct {
 	JqExpression string `json:"jqExpression" yaml:"jqExpression"`
 }
 
-// Params defines an HTTP parameter
-type Params struct {
+// HTTPParam defines an HTTP parameter
+type HTTPParam struct {
 	// Name is the name of the HTTP parameter
 	Name string `json:"name" yaml:"name"`
 
@@ -74,14 +76,16 @@ type Params struct {
 
 // customMetricsInputs is the input to the custommetrics task
 type customMetricsInputs struct {
-	// ProviderURLs a slice of URLs for metric templates
+	// ProviderURLs	A slice of URLs, each of them provides a metrics template file.
 	ProviderURLs []string `json:"providerURLs" yaml:"providerURLs"`
 
-	// Common	values that are common across versions
-	Common map[string]interface{} `json:"common" yaml:"common"`
+	// Values Values used for substituting placeholders in metric templates.
+	Values map[string]interface{} `json:"values" yaml:"values"`
 
-	// VersionInfo values that are specific to each version
-	VersionInfo []map[string]interface{} `json:"versionInfo" yaml:"versionInfo"`
+	// VersionValues Per version values that override values
+	// For each version, its version values are coalesced with values
+	// The length of this slice equals the number of versions
+	VersionValues []map[string]interface{} `json:"versionValues" yaml:"versionValues"`
 }
 
 const (
@@ -104,6 +108,10 @@ type customMetricsTask struct {
 
 // initializeDefaults sets default values for the custom metrics task
 func (t *customMetricsTask) initializeDefaults() {
+	// initialize versionValues if absent
+	if len(t.With.VersionValues) == 0 {
+		t.With.VersionValues = []map[string]interface{}{t.With.Values}
+	}
 }
 
 // validate task inputs
@@ -111,22 +119,18 @@ func (t *customMetricsTask) validateInputs() error {
 	return nil
 }
 
-// for a given version info and Experiment, calculate the elapsed time that
-// should be used for queries
+// getElapsedTimeSeconds using values and experiment
 //
-// elapsed time is based on the StartingTime in the version info or the
-// starting time in the Experiment
-func getElapsedTimeSeconds(versionInfo map[string]interface{}, exp *Experiment) (int64, error) {
-	// elapsedTimeSeconds should not be provided by the user
-	if versionInfo[elapsedTimeSecondsStr] != nil {
-		return 0, errors.New("elapsedTimeSeconds should not be provided by the user in VersionInfo: " + fmt.Sprintf("%v", versionInfo))
-	}
-
+// elapsedTime = currentTime - startingTime
+//
+// First, check for startingTime in values.
+// If unavailable, use startingTime of the experiment.
+func getElapsedTimeSeconds(values map[string]interface{}, exp *Experiment) (int64, error) {
 	startingTime := exp.Result.StartTime.Time
-	if versionInfo[startingTimeStr] != nil {
+	if values[startingTimeStr] != nil {
 		var err error
 		// Calling Parse() method with its parameters
-		startingTime, err = time.Parse(time.RFC3339, fmt.Sprintf("%v", versionInfo[startingTimeStr]))
+		startingTime, err = time.Parse(time.RFC3339, fmt.Sprintf("%v", values[startingTimeStr]))
 
 		if err != nil {
 			return 0, errors.New("cannot parse startingTime")
@@ -142,7 +146,7 @@ func getElapsedTimeSeconds(versionInfo map[string]interface{}, exp *Experiment) 
 //
 // bool return value represents whether the pipeline was able to run to
 // completion (prevents double error statement)
-func queryDatabaseAndGetValue(template MetricsSpec, metric Metric) (interface{}, bool) {
+func queryDatabaseAndGetValue(template ProviderSpec, metric Metric) (interface{}, bool) {
 	var requestBody io.Reader
 	if metric.Body != nil {
 		requestBody = strings.NewReader(*metric.Body)
@@ -217,14 +221,13 @@ func queryDatabaseAndGetValue(template MetricsSpec, metric Metric) (interface{},
 }
 
 // get provider template from URL
-func getProviderTemplate(url string, commonValues map[string]interface{}) (*template.Template, error) {
+func getProviderTemplate(providerURL string) (*template.Template, error) {
 	// fetch b from url
-	resp, err := http.Get(url)
+	resp, err := http.Get(providerURL)
 	if err != nil {
 		log.Logger.Error(err)
 		return nil, err
 	}
-
 	// read responseBody
 	// get the doubly templated metrics spec
 	defer resp.Body.Close()
@@ -232,27 +235,13 @@ func getProviderTemplate(url string, commonValues map[string]interface{}) (*temp
 	if err != nil {
 		return nil, err
 	}
-	dt, err := template.New("doubly-templated").Parse(string(responseBody))
+	tpl, err := template.New("provider template").Funcs(sprig.TxtFuncMap()).Parse(string(responseBody))
 	if err != nil {
 		log.Logger.Error(err)
 		return nil, err
 	}
 
-	// execute template with commonValues
-	// get the singly templated metrics spec
-	var buf bytes.Buffer
-	err = dt.Execute(&buf, commonValues)
-	if err != nil {
-		log.Logger.Error(err)
-		return nil, err
-	}
-	st, err := template.New("singly-templated").Parse(string(responseBody))
-	if err != nil {
-		log.Logger.Error(err)
-		return nil, err
-	}
-
-	return st, nil
+	return tpl, nil
 }
 
 // run executes this task
@@ -272,9 +261,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 	// initialize defaults
 	t.initializeDefaults()
 
-	// inputs for this task determine the number of versions participating in the
-	// experiment. Initiate insights with num versions.
-	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionInfo))
+	err = exp.Result.initInsightsWithNumVersions(len(t.With.VersionValues))
 	if err != nil {
 		return err
 	}
@@ -282,39 +269,43 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 	// collect metrics from all providers and for all versions
 	for _, providerURL := range t.With.ProviderURLs {
 		// finalize metrics spec
-		template, err := getProviderTemplate(providerURL, t.With.Common)
+		template, err := getProviderTemplate(providerURL)
 		if err != nil {
 			return err
 		}
-		for i, versionInfo := range t.With.VersionInfo {
-			// add elapsedTimeSeconds
-			elapsedTimeSeconds, err := getElapsedTimeSeconds(versionInfo, exp)
+
+		for i, versionValues := range t.With.VersionValues {
+			// merge values
+			vals, err := mustMergeOverwrite(t.With.Values, versionValues)
 			if err != nil {
 				return err
 			}
-			if versionInfo == nil {
-				versionInfo = make(map[string]interface{})
+			values := vals.(map[string]interface{})
+			// add elapsedTimeSeconds
+			elapsedTimeSeconds, err := getElapsedTimeSeconds(values, exp)
+			if err != nil {
+				return err
 			}
-			versionInfo[elapsedTimeSecondsStr] = elapsedTimeSeconds
+			values[elapsedTimeSecondsStr] = elapsedTimeSeconds
 
 			// get the metrics spec
 			var buf bytes.Buffer
-			err = template.Execute(&buf, versionInfo)
+			err = template.Execute(&buf, values)
 			if err != nil {
 				return err
 			}
-			var metrics MetricsSpec
-			err = yaml.Unmarshal(buf.Bytes(), &metrics)
+			var provider ProviderSpec
+			err = yaml.Unmarshal(buf.Bytes(), &provider)
 			if err != nil {
 				return err
 			}
 
 			// get each metric
-			for _, metric := range metrics.Metrics {
+			for _, metric := range provider.Metrics {
 				log.Logger.Debug("query for metric ", metric.Name)
 
 				// perform database query and extract metric value
-				value, ok := queryDatabaseAndGetValue(metrics, metric)
+				val, ok := queryDatabaseAndGetValue(provider, metric)
 
 				// check if there were any issues querying database and extracting value
 				if !ok {
@@ -323,7 +314,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 				}
 
 				// do not save value if it has no value
-				if value == nil {
+				if val == nil {
 					log.Logger.Error("could not extract non-nil value for metric ", metric.Name, ": ", err)
 					continue
 				}
@@ -344,14 +335,14 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 				}
 
 				// convert value to float
-				valueString := fmt.Sprint(value)
+				valueString := fmt.Sprint(val)
 				floatValue, err := strconv.ParseFloat(valueString, 64)
 				if err != nil {
 					log.Logger.Error("could not parse string \""+valueString+"\" to float:", err)
 					continue
 				}
 
-				err = exp.Result.Insights.updateMetric(metrics.Provider+"/"+metric.Name, mm, i, floatValue)
+				err = exp.Result.Insights.updateMetric(provider.Provider+"/"+metric.Name, mm, i, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)
