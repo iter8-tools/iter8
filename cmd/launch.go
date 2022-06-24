@@ -8,21 +8,20 @@ import (
 
 // launchDesc is the description of the launch command
 const launchDesc = `
-Launch an experiment. 
+Launch an experiment in the local environment. 
 
-	$ iter8 launch --set "tasks={http}" \
-		--set http.url=https://httpbin.org/get
+	iter8 launch --set "tasks={http}" \
+	--set http.url=https://httpbin.org/get
 
-Use the dry option to simulate an experiment. This creates the experiment.yaml file.
+Use the dry option to simulate an experiment. This creates the experiment.yaml file but does not run the experiment.
 
-	$ iter8 launch \
+	iter8 launch \
 	--set http.url=https://httpbin.org/get \
 	--dry
 
-You can use various launch flags to control the following:
-	1. Whether Iter8 should download the Iter8 experiment chart from a remote URL or reuse local chart.
-	2. The remote URL (example, a GitHub URL) from which the Iter8 experiment chart is downloaded.
-	3. The local (parent) directory under which the Iter8 experiment chart is nested.
+The launch command creates the 'charts' subdirectory under the current working directory, downloads the Iter8 experiment chart, and places it under 'charts'. This behavior can be controlled using various launch flags.
+
+This command supports setting values using the same mechanisms as in Helm. Please see  https://helm.sh/docs/chart_template_guide/values_files/ for more detailed descriptions. In particular, this command supports the --set, --set-file, --set-string, and -f (--values) options all of which have the same behavior as in Helm.
 `
 
 // newLaunchCmd creates the launch command
@@ -31,7 +30,7 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "launch",
-		Short:        "Launch an experiment",
+		Short:        "Launch an experiment in the local environment",
 		Long:         launchDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {

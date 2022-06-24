@@ -8,9 +8,9 @@ import (
 
 // hubDesc is the description of the hub command
 const hubDesc = `
-Download the Iter8 experiment chart from a URL.
+Download the Iter8 experiment chart from a go-getter URL.
 
-	$ iter8 hub
+	iter8 hub
 
 This command is intended for development and testing of experiment charts. For production usage, the iter8 launch command is recommended.
 `

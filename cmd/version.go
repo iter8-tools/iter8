@@ -12,7 +12,7 @@ import (
 var versionDesc = `
 Print the version of Iter8 CLI.
 
-	$ iter8 version
+	iter8 version
 
 The output may look as follows:
 

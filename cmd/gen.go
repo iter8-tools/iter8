@@ -10,9 +10,11 @@ import (
 const genDesc = `
 Generate an experiment.yaml file by combining the Iter8 experiment chart with values.
 
-    $ iter8 gen --set "tasks={http}" --set http.url=https://httpbin.org/get
+	iter8 gen --set "tasks={http}" --set http.url=https://httpbin.org/get
 
-This command is intended for development and testing of experiment charts. For production usage, the launch command is recommended.
+This command supports setting values using the same mechanisms as in Helm. Please see  https://helm.sh/docs/chart_template_guide/values_files/ for more detailed descriptions. In particular, this command supports the --set, --set-file, --set-string, and -f (--values) options all of which have the same behavior as in Helm.	
+
+This command is intended for development and testing of local experiment charts. For production usage, the launch command is recommended.
 `
 
 // newGenCmd creates the gen command
