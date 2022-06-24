@@ -4,7 +4,7 @@ spec:
     with:
       providerURLs:
       - https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/kfserving.metrics.yaml
-      versionInfo:
+      versionValues:
       - namespace_name: ns-candidate
         startingTime: Jan 2, 2006 at 3:04pm (MST)
   # task 2: validate service level objectives for app using
