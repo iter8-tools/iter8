@@ -11,9 +11,9 @@ import (
 
 // runDesc is the description of the run command
 var runDesc = `
-Run an experiment specified in experiment.yaml. This command will modify the experiment.yaml as part of the run.
+Run an experiment specified in experiment.yaml. This command modifies the experiment.yaml file as part of the run.
 
-	$ iter8 run
+	iter8 run
 
 This command is intended for development and testing of experiment charts and tasks. For production usage, the iter8 launch command is recommended.
 `
@@ -44,7 +44,7 @@ func addRunDirFlag(cmd *cobra.Command, runDirPtr *string) {
 // addReuseResult allows the experiment to reuse the experiment result for
 // looping experiments
 func addReuseResult(cmd *cobra.Command, reuseResultPtr *bool) {
-	cmd.Flags().BoolVar(reuseResultPtr, "reuseResult", false, "reuse experiment result; useful for experiments with multiple loops")
+	cmd.Flags().BoolVar(reuseResultPtr, "reuseResult", false, "reuse experiment result; useful for experiments with multiple loops such as Kubernetes experiments with a cronjob runner")
 }
 
 // initialize with run cmd

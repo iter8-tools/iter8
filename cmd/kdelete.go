@@ -13,7 +13,7 @@ import (
 const kDeleteDesc = `
 Delete an experiment (group) in Kubernetes.
 
-	$ iter8 k delete
+	iter8 k delete
 `
 
 // newKDeleteCmd deletes an experiment group in Kubernetes.

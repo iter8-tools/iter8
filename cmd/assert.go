@@ -20,12 +20,12 @@ Assertions are especially useful for automation inside CI/CD/GitOps pipelines.
 
 Supported conditions are 'completed', 'nofailure', 'slos', which indicate that the experiment has completed, none of the tasks have failed, and the SLOs are satisfied.
 
-	$ iter8 assert -c completed -c nofailure -c slos
+	iter8 assert -c completed -c nofailure -c slos
 	# same as iter8 assert -c completed,nofailure,slos
 
 You can optionally specify a timeout, which is the maximum amount of time to wait for the conditions to be satisfied:
 
-	$ iter8 assert -c completed,nofailures,slos -t 5s
+	iter8 assert -c completed,nofailure,slos -t 5s
 `
 
 // newAssertCmd creates the assert command

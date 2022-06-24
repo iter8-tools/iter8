@@ -11,11 +11,13 @@ import (
 const reportDesc = `
 Generate a text or HTML report of an experiment.
 
-	$ iter8 report # same as iter8 report -o text
+	iter8 report 
+	# same as iter8 report -o text
 
 or
 
-	$ iter8 report -o html > report.html # view with browser
+	iter8 report -o html > report.html 
+	# view with browser
 `
 
 // newReportCmd creates the report command

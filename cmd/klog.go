@@ -11,7 +11,7 @@ import (
 const kLogDesc = `
 Fetch logs for a Kubernetes experiment.
 
-	$ iter8 k log
+	iter8 k log
 `
 
 // newKLogCmd creates the Kubernetes log commmand
