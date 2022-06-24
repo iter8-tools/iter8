@@ -23,6 +23,7 @@ require (
 	github.com/antonmedv/expr v1.9.0
 	github.com/bojand/ghz v0.108.0
 	github.com/hashicorp/go-getter v1.6.1
+	github.com/imdario/mergo v0.3.12
 	github.com/itchyny/gojq v0.12.7
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/mattn/go-shellwords v1.0.12
