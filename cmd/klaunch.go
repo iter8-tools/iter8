@@ -11,23 +11,21 @@ import (
 
 // kLaunchDesc is the description of the k launch cmd
 const kLaunchDesc = `
-Launch an experiment in Kubernetes. 
+Launch an experiment inside a Kubernetes cluster. 
 
-	$ iter8 k launch --set "tasks={http}" --set http.url=https://httpbin.org/get \
-		--set runner=job
+	iter8 k launch --set "tasks={http}" --set http.url=https://httpbin.org/get \
+	--set runner=job
 
-Use the dry option to simulate a Kubernetes experiment. This creates the manifest.yaml file, and does not deploy any resources in the cluster.
+Use the dry option to simulate a Kubernetes experiment. This creates the manifest.yaml file, but does not run the experiment, and does not deploy any experiment resource objects in the cluster.
 
-	$ iter8 k launch \
-	  --set http.url=https://httpbin.org/get \
-		--set runner=job \
-		--dry
+	iter8 k launch \
+	--set http.url=https://httpbin.org/get \
+	--set runner=job \
+	--dry
 
+The launch command creates the 'charts' subdirectory under the current working directory, downloads the Iter8 experiment chart, and places it under 'charts'. This behavior can be controlled using various launch flags.
 
-You can use various launch flags to control the following:
-	1. Whether Iter8 should download the Iter8 experiment chart from a remote URL or reuse local chart.
-	2. The remote URL (example, a GitHub URL) from which the Iter8 experiment chart is downloaded.
-	3. The local (parent) directory under which the Iter8 experiment chart is nested.
+This command supports setting values using the same mechanisms as in Helm. Please see  https://helm.sh/docs/chart_template_guide/values_files/ for more detailed descriptions. In particular, this command supports the --set, --set-file, --set-string, and -f (--values) options all of which have the same behavior as in Helm.
 `
 
 // newKLaunchCmd creates the Kubernetes launch command
@@ -36,7 +34,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "launch",
-		Short:        "Launch an experiment in Kubernetes",
+		Short:        "Launch an experiment inside a Kubernetes cluster",
 		Long:         kLaunchDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {

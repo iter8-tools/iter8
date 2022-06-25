@@ -14,8 +14,6 @@ import (
 // docsDesc is the description for the docs command
 const docsDesc = `
 Generate markdown documentation for Iter8 CLI commands. Documentation will be generated for all commands that are not hidden.
-
-This command is intended for Iter8 documentation and CI.
 `
 
 // newDocsCmd creates the docs command
