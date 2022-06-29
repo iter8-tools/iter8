@@ -190,7 +190,7 @@ func TestCEOneVersion(t *testing.T) {
 // one version, three successful metrics
 func TestCEVersionValues(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "ce", testCEURL)
+	ct := headForTests(t, "test-ce", testCEURL)
 	ct.With.VersionValues = []map[string]interface{}{{
 		"ibm_codeengine_revision_name": "v1",
 	}}
@@ -272,7 +272,7 @@ func TestCEVersionValues(t *testing.T) {
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "ce", testCEURL)
+	ct := headForTests(t, "test-ce", testCEURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
@@ -308,7 +308,7 @@ func TestCEUnauthorized(t *testing.T) {
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "ce", testCEURL)
+	ct := headForTests(t, "test-ce", testCEURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
@@ -381,7 +381,7 @@ func TestCESomeValues(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "ce", testCEURL)
+	ct := headForTests(t, "test-ce", testCEURL)
 
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
@@ -458,7 +458,7 @@ func TestCEMultipleVersions(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "ce", testCEURL)
+	ct := headForTests(t, "test-ce", testCEURL)
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
 	// request-count
@@ -533,7 +533,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 // basic test with a request body
 func TestRequestBody(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "ce", testRequestBodyURL)
+	ct := headForTests(t, "test-ce", testRequestBodyURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(exampleQueryParameter),
