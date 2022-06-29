@@ -4,16 +4,14 @@ package watcher
 
 import (
 	"github.com/iter8-tools/iter8/base/log"
-
-	"stathat.com/c/consistent"
 )
 
 // Application is information about versions of an application
 type Application struct {
 	// versions is map of versions for this application
 	versions map[string]Version
-	// c is holds information for members (versions) of consistent hash circle
-	c *consistent.Consistent
+	// map of tracks to version
+	tracks map[string]string
 }
 
 // Version is version of an Application
@@ -56,7 +54,7 @@ func Add(watched WatchedObject) {
 		// create record of discovered app if not already present
 		app = Application{
 			versions: map[string]Version{},
-			c:        consistent.New(),
+			tracks:   map[string]string{},
 		}
 		// record new application
 		apps[name] = app
@@ -75,16 +73,27 @@ func Add(watched WatchedObject) {
 	// set ready to value on watched object, if set
 	// otherwise, use the current readiness value
 	v.Ready = watched.isReady(v.Ready)
-	// if readiness changed, add/remove to/from consistent hash circle
-	if v.Ready {
-		apps[name].c.Add(v.Name)
-	} else {
-		apps[name].c.Remove(v.Name)
-	}
 
-	// set track if not already set; once set this does not change
-	if len(v.Track) == 0 {
-		v.Track = watched.getTrack()
+	// update track <--> ready version mapping
+	if v.Ready {
+		watchedTrack := watched.getTrack()
+		if watchedTrack != "" {
+			// update track for version
+			v.Track = watchedTrack
+			// update version for track
+			app.tracks[watchedTrack] = v.Name
+		}
+	} else {
+		// if version has track then unmap it
+		// but first check the track to version and remove if mapped to this (not ready) version
+		if v.Track != "" {
+			_, ok := app.tracks[v.Track]
+			if ok {
+				delete(app.tracks, v.Track)
+			}
+		}
+		// v not ready, remove any map to track
+		v.Track = ""
 	}
 
 	// record update
@@ -126,7 +135,11 @@ func Delete(watched WatchedObject) {
 	annotations := watched.Obj.GetAnnotations()
 	if _, ok := annotations[READY_ANNOTATION]; ok {
 		v.Ready = false
-		apps[name].c.Remove(v.Name)
+		_, ok := apps[name].tracks[v.Track]
+		if ok {
+			delete(apps[name].tracks, v.Track)
+		}
+		v.Track = ""
 	}
 
 	apps[name].versions[version] = v
@@ -140,13 +153,12 @@ func Delete(watched WatchedObject) {
 // used for debug only
 func dump() {
 	for name, app := range apps {
-		log.Logger.Tracef("application: %s\n", name)
+		log.Logger.Tracef("\nAPPLICATION: %s\n", name)
 		for version, v := range app.versions {
-			readyMsg := "ready"
-			if !v.Ready {
-				readyMsg = "not " + readyMsg
-			}
-			log.Logger.Tracef("   version: %s (%s): %s\n", version, v.Track, readyMsg)
+			log.Logger.Tracef(" > version = %s, track = %s, ready = %t\n", version, v.Track, v.Ready)
+		}
+		for t, v := range app.tracks {
+			log.Logger.Tracef(" > track = %s, version = %s", t, v)
 		}
 	}
 }
