@@ -52,7 +52,7 @@ func (lOpts *LaunchOpts) LocalRun() error {
 		// download chart from Iter8 hub
 		hOpts := &HubOpts{
 			RemoteFolderURL: lOpts.RemoteFolderURL,
-			ChartsDir:       path.Join(lOpts.ChartsParentDir, chartsFolderName),
+			ChartsDir:       path.Join(lOpts.ChartsParentDir, ChartsFolderName),
 		}
 		if err := hOpts.LocalRun(); err != nil {
 			return err
@@ -100,7 +100,7 @@ func (lOpts *LaunchOpts) KubeRun() error {
 		// download chart from Iter8 hub
 		hOpts := &HubOpts{
 			RemoteFolderURL: lOpts.RemoteFolderURL,
-			ChartsDir:       path.Join(lOpts.ChartsParentDir, chartsFolderName),
+			ChartsDir:       path.Join(lOpts.ChartsParentDir, ChartsFolderName),
 		}
 		if err := hOpts.LocalRun(); err != nil {
 			return err
