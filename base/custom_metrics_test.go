@@ -110,7 +110,7 @@ func headForTests(t *testing.T, providerName string, providerURL string) *custom
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "ce", testCEURL)
+	ct := headForTests(t, "test-ce", testCEURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
