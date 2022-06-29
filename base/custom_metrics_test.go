@@ -533,7 +533,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 // basic test with a request body
 func TestRequestBody(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "test-ce", testRequestBodyURL)
+	ct := headForTests(t, testRequestBody, testRequestBodyURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(exampleQueryParameter),
