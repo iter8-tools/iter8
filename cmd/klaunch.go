@@ -37,6 +37,9 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		Short:        "Launch an experiment inside a Kubernetes cluster",
 		Long:         kLaunchDesc,
 		SilenceUsage: true,
+		PreRunE: func(cmd *cobra.Command, _ []string) error {
+			return noDownloadIsRequired(actor, cmd.Flags())
+		},
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.KubeRun()
 		},

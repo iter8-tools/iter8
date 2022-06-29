@@ -1,9 +1,14 @@
 package cmd
 
 import (
+	"errors"
+	"os"
+	"path"
+
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // launchDesc is the description of the launch command
@@ -33,6 +38,9 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 		Short:        "Launch an experiment in the local environment",
 		Long:         launchDesc,
 		SilenceUsage: true,
+		PreRunE: func(cmd *cobra.Command, _ []string) error {
+			return noDownloadIsRequired(actor, cmd.Flags())
+		},
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.LocalRun()
 		},
@@ -46,6 +54,19 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 	addNoDownloadFlag(cmd, &actor.NoDownload)
 
 	return cmd
+}
+
+// noDownloadIsRequired make noDownload flag required, if 'charts' folder is found
+func noDownloadIsRequired(lOpts *ia.LaunchOpts, flags *pflag.FlagSet) error {
+	chartsFolderPath := path.Join(lOpts.ChartsParentDir, ia.ChartsFolderName)
+	if _, err := os.Stat(chartsFolderPath); !os.IsNotExist(err) {
+		if flags.Changed("noDownload") {
+			return nil
+		} else {
+			return errors.New("'charts' folder found; 'noDownload' flag is required")
+		}
+	}
+	return nil
 }
 
 // addDryRunFlag adds dry run flag to the launch command

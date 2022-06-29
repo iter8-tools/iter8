@@ -25,7 +25,7 @@ func DefaultRemoteFolderURL() string {
 	// parse version
 	v := strings.Split(base.Version, "-")
 	ref := v[0]
-	return defaultIter8Repo + "?ref=" + ref + "//" + chartsFolderName
+	return defaultIter8Repo + "?ref=" + ref + "//" + ChartsFolderName
 }
 
 // NewHubOpts initializes and returns hub opts
@@ -33,7 +33,7 @@ func NewHubOpts() *HubOpts {
 
 	return &HubOpts{
 		RemoteFolderURL: DefaultRemoteFolderURL(),
-		ChartsDir:       chartsFolderName,
+		ChartsDir:       ChartsFolderName,
 	}
 }
 

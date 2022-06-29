@@ -22,9 +22,6 @@ import (
 
 // ProviderSpec specifies how to get metrics from a provider
 type ProviderSpec struct {
-	// Provider is the name of the metrics provider
-	Provider string `json:"provider" yaml:"provider"`
-
 	// URL is the database endpoint
 	URL string `json:"url" yaml:"url"`
 
@@ -76,8 +73,8 @@ type HTTPParam struct {
 
 // customMetricsInputs is the input to the custommetrics task
 type customMetricsInputs struct {
-	// ProviderURLs	A slice of URLs, each of them provides a metrics template file.
-	ProviderURLs []string `json:"providerURLs" yaml:"providerURLs"`
+	// Templates	Maps provider to its template URL
+	Templates map[string]string `json:"templates" yaml:"templates"`
 
 	// Values Values used for substituting placeholders in metric templates.
 	Values map[string]interface{} `json:"values" yaml:"values"`
@@ -267,9 +264,9 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 	}
 
 	// collect metrics from all providers and for all versions
-	for j, providerURL := range t.With.ProviderURLs {
+	for providerName, url := range t.With.Templates {
 		// finalize metrics spec
-		template, err := getProviderTemplate(providerURL)
+		template, err := getProviderTemplate(url)
 		if err != nil {
 			return err
 		}
@@ -303,7 +300,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
-			log.Logger.Debugf("provider spec %v for version %v\n", j, i)
+			log.Logger.Debugf("provider spec %v for version %v\n", providerName, i)
 			log.Logger.Debug("--------------------------------")
 			log.Logger.Debug(string(bytes))
 
@@ -349,7 +346,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 					continue
 				}
 
-				err = exp.Result.Insights.updateMetric(provider.Provider+"/"+metric.Name, mm, i, floatValue)
+				err = exp.Result.Insights.updateMetric(providerName+"/"+metric.Name, mm, i, floatValue)
 
 				if err != nil {
 					log.Logger.Error("could not add update metric", err)

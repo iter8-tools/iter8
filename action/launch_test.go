@@ -18,7 +18,7 @@ func TestLocalLaunch(t *testing.T) {
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.RemoteFolderURL = "github.com/sriumcp/iter8.git?ref=ic//charts"
 	// // TODO: fix git ref
-	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + chartsFolderName
+	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + ChartsFolderName
 	lOpts.ChartName = "iter8"
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
 
@@ -34,7 +34,7 @@ func TestKubeLaunch(t *testing.T) {
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.RemoteFolderURL = "github.com/sriumcp/iter8.git?ref=ic//charts"
 	// // TODO: fix git ref
-	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + chartsFolderName
+	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + ChartsFolderName
 	lOpts.ChartName = "iter8"
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
 
@@ -73,7 +73,7 @@ func TestKubeLaunchNoDownload(t *testing.T) {
 	lOpts.NoDownload = true
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
 	// // fixing git ref forever
-	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + chartsFolderName
+	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + ChartsFolderName
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

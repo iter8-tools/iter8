@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	chartsFolderName = "charts"
+	ChartsFolderName = "charts"
 	DefaultChartName = "iter8"
 )
 
@@ -43,7 +43,7 @@ func NewGenOpts() *GenOpts {
 
 // chartDir returns the path to chart directory
 func (gen *GenOpts) chartDir() string {
-	return path.Join(gen.ChartsParentDir, chartsFolderName, gen.ChartName)
+	return path.Join(gen.ChartsParentDir, ChartsFolderName, gen.ChartName)
 }
 
 // LocalRun generates a local experiment.yaml file
