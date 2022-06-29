@@ -90,12 +90,6 @@ func TestStartingTimeFormatError(t *testing.T) {
 
 // some reusable test code
 func headForTests(t *testing.T, providerName string, providerURL string) *customMetricsTask {
-	// values := map[string]interface{}{
-	// 	"providerURL": "http://prometheus.istio-system:9090/api/v1/query",
-	// 	"IAMToken":    "test-token",
-	// 	"GUID":        "test-guid",
-	// }
-
 	// valid collect database task... should succeed
 	ct := &customMetricsTask{
 		TaskMeta: TaskMeta{

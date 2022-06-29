@@ -84,7 +84,7 @@ func TestGenDB(t *testing.T) {
 	m := make(map[string]interface{}, 0)
 	b, _ := json.Marshal(exp.Spec[0])
 	json.Unmarshal(b, &m)
-	m = m["with"].(map[string]interface{})
-	s := m["providerURLs"].([]interface{})
-	assert.Equal(t, []interface{}{"https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl"}, s)
+	w := m["with"].(map[string]interface{})
+	s := w["templates"].(map[string]interface{})
+	assert.Equal(t, map[string]interface{}{"istio-prom": "https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl"}, s)
 }
