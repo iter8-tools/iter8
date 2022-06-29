@@ -77,7 +77,7 @@ func addDryRunFlag(cmd *cobra.Command, dryRunPtr *bool) {
 
 // addNoDownloadFlag adds noDownload flag to the launch command
 func addNoDownloadFlag(cmd *cobra.Command, noDownloadPtr *bool) {
-	cmd.Flags().BoolVar(noDownloadPtr, "noDownload", false, "reuse local charts dir; do not download from Git")
+	cmd.Flags().BoolVar(noDownloadPtr, "noDownload", false, "reuse local charts dir - do not download from remoteFolderURL; if local charts are present, this flag is required - set it to true or false; if local charts are absent, do not use this flag")
 	cmd.Flags().Lookup("noDownload").NoOptDefVal = "true"
 }
 
