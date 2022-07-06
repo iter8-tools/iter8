@@ -8,10 +8,10 @@ import (
 
 // Application is information about versions of an application
 type Application struct {
-	// versions is map of versions for this application
-	versions map[string]Version
+	// Versions is map of versions for this application
+	Versions map[string]Version
 	// map of tracks to version
-	tracks map[string]string
+	Tracks map[string]string
 }
 
 // Version is version of an Application
@@ -25,7 +25,7 @@ type Version struct {
 }
 
 // apps is map of app name to Application
-var apps map[string]Application = map[string]Application{}
+var Apps map[string]Application = map[string]Application{}
 
 // Add updates the apps map using information from a newly added object
 func Add(watched WatchedObject) {
@@ -49,19 +49,19 @@ func Add(watched WatchedObject) {
 	}
 
 	// check if we know about this application; if not create entry
-	app, ok := apps[name]
+	app, ok := Apps[name]
 	if !ok {
 		// create record of discovered app if not already present
 		app = Application{
-			versions: map[string]Version{},
-			tracks:   map[string]string{},
+			Versions: map[string]Version{},
+			Tracks:   map[string]string{},
 		}
 		// record new application
-		apps[name] = app
+		Apps[name] = app
 	}
 
 	// check if we know about this version; if not create entry
-	v, ok := apps[name].versions[version]
+	v, ok := Apps[name].Versions[version]
 	if !ok {
 		// create record of discovered version
 		v = Version{
@@ -81,15 +81,15 @@ func Add(watched WatchedObject) {
 			// update track for version
 			v.Track = watchedTrack
 			// update version for track
-			app.tracks[watchedTrack] = v.Name
+			app.Tracks[watchedTrack] = v.Name
 		}
 	} else {
 		// if version has track then unmap it
 		// but first check the track to version and remove if mapped to this (not ready) version
 		if v.Track != "" {
-			_, ok := app.tracks[v.Track]
+			_, ok := app.Tracks[v.Track]
 			if ok {
-				delete(app.tracks, v.Track)
+				delete(app.Tracks, v.Track)
 			}
 		}
 		// v not ready, remove any map to track
@@ -97,7 +97,7 @@ func Add(watched WatchedObject) {
 	}
 
 	// record update
-	app.versions[version] = v
+	app.Versions[version] = v
 }
 
 // Update updates the apps map using information from a modified object
@@ -117,7 +117,7 @@ func Delete(watched WatchedObject) {
 	if !ok {
 		return // no app.kubernetes.io/name label
 	}
-	_, ok = apps[name]
+	_, ok = Apps[name]
 	if !ok {
 		return // has app.kubernetes.io/name but object wasn't recorded
 	}
@@ -126,7 +126,7 @@ func Delete(watched WatchedObject) {
 	if !ok {
 		return // no app.kubernetes.io/version label
 	}
-	v, ok := apps[name].versions[version]
+	v, ok := Apps[name].Versions[version]
 	if !ok {
 		return // no version recorded (should not happen)
 	}
@@ -135,29 +135,29 @@ func Delete(watched WatchedObject) {
 	annotations := watched.Obj.GetAnnotations()
 	if _, ok := annotations[READY_ANNOTATION]; ok {
 		v.Ready = false
-		_, ok := apps[name].tracks[v.Track]
+		_, ok := Apps[name].Tracks[v.Track]
 		if ok {
-			delete(apps[name].tracks, v.Track)
+			delete(Apps[name].Tracks, v.Track)
 		}
 		v.Track = ""
 	}
 
-	apps[name].versions[version] = v
+	Apps[name].Versions[version] = v
 
-	if len(apps[name].versions) == 0 {
-		delete(apps, name)
+	if len(Apps[name].Versions) == 0 {
+		delete(Apps, name)
 	}
 }
 
 // dump logs the apps map
 // used for debug only
 func dump() {
-	for name, app := range apps {
+	for name, app := range Apps {
 		log.Logger.Tracef("\nAPPLICATION: %s\n", name)
-		for version, v := range app.versions {
+		for version, v := range app.Versions {
 			log.Logger.Tracef(" > version = %s, track = %s, ready = %t\n", version, v.Track, v.Ready)
 		}
-		for t, v := range app.tracks {
+		for t, v := range app.Tracks {
 			log.Logger.Tracef(" > track = %s, version = %s", t, v)
 		}
 	}

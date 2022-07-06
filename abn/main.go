@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"time"
+	"strconv"
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 
+	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -55,7 +56,7 @@ func main() {
 	go newInformer(watcher.ReadConfig(abnConfigFile)).Start(stopCh)
 
 	// launch gRPC server to respond to frontend requests
-	go launchServer([]grpc.ServerOption{})
+	go launchGRPCServer([]grpc.ServerOption{})
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Kill, os.Interrupt)
@@ -75,6 +76,20 @@ func restConfig() (*rest.Config, error) {
 	}
 
 	return kubeCfg, nil
+}
+
+func kubernetesClient() (*kubernetes.Clientset, error) {
+	rest, err := restConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := kubernetes.NewForConfig(rest)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, err
 }
 
 // newInformer creates a new informer watching the identified resources in the identified namespaces
@@ -109,7 +124,7 @@ type abnServer struct {
 // Lookup identifies a version that should be used for a given user
 // This method is exposed to gRPC clients
 func (server *abnServer) Lookup(ctx context.Context, a *pb.Application) (*pb.Session, error) {
-	v, err := watcher.Lookup(a.GetName(), a.GetUser())
+	v, err := pb.Lookup(a.GetName(), a.GetUser())
 	if err != nil {
 		return nil, err
 	}
@@ -122,45 +137,48 @@ func (server *abnServer) Lookup(ctx context.Context, a *pb.Application) (*pb.Ses
 	}, err
 }
 
-type MetricEntry struct {
-	name        string
-	value       string
-	application string
-	user        string
-	track       string
-	version     string
-	time        string
-}
-
 // WriteMetric writes a metric
 // This implmementation writes the metric to the log
 // This method is exposed to gRPC clients
 func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*emptypb.Empty, error) {
-	v, err := watcher.Lookup(m.GetApplication(), m.GetUser())
+	v, err := pb.Lookup(m.GetApplication(), m.GetUser())
 	if err != nil {
 		return &emptypb.Empty{}, err
 	}
-	track := v.Track
-	if track == "" {
-		track = v.Name
+	// track := v.Track
+	// if track == "" {
+	// 	track = v.Name
+	// }
+
+	client, err := kubernetesClient()
+	if err != nil {
+		return &emptypb.Empty{}, err
 	}
 
-	me := MetricEntry{
-		name:        m.GetName(),
-		value:       m.GetValue(),
-		application: m.GetApplication(),
-		user:        m.GetUser(),
-		track:       track,
-		version:     v.Name,
-		time:        time.Now().UTC().Format("2006-01-02 15:04:05"),
+	metricStore := pb.NewMetricStoreSecret(m.GetApplication(), client)
+	metric, err := metricStore.GetSummaryMetric(m.GetName(), v.Name)
+	if err != nil {
+		log.Logger.Warn("Unable to read metric")
+		return &emptypb.Empty{}, nil
 	}
 
-	log.Logger.Info("WriteMetric: ", me)
+	value, err := strconv.ParseFloat(m.GetValue(), 64)
+	if err != nil {
+		log.Logger.Warn("Unable to parse metric value ", m.GetValue())
+		return &emptypb.Empty{}, nil
+	}
+	metric.Add(value)
+	err = metricStore.Write(m.GetName(), v.Name, metric)
+	if err != nil {
+		log.Logger.Warn("unable to write metric to metric store")
+		return &emptypb.Empty{}, nil
+	}
+
 	return &emptypb.Empty{}, nil
 }
 
-// launchServer starts gRPC server
-func launchServer(opts []grpc.ServerOption) {
+// launchGRPCServer starts gRPC server
+func launchGRPCServer(opts []grpc.ServerOption) {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {
