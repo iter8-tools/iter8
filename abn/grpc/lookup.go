@@ -1,4 +1,4 @@
-package watcher
+package grpc
 
 // lookup.go -(internal) implementation of gRPC Lookup method
 
@@ -8,6 +8,7 @@ import (
 	"hash/crc32"
 
 	"github.com/iter8-tools/iter8/abn/util"
+	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
@@ -16,7 +17,7 @@ func rendezvousGet(name string, key string) string {
 	var maxNode []byte
 
 	keyBytes := []byte(key)
-	for t, v := range apps[name].tracks {
+	for t, v := range watcher.Apps[name].Tracks {
 		vBytes := []byte(v)
 		score := hash(vBytes, keyBytes)
 		log.Logger.Debugf("  track %s (version %s): %d", t, v, score)
@@ -37,7 +38,7 @@ func hash(node, key []byte) uint32 {
 	return hasher.Sum32()
 }
 
-func Lookup(name string, user string) (*Version, error) {
+func Lookup(name string, user string) (*watcher.Version, error) {
 	// if user is not provided, use a random string
 	if user == "" {
 		user = util.RandomString(24)
@@ -45,14 +46,14 @@ func Lookup(name string, user string) (*Version, error) {
 	}
 
 	// get app from name, fail if not present
-	app, ok := apps[name]
+	app, ok := watcher.Apps[name]
 	if !ok {
 		return nil, errors.New("no versions found for application")
 	}
 
 	// use rendezvous hash to get version for user, fail if not present
 	v := rendezvousGet(name, user)
-	version, ok := app.versions[v]
+	version, ok := app.Versions[v]
 	if !ok {
 		return nil, errors.New("can't find version")
 	}
