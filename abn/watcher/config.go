@@ -21,10 +21,15 @@ type Config struct {
 
 // ReadConfig reads yaml config file fn and converts to Config object
 func ReadConfig(fn string) *Config {
+	log.Logger.Trace("ReadConfig called")
+	defer log.Logger.Trace("ReadConig completed")
+
 	yfile, err := ioutil.ReadFile(fn)
 	if err != nil {
 		log.Logger.Fatal(err)
 	}
+
+	log.Logger.Debug("read config ", string(yfile))
 
 	var config Config
 	err2 := yaml.Unmarshal(yfile, &config)

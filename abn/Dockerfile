@@ -22,10 +22,12 @@ COPY --from=builder /iter8-abn /bin/iter8-abn
 
 ENTRYPOINT ["/bin/iter8-abn"]
 
-# export ABN_SERVICE_TAG=kalantar/abn-service:20220616-1415
+# export ABN_SERVICE_TAG=
 # docker build -t $ABN_SERVICE_TAG -f abn/Dockerfile .
 # docker push $ABN_SERVICE_TAG
 
 # helm install abn ../hub/charts/abn-service/ --set image=$ABN_SERVICE_TAG --set resources='{deployments,services}' --set namespaces='{default}'
 # helm upgrade abn ../hub/charts/abn-service/ --set image=$ABN_SERVICE_TAG --set resources='{deployments,services}' --set namespaces='{default}'
-# k port-forward svc/abn 50051:50051
+
+# helm install abn ../hub/charts/abn-service-single --set image=$ABN_SERVICE_TAG --set resources='{deployments,services}' --set service.name=abn --set application=backend
+# helm upgrade abn ../hub/charts/abn-service-single --set image=$ABN_SERVICE_TAG --set resources='{deployments,services}' --set service.name=abn --set application=backend
