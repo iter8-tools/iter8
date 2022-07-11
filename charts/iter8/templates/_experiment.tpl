@@ -14,8 +14,12 @@ spec:
   {{- include "task.http" $.Values.http -}}
   {{- else if eq "ready" . }}
   {{- include "task.ready" $ -}}
+  {{- else if eq "slack" . }}
+  {{- include "task.slack" $.Values.slack -}}
+  {{- else if eq "github" . }}
+  {{- include "task.github" $.Values.github -}}
   {{- else }}
-  {{- fail "task name must be one of assess, custommetrics, grpc, http, or ready" -}}
+  {{- fail "task name must be one of assess, custommetrics, grpc, http, ready, github, or slack" -}}
   {{- end }}
   {{- end }}
 result:
