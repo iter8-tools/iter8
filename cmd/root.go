@@ -28,9 +28,9 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "iter8",
-	Short: "Kubernetes testing platform",
+	Short: "Kubernetes release optimizer",
 	Long: `
-Kubernetes testing platform built for DevSecOps, MLOps, SRE, and data science teams. Iter8 makes it easy to ensure that new versions of apps and ML models perform well, are secure, and maximize business value.
+Iter8 is the Kubernetes release optimizer built for DevOps, MLOps, SRE and data science teams. Iter8 makes it easy to ensure that Kubernetes apps and ML models perform well and maximize business value.
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		ll, err := logrus.ParseLevel(logLevel)
