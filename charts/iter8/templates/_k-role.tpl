@@ -34,6 +34,12 @@ rules:
   resources: ["deployments"]
   verbs: ["get"]
 {{- end }}
+{{- if .Values.ready.ksvc }}
+- apiGroups: ["serving.knative.dev"]
+  resourceNames: [{{ .Values.ready.ksvc | quote }}]
+  resources: ["services"]
+  verbs: ["get"]
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

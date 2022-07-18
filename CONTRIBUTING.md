@@ -5,7 +5,7 @@ Welcome! We are delighted that you want to contribute to Iter8! 💖
 As you get started, you are in the best position to give us feedback on key areas including:
 
 * Problems found during setup of Iter8
-* Gaps in our quick start tutorial and other documentation
+* Gaps in our getting started tutorial and other documentation
 * Bugs in our test and automation scripts
 
 If anything doesn't make sense, or doesn't work when you run it, please open a
@@ -14,14 +14,12 @@ bug report and let us know!
 
 ## Ways to contribute
 
-We welcome many different types of contributions including:
+We welcome many types of contributions including:
 
-* [Tutorials and other documentation](#iter8-toolsdocs)
-* [Core Iter8 module with experiment charts](#iter8-toolsiter8)
+* [CLI and Iter8 experiment chart](#iter8-toolsiter8)
+* [Docs](#iter8-toolsdocs)
 * CI, builds, and tests
-* [Web design](#iter8-toolsdocs)
 * Reviewing pull requests
-* Communication, social media, blog posts
 
 ## Ask for help
 
@@ -29,22 +27,11 @@ The best ways to reach us with a question is to ask...
 
 * On the original GitHub issue
 * In the `#development` channel in the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw)
-* During our [community meetings](https://iter8.tools/community/)
+* During our [community meetings](https://iter8.tools/latest/community/community/)
 
 ## Find an issue
 
 Iter8 issues are tracked [here](https://github.com/iter8-tools/iter8/issues).
-
-Issued labeled **good first issue** have extra information to
-help you make your first contribution. Issues labeled **help wanted** are issues
-suitable for someone who has already submitted their first pull request and is good to move on to the second one.
-
-Sometimes there won’t be any issues with these labels. That’s ok! There is
-likely still something for you to work on. If you want to contribute but you
-don’t know where to start or can't find a suitable issue, you can reach out to us over the [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) for help finding something to work on.
-
-Once you see an issue that you'd like to work on, please post a comment saying
-that you want to work on it. Something like "I want to work on this" is fine.
 
 ## Pull request lifecycle
 
@@ -142,25 +129,3 @@ mkdocs serve -s
 ```
 
 You can now see your local docs at [http://localhost:8000](http://localhost:8000). You will also see live updates to [http://localhost:8000](http://localhost:8000) as you update the contents of the `docs` folder.
-
-<!-- ## Pull Request Checklist
-
-When you submit your pull request, or you push new commits to it, our automated
-systems will run some checks on your new code. We require that your pull request
-passes these checks, but we also have more criteria than just that before we can
-accept and merge it. We recommend that you check the following things locally
-before you submit your code:
-
-**TODO** -->
-<!-- list both the automated and any manual checks performed by reviewers, it
-is very helpful when the validations are automated in a script for example in a
-Makefile target. Below is an example of a checklist:
-
-* It passes tests: run the following command to run all of the tests locally:
-  `make build test lint`
-* Impacted code has new or updated tests
-* Documentation created/updated
-* We use [Azure DevOps, GitHub Actions, CircleCI] to test all pull
-  requests. We require that all tests succeed on a pull request before it is merged.
-
--->
