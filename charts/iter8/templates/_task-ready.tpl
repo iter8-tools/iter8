@@ -1,4 +1,4 @@
-{{- define "task.ready.tn }}
+{{- define "task.ready.tn" }}
 {{- if .Values.ready }}
 {{- $namespace := coalesce .Values.ready.namespace .Release.Namespace }}    
 {{- if $namespace }}
