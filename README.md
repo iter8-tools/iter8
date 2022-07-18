@@ -24,10 +24,11 @@ Iter8 packs a number of powerful features that facilitate Kubernetes app testing
 1.  **Generating load and collecting built-in metrics for HTTP and gRPC services.** Simplifies performance testing by eliminating the need to setup and use metrics databases.
 2.  **Well-defined notion of service-level objectives (SLOs).** Makes it simple to define and verify SLOs in experiments.
 3.  **Custom metrics.** Enables the use of custom metrics from any database(s) or REST API(s) in experiments.
-4.  **Readiness checks.** The performance testing portion of the experiment begins only after the service is ready.
+4.  **Readiness check.** The performance testing portion of the experiment begins only after the service is ready.
 5.  **HTML/text reports.** Promotes human understanding of experiment results through visual insights.
 6.  **Assertions.** Verifies whether the target app satisfies the specified SLOs or not after an experiment. Simplifies automation in CI/CD/GitOps pipelines: branch off into different paths depending upon whether the assertions are true or false.
-7.  **Multi-loop experiments.** Experiment loops are executed periodically. Experiment tasks (such as collecting metrics and assessing app versions) are evaluated during each loop of the experiment, and experiment results are updated with the latest assessments.
+7.  **Multi-loop experiments.** Experiment tasks can be executed periodically (multi-loop) instead of just once (single-loop). This enables Iter8 to refresh metric values and perform SLO validation using the latest metric values during each loop.
+8.  **Experiment anywhere.** Iter8 experiments can be launched inside a Kubernetes cluster, in local environments, or inside a GitHub Actions pipeline.
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
