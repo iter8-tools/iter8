@@ -20,22 +20,35 @@ type Config struct {
 }
 
 // ReadConfig reads yaml config file fn and converts to Config object
-func ReadConfig(fn string) *Config {
+func ReadConfig(fn string) Config {
 	log.Logger.Trace("ReadConfig called")
 	defer log.Logger.Trace("ReadConig completed")
 
+	config := Config{
+		Namespaces: []string{},
+		Resources:  []schema.GroupVersionResource{},
+	}
+
 	yfile, err := ioutil.ReadFile(fn)
 	if err != nil {
-		log.Logger.Fatal(err)
+		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
+		return config
 	}
 
-	log.Logger.Debug("read config ", string(yfile))
+	log.Logger.Debugf("read configuration\n%s", string(yfile))
 
-	var config Config
-	err2 := yaml.Unmarshal(yfile, &config)
-	if err2 != nil {
-		log.Logger.Fatal(err2)
+	err = yaml.Unmarshal(yfile, &config)
+	if err != nil {
+		log.Logger.Warnf("invalid configuration file %s: %s", fn, err.Error())
+		return config
 	}
 
-	return &config
+	if len(config.Namespaces) == 0 {
+		log.Logger.Warn("not watching any namespaces - configuration error?")
+	}
+	if len(config.Resources) == 0 {
+		log.Logger.Warn("not watching any resources - configuration error?")
+	}
+
+	return config
 }
