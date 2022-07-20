@@ -28,9 +28,12 @@ type Version struct {
 var Apps map[string]Application = map[string]Application{}
 
 // Add updates the apps map using information from a newly added object
+// If the observed object does not have a name (app.kubernetes.io/name label)
+// or version (app.kubenetes.io/version), it is ignored.
 func Add(watched WatchedObject) {
 	log.Logger.Trace("Add called")
 	defer log.Logger.Trace("Add completed")
+
 	// Assume applications are namespace scoped; use name in form: "namespace/name"
 	// where name is the value of the label app.kubernetes.io/name
 	name, ok := watched.getNamespacedName()
@@ -87,17 +90,14 @@ func Add(watched WatchedObject) {
 		// if version has track then unmap it
 		// but first check the track to version and remove if mapped to this (not ready) version
 		if v.Track != "" {
-			_, ok := app.Tracks[v.Track]
-			if ok {
-				delete(app.Tracks, v.Track)
-			}
+			delete(app.Tracks, v.Track)
 		}
 		// v not ready, remove any map to track
 		v.Track = ""
 	}
 
-	// record update
-	app.Versions[version] = v
+	// record update into Apps
+	Apps[name].Versions[version] = v
 }
 
 // Update updates the apps map using information from a modified object
@@ -135,10 +135,7 @@ func Delete(watched WatchedObject) {
 	annotations := watched.Obj.GetAnnotations()
 	if _, ok := annotations[READY_ANNOTATION]; ok {
 		v.Ready = false
-		_, ok := Apps[name].Tracks[v.Track]
-		if ok {
-			delete(Apps[name].Tracks, v.Track)
-		}
+		delete(Apps[name].Tracks, v.Track)
 		v.Track = ""
 	}
 

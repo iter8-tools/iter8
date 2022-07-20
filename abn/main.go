@@ -93,7 +93,7 @@ func kubernetesClient() (*kubernetes.Clientset, error) {
 }
 
 // newInformer creates a new informer watching the identified resources in the identified namespaces
-func newInformer(abnConfig *watcher.Config) *watcher.MultiInformer {
+func newInformer(abnConfig watcher.Config) *watcher.MultiInformer {
 	cfg, err := restConfig()
 	if err != nil {
 		log.Logger.WithError(err).Fatal("could not get REST config")
