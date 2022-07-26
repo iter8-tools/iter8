@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -25,7 +26,8 @@ func key(ns string, gvr schema.GroupVersionResource) string {
 	return ns + "/" + gvr.Group + "." + gvr.Version + "." + gvr.Resource
 }
 
-func NewInformer(client *InformerClient, types []schema.GroupVersionResource, namespaces []string) *MultiInformer {
+func NewInformer(client *InformerClient, kClient *kubernetes.Clientset, types []schema.GroupVersionResource, namespaces []string, nameToWatch string) *MultiInformer {
+	// func NewInformer(client *InformerClient, types []schema.GroupVersionResource, namespaces []string) *MultiInformer {
 	informer := &MultiInformer{
 		informersByKey:             make(map[string]informers.GenericInformer, len(types)*len(namespaces)),
 		informerFactroyByNamespace: make(map[string]dynamicinformer.DynamicSharedInformerFactory, len(namespaces)),
@@ -39,16 +41,13 @@ func NewInformer(client *InformerClient, types []schema.GroupVersionResource, na
 	}
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			Add(WatchedObject{Obj: obj.(*unstructured.Unstructured)})
-			dump()
+			Add(WatchedObject{Obj: obj.(*unstructured.Unstructured), Client: kClient}, nameToWatch)
 		},
 		UpdateFunc: func(oldObj, obj interface{}) {
-			Update(WatchedObject{Obj: obj.(*unstructured.Unstructured)})
-			dump()
+			Update(WatchedObject{Obj: obj.(*unstructured.Unstructured), Client: kClient}, nameToWatch)
 		},
 		DeleteFunc: func(obj interface{}) {
-			Delete(WatchedObject{Obj: obj.(*unstructured.Unstructured)})
-			dump()
+			Delete(WatchedObject{Obj: obj.(*unstructured.Unstructured), Client: kClient}, nameToWatch)
 		},
 	})
 

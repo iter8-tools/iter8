@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
+	"github.com/iter8-tools/iter8/abn/metricstore"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/sirupsen/logrus"
@@ -33,6 +34,8 @@ import (
 const (
 	// Name of environment variable with file path to resources/namespaces to watch
 	WATCHER_CONFIG_ENV = "WATCHER_CONFIG"
+	NAME_ENV           = "NAME"
+	NAMESPACE_ENV      = "NAMESPACE"
 )
 
 var (
@@ -44,16 +47,26 @@ func main() {
 	flag.Parse()
 	log.Logger.SetLevel(logrus.TraceLevel)
 
+	// 	testMetricStore()
+
 	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
 	if !ok {
 		log.Logger.Fatal("ABn configuation file is required")
 	}
+	name, ok := os.LookupEnv(NAME_ENV)
+	if !ok {
+		log.Logger.Fatal("application name not specified")
+	}
+	namespace, ok := os.LookupEnv(NAMESPACE_ENV)
+	if !ok {
+		log.Logger.Fatal("namespace not specified")
+	}
 
 	stopCh := make(chan struct{})
 
 	// set up watching
-	go newInformer(watcher.ReadConfig(abnConfigFile)).Start(stopCh)
+	go newInformer(watcher.ReadConfig(abnConfigFile), namespace+"/"+name).Start(stopCh)
 
 	// launch gRPC server to respond to frontend requests
 	go launchGRPCServer([]grpc.ServerOption{})
@@ -64,6 +77,42 @@ func main() {
 	<-sigCh
 	close(stopCh)
 }
+
+// func testMetricStore() {
+// 	client, err := kubernetesClient()
+// 	if err != nil {
+// 		log.Logger.Error(err)
+// 		return
+// 	}
+
+// 	metricStore := metricstore.NewMetricStoreSecret("default/backend", client)
+// 	var metric metricstore.SummaryMetric
+
+// 	// metric, err = metricStore.GetSummaryMetric("sample_metric", "v1")
+// 	// log.Logger.Info("default/backend/v1/sample_metric: ", metric, err)
+// 	// metric, err = metricStore.GetSummaryMetric("sample_metric", "v2")
+// 	// log.Logger.Info("default/backend/v2/sample_metric: ", metric, err)
+
+// 	// metricStore.AddMetric("sample_metric", "v1", 34.21)
+
+// 	// metric, err = metricStore.GetSummaryMetric("sample_metric", "v1")
+// 	// log.Logger.Info("default/backend/v1/sample_metric: ", metric, err)
+
+// 	// metric, err = metricStore.GetSummaryMetric("foo", "v2")
+// 	// log.Logger.Info("default/backend/v2/foo: ", metric, err)
+
+// 	log.Logger.Trace("####################################################")
+// 	metricStore.AddMetric("foo", "bar", 398)
+// 	log.Logger.Trace("####################################################")
+// 	metric, err = metricStore.GetSummaryMetric("foo", "bar")
+// 	log.Logger.Trace("####################################################")
+// 	log.Logger.Info("default/backend/v2/foo: ", metric, err)
+// 	log.Logger.Trace("####################################################")
+
+// 	log.Logger.Trace("####################################################")
+// 	metricStore.RecordEvent(metricstore.VersionNewEvent, "bar")
+// 	log.Logger.Trace("####################################################")
+// }
 
 func restConfig() (*rest.Config, error) {
 	kubeCfg, err := rest.InClusterConfig()
@@ -93,7 +142,7 @@ func kubernetesClient() (*kubernetes.Clientset, error) {
 }
 
 // newInformer creates a new informer watching the identified resources in the identified namespaces
-func newInformer(abnConfig watcher.Config) *watcher.MultiInformer {
+func newInformer(abnConfig watcher.Config, name string) *watcher.MultiInformer {
 	cfg, err := restConfig()
 	if err != nil {
 		log.Logger.WithError(err).Fatal("could not get REST config")
@@ -103,11 +152,17 @@ func newInformer(abnConfig watcher.Config) *watcher.MultiInformer {
 	if err != nil {
 		log.Logger.WithError(err).Fatal("unable to create watcher client")
 	}
+	kClient, err := kubernetesClient()
+	if err != nil {
+		log.Logger.WithError(err).Fatal("unable to create kubernetes client")
+	}
 
 	return watcher.NewInformer(
 		client,
+		kClient,
 		abnConfig.Resources,
 		abnConfig.Namespaces,
+		name,
 	)
 }
 
@@ -155,11 +210,9 @@ func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*e
 		return &emptypb.Empty{}, err
 	}
 
-	metricStore := pb.NewMetricStoreSecret(m.GetApplication(), client)
-	metric, err := metricStore.GetSummaryMetric(m.GetName(), v.Name)
+	metricStore, err := metricstore.NewMetricStoreSecret(m.GetApplication(), client)
 	if err != nil {
-		log.Logger.Warn("Unable to read metric")
-		return &emptypb.Empty{}, nil
+		return &emptypb.Empty{}, err
 	}
 
 	value, err := strconv.ParseFloat(m.GetValue(), 64)
@@ -167,8 +220,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*e
 		log.Logger.Warn("Unable to parse metric value ", m.GetValue())
 		return &emptypb.Empty{}, nil
 	}
-	metric.Add(value)
-	err = metricStore.Write(m.GetName(), v.Name, metric)
+	err = metricStore.AddMetric(m.GetName(), v.Name, value)
 	if err != nil {
 		log.Logger.Warn("unable to write metric to metric store")
 		return &emptypb.Empty{}, nil
