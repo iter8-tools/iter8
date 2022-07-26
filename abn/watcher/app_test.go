@@ -35,19 +35,20 @@ func TestAddUpdate(t *testing.T) {
 	var wo WatchedObject
 
 	// no name -- not added
-	wo = getWatchedObject(nil, nil, nil, false)
-	Add(wo)
+	wo = newWatchedObject(nil, nil, nil, false)
+	Add(wo, nn1)
 	assert.Empty(t, Apps)
 
 	// name but no version -- not added
-	wo = getWatchedObject(&app1, nil, nil, false)
-	Add(wo)
+	wo = newWatchedObject(&app1, nil, nil, false)
+	Add(wo, nn1)
 	assert.Empty(t, Apps)
 
 	// name and version -- adds
-	wo = getWatchedObject(&app1, &ver1, &trk1, false)
-	Add(wo)
-	Update(wo)
+	wo = newWatchedObject(&app1, &ver1, &trk1, false)
+	Add(wo, nn1)
+	// Update(wo, app1)
+	// assert.Contains(t, Apps, app1)
 	assert.Len(t, Apps, 1)
 	assert.Len(t, Apps[nn1].Versions, 1)
 	assert.False(t, Apps[nn1].Versions[ver1].Ready)
@@ -56,9 +57,9 @@ func TestAddUpdate(t *testing.T) {
 	assert.Len(t, Apps[nn1].Tracks, 0)
 
 	// add another same name, version, ready
-	wo = getWatchedObject(&app1, &ver1, &trk2, true)
-	Add(wo)
-	Update(wo)
+	wo = newWatchedObject(&app1, &ver1, &trk2, true)
+	Add(wo, nn1)
+	Update(wo, app1)
 	assert.Len(t, Apps, 1)
 	assert.Len(t, Apps[nn1].Versions, 1)
 	assert.True(t, Apps[nn1].Versions[ver1].Ready)
@@ -67,18 +68,26 @@ func TestAddUpdate(t *testing.T) {
 	assert.Len(t, Apps[nn1].Tracks, 1)
 
 	// add another same name, different version
-	wo = getWatchedObject(&app1, &ver2, nil, false)
-	Add(wo)
-	Update(wo)
+	wo = newWatchedObject(&app1, &ver2, nil, false)
+	Add(wo, nn1)
+	Update(wo, app1)
 	assert.Len(t, Apps, 1)
 	assert.Len(t, Apps[nn1].Versions, 2)
 	assert.True(t, Apps[nn1].Versions[ver1].Ready)
 	assert.False(t, Apps[nn1].Versions[ver2].Ready)
 
 	// add another name
-	wo = getWatchedObject(&app2, &ver3, nil, true)
-	Add(wo)
-	Update(wo)
+	wo = newWatchedObject(&app2, &ver3, nil, true)
+	Add(wo, nn1)
+	Update(wo, app1)
+	assert.Len(t, Apps, 1)
+	assert.Contains(t, Apps, nn1)
+	assert.NotContains(t, Apps, nn2)
+
+	// add another name but watching it
+	wo = newWatchedObject(&app2, &ver3, nil, true)
+	Add(wo, nn2)
+	Update(wo, app2)
 	assert.Len(t, Apps, 2)
 	assert.Len(t, Apps[nn1].Versions, 2)
 	assert.Len(t, Apps[nn2].Versions, 1) // there is a version of the other app
@@ -101,9 +110,10 @@ func TestDelete(t *testing.T) {
 	Apps = map[string]Application{}
 
 	// create initial set of objects
-	Add(getWatchedObject(&app1, &ver1, &trk1, true))
-	Add(getWatchedObject(&app1, &ver2, &trk2, true))
-	Add(getWatchedObject(&app2, &ver1, &trk1, true))
+	Add(newWatchedObject(&app1, &ver1, &trk1, true), nn1)
+	assert.Len(t, Apps, 1)
+	Add(newWatchedObject(&app1, &ver2, &trk2, true), nn1)
+	Add(newWatchedObject(&app2, &ver1, &trk1, true), nn2)
 	// base assertions
 	appsProfile := map[string]AppProfile{
 		nn1: {
@@ -117,28 +127,26 @@ func TestDelete(t *testing.T) {
 			numTracks:   1,
 		},
 	}
-	assertApps(t, 2, appsProfile)
+	assertApps(t, 1, appsProfile)
 
 	// no name --> ignore
-	Delete(getWatchedObject(nil, nil, nil, false))
+	Delete(newWatchedObject(nil, nil, nil, false), nn1)
 	// name but no version --> ignore
-	Delete(getWatchedObject(&app1, nil, nil, false))
+	Delete(newWatchedObject(&app1, nil, nil, false), nn1)
 	// has name but no information recorded
 	// should not happen but we are deleting so just ignore
-	Delete(getWatchedObject(&notrecordedapp, &ver1, nil, false))
+	Delete(newWatchedObject(&notrecordedapp, &ver1, nil, false), nn1)
 	// has known name and unrecognized version
 	// should not happend but we are deleting so just ignore
-	Delete(getWatchedObject(&app1, &notrecordedversion, nil, false))
-	assertApps(t, 2, appsProfile)
+	Delete(newWatchedObject(&app1, &notrecordedversion, nil, false), nn1)
+	assertApps(t, 1, appsProfile)
 
 	// if deleted object has a ready annotation then
 	//   set version not ready
 	//   remove track
-	Delete(getWatchedObject(&app1, &ver1, &trk1, true))
+	Delete(newWatchedObject(&app1, &ver1, &trk1, true), nn1)
 	appsProfile[nn1] = AppProfile{numVersions: 2, ready: false, numTracks: 1}
-	assertApps(t, 2, appsProfile)
-
-	dump()
+	assertApps(t, 1, appsProfile)
 }
 
 func assertApps(t *testing.T, numApps int, expected map[string]AppProfile) {
@@ -149,7 +157,7 @@ func assertApps(t *testing.T, numApps int, expected map[string]AppProfile) {
 	}
 }
 
-func getWatchedObject(name *string, version *string, track *string, ready bool) WatchedObject {
+func newWatchedObject(name *string, version *string, track *string, ready bool) WatchedObject {
 	labels := map[string]string{}
 	if name != nil {
 		labels[NAME_LABEL] = *name

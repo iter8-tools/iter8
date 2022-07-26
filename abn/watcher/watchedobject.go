@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -19,6 +20,8 @@ const (
 type WatchedObject struct {
 	// Obj the object
 	Obj *unstructured.Unstructured
+	// Client is kubernetes client to access the object
+	Client *kubernetes.Clientset
 }
 
 // getName gets application name from NAME_LABEL label on watched object
