@@ -228,6 +228,15 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 					return e
 				}
 				tsk = at
+			case NotificationTaskName:
+				nt := &notificationTask{}
+				err := json.Unmarshal(tBytes, nt)
+				if err != nil {
+					e := errors.New("json unmarshal error")
+					log.Logger.WithStackTrace(err.Error()).Error(e)
+					return e
+				}
+				tsk = nt
 			default:
 				log.Logger.Error("unknown task: " + *t.Task)
 				return errors.New("unknown task: " + *t.Task)

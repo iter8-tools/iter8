@@ -251,10 +251,6 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 		return err
 	}
 
-	if exp.driver == nil {
-		return errors.New("no driver was provided for collect-metrics-database task")
-	}
-
 	// initialize defaults
 	t.initializeDefaults()
 
