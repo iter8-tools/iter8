@@ -60,7 +60,7 @@ type MetricStoreSecret struct {
 // NewMetricStoreSecret creates a new MetricStoreSecret
 func NewMetricStoreSecret(app string, kd *driver.KubeDriver) (*MetricStoreSecret, error) {
 	if kd.Clientset == nil {
-		return nil, errors.New("Kubernestes clientset required to create MetricStoreSecret")
+		return nil, errors.New("a Kubernetes clientset is required to create MetricStoreSecret")
 	}
 
 	var ns, nm string

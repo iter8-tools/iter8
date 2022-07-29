@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"syscall"
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/metricstore"
@@ -53,7 +54,7 @@ func Start(kd *driver.KubeDriver) {
 	go launchGRPCServer([]grpc.ServerOption{}, kd)
 
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Kill, os.Interrupt)
+	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
 
 	<-sigCh
 	close(stopCh)
