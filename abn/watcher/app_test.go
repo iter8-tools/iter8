@@ -3,8 +3,9 @@ package watcher
 import (
 	"testing"
 
+	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
-
+	"helm.sh/helm/v3/pkg/cli"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -25,6 +26,7 @@ var ver2 string = "version2"
 var ver3 string = "version3"
 var trk1 string = "track1"
 var trk2 string = "track2"
+var fakeKD *driver.KubeDriver = driver.NewFakeKubeDriver(cli.New())
 
 func TestAddUpdate(t *testing.T) {
 	// // check track
@@ -35,18 +37,18 @@ func TestAddUpdate(t *testing.T) {
 	var wo WatchedObject
 
 	// no name -- not added
-	wo = newWatchedObject(nil, nil, nil, false)
-	Add(wo, nn1)
+	wo = newWatchedObject(nil, nil, nil, false, fakeKD)
+	Add(wo)
 	assert.Empty(t, Apps)
 
 	// name but no version -- not added
-	wo = newWatchedObject(&app1, nil, nil, false)
-	Add(wo, nn1)
+	wo = newWatchedObject(&app1, nil, nil, false, fakeKD)
+	Add(wo)
 	assert.Empty(t, Apps)
 
 	// name and version -- adds
-	wo = newWatchedObject(&app1, &ver1, &trk1, false)
-	Add(wo, nn1)
+	wo = newWatchedObject(&app1, &ver1, &trk1, false, fakeKD)
+	Add(wo)
 	// Update(wo, app1)
 	// assert.Contains(t, Apps, app1)
 	assert.Len(t, Apps, 1)
@@ -57,9 +59,9 @@ func TestAddUpdate(t *testing.T) {
 	assert.Len(t, Apps[nn1].Tracks, 0)
 
 	// add another same name, version, ready
-	wo = newWatchedObject(&app1, &ver1, &trk2, true)
-	Add(wo, nn1)
-	Update(wo, app1)
+	wo = newWatchedObject(&app1, &ver1, &trk2, true, fakeKD)
+	Add(wo)
+	Update(wo)
 	assert.Len(t, Apps, 1)
 	assert.Len(t, Apps[nn1].Versions, 1)
 	assert.True(t, Apps[nn1].Versions[ver1].Ready)
@@ -68,26 +70,26 @@ func TestAddUpdate(t *testing.T) {
 	assert.Len(t, Apps[nn1].Tracks, 1)
 
 	// add another same name, different version
-	wo = newWatchedObject(&app1, &ver2, nil, false)
-	Add(wo, nn1)
-	Update(wo, app1)
+	wo = newWatchedObject(&app1, &ver2, nil, false, fakeKD)
+	Add(wo)
+	Update(wo)
 	assert.Len(t, Apps, 1)
 	assert.Len(t, Apps[nn1].Versions, 2)
 	assert.True(t, Apps[nn1].Versions[ver1].Ready)
 	assert.False(t, Apps[nn1].Versions[ver2].Ready)
 
 	// add another name
-	wo = newWatchedObject(&app2, &ver3, nil, true)
-	Add(wo, nn1)
-	Update(wo, app1)
-	assert.Len(t, Apps, 1)
+	wo = newWatchedObject(&app2, &ver3, nil, true, fakeKD)
+	Add(wo)
+	Update(wo)
+	assert.Len(t, Apps, 2)
 	assert.Contains(t, Apps, nn1)
-	assert.NotContains(t, Apps, nn2)
+	assert.Contains(t, Apps, nn2)
 
 	// add another name but watching it
-	wo = newWatchedObject(&app2, &ver3, nil, true)
-	Add(wo, nn2)
-	Update(wo, app2)
+	wo = newWatchedObject(&app2, &ver3, nil, true, fakeKD)
+	Add(wo)
+	Update(wo)
 	assert.Len(t, Apps, 2)
 	assert.Len(t, Apps[nn1].Versions, 2)
 	assert.Len(t, Apps[nn2].Versions, 1) // there is a version of the other app
@@ -110,10 +112,10 @@ func TestDelete(t *testing.T) {
 	Apps = map[string]Application{}
 
 	// create initial set of objects
-	Add(newWatchedObject(&app1, &ver1, &trk1, true), nn1)
+	Add(newWatchedObject(&app1, &ver1, &trk1, true, fakeKD))
 	assert.Len(t, Apps, 1)
-	Add(newWatchedObject(&app1, &ver2, &trk2, true), nn1)
-	Add(newWatchedObject(&app2, &ver1, &trk1, true), nn2)
+	Add(newWatchedObject(&app1, &ver2, &trk2, true, fakeKD))
+	Add(newWatchedObject(&app2, &ver1, &trk1, true, fakeKD))
 	// base assertions
 	appsProfile := map[string]AppProfile{
 		nn1: {
@@ -130,21 +132,21 @@ func TestDelete(t *testing.T) {
 	assertApps(t, 1, appsProfile)
 
 	// no name --> ignore
-	Delete(newWatchedObject(nil, nil, nil, false), nn1)
+	Delete(newWatchedObject(nil, nil, nil, false, fakeKD))
 	// name but no version --> ignore
-	Delete(newWatchedObject(&app1, nil, nil, false), nn1)
+	Delete(newWatchedObject(&app1, nil, nil, false, fakeKD))
 	// has name but no information recorded
 	// should not happen but we are deleting so just ignore
-	Delete(newWatchedObject(&notrecordedapp, &ver1, nil, false), nn1)
+	Delete(newWatchedObject(&notrecordedapp, &ver1, nil, false, fakeKD))
 	// has known name and unrecognized version
 	// should not happend but we are deleting so just ignore
-	Delete(newWatchedObject(&app1, &notrecordedversion, nil, false), nn1)
+	Delete(newWatchedObject(&app1, &notrecordedversion, nil, false, fakeKD))
 	assertApps(t, 1, appsProfile)
 
 	// if deleted object has a ready annotation then
 	//   set version not ready
 	//   remove track
-	Delete(newWatchedObject(&app1, &ver1, &trk1, true), nn1)
+	Delete(newWatchedObject(&app1, &ver1, &trk1, true, fakeKD))
 	appsProfile[nn1] = AppProfile{numVersions: 2, ready: false, numTracks: 1}
 	assertApps(t, 1, appsProfile)
 }
@@ -157,7 +159,7 @@ func assertApps(t *testing.T, numApps int, expected map[string]AppProfile) {
 	}
 }
 
-func newWatchedObject(name *string, version *string, track *string, ready bool) WatchedObject {
+func newWatchedObject(name *string, version *string, track *string, ready bool, kd *driver.KubeDriver) WatchedObject {
 	labels := map[string]string{}
 	if name != nil {
 		labels[NAME_LABEL] = *name
@@ -183,7 +185,7 @@ func newWatchedObject(name *string, version *string, track *string, ready bool) 
 		Spec: corev1.PodSpec{},
 	}
 	obj, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(&o)
-	wo := WatchedObject{Obj: &unstructured.Unstructured{Object: obj}}
+	wo := WatchedObject{Obj: &unstructured.Unstructured{Object: obj}, Driver: kd}
 
 	return wo
 }
