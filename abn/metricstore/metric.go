@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/driver"
 	"sigs.k8s.io/yaml"
 
 	v1 "k8s.io/api/core/v1"
@@ -57,8 +58,8 @@ type MetricStoreSecret struct {
 }
 
 // NewMetricStoreSecret creates a new MetricStoreSecret
-func NewMetricStoreSecret(app string, client *kubernetes.Clientset) (*MetricStoreSecret, error) {
-	if client == nil {
+func NewMetricStoreSecret(app string, kd *driver.KubeDriver) (*MetricStoreSecret, error) {
+	if kd.Clientset == nil {
 		return nil, errors.New("Kubernestes clientset required to create MetricStoreSecret")
 	}
 
@@ -74,7 +75,7 @@ func NewMetricStoreSecret(app string, client *kubernetes.Clientset) (*MetricStor
 		App:       app,
 		Name:      nm,
 		Namespace: ns,
-		client:    client,
+		client:    kd.Clientset,
 	}, nil
 }
 
@@ -156,7 +157,8 @@ func (store *MetricStoreSecret) Read(version string, metric string) (MetricStore
 	secret, err := store.client.CoreV1().Secrets(store.Namespace).Get(context.Background(), store.Name, metav1.GetOptions{})
 	if err != nil {
 		log.Logger.WithError(err).Warn("unable to read metric store secret")
-		return cache, err
+		// return default cache with secret nil and no error
+		return cache, nil
 	}
 	cache.secret = secret
 
@@ -204,10 +206,10 @@ func (store *MetricStoreSecret) Read(version string, metric string) (MetricStore
 }
 
 func (store *MetricStoreSecret) Write(cache MetricStoreSecretCache) (err error) {
-	if cache.secret == nil {
-		// there was no secret; we fail
-		return errors.New("invalid secret for metrics store")
-	}
+	// if cache.secret == nil {
+	// 	// there was no secret; we will need to create
+	// 	return errors.New("invalid secret for metrics store")
+	// }
 	if cache.metricName != "" {
 		cache.versionData.Metrics[cache.metricName] = cache.metricData
 	}
@@ -221,8 +223,33 @@ func (store *MetricStoreSecret) Write(cache MetricStoreSecretCache) (err error) 
 	}
 
 	// assign to secret data and update cluster
+	mustCreate := false
+	if cache.secret == nil {
+		mustCreate = true
+		cache.secret = &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: store.Name,
+			},
+			Data: map[string][]byte{},
+		}
+		log.Logger.Infof("creating secret %#v", cache.secret)
+	}
 	cache.secret.Data[VERSIONS_DATA] = rawAppData
-	_, err = store.client.CoreV1().Secrets(store.Namespace).Update(context.Background(), cache.secret, metav1.UpdateOptions{})
+
+	// create or update the secret
+	if mustCreate {
+		_, err = store.client.CoreV1().Secrets(store.Namespace).Create(
+			context.Background(),
+			cache.secret,
+			metav1.CreateOptions{},
+		)
+	} else {
+		_, err = store.client.CoreV1().Secrets(store.Namespace).Update(
+			context.Background(),
+			cache.secret,
+			metav1.UpdateOptions{},
+		)
+	}
 	if err != nil {
 		log.Logger.WithError(err).Warn("unable to update metrics store")
 	}

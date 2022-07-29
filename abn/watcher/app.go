@@ -29,7 +29,7 @@ type Version struct {
 	Track string
 }
 
-// apps is map of app name to Application
+// Apps is map of app name to Application
 var Apps map[string]Application = map[string]Application{}
 
 // recrodEvent ensures we call attempt to write events only when the recorder is non-null
@@ -43,7 +43,7 @@ func recordEvent(recorder *metricstore.MetricStoreSecret, event metricstore.Vers
 // Add updates the apps map using information from a newly added object
 // If the observed object does not have a name (app.kubernetes.io/name label)
 // or version (app.kubenetes.io/version), it is ignored.
-func Add(watched WatchedObject, appToWatch string) {
+func Add(watched WatchedObject) {
 	log.Logger.Tracef("Add called for %s/%s", watched.Obj.GetNamespace(), watched.Obj.GetName())
 	defer log.Logger.Trace("Add completed")
 
@@ -53,10 +53,6 @@ func Add(watched WatchedObject, appToWatch string) {
 	if !ok {
 		// no name; ignore the object
 		log.Logger.Debug("no name found")
-		return
-	}
-	if name != appToWatch {
-		log.Logger.Debug("not watching ", name)
 		return
 	}
 
@@ -76,7 +72,7 @@ func Add(watched WatchedObject, appToWatch string) {
 			Versions: map[string]Version{},
 			Tracks:   map[string]string{},
 		}
-		recorder, _ := metricstore.NewMetricStoreSecret(name, watched.Client)
+		recorder, _ := metricstore.NewMetricStoreSecret(name, watched.Driver)
 		app.Recorder = recorder
 
 		// record new application
@@ -138,15 +134,15 @@ func Add(watched WatchedObject, appToWatch string) {
 }
 
 // Update updates the apps map using information from a modified object
-func Update(watched WatchedObject, nameToWatch string) {
+func Update(watched WatchedObject) {
 	log.Logger.Trace("Update called")
 	defer log.Logger.Trace("Update completed")
 
-	Add(watched, nameToWatch)
+	Add(watched)
 }
 
 // Delete updates the apps map using information from a deleted object
-func Delete(watched WatchedObject, nameToWatch string) {
+func Delete(watched WatchedObject) {
 	log.Logger.Trace("Delete called")
 	defer log.Logger.Trace("Delete called")
 
@@ -194,17 +190,3 @@ func Delete(watched WatchedObject, nameToWatch string) {
 		delete(Apps, name)
 	}
 }
-
-// // dump logs the apps map
-// // used for debug only
-// func dump() {
-// 	for name, app := range Apps {
-// 		log.Logger.Tracef("\nAPPLICATION: %s\n", name)
-// 		for version, v := range app.Versions {
-// 			log.Logger.Tracef(" > version = %s, track = %s, ready = %t\n", version, v.Track, v.Ready)
-// 		}
-// 		for t, v := range app.Tracks {
-// 			log.Logger.Tracef(" > track = %s, version = %s", t, v)
-// 		}
-// 	}
-// }
