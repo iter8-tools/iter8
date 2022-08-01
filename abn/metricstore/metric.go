@@ -158,7 +158,7 @@ func (store *MetricStoreSecret) Read(version string, metric string) (MetricStore
 	if err != nil {
 		log.Logger.WithError(err).Warn("unable to read metric store secret")
 		// return default cache with secret nil and no error
-		return cache, nil
+		return cache, errors.New("no secret for application")
 	}
 	cache.secret = secret
 
@@ -206,10 +206,6 @@ func (store *MetricStoreSecret) Read(version string, metric string) (MetricStore
 }
 
 func (store *MetricStoreSecret) Write(cache MetricStoreSecretCache) (err error) {
-	// if cache.secret == nil {
-	// 	// there was no secret; we will need to create
-	// 	return errors.New("invalid secret for metrics store")
-	// }
 	if cache.metricName != "" {
 		cache.versionData.Metrics[cache.metricName] = cache.metricData
 	}
@@ -230,11 +226,13 @@ func (store *MetricStoreSecret) Write(cache MetricStoreSecretCache) (err error) 
 			ObjectMeta: metav1.ObjectMeta{
 				Name: store.Name,
 			},
-			Data: map[string][]byte{},
+			Data:       map[string][]byte{},
+			StringData: map[string]string{},
 		}
 		log.Logger.Infof("creating secret %#v", cache.secret)
 	}
 	cache.secret.Data[VERSIONS_DATA] = rawAppData
+	cache.secret.StringData[VERSIONS_DATA] = string(rawAppData)
 
 	// create or update the secret
 	if mustCreate {

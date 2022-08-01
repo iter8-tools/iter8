@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var dir = filepath.Join("..", "test")
+var dir = filepath.Join("..", "..", "testdata", "abninputs")
 
 func TestReadConfig(t *testing.T) {
 	for _, tt := range []struct {
