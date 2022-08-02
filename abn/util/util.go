@@ -12,7 +12,7 @@ const (
 // RandomString returns a random string of length characters
 func RandomString(length int) string {
 	ran_str := make([]byte, length)
-	// Generating Random string
+	// generate random string
 	for i := 0; i < length; i++ {
 		ran_str[i] = code[rand.Intn(52)]
 	}

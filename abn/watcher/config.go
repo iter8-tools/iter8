@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// Config is ABn serivce configuration
+// Config is A/B(/n) serivce configuration. The configuration identifies the resources to watch and in which namespaces.
 type Config struct {
 	// Namespaces is list of namespaces to watch
 	Namespaces []string `yaml:"namespaces,omitemtpy"`
@@ -19,12 +19,10 @@ type Config struct {
 	Resources []schema.GroupVersionResource `yaml:"resources,omitemtpy"`
 }
 
-// ReadConfig reads yaml config file fn and converts to Config object
-func ReadConfig(fn string) Config {
-	log.Logger.Trace("ReadConfig called")
-	defer log.Logger.Trace("ReadConig completed")
-
-	config := Config{
+// ReadConfig reads yaml config file fn and converts to a Config object
+func ReadConfig(fn string) (config Config) {
+	// empty configuration
+	config = Config{
 		Namespaces: []string{},
 		Resources:  []schema.GroupVersionResource{},
 	}
@@ -32,7 +30,7 @@ func ReadConfig(fn string) Config {
 	yfile, err := ioutil.ReadFile(fn)
 	if err != nil {
 		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
-		return config
+		return config // empty configuration
 	}
 
 	log.Logger.Debugf("read configuration\n%s", string(yfile))
@@ -40,7 +38,7 @@ func ReadConfig(fn string) Config {
 	err = yaml.Unmarshal(yfile, &config)
 	if err != nil {
 		log.Logger.Warnf("invalid configuration file %s: %s", fn, err.Error())
-		return config
+		return config // empty configuration
 	}
 
 	if len(config.Namespaces) == 0 {

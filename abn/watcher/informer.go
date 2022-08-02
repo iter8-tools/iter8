@@ -13,15 +13,18 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
+// MultiInformer holds all of the informers for all namespaces
 type MultiInformer struct {
 	informersByKey             map[string]informers.GenericInformer
 	informerFactroyByNamespace map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
+// addInformer adds an informer
 func (informer *MultiInformer) addInformer(ns string, gvr schema.GroupVersionResource) {
 	informer.informersByKey[key(ns, gvr)] = informer.informerFactroyByNamespace[ns].ForResource(gvr)
 }
 
+// key computes a unique key for an informer from the gvr and namespace
 func key(ns string, gvr schema.GroupVersionResource) string {
 	return ns + "/" + gvr.Group + "." + gvr.Version + "." + gvr.Resource
 }

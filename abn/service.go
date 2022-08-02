@@ -1,5 +1,7 @@
 package abn
 
+// service.go - entry point for A/B(/n) service; starts controller watching resources and gRPC service
+
 import (
 	"context"
 	"flag"
@@ -23,30 +25,31 @@ import (
 )
 
 const (
-	// Name of environment variable with file path to resources/namespaces to watch
+	// Name of environment variable with file path to configuration yaml file
 	WATCHER_CONFIG_ENV = "WATCHER_CONFIG"
 )
 
 var (
-	// Port the service listens on
+	// port the service listens on
 	port = flag.Int("port", 50051, "The server port")
-	// kubedriver *driver.KubeDriver = nil
 )
 
+// Start is entry point to configure services and start them
 func Start(kd *driver.KubeDriver) {
+	// initialize kubernetes driver
 	if err := kd.Init(); err != nil {
-		log.Logger.Fatal("Unable to initialize kubedriver")
+		log.Logger.Fatal("unable to initialize kubedriver")
 	}
 
 	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
 	if !ok {
-		log.Logger.Fatal("ABn configuation file is required")
+		log.Logger.Fatal("configuation file is required")
 	}
 
 	stopCh := make(chan struct{})
 
-	// set up watching
+	// set up resource watching as defined by config
 	// go newInformer(watcher.ReadConfig(abnConfigFile), namespace+"/"+name).Start(stopCh)
 	go newInformer(watcher.ReadConfig(abnConfigFile), kd).Start(stopCh)
 
@@ -100,7 +103,7 @@ func (server *abnServer) Lookup(ctx context.Context, a *pb.Application) (*pb.Ses
 }
 
 // WriteMetric writes a metric
-// This implmementation writes the metric to the log
+// This implmementation writes the metric to a Kubernetes secret
 // This method is exposed to gRPC clients
 func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*emptypb.Empty, error) {
 	v, err := pb.Lookup(m.GetApplication(), m.GetUser())
@@ -108,7 +111,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*e
 		return &emptypb.Empty{}, err
 	}
 
-	metricStore, err := metricstore.NewMetricStoreSecret(m.GetApplication(), server.Driver)
+	ms, err := metricstore.NewMetricStoreSecret(m.GetApplication(), server.Driver)
 	if err != nil {
 		return &emptypb.Empty{}, err
 	}
@@ -118,7 +121,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*e
 		log.Logger.Warn("Unable to parse metric value ", m.GetValue())
 		return &emptypb.Empty{}, nil
 	}
-	err = metricStore.AddMetric(m.GetName(), v.Name, value)
+	err = ms.AddMetric(m.GetName(), v.Name, value)
 	if err != nil {
 		log.Logger.Warn("unable to write metric to metric store")
 		return &emptypb.Empty{}, nil

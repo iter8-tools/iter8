@@ -26,7 +26,7 @@ func newAbnCmd(kd *driver.KubeDriver) *cobra.Command {
 			return actor.LocalRun()
 		},
 		SilenceUsage: true,
-		// Hidden:       true,
+		Hidden:       true,
 	}
 	return cmd
 }
