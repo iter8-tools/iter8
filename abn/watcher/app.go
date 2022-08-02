@@ -13,7 +13,7 @@ import (
 type Application struct {
 	// Versions is map of versions for this application
 	Versions map[string]Version
-	// map of tracks to version
+	// map of tracks to version for quick lookup
 	Tracks map[string]string
 	// recorder used to write events, metrics
 	Recorder *metricstore.MetricStoreSecret
@@ -32,7 +32,8 @@ type Version struct {
 // Apps is map of app name to Application
 var Apps map[string]Application = map[string]Application{}
 
-// recrodEvent ensures we call attempt to write events only when the recorder is non-null
+// recordEvent ensures we call attempt to write events only when the recorder is non-null
+// when the recorder is null, the event is dropped
 func recordEvent(recorder *metricstore.MetricStoreSecret, event metricstore.VersionEventType, version string, track ...string) error {
 	if recorder != nil {
 		return recorder.RecordEvent(event, version, track...)
