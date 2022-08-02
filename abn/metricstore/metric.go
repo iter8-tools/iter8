@@ -232,7 +232,9 @@ func (store *MetricStoreSecret) Write(cache MetricStoreSecretCache) (err error) 
 		log.Logger.Infof("creating secret %#v", cache.secret)
 	}
 	cache.secret.Data[VERSIONS_DATA] = rawAppData
-	cache.secret.StringData[VERSIONS_DATA] = string(rawAppData)
+	if cache.secret.StringData != nil {
+		cache.secret.StringData[VERSIONS_DATA] = string(rawAppData)
+	}
 
 	// create or update the secret
 	if mustCreate {
