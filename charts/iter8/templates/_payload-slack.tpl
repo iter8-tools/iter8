@@ -1,3 +1,3 @@
 {
- 	"text": {{ .Values.JSONStringReport }}
+ 	"text": {{ .JSONStringReport }}
 }
