@@ -1,3 +1,3 @@
 {
- 	"text": {{ .JSONStringReport }}
+ 	"text": "{{ .JSONStringReport }}"
 }
