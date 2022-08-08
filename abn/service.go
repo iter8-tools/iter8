@@ -16,8 +16,8 @@ import (
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/driver"
 
 	"google.golang.org/grpc"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -36,9 +36,9 @@ var (
 )
 
 // Start is entry point to configure services and start them
-func Start(kd *driver.KubeDriver) {
+func Start(kd *base.KubeDriver) {
 	// initialize kubernetes driver
-	if err := kd.Init(); err != nil {
+	if err := kd.InitKube(); err != nil {
 		log.Logger.Fatal("unable to initialize kubedriver")
 	}
 
@@ -66,7 +66,7 @@ func Start(kd *driver.KubeDriver) {
 }
 
 // newServer returns a new gRPC server
-func newServer(kd *driver.KubeDriver) *abnServer {
+func newServer(kd *base.KubeDriver) *abnServer {
 	s := &abnServer{
 		Driver: kd,
 	}
@@ -74,11 +74,11 @@ func newServer(kd *driver.KubeDriver) *abnServer {
 }
 
 type abnServer struct {
-	Driver *driver.KubeDriver
+	Driver *base.KubeDriver
 	pb.UnimplementedABNServer
 }
 
-// Lookup identifies a track that should be used for a given user
+// Lookup identifies a version that should be used for a given user
 // This method is exposed to gRPC clients
 func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.Session, error) {
 	watcher.Applications.Lock()
@@ -136,7 +136,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 }
 
 // launchGRPCServer starts gRPC server
-func launchGRPCServer(opts []grpc.ServerOption, kd *driver.KubeDriver) {
+func launchGRPCServer(opts []grpc.ServerOption, kd *base.KubeDriver) {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {

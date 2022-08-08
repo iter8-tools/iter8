@@ -58,7 +58,7 @@ func (t *readinessTask) initializeDefaults() {
 		t.With.Timeout = StringPointer(defaultTimeout)
 	}
 
-	kd.initKube()
+	kd.InitKube()
 	// set Namespace (from context) if not already set
 	if t.With.Namespace == nil {
 		t.With.Namespace = StringPointer(kd.Namespace())
@@ -125,7 +125,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
 	log.Logger.Trace("looking for resource (", t.With.Group, "/", t.With.Version, ") ", t.With.Resource, ": ", t.With.Name, " in namespace ", *t.With.Namespace)
 
-	obj, err := kd.dynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
+	obj, err := kd.DynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}

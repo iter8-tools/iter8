@@ -2,19 +2,19 @@ package action
 
 import (
 	"github.com/iter8-tools/iter8/abn"
-	"github.com/iter8-tools/iter8/driver"
+	"github.com/iter8-tools/iter8/base"
 )
 
 // AbmOpts are the options used for launching experiments
 type AbnOpts struct {
 	// RunOpts provides options relating to experiment resources
-	RunOpts
+	BaseRunOpts
 }
 
 // NewAbnOpts initializes and returns abn opts
-func NewAbnOpts(kd *driver.KubeDriver) *AbnOpts {
+func NewAbnOpts(kd *base.KubeDriver) *AbnOpts {
 	return &AbnOpts{
-		RunOpts: *NewRunOpts(kd),
+		BaseRunOpts: *NewBaseRunOpts(kd),
 	}
 }
 

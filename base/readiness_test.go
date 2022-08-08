@@ -80,7 +80,7 @@ func TestInvalidTimeout(t *testing.T) {
 func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, pod *unstructured.Unstructured) {
 	*kd = *NewFakeKubeDriver(cli.New())
 	rs := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
-	_, err := kd.dynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
+	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
 	assert.NoError(t, err, "get failed")
 
 	err = rTask.run(&Experiment{
