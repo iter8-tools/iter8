@@ -1,6 +1,3 @@
 {
-	"text": {
-		"type": "mrkdwn",
-		"text": "Your Iter8 report is ready: {{ .JSONStringReport }}"
-	}
+	"text": "Your Iter8 report is ready: {{ .JSONStringReport }}"
 }
