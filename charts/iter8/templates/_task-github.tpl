@@ -11,4 +11,4 @@
     payloadTemplateURL: "https://github.com/iter8-tools/iter8/master/blob/github-template.tpl"
     softFailure: {{ default true .Values.github.softFailure }}
 {{- end }}
-{{- end }}
+{{ end }}

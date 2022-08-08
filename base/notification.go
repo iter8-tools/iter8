@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"strings"
-	"time"
+	"fmt"
 
-	log "github.com/iter8-tools/iter8/base/log"
+	// "io/ioutil"
+	// "net/http"
+
+	"time"
+	// log "github.com/iter8-tools/iter8/base/log"
 )
 
 // notificationInputs is the input to the notification task
@@ -239,36 +239,41 @@ func (t *notificationTask) run(exp *Experiment) error {
 	// 	log.Logger.Error("could not JSON marshal Slack notification body:", err)
 	// }
 
-	var requestBody io.Reader
+	// var requestBody io.Reader
 
 	if t.With.PayloadTemplateURL != "" {
-		requestBody = strings.NewReader(t.getPayload(exp))
+		// requestBody = strings.NewReader(t.getPayload(exp))
+		payload := t.getPayload(exp)
+
+		fmt.Print(payload)
+
+		// requestBody = strings.NewReader(payload)
 	}
 
-	// create a new HTTP request
-	req, err := http.NewRequest(t.With.Method, t.With.Url, requestBody)
-	if err != nil {
-		log.Logger.Error("could not create HTTP request for notify task:", err)
-		return nil
-	}
+	// // create a new HTTP request
+	// req, err := http.NewRequest(t.With.Method, t.With.Url, requestBody)
+	// if err != nil {
+	// 	log.Logger.Error("could not create HTTP request for notify task:", err)
+	// 	return nil
+	// }
 
-	// send request
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Logger.Error("could not send HTTP request for notify task:", err)
-		return nil
-	}
-	defer resp.Body.Close()
+	// // send request
+	// client := &http.Client{}
+	// resp, err := client.Do(req)
+	// if err != nil {
+	// 	log.Logger.Error("could not send HTTP request for notify task:", err)
+	// 	return nil
+	// }
+	// defer resp.Body.Close()
 
-	// read response responseBody
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Logger.Error("could not read response body from Slack notification request", err)
-		return nil
-	}
+	// // read response responseBody
+	// responseBody, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	log.Logger.Error("could not read response body from Slack notification request", err)
+	// 	return nil
+	// }
 
-	log.Logger.Debug("response body: ", string(responseBody))
+	// log.Logger.Debug("response body: ", string(responseBody))
 
 	return nil
 }
