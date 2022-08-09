@@ -8,7 +8,7 @@
     headers:
       Accept: application/vnd.github.everest-preview+json
       Accept: "application/preview-github/json"
-    payloadTemplateURL: "https://github.com/iter8-tools/iter8/master/blob/github-template.tpl"
+    payloadTemplateURL: "https://raw.githubusercontent.com/Alan-Cha/iter8/slack-notification/charts/iter8/templates/_payload-github.tpl"
     softFailure: {{ default true .Values.github.softFailure }}
 {{- end }}
 {{ end }}
