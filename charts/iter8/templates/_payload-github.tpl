@@ -1,4 +1,4 @@
 {
 	"event_type": "iter8",
-	"client_data": {{ .Report }}
+	"client_data": {{ .JSONStringReport }}
 }
