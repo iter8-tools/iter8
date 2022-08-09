@@ -232,6 +232,7 @@ func getProviderTemplate(providerURL string) (*template.Template, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	tpl, err := template.New("provider template").Funcs(sprig.TxtFuncMap()).Parse(string(responseBody))
 	if err != nil {
 		log.Logger.Error(err)

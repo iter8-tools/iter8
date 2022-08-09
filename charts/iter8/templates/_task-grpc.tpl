@@ -39,7 +39,6 @@
 {{- $pf := dict "metadata-file" "metadata.json" }}
 {{- $vals = mustMerge $pf $vals }}
 {{- end }}
-{{- /* Write the main task */ -}}
 # task: generate gRPC requests for app
 # collect Iter8's built-in gRPC latency and error-related metrics
 - task: grpc

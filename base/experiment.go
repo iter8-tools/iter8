@@ -228,8 +228,8 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 					return e
 				}
 				tsk = at
-			case NotificationTaskName:
-				nt := &notificationTask{}
+			case NotifyTaskName:
+				nt := &notifyTask{}
 				err := json.Unmarshal(tBytes, nt)
 				if err != nil {
 					e := errors.New("json unmarshal error")
