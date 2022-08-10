@@ -7,7 +7,6 @@ import (
 	"errors"
 	"hash/crc32"
 
-	"github.com/iter8-tools/iter8/abn/util"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
 )
@@ -41,8 +40,7 @@ func hash(node, key []byte) uint32 {
 func Lookup(name string, user string) (*watcher.Version, error) {
 	// if user is not provided, use a random string
 	if user == "" {
-		user = util.RandomString(24)
-		log.Logger.Debug("no user, using ", user)
+		return nil, errors.New("no user session provided")
 	}
 
 	// get app from name, fail if not present

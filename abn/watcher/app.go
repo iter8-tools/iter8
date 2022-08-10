@@ -1,25 +1,30 @@
 package watcher
 
-// app.go - methods to track applications and their versions
+// app.go - methods to track the runtime state of applications and their versions
+// For each version, maintain information about its readiness and its mapping to a "track", if any.
+
+// A track is a (user assigned) identifier that the user assigns to versions as part of the CI/CD process.
+// When Iter8 A/N(/n) service is used to lookup versions, the track identifier is returned.
+// The caller can use this to route requests to the appropriate version.
+// To do this, the set of track identifiers should be a (small) fixed set, such as "current" and
+// "candidate", that can be mapped to a static routes.
 
 import (
-	"errors"
-
-	"github.com/iter8-tools/iter8/abn/metricstore"
+	"github.com/iter8-tools/iter8/abn/appsummary"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// Application is information about versions of an application
+// Application is runtime information about the versions of an application
 type Application struct {
 	// Versions is map of versions for this application
 	Versions map[string]Version
-	// map of tracks to version for quick lookup
+	// Tracks maps of track identifiers to versions for quick lookup
 	Tracks map[string]string
-	// recorder used to write events, metrics
-	Recorder *metricstore.MetricStoreSecret
+	// Recorder used to persist events and metrics (to an ApplicationSummary)
+	Recorder *appsummary.MetricDriver
 }
 
-// Version is version of an Application
+// Version is runtime details of a version of an Application
 type Version struct {
 	// Name of version
 	Name string
@@ -31,15 +36,6 @@ type Version struct {
 
 // Apps is map of app name to Application
 var Apps map[string]Application = map[string]Application{}
-
-// recordEvent ensures we call attempt to write events only when the recorder is non-null
-// when the recorder is null, the event is dropped
-func recordEvent(recorder *metricstore.MetricStoreSecret, event metricstore.VersionEventType, version string, track ...string) error {
-	if recorder != nil {
-		return recorder.RecordEvent(event, version, track...)
-	}
-	return errors.New("no recorder available")
-}
 
 // Add updates the apps map using information from a newly added object
 // If the observed object does not have a name (app.kubernetes.io/name label)
@@ -73,8 +69,8 @@ func Add(watched WatchedObject) {
 			Versions: map[string]Version{},
 			Tracks:   map[string]string{},
 		}
-		recorder, _ := metricstore.NewMetricStoreSecret(name, watched.Driver)
-		app.Recorder = recorder
+		recorder := appsummary.MetricDriver{Client: watched.Driver.Clientset}
+		app.Recorder = &recorder
 
 		// record new application
 		Apps[name] = app
@@ -91,7 +87,7 @@ func Add(watched WatchedObject) {
 			Ready: false,
 		}
 		// log new version identified
-		recordEvent(recorder, metricstore.VersionNewEvent, version)
+		recorder.RecordEvent(name, version, appsummary.VersionNewEvent)
 	}
 
 	// set ready to value on watched object, if set
@@ -103,7 +99,7 @@ func Add(watched WatchedObject) {
 	if v.Ready {
 		// log version ready (if it wasn't before)
 		if !wasReady {
-			recordEvent(recorder, metricstore.VersionReadyEvent, version)
+			recorder.RecordEvent(name, version, appsummary.VersionReadyEvent)
 		}
 		watchedTrack := watched.getTrack()
 		if watchedTrack != "" {
@@ -115,7 +111,7 @@ func Add(watched WatchedObject) {
 
 			// log maptrack event if mapped to a new track
 			if oldTrack != v.Track {
-				recordEvent(recorder, metricstore.VersionMapTrackEvent, version, v.Track)
+				recorder.RecordEvent(name, version, appsummary.VersionMapTrackEvent, v.Track)
 			}
 		}
 	} else {
@@ -124,7 +120,7 @@ func Add(watched WatchedObject) {
 		if v.Track != "" {
 			delete(app.Tracks, v.Track)
 			// log unmaptrack event
-			recordEvent(recorder, metricstore.VersionUnmapTrackEvent, version)
+			recorder.RecordEvent(name, version, appsummary.VersionUnmapTrackEvent)
 		}
 		// v not ready, remove any map to track
 		v.Track = ""
@@ -172,14 +168,14 @@ func Delete(watched WatchedObject) {
 	if _, ok := annotations[READY_ANNOTATION]; ok {
 		// it was ready; record that it is no longer ready
 		if v.Ready {
-			recordEvent(recorder, metricstore.VersionNoLongerReadyEvent, version)
+			recorder.RecordEvent(name, version, appsummary.VersionNoLongerReadyEvent)
 		}
 		v.Ready = false
 
 		// if it was mapped to a track; mark it unmapped
 		_, ok := Apps[name].Tracks[v.Track]
 		if ok {
-			recordEvent(recorder, metricstore.VersionUnmapTrackEvent, version)
+			recorder.RecordEvent(name, version, appsummary.VersionUnmapTrackEvent)
 		}
 		delete(Apps[name].Tracks, v.Track)
 		v.Track = ""
