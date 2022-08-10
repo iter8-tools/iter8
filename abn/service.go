@@ -1,9 +1,11 @@
 package abn
 
-// service.go - entry point for A/B(/n) service; starts controller watching resources and gRPC service
+// service.go - entry point for A/B(/n) service; starts controller watching resources
+//               and gRPC service to respond to lookup and write metric requests
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -12,8 +14,8 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/iter8-tools/iter8/abn/appsummary"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
-	"github.com/iter8-tools/iter8/abn/metricstore"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
@@ -95,7 +97,7 @@ func (server *abnServer) Lookup(ctx context.Context, a *pb.Application) (*pb.Ses
 	}
 	track := v.Track
 	if track == "" {
-		track = v.Name
+		return nil, errors.New("no track identifier on version " + v.Name)
 	}
 	return &pb.Session{
 		Track: track,
@@ -111,17 +113,14 @@ func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*e
 		return &emptypb.Empty{}, err
 	}
 
-	ms, err := metricstore.NewMetricStoreSecret(m.GetApplication(), server.Driver)
-	if err != nil {
-		return &emptypb.Empty{}, err
-	}
+	md := appsummary.MetricDriver{Client: server.Driver.Clientset}
 
 	value, err := strconv.ParseFloat(m.GetValue(), 64)
 	if err != nil {
 		log.Logger.Warn("Unable to parse metric value ", m.GetValue())
 		return &emptypb.Empty{}, nil
 	}
-	err = ms.AddMetric(m.GetName(), v.Name, value)
+	err = md.AddMetric(m.GetApplication(), v.Name, m.GetName(), value)
 	if err != nil {
 		log.Logger.Warn("unable to write metric to metric store")
 		return &emptypb.Empty{}, nil

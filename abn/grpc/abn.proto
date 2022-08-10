@@ -11,7 +11,7 @@ package main;
 // for more information, see https://github.com/iter8-tools/iter8/issues/1257
 
 service ABN {
-  // Identify a version the caller should send a request to.
+  // Identify a track the caller should send a request to.
   // Should be called for each request (transaction).
   rpc Lookup(Application) returns(Session) {}
 

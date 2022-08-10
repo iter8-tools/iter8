@@ -1,4 +1,4 @@
-package metricstore
+package appsummary
 
 import (
 	"fmt"
@@ -18,6 +18,17 @@ const (
 	SS_IDX    = 4
 	TS_IDX    = 5
 )
+
+func EmptySummaryMetric() SummaryMetric {
+	return SummaryMetric{
+		0,                           // Count
+		0,                           // Sum
+		math.MaxFloat64,             // Min
+		math.SmallestNonzeroFloat64, // Max
+		0,                           // SumSquares
+		float64(time.Now().Unix()),  // LastUpdateTimestamp
+	}
+}
 
 func (m *SummaryMetric) Count() uint32 {
 	return uint32(math.Round((*m)[COUNT_IDX]))
@@ -71,7 +82,7 @@ func (m *SummaryMetric) SetLastUpdateTimestamp(t time.Time) {
 	(*m)[TS_IDX] = float64(t.Unix())
 }
 
-func (metric *SummaryMetric) AddTo(value float64) *SummaryMetric {
+func (metric SummaryMetric) AddTo(value float64) SummaryMetric {
 	log.Logger.Tracef("Add() called with: <%s>", metric.toString())
 	metric.SetCount(metric.Count() + 1)
 	metric.SetSum(metric.Sum() + value)

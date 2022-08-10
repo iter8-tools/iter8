@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ABNClient interface {
-	// Identify a version the caller should send a request to.
+	// Identify a track the caller should send a request to.
 	// Should be called for each request (transaction).
 	Lookup(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Session, error)
 	// Write a metric value to metrics database.
@@ -58,7 +58,7 @@ func (c *aBNClient) WriteMetric(ctx context.Context, in *MetricValue, opts ...gr
 // All implementations must embed UnimplementedABNServer
 // for forward compatibility
 type ABNServer interface {
-	// Identify a version the caller should send a request to.
+	// Identify a track the caller should send a request to.
 	// Should be called for each request (transaction).
 	Lookup(context.Context, *Application) (*Session, error)
 	// Write a metric value to metrics database.
