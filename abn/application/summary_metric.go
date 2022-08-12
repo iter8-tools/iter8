@@ -1,4 +1,4 @@
-package appsummary
+package application
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-type SummaryMetric []float64
+type SummaryMetric [6]float64
 
 const (
 	COUNT_IDX = 0
@@ -82,7 +82,7 @@ func (m *SummaryMetric) SetLastUpdateTimestamp(t time.Time) {
 	(*m)[TS_IDX] = float64(t.Unix())
 }
 
-func (metric SummaryMetric) AddTo(value float64) SummaryMetric {
+func (metric SummaryMetric) Add(value float64) SummaryMetric {
 	log.Logger.Tracef("Add() called with: <%s>", metric.toString())
 	metric.SetCount(metric.Count() + 1)
 	metric.SetSum(metric.Sum() + value)

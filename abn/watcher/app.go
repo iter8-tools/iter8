@@ -10,32 +10,25 @@ package watcher
 // "candidate", that can be mapped to a static routes.
 
 import (
-	"github.com/iter8-tools/iter8/abn/appsummary"
+	app "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// Application is runtime information about the versions of an application
-type Application struct {
-	// Versions is map of versions for this application
-	Versions map[string]Version
-	// Tracks maps of track identifiers to versions for quick lookup
-	Tracks map[string]string
-	// Recorder used to persist events and metrics (to an ApplicationSummary)
-	Recorder *appsummary.MetricDriver
-}
+// Applications is map of app name to Application
+var Applications = map[string]*app.Application{}
 
-// Version is runtime details of a version of an Application
-type Version struct {
-	// Name of version
-	Name string
-	// Ready indicates if version is ready
-	Ready bool
-	// Track is track of version
-	Track string
+func GetApplication(application string, reader *app.ApplicationReaderWriter) (*app.Application, error) {
+	a, ok := Applications[application]
+	if !ok {
+		if reader == nil {
+			return nil, nil
+		}
+		a, err := reader.Read(application)
+		Applications[application] = a
+		return a, err
+	}
+	return a, nil
 }
-
-// Apps is map of app name to Application
-var Apps map[string]Application = map[string]Application{}
 
 // Add updates the apps map using information from a newly added object
 // If the observed object does not have a name (app.kubernetes.io/name label)
@@ -61,73 +54,57 @@ func Add(watched WatchedObject) {
 		return
 	}
 
-	// check if we know about this application; if not create entry
-	app, ok := Apps[name]
-	if !ok {
-		// create record of discovered app if not already present
-		app = Application{
-			Versions: map[string]Version{},
-			Tracks:   map[string]string{},
-		}
-		recorder := appsummary.MetricDriver{Client: watched.Driver.Clientset}
-		app.Recorder = &recorder
+	// check if we know about this application
+	// first check if in memory
+	// if not, read from persistent store
+	// if it does not exist in persistent store, the read will return an initalized Application
+	a, _ := GetApplication(name, watched.Writer)
 
-		// record new application
-		Apps[name] = app
-	}
-
-	recorder := Apps[name].Recorder
-
-	// check if we know about this version; if not create entry
-	v, ok := Apps[name].Versions[version]
-	if !ok {
-		// create record of discovered version
-		v = Version{
-			Name:  version,
-			Ready: false,
-		}
-		// log new version identified
-		recorder.RecordEvent(name, version, appsummary.VersionNewEvent)
+	// get the version
+	// if it isn't in the Application this will create an new Version
+	v, isNew := a.GetVersion(version, true)
+	if isNew {
+		v.AddEvent(app.VersionNewEvent)
 	}
 
 	// set ready to value on watched object, if set
 	// otherwise, use the current readiness value
-	wasReady := v.Ready
-	v.Ready = watched.isReady(v.Ready)
+	oldReady := v.IsReady()
+	watchedReady := watched.isReady(oldReady)
 
 	// update track <--> ready version mapping
-	if v.Ready {
+	if watchedReady {
 		// log version ready (if it wasn't before)
-		if !wasReady {
-			recorder.RecordEvent(name, version, appsummary.VersionReadyEvent)
+		if !oldReady {
+			v.AddEvent(app.VersionReadyEvent)
 		}
 		watchedTrack := watched.getTrack()
 		if watchedTrack != "" {
-			oldTrack := v.Track
-			// update track for version
-			v.Track = watchedTrack
-			// update version for track
-			app.Tracks[watchedTrack] = v.Name
-
+			oldTrack := v.GetTrack()
 			// log maptrack event if mapped to a new track
-			if oldTrack != v.Track {
-				recorder.RecordEvent(name, version, appsummary.VersionMapTrackEvent, v.Track)
+			if oldTrack == nil || *oldTrack != watchedTrack {
+				v.AddEvent(app.VersionMapTrackEvent, watchedTrack)
+				// update a.Tracks
+				a.Tracks[watchedTrack] = version
 			}
 		}
 	} else {
 		// version not ready so if version has track then unmap it
 		// but first check the track to version and remove if mapped to this (not ready) version
-		if v.Track != "" {
-			delete(app.Tracks, v.Track)
+		oldTrack := v.GetTrack()
+		if oldTrack != nil {
+			delete(a.Tracks, *oldTrack)
 			// log unmaptrack event
-			recorder.RecordEvent(name, version, appsummary.VersionUnmapTrackEvent)
+			v.AddEvent(app.VersionUnmapTrackEvent)
 		}
-		// v not ready, remove any map to track
-		v.Track = ""
 	}
 
 	// record update into Apps
-	Apps[name].Versions[version] = v
+	toWrite := Applications[name]
+	err := toWrite.Write()
+	if err != nil {
+		log.Logger.Error("unable to write application")
+	}
 }
 
 // Update updates the apps map using information from a modified object
@@ -147,43 +124,47 @@ func Delete(watched WatchedObject) {
 	if !ok {
 		return // no app.kubernetes.io/name label
 	}
-	_, ok = Apps[name]
+	_, ok = Applications[name]
 	if !ok {
 		return // has app.kubernetes.io/name but object wasn't recorded
 	}
-
-	recorder := Apps[name].Recorder
 
 	version, ok := watched.getVersion()
 	if !ok {
 		return // no app.kubernetes.io/version label
 	}
-	v, ok := Apps[name].Versions[version]
-	if !ok {
-		return // no version recorded (should not happen)
+
+	a, _ := GetApplication(name, nil)
+	if a == nil {
+		return // no record; we don't look in secret if we got a delete event, we must have had an add/update event
+	}
+
+	v, _ := a.GetVersion(version, false)
+	if v == nil {
+		return // no version was recorded; on delete this should not happen
 	}
 
 	// if object being deleted has ready annotation we are no longer ready
-	annotations := watched.Obj.GetAnnotations()
-	if _, ok := annotations[READY_ANNOTATION]; ok {
-		// it was ready; record that it is no longer ready
-		if v.Ready {
-			recorder.RecordEvent(name, version, appsummary.VersionNoLongerReadyEvent)
-		}
-		v.Ready = false
+	versionReady := v.IsReady()
+	watchedReady := watched.isReady(false)
+	versionTrack := v.GetTrack()
 
-		// if it was mapped to a track; mark it unmapped
-		_, ok := Apps[name].Tracks[v.Track]
-		if ok {
-			recorder.RecordEvent(name, version, appsummary.VersionUnmapTrackEvent)
+	if watchedReady {
+		// it was ready; record that it is no longer ready
+		if versionReady {
+			v.AddEvent(app.VersionNoLongerReadyEvent)
 		}
-		delete(Apps[name].Tracks, v.Track)
-		v.Track = ""
+
+		// if it was mapped to a track; mark it unmapped (since no longer ready)
+		if versionTrack != nil {
+			v.AddEvent(app.VersionUnmapTrackEvent)
+			delete(Applications[name].Tracks, *versionTrack)
+		}
 	}
 
-	Apps[name].Versions[version] = v
+	Applications[name].Versions[version] = v
 
-	if len(Apps[name].Versions) == 0 {
-		delete(Apps, name)
+	if len(Applications[name].Versions) == 0 {
+		delete(Applications, name)
 	}
 }

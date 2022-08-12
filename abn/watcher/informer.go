@@ -3,6 +3,7 @@ package watcher
 // informer.go - informer(s) to watch desired resources/namespaces
 
 import (
+	"github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 
@@ -44,13 +45,22 @@ func NewInformer(kd *driver.KubeDriver, types []schema.GroupVersionResource, nam
 	}
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			Add(WatchedObject{Obj: obj.(*unstructured.Unstructured), Driver: kd})
+			Add(WatchedObject{
+				Obj:    obj.(*unstructured.Unstructured),
+				Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
+			})
 		},
 		UpdateFunc: func(oldObj, obj interface{}) {
-			Update(WatchedObject{Obj: obj.(*unstructured.Unstructured), Driver: kd})
+			Update(WatchedObject{
+				Obj:    obj.(*unstructured.Unstructured),
+				Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
+			})
 		},
 		DeleteFunc: func(obj interface{}) {
-			Delete(WatchedObject{Obj: obj.(*unstructured.Unstructured), Driver: kd})
+			Delete(WatchedObject{
+				Obj:    obj.(*unstructured.Unstructured),
+				Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
+			})
 		},
 	})
 
