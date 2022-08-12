@@ -5,7 +5,7 @@ package watcher
 import (
 	"strings"
 
-	"github.com/iter8-tools/iter8/driver"
+	"github.com/iter8-tools/iter8/abn/application"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -18,10 +18,10 @@ const (
 
 // WatchedObject is wrapper for object returned by informer
 type WatchedObject struct {
-	// Obj the object
+	// Obj is the Kubernetes object
 	Obj *unstructured.Unstructured
-	// Means to access the object
-	Driver *driver.KubeDriver
+	// Writer is used to write the object to persistent store
+	Writer *application.ApplicationReaderWriter
 }
 
 // getName gets application name from NAME_LABEL label on watched object

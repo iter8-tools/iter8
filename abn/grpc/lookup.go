@@ -14,18 +14,20 @@ import (
 func rendezvousGet(name string, key string) string {
 	var maxScore uint32
 	var maxNode []byte
+	var track string
 
 	keyBytes := []byte(key)
-	for t, v := range watcher.Apps[name].Tracks {
+	for t, v := range watcher.Applications[name].Tracks {
 		vBytes := []byte(v)
 		score := hash(vBytes, keyBytes)
 		log.Logger.Debugf("  track %s (version %s): %d", t, v, score)
 		if score > maxScore || (score == maxScore && bytes.Compare(vBytes, maxNode) < 0) {
 			maxScore = score
 			maxNode = vBytes
+			track = t
 		}
 	}
-	return string(maxNode)
+	return track
 }
 
 var hasher = crc32.New(crc32.MakeTable(crc32.Castagnoli))
@@ -37,25 +39,42 @@ func hash(node, key []byte) uint32 {
 	return hasher.Sum32()
 }
 
-func Lookup(name string, user string) (*watcher.Version, error) {
-	// if user is not provided, use a random string
+// func Lookup(name string, user string) (*app.Version, error) {
+// 	// if user is not provided, use a random string
+// 	if user == "" {
+// 		return nil, errors.New("no user session provided")
+// 	}
+
+// 	// get app from name, fail if not present
+// 	a, ok := watcher.Applications[name]
+// 	if !ok {
+// 		return nil, errors.New("no versions found for application")
+// 	}
+
+// 	// use rendezvous hash to get version for user, fail if not present
+// 	version := rendezvousGet(name, user)
+// 	v, new := a.Versions[version]
+// 	if new {
+// 		return nil, errors.New("can't find version")
+// 	}
+
+// 	log.Logger.Debugf("lookup.Lookup :: version = %s, track = %v, ready = %v", version, *v.GetTrack(), v.IsReady())
+// 	return &v, nil
+// }
+
+func Lookup(application string, user string) (*string, error) {
+	// if user is not provided, fail
 	if user == "" {
 		return nil, errors.New("no user session provided")
 	}
 
-	// get app from name, fail if not present
-	app, ok := watcher.Apps[name]
+	// check that we have a record of the application
+	_, ok := watcher.Applications[application]
 	if !ok {
-		return nil, errors.New("no versions found for application")
+		return nil, errors.New("application not found")
 	}
 
-	// use rendezvous hash to get version for user, fail if not present
-	v := rendezvousGet(name, user)
-	version, ok := app.Versions[v]
-	if !ok {
-		return nil, errors.New("can't find version")
-	}
-
-	log.Logger.Debugf("lookup.Lookup :: version = %s, track = %s, ready = %t", version.Name, version.Track, version.Ready)
-	return &version, nil
+	// use rendezvous hash to get track for user, fail if not present
+	track := rendezvousGet(application, user)
+	return &track, nil
 }

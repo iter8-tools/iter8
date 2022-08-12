@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/iter8-tools/iter8/abn/appsummary"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
@@ -88,43 +87,63 @@ type abnServer struct {
 	pb.UnimplementedABNServer
 }
 
-// Lookup identifies a version that should be used for a given user
+// Lookup identifies a track that should be used for a given user
 // This method is exposed to gRPC clients
-func (server *abnServer) Lookup(ctx context.Context, a *pb.Application) (*pb.Session, error) {
-	v, err := pb.Lookup(a.GetName(), a.GetUser())
-	if err != nil {
+func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.Session, error) {
+	track, err := pb.Lookup(appMsg.GetName(), appMsg.GetUser())
+	if err != nil || track == nil {
 		return nil, err
 	}
-	track := v.Track
-	if track == "" {
-		return nil, errors.New("no track identifier on version " + v.Name)
-	}
+
 	return &pb.Session{
-		Track: track,
+		Track: *track,
 	}, err
 }
 
 // WriteMetric writes a metric
 // This implmementation writes the metric to a Kubernetes secret
 // This method is exposed to gRPC clients
-func (server *abnServer) WriteMetric(ctx context.Context, m *pb.MetricValue) (*emptypb.Empty, error) {
-	v, err := pb.Lookup(m.GetApplication(), m.GetUser())
-	if err != nil {
+func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
+	log.Logger.Trace("WriteMetric called")
+	application := metricMsg.GetApplication()
+	a, ok := watcher.Applications[application]
+	if !ok {
+		return &emptypb.Empty{}, errors.New("unexpected: cannot find record of application " + application)
+	}
+	log.Logger.Debug("WriteMetric found application")
+
+	track, err := pb.Lookup(metricMsg.GetApplication(), metricMsg.GetUser())
+	if err != nil || track == nil {
 		return &emptypb.Empty{}, err
 	}
+	log.Logger.Debug("WriteMetric using track " + *track)
 
-	md := appsummary.MetricDriver{Client: server.Driver.Clientset}
+	version, ok := a.Tracks[*track]
+	if !ok {
+		return &emptypb.Empty{}, errors.New("track not mapped to version")
+	}
+	log.Logger.Debug("WriteMetric track maps to version " + version)
 
-	value, err := strconv.ParseFloat(m.GetValue(), 64)
+	v, _ := a.GetVersion(version, false)
+	if v == nil {
+		return &emptypb.Empty{}, errors.New("unexpected: trying to write metrics for unknown version")
+	}
+	log.Logger.Debugf("WriteMetric found version %s", v)
+
+	value, err := strconv.ParseFloat(metricMsg.GetValue(), 64)
 	if err != nil {
-		log.Logger.Warn("Unable to parse metric value ", m.GetValue())
+		log.Logger.Warn("Unable to parse metric value ", metricMsg.GetValue())
 		return &emptypb.Empty{}, nil
 	}
-	err = md.AddMetric(m.GetApplication(), v.Name, m.GetName(), value)
-	if err != nil {
-		log.Logger.Warn("unable to write metric to metric store")
-		return &emptypb.Empty{}, nil
-	}
+	log.Logger.Debugf("WriteMetric value is %f", value)
+
+	log.Logger.Debug(a)
+	log.Logger.Tracef("version before Add is %s", v)
+	m, _ := v.GetMetric(metricMsg.GetName(), true)
+	log.Logger.Debugf("WriteMetric found metric %#v", *m)
+	m.Add(value)
+	log.Logger.Debugf("version after Add is %s", v)
+	log.Logger.Debug(a)
 
 	return &emptypb.Empty{}, nil
 }
