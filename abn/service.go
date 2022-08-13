@@ -104,46 +104,38 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 // This implmementation writes the metric to a Kubernetes secret
 // This method is exposed to gRPC clients
 func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
-	log.Logger.Trace("WriteMetric called")
 	application := metricMsg.GetApplication()
 	a, ok := watcher.Applications[application]
 	if !ok {
 		return &emptypb.Empty{}, errors.New("unexpected: cannot find record of application " + application)
 	}
-	log.Logger.Debug("WriteMetric found application")
 
 	track, err := pb.Lookup(metricMsg.GetApplication(), metricMsg.GetUser())
 	if err != nil || track == nil {
 		return &emptypb.Empty{}, err
 	}
-	log.Logger.Debug("WriteMetric using track " + *track)
 
 	version, ok := a.Tracks[*track]
 	if !ok {
 		return &emptypb.Empty{}, errors.New("track not mapped to version")
 	}
-	log.Logger.Debug("WriteMetric track maps to version " + version)
 
 	v, _ := a.GetVersion(version, false)
 	if v == nil {
 		return &emptypb.Empty{}, errors.New("unexpected: trying to write metrics for unknown version")
 	}
-	log.Logger.Debugf("WriteMetric found version %s", v)
 
 	value, err := strconv.ParseFloat(metricMsg.GetValue(), 64)
 	if err != nil {
 		log.Logger.Warn("Unable to parse metric value ", metricMsg.GetValue())
 		return &emptypb.Empty{}, nil
 	}
-	log.Logger.Debugf("WriteMetric value is %f", value)
 
-	log.Logger.Debug(a)
-	log.Logger.Tracef("version before Add is %s", v)
 	m, _ := v.GetMetric(metricMsg.GetName(), true)
-	log.Logger.Debugf("WriteMetric found metric %#v", *m)
 	m.Add(value)
-	log.Logger.Debugf("version after Add is %s", v)
-	log.Logger.Debug(a)
+
+	// persist updated metric
+	a.Write()
 
 	return &emptypb.Empty{}, nil
 }
