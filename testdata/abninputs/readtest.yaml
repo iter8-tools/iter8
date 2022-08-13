@@ -2,11 +2,6 @@ v1:
   history:
   - ev: new
     tm: "2022-07-29T20:31:01.1453186Z"
-  - ev: ready
-    tm: "2022-07-29T20:31:01.1726392Z"
-  - ev: track
-    tm: "2022-07-29T20:31:01.2242678Z"
-    trk: default
   lastUpdateTimestamp: "2022-07-29T20:32:07.0109509Z"
   metrics:
     metric1:

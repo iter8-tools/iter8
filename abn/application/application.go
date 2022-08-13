@@ -1,5 +1,7 @@
 package application
 
+// application.go - type of application
+
 import (
 	"context"
 	"errors"
@@ -10,6 +12,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/yaml"
 )
 
@@ -20,16 +23,33 @@ const (
 
 // Application is an application observed in a kubernetes cluster
 type Application struct {
-	Name      string
+	// Name is the value of the app.kubernetes.io/name field
+	Name string
+	// Namespace is the namespace where the application was discovered
 	Namespace string
+	// Tracks is map of tracks identified to versions
 	Tracks
+	// Versions is list of discovered versions
 	Versions
+	// ReaderWriter is used to read/write to persistent storage (a Kubernetes secret)
 	Writer *ApplicationReaderWriter
 }
 
+// Versions is type of version name to versions map
 type Versions map[string]*Version
+
+// Tracks is map of track identifiers to version names
 type Tracks map[string]string
 
+// ApplicationReaderWriter is type used to read/write fromt/to persistent storage
+type ApplicationReaderWriter struct {
+	// Type Kubernetes client
+	Client kubernetes.Interface
+}
+
+// Read reads the application from persistent storage (a Kubernetes secret)
+// - the secret name/namespace is the same as the application
+// - if no application is present in the persistent storage, a new object is created
 func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
 	a := GetNewAppliation(appName, rw)
 
@@ -54,11 +74,21 @@ func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
 		return a, nil
 	}
 
+	// set Versions
 	a.Versions = versions
-	log.Logger.Debugf("Read returning %#v", a)
+
+	// initialize Tracks
+	for version, v := range versions {
+		track := v.GetTrack()
+		if track != nil {
+			a.Tracks[*track] = version
+		}
+	}
+
 	return a, nil
 }
 
+// Write writes the Application to persistent storage (a Kubernetes secret)
 func (a *Application) Write() error {
 	log.Logger.Tracef("Write called with %#v", a)
 	defer log.Logger.Trace("Write completed")
@@ -114,6 +144,7 @@ func (a *Application) Write() error {
 
 }
 
+// GetNewApplication returns a new (empty) Application for a namespace/name label
 func GetNewAppliation(application string, rw *ApplicationReaderWriter) *Application {
 	var name, namespace string
 	names := strings.Split(application, "/")
@@ -134,10 +165,9 @@ func GetNewAppliation(application string, rw *ApplicationReaderWriter) *Applicat
 	return &a
 }
 
-func (a *Application) GetCanonicalName() string {
-	return a.Namespace + "/" + a.Name
-}
-
+// GetVersion returns the Version identified by version
+// when allowNew is true, a new (blank) Version will  be created if none can be found
+// returns the version and a boolean indicating whether or not a new version was created or not
 func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool) {
 	v, ok := a.Versions[version]
 	if !ok {
@@ -158,17 +188,18 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 	return v, false
 }
 
+// String returns a string representation of the Application
 func (a *Application) String() string {
 	tracks := []string{}
 	for t, v := range a.Tracks {
 		tracks = append(tracks, t+" -> "+v)
 	}
 
-	str := fmt.Sprintf("Application %s/%s:\n\t%s\n", a.Namespace, a.Name,
+	str := fmt.Sprintf("Application %s/%s:\n\t%s", a.Namespace, a.Name,
 		"tracks: ["+strings.Join(tracks, ",")+"]")
 
 	for version, v := range a.Versions {
-		str += fmt.Sprintf("\tversion %s%s", version, v)
+		str += fmt.Sprintf("\n\tversion %s%s", version, v)
 	}
 
 	return str

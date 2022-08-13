@@ -1,5 +1,7 @@
 package application
 
+// version.go - supports notion of version of an application
+
 import (
 	"errors"
 	"fmt"
@@ -96,21 +98,16 @@ func (v *Version) IsReady() bool {
 // GetMetric returns a metric from the list of metrics associated with a version
 // If no metric is present for a given name, a new one is created
 func (v *Version) GetMetric(metric string, allowNew bool) (*SummaryMetric, bool) {
-	log.Logger.Tracef("GetMetric(%s) called", metric)
-	log.Logger.Tracef("version (before) is %s", *v)
 	m, ok := v.Metrics[metric]
 	if !ok {
 		if allowNew {
-			newM := EmptySummaryMetric()
-			v.Metrics[metric] = &newM
-			log.Logger.Tracef("version (end) is %s", *v)
-			return v.Metrics[metric], true
+			m := EmptySummaryMetric()
+			v.Metrics[metric] = m
+			return m, true
 		} else {
-			log.Logger.Tracef("version (end) is %s", *v)
 			return nil, false
 		}
 	}
-	log.Logger.Tracef("version (end) is %s", *v)
 	return m, false
 }
 
@@ -121,8 +118,8 @@ func (v *Version) String() string {
 	}
 
 	metrics := []string{}
-	for n, _ := range v.Metrics {
-		metrics = append(metrics, n)
+	for n, m := range v.Metrics {
+		metrics = append(metrics, fmt.Sprintf("%s(%d)", n, m.Count()))
 	}
 
 	return fmt.Sprintf("\n\t%s\n\t%s",

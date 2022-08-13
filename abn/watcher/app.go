@@ -17,6 +17,8 @@ import (
 // Applications is map of app name to Application
 var Applications = map[string]*app.Application{}
 
+// GetApplication gets an application from map of applications; if the application is not present,
+// a new empty application object will be created
 func GetApplication(application string, reader *app.ApplicationReaderWriter) (*app.Application, error) {
 	a, ok := Applications[application]
 	if !ok {
@@ -97,6 +99,7 @@ func Add(watched WatchedObject) {
 			// log unmaptrack event
 			v.AddEvent(app.VersionUnmapTrackEvent)
 		}
+		v.AddEvent(app.VersionNoLongerReadyEvent)
 	}
 
 	// record update into Apps
@@ -116,6 +119,8 @@ func Update(watched WatchedObject) {
 }
 
 // Delete updates the apps map using information from a deleted object
+// Note that we are not object counting which means we will never actually remove a version
+// from an application or an application from the syste
 func Delete(watched WatchedObject) {
 	log.Logger.Trace("Delete called")
 	defer log.Logger.Trace("Delete called")
@@ -158,11 +163,11 @@ func Delete(watched WatchedObject) {
 		// if it was mapped to a track; mark it unmapped (since no longer ready)
 		if versionTrack != nil {
 			v.AddEvent(app.VersionUnmapTrackEvent)
-			delete(Applications[name].Tracks, *versionTrack)
+			delete(a.Tracks, *versionTrack)
 		}
 	}
 
-	Applications[name].Versions[version] = v
+	// Applications[name].Versions[version] = v
 
 	if len(Applications[name].Versions) == 0 {
 		delete(Applications, name)
