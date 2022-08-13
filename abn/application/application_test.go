@@ -42,11 +42,13 @@ func TestApplication(t *testing.T) {
 	assert.NoError(t, err)
 	// verify can read it back
 	a, err = rw.Read("namespace/name")
+	assert.NotNil(t, a)
 	assert.NoError(t, err)
 
 	// read another application IN cluster
 	a, err = rw.Read("default/application")
 	assert.NotNil(t, a)
+	assert.NoError(t, err)
 	assert.Equal(t, "application", a.Name)
 	assert.Equal(t, "default", a.Namespace)
 	assert.Len(t, a.Versions, 2)
