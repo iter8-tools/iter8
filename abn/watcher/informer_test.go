@@ -11,18 +11,7 @@ import (
 
 func TestNewInformer(t *testing.T) {
 	kd := driver.NewFakeKubeDriver(cli.New())
-	// byteArray, _ := ioutil.ReadFile(base.CompletePath("../../testdata", "abninputs/readtest.yaml"))
-	// s, _ := kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		Name:      app,
-	// 		Namespace: "default",
-	// 	},
-	// 	StringData: map[string]string{"versionData.yaml": string(byteArray)},
-	// }, metav1.CreateOptions{})
-	// s.ObjectMeta.Labels = map[string]string{"foo": "bar"}
-	// kd.Clientset.CoreV1().Secrets("default").Update(context.TODO(), s, metav1.UpdateOptions{})
-
-	informer := NewInformer(
+	w := NewIter8Watcher(
 		kd,
 		[]schema.GroupVersionResource{{
 			Group:    "",
@@ -35,7 +24,5 @@ func TestNewInformer(t *testing.T) {
 		}},
 		[]string{"default", "foo"},
 	)
-	assert.NotNil(t, informer)
-	// 2 resource types for 2 namespaces
-	assert.Equal(t, 4, len(informer.informersByKey))
+	assert.NotNil(t, w)
 }
