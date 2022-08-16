@@ -1,9 +1,7 @@
 package base
 
 import (
-	"errors"
-	"strings"
-
+	app "github.com/iter8-tools/iter8/base/application"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -15,8 +13,6 @@ const (
 type ABNMetricsInputs struct {
 	// Application is name of application to evaluate
 	Application string `json:"application" yaml:"application"`
-	// // Tracks are logical version names that should be evaluated
-	// Tracks []string `json:"tracks" yaml:"tracks"`
 }
 
 type collectABNMetricsTask struct {
@@ -54,22 +50,25 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	// }
 
 	//////////////////////////////////////////////////////////////////////////
-	ms, err := NewMetricStoreSecret(t.With.Application, kd)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Warn("unable to read metrics")
-	}
+	// ms, err := NewMetricStoreSecret(t.With.Application, kd)
+	// if err != nil {
+	// 	log.Logger.WithStackTrace(err.Error()).Warn("unable to read metrics")
+	// }
 
-	// expect an error since we are not specifying the version or metric
-	// but should still get the full appData object (or an empty one if none exists)
-	c, err := ms.Read("", "")
-	// if there are no metrics, we want to fail
-	if err != nil {
-		if strings.Contains(err.Error(), "no secret for application") ||
-			strings.Contains(err.Error(), "expected key not found in secret") ||
-			strings.Contains(err.Error(), "unable to unmarshal appData from secret") {
-			return errors.New("unable to read metrics: " + err.Error())
-		}
-	}
+	rw := app.ApplicationReaderWriter{Client: kd.Clientset}
+	a, _ := rw.Read(t.With.Application)
+
+	// // expect an error since we are not specifying the version or metric
+	// // but should still get the full appData object (or an empty one if none exists)
+	// c, err := ms.Read("", "")
+	// // if there are no metrics, we want to fail
+	// if err != nil {
+	// 	if strings.Contains(err.Error(), "no secret for application") ||
+	// 		strings.Contains(err.Error(), "expected key not found in secret") ||
+	// 		strings.Contains(err.Error(), "unable to unmarshal appData from secret") {
+	// 		return errors.New("unable to read metrics: " + err.Error())
+	// 	}
+	// }
 	// for versionIndex, track := range t.With.Tracks {
 	// 	for metricName, metricData := range c.appData[track].Metrics {
 	// 		in.updateMetric(
@@ -85,15 +84,15 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	// }
 
 	// count number of tracks
-	numTracks := 0
-	for _, versionData := range c.appData {
-		lastEvent := versionData.History[len(versionData.History)-1]
-		if lastEvent.Event == VersionMapTrackEvent {
-			numTracks++
-		}
-	}
+	numTracks := len(a.Tracks)
+	// for _, versionData := range c.appData {
+	// 	lastEvent := versionData.History[len(versionData.History)-1]
+	// 	if lastEvent.Event == VersionMapTrackEvent {
+	// 		numTracks++
+	// 	}
+	// }
 	if numTracks == 0 {
-		log.Logger.Warnf("no tracks detected in application %s", ms.App)
+		log.Logger.Warn("no tracks detected in application")
 		return nil
 	}
 
@@ -108,20 +107,22 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 
 	// add metrics for tracks
 	versionIndex := 0
-	for versionName, versionData := range c.appData {
-		lastEvent := versionData.History[len(versionData.History)-1]
-		if lastEvent.Event == VersionMapTrackEvent {
-			log.Logger.Tracef("version %s is mapped to track %s; using index %d", versionName, lastEvent.Track, versionIndex)
-			for metricName, metricData := range versionData.Metrics {
-				log.Logger.Tracef("   updating metric %s with data %+v", metricName, metricData)
+	for version, v := range a.Versions {
+		t := v.GetTrack()
+		if t != nil {
+			// lastEvent := versionData.History[len(versionData.History)-1]
+			// if lastEvent.Event == VersionMapTrackEvent {
+			log.Logger.Tracef("version %s is mapped to track %s; using index %d", version, *t, versionIndex)
+			for metric, m := range v.Metrics {
+				log.Logger.Tracef("   updating metric %s with data %+v", metric, m)
 				in.updateMetric(
-					abnMetricProvider+"/"+metricName,
+					abnMetricProvider+"/"+metric,
 					MetricMeta{
 						Description: "summary metric",
 						Type:        SummaryMetricType,
 					},
 					versionIndex,
-					metricData,
+					m,
 				)
 			}
 			versionIndex++

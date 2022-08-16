@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/antonmedv/expr"
+	app "github.com/iter8-tools/iter8/base/application"
 	log "github.com/iter8-tools/iter8/base/log"
 	"github.com/montanaflynn/stats"
 	"helm.sh/helm/v3/pkg/time"
@@ -96,7 +97,7 @@ type Insights struct {
 	// SummaryMetricValues:
 	// the outer slice must be the same length as the umber of app versions
 	// the map key must match the name of the summary metric in MetricsInfo
-	SummaryMetricValues []map[string]SummaryMetric
+	SummaryMetricValues []map[string]app.SummaryMetric
 
 	// SLOs involved in this experiment
 	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
@@ -265,7 +266,7 @@ func metricTypeMatch(t MetricType, val interface{}) bool {
 		return t == SampleMetricType
 	case []HistBucket:
 		return t == HistogramMetricType
-	case SummaryMetric:
+	case *app.SummaryMetric:
 		return t == SummaryMetricType
 	default:
 		log.Logger.Error("unsupported type for metric value: ", v)
@@ -288,8 +289,8 @@ func (in *Insights) updateMetricValueHist(m string, i int, val []HistBucket) {
 	in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], val...)
 }
 
-func (in *Insights) updateSummaryMetric(m string, i int, val SummaryMetric) {
-	in.SummaryMetricValues[i][m] = val
+func (in *Insights) updateSummaryMetric(m string, i int, val *app.SummaryMetric) {
+	in.SummaryMetricValues[i][m] = *val
 }
 
 // registerMetric registers a new metric by adding its meta data
@@ -337,7 +338,7 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 	case HistogramMetricType:
 		in.updateMetricValueHist(nm, i, val.([]HistBucket))
 	case SummaryMetricType:
-		in.updateSummaryMetric(nm, i, val.(SummaryMetric))
+		in.updateSummaryMetric(nm, i, val.(*app.SummaryMetric))
 	default:
 		err := fmt.Errorf("unknown metric type %v", mm.Type)
 		log.Logger.Error(err)
@@ -440,11 +441,11 @@ func (in *Insights) initMetrics() error {
 	// initialize hist metric values for each version
 	in.HistMetricValues = make([]map[string][]HistBucket, in.NumVersions)
 	// initialize summary metric values for each version
-	in.SummaryMetricValues = make([]map[string]SummaryMetric, in.NumVersions)
+	in.SummaryMetricValues = make([]map[string]app.SummaryMetric, in.NumVersions)
 	for i := 0; i < in.NumVersions; i++ {
 		in.NonHistMetricValues[i] = make(map[string][]float64)
 		in.HistMetricValues[i] = make(map[string][]HistBucket)
-		in.SummaryMetricValues[i] = make(map[string]SummaryMetric)
+		in.SummaryMetricValues[i] = make(map[string]app.SummaryMetric)
 	}
 	return nil
 }

@@ -3,8 +3,8 @@ package watcher
 // informer.go - informer(s) to watch desired resources/namespaces
 
 import (
-	"github.com/iter8-tools/iter8/abn/application"
-	"github.com/iter8-tools/iter8/driver"
+	driver "github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/application"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"

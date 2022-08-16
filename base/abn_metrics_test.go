@@ -17,7 +17,7 @@ func TestABNMetricsTask(t *testing.T) {
 	byteArray, _ := ioutil.ReadFile(CompletePath("../../testdata", "abninputs/readtest.yaml"))
 	s, _ := kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      app,
+			Name:      "app",
 			Namespace: "default",
 		},
 		StringData: map[string]string{"versionData.yaml": string(byteArray)},

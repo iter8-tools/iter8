@@ -5,7 +5,7 @@ package watcher
 import (
 	"strings"
 
-	"github.com/iter8-tools/iter8/abn/application"
+	"github.com/iter8-tools/iter8/base/application"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
