@@ -51,8 +51,9 @@ func Start(kd *driver.KubeDriver) {
 	stopCh := make(chan struct{})
 
 	// set up resource watching as defined by config
-	// go newInformer(watcher.ReadConfig(abnConfigFile), namespace+"/"+name).Start(stopCh)
-	go newInformer(watcher.ReadConfig(abnConfigFile), kd).Start(stopCh)
+	abnConfig := watcher.ReadConfig(abnConfigFile)
+	w := watcher.NewIter8Watcher(kd, abnConfig.Resources, abnConfig.Namespaces)
+	go w.Start(stopCh)
 
 	// launch gRPC server to respond to frontend requests
 	go launchGRPCServer([]grpc.ServerOption{}, kd)
@@ -62,16 +63,6 @@ func Start(kd *driver.KubeDriver) {
 
 	<-sigCh
 	close(stopCh)
-}
-
-// newInformer creates a new informer watching the identified resources in the identified namespaces
-// func newInformer(abnConfig watcher.Config, name string) *watcher.MultiInformer {
-func newInformer(abnConfig watcher.Config, kd *driver.KubeDriver) *watcher.MultiInformer {
-	return watcher.NewInformer(
-		kd,
-		abnConfig.Resources,
-		abnConfig.Namespaces,
-	)
 }
 
 // newServer returns a new gRPC server
