@@ -88,8 +88,8 @@ type Session struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// Track or logical name of the application version
-	// If this is not available, it will be the version label
+	// Track identifier of an application version
+	// If this is not available, it will be the empty string
 	Track string `protobuf:"bytes,1,opt,name=track,proto3" json:"track,omitempty"`
 }
 

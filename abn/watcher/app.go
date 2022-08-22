@@ -10,16 +10,16 @@ package watcher
 // "candidate", that can be mapped to a static routes.
 
 import (
-	app "github.com/iter8-tools/iter8/abn/application"
+	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
 // Applications is map of app name to Application
-var Applications = map[string]*app.Application{}
+var Applications = map[string]*abnapp.Application{}
 
 // GetApplication gets an application from map of applications; if the application is not present,
 // a new empty application object will be created
-func GetApplication(application string, reader *app.ApplicationReaderWriter) (*app.Application, error) {
+func GetApplication(application string, reader *abnapp.ApplicationReaderWriter) (*abnapp.Application, error) {
 	a, ok := Applications[application]
 	if !ok {
 		if reader == nil {
@@ -66,7 +66,7 @@ func Add(watched WatchedObject) {
 	// if it isn't in the Application this will create an new Version
 	v, isNew := a.GetVersion(version, true)
 	if isNew {
-		v.AddEvent(app.VersionNewEvent)
+		v.AddEvent(abnapp.VersionNewEvent)
 	}
 
 	// set ready to value on watched object, if set
@@ -78,14 +78,14 @@ func Add(watched WatchedObject) {
 	if watchedReady {
 		// log version ready (if it wasn't before)
 		if !oldReady {
-			v.AddEvent(app.VersionReadyEvent)
+			v.AddEvent(abnapp.VersionReadyEvent)
 		}
 		watchedTrack := watched.getTrack()
 		if watchedTrack != "" {
 			oldTrack := v.GetTrack()
 			// log maptrack event if mapped to a new track
 			if oldTrack == nil || *oldTrack != watchedTrack {
-				v.AddEvent(app.VersionMapTrackEvent, watchedTrack)
+				v.AddEvent(abnapp.VersionMapTrackEvent, watchedTrack)
 				// update a.Tracks
 				a.Tracks[watchedTrack] = version
 			}
@@ -97,9 +97,9 @@ func Add(watched WatchedObject) {
 		if oldTrack != nil {
 			delete(a.Tracks, *oldTrack)
 			// log unmaptrack event
-			v.AddEvent(app.VersionUnmapTrackEvent)
+			v.AddEvent(abnapp.VersionUnmapTrackEvent)
 		}
-		v.AddEvent(app.VersionNoLongerReadyEvent)
+		v.AddEvent(abnapp.VersionNoLongerReadyEvent)
 	}
 
 	// record update into Apps
@@ -157,12 +157,12 @@ func Delete(watched WatchedObject) {
 	if watchedReady {
 		// it was ready; record that it is no longer ready
 		if versionReady {
-			v.AddEvent(app.VersionNoLongerReadyEvent)
+			v.AddEvent(abnapp.VersionNoLongerReadyEvent)
 		}
 
 		// if it was mapped to a track; mark it unmapped (since no longer ready)
 		if versionTrack != nil {
-			v.AddEvent(app.VersionUnmapTrackEvent)
+			v.AddEvent(abnapp.VersionUnmapTrackEvent)
 			delete(a.Tracks, *versionTrack)
 		}
 	}
