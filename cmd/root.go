@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
@@ -22,8 +21,6 @@ var (
 	settings = cli.New()
 	// Kuberdriver used by Helm and Kubernetes clients
 	kd = driver.NewKubeDriver(settings)
-	//
-	kd2 = base.NewKubeDriver(settings)
 	// output stream where log messages are printed
 	outStream io.Writer = os.Stdout
 )

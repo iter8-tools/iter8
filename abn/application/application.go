@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/base/metrics"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -83,11 +84,12 @@ func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
 		if track != nil {
 			a.Tracks[*track] = version
 		}
+
 		if v.History == nil {
 			v.History = []VersionEvent{}
 		}
 		if v.Metrics == nil {
-			v.Metrics = map[string]*SummaryMetric{}
+			v.Metrics = map[string]*metrics.SummaryMetric{}
 		}
 	}
 
@@ -181,7 +183,7 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 			log.Logger.Debugf("GetVersion no data found; returning %+v", v)
 			v = &Version{
 				History:             []VersionEvent{},
-				Metrics:             map[string]*SummaryMetric{},
+				Metrics:             map[string]*metrics.SummaryMetric{},
 				LastUpdateTimestamp: time.Now(),
 			}
 			a.Versions[version] = v

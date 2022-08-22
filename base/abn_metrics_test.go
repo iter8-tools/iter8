@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	corev1 "k8s.io/api/core/v1"
@@ -13,9 +14,9 @@ import (
 
 func TestABNMetricsTask(t *testing.T) {
 
-	kd := NewFakeKubeDriver(cli.New())
+	k8sdriver.Driver = k8sdriver.NewFakeKubeDriver(cli.New())
 	byteArray, _ := ioutil.ReadFile(CompletePath("../../testdata", "abninputs/readtest.yaml"))
-	s, _ := kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	s, _ := k8sdriver.Driver.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "app",
 			Namespace: "default",
@@ -23,7 +24,7 @@ func TestABNMetricsTask(t *testing.T) {
 		StringData: map[string]string{"versionData.yaml": string(byteArray)},
 	}, metav1.CreateOptions{})
 	s.ObjectMeta.Labels = map[string]string{"foo": "bar"}
-	kd.Clientset.CoreV1().Secrets("default").Update(context.TODO(), s, metav1.UpdateOptions{})
+	k8sdriver.Driver.Clientset.CoreV1().Secrets("default").Update(context.TODO(), s, metav1.UpdateOptions{})
 
 	task := &collectABNMetricsTask{
 		TaskMeta: TaskMeta{
@@ -37,7 +38,6 @@ func TestABNMetricsTask(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{task},
 		Result: &ExperimentResult{},
-		driver: kd,
 	}
 
 	exp.initResults(1)

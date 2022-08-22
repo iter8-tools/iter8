@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
 	log "github.com/iter8-tools/iter8/base/log"
 
 	corev1 "k8s.io/api/core/v1"
@@ -58,10 +59,10 @@ func (t *readinessTask) initializeDefaults() {
 		t.With.Timeout = StringPointer(defaultTimeout)
 	}
 
-	kd.InitKube()
+	k8sdriver.Driver.InitKube()
 	// set Namespace (from context) if not already set
 	if t.With.Namespace == nil {
-		t.With.Namespace = StringPointer(kd.Namespace())
+		t.With.Namespace = StringPointer(k8sdriver.Driver.Namespace())
 	}
 }
 
@@ -91,7 +92,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 	}
 
 	// get rest config
-	restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
+	restConfig, err := k8sdriver.Driver.EnvSettings.RESTClientGetter().ToRESTConfig()
 	if err != nil {
 		e := errors.New("unable to get Kubernetes REST config")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -125,7 +126,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
 	log.Logger.Trace("looking for resource (", t.With.Group, "/", t.With.Version, ") ", t.With.Resource, ": ", t.With.Name, " in namespace ", *t.With.Namespace)
 
-	obj, err := kd.DynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
+	obj, err := k8sdriver.Driver.DynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}

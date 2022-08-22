@@ -9,14 +9,13 @@ import (
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
-	"github.com/iter8-tools/iter8/driver"
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
+	"github.com/iter8-tools/iter8/base/metrics"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"helm.sh/helm/v3/pkg/cli"
 )
-
-var testDriver *driver.KubeDriver
 
 type Scenario struct {
 	// parameters to lookup
@@ -92,7 +91,7 @@ func TestWriteMetric(t *testing.T) {
 }
 
 func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
-	rw := &abnapp.ApplicationReaderWriter{Client: testDriver.Clientset}
+	rw := &abnapp.ApplicationReaderWriter{Client: k8sdriver.Driver.Clientset}
 
 	// get current count of metric
 	var oldCount uint32 = 0
@@ -139,12 +138,12 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 }
 
 func setup(t *testing.T) (*pb.ABNClient, func()) {
-	testDriver = driver.NewFakeKubeDriver(cli.New())
+	k8sdriver.Driver = k8sdriver.NewFakeKubeDriver(cli.New())
 
 	// populate watcher.Applications with test applications
 	watcher.Applications.Clear()
 	a, err := abnapp.YamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
-	a.Writer = &abnapp.ApplicationReaderWriter{Client: testDriver.Clientset}
+	a.Writer = &abnapp.ApplicationReaderWriter{Client: k8sdriver.Driver.Clientset}
 	assert.NoError(t, err)
 	watcher.Applications.Add("default/application", a)
 
@@ -154,7 +153,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 
 	serverOptions := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(serverOptions...)
-	pb.RegisterABNServer(grpcServer, newServer(testDriver))
+	pb.RegisterABNServer(grpcServer, newServer(k8sdriver.Driver))
 	go grpcServer.Serve(lis)
 
 	// setup client
@@ -172,7 +171,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	}
 }
 
-func getMetric(a *abnapp.Application, track, metric string) *abnapp.SummaryMetric {
+func getMetric(a *abnapp.Application, track, metric string) *metrics.SummaryMetric {
 	version, ok := a.Tracks[track]
 	if !ok {
 		return nil

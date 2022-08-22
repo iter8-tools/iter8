@@ -2,24 +2,29 @@ package action
 
 import (
 	"github.com/iter8-tools/iter8/abn"
-	"github.com/iter8-tools/iter8/base"
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
+	"github.com/iter8-tools/iter8/driver"
 )
 
-// AbmOpts are the options used for launching experiments
+// AbnOpts are the options used for launching experiments
 type AbnOpts struct {
 	// RunOpts provides options relating to experiment resources
-	BaseRunOpts
+	RunOpts
 }
 
 // NewAbnOpts initializes and returns abn opts
-func NewAbnOpts(kd *base.KubeDriver) *AbnOpts {
+func NewAbnOpts(kd *driver.KubeDriver) *AbnOpts {
 	return &AbnOpts{
-		BaseRunOpts: *NewBaseRunOpts(kd),
+		RunOpts: *NewRunOpts(kd),
 	}
 }
 
 // LocalRun launches a local experiment
 func (lOpts *AbnOpts) LocalRun() error {
-	abn.Start(lOpts.KubeDriver)
+	abn.Start(&k8sdriver.KubeDriver{
+		EnvSettings:   lOpts.EnvSettings,
+		Clientset:     lOpts.Clientset,
+		DynamicClient: lOpts.DynamicClient,
+	})
 	return nil
 }

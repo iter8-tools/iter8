@@ -2,7 +2,7 @@ package cmd
 
 import (
 	ia "github.com/iter8-tools/iter8/action"
-	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/spf13/cobra"
 )
@@ -15,7 +15,7 @@ Run the Iter8 A/B(/n) service.
 `
 
 // newAbnCmd creates the abn command
-func newAbnCmd(kd *base.KubeDriver) *cobra.Command {
+func newAbnCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewAbnOpts(kd)
 
 	cmd := &cobra.Command{
@@ -33,5 +33,5 @@ func newAbnCmd(kd *base.KubeDriver) *cobra.Command {
 
 // initialize with assert
 func init() {
-	rootCmd.AddCommand(newAbnCmd(kd2))
+	rootCmd.AddCommand(newAbnCmd(kd))
 }

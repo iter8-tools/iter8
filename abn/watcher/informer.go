@@ -3,8 +3,8 @@ package watcher
 // informer.go - informer(s) to watch desired resources/namespaces
 
 import (
-	driver "github.com/iter8-tools/iter8/base"
-	"github.com/iter8-tools/iter8/base/application"
+	"github.com/iter8-tools/iter8/abn/application"
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -15,7 +15,7 @@ type Iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func NewIter8Watcher(kd *driver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string) *Iter8Watcher {
+func NewIter8Watcher(kd *k8sdriver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string) *Iter8Watcher {
 	w := &Iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}

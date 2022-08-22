@@ -16,7 +16,7 @@ import (
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
-	"github.com/iter8-tools/iter8/base"
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
 	"github.com/iter8-tools/iter8/base/log"
 
 	"google.golang.org/grpc"
@@ -36,7 +36,7 @@ var (
 )
 
 // Start is entry point to configure services and start them
-func Start(kd *base.KubeDriver) {
+func Start(kd *k8sdriver.KubeDriver) {
 	// initialize kubernetes driver
 	if err := kd.InitKube(); err != nil {
 		log.Logger.Fatal("unable to initialize kubedriver")
@@ -66,7 +66,7 @@ func Start(kd *base.KubeDriver) {
 }
 
 // newServer returns a new gRPC server
-func newServer(kd *base.KubeDriver) *abnServer {
+func newServer(kd *k8sdriver.KubeDriver) *abnServer {
 	s := &abnServer{
 		Driver: kd,
 	}
@@ -74,7 +74,7 @@ func newServer(kd *base.KubeDriver) *abnServer {
 }
 
 type abnServer struct {
-	Driver *base.KubeDriver
+	Driver *k8sdriver.KubeDriver
 	pb.UnimplementedABNServer
 }
 
@@ -136,7 +136,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 }
 
 // launchGRPCServer starts gRPC server
-func launchGRPCServer(opts []grpc.ServerOption, kd *base.KubeDriver) {
+func launchGRPCServer(opts []grpc.ServerOption, kd *k8sdriver.KubeDriver) {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {

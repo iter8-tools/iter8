@@ -3,7 +3,7 @@ package watcher
 import (
 	"testing"
 
-	abnapp "github.com/iter8-tools/iter8/abn/application"
+	application "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
@@ -39,9 +39,6 @@ func setup() {
 func TestAddUpdate(t *testing.T) {
 	// setup: clear Applications
 	setup()
-	// Applications.Lock()
-	// defer Applications.Unlock()
-
 	assert.Len(t, Applications.apps, 0)
 
 	var wo WatchedObject
@@ -194,7 +191,7 @@ func TestDelete(t *testing.T) {
 
 // Utility methods
 
-func assertApplication(t *testing.T, a *abnapp.Application, nVersions int, nTracks int) {
+func assertApplication(t *testing.T, a *application.Application, nVersions int, nTracks int) {
 	assert.NotNil(t, a)
 	assert.Len(t, (*a).Versions, nVersions)
 	assert.Len(t, a.Tracks, nTracks)
@@ -228,7 +225,7 @@ func newWatchedObject(name *string, version *string, track *string, ready *strin
 	obj, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(&o)
 	wo := WatchedObject{
 		Obj:    &unstructured.Unstructured{Object: obj},
-		Writer: &abnapp.ApplicationReaderWriter{Client: kd.Clientset},
+		Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
 	}
 
 	return wo

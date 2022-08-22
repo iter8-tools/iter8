@@ -6,10 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
 	"github.com/stretchr/testify/assert"
-
 	"helm.sh/helm/v3/pkg/cli"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -22,7 +21,7 @@ func TestNoObject(t *testing.T) {
 	os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
-	rTask := newReadinessTask("non-existent-pod").withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
+	rTask := newReadinessTask("non-existant-pod").withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
@@ -78,9 +77,9 @@ func TestInvalidTimeout(t *testing.T) {
 
 // runTaskTest creates fake cluster with pod and runs rTask
 func runTaskTest(t *testing.T, rTask *readinessTask, success bool, ns string, pod *unstructured.Unstructured) {
-	*kd = *NewFakeKubeDriver(cli.New())
+	*k8sdriver.Driver = *k8sdriver.NewFakeKubeDriver(cli.New())
 	rs := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
-	_, err := kd.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
+	_, err := k8sdriver.Driver.DynamicClient.Resource(rs).Namespace(ns).Create(context.Background(), pod, metav1.CreateOptions{})
 	assert.NoError(t, err, "get failed")
 
 	err = rTask.run(&Experiment{

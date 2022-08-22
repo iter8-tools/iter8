@@ -7,7 +7,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/iter8-tools/iter8/driver"
+	k8sdriver "github.com/iter8-tools/iter8/base/k8sdriver"
+	metrics "github.com/iter8-tools/iter8/base/metrics"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,7 +24,7 @@ func YamlToApplication(name, folder, file string) (*Application, error) {
 	return byteArrayToApplication(name, byteArray)
 }
 
-func YamlToSecret(folder, file, namespace, name string, kd *driver.KubeDriver) error {
+func YamlToSecret(folder, file, namespace, name string, kd *k8sdriver.KubeDriver) error {
 	byteArray, err := readYamlFromFile(folder, file)
 	if err != nil {
 		return err
@@ -68,8 +69,9 @@ func byteArrayToApplication(name string, data []byte) (*Application, error) {
 			v.History = []VersionEvent{}
 		}
 		if v.Metrics == nil {
-			v.Metrics = map[string]*SummaryMetric{}
+			v.Metrics = map[string]*metrics.SummaryMetric{}
 		}
+
 	}
 
 	return a, nil

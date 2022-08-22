@@ -12,6 +12,7 @@ package watcher
 import (
 	"sync"
 
+	"github.com/iter8-tools/iter8/abn/application"
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
 )
@@ -105,7 +106,7 @@ func Add(watched WatchedObject) {
 	// if it isn't in the Application this will create an new Version
 	v, isNew := a.GetVersion(version, true)
 	if isNew {
-		v.AddEvent(abnapp.VersionNewEvent)
+		v.AddEvent(application.VersionNewEvent)
 	}
 
 	// set ready to value on watched object, if set
@@ -117,14 +118,14 @@ func Add(watched WatchedObject) {
 	if watchedReady {
 		// log version ready (if it wasn't before)
 		if !oldReady {
-			v.AddEvent(abnapp.VersionReadyEvent)
+			v.AddEvent(application.VersionReadyEvent)
 		}
 		watchedTrack := watched.getTrack()
 		if watchedTrack != "" {
 			oldTrack := v.GetTrack()
 			// log maptrack event if mapped to a new track
 			if oldTrack == nil || *oldTrack != watchedTrack {
-				v.AddEvent(abnapp.VersionMapTrackEvent, watchedTrack)
+				v.AddEvent(application.VersionMapTrackEvent, watchedTrack)
 				// update a.Tracks
 				a.Tracks[watchedTrack] = version
 			}
@@ -136,9 +137,9 @@ func Add(watched WatchedObject) {
 		if oldTrack != nil {
 			delete(a.Tracks, *oldTrack)
 			// log unmaptrack event
-			v.AddEvent(abnapp.VersionUnmapTrackEvent)
+			v.AddEvent(application.VersionUnmapTrackEvent)
 		}
-		v.AddEvent(abnapp.VersionNoLongerReadyEvent)
+		v.AddEvent(application.VersionNoLongerReadyEvent)
 	}
 
 	// record update into Apps
@@ -199,12 +200,12 @@ func Delete(watched WatchedObject) {
 	if watchedReady {
 		// it was ready; record that it is no longer ready
 		if versionReady {
-			v.AddEvent(abnapp.VersionNoLongerReadyEvent)
+			v.AddEvent(application.VersionNoLongerReadyEvent)
 		}
 
 		// if it was mapped to a track; mark it unmapped (since no longer ready)
 		if versionTrack != nil {
-			v.AddEvent(abnapp.VersionUnmapTrackEvent)
+			v.AddEvent(application.VersionUnmapTrackEvent)
 			delete(a.Tracks, *versionTrack)
 		}
 	}
