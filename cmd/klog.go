@@ -14,7 +14,7 @@ Fetch logs for a Kubernetes experiment.
 	iter8 k log
 `
 
-// newKLogCmd creates the Kubernetes log commmand
+// newKLogCmd creates the Kubernetes log command
 func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor := ia.NewLogOpts(kd)
 

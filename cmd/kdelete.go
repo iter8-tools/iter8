@@ -34,7 +34,7 @@ func newKDeleteCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	return cmd
 }
 
-// intialize with the k delete cmd
+// initialize with the k delete cmd
 func init() {
 	kCmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
 }
