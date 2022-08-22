@@ -51,7 +51,7 @@ type ApplicationReaderWriter struct {
 // - the secret name/namespace is the same as the application
 // - if no application is present in the persistent storage, a new object is created
 func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
-	a := GetNewAppliation(appName, rw)
+	a := GetNewApplication(appName, rw)
 
 	// read secret from cluster; extract appData
 	secret, err := rw.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
@@ -82,6 +82,12 @@ func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
 		track := v.GetTrack()
 		if track != nil {
 			a.Tracks[*track] = version
+		}
+		if v.History == nil {
+			v.History = []VersionEvent{}
+		}
+		if v.Metrics == nil {
+			v.Metrics = map[string]*SummaryMetric{}
 		}
 	}
 
@@ -145,7 +151,7 @@ func (a *Application) Write() error {
 }
 
 // GetNewApplication returns a new (empty) Application for a namespace/name label
-func GetNewAppliation(application string, rw *ApplicationReaderWriter) *Application {
+func GetNewApplication(application string, rw *ApplicationReaderWriter) *Application {
 	var name, namespace string
 	names := strings.Split(application, "/")
 	if len(names) > 1 {

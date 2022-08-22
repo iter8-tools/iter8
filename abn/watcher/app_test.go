@@ -3,7 +3,7 @@ package watcher
 import (
 	"testing"
 
-	app "github.com/iter8-tools/iter8/abn/application"
+	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
@@ -32,7 +32,7 @@ var F string = "false"
 var fakeKD *driver.KubeDriver
 
 func setup() {
-	Applications = map[string]*app.Application{}
+	Applications = map[string]*abnapp.Application{}
 	fakeKD = driver.NewFakeKubeDriver(cli.New())
 }
 
@@ -187,7 +187,7 @@ func TestDelete(t *testing.T) {
 
 // Utility methods
 
-func assertApplication(t *testing.T, a *app.Application, nVersions int, nTracks int) {
+func assertApplication(t *testing.T, a *abnapp.Application, nVersions int, nTracks int) {
 	assert.NotNil(t, a)
 	assert.Len(t, (*a).Versions, nVersions)
 	assert.Len(t, a.Tracks, nTracks)
@@ -221,7 +221,7 @@ func newWatchedObject(name *string, version *string, track *string, ready *strin
 	obj, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(&o)
 	wo := WatchedObject{
 		Obj:    &unstructured.Unstructured{Object: obj},
-		Writer: &app.ApplicationReaderWriter{Client: kd.Clientset},
+		Writer: &abnapp.ApplicationReaderWriter{Client: kd.Clientset},
 	}
 
 	return wo

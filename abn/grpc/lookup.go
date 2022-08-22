@@ -39,29 +39,6 @@ func hash(node, key []byte) uint32 {
 	return hasher.Sum32()
 }
 
-// func Lookup(name string, user string) (*app.Version, error) {
-// 	// if user is not provided, use a random string
-// 	if user == "" {
-// 		return nil, errors.New("no user session provided")
-// 	}
-
-// 	// get app from name, fail if not present
-// 	a, ok := watcher.Applications[name]
-// 	if !ok {
-// 		return nil, errors.New("no versions found for application")
-// 	}
-
-// 	// use rendezvous hash to get version for user, fail if not present
-// 	version := rendezvousGet(name, user)
-// 	v, new := a.Versions[version]
-// 	if new {
-// 		return nil, errors.New("can't find version")
-// 	}
-
-// 	log.Logger.Debugf("lookup.Lookup :: version = %s, track = %v, ready = %v", version, *v.GetTrack(), v.IsReady())
-// 	return &v, nil
-// }
-
 func Lookup(application string, user string) (*string, error) {
 	// if user is not provided, fail
 	if user == "" {

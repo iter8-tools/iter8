@@ -1,71 +1,74 @@
 package application
 
 import (
-	"context"
-	"io/ioutil"
 	"testing"
 	"time"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestApplication(t *testing.T) {
-	var a *Application
-	var err error
-
-	rw := ApplicationReaderWriter{Client: initKubeDriver(
-		Manifest{
-			folder:    "../../testdata",
-			file:      "abninputs/readtest.yaml",
-			name:      "application",
-			namespace: "default",
-		},
-	).Clientset}
-
-	// read application NOT in cluster
-	a, err = rw.Read("namespace/name")
-	assert.NotNil(t, a)
-	assert.Equal(t, "name", a.Name)
-	assert.Equal(t, "namespace", a.Namespace)
-	assert.Len(t, a.Tracks, 0)
-	assert.Len(t, a.Versions, 0)
+func TestApplicationNotInCluster(t *testing.T) {
+	rw := setup(t)
+	a, err := rw.Read("namespace/name")
+	assert.Error(t, err)
 	assert.ErrorContains(t, err, "not found")
-	assert.Contains(t, a.String(), "Application namespace/name")
 
-	// write application to cluster (should create the secret)
-	err = a.Write()
-	assert.NoError(t, err)
-	// verify can read it back
-	a, err = rw.Read("namespace/name")
-	assert.NotNil(t, a)
+	assertApplication(t, a, applicationAssertion{
+		namespace: "namespace",
+		name:      "name",
+		tracks:    []string{},
+		versions:  []string{},
+	})
+
+	writeVerify(t, a)
+}
+
+func TestApplicationInCluster(t *testing.T) {
+	rw := setup(t)
+	a, err := rw.Read("default/application")
 	assert.NoError(t, err)
 
-	// read another application IN cluster
-	a, err = rw.Read("default/application")
-	assert.NotNil(t, a)
-	assert.NoError(t, err)
-	assert.Equal(t, "application", a.Name)
-	assert.Equal(t, "default", a.Namespace)
-	assert.Len(t, a.Versions, 2)
-	assert.Len(t, a.Tracks, 1)
-	assert.Equal(t, "v2", a.Tracks["candidate"])
+	assertApplication(t, a, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	assertVersion(t, a.Versions["v1"], versionAssertion{
+		events:  []VersionEventType{VersionNewEvent},
+		track:   "",
+		ready:   false,
+		metrics: []string{"metric1"},
+	})
+	assertVersion(t, a.Versions["v2"], versionAssertion{
+		events:  []VersionEventType{VersionNewEvent, VersionReadyEvent, VersionMapTrackEvent},
+		track:   "candidate",
+		ready:   true,
+		metrics: []string{},
+	})
+
+	writeVerify(t, a)
+}
+
+func TestGetVersion(t *testing.T) {
+	rw := setup(t)
+	a, _ := rw.Read("default/application")
 
 	var v *Version
 	var isNew bool
 
 	// get a version that exists
-	v, isNew = a.GetVersion("v1", true)
-	assert.NotNil(t, v)
-	assert.False(t, isNew)
-	assert.Len(t, v.History, 1)
-	assert.False(t, v.IsReady())
-	assert.Nil(t, v.GetTrack())
-	assert.Contains(t, v.String(), "- history: [new]")
+	v, _ = a.GetVersion("v1", true)
+
+	assertVersion(t, v, versionAssertion{
+		events:  []VersionEventType{VersionNewEvent},
+		track:   "",
+		ready:   false,
+		metrics: []string{"metric1"},
+	})
 
 	// get a version that doesn't exist without allowing new creation
 	v, isNew = a.GetVersion("foo", false)
@@ -76,37 +79,15 @@ func TestApplication(t *testing.T) {
 	v, isNew = a.GetVersion("foo", true)
 	assert.NotNil(t, v)
 	assert.True(t, isNew)
-	assert.Len(t, v.History, 0)
 
-	// write the application back to the cluster (should update the secret)
-	err = a.Write()
-	assert.NoError(t, err)
-	a, err = rw.Read("default/application")
-	assert.NotNil(t, a)
-	assert.NoError(t, err)
-}
-
-type Manifest struct {
-	folder    string
-	file      string
-	name      string
-	namespace string
-}
-
-func initKubeDriver(secretManifests ...Manifest) *driver.KubeDriver {
-	kd := driver.NewFakeKubeDriver(cli.New())
-	for _, manifest := range secretManifests {
-		byteArray, _ := ioutil.ReadFile(base.CompletePath(manifest.folder, manifest.file))
-		s, _ := kd.Clientset.CoreV1().Secrets(manifest.namespace).Create(context.TODO(), &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      manifest.name,
-				Namespace: manifest.namespace,
-			},
-			StringData: map[string]string{KEY: string(byteArray)},
-		}, metav1.CreateOptions{})
-		kd.Clientset.CoreV1().Secrets(manifest.namespace).Update(context.TODO(), s, metav1.UpdateOptions{})
-	}
-	return kd
+	a = writeVerify(t, a)
+	// verify version foo is now present
+	assertApplication(t, a, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2", "foo"},
+	})
 }
 
 func TestVersionAndSummaryMetric(t *testing.T) {
@@ -166,4 +147,23 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 	assert.False(t, isNew)
 	assert.Equal(t, uint32(2), m.Count())
 	assert.Equal(t, float64(3865), m.SumSquares())
+}
+
+func setup(t *testing.T) *ApplicationReaderWriter {
+	kd := driver.NewFakeKubeDriver(cli.New())
+	YamlToSecret("../../testdata", "abninputs/readtest.yaml", "default", "application", kd)
+	return &ApplicationReaderWriter{Client: kd.Clientset}
+}
+
+func writeVerify(t *testing.T, a *Application) *Application {
+	application := a.Namespace + "/" + a.Name
+	// write application to cluster (should create the secret, if not present)
+	err := a.Write()
+	assert.NoError(t, err)
+
+	// verify can read it back
+	a, err = a.Writer.Read(application)
+	assert.NotNil(t, a)
+	assert.NoError(t, err)
+	return a
 }
