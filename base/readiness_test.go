@@ -22,7 +22,7 @@ func TestNoObject(t *testing.T) {
 	os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
-	rTask := newReadinessTask("non-existant-pod").withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
+	rTask := newReadinessTask("non-existent-pod").withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
 	runTaskTest(t, rTask, false, ns, pod)
 }
 
