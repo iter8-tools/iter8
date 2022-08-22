@@ -1,8 +1,14 @@
 package base
 
 import (
+	"io/ioutil"
+	"net/http"
 	"path/filepath"
 	"runtime"
+	"text/template"
+
+	"github.com/Masterminds/sprig"
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 // MajorMinor is the minor version of Iter8
@@ -48,4 +54,29 @@ func BoolPointer(b bool) *bool {
 func CompletePath(prefix string, suffix string) string {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
 	return filepath.Join(filepath.Dir(filename), prefix, suffix)
+}
+
+// get provider template from URL
+func getProviderTemplate(providerURL string) (*template.Template, error) {
+	// fetch b from url
+	resp, err := http.Get(providerURL)
+	if err != nil {
+		log.Logger.Error(err)
+		return nil, err
+	}
+	// read responseBody
+	// get the doubly templated metrics spec
+	defer resp.Body.Close()
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	tpl, err := template.New("provider template").Funcs(sprig.TxtFuncMap()).Parse(string(responseBody))
+	if err != nil {
+		log.Logger.Error(err)
+		return nil, err
+	}
+
+	return tpl, nil
 }

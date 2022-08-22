@@ -20,6 +20,6 @@
     headers:
       Authorization: token {{ .token }}
       Accept: application/vnd.github+json
-    payloadTemplateURL: "https://raw.githubusercontent.com/Alan-Cha/iter8/slack-notification/charts/iter8/templates/_payload-github.tpl"
+    payloadTemplateURL: {{ default "https://raw.githubusercontent.com/Alan-Cha/iter8/slack-notification/charts/iter8/templates/_payload-github.tpl" .payloadTemplateURL }}
     softFailure: {{ default true .softFailure }}
 {{ end }}

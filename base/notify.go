@@ -2,7 +2,6 @@ package base
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -78,73 +77,36 @@ type Report struct {
 	Experiment *Experiment `json:"experiment" yaml:"experiment"`
 }
 
-// NotifyPayloadTemplateValues contains the report as well as the report in some other formats
-type NotifyPayloadTemplateValues struct {
-	// Report is the report
-	Report Report `json:"report" yaml:"report"`
+// getReport gets the values for the payload tempalte
+func getReport(exp *Experiment) map[string]Report {
+	return map[string]Report{
+		"Report": Report{
+			// Group: exp.driver.Group
+			// SLOs:           slos,
+			// Metrics:        metrics,
 
-	// JSONStringReport is the report but marshalled into JSON and stringified
-	JSONStringReport string `json:"JSONStringReport" yaml:"JSONStringReport"`
-
-	// EscapedJSONStringReport is the report but marshalled into JSON and stringified and with tabs and new lines escaped
-	EscapedJSONStringReport string `json:"escapedJSONStringReport" yaml:"escapedJSONStringReport"`
-}
-
-// getPayloadTemplateValues gets the values for the payload tempalte
-func getPayloadTemplateValues(exp *Experiment) (*NotifyPayloadTemplateValues, error) {
-	report := Report{
-		// Group: exp.driver.Group
-		// SLOs:           slos,
-		// Metrics:        metrics,
-
-		TimeStamp:         time.Now().String(),
-		Completed:         exp.Completed(),
-		NoTaskFailures:    exp.NoFailure(),
-		NumTasks:          len(exp.Spec),
-		NumCompletedTasks: exp.Result.NumCompletedTasks,
-		NumLoops:          exp.Result.NumLoops,
-		Experiment:        exp,
+			TimeStamp:         time.Now().String(),
+			Completed:         exp.Completed(),
+			NoTaskFailures:    exp.NoFailure(),
+			NumTasks:          len(exp.Spec),
+			NumCompletedTasks: exp.Result.NumCompletedTasks,
+			NumLoops:          exp.Result.NumLoops,
+			Experiment:        exp,
+		},
 	}
-
-	marshalledReport, err := json.MarshalIndent(report, "", "  ")
-	if err != nil {
-		log.Logger.Error("could not JSON marshall report")
-		return nil, err
-	}
-
-	stringReport := string(marshalledReport)
-
-	// escape double quotes, tabs, and new lines
-	escapedReport := strings.Replace(stringReport, "\"", "\\\"", -1)
-	escapedReport = strings.Replace(escapedReport, "\n", "\\n", -1)
-	escapedReport = strings.Replace(escapedReport, "\t", "\\t", -1)
-
-	return &NotifyPayloadTemplateValues{
-		Report:                  report,
-		JSONStringReport:        stringReport,
-		EscapedJSONStringReport: escapedReport,
-	}, nil
 }
 
 // getPayload fetches the payload template from the PayloadTemplateURL and
-// executes it with values from getPayloadTemplateValues()
+// executes it with values from getReport()
 func (t *notifyTask) getPayload(exp *Experiment) (string, error) {
 	if t.With.PayloadTemplateURL != "" {
-		template, err := getProviderTemplate(t.With.PayloadTemplateURL)
-		if err != nil {
-			log.Logger.Error("could not get payload template")
-			return "", err
-		}
+		template, _ := getProviderTemplate(t.With.PayloadTemplateURL)
 
-		values, err := getPayloadTemplateValues(exp)
-		if err != nil {
-			log.Logger.Error("could not get payload template values")
-			return "", err
-		}
+		values := getReport(exp)
 
 		// get the metrics spec
 		var buf bytes.Buffer
-		err = template.Execute(&buf, values)
+		err := template.Execute(&buf, values)
 		if err != nil {
 			log.Logger.Error("could not execute payload template")
 			return "", err
@@ -170,6 +132,10 @@ func (t *notifyTask) initializeDefaults() {
 
 // validate task inputs
 func (t *notifyTask) validateInputs() error {
+	if t.With.Url == "" {
+		return errors.New("no URL was provided for notify task")
+	}
+
 	return nil
 }
 
@@ -179,10 +145,6 @@ func (t *notifyTask) run(exp *Experiment) error {
 	err := t.validateInputs()
 	if err != nil {
 		return err
-	}
-
-	if exp.driver == nil {
-		return errors.New("no driver was provided for collect-metrics-database task")
 	}
 
 	// initialize defaults

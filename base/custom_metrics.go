@@ -10,11 +10,9 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"text/template"
 
 	"time"
 
-	"github.com/Masterminds/sprig"
 	"github.com/itchyny/gojq"
 	log "github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -215,31 +213,6 @@ func queryDatabaseAndGetValue(template ProviderSpec, metric Metric) (interface{}
 	}
 
 	return value, true
-}
-
-// get provider template from URL
-func getProviderTemplate(providerURL string) (*template.Template, error) {
-	// fetch b from url
-	resp, err := http.Get(providerURL)
-	if err != nil {
-		log.Logger.Error(err)
-		return nil, err
-	}
-	// read responseBody
-	// get the doubly templated metrics spec
-	defer resp.Body.Close()
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	tpl, err := template.New("provider template").Funcs(sprig.TxtFuncMap()).Parse(string(responseBody))
-	if err != nil {
-		log.Logger.Error(err)
-		return nil, err
-	}
-
-	return tpl, nil
 }
 
 // run executes this task
