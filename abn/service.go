@@ -81,6 +81,9 @@ type abnServer struct {
 // Lookup identifies a track that should be used for a given user
 // This method is exposed to gRPC clients
 func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.Session, error) {
+	watcher.Applications.Lock()
+	defer watcher.Applications.Unlock()
+
 	track, err := pb.Lookup(appMsg.GetName(), appMsg.GetUser())
 	if err != nil || track == nil {
 		return nil, err
@@ -91,14 +94,15 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	}, err
 }
 
-// WriteMetric writes a metric
-// This implmementation writes the metric to a Kubernetes secret
-// This method is exposed to gRPC clients
 func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
-	application := metricMsg.GetApplication()
-	a, ok := watcher.Applications[application]
-	if !ok {
-		return &emptypb.Empty{}, errors.New("unexpected: cannot find record of application " + application)
+	watcher.Applications.Lock()
+	defer watcher.Applications.Unlock()
+
+	a, err := watcher.Applications.Get(metricMsg.Application, nil)
+	// a, ok := watcher.Applications[metricMsg.GetApplication()]
+	if err != nil || a == nil {
+		// if !ok {
+		return &emptypb.Empty{}, errors.New("unexpected: cannot find record of application " + metricMsg.GetApplication())
 	}
 
 	track, err := pb.Lookup(metricMsg.GetApplication(), metricMsg.GetUser())

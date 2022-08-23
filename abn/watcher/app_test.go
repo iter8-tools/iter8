@@ -32,34 +32,38 @@ var F string = "false"
 var fakeKD *driver.KubeDriver
 
 func setup() {
-	Applications = map[string]*abnapp.Application{}
+	Applications.Clear()
 	fakeKD = driver.NewFakeKubeDriver(cli.New())
 }
 
 func TestAddUpdate(t *testing.T) {
 	// setup: clear Applications
 	setup()
-	assert.Len(t, Applications, 0)
+	// Applications.Lock()
+	// defer Applications.Unlock()
+
+	assert.Len(t, Applications.apps, 0)
 
 	var wo WatchedObject
 
 	// no name -- not added
 	wo = newWatchedObject(nil, nil, nil, nil, fakeKD)
 	Add(wo)
-	assert.Empty(t, Applications)
+	assert.Empty(t, Applications.apps)
 
 	// name but no version -- not added
 	wo = newWatchedObject(&app1, nil, nil, nil, fakeKD)
 	Add(wo)
-	assert.Empty(t, Applications)
+	assert.Empty(t, Applications.apps)
 
 	// name and version -- adds
 	wo = newWatchedObject(&app1, &ver1, &trk1, nil, fakeKD)
 	Add(wo)
 	// Update(wo, app1)
 	// assert.Contains(t, Applications, app1)
-	assert.Len(t, Applications, 1)
-	a, _ := GetApplication(nn1, nil)
+	assert.Len(t, Applications.apps, 1)
+
+	a, _ := Applications.Get(nn1, nil)
 	assert.Len(t, a.Versions, 1)
 	v, _ := a.GetVersion(ver1, false)
 	assert.False(t, v.IsReady())
@@ -71,8 +75,8 @@ func TestAddUpdate(t *testing.T) {
 	wo = newWatchedObject(&app1, &ver1, &trk2, &T, fakeKD)
 	Add(wo)
 	Update(wo)
-	assert.Len(t, Applications, 1)
-	a, _ = GetApplication(nn1, nil)
+	assert.Len(t, Applications.apps, 1)
+	a, _ = Applications.Get(nn1, nil)
 	assert.Len(t, a.Versions, 1)
 	v, _ = a.GetVersion(ver1, false)
 	assert.True(t, v.IsReady())
@@ -84,7 +88,7 @@ func TestAddUpdate(t *testing.T) {
 	// expect version to no longer be ready and not tracked
 	wo = newWatchedObject(&app1, &ver1, nil, &F, fakeKD)
 	Add(wo)
-	a, _ = GetApplication(nn1, nil)
+	a, _ = Applications.Get(nn1, nil)
 	assert.Len(t, a.Versions, 1)
 	v, _ = a.GetVersion(ver1, false)
 	assert.False(t, v.IsReady())
@@ -94,8 +98,8 @@ func TestAddUpdate(t *testing.T) {
 	wo = newWatchedObject(&app1, &ver2, nil, nil, fakeKD)
 	Add(wo)
 	Update(wo)
-	assert.Len(t, Applications, 1)
-	a, _ = GetApplication(nn1, nil)
+	assert.Len(t, Applications.apps, 1)
+	a, _ = Applications.Get(nn1, nil)
 	assert.Len(t, a.Versions, 2)
 	v, _ = a.GetVersion(ver1, false)
 	assert.False(t, v.IsReady()) // remains false
@@ -106,18 +110,18 @@ func TestAddUpdate(t *testing.T) {
 	wo = newWatchedObject(&app2, &ver3, nil, &T, fakeKD)
 	Add(wo)
 	Update(wo)
-	assert.Len(t, Applications, 2)
-	assert.Contains(t, Applications, nn1)
-	assert.Contains(t, Applications, nn2)
+	assert.Len(t, Applications.apps, 2)
+	assert.Contains(t, Applications.apps, nn1)
+	assert.Contains(t, Applications.apps, nn2)
 
 	// add another name but watching it
 	wo = newWatchedObject(&app2, &ver3, nil, &T, fakeKD)
 	Add(wo)
 	Update(wo)
-	assert.Len(t, Applications, 2)
-	a1, _ := GetApplication(nn1, nil)
+	assert.Len(t, Applications.apps, 2)
+	a1, _ := Applications.Get(nn1, nil)
 	assert.Len(t, a1.Versions, 2)
-	a2, _ := GetApplication(nn2, nil)
+	a2, _ := Applications.Get(nn2, nil)
 	assert.Len(t, a2.Versions, 1) // there is a version of the other app
 	v, _ = a1.GetVersion(ver1, false)
 	assert.False(t, v.IsReady())
@@ -133,26 +137,29 @@ func TestDelete(t *testing.T) {
 
 	// setup: clear Applications
 	setup()
-	assert.Len(t, Applications, 0)
+	// Applications.Lock()
+	// defer Applications.Unlock()
+
+	assert.Len(t, Applications.apps, 0)
 
 	// create initial set of objects
 	Add(newWatchedObject(&app1, &ver1, &trk1, &T, fakeKD))
-	assert.Len(t, Applications, 1)
-	assert.Contains(t, Applications, nn1)
-	assert.NotContains(t, Applications, nn2)
+	assert.Len(t, Applications.apps, 1)
+	assert.Contains(t, Applications.apps, nn1)
+	assert.NotContains(t, Applications.apps, nn2)
 
 	Add(newWatchedObject(&app1, &ver2, &trk2, &T, fakeKD))
-	assert.Len(t, Applications, 1)
+	assert.Len(t, Applications.apps, 1)
 
 	Add(newWatchedObject(&app2, &ver1, &trk1, &T, fakeKD))
-	assert.Len(t, Applications, 2)
-	assert.Contains(t, Applications, nn2)
+	assert.Len(t, Applications.apps, 2)
+	assert.Contains(t, Applications.apps, nn2)
 
-	a1, err := GetApplication(nn1, nil)
+	a1, err := Applications.Get(nn1, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, a1)
 	assertApplication(t, a1, 2, 2)
-	a2, err := GetApplication(nn2, nil)
+	a2, err := Applications.Get(nn2, nil)
 	assert.NoError(t, err)
 	assertApplication(t, a2, 1, 1)
 	//assertApplications(t, 2, appsProfile)
@@ -169,10 +176,10 @@ func TestDelete(t *testing.T) {
 	Delete(newWatchedObject(&app1, &notrecordedversion, nil, nil, fakeKD))
 
 	// validate no changes
-	a1, err = GetApplication(nn1, nil)
+	a1, err = Applications.Get(nn1, nil)
 	assert.NoError(t, err)
 	assertApplication(t, a1, 2, 2)
-	a2, err = GetApplication(nn2, nil)
+	a2, err = Applications.Get(nn2, nil)
 	assert.NoError(t, err)
 	assertApplication(t, a2, 1, 1)
 
@@ -180,7 +187,7 @@ func TestDelete(t *testing.T) {
 	//   set version not ready
 	//   remove track
 	Delete(newWatchedObject(&app1, &ver1, &trk1, &T, fakeKD))
-	a1, err = GetApplication(nn1, nil)
+	a1, err = Applications.Get(nn1, nil)
 	assert.NoError(t, err)
 	assertApplication(t, a1, 2, 1)
 }
