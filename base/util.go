@@ -56,8 +56,8 @@ func CompletePath(prefix string, suffix string) string {
 	return filepath.Join(filepath.Dir(filename), prefix, suffix)
 }
 
-// togetTextTemplateFromURL gets template from URL
-func togetTextTemplateFromURL(providerURL string) (*template.Template, error) {
+// getTextTemplateFromURL gets template from URL
+func getTextTemplateFromURL(providerURL string) (*template.Template, error) {
 	// fetch b from url
 	resp, err := http.Get(providerURL)
 	if err != nil {

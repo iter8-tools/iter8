@@ -236,7 +236,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 	// collect metrics from all providers and for all versions
 	for providerName, url := range t.With.Templates {
 		// finalize metrics spec
-		template, err := togetTextTemplateFromURL(url)
+		template, err := getTextTemplateFromURL(url)
 		if err != nil {
 			return err
 		}

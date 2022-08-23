@@ -100,7 +100,7 @@ func getReport(exp *Experiment) map[string]Report {
 // executes it with values from getReport()
 func (t *notifyTask) getPayload(exp *Experiment) (string, error) {
 	if t.With.PayloadTemplateURL != "" {
-		template, err := togetTextTemplateFromURL(t.With.PayloadTemplateURL)
+		template, err := getTextTemplateFromURL(t.With.PayloadTemplateURL)
 		if err != nil {
 			return "", err
 		}
