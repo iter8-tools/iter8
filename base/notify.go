@@ -80,7 +80,7 @@ type Report struct {
 // getReport gets the values for the payload tempalte
 func getReport(exp *Experiment) map[string]Report {
 	return map[string]Report{
-		"Report": Report{
+		"Report": {
 			// Group: exp.driver.Group
 			// SLOs:           slos,
 			// Metrics:        metrics,
@@ -100,13 +100,16 @@ func getReport(exp *Experiment) map[string]Report {
 // executes it with values from getReport()
 func (t *notifyTask) getPayload(exp *Experiment) (string, error) {
 	if t.With.PayloadTemplateURL != "" {
-		template, _ := getProviderTemplate(t.With.PayloadTemplateURL)
+		template, err := getProviderTemplate(t.With.PayloadTemplateURL)
+		if err != nil {
+			return "", err
+		}
 
 		values := getReport(exp)
 
 		// get the metrics spec
 		var buf bytes.Buffer
-		err := template.Execute(&buf, values)
+		err = template.Execute(&buf, values)
 		if err != nil {
 			log.Logger.Error("could not execute payload template")
 			return "", err
@@ -170,7 +173,12 @@ func (t *notifyTask) run(exp *Experiment) error {
 	req, err := http.NewRequest(t.With.Method, t.With.Url, requestBody)
 	if err != nil {
 		log.Logger.Error("could not create HTTP request for notify task:", err)
-		return nil
+
+		if t.With.SoftFailure {
+			return nil
+		} else {
+			return err
+		}
 	}
 
 	// iterate through headers
@@ -192,14 +200,24 @@ func (t *notifyTask) run(exp *Experiment) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Logger.Error("could not send HTTP request for notify task:", err)
-		return nil
+
+		if t.With.SoftFailure {
+			return nil
+		} else {
+			return err
+		}
 	}
 	defer resp.Body.Close()
+
+	if !t.With.SoftFailure && (resp.StatusCode < 200 || resp.StatusCode > 299) {
+		return errors.New("did not receive successful status code for notify task")
+	}
 
 	// read response responseBody
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Logger.Error("could not read response body from Slack notification request", err)
+		log.Logger.Error("could not read response body from notification request", err)
+
 		return nil
 	}
 

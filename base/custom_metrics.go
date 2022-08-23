@@ -71,13 +71,13 @@ type HTTPParam struct {
 
 // customMetricsInputs is the input to the custommetrics task
 type customMetricsInputs struct {
-	// Templates	Maps provider to its template URL
+	// Template maps the provider to its template URL
 	Templates map[string]string `json:"templates" yaml:"templates"`
 
-	// Values Values used for substituting placeholders in metric templates.
+	// Values is used for substituting placeholders in metric templates.
 	Values map[string]interface{} `json:"values" yaml:"values"`
 
-	// VersionValues Per version values that override values
+	// VersionValues are per version values that override values
 	// For each version, its version values are coalesced with values
 	// The length of this slice equals the number of versions
 	VersionValues []map[string]interface{} `json:"versionValues" yaml:"versionValues"`
