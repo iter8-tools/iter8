@@ -5,19 +5,21 @@ package grpc
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"hash/crc32"
 
+	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-func rendezvousGet(name string, key string) string {
+func rendezvousGet(a *abnapp.Application, key string) string {
 	var maxScore uint32
 	var maxNode []byte
 	var track string
 
 	keyBytes := []byte(key)
-	for t, v := range watcher.Applications[name].Tracks {
+	for t, v := range a.Tracks {
 		vBytes := []byte(v)
 		score := hash(vBytes, keyBytes)
 		log.Logger.Debugf("  track %s (version %s): %d", t, v, score)
@@ -46,12 +48,15 @@ func Lookup(application string, user string) (*string, error) {
 	}
 
 	// check that we have a record of the application
-	_, ok := watcher.Applications[application]
-	if !ok {
+	a, err := watcher.Applications.Get(application, nil)
+	if err != nil {
+		return nil, fmt.Errorf("application not found: %s", err.Error())
+	}
+	if a == nil {
 		return nil, errors.New("application not found")
 	}
 
 	// use rendezvous hash to get track for user, fail if not present
-	track := rendezvousGet(application, user)
+	track := rendezvousGet(a, user)
 	return &track, nil
 }
