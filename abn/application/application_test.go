@@ -162,7 +162,7 @@ func writeVerify(t *testing.T, a *Application) *Application {
 	assert.NoError(t, err)
 
 	// verify can read it back
-	a, err = a.Writer.Read(application)
+	a, err = a.ReaderWriter.Read(application)
 	assert.NotNil(t, a)
 	assert.NoError(t, err)
 	return a

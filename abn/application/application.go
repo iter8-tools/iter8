@@ -27,12 +27,12 @@ type Application struct {
 	Name string
 	// Namespace is the namespace where the application was discovered
 	Namespace string
-	// Tracks is map of tracks identified to versions
+	// Tracks is map from application track identifier to version name
 	Tracks
-	// Versions is list of discovered versions
+	// Versions is a map of versions name to version data
 	Versions
 	// ReaderWriter is used to read/write to persistent storage (a Kubernetes secret)
-	Writer *ApplicationReaderWriter
+	ReaderWriter *ApplicationReaderWriter
 }
 
 // Versions is type of version name to versions map
@@ -67,18 +67,14 @@ func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
 		return a, errors.New("secret does not contain expected key: " + KEY)
 	}
 
-	var versions Versions
-	err = yaml.Unmarshal(rawData, &versions)
+	err = yaml.Unmarshal(rawData, &a.Versions)
 	if err != nil {
 		log.Logger.Debug("unmarshal failure")
 		return a, nil
 	}
 
-	// set Versions
-	a.Versions = versions
-
-	// initialize Tracks
-	for version, v := range versions {
+	// initialize Tracks and initialize where unmarshal fails to do so
+	for version, v := range a.Versions {
 		track := v.GetTrack()
 		if track != nil {
 			a.Tracks[*track] = version
@@ -108,7 +104,7 @@ func (a *Application) Write() error {
 
 	// determine if need to
 	exists := true
-	secret, err = a.Writer.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
+	secret, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
 	if err != nil {
 		exists = false
 		secret = &corev1.Secret{
@@ -130,13 +126,13 @@ func (a *Application) Write() error {
 	// create or update the secret
 	if exists {
 		// TBD do we need to merge what we have?
-		_, err = a.Writer.Client.CoreV1().Secrets(a.Namespace).Update(
+		_, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Update(
 			context.Background(),
 			secret,
 			metav1.UpdateOptions{},
 		)
 	} else {
-		_, err = a.Writer.Client.CoreV1().Secrets(a.Namespace).Create(
+		_, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Create(
 			context.Background(),
 			secret,
 			metav1.CreateOptions{},
@@ -152,23 +148,40 @@ func (a *Application) Write() error {
 
 // GetNewApplication returns a new (empty) Application for a namespace/name label
 func GetNewApplication(application string, rw *ApplicationReaderWriter) *Application {
+	a := Application{
+		Name:         GetNameFromKey(application),
+		Namespace:    GetNamespaceFromKey(application),
+		Versions:     Versions{},
+		Tracks:       Tracks{},
+		ReaderWriter: rw,
+	}
+
+	return &a
+}
+
+// GetNameFromKey returns the name from a key of the form "namespace/name"
+func GetNameFromKey(applicationKey string) string {
+	_, n := splitApplicationKey(applicationKey)
+	return n
+}
+
+// GetNamespaceFromKey returns the namespace from a key of the form "namespace/name"
+func GetNamespaceFromKey(applicationKey string) string {
+	ns, _ := splitApplicationKey(applicationKey)
+	return ns
+}
+
+// splitApplicationKey is a utility function that returns the name and namespace from a key of the form "namespace/name"
+func splitApplicationKey(applicationKey string) (string, string) {
 	var name, namespace string
-	names := strings.Split(application, "/")
+	names := strings.Split(applicationKey, "/")
 	if len(names) > 1 {
 		namespace, name = names[0], names[1]
 	} else {
 		namespace, name = "default", names[0]
 	}
 
-	a := Application{
-		Name:      name,
-		Namespace: namespace,
-		Versions:  Versions{},
-		Tracks:    Tracks{},
-		Writer:    rw,
-	}
-
-	return &a
+	return namespace, name
 }
 
 // GetVersion returns the Version identified by version

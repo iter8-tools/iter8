@@ -144,7 +144,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	// populate watcher.Applications with test applications
 	watcher.Applications.Clear()
 	a, err := abnapp.YamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
-	a.Writer = &abnapp.ApplicationReaderWriter{Client: testDriver.Clientset}
+	a.ReaderWriter = &abnapp.ApplicationReaderWriter{Client: testDriver.Clientset}
 	assert.NoError(t, err)
 	watcher.Applications.Add("default/application", a)
 
