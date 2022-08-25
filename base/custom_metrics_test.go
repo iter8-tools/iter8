@@ -44,6 +44,23 @@ const (
 	exampleRequestBody    = "example request body\n"
 )
 
+func getCustomMetricsTask(t *testing.T, providerName string, providerURL string) *customMetricsTask {
+	// valid collect database task... should succeed
+	ct := &customMetricsTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CustomMetricsTaskName),
+		},
+		With: customMetricsInputs{
+			Templates: map[string]string{providerName: providerURL},
+		},
+	}
+
+	httpmock.Activate()
+	t.Cleanup(httpmock.DeactivateAndReset)
+	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
+	return ct
+}
+
 // test getElapsedTimeSeconds()
 func TestGetElapsedTimeSeconds(t *testing.T) {
 	os.Chdir(t.TempDir())
@@ -88,29 +105,11 @@ func TestStartingTimeFormatError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// some reusable test code
-func headForTests(t *testing.T, providerName string, providerURL string) *customMetricsTask {
-	// valid collect database task... should succeed
-	ct := &customMetricsTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CustomMetricsTaskName),
-		},
-		With: customMetricsInputs{
-			Templates: map[string]string{providerName: providerURL},
-		},
-	}
-
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
-	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
-	return ct
-}
-
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
@@ -169,7 +168,6 @@ func TestCEOneVersion(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-		driver: &mockDriver{},
 	}
 	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
@@ -190,7 +188,7 @@ func TestCEOneVersion(t *testing.T) {
 // one version, three successful metrics
 func TestCEVersionValues(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 	ct.With.VersionValues = []map[string]interface{}{{
 		"ibm_codeengine_revision_name": "v1",
 	}}
@@ -252,7 +250,6 @@ func TestCEVersionValues(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-		driver: &mockDriver{},
 	}
 	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
@@ -272,7 +269,7 @@ func TestCEVersionValues(t *testing.T) {
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
@@ -289,7 +286,6 @@ func TestCEUnauthorized(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-		driver: &mockDriver{},
 	}
 	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
@@ -308,7 +304,7 @@ func TestCEUnauthorized(t *testing.T) {
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
@@ -358,7 +354,6 @@ func TestCESomeValues(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-		driver: &mockDriver{},
 	}
 	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
@@ -381,7 +376,7 @@ func TestCESomeValues(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
@@ -433,7 +428,6 @@ func TestCEMultipleVersions(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-		driver: &mockDriver{},
 	}
 	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(2)
@@ -458,7 +452,7 @@ func TestCEMultipleVersions(t *testing.T) {
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
 	// request-count
@@ -509,7 +503,6 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-		driver: &mockDriver{},
 	}
 	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(2)
@@ -533,7 +526,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 // basic test with a request body
 func TestRequestBody(t *testing.T) {
 	os.Chdir(t.TempDir())
-	ct := headForTests(t, testRequestBody, testRequestBodyURL)
+	ct := getCustomMetricsTask(t, testRequestBody, testRequestBodyURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(exampleQueryParameter),
@@ -569,7 +562,6 @@ func TestRequestBody(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-		driver: &mockDriver{},
 	}
 	exp.initResults(1)
 	exp.Result.initInsightsWithNumVersions(1)
