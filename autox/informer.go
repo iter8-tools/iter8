@@ -1,4 +1,4 @@
-package watcher
+package autox
 
 // informer.go - informer(s) to watch desired resources/namespaces
 

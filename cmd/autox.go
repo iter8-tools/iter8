@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	ia "github.com/iter8-tools/iter8/action"
+	"github.com/iter8-tools/iter8/autox"
 	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/spf13/cobra"
@@ -9,20 +9,22 @@ import (
 
 // autoxDesc is the description of autox cmd
 const autoxDesc = `
-Run the Iter8 AutoX service.
+Run the Iter8 autoX controller.
 	iter8 autox
 `
 
 // newAutoXCmd creates the autox command
 func newAutoXCmd(kd *driver.KubeDriver) *cobra.Command {
-	actor := ia.NewAutoXOpts(kd)
+	// actor := ia.NewAutoXOpts(kd)
 
 	cmd := &cobra.Command{
 		Use:   "autox",
-		Short: "Start the Iter8 AutoX service",
+		Short: "Start the Iter8 autoX controller",
 		Long:  autoxDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			return actor.LocalRun()
+			autox.Start(kd)
+
+			return nil
 		},
 		SilenceUsage: true,
 		Hidden:       true,

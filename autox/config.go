@@ -1,4 +1,4 @@
-package watcher
+package autox
 
 // config.go - reading of configurtion (list of resources/namespaces to watch)
 

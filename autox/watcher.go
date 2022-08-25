@@ -1,14 +1,10 @@
 package autox
 
-// service.go - entry point for A/B(/n) service; starts controller watching resources
-//               and gRPC service to respond to lookup and write metric requests
-
 import (
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/iter8-tools/iter8/autox/watcher"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 
@@ -43,9 +39,9 @@ func Start(kd *driver.KubeDriver) {
 	stopCh := make(chan struct{})
 
 	// set up resource watching as defined by config
-	resourceConfig := watcher.ReadConfig(resourceConfigFile)
-	groupConfig := watcher.ReadGroupConfig(groupConfigFile)
-	w := watcher.NewIter8Watcher(kd, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
+	resourceConfig := ReadConfig(resourceConfigFile)
+	groupConfig := ReadGroupConfig(groupConfigFile)
+	w := NewIter8Watcher(kd, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
 	go w.Start(stopCh)
 
 	sigCh := make(chan os.Signal, 1)
