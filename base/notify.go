@@ -48,12 +48,6 @@ type notifyTask struct {
 
 // Report is the data that is given to the payload template
 type Report struct {
-	// Group string `json:"group" yaml:"group"`
-
-	// SLOs map[string]SLOReport `json:"SLOs" yaml:"SLOs"`
-
-	// Metrics map[string]MetricReport `json:"metrics" yaml:"metrics"`
-
 	// Timestamp is when the report was created
 	// For example: 2022-08-09 15:10:36.569745 -0400 EDT m=+12.599643189
 	TimeStamp string `json:"timeStamp" yaml:"timeStamp"`
@@ -81,10 +75,6 @@ type Report struct {
 func getReport(exp *Experiment) map[string]Report {
 	return map[string]Report{
 		"Report": {
-			// Group: exp.driver.Group
-			// SLOs:           slos,
-			// Metrics:        metrics,
-
 			TimeStamp:         time.Now().String(),
 			Completed:         exp.Completed(),
 			NoTaskFailures:    exp.NoFailure(),
