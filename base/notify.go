@@ -146,7 +146,6 @@ func (t *notifyTask) run(exp *Experiment) error {
 	log.Logger.Debug("method: ", t.With.Method, " URL: ", t.With.Url)
 
 	var requestBody io.Reader
-
 	if t.With.PayloadTemplateURL != "" {
 		payload, err := t.getPayload(exp)
 		if err != nil {
