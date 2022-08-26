@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/iter8-tools/iter8/abn/application"
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
@@ -44,7 +43,7 @@ func Start(kd *driver.KubeDriver) {
 		log.Logger.Fatal("unable to initialize kubedriver")
 	}
 	// Initialize appliction map with ReaderWriter
-	abnapp.Applications.SetReaderWriter(&application.ApplicationReaderWriter{Client: kd.Clientset})
+	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: kd.Clientset})
 
 	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
