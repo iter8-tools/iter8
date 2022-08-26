@@ -1,7 +1,5 @@
 v1:
-  history:
-  - ev: new
-    tm: "2022-07-29T20:31:01.1453186Z"
+  ready: false
   lastUpdateTimestamp: "2022-07-29T20:32:07.0109509Z"
   metrics:
     metric1:
@@ -12,12 +10,6 @@ v1:
     - 2025
     - 1659126727
 v2:
-  history:
-  - ev: new
-    tm: "2022-07-29T20:31:01.2940407Z"
-  - ev: ready
-    tm: "2022-07-29T20:31:01.3362958Z"
-  - ev: track
-    tm: "2022-07-29T20:31:01.3676926Z"
-    trk: candidate
+  ready: true
+  track: candidate
   lastUpdateTimestamp: "2022-07-29T20:31:01.3677106Z"

@@ -38,13 +38,11 @@ func TestApplicationInCluster(t *testing.T) {
 	})
 
 	assertVersion(t, a.Versions["v1"], versionAssertion{
-		events:  []VersionEventType{VersionNewEvent},
 		track:   "",
 		ready:   false,
 		metrics: []string{"metric1"},
 	})
 	assertVersion(t, a.Versions["v2"], versionAssertion{
-		events:  []VersionEventType{VersionNewEvent, VersionReadyEvent, VersionMapTrackEvent},
 		track:   "candidate",
 		ready:   true,
 		metrics: []string{},
@@ -64,7 +62,6 @@ func TestGetVersion(t *testing.T) {
 	v, _ = a.GetVersion("v1", true)
 
 	assertVersion(t, v, versionAssertion{
-		events:  []VersionEventType{VersionNewEvent},
 		track:   "",
 		ready:   false,
 		metrics: []string{"metric1"},
@@ -95,21 +92,9 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 	var isNew bool
 
 	v := &Version{
-		History:             []VersionEvent{},
 		Metrics:             map[string]*SummaryMetric{},
 		LastUpdateTimestamp: time.Now(),
 	}
-	assert.Nil(t, v.GetTrack())
-	assert.False(t, v.IsReady())
-
-	v.AddEvent(VersionNewEvent)
-	v.AddEvent(VersionReadyEvent)
-	v.AddEvent(VersionMapTrackEvent, "track")
-	assert.Equal(t, "track", *v.GetTrack())
-	assert.True(t, v.IsReady())
-
-	v.AddEvent(VersionNoLongerReadyEvent)
-	v.AddEvent(VersionUnmapTrackEvent)
 	assert.Nil(t, v.GetTrack())
 	assert.False(t, v.IsReady())
 

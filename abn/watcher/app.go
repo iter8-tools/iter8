@@ -49,10 +49,7 @@ func Add(watched WatchedObject) {
 
 	// get the version
 	// if it isn't in the Application this will create an new Version
-	v, isNew := a.GetVersion(version, true)
-	if isNew {
-		v.AddEvent(abnapp.VersionNewEvent)
-	}
+	v, _ := a.GetVersion(version, true)
 
 	// set ready to value on watched object, if set
 	// otherwise, use the current readiness value
@@ -63,14 +60,14 @@ func Add(watched WatchedObject) {
 	if watchedReady {
 		// log version ready (if it wasn't before)
 		if !oldReady {
-			v.AddEvent(abnapp.VersionReadyEvent)
+			v.Ready = true
 		}
 		watchedTrack := watched.getTrack()
 		if watchedTrack != "" {
 			oldTrack := v.GetTrack()
-			// log maptrack event if mapped to a new track
+			// associate version with track
 			if oldTrack == nil || *oldTrack != watchedTrack {
-				v.AddEvent(abnapp.VersionMapTrackEvent, watchedTrack)
+				v.Track = &watchedTrack
 				// update a.Tracks
 				a.Tracks[watchedTrack] = version
 			}
@@ -81,10 +78,10 @@ func Add(watched WatchedObject) {
 		oldTrack := v.GetTrack()
 		if oldTrack != nil {
 			delete(a.Tracks, *oldTrack)
-			// log unmaptrack event
-			v.AddEvent(abnapp.VersionUnmapTrackEvent)
+			// remove association with track
+			v.Track = nil
 		}
-		v.AddEvent(abnapp.VersionNoLongerReadyEvent)
+		v.Ready = false
 	}
 
 	// record update into Apps
@@ -95,6 +92,7 @@ func Add(watched WatchedObject) {
 }
 
 // Update updates the apps map using information from a modified object
+// Behavior is the same as for a new object
 func Update(watched WatchedObject) {
 	log.Logger.Trace("Update called")
 	defer log.Logger.Trace("Update completed")
@@ -146,12 +144,12 @@ func Delete(watched WatchedObject) {
 	if watchedReady {
 		// it was ready; record that it is no longer ready
 		if versionReady {
-			v.AddEvent(abnapp.VersionNoLongerReadyEvent)
+			v.Ready = false
 		}
 
 		// if it was mapped to a track; mark it unmapped (since no longer ready)
 		if versionTrack != nil {
-			v.AddEvent(abnapp.VersionUnmapTrackEvent)
+			v.Track = nil
 			delete(a.Tracks, *versionTrack)
 		}
 	}

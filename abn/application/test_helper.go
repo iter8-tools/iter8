@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"testing"
 
 	"github.com/iter8-tools/iter8/driver"
@@ -64,9 +65,6 @@ func byteArrayToApplication(name string, data []byte) (*Application, error) {
 		if track != nil {
 			a.Tracks[*track] = version
 		}
-		if v.History == nil {
-			v.History = []VersionEvent{}
-		}
 		if v.Metrics == nil {
 			v.Metrics = map[string]*SummaryMetric{}
 		}
@@ -94,13 +92,11 @@ func assertApplication(t *testing.T, a *Application, assertion applicationAssert
 	assert.Len(t, a.Versions, len(assertion.versions))
 
 	for _, v := range a.Versions {
-		assert.NotNil(t, v.History)
 		assert.NotNil(t, v.Metrics)
 	}
 }
 
 type versionAssertion struct {
-	events  []VersionEventType
 	track   string
 	ready   bool
 	metrics []string
@@ -108,7 +104,7 @@ type versionAssertion struct {
 
 func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 	assert.NotNil(t, v)
-	assert.Contains(t, v.String(), "- history:")
+	assert.Contains(t, v.String(), strconv.FormatBool(assertion.ready))
 
 	track := v.GetTrack()
 	if assertion.track == "" {
@@ -118,12 +114,6 @@ func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 	}
 
 	assert.Equal(t, assertion.ready, v.IsReady())
-
-	assert.Len(t, v.History, len(assertion.events))
-	assert.NotNil(t, v.History)
-	for i, e := range v.History {
-		assert.Equal(t, assertion.events[i], e.Type)
-	}
 
 	assert.Len(t, v.Metrics, len(assertion.metrics))
 	assert.NotNil(t, v.Metrics)

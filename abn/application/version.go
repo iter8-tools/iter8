@@ -3,96 +3,34 @@ package application
 // version.go - supports notion of version of an application
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/iter8-tools/iter8/base/log"
 )
 
 // Version is information about versions of an application in a Kubernetes cluster
 type Version struct {
-	// History is a time ordered list of events that have been observed
-	History []VersionEvent `json:"history" yaml:"history"`
+	// Ready is indicator that the version is ready to receive traffic
+	// indicated by value of annotation iter8.tools/ready
+	Ready bool `json:"ready" yaml:"ready"`
+	// Track is track label assigned to this version
+	// indicated by value of annotation iter8.tools/track
+	Track *string `json:"track,omitempty" yaml:"metrics,omitempty"`
 	// List of (summary) metrics for a version
 	Metrics map[string]*SummaryMetric `json:"metrics" yaml:"metrics"`
 	// LastUpdateTimestamp is time of last update (either event or metric)
 	LastUpdateTimestamp time.Time `json:"lastUpdateTimestamp" yaml:"lastUpdateTimestamp"`
 }
 
-// VersionEvent is a record of an observed event of interest
-type VersionEvent struct {
-	// Timestamp is the time the event is observed
-	Timestamp time.Time `json:"tm" yaml:"tm"`
-	// Type is the type of the event
-	Type VersionEventType `json:"ev" yaml:"ev"`
-	// Track is a track identifier (parameter of a VersionMapTrackEvent)
-	Track string `json:"trk,omitempty" yaml:"trk,omitempty"`
-}
-
-// VersionEventType is type of a VersionEvent type
-type VersionEventType string
-
-const (
-	// VersionNewEvent indicates a new version has been identified
-	VersionNewEvent VersionEventType = "new"
-	// VersionReadyEvetn indicates that a version (that was not previously noted as ready) is ready
-	VersionReadyEvent VersionEventType = "ready"
-	// VersionNoLongerReadyEvent indicates that a version (that was previously noted as ready) is not ready
-	VersionNoLongerReadyEvent VersionEventType = "notready"
-	// VersionMapTrackEvent indicates that a version (that was not previously associated with a track identifier) is associated with a track identifier
-	VersionMapTrackEvent VersionEventType = "track"
-	// VersionUnmapTrackEvent indicates that version (that was previously noted as being associated with a track identifier) is not longer associated wtih a track identifier
-	// This happens when a version is no longer ready or a track is assigned to a different version
-	VersionUnmapTrackEvent VersionEventType = "untrack"
-)
-
 // GetTrack returns a track identifier, if any. Otherwise, it returns nil.
 func (v *Version) GetTrack() *string {
-	numEvents := len(v.History)
-	if numEvents == 0 {
-		return nil
-	}
-	lastEvent := v.History[numEvents-1]
-	if lastEvent.Type == VersionMapTrackEvent {
-		return &lastEvent.Track
-	}
-	return nil
-}
-
-// AddEvent adds an event to the version history
-func (v *Version) AddEvent(typ VersionEventType, track ...string) error {
-	log.Logger.Tracef("AddEvent() called with event %s", typ)
-
-	e := VersionEvent{
-		Type:      typ,
-		Timestamp: time.Now(),
-	}
-	if typ == VersionMapTrackEvent {
-		if len(track) != 1 {
-			return errors.New("map track event requires track")
-		}
-		e.Track = track[0]
-	}
-
-	v.History = append(v.History, e)
-	return nil
+	return v.Track
 }
 
 // IsReady determines if the version is ready
 // Inspects history in reverse to determine last relevant event
 func (v *Version) IsReady() bool {
-	// numEvents = len(v.History)
-	for i := len(v.History) - 1; i >= 0; i-- {
-		switch v.History[i].Type {
-		case VersionReadyEvent:
-			return true
-		case VersionNoLongerReadyEvent:
-			return false
-		}
-	}
-	return false
+	return v.Ready
 }
 
 // GetMetric returns a metric from the list of metrics associated with a version
@@ -112,18 +50,18 @@ func (v *Version) GetMetric(metric string, allowNew bool) (*SummaryMetric, bool)
 }
 
 func (v *Version) String() string {
-	types := []string{}
-	for _, e := range v.History {
-		types = append(types, string(e.Type))
-	}
-
 	metrics := []string{}
 	for n, m := range v.Metrics {
 		metrics = append(metrics, fmt.Sprintf("%s(%d)", n, m.Count()))
 	}
 
-	return fmt.Sprintf("\n\t%s\n\t%s",
-		"- history: ["+strings.Join(types, ",")+"]",
+	track := "<no track>"
+	if v.GetTrack() != nil {
+		track = *v.GetTrack()
+	}
+
+	return fmt.Sprintf("\n\t%t %s\n\t%s",
+		v.IsReady(), track,
 		"- metrics: ["+strings.Join(metrics, ",")+"]",
 	)
 }

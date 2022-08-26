@@ -103,9 +103,6 @@ func (m *ThreadSafeApplicationMap) Read(application string) (*Application, error
 		if track != nil {
 			a.Tracks[*track] = version
 		}
-		if v.History == nil {
-			v.History = []VersionEvent{}
-		}
 		if v.Metrics == nil {
 			v.Metrics = map[string]*SummaryMetric{}
 		}
