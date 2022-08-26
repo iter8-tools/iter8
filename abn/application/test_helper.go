@@ -51,23 +51,17 @@ func readYamlFromFile(folder, file string) ([]byte, error) {
 }
 
 func byteArrayToApplication(name string, data []byte) (*Application, error) {
-	a := NewApplication(name)
-
-	var versions Versions
-	err := yaml.Unmarshal(data, &versions)
+	a := &Application{}
+	err := yaml.Unmarshal(data, a)
 	if err != nil {
-		return a, nil
+		return NewApplication(name), nil
 	}
 
-	// set Versions
-	a.Versions = versions
-
-	// initialize Tracks
-	for version, v := range versions {
-		track := v.GetTrack()
-		if track != nil {
-			a.Tracks[*track] = version
-		}
+	// Initialize versions if not already initialized
+	if a.Versions == nil {
+		a.Versions = Versions{}
+	}
+	for _, v := range a.Versions {
 		if v.Metrics == nil {
 			v.Metrics = map[string]*SummaryMetric{}
 		}

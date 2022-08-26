@@ -106,7 +106,7 @@ func (a *Application) String() string {
 	}
 
 	versions := []string{}
-	for version, _ := range a.Versions {
+	for version := range a.Versions {
 		versions = append(versions, version)
 	}
 

@@ -79,37 +79,36 @@ func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*
 // - the secret name/namespace is the same as the application
 // - if no application is present in the persistent storage, a new object is created
 func (m *ThreadSafeApplicationMap) Read(application string) (*Application, error) {
-	a := NewApplication(application)
-
-	secretNamespace := GetNamespaceFromKey(a.Name)
-	secretName := GetNameFromKey(a.Name) + SECRET_POSTFIX
+	secretNamespace := GetNamespaceFromKey(application)
+	secretName := GetNameFromKey(application) + SECRET_POSTFIX
 
 	// read secret from cluster; extract appData
 	secret, err := m.rw.Client.CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
-		log.Logger.Debug("no secret backing " + a.Name)
-		return a, err
+		log.Logger.Debug("no secret backing " + application)
+		return NewApplication(application), err
 	}
 
 	// read data from secret (is a yaml file)
 	rawData, ok := secret.Data[KEY]
 	if !ok {
 		log.Logger.Debug("key missing in backing secret")
-		return a, errors.New("secret does not contain expected key: " + KEY)
+		return NewApplication(application), errors.New("secret does not contain expected key: " + KEY)
 	}
 
-	err = yaml.Unmarshal(rawData, &a.Versions)
+	// err = yaml.Unmarshal(rawData, &a.Versions)
+	a := &Application{}
+	err = yaml.Unmarshal(rawData, a)
 	if err != nil {
 		log.Logger.Debug("unmarshal failure")
-		return a, nil
+		return NewApplication(application), nil
 	}
 
-	// initialize Tracks and initialize where unmarshal fails to do so
-	for version, v := range a.Versions {
-		track := v.GetTrack()
-		if track != nil {
-			a.Tracks[*track] = version
-		}
+	// initialize a.Versions if not already
+	if a.Versions == nil {
+		a.Versions = Versions{}
+	}
+	for _, v := range a.Versions {
 		if v.Metrics == nil {
 			v.Metrics = map[string]*SummaryMetric{}
 		}
@@ -125,7 +124,7 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 	var secret *corev1.Secret
 
 	// marshal to byte array
-	rawData, err := yaml.Marshal(a.Versions)
+	rawData, err := yaml.Marshal(a)
 	if err != nil {
 		return err
 	}

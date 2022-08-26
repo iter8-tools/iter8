@@ -1,15 +1,19 @@
-v1:
-  ready: false
-  lastUpdateTimestamp: "2022-07-29T20:32:07.0109509Z"
-  metrics:
-    metric1:
-    - 1
-    - 45
-    - 45
-    - 45
-    - 2025
-    - 1659126727
-v2:
-  ready: true
-  track: candidate
-  lastUpdateTimestamp: "2022-07-29T20:31:01.3677106Z"
+name: default/application
+tracks:
+  candidate: v2
+versions:
+  v1:
+    ready: false
+    lastUpdateTimestamp: "2022-07-29T20:32:07.0109509Z"
+    metrics:
+      metric1:
+      - 1
+      - 45
+      - 45
+      - 45
+      - 2025
+      - 1659126727
+  v2:
+    ready: true
+    track: candidate
+    lastUpdateTimestamp: "2022-07-29T20:31:01.3677106Z"
