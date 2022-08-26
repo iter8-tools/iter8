@@ -21,6 +21,12 @@ func Add(watched WatchedObject) {
 	log.Logger.Tracef("Add called for %s/%s", watched.Obj.GetNamespace(), watched.Obj.GetName())
 	defer log.Logger.Trace("Add completed")
 
+	// Is the object involved in a ABn experiment?
+	if !watched.isIter8AbnRelated() {
+		log.Logger.Debug("not Iter8 abn related")
+		return
+	}
+
 	// Assume applications are namespace scoped; use name in form: "namespace/name"
 	// where name is the value of the label app.kubernetes.io/name
 	name, ok := watched.getNamespacedName()

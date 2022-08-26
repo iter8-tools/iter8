@@ -13,7 +13,7 @@ import (
 
 const (
 	// KEY is the name of the field in a kubernetes secret
-	KEY = "versionData.yaml"
+	KEY = "application.yaml"
 )
 
 // Application is an application observed in a kubernetes cluster

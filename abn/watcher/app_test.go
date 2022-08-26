@@ -207,6 +207,7 @@ func newWatchedObject(name *string, version *string, track *string, ready *strin
 	if ready != nil {
 		annotations[READY_ANNOTATION] = *ready
 	}
+	annotations[ITER8_ANNOTATION] = "true"
 
 	o := corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
