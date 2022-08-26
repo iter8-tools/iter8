@@ -10,63 +10,9 @@ package watcher
 // "candidate", that can be mapped to a static routes.
 
 import (
-	"sync"
-
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
 )
-
-// ThreadSafeApplicationMap is type to control thread safety of operations on an application map
-type ThreadSafeApplicationMap struct {
-	mutex sync.Mutex
-	apps  map[string]*abnapp.Application
-}
-
-// Applications is map of app name to Application
-// This is a global variable used to maintain an internal representation of the applications in a cluster
-var Applications = ThreadSafeApplicationMap{
-	apps: map[string]*abnapp.Application{},
-}
-
-// Lock locks the application map; should always be followed by an Unlock()
-func (m *ThreadSafeApplicationMap) Lock() {
-	m.mutex.Lock()
-}
-
-// Unlock unlocks the application map
-func (m *ThreadSafeApplicationMap) Unlock() {
-	m.mutex.Unlock()
-}
-
-// Clear the application map
-func (m *ThreadSafeApplicationMap) Clear() {
-	m.mutex.Lock()
-	m.apps = map[string]*abnapp.Application{}
-	m.mutex.Unlock()
-}
-
-func (m *ThreadSafeApplicationMap) Add(key string, a *abnapp.Application) {
-	m.mutex.Lock()
-	m.apps[key] = a
-	m.mutex.Unlock()
-}
-
-// Get gets an application from map of applications
-// If the application is not present and a reader is provided, an attempt will be made to
-// read it from persistant storage
-// Applications.Lock() should be called first
-func (m *ThreadSafeApplicationMap) Get(key string, reader *abnapp.ApplicationReaderWriter) (*abnapp.Application, error) {
-	a, ok := Applications.apps[key]
-	if !ok {
-		if reader == nil {
-			return nil, nil
-		}
-		a, err := reader.Read(key)
-		Applications.apps[key] = a
-		return a, err
-	}
-	return a, nil
-}
 
 // Add updates the apps map using information from a newly added object
 // If the observed object does not have a name (app.kubernetes.io/name label)
@@ -92,14 +38,14 @@ func Add(watched WatchedObject) {
 		return
 	}
 
-	Applications.mutex.Lock()
-	defer Applications.mutex.Unlock()
+	abnapp.Applications.Lock()
+	defer abnapp.Applications.Unlock()
 
 	// check if we know about this application
 	// first check if in memory
 	// if not, read from persistent store
 	// if it does not exist in persistent store, the read will return an initalized Application
-	a, _ := Applications.Get(name, watched.Writer)
+	a, _ := abnapp.Applications.Get(name, false)
 
 	// get the version
 	// if it isn't in the Application this will create an new Version
@@ -142,8 +88,7 @@ func Add(watched WatchedObject) {
 	}
 
 	// record update into Apps
-	toWrite := Applications.apps[name]
-	err := toWrite.Write()
+	err := abnapp.Applications.Write(a)
 	if err != nil {
 		log.Logger.Error("unable to write application")
 	}
@@ -164,15 +109,17 @@ func Delete(watched WatchedObject) {
 	log.Logger.Trace("Delete called")
 	defer log.Logger.Trace("Delete called")
 
-	Applications.Lock()
-	defer Applications.Unlock()
+	abnapp.Applications.Lock()
+	defer abnapp.Applications.Unlock()
 
 	name, ok := watched.getNamespacedName()
 	if !ok {
 		return // no app.kubernetes.io/name label
 	}
-	_, ok = Applications.apps[name]
-	if !ok {
+	_, err := abnapp.Applications.Get(name, false)
+	// _, ok = abnapp.Applications.apps[name]
+	if err != nil {
+		// if !ok {
 		return // has app.kubernetes.io/name but object wasn't recorded
 	}
 
@@ -181,7 +128,7 @@ func Delete(watched WatchedObject) {
 		return // no app.kubernetes.io/version label
 	}
 
-	a, _ := Applications.Get(name, nil)
+	a, _ := abnapp.Applications.Get(name, true)
 	if a == nil {
 		return // no record; we don't look in secret if we got a delete event, we must have had an add/update event
 	}
@@ -209,9 +156,5 @@ func Delete(watched WatchedObject) {
 		}
 	}
 
-	// Applications[name].Versions[version] = v
-
-	if len(Applications.apps[name].Versions) == 0 {
-		delete(Applications.apps, name)
-	}
+	// TBD with object reference counts, could delete application from abnapp.Applications
 }

@@ -10,8 +10,8 @@ import (
 )
 
 func TestApplicationNotInCluster(t *testing.T) {
-	rw := setup(t)
-	a, err := rw.Read("namespace/name")
+	setup(t)
+	a, err := Applications.Read("namespace/name")
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "not found")
 
@@ -26,8 +26,8 @@ func TestApplicationNotInCluster(t *testing.T) {
 }
 
 func TestApplicationInCluster(t *testing.T) {
-	rw := setup(t)
-	a, err := rw.Read("default/application")
+	setup(t)
+	a, err := Applications.Read("default/application")
 	assert.NoError(t, err)
 
 	assertApplication(t, a, applicationAssertion{
@@ -54,8 +54,8 @@ func TestApplicationInCluster(t *testing.T) {
 }
 
 func TestGetVersion(t *testing.T) {
-	rw := setup(t)
-	a, _ := rw.Read("default/application")
+	setup(t)
+	a, _ := Applications.Read("default/application")
 
 	var v *Version
 	var isNew bool
@@ -149,20 +149,22 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 	assert.Equal(t, float64(3865), m.SumSquares())
 }
 
-func setup(t *testing.T) *ApplicationReaderWriter {
+func setup(t *testing.T) {
 	kd := driver.NewFakeKubeDriver(cli.New())
+	Applications.SetReaderWriter(&ApplicationReaderWriter{Client: kd.Clientset})
+	Applications.Clear()
+
 	YamlToSecret("../../testdata", "abninputs/readtest.yaml", "default", "application", kd)
-	return &ApplicationReaderWriter{Client: kd.Clientset}
 }
 
 func writeVerify(t *testing.T, a *Application) *Application {
 	application := a.Namespace + "/" + a.Name
 	// write application to cluster (should create the secret, if not present)
-	err := a.Write()
+	err := Applications.Write(a)
 	assert.NoError(t, err)
 
 	// verify can read it back
-	a, err = a.ReaderWriter.Read(application)
+	a, err = Applications.Read(application)
 	assert.NotNil(t, a)
 	assert.NoError(t, err)
 	return a

@@ -9,7 +9,6 @@ import (
 	"hash/crc32"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
-	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
 )
 
@@ -48,7 +47,7 @@ func Lookup(application string, user string) (*string, error) {
 	}
 
 	// check that we have a record of the application
-	a, err := watcher.Applications.Get(application, nil)
+	a, err := abnapp.Applications.Get(application, true)
 	if err != nil {
 		return nil, fmt.Errorf("application not found: %s", err.Error())
 	}

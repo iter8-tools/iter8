@@ -3,17 +3,12 @@ package application
 // application.go - type of application
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/iter8-tools/iter8/base/log"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -31,8 +26,6 @@ type Application struct {
 	Tracks
 	// Versions is a map of versions name to version data
 	Versions
-	// ReaderWriter is used to read/write to persistent storage (a Kubernetes secret)
-	ReaderWriter *ApplicationReaderWriter
 }
 
 // Versions is type of version name to versions map
@@ -43,121 +36,118 @@ type Tracks map[string]string
 
 // ApplicationReaderWriter is type used to read/write fromt/to persistent storage
 type ApplicationReaderWriter struct {
-	// Type Kubernetes client
+	// Client is the Kubernetes client to use to read/write secrets
 	Client kubernetes.Interface
 }
 
-// Read reads the application from persistent storage (a Kubernetes secret)
-// - the secret name/namespace is the same as the application
-// - if no application is present in the persistent storage, a new object is created
-func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
-	a := GetNewApplication(appName, rw)
-
-	// read secret from cluster; extract appData
-	secret, err := rw.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
-	if err != nil {
-		log.Logger.Debug("no secret backing " + a.Name)
-		return a, err
+// NewApplication returns a new (empty) Application for a namespace/name label
+func NewApplication(application string) *Application {
+	return &Application{
+		Name:      GetNameFromKey(application),
+		Namespace: GetNamespaceFromKey(application),
+		Versions:  Versions{},
+		Tracks:    Tracks{},
 	}
-
-	// read data from secret (is a yaml file)
-	rawData, ok := secret.Data[KEY]
-	if !ok {
-		log.Logger.Debug("key missing in backing secret")
-		return a, errors.New("secret does not contain expected key: " + KEY)
-	}
-
-	err = yaml.Unmarshal(rawData, &a.Versions)
-	if err != nil {
-		log.Logger.Debug("unmarshal failure")
-		return a, nil
-	}
-
-	// initialize Tracks and initialize where unmarshal fails to do so
-	for version, v := range a.Versions {
-		track := v.GetTrack()
-		if track != nil {
-			a.Tracks[*track] = version
-		}
-		if v.History == nil {
-			v.History = []VersionEvent{}
-		}
-		if v.Metrics == nil {
-			v.Metrics = map[string]*SummaryMetric{}
-		}
-	}
-
-	return a, nil
 }
 
-// Write writes the Application to persistent storage (a Kubernetes secret)
-func (a *Application) Write() error {
-	log.Logger.Tracef("Write called with %#v", a)
-	defer log.Logger.Trace("Write completed")
-	var secret *corev1.Secret
+// // Read reads the application from persistent storage (a Kubernetes secret)
+// // - the secret name/namespace is the same as the application
+// // - if no application is present in the persistent storage, a new object is created
+// func (rw *ApplicationReaderWriter) Read(appName string) (*Application, error) {
+// 	a := NewApplication(appName, rw)
 
-	// marshal to byte array
-	rawData, err := yaml.Marshal(a.Versions)
-	if err != nil {
-		return err
-	}
+// 	// read secret from cluster; extract appData
+// 	secret, err := rw.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
+// 	if err != nil {
+// 		log.Logger.Debug("no secret backing " + a.Name)
+// 		return a, err
+// 	}
 
-	// determine if need to
-	exists := true
-	secret, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
-	if err != nil {
-		exists = false
-		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      a.Name,
-				Namespace: a.Namespace,
-			},
-			Data:       map[string][]byte{},
-			StringData: map[string]string{},
-		}
-		log.Logger.Debug("secret does not exist; creating")
-	}
+// 	// read data from secret (is a yaml file)
+// 	rawData, ok := secret.Data[KEY]
+// 	if !ok {
+// 		log.Logger.Debug("key missing in backing secret")
+// 		return a, errors.New("secret does not contain expected key: " + KEY)
+// 	}
 
-	secret.Data[KEY] = rawData
-	if secret.StringData != nil {
-		secret.StringData[KEY] = string(rawData)
-	}
+// 	err = yaml.Unmarshal(rawData, &a.Versions)
+// 	if err != nil {
+// 		log.Logger.Debug("unmarshal failure")
+// 		return a, nil
+// 	}
 
-	// create or update the secret
-	if exists {
-		// TBD do we need to merge what we have?
-		_, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Update(
-			context.Background(),
-			secret,
-			metav1.UpdateOptions{},
-		)
-	} else {
-		_, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Create(
-			context.Background(),
-			secret,
-			metav1.CreateOptions{},
-		)
-	}
-	if err != nil {
-		log.Logger.WithError(err).Warn("unable to persist application")
-	}
+// 	// initialize Tracks and initialize where unmarshal fails to do so
+// 	for version, v := range a.Versions {
+// 		track := v.GetTrack()
+// 		if track != nil {
+// 			a.Tracks[*track] = version
+// 		}
+// 		if v.History == nil {
+// 			v.History = []VersionEvent{}
+// 		}
+// 		if v.Metrics == nil {
+// 			v.Metrics = map[string]*SummaryMetric{}
+// 		}
+// 	}
 
-	return err
+// 	return a, nil
+// }
 
-}
+// // Write writes the Application to persistent storage (a Kubernetes secret)
+// func (a *Application) Write() error {
+// 	log.Logger.Tracef("Write called with %#v", a)
+// 	defer log.Logger.Trace("Write completed")
+// 	var secret *corev1.Secret
 
-// GetNewApplication returns a new (empty) Application for a namespace/name label
-func GetNewApplication(application string, rw *ApplicationReaderWriter) *Application {
-	a := Application{
-		Name:         GetNameFromKey(application),
-		Namespace:    GetNamespaceFromKey(application),
-		Versions:     Versions{},
-		Tracks:       Tracks{},
-		ReaderWriter: rw,
-	}
+// 	// marshal to byte array
+// 	rawData, err := yaml.Marshal(a.Versions)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return &a
-}
+// 	// determine if need to
+// 	exists := true
+// 	secret, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
+// 	if err != nil {
+// 		exists = false
+// 		secret = &corev1.Secret{
+// 			ObjectMeta: metav1.ObjectMeta{
+// 				Name:      a.Name,
+// 				Namespace: a.Namespace,
+// 			},
+// 			Data:       map[string][]byte{},
+// 			StringData: map[string]string{},
+// 		}
+// 		log.Logger.Debug("secret does not exist; creating")
+// 	}
+
+// 	secret.Data[KEY] = rawData
+// 	if secret.StringData != nil {
+// 		secret.StringData[KEY] = string(rawData)
+// 	}
+
+// 	// create or update the secret
+// 	if exists {
+// 		// TBD do we need to merge what we have?
+// 		_, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Update(
+// 			context.Background(),
+// 			secret,
+// 			metav1.UpdateOptions{},
+// 		)
+// 	} else {
+// 		_, err = a.ReaderWriter.Client.CoreV1().Secrets(a.Namespace).Create(
+// 			context.Background(),
+// 			secret,
+// 			metav1.CreateOptions{},
+// 		)
+// 	}
+// 	if err != nil {
+// 		log.Logger.WithError(err).Warn("unable to persist application")
+// 	}
+
+// 	return err
+
+// }
 
 // GetNameFromKey returns the name from a key of the form "namespace/name"
 func GetNameFromKey(applicationKey string) string {

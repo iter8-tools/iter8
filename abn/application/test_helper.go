@@ -47,7 +47,7 @@ func readYamlFromFile(folder, file string) ([]byte, error) {
 }
 
 func byteArrayToApplication(name string, data []byte) (*Application, error) {
-	a := GetNewApplication(name, nil)
+	a := NewApplication(name)
 
 	var versions Versions
 	err := yaml.Unmarshal(data, &versions)
@@ -130,4 +130,20 @@ func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 	for m := range v.Metrics {
 		assert.Contains(t, assertion.metrics, m)
 	}
+}
+
+func NoApplications(t *testing.T) {
+	assert.Empty(t, Applications.apps)
+}
+
+func Len(t *testing.T, length int) {
+	assert.Len(t, Applications.apps, length)
+}
+
+func Contains(t *testing.T, application string) {
+	assert.Contains(t, Applications.apps, application)
+}
+
+func NotContains(t *testing.T, application string) {
+	assert.NotContains(t, Applications.apps, application)
 }

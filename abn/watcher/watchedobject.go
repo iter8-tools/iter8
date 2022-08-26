@@ -5,7 +5,6 @@ package watcher
 import (
 	"strings"
 
-	"github.com/iter8-tools/iter8/abn/application"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -20,8 +19,6 @@ const (
 type WatchedObject struct {
 	// Obj is the Kubernetes object
 	Obj *unstructured.Unstructured
-	// Writer is used to write the object to persistent store
-	Writer *application.ApplicationReaderWriter
 }
 
 // getName gets application name from NAME_LABEL label on watched object

@@ -8,7 +8,6 @@ import (
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
-	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -92,20 +91,18 @@ func TestWriteMetric(t *testing.T) {
 }
 
 func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
-	rw := &abnapp.ApplicationReaderWriter{Client: testDriver.Clientset}
-
 	// get current count of metric
 	var oldCount uint32 = 0
 	var a *abnapp.Application
-	watcher.Applications.Lock()
-	a, _ = watcher.Applications.Get(scenario.application, rw)
+	abnapp.Applications.Lock()
+	a, _ = abnapp.Applications.Get(scenario.application, false)
 	assert.NotNil(t, a)
 	if scenario.metric != "" {
 		m := getMetric(a, scenario.track, scenario.metric)
 		assert.NotNil(t, m)
 		oldCount = m.Count()
 	}
-	watcher.Applications.Unlock()
+	abnapp.Applications.Unlock()
 
 	// call gRPC service WriteMetric()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -128,25 +125,25 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	}
 
 	// verify that metric count has increased by 1
-	watcher.Applications.Lock()
-	a, _ = watcher.Applications.Get(scenario.application, rw)
+	abnapp.Applications.Lock()
+	a, _ = abnapp.Applications.Get(scenario.application, false)
 	if scenario.metric != "" {
 		m := getMetric(a, scenario.track, scenario.metric)
 		assert.NotNil(t, m)
 		assert.Equal(t, oldCount+1, m.Count())
 	}
-	watcher.Applications.Unlock()
+	abnapp.Applications.Unlock()
 }
 
 func setup(t *testing.T) (*pb.ABNClient, func()) {
 	testDriver = driver.NewFakeKubeDriver(cli.New())
 
 	// populate watcher.Applications with test applications
-	watcher.Applications.Clear()
+	abnapp.Applications.Clear()
 	a, err := abnapp.YamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
-	a.ReaderWriter = &abnapp.ApplicationReaderWriter{Client: testDriver.Clientset}
+	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: testDriver.Clientset})
 	assert.NoError(t, err)
-	watcher.Applications.Add("default/application", a)
+	abnapp.Applications.Add("default/application", a)
 
 	// start server
 	lis, err := net.Listen("tcp", ":0")

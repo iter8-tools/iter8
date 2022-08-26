@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/iter8-tools/iter8/abn/application"
+	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
@@ -37,10 +39,12 @@ var (
 
 // Start is entry point to configure services and start them
 func Start(kd *driver.KubeDriver) {
-	// initialize kubernetes driver
+	// Initialize kubernetes driver
 	if err := kd.Init(); err != nil {
 		log.Logger.Fatal("unable to initialize kubedriver")
 	}
+	// Initialize appliction map with ReaderWriter
+	abnapp.Applications.SetReaderWriter(&application.ApplicationReaderWriter{Client: kd.Clientset})
 
 	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
@@ -81,8 +85,8 @@ type abnServer struct {
 // Lookup identifies a track that should be used for a given user
 // This method is exposed to gRPC clients
 func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.Session, error) {
-	watcher.Applications.Lock()
-	defer watcher.Applications.Unlock()
+	abnapp.Applications.Lock()
+	defer abnapp.Applications.Unlock()
 
 	track, err := pb.Lookup(appMsg.GetName(), appMsg.GetUser())
 	if err != nil || track == nil {
@@ -95,13 +99,11 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 }
 
 func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
-	watcher.Applications.Lock()
-	defer watcher.Applications.Unlock()
+	abnapp.Applications.Lock()
+	defer abnapp.Applications.Unlock()
 
-	a, err := watcher.Applications.Get(metricMsg.Application, nil)
-	// a, ok := watcher.Applications[metricMsg.GetApplication()]
+	a, err := abnapp.Applications.Get(metricMsg.Application, false)
 	if err != nil || a == nil {
-		// if !ok {
 		return &emptypb.Empty{}, errors.New("unexpected: cannot find record of application " + metricMsg.GetApplication())
 	}
 
@@ -130,7 +132,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 	m.Add(value)
 
 	// persist updated metric
-	a.Write()
+	abnapp.Applications.Write(a)
 
 	return &emptypb.Empty{}, nil
 }
