@@ -18,10 +18,8 @@ const (
 
 // Application is an application observed in a kubernetes cluster
 type Application struct {
-	// Name is the value of the app.kubernetes.io/name field
+	// Name is of the form namespace/name where the name is the value of the label app.kubernetes.io/name
 	Name string
-	// Namespace is the namespace where the application was discovered
-	Namespace string
 	// Tracks is map from application track identifier to version name
 	Tracks
 	// Versions is a map of versions name to version data
@@ -43,10 +41,9 @@ type ApplicationReaderWriter struct {
 // NewApplication returns a new (empty) Application for a namespace/name label
 func NewApplication(application string) *Application {
 	return &Application{
-		Name:      GetNameFromKey(application),
-		Namespace: GetNamespaceFromKey(application),
-		Versions:  Versions{},
-		Tracks:    Tracks{},
+		Name:     application,
+		Versions: Versions{},
+		Tracks:   Tracks{},
 	}
 }
 
@@ -54,6 +51,10 @@ func NewApplication(application string) *Application {
 func GetNameFromKey(applicationKey string) string {
 	_, n := splitApplicationKey(applicationKey)
 	return n
+}
+
+func GetSecretNameFromKey(applicationKey string) string {
+	return GetNameFromKey(applicationKey) + SECRET_POSTFIX
 }
 
 // GetNamespaceFromKey returns the namespace from a key of the form "namespace/name"
@@ -84,7 +85,6 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 		if allowNew {
 			log.Logger.Debugf("GetVersion no data found; returning %+v", v)
 			v = &Version{
-				// History:             []VersionEvent{},
 				Metrics:             map[string]*SummaryMetric{},
 				LastUpdateTimestamp: time.Now(),
 			}
@@ -105,12 +105,13 @@ func (a *Application) String() string {
 		tracks = append(tracks, t+" -> "+v)
 	}
 
-	str := fmt.Sprintf("Application %s/%s:\n\t%s", a.Namespace, a.Name,
-		"tracks: ["+strings.Join(tracks, ",")+"]")
-
-	for version, v := range a.Versions {
-		str += fmt.Sprintf("\n\tversion %s%s", version, v)
+	versions := []string{}
+	for version, _ := range a.Versions {
+		versions = append(versions, version)
 	}
 
-	return str
+	return fmt.Sprintf("Application %s:\n\t%s\n\t%s", a.Name,
+		"tracks: ["+strings.Join(tracks, ",")+"]",
+		"versions: ["+strings.Join(versions, ",")+"]",
+	)
 }

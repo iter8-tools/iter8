@@ -11,6 +11,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	SECRET_POSTFIX string = ".iter8abnmetrics"
+)
+
 // ThreadSafeApplicationMap is type to control thread safety of operations on an application map
 type ThreadSafeApplicationMap struct {
 	mutex sync.Mutex
@@ -36,15 +40,15 @@ func (m *ThreadSafeApplicationMap) Unlock() {
 
 // Clear the application map
 func (m *ThreadSafeApplicationMap) Clear() {
-	m.mutex.Lock()
+	m.Lock()
 	m.apps = map[string]*Application{}
-	m.mutex.Unlock()
+	m.Unlock()
 }
 
 func (m *ThreadSafeApplicationMap) Add(key string, a *Application) {
-	m.mutex.Lock()
+	m.Lock()
 	m.apps[key] = a
-	m.mutex.Unlock()
+	m.Unlock()
 }
 
 func (m *ThreadSafeApplicationMap) SetReaderWriter(rw *ApplicationReaderWriter) {
@@ -63,7 +67,7 @@ func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*
 
 	// !ok
 	if m.rw == nil || inMemoryOnly {
-		return nil, nil
+		return nil, errors.New("application record not found in memory")
 	}
 
 	a, err := m.Read(application)
@@ -77,8 +81,11 @@ func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*
 func (m *ThreadSafeApplicationMap) Read(application string) (*Application, error) {
 	a := NewApplication(application)
 
+	secretNamespace := GetNamespaceFromKey(a.Name)
+	secretName := GetNameFromKey(a.Name) + SECRET_POSTFIX
+
 	// read secret from cluster; extract appData
-	secret, err := m.rw.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
+	secret, err := m.rw.Client.CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		log.Logger.Debug("no secret backing " + a.Name)
 		return a, err
@@ -123,15 +130,18 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 		return err
 	}
 
+	secretNamespace := GetNamespaceFromKey(a.Name)
+	secretName := GetSecretNameFromKey(a.Name)
+
 	// determine if need to
 	exists := true
-	secret, err = m.rw.Client.CoreV1().Secrets(a.Namespace).Get(context.Background(), a.Name, metav1.GetOptions{})
+	secret, err = m.rw.Client.CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		exists = false
 		secret = &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      a.Name,
-				Namespace: a.Namespace,
+				Name:      secretName,
+				Namespace: secretNamespace,
 			},
 			Data:       map[string][]byte{},
 			StringData: map[string]string{},
@@ -147,13 +157,13 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 	// create or update the secret
 	if exists {
 		// TBD do we need to merge what we have?
-		_, err = m.rw.Client.CoreV1().Secrets(a.Namespace).Update(
+		_, err = m.rw.Client.CoreV1().Secrets(secretNamespace).Update(
 			context.Background(),
 			secret,
 			metav1.UpdateOptions{},
 		)
 	} else {
-		_, err = m.rw.Client.CoreV1().Secrets(a.Namespace).Create(
+		_, err = m.rw.Client.CoreV1().Secrets(secretNamespace).Create(
 			context.Background(),
 			secret,
 			metav1.CreateOptions{},

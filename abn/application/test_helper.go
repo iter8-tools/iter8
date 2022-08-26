@@ -24,16 +24,19 @@ func YamlToApplication(name, folder, file string) (*Application, error) {
 	return byteArrayToApplication(name, byteArray)
 }
 
-func YamlToSecret(folder, file, namespace, name string, kd *driver.KubeDriver) error {
+func YamlToSecret(folder, file, name string, kd *driver.KubeDriver) error {
 	byteArray, err := readYamlFromFile(folder, file)
 	if err != nil {
 		return err
 	}
 
-	_, err = kd.Clientset.CoreV1().Secrets(namespace).Create(context.TODO(), &corev1.Secret{
+	secretName := GetSecretNameFromKey(name)
+	secretNamespace := GetNamespaceFromKey(name)
+
+	_, err = kd.Clientset.CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:      secretName,
+			Namespace: secretNamespace,
 		},
 		StringData: map[string]string{KEY: string(byteArray)},
 	}, metav1.CreateOptions{})
@@ -82,8 +85,8 @@ func assertApplication(t *testing.T, a *Application, assertion applicationAssert
 	assert.NotNil(t, a)
 	assert.Contains(t, a.String(), assertion.namespace+"/"+assertion.name)
 
-	assert.Equal(t, assertion.name, a.Name)
-	assert.Equal(t, assertion.namespace, a.Namespace)
+	assert.Equal(t, assertion.name, GetNameFromKey(a.Name))
+	assert.Equal(t, assertion.namespace, GetNamespaceFromKey(a.Name))
 
 	assert.Len(t, a.Tracks, len(assertion.tracks))
 	for _, track := range assertion.tracks {

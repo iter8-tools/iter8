@@ -9,7 +9,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 )
 
-func TestApplicationNotInCluster(t *testing.T) {
+func TestApplicationNotInClusterRead(t *testing.T) {
 	setup(t)
 	a, err := Applications.Read("namespace/name")
 	assert.Error(t, err)
@@ -23,6 +23,27 @@ func TestApplicationNotInCluster(t *testing.T) {
 	})
 
 	writeVerify(t, a)
+}
+
+func TestApplicationNotInClusterGet(t *testing.T) {
+	setup(t)
+	// must be in memory but it isn't
+	a, err := Applications.Get("namespace/name", true)
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "application record not found")
+	assert.Nil(t, a)
+
+	// need not be in memory
+	a, err = Applications.Get("namespace/name", false)
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "not found")
+
+	assertApplication(t, a, applicationAssertion{
+		namespace: "namespace",
+		name:      "name",
+		tracks:    []string{},
+		versions:  []string{},
+	})
 }
 
 func TestApplicationInCluster(t *testing.T) {
@@ -49,6 +70,26 @@ func TestApplicationInCluster(t *testing.T) {
 	})
 
 	writeVerify(t, a)
+}
+
+func TestApplicationInClusterGet(t *testing.T) {
+	setup(t)
+	// must be in memory but it isn't
+	a, err := Applications.Get("default/application", true)
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "application record not found")
+	assert.Nil(t, a)
+
+	// need not be in memory
+	a, err = Applications.Get("default/application", false)
+	assert.NoError(t, err)
+
+	assertApplication(t, a, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
 }
 
 func TestGetVersion(t *testing.T) {
@@ -139,11 +180,11 @@ func setup(t *testing.T) {
 	Applications.SetReaderWriter(&ApplicationReaderWriter{Client: kd.Clientset})
 	Applications.Clear()
 
-	YamlToSecret("../../testdata", "abninputs/readtest.yaml", "default", "application", kd)
+	YamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application", kd)
 }
 
 func writeVerify(t *testing.T, a *Application) *Application {
-	application := a.Namespace + "/" + a.Name
+	application := a.Name
 	// write application to cluster (should create the secret, if not present)
 	err := Applications.Write(a)
 	assert.NoError(t, err)
