@@ -85,6 +85,7 @@ func TestWriteMetric(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			client, teardown := setup(t)
 			defer teardown()
+			abnapp.BatchWriteInterval = time.Duration(0)
 			testWriteMetric(t, client, scenario)
 		})
 	}

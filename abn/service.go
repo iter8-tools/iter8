@@ -5,13 +5,11 @@ package abn
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
@@ -21,7 +19,7 @@ import (
 	"github.com/iter8-tools/iter8/driver"
 
 	"google.golang.org/grpc"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
@@ -87,53 +85,33 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	abnapp.Applications.Lock()
 	defer abnapp.Applications.Unlock()
 
-	track, err := pb.Lookup(appMsg.GetName(), appMsg.GetUser())
+	track, err := lookupInternal(
+		appMsg.GetName(),
+		appMsg.GetUser(),
+	)
+
 	if err != nil || track == nil {
 		return nil, err
 	}
-
 	return &pb.Session{
 		Track: *track,
 	}, err
 }
 
+// WriteMetric identifies the track with which a metric is associated (from user) and
+// writes the metric value (currently only supports summary metrics)
 func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
 	abnapp.Applications.Lock()
 	defer abnapp.Applications.Unlock()
 
-	a, err := abnapp.Applications.Get(metricMsg.Application, false)
-	if err != nil || a == nil {
-		return &emptypb.Empty{}, errors.New("unexpected: cannot find record of application " + metricMsg.GetApplication())
-	}
+	err := writeMetricInternal(
+		metricMsg.GetApplication(),
+		metricMsg.GetUser(),
+		metricMsg.GetName(),
+		metricMsg.GetValue(),
+	)
 
-	track, err := pb.Lookup(metricMsg.GetApplication(), metricMsg.GetUser())
-	if err != nil || track == nil {
-		return &emptypb.Empty{}, err
-	}
-
-	version, ok := a.Tracks[*track]
-	if !ok {
-		return &emptypb.Empty{}, errors.New("track not mapped to version")
-	}
-
-	v, _ := a.GetVersion(version, false)
-	if v == nil {
-		return &emptypb.Empty{}, errors.New("unexpected: trying to write metrics for unknown version")
-	}
-
-	value, err := strconv.ParseFloat(metricMsg.GetValue(), 64)
-	if err != nil {
-		log.Logger.Warn("Unable to parse metric value ", metricMsg.GetValue())
-		return &emptypb.Empty{}, nil
-	}
-
-	m, _ := v.GetMetric(metricMsg.GetName(), true)
-	m.Add(value)
-
-	// persist updated metric
-	abnapp.Applications.BatchedWrite(a)
-
-	return &emptypb.Empty{}, nil
+	return &emptypb.Empty{}, err
 }
 
 // launchGRPCServer starts gRPC server

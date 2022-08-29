@@ -1,4 +1,4 @@
-package grpc
+package abn
 
 // lookup.go -(internal) implementation of gRPC Lookup method
 
@@ -40,7 +40,8 @@ func hash(node, key []byte) uint32 {
 	return hasher.Sum32()
 }
 
-func Lookup(application string, user string) (*string, error) {
+// lookupInternal is detailed implementation of gRPC method Lookup
+func lookupInternal(application string, user string) (*string, error) {
 	// if user is not provided, fail
 	if user == "" {
 		return nil, errors.New("no user session provided")
