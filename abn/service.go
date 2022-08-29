@@ -131,7 +131,7 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 	m.Add(value)
 
 	// persist updated metric
-	abnapp.Applications.Write(a)
+	abnapp.Applications.BatchedWrite(a)
 
 	return &emptypb.Empty{}, nil
 }

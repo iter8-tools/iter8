@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/stretchr/testify/assert"
@@ -117,6 +118,20 @@ func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 	for m := range v.Metrics {
 		assert.Contains(t, assertion.metrics, m)
 	}
+}
+
+// Clear the application map
+func (m *ThreadSafeApplicationMap) Clear() {
+	m.Lock()
+	m.apps = map[string]*Application{}
+	m.lastWriteTimes = map[string]*time.Time{}
+	m.Unlock()
+}
+
+func (m *ThreadSafeApplicationMap) Add(key string, a *Application) {
+	m.Lock()
+	m.apps[key] = a
+	m.Unlock()
 }
 
 func NoApplications(t *testing.T) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/iter8-tools/iter8/base/log"
 	corev1 "k8s.io/api/core/v1"
@@ -15,17 +16,28 @@ const (
 	SECRET_POSTFIX string = ".iter8abnmetrics"
 )
 
-// ThreadSafeApplicationMap is type to control thread safety of operations on an application map
-type ThreadSafeApplicationMap struct {
-	mutex sync.Mutex
-	apps  map[string]*Application
-	rw    *ApplicationReaderWriter
+var (
+	// Applications is map of app name to Application
+	// This is a global variable used to maintain an internal representation of the applications in a cluster
+	Applications ThreadSafeApplicationMap
+	// batchWriteInterval is the interval during which a write may not take place
+	BatchWriteInterval time.Duration
+)
+
+// initalize global variables
+func init() {
+	Applications = ThreadSafeApplicationMap{
+		apps: map[string]*Application{},
+	}
+	BatchWriteInterval = time.Duration(60 * time.Second)
 }
 
-// Applications is map of app name to Application
-// This is a global variable used to maintain an internal representation of the applications in a cluster
-var Applications = ThreadSafeApplicationMap{
-	apps: map[string]*Application{},
+// ThreadSafeApplicationMap is type to control thread safety of operations on an application map
+type ThreadSafeApplicationMap struct {
+	mutex          sync.Mutex
+	apps           map[string]*Application
+	lastWriteTimes map[string]*time.Time
+	rw             *ApplicationReaderWriter
 }
 
 // Lock locks the application map; should always be followed by an Unlock()
@@ -36,19 +48,6 @@ func (m *ThreadSafeApplicationMap) Lock() {
 // Unlock unlocks the application map
 func (m *ThreadSafeApplicationMap) Unlock() {
 	m.mutex.Unlock()
-}
-
-// Clear the application map
-func (m *ThreadSafeApplicationMap) Clear() {
-	m.Lock()
-	m.apps = map[string]*Application{}
-	m.Unlock()
-}
-
-func (m *ThreadSafeApplicationMap) Add(key string, a *Application) {
-	m.Lock()
-	m.apps[key] = a
-	m.Unlock()
 }
 
 func (m *ThreadSafeApplicationMap) SetReaderWriter(rw *ApplicationReaderWriter) {
@@ -114,6 +113,10 @@ func (m *ThreadSafeApplicationMap) Read(application string) (*Application, error
 		}
 	}
 
+	// set last write time to read time; it was written in the past
+	now := time.Now()
+	Applications.lastWriteTimes[a.Name] = &now
+
 	return a, nil
 }
 
@@ -170,7 +173,31 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 	}
 	if err != nil {
 		log.Logger.WithError(err).Warn("unable to persist application")
+		return err
 	}
 
-	return err
+	// update last write time for application
+	now := time.Now()
+	Applications.lastWriteTimes[a.Name] = &now
+	return nil
+}
+
+// BatchedWrite writes the Application to persistent storage only if the previous write was more than TIME ago
+func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
+	log.Logger.Tracef("BatchedWrite called")
+	defer log.Logger.Trace("BatchedWrite completed")
+
+	now := time.Now()
+	lastWrite, ok := Applications.lastWriteTimes[a.Name]
+	if !ok || lastWrite == nil {
+		// no record of the application ever being written; write it now
+		m.Write(a)
+	} else {
+		if now.Sub(*Applications.lastWriteTimes[a.Name]) > BatchWriteInterval {
+			m.Write(a)
+		}
+	}
+
+	// it was written too recently; wait until another write call
+	return nil
 }

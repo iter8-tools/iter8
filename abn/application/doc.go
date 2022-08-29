@@ -1,2 +1,2 @@
-// Package appliction provides a runtime model of appliations and their versions
+// Package appliction provides a runtime model of applications and their versions
 package application

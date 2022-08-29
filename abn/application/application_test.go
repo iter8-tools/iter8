@@ -92,6 +92,74 @@ func TestApplicationInClusterGet(t *testing.T) {
 	})
 }
 
+func TestWrite(t *testing.T) {
+	setup(t)
+
+	a, _ := Applications.Read("default/application")
+	assertApplication(t, a, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	// modify application in some way
+	a.Tracks["foo"] = "v1"
+
+	// Write writes immediately
+	Applications.Write(a)
+	b, _ := Applications.Read("default/application")
+	// changed
+	assertApplication(t, b, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate", "foo"},
+		versions:  []string{"v1", "v2"},
+	})
+}
+
+func TestBatchedWrite(t *testing.T) {
+	setup(t)
+	BatchWriteInterval = time.Duration(2 * time.Second)
+
+	a, _ := Applications.Read("default/application")
+	assertApplication(t, a, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	// modify application in some way
+	a.Tracks["foo"] = "v1"
+
+	// BatchedWrite should not write; too soon
+	Applications.BatchedWrite(a)
+	b, _ := Applications.Read("default/application")
+	// no change; it has been too soon
+	assertApplication(t, b, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	// time.Sleep(10 * time.Second)
+	time.Sleep(BatchWriteInterval)
+	// modify application in some way (need to do again because did Read)
+
+	// BatchedWrite should succeed; we waited > BatchWriteInterval
+	Applications.BatchedWrite(a)
+	c, _ := Applications.Read("default/application")
+	// changed
+	assertApplication(t, c, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate", "foo"},
+		versions:  []string{"v1", "v2"},
+	})
+}
+
 func TestGetVersion(t *testing.T) {
 	setup(t)
 	a, _ := Applications.Read("default/application")
