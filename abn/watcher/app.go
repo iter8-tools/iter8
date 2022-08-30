@@ -44,50 +44,39 @@ func Add(watched WatchedObject) {
 		return
 	}
 
+	// the watched object is the object that defines the version of the application
+
 	// check if we know about this application
-	// first check if in memory
-	// if not, read from persistent store
-	// if it does not exist in persistent store, the read will return an initalized Application
+	// first check if in memory then read from persistent store if not found
+	// if it isn't in persistent store, the read will return an initalized Application
 	a, _ := abnapp.Applications.Get(name, false)
 
 	abnapp.Applications.Lock(name)
 	defer abnapp.Applications.Unlock(name)
 
-	// get the version
-	// if it isn't in the Application this will create an new Version
+	// get the version; if it isn't in the Application this will create an new Version
 	v, _ := a.GetVersion(version, true)
 
-	// set ready to value on watched object, if set
-	// otherwise, use the current readiness value
-	oldReady := v.IsReady()
-	watchedReady := watched.isReady(oldReady)
-
-	// update track <--> ready version mapping
-	if watchedReady {
-		// log version ready (if it wasn't before)
-		if !oldReady {
-			v.Ready = true
-		}
-		watchedTrack := watched.getTrack()
-		if watchedTrack != "" {
-			oldTrack := v.GetTrack()
-			// associate version with track
-			if oldTrack == nil || *oldTrack != watchedTrack {
-				v.Track = &watchedTrack
-				// update a.Tracks
-				a.Tracks[watchedTrack] = version
-			}
+	// update track <--> version mapping
+	if !watched.isReady() {
+		// version not ready; ensure no track is nil and not in a.Tracks
+		if v.Track != nil {
+			delete(a.Tracks, *v.Track)
 		}
 	} else {
-		// version not ready so if version has track then unmap it
-		// but first check the track to version and remove if mapped to this (not ready) version
-		oldTrack := v.GetTrack()
-		if oldTrack != nil {
-			delete(a.Tracks, *oldTrack)
-			// remove association with track
+		// version is ready; set v.Track and add to a.Tracks if defined
+		watchedTrack := watched.getTrack()
+		if watchedTrack == "" {
+			// track not set; ensure not in a.Tracks and ensure is nil
+			if v.Track != nil {
+				delete(a.Tracks, *v.Track)
+			}
 			v.Track = nil
+		} else {
+			// track is set
+			v.Track = &watchedTrack
+			a.Tracks[*v.Track] = version
 		}
-		v.Ready = false
 	}
 
 	// record update into Apps
@@ -142,20 +131,10 @@ func Delete(watched WatchedObject) {
 	}
 
 	// if object being deleted has ready annotation we are no longer ready
-	versionReady := v.IsReady()
-	watchedReady := watched.isReady(false)
-	versionTrack := v.GetTrack()
-
-	if watchedReady {
-		// it was ready; record that it is no longer ready
-		if versionReady {
-			v.Ready = false
-		}
-
-		// if it was mapped to a track; mark it unmapped (since no longer ready)
-		if versionTrack != nil {
-			v.Track = nil
-			delete(a.Tracks, *versionTrack)
-		}
+	// set track to nil and remove from a.Tracks
+	if v.Track != nil {
+		delete(a.Tracks, *v.Track)
 	}
+	v.Track = nil
+
 }

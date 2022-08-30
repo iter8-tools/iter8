@@ -58,11 +58,11 @@ func (wo WatchedObject) getTrack() string {
 }
 
 // isReady determines if watched object indicates readiness of version (as indicated by READY_ANNOTATION annotatation)
-func (wo WatchedObject) isReady(currentlyReady bool) bool {
+func (wo WatchedObject) isReady() bool {
 	annotations := wo.Obj.GetAnnotations()
 	ready, ok := annotations[READY_ANNOTATION]
 	if !ok {
-		return currentlyReady || false
+		return false
 	}
 	return strings.ToLower(ready) == "true"
 }

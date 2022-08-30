@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -98,13 +97,11 @@ func assertApplication(t *testing.T, a *Application, assertion applicationAssert
 
 type versionAssertion struct {
 	track   string
-	ready   bool
 	metrics []string
 }
 
 func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 	assert.NotNil(t, v)
-	assert.Contains(t, v.String(), strconv.FormatBool(assertion.ready))
 
 	track := v.GetTrack()
 	if assertion.track == "" {
@@ -112,8 +109,6 @@ func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 	} else {
 		assert.Equal(t, assertion.track, *track)
 	}
-
-	assert.Equal(t, assertion.ready, v.IsReady())
 
 	assert.Len(t, v.Metrics, len(assertion.metrics))
 	assert.NotNil(t, v.Metrics)
@@ -131,18 +126,6 @@ func (m *ThreadSafeApplicationMap) Clear() {
 	m.mutex.Unlock()
 }
 
-func NoApplications(t *testing.T) {
-	assert.Empty(t, Applications.apps)
-}
-
-func Len(t *testing.T, length int) {
+func NumApplications(t *testing.T, length int) {
 	assert.Len(t, Applications.apps, length)
-}
-
-func Contains(t *testing.T, application string) {
-	assert.Contains(t, Applications.apps, application)
-}
-
-func NotContains(t *testing.T, application string) {
-	assert.NotContains(t, Applications.apps, application)
 }

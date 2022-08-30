@@ -60,12 +60,10 @@ func TestApplicationInCluster(t *testing.T) {
 
 	assertVersion(t, a.Versions["v1"], versionAssertion{
 		track:   "",
-		ready:   false,
 		metrics: []string{"metric1"},
 	})
 	assertVersion(t, a.Versions["v2"], versionAssertion{
 		track:   "candidate",
-		ready:   true,
 		metrics: []string{},
 	})
 
@@ -171,7 +169,6 @@ func TestGetVersion(t *testing.T) {
 
 	assertVersion(t, v, versionAssertion{
 		track:   "",
-		ready:   false,
 		metrics: []string{"metric1"},
 	})
 
@@ -204,7 +201,6 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 		LastUpdateTimestamp: time.Now(),
 	}
 	assert.Nil(t, v.GetTrack())
-	assert.False(t, v.IsReady())
 
 	// test GetMetic w/o allowNew
 	m, isNew = v.GetMetric("foo", false)

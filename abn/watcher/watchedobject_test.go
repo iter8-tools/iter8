@@ -52,8 +52,8 @@ func TestHasName(t *testing.T) {
 
 	assert.Equal(t, appTrack, wo.getTrack())
 
-	assert.False(t, wo.isReady(false))
-	assert.True(t, wo.isReady(true))
+	assert.False(t, wo.isReady())
+	assert.False(t, wo.isReady())
 }
 
 func TestHasNoName(t *testing.T) {
@@ -102,6 +102,6 @@ func TestHasNoTrack(t *testing.T) {
 
 	assert.Equal(t, "", wo.getTrack())
 
-	assert.True(t, wo.isReady(false))
-	assert.True(t, wo.isReady(true))
+	assert.True(t, wo.isReady())
+	assert.True(t, wo.isReady())
 }
