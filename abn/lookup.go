@@ -41,22 +41,24 @@ func hash(node, key []byte) uint32 {
 }
 
 // lookupInternal is detailed implementation of gRPC method Lookup
-func lookupInternal(application string, user string) (*string, error) {
+func lookupInternal(application string, user string) (*abnapp.Application, *string, error) {
 	// if user is not provided, fail
 	if user == "" {
-		return nil, errors.New("no user session provided")
+		return nil, nil, errors.New("no user session provided")
 	}
 
 	// check that we have a record of the application
 	a, err := abnapp.Applications.Get(application, true)
 	if err != nil {
-		return nil, fmt.Errorf("application not found: %s", err.Error())
+		return nil, nil, fmt.Errorf("application not found: %s", err.Error())
 	}
 	if a == nil {
-		return nil, errors.New("application not found")
+		return nil, nil, errors.New("application not found")
 	}
 
 	// use rendezvous hash to get track for user, fail if not present
+	abnapp.Applications.RLock(application)
+	defer abnapp.Applications.RUnlock(application)
 	track := rendezvousGet(a, user)
-	return &track, nil
+	return a, &track, nil
 }

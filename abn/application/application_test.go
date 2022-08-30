@@ -146,7 +146,6 @@ func TestBatchedWrite(t *testing.T) {
 
 	// time.Sleep(10 * time.Second)
 	time.Sleep(BatchWriteInterval)
-	// modify application in some way (need to do again because did Read)
 
 	// BatchedWrite should succeed; we waited > BatchWriteInterval
 	Applications.BatchedWrite(a)

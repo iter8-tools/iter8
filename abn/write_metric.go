@@ -10,15 +10,14 @@ import (
 
 // writeMetricInternal is detailed implementation of gRPC method WriteMetric
 func writeMetricInternal(application, user, metric, valueStr string) error {
-	a, err := abnapp.Applications.Get(application, false)
-	if err != nil || a == nil {
-		return errors.New("unexpected: cannot find record of application " + application)
-	}
-
-	track, err := lookupInternal(application, user)
+	a, track, err := lookupInternal(application, user)
 	if err != nil || track == nil {
 		return err
 	}
+
+	// lock for write; we will modify the metric
+	abnapp.Applications.Lock(application)
+	defer abnapp.Applications.Unlock(application)
 
 	version, ok := a.Tracks[*track]
 	if !ok {

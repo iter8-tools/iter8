@@ -44,14 +44,14 @@ func Add(watched WatchedObject) {
 		return
 	}
 
-	abnapp.Applications.Lock()
-	defer abnapp.Applications.Unlock()
-
 	// check if we know about this application
 	// first check if in memory
 	// if not, read from persistent store
 	// if it does not exist in persistent store, the read will return an initalized Application
 	a, _ := abnapp.Applications.Get(name, false)
+
+	abnapp.Applications.Lock(name)
+	defer abnapp.Applications.Unlock(name)
 
 	// get the version
 	// if it isn't in the Application this will create an new Version
@@ -113,17 +113,13 @@ func Delete(watched WatchedObject) {
 	log.Logger.Trace("Delete called")
 	defer log.Logger.Trace("Delete called")
 
-	abnapp.Applications.Lock()
-	defer abnapp.Applications.Unlock()
-
 	name, ok := watched.getNamespacedName()
 	if !ok {
 		return // no app.kubernetes.io/name label
 	}
+
 	_, err := abnapp.Applications.Get(name, false)
-	// _, ok = abnapp.Applications.apps[name]
 	if err != nil {
-		// if !ok {
 		return // has app.kubernetes.io/name but object wasn't recorded
 	}
 
@@ -136,6 +132,9 @@ func Delete(watched WatchedObject) {
 	if a == nil {
 		return // no record; we don't look in secret if we got a delete event, we must have had an add/update event
 	}
+
+	abnapp.Applications.Lock(name)
+	defer abnapp.Applications.Unlock(name)
 
 	v, _ := a.GetVersion(version, false)
 	if v == nil {
@@ -159,6 +158,4 @@ func Delete(watched WatchedObject) {
 			delete(a.Tracks, *versionTrack)
 		}
 	}
-
-	// TBD with object reference counts, could delete application from abnapp.Applications
 }

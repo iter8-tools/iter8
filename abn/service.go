@@ -82,10 +82,7 @@ type abnServer struct {
 // Lookup identifies a track that should be used for a given user
 // This method is exposed to gRPC clients
 func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.Session, error) {
-	abnapp.Applications.Lock()
-	defer abnapp.Applications.Unlock()
-
-	track, err := lookupInternal(
+	_, track, err := lookupInternal(
 		appMsg.GetName(),
 		appMsg.GetUser(),
 	)
@@ -101,9 +98,6 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 // WriteMetric identifies the track with which a metric is associated (from user) and
 // writes the metric value (currently only supports summary metrics)
 func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
-	abnapp.Applications.Lock()
-	defer abnapp.Applications.Unlock()
-
 	err := writeMetricInternal(
 		metricMsg.GetApplication(),
 		metricMsg.GetUser(),
@@ -116,7 +110,6 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 
 // launchGRPCServer starts gRPC server
 func launchGRPCServer(opts []grpc.ServerOption, kd *driver.KubeDriver) {
-
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {
 		log.Logger.WithError(err).Fatal("failed to listen")

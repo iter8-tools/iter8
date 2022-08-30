@@ -69,11 +69,6 @@ func testLookup(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 }
 
 func TestWriteMetric(t *testing.T) {
-	// no application
-	// no track from lookup (no user or no tracks)
-	// invalid value
-	// valid app, track and value
-
 	testcases := map[string]Scenario{
 		"no applicaton": {application: "default/noapp", user: "user", errorSubstring: "track not mapped", track: "", metric: "", value: "76"},
 		"no user":       {application: "default/application", user: "", errorSubstring: "no user session provided", track: "", metric: "", value: "76"},
@@ -95,15 +90,15 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	// get current count of metric
 	var oldCount uint32 = 0
 	var a *abnapp.Application
-	abnapp.Applications.Lock()
 	a, _ = abnapp.Applications.Get(scenario.application, false)
 	assert.NotNil(t, a)
+	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
 		m := getMetric(a, scenario.track, scenario.metric)
 		assert.NotNil(t, m)
 		oldCount = m.Count()
 	}
-	abnapp.Applications.Unlock()
+	abnapp.Applications.RUnlock(a.Name)
 
 	// call gRPC service WriteMetric()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -126,14 +121,15 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	}
 
 	// verify that metric count has increased by 1
-	abnapp.Applications.Lock()
 	a, _ = abnapp.Applications.Get(scenario.application, false)
+	assert.NotNil(t, a)
+	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
 		m := getMetric(a, scenario.track, scenario.metric)
 		assert.NotNil(t, m)
 		assert.Equal(t, oldCount+1, m.Count())
 	}
-	abnapp.Applications.Unlock()
+	abnapp.Applications.RUnlock(a.Name)
 }
 
 func setup(t *testing.T) (*pb.ABNClient, func()) {
@@ -144,7 +140,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	a, err := abnapp.YamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
 	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: testDriver.Clientset})
 	assert.NoError(t, err)
-	abnapp.Applications.Add("default/application", a)
+	abnapp.Applications.Add(a)
 
 	// start server
 	lis, err := net.Listen("tcp", ":0")

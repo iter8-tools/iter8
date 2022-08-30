@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -57,6 +58,7 @@ func byteArrayToApplication(name string, data []byte) (*Application, error) {
 	if err != nil {
 		return NewApplication(name), nil
 	}
+	a.Name = name
 
 	// Initialize versions if not already initialized
 	if a.Versions == nil {
@@ -122,16 +124,11 @@ func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 
 // Clear the application map
 func (m *ThreadSafeApplicationMap) Clear() {
-	m.Lock()
+	m.mutex.Lock()
 	m.apps = map[string]*Application{}
 	m.lastWriteTimes = map[string]*time.Time{}
-	m.Unlock()
-}
-
-func (m *ThreadSafeApplicationMap) Add(key string, a *Application) {
-	m.Lock()
-	m.apps[key] = a
-	m.Unlock()
+	m.mutexes = map[string]*sync.RWMutex{}
+	m.mutex.Unlock()
 }
 
 func NoApplications(t *testing.T) {

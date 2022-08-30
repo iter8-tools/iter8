@@ -27,29 +27,53 @@ var (
 // initalize global variables
 func init() {
 	Applications = ThreadSafeApplicationMap{
-		apps: map[string]*Application{},
+		apps:           map[string]*Application{},
+		mutexes:        map[string]*sync.RWMutex{},
+		lastWriteTimes: map[string]*time.Time{},
 	}
 	BatchWriteInterval = time.Duration(60 * time.Second)
 }
 
 // ThreadSafeApplicationMap is type to control thread safety of operations on an application map
 type ThreadSafeApplicationMap struct {
-	mutex          sync.Mutex
-	apps           map[string]*Application
+	// mutex is used to mediate read/write of the application map (ie, Get vs Add/Clear)
+	mutex sync.RWMutex
+	apps  map[string]*Application
+	// mutexes mediate read/write of individual applications within the map
+	mutexes        map[string]*sync.RWMutex
 	lastWriteTimes map[string]*time.Time
 	rw             *ApplicationReaderWriter
 }
 
-// Lock locks the application map; should always be followed by an Unlock()
-func (m *ThreadSafeApplicationMap) Lock() {
-	m.mutex.Lock()
+// RLock lock application for reading
+func (m *ThreadSafeApplicationMap) RLock(application string) {
+	m.mutexes[application].RLock()
 }
 
-// Unlock unlocks the application map
-func (m *ThreadSafeApplicationMap) Unlock() {
+// RUnlock undoes a single RLock call
+func (m *ThreadSafeApplicationMap) RUnlock(application string) {
+	m.mutexes[application].RUnlock()
+}
+
+// Lock lock application for writing
+func (m *ThreadSafeApplicationMap) Lock(application string) {
+	m.mutexes[application].Lock()
+}
+
+// Unlock unlocks application
+func (m *ThreadSafeApplicationMap) Unlock(application string) {
+	m.mutexes[application].Unlock()
+}
+
+// Add adds an application into the application map
+func (m *ThreadSafeApplicationMap) Add(a *Application) {
+	m.mutex.Lock()
+	m.apps[a.Name] = a
+	m.mutexes[a.Name] = &sync.RWMutex{}
 	m.mutex.Unlock()
 }
 
+// SetReaderWriter sets the ReaderWriter (for reading/writing secrets to a cluster)
 func (m *ThreadSafeApplicationMap) SetReaderWriter(rw *ApplicationReaderWriter) {
 	m.rw = rw
 }
@@ -57,9 +81,10 @@ func (m *ThreadSafeApplicationMap) SetReaderWriter(rw *ApplicationReaderWriter) 
 // Get gets an application from map of applications
 // If the application is not present and a reader is provided, an attempt will be made to
 // read it from persistant storage
-// Applications.Lock() should be called first
 func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*Application, error) {
-	a, ok := Applications.apps[application]
+	m.mutex.RLock()
+	a, ok := m.apps[application]
+	m.mutex.RUnlock()
 	if ok {
 		return a, nil
 	}
@@ -70,7 +95,7 @@ func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*
 	}
 
 	a, err := m.Read(application)
-	Applications.apps[application] = a
+	m.Add(a)
 	return a, err
 }
 
@@ -115,7 +140,7 @@ func (m *ThreadSafeApplicationMap) Read(application string) (*Application, error
 
 	// set last write time to read time; it was written in the past
 	now := time.Now()
-	Applications.lastWriteTimes[a.Name] = &now
+	m.lastWriteTimes[a.Name] = &now
 
 	return a, nil
 }
@@ -178,7 +203,7 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 
 	// update last write time for application
 	now := time.Now()
-	Applications.lastWriteTimes[a.Name] = &now
+	m.lastWriteTimes[a.Name] = &now
 	return nil
 }
 
@@ -188,12 +213,12 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 	defer log.Logger.Trace("BatchedWrite completed")
 
 	now := time.Now()
-	lastWrite, ok := Applications.lastWriteTimes[a.Name]
+	lastWrite, ok := m.lastWriteTimes[a.Name]
 	if !ok || lastWrite == nil {
 		// no record of the application ever being written; write it now
 		m.Write(a)
 	} else {
-		if now.Sub(*Applications.lastWriteTimes[a.Name]) > BatchWriteInterval {
+		if now.Sub(*m.lastWriteTimes[a.Name]) > BatchWriteInterval {
 			m.Write(a)
 		}
 	}
