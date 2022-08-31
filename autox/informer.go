@@ -5,7 +5,7 @@ package autox
 import (
 	"fmt"
 
-	"github.com/iter8-tools/iter8/driver"
+	"github.com/iter8-tools/iter8/autox/k8sdriver"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
@@ -15,7 +15,7 @@ type Iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func NewIter8Watcher(kd *driver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string, groupConfig GroupConfig) *Iter8Watcher {
+func NewIter8Watcher(kd *k8sdriver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string, groupConfig GroupConfig) *Iter8Watcher {
 	w := &Iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
