@@ -52,8 +52,8 @@ func Start(kd *driver.KubeDriver) {
 	stopCh := make(chan struct{})
 
 	// set up resource watching as defined by config
-	abnConfig := watcher.ReadConfig(abnConfigFile)
-	w := watcher.NewIter8Watcher(kd, abnConfig.Resources, abnConfig.Namespaces)
+	c := readConfig(abnConfigFile)
+	w := watcher.NewIter8Watcher(kd, c.Resources, c.Namespaces)
 	go w.Start(stopCh)
 
 	// launch gRPC server to respond to frontend requests
