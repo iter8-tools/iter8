@@ -41,7 +41,7 @@ func TestAdd(t *testing.T) {
 }
 
 func testAdd(t *testing.T, s scenario) {
-	Add(wo(s.iter8, s.application, s.version, s.track, s.ready))
+	addObject(wo(s.iter8, s.application, s.version, s.track, s.ready))
 
 	if s.iter8 != "true" ||
 		s.application == "" ||
@@ -79,14 +79,14 @@ func TestUpdate(t *testing.T) {
 	for label, s := range testcases {
 		t.Run(label, func(t *testing.T) {
 			setup()
-			Add(wo("true", "ns/app", "version", "", ""))
+			addObject(wo("true", "ns/app", "version", "", ""))
 			testUpdate(t, s)
 		})
 	}
 }
 
 func testUpdate(t *testing.T, s scenario) {
-	Update(wo(s.iter8, s.application, s.version, s.track, s.ready))
+	updateObject(wo(s.iter8, s.application, s.version, s.track, s.ready))
 
 	abnapp.NumApplications(t, 1)
 	a, _ := abnapp.Applications.Get("ns/app", true)
@@ -127,14 +127,14 @@ func TestDelete(t *testing.T) {
 	for label, s := range testcases {
 		t.Run(label, func(t *testing.T) {
 			setup()
-			Add(wo("true", "ns/app", "version", "track", "true"))
+			addObject(wo("true", "ns/app", "version", "track", "true"))
 			testDelete(t, s)
 		})
 	}
 }
 
 func testDelete(t *testing.T, s scenario) {
-	Delete(wo(s.iter8, s.application, s.version, s.track, s.ready))
+	deleteObject(wo(s.iter8, s.application, s.version, s.track, s.ready))
 
 	abnapp.NumApplications(t, 1)
 	a, _ := abnapp.Applications.Get("ns/app", true)

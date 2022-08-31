@@ -14,10 +14,10 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-// Add updates the apps map using information from a newly added object
+// addObject updates the apps map using information from a newly added object
 // If the observed object does not have a name (app.kubernetes.io/name label)
 // or version (app.kubenetes.io/version), it is ignored.
-func Add(watched WatchedObject) {
+func addObject(watched WatchedObject) {
 	log.Logger.Tracef("Add called for %s/%s", watched.Obj.GetNamespace(), watched.Obj.GetName())
 	defer log.Logger.Trace("Add completed")
 
@@ -86,19 +86,19 @@ func Add(watched WatchedObject) {
 	}
 }
 
-// Update updates the apps map using information from a modified object
+// updateObject updates the apps map using information from a modified object
 // Behavior is the same as for a new object
-func Update(watched WatchedObject) {
+func updateObject(watched WatchedObject) {
 	log.Logger.Trace("Update called")
 	defer log.Logger.Trace("Update completed")
 
-	Add(watched)
+	addObject(watched)
 }
 
-// Delete updates the apps map using information from a deleted object
+// deleteObject updates the apps map using information from a deleted object
 // Note that we are not object counting which means we will never actually remove a version
 // from an application or an application from the syste
-func Delete(watched WatchedObject) {
+func deleteObject(watched WatchedObject) {
 	log.Logger.Trace("Delete called")
 	defer log.Logger.Trace("Delete called")
 
