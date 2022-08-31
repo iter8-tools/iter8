@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iter8-tools/iter8/abn/k8sdriver"
+	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 )
@@ -263,12 +263,11 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 }
 
 func setup(t *testing.T) {
-	driver := k8sdriver.NewFakeKubeDriver(cli.New())
-	Applications.SetReaderWriter(&ApplicationReaderWriter{Client: driver.Clientset})
+	kClient := k8sclient.NewFakeKubeClient(cli.New())
 	Applications.Clear()
+	Applications.SetReaderWriter(kClient)
 	maxApplicationDataBytes = 750000
-
-	yamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application", driver)
+	yamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application", kClient)
 }
 
 func writeVerify(t *testing.T, a *Application) *Application {

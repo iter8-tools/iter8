@@ -1,4 +1,4 @@
-package k8sdriver
+package k8sclient
 
 import (
 	"errors"
@@ -15,33 +15,32 @@ import (
 )
 
 var (
-	Driver = NewKubeDriver(cli.New())
+	Client = NewKubeClient(cli.New())
 )
 
-// KubeDriver embeds Kube configuration, and
+// KubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
-type KubeDriver struct {
+type KubeClient struct {
 	// EnvSettings provides generic Kubernetes options
 	*cli.EnvSettings
-	// Clientset enables interaction with a Kubernetes cluster using structured types
-	Clientset kubernetes.Interface
+	// typedClient enables interaction with a Kubernetes cluster using structured types
+	typedClient kubernetes.Interface
 	// dynamicClient enables unstructured interaction with a Kubernetes cluster
-	DynamicClient dynamic.Interface
+	dynamicClient dynamic.Interface
 }
 
-// NewKubeDriver creates and returns a new KubeDriver
-func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
-	kd := &KubeDriver{
+// NewKubeClient creates and returns a new KubeClient
+func NewKubeClient(s *cli.EnvSettings) *KubeClient {
+	return &KubeClient{
 		EnvSettings:   s,
-		Clientset:     nil,
-		DynamicClient: nil,
+		typedClient:   nil,
+		dynamicClient: nil,
 	}
-	return kd
 }
 
 // initKube initializes the Kubernetes clientset
-func (kd *KubeDriver) Init() (err error) {
-	if kd.DynamicClient == nil {
+func (kd *KubeClient) Initialize() (err error) {
+	if kd.dynamicClient == nil {
 		// get REST config
 		restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
 		if err != nil {
@@ -50,14 +49,14 @@ func (kd *KubeDriver) Init() (err error) {
 			return e
 		}
 		// get clientset
-		kd.Clientset, err = kubernetes.NewForConfig(restConfig)
+		kd.typedClient, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes clientset")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
 		// get dynamic client
-		kd.DynamicClient, err = dynamic.NewForConfig(restConfig)
+		kd.dynamicClient, err = dynamic.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes dynamic client")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -66,4 +65,12 @@ func (kd *KubeDriver) Init() (err error) {
 	}
 
 	return nil
+}
+
+func (c *KubeClient) Typed() kubernetes.Interface {
+	return c.typedClient
+}
+
+func (c *KubeClient) Dynamic() dynamic.Interface {
+	return c.dynamicClient
 }
