@@ -2,7 +2,10 @@ package abn
 
 import (
 	"context"
+	"io/ioutil"
 	"net"
+	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -13,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"helm.sh/helm/v3/pkg/cli"
+	"sigs.k8s.io/yaml"
 )
 
 var testDriver *driver.KubeDriver
@@ -137,7 +141,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 
 	// populate watcher.Applications with test applications
 	abnapp.Applications.Clear()
-	a, err := abnapp.YamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
+	a, err := yamlToApplication("default/application", "../testdata", "abninputs/readtest.yaml")
 	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: testDriver.Clientset})
 	assert.NoError(t, err)
 	abnapp.Applications.Add(a)
@@ -164,6 +168,42 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 		lis.Close()
 		conn.Close()
 	}
+}
+
+func yamlToApplication(name, folder, file string) (*abnapp.Application, error) {
+	byteArray, err := readYamlFromFile(folder, file)
+	if err != nil {
+		return nil, err
+	}
+
+	return byteArrayToApplication(name, byteArray)
+}
+
+func readYamlFromFile(folder, file string) ([]byte, error) {
+	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
+	fname := filepath.Join(filepath.Dir(filename), folder, file)
+	return ioutil.ReadFile(fname)
+}
+
+func byteArrayToApplication(name string, data []byte) (*abnapp.Application, error) {
+	a := &abnapp.Application{}
+	err := yaml.Unmarshal(data, a)
+	if err != nil {
+		return abnapp.NewApplication(name), nil
+	}
+	a.Name = name
+
+	// Initialize versions if not already initialized
+	if a.Versions == nil {
+		a.Versions = abnapp.Versions{}
+	}
+	for _, v := range a.Versions {
+		if v.Metrics == nil {
+			v.Metrics = map[string]*abnapp.SummaryMetric{}
+		}
+	}
+
+	return a, nil
 }
 
 func getMetric(a *abnapp.Application, track, metric string) *abnapp.SummaryMetric {

@@ -20,8 +20,10 @@ var (
 	// Applications is map of app name to Application
 	// This is a global variable used to maintain an internal representation of the applications in a cluster
 	Applications ThreadSafeApplicationMap
-	// batchWriteInterval is the interval during which a write may not take place
+	// BatchWriteInterval is the interval during which a write may not take place
 	BatchWriteInterval time.Duration
+	// maxApplicationDataBytes is the maximum number of bytes in an applicaton (as YAML converted to []byte)
+	maxApplicationDataBytes int
 )
 
 // initalize global variables
@@ -32,6 +34,7 @@ func init() {
 		lastWriteTimes: map[string]*time.Time{},
 	}
 	BatchWriteInterval = time.Duration(60 * time.Second)
+	maxApplicationDataBytes = 750000 // a secret's maximum size is 1MB
 }
 
 // ThreadSafeApplicationMap is type to control thread safety of operations on an application map
@@ -157,6 +160,18 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 		return err
 	}
 
+	if len(rawData) > maxApplicationDataBytes {
+		deleteUntrackedVersions(a)
+		rawData, err = yaml.Marshal(a)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(rawData) > maxApplicationDataBytes {
+		return errors.New("application data too large")
+	}
+
 	secretNamespace := GetNamespaceFromKey(a.Name)
 	secretName := GetSecretNameFromKey(a.Name)
 
@@ -225,4 +240,17 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 
 	// it was written too recently; wait until another write call
 	return nil
+}
+
+func deleteUntrackedVersions(a *Application) {
+	toDelete := []string{}
+	for version, v := range a.Versions {
+		if v.Track == nil {
+			toDelete = append(toDelete, version)
+		}
+	}
+
+	for _, version := range toDelete {
+		delete(a.Versions, version)
+	}
 }

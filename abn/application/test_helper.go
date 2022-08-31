@@ -13,19 +13,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
-func YamlToApplication(name, folder, file string) (*Application, error) {
-	byteArray, err := readYamlFromFile(folder, file)
-	if err != nil {
-		return nil, err
-	}
-
-	return byteArrayToApplication(name, byteArray)
-}
-
-func YamlToSecret(folder, file, name string, kd *driver.KubeDriver) error {
+func yamlToSecret(folder, file, name string, kd *driver.KubeDriver) error {
 	byteArray, err := readYamlFromFile(folder, file)
 	if err != nil {
 		return err
@@ -49,27 +39,6 @@ func readYamlFromFile(folder, file string) ([]byte, error) {
 	fname := filepath.Join(filepath.Dir(filename), folder, file)
 
 	return ioutil.ReadFile(fname)
-}
-
-func byteArrayToApplication(name string, data []byte) (*Application, error) {
-	a := &Application{}
-	err := yaml.Unmarshal(data, a)
-	if err != nil {
-		return NewApplication(name), nil
-	}
-	a.Name = name
-
-	// Initialize versions if not already initialized
-	if a.Versions == nil {
-		a.Versions = Versions{}
-	}
-	for _, v := range a.Versions {
-		if v.Metrics == nil {
-			v.Metrics = map[string]*SummaryMetric{}
-		}
-	}
-
-	return a, nil
 }
 
 type applicationAssertion struct {

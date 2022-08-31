@@ -116,6 +116,30 @@ func TestWrite(t *testing.T) {
 	})
 }
 
+func TestWriteLimit(t *testing.T) {
+	setup(t)
+	BatchWriteInterval = time.Duration(0)
+	maxApplicationDataBytes = 200
+
+	a, err := Applications.Read("default/application")
+	assert.NoError(t, err)
+	assert.NotNil(t, a)
+
+	// v1 is not associated with a track; only v2 is
+	assert.NotEqual(t, len(a.Tracks), len(a.Versions))
+
+	// because maxApplicationDatBytes is so small, should delete v1
+	err = Applications.Write(a)
+	assert.NoError(t, err)
+
+	b, err := Applications.Read("default/application")
+	assert.NoError(t, err)
+	assert.NotNil(t, b)
+
+	// only v2 is present
+	assert.Equal(t, len(b.Tracks), len(b.Versions))
+}
+
 func TestBatchedWrite(t *testing.T) {
 	setup(t)
 	BatchWriteInterval = time.Duration(2 * time.Second)
@@ -242,8 +266,9 @@ func setup(t *testing.T) {
 	kd := driver.NewFakeKubeDriver(cli.New())
 	Applications.SetReaderWriter(&ApplicationReaderWriter{Client: kd.Clientset})
 	Applications.Clear()
+	maxApplicationDataBytes = 750000
 
-	YamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application", kd)
+	yamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application", kd)
 }
 
 func writeVerify(t *testing.T, a *Application) *Application {
