@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
-	"github.com/iter8-tools/iter8/driver"
+	"github.com/iter8-tools/iter8/abn/k8sdriver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	corev1 "k8s.io/api/core/v1"
@@ -161,7 +161,7 @@ func testDelete(t *testing.T, s scenario) {
 
 func setup() {
 	abnapp.Applications.Clear()
-	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: driver.NewFakeKubeDriver(cli.New()).Clientset})
+	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: k8sdriver.NewFakeKubeDriver(cli.New()).Clientset})
 }
 
 func wo(iter8, name, version, track, ready string) WatchedObject {

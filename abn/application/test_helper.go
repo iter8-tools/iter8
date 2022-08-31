@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iter8-tools/iter8/driver"
+	"github.com/iter8-tools/iter8/abn/k8sdriver"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func yamlToSecret(folder, file, name string, kd *driver.KubeDriver) error {
+func yamlToSecret(folder, file, name string, driver *k8sdriver.KubeDriver) error {
 	byteArray, err := readYamlFromFile(folder, file)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func yamlToSecret(folder, file, name string, kd *driver.KubeDriver) error {
 	secretName := GetSecretNameFromKey(name)
 	secretNamespace := GetNamespaceFromKey(name)
 
-	_, err = kd.Clientset.CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
+	_, err = driver.Clientset.CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: secretNamespace,

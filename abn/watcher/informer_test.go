@@ -3,16 +3,16 @@ package watcher
 import (
 	"testing"
 
-	"github.com/iter8-tools/iter8/driver"
+	"github.com/iter8-tools/iter8/abn/k8sdriver"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestNewInformer(t *testing.T) {
-	kd := driver.NewFakeKubeDriver(cli.New())
+	driver := k8sdriver.NewFakeKubeDriver(cli.New())
 	w := NewIter8Watcher(
-		kd,
+		driver,
 		[]schema.GroupVersionResource{{
 			Group:    "",
 			Version:  "v1",

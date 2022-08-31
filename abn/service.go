@@ -14,9 +14,9 @@ import (
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
+	"github.com/iter8-tools/iter8/abn/k8sdriver"
 	"github.com/iter8-tools/iter8/abn/watcher"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/driver"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -35,13 +35,13 @@ var (
 )
 
 // Start is entry point to configure services and start them
-func Start(kd *driver.KubeDriver) {
+func Start(driver *k8sdriver.KubeDriver) {
 	// Initialize kubernetes driver
-	if err := kd.Init(); err != nil {
+	if err := driver.Init(); err != nil {
 		log.Logger.Fatal("unable to initialize kubedriver")
 	}
 	// Initialize appliction map with ReaderWriter
-	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: kd.Clientset})
+	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: driver.Clientset})
 
 	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
@@ -53,11 +53,11 @@ func Start(kd *driver.KubeDriver) {
 
 	// set up resource watching as defined by config
 	c := readConfig(abnConfigFile)
-	w := watcher.NewIter8Watcher(kd, c.Resources, c.Namespaces)
+	w := watcher.NewIter8Watcher(driver, c.Resources, c.Namespaces)
 	go w.Start(stopCh)
 
 	// launch gRPC server to respond to frontend requests
-	go launchGRPCServer([]grpc.ServerOption{}, kd)
+	go launchGRPCServer([]grpc.ServerOption{}, driver)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
@@ -67,15 +67,15 @@ func Start(kd *driver.KubeDriver) {
 }
 
 // newServer returns a new gRPC server
-func newServer(kd *driver.KubeDriver) *abnServer {
+func newServer(driver *k8sdriver.KubeDriver) *abnServer {
 	s := &abnServer{
-		Driver: kd,
+		Driver: driver,
 	}
 	return s
 }
 
 type abnServer struct {
-	Driver *driver.KubeDriver
+	Driver *k8sdriver.KubeDriver
 	pb.UnimplementedABNServer
 }
 
@@ -109,13 +109,13 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 }
 
 // launchGRPCServer starts gRPC server
-func launchGRPCServer(opts []grpc.ServerOption, kd *driver.KubeDriver) {
+func launchGRPCServer(opts []grpc.ServerOption, driver *k8sdriver.KubeDriver) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {
 		log.Logger.WithError(err).Fatal("failed to listen")
 	}
 
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterABNServer(grpcServer, newServer(kd))
+	pb.RegisterABNServer(grpcServer, newServer(driver))
 	grpcServer.Serve(lis)
 }

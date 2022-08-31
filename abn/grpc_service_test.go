@@ -11,15 +11,13 @@ import (
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
-	"github.com/iter8-tools/iter8/driver"
+	"github.com/iter8-tools/iter8/abn/k8sdriver"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"helm.sh/helm/v3/pkg/cli"
 	"sigs.k8s.io/yaml"
 )
-
-var testDriver *driver.KubeDriver
 
 type Scenario struct {
 	// parameters to lookup
@@ -137,12 +135,11 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 }
 
 func setup(t *testing.T) (*pb.ABNClient, func()) {
-	testDriver = driver.NewFakeKubeDriver(cli.New())
-
+	driver := k8sdriver.NewFakeKubeDriver(cli.New())
 	// populate watcher.Applications with test applications
 	abnapp.Applications.Clear()
 	a, err := yamlToApplication("default/application", "../testdata", "abninputs/readtest.yaml")
-	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: testDriver.Clientset})
+	abnapp.Applications.SetReaderWriter(&abnapp.ApplicationReaderWriter{Client: driver.Clientset})
 	assert.NoError(t, err)
 	abnapp.Applications.Add(a)
 
@@ -152,7 +149,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 
 	serverOptions := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(serverOptions...)
-	pb.RegisterABNServer(grpcServer, newServer(testDriver))
+	pb.RegisterABNServer(grpcServer, newServer(driver))
 	go grpcServer.Serve(lis)
 
 	// setup client
