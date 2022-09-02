@@ -21,15 +21,15 @@ func yamlToSecret(folder, file, name string, kClient *k8sclient.KubeClient) erro
 		return err
 	}
 
-	secretName := GetSecretNameFromKey(name)
-	secretNamespace := GetNamespaceFromKey(name)
+	secretName := secretNameFromKey(name)
+	secretNamespace := namespaceFromKey(name)
 
 	_, err = kClient.Typed().CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: secretNamespace,
 		},
-		StringData: map[string]string{KEY: string(byteArray)},
+		StringData: map[string]string{secretKey: string(byteArray)},
 	}, metav1.CreateOptions{})
 	return err
 }
@@ -50,8 +50,9 @@ func assertApplication(t *testing.T, a *Application, assertion applicationAssert
 	assert.NotNil(t, a)
 	assert.Contains(t, a.String(), assertion.namespace+"/"+assertion.name)
 
-	assert.Equal(t, assertion.name, GetNameFromKey(a.Name))
-	assert.Equal(t, assertion.namespace, GetNamespaceFromKey(a.Name))
+	namespace, name := splitApplicationKey(a.Name)
+	assert.Equal(t, assertion.name, name)
+	assert.Equal(t, assertion.namespace, namespace)
 
 	assert.Len(t, a.Tracks, len(assertion.tracks))
 	for _, track := range assertion.tracks {

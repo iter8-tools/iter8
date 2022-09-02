@@ -25,13 +25,13 @@ func NewIter8Watcher(kClient *k8sclient.KubeClient, resourceTypes []schema.Group
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 				AddFunc: func(obj interface{}) {
-					addObject(WatchedObject{Obj: obj.(*unstructured.Unstructured)})
+					addObject(watchedObject{Obj: obj.(*unstructured.Unstructured)})
 				},
 				UpdateFunc: func(oldObj, obj interface{}) {
-					updateObject(WatchedObject{Obj: obj.(*unstructured.Unstructured)})
+					updateObject(watchedObject{Obj: obj.(*unstructured.Unstructured)})
 				},
 				DeleteFunc: func(obj interface{}) {
-					deleteObject(WatchedObject{Obj: obj.(*unstructured.Unstructured)})
+					deleteObject(watchedObject{Obj: obj.(*unstructured.Unstructured)})
 				},
 			})
 		}

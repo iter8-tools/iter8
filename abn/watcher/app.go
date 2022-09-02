@@ -17,7 +17,7 @@ import (
 // addObject updates the apps map using information from a newly added object
 // If the observed object does not have a name (app.kubernetes.io/name label)
 // or version (app.kubenetes.io/version), it is ignored.
-func addObject(watched WatchedObject) {
+func addObject(watched watchedObject) {
 	log.Logger.Tracef("Add called for %s/%s", watched.Obj.GetNamespace(), watched.Obj.GetName())
 	defer log.Logger.Trace("Add completed")
 
@@ -60,22 +60,22 @@ func addObject(watched WatchedObject) {
 	// update track <--> version mapping
 	if !watched.isReady() {
 		// version not ready; ensure no track is nil and not in a.Tracks
-		if v.Track != nil {
-			delete(a.Tracks, *v.Track)
+		if v.GetTrack() != nil {
+			delete(a.Tracks, *v.GetTrack())
 		}
 	} else {
-		// version is ready; set v.Track and add to a.Tracks if defined
+		// version is ready; set v.GetTrack() and add to a.Tracks if defined
 		watchedTrack := watched.getTrack()
 		if watchedTrack == "" {
 			// track not set; ensure not in a.Tracks and ensure is nil
-			if v.Track != nil {
-				delete(a.Tracks, *v.Track)
+			if v.GetTrack() != nil {
+				delete(a.Tracks, *v.GetTrack())
 			}
-			v.Track = nil
+			v.SetTrack(nil)
 		} else {
 			// track is set
-			v.Track = &watchedTrack
-			a.Tracks[*v.Track] = version
+			v.SetTrack(&watchedTrack)
+			a.Tracks[*v.GetTrack()] = version
 		}
 	}
 
@@ -88,7 +88,7 @@ func addObject(watched WatchedObject) {
 
 // updateObject updates the apps map using information from a modified object
 // Behavior is the same as for a new object
-func updateObject(watched WatchedObject) {
+func updateObject(watched watchedObject) {
 	log.Logger.Trace("Update called")
 	defer log.Logger.Trace("Update completed")
 
@@ -98,7 +98,7 @@ func updateObject(watched WatchedObject) {
 // deleteObject updates the apps map using information from a deleted object
 // Note that we are not object counting which means we will never actually remove a version
 // from an application or an application from the syste
-func deleteObject(watched WatchedObject) {
+func deleteObject(watched watchedObject) {
 	log.Logger.Trace("Delete called")
 	defer log.Logger.Trace("Delete called")
 
@@ -132,9 +132,9 @@ func deleteObject(watched WatchedObject) {
 
 	// if object being deleted has ready annotation we are no longer ready
 	// set track to nil and remove from a.Tracks
-	if v.Track != nil {
-		delete(a.Tracks, *v.Track)
+	if v.GetTrack() != nil {
+		delete(a.Tracks, *v.GetTrack())
 	}
-	v.Track = nil
+	v.SetTrack(nil)
 
 }

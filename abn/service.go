@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/iter8-tools/iter8/abn/watcher"
@@ -52,6 +53,8 @@ func Start(kClient *k8sclient.KubeClient) {
 	c := readConfig(abnConfigFile)
 	w := watcher.NewIter8Watcher(kClient, c.Resources, c.Namespaces)
 	go w.Start(stopCh)
+
+	go abnapp.Applications.PeriodicApplicationsFlush()
 
 	// launch gRPC server to respond to frontend requests
 	go launchGRPCServer([]grpc.ServerOption{})

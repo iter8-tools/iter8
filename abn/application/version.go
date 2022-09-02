@@ -5,7 +5,6 @@ package application
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 // Version is information about versions of an application in a Kubernetes cluster
@@ -15,13 +14,15 @@ type Version struct {
 	Track *string `json:"track,omitempty" yaml:"metrics,omitempty"`
 	// List of (summary) metrics for a version
 	Metrics map[string]*SummaryMetric `json:"metrics" yaml:"metrics"`
-	// LastUpdateTimestamp is time of last update (either event or metric)
-	LastUpdateTimestamp time.Time `json:"lastUpdateTimestamp" yaml:"lastUpdateTimestamp"`
 }
 
 // GetTrack returns a track identifier, if any. Otherwise, it returns nil.
 func (v *Version) GetTrack() *string {
 	return v.Track
+}
+
+func (v *Version) SetTrack(track *string) {
+	v.Track = track
 }
 
 // GetMetric returns a metric from the list of metrics associated with a version

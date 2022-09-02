@@ -16,39 +16,39 @@ const (
 	ITER8_ANNOTATION = "iter8.tools/abn"
 )
 
-// WatchedObject is wrapper for object returned by informer
-type WatchedObject struct {
+// watchedObject is wrapper for object returned by informer
+type watchedObject struct {
 	// Obj is the Kubernetes object
 	Obj *unstructured.Unstructured
 }
 
 // getName gets application name from NAME_LABEL label on watched object
-func (wo WatchedObject) getName() (string, bool) {
+func (wo watchedObject) getName() (string, bool) {
 	labels := wo.Obj.GetLabels()
 	name, ok := labels[NAME_LABEL]
 	return name, ok
 }
 
 // getNamespace gets namespace of watched object
-func (wo WatchedObject) getNamespace() string {
+func (wo watchedObject) getNamespace() string {
 	return wo.Obj.GetNamespace()
 }
 
 // getNamespacedName returns formatted namespace and (application) name
-func (wo WatchedObject) getNamespacedName() (string, bool) {
+func (wo watchedObject) getNamespacedName() (string, bool) {
 	n, ok := wo.getName()
 	return wo.getNamespace() + "/" + n, ok
 }
 
 // getVersion gets application version from VERSION_LABEL label on watched object
-func (wo WatchedObject) getVersion() (string, bool) {
+func (wo watchedObject) getVersion() (string, bool) {
 	labels := wo.Obj.GetLabels()
 	v, ok := labels[VERSION_LABEL]
 	return v, ok
 }
 
 // getTrack get trace of version from TRACK_ANNOTATION annotation on watched object
-func (wo WatchedObject) getTrack() string {
+func (wo watchedObject) getTrack() string {
 	annotations := wo.Obj.GetAnnotations()
 	track, ok := annotations[TRACK_ANNOTATION]
 	if !ok {
@@ -58,7 +58,7 @@ func (wo WatchedObject) getTrack() string {
 }
 
 // isReady determines if watched object indicates readiness of version (as indicated by READY_ANNOTATION annotatation)
-func (wo WatchedObject) isReady() bool {
+func (wo watchedObject) isReady() bool {
 	annotations := wo.Obj.GetAnnotations()
 	ready, ok := annotations[READY_ANNOTATION]
 	if !ok {
@@ -67,7 +67,7 @@ func (wo WatchedObject) isReady() bool {
 	return strings.ToLower(ready) == "true"
 }
 
-func (wo WatchedObject) isIter8AbnRelated() bool {
+func (wo watchedObject) isIter8AbnRelated() bool {
 	annotations := wo.Obj.GetAnnotations()
 	iter8, ok := annotations[ITER8_ANNOTATION]
 	if !ok {

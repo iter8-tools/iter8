@@ -14,23 +14,24 @@ import (
 )
 
 type scenario struct {
-	iter8       string
-	application string
-	version     string
-	track       string
-	ready       string
+	iter8     string
+	namespace string
+	name      string
+	version   string
+	track     string
+	ready     string
 }
 
 func TestAdd(t *testing.T) {
 	testcases := map[string]scenario{
-		"iter8 not set":       {iter8: "", application: "", version: "", track: "", ready: ""},
-		"iter8 not true":      {iter8: "false", application: "ns/app", version: "version", track: "foo", ready: "true"},
-		"no application":      {iter8: "true", application: "", version: "", track: "", ready: ""},
-		"no version":          {iter8: "true", application: "ns/app", version: "", track: "", ready: ""},
-		"w/o track ready":     {iter8: "true", application: "ns/app", version: "version", track: "", ready: "true"},
-		"w/o track not ready": {iter8: "true", application: "ns/app", version: "version", track: "", ready: "false"},
-		"w/ track ready":      {iter8: "true", application: "ns/app", version: "version", track: "track", ready: "true"},
-		"w/ track not ready":  {iter8: "true", application: "ns/app", version: "version", track: "track", ready: ""},
+		"iter8 not set":       {iter8: "", namespace: "", name: "", version: "", track: "", ready: ""},
+		"iter8 not true":      {iter8: "false", namespace: "ns", name: "app", version: "version", track: "foo", ready: "true"},
+		"no application":      {iter8: "true", namespace: "", name: "", version: "", track: "", ready: ""},
+		"no version":          {iter8: "true", namespace: "ns", name: "app", version: "", track: "", ready: ""},
+		"w/o track ready":     {iter8: "true", namespace: "ns", name: "app", version: "version", track: "", ready: "true"},
+		"w/o track not ready": {iter8: "true", namespace: "ns", name: "app", version: "version", track: "", ready: "false"},
+		"w/ track ready":      {iter8: "true", namespace: "ns", name: "app", version: "version", track: "track", ready: "true"},
+		"w/ track not ready":  {iter8: "true", namespace: "ns", name: "app", version: "version", track: "track", ready: ""},
 	}
 	for label, s := range testcases {
 		t.Run(label, func(t *testing.T) {
@@ -41,10 +42,10 @@ func TestAdd(t *testing.T) {
 }
 
 func testAdd(t *testing.T, s scenario) {
-	addObject(wo(s.iter8, s.application, s.version, s.track, s.ready))
+	addObject(wo(s.iter8, s.namespace, s.name, s.version, s.track, s.ready))
 
 	if s.iter8 != "true" ||
-		s.application == "" ||
+		applicationName(s.namespace, s.name) == "" ||
 		s.version == "" {
 		abnapp.NumApplications(t, 0)
 		return
@@ -52,7 +53,7 @@ func testAdd(t *testing.T, s scenario) {
 
 	abnapp.NumApplications(t, 1)
 
-	a, _ := abnapp.Applications.Get(s.application, true)
+	a, _ := abnapp.Applications.Get(applicationName(s.namespace, s.name), true)
 	assert.NotNil(t, a)
 
 	tracks := []string{}
@@ -60,8 +61,8 @@ func testAdd(t *testing.T, s scenario) {
 		tracks = []string{s.track}
 	}
 	assertApplication(t, a, applicationAssertion{
-		namespace: abnapp.GetNamespaceFromKey(s.application),
-		name:      abnapp.GetNameFromKey(s.application),
+		namespace: s.namespace,
+		name:      s.name,
 		tracks:    tracks,
 		versions:  []string{s.version},
 	})
@@ -69,31 +70,31 @@ func testAdd(t *testing.T, s scenario) {
 
 func TestUpdate(t *testing.T) {
 	testcases := map[string]scenario{
-		"no application":      {iter8: "true", application: "", version: "", track: "", ready: ""},
-		"no version":          {iter8: "true", application: "ns/app", version: "", track: "", ready: ""},
-		"w/o track ready":     {iter8: "true", application: "ns/app", version: "version", track: "", ready: "true"},
-		"w/o track not ready": {iter8: "true", application: "ns/app", version: "version", track: "", ready: "false"},
-		"w/ track ready":      {iter8: "true", application: "ns/app", version: "version", track: "track", ready: "true"},
-		"w/ track not ready":  {iter8: "true", application: "ns/app", version: "version", track: "track", ready: ""},
+		"no application":      {iter8: "true", namespace: "", name: "", version: "", track: "", ready: ""},
+		"no version":          {iter8: "true", namespace: "ns", name: "app", version: "", track: "", ready: ""},
+		"w/o track ready":     {iter8: "true", namespace: "ns", name: "app", version: "version", track: "", ready: "true"},
+		"w/o track not ready": {iter8: "true", namespace: "ns", name: "app", version: "version", track: "", ready: "false"},
+		"w/ track ready":      {iter8: "true", namespace: "ns", name: "app", version: "version", track: "track", ready: "true"},
+		"w/ track not ready":  {iter8: "true", namespace: "ns", name: "app", version: "version", track: "track", ready: ""},
 	}
 	for label, s := range testcases {
 		t.Run(label, func(t *testing.T) {
 			setup()
-			addObject(wo("true", "ns/app", "version", "", ""))
+			addObject(wo("true", "ns", "app", "version", "", ""))
 			testUpdate(t, s)
 		})
 	}
 }
 
 func testUpdate(t *testing.T, s scenario) {
-	updateObject(wo(s.iter8, s.application, s.version, s.track, s.ready))
+	updateObject(wo(s.iter8, s.namespace, s.name, s.version, s.track, s.ready))
 
 	abnapp.NumApplications(t, 1)
 	a, _ := abnapp.Applications.Get("ns/app", true)
 	assert.NotNil(t, a)
 
 	if s.iter8 != "true" ||
-		s.application == "" ||
+		applicationName(s.namespace, s.name) == "" ||
 		s.version == "" {
 		assertApplication(t, a, applicationAssertion{
 			namespace: "ns",
@@ -107,8 +108,8 @@ func testUpdate(t *testing.T, s scenario) {
 			tracks = []string{s.track}
 		}
 		assertApplication(t, a, applicationAssertion{
-			namespace: abnapp.GetNamespaceFromKey(s.application),
-			name:      abnapp.GetNameFromKey(s.application),
+			namespace: s.namespace,
+			name:      s.name,
 			tracks:    tracks,
 			versions:  []string{s.version},
 		})
@@ -117,31 +118,31 @@ func testUpdate(t *testing.T, s scenario) {
 
 func TestDelete(t *testing.T) {
 	testcases := map[string]scenario{
-		"no application":      {iter8: "true", application: "", version: "", track: "", ready: ""},
-		"no version":          {iter8: "true", application: "ns/app", version: "", track: "", ready: ""},
-		"w/o track ready":     {iter8: "true", application: "ns/app", version: "version", track: "", ready: "true"},
-		"w/o track not ready": {iter8: "true", application: "ns/app", version: "version", track: "", ready: "false"},
-		"w/ track ready":      {iter8: "true", application: "ns/app", version: "version", track: "track", ready: "true"},
-		"w/ track not ready":  {iter8: "true", application: "ns/app", version: "version", track: "track", ready: ""},
+		"no application":      {iter8: "true", namespace: "", name: "", version: "", track: "", ready: ""},
+		"no version":          {iter8: "true", namespace: "ns", name: "app", version: "", track: "", ready: ""},
+		"w/o track ready":     {iter8: "true", namespace: "ns", name: "app", version: "version", track: "", ready: "true"},
+		"w/o track not ready": {iter8: "true", namespace: "ns", name: "app", version: "version", track: "", ready: "false"},
+		"w/ track ready":      {iter8: "true", namespace: "ns", name: "app", version: "version", track: "track", ready: "true"},
+		"w/ track not ready":  {iter8: "true", namespace: "ns", name: "app", version: "version", track: "track", ready: ""},
 	}
 	for label, s := range testcases {
 		t.Run(label, func(t *testing.T) {
 			setup()
-			addObject(wo("true", "ns/app", "version", "track", "true"))
+			addObject(wo("true", "ns", "app", "version", "track", "true"))
 			testDelete(t, s)
 		})
 	}
 }
 
 func testDelete(t *testing.T, s scenario) {
-	deleteObject(wo(s.iter8, s.application, s.version, s.track, s.ready))
+	deleteObject(wo(s.iter8, s.namespace, s.name, s.version, s.track, s.ready))
 
 	abnapp.NumApplications(t, 1)
 	a, _ := abnapp.Applications.Get("ns/app", true)
 	assert.NotNil(t, a)
 
 	if s.iter8 != "true" ||
-		s.application == "" ||
+		applicationName(s.namespace, s.name) == "" ||
 		s.version == "" {
 		assertApplication(t, a, applicationAssertion{
 			namespace: "ns",
@@ -164,10 +165,10 @@ func setup() {
 	abnapp.Applications.SetReaderWriter(k8sclient.NewFakeKubeClient(cli.New()))
 }
 
-func wo(iter8, name, version, track, ready string) WatchedObject {
+func wo(iter8, namespace, name, version, track, ready string) watchedObject {
 	labels := map[string]string{}
 	if name != "" {
-		labels[NAME_LABEL] = abnapp.GetNameFromKey(name)
+		labels[NAME_LABEL] = name
 	}
 	if version != "" {
 		labels[VERSION_LABEL] = version
@@ -185,15 +186,25 @@ func wo(iter8, name, version, track, ready string) WatchedObject {
 
 	o := corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        abnapp.GetNameFromKey(name),
-			Namespace:   abnapp.GetNamespaceFromKey(name),
+			Name:        name,
+			Namespace:   namespace,
 			Labels:      labels,
 			Annotations: annotations,
 		},
 		Spec: corev1.PodSpec{},
 	}
 	obj, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(&o)
-	wo := WatchedObject{Obj: &unstructured.Unstructured{Object: obj}}
+	wo := watchedObject{Obj: &unstructured.Unstructured{Object: obj}}
 
 	return wo
+}
+
+func applicationName(namespace string, name string) string {
+	if namespace == "" {
+		return name
+	}
+	if name == "" {
+		return namespace
+	}
+	return namespace + "/" + name
 }

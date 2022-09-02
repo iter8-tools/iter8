@@ -11,7 +11,7 @@ import (
 
 func TestApplicationNotInClusterRead(t *testing.T) {
 	setup(t)
-	a, err := Applications.Read("namespace/name")
+	a, err := Applications.readFromSecret("namespace/name")
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "not found")
 
@@ -48,7 +48,7 @@ func TestApplicationNotInClusterGet(t *testing.T) {
 
 func TestApplicationInCluster(t *testing.T) {
 	setup(t)
-	a, err := Applications.Read("default/application")
+	a, err := Applications.readFromSecret("default/application")
 	assert.NoError(t, err)
 
 	assertApplication(t, a, applicationAssertion{
@@ -93,7 +93,7 @@ func TestApplicationInClusterGet(t *testing.T) {
 func TestWrite(t *testing.T) {
 	setup(t)
 
-	a, _ := Applications.Read("default/application")
+	a, _ := Applications.readFromSecret("default/application")
 	assertApplication(t, a, applicationAssertion{
 		namespace: "default",
 		name:      "application",
@@ -106,7 +106,7 @@ func TestWrite(t *testing.T) {
 
 	// Write writes immediately
 	Applications.Write(a)
-	b, _ := Applications.Read("default/application")
+	b, _ := Applications.readFromSecret("default/application")
 	// changed
 	assertApplication(t, b, applicationAssertion{
 		namespace: "default",
@@ -119,9 +119,9 @@ func TestWrite(t *testing.T) {
 func TestWriteLimit(t *testing.T) {
 	setup(t)
 	BatchWriteInterval = time.Duration(0)
-	maxApplicationDataBytes = 200
+	maxApplicationDataBytes = 150
 
-	a, err := Applications.Read("default/application")
+	a, err := Applications.readFromSecret("default/application")
 	assert.NoError(t, err)
 	assert.NotNil(t, a)
 
@@ -132,7 +132,7 @@ func TestWriteLimit(t *testing.T) {
 	err = Applications.Write(a)
 	assert.NoError(t, err)
 
-	b, err := Applications.Read("default/application")
+	b, err := Applications.readFromSecret("default/application")
 	assert.NoError(t, err)
 	assert.NotNil(t, b)
 
@@ -144,7 +144,7 @@ func TestBatchedWrite(t *testing.T) {
 	setup(t)
 	BatchWriteInterval = time.Duration(2 * time.Second)
 
-	a, _ := Applications.Read("default/application")
+	a, _ := Applications.Get("default/application", false)
 	assertApplication(t, a, applicationAssertion{
 		namespace: "default",
 		name:      "application",
@@ -157,7 +157,7 @@ func TestBatchedWrite(t *testing.T) {
 
 	// BatchedWrite should not write; too soon
 	Applications.BatchedWrite(a)
-	b, _ := Applications.Read("default/application")
+	b, _ := Applications.readFromSecret("default/application")
 	// no change; it has been too soon
 	assertApplication(t, b, applicationAssertion{
 		namespace: "default",
@@ -171,7 +171,60 @@ func TestBatchedWrite(t *testing.T) {
 
 	// BatchedWrite should succeed; we waited > BatchWriteInterval
 	Applications.BatchedWrite(a)
-	c, _ := Applications.Read("default/application")
+	c, _ := Applications.readFromSecret("default/application")
+	// changed
+	assertApplication(t, c, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate", "foo"},
+		versions:  []string{"v1", "v2"},
+	})
+}
+
+func TestFlush(t *testing.T) {
+	setup(t)
+	BatchWriteInterval = time.Duration(2 * time.Second)
+
+	a, _ := Applications.Get("default/application", false)
+	assertApplication(t, a, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	// modify application in some way
+	a.Tracks["foo"] = "v1"
+
+	// BatchedWrite should not write; too soon
+	Applications.BatchedWrite(a)
+	b, _ := Applications.readFromSecret("default/application")
+	// no change; it has been too soon
+	assertApplication(t, b, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	// avoid need to sleep by resetting BatchedWriteInterval
+	BatchWriteInterval = time.Duration(0)
+
+	// still not written since no second casll was made
+	b, _ = Applications.readFromSecret("default/application")
+	// no change; it has been too soon
+	assertApplication(t, b, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	time.Sleep(4 * BatchWriteInterval)
+	Applications.flush()
+
+	// now will have been written
+	c, _ := Applications.readFromSecret("default/application")
 	// changed
 	assertApplication(t, c, applicationAssertion{
 		namespace: "default",
@@ -183,7 +236,7 @@ func TestBatchedWrite(t *testing.T) {
 
 func TestGetVersion(t *testing.T) {
 	setup(t)
-	a, _ := Applications.Read("default/application")
+	a, _ := Applications.readFromSecret("default/application")
 
 	var v *Version
 	var isNew bool
@@ -221,8 +274,7 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 	var isNew bool
 
 	v := &Version{
-		Metrics:             map[string]*SummaryMetric{},
-		LastUpdateTimestamp: time.Now(),
+		Metrics: map[string]*SummaryMetric{},
 	}
 	assert.Nil(t, v.GetTrack())
 
@@ -277,7 +329,7 @@ func writeVerify(t *testing.T, a *Application) *Application {
 	assert.NoError(t, err)
 
 	// verify can read it back
-	a, err = Applications.Read(application)
+	a, err = Applications.readFromSecret(application)
 	assert.NotNil(t, a)
 	assert.NoError(t, err)
 	return a

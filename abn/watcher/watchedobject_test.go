@@ -34,7 +34,7 @@ func TestHasName(t *testing.T) {
 	}
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&p)
 	assert.NoError(t, err)
-	wo := WatchedObject{Obj: &unstructured.Unstructured{Object: obj}}
+	wo := watchedObject{Obj: &unstructured.Unstructured{Object: obj}}
 
 	n, ok := wo.getName()
 	assert.True(t, ok)
@@ -69,7 +69,7 @@ func TestHasNoName(t *testing.T) {
 	}
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&p)
 	assert.NoError(t, err)
-	wo := WatchedObject{Obj: &unstructured.Unstructured{Object: obj}}
+	wo := watchedObject{Obj: &unstructured.Unstructured{Object: obj}}
 
 	n, ok := wo.getName()
 	assert.False(t, ok)
@@ -98,7 +98,7 @@ func TestHasNoTrack(t *testing.T) {
 	}
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&p)
 	assert.NoError(t, err)
-	wo := WatchedObject{Obj: &unstructured.Unstructured{Object: obj}}
+	wo := watchedObject{Obj: &unstructured.Unstructured{Object: obj}}
 
 	assert.Equal(t, "", wo.getTrack())
 

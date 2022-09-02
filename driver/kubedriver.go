@@ -37,7 +37,6 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/dynamic"
 )
 
 const (
@@ -54,10 +53,8 @@ const (
 type KubeDriver struct {
 	// EnvSettings provides generic Kubernetes and Helm options
 	*cli.EnvSettings
-	// Clientset enables interaction with a Kubernetes cluster using structured types
+	// Clientset enables interaction with a Kubernetes cluster
 	Clientset kubernetes.Interface
-	// DynamicClient enables interaction with a Kubernetes cluster using unstructured types
-	DynamicClient dynamic.Interface
 	// Configuration enables Helm-based interaction with a Kubernetes cluster
 	*action.Configuration
 	// Group is the experiment group
@@ -73,7 +70,6 @@ func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
 		Group:         DefaultExperimentGroup,
 		Configuration: nil,
 		Clientset:     nil,
-		DynamicClient: nil,
 	}
 	return kd
 }
@@ -92,12 +88,6 @@ func (kd *KubeDriver) InitKube() error {
 		kd.Clientset, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes clientset")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			return e
-		}
-		kd.DynamicClient, err = dynamic.NewForConfig(restConfig)
-		if err != nil {
-			e := errors.New("unable to get Kubernetes dynamic client")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}

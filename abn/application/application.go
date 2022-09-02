@@ -3,17 +3,13 @@ package application
 // application.go - type of application
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/client-go/kubernetes"
-)
-
-const (
-	// KEY is the name of the field in a kubernetes secret
-	KEY = "application.yaml"
 )
 
 // Application is an application observed in a kubernetes cluster
@@ -26,67 +22,28 @@ type Application struct {
 	Versions
 }
 
-// Versions is type of version name to versions map
+// Versions is a map of the version name to a version object
 type Versions map[string]*Version
 
 // Tracks is map of track identifiers to version names
 type Tracks map[string]string
 
-// ApplicationReaderWriter is type used to read/write fromt/to persistent storage
+// ApplicationReaderWriter is used to read/write from/to a Kubernetes secret
 type ApplicationReaderWriter struct {
 	// Client is the Kubernetes client to use to read/write secrets
 	Client kubernetes.Interface
 }
 
-// NewApplication returns a new (empty) Application for a namespace/name label
-func NewApplication(application string) *Application {
-	return &Application{
-		Name:     application,
-		Versions: Versions{},
-		Tracks:   Tracks{},
-	}
-}
-
-// GetNameFromKey returns the name from a key of the form "namespace/name"
-func GetNameFromKey(applicationKey string) string {
-	_, n := splitApplicationKey(applicationKey)
-	return n
-}
-
-func GetSecretNameFromKey(applicationKey string) string {
-	return GetNameFromKey(applicationKey) + SECRET_POSTFIX
-}
-
-// GetNamespaceFromKey returns the namespace from a key of the form "namespace/name"
-func GetNamespaceFromKey(applicationKey string) string {
-	ns, _ := splitApplicationKey(applicationKey)
-	return ns
-}
-
-// splitApplicationKey is a utility function that returns the name and namespace from a key of the form "namespace/name"
-func splitApplicationKey(applicationKey string) (string, string) {
-	var name, namespace string
-	names := strings.Split(applicationKey, "/")
-	if len(names) > 1 {
-		namespace, name = names[0], names[1]
-	} else {
-		namespace, name = "default", names[0]
-	}
-
-	return namespace, name
-}
-
-// GetVersion returns the Version identified by version
-// when allowNew is true, a new (blank) Version will  be created if none can be found
-// returns the version and a boolean indicating whether or not a new version was created or not
+// GetVersion returns the Version object corresponding to a given version name
+// If no corresponding version object exists, a new one will be created when allowNew is set to true
+// returns the version object and a boolean indicating whether or not a new version was created or not
 func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool) {
 	v, ok := a.Versions[version]
 	if !ok {
 		if allowNew {
 			log.Logger.Debugf("GetVersion no data found; returning %+v", v)
 			v = &Version{
-				Metrics:             map[string]*SummaryMetric{},
-				LastUpdateTimestamp: time.Now(),
+				Metrics: map[string]*SummaryMetric{},
 			}
 			a.Versions[version] = v
 			return v, true
@@ -96,6 +53,55 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 
 	log.Logger.Debugf("GetVersion returning %+v", v)
 	return v, false
+}
+
+// UnmarchalJSON unmarshals an application from a byte array. This is a
+// custom JSON unmarshaller to ensurer that maps are initialized
+func (a *Application) UnmarshalJSON(data []byte) error {
+	// use type alias to avoid infinite loop
+	type Alias Application
+	aux := &struct{ *Alias }{Alias: (*Alias)(a)}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// initialize a.Versions if not already
+	if a.Versions == nil {
+		a.Versions = Versions{}
+	}
+	for _, v := range a.Versions {
+		if v.Metrics == nil {
+			v.Metrics = map[string]*SummaryMetric{}
+		}
+	}
+
+	return nil
+}
+
+func (a *Application) MarshalJSON() ([]byte, error) {
+	// use type Alias to avoid inifinite loop
+	type Alias Application
+	rawData, err := json.Marshal(&struct{ *Alias }{Alias: (*Alias)(a)})
+	if err != nil {
+		return rawData, err
+	}
+
+	// remove untracked versions if the rawData is too large
+	if len(rawData) > maxApplicationDataBytes {
+		deleteUntrackedVersions(a)
+		rawData, err = json.Marshal(&struct{ *Alias }{Alias: (*Alias)(a)})
+		if err != nil {
+			return rawData, err
+		}
+	}
+
+	// if it is still too large, return an error
+	if len(rawData) > maxApplicationDataBytes {
+		return rawData, errors.New("application data too large")
+	}
+
+	return rawData, nil
 }
 
 // String returns a string representation of the Application
