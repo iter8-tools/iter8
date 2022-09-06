@@ -20,14 +20,15 @@ type resourceConfig struct {
 	Resources []schema.GroupVersionResource `yaml:"resources,omitempty"`
 }
 
+// chart points to a particular Helm chart
 type chart struct {
-	// Repo is the repo of the helm chart
+	// Repo is the repo of the Helm chart
 	Repo string `yaml:"repo"`
 
-	// Name is the name of the helm chart
+	// Name is the name of the Helm chart
 	Name string `yaml:"name"`
 
-	// ValuesFileURL is the URL to the values file of the helm chart
+	// ValuesFileURL is the URL to the values file of the Helm chart
 	ValuesFileURL string `yaml:"valuesFileURL"`
 }
 
@@ -39,7 +40,7 @@ type chartGroup struct {
 
 type chartGroupConfig []chartGroup
 
-// readConfig reads yaml config file fn and converts to a Config object
+// readConfig reads yaml config file and converts to a resourceConfig object
 func readConfig(fn string) (config resourceConfig) {
 	// empty configuration
 	config = resourceConfig{}
@@ -68,7 +69,7 @@ func readConfig(fn string) (config resourceConfig) {
 	return config
 }
 
-// readChartGroupConfig reads yaml config file fn and converts to a Config object
+// readChartGroupConfig reads yaml chart group config file and converts to a chartGroupConfig object
 func readChartGroupConfig(fn string) (config chartGroupConfig) {
 	// empty configuration
 	config = chartGroupConfig{}

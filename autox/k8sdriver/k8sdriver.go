@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	Driver = NewKubeDriver(cli.New())
+	Driver = newKubeDriver(cli.New())
 )
 
 // KubeDriver embeds Kube configuration, and
@@ -23,14 +23,16 @@ var (
 type KubeDriver struct {
 	// EnvSettings provides generic Kubernetes options
 	*cli.EnvSettings
+
 	// Clientset enables interaction with a Kubernetes cluster using structured types
 	Clientset kubernetes.Interface
+
 	// dynamicClient enables unstructured interaction with a Kubernetes cluster
 	DynamicClient dynamic.Interface
 }
 
-// NewKubeDriver creates and returns a new KubeDriver
-func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
+// newKubeDriver creates and returns a new KubeDriver
+func newKubeDriver(s *cli.EnvSettings) *KubeDriver {
 	kd := &KubeDriver{
 		EnvSettings:   s,
 		Clientset:     nil,
@@ -39,7 +41,7 @@ func NewKubeDriver(s *cli.EnvSettings) *KubeDriver {
 	return kd
 }
 
-// initKube initializes the Kubernetes clientset
+// Init initializes the Kubernetes clientset
 func (kd *KubeDriver) Init() (err error) {
 	if kd.DynamicClient == nil {
 		// get REST config

@@ -11,12 +11,12 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type Iter8Watcher struct {
+type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func NewIter8Watcher(kd *k8sdriver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string, groupConfig chartGroupConfig) *Iter8Watcher {
-	w := &Iter8Watcher{
+func newIter8Watcher(kd *k8sdriver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string, groupConfig chartGroupConfig) *iter8Watcher {
+	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 	// for each namespace, resource type configure Informer
@@ -52,7 +52,7 @@ func NewIter8Watcher(kd *k8sdriver.KubeDriver, resourceTypes []schema.GroupVersi
 	return w
 }
 
-func (watcher *Iter8Watcher) Start(stopChannel chan struct{}) {
+func (watcher *iter8Watcher) start(stopChannel chan struct{}) {
 	for _, f := range watcher.factories {
 		f.Start(stopChannel)
 	}

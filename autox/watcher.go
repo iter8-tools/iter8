@@ -45,8 +45,8 @@ func Start(kd *k8sdriver.KubeDriver) {
 
 	fmt.Println("groupConfig:", groupConfig)
 
-	w := NewIter8Watcher(kd, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
-	go w.Start(stopCh)
+	w := newIter8Watcher(kd, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
+	go w.start(stopCh)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)

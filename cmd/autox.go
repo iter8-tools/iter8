@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/iter8-tools/iter8/autox"
 	"github.com/iter8-tools/iter8/autox/k8sdriver"
 
+	"github.com/iter8-tools/iter8/autox"
 	"github.com/spf13/cobra"
 )
 
