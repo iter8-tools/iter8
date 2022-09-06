@@ -24,6 +24,16 @@ func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 		if mm.Type == base.CounterMetricType || mm.Type == base.GaugeMetricType {
 			keys = append(keys, k)
 		}
+		if mm.Type == base.SummaryMetricType {
+			for _, agg := range []base.AggregationType{
+				base.CountAggregator,
+				base.MeanAggregator,
+				base.StdDevAggregator,
+				base.MinAggregator,
+				base.MaxAggregator} {
+				keys = append(keys, k+"/"+string(agg))
+			}
+		}
 	}
 	// also add metrics referenced in SLOs
 	// only scalar metrics can feature in SLOs (for now)

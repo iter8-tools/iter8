@@ -89,10 +89,10 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 			fmt.Fprintf(w, "\t version %v", i)
 		}
 	} else {
-		fmt.Fprintf(w, "\tSatisfied")
+		fmt.Fprintf(w, "\t Satisfied")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--------------\t---------")
+	fmt.Fprintln(w, "--------------\t ---------")
 
 	if in.SLOs != nil {
 		for i := 0; i < len(in.SLOs.Upper); i++ {
@@ -100,9 +100,9 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
-					fmt.Fprintf(w, "\t%v", in.SLOsSatisfied.Upper[i][j])
-					fmt.Fprintln(w)
+					fmt.Fprintf(w, "\t %v", in.SLOsSatisfied.Upper[i][j])
 				}
+				fmt.Fprintln(w)
 			} else {
 				log.Logger.Error("unable to extract SLO text")
 			}
@@ -112,9 +112,9 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
-					fmt.Fprintf(w, "\t%v", in.SLOsSatisfied.Lower[i][j])
-					fmt.Fprintln(w)
+					fmt.Fprintf(w, "\t %v", in.SLOsSatisfied.Lower[i][j])
 				}
+				fmt.Fprintln(w)
 			} else {
 				log.Logger.Error("unable to extract SLO text")
 			}
@@ -138,13 +138,13 @@ func (r *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	fmt.Fprint(w, "Metric")
 	if in.NumVersions > 1 {
 		for i := 0; i < in.NumVersions; i++ {
-			fmt.Fprintf(w, "\tversion %v", i)
+			fmt.Fprintf(w, "\t version %v", i)
 		}
 	} else {
-		fmt.Fprintf(w, "\tvalue")
+		fmt.Fprintf(w, "\t value")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "-------\t-----")
+	fmt.Fprintln(w, "-------\t -----")
 
 	// keys contain normalized scalar metric names in sorted order
 	keys := r.SortedScalarAndSLOMetrics()
@@ -156,7 +156,7 @@ func (r *TextReporter) printMetricsText(w *tabwriter.Writer) {
 			fmt.Fprint(w, mwu)
 			// add value
 			for j := 0; j < in.NumVersions; j++ {
-				fmt.Fprintf(w, "\t%v", r.ScalarMetricValueStr(j, mn))
+				fmt.Fprintf(w, "\t %v", r.ScalarMetricValueStr(j, mn))
 			}
 			fmt.Fprintln(w)
 		} else {

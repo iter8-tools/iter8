@@ -25,6 +25,8 @@ const (
 	HistogramMetricType MetricType = "Histogram"
 	// SampleMetricType corresponds to a Sample metric type
 	SampleMetricType MetricType = "Sample"
+	// SummaryMetricType corresponds to a Summary metric type
+	SummaryMetricType MetricType = "Summary"
 
 	// decimalRegex is the regex used to identify percentiles
 	decimalRegex = `^([\d]+(\.[\d]*)?|\.[\d]+)$`
