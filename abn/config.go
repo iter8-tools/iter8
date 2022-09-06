@@ -1,6 +1,6 @@
 package abn
 
-// config.go - reading of configurtion (list of resources/namespaces to watch)
+// config.go - reading of configuration (list of resources/namespaces to watch)
 
 import (
 	"io/ioutil"
@@ -11,12 +11,12 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// config is A/B(/n) serivce configuration. The configuration identifies the resources to watch and in which namespaces.
+// config is A/B(/n) service configuration. The configuration identifies the resources to watch and in which namespaces.
 type config struct {
 	// Namespaces is list of namespaces to watch
-	Namespaces []string `yaml:"namespaces,omitemtpy"`
+	Namespaces []string `yaml:"namespaces,omitempty"`
 	// Resources is list of resoure types that should be watched in the namespaces
-	Resources []schema.GroupVersionResource `yaml:"resources,omitemtpy"`
+	Resources []schema.GroupVersionResource `yaml:"resources,omitempty"`
 }
 
 // readConfig reads yaml config file fn and converts to a Config object
