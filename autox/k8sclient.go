@@ -52,6 +52,7 @@ func (kd *kubeClient) init() (err error) {
 			return e
 		}
 		// get clientset
+		// clientSet will be replaced with a Helm client
 		kd.clientset, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes clientset")
