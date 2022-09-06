@@ -15,7 +15,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func yamlToSecret(folder, file, name string, kClient *k8sclient.KubeClient) error {
+func yamlToSecret(folder, file, name string) error {
 	byteArray, err := readYamlFromFile(folder, file)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func yamlToSecret(folder, file, name string, kClient *k8sclient.KubeClient) erro
 	secretName := secretNameFromKey(name)
 	secretNamespace := namespaceFromKey(name)
 
-	_, err = kClient.Typed().CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
+	_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: secretNamespace,

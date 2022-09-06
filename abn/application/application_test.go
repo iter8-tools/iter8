@@ -6,7 +6,6 @@ import (
 
 	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/stretchr/testify/assert"
-	"helm.sh/helm/v3/pkg/cli"
 )
 
 func TestApplicationNotInClusterRead(t *testing.T) {
@@ -315,11 +314,10 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 }
 
 func setup(t *testing.T) {
-	kClient := k8sclient.NewFakeKubeClient(cli.New())
+	k8sclient.Client = *k8sclient.NewFakeKubeClient()
 	Applications.Clear()
-	Applications.SetReaderWriter(kClient)
 	maxApplicationDataBytes = 750000
-	yamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application", kClient)
+	yamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application")
 }
 
 func writeVerify(t *testing.T, a *Application) *Application {

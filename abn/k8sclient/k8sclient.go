@@ -5,44 +5,35 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 
-	"helm.sh/helm/v3/pkg/cli"
-
 	// Import to initialize client auth plugins.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
-var (
-	Client = NewKubeClient(cli.New())
-)
+var Client = KubeClient{}
 
 // KubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
 type KubeClient struct {
-	// EnvSettings provides generic Kubernetes options
-	*cli.EnvSettings
 	// typedClient enables interaction with a Kubernetes cluster using structured types
 	typedClient kubernetes.Interface
 	// dynamicClient enables unstructured interaction with a Kubernetes cluster
 	dynamicClient dynamic.Interface
 }
 
-// NewKubeClient creates and returns a new KubeClient
-func NewKubeClient(s *cli.EnvSettings) *KubeClient {
-	return &KubeClient{
-		EnvSettings:   s,
-		typedClient:   nil,
-		dynamicClient: nil,
-	}
-}
-
 // initKube initializes the Kubernetes clientset
 func (kd *KubeClient) Initialize() (err error) {
 	if kd.dynamicClient == nil {
-		// get REST config
-		restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
+
+		// get rest config
+		// see https://pkg.go.dev/k8s.io/client-go/tools/clientcmd
+		loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+		configOverrides := &clientcmd.ConfigOverrides{}
+		kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
+		restConfig, err := kubeConfig.ClientConfig()
 		if err != nil {
 			e := errors.New("unable to get Kubernetes REST config")
 			log.Logger.WithStackTrace(err.Error()).Error(e)

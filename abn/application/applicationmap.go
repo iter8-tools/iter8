@@ -9,7 +9,6 @@ import (
 
 	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/iter8-tools/iter8/base/log"
-	"helm.sh/helm/v3/pkg/cli"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
@@ -46,9 +45,7 @@ func init() {
 		apps:           map[string]*Application{},
 		mutexes:        map[string]*sync.RWMutex{},
 		lastWriteTimes: map[string]*time.Time{},
-		rw:             k8sclient.NewKubeClient(cli.New()),
 	}
-	Applications.rw.Initialize()
 	BatchWriteInterval = defaultBatchWriteInterval
 	maxApplicationDataBytes = defaultMaxApplicationDataBytes // a secret's maximum size is 1MB
 }
@@ -61,7 +58,6 @@ type ThreadSafeApplicationMap struct {
 	// mutexes mediate read/write of individual applications within the map
 	mutexes        map[string]*sync.RWMutex
 	lastWriteTimes map[string]*time.Time
-	rw             *k8sclient.KubeClient
 }
 
 // RLock lock application for reading
@@ -92,11 +88,6 @@ func (m *ThreadSafeApplicationMap) Add(a *Application) {
 	m.mutex.Unlock()
 }
 
-// SetReaderWriter sets the ReaderWriter (for reading/writing secrets to a cluster)
-func (m *ThreadSafeApplicationMap) SetReaderWriter(rw *k8sclient.KubeClient) {
-	m.rw = rw
-}
-
 // Get gets an application from map of applications
 // If the application is not present and a reader is provided, an attempt will be made to
 // read it from persistant storage
@@ -108,8 +99,7 @@ func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*
 		return a, nil
 	}
 
-	// !ok
-	if m.rw == nil || inMemoryOnly {
+	if inMemoryOnly {
 		return nil, errors.New("application record not found in memory")
 	}
 
@@ -132,7 +122,7 @@ func (m *ThreadSafeApplicationMap) readFromSecret(application string) (*Applicat
 	}
 
 	// read secret from cluster; extract appData
-	secret, err := m.rw.Typed().CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	secret, err := k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		log.Logger.Debug("no secret backing " + application)
 		return newApplication, err
@@ -178,7 +168,7 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 
 	// determine if need to
 	exists := true
-	secret, err = m.rw.Typed().CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	secret, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		exists = false
 		secret = &corev1.Secret{
@@ -200,13 +190,13 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 	// create or update the secret
 	if exists {
 		// TBD do we need to merge what we have?
-		_, err = m.rw.Typed().CoreV1().Secrets(secretNamespace).Update(
+		_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Update(
 			context.Background(),
 			secret,
 			metav1.UpdateOptions{},
 		)
 	} else {
-		_, err = m.rw.Typed().CoreV1().Secrets(secretNamespace).Create(
+		_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Create(
 			context.Background(),
 			secret,
 			metav1.CreateOptions{},

@@ -14,13 +14,13 @@ type Iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func NewIter8Watcher(kClient *k8sclient.KubeClient, resourceTypes []schema.GroupVersionResource, namespaces []string) *Iter8Watcher {
+func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string) *Iter8Watcher {
 	w := &Iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 	// for each namespace, resource type configure Informer
 	for _, ns := range namespaces {
-		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(kClient.Dynamic(), 0, ns, nil)
+		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sclient.Client.Dynamic(), 0, ns, nil)
 		for _, gvr := range resourceTypes {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{

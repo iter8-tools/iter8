@@ -35,11 +35,8 @@ var (
 )
 
 // Start is entry point to configure services and start them
-func Start(kClient *k8sclient.KubeClient) {
-	// Initialize kubernetes client
-	if err := kClient.Initialize(); err != nil {
-		log.Logger.Fatal("unable to initialize kubernetes client")
-	}
+func Start() {
+	k8sclient.Client.Initialize()
 
 	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
@@ -51,7 +48,7 @@ func Start(kClient *k8sclient.KubeClient) {
 
 	// set up resource watching as defined by config
 	c := readConfig(abnConfigFile)
-	w := watcher.NewIter8Watcher(kClient, c.Resources, c.Namespaces)
+	w := watcher.NewIter8Watcher(c.Resources, c.Namespaces)
 	go w.Start(stopCh)
 
 	go abnapp.Applications.PeriodicApplicationsFlush()
