@@ -1,5 +1,5 @@
 spec:
   # task 1: collect custom metrics
-  - tsk: abnmetrics
-    without:
-      application: backend
+  - task: abnmetrics
+    with:
+      application: 1
