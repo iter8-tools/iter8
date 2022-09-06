@@ -11,8 +11,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// ResourceConfig is the configuration that identifies the resources to watch and in which namespaces.
-type ResourceConfig struct {
+// resourceConfig is the configuration that identifies the resources to watch and in which namespaces.
+type resourceConfig struct {
 	// Namespaces is list of namespaces to watch
 	Namespaces []string `yaml:"namespaces,omitempty"`
 
@@ -20,7 +20,7 @@ type ResourceConfig struct {
 	Resources []schema.GroupVersionResource `yaml:"resources,omitempty"`
 }
 
-type ChartConfig struct {
+type chart struct {
 	// Repo is the repo of the helm chart
 	Repo string `yaml:"repo"`
 
@@ -31,16 +31,18 @@ type ChartConfig struct {
 	ValuesFileURL string `yaml:"valuesFileURL"`
 }
 
-type GroupConfig struct {
+type chartGroup struct {
+	Name string `yaml:"name"`
+
+	Charts []chart `yaml:"charts"`
 }
 
-// ReadConfig reads yaml config file fn and converts to a Config object
-func ReadConfig(fn string) (config ResourceConfig) {
+type chartGroupConfig []chartGroup
+
+// readConfig reads yaml config file fn and converts to a Config object
+func readConfig(fn string) (config resourceConfig) {
 	// empty configuration
-	config = ResourceConfig{
-		Namespaces: []string{},
-		Resources:  []schema.GroupVersionResource{},
-	}
+	config = resourceConfig{}
 
 	yfile, err := ioutil.ReadFile(fn)
 	if err != nil {
@@ -66,10 +68,10 @@ func ReadConfig(fn string) (config ResourceConfig) {
 	return config
 }
 
-// ReadGroupConfig reads yaml config file fn and converts to a Config object
-func ReadGroupConfig(fn string) (config GroupConfig) {
+// readChartGroupConfig reads yaml config file fn and converts to a Config object
+func readChartGroupConfig(fn string) (config chartGroupConfig) {
 	// empty configuration
-	config = GroupConfig{}
+	config = chartGroupConfig{}
 
 	yfile, err := ioutil.ReadFile(fn)
 	if err != nil {

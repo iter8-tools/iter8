@@ -15,7 +15,7 @@ type Iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func NewIter8Watcher(kd *k8sdriver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string, groupConfig GroupConfig) *Iter8Watcher {
+func NewIter8Watcher(kd *k8sdriver.KubeDriver, resourceTypes []schema.GroupVersionResource, namespaces []string, groupConfig chartGroupConfig) *Iter8Watcher {
 	w := &Iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}

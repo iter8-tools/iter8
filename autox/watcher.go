@@ -1,6 +1,7 @@
 package autox
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -39,8 +40,11 @@ func Start(kd *k8sdriver.KubeDriver) {
 	stopCh := make(chan struct{})
 
 	// set up resource watching as defined by config
-	resourceConfig := ReadConfig(resourceConfigFile)
-	groupConfig := ReadGroupConfig(groupConfigFile)
+	resourceConfig := readConfig(resourceConfigFile)
+	groupConfig := readChartGroupConfig(groupConfigFile)
+
+	fmt.Println("groupConfig:", groupConfig)
+
 	w := NewIter8Watcher(kd, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
 	go w.Start(stopCh)
 
