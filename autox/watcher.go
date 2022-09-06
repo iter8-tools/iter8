@@ -20,7 +20,7 @@ const (
 // Start is entry point to configure services and start them
 func Start() {
 	// initialize kubernetes driver
-	if err := driver.Init(); err != nil {
+	if err := k8sclient.init(); err != nil {
 		log.Logger.Fatal("unable to initialize kubedriver")
 	}
 

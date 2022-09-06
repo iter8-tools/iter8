@@ -15,35 +15,35 @@ import (
 )
 
 var (
-	driver = newKubeDriver(cli.New())
+	k8sclient = newKubeDriver(cli.New())
 )
 
-// KubeDriver embeds Kube configuration, and
+// kubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
-type KubeDriver struct {
+type kubeClient struct {
 	// EnvSettings provides generic Kubernetes options
 	*cli.EnvSettings
 
-	// Clientset enables interaction with a Kubernetes cluster using structured types
-	Clientset kubernetes.Interface
+	// clientset enables interaction with a Kubernetes cluster using structured types
+	clientset kubernetes.Interface
 
 	// dynamicClient enables unstructured interaction with a Kubernetes cluster
-	DynamicClient dynamic.Interface
+	dynamicClient dynamic.Interface
 }
 
 // newKubeDriver creates and returns a new KubeDriver
-func newKubeDriver(s *cli.EnvSettings) *KubeDriver {
-	kd := &KubeDriver{
+func newKubeDriver(s *cli.EnvSettings) *kubeClient {
+	kd := &kubeClient{
 		EnvSettings:   s,
-		Clientset:     nil,
-		DynamicClient: nil,
+		clientset:     nil,
+		dynamicClient: nil,
 	}
 	return kd
 }
 
-// Init initializes the Kubernetes clientset
-func (kd *KubeDriver) Init() (err error) {
-	if kd.DynamicClient == nil {
+// init initializes the Kubernetes clientset
+func (kd *kubeClient) init() (err error) {
+	if kd.dynamicClient == nil {
 		// get REST config
 		restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
 		if err != nil {
@@ -52,14 +52,14 @@ func (kd *KubeDriver) Init() (err error) {
 			return e
 		}
 		// get clientset
-		kd.Clientset, err = kubernetes.NewForConfig(restConfig)
+		kd.clientset, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes clientset")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
 		// get dynamic client
-		kd.DynamicClient, err = dynamic.NewForConfig(restConfig)
+		kd.dynamicClient, err = dynamic.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes dynamic client")
 			log.Logger.WithStackTrace(err.Error()).Error(e)

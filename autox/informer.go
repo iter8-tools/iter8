@@ -20,7 +20,7 @@ func newIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []s
 	}
 	// for each namespace, resource type configure Informer
 	for _, ns := range namespaces {
-		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(driver.DynamicClient, 0, ns, nil)
+		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sclient.dynamicClient, 0, ns, nil)
 		for _, gvr := range resourceTypes {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
