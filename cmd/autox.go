@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"github.com/iter8-tools/iter8/autox/k8sdriver"
-
 	"github.com/iter8-tools/iter8/autox"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +12,7 @@ Run the Iter8 autoX controller.
 `
 
 // newAutoXCmd creates the autox command
-func newAutoXCmd(kd *k8sdriver.KubeDriver) *cobra.Command {
+func newAutoXCmd() *cobra.Command {
 	// actor := ia.NewAutoXOpts(kd)
 
 	cmd := &cobra.Command{
@@ -22,7 +20,7 @@ func newAutoXCmd(kd *k8sdriver.KubeDriver) *cobra.Command {
 		Short: "Start the Iter8 autoX controller",
 		Long:  autoxDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			autox.Start(kd)
+			autox.Start()
 
 			return nil
 		},
@@ -34,5 +32,5 @@ func newAutoXCmd(kd *k8sdriver.KubeDriver) *cobra.Command {
 
 // initialize with assert
 func init() {
-	rootCmd.AddCommand(newAutoXCmd(k8sdriver.Driver))
+	rootCmd.AddCommand(newAutoXCmd())
 }

@@ -1,4 +1,4 @@
-package k8sdriver
+package autox
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	Driver = newKubeDriver(cli.New())
+	driver = newKubeDriver(cli.New())
 )
 
 // KubeDriver embeds Kube configuration, and

@@ -6,7 +6,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/iter8-tools/iter8/autox/k8sdriver"
 	"github.com/iter8-tools/iter8/base/log"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -19,9 +18,9 @@ const (
 )
 
 // Start is entry point to configure services and start them
-func Start(kd *k8sdriver.KubeDriver) {
+func Start() {
 	// initialize kubernetes driver
-	if err := kd.Init(); err != nil {
+	if err := driver.Init(); err != nil {
 		log.Logger.Fatal("unable to initialize kubedriver")
 	}
 
@@ -45,7 +44,7 @@ func Start(kd *k8sdriver.KubeDriver) {
 
 	fmt.Println("groupConfig:", groupConfig)
 
-	w := newIter8Watcher(kd, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
+	w := newIter8Watcher(driver, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
 	go w.start(stopCh)
 
 	sigCh := make(chan os.Signal, 1)

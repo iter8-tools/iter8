@@ -37,7 +37,6 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/dynamic"
 )
 
 const (
@@ -56,8 +55,6 @@ type KubeDriver struct {
 	*cli.EnvSettings
 	// Clientset enables interaction with a Kubernetes cluster
 	Clientset kubernetes.Interface
-	// DynamicClient enables interaction with a Kubernetes cluster using unstructured types
-	DynamicClient dynamic.Interface
 	// Configuration enables Helm-based interaction with a Kubernetes cluster
 	*action.Configuration
 	// Group is the experiment group
