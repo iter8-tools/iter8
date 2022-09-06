@@ -10,29 +10,42 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func TestReadExperiment(t *testing.T) {
-	os.Chdir(t.TempDir())
+type readScenario struct {
+	good  string
+	tasks int
+	bad   string
+}
 
-	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
+func TestReadExp(t *testing.T) {
+	testcases := map[string]readScenario{
+		"http":       {good: "experiment.yaml", tasks: 4, bad: ""},
+		"grpc":       {good: "experiment_grpc.yaml", tasks: 3, bad: ""},
+		"custom db ": {good: "experiment_db.yaml", tasks: 4, bad: ""},
+		"abn task":   {good: "experiment_abn.yaml", tasks: 1, bad: "experiment_abn_bad.yaml"},
+	}
+	for label, s := range testcases {
+		os.Chdir(t.TempDir())
+		t.Run(label, func(t *testing.T) {
+			testReadExp(t, s)
+		})
+	}
+}
+func testReadExp(t *testing.T, s readScenario) {
+	// valid experiment yaml
+	b, err := ioutil.ReadFile(CompletePath("../testdata", s.good))
 	assert.NoError(t, err)
 	e := &Experiment{}
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 4, len(e.Spec))
-
-	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
-	assert.NoError(t, err)
-	e = &Experiment{}
-	err = yaml.Unmarshal(b, e)
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(e.Spec))
-
-	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_db.yaml"))
-	assert.NoError(t, err)
-	e = &Experiment{}
-	err = yaml.Unmarshal(b, e)
-	assert.NoError(t, err)
-	assert.Equal(t, 4, len(e.Spec))
+	assert.Equal(t, s.tasks, len(e.Spec))
+	if s.bad != "" {
+		// invalid experiment yaml
+		b, err = ioutil.ReadFile(CompletePath("../testdata", s.bad))
+		assert.NoError(t, err)
+		e = &Experiment{}
+		err = yaml.Unmarshal(b, e)
+		assert.Error(t, err)
+	}
 }
 
 func TestRunningTasks(t *testing.T) {
