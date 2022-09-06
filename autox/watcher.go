@@ -44,7 +44,7 @@ func Start() {
 
 	fmt.Println("groupConfig:", groupConfig)
 
-	w := newIter8Watcher(driver, resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
+	w := newIter8Watcher(resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
 	go w.start(stopCh)
 
 	sigCh := make(chan os.Signal, 1)
