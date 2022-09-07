@@ -1,4 +1,4 @@
-package abn
+package core
 
 // lookup.go -(internal) implementation of gRPC Lookup method
 

@@ -1,4 +1,4 @@
-package abn
+package core
 
 // service.go - entry point for A/B(/n) service; starts controller watching resources
 //               and gRPC service to respond to lookup and write metric requests

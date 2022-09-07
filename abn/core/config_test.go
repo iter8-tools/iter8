@@ -1,4 +1,4 @@
-package abn
+package core
 
 import (
 	"path/filepath"
@@ -22,7 +22,7 @@ func TestReadConfig(t *testing.T) {
 		{"nofile", "config.nofile.yaml", 0, 0},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			c := readConfig(completePath("../testdata/abninputs", tt.file))
+			c := readConfig(completePath("../../testdata/abninputs", tt.file))
 			assert.Equal(t, tt.numNamespaces, len(c.Namespaces))
 			assert.Equal(t, tt.numResources, len(c.Resources))
 		})

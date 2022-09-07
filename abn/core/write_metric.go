@@ -1,4 +1,4 @@
-package abn
+package core
 
 import (
 	"errors"

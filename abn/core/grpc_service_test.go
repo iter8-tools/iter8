@@ -1,4 +1,4 @@
-package abn
+package core
 
 import (
 	"context"
@@ -139,7 +139,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	// populate watcher.Applications with test applications
 	abnapp.Applications.Clear()
 	// abnapp.Applications.SetReaderWriter(kClient)
-	a, err := yamlToApplication("default/application", "../testdata", "abninputs/readtest.yaml")
+	a, err := yamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
 	assert.NoError(t, err)
 	abnapp.Applications.Add(a)
 

@@ -1,4 +1,4 @@
-package abn
+package core
 
 // config.go - reading of configuration (list of resources/namespaces to watch)
 

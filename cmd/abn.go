@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/iter8-tools/iter8/abn"
+	abn "github.com/iter8-tools/iter8/abn/core"
 
 	"github.com/spf13/cobra"
 )
