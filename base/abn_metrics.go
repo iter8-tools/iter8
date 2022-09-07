@@ -4,6 +4,7 @@ import (
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	k8sclient "github.com/iter8-tools/iter8/abn/k8sclient"
 	log "github.com/iter8-tools/iter8/base/log"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 const (
@@ -23,6 +24,7 @@ type collectABNMetricsTask struct {
 
 // initializeDefaults sets default values for the task
 func (t *collectABNMetricsTask) initializeDefaults() {
+	k8sclient.Client = *k8sclient.NewKubeClient(cli.New())
 	k8sclient.Client.Initialize()
 }
 
