@@ -26,6 +26,9 @@ const (
 	// The size of an application is proportional to the number of versions and the number of metrics per version.
 	// Since only summary metrics are permitted, each is a fixed size
 	defaultMaxApplicationDataBytes int = 750000
+	// defaultFlushMultiplier is the default multiplier used to compute the
+	// interval for flushing applications that have not been written in a while
+	defaultFlushMultiplier int = 5
 )
 
 var (
@@ -34,6 +37,9 @@ var (
 	Applications ThreadSafeApplicationMap
 	// BatchWriteInterval is the interval over which changes may batched before being persisted
 	BatchWriteInterval time.Duration
+	// flushMultiplier is the interval at which applications are checked to see if they were not persisted because of
+	// write calls stopped or are too infrequent.
+	flushMultiplier int
 	// maxApplicationDataBytes is the maximum number of bytes allowed in an applicaton (as YAML converted to []byte)
 	// this limit prevents trying to persist an application that is too large (Kubernetes secrets have a 1 MB size limit)
 	maxApplicationDataBytes int
@@ -47,6 +53,7 @@ func init() {
 		lastWriteTimes: map[string]*time.Time{},
 	}
 	BatchWriteInterval = defaultBatchWriteInterval
+	flushMultiplier = defaultFlushMultiplier
 	maxApplicationDataBytes = defaultMaxApplicationDataBytes // a secret's maximum size is 1MB
 }
 
@@ -279,13 +286,26 @@ func splitApplicationKey(applicationKey string) (string, string) {
 	return namespace, name
 }
 
-func (m *ThreadSafeApplicationMap) PeriodicApplicationsFlush() {
-	for {
-		time.Sleep(5 * BatchWriteInterval)
-		m.flush()
-	}
+// PeriodicApplicationsFlush periodically checks if there is any (metric) data associated with
+// an application that has not been persisted to the underlying secret. If so, it is written.
+// This supports the edge case of an application that stops receiving requests to write metric data.
+// The period on which flush works is a multiple of the BatchWriteInterval; it is expected that
+// BatchWrite will handle the majority of the required persistence.
+func (m *ThreadSafeApplicationMap) PeriodicApplicationsFlush(done chan struct{}) {
+	ticker := time.NewTicker(time.Duration(flushMultiplier) * BatchWriteInterval)
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				m.flush()
+			}
+		}
+	}()
 }
 
+// flush writes all applications whose last write time is greater than the BatchWriteInterval
 func (m *ThreadSafeApplicationMap) flush() {
 	// get list of applications that need flushing
 	now := time.Now()

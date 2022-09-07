@@ -21,6 +21,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 
+	"helm.sh/helm/v3/pkg/cli"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
@@ -36,6 +37,7 @@ var (
 
 // Start is entry point to configure services and start them
 func Start() {
+	k8sclient.Client = *k8sclient.NewKubeClient(cli.New())
 	k8sclient.Client.Initialize()
 
 	// read abn config (resources and namespaces to watch)
@@ -51,7 +53,7 @@ func Start() {
 	w := watcher.NewIter8Watcher(c.Resources, c.Namespaces)
 	go w.Start(stopCh)
 
-	go abnapp.Applications.PeriodicApplicationsFlush()
+	abnapp.Applications.PeriodicApplicationsFlush(stopCh)
 
 	// launch gRPC server to respond to frontend requests
 	go launchGRPCServer([]grpc.ServerOption{})

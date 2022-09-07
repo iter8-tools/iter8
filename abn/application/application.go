@@ -9,17 +9,16 @@ import (
 	"strings"
 
 	"github.com/iter8-tools/iter8/base/log"
-	"k8s.io/client-go/kubernetes"
 )
 
 // Application is an application observed in a kubernetes cluster
 type Application struct {
 	// Name is of the form namespace/name where the name is the value of the label app.kubernetes.io/name
-	Name string
+	Name string `json:"name" yaml:"name"`
 	// Tracks is map from application track identifier to version name
-	Tracks
+	Tracks `json:"tracks" yaml:"tracks"`
 	// Versions is a map of versions name to version data
-	Versions
+	Versions `json:"versions" yaml:"versions"`
 }
 
 // Versions is a map of the version name to a version object
@@ -27,12 +26,6 @@ type Versions map[string]*Version
 
 // Tracks is map of track identifiers to version names
 type Tracks map[string]string
-
-// ApplicationReaderWriter is used to read/write from/to a Kubernetes secret
-type ApplicationReaderWriter struct {
-	// Client is the Kubernetes client to use to read/write secrets
-	Client kubernetes.Interface
-}
 
 // GetVersion returns the Version object corresponding to a given version name
 // If no corresponding version object exists, a new one will be created when allowNew is set to true

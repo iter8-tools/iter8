@@ -6,6 +6,8 @@ import (
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/stretchr/testify/assert"
+
+	"helm.sh/helm/v3/pkg/cli"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -160,7 +162,7 @@ func testDelete(t *testing.T, s scenario) {
 }
 
 func setup() {
-	k8sclient.Client = *k8sclient.NewFakeKubeClient()
+	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
 	abnapp.Applications.Clear()
 }
 

@@ -6,6 +6,8 @@ import (
 
 	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/stretchr/testify/assert"
+
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 func TestApplicationNotInClusterRead(t *testing.T) {
@@ -219,7 +221,6 @@ func TestFlush(t *testing.T) {
 		versions:  []string{"v1", "v2"},
 	})
 
-	time.Sleep(4 * BatchWriteInterval)
 	Applications.flush()
 
 	// now will have been written
@@ -231,6 +232,42 @@ func TestFlush(t *testing.T) {
 		tracks:    []string{"candidate", "foo"},
 		versions:  []string{"v1", "v2"},
 	})
+}
+
+func TestPeriodicFlush(t *testing.T) {
+	setup(t)
+	BatchWriteInterval = time.Duration(1 * time.Second)
+	flushMultiplier = 2
+
+	done := make(chan struct{})
+	Applications.PeriodicApplicationsFlush(done)
+
+	a, _ := Applications.Get("default/application", false)
+	assertApplication(t, a, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	// modify application in some way
+	a.Tracks["foo"] = "v1"
+
+	// don't write it now; wait for PeriodApplicationsFlush to trigger
+	time.Sleep(time.Duration(1+flushMultiplier) * BatchWriteInterval)
+
+	// should have been flushed
+	c, _ := Applications.readFromSecret("default/application")
+	// changed
+	assertApplication(t, c, applicationAssertion{
+		namespace: "default",
+		name:      "application",
+		tracks:    []string{"candidate", "foo"},
+		versions:  []string{"v1", "v2"},
+	})
+
+	// terminate go flusher
+	close(done)
 }
 
 func TestGetVersion(t *testing.T) {
@@ -314,7 +351,7 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 }
 
 func setup(t *testing.T) {
-	k8sclient.Client = *k8sclient.NewFakeKubeClient()
+	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
 	Applications.Clear()
 	maxApplicationDataBytes = 750000
 	yamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application")

@@ -1,6 +1,7 @@
 package k8sclient
 
 import (
+	"helm.sh/helm/v3/pkg/cli"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
@@ -8,8 +9,13 @@ import (
 	ktesting "k8s.io/client-go/testing"
 )
 
-func NewFakeKubeClient(objects ...runtime.Object) *KubeClient {
-	fakeClient := &KubeClient{}
+// NewFakeKubeClient returns a fake Kubernetes client that is able to manage secrets
+// Used by test cases in several packages to define (global) k8sclient.Client for testing
+func NewFakeKubeClient(s *cli.EnvSettings, objects ...runtime.Object) *KubeClient {
+	fakeClient := &KubeClient{
+		EnvSettings: s,
+		// default other fields
+	}
 
 	// secretDataReactor sets the secret.Data field based on the values from secret.StringData
 	// Credit: this function is adapted from https://github.com/creydr/go-k8s-utils

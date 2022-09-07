@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"helm.sh/helm/v3/pkg/cli"
 	"sigs.k8s.io/yaml"
 )
 
@@ -134,7 +135,7 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 }
 
 func setup(t *testing.T) (*pb.ABNClient, func()) {
-	k8sclient.Client = *k8sclient.NewFakeKubeClient()
+	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
 	// populate watcher.Applications with test applications
 	abnapp.Applications.Clear()
 	// abnapp.Applications.SetReaderWriter(kClient)
