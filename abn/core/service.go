@@ -53,6 +53,7 @@ func Start() {
 	w := watcher.NewIter8Watcher(c.Resources, c.Namespaces)
 	go w.Start(stopCh)
 
+	// this starts a go routine to periodically persist in memory application data
 	abnapp.Applications.PeriodicApplicationsFlush(stopCh)
 
 	// launch gRPC server to respond to frontend requests
