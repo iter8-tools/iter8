@@ -95,10 +95,9 @@ func (m *ThreadSafeApplicationMap) Add(a *Application) {
 	m.mutex.Unlock()
 }
 
-// Get gets an application from map of applications
-// If the application is not present and a reader is provided, an attempt will be made to
-// read it from persistant storage
-func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*Application, error) {
+// Get application object.
+func (m *ThreadSafeApplicationMap) Get(application string) (*Application, error) {
+	// if available in the in-memory map, return it
 	m.mutex.RLock()
 	a, ok := m.apps[application]
 	m.mutex.RUnlock()
@@ -106,12 +105,13 @@ func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*
 		return a, nil
 	}
 
-	if inMemoryOnly {
-		return nil, errors.New("application record not found in memory")
-	}
-
+	// otherwise, read from persistent store (secret)
+	// if no secret, create new object
 	a, err := m.readFromSecret(application)
+
+	// and add to the in memory map
 	m.Add(a)
+
 	return a, err
 }
 
@@ -320,7 +320,7 @@ func (m *ThreadSafeApplicationMap) flush() {
 
 	// flush them .. unless they have been written since we inspected them above
 	for _, application := range toFlush {
-		a, err := m.Get(application, true)
+		a, err := m.Get(application)
 		if err != nil {
 			continue
 		}

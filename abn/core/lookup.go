@@ -19,7 +19,7 @@ func lookupInternal(application string, user string) (*abnapp.Application, *stri
 	}
 
 	// check that we have a record of the application
-	a, err := abnapp.Applications.Get(application, true)
+	a, err := abnapp.Applications.Get(application)
 	if err != nil {
 		return nil, nil, fmt.Errorf("application not found: %s", err.Error())
 	}

@@ -49,7 +49,7 @@ func addObject(watched watchedObject) {
 	// check if we know about this application
 	// first check if in memory then read from persistent store if not found
 	// if it isn't in persistent store, the read will return an initalized Application
-	a, _ := abnapp.Applications.Get(name, false)
+	a, _ := abnapp.Applications.Get(name)
 
 	abnapp.Applications.Lock(name)
 	defer abnapp.Applications.Unlock(name)
@@ -107,7 +107,7 @@ func deleteObject(watched watchedObject) {
 		return // no app.kubernetes.io/name label
 	}
 
-	_, err := abnapp.Applications.Get(name, false)
+	_, err := abnapp.Applications.Get(name)
 	if err != nil {
 		return // has app.kubernetes.io/name but object wasn't recorded
 	}
@@ -117,7 +117,7 @@ func deleteObject(watched watchedObject) {
 		return // no app.kubernetes.io/version label
 	}
 
-	a, _ := abnapp.Applications.Get(name, true)
+	a, _ := abnapp.Applications.Get(name)
 	if a == nil {
 		return // no record; we don't look in secret if we got a delete event, we must have had an add/update event
 	}

@@ -54,7 +54,7 @@ func testAdd(t *testing.T, s scenario) {
 
 	abnapp.NumApplications(t, 1)
 
-	a, _ := abnapp.Applications.Get(applicationName(s.namespace, s.name), true)
+	a, _ := abnapp.Applications.Get(applicationName(s.namespace, s.name))
 	assert.NotNil(t, a)
 
 	tracks := []string{}
@@ -91,7 +91,7 @@ func testUpdate(t *testing.T, s scenario) {
 	updateObject(wo(s.iter8, s.namespace, s.name, s.version, s.track, s.ready))
 
 	abnapp.NumApplications(t, 1)
-	a, _ := abnapp.Applications.Get("ns/app", true)
+	a, _ := abnapp.Applications.Get("ns/app")
 	assert.NotNil(t, a)
 
 	if s.iter8 != "true" ||
@@ -139,7 +139,7 @@ func testDelete(t *testing.T, s scenario) {
 	deleteObject(wo(s.iter8, s.namespace, s.name, s.version, s.track, s.ready))
 
 	abnapp.NumApplications(t, 1)
-	a, _ := abnapp.Applications.Get("ns/app", true)
+	a, _ := abnapp.Applications.Get("ns/app")
 	assert.NotNil(t, a)
 
 	if s.iter8 != "true" ||

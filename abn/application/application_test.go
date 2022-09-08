@@ -28,14 +28,8 @@ func TestApplicationNotInClusterRead(t *testing.T) {
 
 func TestApplicationNotInClusterGet(t *testing.T) {
 	setup(t)
-	// must be in memory but it isn't
-	a, err := Applications.Get("namespace/name", true)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "application record not found")
-	assert.Nil(t, a)
-
-	// need not be in memory
-	a, err = Applications.Get("namespace/name", false)
+	// not in cluster so created
+	a, err := Applications.Get("namespace/name")
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "not found")
 
@@ -73,14 +67,8 @@ func TestApplicationInCluster(t *testing.T) {
 
 func TestApplicationInClusterGet(t *testing.T) {
 	setup(t)
-	// must be in memory but it isn't
-	a, err := Applications.Get("default/application", true)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "application record not found")
-	assert.Nil(t, a)
-
-	// need not be in memory
-	a, err = Applications.Get("default/application", false)
+	// in cluster, no error
+	a, err := Applications.Get("default/application")
 	assert.NoError(t, err)
 
 	assertApplication(t, a, applicationAssertion{
@@ -145,7 +133,7 @@ func TestBatchedWrite(t *testing.T) {
 	setup(t)
 	BatchWriteInterval = time.Duration(2 * time.Second)
 
-	a, _ := Applications.Get("default/application", false)
+	a, _ := Applications.Get("default/application")
 	assertApplication(t, a, applicationAssertion{
 		namespace: "default",
 		name:      "application",
@@ -186,7 +174,7 @@ func TestFlush(t *testing.T) {
 	setup(t)
 	BatchWriteInterval = time.Duration(2 * time.Second)
 
-	a, _ := Applications.Get("default/application", false)
+	a, _ := Applications.Get("default/application")
 	assertApplication(t, a, applicationAssertion{
 		namespace: "default",
 		name:      "application",
@@ -242,7 +230,7 @@ func TestPeriodicFlush(t *testing.T) {
 	done := make(chan struct{})
 	Applications.PeriodicApplicationsFlush(done)
 
-	a, _ := Applications.Get("default/application", false)
+	a, _ := Applications.Get("default/application")
 	assertApplication(t, a, applicationAssertion{
 		namespace: "default",
 		name:      "application",

@@ -92,7 +92,7 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	// get current count of metric
 	var oldCount uint32 = 0
 	var a *abnapp.Application
-	a, _ = abnapp.Applications.Get(scenario.application, false)
+	a, _ = abnapp.Applications.Get(scenario.application)
 	assert.NotNil(t, a)
 	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
@@ -123,7 +123,7 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	}
 
 	// verify that metric count has increased by 1
-	a, _ = abnapp.Applications.Get(scenario.application, false)
+	a, _ = abnapp.Applications.Get(scenario.application)
 	assert.NotNil(t, a)
 	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
