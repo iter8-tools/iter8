@@ -87,12 +87,19 @@ func (m *ThreadSafeApplicationMap) Unlock(application string) {
 	m.mutexes[application].Unlock()
 }
 
-// Add adds an application into the application map
-func (m *ThreadSafeApplicationMap) Add(a *Application) {
+// Add adds an application into the application map if it is not already there
+// Returns the application that is/was there
+func (m *ThreadSafeApplicationMap) Add(a *Application) *Application {
 	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	current, ok := m.apps[a.Name]
+	if ok {
+		return current
+	}
 	m.apps[a.Name] = a
 	m.mutexes[a.Name] = &sync.RWMutex{}
-	m.mutex.Unlock()
+	return a
 }
 
 // Get application object.
@@ -110,7 +117,7 @@ func (m *ThreadSafeApplicationMap) Get(application string) (*Application, error)
 	a, err := m.readFromSecret(application)
 
 	// and add to the in memory map
-	m.Add(a)
+	a = m.Add(a)
 
 	return a, err
 }
