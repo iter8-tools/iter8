@@ -40,8 +40,8 @@ type chartGroup struct {
 
 type chartGroupConfig []chartGroup
 
-// readConfig reads yaml config file and converts to a resourceConfig object
-func readConfig(fn string) (config resourceConfig) {
+// readResourceConfig reads yaml config file and converts to a resourceConfig object
+func readResourceConfig(fn string) (config resourceConfig) {
 	// empty configuration
 	config = resourceConfig{}
 

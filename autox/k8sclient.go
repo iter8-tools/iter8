@@ -14,6 +14,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// Client is a global variable. Before use, it must be assigned and initalized
+var Client kubeClient
+
 var (
 	k8sclient = newKubeDriver(cli.New())
 )

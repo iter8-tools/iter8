@@ -1,7 +1,6 @@
 package autox
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -31,7 +30,7 @@ func Start() {
 	}
 
 	// read group config (apps and helm charts to install)
-	groupConfigFile, ok := os.LookupEnv(CHART_GROUP_CONFIG_ENV)
+	chartGroupConfigFile, ok := os.LookupEnv(CHART_GROUP_CONFIG_ENV)
 	if !ok {
 		log.Logger.Fatal("group configuation file is required")
 	}
@@ -39,12 +38,12 @@ func Start() {
 	stopCh := make(chan struct{})
 
 	// set up resource watching as defined by config
-	resourceConfig := readConfig(resourceConfigFile)
-	groupConfig := readChartGroupConfig(groupConfigFile)
+	resourceConfig := readResourceConfig(resourceConfigFile)
+	chartGroupConfig := readChartGroupConfig(chartGroupConfigFile)
 
-	fmt.Println("groupConfig:", groupConfig)
+	log.Logger.Debug("chartGroupConfig:", chartGroupConfig)
 
-	w := newIter8Watcher(resourceConfig.Resources, resourceConfig.Namespaces, groupConfig)
+	w := newIter8Watcher(resourceConfig.Resources, resourceConfig.Namespaces, chartGroupConfig)
 	go w.start(stopCh)
 
 	sigCh := make(chan os.Signal, 1)

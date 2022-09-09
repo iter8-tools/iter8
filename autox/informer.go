@@ -3,8 +3,7 @@ package autox
 // informer.go - informer(s) to watch desired resources/namespaces
 
 import (
-	"fmt"
-
+	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
@@ -25,21 +24,21 @@ func newIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []s
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 				AddFunc: func(obj interface{}) {
-					fmt.Println("Add:", obj)
+					log.Logger.Debug("Add:", obj)
 					// Add(WatchedObject{
 					// 	Obj:    obj.(*unstructured.Unstructured),
 					// 	Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
 					// })
 				},
 				UpdateFunc: func(oldObj, obj interface{}) {
-					fmt.Println("Update:", obj)
+					log.Logger.Debug("Update:", obj)
 					// Update(WatchedObject{
 					// 	Obj:    obj.(*unstructured.Unstructured),
 					// 	Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
 					// })
 				},
 				DeleteFunc: func(obj interface{}) {
-					fmt.Println("Delete:", obj)
+					log.Logger.Debug("Delete:", obj)
 					// Delete(WatchedObject{
 					// 	Obj:    obj.(*unstructured.Unstructured),
 					// 	Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
