@@ -4,7 +4,7 @@ package watcher
 
 // Configured resource types are watched in a set of namespaces. Each version of an application
 // of interest should be include EXACTLY one watched resource with the following metadata:
-//  - annoatation 'iter8.tools/abn' set to true indicating the resource should be inspected further
+//  - label 'iter8.tools/abn' set to true indicating the resource should be inspected further
 //  - label 'app.kubernetes.io/name' identifying the name of the application to which the resource belongs
 //  - label 'app.kubernetes.io/version' identifying the name of the version  to which the resource belongs
 //

@@ -13,7 +13,7 @@ const (
 	VERSION_LABEL    = "app.kubernetes.io/version"
 	READY_ANNOTATION = "iter8.tools/ready"
 	TRACK_ANNOTATION = "iter8.tools/track"
-	ITER8_ANNOTATION = "iter8.tools/abn"
+	ITER8_LABEL      = "iter8.tools/abn"
 )
 
 // watchedObject is wrapper for object returned by informer
@@ -68,8 +68,8 @@ func (wo watchedObject) isReady() bool {
 }
 
 func (wo watchedObject) isIter8AbnRelated() bool {
-	annotations := wo.Obj.GetAnnotations()
-	iter8, ok := annotations[ITER8_ANNOTATION]
+	labels := wo.Obj.GetLabels()
+	iter8, ok := labels[ITER8_LABEL]
 	if !ok {
 		return false
 	}

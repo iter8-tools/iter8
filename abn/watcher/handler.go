@@ -1,17 +1,20 @@
 package watcher
 
 import (
-	"context"
-	"fmt"
-
 	abnapp "github.com/iter8-tools/iter8/abn/application"
-	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/iter8-tools/iter8/base/log"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/client-go/dynamic/dynamicinformer"
 )
 
+// precond is set of preconditions that must hold true before an object is considered.
+// It must have:
+//  - label 'iter8.tools/abn' set to true indicating the resource should be inspected further
+//  - label 'app.kubernetes.io/name' identifying the name of the application to which the resource belongs
+//  - label 'app.kubernetes.io/version' identifying the name of the version  to which the resource belongs
 func precond(w watchedObject) bool {
 	var ok bool
 
@@ -29,12 +32,13 @@ func precond(w watchedObject) bool {
 	return ok
 }
 
-func handle(w watchedObject, resourceTypes []schema.GroupVersionResource) {
+// handle constructs the application object from the objects currently in the cluster
+func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) {
 	application, _ := w.getNamespacedName()
 	namespace := w.getNamespace()
 	name, _ := w.getName()
 
-	applicationObjs := getApplicationObjects(namespace, name, resourceTypes)
+	applicationObjs := getApplicationObjects(namespace, name, resourceTypes, informerFactories)
 	// there is at least one object (w)
 
 	a, _ := abnapp.Applications.Get(application) // , false)
@@ -67,31 +71,39 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource) {
 	abnapp.Applications.Write(a)
 }
 
-func getApplicationObjects(namespace, name string, gvrs []schema.GroupVersionResource) []watchedObject {
-	ls := fmt.Sprintf("%s=%s", NAME_LABEL, name)
-	watchedObjects := []watchedObject{}
-	for _, gvr := range gvrs {
-		objs, err := k8sclient.Client.Dynamic().
-			Resource(gvr).Namespace(namespace).
-			List(context.Background(), metav1.ListOptions{LabelSelector: ls})
+// getApplicationObjects gets all the objects related to the application based on label app.kubernetes.io/name
+func getApplicationObjects(namespace, name string, gvrs []schema.GroupVersionResource, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) []watchedObject {
+	// define selector
+	selector := labels.NewSelector()
+	reqSpec := []struct {
+		key  string
+		op   selection.Operator
+		vals []string
+	}{
+		{key: ITER8_LABEL, op: selection.Equals, vals: []string{"true"}},
+		{key: NAME_LABEL, op: selection.Equals, vals: []string{name}},
+		{key: VERSION_LABEL, op: selection.Exists, vals: []string{}},
+	}
+	for _, rs := range reqSpec {
+		req, err := labels.NewRequirement(rs.key, rs.op, rs.vals)
 		if err != nil {
-			log.Logger.Error(err)
+			log.Logger.Warn(err)
 			return []watchedObject{}
 		}
-
-		wObjs := toWatchedObjectList(objs)
-		watchedObjects = append(watchedObjects, wObjs...)
+		selector = selector.Add(*req)
 	}
-	return watchedObjects
-}
 
-func toWatchedObjectList(l *unstructured.UnstructuredList) []watchedObject {
-	result := []watchedObject{}
-	for _, o := range l.Items {
-		w := watchedObject{Obj: &o}
-		if precond(w) {
-			result = append(result, watchedObject{Obj: &o})
+	watchedObjects := []watchedObject{}
+	for _, gvr := range gvrs {
+		lister := informerFactories[namespace].ForResource(gvr).Lister()
+		objs, err := lister.List(selector)
+		if err != nil {
+			log.Logger.Warn(err)
+			continue
+		}
+		for _, obj := range objs {
+			watchedObjects = append(watchedObjects, watchedObject{Obj: obj.(*unstructured.Unstructured)})
 		}
 	}
-	return result
+	return watchedObjects
 }

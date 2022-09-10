@@ -116,7 +116,6 @@ func TestInformer(t *testing.T) {
 
 func newUnstructuredDeployment(namespace, application, version, track string) *unstructured.Unstructured {
 	annotations := map[string]interface{}{
-		ITER8_ANNOTATION: "true",
 		READY_ANNOTATION: "true",
 	}
 	if track != "" {
@@ -133,6 +132,7 @@ func newUnstructuredDeployment(namespace, application, version, track string) *u
 				"labels": map[string]interface{}{
 					NAME_LABEL:    application,
 					VERSION_LABEL: version,
+					ITER8_LABEL:   "true",
 				},
 				"annotations": annotations,
 			},

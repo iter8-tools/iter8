@@ -14,6 +14,7 @@ type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
+// NewIter8Watcher returns a watcher for iter8 related objects
 func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string) *iter8Watcher {
 	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
@@ -22,7 +23,7 @@ func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []s
 	handlerFunc := func(obj interface{}) {
 		wo := watchedObject{Obj: obj.(*unstructured.Unstructured)}
 		if precond(wo) {
-			handle(wo, resourceTypes)
+			handle(wo, resourceTypes, w.factories)
 		}
 	}
 
@@ -43,6 +44,7 @@ func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []s
 	return w
 }
 
+// Start starts the watcher
 func (watcher *iter8Watcher) Start(stopChannel chan struct{}) {
 	for _, f := range watcher.factories {
 		f.Start(stopChannel)

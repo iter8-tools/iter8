@@ -182,7 +182,7 @@ func wo(iter8, namespace, name, version, track, ready string) watchedObject {
 		annotations[READY_ANNOTATION] = ready
 	}
 	if iter8 != "" {
-		annotations[ITER8_ANNOTATION] = iter8
+		labels[ITER8_LABEL] = iter8
 	}
 
 	o := corev1.Pod{
