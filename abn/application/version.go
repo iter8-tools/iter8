@@ -9,20 +9,8 @@ import (
 
 // Version is information about versions of an application in a Kubernetes cluster
 type Version struct {
-	// Track is track label assigned to this version
-	// indicated by value of annotation iter8.tools/track
-	Track *string `json:"track,omitempty" yaml:"metrics,omitempty"`
 	// List of (summary) metrics for a version
 	Metrics map[string]*SummaryMetric `json:"metrics" yaml:"metrics"`
-}
-
-// GetTrack returns a track identifier, if any. Otherwise, it returns nil.
-func (v *Version) GetTrack() *string {
-	return v.Track
-}
-
-func (v *Version) SetTrack(track *string) {
-	v.Track = track
 }
 
 // GetMetric returns a metric from the list of metrics associated with a version
@@ -47,13 +35,7 @@ func (v *Version) String() string {
 		metrics = append(metrics, fmt.Sprintf("%s(%d)", n, m.Count()))
 	}
 
-	track := "<no track>"
-	if v.GetTrack() != nil {
-		track = *v.GetTrack()
-	}
-
-	return fmt.Sprintf("\n\t%s\n\t%s",
-		track,
+	return fmt.Sprintf("\n%s",
 		"- metrics: ["+strings.Join(metrics, ",")+"]",
 	)
 }

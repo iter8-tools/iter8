@@ -108,7 +108,7 @@ func TestWrite(t *testing.T) {
 func TestWriteLimit(t *testing.T) {
 	setup(t)
 	BatchWriteInterval = time.Duration(0)
-	maxApplicationDataBytes = 150
+	maxApplicationDataBytes = 100
 
 	a, err := Applications.readFromSecret("default/application")
 	assert.NoError(t, err)
@@ -300,7 +300,6 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 	v := &Version{
 		Metrics: map[string]*SummaryMetric{},
 	}
-	assert.Nil(t, v.GetTrack())
 
 	// test GetMetic w/o allowNew
 	m, isNew = v.GetMetric("foo", false)

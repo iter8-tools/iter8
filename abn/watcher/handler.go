@@ -22,14 +22,17 @@ func precond(w watchedObject) bool {
 		return false
 	}
 
-	_, ok = w.getNamespacedName()
-	if !ok {
+	application, ok := w.getNamespacedName()
+	if !ok || application == "" {
 		return false
 	}
 
-	_, ok = w.getVersion()
+	version, ok := w.getVersion()
+	if !ok || version == "" {
+		return false
+	}
 
-	return ok
+	return true
 }
 
 // handle constructs the application object from the objects currently in the cluster
@@ -41,7 +44,7 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	applicationObjs := getApplicationObjects(namespace, name, resourceTypes, informerFactories)
 	// there is at least one object (w)
 
-	a, _ := abnapp.Applications.Get(application) // , false)
+	a, _ := abnapp.Applications.Get(application)
 
 	abnapp.Applications.Lock(application)
 	// clear a.Tracks, a.Versions[*].Track
@@ -49,20 +52,14 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	for track := range a.Tracks {
 		delete(a.Tracks, track)
 	}
-	for version := range a.Versions {
-		a.Versions[version].Track = nil
-	}
 
 	for _, o := range applicationObjs {
 		version, _ := o.getVersion()
-		v, _ := a.GetVersion(version, true)
+		a.GetVersion(version, true) // make sure version object created
 		if o.isReady() {
 			track := o.getTrack()
 			if track != "" {
-				v.Track = &track
-				if v.Track != nil {
-					a.Tracks[*v.Track] = version
-				}
+				a.Tracks[track] = version
 			}
 		}
 	}
@@ -102,7 +99,10 @@ func getApplicationObjects(namespace, name string, gvrs []schema.GroupVersionRes
 			continue
 		}
 		for _, obj := range objs {
-			watchedObjects = append(watchedObjects, watchedObject{Obj: obj.(*unstructured.Unstructured)})
+			wo := watchedObject{Obj: obj.(*unstructured.Unstructured)}
+			if precond(wo) {
+				watchedObjects = append(watchedObjects, wo)
+			}
 		}
 	}
 	return watchedObjects

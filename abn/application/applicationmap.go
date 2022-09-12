@@ -252,8 +252,15 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 
 func deleteUntrackedVersions(a *Application) {
 	toDelete := []string{}
-	for version, v := range a.Versions {
-		if v.GetTrack() == nil {
+	for version := range a.Versions {
+		track := ""
+		for _, ver := range a.Tracks {
+			if ver == version {
+				track = ver
+				break
+			}
+		}
+		if track == "" {
 			toDelete = append(toDelete, version)
 		}
 	}

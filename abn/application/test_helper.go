@@ -73,13 +73,6 @@ type versionAssertion struct {
 func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
 	assert.NotNil(t, v)
 
-	track := v.GetTrack()
-	if assertion.track == "" {
-		assert.Nil(t, track)
-	} else {
-		assert.Equal(t, assertion.track, *track)
-	}
-
 	assert.Len(t, v.Metrics, len(assertion.metrics))
 	assert.NotNil(t, v.Metrics)
 	for m := range v.Metrics {
