@@ -17,10 +17,6 @@ import (
 // Client is a global variable. Before use, it must be assigned and initalized
 var Client kubeClient
 
-var (
-	k8sclient = newKubeDriver(cli.New())
-)
-
 // kubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
 type kubeClient struct {
@@ -34,36 +30,34 @@ type kubeClient struct {
 	dynamicClient dynamic.Interface
 }
 
-// newKubeDriver creates and returns a new KubeDriver
-func newKubeDriver(s *cli.EnvSettings) *kubeClient {
-	kd := &kubeClient{
-		EnvSettings:   s,
-		clientset:     nil,
-		dynamicClient: nil,
+func newKubeClient(s *cli.EnvSettings) *kubeClient {
+	return &kubeClient{
+		EnvSettings: s,
+		// default other fields
 	}
-	return kd
 }
 
-// init initializes the Kubernetes clientset
-func (kd *kubeClient) init() (err error) {
-	if kd.dynamicClient == nil {
-		// get REST config
-		restConfig, err := kd.EnvSettings.RESTClientGetter().ToRESTConfig()
+// initKube initializes the Kubernetes clientset
+func (c *kubeClient) init() (err error) {
+	if c.dynamicClient == nil {
+		// get rest config
+		restConfig, err := c.EnvSettings.RESTClientGetter().ToRESTConfig()
 		if err != nil {
 			e := errors.New("unable to get Kubernetes REST config")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
+
 		// get clientset
-		// clientSet will be replaced with a Helm client
-		kd.clientset, err = kubernetes.NewForConfig(restConfig)
+		c.clientset, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes clientset")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
+
 		// get dynamic client
-		kd.dynamicClient, err = dynamic.NewForConfig(restConfig)
+		c.dynamicClient, err = dynamic.NewForConfig(restConfig)
 		if err != nil {
 			e := errors.New("unable to get Kubernetes dynamic client")
 			log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -72,4 +66,12 @@ func (kd *kubeClient) init() (err error) {
 	}
 
 	return nil
+}
+
+func (c *kubeClient) Typed() kubernetes.Interface {
+	return c.clientset
+}
+
+func (c *kubeClient) Dynamic() dynamic.Interface {
+	return c.dynamicClient
 }

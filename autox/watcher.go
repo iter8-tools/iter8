@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"helm.sh/helm/v3/pkg/cli"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
@@ -19,9 +20,8 @@ const (
 // Start is entry point to configure services and start them
 func Start() {
 	// initialize kubernetes driver
-	if err := k8sclient.init(); err != nil {
-		log.Logger.Fatal("unable to initialize kubedriver")
-	}
+	Client = *newKubeClient(cli.New())
+	Client.init()
 
 	// read resource config (resources and namespaces to watch)
 	resourceConfigFile, ok := os.LookupEnv(RESOURCE_CONFIG_ENV)
