@@ -22,13 +22,13 @@ func Start(stopCh chan struct{}) {
 	// read resource config (resources and namespaces to watch)
 	resourceConfigFile, ok := os.LookupEnv(RESOURCE_CONFIG_ENV)
 	if !ok {
-		log.Logger.Fatal("resource configuation file is required")
+		log.Logger.Fatal("resource configuration file is required")
 	}
 
 	// read group config (apps and helm charts to install)
 	chartGroupConfigFile, ok := os.LookupEnv(CHART_GROUP_CONFIG_ENV)
 	if !ok {
-		log.Logger.Fatal("group configuation file is required")
+		log.Logger.Fatal("group configuration file is required")
 	}
 
 	// set up resource watching as defined by config

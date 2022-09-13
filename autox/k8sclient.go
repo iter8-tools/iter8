@@ -68,9 +68,9 @@ func (c *kubeClient) init() (err error) {
 	return nil
 }
 
-func (c *kubeClient) typed() kubernetes.Interface {
-	return c.clientset
-}
+// func (c *kubeClient) typed() kubernetes.Interface {
+// 	return c.clientset
+// }
 
 func (c *kubeClient) dynamic() dynamic.Interface {
 	return c.dynamicClient
