@@ -2,11 +2,8 @@ package autox
 
 import (
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/iter8-tools/iter8/base/log"
-	"helm.sh/helm/v3/pkg/cli"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
@@ -18,10 +15,9 @@ const (
 )
 
 // Start is entry point to configure services and start them
-func Start() {
+func Start(stopCh chan struct{}) {
 	// initialize kubernetes driver
-	Client = *newKubeClient(cli.New())
-	Client.init()
+	k8sClient.init()
 
 	// read resource config (resources and namespaces to watch)
 	resourceConfigFile, ok := os.LookupEnv(RESOURCE_CONFIG_ENV)
@@ -35,8 +31,6 @@ func Start() {
 		log.Logger.Fatal("group configuation file is required")
 	}
 
-	stopCh := make(chan struct{})
-
 	// set up resource watching as defined by config
 	resourceConfig := readResourceConfig(resourceConfigFile)
 	chartGroupConfig := readChartGroupConfig(chartGroupConfigFile)
@@ -45,10 +39,4 @@ func Start() {
 
 	w := newIter8Watcher(resourceConfig.Resources, resourceConfig.Namespaces, chartGroupConfig)
 	go w.start(stopCh)
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
-
-	<-sigCh
-	close(stopCh)
 }

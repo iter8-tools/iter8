@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/iter8-tools/iter8/autox"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +24,14 @@ func newAutoXCmd() *cobra.Command {
 		Short: "Start the Iter8 autoX controller",
 		Long:  autoxDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			autox.Start()
+			stopCh := make(chan struct{})
+			autox.Start(stopCh)
+
+			sigCh := make(chan os.Signal, 1)
+			signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
+			<-sigCh
+
+			close(stopCh)
 
 			return nil
 		},

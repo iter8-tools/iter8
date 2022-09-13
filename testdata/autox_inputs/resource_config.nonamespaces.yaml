@@ -1,4 +1,4 @@
 resources:
-- group: apps
-  version: v1
-  resource: deployments
+  - group: apps
+    version: v1
+    resource: deployments

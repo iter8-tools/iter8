@@ -1,32 +1,5 @@
 package autox
 
-// import (
-// 	"testing"
-
-// 	"github.com/stretchr/testify/assert"
-
-// 	"helm.sh/helm/v3/pkg/cli"
-// 	"k8s.io/apimachinery/pkg/runtime/schema"
-// )
-
-// func TestNewInformer(t *testing.T) {
-// 	Client = *newFakeKubeClient(cli.New())
-// 	w := newIter8Watcher(
-// 		[]schema.GroupVersionResource{{
-// 			Group:    "",
-// 			Version:  "v1",
-// 			Resource: "services",
-// 		}, {
-// 			Group:    "apps",
-// 			Version:  "v1",
-// 			Resource: "deployments",
-// 		}},
-// 		[]string{"default", "foo"},
-// 		chartGroupConfig{},
-// 	)
-// 	assert.NotNil(t, w)
-// }
-
 import (
 	"context"
 	"testing"
@@ -35,6 +8,7 @@ import (
 	// abnapp "github.com/iter8-tools/iter8/abn/application"
 	// "github.com/iter8-tools/iter8/abn/k8sclient"
 
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -43,14 +17,35 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var TRACK_ANNOTATION = "iter8.tools/track"
-var NAME_LABEL = "app.kubernetes.io/name"
-var VERSION_LABEL = "app.kubernetes.io/version"
-var READY_ANNOTATION = "iter8.tools/ready"
-var ITER8_ANNOTATION = "iter8.tools/abn"
-var ITER8_LABEL = "iter8.tools/abn"
+const (
+	trackAnnotation = "iter8.tools/track"
+	newLabel        = "app.kubernetes.io/name"
+	versionLabel    = "app.kubernetes.io/version"
+	readyAnnotation = "iter8.tools/ready"
+	iter8Annotation = "iter8.tools/abn"
+	iter8Label      = "iter8.tools/abn"
+)
 
-func TestInformer(t *testing.T) {
+// Check to see if add, update, delete handlers from the watcher are properly invoked
+func TestWatcher(t *testing.T) {
+	addObjectInvocations := 0
+	updateObjectInvocations := 0
+	deleteObjectInvocations := 0
+
+	// Overwrite original handlers
+	addObject = func(obj interface{}) {
+		log.Logger.Debug("Add:", obj)
+		addObjectInvocations++
+	}
+	updateObject = func(oldObj, obj interface{}) {
+		log.Logger.Debug("Update:", oldObj, obj)
+		updateObjectInvocations++
+	}
+	deleteObject = func(obj interface{}) {
+		log.Logger.Debug("Delete:", obj)
+		deleteObjectInvocations++
+	}
+
 	gvr := schema.GroupVersionResource{
 		Group:    "apps",
 		Version:  "v1",
@@ -62,7 +57,7 @@ func TestInformer(t *testing.T) {
 	track := ""
 
 	// define and start watcher
-	Client = *newFakeKubeClient(cli.New())
+	k8sClient = newFakeKubeClient(cli.New())
 	w := newIter8Watcher(
 		[]schema.GroupVersionResource{gvr},
 		[]string{namespace},
@@ -74,7 +69,7 @@ func TestInformer(t *testing.T) {
 
 	// create object; no track defined
 	assert.Equal(t, 0, addObjectInvocations)
-	createdObj, err := Client.Dynamic().
+	createdObj, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),
@@ -91,8 +86,8 @@ func TestInformer(t *testing.T) {
 	// update object with track
 	assert.Equal(t, 0, updateObjectInvocations)
 	track = "track"
-	(createdObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[TRACK_ANNOTATION] = track
-	updatedObj, err := Client.Dynamic().
+	(createdObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[trackAnnotation] = track
+	updatedObj, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Update(
 			context.TODO(),
@@ -108,7 +103,7 @@ func TestInformer(t *testing.T) {
 
 	// delete object --> no track anymore
 	assert.Equal(t, 0, deleteObjectInvocations)
-	err = Client.Dynamic().
+	err = k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Delete(
 			context.TODO(),
@@ -126,10 +121,10 @@ func TestInformer(t *testing.T) {
 
 func newUnstructuredDeployment(namespace, application, version, track string) *unstructured.Unstructured {
 	annotations := map[string]interface{}{
-		READY_ANNOTATION: "true",
+		readyAnnotation: "true",
 	}
 	if track != "" {
-		annotations[TRACK_ANNOTATION] = track
+		annotations[trackAnnotation] = track
 	}
 
 	return &unstructured.Unstructured{
@@ -140,9 +135,9 @@ func newUnstructuredDeployment(namespace, application, version, track string) *u
 				"namespace": namespace,
 				"name":      application,
 				"labels": map[string]interface{}{
-					NAME_LABEL:    application,
-					VERSION_LABEL: version,
-					ITER8_LABEL:   "true",
+					newLabel:     application,
+					versionLabel: version,
+					iter8Label:   "true",
 				},
 				"annotations": annotations,
 			},

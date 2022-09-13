@@ -9,9 +9,17 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-var addObjectInvocations int = 0
-var updateObjectInvocations int = 0
-var deleteObjectInvocations int = 0
+var addObject = func(obj interface{}) {
+	log.Logger.Debug("Add:", obj)
+}
+
+var updateObject = func(oldObj, obj interface{}) {
+	log.Logger.Debug("Update:", oldObj, obj)
+}
+
+var deleteObject = func(obj interface{}) {
+	log.Logger.Debug("Delete:", obj)
+}
 
 type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
@@ -23,50 +31,17 @@ func newIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []s
 	}
 	// for each namespace, resource type configure Informer
 	for _, ns := range namespaces {
-		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(Client.dynamicClient, 0, ns, nil)
+		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
 		for _, gvr := range resourceTypes {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: func(obj interface{}) {
-					addObject(obj)
-					// Add(WatchedObject{
-					// 	Obj:    obj.(*unstructured.Unstructured),
-					// 	Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
-					// })
-				},
-				UpdateFunc: func(oldObj, obj interface{}) {
-					updateObject(oldObj, obj)
-					// Update(WatchedObject{
-					// 	Obj:    obj.(*unstructured.Unstructured),
-					// 	Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
-					// })
-				},
-				DeleteFunc: func(obj interface{}) {
-					deleteObject(obj)
-					// Delete(WatchedObject{
-					// 	Obj:    obj.(*unstructured.Unstructured),
-					// 	Writer: &application.ApplicationReaderWriter{Client: kd.Clientset},
-					// })
-				},
+				AddFunc:    addObject,
+				UpdateFunc: updateObject,
+				DeleteFunc: deleteObject,
 			})
 		}
 	}
 	return w
-}
-
-func addObject(obj interface{}) {
-	log.Logger.Debug("Add:", obj)
-	addObjectInvocations++
-}
-
-func updateObject(oldObj, obj interface{}) {
-	log.Logger.Debug("Update:", obj)
-	updateObjectInvocations++
-}
-
-func deleteObject(obj interface{}) {
-	log.Logger.Debug("Delete:", obj)
-	deleteObjectInvocations++
 }
 
 func (watcher *iter8Watcher) start(stopChannel chan struct{}) {

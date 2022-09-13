@@ -14,8 +14,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// Client is a global variable. Before use, it must be assigned and initalized
-var Client kubeClient
+// k8sClient is a global variable. Before use, it must be assigned and initalized
+var k8sClient kubeClient = newKubeClient(cli.New())
 
 // kubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
@@ -30,14 +30,14 @@ type kubeClient struct {
 	dynamicClient dynamic.Interface
 }
 
-func newKubeClient(s *cli.EnvSettings) *kubeClient {
-	return &kubeClient{
+func newKubeClient(s *cli.EnvSettings) kubeClient {
+	return kubeClient{
 		EnvSettings: s,
 		// default other fields
 	}
 }
 
-// initKube initializes the Kubernetes clientset
+// init initializes the Kubernetes clientset
 func (c *kubeClient) init() (err error) {
 	if c.dynamicClient == nil {
 		// get rest config
@@ -68,10 +68,10 @@ func (c *kubeClient) init() (err error) {
 	return nil
 }
 
-func (c *kubeClient) Typed() kubernetes.Interface {
+func (c *kubeClient) typed() kubernetes.Interface {
 	return c.clientset
 }
 
-func (c *kubeClient) Dynamic() dynamic.Interface {
+func (c *kubeClient) dynamic() dynamic.Interface {
 	return c.dynamicClient
 }
