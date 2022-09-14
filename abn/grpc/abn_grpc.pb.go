@@ -26,6 +26,8 @@ type ABNClient interface {
 	// The metric value is explicitly associated with a list of transactions that contributed to its computation.
 	// The user is expected to identify these transactions.
 	WriteMetric(ctx context.Context, in *MetricValue, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Get metrics for an application
+	GetMetrics(ctx context.Context, in *MetricRequest, opts ...grpc.CallOption) (*ApplicationMetrics, error)
 }
 
 type aBNClient struct {
@@ -54,6 +56,15 @@ func (c *aBNClient) WriteMetric(ctx context.Context, in *MetricValue, opts ...gr
 	return out, nil
 }
 
+func (c *aBNClient) GetMetrics(ctx context.Context, in *MetricRequest, opts ...grpc.CallOption) (*ApplicationMetrics, error) {
+	out := new(ApplicationMetrics)
+	err := c.cc.Invoke(ctx, "/main.ABN/GetMetrics", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ABNServer is the server API for ABN service.
 // All implementations must embed UnimplementedABNServer
 // for forward compatibility
@@ -65,6 +76,8 @@ type ABNServer interface {
 	// The metric value is explicitly associated with a list of transactions that contributed to its computation.
 	// The user is expected to identify these transactions.
 	WriteMetric(context.Context, *MetricValue) (*emptypb.Empty, error)
+	// Get metrics for an application
+	GetMetrics(context.Context, *MetricRequest) (*ApplicationMetrics, error)
 	mustEmbedUnimplementedABNServer()
 }
 
@@ -77,6 +90,9 @@ func (UnimplementedABNServer) Lookup(context.Context, *Application) (*Session, e
 }
 func (UnimplementedABNServer) WriteMetric(context.Context, *MetricValue) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WriteMetric not implemented")
+}
+func (UnimplementedABNServer) GetMetrics(context.Context, *MetricRequest) (*ApplicationMetrics, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMetrics not implemented")
 }
 func (UnimplementedABNServer) mustEmbedUnimplementedABNServer() {}
 
@@ -127,6 +143,24 @@ func _ABN_WriteMetric_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ABN_GetMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MetricRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ABNServer).GetMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.ABN/GetMetrics",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ABNServer).GetMetrics(ctx, req.(*MetricRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ABN_ServiceDesc is the grpc.ServiceDesc for ABN service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -141,6 +175,10 @@ var ABN_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "WriteMetric",
 			Handler:    _ABN_WriteMetric_Handler,
+		},
+		{
+			MethodName: "GetMetrics",
+			Handler:    _ABN_GetMetrics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

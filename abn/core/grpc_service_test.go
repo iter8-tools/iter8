@@ -70,6 +70,26 @@ func testLookup(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	}
 }
 
+func TestGetMetrics(t *testing.T) {
+	client, teardown := setup(t)
+	defer teardown()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	s, err := (*client).GetMetrics(
+		ctx,
+		&pb.MetricRequest{
+			Application: "default/application",
+		},
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, s)
+	jsonStr := s.GetApplicationJson()
+	assert.Equal(t, "{\"name\":\"default/application\",\"tracks\":{\"candidate\":\"v2\"},\"versions\":{\"v1\":{\"metrics\":{\"metric1\":[1,45,45,45,2025]}},\"v2\":{\"metrics\":{}}}}", jsonStr)
+}
+
 func TestWriteMetric(t *testing.T) {
 	testcases := map[string]Scenario{
 		"no applicaton": {application: "", user: "user", errorSubstring: "track not mapped", track: "", metric: "", value: "76"},

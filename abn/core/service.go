@@ -104,6 +104,16 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 	return &emptypb.Empty{}, err
 }
 
+func (server *abnServer) GetMetrics(ctx context.Context, metricReqMsg *pb.MetricRequest) (*pb.ApplicationMetrics, error) {
+	jsonStr, err := getMetricsInternal(
+		metricReqMsg.GetApplication(),
+	)
+
+	return &pb.ApplicationMetrics{
+		ApplicationJson: jsonStr,
+	}, err
+}
+
 // launchGRPCServer starts gRPC server
 func launchGRPCServer(opts []grpc.ServerOption) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
