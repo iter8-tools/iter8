@@ -238,9 +238,7 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 }
 
 // BatchedWrite writes the Application to persistent storage only if the previous write
-// was more than BatchWriteInterval ago. If no more writes take place, it is possible that
-// some data is not persisted. To avoid this, the A/B/n service should periodically Flush
-// application data.
+// was more than BatchWriteInterval ago.
 func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 	log.Logger.Tracef("BatchedWrite called")
 	defer log.Logger.Trace("BatchedWrite completed")
@@ -308,46 +306,4 @@ func splitApplicationKey(applicationKey string) (string, string) {
 	}
 
 	return namespace, name
-}
-
-// PeriodicApplicationsFlush periodically checks if there is any (metric) data associated with
-// an application that has not been persisted to the underlying secret. If so, it is written.
-// This supports the edge case of an application that stops receiving requests to write metric data.
-// The period on which flush works is a multiple of the BatchWriteInterval; it is expected that
-// BatchWrite will handle the majority of the required persistence.
-func (m *ThreadSafeApplicationMap) PeriodicApplicationsFlush(done chan struct{}) {
-	ticker := time.NewTicker(time.Duration(flushMultiplier) * BatchWriteInterval)
-	go func() {
-		for {
-			select {
-			case <-done:
-				return
-			case <-ticker.C:
-				m.flush()
-			}
-		}
-	}()
-}
-
-// flush writes all applications whose last write time is greater than the BatchWriteInterval
-func (m *ThreadSafeApplicationMap) flush() {
-	// get list of applications that need flushing
-	now := time.Now()
-	toFlush := []string{}
-	m.mutex.RLock()
-	for application, last := range m.lastWriteTimes {
-		if now.Sub(*last) > BatchWriteInterval {
-			toFlush = append(toFlush, application)
-		}
-	}
-	m.mutex.RUnlock()
-
-	// flush them .. unless they have been written since we inspected them above
-	for _, application := range toFlush {
-		a, err := m.Get(application)
-		if err != nil || a == nil {
-			continue
-		}
-		m.BatchedWrite(a)
-	}
 }
