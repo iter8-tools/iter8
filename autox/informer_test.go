@@ -65,6 +65,7 @@ func TestWatcher(t *testing.T) {
 	)
 	assert.NotNil(t, w)
 	done := make(chan struct{})
+	defer close(done)
 	w.start(done)
 
 	// create object; no track defined
@@ -80,8 +81,7 @@ func TestWatcher(t *testing.T) {
 	assert.NotNil(t, createdObj)
 
 	// give handler time to execute
-	time.Sleep(1 * time.Second)
-	assert.Equal(t, 1, addObjectInvocations)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 1, addObjectInvocations) }, 5*time.Second, time.Second)
 
 	// update object with track
 	assert.Equal(t, 0, updateObjectInvocations)
@@ -98,8 +98,7 @@ func TestWatcher(t *testing.T) {
 	assert.NotNil(t, updatedObj)
 
 	// give handler time to execute
-	time.Sleep(1 * time.Second)
-	assert.Equal(t, 1, updateObjectInvocations)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 1, updateObjectInvocations) }, 5*time.Second, time.Second)
 
 	// delete object --> no track anymore
 	assert.Equal(t, 0, deleteObjectInvocations)
@@ -113,10 +112,7 @@ func TestWatcher(t *testing.T) {
 	assert.NoError(t, err)
 
 	// give handler time to execute
-	time.Sleep(1 * time.Second)
-	assert.Equal(t, 1, deleteObjectInvocations)
-
-	close(done)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 1, deleteObjectInvocations) }, 5*time.Second, time.Second)
 }
 
 func newUnstructuredDeployment(namespace, application, version, track string) *unstructured.Unstructured {

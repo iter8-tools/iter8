@@ -25,13 +25,12 @@ func newAutoXCmd() *cobra.Command {
 		Long:  autoxDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			stopCh := make(chan struct{})
+			defer close(stopCh)
 			autox.Start(stopCh)
 
 			sigCh := make(chan os.Signal, 1)
 			signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
 			<-sigCh
-
-			close(stopCh)
 
 			return nil
 		},

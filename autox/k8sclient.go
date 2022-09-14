@@ -15,7 +15,7 @@ import (
 )
 
 // k8sClient is a global variable. Before use, it must be assigned and initalized
-var k8sClient kubeClient = newKubeClient(cli.New())
+var k8sClient *kubeClient = newKubeClient(cli.New())
 
 // kubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
@@ -30,8 +30,8 @@ type kubeClient struct {
 	dynamicClient dynamic.Interface
 }
 
-func newKubeClient(s *cli.EnvSettings) kubeClient {
-	return kubeClient{
+func newKubeClient(s *cli.EnvSettings) *kubeClient {
+	return &kubeClient{
 		EnvSettings: s,
 		// default other fields
 	}
