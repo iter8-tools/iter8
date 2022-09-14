@@ -87,9 +87,9 @@ func (m *ThreadSafeApplicationMap) Unlock(application string) {
 	m.mutexes[application].Unlock()
 }
 
-// Add adds an application into the application map if it is not already there
+// Put adds an application into the application map if it is not already there
 // Returns the application that is/was there
-func (m *ThreadSafeApplicationMap) Add(a *Application) *Application {
+func (m *ThreadSafeApplicationMap) Put(a *Application) *Application {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -102,7 +102,7 @@ func (m *ThreadSafeApplicationMap) Add(a *Application) *Application {
 	return a
 }
 
-// Get application object.
+// Get application object from in memory map
 func (m *ThreadSafeApplicationMap) Get(application string) (*Application, error) {
 	// if available in the in-memory map, return it
 	m.mutex.RLock()
@@ -112,12 +112,22 @@ func (m *ThreadSafeApplicationMap) Get(application string) (*Application, error)
 		return a, nil
 	}
 
+	return nil, errors.New(application + " not in memory")
+}
+
+// Read the application object if necessary from persistent storage (a secret)
+func (m *ThreadSafeApplicationMap) Read(application string) (*Application, error) {
+	a, err := m.Get(application)
+	if a != nil {
+		return a, err
+	}
+
 	// otherwise, read from persistent store (secret)
 	// if no secret, create new object
-	a, err := m.readFromSecret(application)
+	a, err = m.readFromSecret(application)
 
 	// and add to the in memory map
-	a = m.Add(a)
+	a = m.Put(a)
 
 	return a, err
 }
@@ -335,7 +345,7 @@ func (m *ThreadSafeApplicationMap) flush() {
 	// flush them .. unless they have been written since we inspected them above
 	for _, application := range toFlush {
 		a, err := m.Get(application)
-		if err != nil {
+		if err != nil || a == nil {
 			continue
 		}
 		m.BatchedWrite(a)

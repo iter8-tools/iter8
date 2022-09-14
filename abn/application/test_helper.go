@@ -1,7 +1,6 @@
 package application
 
 import (
-	"context"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
@@ -9,29 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 func yamlToSecret(folder, file, name string) error {
-	byteArray, err := readYamlFromFile(folder, file)
-	if err != nil {
-		return err
-	}
-
-	secretName := secretNameFromKey(name)
-	secretNamespace := namespaceFromKey(name)
-
-	_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: secretNamespace,
-		},
-		StringData: map[string]string{secretKey: string(byteArray)},
-	}, metav1.CreateOptions{})
-	return err
+	a, _ := yamlToApplication(name, folder, file)
+	return Applications.Write(a)
 }
 
 func readYamlFromFile(folder, file string) ([]byte, error) {
@@ -39,6 +22,40 @@ func readYamlFromFile(folder, file string) ([]byte, error) {
 	fname := filepath.Join(filepath.Dir(filename), folder, file)
 
 	return ioutil.ReadFile(fname)
+}
+
+func yamlToApplication(name, folder, file string) (*Application, error) {
+	byteArray, err := readYamlFromFile(folder, file)
+	if err != nil {
+		return nil, err
+	}
+
+	return byteArrayToApplication(name, byteArray)
+}
+
+func byteArrayToApplication(name string, data []byte) (*Application, error) {
+	a := &Application{}
+	err := yaml.Unmarshal(data, a)
+	if err != nil {
+		return &Application{
+			Name:     name,
+			Versions: Versions{},
+			Tracks:   Tracks{},
+		}, nil
+	}
+	a.Name = name
+
+	// Initialize versions if not already initialized
+	if a.Versions == nil {
+		a.Versions = Versions{}
+	}
+	for _, v := range a.Versions {
+		if v.Metrics == nil {
+			v.Metrics = map[string]*SummaryMetric{}
+		}
+	}
+
+	return a, nil
 }
 
 type applicationAssertion struct {

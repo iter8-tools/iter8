@@ -44,7 +44,7 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	applicationObjs := getApplicationObjects(namespace, name, resourceTypes, informerFactories)
 	// there is at least one object (w)
 
-	a, _ := abnapp.Applications.Get(application)
+	a, _ := abnapp.Applications.Read(application)
 
 	abnapp.Applications.Lock(application)
 	// clear a.Tracks, a.Versions[*].Track
