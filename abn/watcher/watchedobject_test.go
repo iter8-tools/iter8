@@ -23,11 +23,11 @@ func TestHasName(t *testing.T) {
 			Name:      objName,
 			Namespace: objNamespace,
 			Labels: map[string]string{
-				NAME_LABEL:    appName,
-				VERSION_LABEL: appVersion,
+				nameLabel:    appName,
+				versionLabel: appVersion,
 			},
 			Annotations: map[string]string{
-				TRACK_ANNOTATION: appTrack,
+				trackAnnotation: appTrack,
 			},
 		},
 		Spec: corev1.PodSpec{},
@@ -87,11 +87,11 @@ func TestHasNoTrack(t *testing.T) {
 			Name:      objName,
 			Namespace: objNamespace,
 			Labels: map[string]string{
-				NAME_LABEL:    appName,
-				VERSION_LABEL: appVersion,
+				nameLabel:    appName,
+				versionLabel: appVersion,
 			},
 			Annotations: map[string]string{
-				READY_ANNOTATION: "true",
+				readyAnnotation: "true",
 			},
 		},
 		Spec: corev1.PodSpec{},

@@ -26,7 +26,7 @@ import (
 
 const (
 	// Name of environment variable with file path to configuration yaml file
-	WATCHER_CONFIG_ENV = "WATCHER_CONFIG"
+	watcherConfigEnv = "WATCHER_CONFIG"
 )
 
 var (
@@ -40,7 +40,7 @@ func Start() {
 	k8sclient.Client.Initialize()
 
 	// read abn config (resources and namespaces to watch)
-	abnConfigFile, ok := os.LookupEnv(WATCHER_CONFIG_ENV)
+	abnConfigFile, ok := os.LookupEnv(watcherConfigEnv)
 	if !ok {
 		log.Logger.Fatal("configuation file is required")
 	}

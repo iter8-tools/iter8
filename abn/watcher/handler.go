@@ -64,8 +64,6 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 		}
 	}
 	abnapp.Applications.Unlock(application)
-
-	abnapp.Applications.Write(a)
 }
 
 // getApplicationObjects gets all the objects related to the application based on label app.kubernetes.io/name
@@ -77,9 +75,9 @@ func getApplicationObjects(namespace, name string, gvrs []schema.GroupVersionRes
 		op   selection.Operator
 		vals []string
 	}{
-		{key: ITER8_LABEL, op: selection.Equals, vals: []string{"true"}},
-		{key: NAME_LABEL, op: selection.Equals, vals: []string{name}},
-		{key: VERSION_LABEL, op: selection.Exists, vals: []string{}},
+		{key: iter8Label, op: selection.Equals, vals: []string{"true"}},
+		{key: nameLabel, op: selection.Equals, vals: []string{name}},
+		{key: versionLabel, op: selection.Exists, vals: []string{}},
 	}
 	for _, rs := range reqSpec {
 		req, err := labels.NewRequirement(rs.key, rs.op, rs.vals)

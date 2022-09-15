@@ -137,30 +137,30 @@ func TestUpdate(t *testing.T) {
 
 			//update object
 			if s.iter8related == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), ITER8_LABEL)
+				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), iter8Label)
 			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[ITER8_LABEL] = s.iter8related
+				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[iter8Label] = s.iter8related
 			}
 			if s.iter8related == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), NAME_LABEL)
+				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), nameLabel)
 			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[NAME_LABEL] = s.application
+				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[nameLabel] = s.application
 			}
 			if s.iter8related == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), VERSION_LABEL)
+				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), versionLabel)
 			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[VERSION_LABEL] = s.version
+				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[versionLabel] = s.version
 			}
 
 			if s.track == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{}), TRACK_ANNOTATION)
+				delete((existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{}), trackAnnotation)
 			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[TRACK_ANNOTATION] = s.track
+				(existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[trackAnnotation] = s.track
 			}
 			if s.ready == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{}), READY_ANNOTATION)
+				delete((existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{}), readyAnnotation)
 			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[READY_ANNOTATION] = s.ready
+				(existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[readyAnnotation] = s.ready
 			}
 
 			updatedObj, err := k8sclient.Client.Dynamic().
@@ -353,21 +353,21 @@ func createObject(t *testing.T, gvr schema.GroupVersionResource, iter8related, n
 func newUnstructuredDeployment(iter8related, namespace, application, version, track string, ready string) *unstructured.Unstructured {
 	labels := map[string]interface{}{}
 	if application != "" {
-		labels[NAME_LABEL] = application
+		labels[nameLabel] = application
 	}
 	if version != "" {
-		labels[VERSION_LABEL] = version
+		labels[versionLabel] = version
 	}
 	if iter8related != "" {
-		labels[ITER8_LABEL] = iter8related
+		labels[iter8Label] = iter8related
 	}
 
 	annotations := map[string]interface{}{}
 	if ready != "" {
-		annotations[READY_ANNOTATION] = ready
+		annotations[readyAnnotation] = ready
 	}
 	if track != "" {
-		annotations[TRACK_ANNOTATION] = track
+		annotations[trackAnnotation] = track
 	}
 
 	return &unstructured.Unstructured{
