@@ -1,0 +1,13 @@
+name: default/application
+tracks:
+  candidate: v2
+versions:
+  v1:
+    metrics:
+      metric1:
+      - 1
+      - 45
+      - 45
+      - 45
+      - 2025
+  v2: {}
