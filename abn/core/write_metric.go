@@ -19,7 +19,7 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	abnapp.Applications.Lock(application)
 	defer abnapp.Applications.Unlock(application)
 
-	version, ok := a.GetTracks()[*track]
+	version, ok := a.Tracks[*track]
 	if !ok {
 		return errors.New("track not mapped to version")
 	}

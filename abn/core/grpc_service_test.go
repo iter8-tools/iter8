@@ -118,13 +118,13 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 		return
 	}
 	assert.NotNil(t, a)
-	abnapp.Applications.RLock(a.GetName())
+	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
 		m := getMetric(a, scenario.track, scenario.metric)
 		assert.NotNil(t, m)
 		oldCount = m.Count()
 	}
-	abnapp.Applications.RUnlock(a.GetName())
+	abnapp.Applications.RUnlock(a.Name)
 
 	// call gRPC service WriteMetric()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -149,13 +149,13 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	// verify that metric count has increased by 1
 	a, _ = abnapp.Applications.Get(scenario.application)
 	assert.NotNil(t, a)
-	abnapp.Applications.RLock(a.GetName())
+	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
 		m := getMetric(a, scenario.track, scenario.metric)
 		assert.NotNil(t, m)
 		assert.Equal(t, oldCount+1, m.Count())
 	}
-	abnapp.Applications.RUnlock(a.GetName())
+	abnapp.Applications.RUnlock(a.Name)
 }
 
 func setup(t *testing.T) (*pb.ABNClient, func()) {
@@ -211,7 +211,7 @@ func byteArrayToApplication(name string, data []byte) (*abnapp.Application, erro
 	if err != nil {
 		return abnapp.NewApplication(name), nil
 	}
-	a.SetName(name)
+	a.Name = name
 
 	// Initialize versions if not already initialized
 	if a.Versions == nil {
@@ -227,7 +227,7 @@ func byteArrayToApplication(name string, data []byte) (*abnapp.Application, erro
 }
 
 func getMetric(a *abnapp.Application, track, metric string) *abnapp.SummaryMetric {
-	version, ok := a.GetTracks()[track]
+	version, ok := a.Tracks[track]
 	if !ok {
 		return nil
 	}

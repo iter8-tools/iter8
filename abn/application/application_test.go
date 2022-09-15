@@ -97,7 +97,7 @@ func TestWriteLimit(t *testing.T) {
 	assert.NotNil(t, a)
 
 	// v1 is not associated with a track; only v2 is
-	assert.NotEqual(t, len(a.GetTracks()), len(a.Versions))
+	assert.NotEqual(t, len(a.Tracks), len(a.Versions))
 
 	// because maxApplicationDatBytes is so small, should delete v1
 	err = Applications.Write(a)
@@ -108,7 +108,7 @@ func TestWriteLimit(t *testing.T) {
 	assert.NotNil(t, b)
 
 	// only v2 is present
-	assert.Equal(t, len(b.GetTracks()), len(b.Versions))
+	assert.Equal(t, len(b.Tracks), len(b.Versions))
 }
 
 func TestBatchedWrite(t *testing.T) {
@@ -197,7 +197,7 @@ func TestGetVersion(t *testing.T) {
 
 	// b := writeVerify(t, a)
 
-	application := a.GetName()
+	application := a.Name
 	// write application to cluster (should create the secret, if not present)
 	err := Applications.Write(a)
 	assert.NoError(t, err)
@@ -300,7 +300,7 @@ func setupInMemoryNotInCluster(t *testing.T, applications ...applicationSource) 
 }
 
 func writeVerify(t *testing.T, a *Application) *Application {
-	application := a.GetName()
+	application := a.Name
 	// write application to cluster (should create the secret, if not present)
 	err := Applications.Write(a)
 	assert.NoError(t, err)

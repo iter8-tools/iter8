@@ -36,27 +36,9 @@ func NewApplication(name string) *Application {
 	}
 }
 
-// GetName returns the name of an application
-func (a *Application) GetName() string {
-	return a.Name
-}
-
-// SetName sets the name of an application; for testing only
-func (a *Application) SetName(name string) {
-	a.Name = name
-}
-
-// GetTracks returns a map of track identifier to version name for this application
-func (a *Application) GetTracks() Tracks {
-	return a.Tracks
-}
-
 // ClearTracks clears the mapping of track identfiers to version names
 func (a *Application) ClearTracks() {
 	a.Tracks = Tracks{}
-	// for track := range a.GetTracks() {
-	// 	delete(a.Tracks, track)
-	// }
 }
 
 // GetVersion returns the Version object corresponding to a given version name
@@ -132,7 +114,7 @@ func (a *Application) MarshalJSON() ([]byte, error) {
 // String returns a string representation of the Application
 func (a *Application) String() string {
 	tracks := []string{}
-	for t, v := range a.GetTracks() {
+	for t, v := range a.Tracks {
 		tracks = append(tracks, t+" -> "+v)
 	}
 

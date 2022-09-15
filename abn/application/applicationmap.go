@@ -86,12 +86,12 @@ func (m *ThreadSafeApplicationMap) Put(a *Application) *Application {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	current, ok := m.apps[a.GetName()]
+	current, ok := m.apps[a.Name]
 	if ok {
 		return current
 	}
-	m.apps[a.GetName()] = a
-	m.mutexes[a.GetName()] = &sync.RWMutex{}
+	m.apps[a.Name] = a
+	m.mutexes[a.Name] = &sync.RWMutex{}
 	return a
 }
 
@@ -156,11 +156,11 @@ func (m *ThreadSafeApplicationMap) readFromSecret(application string) (*Applicat
 	}
 
 	// set name
-	a.SetName(application)
+	a.Name = application
 
 	// set last write time to read time; it was written in the past
 	now := time.Now()
-	m.lastWriteTimes[a.GetName()] = &now
+	m.lastWriteTimes[a.Name] = &now
 
 	return a, nil
 }
@@ -179,8 +179,8 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 		return err
 	}
 
-	secretNamespace := namespaceFromKey(a.GetName())
-	secretName := secretNameFromKey(a.GetName())
+	secretNamespace := namespaceFromKey(a.Name)
+	secretName := secretNameFromKey(a.Name)
 
 	// determine if need to
 	exists := true
@@ -225,7 +225,7 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 
 	// update last write time for application
 	now := time.Now()
-	m.lastWriteTimes[a.GetName()] = &now
+	m.lastWriteTimes[a.Name] = &now
 	return nil
 }
 
@@ -236,12 +236,12 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 	defer log.Logger.Trace("BatchedWrite completed")
 
 	now := time.Now()
-	lastWrite, ok := m.lastWriteTimes[a.GetName()]
+	lastWrite, ok := m.lastWriteTimes[a.Name]
 	if !ok || lastWrite == nil {
 		// no record of the application ever being written; write it now
 		m.Write(a)
 	} else {
-		if now.Sub(*m.lastWriteTimes[a.GetName()]) > BatchWriteInterval {
+		if now.Sub(*m.lastWriteTimes[a.Name]) > BatchWriteInterval {
 			m.Write(a)
 		}
 	}
@@ -254,7 +254,7 @@ func deleteUntrackedVersions(a *Application) {
 	toDelete := []string{}
 	for version := range a.Versions {
 		track := ""
-		for _, ver := range a.GetTracks() {
+		for _, ver := range a.Tracks {
 			if ver == version {
 				track = ver
 				break

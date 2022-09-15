@@ -64,13 +64,13 @@ func assertApplication(t *testing.T, a *Application, assertion applicationAssert
 	r = r && assert.NotNil(t, a)
 	r = r && assert.Contains(t, a.String(), assertion.namespace+"/"+assertion.name)
 
-	namespace, name := splitApplicationKey(a.GetName())
+	namespace, name := splitApplicationKey(a.Name)
 	r = r && assert.Equal(t, assertion.name, name)
 	r = r && assert.Equal(t, assertion.namespace, namespace)
 
-	r = r && assert.Len(t, a.GetTracks(), len(assertion.tracks))
+	r = r && assert.Len(t, a.Tracks, len(assertion.tracks))
 	for _, track := range assertion.tracks {
-		r = r && assert.Contains(t, a.Versions, a.GetTracks()[track])
+		r = r && assert.Contains(t, a.Versions, a.Tracks[track])
 	}
 	r = r && assert.Len(t, a.Versions, len(assertion.versions))
 
