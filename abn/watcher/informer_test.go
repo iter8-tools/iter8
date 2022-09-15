@@ -23,16 +23,13 @@ func TestAdd(t *testing.T) {
 		application  string
 		version      string
 		track        string
-		ready        string
 	}{
-		"iter8 not set":        {iter8related: "", namespace: "namespace", application: "name", version: "version", track: "track", ready: "true"},
-		"iter8 not true":       {iter8related: "false", namespace: "namespace", application: "name", version: "version", track: "track", ready: "true"},
-		"no application":       {iter8related: "true", namespace: "namespace", application: "", version: "version", track: "track", ready: "true"},
-		"no version":           {iter8related: "true", namespace: "namespace", application: "name", version: "", track: "track", ready: "true"},
-		"w/o track, ready":     {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "", ready: "ready"},
-		"w/o track, not ready": {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "", ready: "false"},
-		"w/ track, ready":      {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track", ready: "true"},
-		"w/ track, not ready":  {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track", ready: ""},
+		"iter8 not set":  {iter8related: "", namespace: "namespace", application: "name", version: "version", track: "track"},
+		"iter8 not true": {iter8related: "false", namespace: "namespace", application: "name", version: "version", track: "track"},
+		"no application": {iter8related: "true", namespace: "namespace", application: "", version: "version", track: "track"},
+		"no version":     {iter8related: "true", namespace: "namespace", application: "name", version: "", track: "track"},
+		"no track":       {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: ""},
+		"all":            {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track"},
 	}
 
 	for label, s := range scenarios {
@@ -47,7 +44,7 @@ func TestAdd(t *testing.T) {
 			defer close(done)
 			setup(t, gvr, s.namespace, done)
 
-			createObject(t, gvr, s.iter8related, s.namespace, s.application, s.version, s.track, s.ready)
+			createObject(t, gvr, s.iter8related, s.namespace, s.application, s.version, s.track)
 
 			assert.Eventually(
 				t,
@@ -68,7 +65,7 @@ func TestAdd(t *testing.T) {
 					r = r && assert.NotNil(t, a)
 
 					tracks := []string{}
-					if s.track != "" && s.ready == "true" {
+					if s.track != "" {
 						tracks = []string{s.track}
 					}
 					r = r && assertApplication(t, a, applicationAssertion{
@@ -93,14 +90,11 @@ func TestUpdate(t *testing.T) {
 		application  string
 		version      string
 		track        string
-		ready        string
 	}{
-		"no application":       {iter8related: "true", namespace: "namespace", application: "", version: "version", track: "track", ready: "true"},
-		"no version":           {iter8related: "true", namespace: "namespace", application: "name", version: "", track: "track", ready: "true"},
-		"w/o track, ready":     {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "", ready: "ready"},
-		"w/o track, not ready": {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "", ready: "false"},
-		"w/ track, ready":      {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track", ready: "true"},
-		"w/ track, not ready":  {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track", ready: ""},
+		"no application": {iter8related: "true", namespace: "namespace", application: "", version: "version", track: "track"},
+		"no version":     {iter8related: "true", namespace: "namespace", application: "name", version: "", track: "track"},
+		"no track":       {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: ""},
+		"all":            {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track"},
 	}
 
 	for label, s := range scenarios {
@@ -114,7 +108,7 @@ func TestUpdate(t *testing.T) {
 			done := make(chan struct{})
 			defer close(done)
 			setup(t, gvr, s.namespace, done)
-			existingObj := createObject(t, gvr, "true", "namespace", "name", "version", "", "")
+			existingObj := createObject(t, gvr, "true", "namespace", "name", "version", "")
 			// verify that existing object is as expected
 			assert.Eventually(
 				t,
@@ -135,33 +129,11 @@ func TestUpdate(t *testing.T) {
 				100*time.Millisecond,
 			)
 
-			//update object
-			if s.iter8related == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), ITER8_LABEL)
-			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[ITER8_LABEL] = s.iter8related
-			}
-			if s.iter8related == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), NAME_LABEL)
-			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[NAME_LABEL] = s.application
-			}
-			if s.iter8related == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), VERSION_LABEL)
-			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[VERSION_LABEL] = s.version
-			}
-
-			if s.track == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{}), TRACK_ANNOTATION)
-			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[TRACK_ANNOTATION] = s.track
-			}
-			if s.ready == "" {
-				delete((existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{}), READY_ANNOTATION)
-			} else {
-				(existingObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[READY_ANNOTATION] = s.ready
-			}
+			//update object labels
+			updateLabel(existingObj, iter8Label, s.iter8related)
+			updateLabel(existingObj, nameLabel, s.application)
+			updateLabel(existingObj, versionLabel, s.version)
+			updateLabel(existingObj, trackLabel, s.track)
 
 			updatedObj, err := k8sclient.Client.Dynamic().
 				Resource(gvr).Namespace(s.namespace).
@@ -201,7 +173,7 @@ func TestUpdate(t *testing.T) {
 					r = r && assert.NotNil(t, a)
 
 					tracks := []string{}
-					if s.track != "" && s.ready == "true" {
+					if s.track != "" {
 						tracks = []string{s.track}
 					}
 					r = r && assertApplication(t, a, applicationAssertion{
@@ -219,6 +191,15 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
+func updateLabel(obj *unstructured.Unstructured, key string, value string) {
+	if value == "" {
+		delete((obj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{}), key)
+	} else {
+		(obj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[key] = value
+	}
+
+}
+
 func TestDelete(t *testing.T) {
 	scenarios := map[string]struct {
 		iter8related string
@@ -226,12 +207,9 @@ func TestDelete(t *testing.T) {
 		application  string
 		version      string
 		track        string
-		ready        string
 	}{
-		"w/o track, ready":     {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "", ready: "ready"},
-		"w/o track, not ready": {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "", ready: "false"},
-		"w/ track, ready":      {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track", ready: "true"},
-		"w/ track, not ready":  {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track", ready: ""},
+		"no track, ready": {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: ""},
+		"track, ready":    {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track"},
 	}
 
 	for label, s := range scenarios {
@@ -247,7 +225,7 @@ func TestDelete(t *testing.T) {
 			setup(t, gvr, s.namespace, done)
 
 			// add existing object (to delete)
-			createObject(t, gvr, "true", "namespace", "name", "version", "track", "true")
+			createObject(t, gvr, "true", "namespace", "name", "version", "track")
 			// verify that existing object is as expected
 			assert.Eventually(
 				t,
@@ -336,13 +314,13 @@ func setup(t *testing.T, gvr schema.GroupVersionResource, namespace string, done
 	w.Start(done)
 }
 
-func createObject(t *testing.T, gvr schema.GroupVersionResource, iter8related, namespace, application, version, track string, ready string) *unstructured.Unstructured {
+func createObject(t *testing.T, gvr schema.GroupVersionResource, iter8related, namespace, application, version, track string) *unstructured.Unstructured {
 	// create object; no track defined
 	createdObj, err := k8sclient.Client.Dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),
-			newUnstructuredDeployment(iter8related, namespace, application, version, track, ready),
+			newUnstructuredDeployment(iter8related, namespace, application, version, track),
 			metav1.CreateOptions{},
 		)
 	assert.NoError(t, err)
@@ -350,24 +328,20 @@ func createObject(t *testing.T, gvr schema.GroupVersionResource, iter8related, n
 	return createdObj
 }
 
-func newUnstructuredDeployment(iter8related, namespace, application, version, track string, ready string) *unstructured.Unstructured {
+func newUnstructuredDeployment(iter8related, namespace, application, version, track string) *unstructured.Unstructured {
 	labels := map[string]interface{}{}
 	if application != "" {
-		labels[NAME_LABEL] = application
+		labels[nameLabel] = application
 	}
 	if version != "" {
-		labels[VERSION_LABEL] = version
+		labels[versionLabel] = version
 	}
 	if iter8related != "" {
-		labels[ITER8_LABEL] = iter8related
+		labels[iter8Label] = iter8related
 	}
 
-	annotations := map[string]interface{}{}
-	if ready != "" {
-		annotations[READY_ANNOTATION] = ready
-	}
 	if track != "" {
-		annotations[TRACK_ANNOTATION] = track
+		labels[trackLabel] = track
 	}
 
 	return &unstructured.Unstructured{
@@ -375,10 +349,9 @@ func newUnstructuredDeployment(iter8related, namespace, application, version, tr
 			"apiVersion": "apps/v1",
 			"kind":       "Deployment",
 			"metadata": map[string]interface{}{
-				"namespace":   namespace,
-				"name":        application,
-				"labels":      labels,
-				"annotations": annotations,
+				"namespace": namespace,
+				"name":      application,
+				"labels":    labels,
 			},
 			"spec": application,
 		},

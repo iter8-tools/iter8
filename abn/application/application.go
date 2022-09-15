@@ -14,11 +14,11 @@ import (
 
 // Application is an application observed in a kubernetes cluster
 type Application struct {
-	// Name is of the form namespace/name where the name is the value of the label app.kubernetes.io/name
+	// Name is of the form namespace/Name where the Name is the value of the label app.kubernetes.io/Name
 	Name string `json:"name" yaml:"name"`
 	// Tracks is map from application track identifier to version name
-	Tracks `json:"tracks" yaml:"tracks"`
-	// Versions is a map of versions name to version data
+	Tracks Tracks `json:"tracks" yaml:"tracks"`
+	// Versions maps version name to version data (a set of metrics)
 	Versions `json:"versions" yaml:"versions"`
 }
 
@@ -27,6 +27,20 @@ type Versions map[string]*Version
 
 // Tracks is map of track identifiers to version names
 type Tracks map[string]string
+
+// NewApplication returns a new Application object with name
+func NewApplication(name string) *Application {
+	return &Application{
+		Name:     name,
+		Versions: Versions{},
+		Tracks:   Tracks{},
+	}
+}
+
+// ClearTracks clears the mapping of track identfiers to version names
+func (a *Application) ClearTracks() {
+	a.Tracks = Tracks{}
+}
 
 // GetVersion returns the Version object corresponding to a given version name
 // If no corresponding version object exists, a new one will be created when allowNew is set to true

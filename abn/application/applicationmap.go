@@ -132,11 +132,7 @@ func (m *ThreadSafeApplicationMap) readFromSecret(application string) (*Applicat
 	secretNamespace := namespaceFromKey(application)
 	secretName := nameFromKey(application) + secretPostfix
 
-	newApplication := &Application{
-		Name:     application,
-		Versions: Versions{},
-		Tracks:   Tracks{},
-	}
+	newApplication := NewApplication(application)
 
 	// read secret from cluster; extract appData
 	secret, err := k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
@@ -158,6 +154,9 @@ func (m *ThreadSafeApplicationMap) readFromSecret(application string) (*Applicat
 		log.Logger.Debug("unmarshal failure")
 		return newApplication, nil
 	}
+
+	// set name
+	a.Name = application
 
 	// set last write time to read time; it was written in the past
 	now := time.Now()

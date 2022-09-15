@@ -9,11 +9,10 @@ import (
 )
 
 const (
-	NAME_LABEL       = "app.kubernetes.io/name"
-	VERSION_LABEL    = "app.kubernetes.io/version"
-	READY_ANNOTATION = "iter8.tools/ready"
-	TRACK_ANNOTATION = "iter8.tools/track"
-	ITER8_LABEL      = "iter8.tools/abn"
+	nameLabel    = "app.kubernetes.io/name"
+	versionLabel = "app.kubernetes.io/version"
+	trackLabel   = "iter8.tools/track"
+	iter8Label   = "iter8.tools/abn"
 )
 
 // watchedObject is wrapper for object returned by informer
@@ -25,7 +24,7 @@ type watchedObject struct {
 // getName gets application name from NAME_LABEL label on watched object
 func (wo watchedObject) getName() (string, bool) {
 	labels := wo.Obj.GetLabels()
-	name, ok := labels[NAME_LABEL]
+	name, ok := labels[nameLabel]
 	return name, ok
 }
 
@@ -43,33 +42,23 @@ func (wo watchedObject) getNamespacedName() (string, bool) {
 // getVersion gets application version from VERSION_LABEL label on watched object
 func (wo watchedObject) getVersion() (string, bool) {
 	labels := wo.Obj.GetLabels()
-	v, ok := labels[VERSION_LABEL]
+	v, ok := labels[versionLabel]
 	return v, ok
 }
 
 // getTrack get trace of version from TRACK_ANNOTATION annotation on watched object
 func (wo watchedObject) getTrack() string {
-	annotations := wo.Obj.GetAnnotations()
-	track, ok := annotations[TRACK_ANNOTATION]
+	labels := wo.Obj.GetLabels()
+	track, ok := labels[trackLabel]
 	if !ok {
 		return ""
 	}
 	return track
 }
 
-// isReady determines if watched object indicates readiness of version (as indicated by READY_ANNOTATION annotatation)
-func (wo watchedObject) isReady() bool {
-	annotations := wo.Obj.GetAnnotations()
-	ready, ok := annotations[READY_ANNOTATION]
-	if !ok {
-		return false
-	}
-	return strings.ToLower(ready) == "true"
-}
-
 func (wo watchedObject) isIter8AbnRelated() bool {
 	labels := wo.Obj.GetLabels()
-	iter8, ok := labels[ITER8_LABEL]
+	iter8, ok := labels[iter8Label]
 	if !ok {
 		return false
 	}

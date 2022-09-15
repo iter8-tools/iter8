@@ -39,11 +39,7 @@ func byteArrayToApplication(name string, data []byte) (*Application, error) {
 	a := &Application{}
 	err := yaml.Unmarshal(data, a)
 	if err != nil {
-		return &Application{
-			Name:     name,
-			Versions: Versions{},
-			Tracks:   Tracks{},
-		}, nil
+		return NewApplication(name), nil
 	}
 	a.Name = name
 

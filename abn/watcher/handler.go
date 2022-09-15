@@ -49,23 +49,17 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	abnapp.Applications.Lock(application)
 	// clear a.Tracks, a.Versions[*].Track
 	// this is necessary because  we keep old versions in memory
-	for track := range a.Tracks {
-		delete(a.Tracks, track)
-	}
+	a.ClearTracks()
 
 	for _, o := range applicationObjs {
 		version, _ := o.getVersion()
 		a.GetVersion(version, true) // make sure version object created
-		if o.isReady() {
-			track := o.getTrack()
-			if track != "" {
-				a.Tracks[track] = version
-			}
+		track := o.getTrack()
+		if track != "" {
+			a.Tracks[track] = version
 		}
 	}
 	abnapp.Applications.Unlock(application)
-
-	abnapp.Applications.Write(a)
 }
 
 // getApplicationObjects gets all the objects related to the application based on label app.kubernetes.io/name
@@ -77,9 +71,9 @@ func getApplicationObjects(namespace, name string, gvrs []schema.GroupVersionRes
 		op   selection.Operator
 		vals []string
 	}{
-		{key: ITER8_LABEL, op: selection.Equals, vals: []string{"true"}},
-		{key: NAME_LABEL, op: selection.Equals, vals: []string{name}},
-		{key: VERSION_LABEL, op: selection.Exists, vals: []string{}},
+		{key: iter8Label, op: selection.Equals, vals: []string{"true"}},
+		{key: nameLabel, op: selection.Equals, vals: []string{name}},
+		{key: versionLabel, op: selection.Exists, vals: []string{}},
 	}
 	for _, rs := range reqSpec {
 		req, err := labels.NewRequirement(rs.key, rs.op, rs.vals)

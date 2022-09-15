@@ -71,16 +71,16 @@ func testLookup(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	}
 }
 
-func TestGetMetrics(t *testing.T) {
+func TestGetApplicationData(t *testing.T) {
 	client, teardown := setup(t)
 	defer teardown()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	s, err := (*client).GetMetrics(
+	s, err := (*client).GetApplicationData(
 		ctx,
-		&pb.MetricRequest{
+		&pb.ApplicationRequest{
 			Application: "default/application",
 		},
 	)
@@ -210,11 +210,7 @@ func byteArrayToApplication(name string, data []byte) (*abnapp.Application, erro
 	a := &abnapp.Application{}
 	err := yaml.Unmarshal(data, a)
 	if err != nil {
-		return &abnapp.Application{
-			Name:     name,
-			Versions: abnapp.Versions{},
-			Tracks:   abnapp.Tracks{},
-		}, nil
+		return abnapp.NewApplication(name), nil
 	}
 	a.Name = name
 

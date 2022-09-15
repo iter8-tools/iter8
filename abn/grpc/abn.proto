@@ -20,8 +20,8 @@ service ABN {
   // The user is expected to identify these transactions.
   rpc WriteMetric(MetricValue) returns (google.protobuf.Empty) {}
 
-  // Get metrics for an application
-  rpc GetMetrics(MetricRequest) returns (ApplicationMetrics) {}
+  // Get application data (tracks, versions and metrics for each)
+  rpc GetApplicationData(ApplicationRequest) returns (ApplicationData) {}
 }
 
 message Application {
@@ -50,12 +50,12 @@ message MetricValue {
   string user = 4;
 }
 
-message MetricRequest {
+message ApplicationRequest {
   // name of application
   string application = 1;
 }
 
-message ApplicationMetrics {
+message ApplicationData {
   // JSON string of application
   string applicationJson = 1;
 }

@@ -4,14 +4,10 @@ import (
 	"encoding/json"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
-	"github.com/iter8-tools/iter8/base/log"
 )
 
-// writeMetricInternal is detailed implementation of gRPC method WriteMetric
-func getMetricsInternal(application string) (string, error) {
-	log.Logger.Trace("getMetricsInternal called")
-	defer log.Logger.Trace("getMetricsInternal ended")
-
+// getApplicationDataInternal is detailed implementation of gRPC method GetApplicationData
+func getApplicationDataInternal(application string) (string, error) {
 	a, err := abnapp.Applications.Get(application)
 	if err != nil {
 		return "", err
