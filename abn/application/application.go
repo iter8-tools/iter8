@@ -17,7 +17,7 @@ type Application struct {
 	Name string `json:"name" yaml:"name"`
 	// Tracks is map from application track identifier to version name
 	Tracks `json:"tracks" yaml:"tracks"`
-	// Versions is a map of versions name to version data
+	// Versions maps version name to version data (a set of metrics)
 	Versions `json:"versions" yaml:"versions"`
 }
 

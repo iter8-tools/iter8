@@ -100,12 +100,12 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 	return &emptypb.Empty{}, err
 }
 
-func (server *abnServer) GetMetrics(ctx context.Context, metricReqMsg *pb.MetricRequest) (*pb.ApplicationMetrics, error) {
-	jsonStr, err := getMetricsInternal(
+func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *pb.ApplicationRequest) (*pb.ApplicationData, error) {
+	jsonStr, err := getApplicationDataInternal(
 		metricReqMsg.GetApplication(),
 	)
 
-	return &pb.ApplicationMetrics{
+	return &pb.ApplicationData{
 		ApplicationJson: jsonStr,
 	}, err
 }

@@ -26,8 +26,8 @@ type ABNClient interface {
 	// The metric value is explicitly associated with a list of transactions that contributed to its computation.
 	// The user is expected to identify these transactions.
 	WriteMetric(ctx context.Context, in *MetricValue, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// Get metrics for an application
-	GetMetrics(ctx context.Context, in *MetricRequest, opts ...grpc.CallOption) (*ApplicationMetrics, error)
+	// Get application data (tracks, versions and metrics for each)
+	GetApplicationData(ctx context.Context, in *ApplicationRequest, opts ...grpc.CallOption) (*ApplicationData, error)
 }
 
 type aBNClient struct {
@@ -56,9 +56,9 @@ func (c *aBNClient) WriteMetric(ctx context.Context, in *MetricValue, opts ...gr
 	return out, nil
 }
 
-func (c *aBNClient) GetMetrics(ctx context.Context, in *MetricRequest, opts ...grpc.CallOption) (*ApplicationMetrics, error) {
-	out := new(ApplicationMetrics)
-	err := c.cc.Invoke(ctx, "/main.ABN/GetMetrics", in, out, opts...)
+func (c *aBNClient) GetApplicationData(ctx context.Context, in *ApplicationRequest, opts ...grpc.CallOption) (*ApplicationData, error) {
+	out := new(ApplicationData)
+	err := c.cc.Invoke(ctx, "/main.ABN/GetApplicationData", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,8 +76,8 @@ type ABNServer interface {
 	// The metric value is explicitly associated with a list of transactions that contributed to its computation.
 	// The user is expected to identify these transactions.
 	WriteMetric(context.Context, *MetricValue) (*emptypb.Empty, error)
-	// Get metrics for an application
-	GetMetrics(context.Context, *MetricRequest) (*ApplicationMetrics, error)
+	// Get application data (tracks, versions and metrics for each)
+	GetApplicationData(context.Context, *ApplicationRequest) (*ApplicationData, error)
 	mustEmbedUnimplementedABNServer()
 }
 
@@ -91,8 +91,8 @@ func (UnimplementedABNServer) Lookup(context.Context, *Application) (*Session, e
 func (UnimplementedABNServer) WriteMetric(context.Context, *MetricValue) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WriteMetric not implemented")
 }
-func (UnimplementedABNServer) GetMetrics(context.Context, *MetricRequest) (*ApplicationMetrics, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMetrics not implemented")
+func (UnimplementedABNServer) GetApplicationData(context.Context, *ApplicationRequest) (*ApplicationData, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetApplicationData not implemented")
 }
 func (UnimplementedABNServer) mustEmbedUnimplementedABNServer() {}
 
@@ -143,20 +143,20 @@ func _ABN_WriteMetric_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ABN_GetMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MetricRequest)
+func _ABN_GetApplicationData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplicationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ABNServer).GetMetrics(ctx, in)
+		return srv.(ABNServer).GetApplicationData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/main.ABN/GetMetrics",
+		FullMethod: "/main.ABN/GetApplicationData",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ABNServer).GetMetrics(ctx, req.(*MetricRequest))
+		return srv.(ABNServer).GetApplicationData(ctx, req.(*ApplicationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -177,8 +177,8 @@ var ABN_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ABN_WriteMetric_Handler,
 		},
 		{
-			MethodName: "GetMetrics",
-			Handler:    _ABN_GetMetrics_Handler,
+			MethodName: "GetApplicationData",
+			Handler:    _ABN_GetApplicationData_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
