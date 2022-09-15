@@ -26,9 +26,6 @@ const (
 	// The size of an application is proportional to the number of versions and the number of metrics per version.
 	// Since only summary metrics are permitted, each is a fixed size
 	defaultMaxApplicationDataBytes int = 750000
-	// defaultFlushMultiplier is the default multiplier used to compute the
-	// interval for flushing applications that have not been written in a while
-	defaultFlushMultiplier int = 5
 )
 
 var (
@@ -37,9 +34,6 @@ var (
 	Applications ThreadSafeApplicationMap
 	// BatchWriteInterval is the interval over which changes may batched before being persisted
 	BatchWriteInterval time.Duration
-	// flushMultiplier is the interval at which applications are checked to see if they were not persisted because of
-	// write calls stopped or are too infrequent.
-	flushMultiplier int
 	// maxApplicationDataBytes is the maximum number of bytes allowed in an applicaton (as YAML converted to []byte)
 	// this limit prevents trying to persist an application that is too large (Kubernetes secrets have a 1 MB size limit)
 	maxApplicationDataBytes int
@@ -53,7 +47,6 @@ func init() {
 		lastWriteTimes: map[string]*time.Time{},
 	}
 	BatchWriteInterval = defaultBatchWriteInterval
-	flushMultiplier = defaultFlushMultiplier
 	maxApplicationDataBytes = defaultMaxApplicationDataBytes // a secret's maximum size is 1MB
 }
 
@@ -87,18 +80,24 @@ func (m *ThreadSafeApplicationMap) Unlock(application string) {
 	m.mutexes[application].Unlock()
 }
 
-// Add adds an application into the application map
-func (m *ThreadSafeApplicationMap) Add(a *Application) {
+// Put adds an application into the application map if it is not already there
+// Returns the application that is/was there
+func (m *ThreadSafeApplicationMap) Put(a *Application) *Application {
 	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	current, ok := m.apps[a.Name]
+	if ok {
+		return current
+	}
 	m.apps[a.Name] = a
 	m.mutexes[a.Name] = &sync.RWMutex{}
-	m.mutex.Unlock()
+	return a
 }
 
-// Get gets an application from map of applications
-// If the application is not present and a reader is provided, an attempt will be made to
-// read it from persistant storage
-func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*Application, error) {
+// Get application object from in memory map
+func (m *ThreadSafeApplicationMap) Get(application string) (*Application, error) {
+	// if available in the in-memory map, return it
 	m.mutex.RLock()
 	a, ok := m.apps[application]
 	m.mutex.RUnlock()
@@ -106,12 +105,23 @@ func (m *ThreadSafeApplicationMap) Get(application string, inMemoryOnly bool) (*
 		return a, nil
 	}
 
-	if inMemoryOnly {
-		return nil, errors.New("application record not found in memory")
+	return nil, errors.New(application + " not in memory")
+}
+
+// Read the application object if necessary from persistent storage (a secret)
+func (m *ThreadSafeApplicationMap) Read(application string) (*Application, error) {
+	a, err := m.Get(application)
+	if a != nil {
+		return a, err
 	}
 
-	a, err := m.readFromSecret(application)
-	m.Add(a)
+	// otherwise, read from persistent store (secret)
+	// if no secret, create new object
+	a, err = m.readFromSecret(application)
+
+	// and add to the in memory map
+	a = m.Put(a)
+
 	return a, err
 }
 
@@ -221,9 +231,7 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 }
 
 // BatchedWrite writes the Application to persistent storage only if the previous write
-// was more than BatchWriteInterval ago. If no more writes take place, it is possible that
-// some data is not persisted. To avoid this, the A/B/n service should periodically Flush
-// application data.
+// was more than BatchWriteInterval ago.
 func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 	log.Logger.Tracef("BatchedWrite called")
 	defer log.Logger.Trace("BatchedWrite completed")
@@ -245,8 +253,15 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 
 func deleteUntrackedVersions(a *Application) {
 	toDelete := []string{}
-	for version, v := range a.Versions {
-		if v.GetTrack() == nil {
+	for version := range a.Versions {
+		track := ""
+		for _, ver := range a.Tracks {
+			if ver == version {
+				track = ver
+				break
+			}
+		}
+		if track == "" {
 			toDelete = append(toDelete, version)
 		}
 	}
@@ -284,46 +299,4 @@ func splitApplicationKey(applicationKey string) (string, string) {
 	}
 
 	return namespace, name
-}
-
-// PeriodicApplicationsFlush periodically checks if there is any (metric) data associated with
-// an application that has not been persisted to the underlying secret. If so, it is written.
-// This supports the edge case of an application that stops receiving requests to write metric data.
-// The period on which flush works is a multiple of the BatchWriteInterval; it is expected that
-// BatchWrite will handle the majority of the required persistence.
-func (m *ThreadSafeApplicationMap) PeriodicApplicationsFlush(done chan struct{}) {
-	ticker := time.NewTicker(time.Duration(flushMultiplier) * BatchWriteInterval)
-	go func() {
-		for {
-			select {
-			case <-done:
-				return
-			case <-ticker.C:
-				m.flush()
-			}
-		}
-	}()
-}
-
-// flush writes all applications whose last write time is greater than the BatchWriteInterval
-func (m *ThreadSafeApplicationMap) flush() {
-	// get list of applications that need flushing
-	now := time.Now()
-	toFlush := []string{}
-	m.mutex.RLock()
-	for application, last := range m.lastWriteTimes {
-		if now.Sub(*last) > BatchWriteInterval {
-			toFlush = append(toFlush, application)
-		}
-	}
-	m.mutex.RUnlock()
-
-	// flush them .. unless they have been written since we inspected them above
-	for _, application := range toFlush {
-		a, err := m.Get(application, true)
-		if err != nil {
-			continue
-		}
-		m.BatchedWrite(a)
-	}
 }

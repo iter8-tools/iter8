@@ -11,89 +11,59 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 )
 
-func TestApplicationNotInClusterRead(t *testing.T) {
-	setup(t)
-	a, err := Applications.readFromSecret("namespace/name")
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "not found")
-
-	assertApplication(t, a, applicationAssertion{
-		namespace: "namespace",
-		name:      "name",
-		tracks:    []string{},
-		versions:  []string{},
-	})
-
-	writeVerify(t, a)
-}
-
-func TestApplicationNotInClusterGet(t *testing.T) {
-	setup(t)
-	// must be in memory but it isn't
-	a, err := Applications.Get("namespace/name", true)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "application record not found")
-	assert.Nil(t, a)
-
-	// need not be in memory
-	a, err = Applications.Get("namespace/name", false)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "not found")
-
-	assertApplication(t, a, applicationAssertion{
-		namespace: "namespace",
-		name:      "name",
-		tracks:    []string{},
-		versions:  []string{},
-	})
-}
-
-func TestApplicationInCluster(t *testing.T) {
-	setup(t)
-	a, err := Applications.readFromSecret("default/application")
-	assert.NoError(t, err)
-
-	assertApplication(t, a, applicationAssertion{
+func TestGetAndRead(t *testing.T) {
+	app := applicationAssertion{
 		namespace: "default",
 		name:      "application",
 		tracks:    []string{"candidate"},
 		versions:  []string{"v1", "v2"},
-	})
-
-	assertVersion(t, a.Versions["v1"], versionAssertion{
-		track:   "",
-		metrics: []string{"metric1"},
-	})
-	assertVersion(t, a.Versions["v2"], versionAssertion{
-		track:   "candidate",
-		metrics: []string{},
-	})
-
-	writeVerify(t, a)
-}
-
-func TestApplicationInClusterGet(t *testing.T) {
-	setup(t)
-	// must be in memory but it isn't
-	a, err := Applications.Get("default/application", true)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "application record not found")
-	assert.Nil(t, a)
-
-	// need not be in memory
-	a, err = Applications.Get("default/application", false)
-	assert.NoError(t, err)
-
-	assertApplication(t, a, applicationAssertion{
+	}
+	defaultApp := applicationAssertion{
 		namespace: "default",
 		name:      "application",
-		tracks:    []string{"candidate"},
-		versions:  []string{"v1", "v2"},
-	})
+		tracks:    []string{},
+		versions:  []string{},
+	}
+	scenarios := map[string]struct {
+		fetch         func(name string) (*Application, error)
+		setup         func(t *testing.T, applications ...applicationSource)
+		errorContains string
+		isNil         bool
+		appSpec       *applicationAssertion
+	}{
+		"GET in memory, in cluster":          {setup: setupInMemoryInCluster, fetch: Applications.Get, isNil: false, appSpec: &app, errorContains: ""},
+		"READ in memory, in cluster":         {setup: setupInMemoryInCluster, fetch: Applications.Read, isNil: false, appSpec: &app, errorContains: ""},
+		"GET in memory, not in cluster":      {setup: setupInMemoryNotInCluster, fetch: Applications.Get, isNil: false, appSpec: &app, errorContains: ""},
+		"READ in memory, not in cluster":     {setup: setupInMemoryNotInCluster, fetch: Applications.Read, isNil: false, appSpec: &app, errorContains: ""},
+		"GET not in memory, in cluster":      {setup: setupNotInMemoryInCluster, fetch: Applications.Get, isNil: true, appSpec: nil, errorContains: "not in memory"},
+		"READ not in memory, in cluster":     {setup: setupNotInMemoryInCluster, fetch: Applications.Read, isNil: false, appSpec: &app, errorContains: ""},
+		"GET not in memory, not in cluster":  {setup: setupNotInMemoryNotInCluster, fetch: Applications.Get, isNil: true, appSpec: nil, errorContains: "not in memory"},
+		"READ not in memory, not in cluster": {setup: setupNotInMemoryNotInCluster, fetch: Applications.Read, isNil: false, appSpec: &defaultApp, errorContains: "not found"},
+	}
+
+	for label, s := range scenarios {
+		t.Run(label, func(t *testing.T) {
+			s.setup(t, applicationSource{namespace: "default", name: "application", folder: testdata, file: testfile})
+			a, err := s.fetch("default/application")
+			if s.errorContains != "" {
+				assert.Error(t, err)
+				assert.ErrorContains(t, err, s.errorContains)
+			} else {
+				assert.NoError(t, err)
+			}
+			if s.appSpec == nil {
+				assert.Nil(t, a)
+			} else {
+				assert.NotNil(t, a)
+				assertApplication(t, a, *s.appSpec)
+				writeVerify(t, a)
+			}
+		})
+	}
 }
 
 func TestWrite(t *testing.T) {
-	setup(t)
+	setupInMemoryInCluster(t, applicationSource{namespace: "default", name: "application", folder: testdata, file: testfile})
 
 	a, _ := Applications.readFromSecret("default/application")
 	assertApplication(t, a, applicationAssertion{
@@ -119,9 +89,9 @@ func TestWrite(t *testing.T) {
 }
 
 func TestWriteLimit(t *testing.T) {
-	setup(t)
+	setupInMemoryInCluster(t, applicationSource{namespace: "default", name: "application", folder: testdata, file: testfile})
 	BatchWriteInterval = time.Duration(0)
-	maxApplicationDataBytes = 150
+	maxApplicationDataBytes = 100
 
 	a, err := Applications.readFromSecret("default/application")
 	assert.NoError(t, err)
@@ -143,13 +113,15 @@ func TestWriteLimit(t *testing.T) {
 }
 
 func TestBatchedWrite(t *testing.T) {
-	setup(t)
+	ns := "test"
+	nm := "batchedwrite"
+	setupInMemoryInCluster(t, applicationSource{namespace: ns, name: nm, folder: testdata, file: testfile})
 	BatchWriteInterval = time.Duration(2 * time.Second)
 
-	a, _ := Applications.Get("default/application", false)
+	a, _ := Applications.Get(ns + "/" + nm)
 	assertApplication(t, a, applicationAssertion{
-		namespace: "default",
-		name:      "application",
+		namespace: ns,
+		name:      nm,
 		tracks:    []string{"candidate"},
 		versions:  []string{"v1", "v2"},
 	})
@@ -159,128 +131,50 @@ func TestBatchedWrite(t *testing.T) {
 
 	// BatchedWrite should not write; too soon
 	Applications.BatchedWrite(a)
-	b, _ := Applications.readFromSecret("default/application")
+	b, _ := Applications.readFromSecret(ns + "/" + nm)
 	// no change; it has been too soon
 	assertApplication(t, b, applicationAssertion{
-		namespace: "default",
-		name:      "application",
+		namespace: ns,
+		name:      nm,
 		tracks:    []string{"candidate"},
 		versions:  []string{"v1", "v2"},
 	})
 
-	// time.Sleep(10 * time.Second)
-	time.Sleep(BatchWriteInterval)
+	time.Sleep((250 * time.Millisecond) + BatchWriteInterval)
 
 	// BatchedWrite should succeed; we waited > BatchWriteInterval
 	Applications.BatchedWrite(a)
-	c, _ := Applications.readFromSecret("default/application")
+	c, _ := Applications.Read(ns + "/" + nm)
 	// changed
 	assertApplication(t, c, applicationAssertion{
-		namespace: "default",
-		name:      "application",
+		namespace: ns,
+		name:      nm,
 		tracks:    []string{"candidate", "foo"},
 		versions:  []string{"v1", "v2"},
 	})
 }
 
-func TestFlush(t *testing.T) {
-	setup(t)
-	BatchWriteInterval = time.Duration(2 * time.Second)
-
-	a, _ := Applications.Get("default/application", false)
-	assertApplication(t, a, applicationAssertion{
-		namespace: "default",
-		name:      "application",
-		tracks:    []string{"candidate"},
-		versions:  []string{"v1", "v2"},
-	})
-
-	// modify application in some way
-	a.Tracks["foo"] = "v1"
-
-	// BatchedWrite should not write; too soon
-	Applications.BatchedWrite(a)
-	b, _ := Applications.readFromSecret("default/application")
-	// no change; it has been too soon
-	assertApplication(t, b, applicationAssertion{
-		namespace: "default",
-		name:      "application",
-		tracks:    []string{"candidate"},
-		versions:  []string{"v1", "v2"},
-	})
-
-	// avoid need to sleep by resetting BatchedWriteInterval
-	BatchWriteInterval = time.Duration(0)
-
-	// still not written since no second casll was made
-	b, _ = Applications.readFromSecret("default/application")
-	// no change; it has been too soon
-	assertApplication(t, b, applicationAssertion{
-		namespace: "default",
-		name:      "application",
-		tracks:    []string{"candidate"},
-		versions:  []string{"v1", "v2"},
-	})
-
-	Applications.flush()
-
-	// now will have been written
-	c, _ := Applications.readFromSecret("default/application")
-	// changed
-	assertApplication(t, c, applicationAssertion{
-		namespace: "default",
-		name:      "application",
-		tracks:    []string{"candidate", "foo"},
-		versions:  []string{"v1", "v2"},
-	})
-}
-
-func TestPeriodicFlush(t *testing.T) {
-	setup(t)
-	BatchWriteInterval = time.Duration(1 * time.Second)
-	flushMultiplier = 2
-
-	done := make(chan struct{})
-	Applications.PeriodicApplicationsFlush(done)
-
-	a, _ := Applications.Get("default/application", false)
-	assertApplication(t, a, applicationAssertion{
-		namespace: "default",
-		name:      "application",
-		tracks:    []string{"candidate"},
-		versions:  []string{"v1", "v2"},
-	})
-
-	// modify application in some way
-	a.Tracks["foo"] = "v1"
-
-	// don't write it now; wait for PeriodApplicationsFlush to trigger
-	time.Sleep(time.Duration(1+flushMultiplier) * BatchWriteInterval)
-
-	// should have been flushed
-	c, _ := Applications.readFromSecret("default/application")
-	// changed
-	assertApplication(t, c, applicationAssertion{
-		namespace: "default",
-		name:      "application",
-		tracks:    []string{"candidate", "foo"},
-		versions:  []string{"v1", "v2"},
-	})
-
-	// terminate go flusher
-	close(done)
-}
+const testdata string = "../../testdata"
+const testfile string = "abninputs/readtest.yaml"
 
 func TestGetVersion(t *testing.T) {
-	setup(t)
-	a, _ := Applications.readFromSecret("default/application")
+	ns := "test"
+	nm := "getversion"
+	setupInMemoryInCluster(t, applicationSource{namespace: ns, name: nm, folder: testdata, file: testfile})
+	a, _ := Applications.Read(ns + "/" + nm)
+	// verify it is as expected
+	assertApplication(t, a, applicationAssertion{
+		namespace: ns,
+		name:      nm,
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2"},
+	})
 
 	var v *Version
 	var isNew bool
 
 	// get a version that exists
-	v, _ = a.GetVersion("v1", true)
-
+	v, _ = a.GetVersion("v1", false)
 	assertVersion(t, v, versionAssertion{
 		track:   "",
 		metrics: []string{"metric1"},
@@ -289,18 +183,35 @@ func TestGetVersion(t *testing.T) {
 	// get a version that doesn't exist without allowing new creation
 	v, isNew = a.GetVersion("foo", false)
 	assert.Nil(t, v)
-	assert.True(t, isNew)
+	assert.False(t, isNew)
 
 	// get a version that doesn't exist allowing new creation
 	v, isNew = a.GetVersion("foo", true)
 	assert.NotNil(t, v)
 	assert.True(t, isNew)
+	assertApplication(t, a, applicationAssertion{
+		namespace: ns,
+		name:      nm,
+		tracks:    []string{"candidate"},
+		versions:  []string{"v1", "v2", "foo"},
+	})
 
-	a = writeVerify(t, a)
+	// b := writeVerify(t, a)
+
+	application := a.Name
+	// write application to cluster (should create the secret, if not present)
+	err := Applications.Write(a)
+	assert.NoError(t, err)
+	// read back from cluster; clear Applications first so actually read from secret
+	Applications.Clear()
+	a, err = Applications.Read(application)
+	assert.NotNil(t, a)
+	assert.NoError(t, err)
+
 	// verify version foo is now present
 	assertApplication(t, a, applicationAssertion{
-		namespace: "default",
-		name:      "application",
+		namespace: ns,
+		name:      nm,
 		tracks:    []string{"candidate"},
 		versions:  []string{"v1", "v2", "foo"},
 	})
@@ -313,7 +224,6 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 	v := &Version{
 		Metrics: map[string]*metrics.SummaryMetric{},
 	}
-	assert.Nil(t, v.GetTrack())
 
 	// test GetMetic w/o allowNew
 	m, isNew = v.GetMetric("foo", false)
@@ -351,11 +261,43 @@ func TestVersionAndSummaryMetric(t *testing.T) {
 	assert.Equal(t, float64(3865), m.SumSquares())
 }
 
-func setup(t *testing.T) {
+type applicationSource struct {
+	namespace string
+	name      string
+	folder    string
+	file      string
+}
+
+func setupInitialization(t *testing.T) {
 	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
 	Applications.Clear()
-	maxApplicationDataBytes = 750000
-	yamlToSecret("../../testdata", "abninputs/readtest.yaml", "default/application")
+	maxApplicationDataBytes = defaultMaxApplicationDataBytes
+	BatchWriteInterval = defaultBatchWriteInterval
+}
+
+func setupNotInMemoryNotInCluster(t *testing.T, applications ...applicationSource) {
+	setupInitialization(t)
+}
+
+func setupNotInMemoryInCluster(t *testing.T, applications ...applicationSource) {
+	setupInitialization(t)
+	for _, aSrc := range applications {
+		yamlToSecret(aSrc.folder, aSrc.file, aSrc.namespace+"/"+aSrc.name)
+	}
+}
+
+func setupInMemoryInCluster(t *testing.T, applications ...applicationSource) {
+	setupNotInMemoryInCluster(t, applications...)
+	for _, aSrc := range applications {
+		a, err := Applications.Read(aSrc.namespace + "/" + aSrc.name)
+		assert.NoError(t, err)
+		assert.NotNil(t, a)
+	}
+}
+
+func setupInMemoryNotInCluster(t *testing.T, applications ...applicationSource) {
+	setupInMemoryInCluster(t, applications...)
+	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
 }
 
 func writeVerify(t *testing.T, a *Application) *Application {

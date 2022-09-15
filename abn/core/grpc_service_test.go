@@ -71,9 +71,29 @@ func testLookup(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	}
 }
 
+func TestGetMetrics(t *testing.T) {
+	client, teardown := setup(t)
+	defer teardown()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	s, err := (*client).GetMetrics(
+		ctx,
+		&pb.MetricRequest{
+			Application: "default/application",
+		},
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, s)
+	jsonStr := s.GetApplicationJson()
+	assert.Equal(t, "{\"name\":\"default/application\",\"tracks\":{\"candidate\":\"v2\"},\"versions\":{\"v1\":{\"metrics\":{\"metric1\":[1,45,45,45,2025]}},\"v2\":{\"metrics\":{}}}}", jsonStr)
+}
+
 func TestWriteMetric(t *testing.T) {
 	testcases := map[string]Scenario{
-		"no applicaton": {application: "default/noapp", user: "user", errorSubstring: "track not mapped", track: "", metric: "", value: "76"},
+		"no applicaton": {application: "", user: "user", errorSubstring: "track not mapped", track: "", metric: "", value: "76"},
 		"no user":       {application: "default/application", user: "", errorSubstring: "no user session provided", track: "", metric: "", value: "76"},
 		"invalid value": {application: "default/application", user: "user", errorSubstring: "", track: "", metric: "", value: "abc"},
 		"valid":         {application: "default/application", user: "user", errorSubstring: "", track: "candidate", metric: "metric1", value: "76"},
@@ -93,7 +113,11 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	// get current count of metric
 	var oldCount uint32 = 0
 	var a *abnapp.Application
-	a, _ = abnapp.Applications.Get(scenario.application, false)
+	a, err := abnapp.Applications.Get(scenario.application)
+	if scenario.application == "" {
+		assert.ErrorContains(t, err, "not in memory")
+		return
+	}
 	assert.NotNil(t, a)
 	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
@@ -107,7 +131,7 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	_, err := (*client).WriteMetric(
+	_, err = (*client).WriteMetric(
 		ctx,
 		&pb.MetricValue{
 			Name:        scenario.metric,
@@ -124,7 +148,7 @@ func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	}
 
 	// verify that metric count has increased by 1
-	a, _ = abnapp.Applications.Get(scenario.application, false)
+	a, _ = abnapp.Applications.Get(scenario.application)
 	assert.NotNil(t, a)
 	abnapp.Applications.RLock(a.Name)
 	if scenario.metric != "" {
@@ -139,10 +163,9 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
 	// populate watcher.Applications with test applications
 	abnapp.Applications.Clear()
-	// abnapp.Applications.SetReaderWriter(kClient)
 	a, err := yamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
 	assert.NoError(t, err)
-	abnapp.Applications.Add(a)
+	abnapp.Applications.Put(a)
 
 	// start server
 	lis, err := net.Listen("tcp", ":0")

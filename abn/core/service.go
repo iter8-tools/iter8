@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/iter8-tools/iter8/abn/watcher"
@@ -52,8 +51,6 @@ func Start() {
 	c := readConfig(abnConfigFile)
 	w := watcher.NewIter8Watcher(c.Resources, c.Namespaces)
 	go w.Start(stopCh)
-
-	abnapp.Applications.PeriodicApplicationsFlush(stopCh)
 
 	// launch gRPC server to respond to frontend requests
 	go launchGRPCServer([]grpc.ServerOption{})
@@ -101,6 +98,16 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 	)
 
 	return &emptypb.Empty{}, err
+}
+
+func (server *abnServer) GetMetrics(ctx context.Context, metricReqMsg *pb.MetricRequest) (*pb.ApplicationMetrics, error) {
+	jsonStr, err := getMetricsInternal(
+		metricReqMsg.GetApplication(),
+	)
+
+	return &pb.ApplicationMetrics{
+		ApplicationJson: jsonStr,
+	}, err
 }
 
 // launchGRPCServer starts gRPC server

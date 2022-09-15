@@ -42,7 +42,7 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 			a.Versions[version] = v
 			return v, true
 		}
-		return nil, true
+		return nil, false
 	}
 
 	log.Logger.Debugf("GetVersion returning %+v", v)

@@ -19,6 +19,9 @@ service ABN {
   // The metric value is explicitly associated with a list of transactions that contributed to its computation.
   // The user is expected to identify these transactions.
   rpc WriteMetric(MetricValue) returns (google.protobuf.Empty) {}
+
+  // Get metrics for an application
+  rpc GetMetrics(MetricRequest) returns (ApplicationMetrics) {}
 }
 
 message Application {
@@ -45,7 +48,16 @@ message MetricValue {
   string application = 3;
   // User or user session identifier
   string user = 4;
+}
 
+message MetricRequest {
+  // name of application
+  string application = 1;
+}
+
+message ApplicationMetrics {
+  // JSON string of application
+  string applicationJson = 1;
 }
 
 // https://developers.google.com/protocol-buffers/docs/proto3

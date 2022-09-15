@@ -10,36 +10,42 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type Iter8Watcher struct {
+type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string) *Iter8Watcher {
-	w := &Iter8Watcher{
+// NewIter8Watcher returns a watcher for iter8 related objects
+func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string) *iter8Watcher {
+	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
+
+	handlerFunc := func(obj interface{}) {
+		wo := watchedObject{Obj: obj.(*unstructured.Unstructured)}
+		if precond(wo) {
+			handle(wo, resourceTypes, w.factories)
+		}
+	}
+
 	// for each namespace, resource type configure Informer
 	for _, ns := range namespaces {
 		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sclient.Client.Dynamic(), 0, ns, nil)
 		for _, gvr := range resourceTypes {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: func(obj interface{}) {
-					addObject(watchedObject{Obj: obj.(*unstructured.Unstructured)})
-				},
+				AddFunc: handlerFunc,
 				UpdateFunc: func(oldObj, obj interface{}) {
-					updateObject(watchedObject{Obj: obj.(*unstructured.Unstructured)})
+					handlerFunc(obj)
 				},
-				DeleteFunc: func(obj interface{}) {
-					deleteObject(watchedObject{Obj: obj.(*unstructured.Unstructured)})
-				},
+				DeleteFunc: handlerFunc,
 			})
 		}
 	}
 	return w
 }
 
-func (watcher *Iter8Watcher) Start(stopChannel chan struct{}) {
+// Start starts the watcher
+func (watcher *iter8Watcher) Start(stopChannel chan struct{}) {
 	for _, f := range watcher.factories {
 		f.Start(stopChannel)
 	}

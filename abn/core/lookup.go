@@ -3,10 +3,9 @@ package core
 // lookup.go -(internal) implementation of gRPC Lookup method
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"hash/crc32"
+	"hash/maphash"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 )
@@ -19,7 +18,7 @@ func lookupInternal(application string, user string) (*abnapp.Application, *stri
 	}
 
 	// check that we have a record of the application
-	a, err := abnapp.Applications.Get(application, true)
+	a, err := abnapp.Applications.Get(application)
 	if err != nil {
 		return nil, nil, fmt.Errorf("application not found: %s", err.Error())
 	}
@@ -48,32 +47,27 @@ func lookupInternal(application string, user string) (*abnapp.Application, *stri
 // Inspired by https://github.com/tysonmote/rendezvous/blob/master/rendezvous.go
 func rendezvousGet(a *abnapp.Application, user string) string {
 	// current maximimum score as computed by the hash function
-	var maxScore uint32
+	var maxScore uint64
 	// maxTrack is the track with the current maximum score
 	var maxTrack string
-	// maxVersion is the version name (as []byte) associated with maxTrack
-	var maxVersion []byte
+	// maxVersion is the version name associated with maxTrack
+	var maxVersion string
 
-	userBytes := []byte(user)
-	for t, v := range a.Tracks {
-		versionBytes := []byte(v)
-		score := hash(versionBytes, userBytes)
-		if score > maxScore || (score == maxScore && bytes.Compare(versionBytes, maxVersion) < 0) {
+	for track, version := range a.Tracks {
+		score := hash(version, user)
+		if score > maxScore || (score == maxScore && version > maxVersion) {
 			maxScore = score
-			maxVersion = versionBytes
-			maxTrack = t
+			maxVersion = version
+			maxTrack = track
 		}
 	}
 	return maxTrack
 }
 
-// hasher is a 32 bit hash function
-var hasher = crc32.New(crc32.MakeTable(crc32.Castagnoli))
-
 // hash computes the score for a version, user combination
-func hash(version, user []byte) uint32 {
-	hasher.Reset()
-	hasher.Write(user)
-	hasher.Write(version)
-	return hasher.Sum32()
+func hash(version, user string) uint64 {
+	var hasher maphash.Hash
+	hasher.WriteString(user)
+	hasher.WriteString(version)
+	return hasher.Sum64()
 }

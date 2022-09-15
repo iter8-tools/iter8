@@ -10,5 +10,4 @@ versions:
       - 45
       - 45
       - 2025
-  v2:
-    track: candidate
+  v2: {}

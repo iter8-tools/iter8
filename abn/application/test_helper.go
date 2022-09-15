@@ -1,7 +1,6 @@
 package application
 
 import (
-	"context"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
@@ -9,29 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 func yamlToSecret(folder, file, name string) error {
-	byteArray, err := readYamlFromFile(folder, file)
-	if err != nil {
-		return err
-	}
-
-	secretName := secretNameFromKey(name)
-	secretNamespace := namespaceFromKey(name)
-
-	_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: secretNamespace,
-		},
-		StringData: map[string]string{secretKey: string(byteArray)},
-	}, metav1.CreateOptions{})
-	return err
+	a, _ := yamlToApplication(name, folder, file)
+	return Applications.Write(a)
 }
 
 func readYamlFromFile(folder, file string) ([]byte, error) {
@@ -41,28 +24,65 @@ func readYamlFromFile(folder, file string) ([]byte, error) {
 	return ioutil.ReadFile(fname)
 }
 
+func yamlToApplication(name, folder, file string) (*Application, error) {
+	byteArray, err := readYamlFromFile(folder, file)
+	if err != nil {
+		return nil, err
+	}
+
+	return byteArrayToApplication(name, byteArray)
+}
+
+func byteArrayToApplication(name string, data []byte) (*Application, error) {
+	a := &Application{}
+	err := yaml.Unmarshal(data, a)
+	if err != nil {
+		return &Application{
+			Name:     name,
+			Versions: Versions{},
+			Tracks:   Tracks{},
+		}, nil
+	}
+	a.Name = name
+
+	// Initialize versions if not already initialized
+	if a.Versions == nil {
+		a.Versions = Versions{}
+	}
+	for _, v := range a.Versions {
+		if v.Metrics == nil {
+			v.Metrics = map[string]*SummaryMetric{}
+		}
+	}
+
+	return a, nil
+}
+
 type applicationAssertion struct {
 	namespace, name  string
 	tracks, versions []string
 }
 
-func assertApplication(t *testing.T, a *Application, assertion applicationAssertion) {
-	assert.NotNil(t, a)
-	assert.Contains(t, a.String(), assertion.namespace+"/"+assertion.name)
+func assertApplication(t *testing.T, a *Application, assertion applicationAssertion) bool {
+	r := true
+	r = r && assert.NotNil(t, a)
+	r = r && assert.Contains(t, a.String(), assertion.namespace+"/"+assertion.name)
 
 	namespace, name := splitApplicationKey(a.Name)
-	assert.Equal(t, assertion.name, name)
-	assert.Equal(t, assertion.namespace, namespace)
+	r = r && assert.Equal(t, assertion.name, name)
+	r = r && assert.Equal(t, assertion.namespace, namespace)
 
-	assert.Len(t, a.Tracks, len(assertion.tracks))
+	r = r && assert.Len(t, a.Tracks, len(assertion.tracks))
 	for _, track := range assertion.tracks {
-		assert.Contains(t, a.Versions, a.Tracks[track])
+		r = r && assert.Contains(t, a.Versions, a.Tracks[track])
 	}
-	assert.Len(t, a.Versions, len(assertion.versions))
+	r = r && assert.Len(t, a.Versions, len(assertion.versions))
 
 	for _, v := range a.Versions {
-		assert.NotNil(t, v.Metrics)
+		r = r && assert.NotNil(t, v.Metrics)
 	}
+
+	return r
 }
 
 type versionAssertion struct {
@@ -70,21 +90,17 @@ type versionAssertion struct {
 	metrics []string
 }
 
-func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
-	assert.NotNil(t, v)
+func assertVersion(t *testing.T, v *Version, assertion versionAssertion) bool {
+	r := true
 
-	track := v.GetTrack()
-	if assertion.track == "" {
-		assert.Nil(t, track)
-	} else {
-		assert.Equal(t, assertion.track, *track)
-	}
+	r = r && assert.NotNil(t, v)
 
-	assert.Len(t, v.Metrics, len(assertion.metrics))
-	assert.NotNil(t, v.Metrics)
+	r = r && assert.Len(t, v.Metrics, len(assertion.metrics))
+	r = r && assert.NotNil(t, v.Metrics)
 	for m := range v.Metrics {
-		assert.Contains(t, assertion.metrics, m)
+		r = r && assert.Contains(t, assertion.metrics, m)
 	}
+	return r
 }
 
 // Clear the application map
@@ -96,6 +112,6 @@ func (m *ThreadSafeApplicationMap) Clear() {
 	m.mutex.Unlock()
 }
 
-func NumApplications(t *testing.T, length int) {
-	assert.Len(t, Applications.apps, length)
+func NumApplications(t *testing.T, length int) bool {
+	return assert.Len(t, Applications.apps, length)
 }
