@@ -63,23 +63,26 @@ type applicationAssertion struct {
 	tracks, versions []string
 }
 
-func assertApplication(t *testing.T, a *Application, assertion applicationAssertion) {
-	assert.NotNil(t, a)
-	assert.Contains(t, a.String(), assertion.namespace+"/"+assertion.name)
+func assertApplication(t *testing.T, a *Application, assertion applicationAssertion) bool {
+	r := true
+	r = r && assert.NotNil(t, a)
+	r = r && assert.Contains(t, a.String(), assertion.namespace+"/"+assertion.name)
 
 	namespace, name := splitApplicationKey(a.Name)
-	assert.Equal(t, assertion.name, name)
-	assert.Equal(t, assertion.namespace, namespace)
+	r = r && assert.Equal(t, assertion.name, name)
+	r = r && assert.Equal(t, assertion.namespace, namespace)
 
-	assert.Len(t, a.Tracks, len(assertion.tracks))
+	r = r && assert.Len(t, a.Tracks, len(assertion.tracks))
 	for _, track := range assertion.tracks {
-		assert.Contains(t, a.Versions, a.Tracks[track])
+		r = r && assert.Contains(t, a.Versions, a.Tracks[track])
 	}
-	assert.Len(t, a.Versions, len(assertion.versions))
+	r = r && assert.Len(t, a.Versions, len(assertion.versions))
 
 	for _, v := range a.Versions {
-		assert.NotNil(t, v.Metrics)
+		r = r && assert.NotNil(t, v.Metrics)
 	}
+
+	return r
 }
 
 type versionAssertion struct {
@@ -87,14 +90,17 @@ type versionAssertion struct {
 	metrics []string
 }
 
-func assertVersion(t *testing.T, v *Version, assertion versionAssertion) {
-	assert.NotNil(t, v)
+func assertVersion(t *testing.T, v *Version, assertion versionAssertion) bool {
+	r := true
 
-	assert.Len(t, v.Metrics, len(assertion.metrics))
-	assert.NotNil(t, v.Metrics)
+	r = r && assert.NotNil(t, v)
+
+	r = r && assert.Len(t, v.Metrics, len(assertion.metrics))
+	r = r && assert.NotNil(t, v.Metrics)
 	for m := range v.Metrics {
-		assert.Contains(t, assertion.metrics, m)
+		r = r && assert.Contains(t, assertion.metrics, m)
 	}
+	return r
 }
 
 // Clear the application map
@@ -106,6 +112,6 @@ func (m *ThreadSafeApplicationMap) Clear() {
 	m.mutex.Unlock()
 }
 
-func NumApplications(t *testing.T, length int) {
-	assert.Len(t, Applications.apps, length)
+func NumApplications(t *testing.T, length int) bool {
+	return assert.Len(t, Applications.apps, length)
 }

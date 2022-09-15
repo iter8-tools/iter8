@@ -272,7 +272,6 @@ func setupInitialization(t *testing.T) {
 	Applications.Clear()
 	maxApplicationDataBytes = defaultMaxApplicationDataBytes
 	BatchWriteInterval = defaultBatchWriteInterval
-	flushMultiplier = defaultFlushMultiplier
 }
 
 func setupNotInMemoryNotInCluster(t *testing.T, applications ...applicationSource) {

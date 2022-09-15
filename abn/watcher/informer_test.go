@@ -44,41 +44,44 @@ func TestAdd(t *testing.T) {
 			}
 
 			done := make(chan struct{})
+			defer close(done)
 			setup(t, gvr, s.namespace, done)
 
 			createObject(t, gvr, s.iter8related, s.namespace, s.application, s.version, s.track, s.ready)
 
-			// give handler opportunity to execute
-			time.Sleep(500 * time.Millisecond)
+			assert.Eventually(
+				t,
+				func() bool {
+					r := true
+					// if any preconditions are not met, then no application added
+					if strings.ToLower(s.iter8related) != "true" ||
+						s.application == "" ||
+						s.version == "" {
+						r = r && abnapp.NumApplications(t, 0)
+						return r
+					}
 
-			// verify results as expected
-			// if any preconditions are not met, then no application added
-			if strings.ToLower(s.iter8related) != "true" ||
-				s.application == "" ||
-				s.version == "" {
-				abnapp.NumApplications(t, 0)
-				return
-			}
+					// otherwise application created
 
-			// otherwise application created
+					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
+					r = r && assert.NoError(t, err)
+					r = r && assert.NotNil(t, a)
 
-			a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
-			assert.NoError(t, err)
-			assert.NotNil(t, a)
-
-			tracks := []string{}
-			if s.track != "" && s.ready == "true" {
-				tracks = []string{s.track}
-			}
-			assertApplication(t, a, applicationAssertion{
-				namespace: s.namespace,
-				name:      s.application,
-				tracks:    tracks,
-				versions:  []string{s.version},
-			})
-
-			// terminate the informers
-			close(done)
+					tracks := []string{}
+					if s.track != "" && s.ready == "true" {
+						tracks = []string{s.track}
+					}
+					r = r && assertApplication(t, a, applicationAssertion{
+						namespace: s.namespace,
+						name:      s.application,
+						tracks:    tracks,
+						versions:  []string{s.version},
+					})
+					return r
+				},
+				10*time.Second,
+				100*time.Millisecond,
+			)
 		})
 	}
 }
@@ -109,19 +112,28 @@ func TestUpdate(t *testing.T) {
 			}
 
 			done := make(chan struct{})
+			defer close(done)
 			setup(t, gvr, s.namespace, done)
 			existingObj := createObject(t, gvr, "true", "namespace", "name", "version", "", "")
 			// verify that existing object is as expected
-			time.Sleep(500 * time.Millisecond)
-			a, err := abnapp.Applications.Get("namespace/name")
-			assert.NoError(t, err)
-			assert.NotNil(t, a)
-			assertApplication(t, a, applicationAssertion{
-				namespace: "namespace",
-				name:      "name",
-				tracks:    []string{},
-				versions:  []string{"version"},
-			})
+			assert.Eventually(
+				t,
+				func() bool {
+					r := true
+					a, err := abnapp.Applications.Get("namespace/name")
+					r = r && assert.NoError(t, err)
+					r = r && assert.NotNil(t, a)
+					r = r && assertApplication(t, a, applicationAssertion{
+						namespace: "namespace",
+						name:      "name",
+						tracks:    []string{},
+						versions:  []string{"version"},
+					})
+					return r
+				},
+				10*time.Second,
+				100*time.Millisecond,
+			)
 
 			//update object
 			if s.iter8related == "" {
@@ -161,47 +173,48 @@ func TestUpdate(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, updatedObj)
 
-			// give handler opportunity to execute
-			time.Sleep(500 * time.Millisecond)
+			assert.Eventually(
+				t,
+				func() bool {
+					r := true
+					// if any preconditions are not met, then no change was made to applications
+					if strings.ToLower(s.iter8related) != "true" ||
+						s.application == "" ||
+						s.version == "" {
+						// abnapp.NumApplications(t, 1)
+						a, err := abnapp.Applications.Get("namespace/name")
+						r = r && assert.NoError(t, err)
+						r = r && assert.NotNil(t, a)
+						r = r && assertApplication(t, a, applicationAssertion{
+							namespace: "namespace",
+							name:      "name",
+							tracks:    []string{},
+							versions:  []string{"version"},
+						})
+						return r
+					}
 
-			// verify results as expected
+					// otherwise application was possibily modified in some way
+					// at least this application exists since it was preexisting
+					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
+					r = r && assert.NoError(t, err)
+					r = r && assert.NotNil(t, a)
 
-			// if any preconditions are not met, then no change was made to applications
-			if strings.ToLower(s.iter8related) != "true" ||
-				s.application == "" ||
-				s.version == "" {
-				// abnapp.NumApplications(t, 1)
-				a, err = abnapp.Applications.Get("namespace/name")
-				assert.NoError(t, err)
-				assert.NotNil(t, a)
-				assertApplication(t, a, applicationAssertion{
-					namespace: "namespace",
-					name:      "name",
-					tracks:    []string{},
-					versions:  []string{"version"},
-				})
-				return
-			}
-
-			// otherwise application was possibily modified in some way
-			// at least this application exists since it was preexisting
-			a, err = abnapp.Applications.Get(s.namespace + "/" + s.application)
-			assert.NoError(t, err)
-			assert.NotNil(t, a)
-
-			tracks := []string{}
-			if s.track != "" && s.ready == "true" {
-				tracks = []string{s.track}
-			}
-			assertApplication(t, a, applicationAssertion{
-				namespace: s.namespace,
-				name:      s.application,
-				tracks:    tracks,
-				versions:  []string{s.version},
-			})
-
-			// terminate the informers
-			close(done)
+					tracks := []string{}
+					if s.track != "" && s.ready == "true" {
+						tracks = []string{s.track}
+					}
+					r = r && assertApplication(t, a, applicationAssertion{
+						namespace: s.namespace,
+						name:      s.application,
+						tracks:    tracks,
+						versions:  []string{s.version},
+					})
+					return r
+				},
+				10*time.Second,
+				100*time.Millisecond,
+			)
 		})
 	}
 }
@@ -230,24 +243,33 @@ func TestDelete(t *testing.T) {
 			}
 
 			done := make(chan struct{})
+			defer close(done)
 			setup(t, gvr, s.namespace, done)
 
 			// add existing object (to delete)
 			createObject(t, gvr, "true", "namespace", "name", "version", "track", "true")
 			// verify that existing object is as expected
-			time.Sleep(500 * time.Millisecond)
-			a, err := abnapp.Applications.Get("namespace/name")
-			assert.NoError(t, err)
-			assert.NotNil(t, a)
-			assertApplication(t, a, applicationAssertion{
-				namespace: "namespace",
-				name:      "name",
-				tracks:    []string{"track"},
-				versions:  []string{"version"},
-			})
+			assert.Eventually(
+				t,
+				func() bool {
+					r := true
+					a, err := abnapp.Applications.Get("namespace/name")
+					r = r && assert.NoError(t, err)
+					r = r && assert.NotNil(t, a)
+					r = r && assertApplication(t, a, applicationAssertion{
+						namespace: "namespace",
+						name:      "name",
+						tracks:    []string{"track"},
+						versions:  []string{"version"},
+					})
+					return r
+				},
+				10*time.Second,
+				100*time.Millisecond,
+			)
 
 			// delete object --> no track anymore
-			err = k8sclient.Client.Dynamic().
+			err := k8sclient.Client.Dynamic().
 				Resource(gvr).Namespace(s.namespace).
 				Delete(
 					context.TODO(),
@@ -256,43 +278,44 @@ func TestDelete(t *testing.T) {
 				)
 			assert.NoError(t, err)
 
-			// give handler opportunity to execute
-			time.Sleep(500 * time.Millisecond)
+			assert.Eventually(
+				t,
+				func() bool {
+					r := true
+					// if any preconditions are not met, then no change was made to applications
+					if strings.ToLower(s.iter8related) != "true" ||
+						s.application == "" ||
+						s.version == "" {
+						a, err := abnapp.Applications.Get("namespace/name")
+						r = r && assert.NoError(t, err)
+						r = r && assert.NotNil(t, a)
+						r = r && assertApplication(t, a, applicationAssertion{
+							namespace: "namespace",
+							name:      "name",
+							tracks:    []string{"track"},
+							versions:  []string{"version"},
+						})
+						return r
+					}
 
-			// verify results as expected
+					// otherwise application was possibily modified in some way
+					// at least this application exists since it was preexisting
+					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
+					r = r && assert.NoError(t, err)
+					r = r && assert.NotNil(t, a)
 
-			// if any preconditions are not met, then no change was made to applications
-			if strings.ToLower(s.iter8related) != "true" ||
-				s.application == "" ||
-				s.version == "" {
-				// abnapp.NumApplications(t, 1)
-				a, err = abnapp.Applications.Get("namespace/name")
-				assert.NoError(t, err)
-				assert.NotNil(t, a)
-				assertApplication(t, a, applicationAssertion{
-					namespace: "namespace",
-					name:      "name",
-					tracks:    []string{"track"},
-					versions:  []string{"version"},
-				})
-				return
-			}
+					r = r && assertApplication(t, a, applicationAssertion{
+						namespace: s.namespace,
+						name:      s.application,
+						tracks:    []string{},
+						versions:  []string{s.version},
+					})
 
-			// otherwise application was possibily modified in some way
-			// at least this application exists since it was preexisting
-			a, err = abnapp.Applications.Get(s.namespace + "/" + s.application)
-			assert.NoError(t, err)
-			assert.NotNil(t, a)
-
-			assertApplication(t, a, applicationAssertion{
-				namespace: s.namespace,
-				name:      s.application,
-				tracks:    []string{},
-				versions:  []string{s.version},
-			})
-
-			// terminate the informers
-			close(done)
+					return r
+				},
+				10*time.Second,
+				100*time.Millisecond,
+			)
 		})
 	}
 }
