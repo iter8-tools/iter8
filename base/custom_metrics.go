@@ -10,11 +10,9 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"text/template"
 
 	"time"
 
-	"github.com/Masterminds/sprig"
 	"github.com/itchyny/gojq"
 	log "github.com/iter8-tools/iter8/base/log"
 	"sigs.k8s.io/yaml"
@@ -73,13 +71,13 @@ type HTTPParam struct {
 
 // customMetricsInputs is the input to the custommetrics task
 type customMetricsInputs struct {
-	// Templates	Maps provider to its template URL
+	// Template maps the provider to its template URL
 	Templates map[string]string `json:"templates" yaml:"templates"`
 
-	// Values Values used for substituting placeholders in metric templates.
+	// Values is used for substituting placeholders in metric templates.
 	Values map[string]interface{} `json:"values" yaml:"values"`
 
-	// VersionValues Per version values that override values
+	// VersionValues are per version values that override values
 	// For each version, its version values are coalesced with values
 	// The length of this slice equals the number of versions
 	VersionValues []map[string]interface{} `json:"versionValues" yaml:"versionValues"`
@@ -217,30 +215,6 @@ func queryDatabaseAndGetValue(template ProviderSpec, metric Metric) (interface{}
 	return value, true
 }
 
-// get provider template from URL
-func getProviderTemplate(providerURL string) (*template.Template, error) {
-	// fetch b from url
-	resp, err := http.Get(providerURL)
-	if err != nil {
-		log.Logger.Error(err)
-		return nil, err
-	}
-	// read responseBody
-	// get the doubly templated metrics spec
-	defer resp.Body.Close()
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	tpl, err := template.New("provider template").Funcs(sprig.TxtFuncMap()).Parse(string(responseBody))
-	if err != nil {
-		log.Logger.Error(err)
-		return nil, err
-	}
-
-	return tpl, nil
-}
-
 // run executes this task
 func (t *customMetricsTask) run(exp *Experiment) error {
 	// validate inputs
@@ -249,10 +223,6 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 	err = t.validateInputs()
 	if err != nil {
 		return err
-	}
-
-	if exp.driver == nil {
-		return errors.New("no driver was provided for collect-metrics-database task")
 	}
 
 	// initialize defaults
@@ -266,7 +236,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 	// collect metrics from all providers and for all versions
 	for providerName, url := range t.With.Templates {
 		// finalize metrics spec
-		template, err := getProviderTemplate(url)
+		template, err := getTextTemplateFromURL(url)
 		if err != nil {
 			return err
 		}
