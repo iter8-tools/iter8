@@ -13,10 +13,10 @@ import (
 
 // Application is an application observed in a kubernetes cluster
 type Application struct {
-	// Name is of the form namespace/name where the name is the value of the label app.kubernetes.io/name
+	// Name is of the form namespace/Name where the Name is the value of the label app.kubernetes.io/Name
 	Name string `json:"name" yaml:"name"`
 	// Tracks is map from application track identifier to version name
-	Tracks `json:"tracks" yaml:"tracks"`
+	Tracks Tracks `json:"tracks" yaml:"tracks"`
 	// Versions maps version name to version data (a set of metrics)
 	Versions `json:"versions" yaml:"versions"`
 }
@@ -26,6 +26,38 @@ type Versions map[string]*Version
 
 // Tracks is map of track identifiers to version names
 type Tracks map[string]string
+
+// NewApplication returns a new Application object with name
+func NewApplication(name string) *Application {
+	return &Application{
+		Name:     name,
+		Versions: Versions{},
+		Tracks:   Tracks{},
+	}
+}
+
+// GetName returns the name of an application
+func (a *Application) GetName() string {
+	return a.Name
+}
+
+// SetName sets the name of an application; for testing only
+func (a *Application) SetName(name string) {
+	a.Name = name
+}
+
+// GetTracks returns a map of track identifier to version name for this application
+func (a *Application) GetTracks() Tracks {
+	return a.Tracks
+}
+
+// ClearTracks clears the mapping of track identfiers to version names
+func (a *Application) ClearTracks() {
+	a.Tracks = Tracks{}
+	// for track := range a.GetTracks() {
+	// 	delete(a.Tracks, track)
+	// }
+}
 
 // GetVersion returns the Version object corresponding to a given version name
 // If no corresponding version object exists, a new one will be created when allowNew is set to true
@@ -100,7 +132,7 @@ func (a *Application) MarshalJSON() ([]byte, error) {
 // String returns a string representation of the Application
 func (a *Application) String() string {
 	tracks := []string{}
-	for t, v := range a.Tracks {
+	for t, v := range a.GetTracks() {
 		tracks = append(tracks, t+" -> "+v)
 	}
 

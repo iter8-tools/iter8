@@ -53,7 +53,7 @@ func rendezvousGet(a *abnapp.Application, user string) string {
 	// maxVersion is the version name associated with maxTrack
 	var maxVersion string
 
-	for track, version := range a.Tracks {
+	for track, version := range a.GetTracks() {
 		score := hash(version, user)
 		if score > maxScore || (score == maxScore && version > maxVersion) {
 			maxScore = score

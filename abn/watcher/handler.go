@@ -49,16 +49,14 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	abnapp.Applications.Lock(application)
 	// clear a.Tracks, a.Versions[*].Track
 	// this is necessary because  we keep old versions in memory
-	for track := range a.Tracks {
-		delete(a.Tracks, track)
-	}
+	a.ClearTracks()
 
 	for _, o := range applicationObjs {
 		version, _ := o.getVersion()
 		a.GetVersion(version, true) // make sure version object created
 		track := o.getTrack()
 		if track != "" {
-			a.Tracks[track] = version
+			a.GetTracks()[track] = version
 		}
 	}
 	abnapp.Applications.Unlock(application)

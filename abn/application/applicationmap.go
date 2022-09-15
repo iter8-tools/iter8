@@ -86,12 +86,12 @@ func (m *ThreadSafeApplicationMap) Put(a *Application) *Application {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	current, ok := m.apps[a.Name]
+	current, ok := m.apps[a.GetName()]
 	if ok {
 		return current
 	}
-	m.apps[a.Name] = a
-	m.mutexes[a.Name] = &sync.RWMutex{}
+	m.apps[a.GetName()] = a
+	m.mutexes[a.GetName()] = &sync.RWMutex{}
 	return a
 }
 
@@ -132,11 +132,7 @@ func (m *ThreadSafeApplicationMap) readFromSecret(application string) (*Applicat
 	secretNamespace := namespaceFromKey(application)
 	secretName := nameFromKey(application) + secretPostfix
 
-	newApplication := &Application{
-		Name:     application,
-		Versions: Versions{},
-		Tracks:   Tracks{},
-	}
+	newApplication := NewApplication(application)
 
 	// read secret from cluster; extract appData
 	secret, err := k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
@@ -159,9 +155,12 @@ func (m *ThreadSafeApplicationMap) readFromSecret(application string) (*Applicat
 		return newApplication, nil
 	}
 
+	// set name
+	a.SetName(application)
+
 	// set last write time to read time; it was written in the past
 	now := time.Now()
-	m.lastWriteTimes[a.Name] = &now
+	m.lastWriteTimes[a.GetName()] = &now
 
 	return a, nil
 }
@@ -180,8 +179,8 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 		return err
 	}
 
-	secretNamespace := namespaceFromKey(a.Name)
-	secretName := secretNameFromKey(a.Name)
+	secretNamespace := namespaceFromKey(a.GetName())
+	secretName := secretNameFromKey(a.GetName())
 
 	// determine if need to
 	exists := true
@@ -226,7 +225,7 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 
 	// update last write time for application
 	now := time.Now()
-	m.lastWriteTimes[a.Name] = &now
+	m.lastWriteTimes[a.GetName()] = &now
 	return nil
 }
 
@@ -237,12 +236,12 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 	defer log.Logger.Trace("BatchedWrite completed")
 
 	now := time.Now()
-	lastWrite, ok := m.lastWriteTimes[a.Name]
+	lastWrite, ok := m.lastWriteTimes[a.GetName()]
 	if !ok || lastWrite == nil {
 		// no record of the application ever being written; write it now
 		m.Write(a)
 	} else {
-		if now.Sub(*m.lastWriteTimes[a.Name]) > BatchWriteInterval {
+		if now.Sub(*m.lastWriteTimes[a.GetName()]) > BatchWriteInterval {
 			m.Write(a)
 		}
 	}
@@ -255,7 +254,7 @@ func deleteUntrackedVersions(a *Application) {
 	toDelete := []string{}
 	for version := range a.Versions {
 		track := ""
-		for _, ver := range a.Tracks {
+		for _, ver := range a.GetTracks() {
 			if ver == version {
 				track = ver
 				break
