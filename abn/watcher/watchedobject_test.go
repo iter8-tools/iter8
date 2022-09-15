@@ -25,9 +25,7 @@ func TestHasName(t *testing.T) {
 			Labels: map[string]string{
 				nameLabel:    appName,
 				versionLabel: appVersion,
-			},
-			Annotations: map[string]string{
-				trackAnnotation: appTrack,
+				trackLabel:   appTrack,
 			},
 		},
 		Spec: corev1.PodSpec{},
@@ -51,9 +49,6 @@ func TestHasName(t *testing.T) {
 	assert.Equal(t, appVersion, v)
 
 	assert.Equal(t, appTrack, wo.getTrack())
-
-	assert.False(t, wo.isReady())
-	assert.False(t, wo.isReady())
 }
 
 func TestHasNoName(t *testing.T) {
@@ -90,9 +85,6 @@ func TestHasNoTrack(t *testing.T) {
 				nameLabel:    appName,
 				versionLabel: appVersion,
 			},
-			Annotations: map[string]string{
-				readyAnnotation: "true",
-			},
 		},
 		Spec: corev1.PodSpec{},
 	}
@@ -101,7 +93,4 @@ func TestHasNoTrack(t *testing.T) {
 	wo := watchedObject{Obj: &unstructured.Unstructured{Object: obj}}
 
 	assert.Equal(t, "", wo.getTrack())
-
-	assert.True(t, wo.isReady())
-	assert.True(t, wo.isReady())
 }

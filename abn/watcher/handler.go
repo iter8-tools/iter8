@@ -56,11 +56,9 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	for _, o := range applicationObjs {
 		version, _ := o.getVersion()
 		a.GetVersion(version, true) // make sure version object created
-		if o.isReady() {
-			track := o.getTrack()
-			if track != "" {
-				a.Tracks[track] = version
-			}
+		track := o.getTrack()
+		if track != "" {
+			a.Tracks[track] = version
 		}
 	}
 	abnapp.Applications.Unlock(application)

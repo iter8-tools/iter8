@@ -9,11 +9,10 @@ import (
 )
 
 const (
-	nameLabel       = "app.kubernetes.io/name"
-	versionLabel    = "app.kubernetes.io/version"
-	readyAnnotation = "iter8.tools/ready"
-	trackAnnotation = "iter8.tools/track"
-	iter8Label      = "iter8.tools/abn"
+	nameLabel    = "app.kubernetes.io/name"
+	versionLabel = "app.kubernetes.io/version"
+	trackLabel   = "iter8.tools/track"
+	iter8Label   = "iter8.tools/abn"
 )
 
 // watchedObject is wrapper for object returned by informer
@@ -49,22 +48,12 @@ func (wo watchedObject) getVersion() (string, bool) {
 
 // getTrack get trace of version from TRACK_ANNOTATION annotation on watched object
 func (wo watchedObject) getTrack() string {
-	annotations := wo.Obj.GetAnnotations()
-	track, ok := annotations[trackAnnotation]
+	labels := wo.Obj.GetLabels()
+	track, ok := labels[trackLabel]
 	if !ok {
 		return ""
 	}
 	return track
-}
-
-// isReady determines if watched object indicates readiness of version (as indicated by READY_ANNOTATION annotatation)
-func (wo watchedObject) isReady() bool {
-	annotations := wo.Obj.GetAnnotations()
-	ready, ok := annotations[readyAnnotation]
-	if !ok {
-		return false
-	}
-	return strings.ToLower(ready) == "true"
 }
 
 func (wo watchedObject) isIter8AbnRelated() bool {
