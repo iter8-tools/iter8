@@ -49,6 +49,15 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 	return v, false
 }
 
+func (a *Application) GetTrack(version string) *string {
+	for t, v := range a.Tracks {
+		if v == version {
+			return &t
+		}
+	}
+	return nil
+}
+
 // UnmarchalJSON unmarshals an application from a byte array. This is a
 // custom JSON unmarshaller to ensurer that maps are initialized
 func (a *Application) UnmarshalJSON(data []byte) error {

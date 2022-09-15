@@ -1,9 +1,16 @@
 package base
 
 import (
+	"context"
+	"encoding/json"
+	"time"
+
 	abnapp "github.com/iter8-tools/iter8/abn/application"
+	pb "github.com/iter8-tools/iter8/abn/grpc"
 	k8sclient "github.com/iter8-tools/iter8/abn/k8sclient"
 	log "github.com/iter8-tools/iter8/base/log"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"helm.sh/helm/v3/pkg/cli"
 )
 
@@ -46,7 +53,36 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	// initialize defaults
 	t.initializeDefaults()
 
-	a, _ := abnapp.Applications.Get(t.With.Application, false)
+	// a, _ := abnapp.Applications.Get(t.With.Application, false)
+
+	// setup client
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	// conn, err := grpc.Dial(lis.Addr().String(), opts...)
+	conn, err := grpc.Dial("abn:50051", opts...)
+	if err != nil {
+		return err
+	}
+	c := pb.NewABNClient(conn)
+
+	// get application
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	s, err := c.GetMetrics(
+		ctx,
+		&pb.MetricRequest{
+			Application: t.With.Application,
+		},
+	)
+	if err != nil {
+		return err
+	}
+	applicationJson := s.GetApplicationJson()
+	a := &abnapp.Application{}
+	err = json.Unmarshal([]byte(applicationJson), a)
+	if err != nil {
+		return err
+	}
 
 	// count number of tracks
 	numTracks := len(a.Tracks)
@@ -67,7 +103,7 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	// add metrics for tracks
 	versionIndex := 0
 	for version, v := range a.Versions {
-		t := v.GetTrack()
+		t := a.GetTrack(version)
 		if t != nil {
 			log.Logger.Tracef("version %s is mapped to track %s; using index %d", version, *t, versionIndex)
 			for metric, m := range v.Metrics {
