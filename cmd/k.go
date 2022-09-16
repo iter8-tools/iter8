@@ -56,10 +56,6 @@ func init() {
 	kCmd.AddCommand(newKReportCmd(kd))
 
 	// add k run
-	if cmd, err := newKRunCmd(kd, os.Stdout); err != nil {
-		os.Exit(1)
-	} else {
-		kCmd.AddCommand(cmd)
-	}
+	kCmd.AddCommand(newKRunCmd(kd, os.Stdout))
 
 }
