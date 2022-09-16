@@ -57,7 +57,6 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 
 	// setup client
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	// conn, err := grpc.Dial(lis.Addr().String(), opts...)
 	conn, err := grpc.Dial("abn:50051", opts...)
 	if err != nil {
 		return err
@@ -68,9 +67,9 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	s, err := c.GetMetrics(
+	s, err := c.GetApplicationData(
 		ctx,
-		&pb.MetricRequest{
+		&pb.ApplicationRequest{
 			Application: t.With.Application,
 		},
 	)
