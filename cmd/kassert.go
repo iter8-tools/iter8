@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// kAssertDesc is the description of the k assert cmd
-const kAssertDesc = `
+// kassertDesc is the description of the k assert cmd
+const kassertDesc = `
 Assert if the result of a Kubernetes experiment satisfies the specified conditions. If all conditions are satisfied, the command exits with code 0. Else, the command exits with code 1. 
 
 Assertions are especially useful for automation inside CI/CD/GitOps pipelines.
@@ -32,7 +32,7 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "assert",
 		Short:        "Assert if Kubernetes experiment result satisfies conditions",
-		Long:         kAssertDesc,
+		Long:         kassertDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			allGood, err := actor.KubeRun()
@@ -55,9 +55,4 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	addConditionFlag(cmd, &actor.Conditions)
 	addTimeoutFlag(cmd, &actor.Timeout)
 	return cmd
-}
-
-// initialize with k assert cmd
-func init() {
-	kCmd.AddCommand(newKAssertCmd(kd))
 }

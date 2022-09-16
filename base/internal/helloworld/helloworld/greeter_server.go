@@ -50,6 +50,7 @@ type Greeter struct {
 }
 
 func randomSleep(max int) {
+	// #nosec
 	msCount := rand.Intn(max) + 1
 	time.Sleep(time.Millisecond * time.Duration(msCount))
 }

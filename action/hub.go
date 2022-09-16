@@ -21,6 +21,7 @@ type HubOpts struct {
 	ChartsDir string
 }
 
+// DefaultRemoteFolderURL returns the default value of the remote Iter8 folder
 func DefaultRemoteFolderURL() string {
 	// parse version
 	v := strings.Split(base.Version, "-")

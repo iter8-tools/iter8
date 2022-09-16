@@ -16,6 +16,7 @@ import (
 
 const (
 	// secretPostfix is the postfix added to an application name to create a secret name
+	/* #nosec */
 	secretPostfix string = ".iter8abnmetrics"
 	// secretKey is the name of the key in the data field of a kubernetes secret in which the application will be written
 	secretKey string = "application.yaml"
@@ -239,10 +240,18 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 	lastWrite, ok := m.lastWriteTimes[a.Name]
 	if !ok || lastWrite == nil {
 		// no record of the application ever being written; write it now
-		m.Write(a)
+		err := m.Write(a)
+		if err != nil {
+			log.Logger.Error(err)
+			return err
+		}
 	} else {
 		if now.Sub(*m.lastWriteTimes[a.Name]) > BatchWriteInterval {
-			m.Write(a)
+			err := m.Write(a)
+			if err != nil {
+				log.Logger.Error(err)
+				return err
+			}
 		}
 	}
 

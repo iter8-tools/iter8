@@ -62,9 +62,8 @@ func noDownloadIsRequired(lOpts *ia.LaunchOpts, flags *pflag.FlagSet) error {
 	if _, err := os.Stat(chartsFolderPath); !os.IsNotExist(err) {
 		if flags.Changed("noDownload") {
 			return nil
-		} else {
-			return errors.New("'charts' folder found; 'noDownload' flag is required")
 		}
+		return errors.New("'charts' folder found; 'noDownload' flag is required")
 	}
 	return nil
 }
@@ -79,9 +78,4 @@ func addDryRunFlag(cmd *cobra.Command, dryRunPtr *bool) {
 func addNoDownloadFlag(cmd *cobra.Command, noDownloadPtr *bool) {
 	cmd.Flags().BoolVar(noDownloadPtr, "noDownload", false, "reuse local charts dir - do not download from remoteFolderURL; if local charts are present, this flag is required - set it to true or false; if local charts are absent, do not use this flag")
 	cmd.Flags().Lookup("noDownload").NoOptDefVal = "true"
-}
-
-// initialize with the launch cmd
-func init() {
-	rootCmd.AddCommand(newLaunchCmd(kd))
 }

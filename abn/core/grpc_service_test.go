@@ -2,8 +2,8 @@ package core
 
 import (
 	"context"
-	"io/ioutil"
 	"net"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -94,7 +94,7 @@ func TestWriteMetric(t *testing.T) {
 	testcases := map[string]Scenario{
 		"no applicaton": {application: "", user: "user", errorSubstring: "track not mapped", track: "", metric: "", value: "76"},
 		"no user":       {application: "default/application", user: "", errorSubstring: "no user session provided", track: "", metric: "", value: "76"},
-		"invalid value": {application: "default/application", user: "user", errorSubstring: "", track: "", metric: "", value: "abc"},
+		"invalid value": {application: "default/application", user: "user", errorSubstring: "strconv.ParseFloat: parsing \"abc\": invalid syntax", track: "", metric: "", value: "abc"},
 		"valid":         {application: "default/application", user: "user", errorSubstring: "", track: "candidate", metric: "metric1", value: "76"},
 	}
 
@@ -110,7 +110,7 @@ func TestWriteMetric(t *testing.T) {
 
 func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	// get current count of metric
-	var oldCount uint32 = 0
+	var oldCount uint32
 	var a *abnapp.Application
 	a, err := abnapp.Applications.Get(scenario.application)
 	if scenario.application == "" {
@@ -167,13 +167,15 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	abnapp.Applications.Put(a)
 
 	// start server
-	lis, err := net.Listen("tcp", ":0")
+	lis, err := net.Listen("tcp", "127.0.0.1:12345")
 	assert.NoError(t, err)
 
 	serverOptions := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(serverOptions...)
 	pb.RegisterABNServer(grpcServer, newServer())
-	go grpcServer.Serve(lis)
+	go func() {
+		_ = grpcServer.Serve(lis)
+	}()
 
 	// setup client
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
@@ -185,8 +187,8 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	// return client and teardown function to clean up
 	return &c, func() {
 		grpcServer.Stop()
-		lis.Close()
-		conn.Close()
+		_ = lis.Close()
+		_ = conn.Close()
 	}
 }
 
@@ -201,8 +203,8 @@ func yamlToApplication(name, folder, file string) (*abnapp.Application, error) {
 
 func readYamlFromFile(folder, file string) ([]byte, error) {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
-	fname := filepath.Join(filepath.Dir(filename), folder, file)
-	return ioutil.ReadFile(fname)
+	fname := filepath.Clean(filepath.Join(filepath.Dir(filename), folder, file))
+	return os.ReadFile(fname)
 }
 
 func byteArrayToApplication(name string, data []byte) (*abnapp.Application, error) {

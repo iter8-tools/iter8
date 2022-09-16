@@ -5,28 +5,32 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 
+	// auth enables automatic authentication to various hosted clouds
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 const (
-	// Name of environment variable with file path to configuration yaml file
-	RESOURCE_CONFIG_ENV    = "RESOURCE_CONFIG"
-	CHART_GROUP_CONFIG_ENV = "CHART_GROUP_CONFIG"
+	// Name of environment variable with file path to resource configuration yaml file
+	resourceConfigEnv = "RESOURCE_CONFIG"
+	// Name of environment variable with file path to chart group configuration yaml file
+	chartGroupConfigEnv = "CHART_GROUP_CONFIG"
 )
 
 // Start is entry point to configure services and start them
-func Start(stopCh chan struct{}) {
+func Start(stopCh chan struct{}) error {
 	// initialize kubernetes driver
-	k8sClient.init()
+	if err := k8sClient.init(); err != nil {
+		log.Logger.Fatal("unable to init k8s client")
+	}
 
 	// read resource config (resources and namespaces to watch)
-	resourceConfigFile, ok := os.LookupEnv(RESOURCE_CONFIG_ENV)
+	resourceConfigFile, ok := os.LookupEnv(resourceConfigEnv)
 	if !ok {
 		log.Logger.Fatal("resource configuration file is required")
 	}
 
 	// read group config (apps and helm charts to install)
-	chartGroupConfigFile, ok := os.LookupEnv(CHART_GROUP_CONFIG_ENV)
+	chartGroupConfigFile, ok := os.LookupEnv(chartGroupConfigEnv)
 	if !ok {
 		log.Logger.Fatal("group configuration file is required")
 	}
@@ -39,4 +43,5 @@ func Start(stopCh chan struct{}) {
 
 	w := newIter8Watcher(resourceConfig.Resources, resourceConfig.Namespaces, chartGroupConfig)
 	go w.start(stopCh)
+	return nil
 }

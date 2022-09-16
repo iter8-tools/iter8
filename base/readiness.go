@@ -58,7 +58,6 @@ func (t *readinessTask) initializeDefaults() {
 		t.With.Timeout = StringPointer(defaultTimeout)
 	}
 
-	kd.initKube()
 	// set Namespace (from context) if not already set
 	if t.With.Namespace == nil {
 		t.With.Namespace = StringPointer(kd.Namespace())
@@ -79,7 +78,11 @@ func (t *readinessTask) run(exp *Experiment) error {
 		return err
 	}
 
-	// initialization
+	// kd is required by initializeDefaults
+	if err = kd.initKube(); err != nil {
+		return err
+	}
+	// initialize default values
 	t.initializeDefaults()
 
 	// parse timeout
@@ -161,13 +164,13 @@ func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*
 		return nil, errors.New("no object")
 	}
 
-	resultJson, err := obj.MarshalJSON()
+	resultJSON, err := obj.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
 
 	resultObj := make(map[string]interface{})
-	err = json.Unmarshal(resultJson, &resultObj)
+	err = json.Unmarshal(resultJSON, &resultObj)
 	if err != nil {
 		return nil, err
 	}

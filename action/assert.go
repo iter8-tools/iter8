@@ -43,7 +43,7 @@ func (aOpts *AssertOpts) LocalRun() (bool, error) {
 	})
 }
 
-// LocalRun asserts conditions for a Kubernetes experiment
+// KubeRun asserts conditions for a Kubernetes experiment
 func (aOpts *AssertOpts) KubeRun() (bool, error) {
 	if err := aOpts.KubeDriver.Init(); err != nil {
 		return false, err
@@ -53,8 +53,8 @@ func (aOpts *AssertOpts) KubeRun() (bool, error) {
 }
 
 // Run builds the experiment and verifies assert conditions
-func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {
-	allGood, err := assert.verify(eio)
+func (aOpts *AssertOpts) Run(eio base.Driver) (bool, error) {
+	allGood, err := aOpts.verify(eio)
 	if err != nil {
 		return false, err
 	}
@@ -66,7 +66,7 @@ func (assert *AssertOpts) Run(eio base.Driver) (bool, error) {
 }
 
 // verify implements the core logic of assert
-func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
+func (aOpts *AssertOpts) verify(eio base.Driver) (bool, error) {
 	// timeSpent tracks how much time has been spent so far in assert attempts
 	var timeSpent, _ = time.ParseDuration("0s")
 
@@ -82,7 +82,7 @@ func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 
 		allGood := true
 
-		for _, cond := range assert.Conditions {
+		for _, cond := range aOpts.Conditions {
 			if strings.ToLower(cond) == Completed {
 				c := exp.Completed()
 				allGood = allGood && c
@@ -116,16 +116,14 @@ func (assert *AssertOpts) verify(eio base.Driver) (bool, error) {
 		if allGood {
 			log.Logger.Info("all conditions were satisfied")
 			return true, nil
-		} else {
-			if timeSpent >= assert.Timeout {
-				log.Logger.Info("not all conditions were satisfied")
-				return false, nil
-			} else {
-				log.Logger.Infof("sleeping %v ................................", sleepTime)
-				time.Sleep(sleepTime)
-				timeSpent += sleepTime
-			}
 		}
+		if timeSpent >= aOpts.Timeout {
+			log.Logger.Info("not all conditions were satisfied")
+			return false, nil
+		}
+		log.Logger.Infof("sleeping %v ................................", sleepTime)
+		time.Sleep(sleepTime)
+		timeSpent += sleepTime
 	}
 
 }

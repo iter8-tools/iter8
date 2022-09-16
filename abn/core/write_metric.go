@@ -32,14 +32,12 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	value, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
 		log.Logger.Warn("Unable to parse metric value ", valueStr)
-		return nil
+		return err
 	}
 
 	m, _ := v.GetMetric(metric, true)
 	m.Add(value)
 
 	// persist updated metric
-	abnapp.Applications.BatchedWrite(a)
-
-	return err
+	return abnapp.Applications.BatchedWrite(a)
 }

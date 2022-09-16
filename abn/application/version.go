@@ -22,9 +22,8 @@ func (v *Version) GetMetric(metric string, allowNew bool) (*SummaryMetric, bool)
 			m := EmptySummaryMetric()
 			v.Metrics[metric] = m
 			return m, true
-		} else {
-			return nil, false
 		}
+		return nil, false
 	}
 	return m, false
 }

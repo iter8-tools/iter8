@@ -84,9 +84,3 @@ func addShortFlag(cmd *cobra.Command, shortPtr *bool) {
 	cmd.Flags().BoolVar(shortPtr, "short", false, "print abbreviated version info")
 	cmd.Flags().Lookup("short").NoOptDefVal = "true"
 }
-
-// initialize with version cmd
-func init() {
-	vCmd := newVersionCmd()
-	rootCmd.AddCommand(vCmd)
-}

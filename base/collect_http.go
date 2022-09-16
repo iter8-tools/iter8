@@ -3,7 +3,7 @@ package base
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"fortio.org/fortio/fhttp"
@@ -59,14 +59,14 @@ const (
 	// httpMetricPrefix is the prefix for all metrics collected by this task
 	httpMetricPrefix = "http"
 	// the following are a list of names for metrics collected by this task
-	builtInHTTPRequestCountId  = "request-count"
-	builtInHTTPErrorCountId    = "error-count"
-	builtInHTTPErrorRateId     = "error-rate"
-	builtInHTTPLatencyMeanId   = "latency-mean"
-	builtInHTTPLatencyStdDevId = "latency-stddev"
-	builtInHTTPLatencyMinId    = "latency-min"
-	builtInHTTPLatencyMaxId    = "latency-max"
-	builtInHTTPLatencyHistId   = "latency"
+	builtInHTTPRequestCountID  = "request-count"
+	builtInHTTPErrorCountID    = "error-count"
+	builtInHTTPErrorRateID     = "error-rate"
+	builtInHTTPLatencyMeanID   = "latency-mean"
+	builtInHTTPLatencyStdDevID = "latency-stddev"
+	builtInHTTPLatencyMinID    = "latency-min"
+	builtInHTTPLatencyMaxID    = "latency-max"
+	builtInHTTPLatencyHistID   = "latency"
 	// prefix used in latency percentile metric names
 	// example: latency-p75.0 is the 75th percentile latency
 	builtInHTTPLatencyPercentilePrefix = "latency-p"
@@ -180,17 +180,19 @@ func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
 		fo.Payload = []byte(*t.With.PayloadStr)
 	}
 	if t.With.PayloadFile != nil {
-		b, err := ioutil.ReadFile(*t.With.PayloadFile)
+		b, err := os.ReadFile(*t.With.PayloadFile)
 		if err != nil {
 			return nil, err
-		} else {
-			fo.Payload = b
 		}
+		fo.Payload = b
 	}
 
 	// headers
 	for key, value := range t.With.Headers {
-		fo.AddAndValidateExtraHeader(key + ":" + value)
+		if err = fo.AddAndValidateExtraHeader(key + ":" + value); err != nil {
+			log.Logger.WithStackTrace("unable to add header").Error(err)
+			return nil, err
+		}
 	}
 
 	return fo, nil
@@ -242,12 +244,14 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 
 	if data != nil {
 		// request count
-		m := httpMetricPrefix + "/" + builtInHTTPRequestCountId
+		m := httpMetricPrefix + "/" + builtInHTTPRequestCountID
 		mm := MetricMeta{
 			Description: "number of requests sent",
 			Type:        CounterMetricType,
 		}
-		in.updateMetric(m, mm, 0, float64(data.DurationHistogram.Count))
+		if err = in.updateMetric(m, mm, 0, float64(data.DurationHistogram.Count)); err != nil {
+			return err
+		}
 
 		// error count & rate
 		val := float64(0)
@@ -257,59 +261,71 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 			}
 		}
 		// error count
-		m = httpMetricPrefix + "/" + builtInHTTPErrorCountId
+		m = httpMetricPrefix + "/" + builtInHTTPErrorCountID
 		mm = MetricMeta{
 			Description: "number of responses that were errors",
 			Type:        CounterMetricType,
 		}
-		in.updateMetric(m, mm, 0, val)
+		if err = in.updateMetric(m, mm, 0, val); err != nil {
+			return err
+		}
 
 		// error-rate
-		m = httpMetricPrefix + "/" + builtInHTTPErrorRateId
+		m = httpMetricPrefix + "/" + builtInHTTPErrorRateID
 		rc := float64(data.DurationHistogram.Count)
 		if rc != 0 {
 			mm = MetricMeta{
 				Description: "fraction of responses that were errors",
 				Type:        GaugeMetricType,
 			}
-			in.updateMetric(m, mm, 0, val/rc)
+			if err = in.updateMetric(m, mm, 0, val/rc); err != nil {
+				return err
+			}
 		}
 
 		// mean-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyMeanId
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyMeanID
 		mm = MetricMeta{
 			Description: "mean of observed latency values",
 			Type:        GaugeMetricType,
 			Units:       StringPointer("msec"),
 		}
-		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Avg)
+		if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Avg); err != nil {
+			return err
+		}
 
 		// stddev-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyStdDevId
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyStdDevID
 		mm = MetricMeta{
 			Description: "standard deviation of observed latency values",
 			Type:        GaugeMetricType,
 			Units:       StringPointer("msec"),
 		}
-		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.StdDev)
+		if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.StdDev); err != nil {
+			return err
+		}
 
 		// min-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyMinId
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyMinID
 		mm = MetricMeta{
 			Description: "minimum of observed latency values",
 			Type:        GaugeMetricType,
 			Units:       StringPointer("msec"),
 		}
-		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Min)
+		if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Min); err != nil {
+			return err
+		}
 
 		// max-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyMaxId
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyMaxID
 		mm = MetricMeta{
 			Description: "maximum of observed latency values",
 			Type:        GaugeMetricType,
 			Units:       StringPointer("msec"),
 		}
-		in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Max)
+		if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Max); err != nil {
+			return err
+		}
 
 		// percentiles
 		for _, p := range data.DurationHistogram.Percentiles {
@@ -319,18 +335,22 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 				Type:        GaugeMetricType,
 				Units:       StringPointer("msec"),
 			}
-			in.updateMetric(m, mm, 0, 1000.0*p.Value)
+			if err = in.updateMetric(m, mm, 0, 1000.0*p.Value); err != nil {
+				return err
+			}
 		}
 
 		// latency histogram
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyHistId
+		m = httpMetricPrefix + "/" + builtInHTTPLatencyHistID
 		mm = MetricMeta{
 			Description: "Latency Histogram",
 			Type:        HistogramMetricType,
 			Units:       StringPointer("msec"),
 		}
 		lh := latencyHist(data.DurationHistogram)
-		in.updateMetric(m, mm, 0, lh)
+		if err = in.updateMetric(m, mm, 0, lh); err != nil {
+			return err
+		}
 	}
 	return nil
 }

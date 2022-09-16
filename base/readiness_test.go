@@ -19,7 +19,7 @@ import (
 
 // TestNoObject tests that task fails if the object is not present
 func TestNoObject(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
 	rTask := newReadinessTask("non-existent-pod").withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
@@ -31,7 +31,7 @@ func TestNoObject(t *testing.T) {
 // Also validates parsing of timeout
 // Also validates setting of default namespace
 func TestWithoutConditions(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).build()
 	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withTimeout("20s").build()
@@ -40,7 +40,7 @@ func TestWithoutConditions(t *testing.T) {
 
 // TestWithCondition tests that the task succeeds when the condition is present and True
 func TestWithCondition(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
 	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
@@ -49,7 +49,7 @@ func TestWithCondition(t *testing.T) {
 
 // TestWithFalseCondition tests that the task fails when the condition is present and not True
 func TestWithFalseCondition(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "False").build()
 	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withCondition("Ready").build()
@@ -58,7 +58,7 @@ func TestWithFalseCondition(t *testing.T) {
 
 // TestConditionNotPresent tests that the task fails when the condition is not present (but others are)
 func TestConditionNotPresent(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).build()
 	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withCondition("NotPresent").build()
@@ -67,7 +67,7 @@ func TestConditionNotPresent(t *testing.T) {
 
 // TestInvalidTimeout tests that the task fails when the specified timeout is invalid (not parseable)
 func TestInvalidTimeout(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ns, nm := "default", "test-pod"
 	pod := newPod(ns, nm).withCondition("Ready", "True").build()
 	rTask := newReadinessTask(nm).withVersion("v1").withResource("pods").withNamespace(ns).withTimeout("timeout").build()
@@ -148,10 +148,10 @@ func newReadinessTask(name string) *readinessTaskBuilder {
 	return (*readinessTaskBuilder)(rTask)
 }
 
-// func (t *readinessTaskBuilder) withGroup(group string) *readinessTaskBuilder {
-// 	t.With.Group = group
-// 	return t
-// }
+//	func (t *readinessTaskBuilder) withGroup(group string) *readinessTaskBuilder {
+//		t.With.Group = group
+//		return t
+//	}
 func (t *readinessTaskBuilder) withVersion(version string) *readinessTaskBuilder {
 	t.With.Version = version
 	return t

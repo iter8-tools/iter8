@@ -10,7 +10,7 @@ import (
 func TestHub(t *testing.T) {
 	// fix hOpts
 	hOpts := NewHubOpts()
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	hOpts.RemoteFolderURL = "github.com/iter8-tools/iter8.git//charts"
 
 	err := hOpts.LocalRun()

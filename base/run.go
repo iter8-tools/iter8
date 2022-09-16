@@ -15,7 +15,7 @@ const (
 
 var (
 	// tempDirEnv is a temporary directory
-	tempDirEnv string = fmt.Sprintf("TEMP_DIR=%v", os.TempDir())
+	tempDirEnv = fmt.Sprintf("TEMP_DIR=%v", os.TempDir())
 )
 
 // runTask enables running a shell script
@@ -36,6 +36,7 @@ func (t *runTask) validateInputs() error {
 func (t *runTask) getCommand() *exec.Cmd {
 	cmdStr := *t.TaskMeta.Run
 	// create command to be executed
+	// #nosec
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	// append the environment variable for temp dir
 	cmd.Env = append(os.Environ(), tempDirEnv)

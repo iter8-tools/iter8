@@ -1,0 +1,172 @@
+spec:
+  # task 1: generate HTTP requests for application URL
+  # collect Iter8's built-in HTTP latency and error-related metrics
+  - task: http
+    with:
+      duration: 2s
+      errorRanges:
+      - lower: 500
+      url: https://httpbin.org/get
+  # task 2: validate service level objectives for app using
+  # the metrics collected in the above task
+  - task: assess
+    with:
+      SLOs:
+        Upper:
+        - metric: "http/error-rate"
+          limit: 0
+        - metric: "http/latency-mean"
+          limit: 500
+        - metric: "http/latency-p50"
+          limit: 1000
+        - metric: "http/latency-p50.0"
+          limit: 1000
+        - metric: "http/latency-p95.0"
+          limit: 2500
+        - metric: "http/latency-p99"
+          limit: 5000
+        Lower:
+        - metric: "user/engagement"
+          limit: 10000000
+  # tasks 3 & 4: print if SLOs are satisfied or not
+  - if: SLOs()
+    run: echo "SLOs satisfied"
+  - if: not SLOs()
+    run: echo "SLOs not satisfied"
+result:
+  failure: false
+  insights:
+    SLOs:
+      upper:
+      - metric: "http/error-rate"
+        limit: 0
+      - metric: "http/latency-mean"
+        limit: 500
+      - metric: "http/latency-p50"
+        limit: 1000
+      - metric: "http/latency-p50.0"
+        limit: 1000
+      - metric: "http/latency-p95.0"
+        limit: 2500
+      - metric: "http/latency-p99"
+        limit: 5000
+      lower:
+      - metric: "user/engagement"
+        limit: 10000000
+    SLOsSatisfied:
+      upper:
+      - - true
+      - - true
+      - - true
+      - - true
+      - - true
+      - - true
+      lower:
+      - - true
+    histMetricValues:
+    - http/latency:
+      - count: 3
+        lower: 11.388804
+        upper: 12
+      - count: 7
+        lower: 12
+        upper: 14
+      - count: 4
+        lower: 14
+        upper: 16
+      - count: 1
+        lower: 16
+        upper: 18.000000000000004
+      - count: 1
+        lower: 250
+        upper: 272.838867
+    metricsInfo:
+      http/error-count:
+        description: number of responses that were errors
+        type: Counter
+      http/error-rate:
+        description: fraction of responses that were errors
+        type: Gauge
+      http/latency:
+        description: Latency Histogram
+        type: Histogram
+        units: msec
+      http/latency-max:
+        description: maximum of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-mean:
+        description: mean of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-min:
+        description: minimum of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-p50:
+        description: 50-th percentile of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-p75:
+        description: 75-th percentile of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-p90:
+        description: 90-th percentile of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-p95:
+        description: 95-th percentile of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-p99:
+        description: 99-th percentile of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-p99.9:
+        description: 99.9-th percentile of observed latency values
+        type: Gauge
+        units: msec
+      http/latency-stddev:
+        description: standard deviation of observed latency values
+        type: Gauge
+        units: msec
+      http/request-count:
+        description: number of requests sent
+        type: Counter
+      user/engagement:
+        description: number of user engagements
+        type: Counter
+    nonHistMetricValues:
+    - http/error-count:
+      - 0
+      http/error-rate:
+      - 0
+      http/latency-max:
+      - 272.838867
+      http/latency-mean:
+      - 29.624432499999998
+      http/latency-min:
+      - 11.388804
+      http/latency-p50:
+      - 13.428571428571429
+      http/latency-p75:
+      - 15
+      http/latency-p90:
+      - 16.8
+      http/latency-p95:
+      - 254.56777339999996
+      http/latency-p99:
+      - 269.18464828
+      http/latency-p99.9:
+      - 272.473445128
+      http/latency-stddev:
+      - 62.81583554772398
+      http/request-count:
+      - 16
+      user/engagement:
+      - 100000000
+    numVersions: 1
+  iter8Version: v0.11
+  numCompletedTasks: 4
+  startTime: "2022-03-16T10:22:58.540897-04:00"

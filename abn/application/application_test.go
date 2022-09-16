@@ -76,7 +76,7 @@ func TestWrite(t *testing.T) {
 	a.Tracks["foo"] = "v1"
 
 	// Write writes immediately
-	Applications.Write(a)
+	_ = Applications.Write(a)
 	b, _ := Applications.readFromSecret("default/application")
 	// changed
 	assertApplication(t, b, applicationAssertion{
@@ -129,7 +129,7 @@ func TestBatchedWrite(t *testing.T) {
 	a.Tracks["foo"] = "v1"
 
 	// BatchedWrite should not write; too soon
-	Applications.BatchedWrite(a)
+	_ = Applications.BatchedWrite(a)
 	b, _ := Applications.readFromSecret(ns + "/" + nm)
 	// no change; it has been too soon
 	assertApplication(t, b, applicationAssertion{
@@ -142,7 +142,7 @@ func TestBatchedWrite(t *testing.T) {
 	time.Sleep((250 * time.Millisecond) + BatchWriteInterval)
 
 	// BatchedWrite should succeed; we waited > BatchWriteInterval
-	Applications.BatchedWrite(a)
+	_ = Applications.BatchedWrite(a)
 	c, _ := Applications.Read(ns + "/" + nm)
 	// changed
 	assertApplication(t, c, applicationAssertion{
@@ -281,7 +281,7 @@ func setupNotInMemoryNotInCluster(t *testing.T, applications ...applicationSourc
 func setupNotInMemoryInCluster(t *testing.T, applications ...applicationSource) {
 	setupInitialization(t)
 	for _, aSrc := range applications {
-		yamlToSecret(aSrc.folder, aSrc.file, aSrc.namespace+"/"+aSrc.name)
+		_ = yamlToSecret(aSrc.folder, aSrc.file, aSrc.namespace+"/"+aSrc.name)
 	}
 }
 

@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"os"
+
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
 
-// kCmd is the root command that enables Kubernetes experiments
-var kCmd = &cobra.Command{
+// kcmd is the root command that enables Kubernetes experiments
+var kcmd = &cobra.Command{
 	Use:   "k",
 	Short: "Work with Kubernetes experiments",
 	Long:  "Work with Kubernetes experiments",
@@ -18,11 +21,41 @@ func addExperimentGroupFlag(cmd *cobra.Command, groupP *string) {
 }
 
 func init() {
-	settings.AddFlags(kCmd.PersistentFlags())
+	settings.AddFlags(kcmd.PersistentFlags())
 	// hiding these Helm flags for now
-	kCmd.PersistentFlags().MarkHidden("debug")
-	kCmd.PersistentFlags().MarkHidden("registry-config")
-	kCmd.PersistentFlags().MarkHidden("repository-config")
-	kCmd.PersistentFlags().MarkHidden("repository-cache")
-	rootCmd.AddCommand(kCmd)
+	if err := kcmd.PersistentFlags().MarkHidden("debug"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := kcmd.PersistentFlags().MarkHidden("registry-config"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := kcmd.PersistentFlags().MarkHidden("repository-config"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := kcmd.PersistentFlags().MarkHidden("repository-cache"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
+
+	// add k assert
+	kcmd.AddCommand(newKAssertCmd(kd))
+
+	// add k delete
+	kcmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
+
+	// add k launch
+	kcmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
+
+	// add k log
+	kcmd.AddCommand(newKLogCmd(kd))
+
+	// add k report
+	kcmd.AddCommand(newKReportCmd(kd))
+
+	// add k run
+	kcmd.AddCommand(newKRunCmd(kd, os.Stdout))
+
 }

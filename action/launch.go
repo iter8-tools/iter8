@@ -31,7 +31,7 @@ type LaunchOpts struct {
 	*driver.KubeDriver
 }
 
-// NewHubOpts initializes and returns launch opts
+// NewLaunchOpts initializes and returns launch opts
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	return &LaunchOpts{
 		DryRun:          false,
@@ -117,7 +117,9 @@ func (lOpts *LaunchOpts) KubeRun() error {
 		GenDir:          lOpts.RunDir,
 		ChartName:       lOpts.ChartName,
 	}
-	driver.UpdateChartDependencies(gOpts.chartDir(), lOpts.EnvSettings)
+	if err := driver.UpdateChartDependencies(gOpts.chartDir(), lOpts.EnvSettings); err != nil {
+		return err
+	}
 
 	return lOpts.KubeDriver.Launch(gOpts.chartDir(), lOpts.Options, lOpts.Group, lOpts.DryRun)
 }

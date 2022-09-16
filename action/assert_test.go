@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -16,8 +15,8 @@ import (
 )
 
 func TestLocalAssert(t *testing.T) {
-	os.Chdir(t.TempDir())
-	driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputs/experiment.yaml"))
+	_ = os.Chdir(t.TempDir())
+	_ = driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputs/experiment.yaml"))
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
@@ -28,8 +27,8 @@ func TestLocalAssert(t *testing.T) {
 }
 
 func TestLocalAssertFailing(t *testing.T) {
-	os.Chdir(t.TempDir())
-	driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputsfail/experiment.yaml"))
+	_ = os.Chdir(t.TempDir())
+	_ = driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputsfail/experiment.yaml"))
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
@@ -41,13 +40,13 @@ func TestLocalAssertFailing(t *testing.T) {
 }
 
 func TestKubeAssert(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
 	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentPath))
-	aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentPath))
+	_, _ = aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",

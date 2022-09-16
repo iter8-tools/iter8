@@ -14,7 +14,7 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	var err error
 
 	// fix lOpts
@@ -34,7 +34,7 @@ func TestLog(t *testing.T) {
 
 	// fix lOpts
 	logOpts := NewLogOpts(lOpts.KubeDriver)
-	logOpts.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
+	_, _ = logOpts.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job-8218s",
 			Namespace: "default",

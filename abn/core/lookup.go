@@ -67,7 +67,7 @@ func rendezvousGet(a *abnapp.Application, user string) string {
 // hash computes the score for a version, user combination
 func hash(version, user string) uint64 {
 	var hasher maphash.Hash
-	hasher.WriteString(user)
-	hasher.WriteString(version)
+	_, _ = hasher.WriteString(user)
+	_, _ = hasher.WriteString(version)
 	return hasher.Sum64()
 }

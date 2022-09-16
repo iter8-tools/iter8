@@ -29,8 +29,3 @@ func newAbnCmd() *cobra.Command {
 	}
 	return cmd
 }
-
-// initialize with assert
-func init() {
-	rootCmd.AddCommand(newAbnCmd())
-}
