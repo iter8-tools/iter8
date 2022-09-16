@@ -4,6 +4,7 @@ package autox
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -41,13 +42,14 @@ type chartGroup struct {
 type chartGroupConfig []chartGroup
 
 // readResourceConfig reads yaml config file and converts to a resourceConfig object
-func readResourceConfig(fn string) (config resourceConfig) {
+func readResourceConfig(fp string) (config resourceConfig) {
 	// empty configuration
 	config = resourceConfig{}
 
-	yfile, err := os.ReadFile(fn)
+	filePath := filepath.Clean(fp)
+	yfile, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
+		log.Logger.Warnf("unable to read configuration file %s: %s", fp, err.Error())
 		return config // empty configuration
 	}
 
@@ -55,7 +57,7 @@ func readResourceConfig(fn string) (config resourceConfig) {
 
 	err = yaml.Unmarshal(yfile, &config)
 	if err != nil {
-		log.Logger.Warnf("invalid configuration file %s: %s", fn, err.Error())
+		log.Logger.Warnf("invalid configuration file %s: %s", fp, err.Error())
 		return config // empty configuration
 	}
 
@@ -74,7 +76,7 @@ func readChartGroupConfig(fn string) (config chartGroupConfig) {
 	// empty configuration
 	config = chartGroupConfig{}
 
-	yfile, err := os.ReadFile(fn)
+	yfile, err := os.ReadFile(filepath.Clean(fn))
 	if err != nil {
 		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
 		return config // empty configuration

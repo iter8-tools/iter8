@@ -16,6 +16,8 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/downloader"
+
+	// auth import enables automated authentication to various hosted clouds
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/util/retry"
 
@@ -111,11 +113,11 @@ func (kd *KubeDriver) initHelm() error {
 }
 
 // initRevision initializes the latest revision
-func (driver *KubeDriver) initRevision() error {
+func (kd *KubeDriver) initRevision() error {
 	// update revision to latest, if none is specified
-	if driver.revision <= 0 {
-		if rel, err := driver.getLastRelease(); err == nil && rel != nil {
-			driver.revision = rel.Version
+	if kd.revision <= 0 {
+		if rel, err := kd.getLastRelease(); err == nil && rel != nil {
+			kd.revision = rel.Version
 		} else {
 			return err
 		}
@@ -138,30 +140,29 @@ func (kd *KubeDriver) Init() error {
 }
 
 // getLastRelease fetches the last release of an Iter8 experiment
-func (driver *KubeDriver) getLastRelease() (*release.Release, error) {
-	log.Logger.Debugf("fetching latest revision for experiment group %v", driver.Group)
+func (kd *KubeDriver) getLastRelease() (*release.Release, error) {
+	log.Logger.Debugf("fetching latest revision for experiment group %v", kd.Group)
 	// getting last revision
-	rel, err := driver.Configuration.Releases.Last(driver.Group)
+	rel, err := kd.Configuration.Releases.Last(kd.Group)
 	if err != nil {
 		if helmerrors.Is(err, helmdriver.ErrReleaseNotFound) {
 			log.Logger.Debugf("experiment release not found")
 			return nil, nil
-		} else {
-			e := fmt.Errorf("unable to get latest revision for experiment group %v", driver.Group)
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			return nil, e
 		}
+		e := fmt.Errorf("unable to get latest revision for experiment group %v", kd.Group)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, e
 	}
 	return rel, nil
 }
 
 // getExperimentSecretName yields the name of the experiment secret
-func (driver *KubeDriver) getExperimentSecretName() string {
-	return fmt.Sprintf("%v", driver.Group)
+func (kd *KubeDriver) getExperimentSecretName() string {
+	return fmt.Sprintf("%v", kd.Group)
 }
 
 // getSecretWithRetry attempts to get a Kubernetes secret with retries
-func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, err error) {
+func (kd *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, err error) {
 	err1 := retry.OnError(
 		wait.Backoff{
 			Steps:    int(secretTimeout / retryInterval),
@@ -174,7 +175,7 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 			return kerrors.ReasonForError(err2) == metav1.StatusReasonForbidden
 		},
 		func() (err3 error) {
-			secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+			secretsClient := kd.Clientset.CoreV1().Secrets(kd.Namespace())
 			sec, err3 = secretsClient.Get(context.Background(), name, metav1.GetOptions{})
 			return err3
 		},
@@ -188,13 +189,13 @@ func (driver *KubeDriver) getSecretWithRetry(name string) (sec *corev1.Secret, e
 }
 
 // getExperimentSecret gets the Kubernetes experiment secret
-func (driver *KubeDriver) getExperimentSecret() (s *corev1.Secret, err error) {
-	return driver.getSecretWithRetry(driver.getExperimentSecretName())
+func (kd *KubeDriver) getExperimentSecret() (s *corev1.Secret, err error) {
+	return kd.getSecretWithRetry(kd.getExperimentSecretName())
 }
 
 // Read experiment from secret
-func (driver *KubeDriver) Read() (*base.Experiment, error) {
-	s, err := driver.getExperimentSecret()
+func (kd *KubeDriver) Read() (*base.Experiment, error) {
+	s, err := kd.getExperimentSecret()
 	if err != nil {
 		return nil, err
 	}
@@ -210,13 +211,13 @@ func (driver *KubeDriver) Read() (*base.Experiment, error) {
 }
 
 // formExperimentSecret creates the experiment secret using the experiment
-func (driver *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secret, error) {
+func (kd *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secret, error) {
 	byteArray, _ := yaml.Marshal(e)
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: driver.getExperimentSecretName(),
+			Name: kd.getExperimentSecretName(),
 			Annotations: map[string]string{
-				"iter8.tools/group": driver.Group,
+				"iter8.tools/group": kd.Group,
 			},
 		},
 		StringData: map[string]string{ExperimentPath: string(byteArray)},
@@ -227,9 +228,9 @@ func (driver *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secr
 
 // updateExperimentSecret updates the experiment secret
 // as opposed to patch, update is an atomic operation
-func (driver *KubeDriver) updateExperimentSecret(e *base.Experiment) error {
-	if sec, err := driver.formExperimentSecret(e); err == nil {
-		secretsClient := driver.Clientset.CoreV1().Secrets(driver.Namespace())
+func (kd *KubeDriver) updateExperimentSecret(e *base.Experiment) error {
+	if sec, err := kd.formExperimentSecret(e); err == nil {
+		secretsClient := kd.Clientset.CoreV1().Secrets(kd.Namespace())
 		_, err1 := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
 		// TODO: Evaluate if result secret update requires retries.
 		// Probably not. Conflicts will be avoided if cronjob avoids parallel jobs.
@@ -245,16 +246,16 @@ func (driver *KubeDriver) updateExperimentSecret(e *base.Experiment) error {
 }
 
 // Write writes a Kubernetes experiment
-func (driver *KubeDriver) Write(e *base.Experiment) error {
-	if err := driver.updateExperimentSecret(e); err != nil {
+func (kd *KubeDriver) Write(e *base.Experiment) error {
+	if err := kd.updateExperimentSecret(e); err != nil {
 		return err
 	}
 	return nil
 }
 
 // GetRevision gets the experiment revision
-func (driver *KubeDriver) GetRevision() int {
-	return driver.revision
+func (kd *KubeDriver) GetRevision() int {
+	return kd.revision
 }
 
 // UpdateChartDependencies for an Iter8 experiment chart
@@ -287,7 +288,7 @@ func UpdateChartDependencies(chartDir string, settings *cli.EnvSettings) error {
 
 // writeManifest writes the Kubernetes experiment manifest to a local file
 func writeManifest(rel *release.Release) error {
-	err := os.WriteFile(ManifestFile, []byte(rel.Manifest), 0664)
+	err := os.WriteFile(ManifestFile, []byte(rel.Manifest), 0600)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write kubernetes manifest into ", ManifestFile)
 		return err
@@ -299,12 +300,12 @@ func writeManifest(rel *release.Release) error {
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 // Upgrade a Kubernetes experiment to the next release
-func (driver *KubeDriver) upgrade(chartDir string, valueOpts values.Options, group string, dry bool) error {
-	client := action.NewUpgrade(driver.Configuration)
-	client.Namespace = driver.Namespace()
+func (kd *KubeDriver) upgrade(chartDir string, valueOpts values.Options, group string, dry bool) error {
+	client := action.NewUpgrade(kd.Configuration)
+	client.Namespace = kd.Namespace()
 	client.DryRun = dry
 
-	ch, vals, err := driver.getChartAndVals(chartDir, valueOpts)
+	ch, vals, err := kd.getChartAndVals(chartDir, valueOpts)
 	if err != nil {
 		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -334,7 +335,7 @@ func (driver *KubeDriver) upgrade(chartDir string, valueOpts values.Options, gro
 	}
 
 	// upgrading revision info
-	driver.revision = rel.Version
+	kd.revision = rel.Version
 
 	// write manifest if dry
 	if dry {
@@ -353,13 +354,13 @@ func (driver *KubeDriver) upgrade(chartDir string, valueOpts values.Options, gro
 // install a Kubernetes experiment
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-func (driver *KubeDriver) install(chartDir string, valueOpts values.Options, group string, dry bool) error {
-	client := action.NewInstall(driver.Configuration)
-	client.Namespace = driver.Namespace()
+func (kd *KubeDriver) install(chartDir string, valueOpts values.Options, group string, dry bool) error {
+	client := action.NewInstall(kd.Configuration)
+	client.Namespace = kd.Namespace()
 	client.DryRun = dry
 	client.ReleaseName = group
 
-	ch, vals, err := driver.getChartAndVals(chartDir, valueOpts)
+	ch, vals, err := kd.getChartAndVals(chartDir, valueOpts)
 	if err != nil {
 		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -389,7 +390,7 @@ func (driver *KubeDriver) install(chartDir string, valueOpts values.Options, gro
 	}
 
 	// upgrading revision info
-	driver.revision = rel.Version
+	kd.revision = rel.Version
 
 	// write manifest if dry
 	if dry {
@@ -406,38 +407,37 @@ func (driver *KubeDriver) install(chartDir string, valueOpts values.Options, gro
 }
 
 // Launch a Kubernetes experiment
-func (driver *KubeDriver) Launch(chartDir string, valueOpts values.Options, group string, dry bool) error {
-	if driver.revision <= 0 {
-		return driver.install(chartDir, valueOpts, group, dry)
-	} else {
-		return driver.upgrade(chartDir, valueOpts, group, dry)
+func (kd *KubeDriver) Launch(chartDir string, valueOpts values.Options, group string, dry bool) error {
+	if kd.revision <= 0 {
+		return kd.install(chartDir, valueOpts, group, dry)
 	}
+	return kd.upgrade(chartDir, valueOpts, group, dry)
 }
 
 // Delete a Kubernetes experiment group
-func (driver *KubeDriver) Delete() error {
-	client := action.NewUninstall(driver.Configuration)
-	_, err := client.Run(driver.Group)
+func (kd *KubeDriver) Delete() error {
+	client := action.NewUninstall(kd.Configuration)
+	_, err := client.Run(kd.Group)
 	if err != nil {
-		e := fmt.Errorf("deletion of experiment group %v failed", driver.Group)
+		e := fmt.Errorf("deletion of experiment group %v failed", kd.Group)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
-	log.Logger.Infof("experiment group %v deleted", driver.Group)
+	log.Logger.Infof("experiment group %v deleted", kd.Group)
 	return nil
 }
 
 // getChartAndVals gets experiment chart and its values
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-func (driver *KubeDriver) getChartAndVals(chartDir string, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
+func (kd *KubeDriver) getChartAndVals(chartDir string, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
 	// update dependencies for the chart
-	if err := UpdateChartDependencies(chartDir, driver.EnvSettings); err != nil {
+	if err := UpdateChartDependencies(chartDir, kd.EnvSettings); err != nil {
 		return nil, nil, err
 	}
 
 	// form chart values
-	p := getter.All(driver.EnvSettings)
+	p := getter.All(kd.EnvSettings)
 	vals, err := valueOpts.MergeValues(p)
 	if err != nil {
 		e := fmt.Errorf("unable to merge chart values")
@@ -478,10 +478,10 @@ func checkIfInstallable(ch *chart.Chart) error {
 }
 
 // GetExperimentLogs gets logs for a Kubernetes experiment
-func (driver *KubeDriver) GetExperimentLogs() (string, error) {
-	podsClient := driver.Clientset.CoreV1().Pods(driver.Namespace())
+func (kd *KubeDriver) GetExperimentLogs() (string, error) {
+	podsClient := kd.Clientset.CoreV1().Pods(kd.Namespace())
 	pods, err := podsClient.List(context.TODO(), metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("iter8.tools/group=%v", driver.Group),
+		LabelSelector: fmt.Sprintf("iter8.tools/group=%v", kd.Group),
 	})
 	if err != nil {
 		e := errors.New("unable to get experiment pod(s)")
@@ -498,7 +498,10 @@ func (driver *KubeDriver) GetExperimentLogs() (string, error) {
 			return "", e
 		}
 
-		defer podLogs.Close()
+		defer func() {
+			_ = podLogs.Close()
+		}()
+
 		buf := new(bytes.Buffer)
 		_, err = io.Copy(buf, podLogs)
 		if err != nil {

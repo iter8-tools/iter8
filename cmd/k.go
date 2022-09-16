@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// kCmd is the root command that enables Kubernetes experiments
-var kCmd = &cobra.Command{
+// kcmd is the root command that enables Kubernetes experiments
+var kcmd = &cobra.Command{
 	Use:   "k",
 	Short: "Work with Kubernetes experiments",
 	Long:  "Work with Kubernetes experiments",
@@ -21,41 +21,41 @@ func addExperimentGroupFlag(cmd *cobra.Command, groupP *string) {
 }
 
 func init() {
-	settings.AddFlags(kCmd.PersistentFlags())
+	settings.AddFlags(kcmd.PersistentFlags())
 	// hiding these Helm flags for now
-	if err := kCmd.PersistentFlags().MarkHidden("debug"); err != nil {
+	if err := kcmd.PersistentFlags().MarkHidden("debug"); err != nil {
 		log.Logger.Fatal(err)
 		os.Exit(1)
 	}
-	if err := kCmd.PersistentFlags().MarkHidden("registry-config"); err != nil {
+	if err := kcmd.PersistentFlags().MarkHidden("registry-config"); err != nil {
 		log.Logger.Fatal(err)
 		os.Exit(1)
 	}
-	if err := kCmd.PersistentFlags().MarkHidden("repository-config"); err != nil {
+	if err := kcmd.PersistentFlags().MarkHidden("repository-config"); err != nil {
 		log.Logger.Fatal(err)
 		os.Exit(1)
 	}
-	if err := kCmd.PersistentFlags().MarkHidden("repository-cache"); err != nil {
+	if err := kcmd.PersistentFlags().MarkHidden("repository-cache"); err != nil {
 		log.Logger.Fatal(err)
 		os.Exit(1)
 	}
 
 	// add k assert
-	kCmd.AddCommand(newKAssertCmd(kd))
+	kcmd.AddCommand(newKAssertCmd(kd))
 
 	// add k delete
-	kCmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
+	kcmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
 
 	// add k launch
-	kCmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
+	kcmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
 
 	// add k log
-	kCmd.AddCommand(newKLogCmd(kd))
+	kcmd.AddCommand(newKLogCmd(kd))
 
 	// add k report
-	kCmd.AddCommand(newKReportCmd(kd))
+	kcmd.AddCommand(newKReportCmd(kd))
 
 	// add k run
-	kCmd.AddCommand(newKRunCmd(kd, os.Stdout))
+	kcmd.AddCommand(newKRunCmd(kd, os.Stdout))
 
 }

@@ -21,6 +21,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"helm.sh/helm/v3/pkg/cli"
+	// auth package is necessary to enable authentication with various cloud vendors
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 

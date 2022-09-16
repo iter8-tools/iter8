@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// kLaunchDesc is the description of the k launch cmd
-const kLaunchDesc = `
+// klaunchDesc is the description of the k launch cmd
+const klaunchDesc = `
 Launch an experiment inside a Kubernetes cluster. 
 
 	iter8 k launch --set "tasks={http}" --set http.url=https://httpbin.org/get \
@@ -34,7 +34,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "launch",
 		Short:        "Launch an experiment inside a Kubernetes cluster",
-		Long:         kLaunchDesc,
+		Long:         klaunchDesc,
 		SilenceUsage: true,
 		PreRunE: func(cmd *cobra.Command, _ []string) error {
 			return noDownloadIsRequired(actor, cmd.Flags())

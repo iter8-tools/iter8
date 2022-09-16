@@ -32,7 +32,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		With: runner.Config{
 			Data: map[string]interface{}{"name": "bob"},
 			Call: "helloworld.Greeter.SayHello",
-			Host: internal.TestLocalhost,
+			Host: internal.LocalHostPort,
 		},
 	}
 
@@ -92,7 +92,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 			Data:        map[string]interface{}{"name": "bob"},
 			DialTimeout: runner.Duration(20 * time.Second),
 			Call:        "helloworld.Greeter.SayHello",
-			Host:        internal.TestLocalhost,
+			Host:        internal.LocalHostPort,
 		},
 	}
 

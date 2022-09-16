@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	// TextOutputFormat is the output format used to create text output
+	// TextOutputFormatKey is the output format used to create text output
 	TextOutputFormatKey = "text"
 
-	// HTMLOutputFormat is the output format used to create html output
+	// HTMLOutputFormatKey is the output format used to create html output
 	HTMLOutputFormatKey = "html"
 )
 
@@ -57,28 +57,29 @@ func (rOpts *ReportOpts) KubeRun(out io.Writer) error {
 
 // Run generates the text or HTML report
 func (rOpts *ReportOpts) Run(eio base.Driver, out io.Writer) error {
-	if e, err := base.BuildExperiment(eio); err != nil {
+	var e *base.Experiment
+	var err error
+	if e, err = base.BuildExperiment(eio); err != nil {
 		return err
-	} else {
-		switch strings.ToLower(rOpts.OutputFormat) {
-		case TextOutputFormatKey:
-			reporter := report.TextReporter{
-				Reporter: &report.Reporter{
-					Experiment: e,
-				},
-			}
-			return reporter.Gen(out)
-		case HTMLOutputFormatKey:
-			reporter := report.HTMLReporter{
-				Reporter: &report.Reporter{
-					Experiment: e,
-				},
-			}
-			return reporter.Gen(out)
-		default:
-			e := fmt.Errorf("unsupported report format %v", rOpts.OutputFormat)
-			log.Logger.Error(e)
-			return e
+	}
+	switch strings.ToLower(rOpts.OutputFormat) {
+	case TextOutputFormatKey:
+		reporter := report.TextReporter{
+			Reporter: &report.Reporter{
+				Experiment: e,
+			},
 		}
+		return reporter.Gen(out)
+	case HTMLOutputFormatKey:
+		reporter := report.HTMLReporter{
+			Reporter: &report.Reporter{
+				Experiment: e,
+			},
+		}
+		return reporter.Gen(out)
+	default:
+		e := fmt.Errorf("unsupported report format %v", rOpts.OutputFormat)
+		log.Logger.Error(e)
+		return e
 	}
 }

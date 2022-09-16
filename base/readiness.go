@@ -164,13 +164,13 @@ func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*
 		return nil, errors.New("no object")
 	}
 
-	resultJson, err := obj.MarshalJSON()
+	resultJSON, err := obj.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
 
 	resultObj := make(map[string]interface{})
-	err = json.Unmarshal(resultJson, &resultObj)
+	err = json.Unmarshal(resultJSON, &resultObj)
 	if err != nil {
 		return nil, err
 	}

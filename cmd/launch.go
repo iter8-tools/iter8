@@ -62,9 +62,8 @@ func noDownloadIsRequired(lOpts *ia.LaunchOpts, flags *pflag.FlagSet) error {
 	if _, err := os.Stat(chartsFolderPath); !os.IsNotExist(err) {
 		if flags.Changed("noDownload") {
 			return nil
-		} else {
-			return errors.New("'charts' folder found; 'noDownload' flag is required")
 		}
+		return errors.New("'charts' folder found; 'noDownload' flag is required")
 	}
 	return nil
 }

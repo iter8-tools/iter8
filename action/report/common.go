@@ -58,9 +58,8 @@ func (r *Reporter) ScalarMetricValueStr(j int, mn string) string {
 	val := r.Result.Insights.ScalarMetricValue(j, mn)
 	if val != nil {
 		return fmt.Sprintf("%0.2f", *val)
-	} else {
-		return "unavailable"
 	}
+	return "unavailable"
 }
 
 // MetricWithUnits provides the string representation of a metric name with units

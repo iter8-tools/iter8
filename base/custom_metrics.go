@@ -178,7 +178,9 @@ func queryDatabaseAndGetValue(template ProviderSpec, metric Metric) (interface{}
 		log.Logger.Error("could not request metric ", metric.Name, ": ", err)
 		return nil, false
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	// read response responseBody
 	responseBody, err := io.ReadAll(resp.Body)

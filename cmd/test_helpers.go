@@ -131,7 +131,7 @@ func resetEnv() func() {
 		os.Clearenv()
 		for _, pair := range origEnv {
 			kv := strings.SplitN(pair, "=", 2)
-			os.Setenv(kv[0], kv[1])
+			_ = os.Setenv(kv[0], kv[1])
 		}
 		logLevel = "info"
 		log.Logger.Out = os.Stderr
@@ -178,7 +178,8 @@ func AssertGoldenString(t TestingT, actual, filename string) {
 func AssertGoldenFile(t TestingT, actualFileName string, expectedFilename string) {
 	t.Helper()
 
-	actual, err := os.ReadFile(actualFileName)
+	afn := filepath.Clean(actualFileName)
+	actual, err := os.ReadFile(afn)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -198,13 +199,14 @@ func compare(actual []byte, filename string) error {
 		return err
 	}
 
-	expected, err := os.ReadFile(filename)
+	fn := filepath.Clean(filename)
+	expected, err := os.ReadFile(fn)
 	if err != nil {
 		return errors.Wrapf(err, "unable to read testdata %s", filename)
 	}
 	expected = normalize(expected)
 	if !bytes.Equal(expected, actual) {
-		return errors.Errorf("does not match golden file %s\n\nWANT:\n'%s'\n\nGOT:\n'%s'\n", filename, expected, actual)
+		return errors.Errorf("does not match golden file %s WANT: '%s' GOT: '%s'", filename, expected, actual)
 	}
 	return nil
 }
@@ -213,7 +215,7 @@ func update(filename string, in []byte) error {
 	if !*updateGolden {
 		return nil
 	}
-	return os.WriteFile(filename, normalize(in), 0666)
+	return os.WriteFile(filename, normalize(in), 0600)
 }
 
 func normalize(in []byte) []byte {

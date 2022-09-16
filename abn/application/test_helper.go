@@ -20,8 +20,8 @@ func yamlToSecret(folder, file, name string) error {
 func readYamlFromFile(folder, file string) ([]byte, error) {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
 	fname := filepath.Join(filepath.Dir(filename), folder, file)
-
-	return os.ReadFile(fname)
+	fn := filepath.Clean(fname)
+	return os.ReadFile(fn)
 }
 
 func yamlToApplication(name, folder, file string) (*Application, error) {
@@ -108,6 +108,7 @@ func (m *ThreadSafeApplicationMap) Clear() {
 	m.mutex.Unlock()
 }
 
+// NumApplications asserts that the number of applications in the application map equals the given length
 func NumApplications(t *testing.T, length int) bool {
 	return assert.Len(t, Applications.apps, length)
 }

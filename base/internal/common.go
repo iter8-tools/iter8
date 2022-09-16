@@ -6,7 +6,6 @@ Credit: This file is sourced from https://github.com/bojand/ghz and modified for
 
 import (
 	"net"
-	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -14,17 +13,14 @@ import (
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
 )
 
-// TestPort is the port.
-var TestPort string
-
-// TestLocalhost is the localhost.
-var TestLocalhost string
+// LocalHostPort is the localhost:12345 combo used for testing
+const LocalHostPort = "localhost:12345"
 
 // StartServer starts the server.
 //
 // For testing only.
 func StartServer(secure bool) (*helloworld.Greeter, *grpc.Server, error) {
-	lis, err := net.Listen("tcp", ":0")
+	lis, err := net.Listen("tcp", LocalHostPort)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -42,9 +38,6 @@ func StartServer(secure bool) (*helloworld.Greeter, *grpc.Server, error) {
 	reflection.Register(s)
 
 	gs.Stats = stats
-
-	TestPort = strconv.Itoa(lis.Addr().(*net.TCPAddr).Port)
-	TestLocalhost = "localhost:" + TestPort
 
 	go func() {
 		_ = s.Serve(lis)

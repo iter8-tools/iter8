@@ -62,7 +62,7 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 	return v, false
 }
 
-// UnmarchalJSON unmarshals an application from a byte array. This is a
+// UnmarshalJSON unmarshals an application from a byte array. This is a
 // custom JSON unmarshaller to ensurer that maps are initialized
 func (a *Application) UnmarshalJSON(data []byte) error {
 	// use type alias to avoid infinite loop
@@ -86,6 +86,7 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON creates a JSONified byte array out of application
 func (a *Application) MarshalJSON() ([]byte, error) {
 	// use type Alias to avoid inifinite loop
 	type Alias Application

@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// kLogDesc is the description of the k log cmd
-const kLogDesc = `
+// klogDesc is the description of the k log cmd
+const klogDesc = `
 Fetch logs for a Kubernetes experiment.
 
 	iter8 k log
@@ -21,15 +21,16 @@ func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "log",
 		Short:        "Fetch logs for a Kubernetes experiment",
-		Long:         kLogDesc,
+		Long:         klogDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			if lg, err := actor.KubeRun(); err != nil {
+			var lg string
+			var err error
+			if lg, err = actor.KubeRun(); err != nil {
 				return err
-			} else {
-				log.Logger.WithIndentedTrace(lg).Info("experiment logs from Kubernetes cluster")
-				return nil
 			}
+			log.Logger.WithIndentedTrace(lg).Info("experiment logs from Kubernetes cluster")
+			return nil
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group)

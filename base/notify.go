@@ -15,7 +15,7 @@ import (
 // notifyInputs is the input to the notify task
 type notifyInputs struct {
 	// URL is the URL of the notification hook
-	Url string `json:"url" yaml:"url"`
+	URL string `json:"url" yaml:"url"`
 
 	// Method is the HTTP method that needs to be used
 	Method string `json:"method,omitempty" yaml:"method,omitempty"`
@@ -124,7 +124,7 @@ func (t *notifyTask) initializeDefaults() {
 
 // validate task inputs
 func (t *notifyTask) validateInputs() error {
-	if t.With.Url == "" {
+	if t.With.URL == "" {
 		return errors.New("no URL was provided for notify task")
 	}
 
@@ -144,7 +144,7 @@ func (t *notifyTask) run(exp *Experiment) error {
 
 	var requestBody io.Reader
 
-	log.Logger.Debug("method: ", t.With.Method, " URL: ", t.With.Url)
+	log.Logger.Debug("method: ", t.With.Method, " URL: ", t.With.URL)
 
 	if t.With.PayloadTemplateURL != "" {
 		payload, err := t.getPayload(exp)
@@ -159,15 +159,14 @@ func (t *notifyTask) run(exp *Experiment) error {
 	}
 
 	// create a new HTTP request
-	req, err := http.NewRequest(t.With.Method, t.With.Url, requestBody)
+	req, err := http.NewRequest(t.With.Method, t.With.URL, requestBody)
 	if err != nil {
 		log.Logger.Error("could not create HTTP request for notify task:", err)
 
 		if t.With.SoftFailure {
 			return nil
-		} else {
-			return err
 		}
+		return err
 	}
 
 	// iterate through headers
@@ -192,11 +191,12 @@ func (t *notifyTask) run(exp *Experiment) error {
 
 		if t.With.SoftFailure {
 			return nil
-		} else {
-			return err
 		}
+		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if !t.With.SoftFailure && (resp.StatusCode < 200 || resp.StatusCode > 299) {
 		return errors.New("did not receive successful status code for notify task")

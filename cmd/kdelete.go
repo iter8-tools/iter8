@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// kDeleteDesc is the description of the delete cmd
-const kDeleteDesc = `
+// kdeleteDesc is the description of the delete cmd
+const kdeleteDesc = `
 Delete an experiment (group) in Kubernetes.
 
 	iter8 k delete
@@ -22,7 +22,7 @@ func newKDeleteCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "delete",
 		Short:        "Delete an experiment (group) in Kubernetes",
-		Long:         kDeleteDesc,
+		Long:         kdeleteDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.KubeRun()

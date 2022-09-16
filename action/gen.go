@@ -16,7 +16,9 @@ import (
 )
 
 const (
+	// ChartsFolderName is the folder where Iter8 looks for Iter8 experiment charts
 	ChartsFolderName = "charts"
+	// DefaultChartName is the default name of the Iter8 chart
 	DefaultChartName = "iter8"
 )
 
@@ -91,7 +93,7 @@ func (gen *GenOpts) LocalRun() error {
 
 	// write experiment
 	expBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentPath)])
-	err = os.WriteFile(path.Join(gen.GenDir, driver.ExperimentPath), expBytes, 0664)
+	err = os.WriteFile(path.Join(gen.GenDir, driver.ExperimentPath), expBytes, 0600)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
 		return err

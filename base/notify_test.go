@@ -35,7 +35,7 @@ func getNotifyTask(t *testing.T, n notifyInputs) *notifyTask {
 func TestNotify(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
-		Url:         testNotifyURL,
+		URL:         testNotifyURL,
 		SoftFailure: false,
 	})
 
@@ -67,7 +67,7 @@ func TestNotifyWithPayload(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
 		Method:             "POST",
-		Url:                testNotifyURL,
+		URL:                testNotifyURL,
 		PayloadTemplateURL: testNotifyURL + templatePath,
 		SoftFailure:        false,
 	})
@@ -134,7 +134,7 @@ func TestNotifyWithPayload(t *testing.T) {
 func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
-		Url: testNotifyURL,
+		URL: testNotifyURL,
 		Headers: map[string]string{
 			"Hello": "headers",
 		},
@@ -176,7 +176,7 @@ func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 func TestNotifyBadMethod(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
-		Url:         testNotifyURL,
+		URL:         testNotifyURL,
 		Method:      "abc",
 		SoftFailure: false,
 	})
@@ -194,7 +194,7 @@ func TestNotifyBadMethod(t *testing.T) {
 	assert.Error(t, err)
 
 	nt = getNotifyTask(t, notifyInputs{
-		Url:         testNotifyURL,
+		URL:         testNotifyURL,
 		Method:      "abc",
 		SoftFailure: true,
 	})
@@ -216,7 +216,7 @@ func TestNotifyBadMethod(t *testing.T) {
 func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
-		Url:                testNotifyURL,
+		URL:                testNotifyURL,
 		PayloadTemplateURL: testNotifyURL + templatePath,
 		SoftFailure:        false,
 	})

@@ -15,7 +15,7 @@ import (
 )
 
 // k8sClient is a global variable. Before use, it must be assigned and initalized
-var k8sClient *kubeClient = newKubeClient(cli.New())
+var k8sClient = newKubeClient(cli.New())
 
 // kubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs

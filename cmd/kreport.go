@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// kReportDesc is the description of the k report cmd
-const kReportDesc = `
+// kreportDesc is the description of the k report cmd
+const kreportDesc = `
 Generate a text or HTML report of a Kubernetes experiment.
 
 	iter8 k report 
@@ -27,7 +27,7 @@ func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "report",
 		Short:        "Generate report for Kubernetes experiment",
-		Long:         kReportDesc,
+		Long:         kreportDesc,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.KubeRun(outStream)

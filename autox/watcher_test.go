@@ -23,8 +23,8 @@ func TestAutoXStart(t *testing.T) {
 	k8sClient = newFakeKubeClient(cli.New())
 
 	// Start requires some environment variables to be set
-	os.Setenv(resourceConfigEnv, "../testdata/autox_inputs/resource_config.example.yaml")
-	os.Setenv(chartGroupConfigEnv, "../testdata/autox_inputs/group_config.example.yaml")
+	_ = os.Setenv(resourceConfigEnv, "../testdata/autox_inputs/resource_config.example.yaml")
+	_ = os.Setenv(chartGroupConfigEnv, "../testdata/autox_inputs/group_config.example.yaml")
 
 	stopCh := make(chan struct{})
 	defer close(stopCh)

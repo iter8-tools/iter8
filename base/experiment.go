@@ -159,7 +159,7 @@ type taskMetaWith struct {
 	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
-// UnmarshallJSON will unmarshal an experiment spec from bytes
+// UnmarshalJSON will unmarshal an experiment spec from bytes
 // This is a custom JSON unmarshaler
 func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 	var v []taskMetaWith
@@ -259,21 +259,18 @@ func metricTypeMatch(t MetricType, val interface{}) bool {
 	case float64:
 		if t == CounterMetricType || t == GaugeMetricType {
 			return true
-		} else {
-			return false
 		}
+		return false
 	case []float64:
 		if t == SampleMetricType {
 			return true
-		} else {
-			return false
 		}
+		return false
 	case []HistBucket:
 		if t == HistogramMetricType {
 			return true
-		} else {
-			return false
 		}
+		return false
 	default:
 		log.Logger.Error("unsupported type for metric value: ", v)
 		return false
@@ -353,11 +350,10 @@ func (in *Insights) setSLOs(slos *SLOLimits) error {
 	if in.SLOs != nil {
 		if reflect.DeepEqual(in.SLOs, slos) {
 			return nil
-		} else {
-			e := fmt.Errorf("old and new value of slos conflict")
-			log.Logger.WithStackTrace(fmt.Sprint("old: ", in.SLOs, "new: ", slos)).Error(e)
-			return e
 		}
+		e := fmt.Errorf("old and new value of slos conflict")
+		log.Logger.WithStackTrace(fmt.Sprint("old: ", in.SLOs, "new: ", slos)).Error(e)
+		return e
 	}
 	// LHS will be nil
 	in.SLOs = slos
@@ -365,31 +361,31 @@ func (in *Insights) setSLOs(slos *SLOLimits) error {
 }
 
 // initializeSLOsSatisfied initializes the SLOs satisfied field
-func (e *Experiment) initializeSLOsSatisfied() error {
-	if e.Result.Insights.SLOsSatisfied != nil {
+func (exp *Experiment) initializeSLOsSatisfied() error {
+	if exp.Result.Insights.SLOsSatisfied != nil {
 		return nil // already initialized
 	}
 	// LHS will be nil
-	e.Result.Insights.SLOsSatisfied = &SLOResults{
+	exp.Result.Insights.SLOsSatisfied = &SLOResults{
 		Upper: make([][]bool, 0),
 		Lower: make([][]bool, 0),
 	}
-	if e.Result.Insights.SLOs != nil {
-		e.Result.Insights.SLOsSatisfied.Upper = make([][]bool, len(e.Result.Insights.SLOs.Upper))
-		for i := 0; i < len(e.Result.Insights.SLOs.Upper); i++ {
-			e.Result.Insights.SLOsSatisfied.Upper[i] = make([]bool, e.Result.Insights.NumVersions)
+	if exp.Result.Insights.SLOs != nil {
+		exp.Result.Insights.SLOsSatisfied.Upper = make([][]bool, len(exp.Result.Insights.SLOs.Upper))
+		for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ {
+			exp.Result.Insights.SLOsSatisfied.Upper[i] = make([]bool, exp.Result.Insights.NumVersions)
 		}
-		e.Result.Insights.SLOsSatisfied.Lower = make([][]bool, len(e.Result.Insights.SLOs.Lower))
-		for i := 0; i < len(e.Result.Insights.SLOs.Lower); i++ {
-			e.Result.Insights.SLOsSatisfied.Lower[i] = make([]bool, e.Result.Insights.NumVersions)
+		exp.Result.Insights.SLOsSatisfied.Lower = make([][]bool, len(exp.Result.Insights.SLOs.Lower))
+		for i := 0; i < len(exp.Result.Insights.SLOs.Lower); i++ {
+			exp.Result.Insights.SLOsSatisfied.Lower[i] = make([]bool, exp.Result.Insights.NumVersions)
 		}
 	}
 	return nil
 }
 
 // initResults initializes the results section of an experiment
-func (e *Experiment) initResults(revision int) {
-	e.Result = &ExperimentResult{
+func (exp *Experiment) initResults(revision int) {
+	exp.Result = &ExperimentResult{
 		Revision:          revision,
 		StartTime:         time.Now(),
 		NumLoops:          0,
@@ -489,64 +485,58 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		agg, err := stats.Mean(vals)
 		if err == nil {
 			return float64Pointer(agg)
-		} else {
-			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error for version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-			return nil
 		}
+		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error for version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+		return nil
 	case StdDevAggregator:
 		agg, err := stats.StandardDeviation(vals)
 		if err == nil {
 			return float64Pointer(agg)
-		} else {
-			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-			return nil
 		}
+		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+		return nil
 	case MinAggregator:
 		agg, err := stats.Min(vals)
 		if err == nil {
 			return float64Pointer(agg)
-		} else {
-			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-			return nil
 		}
+		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+		return nil
 	case MaxAggregator:
 		agg, err := stats.Mean(vals)
 		if err == nil {
 			return float64Pointer(agg)
-		} else {
-			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-			return nil
 		}
+		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
+		return nil
 	default: // don't do anything
 	}
 
 	// at this point, 'a' must be a percentile aggregator
+	var percent float64
+	var err error
 	if strings.HasPrefix(a, "p") {
 		b := strings.TrimPrefix(a, "p")
 		// b must be a percent
 		if match, _ := regexp.MatchString(decimalRegex, b); match {
 			// extract percent
-			if percent, err := strconv.ParseFloat(b, 64); err != nil {
+			if percent, err = strconv.ParseFloat(b, 64); err != nil {
 				log.Logger.WithStackTrace(err.Error()).Errorf("error extracting percent from aggregation func %v", a)
 				return nil
-			} else {
-				// compute percentile
-				agg, err := stats.Percentile(vals, percent)
-				if err == nil {
-					return float64Pointer(agg)
-				} else {
-					log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-					return nil
-				}
 			}
-		} else {
-			log.Logger.Errorf("unable to extract percent from agggregation func %v", a)
+			// compute percentile
+			agg, err := stats.Percentile(vals, percent)
+			if err == nil {
+				return float64Pointer(agg)
+			}
+			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 			return nil
 		}
-	} else {
-		log.Logger.Errorf("invalid aggregation %v", a)
+		log.Logger.Errorf("unable to extract percent from agggregation func %v", a)
 		return nil
 	}
+	log.Logger.Errorf("invalid aggregation %v", a)
+	return nil
 }
 
 // aggregateMetric returns the aggregated metric value for a given version and metric
@@ -558,14 +548,12 @@ func (in *Insights) aggregateMetric(i int, m string) *float64 {
 		if m.Type == SampleMetricType {
 			log.Logger.Tracef("metric %v used for aggregation is a sample metric", baseMetric)
 			return in.getSampleAggregation(i, baseMetric, s[2])
-		} else {
-			log.Logger.Errorf("metric %v used for aggregation is not a sample metric", baseMetric)
-			return nil
 		}
-	} else {
-		log.Logger.Warnf("could not find metric %v used for aggregation", baseMetric)
+		log.Logger.Errorf("metric %v used for aggregation is not a sample metric", baseMetric)
 		return nil
 	}
+	log.Logger.Warnf("could not find metric %v used for aggregation", baseMetric)
+	return nil
 }
 
 // NormalizeMetricName normalizes percentile values in metric names
@@ -579,19 +567,19 @@ func NormalizeMetricName(m string) (string, error) {
 		pre = preGRPC
 	}
 	if len(pre) > 0 {
+		var percent float64
+		var e error
 		remainder := strings.TrimPrefix(m, pre)
-		if percent, e := strconv.ParseFloat(remainder, 64); e != nil {
+		if percent, e = strconv.ParseFloat(remainder, 64); e != nil {
 			err := fmt.Errorf("cannot extract percent from metric %v", m)
 			log.Logger.WithStackTrace(e.Error()).Error(err)
 			return m, err
-		} else {
-			// return percent normalized metric name
-			return fmt.Sprintf("%v%v", pre, percent), nil
 		}
-	} else {
-		// already normalized
-		return m, nil
+		// return percent normalized metric name
+		return fmt.Sprintf("%v%v", pre, percent), nil
 	}
+	// already normalized
+	return m, nil
 }
 
 // ScalarMetricValue gets the value of the given scalar metric for the given version
@@ -601,11 +589,12 @@ func (in *Insights) ScalarMetricValue(i int, m string) *float64 {
 		log.Logger.Tracef("%v is an aggregated metric", m)
 		return in.aggregateMetric(i, m)
 	} else if len(s) == 2 { // this appears to be a non-aggregated metric
-		if nm, err := NormalizeMetricName(m); err != nil {
+		var nm string
+		var err error
+		if nm, err = NormalizeMetricName(m); err != nil {
 			return nil
-		} else {
-			return in.getCounterOrGaugeMetricFromValuesMap(i, nm)
 		}
+		return in.getCounterOrGaugeMetricFromValuesMap(i, nm)
 	} else {
 		log.Logger.Errorf("invalid metric name %v", m)
 		log.Logger.Error("metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function")
@@ -819,18 +808,18 @@ func (exp *Experiment) run(driver Driver) error {
 }
 
 // failExperiment sets the experiment failure status to true
-func (e *Experiment) failExperiment() {
-	e.Result.Failure = true
+func (exp *Experiment) failExperiment() {
+	exp.Result.Failure = true
 }
 
 // incrementNumCompletedTasks increments the number of completed tasks in the experimeent
-func (e *Experiment) incrementNumCompletedTasks() {
-	e.Result.NumCompletedTasks++
+func (exp *Experiment) incrementNumCompletedTasks() {
+	exp.Result.NumCompletedTasks++
 }
 
 // incrementNumLoops increments the number of loops (experiment iterations)
-func (e *Experiment) incrementNumLoops() {
-	e.Result.NumLoops++
+func (exp *Experiment) incrementNumLoops() {
+	exp.Result.NumLoops++
 }
 
 // getIf returns the condition (if any) which determine
@@ -876,12 +865,13 @@ func BuildExperiment(driver Driver) (*Experiment, error) {
 
 // RunExperiment runs an experiment
 func RunExperiment(reuseResult bool, driver Driver) error {
-	if exp, err := BuildExperiment(driver); err != nil {
+	var exp *Experiment
+	var err error
+	if exp, err = BuildExperiment(driver); err != nil {
 		return err
-	} else {
-		if !reuseResult {
-			exp.initResults(driver.GetRevision())
-		}
-		return exp.run(driver)
 	}
+	if !reuseResult {
+		exp.initResults(driver.GetRevision())
+	}
+	return exp.run(driver)
 }

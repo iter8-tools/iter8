@@ -29,7 +29,7 @@ func (f *FileDriver) Read() (*base.Experiment, error) {
 // Write the experiment
 func (f *FileDriver) Write(exp *base.Experiment) error {
 	b, _ := yaml.Marshal(exp)
-	err := os.WriteFile(path.Join(f.RunDir, ExperimentPath), b, 0664)
+	err := os.WriteFile(path.Join(f.RunDir, ExperimentPath), b, 0600)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
 		return errors.New("unable to write experiment")

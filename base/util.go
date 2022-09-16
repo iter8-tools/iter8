@@ -59,6 +59,7 @@ func CompletePath(prefix string, suffix string) string {
 // getTextTemplateFromURL gets template from URL
 func getTextTemplateFromURL(providerURL string) (*template.Template, error) {
 	// fetch b from url
+	// #nosec
 	resp, err := http.Get(providerURL)
 	if err != nil {
 		log.Logger.Error(err)
@@ -66,7 +67,9 @@ func getTextTemplateFromURL(providerURL string) (*template.Template, error) {
 	}
 	// read responseBody
 	// get the doubly templated metrics spec
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

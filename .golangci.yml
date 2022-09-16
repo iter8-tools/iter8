@@ -13,7 +13,7 @@ linters:
   - typecheck
   - unused
   - goimports
-  - golint
+  - revive
   - govet
   - staticcheck
   - gosec

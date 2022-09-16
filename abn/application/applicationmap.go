@@ -16,6 +16,7 @@ import (
 
 const (
 	// secretPostfix is the postfix added to an application name to create a secret name
+	/* #nosec */
 	secretPostfix string = ".iter8abnmetrics"
 	// secretKey is the name of the key in the data field of a kubernetes secret in which the application will be written
 	secretKey string = "application.yaml"

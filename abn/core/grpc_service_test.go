@@ -110,7 +110,7 @@ func TestWriteMetric(t *testing.T) {
 
 func testWriteMetric(t *testing.T, client *pb.ABNClient, scenario Scenario) {
 	// get current count of metric
-	var oldCount uint32 = 0
+	var oldCount uint32
 	var a *abnapp.Application
 	a, err := abnapp.Applications.Get(scenario.application)
 	if scenario.application == "" {
@@ -167,7 +167,7 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	abnapp.Applications.Put(a)
 
 	// start server
-	lis, err := net.Listen("tcp", ":0")
+	lis, err := net.Listen("tcp", "127.0.0.1:12345")
 	assert.NoError(t, err)
 
 	serverOptions := []grpc.ServerOption{}
@@ -187,8 +187,8 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	// return client and teardown function to clean up
 	return &c, func() {
 		grpcServer.Stop()
-		lis.Close()
-		conn.Close()
+		_ = lis.Close()
+		_ = conn.Close()
 	}
 }
 
@@ -203,7 +203,7 @@ func yamlToApplication(name, folder, file string) (*abnapp.Application, error) {
 
 func readYamlFromFile(folder, file string) ([]byte, error) {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
-	fname := filepath.Join(filepath.Dir(filename), folder, file)
+	fname := filepath.Clean(filepath.Join(filepath.Dir(filename), folder, file))
 	return os.ReadFile(fname)
 }
 

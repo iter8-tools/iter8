@@ -4,6 +4,7 @@ package core
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -27,7 +28,7 @@ func readConfig(fn string) (c config) {
 		Resources:  []schema.GroupVersionResource{},
 	}
 
-	yfile, err := os.ReadFile(fn)
+	yfile, err := os.ReadFile(filepath.Clean(fn))
 	if err != nil {
 		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
 		return c // empty configuration

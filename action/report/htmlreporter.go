@@ -56,35 +56,35 @@ func (ht *HTMLReporter) Gen(out io.Writer) error {
 
 // RenderStr is a helper method for rendering strings
 // Used in HTML template
-func (r *HTMLReporter) RenderStr(what string) (string, error) {
-	var val string = ""
-	var err error = nil
+func (ht *HTMLReporter) RenderStr(what string) (string, error) {
+	var val string
+	var err error
 	switch what {
 	case "showClassStatus":
 		val = "show"
-		if r.NoFailure() {
+		if ht.NoFailure() {
 			val = ""
 		}
 	case "textColorStatus":
 		val = "text-danger"
-		if r.NoFailure() {
+		if ht.NoFailure() {
 			val = "text-success"
 		}
 	case "thumbsStatus":
 		val = "down"
-		if r.NoFailure() {
+		if ht.NoFailure() {
 			val = "up"
 		}
 	case "msgStatus":
 		completionStatus := "Experiment completed."
-		if !r.Completed() {
+		if !ht.Completed() {
 			completionStatus = "Experiment has not completed."
 		}
 		failureStatus := "Experiment has failures."
-		if r.NoFailure() {
+		if ht.NoFailure() {
 			failureStatus = "Experiment has no failures."
 		}
-		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(r.Spec), r.Result.NumCompletedTasks)
+		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(ht.Spec), ht.Result.NumCompletedTasks)
 		val = fmt.Sprint(completionStatus)
 		val += " "
 		val += fmt.Sprint(failureStatus)
@@ -97,8 +97,8 @@ func (r *HTMLReporter) RenderStr(what string) (string, error) {
 }
 
 // MetricDescriptionHTML is used to described metrics in the metrics and SLO section of the HTML report
-func (r *HTMLReporter) MetricDescriptionHTML(metricName string) (string, error) {
-	in := r.Result.Insights
+func (ht *HTMLReporter) MetricDescriptionHTML(metricName string) (string, error) {
+	in := ht.Result.Insights
 	nm, err := base.NormalizeMetricName(metricName)
 	if err != nil {
 		return "", err
@@ -117,24 +117,22 @@ func (r *HTMLReporter) MetricDescriptionHTML(metricName string) (string, error) 
 func renderSLOSatisfiedHTML(s bool) string {
 	if s {
 		return "fa-check-circle"
-	} else {
-		return "fa-times-circle"
 	}
+	return "fa-times-circle"
 }
 
 // renderSLOSatisfiedCellClass dictates the cell color indicating if the SLO is satisfied
 func renderSLOSatisfiedCellClass(s bool) string {
 	if s {
 		return "text-success"
-	} else {
-		return "text-danger"
 	}
+	return "text-danger"
 }
 
 // SortedVectorMetrics extracts vector metric names from experiment in sorted order
-func (r *HTMLReporter) SortedVectorMetrics() []string {
+func (ht *HTMLReporter) SortedVectorMetrics() []string {
 	keys := []string{}
-	for k, mm := range r.Result.Insights.MetricsInfo {
+	for k, mm := range ht.Result.Insights.MetricsInfo {
 		if mm.Type == base.HistogramMetricType || mm.Type == base.SampleMetricType {
 			keys = append(keys, k)
 		}
@@ -148,6 +146,7 @@ func sampleHist(h []base.HistBucket) []float64 {
 	vals := []float64{}
 	for _, b := range h {
 		for i := 0; i < int(b.Count); i++ {
+			/* #nosec */
 			vals = append(vals, b.Lower+(b.Upper-b.Lower)*rand.Float64())
 		}
 	}
@@ -157,8 +156,8 @@ func sampleHist(h []base.HistBucket) []float64 {
 // VectorMetricValue gets the value of the given vector metric for the given version
 // If it is a histogram metric, then its values are sampled from the histogram
 // Recall: VectorMetric can be a histogram metric or a sample metric.
-func (r *HTMLReporter) VectorMetricValue(i int, m string) []float64 {
-	in := r.Result.Insights
+func (ht *HTMLReporter) VectorMetricValue(i int, m string) []float64 {
+	in := ht.Result.Insights
 	mm, ok := in.MetricsInfo[m]
 	if !ok {
 		log.Logger.Error("could not find vector metric: ", m)

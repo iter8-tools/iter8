@@ -10,7 +10,7 @@ type LogOpts struct {
 	*driver.KubeDriver
 }
 
-// NewHubOpts initializes and returns log opts
+// NewLogOpts initializes and returns log opts
 func NewLogOpts(kd *driver.KubeDriver) *LogOpts {
 	return &LogOpts{
 		KubeDriver: kd,

@@ -58,7 +58,7 @@ func TestRunningTasks(t *testing.T) {
 		With: assessInputs{
 			SLOs: &SLOLimits{
 				Upper: []SLO{{
-					Metric: httpMetricPrefix + "/" + builtInHTTPErrorCountId,
+					Metric: httpMetricPrefix + "/" + builtInHTTPErrorCountID,
 					Limit:  0,
 				}},
 			},

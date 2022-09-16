@@ -31,7 +31,7 @@ type LaunchOpts struct {
 	*driver.KubeDriver
 }
 
-// NewHubOpts initializes and returns launch opts
+// NewLaunchOpts initializes and returns launch opts
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	return &LaunchOpts{
 		DryRun:          false,

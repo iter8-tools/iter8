@@ -1,5 +1,4 @@
 // Package watcher provides methods to watch resources and build a runtime model of applications
-
 package watcher
 
 // Configured resource types are watched in a set of namespaces. Each version of an application

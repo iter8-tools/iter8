@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// kRunDesc is the description of the k run command
-const kRunDesc = `
+// krunDesc is the description of the k run command
+const krunDesc = `
 Run a Kubernetes experiment. This command reads an experiment specified in a secret and writes the result back to the secret.
 
 	$ iter8 k run --namespace {{ .Experiment.Namespace }} --group {{ .Experiment.group }}
@@ -24,7 +24,7 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "run",
 		Short:        "Run a Kubernetes experiment",
-		Long:         kRunDesc,
+		Long:         krunDesc,
 		SilenceUsage: true,
 		Hidden:       true,
 		RunE: func(_ *cobra.Command, _ []string) error {

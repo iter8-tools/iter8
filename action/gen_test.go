@@ -29,7 +29,7 @@ func dumpExperiment(t *testing.T) {
 	assert.NoError(t, err)
 	b, err := io.ReadAll(file)
 	assert.NoError(t, err)
-	file.Close()
+	_ = file.Close()
 	l := log.Logger.GetLevel()
 	log.Logger.SetLevel(logrus.DebugLevel)
 	log.Logger.Debug("\n" + string(b))
