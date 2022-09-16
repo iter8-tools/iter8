@@ -84,6 +84,9 @@ func init() {
 	// add hub
 	rootCmd.AddCommand(newHubCmd())
 
+	// add k
+	rootCmd.AddCommand(kCmd)
+
 	// add launch
 	rootCmd.AddCommand(newLaunchCmd(kd))
 
