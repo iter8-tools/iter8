@@ -17,6 +17,54 @@ linters:
   - govet
   - staticcheck
   - gosec
+  - bodyclose
+  - durationcheck
+  - exportloopref
+  - decorder
+  - gofmt
+  - goprintffuncname
+  - grouper
+  - importas
+  - interfacebloat
+  - maintidx
+  - makezero
+  - nakedret
+  - nosprintfhostport
+  - prealloc
+  - predeclared 
+  - reassign
+  - stylecheck 
+  - usestdlibvars
+  # - wsl
+  # - wrapcheck
+  # - whitespace
+  # - varnamelen
+  # - wastedassign  
+  # - unconvert
+  # - unparam
+  # - tenv
+  # - thelper
+  # - tagliatelle
+  # - paralleltest
+  # - misspell
+  # - nonamedreturns
+  # - noctx
+  # - nlreturn
+  # - nilnil
+  # - nilerr
+  # - nestif
+  # - lll 
+  # - ireturn
+  # - gomnd 
+  # - godox
+  # - godot
+  # - goconst
+  # - gocognit
+  # - gochecknoinits
+  # - gochecknoglobals
+  # - funlen
+  # - dupl
+  # - forcetypeassert
 
 issues:
   exclude-use-default: false
