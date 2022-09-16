@@ -29,6 +29,8 @@ type KubeClient struct {
 	dynamicClient dynamic.Interface
 }
 
+// NewKubeClient returns a KubeClient with the given settings.
+// Must be initialized before it can be used.
 func NewKubeClient(s *cli.EnvSettings) *KubeClient {
 	return &KubeClient{
 		EnvSettings: s,
@@ -36,7 +38,7 @@ func NewKubeClient(s *cli.EnvSettings) *KubeClient {
 	}
 }
 
-// initKube initializes the Kubernetes clientset
+// Initialize initializes the Kubernetes clientset
 func (c *KubeClient) Initialize() (err error) {
 	if c.dynamicClient == nil {
 		// get rest config
@@ -65,10 +67,12 @@ func (c *KubeClient) Initialize() (err error) {
 	return nil
 }
 
+// Typed is the typed k8s client interface
 func (c *KubeClient) Typed() kubernetes.Interface {
 	return c.typedClient
 }
 
+// Dynamic is the dynamic (untyped) k8s client interface
 func (c *KubeClient) Dynamic() dynamic.Interface {
 	return c.dynamicClient
 }

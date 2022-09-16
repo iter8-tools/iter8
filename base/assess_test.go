@@ -9,7 +9,7 @@ import (
 
 // Test a runnable assert condition here
 func TestRunAssess(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	// simple assess without any SLOs
 	// should succeed
 	task := &assessTask{
@@ -22,7 +22,7 @@ func TestRunAssess(t *testing.T) {
 		Spec: []Task{task},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 	err := task.run(exp)
 	assert.NoError(t, err)
 

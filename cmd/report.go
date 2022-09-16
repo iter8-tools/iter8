@@ -42,8 +42,3 @@ func newReportCmd(kd *driver.KubeDriver) *cobra.Command {
 func addOutputFormatFlag(cmd *cobra.Command, outputFormat *string) {
 	cmd.Flags().StringVarP(outputFormat, "outputFormat", "o", "text", "text | html")
 }
-
-// initialize with the report cmd
-func init() {
-	rootCmd.AddCommand(newReportCmd(kd))
-}

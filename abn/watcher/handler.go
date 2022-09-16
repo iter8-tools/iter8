@@ -12,9 +12,9 @@ import (
 
 // precond is set of preconditions that must hold true before an object is considered.
 // It must have:
-//  - label 'iter8.tools/abn' set to true indicating the resource should be inspected further
-//  - label 'app.kubernetes.io/name' identifying the name of the application to which the resource belongs
-//  - label 'app.kubernetes.io/version' identifying the name of the version  to which the resource belongs
+//   - label 'iter8.tools/abn' set to true indicating the resource should be inspected further
+//   - label 'app.kubernetes.io/name' identifying the name of the application to which the resource belongs
+//   - label 'app.kubernetes.io/version' identifying the name of the version  to which the resource belongs
 func precond(w watchedObject) bool {
 	var ok bool
 

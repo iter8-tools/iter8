@@ -9,8 +9,8 @@ import (
 )
 
 func TestAssert(t *testing.T) {
-	os.Chdir(t.TempDir())
-	id.CopyFileToPwd(t, base.CompletePath("../testdata", "assertinputs/experiment.yaml"))
+	_ = os.Chdir(t.TempDir())
+	_ = id.CopyFileToPwd(t, base.CompletePath("../testdata", "assertinputs/experiment.yaml"))
 	tests := []cmdTestCase{
 		// assert, SLOs
 		{

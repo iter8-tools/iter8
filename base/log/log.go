@@ -49,7 +49,7 @@ func (l *Iter8Logger) WithStackTrace(t string) *logrus.Entry {
 	})
 }
 
-// WithSpaces yields a log entry with a formatted indent embedded in it.
+// WithIndentedTrace yields a log entry with a formatted indent embedded in it.
 func (l *Iter8Logger) WithIndentedTrace(t string) *logrus.Entry {
 	return l.WithField("indented-trace", &StackTrace{
 		prefix: "  ",

@@ -10,8 +10,8 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	os.Chdir(t.TempDir())
-	id.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
+	_ = os.Chdir(t.TempDir())
+	_ = id.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
 	base.SetupWithMock(t)
 
 	// fake kube cluster

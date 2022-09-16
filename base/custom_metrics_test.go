@@ -2,7 +2,7 @@ package base
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -63,7 +63,7 @@ func getCustomMetricsTask(t *testing.T, providerName string, providerURL string)
 
 // test getElapsedTimeSeconds()
 func TestGetElapsedTimeSeconds(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	versionValues := map[string]interface{}{
 		"startingTime": "2020-02-01T09:44:40Z",
 	}
@@ -88,7 +88,7 @@ func TestGetElapsedTimeSeconds(t *testing.T) {
 
 // test if a user sets startingTime incorrectly getElapsedTimeSeconds()
 func TestStartingTimeFormatError(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	versionValues := map[string]interface{}{
 		"startingTime": "1652935205",
 	}
@@ -108,7 +108,7 @@ func TestStartingTimeFormatError(t *testing.T) {
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	// request-count
@@ -170,7 +170,7 @@ func TestCEOneVersion(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := ct.run(exp)
 
@@ -187,7 +187,7 @@ func TestCEOneVersion(t *testing.T) {
 // basic test with versionValues, mimicking Code Engine
 // one version, three successful metrics
 func TestCEVersionValues(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 	ct.With.VersionValues = []map[string]interface{}{{
 		"ibm_codeengine_revision_name": "v1",
@@ -252,7 +252,7 @@ func TestCEVersionValues(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := ct.run(exp)
 
@@ -268,7 +268,7 @@ func TestCEVersionValues(t *testing.T) {
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	// request-count
@@ -288,7 +288,7 @@ func TestCEUnauthorized(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := ct.run(exp)
 
@@ -303,7 +303,7 @@ func TestCEUnauthorized(t *testing.T) {
 // test with one version with some values, mimicking Code Engine
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	// request-count
@@ -356,7 +356,7 @@ func TestCESomeValues(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := ct.run(exp)
 
@@ -375,7 +375,7 @@ func TestCESomeValues(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
@@ -430,7 +430,7 @@ func TestCEMultipleVersions(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(2)
+	_ = exp.Result.initInsightsWithNumVersions(2)
 
 	err := ct.run(exp)
 
@@ -451,7 +451,7 @@ func TestCEMultipleVersions(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
@@ -505,7 +505,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(2)
+	_ = exp.Result.initInsightsWithNumVersions(2)
 
 	err := ct.run(exp)
 
@@ -525,14 +525,14 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 
 // basic test with a request body
 func TestRequestBody(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, testRequestBody, testRequestBodyURL)
 
 	// request-count
 	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(exampleQueryParameter),
 		func(req *http.Request) (*http.Response, error) {
 			if req.Body != nil {
-				b, err := ioutil.ReadAll(req.Body)
+				b, err := io.ReadAll(req.Body)
 				if err != nil {
 					panic(err)
 				}
@@ -564,7 +564,7 @@ func TestRequestBody(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := ct.run(exp)
 

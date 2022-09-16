@@ -98,6 +98,13 @@ vet: ## Run go vet against code
 staticcheck:
 	staticcheck ./...
 
+.PHONY: golangci-lint
+golangci-lint:
+	golangci-lint run ./...
+
+.PHONY: lint
+lint:	vet staticcheck golangci-lint
+
 .PHONY: test
 test: fmt vet ## Run tests.
 	go test -v ./... -coverprofile=coverage.out

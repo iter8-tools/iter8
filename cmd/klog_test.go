@@ -15,7 +15,7 @@ import (
 )
 
 func TestKLog(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k launch
 		{
@@ -34,7 +34,7 @@ func TestKLog(t *testing.T) {
 	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
+	_, _ = kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job-8218s",
 			Namespace: "default",

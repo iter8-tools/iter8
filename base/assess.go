@@ -28,7 +28,7 @@ const (
 // initializeDefaults sets default values for task inputs
 func (t *assessTask) initializeDefaults() {}
 
-//validateInputs for this task
+// validateInputs for this task
 func (t *assessTask) validateInputs() error {
 	return nil
 }

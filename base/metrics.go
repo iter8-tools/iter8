@@ -33,7 +33,7 @@ const (
 	CountAggregator AggregationType = "count"
 	// MeanAggregator corresponds to aggregation of type mean
 	MeanAggregator AggregationType = "mean"
-	// StddevAggregator corresponds to aggregation of type stddev
+	// StdDevAggregator corresponds to aggregation of type stddev
 	StdDevAggregator AggregationType = "stddev"
 	// MinAggregator corresponds to aggregation of type min
 	MinAggregator AggregationType = "min"

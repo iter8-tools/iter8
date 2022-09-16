@@ -10,13 +10,14 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type iter8Watcher struct {
+// Iter8Watcher enables creation of informers needed by the abn service
+type Iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
 // NewIter8Watcher returns a watcher for iter8 related objects
-func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string) *iter8Watcher {
-	w := &iter8Watcher{
+func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string) *Iter8Watcher {
+	w := &Iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
@@ -45,7 +46,7 @@ func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []s
 }
 
 // Start starts the watcher
-func (watcher *iter8Watcher) Start(stopChannel chan struct{}) {
+func (watcher *Iter8Watcher) Start(stopChannel chan struct{}) {
 	for _, f := range watcher.factories {
 		f.Start(stopChannel)
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 func TestRunCollectHTTP(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	httpmock.Activate()
 	t.Cleanup(httpmock.DeactivateAndReset)
 
@@ -39,7 +39,7 @@ func TestRunCollectHTTP(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
-	mm, err := exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "/" + builtInHTTPLatencyMeanId)
+	mm, err := exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "/" + builtInHTTPLatencyMeanID)
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 

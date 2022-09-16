@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"io"
-	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
@@ -45,9 +44,4 @@ func addRunDirFlag(cmd *cobra.Command, runDirPtr *string) {
 // looping experiments
 func addReuseResult(cmd *cobra.Command, reuseResultPtr *bool) {
 	cmd.Flags().BoolVar(reuseResultPtr, "reuseResult", false, "reuse experiment result; useful for experiments with multiple loops such as Kubernetes experiments with a cronjob runner")
-}
-
-// initialize with run cmd
-func init() {
-	rootCmd.AddCommand(newRunCmd(kd, os.Stdout))
 }

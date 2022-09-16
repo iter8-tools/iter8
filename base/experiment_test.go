@@ -1,7 +1,6 @@
 package base
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -11,23 +10,23 @@ import (
 )
 
 func TestReadExperiment(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 
-	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
+	b, err := os.ReadFile(CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)
 	e := &Experiment{}
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(e.Spec))
 
-	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
+	b, err = os.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
 	assert.NoError(t, err)
 	e = &Experiment{}
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(e.Spec))
 
-	b, err = ioutil.ReadFile(CompletePath("../testdata", "experiment_db.yaml"))
+	b, err = os.ReadFile(CompletePath("../testdata", "experiment_db.yaml"))
 	assert.NoError(t, err)
 	e = &Experiment{}
 	err = yaml.Unmarshal(b, e)
@@ -36,7 +35,7 @@ func TestReadExperiment(t *testing.T) {
 }
 
 func TestRunningTasks(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	SetupWithMock(t)
 
 	// valid collect task... should succeed
@@ -59,7 +58,7 @@ func TestRunningTasks(t *testing.T) {
 		With: assessInputs{
 			SLOs: &SLOLimits{
 				Upper: []SLO{{
-					Metric: httpMetricPrefix + "/" + builtInHTTPErrorCountId,
+					Metric: httpMetricPrefix + "/" + builtInHTTPErrorCountID,
 					Limit:  0,
 				}},
 			},
@@ -85,10 +84,10 @@ func TestRunningTasks(t *testing.T) {
 }
 
 func TestRunExperiment(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	SetupWithMock(t)
 
-	b, err := ioutil.ReadFile(CompletePath("../testdata", "experiment.yaml"))
+	b, err := os.ReadFile(CompletePath("../testdata", "experiment.yaml"))
 	assert.NoError(t, err)
 	e := &Experiment{}
 	err = yaml.Unmarshal(b, e)
@@ -106,7 +105,7 @@ func TestRunExperiment(t *testing.T) {
 }
 
 func TestFailExperiment(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	exp := Experiment{
 		Spec: ExperimentSpec{},
 	}

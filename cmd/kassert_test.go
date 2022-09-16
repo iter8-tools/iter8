@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 )
 
 func TestKAssert(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k launch
 		{
@@ -40,8 +39,8 @@ func TestKAssert(t *testing.T) {
 	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", id.ExperimentPath))
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata", id.ExperimentPath))
+	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",
@@ -49,7 +48,7 @@ func TestKAssert(t *testing.T) {
 		StringData: map[string]string{id.ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
+	_, _ = kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job",
 			Namespace: "default",

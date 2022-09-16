@@ -111,8 +111,7 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 	}
 
 	// 3. Init insights with num versions: always 1 in this task
-	err = exp.Result.initInsightsWithNumVersions(1)
-	if err != nil {
+	if err = exp.Result.initInsightsWithNumVersions(1); err != nil {
 		return err
 	}
 	in := exp.Result.Insights
@@ -126,7 +125,9 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 			Description: "number of gRPC requests sent",
 			Type:        CounterMetricType,
 		}
-		in.updateMetric(m, mm, 0, float64(data.Count))
+		if err = in.updateMetric(m, mm, 0, float64(data.Count)); err != nil {
+			return err
+		}
 
 		// populate error count & rate
 		ec := float64(0)
@@ -141,7 +142,9 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 			Description: "number of responses that were errors",
 			Type:        CounterMetricType,
 		}
-		in.updateMetric(m, mm, 0, ec)
+		if err = in.updateMetric(m, mm, 0, ec); err != nil {
+			return err
+		}
 
 		// populate rate
 		// todo: This logic breaks for looped experiments. Fix when we get to loops.
@@ -152,7 +155,9 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 				Description: "fraction of responses that were errors",
 				Type:        GaugeMetricType,
 			}
-			in.updateMetric(m, mm, 0, ec/rc)
+			if err = in.updateMetric(m, mm, 0, ec/rc); err != nil {
+				return err
+			}
 		}
 
 		// populate latency sample
@@ -163,7 +168,9 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 			Units:       StringPointer("msec"),
 		}
 		lh := latencySample(data.Details)
-		in.updateMetric(m, mm, 0, lh)
+		if err = in.updateMetric(m, mm, 0, lh); err != nil {
+			return err
+		}
 	}
 	return nil
 }

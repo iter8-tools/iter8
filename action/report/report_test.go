@@ -10,8 +10,8 @@ import (
 )
 
 func TestReportText(t *testing.T) {
-	os.Chdir(t.TempDir())
-	driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experiment.yaml"))
+	_ = os.Chdir(t.TempDir())
+	_ = driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experiment.yaml"))
 
 	fd := driver.FileDriver{
 		RunDir: ".",
@@ -27,10 +27,29 @@ func TestReportText(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestReportHTML(t *testing.T) {
-	os.Chdir(t.TempDir())
-	driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experiment.yaml"))
+func TestReportTextWithLowerSLOs(t *testing.T) {
+	_ = os.Chdir(t.TempDir())
+	_ = driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experimentWithLowerSLOs.yaml"))
+	_ = os.Rename("experimentWithLowerSLOs.yaml", "experiment.yaml")
 
+	fd := driver.FileDriver{
+		RunDir: ".",
+	}
+	exp, err := base.BuildExperiment(&fd)
+	assert.NoError(t, err)
+	reporter := TextReporter{
+		Reporter: &Reporter{
+			Experiment: exp,
+		},
+	}
+	err = reporter.Gen(os.Stdout)
+	assert.NoError(t, err)
+}
+
+func TestReportHTMLWithLowerSLOs(t *testing.T) {
+	_ = os.Chdir(t.TempDir())
+	_ = driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experimentWithLowerSLOs.yaml"))
+	_ = os.Rename("experimentWithLowerSLOs.yaml", "experiment.yaml")
 	fd := driver.FileDriver{
 		RunDir: ".",
 	}

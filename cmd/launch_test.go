@@ -9,7 +9,7 @@ import (
 )
 
 func TestLaunch(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// launch, chartsParentDir, noDownload
 		{

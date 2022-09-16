@@ -10,7 +10,7 @@ import (
 )
 
 func TestKDelete(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// Launch, base case, values from CLI
 		{

@@ -8,7 +8,7 @@ import (
 )
 
 func TestHub(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// basic hub
 		{

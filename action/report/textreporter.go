@@ -22,6 +22,7 @@ type TextReporter struct {
 }
 
 // reportText is the text report template
+//
 //go:embed textreport.tpl
 var reportText string
 
@@ -48,16 +49,16 @@ func (tr *TextReporter) Gen(out io.Writer) error {
 }
 
 // PrintSLOsText returns SLOs section of the text report as a string
-func (r *TextReporter) PrintSLOsText() string {
+func (tr *TextReporter) PrintSLOsText() string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)
-	r.printSLOsText(w)
+	tr.printSLOsText(w)
 	return b.String()
 }
 
 // getSLOStrText gets the text for an SLO
-func (r *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
-	in := r.Result.Insights
+func (tr *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
+	in := tr.Result.Insights
 	var slo base.SLO
 	if upper {
 		slo = in.SLOs.Upper[i]
@@ -65,7 +66,7 @@ func (r *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
 		slo = in.SLOs.Lower[i]
 	}
 	// get metric with units and description
-	str, err := r.MetricWithUnits(slo.Metric)
+	str, err := tr.MetricWithUnits(slo.Metric)
 	if err != nil {
 		log.Logger.Error("unable to get slo metric with units")
 		return "", err
@@ -81,8 +82,8 @@ func (r *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
 }
 
 // printSLOsText prints all SLOs into tab writer
-func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
-	in := r.Result.Insights
+func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
+	in := tr.Result.Insights
 	fmt.Fprint(w, "SLO Conditions")
 	if in.NumVersions > 1 {
 		for i := 0; i < in.NumVersions; i++ {
@@ -95,8 +96,11 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "--------------\t---------")
 
 	if in.SLOs != nil {
+		log.Logger.Debug("SLOs are not nil")
+		log.Logger.Debug("found ", len(in.SLOs.Upper), " upper SLOs")
 		for i := 0; i < len(in.SLOs.Upper); i++ {
-			str, err := r.getSLOStrText(i, true)
+			log.Logger.Debug("Upper SLO ", i)
+			str, err := tr.getSLOStrText(i, true)
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
@@ -107,8 +111,11 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 				log.Logger.Error("unable to extract SLO text")
 			}
 		}
+
+		log.Logger.Debug("found ", len(in.SLOs.Lower), " lower SLOs")
 		for i := 0; i < len(in.SLOs.Lower); i++ {
-			str, err := r.getSLOStrText(i, false)
+			log.Logger.Debug("Lower SLO ", i)
+			str, err := tr.getSLOStrText(i, false)
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
@@ -121,20 +128,20 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 		}
 	}
 
-	w.Flush()
+	_ = w.Flush()
 }
 
 // PrintMetricsText returns metrics section of the text report as a string
-func (r *TextReporter) PrintMetricsText() string {
+func (tr *TextReporter) PrintMetricsText() string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)
-	r.printMetricsText(w)
+	tr.printMetricsText(w)
 	return b.String()
 }
 
 // printMetricsText prints metrics into tab writer
-func (r *TextReporter) printMetricsText(w *tabwriter.Writer) {
-	in := r.Result.Insights
+func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
+	in := tr.Result.Insights
 	fmt.Fprint(w, "Metric")
 	if in.NumVersions > 1 {
 		for i := 0; i < in.NumVersions; i++ {
@@ -147,21 +154,21 @@ func (r *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "-------\t-----")
 
 	// keys contain normalized scalar metric names in sorted order
-	keys := r.SortedScalarAndSLOMetrics()
+	keys := tr.SortedScalarAndSLOMetrics()
 
 	for _, mn := range keys {
-		mwu, err := r.MetricWithUnits(mn)
+		mwu, err := tr.MetricWithUnits(mn)
 		if err == nil {
 			// add metric name with units
 			fmt.Fprint(w, mwu)
 			// add value
 			for j := 0; j < in.NumVersions; j++ {
-				fmt.Fprintf(w, "\t%v", r.ScalarMetricValueStr(j, mn))
+				fmt.Fprintf(w, "\t%v", tr.ScalarMetricValueStr(j, mn))
 			}
 			fmt.Fprintln(w)
 		} else {
 			log.Logger.Error(err)
 		}
 	}
-	w.Flush()
+	_ = w.Flush()
 }
