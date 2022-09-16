@@ -50,7 +50,7 @@ result:
         limit: 2500
       - metric: "http/latency-p99"
         limit: 5000
-      upper:
+      lower:
       - metric: "user/engagement"
         limit: 10000000
     SLOsSatisfied:

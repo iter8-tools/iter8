@@ -96,7 +96,10 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "--------------\t---------")
 
 	if in.SLOs != nil {
+		log.Logger.Debug("SLOs are not nil")
+		log.Logger.Debug("found ", len(in.SLOs.Upper), " upper SLOs")
 		for i := 0; i < len(in.SLOs.Upper); i++ {
+			log.Logger.Debug("Upper SLO ", i)
 			str, err := r.getSLOStrText(i, true)
 			if err == nil {
 				fmt.Fprint(w, str)
@@ -108,7 +111,10 @@ func (r *TextReporter) printSLOsText(w *tabwriter.Writer) {
 				log.Logger.Error("unable to extract SLO text")
 			}
 		}
+
+		log.Logger.Debug("found ", len(in.SLOs.Lower), " lower SLOs")
 		for i := 0; i < len(in.SLOs.Lower); i++ {
+			log.Logger.Debug("Lower SLO ", i)
 			str, err := r.getSLOStrText(i, false)
 			if err == nil {
 				fmt.Fprint(w, str)
