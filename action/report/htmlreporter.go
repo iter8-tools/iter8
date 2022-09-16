@@ -54,57 +54,6 @@ func (ht *HTMLReporter) Gen(out io.Writer) error {
 	return nil
 }
 
-// HTMLHistCharts returns histogram charts section in HTML report
-func (r *HTMLReporter) HTMLHistCharts() string {
-	return `
-	<script>
-		var charts = [];
-		for (let i = 0; i < chartData.length; i++) {
-			nv.addGraph(function() {
-				charts.push(nv.models.multiBarChart());
-
-				charts[i]
-						.stacked(false)
-						.showControls(false)
-						.margin({left: 100, bottom: 100})
-						.useInteractiveGuideline(true)
-						.duration(250);
-
-				var contentGenerator = charts[i].interactiveLayer.tooltip.contentGenerator();
-				var tooltip = charts[i].interactiveLayer.tooltip;
-				tooltip.headerFormatter(function (d) {
-					var lower = d;
-					var upper = d + chartData[i].width;
-					lower = lower.toFixed(2);
-					upper = upper.toFixed(2);
-					return "<p>Range: [" + lower + ", " + upper + "]";
-				});
-				
-				// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
-				charts[i].xAxis
-						.axisLabel(chartData[i].xAxisLabel)
-						.tickFormat(function(d) { return d3.format(',.2f')(d);});
-
-				charts[i].yAxis
-						.axisLabel('Count')
-						.tickFormat(d3.format(',.1f'));
-
-				charts[i].showXAxis(true);
-
-				d3.select('#hist-chart-' + i)
-				.datum(chartData[i].datum)
-				.transition()
-				.call(charts[i]);
-						
-				nv.utils.windowResize(charts[i].update);
-				charts[i].dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
-				return charts[i];
-		});
-	}
-	</script>	
-	`
-}
-
 // RenderStr is a helper method for rendering strings
 // Used in HTML template
 func (r *HTMLReporter) RenderStr(what string) (string, error) {

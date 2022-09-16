@@ -40,12 +40,6 @@ func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 				keys = append(keys, nm)
 			}
 		}
-		for _, v := range r.Result.Insights.SLOs.Lower {
-			nm, err := base.NormalizeMetricName(v.Metric)
-			if err == nil {
-				keys = append(keys, nm)
-			}
-		}
 	}
 	// remove duplicates
 	tmp := base.Uniq(keys)
