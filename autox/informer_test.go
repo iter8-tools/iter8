@@ -22,7 +22,6 @@ const (
 	newLabel        = "app.kubernetes.io/name"
 	versionLabel    = "app.kubernetes.io/version"
 	readyAnnotation = "iter8.tools/ready"
-	iter8Annotation = "iter8.tools/abn"
 	iter8Label      = "iter8.tools/abn"
 )
 

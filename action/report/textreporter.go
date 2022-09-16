@@ -22,6 +22,7 @@ type TextReporter struct {
 }
 
 // reportText is the text report template
+//
 //go:embed textreport.tpl
 var reportText string
 

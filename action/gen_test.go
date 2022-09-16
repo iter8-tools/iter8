@@ -53,7 +53,7 @@ func TestGenGRPC(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(exp.Spec))
 
-	m := make(map[string]interface{}, 0)
+	m := make(map[string]interface{})
 	b, _ := json.Marshal(exp.Spec[0])
 	_ = json.Unmarshal(b, &m)
 	m = m["with"].(map[string]interface{})
@@ -81,7 +81,7 @@ func TestGenDB(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(exp.Spec))
 
-	m := make(map[string]interface{}, 0)
+	m := make(map[string]interface{})
 	b, _ := json.Marshal(exp.Spec[0])
 	_ = json.Unmarshal(b, &m)
 	w := m["with"].(map[string]interface{})
