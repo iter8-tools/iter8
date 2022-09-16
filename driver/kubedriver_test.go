@@ -2,7 +2,6 @@ package driver
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -16,7 +15,7 @@ import (
 )
 
 func TestKOps(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	kd := NewKubeDriver(cli.New()) // we will ignore this value
 	assert.NotNil(t, kd)
 
@@ -64,14 +63,14 @@ func TestKOps(t *testing.T) {
 }
 
 func TestKubeRun(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
+	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",
@@ -79,7 +78,7 @@ func TestKubeRun(t *testing.T) {
 		StringData: map[string]string{ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
+	_, _ = kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job",
 			Namespace: "default",
@@ -100,21 +99,21 @@ func TestKubeRun(t *testing.T) {
 }
 
 func TestLogs(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
+	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",
 		},
 		StringData: map[string]string{ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
-	kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
+	_, _ = kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default-1-job-1831a",
 			Namespace: "default",
@@ -131,7 +130,7 @@ func TestLogs(t *testing.T) {
 }
 
 func TestDryInstall(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	kd := NewFakeKubeDriver(cli.New())
 
 	err := kd.Launch(base.CompletePath("../", "charts/iter8"), values.Options{

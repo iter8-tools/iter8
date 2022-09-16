@@ -1,7 +1,7 @@
 package application
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -21,7 +21,7 @@ func readYamlFromFile(folder, file string) ([]byte, error) {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
 	fname := filepath.Join(filepath.Dir(filename), folder, file)
 
-	return ioutil.ReadFile(fname)
+	return os.ReadFile(fname)
 }
 
 func yamlToApplication(name, folder, file string) (*Application, error) {

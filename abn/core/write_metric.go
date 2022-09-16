@@ -39,7 +39,5 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	m.Add(value)
 
 	// persist updated metric
-	abnapp.Applications.BatchedWrite(a)
-
-	return err
+	return abnapp.Applications.BatchedWrite(a)
 }

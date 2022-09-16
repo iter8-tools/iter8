@@ -33,7 +33,7 @@ func getNotifyTask(t *testing.T, n notifyInputs) *notifyTask {
 
 // GET method
 func TestNotify(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
 		Url:         testNotifyURL,
 		SoftFailure: false,
@@ -48,7 +48,7 @@ func TestNotify(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := nt.run(exp)
 
@@ -64,7 +64,7 @@ type testNotification struct {
 
 // POST method and PayloadTemplateURL
 func TestNotifyWithPayload(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
 		Method:             "POST",
 		Url:                testNotifyURL,
@@ -87,7 +87,7 @@ func TestNotifyWithPayload(t *testing.T) {
 		func(req *http.Request) (*http.Response, error) {
 			buf := new(bytes.Buffer)
 
-			buf.ReadFrom(req.Body)
+			_, _ = buf.ReadFrom(req.Body)
 
 			// reqString := buf.String()
 			// fmt.Println(reqString)
@@ -122,7 +122,7 @@ func TestNotifyWithPayload(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := nt.run(exp)
 
@@ -132,7 +132,7 @@ func TestNotifyWithPayload(t *testing.T) {
 
 // GET method and headers and query parameters
 func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
 		Url: testNotifyURL,
 		Headers: map[string]string{
@@ -164,7 +164,7 @@ func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := nt.run(exp)
 
@@ -174,7 +174,7 @@ func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 
 // bad method and SoftFailure
 func TestNotifyBadMethod(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
 		Url:         testNotifyURL,
 		Method:      "abc",
@@ -186,7 +186,7 @@ func TestNotifyBadMethod(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := nt.run(exp)
 
@@ -204,7 +204,7 @@ func TestNotifyBadMethod(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err = nt.run(exp)
 
@@ -214,7 +214,7 @@ func TestNotifyBadMethod(t *testing.T) {
 
 // default to POST method with PayloadTemplateURL
 func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
 		Url:                testNotifyURL,
 		PayloadTemplateURL: testNotifyURL + templatePath,
@@ -250,7 +250,7 @@ func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := nt.run(exp)
 
@@ -260,7 +260,7 @@ func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 
 // No URL
 func TestNotifyNoURL(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	nt := getNotifyTask(t, notifyInputs{
 		SoftFailure: false,
 	})
@@ -270,7 +270,7 @@ func TestNotifyNoURL(t *testing.T) {
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 
 	err := nt.run(exp)
 

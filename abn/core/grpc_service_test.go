@@ -2,8 +2,8 @@ package core
 
 import (
 	"context"
-	"io/ioutil"
 	"net"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -173,7 +173,9 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	serverOptions := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(serverOptions...)
 	pb.RegisterABNServer(grpcServer, newServer())
-	go grpcServer.Serve(lis)
+	go func() {
+		_ = grpcServer.Serve(lis)
+	}()
 
 	// setup client
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
@@ -202,7 +204,7 @@ func yamlToApplication(name, folder, file string) (*abnapp.Application, error) {
 func readYamlFromFile(folder, file string) ([]byte, error) {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
 	fname := filepath.Join(filepath.Dir(filename), folder, file)
-	return ioutil.ReadFile(fname)
+	return os.ReadFile(fname)
 }
 
 func byteArrayToApplication(name string, data []byte) (*abnapp.Application, error) {

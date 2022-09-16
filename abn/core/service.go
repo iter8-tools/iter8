@@ -37,7 +37,9 @@ var (
 // Start is entry point to configure services and start them
 func Start() {
 	k8sclient.Client = *k8sclient.NewKubeClient(cli.New())
-	k8sclient.Client.Initialize()
+	if err := k8sclient.Client.Initialize(); err != nil {
+		log.Logger.WithStackTrace("unable to initialize k8s client").Fatal(err)
+	}
 
 	// read abn config (resources and namespaces to watch)
 	abnConfigFile, ok := os.LookupEnv(watcherConfigEnv)
@@ -119,5 +121,8 @@ func launchGRPCServer(opts []grpc.ServerOption) {
 
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterABNServer(grpcServer, newServer())
-	grpcServer.Serve(lis)
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		log.Logger.WithError(err).Fatal("failed to start service")
+	}
 }

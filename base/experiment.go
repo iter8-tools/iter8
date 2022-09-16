@@ -183,19 +183,26 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 		if t.Run != nil {
 			log.Logger.Debug("found run task: ", *t.Run)
 			rt := &runTask{}
-			json.Unmarshal(tBytes, rt)
+			if err := json.Unmarshal(tBytes, rt); err != nil {
+				e := errors.New("json unmarshal error")
+				log.Logger.WithStackTrace(err.Error()).Error(e)
+				return e
+			}
 			tsk = rt
 		} else {
 			// this is some other task
 			switch *t.Task {
 			case ReadinessTaskName:
 				rt := &readinessTask{}
-				json.Unmarshal(tBytes, rt)
+				if err := json.Unmarshal(tBytes, rt); err != nil {
+					e := errors.New("json unmarshal error")
+					log.Logger.WithStackTrace(err.Error()).Error(e)
+					return e
+				}
 				tsk = rt
 			case CustomMetricsTaskName:
 				cdt := &customMetricsTask{}
-				err := json.Unmarshal(tBytes, cdt)
-				if err != nil {
+				if err := json.Unmarshal(tBytes, cdt); err != nil {
 					e := errors.New("json unmarshal error")
 					log.Logger.WithStackTrace(err.Error()).Error(e)
 					return e
@@ -203,8 +210,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				tsk = cdt
 			case CollectHTTPTaskName:
 				cht := &collectHTTPTask{}
-				err := json.Unmarshal(tBytes, cht)
-				if err != nil {
+				if err := json.Unmarshal(tBytes, cht); err != nil {
 					e := errors.New("json unmarshal error")
 					log.Logger.WithStackTrace(err.Error()).Error(e)
 					return e
@@ -212,8 +218,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				tsk = cht
 			case CollectGRPCTaskName:
 				cgt := &collectGRPCTask{}
-				err := json.Unmarshal(tBytes, cgt)
-				if err != nil {
+				if err := json.Unmarshal(tBytes, cgt); err != nil {
 					e := errors.New("json unmarshal error")
 					log.Logger.WithStackTrace(err.Error()).Error(e)
 					return e
@@ -221,8 +226,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				tsk = cgt
 			case AssessTaskName:
 				at := &assessTask{}
-				err := json.Unmarshal(tBytes, at)
-				if err != nil {
+				if err := json.Unmarshal(tBytes, at); err != nil {
 					e := errors.New("json unmarshal error")
 					log.Logger.WithStackTrace(err.Error()).Error(e)
 					return e
@@ -230,8 +234,7 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 				tsk = at
 			case NotifyTaskName:
 				nt := &notifyTask{}
-				err := json.Unmarshal(tBytes, nt)
-				if err != nil {
+				if err := json.Unmarshal(tBytes, nt); err != nil {
 					e := errors.New("json unmarshal error")
 					log.Logger.WithStackTrace(err.Error()).Error(e)
 					return e
@@ -411,8 +414,7 @@ func (r *ExperimentResult) initInsightsWithNumVersions(n int) error {
 			NumVersions: n,
 		}
 	}
-	r.Insights.initMetrics()
-	return nil
+	return r.Insights.initMetrics()
 }
 
 // initMetrics initializes the data structes inside insights that will hold metrics

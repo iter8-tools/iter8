@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra/doc"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/spf13/cobra"
 )
@@ -31,7 +33,8 @@ func newDocsCmd() *cobra.Command {
 			hdrFunc := func(filename string) string {
 				base := filepath.Base(filename)
 				name := strings.TrimSuffix(base, path.Ext(base))
-				title := strings.Title(strings.Replace(name, "_", " ", -1))
+				caser := cases.Title(language.English)
+				title := caser.String(strings.Replace(name, "_", " ", -1))
 				tpl := `---
 template: main.html
 title: "%s"
@@ -53,7 +56,7 @@ hide:
 // addDocsFlags defines the flags for the docs command
 func addDocsFlags(cmd *cobra.Command, docsDirPtr *string) {
 	cmd.Flags().StringVar(docsDirPtr, "commandDocsDir", "", "directory where Iter8 CLI documentation will be created")
-	cmd.MarkFlagRequired("commandDocsDir")
+	_ = cmd.MarkFlagRequired("commandDocsDir")
 }
 
 // initialize with docs command

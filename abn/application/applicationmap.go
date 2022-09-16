@@ -239,10 +239,18 @@ func (m *ThreadSafeApplicationMap) BatchedWrite(a *Application) error {
 	lastWrite, ok := m.lastWriteTimes[a.Name]
 	if !ok || lastWrite == nil {
 		// no record of the application ever being written; write it now
-		m.Write(a)
+		err := m.Write(a)
+		if err != nil {
+			log.Logger.Error(err)
+			return err
+		}
 	} else {
 		if now.Sub(*m.lastWriteTimes[a.Name]) > BatchWriteInterval {
-			m.Write(a)
+			err := m.Write(a)
+			if err != nil {
+				log.Logger.Error(err)
+				return err
+			}
 		}
 	}
 

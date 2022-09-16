@@ -2,7 +2,7 @@ package driver
 
 import (
 	"errors"
-	"io/ioutil"
+	"os"
 	"path"
 
 	"github.com/iter8-tools/iter8/base"
@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-//FileDriver enables reading and writing experiment spec and result files
+// FileDriver enables reading and writing experiment spec and result files
 type FileDriver struct {
 	// RunDir is the directory where the experiment.yaml file is to be found
 	RunDir string
@@ -18,7 +18,7 @@ type FileDriver struct {
 
 // Read the experiment
 func (f *FileDriver) Read() (*base.Experiment, error) {
-	b, err := ioutil.ReadFile(path.Join(f.RunDir, ExperimentPath))
+	b, err := os.ReadFile(path.Join(f.RunDir, ExperimentPath))
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment")
 		return nil, errors.New("unable to read experiment")
@@ -29,7 +29,7 @@ func (f *FileDriver) Read() (*base.Experiment, error) {
 // Write the experiment
 func (f *FileDriver) Write(exp *base.Experiment) error {
 	b, _ := yaml.Marshal(exp)
-	err := ioutil.WriteFile(path.Join(f.RunDir, ExperimentPath), b, 0664)
+	err := os.WriteFile(path.Join(f.RunDir, ExperimentPath), b, 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
 		return errors.New("unable to write experiment")

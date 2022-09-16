@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
@@ -269,7 +268,7 @@ func UpdateChartDependencies(chartDir string, settings *cli.EnvSettings) error {
 	}
 	client := action.NewDependency()
 	man := &downloader.Manager{
-		Out:              ioutil.Discard,
+		Out:              io.Discard,
 		ChartPath:        chartDir,
 		Keyring:          client.Keyring,
 		SkipUpdate:       client.SkipRefresh,
@@ -288,7 +287,7 @@ func UpdateChartDependencies(chartDir string, settings *cli.EnvSettings) error {
 
 // writeManifest writes the Kubernetes experiment manifest to a local file
 func writeManifest(rel *release.Release) error {
-	err := ioutil.WriteFile(ManifestFile, []byte(rel.Manifest), 0664)
+	err := os.WriteFile(ManifestFile, []byte(rel.Manifest), 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write kubernetes manifest into ", ManifestFile)
 		return err

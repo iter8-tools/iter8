@@ -5,6 +5,7 @@ import (
 	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +20,7 @@ This command is intended for use within the Iter8 Docker image that is used to e
 `
 
 // newKRunCmd creates the Kubernetes run command
-func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
+func newKRunCmd(kd *driver.KubeDriver, out io.Writer) (*cobra.Command, error) {
 	actor := ia.NewRunOpts(kd)
 
 	cmd := &cobra.Command{
@@ -35,11 +36,18 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	addExperimentGroupFlag(cmd, &actor.Group)
 	addReuseResult(cmd, &actor.ReuseResult)
 	actor.EnvSettings = settings
-	cmd.MarkFlagRequired("namespace")
-	return cmd
+	if err := cmd.MarkFlagRequired("namespace"); err != nil {
+		log.Logger.Error(err)
+		return nil, err
+	}
+	return cmd, nil
 }
 
 // initialize with k run cmd
 func init() {
-	kCmd.AddCommand(newKRunCmd(kd, os.Stdout))
+	cmd, err := newKRunCmd(kd, os.Stdout)
+	if err != nil {
+		os.Exit(1)
+	}
+	kCmd.AddCommand(cmd)
 }

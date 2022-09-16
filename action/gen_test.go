@@ -2,7 +2,7 @@ package action
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 
@@ -15,7 +15,7 @@ import (
 
 func TestGen(t *testing.T) {
 	// fix gOpts
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
 	gOpts.ChartName = "iter8"
@@ -27,7 +27,7 @@ func TestGen(t *testing.T) {
 func dumpExperiment(t *testing.T) {
 	file, err := os.Open("experiment.yaml")
 	assert.NoError(t, err)
-	b, err := ioutil.ReadAll(file)
+	b, err := io.ReadAll(file)
 	assert.NoError(t, err)
 	file.Close()
 	l := log.Logger.GetLevel()
@@ -38,7 +38,7 @@ func dumpExperiment(t *testing.T) {
 
 func TestGenGRPC(t *testing.T) {
 	// fix gOpts
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
 	gOpts.ChartName = "iter8"
@@ -55,7 +55,7 @@ func TestGenGRPC(t *testing.T) {
 
 	m := make(map[string]interface{}, 0)
 	b, _ := json.Marshal(exp.Spec[0])
-	json.Unmarshal(b, &m)
+	_ = json.Unmarshal(b, &m)
 	m = m["with"].(map[string]interface{})
 	s := m["proto"].(string)
 	assert.Equal(t, "helloworld.proto", s)
@@ -63,7 +63,7 @@ func TestGenGRPC(t *testing.T) {
 
 func TestGenDB(t *testing.T) {
 	// fix gOpts
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
 	gOpts.ChartsParentDir = base.CompletePath("../", "")
 	gOpts.ChartName = "iter8"
@@ -83,7 +83,7 @@ func TestGenDB(t *testing.T) {
 
 	m := make(map[string]interface{}, 0)
 	b, _ := json.Marshal(exp.Spec[0])
-	json.Unmarshal(b, &m)
+	_ = json.Unmarshal(b, &m)
 	w := m["with"].(map[string]interface{})
 	s := w["templates"].(map[string]interface{})
 	assert.Equal(t, map[string]interface{}{"istio-prom": "https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl"}, s)

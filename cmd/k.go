@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"os"
+
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 )
@@ -20,9 +23,20 @@ func addExperimentGroupFlag(cmd *cobra.Command, groupP *string) {
 func init() {
 	settings.AddFlags(kCmd.PersistentFlags())
 	// hiding these Helm flags for now
-	kCmd.PersistentFlags().MarkHidden("debug")
-	kCmd.PersistentFlags().MarkHidden("registry-config")
-	kCmd.PersistentFlags().MarkHidden("repository-config")
-	kCmd.PersistentFlags().MarkHidden("repository-cache")
-	rootCmd.AddCommand(kCmd)
+	if err := kCmd.PersistentFlags().MarkHidden("debug"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := kCmd.PersistentFlags().MarkHidden("registry-config"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := kCmd.PersistentFlags().MarkHidden("repository-config"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := kCmd.PersistentFlags().MarkHidden("repository-cache"); err != nil {
+		log.Logger.Fatal(err)
+		os.Exit(1)
+	}
 }

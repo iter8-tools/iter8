@@ -9,7 +9,7 @@ import (
 )
 
 func TestRunCollectHTTP(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	httpmock.Activate()
 	t.Cleanup(httpmock.DeactivateAndReset)
 

@@ -11,7 +11,7 @@ import (
 )
 
 func TestLocalLaunch(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	// fix lOpts
@@ -28,7 +28,7 @@ func TestLocalLaunch(t *testing.T) {
 
 func TestKubeLaunch(t *testing.T) {
 	var err error
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
@@ -48,7 +48,7 @@ func TestKubeLaunch(t *testing.T) {
 }
 
 func TestLocalLaunchNoDownload(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	// fix lOpts
@@ -64,7 +64,7 @@ func TestLocalLaunchNoDownload(t *testing.T) {
 
 func TestKubeLaunchNoDownload(t *testing.T) {
 	var err error
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))

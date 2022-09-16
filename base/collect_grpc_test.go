@@ -16,7 +16,7 @@ import (
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
 	if err != nil {
@@ -71,7 +71,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 }
 
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
 	if err != nil {
@@ -133,7 +133,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	}
 
 	exp.initResults(1)
-	exp.Result.initInsightsWithNumVersions(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
 	err = exp.Spec[0].run(exp)
 	assert.NoError(t, err)
 	err = exp.Spec[1].run(exp)

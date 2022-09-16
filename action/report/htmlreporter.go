@@ -24,6 +24,7 @@ type HTMLReporter struct {
 }
 
 // reportHTML is the HTML report template
+//
 //go:embed htmlreport.tpl
 var reportHTML string
 
@@ -126,7 +127,6 @@ func (r *HTMLReporter) RenderStr(what string) (string, error) {
 			val = "up"
 		}
 	case "msgStatus":
-		val = ""
 		completionStatus := "Experiment completed."
 		if !r.Completed() {
 			completionStatus = "Experiment has not completed."

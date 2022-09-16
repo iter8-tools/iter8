@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -15,8 +14,8 @@ import (
 )
 
 func TestLocalRun(t *testing.T) {
-	os.Chdir(t.TempDir())
-	driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
+	_ = os.Chdir(t.TempDir())
+	_ = driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
 
 	base.SetupWithMock(t)
 	// fix rOpts
@@ -26,13 +25,13 @@ func TestLocalRun(t *testing.T) {
 }
 
 func TestKubeRun(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata", driver.ExperimentPath))
-	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata", driver.ExperimentPath))
+	_, _ = rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",

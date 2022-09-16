@@ -1,7 +1,7 @@
 package base
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"path/filepath"
 	"runtime"
@@ -67,7 +67,7 @@ func getTextTemplateFromURL(providerURL string) (*template.Template, error) {
 	// read responseBody
 	// get the doubly templated metrics spec
 	defer resp.Body.Close()
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

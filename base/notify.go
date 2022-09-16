@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -204,7 +203,7 @@ func (t *notifyTask) run(exp *Experiment) error {
 	}
 
 	// read response responseBody
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Logger.Error("could not read response body from notification request", err)
 

@@ -3,7 +3,7 @@ package core
 // config.go - reading of configuration (list of resources/namespaces to watch)
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -27,7 +27,7 @@ func readConfig(fn string) (c config) {
 		Resources:  []schema.GroupVersionResource{},
 	}
 
-	yfile, err := ioutil.ReadFile(fn)
+	yfile, err := os.ReadFile(fn)
 	if err != nil {
 		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
 		return c // empty configuration

@@ -3,7 +3,7 @@ package autox
 // config.go - reading of configurtion (list of resources/namespaces to watch)
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,7 +45,7 @@ func readResourceConfig(fn string) (config resourceConfig) {
 	// empty configuration
 	config = resourceConfig{}
 
-	yfile, err := ioutil.ReadFile(fn)
+	yfile, err := os.ReadFile(fn)
 	if err != nil {
 		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
 		return config // empty configuration
@@ -74,7 +74,7 @@ func readChartGroupConfig(fn string) (config chartGroupConfig) {
 	// empty configuration
 	config = chartGroupConfig{}
 
-	yfile, err := ioutil.ReadFile(fn)
+	yfile, err := os.ReadFile(fn)
 	if err != nil {
 		log.Logger.Warnf("unable to read configuration file %s: %s", fn, err.Error())
 		return config // empty configuration

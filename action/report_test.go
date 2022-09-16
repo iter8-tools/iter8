@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 )
 
 func TestLocalReportText(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs")
@@ -25,7 +24,7 @@ func TestLocalReportText(t *testing.T) {
 }
 
 func TestLocalReportTextNoInsights(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs/noinsights")
@@ -35,7 +34,7 @@ func TestLocalReportTextNoInsights(t *testing.T) {
 }
 
 func TestLocalReportHTML(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs")
@@ -46,13 +45,13 @@ func TestLocalReportHTML(t *testing.T) {
 }
 
 func TestKubeReportText(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentPath))
-	rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentPath))
+	_, _ = rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",
@@ -65,7 +64,7 @@ func TestKubeReportText(t *testing.T) {
 }
 
 func TestLocalReportHTMLNoInsights(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.RunDir = base.CompletePath("../", "testdata/assertinputs/noinsights")

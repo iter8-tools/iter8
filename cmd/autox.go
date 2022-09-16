@@ -26,8 +26,9 @@ func newAutoXCmd() *cobra.Command {
 		RunE: func(_ *cobra.Command, _ []string) error {
 			stopCh := make(chan struct{})
 			defer close(stopCh)
-			autox.Start(stopCh)
-
+			if err := autox.Start(stopCh); err != nil {
+				return err
+			}
 			sigCh := make(chan os.Signal, 1)
 			signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
 			<-sigCh

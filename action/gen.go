@@ -1,7 +1,7 @@
 package action
 
 import (
-	"io/ioutil"
+	"os"
 	"path"
 
 	"github.com/iter8-tools/iter8/base/log"
@@ -91,7 +91,7 @@ func (gen *GenOpts) LocalRun() error {
 
 	// write experiment
 	expBytes := []byte(m[path.Join(c.Name(), "templates", driver.ExperimentPath)])
-	err = ioutil.WriteFile(path.Join(gen.GenDir, driver.ExperimentPath), expBytes, 0664)
+	err = os.WriteFile(path.Join(gen.GenDir, driver.ExperimentPath), expBytes, 0664)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
 		return err

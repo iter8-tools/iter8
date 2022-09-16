@@ -8,7 +8,7 @@ import (
 )
 
 func TestRunRun(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	// valid run task... should succeed
 	rt := &runTask{
 		TaskMeta: TaskMeta{

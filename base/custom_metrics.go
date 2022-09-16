@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -182,7 +181,7 @@ func queryDatabaseAndGetValue(template ProviderSpec, metric Metric) (interface{}
 	defer resp.Body.Close()
 
 	// read response responseBody
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Logger.Error("could not read response body for metric ", metric.Name, ": ", err)
 		return nil, false
@@ -264,7 +263,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			if err != nil {
 				return err
 			}
-			bytes, _ := ioutil.ReadAll(&buf)
+			bytes, _ := io.ReadAll(&buf)
 			var provider ProviderSpec
 			err = yaml.Unmarshal(bytes, &provider)
 			if err != nil {

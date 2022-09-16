@@ -3,7 +3,6 @@ package driver
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -58,18 +57,11 @@ func initHelmFake(kd *KubeDriver) {
 
 	kd.Configuration = &action.Configuration{
 		Releases:       storage.Init(helmdriver.NewMemory()),
-		KubeClient:     &helmfake.FailingKubeClient{PrintingKubeClient: helmfake.PrintingKubeClient{Out: ioutil.Discard}},
+		KubeClient:     &helmfake.FailingKubeClient{PrintingKubeClient: helmfake.PrintingKubeClient{Out: io.Discard}},
 		Capabilities:   chartutil.DefaultCapabilities,
 		RegistryClient: registryClient,
 		Log:            log.Logger.Debugf,
 	}
-}
-
-// initFake initializes fake Kubernetes and Helm clients
-func initFake(kd *KubeDriver, objects ...runtime.Object) error {
-	initKubeFake(kd, objects...)
-	initHelmFake(kd)
-	return nil
 }
 
 // NewFakeKubeDriver creates and returns a new KubeDriver with fake clients
@@ -78,7 +70,8 @@ func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDrive
 		EnvSettings: s,
 		Group:       DefaultExperimentGroup,
 	}
-	initFake(kd, objects...)
+	initKubeFake(kd, objects...)
+	initHelmFake(kd)
 	return kd
 }
 
@@ -99,6 +92,6 @@ func CopyFileToPwd(t *testing.T, filePath string) error {
 	t.Cleanup(func() {
 		destFile.Close()
 	})
-	io.Copy(destFile, srcFile)
+	_, _ = io.Copy(destFile, srcFile)
 	return nil
 }

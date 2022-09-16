@@ -9,9 +9,9 @@ import (
 )
 
 func TestLocalRun(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
-	CopyFileToPwd(t, base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
+	_ = CopyFileToPwd(t, base.CompletePath("../", "testdata/drivertests/experiment.yaml"))
 
 	fd := FileDriver{
 		RunDir: ".",
@@ -24,7 +24,7 @@ func TestLocalRun(t *testing.T) {
 }
 
 func TestFileDriverReadError(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	fd := FileDriver{

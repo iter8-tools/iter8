@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 )
 
 func TestKReport(t *testing.T) {
-	os.Chdir(t.TempDir())
+	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k report
 		{
@@ -28,8 +27,8 @@ func TestKReport(t *testing.T) {
 	// mock the environment
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := ioutil.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentPath))
-	kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/assertinputs", id.ExperimentPath))
+	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",

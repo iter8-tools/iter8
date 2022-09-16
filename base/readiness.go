@@ -58,7 +58,6 @@ func (t *readinessTask) initializeDefaults() {
 		t.With.Timeout = StringPointer(defaultTimeout)
 	}
 
-	kd.initKube()
 	// set Namespace (from context) if not already set
 	if t.With.Namespace == nil {
 		t.With.Namespace = StringPointer(kd.Namespace())
@@ -79,7 +78,11 @@ func (t *readinessTask) run(exp *Experiment) error {
 		return err
 	}
 
-	// initialization
+	// kd is required by initializeDefaults
+	if err = kd.initKube(); err != nil {
+		return err
+	}
+	// initialize default values
 	t.initializeDefaults()
 
 	// parse timeout
