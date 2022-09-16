@@ -39,4 +39,27 @@ func init() {
 		log.Logger.Fatal(err)
 		os.Exit(1)
 	}
+
+	// add k assert
+	kCmd.AddCommand(newKAssertCmd(kd))
+
+	// add k delete
+	kCmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
+
+	// add k launch
+	kCmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
+
+	// add k log
+	kCmd.AddCommand(newKLogCmd(kd))
+
+	// add k report
+	kCmd.AddCommand(newKReportCmd(kd))
+
+	// add k run
+	if cmd, err := newKRunCmd(kd, os.Stdout); err != nil {
+		os.Exit(1)
+	} else {
+		kCmd.AddCommand(cmd)
+	}
+
 }

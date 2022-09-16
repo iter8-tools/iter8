@@ -36,8 +36,3 @@ func newKLogCmd(kd *driver.KubeDriver) *cobra.Command {
 	actor.EnvSettings = settings
 	return cmd
 }
-
-// initialize with k log cmd
-func init() {
-	kCmd.AddCommand(newKLogCmd(kd))
-}

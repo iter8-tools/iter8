@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"io"
-	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
@@ -41,13 +40,4 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) (*cobra.Command, error) {
 		return nil, err
 	}
 	return cmd, nil
-}
-
-// initialize with k run cmd
-func init() {
-	cmd, err := newKRunCmd(kd, os.Stdout)
-	if err != nil {
-		os.Exit(1)
-	}
-	kCmd.AddCommand(cmd)
 }

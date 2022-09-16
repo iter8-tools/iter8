@@ -56,8 +56,3 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	addTimeoutFlag(cmd, &actor.Timeout)
 	return cmd
 }
-
-// initialize with k assert cmd
-func init() {
-	kCmd.AddCommand(newKAssertCmd(kd))
-}

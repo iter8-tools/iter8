@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"io"
-	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
@@ -63,9 +62,4 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 func addDryRunForKFlag(cmd *cobra.Command, dryRunPtr *bool) {
 	cmd.Flags().BoolVar(dryRunPtr, "dry", false, "simulate an experiment launch; outputs manifest.yaml file")
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
-}
-
-// initialize with the k launch cmd
-func init() {
-	kCmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
 }

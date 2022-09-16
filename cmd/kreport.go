@@ -41,8 +41,3 @@ func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	addOutputFormatFlag(cmd, &actor.OutputFormat)
 	return cmd
 }
-
-// initialize with the k report cmd
-func init() {
-	kCmd.AddCommand(newKReportCmd(kd))
-}

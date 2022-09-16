@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"io"
-	"os"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
@@ -32,9 +31,4 @@ func newKDeleteCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	addExperimentGroupFlag(cmd, &actor.Group)
 	actor.EnvSettings = settings
 	return cmd
-}
-
-// initialize with the k delete cmd
-func init() {
-	kCmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
 }

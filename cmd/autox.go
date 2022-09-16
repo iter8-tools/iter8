@@ -40,8 +40,3 @@ func newAutoXCmd() *cobra.Command {
 	}
 	return cmd
 }
-
-// initialize with assert
-func init() {
-	rootCmd.AddCommand(newAutoXCmd())
-}

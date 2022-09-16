@@ -66,8 +66,3 @@ func addConditionFlag(cmd *cobra.Command, conditionPtr *[]string) {
 func addTimeoutFlag(cmd *cobra.Command, timeoutPtr *time.Duration) {
 	cmd.Flags().DurationVar(timeoutPtr, "timeout", 0, "timeout duration (e.g., 5s)")
 }
-
-// initialize with assert
-func init() {
-	rootCmd.AddCommand(newAssertCmd(kd))
-}

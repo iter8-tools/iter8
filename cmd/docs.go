@@ -58,8 +58,3 @@ func addDocsFlags(cmd *cobra.Command, docsDirPtr *string) {
 	cmd.Flags().StringVar(docsDirPtr, "commandDocsDir", "", "directory where Iter8 CLI documentation will be created")
 	_ = cmd.MarkFlagRequired("commandDocsDir")
 }
-
-// initialize with docs command
-func init() {
-	rootCmd.AddCommand(newDocsCmd())
-}

@@ -36,8 +36,3 @@ func newHubCmd() *cobra.Command {
 func addRemoteFolderURLFlag(cmd *cobra.Command, remoteFolderURLPtr *string) {
 	cmd.Flags().StringVar(remoteFolderURLPtr, "remoteFolderURL", ia.DefaultRemoteFolderURL(), "URL of the remote folder containing the Iter8 experiment chart. Accepts any URL supported by https://github.com/hashicorp/go-getter")
 }
-
-// initialize with the hub command
-func init() {
-	rootCmd.AddCommand(newHubCmd())
-}

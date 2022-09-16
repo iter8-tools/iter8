@@ -45,8 +45,3 @@ func addChartsParentDirFlag(cmd *cobra.Command, chartsParentDirPtr *string) {
 func addChartNameFlag(cmd *cobra.Command, chartNamePtr *string) {
 	cmd.Flags().StringVarP(chartNamePtr, "chartName", "c", ia.DefaultChartName, "name of the experiment chart")
 }
-
-// initialize with gen command
-func init() {
-	rootCmd.AddCommand(newGenCmd())
-}

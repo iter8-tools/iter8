@@ -49,14 +49,6 @@ func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
 
-// initialize Iter8 CLI root command
-func init() {
-	// disable completion command for now
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
-	rootCmd.SilenceErrors = true // will get printed in Execute() (by cobra.CheckErr())
-}
-
 // addValueFlags adds flags that enable supplying values to the given command
 // Credit: the following function is from Helm. Please see:
 // https://github.com/helm/helm/blob/main/cmd/helm/flags.go
@@ -65,4 +57,43 @@ func addValueFlags(f *pflag.FlagSet, v *values.Options) {
 	f.StringArrayVar(&v.Values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 	f.StringArrayVar(&v.StringValues, "set-string", []string{}, "set STRING values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 	f.StringArrayVar(&v.FileValues, "set-file", []string{}, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
+}
+
+// initialize Iter8 CLI root command and add all subcommands
+func init() {
+	// disable completion command for now
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
+	rootCmd.SilenceErrors = true // will get printed in Execute() (by cobra.CheckErr())
+
+	// add abn
+	rootCmd.AddCommand(newAbnCmd())
+
+	// add assert
+	rootCmd.AddCommand(newAssertCmd(kd))
+
+	// add autox
+	rootCmd.AddCommand(newAutoXCmd())
+
+	// add docs
+	rootCmd.AddCommand(newDocsCmd())
+
+	// add gen
+	rootCmd.AddCommand(newGenCmd())
+
+	// add hub
+	rootCmd.AddCommand(newHubCmd())
+
+	// add launch
+	rootCmd.AddCommand(newLaunchCmd(kd))
+
+	// add report
+	rootCmd.AddCommand(newReportCmd(kd))
+
+	// add run
+	rootCmd.AddCommand(newRunCmd(kd, os.Stdout))
+
+	// add version
+	rootCmd.AddCommand(newVersionCmd())
+
 }
