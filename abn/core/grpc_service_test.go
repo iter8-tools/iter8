@@ -12,6 +12,7 @@ import (
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/k8sclient"
+	"github.com/iter8-tools/iter8/base/metrics"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -221,14 +222,14 @@ func byteArrayToApplication(name string, data []byte) (*abnapp.Application, erro
 	}
 	for _, v := range a.Versions {
 		if v.Metrics == nil {
-			v.Metrics = map[string]*abnapp.SummaryMetric{}
+			v.Metrics = map[string]*metrics.SummaryMetric{}
 		}
 	}
 
 	return a, nil
 }
 
-func getMetric(a *abnapp.Application, track, metric string) *abnapp.SummaryMetric {
+func getMetric(a *abnapp.Application, track, metric string) *metrics.SummaryMetric {
 	version, ok := a.Tracks[track]
 	if !ok {
 		return nil

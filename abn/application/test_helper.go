@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/iter8-tools/iter8/base/metrics"
 	"github.com/stretchr/testify/assert"
 	"sigs.k8s.io/yaml"
 )
@@ -47,7 +48,7 @@ func byteArrayToApplication(name string, data []byte) (*Application, error) {
 	}
 	for _, v := range a.Versions {
 		if v.Metrics == nil {
-			v.Metrics = map[string]*SummaryMetric{}
+			v.Metrics = map[string]*metrics.SummaryMetric{}
 		}
 	}
 

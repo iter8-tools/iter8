@@ -2,6 +2,17 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
+  name: {{ .Release.Name }}-metricstore
+  annotations:
+    iter8.tools/group: {{ .Release.Name }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
   name: {{ .Release.Name }}
   annotations:
     iter8.tools/group: {{ .Release.Name }}
