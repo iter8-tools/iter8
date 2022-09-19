@@ -15,26 +15,26 @@ import (
 // resourceConfig is the configuration that identifies the resources to watch and in which namespaces.
 type resourceConfig struct {
 	// Namespaces is list of namespaces to watch
-	Namespaces []string `yaml:"namespaces,omitempty"`
+	Namespaces []string `json:"namespaces,omitempty" yaml:"namespaces,omitempty"`
 
 	// Resources is list of resoure types that should be watched in the namespaces
-	Resources []schema.GroupVersionResource `yaml:"resources,omitempty"`
+	Resources []schema.GroupVersionResource `json:"resources,omitempty" yaml:"resources,omitempty"`
 }
 
 // chart points to a particular Helm chart
 type chart struct {
 	// Repo is the repo of the Helm chart
-	Repo string `yaml:"repo"`
+	Repo string `json:"repo" yaml:"repo"`
 
 	// Name is the name of the Helm chart
-	Name string `yaml:"name"`
+	Name string `json:"name" yaml:"name"`
 
 	// ValuesFileURL is the URL to the values file of the Helm chart
-	ValuesFileURL string `yaml:"valuesFileURL"`
+	ValuesFileURL string `json:"valuesFileURL" yaml:"valuesFileURL"`
 }
 
 type chartGroup struct {
-	Charts map[string]chart `yaml:"charts"`
+	Charts map[string]chart `json:"charts" yaml:"charts"`
 }
 
 type chartGroupConfig map[string]chartGroup

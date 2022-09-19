@@ -7,13 +7,19 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 )
 
 const (
 	autoxLabel = "iter8.tools/autox-group"
+)
+
+type chartAction int64
+
+const (
+	releaseAction chartAction = 0
+	deleteAction  chartAction = 1
 )
 
 func getReleaseName(chartGroupName string, chartName string) string {
@@ -23,6 +29,8 @@ func getReleaseName(chartGroupName string, chartName string) string {
 func releaseHelmChart(releaseName string, chart chart) {
 	// TODO: check if there is a preexisting Helm release
 
+	// TODO: mutex
+
 	// TODO: release Helm chart
 
 	log.Logger.Debug("Release chart:", releaseName)
@@ -31,17 +39,25 @@ func releaseHelmChart(releaseName string, chart chart) {
 func deleteHelmChart(releaseName string, chart chart) {
 	// TODO: check if there is a preexisting Helm release
 
+	// TODO: mutex
+
 	// TODO: delete Helm chart
 
 	log.Logger.Debug("Delete chart:", releaseName)
 }
 
-func iterateCharts(appName string, cgc chartGroupConfig, callback func(releaseName string, chart chart)) {
-	if cg, ok := cgc[appName]; ok {
+func doChartAction(appName string, chartAction chartAction) {
+	if cg, ok := iter8ChartGroupConfig[appName]; ok {
 		for chartName, chart := range cg.Charts {
 			releaseName := getReleaseName(appName, chartName)
 
-			callback(releaseName, chart)
+			switch chartAction {
+			case releaseAction:
+				releaseHelmChart(releaseName, chart)
+
+			case deleteAction:
+				deleteHelmChart(releaseName, chart)
+			}
 		}
 	} else {
 		// TODO: what log level should this be?
@@ -49,65 +65,67 @@ func iterateCharts(appName string, cgc chartGroupConfig, callback func(releaseNa
 	}
 }
 
-var addObject = func(cgc chartGroupConfig) func(obj interface{}) {
-	return func(obj interface{}) {
-		log.Logger.Debug("Add:", obj)
+var addObject = func(obj interface{}) {
+	log.Logger.Debug("Add:", obj)
 
-		uObj := obj.(*unstructured.Unstructured)
-		appName := uObj.GetName()
-		// example label: iter8.tools/autox-group=hello
-		labels := uObj.GetLabels()
+	uObj := obj.(*unstructured.Unstructured)
+	appName := uObj.GetName()
+	// example label: iter8.tools/autox-group=hello
+	labels := uObj.GetLabels()
 
-		// check if the app name matches the name in the autox label
-		if autoxLabelName, ok := labels[autoxLabel]; ok && appName == autoxLabelName {
-			// Release Helm charts
-			iterateCharts(appName, cgc, releaseHelmChart)
-		}
+	// check if the app name matches the name in the autox label
+	if autoxLabelName, ok := labels[autoxLabel]; ok && appName == autoxLabelName {
+		// Release Helm charts
+		doChartAction(appName, releaseAction)
 	}
 }
 
-var updateObject = func(cgc chartGroupConfig) func(oldObj, obj interface{}) {
-	return func(oldObj, obj interface{}) {
-		log.Logger.Debug("Update:", oldObj, obj)
+func pruneLabels(labels map[string]string) map[string]string {
+	// TODO: select labels important for autoX
 
-		uOldObj := oldObj.(*unstructured.Unstructured)
-		oldLabels := uOldObj.GetLabels()
-
-		uObj := obj.(*unstructured.Unstructured)
-		appName := uObj.GetName()
-		// example label: iter8.tools/autox-group=hello
-		labels := uObj.GetLabels()
-
-		if autoxLabelName, ok := labels[autoxLabel]; ok && appName == autoxLabelName {
-			hasOldLabel := oldLabels[autoxLabel] == appName
-			hasLabel := labels[autoxLabel] == appName
-
-			// Release Helm charts
-			if !hasOldLabel && hasLabel {
-				iterateCharts(appName, cgc, releaseHelmChart)
-
-				// Delete Helm charts
-			} else if hasOldLabel && !hasLabel {
-				iterateCharts(appName, cgc, deleteHelmChart)
-			}
-		}
-	}
+	return labels
 }
 
-var deleteObject = func(cgc chartGroupConfig) func(obj interface{}) {
-	return func(obj interface{}) {
-		log.Logger.Debug("Delete:", obj)
+var updateObject = func(oldObj, obj interface{}) {
+	log.Logger.Debug("Update:", oldObj, obj)
 
-		uObj := obj.(*unstructured.Unstructured)
-		appName := uObj.GetName()
-		// example label: iter8.tools/autox-group=hello
-		labels := uObj.GetLabels()
+	uOldObj := oldObj.(*unstructured.Unstructured)
+	oldLabels := pruneLabels(uOldObj.GetLabels())
 
-		// check if the app name matches the name in the autox label
-		if autoxLabelName, ok := labels[autoxLabel]; ok && appName == autoxLabelName {
+	uObj := obj.(*unstructured.Unstructured)
+	resourceName := uObj.GetName()
+	// example label: iter8.tools/autox-group=hello
+	labels := pruneLabels(uObj.GetLabels())
+
+	// if reflect.DeepEqual(oldLabels, labels) { return }
+
+	if autoxLabelName, ok := labels[autoxLabel]; ok && resourceName == autoxLabelName {
+		hasOldLabel := oldLabels[autoxLabel] == resourceName
+		hasLabel := labels[autoxLabel] == resourceName
+
+		// Release Helm charts
+		if !hasOldLabel && hasLabel {
+			doChartAction(resourceName, releaseAction)
+
 			// Delete Helm charts
-			iterateCharts(appName, cgc, deleteHelmChart)
+		} else if hasOldLabel && !hasLabel {
+			doChartAction(resourceName, deleteAction)
 		}
+	}
+}
+
+var deleteObject = func(obj interface{}) {
+	log.Logger.Debug("Delete:", obj)
+
+	uObj := obj.(*unstructured.Unstructured)
+	appName := uObj.GetName()
+	// example label: iter8.tools/autox-group=hello
+	labels := uObj.GetLabels()
+
+	// check if the app name matches the name in the autox label
+	if autoxLabelName, ok := labels[autoxLabel]; ok && appName == autoxLabelName {
+		// Delete Helm charts
+		doChartAction(appName, deleteAction)
 	}
 }
 
@@ -115,19 +133,19 @@ type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func newIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string, cgc chartGroupConfig) *iter8Watcher {
+func newIter8Watcher() *iter8Watcher {
 	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 	// for each namespace, resource type configure Informer
-	for _, ns := range namespaces {
+	for _, ns := range iter8ResourceConfig.Namespaces {
 		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
-		for _, gvr := range resourceTypes {
+		for _, gvr := range iter8ResourceConfig.Resources {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc:    addObject(cgc),
-				UpdateFunc: updateObject(cgc),
-				DeleteFunc: deleteObject(cgc),
+				AddFunc:    addObject,
+				UpdateFunc: updateObject,
+				DeleteFunc: deleteObject,
 			})
 		}
 	}

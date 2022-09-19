@@ -32,25 +32,19 @@ func TestWatcher(t *testing.T) {
 	deleteObjectInvocations := 0
 
 	// Overwrite original handlers
-	addObject = func(cgc chartGroupConfig) func(obj interface{}) {
-		return func(obj interface{}) {
-			log.Logger.Debug("Add:", obj)
-			addObjectInvocations++
-		}
+	addObject = func(obj interface{}) {
+		log.Logger.Debug("Add:", obj)
+		addObjectInvocations++
 	}
 
-	updateObject = func(cgc chartGroupConfig) func(oldObj, obj interface{}) {
-		return func(oldObj, obj interface{}) {
-			log.Logger.Debug("Update:", oldObj, obj)
-			updateObjectInvocations++
-		}
+	updateObject = func(oldObj, obj interface{}) {
+		log.Logger.Debug("Update:", oldObj, obj)
+		updateObjectInvocations++
 	}
 
-	deleteObject = func(cgc chartGroupConfig) func(obj interface{}) {
-		return func(obj interface{}) {
-			log.Logger.Debug("Delete:", obj)
-			deleteObjectInvocations++
-		}
+	deleteObject = func(obj interface{}) {
+		log.Logger.Debug("Delete:", obj)
+		deleteObjectInvocations++
 	}
 
 	gvr := schema.GroupVersionResource{
@@ -65,11 +59,7 @@ func TestWatcher(t *testing.T) {
 
 	// define and start watcher
 	k8sClient = newFakeKubeClient(cli.New())
-	w := newIter8Watcher(
-		[]schema.GroupVersionResource{gvr},
-		[]string{namespace},
-		chartGroupConfig{},
-	)
+	w := newIter8Watcher()
 	assert.NotNil(t, w)
 	done := make(chan struct{})
 	defer close(done)
