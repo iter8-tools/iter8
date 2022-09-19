@@ -15,9 +15,11 @@ import (
 
 func TestAutoXStart(t *testing.T) {
 	addObjectInvocations := 0
-	addObject = func(obj interface{}) {
-		log.Logger.Debug("Add:", obj)
-		addObjectInvocations++
+	addObject = func(cgc chartGroupConfig) func(obj interface{}) {
+		return func(obj interface{}) {
+			log.Logger.Debug("Add:", obj)
+			addObjectInvocations++
+		}
 	}
 
 	k8sClient = newFakeKubeClient(cli.New())

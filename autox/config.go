@@ -34,12 +34,10 @@ type chart struct {
 }
 
 type chartGroup struct {
-	Name string `yaml:"name"`
-
-	Charts []chart `yaml:"charts"`
+	Charts map[string]chart `yaml:"charts"`
 }
 
-type chartGroupConfig []chartGroup
+type chartGroupConfig map[string]chartGroup
 
 // readResourceConfig reads yaml config file and converts to a resourceConfig object
 func readResourceConfig(fp string) (config resourceConfig) {

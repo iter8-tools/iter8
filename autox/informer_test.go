@@ -32,17 +32,25 @@ func TestWatcher(t *testing.T) {
 	deleteObjectInvocations := 0
 
 	// Overwrite original handlers
-	addObject = func(obj interface{}) {
-		log.Logger.Debug("Add:", obj)
-		addObjectInvocations++
+	addObject = func(cgc chartGroupConfig) func(obj interface{}) {
+		return func(obj interface{}) {
+			log.Logger.Debug("Add:", obj)
+			addObjectInvocations++
+		}
 	}
-	updateObject = func(oldObj, obj interface{}) {
-		log.Logger.Debug("Update:", oldObj, obj)
-		updateObjectInvocations++
+
+	updateObject = func(cgc chartGroupConfig) func(oldObj, obj interface{}) {
+		return func(oldObj, obj interface{}) {
+			log.Logger.Debug("Update:", oldObj, obj)
+			updateObjectInvocations++
+		}
 	}
-	deleteObject = func(obj interface{}) {
-		log.Logger.Debug("Delete:", obj)
-		deleteObjectInvocations++
+
+	deleteObject = func(cgc chartGroupConfig) func(obj interface{}) {
+		return func(obj interface{}) {
+			log.Logger.Debug("Delete:", obj)
+			deleteObjectInvocations++
+		}
 	}
 
 	gvr := schema.GroupVersionResource{
