@@ -16,7 +16,7 @@ func TestService(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(1) // one step up the call stack
 	fname := filepath.Join(filepath.Dir(filename), "../../testdata/abninputs", "config.yaml")
 	fn := filepath.Clean(fname)
-	os.Setenv(watcherConfigEnv, fn)
+	_ = os.Setenv(watcherConfigEnv, fn)
 
 	stopCh := make(chan struct{})
 	w := initializeServer()

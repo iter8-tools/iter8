@@ -15,15 +15,17 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-type ABNClientInterface interface {
-	CallGetApplicationJson(appName string) (string, error)
+// abnClientInterface is interface for calling gRPC services
+type abnClientInterface interface {
+	callGetApplicationJSON(appName string) (string, error)
 }
 
+// defaultABNClient is default implementation of interface that calls the service
 type defaultABNClient struct {
 	endpoint string
 }
 
-func (wc *defaultABNClient) CallGetApplicationJson(appName string) (string, error) {
+func (wc *defaultABNClient) callGetApplicationJSON(appName string) (string, error) {
 	// setup client
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	conn, err := grpc.Dial(wc.endpoint, opts...)
@@ -67,7 +69,7 @@ type ABNMetricsInputs struct {
 type collectABNMetricsTask struct {
 	TaskMeta
 	With   ABNMetricsInputs `json:"with" yaml:"with"`
-	client ABNClientInterface
+	client abnClientInterface
 }
 
 // initializeDefaults sets default values for the task
@@ -103,7 +105,7 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	t.initializeDefaults()
 
 	// get application json from abn service
-	applicationJSON, err := t.client.CallGetApplicationJson(t.With.Application)
+	applicationJSON, err := t.client.callGetApplicationJSON(t.With.Application)
 	if err != nil {
 		return err
 	}

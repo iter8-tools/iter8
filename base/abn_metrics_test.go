@@ -2,22 +2,24 @@ package base
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+// mockABNClient implements a mocked call to gRPC service
 type mockABNClient struct {
 	response []byte
 }
 
-func (c *mockABNClient) CallGetApplicationJson(appName string) (string, error) {
+func (c *mockABNClient) callGetApplicationJSON(appName string) (string, error) {
 	return string(c.response), nil
 }
 
 func TestABNMetricsTask(t *testing.T) {
 	fname := CompletePath("../testdata", "abninputs/application.yaml")
-	b, err := os.ReadFile(fname)
+	b, err := os.ReadFile(filepath.Clean(fname))
 	assert.NoError(t, err)
 
 	task := &collectABNMetricsTask{
