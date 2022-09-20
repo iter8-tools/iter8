@@ -78,6 +78,9 @@ type Insights struct {
 	// NumVersions is the number of app versions detected by Iter8
 	NumVersions int `json:"numVersions" yaml:"numVersions"`
 
+	// VersionNames is list of version identifiers if known
+	VersionNames []string `json:"versionNames" yaml:"versionNames"`
+
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
 

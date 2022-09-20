@@ -81,14 +81,23 @@ func (tr *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
 	return str, nil
 }
 
+func (tr *TextReporter) printVersions(w *tabwriter.Writer) {
+	in := tr.Result.Insights
+	for i := 0; i < in.NumVersions; i++ {
+		if in.VersionNames != nil {
+			fmt.Fprintf(w, "\t %s", in.VersionNames[i])
+		} else {
+			fmt.Fprintf(w, "\t version %v", i)
+		}
+	}
+}
+
 // printSLOsText prints all SLOs into tab writer
 func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
 	in := tr.Result.Insights
 	fmt.Fprint(w, "SLO Conditions")
 	if in.NumVersions > 1 {
-		for i := 0; i < in.NumVersions; i++ {
-			fmt.Fprintf(w, "\t version %v", i)
-		}
+		tr.printVersions(w)
 	} else {
 		fmt.Fprintf(w, "\t Satisfied")
 	}
@@ -144,9 +153,7 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	in := tr.Result.Insights
 	fmt.Fprint(w, "Metric")
 	if in.NumVersions > 1 {
-		for i := 0; i < in.NumVersions; i++ {
-			fmt.Fprintf(w, "\t version %v", i)
-		}
+		tr.printVersions(w)
 	} else {
 		fmt.Fprintf(w, "\t value")
 	}

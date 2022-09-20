@@ -135,7 +135,9 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 
 	// add metrics for tracks
 	versionIndex := 0
+	in.VersionNames = make([]string, in.NumVersions)
 	for track, version := range a.Tracks {
+		in.VersionNames[versionIndex] = track
 		v, _ := a.GetVersion(version, false)
 		if v == nil {
 			log.Logger.Debugf("expected version %s not found", version)
