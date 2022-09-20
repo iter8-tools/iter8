@@ -2,7 +2,6 @@ package base
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -13,7 +12,43 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"helm.sh/helm/v3/pkg/cli"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
+
+type ABNClientInterface interface {
+	CallGetApplicationJson(appName string) (string, error)
+}
+
+type defaultABNClient struct {
+	endpoint string
+}
+
+func (wc *defaultABNClient) CallGetApplicationJson(appName string) (string, error) {
+	// setup client
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	conn, err := grpc.Dial(wc.endpoint, opts...)
+	if err != nil {
+		return "", err
+	}
+	c := pb.NewABNClient(conn)
+
+	// get application
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	s, err := c.GetApplicationData(
+		ctx,
+		&pb.ApplicationRequest{
+			Application: appName,
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+	applicationJSON := s.GetApplicationJson()
+
+	return applicationJSON, nil
+}
 
 const (
 	// CollectABNMetrics is the name of the task to read A/B(/n) metric values
@@ -31,7 +66,8 @@ type ABNMetricsInputs struct {
 // collectABNMetricsTask is task defintion for abnmetrics task
 type collectABNMetricsTask struct {
 	TaskMeta
-	With ABNMetricsInputs `json:"with" yaml:"with"`
+	With   ABNMetricsInputs `json:"with" yaml:"with"`
+	client ABNClientInterface
 }
 
 // initializeDefaults sets default values for the task
@@ -39,6 +75,12 @@ func (t *collectABNMetricsTask) initializeDefaults() {
 	k8sclient.Client = *k8sclient.NewKubeClient(cli.New())
 	if err := k8sclient.Client.Initialize(); err != nil {
 		log.Logger.WithStackTrace("unable to initialize k8s client").Fatal(err)
+	}
+
+	if t.client == nil {
+		t.client = &defaultABNClient{
+			endpoint: "iter8-abn:50051",
+		}
 	}
 }
 
@@ -60,32 +102,15 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	// initialize defaults
 	t.initializeDefaults()
 
-	// a, _ := abnapp.Applications.Get(t.With.Application, false)
-
-	// setup client
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	conn, err := grpc.Dial("iter8-abn:50051", opts...)
+	// get application json from abn service
+	applicationJSON, err := t.client.CallGetApplicationJson(t.With.Application)
 	if err != nil {
 		return err
 	}
-	c := pb.NewABNClient(conn)
 
-	// get application
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	s, err := c.GetApplicationData(
-		ctx,
-		&pb.ApplicationRequest{
-			Application: t.With.Application,
-		},
-	)
-	if err != nil {
-		return err
-	}
-	applicationJSON := s.GetApplicationJson()
+	// convert to Application
 	a := &abnapp.Application{}
-	err = json.Unmarshal([]byte(applicationJSON), a)
+	err = yaml.Unmarshal([]byte(applicationJSON), a)
 	if err != nil {
 		return err
 	}

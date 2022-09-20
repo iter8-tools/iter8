@@ -37,6 +37,24 @@ var (
 
 // Start is entry point to configure services and start them
 func Start() {
+	w := initializeServer()
+	stopCh := make(chan struct{})
+
+	// start watchers
+	go w.Start(stopCh)
+
+	// launch gRPC server to respond to frontend requests
+	go launchGRPCServer([]grpc.ServerOption{})
+
+	// shutdown gracefully on termination
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
+
+	<-sigCh
+	close(stopCh)
+}
+
+func initializeServer() *watcher.Iter8Watcher {
 	k8sclient.Client = *k8sclient.NewKubeClient(cli.New())
 	if err := k8sclient.Client.Initialize(); err != nil {
 		log.Logger.WithStackTrace("unable to initialize k8s client").Fatal(err)
@@ -48,21 +66,10 @@ func Start() {
 		log.Logger.Fatal("configuation file is required")
 	}
 
-	stopCh := make(chan struct{})
-
 	// set up resource watching as defined by config
 	c := readConfig(abnConfigFile)
 	w := watcher.NewIter8Watcher(c.Resources, c.Namespaces)
-	go w.Start(stopCh)
-
-	// launch gRPC server to respond to frontend requests
-	go launchGRPCServer([]grpc.ServerOption{})
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
-
-	<-sigCh
-	close(stopCh)
+	return w
 }
 
 // newServer returns a new gRPC server

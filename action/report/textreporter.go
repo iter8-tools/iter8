@@ -104,7 +104,7 @@ func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
-					fmt.Fprintf(w, "\t% v", in.SLOsSatisfied.Upper[i][j])
+					fmt.Fprintf(w, "\t %v", in.SLOsSatisfied.Upper[i][j])
 				}
 				fmt.Fprintln(w)
 			} else {
@@ -119,7 +119,7 @@ func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
-					fmt.Fprintf(w, "\t% v", in.SLOsSatisfied.Lower[i][j])
+					fmt.Fprintf(w, "\t %v", in.SLOsSatisfied.Lower[i][j])
 				}
 				fmt.Fprintln(w)
 			} else {

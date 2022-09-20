@@ -91,6 +91,7 @@ func assertVersion(t *testing.T, v *Version, assertion versionAssertion) bool {
 	r := true
 
 	r = r && assert.NotNil(t, v)
+	r = r && assert.Contains(t, v.String(), "- metrics:")
 
 	r = r && assert.Len(t, v.Metrics, len(assertion.metrics))
 	r = r && assert.NotNil(t, v.Metrics)
