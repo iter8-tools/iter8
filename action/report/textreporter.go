@@ -102,7 +102,11 @@ func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "\t Satisfied")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--------------\t ---------")
+	fmt.Fprint(w, "--------------")
+	for i := 0; i < in.NumVersions; i++ {
+		fmt.Fprint(w, "\t ---------")
+	}
+	fmt.Fprintln(w)
 
 	if in.SLOs != nil {
 		log.Logger.Debug("SLOs are not nil")
@@ -158,7 +162,11 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "\t value")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "-------\t -----")
+	fmt.Fprint(w, "-------")
+	for i := 0; i < in.NumVersions; i++ {
+		fmt.Fprint(w, "\t -----")
+	}
+	fmt.Fprintln(w)
 
 	// keys contain normalized scalar metric names in sorted order
 	keys := tr.SortedScalarAndSLOMetrics()
