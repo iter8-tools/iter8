@@ -80,12 +80,12 @@ var addObject = func(obj interface{}) {
 	uObj := obj.(*unstructured.Unstructured)
 	resourceName := uObj.GetName()
 	// example label: iter8.tools/autox-group=hello
-	labels := uObj.GetLabels()
+	labels := pruneLabels(uObj.GetLabels())
 
 	// check if the app name matches the name in the autox label
 	if autoxLabelName, ok := labels[autoxLabel]; ok && resourceName == autoxLabelName {
 		// Release Helm charts
-		doChartAction(resourceName, releaseAction)
+		installHelmReleases(resourceName)
 	}
 }
 
@@ -122,12 +122,12 @@ var deleteObject = func(obj interface{}) {
 	uObj := obj.(*unstructured.Unstructured)
 	resourceName := uObj.GetName()
 	// example label: iter8.tools/autox-group=hello
-	labels := uObj.GetLabels()
+	labels := pruneLabels(uObj.GetLabels())
 
 	// check if the app name matches the name in the autox label
 	if autoxLabelName, ok := labels[autoxLabel]; ok && resourceName == autoxLabelName {
 		// Delete Helm charts
-		doChartAction(resourceName, deleteAction)
+		deleteHelmReleases(resourceName)
 	}
 }
 

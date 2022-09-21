@@ -33,10 +33,14 @@ type chart struct {
 	ValuesFileURL string `json:"valuesFileURL" yaml:"valuesFileURL"`
 }
 
+// chartGroup is the configuration of all the Helm charts for a particular experiment group
+// the key is an identifier for the chart
 type chartGroup struct {
 	Charts map[string]chart `json:"charts" yaml:"charts"`
 }
 
+// chartGroupConfig is the configuration for all the Helm charts
+// the key is the experiment group name
 type chartGroupConfig map[string]chartGroup
 
 // readResourceConfig reads yaml config file and converts to a resourceConfig object
