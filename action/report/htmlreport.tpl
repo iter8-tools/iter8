@@ -70,7 +70,7 @@
                 <th scope="col">SLO Conditions</th>
                 {{- if ge .Result.Insights.NumVersions 2 }}
                 {{- range until .Result.Insights.NumVersions }}
-                <th scope="col" class="text-center">Version {{ . }} </th>
+                <th scope="col" class="text-center">{{ $.Result.Insights.TrackVersionStr . }}</th>
                 {{- end}}              
                 {{- else }} 
                 <th scope="col" class="text-center">Satisfied</th>
@@ -154,7 +154,7 @@
                 <th scope="col">Metric</th>
                 {{- if ge .Result.Insights.NumVersions 2 }}
                 {{- range until .Result.Insights.NumVersions }}
-                <th scope="col" class="text-center">Version {{ . }} </th>
+                <th scope="col" class="text-center">{{ $.Result.Insights.TrackVersionStr . }}</th>
                 {{- end}}              
                 {{- else }} 
                 <th scope="col" class="text-center">Value</th>

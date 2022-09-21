@@ -79,7 +79,7 @@ type Insights struct {
 	NumVersions int `json:"numVersions" yaml:"numVersions"`
 
 	// VersionNames is list of version identifiers if known
-	VersionNames []string `json:"versionNames" yaml:"versionNames"`
+	VersionNames []VersionInfo `json:"versionNames" yaml:"versionNames"`
 
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
@@ -117,6 +117,15 @@ type MetricMeta struct {
 	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
 	// Type of the metric. Example: counter
 	Type MetricType `json:"type" yaml:"type"`
+}
+
+// VersionInfo is basic information about a version
+type VersionInfo struct {
+	// Version name
+	Version string `json:"version" yaml:"version"`
+
+	// Track identifier assigned to version
+	Track string `json:"track" yaml:"track"`
 }
 
 // SLO is a service level objective
@@ -376,6 +385,27 @@ func (in *Insights) setSLOs(slos *SLOLimits) error {
 	// LHS will be nil
 	in.SLOs = slos
 	return nil
+}
+
+// Create string from version/track info for display purposes
+func (in *Insights) TrackVersionStr(i int) string {
+	// if VersionNames not defined or all fields empty return default "version i"
+	if in.VersionNames == nil ||
+		len(in.VersionNames[i].Version)+len(in.VersionNames[i].Track) == 0 {
+		return fmt.Sprintf("version %d", i)
+	}
+
+	if len(in.VersionNames[i].Track) == 0 {
+		// version not ""
+		return in.VersionNames[i].Version
+	}
+
+	if len(in.VersionNames[i].Version) == 0 {
+		// track not ""
+		return in.VersionNames[i].Track
+	}
+
+	return in.VersionNames[i].Track + " (" + in.VersionNames[i].Version + ")"
 }
 
 // initializeSLOsSatisfied initializes the SLOs satisfied field

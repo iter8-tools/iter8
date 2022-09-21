@@ -84,11 +84,7 @@ func (tr *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
 func (tr *TextReporter) printVersions(w *tabwriter.Writer) {
 	in := tr.Result.Insights
 	for i := 0; i < in.NumVersions; i++ {
-		if in.VersionNames != nil {
-			fmt.Fprintf(w, "\t %s", in.VersionNames[i])
-		} else {
-			fmt.Fprintf(w, "\t version %v", i)
-		}
+		fmt.Fprintf(w, "\t %s", in.TrackVersionStr(i))
 	}
 }
 
