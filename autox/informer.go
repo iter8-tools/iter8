@@ -4,6 +4,7 @@ package autox
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -26,7 +27,11 @@ func getReleaseName(chartGroupName string, chartName string) string {
 	return fmt.Sprintf("autox-%s-%s", chartGroupName, chartName)
 }
 
-func releaseHelmChart(releaseName string, chart chart) {
+func installHelmReleases(resourceName string) {
+	doChartAction(resourceName, releaseAction)
+}
+
+func installHelmRelease(releaseName string, chart chart) {
 	// TODO: check if there is a preexisting Helm release
 
 	// TODO: mutex
@@ -36,7 +41,11 @@ func releaseHelmChart(releaseName string, chart chart) {
 	log.Logger.Debug("Release chart:", releaseName)
 }
 
-func deleteHelmChart(releaseName string, chart chart) {
+func deleteHelmReleases(resourceName string) {
+	doChartAction(resourceName, deleteAction)
+}
+
+func deleteHelmRelease(releaseName string, chart chart) {
 	// TODO: check if there is a preexisting Helm release
 
 	// TODO: mutex
@@ -46,22 +55,22 @@ func deleteHelmChart(releaseName string, chart chart) {
 	log.Logger.Debug("Delete chart:", releaseName)
 }
 
-func doChartAction(appName string, chartAction chartAction) {
-	if cg, ok := iter8ChartGroupConfig[appName]; ok {
+func doChartAction(resourceName string, chartAction chartAction) {
+	if cg, ok := iter8ChartGroupConfig[resourceName]; ok {
 		for chartName, chart := range cg.Charts {
-			releaseName := getReleaseName(appName, chartName)
+			releaseName := getReleaseName(resourceName, chartName)
 
 			switch chartAction {
 			case releaseAction:
-				releaseHelmChart(releaseName, chart)
+				installHelmRelease(releaseName, chart)
 
 			case deleteAction:
-				deleteHelmChart(releaseName, chart)
+				deleteHelmRelease(releaseName, chart)
 			}
 		}
 	} else {
 		// TODO: what log level should this be?
-		log.Logger.Debug("AutoX should make a Helm release for app \"", appName, "\" but no Helm charts were provided in the chartGroupConfig")
+		log.Logger.Debug("AutoX should make a Helm release for app \"", resourceName, "\" but no Helm charts were provided in the chartGroupConfig")
 	}
 }
 
@@ -69,14 +78,14 @@ var addObject = func(obj interface{}) {
 	log.Logger.Debug("Add:", obj)
 
 	uObj := obj.(*unstructured.Unstructured)
-	appName := uObj.GetName()
+	resourceName := uObj.GetName()
 	// example label: iter8.tools/autox-group=hello
 	labels := uObj.GetLabels()
 
 	// check if the app name matches the name in the autox label
-	if autoxLabelName, ok := labels[autoxLabel]; ok && appName == autoxLabelName {
+	if autoxLabelName, ok := labels[autoxLabel]; ok && resourceName == autoxLabelName {
 		// Release Helm charts
-		doChartAction(appName, releaseAction)
+		doChartAction(resourceName, releaseAction)
 	}
 }
 
@@ -97,35 +106,28 @@ var updateObject = func(oldObj, obj interface{}) {
 	// example label: iter8.tools/autox-group=hello
 	labels := pruneLabels(uObj.GetLabels())
 
-	// if reflect.DeepEqual(oldLabels, labels) { return }
-
-	if autoxLabelName, ok := labels[autoxLabel]; ok && resourceName == autoxLabelName {
-		hasOldLabel := oldLabels[autoxLabel] == resourceName
-		hasLabel := labels[autoxLabel] == resourceName
-
-		// Release Helm charts
-		if !hasOldLabel && hasLabel {
-			doChartAction(resourceName, releaseAction)
-
-			// Delete Helm charts
-		} else if hasOldLabel && !hasLabel {
-			doChartAction(resourceName, deleteAction)
-		}
+	// if the pruned labels are the same, do nothing
+	if reflect.DeepEqual(oldLabels, labels) {
+		return
 	}
+
+	// if the pruned labels are different, then update by deleteing and reinstalling
+	deleteHelmReleases(resourceName)
+	installHelmReleases(resourceName)
 }
 
 var deleteObject = func(obj interface{}) {
 	log.Logger.Debug("Delete:", obj)
 
 	uObj := obj.(*unstructured.Unstructured)
-	appName := uObj.GetName()
+	resourceName := uObj.GetName()
 	// example label: iter8.tools/autox-group=hello
 	labels := uObj.GetLabels()
 
 	// check if the app name matches the name in the autox label
-	if autoxLabelName, ok := labels[autoxLabel]; ok && appName == autoxLabelName {
+	if autoxLabelName, ok := labels[autoxLabel]; ok && resourceName == autoxLabelName {
 		// Delete Helm charts
-		doChartAction(appName, deleteAction)
+		doChartAction(resourceName, deleteAction)
 	}
 }
 
