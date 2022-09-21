@@ -26,7 +26,8 @@ const (
 )
 
 // Check to see if add, update, delete handlers from the watcher are properly invoked
-func TestWatcher(t *testing.T) {
+// after the watcher is created using newIter8Watcher()
+func TestNewIter8Watcher(t *testing.T) {
 	addObjectInvocations := 0
 	updateObjectInvocations := 0
 	deleteObjectInvocations := 0

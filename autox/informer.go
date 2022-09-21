@@ -111,7 +111,7 @@ var updateObject = func(oldObj, obj interface{}) {
 		return
 	}
 
-	// if the pruned labels are different, then update by deleteing and reinstalling
+	// if the pruned labels are different, then update by deleting and reinstalling
 	deleteHelmReleases(resourceName)
 	installHelmReleases(resourceName)
 }
