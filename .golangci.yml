@@ -17,6 +17,7 @@ linters:
   - govet
   - staticcheck
   - gosec
+  - misspell
 
 issues:
   exclude-use-default: false
