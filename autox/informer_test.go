@@ -59,6 +59,12 @@ func TestWatcher(t *testing.T) {
 
 	// define and start watcher
 	k8sClient = newFakeKubeClient(cli.New())
+
+	iter8ResourceConfig = resourceConfig{
+		Namespaces: []string{namespace},
+		Resources:  []schema.GroupVersionResource{gvr},
+	}
+
 	w := newIter8Watcher()
 	assert.NotNil(t, w)
 	done := make(chan struct{})
