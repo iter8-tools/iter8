@@ -33,9 +33,9 @@ type Scenario struct {
 
 func TestLookup(t *testing.T) {
 	testcases := map[string]Scenario{
-		"no applicaton": {application: "default/noapp", user: "foobar", errorSubstring: "application not found", track: ""},
-		"no user":       {application: "default/application", user: "", errorSubstring: "no user session provided", track: ""},
-		"valid":         {application: "default/application", user: "user", errorSubstring: "", track: "candidate"},
+		"no application": {application: "default/noapp", user: "foobar", errorSubstring: "application not found", track: ""},
+		"no user":        {application: "default/application", user: "", errorSubstring: "no user session provided", track: ""},
+		"valid":          {application: "default/application", user: "user", errorSubstring: "", track: "candidate"},
 	}
 
 	for label, scenario := range testcases {
@@ -92,10 +92,10 @@ func TestGetApplicationData(t *testing.T) {
 
 func TestWriteMetric(t *testing.T) {
 	testcases := map[string]Scenario{
-		"no applicaton": {application: "", user: "user", errorSubstring: "track not mapped", track: "", metric: "", value: "76"},
-		"no user":       {application: "default/application", user: "", errorSubstring: "no user session provided", track: "", metric: "", value: "76"},
-		"invalid value": {application: "default/application", user: "user", errorSubstring: "strconv.ParseFloat: parsing \"abc\": invalid syntax", track: "", metric: "", value: "abc"},
-		"valid":         {application: "default/application", user: "user", errorSubstring: "", track: "candidate", metric: "metric1", value: "76"},
+		"no application": {application: "", user: "user", errorSubstring: "track not mapped", track: "", metric: "", value: "76"},
+		"no user":        {application: "default/application", user: "", errorSubstring: "no user session provided", track: "", metric: "", value: "76"},
+		"invalid value":  {application: "default/application", user: "user", errorSubstring: "strconv.ParseFloat: parsing \"abc\": invalid syntax", track: "", metric: "", value: "abc"},
+		"valid":          {application: "default/application", user: "user", errorSubstring: "", track: "candidate", metric: "metric1", value: "76"},
 	}
 
 	for label, scenario := range testcases {

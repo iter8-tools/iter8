@@ -70,7 +70,7 @@ type Report struct {
 	Experiment *Experiment `json:"experiment" yaml:"experiment"`
 }
 
-// getReport gets the values for the payload tempalte
+// getReport gets the values for the payload template
 func getReport(exp *Experiment) map[string]Report {
 	return map[string]Report{
 		"Report": {
