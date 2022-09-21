@@ -7,11 +7,9 @@ import (
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
-	k8sclient "github.com/iter8-tools/iter8/abn/k8sclient"
 	log "github.com/iter8-tools/iter8/base/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -74,11 +72,6 @@ type collectABNMetricsTask struct {
 
 // initializeDefaults sets default values for the task
 func (t *collectABNMetricsTask) initializeDefaults() {
-	k8sclient.Client = *k8sclient.NewKubeClient(cli.New())
-	if err := k8sclient.Client.Initialize(); err != nil {
-		log.Logger.WithStackTrace("unable to initialize k8s client").Fatal(err)
-	}
-
 	if t.client == nil {
 		t.client = &defaultABNClient{
 			endpoint: "iter8-abn:50051",
