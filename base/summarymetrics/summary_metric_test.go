@@ -1,4 +1,4 @@
-package metrics
+package summarymetrics
 
 import (
 	"testing"

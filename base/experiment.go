@@ -12,7 +12,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/base/metrics"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/montanaflynn/stats"
 	"helm.sh/helm/v3/pkg/time"
 )
@@ -100,7 +100,7 @@ type Insights struct {
 	// SummaryMetricValues:
 	// the outer slice must be the same length as the number of tracks
 	// the map key must match the name of the summary metric in MetricsInfo
-	SummaryMetricValues []map[string]metrics.SummaryMetric
+	SummaryMetricValues []map[string]summarymetrics.SummaryMetric
 
 	// SLOs involved in this experiment
 	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
@@ -289,7 +289,7 @@ func metricTypeMatch(t MetricType, val interface{}) bool {
 		return t == SampleMetricType
 	case []HistBucket:
 		return t == HistogramMetricType
-	case *metrics.SummaryMetric:
+	case *summarymetrics.SummaryMetric:
 		return t == SummaryMetricType
 	default:
 		log.Logger.Error("unsupported type for metric value: ", v)
@@ -313,7 +313,7 @@ func (in *Insights) updateMetricValueHist(m string, i int, val []HistBucket) {
 }
 
 // updateSummaryMetric updates a summary metric value for a given version
-func (in *Insights) updateSummaryMetric(m string, i int, val *metrics.SummaryMetric) {
+func (in *Insights) updateSummaryMetric(m string, i int, val *summarymetrics.SummaryMetric) {
 	in.SummaryMetricValues[i][m] = *val
 }
 
@@ -362,7 +362,7 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 	case HistogramMetricType:
 		in.updateMetricValueHist(nm, i, val.([]HistBucket))
 	case SummaryMetricType:
-		in.updateSummaryMetric(nm, i, val.(*metrics.SummaryMetric))
+		in.updateSummaryMetric(nm, i, val.(*summarymetrics.SummaryMetric))
 	default:
 		err := fmt.Errorf("unknown metric type %v", mm.Type)
 		log.Logger.Error(err)
@@ -387,7 +387,7 @@ func (in *Insights) setSLOs(slos *SLOLimits) error {
 	return nil
 }
 
-// Create string from version/track info for display purposes
+// TrackVersionStr creates a string of version name/track for display purposes
 func (in *Insights) TrackVersionStr(i int) string {
 	// if VersionNames not defined or all fields empty return default "version i"
 	if in.VersionNames == nil ||
@@ -488,11 +488,11 @@ func (in *Insights) initMetrics() error {
 	// initialize hist metric values for each version
 	in.HistMetricValues = make([]map[string][]HistBucket, in.NumVersions)
 	// initialize summary metric values for each version
-	in.SummaryMetricValues = make([]map[string]metrics.SummaryMetric, in.NumVersions)
+	in.SummaryMetricValues = make([]map[string]summarymetrics.SummaryMetric, in.NumVersions)
 	for i := 0; i < in.NumVersions; i++ {
 		in.NonHistMetricValues[i] = make(map[string][]float64)
 		in.HistMetricValues[i] = make(map[string][]HistBucket)
-		in.SummaryMetricValues[i] = make(map[string]metrics.SummaryMetric)
+		in.SummaryMetricValues[i] = make(map[string]summarymetrics.SummaryMetric)
 	}
 	return nil
 }

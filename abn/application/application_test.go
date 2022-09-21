@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/iter8-tools/iter8/abn/k8sclient"
-	"github.com/iter8-tools/iter8/base/metrics"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/stretchr/testify/assert"
 
 	"helm.sh/helm/v3/pkg/cli"
@@ -218,11 +218,11 @@ func TestGetVersion(t *testing.T) {
 }
 
 func TestVersionAndSummaryMetric(t *testing.T) {
-	var m *metrics.SummaryMetric
+	var m *summarymetrics.SummaryMetric
 	var isNew bool
 
 	v := &Version{
-		Metrics: map[string]*metrics.SummaryMetric{},
+		Metrics: map[string]*summarymetrics.SummaryMetric{},
 	}
 
 	// test GetMetic w/o allowNew
