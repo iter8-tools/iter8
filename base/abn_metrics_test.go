@@ -42,10 +42,16 @@ func TestABNMetricsTask(t *testing.T) {
 	err = task.run(exp)
 	assert.NoError(t, err)
 
-	// index 0: track = candidate; version = v2 expect count 252
-	c := exp.Result.Insights.getSummaryAggregation(0, "abn/sample_metric", "count")
-	assert.Equal(t, float64(252), *c)
-	// index 1: track = default; version = v1; expect count 223
-	c = exp.Result.Insights.getSummaryAggregation(1, "abn/sample_metric", "count")
-	assert.Equal(t, float64(223), *c)
+	assertCount(t, exp.Result.Insights, "default", float64(223))
+	assertCount(t, exp.Result.Insights, "candidate", float64(252))
+}
+
+func assertCount(t *testing.T, in *Insights, track string, count float64) bool {
+	for i, vn := range in.VersionNames {
+		if vn.Track == track {
+			c := in.getSummaryAggregation(i, "abn/sample_metric", "count")
+			return assert.Equal(t, count, *c)
+		}
+	}
+	return false
 }

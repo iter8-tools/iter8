@@ -1,8 +1,11 @@
 package cmd
 
 import (
-	abn "github.com/iter8-tools/iter8/abn/core"
+	"os"
+	"os/signal"
+	"syscall"
 
+	abn "github.com/iter8-tools/iter8/abn/core"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +24,15 @@ func newAbnCmd() *cobra.Command {
 		Short: "Start the Iter8 A/B(/n) service",
 		Long:  abnDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			abn.Start()
+			stopCh := make(chan struct{})
+			defer close(stopCh)
+			if err := abn.Start(stopCh); err != nil {
+				return err
+			}
+			sigCh := make(chan os.Signal, 1)
+			signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
+			<-sigCh
+
 			return nil
 		},
 		SilenceUsage: true,

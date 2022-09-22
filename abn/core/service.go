@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/signal"
-	"syscall"
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/k8sclient"
@@ -20,7 +18,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"helm.sh/helm/v3/pkg/cli"
 	// auth package is necessary to enable authentication with various cloud vendors
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
@@ -36,26 +33,7 @@ var (
 )
 
 // Start is entry point to configure services and start them
-func Start() {
-	w := initializeServer()
-	stopCh := make(chan struct{})
-
-	// start watchers
-	go w.Start(stopCh)
-
-	// launch gRPC server to respond to frontend requests
-	go launchGRPCServer([]grpc.ServerOption{})
-
-	// shutdown gracefully on termination
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
-
-	<-sigCh
-	close(stopCh)
-}
-
-func initializeServer() *watcher.Iter8Watcher {
-	k8sclient.Client = *k8sclient.NewKubeClient(cli.New())
+func Start(stopCh chan struct{}) error {
 	if err := k8sclient.Client.Initialize(); err != nil {
 		log.Logger.WithStackTrace("unable to initialize k8s client").Fatal(err)
 	}
@@ -69,7 +47,14 @@ func initializeServer() *watcher.Iter8Watcher {
 	// set up resource watching as defined by config
 	c := readConfig(abnConfigFile)
 	w := watcher.NewIter8Watcher(c.Resources, c.Namespaces)
-	return w
+
+	// start watchers
+	go w.Start(stopCh)
+
+	// launch gRPC server to respond to frontend requests
+	go launchGRPCServer([]grpc.ServerOption{})
+
+	return nil
 }
 
 // newServer returns a new gRPC server
