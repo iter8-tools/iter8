@@ -35,12 +35,12 @@ var (
 	Applications ThreadSafeApplicationMap
 	// BatchWriteInterval is the interval over which changes may batched before being persisted
 	BatchWriteInterval time.Duration
-	// maxApplicationDataBytes is the maximum number of bytes allowed in an applicaton (as YAML converted to []byte)
+	// maxApplicationDataBytes is the maximum number of bytes allowed in an application (as YAML converted to []byte)
 	// this limit prevents trying to persist an application that is too large (Kubernetes secrets have a 1 MB size limit)
 	maxApplicationDataBytes int
 )
 
-// initalize global variables
+// initialize global variables
 func init() {
 	Applications = ThreadSafeApplicationMap{
 		apps:           map[string]*Application{},

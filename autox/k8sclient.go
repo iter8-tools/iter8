@@ -14,7 +14,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// k8sClient is a global variable. Before use, it must be assigned and initalized
+// k8sClient is a global variable. Before use, it must be assigned and initialized
 var k8sClient = newKubeClient(cli.New())
 
 // kubeClient embeds Kube configuration, and

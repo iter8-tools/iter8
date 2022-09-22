@@ -26,7 +26,8 @@ const (
 )
 
 // Check to see if add, update, delete handlers from the watcher are properly invoked
-func TestWatcher(t *testing.T) {
+// after the watcher is created using newIter8Watcher()
+func TestNewIter8Watcher(t *testing.T) {
 	addObjectInvocations := 0
 	updateObjectInvocations := 0
 	deleteObjectInvocations := 0
@@ -36,10 +37,12 @@ func TestWatcher(t *testing.T) {
 		log.Logger.Debug("Add:", obj)
 		addObjectInvocations++
 	}
+
 	updateObject = func(oldObj, obj interface{}) {
 		log.Logger.Debug("Update:", oldObj, obj)
 		updateObjectInvocations++
 	}
+
 	deleteObject = func(obj interface{}) {
 		log.Logger.Debug("Delete:", obj)
 		deleteObjectInvocations++
@@ -57,11 +60,13 @@ func TestWatcher(t *testing.T) {
 
 	// define and start watcher
 	k8sClient = newFakeKubeClient(cli.New())
-	w := newIter8Watcher(
-		[]schema.GroupVersionResource{gvr},
-		[]string{namespace},
-		chartGroupConfig{},
-	)
+
+	iter8ResourceConfig = resourceConfig{
+		Namespaces: []string{namespace},
+		Resources:  []schema.GroupVersionResource{gvr},
+	}
+
+	w := newIter8Watcher()
 	assert.NotNil(t, w)
 	done := make(chan struct{})
 	defer close(done)
