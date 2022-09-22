@@ -68,7 +68,7 @@ type ABNMetricsInputs struct {
 	Application string `json:"application" yaml:"application"`
 }
 
-// collectABNMetricsTask is task defintion for abnmetrics task
+// collectABNMetricsTask is task definition for abnmetrics task
 type collectABNMetricsTask struct {
 	TaskMeta
 	With   ABNMetricsInputs `json:"with" yaml:"with"`
@@ -135,18 +135,23 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 
 	in := exp.Result.Insights
 
-	// add metrics for tracks
+	// add metrics for all tracks
 	versionIndex := 0
 	in.VersionNames = make([]VersionInfo, in.NumVersions)
+	// for each track (and corresponding version), get the Version object
+	// Use it to update all metrics for this version
 	for track, version := range a.Tracks {
+		// set the track identifier/version name in result
 		in.VersionNames[versionIndex].Version = version
 		in.VersionNames[versionIndex].Track = track
+		// get version object from retrieved application object
 		v, _ := a.GetVersion(version, false)
 		if v == nil {
 			log.Logger.Debugf("expected version %s not found", version)
 			return errors.New("expected version not found")
 		}
 		log.Logger.Tracef("version %s is mapped to track %s; using index %d", version, track, versionIndex)
+		// update all metrics with new values (is summary metric so just replace)
 		for metric, m := range v.Metrics {
 			log.Logger.Tracef("   updating metric %s with data %+v", metric, m)
 			err := in.updateMetric(
