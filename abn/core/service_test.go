@@ -2,6 +2,8 @@ package core
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
@@ -24,14 +26,18 @@ func TestStart(t *testing.T) {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
-	err := Start(stopCh)
+	// 49152-65535 are recommended ports; we use a random one for testing
+	/* #nosec */
+	port := rand.Intn(65535-49152) + 49152
+
+	err := Start(port, stopCh)
 	assert.NoError(t, err)
 
 	// verify grpc service working by calling a method
 	// there is no data so should be told not found
 	// setup client
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	conn, err := grpc.Dial("0.0.0.0:50051", opts...)
+	conn, err := grpc.Dial(fmt.Sprintf("0.0.0.0:%d", port), opts...)
 	assert.NoError(t, err)
 	defer func() { _ = conn.Close() }()
 	c := pb.NewABNClient(conn)

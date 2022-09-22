@@ -2,6 +2,8 @@ package core
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"path/filepath"
@@ -167,8 +169,12 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	assert.NoError(t, err)
 	abnapp.Applications.Put(a)
 
+	// 49152-65535 are recommended ports; we use a random one for testing
+	/* #nosec */
+	port := rand.Intn(65535-49152) + 49152
+
 	// start server
-	lis, err := net.Listen("tcp", "127.0.0.1:12345")
+	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	assert.NoError(t, err)
 
 	serverOptions := []grpc.ServerOption{}

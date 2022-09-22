@@ -16,6 +16,9 @@ Run the Iter8 A/B(/n) service.
 	iter8 abn
 `
 
+// port number on which gRPC service should listen
+var port int
+
 // newAbnCmd creates the abn command
 func newAbnCmd() *cobra.Command {
 
@@ -26,7 +29,7 @@ func newAbnCmd() *cobra.Command {
 		RunE: func(_ *cobra.Command, _ []string) error {
 			stopCh := make(chan struct{})
 			defer close(stopCh)
-			if err := abn.Start(stopCh); err != nil {
+			if err := abn.Start(port, stopCh); err != nil {
 				return err
 			}
 			sigCh := make(chan os.Signal, 1)
@@ -38,5 +41,11 @@ func newAbnCmd() *cobra.Command {
 		SilenceUsage: true,
 		Hidden:       true,
 	}
+	addPortFlag(cmd, &port)
 	return cmd
+}
+
+// addTimeoutFlag adds timeout flag to command
+func addPortFlag(cmd *cobra.Command, portPtr *int) {
+	cmd.Flags().IntVar(portPtr, "port", 50051, "service port")
 }

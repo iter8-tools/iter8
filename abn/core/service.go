@@ -5,10 +5,10 @@ package core
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"net"
 	"os"
+	"sync"
 
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/k8sclient"
@@ -27,13 +27,13 @@ const (
 	watcherConfigEnv = "WATCHER_CONFIG"
 )
 
-var (
-	// port the service listens on
-	port = flag.Int("port", 50051, "The server port")
-)
+// var (
+// 	// port the service listens on
+// 	port = flag.Int("port", 50051, "The server port")
+// )
 
 // Start is entry point to configure services and start them
-func Start(stopCh chan struct{}) error {
+func Start(port int, stopCh chan struct{}) error {
 	if err := k8sclient.Client.Initialize(); err != nil {
 		log.Logger.WithStackTrace("unable to initialize k8s client").Fatal(err)
 	}
@@ -52,7 +52,7 @@ func Start(stopCh chan struct{}) error {
 	go w.Start(stopCh)
 
 	// launch gRPC server to respond to frontend requests
-	go launchGRPCServer([]grpc.ServerOption{})
+	go launchGRPCServer(port, []grpc.ServerOption{}, stopCh)
 
 	return nil
 }
@@ -106,16 +106,27 @@ func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *p
 }
 
 // launchGRPCServer starts gRPC server
-func launchGRPCServer(opts []grpc.ServerOption) {
-	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
+func launchGRPCServer(port int, opts []grpc.ServerOption, stopCh chan struct{}) {
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		log.Logger.WithError(err).Fatal("failed to listen")
 	}
 
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterABNServer(grpcServer, newServer())
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		<-stopCh
+		log.Logger.Warnf("stop channel closed, shutting down")
+		grpcServer.GracefulStop()
+	}()
+
 	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Logger.WithError(err).Fatal("failed to start service")
 	}
+	wg.Wait()
+	log.Logger.Trace("service shutdown")
 }
