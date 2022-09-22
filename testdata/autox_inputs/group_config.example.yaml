@@ -1,9 +1,12 @@
-myApp:
+myApp: # the autox group label value will correspond to this
   charts:
     name1:
       repo: abc
       name: def
       valuesFileUrl: abcdef.com/abcdef
+      # when we chart is released, the release will be called
+      # autox-myApp-name1-832ab
+      # last random suffix at the end is generated based on (pruned) labels
     name2:
       repo: ghi
       name: jkl
