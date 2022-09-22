@@ -33,33 +33,31 @@ func TestStart(t *testing.T) {
 	err := Start(port, stopCh)
 	assert.NoError(t, err)
 
-	// verify grpc service working by calling a method
-	// there is no data so should be told not found
-	// setup client
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	conn, err := grpc.Dial(fmt.Sprintf("0.0.0.0:%d", port), opts...)
-	assert.NoError(t, err)
-	defer func() { _ = conn.Close() }()
-	c := pb.NewABNClient(conn)
-	client := &c
-
 	// initially the service might take time to come up
 	assert.Eventually(
 		t,
 		func() bool {
-			_, err = callLookup(client)
+			_, err = callLookup(port)
 			return assert.ErrorContains(t, err, "application not found")
 		},
-		10*time.Second,
+		20*time.Second,
 		time.Second,
 	)
 }
 
-func callLookup(client *pb.ABNClient) (*pb.Session, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func callLookup(port int) (*pb.Session, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	a, err := (*client).Lookup(
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	conn, err := grpc.Dial(fmt.Sprintf("0.0.0.0:%d", port), opts...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = conn.Close() }()
+	c := pb.NewABNClient(conn)
+
+	a, err := c.Lookup(
 		ctx,
 		&pb.Application{
 			Name: "default/application",
