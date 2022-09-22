@@ -40,6 +40,8 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	application, _ := w.getNamespacedName()
 	namespace := w.getNamespace()
 	name, _ := w.getName()
+	version, _ := w.getVersion()
+	log.Logger.Tracef("handle called for %s (%s)", application, version)
 
 	applicationObjs := getApplicationObjects(namespace, name, resourceTypes, informerFactories)
 	// there is at least one object (w)
@@ -47,6 +49,7 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 	a, _ := abnapp.Applications.Read(application)
 
 	abnapp.Applications.Lock(application)
+	defer abnapp.Applications.Unlock(application)
 	// clear a.Tracks, a.Versions[*].Track
 	// this is necessary because  we keep old versions in memory
 	a.ClearTracks()
@@ -59,7 +62,6 @@ func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, inform
 			a.Tracks[track] = version
 		}
 	}
-	abnapp.Applications.Unlock(application)
 }
 
 // getApplicationObjects gets all the objects related to the application based on label app.kubernetes.io/name

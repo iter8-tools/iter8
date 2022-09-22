@@ -13,6 +13,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
+const (
+	defaultEndpoint = "iter8-abn:50051"
+)
+
 // abnClientInterface is interface for calling gRPC services
 type abnClientInterface interface {
 	callGetApplicationJSON(appName string) (string, error)
@@ -59,6 +63,7 @@ const (
 
 // ABNMetricsInputs is the inputs for for the abnmetrics task
 type ABNMetricsInputs struct {
+	Endpoint *string `json:"endpoint,omitempty" yaml:"endpoint,omitempty"`
 	// Application is name of application to evaluate
 	Application string `json:"application" yaml:"application"`
 }
@@ -73,8 +78,12 @@ type collectABNMetricsTask struct {
 // initializeDefaults sets default values for the task
 func (t *collectABNMetricsTask) initializeDefaults() {
 	if t.client == nil {
+		ep := defaultEndpoint
+		if t.With.Endpoint != nil {
+			ep = *t.With.Endpoint
+		}
 		t.client = &defaultABNClient{
-			endpoint: "iter8-abn:50051",
+			endpoint: ep,
 		}
 	}
 }

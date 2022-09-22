@@ -27,11 +27,6 @@ const (
 	watcherConfigEnv = "WATCHER_CONFIG"
 )
 
-// var (
-// 	// port the service listens on
-// 	port = flag.Int("port", 50051, "The server port")
-// )
-
 // Start is entry point to configure services and start them
 func Start(port int, stopCh chan struct{}) error {
 	if err := k8sclient.Client.Initialize(); err != nil {
@@ -107,6 +102,8 @@ func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *p
 
 // launchGRPCServer starts gRPC server
 func launchGRPCServer(port int, opts []grpc.ServerOption, stopCh chan struct{}) {
+	log.Logger.Tracef("starting gRPC service on port %d", port)
+
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		log.Logger.WithError(err).Fatal("failed to listen")
