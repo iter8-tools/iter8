@@ -13,7 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func TestAutoXStart(t *testing.T) {
+func TestStart(t *testing.T) {
 	addObjectInvocations := 0
 	addObject = func(obj interface{}) {
 		log.Logger.Debug("Add:", obj)

@@ -166,7 +166,7 @@ func TestUpdate(t *testing.T) {
 						return r
 					}
 
-					// otherwise application was possibily modified in some way
+					// otherwise application was possibility modified in some way
 					// at least this application exists since it was preexisting
 					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
 					r = r && assert.NoError(t, err)
@@ -276,7 +276,7 @@ func TestDelete(t *testing.T) {
 						return r
 					}
 
-					// otherwise application was possibily modified in some way
+					// otherwise application was possibility modified in some way
 					// at least this application exists since it was preexisting
 					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
 					r = r && assert.NoError(t, err)

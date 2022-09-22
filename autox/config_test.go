@@ -42,18 +42,18 @@ func TestReadGroupChartConfig(t *testing.T) {
 		numChartGroups int
 	}{
 		{"empty", "config.empty.yaml", 0},
-		{"invalid", "config.invalid.yaml", 0},
+		{"invalid", "config.invalid.yaml", 1},
 		{"garbage", "config.garbage.yaml", 0},
 		{"nofile", "config.nofile.yaml", 0},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			c := readChartGroupConfig(completePath("../testdata/autox_inputs", tt.file))
 			assert.Equal(t, tt.numChartGroups, len(c))
-
-			c = readChartGroupConfig(completePath("../testdata/autox_inputs", "group_config.example.yaml"))
-			assert.Equal(t, 2, len(c))
-			assert.Equal(t, 2, len(c[0].Charts))
-			assert.Equal(t, 1, len(c[1].Charts))
 		})
 	}
+
+	c := readChartGroupConfig(completePath("../testdata/autox_inputs", "group_config.example.yaml"))
+	assert.Equal(t, 2, len(c))
+	assert.Equal(t, 2, len(c["myApp"].Charts))
+	assert.Equal(t, 1, len(c["myApp2"].Charts))
 }

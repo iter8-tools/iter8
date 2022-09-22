@@ -16,6 +16,9 @@ const (
 	chartGroupConfigEnv = "CHART_GROUP_CONFIG"
 )
 
+var iter8ResourceConfig resourceConfig
+var iter8ChartGroupConfig chartGroupConfig
+
 // Start is entry point to configure services and start them
 func Start(stopCh chan struct{}) error {
 	// initialize kubernetes driver
@@ -36,12 +39,12 @@ func Start(stopCh chan struct{}) error {
 	}
 
 	// set up resource watching as defined by config
-	resourceConfig := readResourceConfig(resourceConfigFile)
-	chartGroupConfig := readChartGroupConfig(chartGroupConfigFile)
+	iter8ResourceConfig = readResourceConfig(resourceConfigFile)
+	iter8ChartGroupConfig = readChartGroupConfig(chartGroupConfigFile)
 
-	log.Logger.Debug("chartGroupConfig:", chartGroupConfig)
+	log.Logger.Debug("chartGroupConfig:", iter8ChartGroupConfig)
 
-	w := newIter8Watcher(resourceConfig.Resources, resourceConfig.Namespaces, chartGroupConfig)
+	w := newIter8Watcher()
 	go w.start(stopCh)
 	return nil
 }

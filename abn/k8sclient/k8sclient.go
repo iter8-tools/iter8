@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// Client is a global variable. Before use, it must be assigned and initalized
+// Client is a global variable. Before use, it must be assigned and initialized
 var Client KubeClient
 
 // KubeClient embeds Kube configuration, and

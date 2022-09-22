@@ -1,13 +1,16 @@
-- name: myApp
+myApp:
   charts:
-    - repo: abc
+    name1:
+      repo: abc
       name: def
       valuesFileUrl: abcdef.com/abcdef
-    - repo: ghi
+    name2:
+      repo: ghi
       name: jkl
       valuesFileUrl: ghijkl.com/ghijkl
-- name: myApp2
+myApp2:
   charts:
-    - repo: mno
+    name3: 
+      repo: mno
       name: pqr
       valuesFileUrl: mnopqr.com/mnopqr
