@@ -2,7 +2,7 @@ package base
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
@@ -11,10 +11,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/apimachinery/pkg/util/yaml"
-)
-
-const (
-	defaultEndpoint = "iter8-abn:50051"
 )
 
 // abnClientInterface is interface for calling gRPC services
@@ -63,7 +59,7 @@ const (
 
 // ABNMetricsInputs is the inputs for for the abnmetrics task
 type ABNMetricsInputs struct {
-	Endpoint *string `json:"endpoint,omitempty" yaml:"endpoint,omitempty"`
+	Endpoint *string `json:"endpoint" yaml:"endpoint"`
 	// Application is name of application to evaluate
 	Application string `json:"application" yaml:"application"`
 }
@@ -78,12 +74,8 @@ type collectABNMetricsTask struct {
 // initializeDefaults sets default values for the task
 func (t *collectABNMetricsTask) initializeDefaults() {
 	if t.client == nil {
-		ep := defaultEndpoint
-		if t.With.Endpoint != nil {
-			ep = *t.With.Endpoint
-		}
 		t.client = &defaultABNClient{
-			endpoint: ep,
+			endpoint: *t.With.Endpoint,
 		}
 	}
 }
@@ -147,8 +139,9 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 		// get version object from retrieved application object
 		v, _ := a.GetVersion(version, false)
 		if v == nil {
-			log.Logger.Debugf("expected version %s not found", version)
-			return errors.New("expected version not found")
+			err := fmt.Errorf("expected version %s not found", version)
+			log.Logger.Error(err)
+			return err
 		}
 		log.Logger.Tracef("version %s is mapped to track %s; using index %d", version, track, versionIndex)
 		// update all metrics with new values (is summary metric so just replace)
@@ -157,8 +150,7 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 			err := in.updateMetric(
 				abnMetricProvider+"/"+metric,
 				MetricMeta{
-					Description: "summary metric",
-					Type:        SummaryMetricType,
+					Type: SummaryMetricType,
 				},
 				versionIndex,
 				m,
