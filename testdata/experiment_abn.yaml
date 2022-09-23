@@ -1,0 +1,6 @@
+spec:
+  # task 1: collect abn metrics
+  - task: abnmetrics
+    with:
+        endpoint: iter8-abn:50051
+        application: default/backend

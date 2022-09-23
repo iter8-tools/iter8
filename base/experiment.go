@@ -391,6 +391,7 @@ func (in *Insights) setSLOs(slos *SLOLimits) error {
 func (in *Insights) TrackVersionStr(i int) string {
 	// if VersionNames not defined or all fields empty return default "version i"
 	if in.VersionNames == nil ||
+		len(in.VersionNames) == 0 ||
 		len(in.VersionNames[i].Version)+len(in.VersionNames[i].Track) == 0 {
 		return fmt.Sprintf("version %d", i)
 	}
@@ -530,6 +531,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 	vals := in.NonHistMetricValues[i][baseMetric]
 	if len(vals) == 0 {
 		log.Logger.Infof("metric %v for version %v has no sample", baseMetric, i)
+		return nil
 	}
 	if len(vals) == 1 {
 		log.Logger.Warnf("metric %v for version %v has sample of size 1", baseMetric, i)
@@ -558,7 +560,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 		return nil
 	case MaxAggregator:
-		agg, err := stats.Mean(vals)
+		agg, err := stats.Max(vals)
 		if err == nil {
 			return float64Pointer(agg)
 		}
@@ -597,7 +599,11 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 // getSummaryAggregation aggregates the given base metric for the given version (i) with the given aggregation (a)
 func (in *Insights) getSummaryAggregation(i int, baseMetric string, a string) *float64 {
 	at := AggregationType(a)
-	m := in.SummaryMetricValues[i][baseMetric]
+	m, ok := in.SummaryMetricValues[i][baseMetric]
+	if !ok { // metric not in list
+		log.Logger.Errorf("invalid metric %s", baseMetric)
+		return nil
+	}
 
 	switch at {
 	case CountAggregator:
@@ -624,6 +630,11 @@ func (in *Insights) getSummaryAggregation(i int, baseMetric string, a string) *f
 // aggregateMetric returns the aggregated metric value for a given version and metric
 func (in *Insights) aggregateMetric(i int, m string) *float64 {
 	s := strings.Split(m, "/")
+	if len(s) != 3 {
+		// should not have been called
+		log.Logger.Errorf("metric name %v not valid for aggregation", m)
+		return nil
+	}
 	baseMetric := s[0] + "/" + s[1]
 	if m, ok := in.MetricsInfo[baseMetric]; ok {
 		log.Logger.Tracef("found metric %v used for aggregation", baseMetric)
@@ -634,7 +645,7 @@ func (in *Insights) aggregateMetric(i int, m string) *float64 {
 			log.Logger.Tracef("metric %v used for aggregation is a summary metric", baseMetric)
 			return in.getSummaryAggregation(i, baseMetric, s[2])
 		}
-		log.Logger.Errorf("metric %v used for aggregation is not a sample metric", baseMetric)
+		log.Logger.Errorf("metric %v used for aggregation is not a sample or summary metric", baseMetric)
 		return nil
 	}
 	log.Logger.Warnf("could not find metric %v used for aggregation", baseMetric)

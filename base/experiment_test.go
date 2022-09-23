@@ -32,6 +32,13 @@ func TestReadExperiment(t *testing.T) {
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(e.Spec))
+
+	b, err = os.ReadFile(CompletePath("../testdata", "experiment_abn.yaml"))
+	assert.NoError(t, err)
+	e = &Experiment{}
+	err = yaml.Unmarshal(b, e)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(e.Spec))
 }
 
 func TestRunningTasks(t *testing.T) {
