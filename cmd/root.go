@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/iter8-tools/iter8/autox"
 	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
@@ -19,8 +20,10 @@ var (
 	logLevel = "info"
 	// Default Helm and Kubernetes settings
 	settings = cli.New()
-	// Kuberdriver used by Helm and Kubernetes clients
+	// KubeDriver used by actions package
 	kd = driver.NewKubeDriver(settings)
+	// KubeClient used by autoX
+	autoXKClient = autox.NewKubeClient(settings)
 	// output stream where log messages are printed
 	outStream io.Writer = os.Stdout
 )
