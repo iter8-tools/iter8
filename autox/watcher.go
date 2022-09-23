@@ -20,9 +20,9 @@ var iter8ResourceConfig resourceConfig
 var iter8ChartGroupConfig chartGroupConfig
 
 // Start is entry point to configure services and start them
-func Start(stopCh chan struct{}) error {
+func (opts *Opts) Start(stopCh chan struct{}) error {
 	// initialize kubernetes driver
-	if err := k8sClient.init(); err != nil {
+	if err := opts.KubeClient.init(); err != nil {
 		log.Logger.Fatal("unable to init k8s client")
 	}
 
@@ -44,7 +44,7 @@ func Start(stopCh chan struct{}) error {
 
 	log.Logger.Debug("chartGroupConfig:", iter8ChartGroupConfig)
 
-	w := newIter8Watcher()
+	w := newIter8Watcher(opts.KubeClient)
 	go w.start(stopCh)
 	return nil
 }

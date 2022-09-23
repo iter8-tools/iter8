@@ -15,7 +15,10 @@ import (
 )
 
 const (
-	autoXLabel = "iter8.tools/autox-group"
+	autoXLabel   = "iter8.tools/autox-group"
+	appLabel     = "app.kubernetes.io/name"
+	versionLabel = "app.kubernetes.io/version"
+	trackLabel   = "iter8.tools/track"
 )
 
 type chartAction int64
@@ -39,12 +42,16 @@ func getReleaseName(chartGroupName string, chartID string, prunedLabels map[stri
 	_, _ = hasher.WriteString(chartGroupName)
 	_, _ = hasher.WriteString(chartID)
 
-	// adding version label
-	version := prunedLabels["app.kubernetes.io/version"]
+	// hash app label
+	app := prunedLabels[appLabel]
+	_, _ = hasher.WriteString(app)
+
+	// hash version label
+	version := prunedLabels[versionLabel]
 	_, _ = hasher.WriteString(version)
 
-	// adding track label
-	track := prunedLabels["iter8.tools/track"]
+	// hash track label
+	track := prunedLabels[trackLabel]
 	_, _ = hasher.WriteString(track)
 
 	nonce := fmt.Sprintf("%05x", hasher.Sum64())
@@ -59,11 +66,16 @@ func installHelmReleases(prunedLabels map[string]string, namespace string) error
 
 // installHelmRelease for a given chart within a chart group
 func installHelmRelease(releaseName string, chart chart, namespace string) error {
-	// TODO: check if there is a preexisting Helm release
+	// download chart
 
-	// TODO: mutex
+	// upgrade chart
 
-	// TODO: release Helm chart
+	// get manifests (using the Helm client)
+
+	// install manifests
+
+	// if the install fails (for e.g., due to pre-existing helm resources), we simply log this info
+	// note that installs can fail, when autoX restarts after a crash
 
 	log.Logger.Debug("Release chart:", releaseName)
 	return nil
@@ -130,29 +142,27 @@ var addObject = func(obj interface{}) {
 
 	// if there is no autoX label, there is nothing to do
 	labels := uObj.GetLabels()
-	if !gotAutoXLabel(labels) {
+	if !hasAutoXLabel(labels) {
 		return
 	}
 	// there is an autoX group name
 
 	// we will install Helm releases
 	prunedLabels := pruneLabels(labels)
-	installHelmReleases(prunedLabels, uObj.GetNamespace())
+	_ = installHelmReleases(prunedLabels, uObj.GetNamespace())
 }
 
 // pruneLabels will extract the labels that are relevant for autoX
 func pruneLabels(labels map[string]string) map[string]string {
 	prunedLabels := map[string]string{}
-	// if the autoX label exists, get it and stuff it into pruneLabels
-	if autoXLabelValue, ok := labels[autoXLabel]; ok {
-		prunedLabels[autoXLabel] = autoXLabelValue
+	for _, l := range []string{autoXLabel, appLabel, versionLabel, trackLabel} {
+		prunedLabels[l] = labels[l]
 	}
-	// other labels like track and version can be potentially extracted in the future
 	return prunedLabels
 }
 
-// gotAutoXLabel checks if autoX label is present
-func gotAutoXLabel(labels map[string]string) bool {
+// hasAutoXLabel checks if autoX label is present
+func hasAutoXLabel(labels map[string]string) bool {
 	_, ok := labels[autoXLabel]
 	return ok
 }
@@ -161,43 +171,46 @@ var updateObject = func(oldObj, obj interface{}) {
 	log.Logger.Debug("Update:", oldObj, obj)
 
 	uOldObj := oldObj.(*unstructured.Unstructured)
-	oldLabels := pruneLabels(uOldObj.GetLabels())
+	prunedLabelsOld := pruneLabels(uOldObj.GetLabels())
 
 	uObj := obj.(*unstructured.Unstructured)
-	resourceName := uObj.GetName()
-	// example label: iter8.tools/autox-group=hello
-	labels := pruneLabels(uObj.GetLabels())
+	prunedLabels := pruneLabels(uObj.GetLabels())
 
-	// if the pruned labels are the same, do nothing
-	if reflect.DeepEqual(oldLabels, labels) {
+	// if the pruned label sets are equal, do nothing
+	if reflect.DeepEqual(prunedLabelsOld, prunedLabels) {
 		return
 	}
 
-	// if the pruned labels are different, then update by deleting and reinstalling
-	deleteHelmReleases(resourceName)
-	installHelmReleases(resourceName)
+	// if the pruned label sets are different, then
+	// first attempt delete, and then attempt install
+	if hasAutoXLabel(prunedLabelsOld) {
+		_ = deleteHelmReleases(prunedLabelsOld, uOldObj.GetNamespace())
+	}
+
+	if hasAutoXLabel(prunedLabels) {
+		_ = installHelmReleases(prunedLabels, uOldObj.GetNamespace())
+	}
 }
 
 var deleteObject = func(obj interface{}) {
 	log.Logger.Debug("Delete:", obj)
 
 	uObj := obj.(*unstructured.Unstructured)
-	resourceName := uObj.GetName()
-	// example label: iter8.tools/autox-group=hello
-	labels := pruneLabels(uObj.GetLabels())
+	prunedLabels := pruneLabels(uObj.GetLabels())
 
-	// check if the app name matches the name in the autox label
-	if autoxLabelName, ok := labels[autoxLabel]; ok && resourceName == autoxLabelName {
-		// Delete Helm charts
-		deleteHelmReleases(resourceName)
+	if !hasAutoXLabel(prunedLabels) {
+		return
 	}
+
+	// Delete Helm charts
+	_ = deleteHelmReleases(prunedLabels, uObj.GetNamespace())
 }
 
 type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func newIter8Watcher() *iter8Watcher {
+func newIter8Watcher(k8sClient *KubeClient) *iter8Watcher {
 	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}

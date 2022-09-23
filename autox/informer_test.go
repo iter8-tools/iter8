@@ -17,14 +17,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	trackAnnotation = "iter8.tools/track"
-	newLabel        = "app.kubernetes.io/name"
-	versionLabel    = "app.kubernetes.io/version"
-	readyAnnotation = "iter8.tools/ready"
-	iter8Label      = "iter8.tools/abn"
-)
-
 // Check to see if add, update, delete handlers from the watcher are properly invoked
 // after the watcher is created using newIter8Watcher()
 func TestNewIter8Watcher(t *testing.T) {
@@ -59,14 +51,14 @@ func TestNewIter8Watcher(t *testing.T) {
 	track := ""
 
 	// define and start watcher
-	k8sClient = newFakeKubeClient(cli.New())
+	k8sClient := newFakeKubeClient(cli.New())
 
 	iter8ResourceConfig = resourceConfig{
 		Namespaces: []string{namespace},
 		Resources:  []schema.GroupVersionResource{gvr},
 	}
 
-	w := newIter8Watcher()
+	w := newIter8Watcher(k8sClient)
 	assert.NotNil(t, w)
 	done := make(chan struct{})
 	defer close(done)
@@ -90,7 +82,7 @@ func TestNewIter8Watcher(t *testing.T) {
 	// update object with track
 	assert.Equal(t, 0, updateObjectInvocations)
 	track = "track"
-	(createdObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[trackAnnotation] = track
+	(createdObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[trackLabel] = track
 	updatedObj, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Update(
@@ -121,10 +113,10 @@ func TestNewIter8Watcher(t *testing.T) {
 
 func newUnstructuredDeployment(namespace, application, version, track string) *unstructured.Unstructured {
 	annotations := map[string]interface{}{
-		readyAnnotation: "true",
+		"iter8.tools/ready": "true",
 	}
 	if track != "" {
-		annotations[trackAnnotation] = track
+		annotations[trackLabel] = track
 	}
 
 	return &unstructured.Unstructured{
@@ -135,9 +127,9 @@ func newUnstructuredDeployment(namespace, application, version, track string) *u
 				"namespace": namespace,
 				"name":      application,
 				"labels": map[string]interface{}{
-					newLabel:     application,
-					versionLabel: version,
-					iter8Label:   "true",
+					appLabel:             application,
+					versionLabel:         version,
+					"iter8.toools/ready": "true",
 				},
 				"annotations": annotations,
 			},

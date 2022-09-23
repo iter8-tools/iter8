@@ -20,7 +20,7 @@ func TestStart(t *testing.T) {
 		addObjectInvocations++
 	}
 
-	k8sClient = newFakeKubeClient(cli.New())
+	opts := NewOpts(newFakeKubeClient(cli.New()))
 
 	// Start requires some environment variables to be set
 	_ = os.Setenv(resourceConfigEnv, "../testdata/autox_inputs/resource_config.example.yaml")
@@ -28,7 +28,7 @@ func TestStart(t *testing.T) {
 
 	stopCh := make(chan struct{})
 	defer close(stopCh)
-	_ = Start(stopCh)
+	_ = opts.Start(stopCh)
 
 	// create object; no track defined
 	assert.Equal(t, 0, addObjectInvocations)
@@ -43,7 +43,7 @@ func TestStart(t *testing.T) {
 	version := "v1"
 	track := ""
 
-	createdObj, err := k8sClient.dynamic().
+	createdObj, err := opts.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),

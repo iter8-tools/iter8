@@ -12,6 +12,12 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// Opts are the options used for launching autoX service
+type Opts struct {
+	// KubeClient enables Kubernetes and Helm interactions with the cluster
+	*KubeClient
+}
+
 // resourceConfig is the configuration that identifies the resources to watch and in which namespaces.
 type resourceConfig struct {
 	// Namespaces is list of namespaces to watch
@@ -42,6 +48,13 @@ type chartGroup struct {
 // chartGroupConfig is the configuration for all the Helm charts
 // the key is the experiment group name
 type chartGroupConfig map[string]chartGroup
+
+// NewOpts returns an autox options object
+func NewOpts(kc *KubeClient) *Opts {
+	return &Opts{
+		KubeClient: kc,
+	}
+}
 
 // readResourceConfig reads yaml config file and converts to a resourceConfig object
 func readResourceConfig(fp string) (config resourceConfig) {
