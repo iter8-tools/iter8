@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 )
 
 // Application is an application observed in a kubernetes cluster
@@ -50,7 +51,7 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 		if allowNew {
 			log.Logger.Debugf("GetVersion no data found; returning %+v", v)
 			v = &Version{
-				Metrics: map[string]*SummaryMetric{},
+				Metrics: map[string]*summarymetrics.SummaryMetric{},
 			}
 			a.Versions[version] = v
 			return v, true
@@ -79,7 +80,7 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 	}
 	for _, v := range a.Versions {
 		if v.Metrics == nil {
-			v.Metrics = map[string]*SummaryMetric{}
+			v.Metrics = map[string]*summarymetrics.SummaryMetric{}
 		}
 	}
 

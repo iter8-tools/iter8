@@ -81,19 +81,28 @@ func (tr *TextReporter) getSLOStrText(i int, upper bool) (string, error) {
 	return str, nil
 }
 
+func (tr *TextReporter) printVersions(w *tabwriter.Writer) {
+	in := tr.Result.Insights
+	for i := 0; i < in.NumVersions; i++ {
+		fmt.Fprintf(w, "\t %s", in.TrackVersionStr(i))
+	}
+}
+
 // printSLOsText prints all SLOs into tab writer
 func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
 	in := tr.Result.Insights
 	fmt.Fprint(w, "SLO Conditions")
 	if in.NumVersions > 1 {
-		for i := 0; i < in.NumVersions; i++ {
-			fmt.Fprintf(w, "\t version %v", i)
-		}
+		tr.printVersions(w)
 	} else {
-		fmt.Fprintf(w, "\tSatisfied")
+		fmt.Fprintf(w, "\t Satisfied")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "--------------\t---------")
+	fmt.Fprint(w, "--------------")
+	for i := 0; i < in.NumVersions; i++ {
+		fmt.Fprint(w, "\t ---------")
+	}
+	fmt.Fprintln(w)
 
 	if in.SLOs != nil {
 		log.Logger.Debug("SLOs are not nil")
@@ -104,9 +113,9 @@ func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
-					fmt.Fprintf(w, "\t%v", in.SLOsSatisfied.Upper[i][j])
-					fmt.Fprintln(w)
+					fmt.Fprintf(w, "\t %v", in.SLOsSatisfied.Upper[i][j])
 				}
+				fmt.Fprintln(w)
 			} else {
 				log.Logger.Error("unable to extract SLO text")
 			}
@@ -119,9 +128,9 @@ func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
 			if err == nil {
 				fmt.Fprint(w, str)
 				for j := 0; j < in.NumVersions; j++ {
-					fmt.Fprintf(w, "\t%v", in.SLOsSatisfied.Lower[i][j])
-					fmt.Fprintln(w)
+					fmt.Fprintf(w, "\t %v", in.SLOsSatisfied.Lower[i][j])
 				}
+				fmt.Fprintln(w)
 			} else {
 				log.Logger.Error("unable to extract SLO text")
 			}
@@ -144,14 +153,16 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	in := tr.Result.Insights
 	fmt.Fprint(w, "Metric")
 	if in.NumVersions > 1 {
-		for i := 0; i < in.NumVersions; i++ {
-			fmt.Fprintf(w, "\tversion %v", i)
-		}
+		tr.printVersions(w)
 	} else {
-		fmt.Fprintf(w, "\tvalue")
+		fmt.Fprintf(w, "\t value")
 	}
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "-------\t-----")
+	fmt.Fprint(w, "-------")
+	for i := 0; i < in.NumVersions; i++ {
+		fmt.Fprint(w, "\t -----")
+	}
+	fmt.Fprintln(w)
 
 	// keys contain normalized scalar metric names in sorted order
 	keys := tr.SortedScalarAndSLOMetrics()
@@ -163,7 +174,7 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 			fmt.Fprint(w, mwu)
 			// add value
 			for j := 0; j < in.NumVersions; j++ {
-				fmt.Fprintf(w, "\t%v", tr.ScalarMetricValueStr(j, mn))
+				fmt.Fprintf(w, "\t %v", tr.ScalarMetricValueStr(j, mn))
 			}
 			fmt.Fprintln(w)
 		} else {

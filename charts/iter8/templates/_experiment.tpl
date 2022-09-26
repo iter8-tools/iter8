@@ -6,6 +6,8 @@ spec:
   {{- range .Values.tasks }}
   {{- if eq "assess" . }}
   {{- include "task.assess" $.Values.assess -}}
+  {{- else if eq "abnmetrics" . }}
+  {{- include "task.abnmetrics" $.Values.abnmetrics -}}
   {{- else if eq "custommetrics" . }}
   {{- include "task.custommetrics" $.Values.custommetrics -}}
   {{- else if eq "grpc" . }}
