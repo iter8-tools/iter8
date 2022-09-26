@@ -205,31 +205,3 @@ func newUnstructuredDeployment(namespace, application, version, track string, ad
 		},
 	}
 }
-
-// func newUnstructuredDeployment(namespace, application, version, track string) *unstructured.Unstructured {
-// 	annotations := map[string]interface{}{
-// 		"iter8.tools/ready": "true",
-// 	}
-// 	if track != "" {
-// 		annotations[trackLabel] = track
-// 	}
-
-// 	return &unstructured.Unstructured{
-// 		Object: map[string]interface{}{
-// 			"apiVersion": "apps/v1",
-// 			"kind":       "Deployment",
-// 			"metadata": map[string]interface{}{
-// 				"namespace": namespace,
-// 				"name":      application,
-// 				"labels": map[string]interface{}{
-// 					appLabel:                  application,
-// 					versionLabel:              version,
-// 					"iter8.toools/ready":      "true",
-// 					"iter8.tools/autox-group": "myApp",
-// 				},
-// 				"annotations": annotations,
-// 			},
-// 			"spec": application,
-// 		},
-// 	}
-// }
