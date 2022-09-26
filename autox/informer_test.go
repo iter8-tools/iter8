@@ -1,14 +1,14 @@
 package autox
 
 import (
-	"context"
-	"testing"
-	"time"
 
 	// abnapp "github.com/iter8-tools/iter8/abn/application"
 	// "github.com/iter8-tools/iter8/abn/k8sclient"
 
-	"github.com/iter8-tools/iter8/base/log"
+	"context"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -20,24 +20,21 @@ import (
 // Check to see if add, update, delete handlers from the watcher are properly invoked
 // after the watcher is created using newIter8Watcher()
 func TestNewIter8Watcher(t *testing.T) {
-	addObjectInvocations := 0
-	updateObjectInvocations := 0
-	deleteObjectInvocations := 0
+	// autoX needs the resource and chart group config
+	iter8ResourceConfig = readResourceConfig("../testdata/autox_inputs/resource_config.example.yaml")
+	iter8ChartGroupConfig = readChartGroupConfig("../testdata/autox_inputs/group_config.example.yaml")
 
-	// Overwrite original handlers
-	addObject = func(obj interface{}) {
-		log.Logger.Debug("Add:", obj)
-		addObjectInvocations++
+	// autoX handler will call on installHelmRelease and deleteHelmRelease
+	installHelmReleaseInvocations := 0
+	installHelmRelease = func(releaseName string, chart chart, namespace string) error {
+		installHelmReleaseInvocations++
+		return nil
 	}
 
-	updateObject = func(oldObj, obj interface{}) {
-		log.Logger.Debug("Update:", oldObj, obj)
-		updateObjectInvocations++
-	}
-
-	deleteObject = func(obj interface{}) {
-		log.Logger.Debug("Delete:", obj)
-		deleteObjectInvocations++
+	deleteHelmReleaseInvocations := 0
+	deleteHelmRelease = func(releaseName string, namespace string) error {
+		deleteHelmReleaseInvocations++
+		return nil
 	}
 
 	gvr := schema.GroupVersionResource{
@@ -46,7 +43,7 @@ func TestNewIter8Watcher(t *testing.T) {
 		Resource: "deployments",
 	}
 	namespace := "default"
-	application := "demo"
+	application := "myApp"
 	version := "v1"
 	track := ""
 
@@ -64,23 +61,61 @@ func TestNewIter8Watcher(t *testing.T) {
 	defer close(done)
 	w.start(done)
 
-	// create object; no track defined
-	assert.Equal(t, 0, addObjectInvocations)
+	// create object without autoXLabel
+	// this should not trigger any installHelmRelease (or deleteHelmRelease)
+	assert.Equal(t, 0, installHelmReleaseInvocations)
+	assert.Equal(t, 0, deleteHelmReleaseInvocations)
+	createdObjNoAutoXLabel, err := k8sClient.dynamic().
+		Resource(gvr).Namespace(namespace).
+		Create(
+			context.TODO(),
+			newUnstructuredDeployment(
+				namespace,
+				"demo",
+				version,
+				track,
+				map[string]string{},
+			),
+			metav1.CreateOptions{},
+		)
+	assert.NoError(t, err)
+	assert.NotNil(t, createdObjNoAutoXLabel)
+
+	// give handler time to execute
+	// the invocations should not change as the created object has no autoXLabel
+	assert.Eventually(t, func() bool { return assert.Equal(t, 0, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+
+	// create object with autoXLabel
 	createdObj, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),
-			newUnstructuredDeployment(namespace, application, version, track),
+			newUnstructuredDeployment(
+				namespace,
+				application,
+				version,
+				track,
+				map[string]string{
+					// which will allow installHelmRelease and deleteHelmRelease to trigger
+					autoXLabel: "myApp",
+				},
+			),
 			metav1.CreateOptions{},
 		)
 	assert.NoError(t, err)
 	assert.NotNil(t, createdObj)
 
 	// give handler time to execute
-	assert.Eventually(t, func() bool { return assert.Equal(t, 1, addObjectInvocations) }, 5*time.Second, time.Second)
+	// creating an object will installHelmRelease for each chart in the chart group
+	// in this case, there are 2 charts
+	// once for autox-myApp-name1-XXXXX and autox-myApp-name2-XXXXX
+	assert.Eventually(t, func() bool { return assert.Equal(t, 2, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 
-	// update object with track
-	assert.Equal(t, 0, updateObjectInvocations)
+	// update annotations
+	// this should not trigger deleteHelmRelease/installHelmRelease
+	// these functions should only be triggered when a (pruned) label is changed
 	track = "track"
 	(createdObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[trackLabel] = track
 	updatedObj, err := k8sClient.dynamic().
@@ -94,10 +129,31 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NotNil(t, updatedObj)
 
 	// give handler time to execute
-	assert.Eventually(t, func() bool { return assert.Equal(t, 1, updateObjectInvocations) }, 5*time.Second, time.Second)
+	// the invocations should not change as a (pruned) label was not changed
+	assert.Eventually(t, func() bool { return assert.Equal(t, 2, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 
-	// delete object --> no track anymore
-	assert.Equal(t, 0, deleteObjectInvocations)
+	// update (pruned) labels
+	// this should trigger deleteHelmRelease/installHelmRelease
+	// change versionLabel, which is a pruned label
+	(createdObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[versionLabel] = "v2"
+	updatedObj, err = k8sClient.dynamic().
+		Resource(gvr).Namespace(namespace).
+		Update(
+			context.TODO(),
+			createdObj,
+			metav1.UpdateOptions{},
+		)
+	assert.NoError(t, err)
+	assert.NotNil(t, updatedObj)
+
+	// give handler time to execute
+	// updating (pruned) labels will trigger both deleteHelmRelease and installHelmRelease for each chart in the chart group
+	// in this case, there are 2 charts
+	assert.Eventually(t, func() bool { return assert.Equal(t, 4, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 2, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+
+	// delete object
 	err = k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Delete(
@@ -108,10 +164,13 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NoError(t, err)
 
 	// give handler time to execute
-	assert.Eventually(t, func() bool { return assert.Equal(t, 1, deleteObjectInvocations) }, 5*time.Second, time.Second)
+	// only deleteHelmRelease should trigger, once for each chart in the chart group
+	// in this case, there are 2 charts
+	assert.Eventually(t, func() bool { return assert.Equal(t, 4, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 4, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 }
 
-func newUnstructuredDeployment(namespace, application, version, track string) *unstructured.Unstructured {
+func newUnstructuredDeployment(namespace, application, version, track string, additionalLabels map[string]string) *unstructured.Unstructured {
 	annotations := map[string]interface{}{
 		"iter8.tools/ready": "true",
 	}
@@ -119,21 +178,58 @@ func newUnstructuredDeployment(namespace, application, version, track string) *u
 		annotations[trackLabel] = track
 	}
 
+	labels := map[string]interface{}{
+		appLabel:            application,
+		versionLabel:        version,
+		"iter8.tools/ready": "true",
+	}
+
+	// add additionalLabes to labels
+	if len(additionalLabels) > 0 {
+		for labelName, labelValue := range additionalLabels {
+			labels[labelName] = labelValue
+		}
+	}
+
 	return &unstructured.Unstructured{
 		Object: map[string]interface{}{
 			"apiVersion": "apps/v1",
 			"kind":       "Deployment",
 			"metadata": map[string]interface{}{
-				"namespace": namespace,
-				"name":      application,
-				"labels": map[string]interface{}{
-					appLabel:             application,
-					versionLabel:         version,
-					"iter8.toools/ready": "true",
-				},
+				"namespace":   namespace,
+				"name":        application,
+				"labels":      labels,
 				"annotations": annotations,
 			},
 			"spec": application,
 		},
 	}
 }
+
+// func newUnstructuredDeployment(namespace, application, version, track string) *unstructured.Unstructured {
+// 	annotations := map[string]interface{}{
+// 		"iter8.tools/ready": "true",
+// 	}
+// 	if track != "" {
+// 		annotations[trackLabel] = track
+// 	}
+
+// 	return &unstructured.Unstructured{
+// 		Object: map[string]interface{}{
+// 			"apiVersion": "apps/v1",
+// 			"kind":       "Deployment",
+// 			"metadata": map[string]interface{}{
+// 				"namespace": namespace,
+// 				"name":      application,
+// 				"labels": map[string]interface{}{
+// 					appLabel:                  application,
+// 					versionLabel:              version,
+// 					"iter8.toools/ready":      "true",
+// 					"iter8.tools/autox-group": "myApp",
+// 				},
+// 				"annotations": annotations,
+// 			},
+// 			"spec": application,
+// 		},
+// 	}
+// }

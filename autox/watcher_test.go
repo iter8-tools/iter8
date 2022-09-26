@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,10 +13,11 @@ import (
 )
 
 func TestStart(t *testing.T) {
-	addObjectInvocations := 0
-	addObject = func(obj interface{}) {
-		log.Logger.Debug("Add:", obj)
-		addObjectInvocations++
+	// autoX watcher will call on installHelmRelease
+	installHelmReleaseInvocations := 0
+	installHelmRelease = func(releaseName string, chart chart, namespace string) error {
+		installHelmReleaseInvocations++
+		return nil
 	}
 
 	opts := NewOpts(newFakeKubeClient(cli.New()))
@@ -31,7 +31,7 @@ func TestStart(t *testing.T) {
 	_ = opts.Start(stopCh)
 
 	// create object; no track defined
-	assert.Equal(t, 0, addObjectInvocations)
+	assert.Equal(t, 0, installHelmReleaseInvocations)
 
 	gvr := schema.GroupVersionResource{
 		Group:    "apps",
@@ -47,12 +47,23 @@ func TestStart(t *testing.T) {
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),
-			newUnstructuredDeployment(namespace, application, version, track),
-			metav1.CreateOptions{},
+			newUnstructuredDeployment(
+				namespace,
+				application,
+				version,
+				track,
+				map[string]string{
+					// add the autoXLabel, which will allow installHelmRelease to trigger
+					autoXLabel: "myApp",
+				},
+			), metav1.CreateOptions{},
 		)
 	assert.NoError(t, err)
 	assert.NotNil(t, createdObj)
 
 	// give handler time to execute
-	assert.Eventually(t, func() bool { return assert.Equal(t, 1, addObjectInvocations) }, 5*time.Second, time.Second)
+	// creating an object will installHelmRelease for each chart in the chart group
+	// in this case, there are 2 charts
+	// once for autox-myApp-name1-XXXXX and autox-myApp-name2-XXXXX
+	assert.Eventually(t, func() bool { return assert.Equal(t, 2, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
 }
