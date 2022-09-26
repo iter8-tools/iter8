@@ -65,7 +65,7 @@ func installHelmReleases(prunedLabels map[string]string, namespace string) error
 }
 
 // installHelmRelease for a given chart within a chart group
-func installHelmRelease(releaseName string, chart chart, namespace string) error {
+var installHelmRelease = func(releaseName string, chart chart, namespace string) error {
 	// download chart
 
 	// upgrade chart
@@ -87,7 +87,7 @@ func deleteHelmReleases(prunedLabels map[string]string, namespace string) error 
 }
 
 // deleteHelmRelease with a given release name
-func deleteHelmRelease(releaseName string, namespace string) error {
+var deleteHelmRelease = func(releaseName string, namespace string) error {
 	// TODO: check if there is a preexisting Helm release
 
 	// TODO: mutex
@@ -103,6 +103,7 @@ func deleteHelmRelease(releaseName string, namespace string) error {
 func doChartAction(prunedLabels map[string]string, chartAction chartAction, namespace string) error {
 	// get chart group name
 	chartGroupName := prunedLabels[autoXLabel]
+
 	// iterate through the charts in this chart group
 	var err error
 	if cg, ok := iter8ChartGroupConfig[chartGroupName]; ok {
@@ -134,24 +135,6 @@ func doChartAction(prunedLabels map[string]string, chartAction chartAction, name
 	return err
 }
 
-// addObject is the function object that will be used as the add handler in the informer
-var addObject = func(obj interface{}) {
-	log.Logger.Debug("Add:", obj)
-
-	uObj := obj.(*unstructured.Unstructured)
-
-	// if there is no autoX label, there is nothing to do
-	labels := uObj.GetLabels()
-	if !hasAutoXLabel(labels) {
-		return
-	}
-	// there is an autoX group name
-
-	// we will install Helm releases
-	prunedLabels := pruneLabels(labels)
-	_ = installHelmReleases(prunedLabels, uObj.GetNamespace())
-}
-
 // pruneLabels will extract the labels that are relevant for autoX
 func pruneLabels(labels map[string]string) map[string]string {
 	prunedLabels := map[string]string{}
@@ -167,7 +150,26 @@ func hasAutoXLabel(labels map[string]string) bool {
 	return ok
 }
 
-var updateObject = func(oldObj, obj interface{}) {
+// addObject is the function object that will be used as the add handler in the informer
+func addObject(obj interface{}) {
+	log.Logger.Debug("Add:", obj)
+
+	uObj := obj.(*unstructured.Unstructured)
+
+	// if there is no autoX label, there is nothing to do
+	labels := uObj.GetLabels()
+	if !hasAutoXLabel(labels) {
+		return
+	}
+	// there is an autoX group name
+
+	// we will install Helm releases
+	prunedLabels := pruneLabels(labels)
+
+	_ = installHelmReleases(prunedLabels, uObj.GetNamespace())
+}
+
+func updateObject(oldObj, obj interface{}) {
 	log.Logger.Debug("Update:", oldObj, obj)
 
 	uOldObj := oldObj.(*unstructured.Unstructured)
@@ -192,7 +194,7 @@ var updateObject = func(oldObj, obj interface{}) {
 	}
 }
 
-var deleteObject = func(obj interface{}) {
+func deleteObject(obj interface{}) {
 	log.Logger.Debug("Delete:", obj)
 
 	uObj := obj.(*unstructured.Unstructured)
