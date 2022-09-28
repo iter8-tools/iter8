@@ -27,6 +27,19 @@ type resourceConfig struct {
 	Resources []schema.GroupVersionResource `json:"resources,omitempty" yaml:"resources,omitempty"`
 }
 
+// trigger specifies when a chartGroup should be installed
+type trigger struct {
+	Group string `json:"group,omitempty" yaml:"group,omitempty"`
+
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
+
+	Resource string `json:"resource,omitempty" yaml:"resource,omitempty"`
+
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+
+	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
+}
+
 // chart points to a particular Helm chart
 type chart struct {
 	// Repo is the repo of the Helm chart
@@ -39,15 +52,24 @@ type chart struct {
 	ValuesFileURL string `json:"valuesFileURL" yaml:"valuesFileURL"`
 }
 
-// chartGroup is the configuration of all the Helm charts for a particular experiment group
-// the key is an identifier for the chart
+// chartGroup is the configuration of all the Helm charts for a particular experiment group and their install trigger
 type chartGroup struct {
-	Charts map[string]chart `json:"charts" yaml:"charts"`
+	// Trigger defines when the ReleaseSpecs should be installed
+	Trigger trigger `json:"trigger" yaml:"trigger"`
+
+	// ReleaseSpecs is the set of Helm charts
+	// the keys in ReleaseSpecs are identifiers for each chart
+	ReleaseSpecs map[string]chart `json:"releaseSpecs" yaml:"releaseSpecs"`
 }
 
-// chartGroupConfig is the configuration for all the Helm charts
-// the key is the experiment group name
-type chartGroupConfig map[string]chartGroup
+// // chartGroupConfig is the configuration for all the Helm charts and their triggers
+type chartGroupConfig struct {
+	// Namespaces are the namespaces that autoX cleans on start
+	Namespaces []string `json:"namespaces" yaml:"namespaces"`
+
+	// Specs contains the chartGroups, which contain the Helm charts and their triggers
+	Specs map[string]chartGroup
+}
 
 // NewOpts returns an autox options object
 func NewOpts(kc *KubeClient) *Opts {
