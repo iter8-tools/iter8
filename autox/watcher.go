@@ -1,11 +1,13 @@
 package autox
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/iter8-tools/iter8/base/log"
 
 	// auth enables automatic authentication to various hosted clouds
+
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
@@ -16,20 +18,42 @@ const (
 	chartGroupConfigEnv = "CHART_GROUP_CONFIG"
 )
 
-var iter8ResourceConfig resourceConfig
 var iter8ChartGroupConfig chartGroupConfig
+
+func validateChartGroupConfig(cgc chartGroupConfig) error {
+	var err error
+
+	for chartGroupID, chartGroup := range iter8ChartGroupConfig.Specs {
+		// validate trigger
+		if chartGroup.Trigger.Namespace == "" {
+			err = fmt.Errorf("trigger in chart group \"%s\" does not have a namespace", chartGroupID)
+			break
+		}
+
+		if chartGroup.Trigger.Group == "" {
+			err = fmt.Errorf("trigger in chart group \"%s\" does not have a group", chartGroupID)
+			break
+		}
+
+		if chartGroup.Trigger.Version == "" {
+			err = fmt.Errorf("trigger in chart group \"%s\" does not have a version", chartGroupID)
+			break
+		}
+
+		if chartGroup.Trigger.Resource == "" {
+			err = fmt.Errorf("trigger in chart group \"%s\" does not have a resource", chartGroupID)
+			break
+		}
+	}
+
+	return err
+}
 
 // Start is entry point to configure services and start them
 func (opts *Opts) Start(stopCh chan struct{}) error {
 	// initialize kubernetes driver
 	if err := opts.KubeClient.init(); err != nil {
 		log.Logger.Fatal("unable to init k8s client")
-	}
-
-	// read resource config (resources and namespaces to watch)
-	resourceConfigFile, ok := os.LookupEnv(resourceConfigEnv)
-	if !ok {
-		log.Logger.Fatal("resource configuration file is required")
 	}
 
 	// read group config (apps and helm charts to install)
@@ -39,8 +63,12 @@ func (opts *Opts) Start(stopCh chan struct{}) error {
 	}
 
 	// set up resource watching as defined by config
-	iter8ResourceConfig = readResourceConfig(resourceConfigFile)
 	iter8ChartGroupConfig = readChartGroupConfig(chartGroupConfigFile)
+
+	err := validateChartGroupConfig(iter8ChartGroupConfig)
+	if err != nil {
+		return err
+	}
 
 	log.Logger.Debug("chartGroupConfig:", iter8ChartGroupConfig)
 

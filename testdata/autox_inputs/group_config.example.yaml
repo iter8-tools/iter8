@@ -5,6 +5,9 @@ specs:
   myApp: # the autox group label value will correspond to this
     trigger:
       namespace: default
+      group:    "apps"
+      version:  "v1"
+      resource: "deployments"
     releaseSpecs:
       # when we chart is released, the release will be called
       # autox-myApp-name1-832ab
@@ -20,6 +23,9 @@ specs:
   myApp2:
     trigger:
       namespace: test
+      group:    "apps"
+      version:  "v1"
+      resource: "deployments"
     releaseSpecs:
       name3: 
         repo: mno

@@ -29,15 +29,15 @@ type resourceConfig struct {
 
 // trigger specifies when a chartGroup should be installed
 type trigger struct {
-	Group map[string]string `json:"group,omitempty" yaml:"group,omitempty"`
+	Group string `json:"group,omitempty" yaml:"group,omitempty"`
 
-	Version map[string]string `json:"version,omitempty" yaml:"version,omitempty"`
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 
-	Resource map[string]string `json:"resource,omitempty" yaml:"resource,omitempty"`
+	Resource string `json:"resource,omitempty" yaml:"resource,omitempty"`
 
-	Name map[string]string `json:"name,omitempty" yaml:"name,omitempty"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 
-	Namespace map[string]string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
+	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 }
 
 // chart points to a particular Helm chart
