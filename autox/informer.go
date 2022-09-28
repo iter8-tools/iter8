@@ -106,8 +106,8 @@ func doChartAction(prunedLabels map[string]string, chartAction chartAction, name
 
 	// iterate through the charts in this chart group
 	var err error
-	if cg, ok := iter8ChartGroupConfig[chartGroupName]; ok {
-		for chartID, chart := range cg.Charts {
+	if cg, ok := iter8ChartGroupConfig.Specs[chartGroupName]; ok {
+		for chartID, chart := range cg.ReleaseSpecs {
 			// get release name
 			releaseName := getReleaseName(chartGroupName, chartID, prunedLabels)
 			// perform action for this release
