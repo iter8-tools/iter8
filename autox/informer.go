@@ -10,6 +10,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 )
@@ -216,10 +217,30 @@ func newIter8Watcher(k8sClient *KubeClient) *iter8Watcher {
 	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
+
+	// aggregate all triggers (namespaces and GVR) from the chartGroupConfig
+	triggers := map[string][]schema.GroupVersionResource{}
+	for _, chartGroup := range iter8ChartGroupConfig.Specs {
+
+		namespace := chartGroup.Trigger.Namespace
+		gvr := schema.GroupVersionResource{
+			Group:    chartGroup.Trigger.Group,
+			Version:  chartGroup.Trigger.Version,
+			Resource: chartGroup.Trigger.Resource,
+		}
+
+		// add namespace and GVR to triggers
+		if _, ok := triggers[namespace]; ok {
+			triggers[namespace] = []schema.GroupVersionResource{gvr}
+		} else {
+			triggers[namespace] = append(triggers[namespace], gvr)
+		}
+	}
+
 	// for each namespace, resource type configure Informer
-	for _, ns := range iter8ResourceConfig.Namespaces {
+	for ns, gvrs := range triggers {
 		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
-		for _, gvr := range iter8ResourceConfig.Resources {
+		for _, gvr := range gvrs {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 				AddFunc:    addObject,
