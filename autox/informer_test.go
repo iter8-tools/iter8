@@ -21,7 +21,6 @@ import (
 // after the watcher is created using newIter8Watcher()
 func TestNewIter8Watcher(t *testing.T) {
 	// autoX needs the resource and chart group config
-	iter8ResourceConfig = readResourceConfig("../testdata/autox_inputs/resource_config.example.yaml")
 	iter8ChartGroupConfig = readChartGroupConfig("../testdata/autox_inputs/group_config.example.yaml")
 
 	// autoX handler will call on installHelmRelease and deleteHelmRelease
@@ -49,11 +48,6 @@ func TestNewIter8Watcher(t *testing.T) {
 
 	// define and start watcher
 	k8sClient := newFakeKubeClient(cli.New())
-
-	iter8ResourceConfig = resourceConfig{
-		Namespaces: []string{namespace},
-		Resources:  []schema.GroupVersionResource{gvr},
-	}
 
 	w := newIter8Watcher(k8sClient)
 	assert.NotNil(t, w)
