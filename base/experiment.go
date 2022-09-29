@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/montanaflynn/stats"
 	"helm.sh/helm/v3/pkg/time"
 )
@@ -76,6 +78,9 @@ type Insights struct {
 	// NumVersions is the number of app versions detected by Iter8
 	NumVersions int `json:"numVersions" yaml:"numVersions"`
 
+	// VersionNames is list of version identifiers if known
+	VersionNames []VersionInfo `json:"versionNames" yaml:"versionNames"`
+
 	// MetricsInfo identifies the metrics involved in this experiment
 	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
 
@@ -92,6 +97,11 @@ type Insights struct {
 	// the inner slice contains the list of all observed histogram buckets for a given version and given metric; value [i]["foo/bar"][k] is the [k]th observed bucket for version [i] for the hist metric `bar` under backend `foo`.
 	HistMetricValues []map[string][]HistBucket `json:"histMetricValues,omitempty" yaml:"histMetricValues,omitempty"`
 
+	// SummaryMetricValues:
+	// the outer slice must be the same length as the number of tracks
+	// the map key must match the name of the summary metric in MetricsInfo
+	SummaryMetricValues []map[string]summarymetrics.SummaryMetric
+
 	// SLOs involved in this experiment
 	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 
@@ -107,6 +117,15 @@ type MetricMeta struct {
 	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
 	// Type of the metric. Example: counter
 	Type MetricType `json:"type" yaml:"type"`
+}
+
+// VersionInfo is basic information about a version
+type VersionInfo struct {
+	// Version name
+	Version string `json:"version" yaml:"version"`
+
+	// Track identifier assigned to version
+	Track string `json:"track" yaml:"track"`
 }
 
 // SLO is a service level objective
@@ -224,6 +243,14 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 					return e
 				}
 				tsk = cgt
+			case CollectABNMetrics:
+				cgt := &collectABNMetricsTask{}
+				if err := json.Unmarshal(tBytes, cgt); err != nil {
+					e := errors.New("json unmarshal error")
+					log.Logger.WithStackTrace(err.Error()).Error(e)
+					return e
+				}
+				tsk = cgt
 			case AssessTaskName:
 				at := &assessTask{}
 				if err := json.Unmarshal(tBytes, at); err != nil {
@@ -257,20 +284,13 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 func metricTypeMatch(t MetricType, val interface{}) bool {
 	switch v := val.(type) {
 	case float64:
-		if t == CounterMetricType || t == GaugeMetricType {
-			return true
-		}
-		return false
+		return t == CounterMetricType || t == GaugeMetricType
 	case []float64:
-		if t == SampleMetricType {
-			return true
-		}
-		return false
+		return t == SampleMetricType
 	case []HistBucket:
-		if t == HistogramMetricType {
-			return true
-		}
-		return false
+		return t == HistogramMetricType
+	case *summarymetrics.SummaryMetric:
+		return t == SummaryMetricType
 	default:
 		log.Logger.Error("unsupported type for metric value: ", v)
 		return false
@@ -290,6 +310,11 @@ func (in *Insights) updateMetricValueVector(m string, i int, val []float64) {
 // updateMetricValueHist updates a histogram metric value for a given version
 func (in *Insights) updateMetricValueHist(m string, i int, val []HistBucket) {
 	in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], val...)
+}
+
+// updateSummaryMetric updates a summary metric value for a given version
+func (in *Insights) updateSummaryMetric(m string, i int, val *summarymetrics.SummaryMetric) {
+	in.SummaryMetricValues[i][m] = *val
 }
 
 // registerMetric registers a new metric by adding its meta data
@@ -336,6 +361,8 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 		in.updateMetricValueVector(nm, i, val.([]float64))
 	case HistogramMetricType:
 		in.updateMetricValueHist(nm, i, val.([]HistBucket))
+	case SummaryMetricType:
+		in.updateSummaryMetric(nm, i, val.(*summarymetrics.SummaryMetric))
 	default:
 		err := fmt.Errorf("unknown metric type %v", mm.Type)
 		log.Logger.Error(err)
@@ -358,6 +385,28 @@ func (in *Insights) setSLOs(slos *SLOLimits) error {
 	// LHS will be nil
 	in.SLOs = slos
 	return nil
+}
+
+// TrackVersionStr creates a string of version name/track for display purposes
+func (in *Insights) TrackVersionStr(i int) string {
+	// if VersionNames not defined or all fields empty return default "version i"
+	if in.VersionNames == nil ||
+		len(in.VersionNames) == 0 ||
+		len(in.VersionNames[i].Version)+len(in.VersionNames[i].Track) == 0 {
+		return fmt.Sprintf("version %d", i)
+	}
+
+	if len(in.VersionNames[i].Track) == 0 {
+		// version not ""
+		return in.VersionNames[i].Version
+	}
+
+	if len(in.VersionNames[i].Version) == 0 {
+		// track not ""
+		return in.VersionNames[i].Track
+	}
+
+	return in.VersionNames[i].Track + " (" + in.VersionNames[i].Version + ")"
 }
 
 // initializeSLOsSatisfied initializes the SLOs satisfied field
@@ -415,13 +464,17 @@ func (r *ExperimentResult) initInsightsWithNumVersions(n int) error {
 
 // initMetrics initializes the data structes inside insights that will hold metrics
 func (in *Insights) initMetrics() error {
-	if in.NonHistMetricValues != nil || in.HistMetricValues != nil {
-		if len(in.NonHistMetricValues) != in.NumVersions || len(in.HistMetricValues) != in.NumVersions {
+	if in.NonHistMetricValues != nil ||
+		in.HistMetricValues != nil ||
+		in.SummaryMetricValues != nil {
+		if len(in.NonHistMetricValues) != in.NumVersions ||
+			len(in.HistMetricValues) != in.NumVersions ||
+			len(in.SummaryMetricValues) != in.NumVersions {
 			err := fmt.Errorf("inconsistent number for app versions in non hist metric values (%v), hist metric values (%v), num versions (%v)", len(in.NonHistMetricValues), len(in.HistMetricValues), in.NumVersions)
 			log.Logger.Error(err)
 			return err
 		}
-		if len(in.NonHistMetricValues[0])+len(in.HistMetricValues[0]) != len(in.MetricsInfo) {
+		if len(in.NonHistMetricValues[0])+len(in.HistMetricValues[0])+len(in.SummaryMetricValues[0]) != len(in.MetricsInfo) {
 			err := fmt.Errorf("inconsistent number for metrics in non hist metric values (%v), hist metric values (%v), metrics info (%v)", len(in.NonHistMetricValues[0]), len(in.HistMetricValues[0]), len(in.MetricsInfo))
 			log.Logger.Error(err)
 			return err
@@ -435,9 +488,12 @@ func (in *Insights) initMetrics() error {
 	in.NonHistMetricValues = make([]map[string][]float64, in.NumVersions)
 	// initialize hist metric values for each version
 	in.HistMetricValues = make([]map[string][]HistBucket, in.NumVersions)
+	// initialize summary metric values for each version
+	in.SummaryMetricValues = make([]map[string]summarymetrics.SummaryMetric, in.NumVersions)
 	for i := 0; i < in.NumVersions; i++ {
 		in.NonHistMetricValues[i] = make(map[string][]float64)
 		in.HistMetricValues[i] = make(map[string][]HistBucket)
+		in.SummaryMetricValues[i] = make(map[string]summarymetrics.SummaryMetric)
 	}
 	return nil
 }
@@ -475,6 +531,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 	vals := in.NonHistMetricValues[i][baseMetric]
 	if len(vals) == 0 {
 		log.Logger.Infof("metric %v for version %v has no sample", baseMetric, i)
+		return nil
 	}
 	if len(vals) == 1 {
 		log.Logger.Warnf("metric %v for version %v has sample of size 1", baseMetric, i)
@@ -503,7 +560,7 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
 		return nil
 	case MaxAggregator:
-		agg, err := stats.Mean(vals)
+		agg, err := stats.Max(vals)
 		if err == nil {
 			return float64Pointer(agg)
 		}
@@ -539,17 +596,56 @@ func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *fl
 	return nil
 }
 
+// getSummaryAggregation aggregates the given base metric for the given version (i) with the given aggregation (a)
+func (in *Insights) getSummaryAggregation(i int, baseMetric string, a string) *float64 {
+	at := AggregationType(a)
+	m, ok := in.SummaryMetricValues[i][baseMetric]
+	if !ok { // metric not in list
+		log.Logger.Errorf("invalid metric %s", baseMetric)
+		return nil
+	}
+
+	switch at {
+	case CountAggregator:
+		return float64Pointer(float64(m.Count()))
+	case MeanAggregator:
+		return float64Pointer(m.Sum() / float64(m.Count()))
+	case StdDevAggregator:
+		// sample variance (bessel's correction)
+		// ss / (count -1) - mean^2 * count / (count -1)
+		mean := m.Sum() / float64(m.Count())
+		nMinus1 := float64(m.Count() - 1)
+		return float64Pointer(math.Sqrt((m.SumSquares() / nMinus1) - (mean*mean*float64(m.Count()))/nMinus1))
+	case MinAggregator:
+		return float64Pointer(m.Min())
+	case MaxAggregator:
+		return float64Pointer(m.Max())
+	default:
+		// unknown, do nothing
+	}
+	log.Logger.Errorf("invalid aggregation %v", a)
+	return nil
+}
+
 // aggregateMetric returns the aggregated metric value for a given version and metric
 func (in *Insights) aggregateMetric(i int, m string) *float64 {
 	s := strings.Split(m, "/")
+	if len(s) != 3 {
+		// should not have been called
+		log.Logger.Errorf("metric name %v not valid for aggregation", m)
+		return nil
+	}
 	baseMetric := s[0] + "/" + s[1]
 	if m, ok := in.MetricsInfo[baseMetric]; ok {
 		log.Logger.Tracef("found metric %v used for aggregation", baseMetric)
 		if m.Type == SampleMetricType {
 			log.Logger.Tracef("metric %v used for aggregation is a sample metric", baseMetric)
 			return in.getSampleAggregation(i, baseMetric, s[2])
+		} else if m.Type == SummaryMetricType {
+			log.Logger.Tracef("metric %v used for aggregation is a summary metric", baseMetric)
+			return in.getSummaryAggregation(i, baseMetric, s[2])
 		}
-		log.Logger.Errorf("metric %v used for aggregation is not a sample metric", baseMetric)
+		log.Logger.Errorf("metric %v used for aggregation is not a sample or summary metric", baseMetric)
 		return nil
 	}
 	log.Logger.Warnf("could not find metric %v used for aggregation", baseMetric)

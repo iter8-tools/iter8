@@ -1,0 +1,21 @@
+name: default/backend
+tracks:
+  candidate: v2
+  default: v1
+versions:
+  v1:
+    metrics:
+      sample_metric:
+      - 223
+      - 10309
+      - 0
+      - 100
+      - 652049
+  v2:
+    metrics:
+      sample_metric:
+      - 252
+      - 12228
+      - 0
+      - 100
+      - 782208

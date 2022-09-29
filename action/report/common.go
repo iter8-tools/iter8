@@ -19,10 +19,20 @@ type Reporter struct {
 // and also for scalar metrics referenced in SLOs.
 func (r *Reporter) SortedScalarAndSLOMetrics() []string {
 	keys := []string{}
-	// add scalar metrics referenced in MetricsInfo
+	// add scalar and summary metrics referenced in MetricsInfo
 	for k, mm := range r.Result.Insights.MetricsInfo {
 		if mm.Type == base.CounterMetricType || mm.Type == base.GaugeMetricType {
 			keys = append(keys, k)
+		}
+		if mm.Type == base.SummaryMetricType {
+			for _, agg := range []base.AggregationType{
+				base.CountAggregator,
+				base.MeanAggregator,
+				base.StdDevAggregator,
+				base.MinAggregator,
+				base.MaxAggregator} {
+				keys = append(keys, k+"/"+string(agg))
+			}
 		}
 	}
 	// also add metrics referenced in SLOs

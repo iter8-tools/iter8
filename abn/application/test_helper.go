@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/stretchr/testify/assert"
 	"sigs.k8s.io/yaml"
 )
@@ -47,7 +48,7 @@ func byteArrayToApplication(name string, data []byte) (*Application, error) {
 	}
 	for _, v := range a.Versions {
 		if v.Metrics == nil {
-			v.Metrics = map[string]*SummaryMetric{}
+			v.Metrics = map[string]*summarymetrics.SummaryMetric{}
 		}
 	}
 
@@ -90,6 +91,7 @@ func assertVersion(t *testing.T, v *Version, assertion versionAssertion) bool {
 	r := true
 
 	r = r && assert.NotNil(t, v)
+	r = r && assert.Contains(t, v.String(), "- metrics:")
 
 	r = r && assert.Len(t, v.Metrics, len(assertion.metrics))
 	r = r && assert.NotNil(t, v.Metrics)

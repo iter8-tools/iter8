@@ -6,10 +6,7 @@ package watcher
 //  - label 'iter8.tools/abn' set to true indicating the resource should be inspected further
 //  - label 'app.kubernetes.io/name' identifying the name of the application to which the resource belongs
 //  - label 'app.kubernetes.io/version' identifying the name of the version  to which the resource belongs
-//
-// It may also include the following metadata:
-//  - annotation 'iter8.tools/ready' indicating the version is ready to receive traffic (default: false)
-//  - annotation 'iter8.tools/track' defining the track label that should be associated with the version (no track when not present)
+//  - label 'iter8.tools/track' defining the track label that should be associated with the version (no track when not present)
 
 // A track is a user assigned identifier. When the Iter8 A/N(/n) service is used to lookup versions,
 // the track identifier is returned (instead of a version name). The caller can use the the track

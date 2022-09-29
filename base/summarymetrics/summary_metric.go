@@ -1,4 +1,4 @@
-package application
+package summarymetrics
 
 // summary_metric.go - defines a summary metric object. For space efficiency it is an array of 6 float64.
 

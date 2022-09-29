@@ -2,6 +2,8 @@ package core
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"path/filepath"
@@ -12,6 +14,7 @@ import (
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/abn/k8sclient"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -166,8 +169,12 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	assert.NoError(t, err)
 	abnapp.Applications.Put(a)
 
+	// 49152-65535 are recommended ports; we use a random one for testing
+	/* #nosec */
+	port := rand.Intn(65535-49152) + 49152
+
 	// start server
-	lis, err := net.Listen("tcp", "127.0.0.1:12345")
+	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	assert.NoError(t, err)
 
 	serverOptions := []grpc.ServerOption{}
@@ -221,14 +228,14 @@ func byteArrayToApplication(name string, data []byte) (*abnapp.Application, erro
 	}
 	for _, v := range a.Versions {
 		if v.Metrics == nil {
-			v.Metrics = map[string]*abnapp.SummaryMetric{}
+			v.Metrics = map[string]*summarymetrics.SummaryMetric{}
 		}
 	}
 
 	return a, nil
 }
 
-func getMetric(a *abnapp.Application, track, metric string) *abnapp.SummaryMetric {
+func getMetric(a *abnapp.Application, track, metric string) *summarymetrics.SummaryMetric {
 	version, ok := a.Tracks[track]
 	if !ok {
 		return nil

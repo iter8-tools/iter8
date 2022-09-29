@@ -14,7 +14,7 @@ import (
 )
 
 // Client is a global variable. Before use, it must be assigned and initialized
-var Client KubeClient
+var Client = *NewKubeClient(cli.New())
 
 // KubeClient embeds Kube configuration, and
 // enables interaction with a Kubernetes cluster through Kube APIs
