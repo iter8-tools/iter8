@@ -51,8 +51,8 @@ func (wc *defaultABNClient) callGetApplicationJSON(appName string) (string, erro
 }
 
 const (
-	// CollectABNMetrics is the name of the task to read A/B(/n) metric values
-	CollectABNMetrics = "abnmetrics"
+	// CollectABNMetricsTaskName is the name of the task to read A/B(/n) metric values
+	CollectABNMetricsTaskName = "abnmetrics"
 	// abnMetricProvider is prefix for abn metrics
 	abnMetricProvider = "abn"
 )
