@@ -24,7 +24,7 @@ func TestABNMetricsTask(t *testing.T) {
 
 	task := &collectABNMetricsTask{
 		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectABNMetrics),
+			Task: StringPointer(CollectABNMetricsTaskName),
 		},
 		With: ABNMetricsInputs{
 			Application: "default/application",
