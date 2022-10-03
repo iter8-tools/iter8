@@ -43,5 +43,15 @@
     condition: Ready
 {{- include "task.ready.tn" . }}
 {{- end }}
+{{- if .Values.ready.chaosengine }}
+# task: determine if chaos engine resource exists
+- task: ready
+  with:
+    name: {{ .Values.ready.chaosengine | quote }}
+    group: litmuschaos.io
+    version: v1alpha1
+    resource: chaosengines
+{{- include "task.ready.tn" . }}
+{{- end }}
 {{- end }}
 {{- end }}
