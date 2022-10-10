@@ -263,12 +263,18 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			var buf bytes.Buffer
 			err = template.Execute(&buf, values)
 			if err != nil {
+				log.Logger.Error("cannot execute metrics spec with values", err)
+				log.Logger.Error("metrics spec:", buf.String())
+				log.Logger.Error("values:", values)
 				return err
 			}
+
 			bytes, _ := io.ReadAll(&buf)
 			var provider ProviderSpec
 			err = yaml.Unmarshal(bytes, &provider)
 			if err != nil {
+				log.Logger.Error("cannot unmarshal provider spec", err)
+				log.Logger.Error("provider spec:", string(bytes))
 				return err
 			}
 			log.Logger.Debugf("provider spec %v for version %v\n", providerName, i)
