@@ -19,9 +19,8 @@ func TestLog(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.ChartsParentDir = base.CompletePath("../", "")
-	lOpts.ChartName = "iter8"
-	lOpts.NoDownload = true
+	lOpts.ChartName = base.CompletePath("../", "iter8")
+	lOpts.LocalChart = true
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
 
 	err = lOpts.KubeRun()

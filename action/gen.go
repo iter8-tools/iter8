@@ -16,8 +16,6 @@ import (
 )
 
 const (
-	// ChartsFolderName is the folder where Iter8 looks for Iter8 experiment charts
-	ChartsFolderName = "charts"
 	// DefaultChartName is the default name of the Iter8 chart
 	DefaultChartName = "iter8"
 )
@@ -45,16 +43,11 @@ func NewGenOpts() *GenOpts {
 
 // chartDir returns the path to chart directory
 func (gen *GenOpts) chartDir() string {
-	return path.Join(gen.ChartsParentDir, ChartsFolderName, gen.ChartName)
+	return path.Join(gen.ChartsParentDir, gen.ChartName)
 }
 
 // LocalRun generates a local experiment.yaml file
 func (gen *GenOpts) LocalRun() error {
-	// update dependencies
-	if err := driver.UpdateChartDependencies(gen.chartDir(), nil); err != nil {
-		return err
-	}
-
 	// read in the experiment chart
 	c, err := loader.Load(gen.chartDir())
 	if err != nil {

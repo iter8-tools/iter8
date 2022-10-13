@@ -300,14 +300,32 @@ func writeManifest(rel *release.Release) error {
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/upgrade.go#L69
 // Upgrade a Kubernetes experiment to the next release
-func (kd *KubeDriver) upgrade(chartDir string, valueOpts values.Options, group string, dry bool) error {
+func (kd *KubeDriver) upgrade(chartPathOptions action.ChartPathOptions, chartName string, valueOpts values.Options, group string, dry bool) error {
 	client := action.NewUpgrade(kd.Configuration)
 	client.Namespace = kd.Namespace()
 	client.DryRun = dry
 
-	ch, vals, err := kd.getChartAndVals(chartDir, valueOpts)
+	client.ChartPathOptions.CaFile = chartPathOptions.CaFile
+	client.ChartPathOptions.CertFile = chartPathOptions.CertFile
+	client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile
+	client.ChartPathOptions.InsecureSkipTLSverify = chartPathOptions.InsecureSkipTLSverify
+	client.ChartPathOptions.Keyring = chartPathOptions.Keyring
+	client.ChartPathOptions.Password = chartPathOptions.Password
+	client.ChartPathOptions.PassCredentialsAll = chartPathOptions.PassCredentialsAll
+	client.ChartPathOptions.RepoURL = chartPathOptions.RepoURL
+	client.ChartPathOptions.Username = chartPathOptions.Username
+	client.ChartPathOptions.Verify = chartPathOptions.Verify
+	client.ChartPathOptions.Version = chartPathOptions.Version
+
+	cp, err := client.ChartPathOptions.LocateChart(chartName, kd.EnvSettings)
 	if err != nil {
-		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
+		log.Logger.Error(err)
+		return err
+	}
+
+	chartRequested, vals, err := kd.getChartAndVals(cp, valueOpts)
+	if err != nil {
+		e := fmt.Errorf("unable to get chart and value for %v", cp)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
@@ -323,46 +341,53 @@ func (kd *KubeDriver) upgrade(chartDir string, valueOpts values.Options, group s
 	signal.Notify(cSignal, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-cSignal
-		fmt.Printf("experiment for group %s has been cancelled.\n", group)
+		log.Logger.Warnf("experiment for group %s has been cancelled.\n", group)
 		cancel()
 	}()
 
-	rel, err := client.RunWithContext(ctx, group, ch, vals)
+	rel, err := client.RunWithContext(ctx, group, chartRequested, vals)
 	if err != nil {
 		e := fmt.Errorf("experiment launch failed")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
 
-	// upgrading revision info
-	kd.revision = rel.Version
-
-	// write manifest if dry
-	if dry {
-		err := writeManifest(rel)
-		if err != nil {
-			return err
-		}
-		log.Logger.Info("dry run complete")
-	} else {
-		log.Logger.Info("experiment launched. Happy Iter8ing!")
-	}
-
-	return nil
+	return kd.updateRevision(rel, dry)
 }
 
 // install a Kubernetes experiment
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
-func (kd *KubeDriver) install(chartDir string, valueOpts values.Options, group string, dry bool) error {
+func (kd *KubeDriver) install(chartPathOptions action.ChartPathOptions, chartName string, valueOpts values.Options, group string, dry bool) error {
+
+	// buf := new(bytes.Buffer)
 	client := action.NewInstall(kd.Configuration)
 	client.Namespace = kd.Namespace()
+	client.RepoURL = chartPathOptions.RepoURL
 	client.DryRun = dry
 	client.ReleaseName = group
 
-	ch, vals, err := kd.getChartAndVals(chartDir, valueOpts)
+	client.ChartPathOptions.CaFile = chartPathOptions.CaFile
+	client.ChartPathOptions.CertFile = chartPathOptions.CertFile
+	client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile
+	client.ChartPathOptions.InsecureSkipTLSverify = chartPathOptions.InsecureSkipTLSverify
+	client.ChartPathOptions.Keyring = chartPathOptions.Keyring
+	client.ChartPathOptions.Password = chartPathOptions.Password
+	client.ChartPathOptions.PassCredentialsAll = chartPathOptions.PassCredentialsAll
+	client.ChartPathOptions.RepoURL = chartPathOptions.RepoURL
+	client.ChartPathOptions.Username = chartPathOptions.Username
+	client.ChartPathOptions.Verify = chartPathOptions.Verify
+	client.ChartPathOptions.Version = chartPathOptions.Version
+
+	cp, err := client.ChartPathOptions.LocateChart(chartName, kd.EnvSettings)
 	if err != nil {
-		e := fmt.Errorf("unable to get chart and vals for %v", chartDir)
+		log.Logger.Error(err)
+		return err
+	}
+
+	chartRequested, vals, err := kd.getChartAndVals(cp, valueOpts)
+	if err != nil {
+		e := fmt.Errorf("unable to get chart and value for %v", cp)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
@@ -378,17 +403,21 @@ func (kd *KubeDriver) install(chartDir string, valueOpts values.Options, group s
 	signal.Notify(cSignal, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-cSignal
-		fmt.Printf("experiment for group %s has been cancelled.\n", group)
+		log.Logger.Warnf("experiment for group %s has been cancelled.\n", group)
 		cancel()
 	}()
 
-	rel, err := client.RunWithContext(ctx, ch, vals)
+	rel, err := client.RunWithContext(ctx, chartRequested, vals)
 	if err != nil {
 		e := fmt.Errorf("experiment launch failed")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
 
+	return kd.updateRevision(rel, dry)
+}
+
+func (kd *KubeDriver) updateRevision(rel *release.Release, dry bool) error {
 	// upgrading revision info
 	kd.revision = rel.Version
 
@@ -402,16 +431,15 @@ func (kd *KubeDriver) install(chartDir string, valueOpts values.Options, group s
 	} else {
 		log.Logger.Info("experiment launched. Happy Iter8ing!")
 	}
-
 	return nil
 }
 
 // Launch a Kubernetes experiment
-func (kd *KubeDriver) Launch(chartDir string, valueOpts values.Options, group string, dry bool) error {
+func (kd *KubeDriver) Launch(chartPathOptions action.ChartPathOptions, chartName string, valueOpts values.Options, group string, dry bool) error {
 	if kd.revision <= 0 {
-		return kd.install(chartDir, valueOpts, group, dry)
+		return kd.install(chartPathOptions, chartName, valueOpts, group, dry)
 	}
-	return kd.upgrade(chartDir, valueOpts, group, dry)
+	return kd.upgrade(chartPathOptions, chartName, valueOpts, group, dry)
 }
 
 // Delete a Kubernetes experiment group
@@ -431,11 +459,6 @@ func (kd *KubeDriver) Delete() error {
 // Credit: the logic for this function is sourced from Helm
 // https://github.com/helm/helm/blob/8ab18f7567cedffdfa5ba4d7f6abfb58efc313f8/cmd/helm/install.go#L177
 func (kd *KubeDriver) getChartAndVals(chartDir string, valueOpts values.Options) (*chart.Chart, map[string]interface{}, error) {
-	// update dependencies for the chart
-	if err := UpdateChartDependencies(chartDir, kd.EnvSettings); err != nil {
-		return nil, nil, err
-	}
-
 	// form chart values
 	p := getter.All(kd.EnvSettings)
 	vals, err := valueOpts.MergeValues(p)

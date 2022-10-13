@@ -26,6 +26,7 @@ func newRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		Short:        "Run an experiment",
 		Long:         runDesc,
 		SilenceUsage: true,
+		Hidden:       true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.LocalRun()
 		},

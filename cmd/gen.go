@@ -26,6 +26,7 @@ func newGenCmd() *cobra.Command {
 		Short:        "Generate experiment.yaml file by combining an experiment chart with values",
 		Long:         genDesc,
 		SilenceUsage: true,
+		Hidden:       true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.LocalRun()
 		},

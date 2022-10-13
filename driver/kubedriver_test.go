@@ -7,6 +7,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
+	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 	batchv1 "k8s.io/api/batch/v1"
@@ -24,7 +25,7 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	// install
-	err = kd.install(base.CompletePath("../", "charts/iter8"), values.Options{
+	err = kd.install(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
 		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
@@ -39,7 +40,7 @@ func TestKOps(t *testing.T) {
 	assert.NoError(t, err)
 
 	// upgrade
-	err = kd.upgrade(base.CompletePath("../", "charts/iter8"), values.Options{
+	err = kd.upgrade(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
 		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
@@ -133,7 +134,7 @@ func TestDryInstall(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	kd := NewFakeKubeDriver(cli.New())
 
-	err := kd.Launch(base.CompletePath("../", "charts/iter8"), values.Options{
+	err := kd.Launch(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
 		ValueFiles:   []string{},
 		StringValues: []string{},
 		Values:       []string{"tasks={http}", "http.url=https://localhost:12345"},
