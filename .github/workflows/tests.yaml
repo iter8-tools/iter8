@@ -50,7 +50,8 @@ jobs:
         done;        
     - name: launch experiment
       run: |
-        iter8 launch --noDownload \
+        iter8 launch --localChart \
+        --chartName charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://$HOST_IP/post" \
         --set http.payloadURL="https://httpbin.org/stream/1"
@@ -59,7 +60,8 @@ jobs:
         iter8 assert -c completed -c nofailure
     - name: launch experiment
       run: |
-        iter8 launch --noDownload \
+        iter8 launch --localChart \
+        --chartName charts/iter8 \
         --set "tasks={http,assess}" \
         --set http.url="http://$HOST_IP/post" \
         --set http.payloadURL="https://httpbin.org/stream/1" \
@@ -92,7 +94,8 @@ jobs:
         kubectl expose deploy httpbin --port=80
     - name: wait for the app to come up
       run: |
-        iter8 launch --noDownload \
+        iter8 launch --localChart \
+        --chartName charts/iter8 \
         --set "tasks={ready}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
@@ -102,7 +105,8 @@ jobs:
         kubectl port-forward service/httpbin 8080:80 &
     - name: launch experiment
       run: |
-        iter8 launch --noDownload \
+        iter8 launch --localChart \
+        --chartName charts/iter8 \
         --set "tasks={ready,http,assess}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
@@ -135,7 +139,8 @@ jobs:
       run: |
         set -e
         export LOG_LEVEL=trace
-        iter8 launch --noDownload \
+        iter8 launch --localChart \
+          --chartName charts/iter8 \
           --set "tasks={grpc,assess}" \
           --set grpc.host="127.0.0.1:50051" \
           --set grpc.call="helloworld.Greeter.SayHello" \
@@ -151,7 +156,8 @@ jobs:
       run: |
         set -e
         export LOG_LEVEL=trace
-        iter8 launch --noDownload \
+        iter8 launch --localChart \
+          --chartName charts/iter8 \
           --set "tasks={grpc,assess}" \
           --set grpc.host="127.0.0.1:50051" \
           --set grpc.call="helloworld.Greeter.SayHello" \
@@ -192,7 +198,8 @@ jobs:
         wait: 300s
     - name: load-test-http in Kubernetes
       run: |
-        iter8 k launch --noDownload \
+        iter8 k launch --localChart \
+        --chartName charts/iter8 \
         --set "tasks={http,assess}" \
         --set http.url="http://$HOST_IP/get" \
         --set http.duration="3s" \
