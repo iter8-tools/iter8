@@ -25,13 +25,13 @@ func TestNewIter8Watcher(t *testing.T) {
 
 	// autoX handler will call on installHelmRelease and deleteHelmRelease
 	installHelmReleaseInvocations := 0
-	installHelmRelease = func(releaseName string, chart chart, namespace string) error {
+	installHelmRelease = func(releaseName string, chartGroupName string, chart chart, namespace string) error {
 		installHelmReleaseInvocations++
 		return nil
 	}
 
 	deleteHelmReleaseInvocations := 0
-	deleteHelmRelease = func(releaseName string, namespace string) error {
+	deleteHelmRelease = func(releaseName string, chartGroupName string, namespace string) error {
 		deleteHelmReleaseInvocations++
 		return nil
 	}
