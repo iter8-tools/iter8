@@ -3,16 +3,24 @@ package autox
 // informer.go - informer(s) to watch desired resources/namespaces
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"hash/maphash"
+	"os"
 	"reflect"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
+
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -27,7 +35,43 @@ type chartAction int64
 const (
 	releaseAction chartAction = 0
 	deleteAction  chartAction = 1
+
+	applicationTemplateFilePath string = "application.tpl"
 )
+
+type applicationValues struct {
+	name string
+
+	namespace string
+
+	// owner struct {
+	// 	apiVersion string
+	// 	name string
+	// 	uid string
+	// }
+
+	// chart struct {
+	// 	name string
+
+	// 	values map[string]interface{}
+
+	// 	chartVersion string
+	// }
+
+	ownerApiVersion string
+
+	ownerName string
+
+	ownerUID string
+
+	chartURL string
+
+	chartName string
+
+	chartValues map[string]interface{}
+
+	chartVersion string
+}
 
 // the name of a release will depend on:
 //
@@ -66,17 +110,143 @@ func installHelmReleases(prunedLabels map[string]string, namespace string) error
 }
 
 // installHelmRelease for a given chart within a chart group
-var installHelmRelease = func(releaseName string, chart chart, namespace string) error {
-	// download chart
+var installHelmRelease = func(releaseName string, chartGroupName string, chart chart, namespace string) error {
+	secretsClient := k8sClient.clientset.CoreV1().Secrets(namespace)
 
-	// upgrade chart
+	// // TODO: what to put for ctx?
+	// // get secret
+	// secret, err := secretsClient.Get(context.TODO(), "hello", metaV1.GetOptions{})
+	// if err != nil {
+	// 	log.Logger.Error("could not read from secret")
+	// 	return err
+	// }
 
-	// get manifests (using the Helm client)
+	// TODO: what to put for ctx?
+	// get secret, based on autoX label
+	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, chartGroupName)
+	secretList, err := secretsClient.List(context.TODO(), metaV1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		log.Logger.Error("could not list secrets")
+		return err
+	}
 
-	// install manifests
+	// ensure that only one secret was found
+	if secretsLen := len(secretList.Items); secretsLen == 0 {
+		log.Logger.Error("expected secret with label selector:", labelSelector, "but none were found")
+		return err
+	} else if secretsLen > 1 {
+		log.Logger.Error("expected secret with label selector:", labelSelector, "but more than one were found")
+		return err
+	}
+	secret := secretList.Items[0]
 
-	// if the install fails (for e.g., due to pre-existing helm resources), we simply log this info
-	// note that installs can fail, when autoX restarts after a crash
+	values := applicationValues{
+		name:      releaseName,
+		namespace: namespace,
+
+		ownerApiVersion: secret.APIVersion,
+		ownerName:       secret.Name,
+		ownerUID:        string(secret.GetUID()),
+
+		chartURL:     chart.RepoURL,
+		chartName:    chart.Name,
+		chartValues:  chart.Values,
+		chartVersion: chart.Version,
+	}
+
+	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
+
+	// get application template
+	dat, err := os.ReadFile(applicationTemplateFilePath)
+	if err != nil {
+		log.Logger.Error("could not read application template")
+		return err
+	}
+
+	tpl, err := base.CreateTemplate(string(dat))
+	if err != nil {
+		log.Logger.Error("could not create application template")
+		return err
+	}
+
+	var buf bytes.Buffer
+	err = tpl.Execute(&buf, values)
+	if err != nil {
+		log.Logger.Error("could not execute application template")
+		return err
+	}
+
+	log.Logger.Debug("application manifest:", buf.String())
+
+	// deployment := &unstructured.Unstructured{
+	// 	Object: map[string]interface{}{
+	// 		"apiVersion": "apps/v1",
+	// 		"kind":       "Deployment",
+	// 		"metadata": map[string]interface{}{
+	// 			"name": "demo-deployment",
+	// 		},
+	// 		"spec": map[string]interface{}{
+	// 			"replicas": 2,
+	// 			"selector": map[string]interface{}{
+	// 				"matchLabels": map[string]interface{}{
+	// 					"app": "demo",
+	// 				},
+	// 			},
+	// 			"template": map[string]interface{}{
+	// 				"metadata": map[string]interface{}{
+	// 					"labels": map[string]interface{}{
+	// 						"app": "demo",
+	// 					},
+	// 				},
+
+	// 				"spec": map[string]interface{}{
+	// 					"containers": []map[string]interface{}{
+	// 						{
+	// 							"name":  "web",
+	// 							"image": "nginx:1.12",
+	// 							"ports": []map[string]interface{}{
+	// 								{
+	// 									"name":          "http",
+	// 									"protocol":      "TCP",
+	// 									"containerPort": 80,
+	// 								},
+	// 							},
+	// 						},
+	// 					},
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// }
+
+	// serialize application manifest into unstructured object
+	obj, _, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(buf.Bytes(), nil, nil)
+	if err != nil {
+		log.Logger.Error("could not serialize application manifest")
+		return err
+	}
+	unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	if err != nil {
+		log.Logger.Error("could not convert application manifest into unstructured object")
+		return err
+	}
+	unstructuredObj := &unstructured.Unstructured{Object: unstructuredMap}
+
+	// TODO: what to put for ctx?
+	// create application object
+	_, err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Create(context.TODO(), unstructuredObj, metaV1.CreateOptions{})
+	if err != nil {
+		log.Logger.Error("could not create application:", releaseName)
+		return err
+	}
+
+	// err = k8sClient.dynamic().Resource(deploymentRes).Namespace(namespace).Delete(context.TODO(), releaseName, metaV1.DeleteOptions{})
+	// if err != nil {
+	// 	log.Logger.Error("could not delete application:", releaseName)
+	// 	return err
+	// }
 
 	log.Logger.Debug("Release chart:", releaseName)
 	return nil
@@ -88,12 +258,14 @@ func deleteHelmReleases(prunedLabels map[string]string, namespace string) error 
 }
 
 // deleteHelmRelease with a given release name
-var deleteHelmRelease = func(releaseName string, namespace string) error {
-	// TODO: check if there is a preexisting Helm release
+var deleteHelmRelease = func(releaseName string, chartGroupName string, namespace string) error {
+	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 
-	// TODO: mutex
-
-	// TODO: delete Helm chart
+	err := k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseName, metaV1.DeleteOptions{})
+	if err != nil {
+		log.Logger.Error("could not delete application:", releaseName)
+		return err
+	}
 
 	log.Logger.Debug("Delete chart:", releaseName)
 	return nil
@@ -115,12 +287,12 @@ func doChartAction(prunedLabels map[string]string, chartAction chartAction, name
 			switch chartAction {
 			case releaseAction:
 				// if there is an error, keep going forward in the for loop
-				if err1 := installHelmRelease(releaseName, chart, namespace); err1 != nil {
+				if err1 := installHelmRelease(releaseName, chartGroupName, chart, namespace); err1 != nil {
 					err = errors.New("one or more Helm release installs failed")
 				}
 			case deleteAction:
 				// if there is an error, keep going forward in the for loop
-				if err1 := deleteHelmRelease(releaseName, namespace); err1 != nil {
+				if err1 := deleteHelmRelease(releaseName, chartGroupName, namespace); err1 != nil {
 					err = errors.New("one or more Helm release deletions failed")
 				}
 			}

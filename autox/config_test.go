@@ -14,27 +14,6 @@ func completePath(prefix string, suffix string) string {
 	return filepath.Join(filepath.Dir(filename), prefix, suffix)
 }
 
-func TestReadResourceConfig(t *testing.T) {
-	for _, tt := range []struct {
-		name          string
-		file          string
-		numNamespaces int
-		numResources  int
-	}{
-		{"empty", "config.empty.yaml", 0, 0},
-		{"invalid", "config.invalid.yaml", 0, 0},
-		{"garbage", "config.garbage.yaml", 0, 0},
-		{"nofile", "config.nofile.yaml", 0, 0},
-		{"nonamespaces", "resource_config.nonamespaces.yaml", 0, 1},
-	} {
-		t.Run(tt.name, func(t *testing.T) {
-			c := readResourceConfig(completePath("../testdata/autox_inputs", tt.file))
-			assert.Equal(t, tt.numNamespaces, len(c.Namespaces))
-			assert.Equal(t, tt.numResources, len(c.Resources))
-		})
-	}
-}
-
 func TestReadGroupChartConfig(t *testing.T) {
 	for _, tt := range []struct {
 		name           string

@@ -23,7 +23,6 @@ func TestStart(t *testing.T) {
 	opts := NewOpts(newFakeKubeClient(cli.New()))
 
 	// Start requires some environment variables to be set
-	_ = os.Setenv(resourceConfigEnv, "../testdata/autox_inputs/resource_config.example.yaml")
 	_ = os.Setenv(chartGroupConfigEnv, "../testdata/autox_inputs/group_config.example.yaml")
 
 	stopCh := make(chan struct{})
