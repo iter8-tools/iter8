@@ -7,9 +7,6 @@ import (
 
 	"helm.sh/helm/v3/pkg/cli"
 
-	// Import to initialize client auth plugins.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
@@ -27,6 +24,7 @@ type KubeClient struct {
 	dynamicClient dynamic.Interface
 }
 
+// NewKubeClient creates an empty KubeClient
 func NewKubeClient(s *cli.EnvSettings) *KubeClient {
 	return &KubeClient{
 		EnvSettings: s,

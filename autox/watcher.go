@@ -5,10 +5,6 @@ import (
 	"os"
 
 	"github.com/iter8-tools/iter8/base/log"
-
-	// auth enables automatic authentication to various hosted clouds
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 const (
