@@ -15,11 +15,6 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-const (
-	// DefaultChartName is the default name of the Iter8 chart
-	DefaultChartName = "iter8"
-)
-
 // GenOpts are the options used for generating experiment.yaml
 type GenOpts struct {
 	// Options provides the values to be combined with the experiment chart

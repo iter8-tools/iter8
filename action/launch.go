@@ -11,6 +11,13 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
+const (
+	// DefaultHelmRepository is the URL of the default Helm repository
+	DefaultHelmRepository = "https://iter8-tools.github.io/hub"
+	// DefaultChartName is the default name of the Iter8 chart
+	DefaultChartName = "iter8"
+)
+
 // LaunchOpts are the options used for launching experiments
 type LaunchOpts struct {
 	// DryRun enables simulating a launch
