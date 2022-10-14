@@ -12,12 +12,11 @@ import (
 )
 
 const (
-	// Name of environment variable with file path to resource configuration yaml file
-	resourceConfigEnv = "RESOURCE_CONFIG"
 	// Name of environment variable with file path to chart group configuration yaml file
 	chartGroupConfigEnv = "CHART_GROUP_CONFIG"
 )
 
+var k8sClient *KubeClient
 var iter8ChartGroupConfig chartGroupConfig
 
 func validateChartGroupConfig(cgc chartGroupConfig) error {
@@ -55,6 +54,8 @@ func (opts *Opts) Start(stopCh chan struct{}) error {
 	if err := opts.KubeClient.init(); err != nil {
 		log.Logger.Fatal("unable to init k8s client")
 	}
+
+	k8sClient = opts.KubeClient
 
 	// read group config (apps and helm charts to install)
 	chartGroupConfigFile, ok := os.LookupEnv(chartGroupConfigEnv)

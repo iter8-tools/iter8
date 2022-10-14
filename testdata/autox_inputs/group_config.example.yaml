@@ -1,6 +1,3 @@
-namespaces:
-  - default
-  - test
 specs:
   myApp: # the autox group label value will correspond to this
     trigger:

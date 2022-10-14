@@ -4,7 +4,7 @@ metadata:
   namespace: {{ .namespace }}
   ownerReferences:
     - apiVersion: {{ .ownerApiVersion }}
-    kind: {{ .ownerKind}}
+    kind: Secret
     name: {{ .ownerName}}
     uid: {{ .ownerUID}}
 spec:

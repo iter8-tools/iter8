@@ -40,16 +40,32 @@ type trigger struct {
 	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 }
 
+// // chart points to a particular Helm chart
+// type chart struct {
+// 	// Repo is the repo of the Helm chart
+// 	Repo string `json:"repo" yaml:"repo"`
+
+// 	// Name is the name of the Helm chart
+// 	Name string `json:"name" yaml:"name"`
+
+// 	// ValuesFileURL is the URL to the values file of the Helm chart
+// 	ValuesFileURL string `json:"valuesFileURL" yaml:"valuesFileURL"`
+// }
+
 // chart points to a particular Helm chart
 type chart struct {
-	// Repo is the repo of the Helm chart
-	Repo string `json:"repo" yaml:"repo"`
+	// RepoURL is the url of the Helm repo
+	RepoURL string `json:"repoURL" yaml:"repoURL"`
 
 	// Name is the name of the Helm chart
 	Name string `json:"name" yaml:"name"`
 
-	// ValuesFileURL is the URL to the values file of the Helm chart
-	ValuesFileURL string `json:"valuesFileURL" yaml:"valuesFileURL"`
+	// Values is the values of the Helm chart
+	Values map[string]interface{} `json:"values" yaml:"values"`
+
+	// Version is the version of the Helm chart
+	// TODO: add version constraint, example: "1.16.X"
+	Version string `json:"version" yaml:"version"`
 }
 
 // chartGroup is the configuration of all the Helm charts for a particular experiment group and their install trigger
