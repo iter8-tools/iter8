@@ -21,7 +21,7 @@ spec:
   {{- else if eq "github" . }}
   {{- include "task.github" $.Values.github -}}
   {{- else }}
-  {{- fail "task name must be one of assess, custommetrics, grpc, http, ready, github, or slack" -}}
+  {{- fail "task name must be one of assess, custommetrics, abnmetrics, grpc, http, ready, github, or slack" -}}
   {{- end }}
   {{- end }}
 result:

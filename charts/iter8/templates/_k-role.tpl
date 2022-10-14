@@ -2,17 +2,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Release.Name }}-metricstore
-  annotations:
-    iter8.tools/group: {{ .Release.Name }}
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["list", "get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
   name: {{ .Release.Name }}
   annotations:
     iter8.tools/group: {{ .Release.Name }}
@@ -49,6 +38,12 @@ rules:
 - apiGroups: ["serving.knative.dev"]
   resourceNames: [{{ .Values.ready.ksvc | quote }}]
   resources: ["services"]
+  verbs: ["get"]
+{{- end }}
+{{- if .Values.ready.chaosengine }}
+- apiGroups: ["litmuschaos.io"]
+  resourceNames: [{{ .Values.ready.chaosengine | quote }}]
+  resources: ["chaosengines"]
   verbs: ["get"]
 {{- end }}
 {{- end }}
