@@ -39,38 +39,28 @@ const (
 	applicationTemplateFilePath string = "application.tpl"
 )
 
+// applicationValues is the values for the application template
 type applicationValues struct {
+	// name is the name of the application
 	name string
 
+	// name is the namespace of the application
 	namespace string
 
-	// owner struct {
-	// 	apiVersion string
-	// 	name string
-	// 	uid string
-	// }
+	// owner is the chart group secret for this application
+	owner struct {
+		apiVersion string
+		name       string
+		uid        string
+	}
 
-	// chart struct {
-	// 	name string
-
-	// 	values map[string]interface{}
-
-	// 	chartVersion string
-	// }
-
-	ownerApiVersion string
-
-	ownerName string
-
-	ownerUID string
-
-	chartURL string
-
-	chartName string
-
-	chartValues map[string]interface{}
-
-	chartVersion string
+	// chart is the Helm chart for this application
+	chart struct {
+		url     string
+		name    string
+		values  map[string]interface{}
+		version string
+	}
 }
 
 // the name of a release will depend on:
@@ -113,14 +103,6 @@ func installHelmReleases(prunedLabels map[string]string, namespace string) error
 var installHelmRelease = func(releaseName string, chartGroupName string, chart chart, namespace string) error {
 	secretsClient := k8sClient.clientset.CoreV1().Secrets(namespace)
 
-	// // TODO: what to put for ctx?
-	// // get secret
-	// secret, err := secretsClient.Get(context.TODO(), "hello", metaV1.GetOptions{})
-	// if err != nil {
-	// 	log.Logger.Error("could not read from secret")
-	// 	return err
-	// }
-
 	// TODO: what to put for ctx?
 	// get secret, based on autoX label
 	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, chartGroupName)
@@ -146,14 +128,27 @@ var installHelmRelease = func(releaseName string, chartGroupName string, chart c
 		name:      releaseName,
 		namespace: namespace,
 
-		ownerApiVersion: secret.APIVersion,
-		ownerName:       secret.Name,
-		ownerUID:        string(secret.GetUID()),
+		owner: struct {
+			apiVersion string
+			name       string
+			uid        string
+		}{
+			apiVersion: secret.APIVersion,
+			name:       secret.Name,
+			uid:        string(secret.GetUID()),
+		},
 
-		chartURL:     chart.RepoURL,
-		chartName:    chart.Name,
-		chartValues:  chart.Values,
-		chartVersion: chart.Version,
+		chart: struct {
+			url     string
+			name    string
+			values  map[string]interface{}
+			version string
+		}{
+			url:     chart.RepoURL,
+			name:    chart.Name,
+			values:  chart.Values,
+			version: chart.Version,
+		},
 	}
 
 	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
@@ -180,47 +175,6 @@ var installHelmRelease = func(releaseName string, chartGroupName string, chart c
 
 	log.Logger.Debug("application manifest:", buf.String())
 
-	// deployment := &unstructured.Unstructured{
-	// 	Object: map[string]interface{}{
-	// 		"apiVersion": "apps/v1",
-	// 		"kind":       "Deployment",
-	// 		"metadata": map[string]interface{}{
-	// 			"name": "demo-deployment",
-	// 		},
-	// 		"spec": map[string]interface{}{
-	// 			"replicas": 2,
-	// 			"selector": map[string]interface{}{
-	// 				"matchLabels": map[string]interface{}{
-	// 					"app": "demo",
-	// 				},
-	// 			},
-	// 			"template": map[string]interface{}{
-	// 				"metadata": map[string]interface{}{
-	// 					"labels": map[string]interface{}{
-	// 						"app": "demo",
-	// 					},
-	// 				},
-
-	// 				"spec": map[string]interface{}{
-	// 					"containers": []map[string]interface{}{
-	// 						{
-	// 							"name":  "web",
-	// 							"image": "nginx:1.12",
-	// 							"ports": []map[string]interface{}{
-	// 								{
-	// 									"name":          "http",
-	// 									"protocol":      "TCP",
-	// 									"containerPort": 80,
-	// 								},
-	// 							},
-	// 						},
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
-
 	// serialize application manifest into unstructured object
 	obj, _, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(buf.Bytes(), nil, nil)
 	if err != nil {
@@ -241,12 +195,6 @@ var installHelmRelease = func(releaseName string, chartGroupName string, chart c
 		log.Logger.Error("could not create application:", releaseName)
 		return err
 	}
-
-	// err = k8sClient.dynamic().Resource(deploymentRes).Namespace(namespace).Delete(context.TODO(), releaseName, metaV1.DeleteOptions{})
-	// if err != nil {
-	// 	log.Logger.Error("could not delete application:", releaseName)
-	// 	return err
-	// }
 
 	log.Logger.Debug("Release chart:", releaseName)
 	return nil
@@ -377,7 +325,7 @@ func deleteObject(obj interface{}) {
 		return
 	}
 
-	// Delete Helm charts
+	// delete Helm charts
 	_ = deleteHelmReleases(prunedLabels, uObj.GetNamespace())
 }
 

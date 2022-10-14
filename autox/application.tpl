@@ -3,22 +3,22 @@ metadata:
   name: {{ .name }}
   namespace: {{ .namespace }}
   ownerReferences:
-    - apiVersion: {{ .ownerApiVersion }}
+    - apiVersion: {{ .owner.apiVersion }}
     kind: Secret
-    name: {{ .ownerName}}
-    uid: {{ .ownerUID}}
+    name: {{ .owner.name}}
+    uid: {{ .owner.uid}}
 spec:
   destination:
     namespace: kubeseal
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: {{ .chartName }}
+    chart: {{ .chart.name }}
     helm:
       values: 
-        {{ .chartValues | toYAML | indent 4 }}
-    repoURL: {{ .chartURL }}
-    targetRevision: {{ .chartVersion }}
+        {{ .chart.values | toYAML | indent 4 }}
+    repoURL: {{ .chart.url }}
+    targetRevision: {{ .chart.version }}
   syncPolicy:
     automated:
       prune: true
