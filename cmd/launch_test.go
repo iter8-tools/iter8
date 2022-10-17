@@ -11,7 +11,7 @@ import (
 func TestLaunch(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
-		// launch, chartsParentDir, noDownload
+		// launch, localChart
 		{
 			name:   "basic launch",
 			cmd:    fmt.Sprintf("launch -c %v --localChart --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../charts", "iter8")),

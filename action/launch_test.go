@@ -42,7 +42,7 @@ func TestKubeLaunch(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestLocalLaunchNoDownload(t *testing.T) {
+func TestLocalLaunchLocalChart(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
@@ -56,7 +56,7 @@ func TestLocalLaunchNoDownload(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestKubeLaunchNoDownload(t *testing.T) {
+func TestKubeLaunchLocalChart(t *testing.T) {
 	var err error
 	_ = os.Chdir(t.TempDir())
 

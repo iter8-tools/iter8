@@ -19,8 +19,6 @@ import (
 type GenOpts struct {
 	// Options provides the values to be combined with the experiment chart
 	values.Options
-	// ChartsParentDir is the directory where `charts` directory is located
-	ChartsParentDir string
 	// GenDir is the directory where the chart templates are rendered
 	GenDir string
 	// ChartName is the name of the chart
@@ -30,21 +28,15 @@ type GenOpts struct {
 // NewGenOpts initializes and returns gen opts
 func NewGenOpts() *GenOpts {
 	return &GenOpts{
-		ChartsParentDir: ".",
-		GenDir:          ".",
-		ChartName:       DefaultChartName,
+		GenDir:    ".",
+		ChartName: DefaultChartName,
 	}
-}
-
-// chartDir returns the path to chart directory
-func (gen *GenOpts) chartDir() string {
-	return path.Join(gen.ChartsParentDir, gen.ChartName)
 }
 
 // LocalRun generates a local experiment.yaml file
 func (gen *GenOpts) LocalRun() error {
 	// read in the experiment chart
-	c, err := loader.Load(gen.chartDir())
+	c, err := loader.Load(gen.ChartName)
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error("unable to load experiment chart")
 		return err

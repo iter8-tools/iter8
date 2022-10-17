@@ -2,6 +2,7 @@ package action
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/iter8-tools/iter8/base/log"
@@ -57,10 +58,9 @@ func (lOpts *LaunchOpts) LocalRun() error {
 	if lOpts.LocalChart {
 		// local charts
 		gOpts = GenOpts{
-			Options:         lOpts.Options,
-			ChartsParentDir: filepath.Dir(lOpts.ChartName),
-			GenDir:          lOpts.RunDir,
-			ChartName:       filepath.Base(lOpts.ChartName),
+			Options:   lOpts.Options,
+			GenDir:    lOpts.RunDir,
+			ChartName: path.Join(filepath.Dir(lOpts.ChartName), filepath.Base(lOpts.ChartName)),
 		}
 	} else {
 		// non-local charts. download charts
@@ -93,10 +93,9 @@ func (lOpts *LaunchOpts) LocalRun() error {
 
 		// gen experiment spec
 		gOpts = GenOpts{
-			Options:         lOpts.Options,
-			ChartsParentDir: client.UntarDir, //chartsFolderName
-			GenDir:          lOpts.RunDir,
-			ChartName:       lOpts.ChartName,
+			Options:   lOpts.Options,
+			GenDir:    lOpts.RunDir,
+			ChartName: path.Join(client.UntarDir, lOpts.ChartName),
 		}
 	}
 
