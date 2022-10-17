@@ -13,8 +13,8 @@ import (
 // newFakeKubeClient returns a fake Kubernetes client that is able to manage secrets
 // Includes dynamic client with Deployments as listed objects
 // Used by test cases in several packages to define (global) k8sclient.Client for testing
-func newFakeKubeClient(s *cli.EnvSettings, objects ...runtime.Object) *KubeClient {
-	fakeClient := KubeClient{
+func newFakeKubeClient(s *cli.EnvSettings, objects ...runtime.Object) *kubeClient {
+	fakeClient := kubeClient{
 		EnvSettings: s,
 		// default other fields
 	}

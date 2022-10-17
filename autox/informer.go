@@ -49,9 +49,8 @@ type applicationValues struct {
 
 	// owner is the chart group secret for this application
 	owner struct {
-		apiVersion string
-		name       string
-		uid        string
+		name string
+		uid  string
 	}
 
 	// chart is the Helm chart for this application
@@ -129,13 +128,11 @@ var installHelmRelease = func(releaseName string, chartGroupName string, chart c
 		namespace: namespace,
 
 		owner: struct {
-			apiVersion string
-			name       string
-			uid        string
+			name string
+			uid  string
 		}{
-			apiVersion: secret.APIVersion,
-			name:       secret.Name,
-			uid:        string(secret.GetUID()),
+			name: secret.Name,
+			uid:  string(secret.GetUID()),
 		},
 
 		chart: struct {
@@ -333,7 +330,7 @@ type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func newIter8Watcher(k8sClient *KubeClient) *iter8Watcher {
+func newIter8Watcher(k8sClient *kubeClient) *iter8Watcher {
 	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}

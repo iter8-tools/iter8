@@ -14,7 +14,7 @@ import (
 // Opts are the options used for launching autoX service
 type Opts struct {
 	// KubeClient enables Kubernetes and Helm interactions with the cluster
-	*KubeClient
+	*kubeClient
 }
 
 // trigger specifies when a chartGroup should be installed
@@ -78,9 +78,9 @@ type chartGroupConfig struct {
 }
 
 // NewOpts returns an autox options object
-func NewOpts(kc *KubeClient) *Opts {
+func NewOpts(kc *kubeClient) *Opts {
 	return &Opts{
-		KubeClient: kc,
+		kubeClient: kc,
 	}
 }
 
