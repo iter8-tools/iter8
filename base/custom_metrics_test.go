@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -42,6 +43,43 @@ const (
 		"}[0s])) or on() vector(0)\n"
 	exampleQueryParameter = "example query parameter\n"
 	exampleRequestBody    = "example request body\n"
+	istioPromProviderURL  = "https://raw.githubusercontent.com/iter8-tools/iter8/master/custommetrics/istio-prom.tpl"
+	istioPromRequestCount = "sum(last_over_time(istio_requests_total{\n" +
+		"  \n\n" +
+		"  reporter=\"destination\",\n" +
+		"  destination_workload=\"myApp\",\n" +
+		"  destination_workload_namespace=\"production\"\n" +
+		"}[0s])) or on() vector(0)"
+	istioPromErrorCount = "sum(last_over_time(istio_requests_total{\n" +
+		"  response_code=~'5..',\n" +
+		"  \n\n" +
+		"  reporter=\"destination\",\n" +
+		"  destination_workload=\"myApp\",\n" +
+		"  destination_workload_namespace=\"production\"\n" +
+		"}[0s])) or on() vector(0)"
+	istioPromErrorRate = "(sum(last_over_time(istio_requests_total{\n" +
+		"  response_code=~'5..',\n" +
+		"  \n\n" +
+		"  reporter=\"destination\",\n" +
+		"  destination_workload=\"myApp\",\n" +
+		"  destination_workload_namespace=\"production\"\n" +
+		"}[0s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{\n" +
+		"  \n\n" +
+		"  reporter=\"destination\",\n" +
+		"  destination_workload=\"myApp\",\n" +
+		"  destination_workload_namespace=\"production\"\n" +
+		"}[0s])) or on() vector(0))"
+	istioPromMeanLatency = "(sum(last_over_time(istio_request_duration_milliseconds_sum{\n" +
+		"  \n\n" +
+		"  reporter=\"destination\",\n" +
+		"  destination_workload=\"myApp\",\n" +
+		"  destination_workload_namespace=\"production\"\n" +
+		"}[0s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{\n" +
+		"  \n\n" +
+		"  reporter=\"destination\",\n" +
+		"  destination_workload=\"myApp\",\n" +
+		"  destination_workload_namespace=\"production\"\n" +
+		"}[0s])) or on() vector(0))"
 )
 
 func getCustomMetricsTask(t *testing.T, providerName string, providerURL string) *customMetricsTask {
@@ -103,6 +141,123 @@ func TestStartingTimeFormatError(t *testing.T) {
 	exp.initResults(1)
 	_, err := getElapsedTimeSeconds(versionValues, exp)
 	assert.Error(t, err)
+}
+
+// test istio-prom provider spec
+func TestIstioProm(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../custommetrics", "istio-prom.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
+	_ = os.Chdir(t.TempDir())
+	ct := getCustomMetricsTask(t, "istio-prom", istioPromProviderURL)
+	ct.With.VersionValues = []map[string]interface{}{{
+		"reporter":                     "destination",
+		"destinationWorkload":          "myApp",
+		"destinationWorkloadNamespace": "production",
+		"elapsedTimeSeconds":           "5",
+	}}
+
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
+
+	// mock Istio Prometheus server
+	httpmock.RegisterResponder("GET", "http://prometheus.istio-system:9090/api/v1/query",
+		func(req *http.Request) (*http.Response, error) {
+			queryParam := strings.TrimSpace(req.URL.Query().Get("query"))
+
+			switch queryParam {
+			case istioPromRequestCount:
+				return httpmock.NewStringResponse(200, `{
+					"status": "success",
+					"data": {
+						"resultType": "vector",
+						"result": [
+							{
+								"metric": {},
+								"value": [
+									1645602108.839,
+									"43"
+								]
+							}
+						]
+					}
+				}`), nil
+
+			case istioPromErrorCount:
+				return httpmock.NewStringResponse(200, `{
+						"status": "success",
+						"data": {
+							"resultType": "vector",
+							"result": [
+								{
+									"metric": {},
+									"value": [
+										1645602108.839,
+										"6"
+									]
+								}
+							]
+						}
+					}`), nil
+
+			case istioPromErrorRate:
+				return httpmock.NewStringResponse(200, `{
+						"status": "success",
+						"data": {
+							"resultType": "vector",
+							"result": [
+								{
+									"metric": {},
+									"value": [
+										1645602108.839,
+										"0.13953488372093023"
+									]
+								}
+							]
+						}
+					}`), nil
+
+			case istioPromMeanLatency:
+				return httpmock.NewStringResponse(200, `{
+						"status": "success",
+						"data": {
+							"resultType": "vector",
+							"result": [
+								{
+									"metric": {},
+									"value": [
+										1645602108.839,
+										"52"
+									]
+								}
+							]
+						}
+					}`), nil
+
+			}
+
+			return nil, errors.New("")
+		})
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
+
+	err = ct.run(exp)
+
+	// test should not fail
+	assert.NoError(t, err)
+
+	// all three metrics should exist and have values
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/request-count"][0], float64(43))
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/error-count"][0], float64(6))
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/error-rate"][0], 0.13953488372093023)
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/latency-mean"][0], float64(52))
 }
 
 // basic test with one version, mimicking Code Engine
@@ -181,7 +336,6 @@ func TestCEOneVersion(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/request-count"][0], float64(43))
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-count"][0], float64(6))
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["test-ce/error-rate"][0], 0.13953488372093023)
-
 }
 
 // basic test with versionValues, mimicking Code Engine

@@ -8,7 +8,7 @@
 # and uses the resulting metric specs to query Prometheus.
 # The placeholders are as follows.
 # 
-# reporter                        string  optional
+# reporter                        string  optional (either "destination" or "source")
 # destinationWorkload             string  required
 # destinationWorkloadNamespace    string  required
 # elapsedTimeSeconds              int     implicit
@@ -32,14 +32,14 @@
 
 {{- define "istio-prom-reporter"}}
 {{- if .reporter }}
-reporter="{{ .reporter }}",
+        reporter="{{ .reporter }}",
 {{- end }}
 {{- end }}
 
 {{- define "istio-prom-dest"}}
 {{ template "istio-prom-reporter" . }}
-destination_workload="{{ .destinationWorkload }}",
-destination_workload_namespace="{{ .destinationWorkloadNamespace }}"
+        destination_workload="{{ .destinationWorkload }}",
+        destination_workload_namespace="{{ .destinationWorkloadNamespace }}"
 {{- end }}
 
 # url is the HTTP endpoint where the Prometheus service installed by Istio's Prom add-on
