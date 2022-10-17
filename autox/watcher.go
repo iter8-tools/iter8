@@ -12,7 +12,7 @@ const (
 	chartGroupConfigEnv = "CHART_GROUP_CONFIG"
 )
 
-var k8sClient *KubeClient
+var k8sClient *kubeClient
 var iter8ChartGroupConfig chartGroupConfig
 
 func validateChartGroupConfig(cgc chartGroupConfig) error {
@@ -47,11 +47,11 @@ func validateChartGroupConfig(cgc chartGroupConfig) error {
 // Start is entry point to configure services and start them
 func (opts *Opts) Start(stopCh chan struct{}) error {
 	// initialize kubernetes driver
-	if err := opts.KubeClient.init(); err != nil {
+	if err := opts.kubeClient.init(); err != nil {
 		log.Logger.Fatal("unable to init k8s client")
 	}
 
-	k8sClient = opts.KubeClient
+	k8sClient = opts.kubeClient
 
 	// read group config (apps and helm charts to install)
 	chartGroupConfigFile, ok := os.LookupEnv(chartGroupConfigEnv)
@@ -69,7 +69,7 @@ func (opts *Opts) Start(stopCh chan struct{}) error {
 
 	log.Logger.Debug("chartGroupConfig:", iter8ChartGroupConfig)
 
-	w := newIter8Watcher(opts.KubeClient)
+	w := newIter8Watcher(opts.kubeClient)
 	go w.start(stopCh)
 	return nil
 }

@@ -3,7 +3,7 @@ metadata:
   name: {{ .name }}
   namespace: {{ .namespace }}
   ownerReferences:
-    - apiVersion: {{ .owner.apiVersion }}
+    - apiVersion: v1
     kind: Secret
     name: {{ .owner.name}}
     uid: {{ .owner.uid}}
@@ -16,7 +16,7 @@ spec:
     chart: {{ .chart.name }}
     helm:
       values: 
-        {{ .chart.values | toYAML | indent 4 }}
+        {{ .chart.values | toYaml | indent 4 }}
     repoURL: {{ .chart.url }}
     targetRevision: {{ .chart.version }}
   syncPolicy:
