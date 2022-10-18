@@ -1,6 +1,6 @@
 apiVersion: v2
 name: iter8
-version: 0.11.3
+version: 0.11.4
 description: Iter8 experiment chart
 type: application
 home: https://iter8.tools
