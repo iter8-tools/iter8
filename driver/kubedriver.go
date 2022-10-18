@@ -15,7 +15,6 @@ import (
 	// Import to initialize client auth plugins.
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/downloader"
 
 	// auth import enables automated authentication to various hosted clouds
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -256,34 +255,6 @@ func (kd *KubeDriver) Write(e *base.Experiment) error {
 // GetRevision gets the experiment revision
 func (kd *KubeDriver) GetRevision() int {
 	return kd.revision
-}
-
-// UpdateChartDependencies for an Iter8 experiment chart
-// for now this function has one purpose ...
-// bring iter8lib dependency into other experiment charts like load-test-http
-func UpdateChartDependencies(chartDir string, settings *cli.EnvSettings) error {
-	// client and settings may not really be initialized with proper values
-	// should be ok considering iter8lib is a local file dependency
-	if settings == nil {
-		settings = cli.New()
-	}
-	client := action.NewDependency()
-	man := &downloader.Manager{
-		Out:              io.Discard,
-		ChartPath:        chartDir,
-		Keyring:          client.Keyring,
-		SkipUpdate:       client.SkipRefresh,
-		Getters:          getter.All(settings),
-		RepositoryConfig: settings.RepositoryConfig,
-		RepositoryCache:  settings.RepositoryCache,
-		Debug:            settings.Debug,
-	}
-	log.Logger.Debug("updating chart ", chartDir)
-	if err := man.Update(); err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to update chart dependencies")
-		return err
-	}
-	return nil
 }
 
 // writeManifest writes the Kubernetes experiment manifest to a local file

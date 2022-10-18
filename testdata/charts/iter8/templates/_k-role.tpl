@@ -40,6 +40,12 @@ rules:
   resources: ["services"]
   verbs: ["get"]
 {{- end }}
+{{- if .Values.ready.chaosengine }}
+- apiGroups: ["litmuschaos.io"]
+  resourceNames: [{{ .Values.ready.chaosengine | quote }}]
+  resources: ["chaosengines"]
+  verbs: ["get"]
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
