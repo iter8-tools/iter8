@@ -48,7 +48,7 @@ func TestLocalLaunchLocalChart(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.ChartName = base.CompletePath("../charts", "iter8")
+	lOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
 	lOpts.LocalChart = true
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
 
@@ -62,7 +62,7 @@ func TestKubeLaunchLocalChart(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.ChartName = base.CompletePath("../charts", "iter8")
+	lOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
 	lOpts.LocalChart = true
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
 

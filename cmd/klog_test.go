@@ -20,7 +20,7 @@ func TestKLog(t *testing.T) {
 		// k launch
 		{
 			name:   "k launch",
-			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../charts", "iter8")),
+			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../testdata/charts", "iter8")),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 		// k assert

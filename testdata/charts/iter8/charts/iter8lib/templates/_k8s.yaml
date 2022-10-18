@@ -1,3 +1,4 @@
+{{- define "k8s" -}}
 {{ include "k.secret" . }}
 ---
 {{ include "k.role" . }}
@@ -14,3 +15,5 @@
 {{- else }}
 {{- fail "runner must be one of job, cronjob, or none" }}
 {{- end }}
+{{- end }}
+

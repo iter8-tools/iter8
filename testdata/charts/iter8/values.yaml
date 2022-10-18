@@ -8,6 +8,3 @@ majorMinor: v0.11
 runner: none
 
 logLevel: info
-
-abnmetrics:
-  endpoint: iter8-abn:50051

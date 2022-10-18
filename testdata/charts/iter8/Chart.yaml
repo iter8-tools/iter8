@@ -1,0 +1,17 @@
+apiVersion: v2
+dependencies:
+- name: iter8lib
+  repository: https://iter8-tools.github.io/hub/
+  version: 0.11.0
+description: Iter8 experiment library chart
+home: https://iter8.tools
+icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+maintainers:
+- email: spartha@us.ibm.com
+  name: Srinivasan Parthasarathy
+  url: https://researcher.watson.ibm.com/researcher/view.php?person=us-spartha
+name: iter8
+sources:
+- https://github.com/iter8-tools/iter8
+type: application
+version: 0.11.2
