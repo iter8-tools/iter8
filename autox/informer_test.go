@@ -20,18 +20,18 @@ import (
 // Check to see if add, update, delete handlers from the watcher are properly invoked
 // after the watcher is created using newIter8Watcher()
 func TestNewIter8Watcher(t *testing.T) {
-	// autoX needs the resource and chart group config
-	iter8ChartGroupConfig = readChartGroupConfig("../testdata/autox_inputs/group_config.example.yaml")
+	// autoX needs the config
+	autoXConfig = readConfig("../testdata/autox_inputs/config.example.yaml")
 
 	// autoX handler will call on installHelmRelease and deleteHelmRelease
 	installHelmReleaseInvocations := 0
-	installHelmRelease = func(releaseName string, chartGroupName string, chart chart, namespace string) error {
+	installHelmRelease = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string) error {
 		installHelmReleaseInvocations++
 		return nil
 	}
 
 	deleteHelmReleaseInvocations := 0
-	deleteHelmRelease = func(releaseName string, chartGroupName string, namespace string) error {
+	deleteHelmRelease = func(releaseName string, specGroupName string, namespace string) error {
 		deleteHelmReleaseInvocations++
 		return nil
 	}
@@ -101,8 +101,8 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NotNil(t, createdObj)
 
 	// give handler time to execute
-	// creating an object will installHelmRelease for each chart in the chart group
-	// in this case, there are 2 charts
+	// creating an object will installHelmRelease for each spec in the spec group
+	// in this case, there are 2 specs
 	// once for autox-myApp-name1-XXXXX and autox-myApp-name2-XXXXX
 	assert.Eventually(t, func() bool { return assert.Equal(t, 2, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
 	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
@@ -142,8 +142,8 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NotNil(t, updatedObj)
 
 	// give handler time to execute
-	// updating (pruned) labels will trigger both deleteHelmRelease and installHelmRelease for each chart in the chart group
-	// in this case, there are 2 charts
+	// updating (pruned) labels will trigger both deleteHelmRelease and installHelmRelease for each spec in the spec group
+	// in this case, there are 2 specs
 	assert.Eventually(t, func() bool { return assert.Equal(t, 4, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
 	assert.Eventually(t, func() bool { return assert.Equal(t, 2, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 
@@ -158,8 +158,8 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NoError(t, err)
 
 	// give handler time to execute
-	// only deleteHelmRelease should trigger, once for each chart in the chart group
-	// in this case, there are 2 charts
+	// only deleteHelmRelease should trigger, once for each spec in the spec group
+	// in this case, there are 2 specs
 	assert.Eventually(t, func() bool { return assert.Equal(t, 4, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
 	assert.Eventually(t, func() bool { return assert.Equal(t, 4, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 }
