@@ -47,7 +47,7 @@ type applicationValues struct {
 	// name is the namespace of the application
 	namespace string
 
-	// owner is the chart group secret for this application
+	// owner is the spec group secret for this application
 	owner struct {
 		name string
 		uid  string
@@ -65,16 +65,16 @@ type applicationValues struct {
 // the name of a release will depend on:
 //
 //	the name of the releaseSpec,
-//	the id of the chart within the releaseSpec, and
+//	the ID of the spec within the releaseSpec, and
 //	the set of (pruned) labels that triggers this release
-func getReleaseName(chartGroupName string, chartID string, prunedLabels map[string]string) string {
+func getReleaseName(group string, releaseSpecID string, prunedLabels map[string]string) string {
 
 	// use labels relevant to autoX to create a random hash value
 	// this value will be appended as a suffix in the release name
 	var hasher maphash.Hash
-	// chartGroupName and chartID are always hashed
-	_, _ = hasher.WriteString(chartGroupName)
-	_, _ = hasher.WriteString(chartID)
+	// specGroupName and specID are always hashed
+	_, _ = hasher.WriteString(group)
+	_, _ = hasher.WriteString(releaseSpecID)
 
 	// hash app label
 	app := prunedLabels[appLabel]
@@ -90,21 +90,21 @@ func getReleaseName(chartGroupName string, chartID string, prunedLabels map[stri
 
 	nonce := fmt.Sprintf("%05x", hasher.Sum64())
 	nonce = nonce[:5]
-	return fmt.Sprintf("autox-%s-%s-%s", chartGroupName, chartID, nonce)
+	return fmt.Sprintf("autox-%s-%s-%s", group, releaseSpecID, nonce)
 }
 
-// installHelmReleases for a given chart group
+// installHelmReleases for a given spec group
 func installHelmReleases(prunedLabels map[string]string, namespace string) error {
 	return doChartAction(prunedLabels, releaseAction, namespace)
 }
 
-// installHelmRelease for a given chart within a chart group
-var installHelmRelease = func(releaseName string, chartGroupName string, chart chart, namespace string) error {
+// installHelmRelease for a given spec within a spec group
+var installHelmRelease = func(releaseName string, group string, releaseSpec releaseSpec, namespace string) error {
 	secretsClient := k8sClient.clientset.CoreV1().Secrets(namespace)
 
 	// TODO: what to put for ctx?
 	// get secret, based on autoX label
-	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, chartGroupName)
+	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, group)
 	secretList, err := secretsClient.List(context.TODO(), metaV1.ListOptions{
 		LabelSelector: labelSelector,
 	})
@@ -141,10 +141,10 @@ var installHelmRelease = func(releaseName string, chartGroupName string, chart c
 			values  map[string]interface{}
 			version string
 		}{
-			url:     chart.RepoURL,
-			name:    chart.Name,
-			values:  chart.Values,
-			version: chart.Version,
+			url:     releaseSpec.RepoURL,
+			name:    releaseSpec.Name,
+			values:  releaseSpec.Values,
+			version: releaseSpec.Version,
 		},
 	}
 
@@ -197,13 +197,13 @@ var installHelmRelease = func(releaseName string, chartGroupName string, chart c
 	return nil
 }
 
-// deleteHelmReleases for a given chart group
+// deleteHelmReleases for a given spec group
 func deleteHelmReleases(prunedLabels map[string]string, namespace string) error {
 	return doChartAction(prunedLabels, deleteAction, namespace)
 }
 
 // deleteHelmRelease with a given release name
-var deleteHelmRelease = func(releaseName string, chartGroupName string, namespace string) error {
+var deleteHelmRelease = func(releaseName string, group string, namespace string) error {
 	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 
 	err := k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseName, metaV1.DeleteOptions{})
@@ -216,34 +216,34 @@ var deleteHelmRelease = func(releaseName string, chartGroupName string, namespac
 	return nil
 }
 
-// doChartAction iterates through a given chart group, and performs action for each chart
+// doChartAction iterates through a given spec group, and performs action for each spec
 // action can be install or delete
 func doChartAction(prunedLabels map[string]string, chartAction chartAction, namespace string) error {
-	// get chart group name
-	chartGroupName := prunedLabels[autoXLabel]
+	// get group
+	group := prunedLabels[autoXLabel]
 
-	// iterate through the charts in this chart group
+	// iterate through the specs in this spec group
 	var err error
-	if cg, ok := iter8ChartGroupConfig.Specs[chartGroupName]; ok {
-		for chartID, chart := range cg.ReleaseSpecs {
+	if releaseGroupSpec, ok := autoXConfig.Specs[group]; ok {
+		for releaseSpecID, releaseSpec := range releaseGroupSpec.ReleaseSpecs {
 			// get release name
-			releaseName := getReleaseName(chartGroupName, chartID, prunedLabels)
+			releaseName := getReleaseName(group, releaseSpecID, prunedLabels)
 			// perform action for this release
 			switch chartAction {
 			case releaseAction:
 				// if there is an error, keep going forward in the for loop
-				if err1 := installHelmRelease(releaseName, chartGroupName, chart, namespace); err1 != nil {
+				if err1 := installHelmRelease(releaseName, group, releaseSpec, namespace); err1 != nil {
 					err = errors.New("one or more Helm release installs failed")
 				}
 			case deleteAction:
 				// if there is an error, keep going forward in the for loop
-				if err1 := deleteHelmRelease(releaseName, chartGroupName, namespace); err1 != nil {
+				if err1 := deleteHelmRelease(releaseName, group, namespace); err1 != nil {
 					err = errors.New("one or more Helm release deletions failed")
 				}
 			}
 		}
 	} else {
-		log.Logger.Warnf("no matching chart group name in autoX group configuration: %s", chartGroupName)
+		log.Logger.Warnf("no matching group name in autoX group configuration: %s", group)
 	}
 
 	if err != nil {
@@ -335,15 +335,15 @@ func newIter8Watcher(k8sClient *kubeClient) *iter8Watcher {
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
-	// aggregate all triggers (namespaces and GVR) from the chartGroupConfig
+	// aggregate all triggers (namespaces and GVR) from the releaseGroupConfig
 	triggers := map[string][]schema.GroupVersionResource{}
-	for _, chartGroup := range iter8ChartGroupConfig.Specs {
+	for _, releaseGroupSpec := range autoXConfig.Specs {
 
-		namespace := chartGroup.Trigger.Namespace
+		namespace := releaseGroupSpec.Trigger.Namespace
 		gvr := schema.GroupVersionResource{
-			Group:    chartGroup.Trigger.Group,
-			Version:  chartGroup.Trigger.Version,
-			Resource: chartGroup.Trigger.Resource,
+			Group:    releaseGroupSpec.Trigger.Group,
+			Version:  releaseGroupSpec.Trigger.Version,
+			Resource: releaseGroupSpec.Trigger.Resource,
 		}
 
 		// add namespace and GVR to triggers

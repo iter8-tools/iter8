@@ -8,35 +8,35 @@ import (
 )
 
 const (
-	// Name of environment variable with file path to chart group configuration yaml file
-	chartGroupConfigEnv = "CHART_GROUP_CONFIG"
+	// Name of environment variable with file path to spec group configuration yaml file
+	configEnv = "CONFIG"
 )
 
 var k8sClient *kubeClient
-var iter8ChartGroupConfig chartGroupConfig
+var autoXConfig config
 
-func validateChartGroupConfig(cgc chartGroupConfig) error {
+func validateConfig(c config) error {
 	var err error
 
-	for chartGroupID, chartGroup := range iter8ChartGroupConfig.Specs {
+	for releaseGroupSpecID, releaseGroupSpec := range autoXConfig.Specs {
 		// validate trigger
-		if chartGroup.Trigger.Namespace == "" {
-			err = fmt.Errorf("trigger in chart group \"%s\" does not have a namespace", chartGroupID)
+		if releaseGroupSpec.Trigger.Namespace == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a namespace", releaseGroupSpecID)
 			break
 		}
 
-		if chartGroup.Trigger.Group == "" {
-			err = fmt.Errorf("trigger in chart group \"%s\" does not have a group", chartGroupID)
+		if releaseGroupSpec.Trigger.Group == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a group", releaseGroupSpecID)
 			break
 		}
 
-		if chartGroup.Trigger.Version == "" {
-			err = fmt.Errorf("trigger in chart group \"%s\" does not have a version", chartGroupID)
+		if releaseGroupSpec.Trigger.Version == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a version", releaseGroupSpecID)
 			break
 		}
 
-		if chartGroup.Trigger.Resource == "" {
-			err = fmt.Errorf("trigger in chart group \"%s\" does not have a resource", chartGroupID)
+		if releaseGroupSpec.Trigger.Resource == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a resource", releaseGroupSpecID)
 			break
 		}
 	}
@@ -53,21 +53,21 @@ func (opts *Opts) Start(stopCh chan struct{}) error {
 
 	k8sClient = opts.kubeClient
 
-	// read group config (apps and helm charts to install)
-	chartGroupConfigFile, ok := os.LookupEnv(chartGroupConfigEnv)
+	// read group config (apps and Helm charts to install)
+	configFile, ok := os.LookupEnv(configEnv)
 	if !ok {
 		log.Logger.Fatal("group configuration file is required")
 	}
 
 	// set up resource watching as defined by config
-	iter8ChartGroupConfig = readChartGroupConfig(chartGroupConfigFile)
+	autoXConfig = readConfig(configFile)
 
-	err := validateChartGroupConfig(iter8ChartGroupConfig)
+	err := validateConfig(autoXConfig)
 	if err != nil {
 		return err
 	}
 
-	log.Logger.Debug("chartGroupConfig:", iter8ChartGroupConfig)
+	log.Logger.Debug("config:", autoXConfig)
 
 	w := newIter8Watcher(opts.kubeClient)
 	go w.start(stopCh)
