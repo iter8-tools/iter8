@@ -20,14 +20,12 @@ func TestStart(t *testing.T) {
 		return nil
 	}
 
-	opts := NewOpts(newFakeKubeClient(cli.New()))
-
 	// Start requires some environment variables to be set
 	_ = os.Setenv(configEnv, "../testdata/autox_inputs/config.example.yaml")
 
 	stopCh := make(chan struct{})
 	defer close(stopCh)
-	_ = opts.Start(stopCh)
+	_ = Start(stopCh, newFakeKubeClient(cli.New()))
 
 	// create object; no track defined
 	assert.Equal(t, 0, installHelmReleaseInvocations)
@@ -42,7 +40,7 @@ func TestStart(t *testing.T) {
 	version := "v1"
 	track := ""
 
-	createdObj, err := opts.dynamic().
+	createdObj, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),

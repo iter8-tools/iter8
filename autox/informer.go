@@ -330,7 +330,7 @@ type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func newIter8Watcher(k8sClient *kubeClient) *iter8Watcher {
+func newIter8Watcher() *iter8Watcher {
 	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
@@ -347,17 +347,14 @@ func newIter8Watcher(k8sClient *kubeClient) *iter8Watcher {
 		}
 
 		// add namespace and GVR to triggers
-		if _, ok := triggers[namespace]; ok {
-			triggers[namespace] = []schema.GroupVersionResource{gvr}
-		} else {
-			triggers[namespace] = append(triggers[namespace], gvr)
-		}
+		triggers[namespace] = append(triggers[namespace], gvr)
 	}
 
-	// for each namespace, resource type configure Informer
+	// for each namespace and resource type, configure an informer
 	for ns, gvrs := range triggers {
 		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
 		for _, gvr := range gvrs {
+
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 				AddFunc:    addObject,
@@ -366,6 +363,7 @@ func newIter8Watcher(k8sClient *kubeClient) *iter8Watcher {
 			})
 		}
 	}
+
 	return w
 }
 
