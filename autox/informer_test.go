@@ -47,9 +47,9 @@ func TestNewIter8Watcher(t *testing.T) {
 	track := ""
 
 	// define and start watcher
-	k8sClient := newFakeKubeClient(cli.New())
+	k8sClient = newFakeKubeClient(cli.New())
 
-	w := newIter8Watcher(k8sClient)
+	w := newIter8Watcher()
 	assert.NotNil(t, w)
 	done := make(chan struct{})
 	defer close(done)

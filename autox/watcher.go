@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/iter8-tools/iter8/base/log"
+
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 const (
@@ -45,13 +47,20 @@ func validateConfig(c config) error {
 }
 
 // Start is entry point to configure services and start them
-func (opts *Opts) Start(stopCh chan struct{}) error {
-	// initialize kubernetes driver
-	if err := opts.kubeClient.init(); err != nil {
-		log.Logger.Fatal("unable to init k8s client")
+func Start(stopCh chan struct{}, autoxK *kubeClient) error {
+	if autoxK == nil {
+		// get the real client
+
+		k8sClient = NewKubeClient(cli.New())
+	} else {
+		// set it here
+		k8sClient = autoxK
 	}
 
-	k8sClient = opts.kubeClient
+	// initialize kubernetes driver
+	if err := k8sClient.init(); err != nil {
+		log.Logger.Fatal("unable to init k8s client")
+	}
 
 	// read group config (apps and Helm charts to install)
 	configFile, ok := os.LookupEnv(configEnv)
@@ -69,7 +78,7 @@ func (opts *Opts) Start(stopCh chan struct{}) error {
 
 	log.Logger.Debug("config:", autoXConfig)
 
-	w := newIter8Watcher(opts.kubeClient)
+	w := newIter8Watcher()
 	go w.start(stopCh)
 	return nil
 }

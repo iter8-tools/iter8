@@ -11,12 +11,6 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// Opts are the options used for launching autoX service
-type Opts struct {
-	// KubeClient enables Kubernetes and Helm interactions with the cluster
-	*kubeClient
-}
-
 // trigger specifies when a releaseGroupSpec should be installed
 type trigger struct {
 	Group string `json:"group,omitempty" yaml:"group,omitempty"`
@@ -61,13 +55,6 @@ type config struct {
 	// Specs contains the releaseGroupSpecs, which contain the Helm charts and their triggers
 	// the keys in Specs are identifiers for each releaseGroupSpec (releaseGroupSpecID)
 	Specs map[string]releaseGroupSpec
-}
-
-// NewOpts returns an autox options object
-func NewOpts(kc *kubeClient) *Opts {
-	return &Opts{
-		kubeClient: kc,
-	}
 }
 
 // readConfig reads yaml autoX config file and converts to a config object
