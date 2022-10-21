@@ -1,22 +1,16 @@
 # This file provides templated metric specifications that enable
 # Iter8 to retrieve metrics from Istio's Prometheus add-on.
 # 
-# For a list of metrics supported out-of-the-box by the Istio Prom add-on, 
+# For a list of metrics supported out-of-the-box by the Istio Prometheus add-on, 
 # please see https://istio.io/latest/docs/reference/config/metrics/
 #
 # Iter8 substitutes the placeholders in this file with values, 
 # and uses the resulting metric specs to query Prometheus.
 # The placeholders are as follows.
 # 
-# reporter                        string  optional (either "destination" or "source")
-# destinationWorkload             string  required
-# destinationWorkloadNamespace    string  required
 # elapsedTimeSeconds              int     implicit
 # startingTime                    string  optional
 # latencyPercentiles              []int   optional
-#
-# For descriptions of reporter, destinationWorkload, and destinationWorkloadNamespace, 
-# please see https://istio.io/latest/docs/reference/config/metrics/
 #
 # elapsedTimeSeconds: this should not be specified directly by the user. 
 # It is implicitly computed by Iter8 according to the following formula
@@ -30,17 +24,17 @@
 # For example, if this is set to [50,75,90,95],
 # then, latency-p50, latency-p75, latency-p90, latency-p95 metric specs are created.
 
-{{- define "istio-prom-reporter"}}
-{{- if .reporter }}
-        reporter="{{ .reporter }}",
+{{- define "labels"}}
+{{- range $key, $val := .labels }}
+{{- if or (eq (kindOf $val) "slice") (eq (kindOf $val) "map")}}
+{{- fail (printf "labels should be a primitive types but received: %s :%s" $key $val) }}
 {{- end }}
+{{- if eq $key "response_code"}}
+{{- fail "labels should not contain 'response_code'" }}
 {{- end }}
-
-{{- define "istio-prom-dest"}}
-{{ template "istio-prom-reporter" . }}
-        destination_workload="{{ .destinationWorkload }}",
-        destination_workload_namespace="{{ .destinationWorkloadNamespace }}"
+          {{ $key }}="{{ $val }}",
 {{- end }}
+{{- end}}
 
 # url is the HTTP endpoint where the Prometheus service installed by Istio's Prom add-on
 # can be queried for metrics
@@ -57,7 +51,7 @@ metrics:
   - name: query
     value: |
       sum(last_over_time(istio_requests_total{
-        {{ template "istio-prom-dest" . }}
+        {{ template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-count
@@ -69,7 +63,7 @@ metrics:
     value: |
       sum(last_over_time(istio_requests_total{
         response_code=~'5..',
-        {{ template "istio-prom-dest" . }}
+        {{ template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-rate
@@ -81,9 +75,9 @@ metrics:
     value: |
       (sum(last_over_time(istio_requests_total{
         response_code=~'5..',
-        {{ template "istio-prom-dest" . }}
+        {{ template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
-        {{ template "istio-prom-dest" . }}
+        {{ template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))
   jqExpression: .data.result.[0].value.[1]
 - name: latency-mean
@@ -94,9 +88,9 @@ metrics:
   - name: query
     value: |
       (sum(last_over_time(istio_request_duration_milliseconds_sum{
-        {{ template "istio-prom-dest" . }}
+        {{ template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
-        {{ template "istio-prom-dest" . }}
+        {{ template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- range $i, $p := .latencyPercentiles }}
@@ -108,7 +102,7 @@ metrics:
   - name: query
     value: |
       histogram_quantile(0.{{ $p }}, sum(rate(istio_request_duration_milliseconds_bucket{
-        {{ template "istio-prom-dest" $ }}
+        {{ template "labels" $ }}
       }[{{ .elapsedTimeSeconds }}s])) by (le))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- end }}
