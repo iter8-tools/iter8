@@ -32,7 +32,7 @@
 {{- if eq $key "response_code"}}
 {{- fail "labels should not contain 'response_code'" }}
 {{- end }}
-          {{ $key }}="{{ $val }}",
+        {{ $key }}="{{ $val }}",
 {{- end }}
 {{- end}}
 
@@ -51,7 +51,7 @@ metrics:
   - name: query
     value: |
       sum(last_over_time(istio_requests_total{
-        {{ template "labels" . }}
+        {{- template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-count
@@ -63,7 +63,7 @@ metrics:
     value: |
       sum(last_over_time(istio_requests_total{
         response_code=~'5..',
-        {{ template "labels" . }}
+        {{- template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-rate
@@ -75,9 +75,9 @@ metrics:
     value: |
       (sum(last_over_time(istio_requests_total{
         response_code=~'5..',
-        {{ template "labels" . }}
+        {{- template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
-        {{ template "labels" . }}
+        {{- template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))
   jqExpression: .data.result.[0].value.[1]
 - name: latency-mean
@@ -88,9 +88,9 @@ metrics:
   - name: query
     value: |
       (sum(last_over_time(istio_request_duration_milliseconds_sum{
-        {{ template "labels" . }}
+        {{- template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
-        {{ template "labels" . }}
+        {{- template "labels" . }}
       }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- range $i, $p := .latencyPercentiles }}
@@ -102,7 +102,7 @@ metrics:
   - name: query
     value: |
       histogram_quantile(0.{{ $p }}, sum(rate(istio_request_duration_milliseconds_bucket{
-        {{ template "labels" $ }}
+        {{- template "labels" $ }}
       }[{{ .elapsedTimeSeconds }}s])) by (le))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- end }}

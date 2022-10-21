@@ -45,40 +45,34 @@ const (
 	exampleRequestBody    = "example request body\n"
 	istioPromProviderURL  = "https://raw.githubusercontent.com/iter8-tools/iter8/master/custommetrics/istio-prom.tpl"
 	istioPromRequestCount = "sum(last_over_time(istio_requests_total{\n" +
-		"  \n\n" +
-		"  reporter=\"destination\",\n" +
 		"  destination_workload=\"myApp\",\n" +
-		"  destination_workload_namespace=\"production\"\n" +
+		"  destination_workload_namespace=\"production\",\n" +
+		"  reporter=\"destination\",\n" +
 		"}[0s])) or on() vector(0)"
 	istioPromErrorCount = "sum(last_over_time(istio_requests_total{\n" +
 		"  response_code=~'5..',\n" +
-		"  \n\n" +
-		"  reporter=\"destination\",\n" +
 		"  destination_workload=\"myApp\",\n" +
-		"  destination_workload_namespace=\"production\"\n" +
+		"  destination_workload_namespace=\"production\",\n" +
+		"  reporter=\"destination\",\n" +
 		"}[0s])) or on() vector(0)"
 	istioPromErrorRate = "(sum(last_over_time(istio_requests_total{\n" +
 		"  response_code=~'5..',\n" +
-		"  \n\n" +
-		"  reporter=\"destination\",\n" +
 		"  destination_workload=\"myApp\",\n" +
-		"  destination_workload_namespace=\"production\"\n" +
+		"  destination_workload_namespace=\"production\",\n" +
+		"  reporter=\"destination\",\n" +
 		"}[0s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{\n" +
-		"  \n\n" +
-		"  reporter=\"destination\",\n" +
 		"  destination_workload=\"myApp\",\n" +
-		"  destination_workload_namespace=\"production\"\n" +
+		"  destination_workload_namespace=\"production\",\n" +
+		"  reporter=\"destination\",\n" +
 		"}[0s])) or on() vector(0))"
 	istioPromMeanLatency = "(sum(last_over_time(istio_request_duration_milliseconds_sum{\n" +
-		"  \n\n" +
-		"  reporter=\"destination\",\n" +
 		"  destination_workload=\"myApp\",\n" +
-		"  destination_workload_namespace=\"production\"\n" +
+		"  destination_workload_namespace=\"production\",\n" +
+		"  reporter=\"destination\",\n" +
 		"}[0s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{\n" +
-		"  \n\n" +
-		"  reporter=\"destination\",\n" +
 		"  destination_workload=\"myApp\",\n" +
-		"  destination_workload_namespace=\"production\"\n" +
+		"  destination_workload_namespace=\"production\",\n" +
+		"  reporter=\"destination\",\n" +
 		"}[0s])) or on() vector(0))"
 )
 
@@ -152,10 +146,12 @@ func TestIstioProm(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "istio-prom", istioPromProviderURL)
 	ct.With.VersionValues = []map[string]interface{}{{
-		"reporter":                     "destination",
-		"destinationWorkload":          "myApp",
-		"destinationWorkloadNamespace": "production",
-		"elapsedTimeSeconds":           "5",
+		"labels": map[string]interface{}{
+			"reporter":                       "destination",
+			"destination_workload":           "myApp",
+			"destination_workload_namespace": "production",
+		},
+		"elapsedTimeSeconds": "5",
 	}}
 
 	// mock provider URL
