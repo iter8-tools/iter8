@@ -24,8 +24,8 @@ type kubeClient struct {
 	dynamicClient dynamic.Interface
 }
 
-// NewKubeClient creates an empty KubeClient
-func NewKubeClient(s *cli.EnvSettings) *kubeClient {
+// newKubeClient creates an empty KubeClient
+func newKubeClient(s *cli.EnvSettings) *kubeClient {
 	return &kubeClient{
 		EnvSettings: s,
 		// default other fields

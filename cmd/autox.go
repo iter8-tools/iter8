@@ -17,8 +17,6 @@ Run the Iter8 autoX controller.
 
 // newAutoXCmd creates the autox command
 func newAutoXCmd() *cobra.Command {
-	actor := autox.NewOpts(autoXKClient)
-
 	cmd := &cobra.Command{
 		Use:   "autox",
 		Short: "Start the Iter8 autoX controller",
@@ -27,7 +25,7 @@ func newAutoXCmd() *cobra.Command {
 			stopCh := make(chan struct{})
 			defer close(stopCh)
 
-			if err := actor.Start(stopCh); err != nil {
+			if err := autox.Start(stopCh, nil); err != nil {
 				return err
 			}
 			sigCh := make(chan os.Signal, 1)
