@@ -336,6 +336,7 @@ func newIter8Watcher() *iter8Watcher {
 	}
 
 	// aggregate all triggers (namespaces and GVR) from the releaseGroupConfig
+	// triggers map has namespace as its key and the object GVRs within the namespace that it is watching as its value
 	triggers := map[string][]schema.GroupVersionResource{}
 	for _, releaseGroupSpec := range autoXConfig.Specs {
 
@@ -353,8 +354,9 @@ func newIter8Watcher() *iter8Watcher {
 	// for each namespace and resource type, configure an informer
 	for ns, gvrs := range triggers {
 		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
-		for _, gvr := range gvrs {
 
+		// TBD: optimize the informers by supplying the trigger object name, perhaps through list options
+		for _, gvr := range gvrs {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 				AddFunc:    addObject,

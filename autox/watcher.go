@@ -51,7 +51,7 @@ func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 	if autoxK == nil {
 		// get the real client
 
-		k8sClient = NewKubeClient(cli.New())
+		k8sClient = newKubeClient(cli.New())
 	} else {
 		// set it here
 		k8sClient = autoxK
