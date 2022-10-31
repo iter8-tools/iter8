@@ -277,16 +277,16 @@ func (kd *KubeDriver) upgrade(chartPathOptions action.ChartPathOptions, chartNam
 	client.DryRun = dry
 
 	// copy chartpathoptions
-	client.ChartPathOptions.CaFile = chartPathOptions.CaFile
-	client.ChartPathOptions.CertFile = chartPathOptions.CertFile
-	client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile
-	client.ChartPathOptions.InsecureSkipTLSverify = chartPathOptions.InsecureSkipTLSverify
-	client.ChartPathOptions.Keyring = chartPathOptions.Keyring
-	client.ChartPathOptions.Password = chartPathOptions.Password
-	client.ChartPathOptions.PassCredentialsAll = chartPathOptions.PassCredentialsAll
+	// client.ChartPathOptions.CaFile = chartPathOptions.CaFile
+	// client.ChartPathOptions.CertFile = chartPathOptions.CertFile
+	// client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile
+	// client.ChartPathOptions.InsecureSkipTLSverify = chartPathOptions.InsecureSkipTLSverify
+	// client.ChartPathOptions.Keyring = chartPathOptions.Keyring
+	// client.ChartPathOptions.Password = chartPathOptions.Password
+	// client.ChartPathOptions.PassCredentialsAll = chartPathOptions.PassCredentialsAll
 	client.ChartPathOptions.RepoURL = chartPathOptions.RepoURL
-	client.ChartPathOptions.Username = chartPathOptions.Username
-	client.ChartPathOptions.Verify = chartPathOptions.Verify
+	// client.ChartPathOptions.Username = chartPathOptions.Username
+	// client.ChartPathOptions.Verify = chartPathOptions.Verify
 	client.ChartPathOptions.Version = chartPathOptions.Version
 
 	cp, err := client.ChartPathOptions.LocateChart(chartName, kd.EnvSettings)
@@ -340,16 +340,16 @@ func (kd *KubeDriver) install(chartPathOptions action.ChartPathOptions, chartNam
 	client.ReleaseName = group
 
 	// copy chartPathOptions to client
-	client.ChartPathOptions.CaFile = chartPathOptions.CaFile
-	client.ChartPathOptions.CertFile = chartPathOptions.CertFile
-	client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile
-	client.ChartPathOptions.InsecureSkipTLSverify = chartPathOptions.InsecureSkipTLSverify
-	client.ChartPathOptions.Keyring = chartPathOptions.Keyring
-	client.ChartPathOptions.Password = chartPathOptions.Password
-	client.ChartPathOptions.PassCredentialsAll = chartPathOptions.PassCredentialsAll
+	// client.ChartPathOptions.CaFile = chartPathOptions.CaFile
+	// client.ChartPathOptions.CertFile = chartPathOptions.CertFile
+	// client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile
+	// client.ChartPathOptions.InsecureSkipTLSverify = chartPathOptions.InsecureSkipTLSverify
+	// client.ChartPathOptions.Keyring = chartPathOptions.Keyring
+	// client.ChartPathOptions.Password = chartPathOptions.Password
+	// client.ChartPathOptions.PassCredentialsAll = chartPathOptions.PassCredentialsAll
 	client.ChartPathOptions.RepoURL = chartPathOptions.RepoURL
-	client.ChartPathOptions.Username = chartPathOptions.Username
-	client.ChartPathOptions.Verify = chartPathOptions.Verify
+	// client.ChartPathOptions.Username = chartPathOptions.Username
+	// client.ChartPathOptions.Verify = chartPathOptions.Verify
 	client.ChartPathOptions.Version = chartPathOptions.Version
 
 	cp, err := client.ChartPathOptions.LocateChart(chartName, kd.EnvSettings)
