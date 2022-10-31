@@ -17,8 +17,6 @@ func TestLocalLaunch(t *testing.T) {
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
-	lOpts.RepoURL = DefaultHelmRepository
-	lOpts.ChartName = DefaultChartName
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
 }
@@ -29,8 +27,6 @@ func TestKubeLaunch(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.RepoURL = DefaultHelmRepository
-	lOpts.ChartName = DefaultChartName
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
 
 	err = lOpts.KubeRun()

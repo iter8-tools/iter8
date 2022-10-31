@@ -2,15 +2,13 @@ package cmd
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"helm.sh/helm/v3/pkg/action"
-	"k8s.io/client-go/util/homedir"
+	// "helm.sh/helm/v3/pkg/action"
+	// "k8s.io/client-go/util/homedir"
 )
 
 // launchDesc is the description of the launch command
@@ -48,7 +46,7 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 		},
 	}
 	addDryRunFlag(cmd, &actor.DryRun)
-	addChartPathOptionsFlags(cmd, &actor.ChartPathOptions)
+	// addChartPathOptionsFlags(cmd, &actor.ChartPathOptions)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	addRunDirFlag(cmd, &actor.RunDir)
@@ -80,26 +78,26 @@ func addLocalChartFlag(cmd *cobra.Command, localChartPtr *bool) {
 // addChartPathOptionsFlags adds flags related to Helm chart repository
 // copied from
 // https://github.com/helm/helm/blob/ce66412a723e4d89555dc67217607c6579ffcb21/cmd/helm/flags.go
-func addChartPathOptionsFlags(cmd *cobra.Command, c *action.ChartPathOptions) {
-	cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 1.1.1) or it may reference a valid range (e.g. ^2.0.0). If this is not specified, the latest version is used")
-	cmd.Flags().BoolVar(&c.Verify, "verify", false, "verify the package before using it")
-	cmd.Flags().StringVar(&c.Keyring, "keyring", defaultKeyring(), "location of public keys used for verification")
-	cmd.Flags().StringVar(&c.RepoURL, "repo", "https://iter8-tools.github.io/hub", "chart repository url where to locate the requested chart")
-	cmd.Flags().StringVar(&c.Username, "username", "", "chart repository username where to locate the requested chart")
-	cmd.Flags().StringVar(&c.Password, "password", "", "chart repository password where to locate the requested chart")
-	cmd.Flags().StringVar(&c.CertFile, "cert-file", "", "identify HTTPS client using this SSL certificate file")
-	cmd.Flags().StringVar(&c.KeyFile, "key-file", "", "identify HTTPS client using this SSL key file")
-	cmd.Flags().BoolVar(&c.InsecureSkipTLSverify, "insecure-skip-tls-verify", false, "skip tls certificate checks for the chart download")
-	cmd.Flags().StringVar(&c.CaFile, "ca-file", "", "verify certificates of HTTPS-enabled servers using this CA bundle")
-	cmd.Flags().BoolVar(&c.PassCredentialsAll, "pass-credentials", false, "pass credentials to all domains")
-}
+// func addChartPathOptionsFlags(cmd *cobra.Command, c *action.ChartPathOptions) {
+// cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 1.1.1) or it may reference a valid range (e.g. ^2.0.0). If this is not specified, the latest version is used")
+// cmd.Flags().BoolVar(&c.Verify, "verify", false, "verify the package before using it")
+// cmd.Flags().StringVar(&c.Keyring, "keyring", defaultKeyring(), "location of public keys used for verification")
+// cmd.Flags().StringVar(&c.RepoURL, "repo", "https://iter8-tools.github.io/hub", "chart repository url where to locate the requested chart")
+// cmd.Flags().StringVar(&c.Username, "username", "", "chart repository username where to locate the requested chart")
+// cmd.Flags().StringVar(&c.Password, "password", "", "chart repository password where to locate the requested chart")
+// cmd.Flags().StringVar(&c.CertFile, "cert-file", "", "identify HTTPS client using this SSL certificate file")
+// cmd.Flags().StringVar(&c.KeyFile, "key-file", "", "identify HTTPS client using this SSL key file")
+// cmd.Flags().BoolVar(&c.InsecureSkipTLSverify, "insecure-skip-tls-verify", false, "skip tls certificate checks for the chart download")
+// cmd.Flags().StringVar(&c.CaFile, "ca-file", "", "verify certificates of HTTPS-enabled servers using this CA bundle")
+// cmd.Flags().BoolVar(&c.PassCredentialsAll, "pass-credentials", false, "pass credentials to all domains")
+// }
 
-// defaultKeyring returns the expanded path to the default keyring.
-// copied from
-// https://github.com/helm/helm/blob/ce66412a723e4d89555dc67217607c6579ffcb21/cmd/helm/dependency_build.go
-func defaultKeyring() string {
-	if v, ok := os.LookupEnv("GNUPGHOME"); ok {
-		return filepath.Join(v, "pubring.gpg")
-	}
-	return filepath.Join(homedir.HomeDir(), ".gnupg", "pubring.gpg")
-}
+// // defaultKeyring returns the expanded path to the default keyring.
+// // copied from
+// // https://github.com/helm/helm/blob/ce66412a723e4d89555dc67217607c6579ffcb21/cmd/helm/dependency_build.go
+// func defaultKeyring() string {
+// 	if v, ok := os.LookupEnv("GNUPGHOME"); ok {
+// 		return filepath.Join(v, "pubring.gpg")
+// 	}
+// 	return filepath.Join(homedir.HomeDir(), ".gnupg", "pubring.gpg")
+// }

@@ -276,6 +276,7 @@ func (kd *KubeDriver) upgrade(chartPathOptions action.ChartPathOptions, chartNam
 	client.Namespace = kd.Namespace()
 	client.DryRun = dry
 
+	// copy chartpathoptions
 	client.ChartPathOptions.CaFile = chartPathOptions.CaFile
 	client.ChartPathOptions.CertFile = chartPathOptions.CertFile
 	client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile
@@ -338,6 +339,7 @@ func (kd *KubeDriver) install(chartPathOptions action.ChartPathOptions, chartNam
 	client.DryRun = dry
 	client.ReleaseName = group
 
+	// copy chartPathOptions to client
 	client.ChartPathOptions.CaFile = chartPathOptions.CaFile
 	client.ChartPathOptions.CertFile = chartPathOptions.CertFile
 	client.ChartPathOptions.KeyFile = chartPathOptions.KeyFile

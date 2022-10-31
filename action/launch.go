@@ -4,7 +4,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"helm.sh/helm/v3/pkg/action"
@@ -40,14 +42,21 @@ type LaunchOpts struct {
 // NewLaunchOpts initializes and returns launch opts
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	return &LaunchOpts{
-		DryRun:           false,
-		ChartPathOptions: action.ChartPathOptions{},
-		ChartName:        "",
-		Options:          values.Options{},
-		RunDir:           ".",
-		KubeDriver:       kd,
-		LocalChart:       false,
+		DryRun: false,
+		ChartPathOptions: action.ChartPathOptions{
+			RepoURL: DefaultHelmRepository,
+			Version: defaultChartVersion(),
+		},
+		ChartName:  DefaultChartName,
+		Options:    values.Options{},
+		RunDir:     ".",
+		KubeDriver: kd,
+		LocalChart: false,
 	}
+}
+
+func defaultChartVersion() string {
+	return strings.Replace(base.MajorMinor, "v", "", 1) + ".x"
 }
 
 // LocalRun launches a local experiment

@@ -49,7 +49,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	actor.EnvSettings = settings
 
 	// flags shared with launch
-	addChartPathOptionsFlags(cmd, &actor.ChartPathOptions)
+	// addChartPathOptionsFlags(cmd, &actor.ChartPathOptions)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	addLocalChartFlag(cmd, &actor.LocalChart)
