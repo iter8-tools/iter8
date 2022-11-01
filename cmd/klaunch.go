@@ -37,7 +37,7 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		Long:         klaunchDesc,
 		SilenceUsage: true,
 		PreRunE: func(cmd *cobra.Command, _ []string) error {
-			return noDownloadIsRequired(actor, cmd.Flags())
+			return chartNameIsRequired(actor, cmd.Flags())
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.KubeRun()
@@ -49,11 +49,10 @@ func newKLaunchCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 	actor.EnvSettings = settings
 
 	// flags shared with launch
-	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
-	addRemoteFolderURLFlag(cmd, &actor.RemoteFolderURL)
+	// addChartPathOptionsFlags(cmd, &actor.ChartPathOptions)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
-	addNoDownloadFlag(cmd, &actor.NoDownload)
+	addLocalChartFlag(cmd, &actor.LocalChart)
 
 	return cmd
 }

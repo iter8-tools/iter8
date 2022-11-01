@@ -11,16 +11,16 @@ import (
 func TestLaunch(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
-		// launch, chartsParentDir, noDownload
+		// launch, localChart
 		{
 			name:   "basic launch",
-			cmd:    fmt.Sprintf("launch -c iter8 --chartsParentDir %v --noDownload --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../", "")),
+			cmd:    fmt.Sprintf("launch -c %v --localChart --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../testdata/charts", "iter8")),
 			golden: base.CompletePath("../testdata", "output/launch.txt"),
 		},
 		// launch, values file
 		{
 			name:   "launch with values file",
-			cmd:    fmt.Sprintf("launch -c iter8 --chartsParentDir %v --noDownload --set tasks={http,assess} --set http.duration=2s -f %v", base.CompletePath("../", ""), base.CompletePath("../testdata", "config.yaml")),
+			cmd:    fmt.Sprintf("launch -c %v --localChart --set tasks={http,assess} --set http.duration=2s -f %v", base.CompletePath("../testdata/charts", "iter8"), base.CompletePath("../testdata", "config.yaml")),
 			golden: base.CompletePath("../testdata", "output/launch-with-slos.txt"),
 		},
 	}
