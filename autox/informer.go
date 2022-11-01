@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"hash/maphash"
-	"os"
 	"reflect"
+	"sync"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -20,7 +20,7 @@ import (
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -30,13 +30,15 @@ const (
 	trackLabel   = "iter8.tools/track"
 )
 
+var ns string
+var gvr schema.GroupVersionResource
+var m sync.Mutex
+
 type chartAction int64
 
 const (
 	releaseAction chartAction = 0
 	deleteAction  chartAction = 1
-
-	applicationTemplateFilePath string = "application.tpl"
 )
 
 // applicationValues is the values for the application template
@@ -105,7 +107,7 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 	// TODO: what to put for ctx?
 	// get secret, based on autoX label
 	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, group)
-	secretList, err := secretsClient.List(context.TODO(), metaV1.ListOptions{
+	secretList, err := secretsClient.List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
 	if err != nil {
@@ -150,14 +152,10 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 
 	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 
-	// get application template
-	dat, err := os.ReadFile(applicationTemplateFilePath)
-	if err != nil {
-		log.Logger.Error("could not read application template")
-		return err
-	}
+	//go:embed application.tpl
+	var tplStr string
 
-	tpl, err := base.CreateTemplate(string(dat))
+	tpl, err := base.CreateTemplate(tplStr)
 	if err != nil {
 		log.Logger.Error("could not create application template")
 		return err
@@ -187,7 +185,7 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 
 	// TODO: what to put for ctx?
 	// create application object
-	_, err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Create(context.TODO(), unstructuredObj, metaV1.CreateOptions{})
+	_, err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Create(context.TODO(), unstructuredObj, metav1.CreateOptions{})
 	if err != nil {
 		log.Logger.Error("could not create application:", releaseName)
 		return err
@@ -206,7 +204,7 @@ func deleteHelmReleases(prunedLabels map[string]string, namespace string) error 
 var deleteHelmRelease = func(releaseName string, group string, namespace string) error {
 	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 
-	err := k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseName, metaV1.DeleteOptions{})
+	err := k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
 	if err != nil {
 		log.Logger.Error("could not delete application:", releaseName)
 		return err
@@ -270,60 +268,104 @@ func hasAutoXLabel(labels map[string]string) bool {
 
 // addObject is the function object that will be used as the add handler in the informer
 func addObject(obj interface{}) {
+	m.Lock()
+	defer m.Unlock()
+
 	log.Logger.Debug("Add:", obj)
 
-	uObj := obj.(*unstructured.Unstructured)
+	u := obj.(*unstructured.Unstructured)
+	clientU, err := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), u.GetName(), metav1.GetOptions{})
 
-	// if there is no autoX label, there is nothing to do
-	labels := uObj.GetLabels()
-	if !hasAutoXLabel(labels) {
+	if err != nil {
+		log.Logger.Warn("could not get object \"%s\" from client", u)
 		return
 	}
-	// there is an autoX group name
 
-	// we will install Helm releases
+	if clientU != nil {
+		log.Logger.Warn("expected object \"%s\" to exist but none were found", u)
+		return
+	}
+
+	// check if autoX label exists
+	labels := clientU.GetLabels()
+	if !hasAutoXLabel(labels) {
+		log.Logger.Warn("expected object \"%s\" to have label \"%s\" but none were found", clientU, autoXLabel)
+		return
+	}
+
+	// only install Helm releases if auto X label exists
 	prunedLabels := pruneLabels(labels)
+	_ = addObjectHelper(clientU, prunedLabels)
+}
 
-	_ = installHelmReleases(prunedLabels, uObj.GetNamespace())
+func addObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string) error {
+	return installHelmReleases(prunedLabels, uObj.GetNamespace())
 }
 
 func updateObject(oldObj, obj interface{}) {
+	m.Lock()
+	defer m.Unlock()
+
 	log.Logger.Debug("Update:", oldObj, obj)
 
-	uOldObj := oldObj.(*unstructured.Unstructured)
-	prunedLabelsOld := pruneLabels(uOldObj.GetLabels())
+	oldU := oldObj.(*unstructured.Unstructured)
+	oldPrunedLabels := pruneLabels(oldU.GetLabels())
 
-	uObj := obj.(*unstructured.Unstructured)
-	prunedLabels := pruneLabels(uObj.GetLabels())
+	u := obj.(*unstructured.Unstructured)
+	clientU, err := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), u.GetName(), metav1.GetOptions{})
+	if err != nil {
+		log.Logger.Error("")
+		return
+	}
+	prunedLabels := pruneLabels(clientU.GetLabels())
 
-	// if the pruned label sets are equal, do nothing
-	if reflect.DeepEqual(prunedLabelsOld, prunedLabels) {
+	// check if labels have changed
+	if reflect.DeepEqual(oldPrunedLabels, prunedLabels) {
+		log.Logger.Debug("updated object has no labels changes")
 		return
 	}
 
-	// if the pruned label sets are different, then
-	// first attempt delete, and then attempt install
-	if hasAutoXLabel(prunedLabelsOld) {
-		_ = deleteHelmReleases(prunedLabelsOld, uOldObj.GetNamespace())
+	// if labels have changed, then delete the Helm releases
+	_ = deleteObjectHelper(clientU, prunedLabels)
+
+	// check if autoX label exists
+	labels := clientU.GetLabels()
+	if !hasAutoXLabel(labels) {
+		log.Logger.Warn("unstructured.Unstructured should have autoXLabel but does not")
+		return
 	}
 
-	if hasAutoXLabel(prunedLabels) {
-		_ = installHelmReleases(prunedLabels, uOldObj.GetNamespace())
-	}
+	// only install Helm releases if auto X label exists
+	_ = addObjectHelper(clientU, prunedLabels)
 }
 
 func deleteObject(obj interface{}) {
+	m.Lock()
+	defer m.Unlock()
+
 	log.Logger.Debug("Delete:", obj)
 
-	uObj := obj.(*unstructured.Unstructured)
-	prunedLabels := pruneLabels(uObj.GetLabels())
+	u := obj.(*unstructured.Unstructured)
+	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), u.GetName(), metav1.GetOptions{})
 
-	if !hasAutoXLabel(prunedLabels) {
+	if clientU != nil {
+		log.Logger.Warn("")
 		return
 	}
 
-	// delete Helm charts
-	_ = deleteHelmReleases(prunedLabels, uObj.GetNamespace())
+	// check if autoX label exists
+	labels := clientU.GetLabels()
+	if !hasAutoXLabel(labels) {
+		log.Logger.Warn("unstructured.Unstructured should have autoXLabel but does not")
+	}
+
+	// delete Helm releases if auto X label exists
+	prunedLabels := pruneLabels(labels)
+	_ = deleteObjectHelper(u, prunedLabels)
+}
+
+func deleteObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string) error {
+	return deleteHelmReleases(prunedLabels, uObj.GetNamespace())
 }
 
 type iter8Watcher struct {
