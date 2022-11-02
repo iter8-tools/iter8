@@ -117,7 +117,7 @@ jobs:
         iter8 version
     - name: launch
       run: |
-        iter8 launch --noDownload \
+        iter8 launch --localChart -c testdata/charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://$HOST_IP/get"
     - name: assert
