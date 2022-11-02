@@ -167,6 +167,6 @@ result:
       user/engagement:
       - 100000000
     numVersions: 1
-  iter8Version: v0.11
+  iter8Version: v0.12
   numCompletedTasks: 4
   startTime: "2022-03-16T10:22:58.540897-04:00"
