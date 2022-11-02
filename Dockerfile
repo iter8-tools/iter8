@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y wget
 
 # Set Iter8 version from build args
 ARG TAG
-ENV TAG=${TAG:-v0.11.0}
+ENV TAG=${TAG:-v0.12.0}
 
 # Download iter8 compressed binary
 RUN wget https://github.com/iter8-tools/iter8/releases/download/${TAG}/iter8-linux-amd64.tar.gz

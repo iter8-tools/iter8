@@ -23,6 +23,6 @@
     headers:
       Authorization: token {{ .token }}
       Accept: application/vnd.github+json
-    payloadTemplateURL: {{ default "https://raw.githubusercontent.com/iter8-tools/iter8/v0.11.10/charts/iter8/templates/_payload-github.tpl" .payloadTemplateURL }}
+    payloadTemplateURL: {{ default "https://raw.githubusercontent.com/iter8-tools/hub/iter8-0.12.1/charts/iter8/templates/_payload-github.tpl" .payloadTemplateURL }}
     softFailure: {{ default true .softFailure }}
 {{ end }}
