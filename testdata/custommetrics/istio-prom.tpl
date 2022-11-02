@@ -8,9 +8,15 @@
 # and uses the resulting metric specs to query Prometheus.
 # The placeholders are as follows.
 # 
-# elapsedTimeSeconds              int     implicit
-# startingTime                    string  optional
-# latencyPercentiles              []int   optional
+# labels                          map[string]interface{}              optional
+# elapsedTimeSeconds              int                                 implicit
+# startingTime                    string                              optional
+# latencyPercentiles              []int                               optional
+#
+# labels: this is the set of Prometheus labels that will be used to identify a particular
+# app version. These labels will be applied to every Prometheus query. To learn more
+# about what labels you can use for Prometheus, please see
+# https://istio.io/latest/docs/reference/config/metrics/#labels
 #
 # elapsedTimeSeconds: this should not be specified directly by the user. 
 # It is implicitly computed by Iter8 according to the following formula

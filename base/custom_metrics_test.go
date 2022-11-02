@@ -14,36 +14,44 @@ import (
 )
 
 const (
-	testCEURL          = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-ce.metrics.yaml"
-	testRequestBodyURL = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-request-body.metrics.yaml"
-	testRequestBody    = "test-request-body"
-	testPromURL        = `test-database.com/prometheus/api/v1/query`
-	queryString        = "?query="
-	requestCountQuery  = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"}[0s])) or on() vector(0)\n"
-	errorCountQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"  ibm_codeengine_status!=\"200\",\n" +
-		"}[0s])) or on() vector(0)\n"
-	errorRateQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"  ibm_codeengine_status!=\"200\",\n" +
-		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"}[0s])) or on() vector(0)\n"
-	requestCountWithRevisionNameQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"  ibm_codeengine_revision_name=\"v1\",\n" +
-		"}[0s])) or on() vector(0)\n"
-	errorCountWithRevisionNameQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"  ibm_codeengine_status!=\"200\",\n" +
-		"  ibm_codeengine_revision_name=\"v1\",\n" +
-		"}[0s])) or on() vector(0)\n"
-	errorRateWithRevisionNameQuery = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"  ibm_codeengine_status!=\"200\",\n" +
-		"  ibm_codeengine_revision_name=\"v1\",\n" +
-		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
-		"  ibm_codeengine_revision_name=\"v1\",\n" +
-		"}[0s])) or on() vector(0)\n"
+	queryString           = "?query="
 	exampleQueryParameter = "example query parameter\n"
 	exampleRequestBody    = "example request body\n"
-	istioPromProviderURL  = "https://raw.githubusercontent.com/iter8-tools/iter8/master/custommetrics/istio-prom.tpl"
+
+	// the provider URL is mocked
+	cePromProviderURL  = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-ce.metrics.yaml"
+	testCE             = "test-ce"
+	testCEPromURL      = `test-database.com/prometheus/api/v1/query`
+	testCERequestCount = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"}[0s])) or on() vector(0)\n"
+	testCEErrorCount = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"}[0s])) or on() vector(0)\n"
+	testCEErrorRate = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"}[0s])) or on() vector(0)\n"
+	testCERequestCountWithRevisionName = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)\n"
+	testCEErrorCountWithRevisionName = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)\n"
+	testCEErrorRateWithRevisionName = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_status!=\"200\",\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
+		"  ibm_codeengine_revision_name=\"v1\",\n" +
+		"}[0s])) or on() vector(0)\n"
+
+	// the provider URL is mocked
+	testProviderURL = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-request-body.metrics.yaml"
+	testRequestBody = "test-request-body"
+
+	// the provider URL is mocked
+	istioPromProviderURL = "https://raw.githubusercontent.com/iter8-tools/iter8/master/custommetrics/istio-prom.tpl"
+
 	istioPromRequestCount = "sum(last_over_time(istio_requests_total{\n" +
 		"  destination_workload=\"myApp\",\n" +
 		"  destination_workload_namespace=\"production\",\n" +
@@ -139,7 +147,7 @@ func TestStartingTimeFormatError(t *testing.T) {
 
 // test istio-prom provider spec
 func TestIstioProm(t *testing.T) {
-	dat, err := os.ReadFile(CompletePath("../custommetrics", "istio-prom.tpl"))
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "istio-prom.tpl"))
 	assert.NoError(t, err)
 	tplString := string(dat)
 
@@ -259,11 +267,19 @@ func TestIstioProm(t *testing.T) {
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -281,7 +297,7 @@ func TestCEOneVersion(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -299,7 +315,7 @@ func TestCEOneVersion(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -323,7 +339,7 @@ func TestCEOneVersion(t *testing.T) {
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 
-	err := ct.run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -337,14 +353,23 @@ func TestCEOneVersion(t *testing.T) {
 // basic test with versionValues, mimicking Code Engine
 // one version, three successful metrics
 func TestCEVersionValues(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
+
 	ct.With.VersionValues = []map[string]interface{}{{
 		"ibm_codeengine_revision_name": "v1",
 	}}
 
 	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountWithRevisionNameQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCountWithRevisionName),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -362,7 +387,7 @@ func TestCEVersionValues(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountWithRevisionNameQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCountWithRevisionName),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -380,7 +405,7 @@ func TestCEVersionValues(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateWithRevisionNameQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRateWithRevisionName),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -404,7 +429,7 @@ func TestCEVersionValues(t *testing.T) {
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 
-	err := ct.run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -418,19 +443,27 @@ func TestCEVersionValues(t *testing.T) {
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	exp := &Experiment{
@@ -440,24 +473,31 @@ func TestCEUnauthorized(t *testing.T) {
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 
-	err := ct.run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
 
 	// no values should be collected because of unauthorized requests
 	assert.Equal(t, len(exp.Result.Insights.NonHistMetricValues[0]), 0)
-
 }
 
 // test with one version with some values, mimicking Code Engine
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -466,7 +506,7 @@ func TestCESomeValues(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -484,7 +524,7 @@ func TestCESomeValues(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -508,7 +548,7 @@ func TestCESomeValues(t *testing.T) {
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 
-	err := ct.run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -525,13 +565,21 @@ func TestCESomeValues(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
 
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
+
 	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -540,7 +588,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -558,7 +606,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -582,7 +630,7 @@ func TestCEMultipleVersions(t *testing.T) {
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(2)
 
-	err := ct.run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -601,12 +649,21 @@ func TestCEMultipleVersions(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "test-ce", testCEURL)
+	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
+
 	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(requestCountQuery), httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -615,7 +672,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorCountQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -633,7 +690,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(errorRateQuery),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -657,7 +714,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(2)
 
-	err := ct.run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
@@ -675,11 +732,19 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 
 // basic test with a request body
 func TestRequestBody(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", testRequestBody+".tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testRequestBody, testRequestBodyURL)
+	ct := getCustomMetricsTask(t, testRequestBody, testProviderURL)
+
+	// mock provider URL
+	httpmock.RegisterResponder("GET", istioPromProviderURL,
+		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testPromURL+queryString+url.QueryEscape(exampleQueryParameter),
+	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(exampleQueryParameter),
 		func(req *http.Request) (*http.Response, error) {
 			if req.Body != nil {
 				b, err := io.ReadAll(req.Body)
@@ -716,7 +781,7 @@ func TestRequestBody(t *testing.T) {
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 
-	err := ct.run(exp)
+	err = ct.run(exp)
 
 	// test should not fail
 	assert.NoError(t, err)
