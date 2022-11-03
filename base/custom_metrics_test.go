@@ -267,7 +267,7 @@ func TestIstioProm(t *testing.T) {
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {
-	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "test-ce.tpl"))
 	assert.NoError(t, err)
 	tplString := string(dat)
 
@@ -353,7 +353,7 @@ func TestCEOneVersion(t *testing.T) {
 // basic test with versionValues, mimicking Code Engine
 // one version, three successful metrics
 func TestCEVersionValues(t *testing.T) {
-	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "test-ce.tpl"))
 	assert.NoError(t, err)
 	tplString := string(dat)
 
@@ -443,7 +443,7 @@ func TestCEVersionValues(t *testing.T) {
 // test with one version and improper authorization, mimicking Code Engine
 // one version, three successful metrics
 func TestCEUnauthorized(t *testing.T) {
-	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "test-ce.tpl"))
 	assert.NoError(t, err)
 	tplString := string(dat)
 
@@ -485,7 +485,7 @@ func TestCEUnauthorized(t *testing.T) {
 // test with one version with some values, mimicking Code Engine
 // one version, three successful metrics, one without values
 func TestCESomeValues(t *testing.T) {
-	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "test-ce.tpl"))
 	assert.NoError(t, err)
 	tplString := string(dat)
 
@@ -565,7 +565,7 @@ func TestCESomeValues(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersions(t *testing.T) {
-	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "test-ce.tpl"))
 	assert.NoError(t, err)
 	tplString := string(dat)
 
@@ -649,7 +649,7 @@ func TestCEMultipleVersions(t *testing.T) {
 // test with two version with some values, mimicking Code Engine
 // two versions, four successful metrics, two without values
 func TestCEMultipleVersionsAndMetrics(t *testing.T) {
-	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "ce-prom.tpl"))
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "test-ce.tpl"))
 	assert.NoError(t, err)
 	tplString := string(dat)
 
