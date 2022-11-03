@@ -1,0 +1,15 @@
+apiVersion: v2
+description: Iter8 experiment chart
+home: https://iter8.tools
+icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+maintainers:
+- email: spartha@us.ibm.com
+  name: Srinivasan Parthasarathy
+  url: https://researcher.watson.ibm.com/researcher/view.php?person=us-spartha
+- email: kalantar@us.ibm.com
+  name: Michael Kalantar
+name: iter8
+sources:
+- https://github.com/iter8-tools/hub
+type: application
+version: 0.12.1

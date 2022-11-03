@@ -81,9 +81,6 @@ func init() {
 	// add gen
 	rootCmd.AddCommand(newGenCmd())
 
-	// add hub
-	rootCmd.AddCommand(newHubCmd())
-
 	// add k
 	rootCmd.AddCommand(kcmd)
 

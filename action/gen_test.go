@@ -17,8 +17,7 @@ func TestGen(t *testing.T) {
 	// fix gOpts
 	_ = os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
-	gOpts.ChartsParentDir = base.CompletePath("../", "")
-	gOpts.ChartName = "iter8"
+	gOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
 	gOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get"}
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)
@@ -40,8 +39,7 @@ func TestGenGRPC(t *testing.T) {
 	// fix gOpts
 	_ = os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
-	gOpts.ChartsParentDir = base.CompletePath("../", "")
-	gOpts.ChartName = "iter8"
+	gOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
 	gOpts.Values = []string{"tasks={grpc,assess}", "grpc.host=localhost:50051", "grpc.call=helloworld.Greeter.SayHello", "grpc.proto=helloworld.proto", "grpc.protoset=helloworld.protoset", "grpc.data.name=frodo", "assess.SLOs.upper.grpc/error-rate=0", "assess.SLOs.upper.grpc/latency/mean=150"}
 	err := gOpts.LocalRun()
 	assert.NoError(t, err)
@@ -65,8 +63,7 @@ func TestGenDB(t *testing.T) {
 	// fix gOpts
 	_ = os.Chdir(t.TempDir())
 	gOpts := NewGenOpts()
-	gOpts.ChartsParentDir = base.CompletePath("../", "")
-	gOpts.ChartName = "iter8"
+	gOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
 	gOpts.Values = []string{"tasks={custommetrics,assess}", "custommetrics.templates.istio-prom=https://raw.githubusercontent.com/iter8-tools/iter8/master/charts/iter8lib/templates/_metrics-istio.tpl", "custommetrics.values.URL=http://prometheus.istio-system:9090/api/v1/query", "custommetrics.values.destinationWorkload=httpbin-v2", "custommetrics.values.destinationWorkloadNamespace=default", `custommetrics.values.startingTime="2020-02-01T09:44:40Z"`, "assess.SLOs.upper.istio/error-rate=0"}
 
 	err := gOpts.LocalRun()

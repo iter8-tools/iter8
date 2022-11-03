@@ -16,12 +16,7 @@ func TestLocalLaunch(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.RemoteFolderURL = "github.com/sriumcp/iter8.git?ref=ic//charts"
-	// // TODO: fix git ref
-	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + ChartsFolderName
-	lOpts.ChartName = "iter8"
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
-
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
 }
@@ -32,10 +27,6 @@ func TestKubeLaunch(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.RemoteFolderURL = "github.com/sriumcp/iter8.git?ref=ic//charts"
-	// // TODO: fix git ref
-	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + ChartsFolderName
-	lOpts.ChartName = "iter8"
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
 
 	err = lOpts.KubeRun()
@@ -47,33 +38,29 @@ func TestKubeLaunch(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestLocalLaunchNoDownload(t *testing.T) {
+func TestLocalLaunchLocalChart(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.ChartsParentDir = base.CompletePath("../", "")
-	lOpts.ChartName = "iter8"
-	lOpts.NoDownload = true
+	lOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
+	lOpts.LocalChart = true
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
 
 	err := lOpts.LocalRun()
 	assert.NoError(t, err)
 }
 
-func TestKubeLaunchNoDownload(t *testing.T) {
+func TestKubeLaunchLocalChart(t *testing.T) {
 	var err error
 	_ = os.Chdir(t.TempDir())
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.ChartsParentDir = base.CompletePath("../", "")
-	lOpts.ChartName = "iter8"
-	lOpts.NoDownload = true
+	lOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
+	lOpts.LocalChart = true
 	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
-	// // fixing git ref forever
-	// lOpts.RemoteFolderURL = defaultIter8Repo + "?ref=v0.11.0" + "//" + ChartsFolderName
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

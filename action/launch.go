@@ -1,26 +1,32 @@
 package action
 
 import (
+	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
+)
+
+const (
+	// DefaultHelmRepository is the URL of the default Helm repository
+	DefaultHelmRepository = "https://iter8-tools.github.io/hub"
+	// DefaultChartName is the default name of the Iter8 chart
+	DefaultChartName = "iter8"
 )
 
 // LaunchOpts are the options used for launching experiments
 type LaunchOpts struct {
 	// DryRun enables simulating a launch
 	DryRun bool
-	// RemoteFolderURL is the URL of the remote Iter8 experiment charts folder
-	// Remote URLs can be any go-getter URLs like GitHub or GitLab URLs
-	// https://github.com/hashicorp/go-getter
-	RemoteFolderURL string
-	// ChartsParentDir is the directory where `charts` is to be downloaded or is located
-	ChartsParentDir string
-	// NoDownload disables charts download.
-	// With this option turned on, `charts` that are already present locally are reused
-	NoDownload bool
+	// ChartPathOptions
+	action.ChartPathOptions
 	// ChartName is the name of the chart
 	ChartName string
 	// Options provides the values to be combined with the experiment chart
@@ -29,46 +35,79 @@ type LaunchOpts struct {
 	RunDir string
 	// KubeDriver enables Kubernetes experiment run
 	*driver.KubeDriver
+	// LocalChart indicates the chart is on the local filesystem
+	LocalChart bool
 }
 
 // NewLaunchOpts initializes and returns launch opts
 func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 	return &LaunchOpts{
-		DryRun:          false,
-		RemoteFolderURL: DefaultRemoteFolderURL(),
-		ChartsParentDir: ".",
-		NoDownload:      false,
-		ChartName:       "",
-		Options:         values.Options{},
-		RunDir:          ".",
-		KubeDriver:      kd,
+		DryRun: false,
+		ChartPathOptions: action.ChartPathOptions{
+			RepoURL: DefaultHelmRepository,
+			Version: defaultChartVersion(),
+		},
+		ChartName:  DefaultChartName,
+		Options:    values.Options{},
+		RunDir:     ".",
+		KubeDriver: kd,
+		LocalChart: false,
 	}
+}
+
+func defaultChartVersion() string {
+	return strings.Replace(base.MajorMinor, "v", "", 1) + ".x"
 }
 
 // LocalRun launches a local experiment
 func (lOpts *LaunchOpts) LocalRun() error {
 	log.Logger.Debug("launch local run started...")
-	if !lOpts.NoDownload {
-		// download chart from Iter8 hub
-		hOpts := &HubOpts{
-			RemoteFolderURL: lOpts.RemoteFolderURL,
-			ChartsDir:       path.Join(lOpts.ChartsParentDir, ChartsFolderName),
+
+	var gOpts GenOpts
+	if lOpts.LocalChart {
+		// local charts
+		gOpts = GenOpts{
+			Options:   lOpts.Options,
+			GenDir:    lOpts.RunDir,
+			ChartName: path.Join(filepath.Dir(lOpts.ChartName), filepath.Base(lOpts.ChartName)),
 		}
-		if err := hOpts.LocalRun(); err != nil {
+	} else {
+		// non-local charts. download charts
+
+		// create temporary folder to store chart
+		chartsFolderName, err := os.MkdirTemp("", "iter8-")
+		if err != nil {
+			log.Logger.Error("failed to download chart")
 			return err
 		}
-		log.Logger.Debug("hub complete")
-	} else {
-		log.Logger.Debug("using `charts` under ", lOpts.ChartsParentDir)
+		defer func() {
+			// ignore error value
+			_ = os.RemoveAll(chartsFolderName)
+		}()
+
+		// pull chart (and its dependencies)
+		client := action.NewPullWithOpts(action.WithConfig(&action.Configuration{}))
+		client.RepoURL = lOpts.RepoURL
+		client.Untar = true
+		client.UntarDir = chartsFolderName + "/charts"
+		client.Settings = cli.New()
+		log.Logger.Debug("client.UntarDir ", client.UntarDir)
+
+		_, err = client.Run(lOpts.ChartName)
+		if err != nil {
+			return err
+		}
+
+		log.Logger.Trace("chart pulled")
+
+		// gen experiment spec
+		gOpts = GenOpts{
+			Options:   lOpts.Options,
+			GenDir:    lOpts.RunDir,
+			ChartName: path.Join(client.UntarDir, lOpts.ChartName),
+		}
 	}
 
-	// gen experiment spec
-	gOpts := GenOpts{
-		Options:         lOpts.Options,
-		ChartsParentDir: lOpts.ChartsParentDir,
-		GenDir:          lOpts.RunDir,
-		ChartName:       lOpts.ChartName,
-	}
 	if err := gOpts.LocalRun(); err != nil {
 		return err
 	}
@@ -96,30 +135,5 @@ func (lOpts *LaunchOpts) KubeRun() error {
 		return err
 	}
 
-	if !lOpts.NoDownload {
-		// download chart from Iter8 hub
-		hOpts := &HubOpts{
-			RemoteFolderURL: lOpts.RemoteFolderURL,
-			ChartsDir:       path.Join(lOpts.ChartsParentDir, ChartsFolderName),
-		}
-		if err := hOpts.LocalRun(); err != nil {
-			return err
-		}
-		log.Logger.Debug("hub complete")
-	} else {
-		log.Logger.Debug("using `charts` under ", lOpts.ChartsParentDir)
-	}
-
-	// update dependencies
-	gOpts := GenOpts{
-		Options:         lOpts.Options,
-		ChartsParentDir: lOpts.ChartsParentDir,
-		GenDir:          lOpts.RunDir,
-		ChartName:       lOpts.ChartName,
-	}
-	if err := driver.UpdateChartDependencies(gOpts.chartDir(), lOpts.EnvSettings); err != nil {
-		return err
-	}
-
-	return lOpts.KubeDriver.Launch(gOpts.chartDir(), lOpts.Options, lOpts.Group, lOpts.DryRun)
+	return lOpts.KubeDriver.Launch(lOpts.ChartPathOptions, lOpts.ChartName, lOpts.Options, lOpts.Group, lOpts.DryRun)
 }

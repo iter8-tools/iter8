@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"errors"
-	"os"
-	"path"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/driver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	// "helm.sh/helm/v3/pkg/action"
+	// "k8s.io/client-go/util/homedir"
 )
 
 // launchDesc is the description of the launch command
@@ -39,31 +39,26 @@ func newLaunchCmd(kd *driver.KubeDriver) *cobra.Command {
 		Long:         launchDesc,
 		SilenceUsage: true,
 		PreRunE: func(cmd *cobra.Command, _ []string) error {
-			return noDownloadIsRequired(actor, cmd.Flags())
+			return chartNameIsRequired(actor, cmd.Flags())
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.LocalRun()
 		},
 	}
 	addDryRunFlag(cmd, &actor.DryRun)
-	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
-	addRemoteFolderURLFlag(cmd, &actor.RemoteFolderURL)
+	// addChartPathOptionsFlags(cmd, &actor.ChartPathOptions)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	addRunDirFlag(cmd, &actor.RunDir)
-	addNoDownloadFlag(cmd, &actor.NoDownload)
+	addLocalChartFlag(cmd, &actor.LocalChart)
 
 	return cmd
 }
 
-// noDownloadIsRequired make noDownload flag required, if 'charts' folder is found
-func noDownloadIsRequired(lOpts *ia.LaunchOpts, flags *pflag.FlagSet) error {
-	chartsFolderPath := path.Join(lOpts.ChartsParentDir, ia.ChartsFolderName)
-	if _, err := os.Stat(chartsFolderPath); !os.IsNotExist(err) {
-		if flags.Changed("noDownload") {
-			return nil
-		}
-		return errors.New("'charts' folder found; 'noDownload' flag is required")
+// chartNameIsRequired makes chartName required if localChart is set
+func chartNameIsRequired(lOpts *ia.LaunchOpts, flags *pflag.FlagSet) error {
+	if flags.Changed("localChart") && !flags.Changed("chartName") {
+		return errors.New("localChart specified; 'chartName' is required")
 	}
 	return nil
 }
@@ -74,8 +69,35 @@ func addDryRunFlag(cmd *cobra.Command, dryRunPtr *bool) {
 	cmd.Flags().Lookup("dry").NoOptDefVal = "true"
 }
 
-// addNoDownloadFlag adds noDownload flag to the launch command
-func addNoDownloadFlag(cmd *cobra.Command, noDownloadPtr *bool) {
-	cmd.Flags().BoolVar(noDownloadPtr, "noDownload", false, "reuse local charts dir - do not download from remoteFolderURL; if local charts are present, this flag is required - set it to true or false; if local charts are absent, do not use this flag")
-	cmd.Flags().Lookup("noDownload").NoOptDefVal = "true"
+// addLocalChartFlag adds the localChart flag to the launch command
+func addLocalChartFlag(cmd *cobra.Command, localChartPtr *bool) {
+	cmd.Flags().BoolVar(localChartPtr, "localChart", false, "use local charts")
+	cmd.Flags().Lookup("localChart").NoOptDefVal = "true"
 }
+
+// addChartPathOptionsFlags adds flags related to Helm chart repository
+// copied from
+// https://github.com/helm/helm/blob/ce66412a723e4d89555dc67217607c6579ffcb21/cmd/helm/flags.go
+// func addChartPathOptionsFlags(cmd *cobra.Command, c *action.ChartPathOptions) {
+// cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 1.1.1) or it may reference a valid range (e.g. ^2.0.0). If this is not specified, the latest version is used")
+// cmd.Flags().BoolVar(&c.Verify, "verify", false, "verify the package before using it")
+// cmd.Flags().StringVar(&c.Keyring, "keyring", defaultKeyring(), "location of public keys used for verification")
+// cmd.Flags().StringVar(&c.RepoURL, "repo", "https://iter8-tools.github.io/hub", "chart repository url where to locate the requested chart")
+// cmd.Flags().StringVar(&c.Username, "username", "", "chart repository username where to locate the requested chart")
+// cmd.Flags().StringVar(&c.Password, "password", "", "chart repository password where to locate the requested chart")
+// cmd.Flags().StringVar(&c.CertFile, "cert-file", "", "identify HTTPS client using this SSL certificate file")
+// cmd.Flags().StringVar(&c.KeyFile, "key-file", "", "identify HTTPS client using this SSL key file")
+// cmd.Flags().BoolVar(&c.InsecureSkipTLSverify, "insecure-skip-tls-verify", false, "skip tls certificate checks for the chart download")
+// cmd.Flags().StringVar(&c.CaFile, "ca-file", "", "verify certificates of HTTPS-enabled servers using this CA bundle")
+// cmd.Flags().BoolVar(&c.PassCredentialsAll, "pass-credentials", false, "pass credentials to all domains")
+// }
+
+// // defaultKeyring returns the expanded path to the default keyring.
+// // copied from
+// // https://github.com/helm/helm/blob/ce66412a723e4d89555dc67217607c6579ffcb21/cmd/helm/dependency_build.go
+// func defaultKeyring() string {
+// 	if v, ok := os.LookupEnv("GNUPGHOME"); ok {
+// 		return filepath.Join(v, "pubring.gpg")
+// 	}
+// 	return filepath.Join(homedir.HomeDir(), ".gnupg", "pubring.gpg")
+// }

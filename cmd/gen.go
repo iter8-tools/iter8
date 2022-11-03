@@ -26,19 +26,14 @@ func newGenCmd() *cobra.Command {
 		Short:        "Generate experiment.yaml file by combining an experiment chart with values",
 		Long:         genDesc,
 		SilenceUsage: true,
+		Hidden:       true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return actor.LocalRun()
 		},
 	}
-	addChartsParentDirFlag(cmd, &actor.ChartsParentDir)
 	addChartNameFlag(cmd, &actor.ChartName)
 	addValueFlags(cmd.Flags(), &actor.Options)
 	return cmd
-}
-
-// addChartsParentDirFlag to the command
-func addChartsParentDirFlag(cmd *cobra.Command, chartsParentDirPtr *string) {
-	cmd.Flags().StringVar(chartsParentDirPtr, "chartsParentDir", ".", "directory under which the charts folder is located")
 }
 
 // addChartNameFlag to the command

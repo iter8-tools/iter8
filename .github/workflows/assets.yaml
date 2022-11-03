@@ -93,38 +93,6 @@ jobs:
         build-args: |
           TAG=v${{ env.VERSION }}
 
-  gh-action:
-    runs-on: ubuntu-latest
-    needs: assets
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: run httpbin
-      run: |
-        set -e
-        docker pull kennethreitz/httpbin
-        docker run -p 80:80 kennethreitz/httpbin &
-        HOST_IP=$(ip -f inet addr show docker0 | grep -Po 'inet \K[\d.]+')
-        echo "HOST_IP=$HOST_IP" >> $GITHUB_ENV
-        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$HOST_IP/get)" != "200" ]]; do
-          sleep 5; 
-        done;
-
-    - name: install Iter8 CLI
-      uses: ./
-    - name: version
-      run: | 
-        iter8 version
-    - name: launch
-      run: |
-        iter8 launch --noDownload \
-        --set "tasks={http}" \
-        --set http.url="http://$HOST_IP/get"
-    - name: assert
-      run: |
-        iter8 assert -c completed -c nofailure
-
-
   kubernetes-http-experiment:
     name: Kubernetes http load test    
     runs-on: ubuntu-latest
@@ -132,7 +100,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.11
+    - uses: iter8-tools/iter8@v0.12.0-pre
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -162,7 +130,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.11
+    - uses: iter8-tools/iter8@v0.12.0-pre
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -194,7 +162,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.11
+    - uses: iter8-tools/iter8@v0.12.0-pre
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -224,7 +192,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.11
+    - uses: iter8-tools/iter8@v0.12.0-pre
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
