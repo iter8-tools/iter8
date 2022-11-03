@@ -75,7 +75,7 @@ func getTextTemplateFromURL(providerURL string) (*template.Template, error) {
 		return nil, err
 	}
 
-	tpl, err := createTemplate(string(responseBody))
+	tpl, err := CreateTemplate(string(responseBody))
 	if err != nil {
 		log.Logger.Error(err)
 		return nil, err
@@ -84,7 +84,7 @@ func getTextTemplateFromURL(providerURL string) (*template.Template, error) {
 	return tpl, nil
 }
 
-// createTemplate creates a template from a string
-func createTemplate(tplString string) (*template.Template, error) {
+// CreateTemplate creates a template from a string
+func CreateTemplate(tplString string) (*template.Template, error) {
 	return template.New("provider template").Funcs(sprig.TxtFuncMap()).Parse(string(tplString))
 }
