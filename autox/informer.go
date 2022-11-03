@@ -279,20 +279,8 @@ func addObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) func(o
 			return
 		}
 
-		if clientU != nil {
+		if clientU == nil {
 			log.Logger.Warnf("expected object \"%v\" to exist but none were found", u)
-
-			// log.Logger.Warn()
-
-			// log.Logger.Warn("name:", u.GetName())
-			// log.Logger.Warn("gvr:", gvr)
-			// log.Logger.Warn("ns:", ns)
-
-			// l, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).List(context.TODO(), metav1.ListOptions{})
-			// log.Logger.Warn(l)
-
-			// log.Logger.Warn()
-
 			return
 		}
 
@@ -330,6 +318,14 @@ func updateObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) fun
 			log.Logger.Warnf("could not get object \"%v\" from client", u)
 			return
 		}
+
+		// TODO: if we cannot get the object from the dynamicClient, should we send a warning and stop or should we
+		// skip the Helm deletion and go directly to Helm install?
+		if clientU == nil {
+			log.Logger.Warnf("expected object \"%v\" to exist but none were found", u)
+			return
+		}
+
 		prunedLabels := pruneLabels(clientU.GetLabels())
 
 		// check if labels have changed
