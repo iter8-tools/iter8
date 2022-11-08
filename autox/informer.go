@@ -150,7 +150,7 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 		},
 	}
 
-	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
+	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
 
 	tpl, err := base.CreateTemplate(tplStr)
 	if err != nil {
@@ -199,7 +199,7 @@ func deleteHelmReleases(prunedLabels map[string]string, namespace string, autoXC
 
 // deleteHelmRelease with a given release name
 var deleteHelmRelease = func(releaseName string, group string, namespace string) error {
-	gvr := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
+	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
 
 	err := k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
 	if err != nil {
