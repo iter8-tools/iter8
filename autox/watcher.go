@@ -15,7 +15,6 @@ const (
 )
 
 var k8sClient *kubeClient
-var autoXConfig config
 
 func validateConfig(c config) error {
 	var err error
@@ -68,7 +67,7 @@ func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 	}
 
 	// set up resource watching as defined by config
-	autoXConfig = readConfig(configFile)
+	autoXConfig := readConfig(configFile)
 
 	err := validateConfig(autoXConfig)
 	if err != nil {
@@ -77,7 +76,7 @@ func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 
 	log.Logger.Debug("config:", autoXConfig)
 
-	w := newIter8Watcher()
+	w := newIter8Watcher(autoXConfig)
 	go w.start(stopCh)
 	return nil
 }
