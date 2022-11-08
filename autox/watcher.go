@@ -20,7 +20,7 @@ var autoXConfig config
 func validateConfig(c config) error {
 	var err error
 
-	for releaseGroupSpecID, releaseGroupSpec := range autoXConfig.Specs {
+	for releaseGroupSpecID, releaseGroupSpec := range c.Specs {
 		// validate trigger
 		if releaseGroupSpec.Trigger.Namespace == "" {
 			err = fmt.Errorf("trigger in spec group \"%s\" does not have a namespace", releaseGroupSpecID)
@@ -49,8 +49,7 @@ func validateConfig(c config) error {
 // Start is entry point to configure services and start them
 func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 	if autoxK == nil {
-		// get the real client
-
+		// get a default client
 		k8sClient = newKubeClient(cli.New())
 	} else {
 		// set it here

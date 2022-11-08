@@ -9,7 +9,7 @@ metadata:
     uid: {{ .owner.uid}}
 spec:
   destination:
-    namespace: {{ .trigger.Namespace }}
+    namespace: {{ .namespace }}
     server: https://kubernetes.default.svc
   project: default
   source:
