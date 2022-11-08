@@ -21,7 +21,7 @@ import (
 // after the watcher is created using newIter8Watcher()
 func TestNewIter8Watcher(t *testing.T) {
 	// autoX needs the config
-	autoXConfig = readConfig("../testdata/autox_inputs/config.example.yaml")
+	autoXConfig := readConfig("../testdata/autox_inputs/config.example.yaml")
 
 	// autoX handler will call on installHelmRelease and deleteHelmRelease
 	installHelmReleaseInvocations := 0
@@ -49,7 +49,7 @@ func TestNewIter8Watcher(t *testing.T) {
 	// define and start watcher
 	k8sClient = newFakeKubeClient(cli.New())
 
-	w := newIter8Watcher()
+	w := newIter8Watcher(autoXConfig)
 	assert.NotNil(t, w)
 	done := make(chan struct{})
 	defer close(done)

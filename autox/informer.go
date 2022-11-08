@@ -96,8 +96,8 @@ func getReleaseName(group string, releaseSpecID string, prunedLabels map[string]
 }
 
 // installHelmReleases for a given spec group
-func installHelmReleases(prunedLabels map[string]string, namespace string) error {
-	return doChartAction(prunedLabels, releaseAction, namespace)
+func installHelmReleases(prunedLabels map[string]string, namespace string, autoXConfig config) error {
+	return doChartAction(prunedLabels, releaseAction, namespace, autoXConfig)
 }
 
 // installHelmRelease for a given spec within a spec group
@@ -193,8 +193,8 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 }
 
 // deleteHelmReleases for a given spec group
-func deleteHelmReleases(prunedLabels map[string]string, namespace string) error {
-	return doChartAction(prunedLabels, deleteAction, namespace)
+func deleteHelmReleases(prunedLabels map[string]string, namespace string, autoXConfig config) error {
+	return doChartAction(prunedLabels, deleteAction, namespace, autoXConfig)
 }
 
 // deleteHelmRelease with a given release name
@@ -213,7 +213,7 @@ var deleteHelmRelease = func(releaseName string, group string, namespace string)
 
 // doChartAction iterates through a given spec group, and performs action for each spec
 // action can be install or delete
-func doChartAction(prunedLabels map[string]string, chartAction chartAction, namespace string) error {
+func doChartAction(prunedLabels map[string]string, chartAction chartAction, namespace string, autoXConfig config) error {
 	// get group
 	group := prunedLabels[autoXLabel]
 
@@ -264,7 +264,7 @@ func hasAutoXLabel(labels map[string]string) bool {
 }
 
 // addObject is the function object that will be used as the add handler in the informer
-func addObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) func(obj interface{}) {
+func addObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex, autoXConfig config) func(obj interface{}) {
 	return func(obj interface{}) {
 		m.Lock()
 		defer m.Unlock()
@@ -291,17 +291,17 @@ func addObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) func(o
 			return
 		}
 
-		// only install Helm releases if auto X label exists
+		// only install Helm releases if autoX label exists
 		prunedLabels := pruneLabels(labels)
-		_ = addObjectHelper(clientU, prunedLabels)
+		_ = addObjectHelper(clientU, prunedLabels, autoXConfig)
 	}
 }
 
-func addObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string) error {
-	return installHelmReleases(prunedLabels, uObj.GetNamespace())
+func addObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string, autoXConfig config) error {
+	return installHelmReleases(prunedLabels, uObj.GetNamespace(), autoXConfig)
 }
 
-func updateObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) func(oldObj, obj interface{}) {
+func updateObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex, autoXConfig config) func(oldObj, obj interface{}) {
 	return func(oldObj, obj interface{}) {
 		m.Lock()
 		defer m.Unlock()
@@ -335,7 +335,7 @@ func updateObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) fun
 		}
 
 		// if labels have changed, then delete the Helm releases
-		_ = deleteObjectHelper(clientU, prunedLabels)
+		_ = deleteObjectHelper(clientU, prunedLabels, autoXConfig)
 
 		// check if autoX label exists
 		labels := clientU.GetLabels()
@@ -344,12 +344,12 @@ func updateObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) fun
 			return
 		}
 
-		// only install Helm releases if auto X label exists
-		_ = addObjectHelper(clientU, prunedLabels)
+		// only install Helm releases if autoX label exists
+		_ = addObjectHelper(clientU, prunedLabels, autoXConfig)
 	}
 }
 
-func deleteObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) func(obj interface{}) {
+func deleteObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex, autoXConfig config) func(obj interface{}) {
 	return func(obj interface{}) {
 		m.Lock()
 		defer m.Unlock()
@@ -363,22 +363,22 @@ func deleteObject(ns string, gvr schema.GroupVersionResource, m *sync.Mutex) fun
 			return
 		}
 
-		// delete Helm releases if auto X label exists
+		// delete Helm releases if autoX label exists
 		labels := u.GetLabels()
 		prunedLabels := pruneLabels(labels)
-		_ = deleteObjectHelper(u, prunedLabels)
+		_ = deleteObjectHelper(u, prunedLabels, autoXConfig)
 	}
 }
 
-func deleteObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string) error {
-	return deleteHelmReleases(prunedLabels, uObj.GetNamespace())
+func deleteObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string, autoXConfig config) error {
+	return deleteHelmReleases(prunedLabels, uObj.GetNamespace(), autoXConfig)
 }
 
 type iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-func newIter8Watcher() *iter8Watcher {
+func newIter8Watcher(autoXConfig config) *iter8Watcher {
 	w := &iter8Watcher{
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
@@ -410,9 +410,9 @@ func newIter8Watcher() *iter8Watcher {
 		for _, gvr := range gvrs {
 			informer := w.factories[ns].ForResource(gvr)
 			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc:    addObject(ns, gvr, &m),
-				UpdateFunc: updateObject(ns, gvr, &m),
-				DeleteFunc: deleteObject(ns, gvr, &m),
+				AddFunc:    addObject(ns, gvr, &m, autoXConfig),
+				UpdateFunc: updateObject(ns, gvr, &m, autoXConfig),
+				DeleteFunc: deleteObject(ns, gvr, &m, autoXConfig),
 			})
 		}
 	}
