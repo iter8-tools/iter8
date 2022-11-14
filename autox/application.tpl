@@ -4,10 +4,10 @@ metadata:
   name: {{ .name }}
   namespace: {{ .namespace }}
   ownerReferences:
-    - apiVersion: v1
+  - apiVersion: v1
     kind: Secret
-    name: {{ .owner.name}}
-    uid: {{ .owner.uid}}
+    name: {{ .owner.name }}
+    uid: {{ .owner.uid }}
 spec:
   destination:
     namespace: {{ .namespace }}

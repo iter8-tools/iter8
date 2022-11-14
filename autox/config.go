@@ -26,9 +26,6 @@ type trigger struct {
 
 // releaseSpec points to a particular Helm releaseSpec
 type releaseSpec struct {
-	// RepoURL is the url of the Helm repo
-	RepoURL string `json:"repoURL" yaml:"repoURL"`
-
 	// Name is the name of the Helm chart
 	Name string `json:"name" yaml:"name"`
 
