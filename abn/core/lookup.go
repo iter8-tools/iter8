@@ -10,6 +10,8 @@ import (
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 )
 
+var versionHasher maphash.Hash
+
 // lookupInternal is detailed implementation of gRPC method Lookup
 func lookupInternal(application string, user string) (*abnapp.Application, *string, error) {
 	// if user is not provided, fail
@@ -66,8 +68,8 @@ func rendezvousGet(a *abnapp.Application, user string) string {
 
 // hash computes the score for a version, user combination
 func hash(version, user string) uint64 {
-	var hasher maphash.Hash
-	_, _ = hasher.WriteString(user)
-	_, _ = hasher.WriteString(version)
-	return hasher.Sum64()
+	versionHasher.Reset()
+	_, _ = versionHasher.WriteString(user)
+	_, _ = versionHasher.WriteString(version)
+	return versionHasher.Sum64()
 }

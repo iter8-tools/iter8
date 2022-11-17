@@ -72,6 +72,8 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	if err != nil || track == nil {
 		return nil, err
 	}
+	log.Logger.Debug(fmt.Sprintf("lookup(%s,%s) -> %s", appMsg.GetName(), appMsg.GetUser(), *track))
+
 	return &pb.Session{
 		Track: *track,
 	}, err
