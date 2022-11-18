@@ -19,8 +19,15 @@ var k8sClient *kubeClient
 func validateConfig(c config) error {
 	var err error
 
+	triggerStrings := map[string]bool{}
+
 	for releaseGroupSpecID, releaseGroupSpec := range c.Specs {
 		// validate trigger
+		if releaseGroupSpec.Trigger.Name == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a name", releaseGroupSpecID)
+			break
+		}
+
 		if releaseGroupSpec.Trigger.Namespace == "" {
 			err = fmt.Errorf("trigger in spec group \"%s\" does not have a namespace", releaseGroupSpecID)
 			break
@@ -40,6 +47,14 @@ func validateConfig(c config) error {
 			err = fmt.Errorf("trigger in spec group \"%s\" does not have a resource", releaseGroupSpecID)
 			break
 		}
+
+		// check for trigger uniqueness
+		triggerString := fmt.Sprintf("%s/%s/%s/%s/%s", releaseGroupSpec.Trigger.Name, releaseGroupSpec.Trigger.Namespace, releaseGroupSpec.Trigger.Group, releaseGroupSpec.Trigger.Version, releaseGroupSpec.Trigger.Resource)
+		if _, ok := triggerStrings[triggerString]; ok {
+			err = fmt.Errorf("multiple release specs with the same trigger: name: \"%s\", namespace: \"%s\", group: \"%s\", version: \"%s\", resource: \"%s\",", releaseGroupSpec.Trigger.Name, releaseGroupSpec.Trigger.Namespace, releaseGroupSpec.Trigger.Group, releaseGroupSpec.Trigger.Version, releaseGroupSpec.Trigger.Resource)
+			break
+		}
+		triggerStrings[triggerString] = true
 	}
 
 	return err

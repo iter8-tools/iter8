@@ -105,7 +105,7 @@ func TestNewIter8Watcher(t *testing.T) {
 	// in this case, there are 2 specs
 	// once for autox-myApp-name1-XXXXX and autox-myApp-name2-XXXXX
 	assert.Eventually(t, func() bool { return assert.Equal(t, 2, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 2, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 
 	// update annotations
 	// this should not trigger deleteHelmRelease/installHelmRelease
@@ -124,8 +124,8 @@ func TestNewIter8Watcher(t *testing.T) {
 
 	// give handler time to execute
 	// the invocations should not change as a (pruned) label was not changed
-	assert.Eventually(t, func() bool { return assert.Equal(t, 2, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 4, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 4, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 
 	// update (pruned) labels
 	// this should trigger deleteHelmRelease/installHelmRelease
@@ -144,8 +144,8 @@ func TestNewIter8Watcher(t *testing.T) {
 	// give handler time to execute
 	// updating (pruned) labels will trigger both deleteHelmRelease and installHelmRelease for each spec in the spec group
 	// in this case, there are 2 specs
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 2, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 6, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 6, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 
 	// delete object
 	err = k8sClient.dynamic().
@@ -160,8 +160,8 @@ func TestNewIter8Watcher(t *testing.T) {
 	// give handler time to execute
 	// only deleteHelmRelease should trigger, once for each spec in the spec group
 	// in this case, there are 2 specs
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 6, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 8, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
 }
 
 func newUnstructuredDeployment(namespace, application, version, track string, additionalLabels map[string]string) *unstructured.Unstructured {
