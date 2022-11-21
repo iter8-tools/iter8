@@ -18,7 +18,7 @@ spec:
     helm:
       values: 
         {{ .chart.values | toYaml | indent 4 }}
-    repoURL: {{ .chart.url }}
+    repoURL: https://iter8-tools.github.io/hub
     targetRevision: {{ .chart.version }}
   syncPolicy:
     automated:
