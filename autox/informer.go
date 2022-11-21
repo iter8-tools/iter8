@@ -30,6 +30,7 @@ const (
 	trackLabel   = "iter8.tools/track"
 )
 
+var hasher maphash.Hash
 var m sync.Mutex
 
 //go:embed application.tpl
@@ -70,10 +71,10 @@ type applicationValues struct {
 //	the ID of the spec within the releaseSpec, and
 //	the set of (pruned) labels that triggers this release
 func getReleaseName(group string, releaseSpecID string, prunedLabels map[string]string) string {
+	hasher.Reset()
 
 	// use labels relevant to autoX to create a random hash value
 	// this value will be appended as a suffix in the release name
-	var hasher maphash.Hash
 	// specGroupName and specID are always hashed
 	_, _ = hasher.WriteString(group)
 	_, _ = hasher.WriteString(releaseSpecID)
