@@ -248,7 +248,7 @@ func hasAutoXLabel(labels map[string]string) bool {
 }
 
 // handle is the entry point to all (add, update, delete) event handlers
-func handle(obj interface{}, releaseGroupSpec releaseGroupSpec) {
+func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) {
 	m.Lock()
 	defer m.Unlock()
 
@@ -262,6 +262,7 @@ func handle(obj interface{}, releaseGroupSpec releaseGroupSpec) {
 	prunedLabels := pruneLabels(labels)
 
 	// always delete Helm releases
+	log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
 	_ = doChartAction(prunedLabels, deleteAction, ns, releaseGroupSpec)
 
 	// install Helm releases if (client) object exists and has autoX label
@@ -284,10 +285,12 @@ func handle(obj interface{}, releaseGroupSpec releaseGroupSpec) {
 		// check if autoX label exists
 		clientLabels := clientU.GetLabels()
 		if !hasAutoXLabel(clientLabels) {
+			log.Logger.Debugf("do not install Helm releases for release group \"%s\" because Kubernetes object \"%s\" in namespace \"%s\" does not have %s label", releaseGroupSpecName, clientName, clientNs, autoXLabel)
 			return
 		}
 
-		// only install Helm releases if autoX label exists
+		// install Helm releases
+		log.Logger.Debugf("install Helm releases for release group \"%s\"", releaseGroupSpecName)
 		clientPrunedLabels := pruneLabels(clientLabels)
 		_ = doChartAction(clientPrunedLabels, releaseAction, clientNs, releaseGroupSpec)
 	}
@@ -307,21 +310,21 @@ func getGVR(releaseGroupSpec releaseGroupSpec) schema.GroupVersionResource {
 func addObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(obj interface{}) {
 	return func(obj interface{}) {
 		log.Logger.Debug("Add:", obj)
-		handle(obj, releaseGroupSpec)
+		handle(obj, releaseGroupSpecName, releaseGroupSpec)
 	}
 }
 
 func updateObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(oldObj, obj interface{}) {
 	return func(oldObj, obj interface{}) {
 		log.Logger.Debug("Update:", obj)
-		handle(obj, releaseGroupSpec)
+		handle(obj, releaseGroupSpecName, releaseGroupSpec)
 	}
 }
 
 func deleteObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(obj interface{}) {
 	return func(obj interface{}) {
 		log.Logger.Debug("Delete:", obj)
-		handle(obj, releaseGroupSpec)
+		handle(obj, releaseGroupSpecName, releaseGroupSpec)
 	}
 }
 
