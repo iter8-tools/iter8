@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// config is A/B(/n) service configuration. The configuration identifies the resources to watch and in which namespaces.
+// config is A/B/n service configuration. The configuration identifies the resources to watch and in which namespaces.
 type config struct {
 	// Namespaces is list of namespaces to watch
 	Namespaces []string `yaml:"namespaces,omitempty"`
