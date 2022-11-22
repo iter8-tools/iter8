@@ -252,43 +252,56 @@ func handle(obj interface{}, releaseGroupSpec releaseGroupSpec) {
 	m.Lock()
 	defer m.Unlock()
 
-	// get namespace and GVR from release group spec trigger
-	ns, gvr := getNSAndGVR(releaseGroupSpec)
-
-	// fetch object from cluster
+	// parse object
 	u := obj.(*unstructured.Unstructured)
-	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), u.GetName(), metav1.GetOptions{})
-
-	// always delete Helm releases
+	name := u.GetName()
+	ns := u.GetNamespace()
+	// Note: GVR is from the release group spec, not available through the obj
+	gvr := getGVR(releaseGroupSpec)
 	labels := u.GetLabels()
 	prunedLabels := pruneLabels(labels)
-	// use ns instead of clientU.GetNamespace() as clientU is not available in delete case
+
+	// always delete Helm releases
 	_ = doChartAction(prunedLabels, deleteAction, ns, releaseGroupSpec)
 
-	// install Helm releases if object exists and has autoX label
+	// install Helm releases if (client) object exists and has autoX label
+	// fetch (client) object from cluster
+	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
 	if clientU != nil {
+		clientName := clientU.GetName()
+		clientNs := clientU.GetNamespace()
+
+		// sanity check
+		if clientName != name {
+			log.Logger.Errorf("autoX expected Kubernetes object to have name \"%s\" but had name \"%s\" instead", name, clientName)
+			return
+		}
+		if clientNs != ns {
+			log.Logger.Errorf("autoX expected Kubernetes object to have name \"%s\" but had name \"%s\" instead", ns, clientNs)
+			return
+		}
+
 		// check if autoX label exists
-		labels := clientU.GetLabels()
-		if !hasAutoXLabel(labels) {
+		clientLabels := clientU.GetLabels()
+		if !hasAutoXLabel(clientLabels) {
 			return
 		}
 
 		// only install Helm releases if autoX label exists
-		prunedLabels := pruneLabels(labels)
-		_ = doChartAction(prunedLabels, releaseAction, clientU.GetNamespace(), releaseGroupSpec)
+		clientPrunedLabels := pruneLabels(clientLabels)
+		_ = doChartAction(clientPrunedLabels, releaseAction, clientNs, releaseGroupSpec)
 	}
 }
 
-// getNSAndGVR gets the namespace and GVR from a release group spec trigger
-func getNSAndGVR(releaseGroupSpec releaseGroupSpec) (string, schema.GroupVersionResource) {
-	ns := releaseGroupSpec.Trigger.Namespace
+// getGVR gets the namespace and GVR from a release group spec trigger
+func getGVR(releaseGroupSpec releaseGroupSpec) schema.GroupVersionResource {
 	gvr := schema.GroupVersionResource{
 		Group:    releaseGroupSpec.Trigger.Group,
 		Version:  releaseGroupSpec.Trigger.Version,
 		Resource: releaseGroupSpec.Trigger.Resource,
 	}
 
-	return ns, gvr
+	return gvr
 }
 
 func addObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(obj interface{}) {
@@ -326,7 +339,8 @@ func newIter8Watcher(autoXConfig config) *iter8Watcher {
 	// triggers map has namespace as its key and the object GVRs within the namespace that it is watching as its value
 	// triggers := map[string][]schema.GroupVersionResource{}
 	for releaseGroupSpecName, releaseGroupSpec := range autoXConfig.Specs {
-		ns, gvr := getNSAndGVR(releaseGroupSpec)
+		ns := releaseGroupSpec.Trigger.Namespace
+		gvr := getGVR(releaseGroupSpec)
 
 		w.factories[releaseGroupSpecName] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
 
