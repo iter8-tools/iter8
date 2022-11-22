@@ -96,11 +96,6 @@ func getReleaseName(group string, releaseSpecID string, prunedLabels map[string]
 	return fmt.Sprintf("autox-%s-%s-%s", group, releaseSpecID, nonce)
 }
 
-// installHelmReleases for a given spec group
-func installHelmReleases(prunedLabels map[string]string, namespace string, autoXConfig config) error {
-	return doChartAction(prunedLabels, releaseAction, namespace, autoXConfig)
-}
-
 // installHelmRelease for a given spec within a spec group
 var installHelmRelease = func(releaseName string, group string, releaseSpec releaseSpec, namespace string) error {
 	secretsClient := k8sClient.clientset.CoreV1().Secrets(namespace)
@@ -191,11 +186,6 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 	return nil
 }
 
-// deleteHelmReleases for a given spec group
-func deleteHelmReleases(prunedLabels map[string]string, namespace string, autoXConfig config) error {
-	return doChartAction(prunedLabels, deleteAction, namespace, autoXConfig)
-}
-
 // deleteHelmRelease with a given release name
 var deleteHelmRelease = func(releaseName string, group string, namespace string) error {
 	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
@@ -212,32 +202,27 @@ var deleteHelmRelease = func(releaseName string, group string, namespace string)
 
 // doChartAction iterates through a given spec group, and performs action for each spec
 // action can be install or delete
-func doChartAction(prunedLabels map[string]string, chartAction chartAction, namespace string, autoXConfig config) error {
+func doChartAction(prunedLabels map[string]string, chartAction chartAction, namespace string, releaseGroupSpec releaseGroupSpec) error {
 	// get group
 	group := prunedLabels[autoXLabel]
 
-	// iterate through the specs in this spec group
 	var err error
-	if releaseGroupSpec, ok := autoXConfig.Specs[group]; ok {
-		for releaseSpecID, releaseSpec := range releaseGroupSpec.ReleaseSpecs {
-			// get release name
-			releaseName := getReleaseName(group, releaseSpecID, prunedLabels)
-			// perform action for this release
-			switch chartAction {
-			case releaseAction:
-				// if there is an error, keep going forward in the for loop
-				if err1 := installHelmRelease(releaseName, group, releaseSpec, namespace); err1 != nil {
-					err = errors.New("one or more Helm release installs failed")
-				}
-			case deleteAction:
-				// if there is an error, keep going forward in the for loop
-				if err1 := deleteHelmRelease(releaseName, group, namespace); err1 != nil {
-					err = errors.New("one or more Helm release deletions failed")
-				}
+	for releaseSpecID, releaseSpec := range releaseGroupSpec.ReleaseSpecs {
+		// get release name
+		releaseName := getReleaseName(group, releaseSpecID, prunedLabels)
+		// perform action for this release
+		switch chartAction {
+		case releaseAction:
+			// if there is an error, keep going forward in the for loop
+			if err1 := installHelmRelease(releaseName, group, releaseSpec, namespace); err1 != nil {
+				err = errors.New("one or more Helm release installs failed")
+			}
+		case deleteAction:
+			// if there is an error, keep going forward in the for loop
+			if err1 := deleteHelmRelease(releaseName, group, namespace); err1 != nil {
+				err = errors.New("one or more Helm release deletions failed")
 			}
 		}
-	} else {
-		log.Logger.Warnf("no matching group name in autoX group configuration: %s", group)
 	}
 
 	if err != nil {
@@ -262,17 +247,23 @@ func hasAutoXLabel(labels map[string]string) bool {
 	return ok
 }
 
-func handle(obj interface{}, ns string, gvr schema.GroupVersionResource, autoXConfig config) {
+// handle is the entry point to all (add, update, delete) event handlers
+func handle(obj interface{}, releaseGroupSpec releaseGroupSpec) {
 	m.Lock()
 	defer m.Unlock()
 
+	// get namespace and GVR from release group spec trigger
+	ns, gvr := getNSAndGVR(releaseGroupSpec)
+
+	// fetch object from cluster
 	u := obj.(*unstructured.Unstructured)
 	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), u.GetName(), metav1.GetOptions{})
 
 	// always delete Helm releases
 	labels := u.GetLabels()
 	prunedLabels := pruneLabels(labels)
-	_ = deleteObjectHelper(u, prunedLabels, autoXConfig)
+	// use ns instead of clientU.GetNamespace() as clientU is not available in delete case
+	_ = doChartAction(prunedLabels, deleteAction, ns, releaseGroupSpec)
 
 	// install Helm releases if object exists and has autoX label
 	if clientU != nil {
@@ -284,37 +275,41 @@ func handle(obj interface{}, ns string, gvr schema.GroupVersionResource, autoXCo
 
 		// only install Helm releases if autoX label exists
 		prunedLabels := pruneLabels(labels)
-		_ = addObjectHelper(clientU, prunedLabels, autoXConfig)
+		_ = doChartAction(prunedLabels, releaseAction, clientU.GetNamespace(), releaseGroupSpec)
 	}
 }
 
-func addObject(ns string, gvr schema.GroupVersionResource, autoXConfig config) func(obj interface{}) {
+// getNSAndGVR gets the namespace and GVR from a release group spec trigger
+func getNSAndGVR(releaseGroupSpec releaseGroupSpec) (string, schema.GroupVersionResource) {
+	ns := releaseGroupSpec.Trigger.Namespace
+	gvr := schema.GroupVersionResource{
+		Group:    releaseGroupSpec.Trigger.Group,
+		Version:  releaseGroupSpec.Trigger.Version,
+		Resource: releaseGroupSpec.Trigger.Resource,
+	}
+
+	return ns, gvr
+}
+
+func addObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(obj interface{}) {
 	return func(obj interface{}) {
 		log.Logger.Debug("Add:", obj)
-		handle(obj, ns, gvr, autoXConfig)
+		handle(obj, releaseGroupSpec)
 	}
 }
 
-func updateObject(ns string, gvr schema.GroupVersionResource, autoXConfig config) func(oldObj, obj interface{}) {
+func updateObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(oldObj, obj interface{}) {
 	return func(oldObj, obj interface{}) {
 		log.Logger.Debug("Update:", obj)
-		handle(obj, ns, gvr, autoXConfig)
+		handle(obj, releaseGroupSpec)
 	}
 }
 
-func deleteObject(ns string, gvr schema.GroupVersionResource, autoXConfig config) func(obj interface{}) {
+func deleteObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(obj interface{}) {
 	return func(obj interface{}) {
 		log.Logger.Debug("Delete:", obj)
-		handle(obj, ns, gvr, autoXConfig)
+		handle(obj, releaseGroupSpec)
 	}
-}
-
-func addObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string, autoXConfig config) error {
-	return installHelmReleases(prunedLabels, uObj.GetNamespace(), autoXConfig)
-}
-
-func deleteObjectHelper(uObj *unstructured.Unstructured, prunedLabels map[string]string, autoXConfig config) error {
-	return deleteHelmReleases(prunedLabels, uObj.GetNamespace(), autoXConfig)
 }
 
 type iter8Watcher struct {
@@ -323,38 +318,24 @@ type iter8Watcher struct {
 
 func newIter8Watcher(autoXConfig config) *iter8Watcher {
 	w := &iter8Watcher{
+		// the key is releaseGroupSpecName
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
 	// aggregate all triggers (namespaces and GVR) from the releaseGroupConfig
 	// triggers map has namespace as its key and the object GVRs within the namespace that it is watching as its value
-	triggers := map[string][]schema.GroupVersionResource{}
-	for _, releaseGroupSpec := range autoXConfig.Specs {
+	// triggers := map[string][]schema.GroupVersionResource{}
+	for releaseGroupSpecName, releaseGroupSpec := range autoXConfig.Specs {
+		ns, gvr := getNSAndGVR(releaseGroupSpec)
 
-		namespace := releaseGroupSpec.Trigger.Namespace
-		gvr := schema.GroupVersionResource{
-			Group:    releaseGroupSpec.Trigger.Group,
-			Version:  releaseGroupSpec.Trigger.Version,
-			Resource: releaseGroupSpec.Trigger.Resource,
-		}
+		w.factories[releaseGroupSpecName] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
 
-		// add namespace and GVR to triggers
-		triggers[namespace] = append(triggers[namespace], gvr)
-	}
-
-	// for each namespace and resource type, configure an informer
-	for ns, gvrs := range triggers {
-		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
-
-		// TBD: optimize the informers by supplying the trigger object name, perhaps through list options
-		for _, gvr := range gvrs {
-			informer := w.factories[ns].ForResource(gvr)
-			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc:    addObject(ns, gvr, autoXConfig),
-				UpdateFunc: updateObject(ns, gvr, autoXConfig),
-				DeleteFunc: deleteObject(ns, gvr, autoXConfig),
-			})
-		}
+		informer := w.factories[releaseGroupSpecName].ForResource(gvr)
+		informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+			AddFunc:    addObject(releaseGroupSpecName, releaseGroupSpec),
+			UpdateFunc: updateObject(releaseGroupSpecName, releaseGroupSpec),
+			DeleteFunc: deleteObject(releaseGroupSpecName, releaseGroupSpec),
+		})
 	}
 
 	return w
