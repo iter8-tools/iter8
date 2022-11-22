@@ -159,7 +159,7 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 		return err
 	}
 
-	log.Logger.Debug("application manifest:", buf.String())
+	fmt.Print("application manifest:", buf.String())
 
 	// serialize application manifest into unstructured object
 	obj, _, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(buf.Bytes(), nil, nil)
@@ -254,15 +254,22 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 
 	// parse object
 	u := obj.(*unstructured.Unstructured)
+
+	// check if name matches trigger
 	name := u.GetName()
+	if name != releaseGroupSpec.Trigger.Name {
+		return
+	}
+
+	// namespace and GVR should already match trigger
 	ns := u.GetNamespace()
 	// Note: GVR is from the release group spec, not available through the obj
 	gvr := getGVR(releaseGroupSpec)
-	labels := u.GetLabels()
-	prunedLabels := pruneLabels(labels)
 
 	// always delete Helm releases
 	log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
+	labels := u.GetLabels()
+	prunedLabels := pruneLabels(labels)
 	_ = doChartAction(prunedLabels, deleteAction, ns, releaseGroupSpec)
 
 	// install Helm releases if (client) object exists and has autoX label
