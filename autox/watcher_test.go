@@ -36,7 +36,7 @@ func TestStart(t *testing.T) {
 		Resource: "deployments",
 	}
 	namespace := "default"
-	application := "demo"
+	application := "myApp"
 	version := "v1"
 	track := ""
 
