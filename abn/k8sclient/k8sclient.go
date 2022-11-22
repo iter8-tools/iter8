@@ -20,7 +20,7 @@ var Client = *NewKubeClient(cli.New())
 // enables interaction with a Kubernetes cluster through Kube APIs
 type KubeClient struct {
 	// EnvSettings provides generic Kubernets and Helm options; while Helm is not needed
-	// for A/B(/n) functionality, we use here since we do so in other places and it
+	// for A/B/n functionality, we use here since we do so in other places and it
 	// provides an easy way to get the Kubernetes configuration whether in cluster or not.
 	*cli.EnvSettings
 	// typedClient enables interaction with a Kubernetes cluster using structured types
