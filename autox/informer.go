@@ -8,7 +8,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"hash/maphash"
 	"sync"
 
 	"github.com/iter8-tools/iter8/base"
@@ -30,7 +29,6 @@ const (
 	trackLabel   = "iter8.tools/track"
 )
 
-var hasher maphash.Hash
 var m sync.Mutex
 
 //go:embed application.tpl
@@ -70,30 +68,8 @@ type applicationValues struct {
 //	the name of the releaseSpec,
 //	the ID of the spec within the releaseSpec, and
 //	the set of (pruned) labels that triggers this release
-func getReleaseName(group string, releaseSpecID string, prunedLabels map[string]string) string {
-	hasher.Reset()
-
-	// use labels relevant to autoX to create a random hash value
-	// this value will be appended as a suffix in the release name
-	// specGroupName and specID are always hashed
-	_, _ = hasher.WriteString(group)
-	_, _ = hasher.WriteString(releaseSpecID)
-
-	// hash app label
-	app := prunedLabels[appLabel]
-	_, _ = hasher.WriteString(app)
-
-	// hash version label
-	version := prunedLabels[versionLabel]
-	_, _ = hasher.WriteString(version)
-
-	// hash track label
-	track := prunedLabels[trackLabel]
-	_, _ = hasher.WriteString(track)
-
-	nonce := fmt.Sprintf("%05x", hasher.Sum64())
-	nonce = nonce[:5]
-	return fmt.Sprintf("autox-%s-%s-%s", group, releaseSpecID, nonce)
+func getReleaseName(group string, releaseSpecID string) string {
+	return fmt.Sprintf("autox-%s-%s", group, releaseSpecID)
 }
 
 // installHelmRelease for a given spec within a spec group
@@ -202,14 +178,12 @@ var deleteHelmRelease = func(releaseName string, group string, namespace string)
 
 // doChartAction iterates through a given spec group, and performs action for each spec
 // action can be install or delete
-func doChartAction(prunedLabels map[string]string, chartAction chartAction, namespace string, releaseGroupSpec releaseGroupSpec) error {
+func doChartAction(group string, chartAction chartAction, namespace string, releaseGroupSpec releaseGroupSpec) error {
 	// get group
-	group := prunedLabels[autoXLabel]
-
 	var err error
 	for releaseSpecID, releaseSpec := range releaseGroupSpec.ReleaseSpecs {
 		// get release name
-		releaseName := getReleaseName(group, releaseSpecID, prunedLabels)
+		releaseName := getReleaseName(group, releaseSpecID)
 		// perform action for this release
 		switch chartAction {
 		case releaseAction:
@@ -232,14 +206,14 @@ func doChartAction(prunedLabels map[string]string, chartAction chartAction, name
 	return err
 }
 
-// pruneLabels will extract the labels that are relevant for autoX
-func pruneLabels(labels map[string]string) map[string]string {
-	prunedLabels := map[string]string{}
-	for _, l := range []string{autoXLabel, appLabel, versionLabel, trackLabel} {
-		prunedLabels[l] = labels[l]
-	}
-	return prunedLabels
-}
+// // pruneLabels will extract the labels that are relevant for autoX
+// func pruneLabels(labels map[string]string) map[string]string {
+// 	prunedLabels := map[string]string{}
+// 	for _, l := range []string{autoXLabel, appLabel, versionLabel, trackLabel} {
+// 		prunedLabels[l] = labels[l]
+// 	}
+// 	return prunedLabels
+// }
 
 // hasAutoXLabel checks if autoX label is present
 func hasAutoXLabel(labels map[string]string) bool {
@@ -271,22 +245,19 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 
 	// delete Helm releases if (client) object exists and no longer has autoX label
 	if clientU != nil {
-		// check if autoX label exists
+		// check if autoX label does not exist
 		clientLabels := clientU.GetLabels()
 		if !hasAutoXLabel(clientLabels) {
 			log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
 
-			clientPrunedLabels := pruneLabels(clientLabels)
-			_ = doChartAction(clientPrunedLabels, deleteAction, ns, releaseGroupSpec)
+			_ = doChartAction(releaseGroupSpecName, deleteAction, ns, releaseGroupSpec)
 		}
 
 		// delete Helm releases if (client) object does not exist
 	} else {
 		log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
 
-		labels := u.GetLabels()
-		prunedLabels := pruneLabels(labels)
-		_ = doChartAction(prunedLabels, deleteAction, ns, releaseGroupSpec)
+		_ = doChartAction(releaseGroupSpecName, deleteAction, ns, releaseGroupSpec)
 	}
 
 	// install Helm releases if (client) object exists and has autoX label
@@ -315,8 +286,7 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 
 		// install Helm releases
 		log.Logger.Debugf("install Helm releases for release group \"%s\"", releaseGroupSpecName)
-		clientPrunedLabels := pruneLabels(clientLabels)
-		_ = doChartAction(clientPrunedLabels, releaseAction, clientNs, releaseGroupSpec)
+		_ = doChartAction(releaseGroupSpecName, releaseAction, clientNs, releaseGroupSpec)
 	}
 }
 
