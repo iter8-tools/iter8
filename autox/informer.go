@@ -274,13 +274,11 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 		// check if autoX label exists
 		clientLabels := clientU.GetLabels()
 		if !hasAutoXLabel(clientLabels) {
-			return
+			log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
+
+			clientPrunedLabels := pruneLabels(clientLabels)
+			_ = doChartAction(clientPrunedLabels, deleteAction, ns, releaseGroupSpec)
 		}
-
-		log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
-
-		clientPrunedLabels := pruneLabels(clientLabels)
-		_ = doChartAction(clientPrunedLabels, deleteAction, ns, releaseGroupSpec)
 
 		// delete Helm releases if (client) object does not exist
 	} else {
