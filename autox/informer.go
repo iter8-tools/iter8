@@ -121,6 +121,9 @@ var installHelmRelease = func(releaseName string, releaseGroupSpecName string, r
 		},
 	}
 
+	// add additionalValues to the values
+	// Argo CD will create a new experiment if it sees that the additionalValues are different from the previous experiment
+	// additionalValues will contain the pruned labels from the Kubernetes object
 	values.chart.values[autoXAdditionValues] = additionalValues
 
 	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
@@ -280,7 +283,7 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 
 		// check if autoX label exists
 		clientLabels := clientU.GetLabels()
-		clientPruneLabels := pruneLabels(clientLabels)
+		clientPrunedLabels := pruneLabels(clientLabels)
 		if !hasAutoXLabel(clientLabels) {
 			log.Logger.Debugf("do not install Helm releases for release group \"%s\" because Kubernetes object \"%s\" in namespace \"%s\" does not have %s label", releaseGroupSpecName, clientName, clientNs, autoXLabel)
 			return
@@ -288,7 +291,7 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 
 		// install Helm releases
 		log.Logger.Debugf("install Helm releases for release group \"%s\"", releaseGroupSpecName)
-		_ = doChartAction(releaseGroupSpecName, releaseAction, clientNs, releaseGroupSpec, clientPruneLabels)
+		_ = doChartAction(releaseGroupSpecName, releaseAction, clientNs, releaseGroupSpec, clientPrunedLabels)
 	}
 }
 
