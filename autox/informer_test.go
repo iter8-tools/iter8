@@ -25,7 +25,7 @@ func TestNewIter8Watcher(t *testing.T) {
 
 	// autoX handler will call on installHelmRelease and deleteHelmRelease
 	installHelmReleaseInvocations := 0
-	installHelmRelease = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string, applicationValues map[string]string) error {
+	installHelmRelease = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
 		installHelmReleaseInvocations++
 		return nil
 	}
@@ -178,7 +178,7 @@ func newUnstructuredDeployment(namespace, application, version, track string, ad
 		"iter8.tools/ready": "true",
 	}
 
-	// add additionalLabes to labels
+	// add additionalLabels to labels
 	if len(additionalLabels) > 0 {
 		for labelName, labelValue := range additionalLabels {
 			labels[labelName] = labelValue
