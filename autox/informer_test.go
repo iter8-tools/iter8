@@ -25,7 +25,7 @@ func TestNewIter8Watcher(t *testing.T) {
 
 	// autoX handler will call on installHelmRelease and deleteHelmRelease
 	installHelmReleaseInvocations := 0
-	installHelmRelease = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string) error {
+	installHelmRelease = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string, additapplicationValues map[string]string) error {
 		installHelmReleaseInvocations++
 		return nil
 	}

@@ -68,17 +68,17 @@ type applicationValues struct {
 //	the name of the releaseSpec,
 //	the ID of the spec within the releaseSpec, and
 //	the set of (pruned) labels that triggers this release
-func getReleaseName(group string, releaseSpecID string) string {
-	return fmt.Sprintf("autox-%s-%s", group, releaseSpecID)
+func getReleaseName(releaseGroupSpecName string, releaseSpecID string) string {
+	return fmt.Sprintf("autox-%s-%s", releaseGroupSpecName, releaseSpecID)
 }
 
 // installHelmRelease for a given spec within a spec group
-var installHelmRelease = func(releaseName string, group string, releaseSpec releaseSpec, namespace string) error {
+var installHelmRelease = func(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
 	secretsClient := k8sClient.clientset.CoreV1().Secrets(namespace)
 
 	// TODO: what to put for ctx?
 	// get secret, based on autoX label
-	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, group)
+	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, releaseGroupSpecName)
 	secretList, err := secretsClient.List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
@@ -118,6 +118,8 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 			values:  releaseSpec.Values,
 			version: releaseSpec.Version,
 		},
+
+		// TODO: add additionalValues
 	}
 
 	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
@@ -134,8 +136,6 @@ var installHelmRelease = func(releaseName string, group string, releaseSpec rele
 		log.Logger.Error("could not execute application template")
 		return err
 	}
-
-	fmt.Print("application manifest:", buf.String())
 
 	// serialize application manifest into unstructured object
 	obj, _, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(buf.Bytes(), nil, nil)
@@ -178,7 +178,7 @@ var deleteHelmRelease = func(releaseName string, group string, namespace string)
 
 // doChartAction iterates through a given spec group, and performs action for each spec
 // action can be install or delete
-func doChartAction(group string, chartAction chartAction, namespace string, releaseGroupSpec releaseGroupSpec) error {
+func doChartAction(group string, chartAction chartAction, namespace string, releaseGroupSpec releaseGroupSpec, additionalValues map[string]string) error {
 	// get group
 	var err error
 	for releaseSpecID, releaseSpec := range releaseGroupSpec.ReleaseSpecs {
@@ -188,7 +188,7 @@ func doChartAction(group string, chartAction chartAction, namespace string, rele
 		switch chartAction {
 		case releaseAction:
 			// if there is an error, keep going forward in the for loop
-			if err1 := installHelmRelease(releaseName, group, releaseSpec, namespace); err1 != nil {
+			if err1 := installHelmRelease(releaseName, group, releaseSpec, namespace, additionalValues); err1 != nil {
 				err = errors.New("one or more Helm release installs failed")
 			}
 		case deleteAction:
@@ -206,14 +206,14 @@ func doChartAction(group string, chartAction chartAction, namespace string, rele
 	return err
 }
 
-// // pruneLabels will extract the labels that are relevant for autoX
-// func pruneLabels(labels map[string]string) map[string]string {
-// 	prunedLabels := map[string]string{}
-// 	for _, l := range []string{autoXLabel, appLabel, versionLabel, trackLabel} {
-// 		prunedLabels[l] = labels[l]
-// 	}
-// 	return prunedLabels
-// }
+// pruneLabels will extract the labels that are relevant for autoX
+func pruneLabels(labels map[string]string) map[string]string {
+	prunedLabels := map[string]string{}
+	for _, l := range []string{autoXLabel, appLabel, versionLabel, trackLabel} {
+		prunedLabels[l] = labels[l]
+	}
+	return prunedLabels
+}
 
 // hasAutoXLabel checks if autoX label is present
 func hasAutoXLabel(labels map[string]string) bool {
@@ -250,14 +250,14 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 		if !hasAutoXLabel(clientLabels) {
 			log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
 
-			_ = doChartAction(releaseGroupSpecName, deleteAction, ns, releaseGroupSpec)
+			_ = doChartAction(releaseGroupSpecName, deleteAction, ns, releaseGroupSpec, nil)
 		}
 
 		// delete Helm releases if (client) object does not exist
 	} else {
 		log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
 
-		_ = doChartAction(releaseGroupSpecName, deleteAction, ns, releaseGroupSpec)
+		_ = doChartAction(releaseGroupSpecName, deleteAction, ns, releaseGroupSpec, nil)
 	}
 
 	// install Helm releases if (client) object exists and has autoX label
@@ -279,6 +279,7 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 
 		// check if autoX label exists
 		clientLabels := clientU.GetLabels()
+		clientPruneLabels := pruneLabels(clientLabels)
 		if !hasAutoXLabel(clientLabels) {
 			log.Logger.Debugf("do not install Helm releases for release group \"%s\" because Kubernetes object \"%s\" in namespace \"%s\" does not have %s label", releaseGroupSpecName, clientName, clientNs, autoXLabel)
 			return
@@ -286,7 +287,7 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 
 		// install Helm releases
 		log.Logger.Debugf("install Helm releases for release group \"%s\"", releaseGroupSpecName)
-		_ = doChartAction(releaseGroupSpecName, releaseAction, clientNs, releaseGroupSpec)
+		_ = doChartAction(releaseGroupSpecName, releaseAction, clientNs, releaseGroupSpec, clientPruneLabels)
 	}
 }
 
