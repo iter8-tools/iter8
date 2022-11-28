@@ -266,15 +266,34 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 	// Note: GVR is from the release group spec, not available through the obj
 	gvr := getGVR(releaseGroupSpec)
 
-	// always delete Helm releases
-	log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
-	labels := u.GetLabels()
-	prunedLabels := pruneLabels(labels)
-	_ = doChartAction(prunedLabels, deleteAction, ns, releaseGroupSpec)
+	// get (client) object from cluster
+	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
+
+	// delete Helm releases if (client) object exists and no longer has autoX label
+	if clientU != nil {
+		// check if autoX label exists
+		clientLabels := clientU.GetLabels()
+		if !hasAutoXLabel(clientLabels) {
+			return
+		}
+
+		log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
+
+		clientPrunedLabels := pruneLabels(clientLabels)
+		_ = doChartAction(clientPrunedLabels, deleteAction, ns, releaseGroupSpec)
+
+		// delete Helm releases if (client) object does not exist
+	} else {
+		log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
+
+		labels := u.GetLabels()
+		prunedLabels := pruneLabels(labels)
+		_ = doChartAction(prunedLabels, deleteAction, ns, releaseGroupSpec)
+	}
 
 	// install Helm releases if (client) object exists and has autoX label
 	// fetch (client) object from cluster
-	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
+	// clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
 	if clientU != nil {
 		clientName := clientU.GetName()
 		clientNs := clientU.GetNamespace()
@@ -341,7 +360,7 @@ type iter8Watcher struct {
 
 func newIter8Watcher(autoXConfig config) *iter8Watcher {
 	w := &iter8Watcher{
-		// the key is releaseGroupSpecName
+		// the key is the name of the release group spec (releaseGroupSpecName)
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
