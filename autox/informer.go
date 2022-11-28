@@ -23,10 +23,11 @@ import (
 )
 
 const (
-	autoXLabel   = "iter8.tools/autox-group"
-	appLabel     = "app.kubernetes.io/name"
-	versionLabel = "app.kubernetes.io/version"
-	trackLabel   = "iter8.tools/track"
+	autoXLabel          = "iter8.tools/autox-group"
+	autoXAdditionValues = "autoXAdditionalValues"
+	appLabel            = "app.kubernetes.io/name"
+	versionLabel        = "app.kubernetes.io/version"
+	trackLabel          = "iter8.tools/track"
 )
 
 var m sync.Mutex
@@ -118,9 +119,9 @@ var installHelmRelease = func(releaseName string, releaseGroupSpecName string, r
 			values:  releaseSpec.Values,
 			version: releaseSpec.Version,
 		},
-
-		// TODO: add additionalValues
 	}
+
+	values.chart.values[autoXAdditionValues] = additionalValues
 
 	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
 
