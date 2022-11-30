@@ -216,9 +216,9 @@ jobs:
         iter8 k report
         iter8 k delete
 
-  static-check:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - uses: dominikh/staticcheck-action@v1.2.0
+  # static-check:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Check out code into the Go module directory
+  #     uses: actions/checkout@v2
+  #   - uses: dominikh/staticcheck-action@v1.2.0
