@@ -13,10 +13,10 @@ import (
 )
 
 func TestStart(t *testing.T) {
-	// autoX watcher will call on installHelmRelease
-	installHelmReleaseInvocations := 0
-	installHelmRelease = func(releaseName string, group string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
-		installHelmReleaseInvocations++
+	// autoX watcher will call on applyHelmRelease
+	applyHelmReleaseInvocations := 0
+	applyHelmRelease = func(releaseName string, group string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
+		applyHelmReleaseInvocations++
 		return nil
 	}
 
@@ -28,7 +28,7 @@ func TestStart(t *testing.T) {
 	_ = Start(stopCh, newFakeKubeClient(cli.New()))
 
 	// create object; no track defined
-	assert.Equal(t, 0, installHelmReleaseInvocations)
+	assert.Equal(t, 0, applyHelmReleaseInvocations)
 
 	gvr := schema.GroupVersionResource{
 		Group:    "apps",
@@ -50,7 +50,7 @@ func TestStart(t *testing.T) {
 				version,
 				track,
 				map[string]string{
-					// add the autoXLabel, which will allow installHelmRelease to trigger
+					// add the autoXLabel, which will allow applyHelmRelease to trigger
 					autoXLabel: "myApp",
 				},
 			), metav1.CreateOptions{},
@@ -59,8 +59,8 @@ func TestStart(t *testing.T) {
 	assert.NotNil(t, createdObj)
 
 	// give handler time to execute
-	// creating an object will installHelmRelease for each spec in the spec group
+	// creating an object will applyHelmRelease for each spec in the spec group
 	// in this case, there are 2 specs
 	// once for autox-myApp-name1-XXXXX and autox-myApp-name2-XXXXX
-	assert.Eventually(t, func() bool { return assert.Equal(t, 2, installHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool { return assert.Equal(t, 2, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
 }
