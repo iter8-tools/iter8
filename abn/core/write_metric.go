@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
@@ -14,6 +15,7 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	if err != nil || track == nil {
 		return err
 	}
+	log.Logger.Debug(fmt.Sprintf("lookup(%s,%s) -> %s", application, user, *track))
 
 	// lock for write; we will modify the metric
 	abnapp.Applications.Lock(application)

@@ -1,6 +1,6 @@
 package core
 
-// service.go - entry point for A/B(/n) service; starts controller watching resources
+// service.go - entry point for A/B/n service; starts controller watching resources
 //               and gRPC service to respond to lookup and write metric requests
 
 import (
@@ -72,6 +72,8 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	if err != nil || track == nil {
 		return nil, err
 	}
+	log.Logger.Debug(fmt.Sprintf("lookup(%s,%s) -> %s", appMsg.GetName(), appMsg.GetUser(), *track))
+
 	return &pb.Session{
 		Track: *track,
 	}, err

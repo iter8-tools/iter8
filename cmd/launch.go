@@ -71,7 +71,7 @@ func addDryRunFlag(cmd *cobra.Command, dryRunPtr *bool) {
 
 // addLocalChartFlag adds the localChart flag to the launch command
 func addLocalChartFlag(cmd *cobra.Command, localChartPtr *bool) {
-	cmd.Flags().BoolVar(localChartPtr, "localChart", false, "use local charts")
+	cmd.Flags().BoolVar(localChartPtr, "localChart", false, "use local chart identified by --chartName")
 	cmd.Flags().Lookup("localChart").NoOptDefVal = "true"
 }
 

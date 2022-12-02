@@ -8,7 +8,7 @@ package watcher
 //  - label 'app.kubernetes.io/version' identifying the name of the version  to which the resource belongs
 //  - label 'iter8.tools/track' defining the track label that should be associated with the version (no track when not present)
 
-// A track is a user assigned identifier. When the Iter8 A/N(/n) service is used to lookup versions,
+// A track is a user assigned identifier. When the Iter8 A/B/n service is used to lookup versions,
 // the track identifier is returned (instead of a version name). The caller can use the the track
 // identifier to route requests to the appropriate version. To do this, the set of track identifiers
 // should be a (small) fixed set, such as "current" and "candidate", that can be mapped to a set of

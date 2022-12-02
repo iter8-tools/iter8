@@ -11,7 +11,7 @@ import (
 
 // abnDesc is the description of abn cmd
 const abnDesc = `
-Run the Iter8 A/B(/n) service.
+Run the Iter8 A/B/n service.
 
 	iter8 abn
 `
@@ -24,7 +24,7 @@ func newAbnCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "abn",
-		Short: "Start the Iter8 A/B(/n) service",
+		Short: "Start the Iter8 A/B/n service",
 		Long:  abnDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			stopCh := make(chan struct{})
