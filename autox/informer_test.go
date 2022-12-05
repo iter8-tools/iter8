@@ -21,7 +21,7 @@ import (
 // after the watcher is created using newIter8Watcher()
 func TestNewIter8Watcher(t *testing.T) {
 	// autoX needs the config
-	autoXConfig := readReleaseGroupSpecs("../testdata/autox_inputs/config.example.yaml")
+	autoXConfig := readConfig("../testdata/autox_inputs/config.example.yaml")
 
 	// autoX handler will call on applyHelmRelease and deleteHelmRelease
 	applyHelmReleaseInvocations := 0

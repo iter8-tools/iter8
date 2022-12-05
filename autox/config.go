@@ -53,8 +53,8 @@ type config struct {
 	Specs map[string]releaseGroupSpec
 }
 
-// readReleaseGroupSpecs reads YAML autoX config file and converts to a config object
-func readReleaseGroupSpecs(fn string) (c config) {
+// readConfig reads YAML autoX config file and converts to a config object
+func readConfig(fn string) (c config) {
 	// empty configuration
 	c = config{}
 

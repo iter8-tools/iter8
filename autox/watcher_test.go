@@ -21,7 +21,7 @@ func TestStart(t *testing.T) {
 	}
 
 	// Start requires some environment variables to be set
-	_ = os.Setenv(specsEnv, "../testdata/autox_inputs/config.example.yaml")
+	_ = os.Setenv(configEnv, "../testdata/autox_inputs/config.example.yaml")
 
 	stopCh := make(chan struct{})
 	defer close(stopCh)
