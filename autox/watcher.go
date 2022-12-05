@@ -10,17 +10,19 @@ import (
 )
 
 const (
-	// Name of environment variable with file path to spec group configuration yaml file
-	configEnv = "CONFIG"
+	// specsEnv is the name of environment variable with file path to the release group specs
+	specsEnv = "RELEASE_GROUP_SPECS"
 )
 
 var k8sClient *kubeClient
 
-func validateConfig(c config) error {
+// validateReleaseGroupSpecs validates the release group specs
+func validateReleaseGroupSpecs(c config) error {
 	var err error
 
 	triggerStrings := map[string]bool{}
 
+	// iterate through all the release group specs
 	for releaseGroupSpecID, releaseGroupSpec := range c.Specs {
 		// validate trigger
 		if releaseGroupSpec.Trigger.Name == "" {
@@ -30,11 +32,6 @@ func validateConfig(c config) error {
 
 		if releaseGroupSpec.Trigger.Namespace == "" {
 			err = fmt.Errorf("trigger in spec group \"%s\" does not have a namespace", releaseGroupSpecID)
-			break
-		}
-
-		if releaseGroupSpec.Trigger.Group == "" {
-			err = fmt.Errorf("trigger in spec group \"%s\" does not have a group", releaseGroupSpecID)
 			break
 		}
 
@@ -75,23 +72,22 @@ func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 		log.Logger.Fatal("unable to init k8s client")
 	}
 
-	// read group config (apps and Helm charts to install)
-	configFile, ok := os.LookupEnv(configEnv)
+	// read release group specs
+	specsFile, ok := os.LookupEnv(specsEnv)
 	if !ok {
 		log.Logger.Fatal("group configuration file is required")
 	}
+	specs := readReleaseGroupSpecs(specsFile)
 
-	// set up resource watching as defined by config
-	autoXConfig := readConfig(configFile)
-
-	err := validateConfig(autoXConfig)
+	// validate the release group specs
+	err := validateReleaseGroupSpecs(specs)
 	if err != nil {
 		return err
 	}
 
-	log.Logger.Debug("config:", autoXConfig)
+	log.Logger.Debug("release group specs:", specs)
 
-	w := newIter8Watcher(autoXConfig)
+	w := newIter8Watcher(specs)
 	go w.start(stopCh)
 	return nil
 }

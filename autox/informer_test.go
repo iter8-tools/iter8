@@ -21,17 +21,17 @@ import (
 // after the watcher is created using newIter8Watcher()
 func TestNewIter8Watcher(t *testing.T) {
 	// autoX needs the config
-	autoXConfig := readConfig("../testdata/autox_inputs/config.example.yaml")
+	autoXConfig := readReleaseGroupSpecs("../testdata/autox_inputs/config.example.yaml")
 
 	// autoX handler will call on applyHelmRelease and deleteHelmRelease
 	applyHelmReleaseInvocations := 0
-	applyHelmRelease = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
+	applyApplicationObject = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
 		applyHelmReleaseInvocations++
 		return nil
 	}
 
 	deleteHelmReleaseInvocations := 0
-	deleteHelmRelease = func(releaseName string, specGroupName string, namespace string) error {
+	deleteApplicationObject = func(releaseName string, specGroupName string, namespace string) error {
 		deleteHelmReleaseInvocations++
 		return nil
 	}
