@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	// specsEnv is the name of environment variable with file path to the release group specs
-	specsEnv = "RELEASE_GROUP_SPECS"
+	// configEnv is the name of environment variable with file path to the config
+	configEnv = "CONFIG"
 )
 
 var k8sClient *kubeClient
 
-// validateReleaseGroupSpecs validates the release group specs
-func validateReleaseGroupSpecs(c config) error {
+// validateConfig validates config, which contains all the release group specs
+func validateConfig(c config) error {
 	var err error
 
 	triggerStrings := map[string]bool{}
@@ -73,21 +73,21 @@ func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 	}
 
 	// read release group specs
-	specsFile, ok := os.LookupEnv(specsEnv)
+	configFile, ok := os.LookupEnv(configEnv)
 	if !ok {
 		log.Logger.Fatal("group configuration file is required")
 	}
-	specs := readReleaseGroupSpecs(specsFile)
+	config := readConfig(configFile)
 
 	// validate the release group specs
-	err := validateReleaseGroupSpecs(specs)
+	err := validateConfig(config)
 	if err != nil {
 		return err
 	}
 
-	log.Logger.Debug("release group specs:", specs)
+	log.Logger.Debug("config (release group specs):", config)
 
-	w := newIter8Watcher(specs)
+	w := newIter8Watcher(config)
 	go w.start(stopCh)
 	return nil
 }
