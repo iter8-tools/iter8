@@ -15,13 +15,13 @@ import (
 func TestStart(t *testing.T) {
 	// autoX watcher will call on applyHelmRelease
 	applyHelmReleaseInvocations := 0
-	applyHelmRelease = func(releaseName string, group string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
+	applyApplicationObject = func(releaseName string, group string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
 		applyHelmReleaseInvocations++
 		return nil
 	}
 
 	// Start requires some environment variables to be set
-	_ = os.Setenv(configEnv, "../testdata/autox_inputs/config.example.yaml")
+	_ = os.Setenv(specsEnv, "../testdata/autox_inputs/config.example.yaml")
 
 	stopCh := make(chan struct{})
 	defer close(stopCh)

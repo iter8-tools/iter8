@@ -26,12 +26,12 @@ func TestReadConfig(t *testing.T) {
 		{"nofile", "config.nofile.yaml", 0},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			c := readConfig(completePath("../testdata/autox_inputs", tt.file))
+			c := readReleaseGroupSpecs(completePath("../testdata/autox_inputs", tt.file))
 			assert.Equal(t, tt.numSpecGroups, len(c.Specs))
 		})
 	}
 
-	c := readConfig(completePath("../testdata/autox_inputs", "config.example.yaml"))
+	c := readReleaseGroupSpecs(completePath("../testdata/autox_inputs", "config.example.yaml"))
 	assert.Equal(t, 2, len(c.Specs))
 	assert.Equal(t, 2, len(c.Specs["myApp"].ReleaseSpecs))
 	assert.Equal(t, 1, len(c.Specs["myApp2"].ReleaseSpecs))

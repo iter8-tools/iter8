@@ -11,17 +11,17 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// trigger specifies when a releaseGroupSpec should be installed
+// trigger specifies a Kubernetes resource object. When this Kubernetes resource object is created/updated/deleted, then the releaseGroupSpecs will be applied/deleted.
 type trigger struct {
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+
+	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
+
 	Group string `json:"group,omitempty" yaml:"group,omitempty"`
 
 	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 
 	Resource string `json:"resource,omitempty" yaml:"resource,omitempty"`
-
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
-
-	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 }
 
 // releaseSpec points to a particular Helm releaseSpec
@@ -33,7 +33,6 @@ type releaseSpec struct {
 	Values map[string]interface{} `json:"values" yaml:"values"`
 
 	// Version is the version of the Helm chart
-	// TODO: add version constraint, example: "1.16.X"
 	Version string `json:"version" yaml:"version"`
 }
 
@@ -54,8 +53,8 @@ type config struct {
 	Specs map[string]releaseGroupSpec
 }
 
-// readConfig reads yaml autoX config file and converts to a config object
-func readConfig(fn string) (c config) {
+// readReleaseGroupSpecs reads YAML autoX config file and converts to a config object
+func readReleaseGroupSpecs(fn string) (c config) {
 	// empty configuration
 	c = config{}
 
@@ -72,13 +71,6 @@ func readConfig(fn string) (c config) {
 		log.Logger.Warnf("invalid configuration file %s: %s", fn, err.Error())
 		return c // empty configuration
 	}
-
-	// if len(config.Namespaces) == 0 {
-	// 	log.Logger.Warn("not watching any namespaces - configuration error?")
-	// }
-	// if len(config.Resources) == 0 {
-	// 	log.Logger.Warn("not watching any resources - configuration error?")
-	// }
 
 	return c
 }

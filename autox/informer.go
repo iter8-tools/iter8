@@ -15,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 
@@ -23,7 +22,16 @@ import (
 )
 
 const (
-	autoXLabel          = "iter8.tools/autox-group"
+	// this label is used in trigger objects
+	// label always set to true when present
+	// AutoX controller will only check for the existence of this label, not its value
+	autoXLabel = "iter8.tools/autox"
+
+	// this label is used in secrets (to allow for ownership over the application objects)
+	// label is set to the name of a release group spec (releaseGroupSpecName)
+	// there is a 1:1 mapping of secrets to release group specs
+	autoXGroupLabel = "iter8.tools/autox-group"
+
 	autoXAdditionValues = "autoXAdditionalValues"
 	appLabel            = "app.kubernetes.io/name"
 	versionLabel        = "app.kubernetes.io/version"
@@ -42,7 +50,7 @@ const (
 	deleteAction chartAction = 1
 )
 
-// applicationValues is the values for the application template
+// applicationValues is the values for the (Argo CD) application template
 type applicationValues struct {
 	// name is the name of the application
 	name string
@@ -50,7 +58,10 @@ type applicationValues struct {
 	// name is the namespace of the application
 	namespace string
 
-	// owner is the spec group secret for this application
+	// owner is the release group spec secret for this application
+	// we create an secret for each release group spec
+	// this secret is assigned as the owner of this spec
+	// when we delete the secret, the application is also deleted
 	owner struct {
 		name string
 		uid  string
@@ -66,20 +77,18 @@ type applicationValues struct {
 
 // the name of a release will depend on:
 //
-//	the name of the releaseSpec,
-//	the ID of the spec within the releaseSpec, and
-//	the set of (pruned) labels that triggers this release
+//	the name of the release group spec (releaseGroupSpecName)
+//	the ID of the release spec (releaseSpecID)
 func getReleaseName(releaseGroupSpecName string, releaseSpecID string) string {
 	return fmt.Sprintf("autox-%s-%s", releaseGroupSpecName, releaseSpecID)
 }
 
-// applyHelmRelease for a given spec within a spec group
-var applyHelmRelease = func(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
+// applyApplicationObject will apply an application based on a release spec
+var applyApplicationObject = func(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
 	secretsClient := k8sClient.clientset.CoreV1().Secrets(namespace)
 
-	// TODO: what to put for ctx?
-	// get secret, based on autoX label
-	labelSelector := fmt.Sprintf("%s=%s", autoXLabel, releaseGroupSpecName)
+	// get secret, based on autoX group label
+	labelSelector := fmt.Sprintf("%s=%s", autoXGroupLabel, releaseGroupSpecName)
 	secretList, err := secretsClient.List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
@@ -88,7 +97,7 @@ var applyHelmRelease = func(releaseName string, releaseGroupSpecName string, rel
 		return err
 	}
 
-	// ensure that only one secret was found
+	// ensure that only one secret is found
 	if secretsLen := len(secretList.Items); secretsLen == 0 {
 		log.Logger.Error("expected secret with label selector:", labelSelector, "but none were found")
 		return err
@@ -107,7 +116,7 @@ var applyHelmRelease = func(releaseName string, releaseGroupSpecName string, rel
 			uid  string
 		}{
 			name: secret.Name,
-			uid:  string(secret.GetUID()),
+			uid:  string(secret.GetUID()), // assign the release group spec secret as the owner of the application
 		},
 
 		chart: struct {
@@ -126,8 +135,6 @@ var applyHelmRelease = func(releaseName string, releaseGroupSpecName string, rel
 	// additionalValues will contain the pruned labels from the Kubernetes object
 	values.chart.values[autoXAdditionValues] = additionalValues
 
-	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
-
 	tpl, err := base.CreateTemplate(tplStr)
 	if err != nil {
 		log.Logger.Error("could not create application template")
@@ -141,63 +148,60 @@ var applyHelmRelease = func(releaseName string, releaseGroupSpecName string, rel
 		return err
 	}
 
-	// serialize application manifest into unstructured object
-	obj, _, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(buf.Bytes(), nil, nil)
+	// decode object into unstructured.UnstructuredJSONScheme
+	// source: https://github.com/kubernetes/client-go/blob/1ac8d459351e21458fd1041f41e43403eadcbdba/dynamic/simple.go#L186
+	uncastObj, err := runtime.Decode(unstructured.UnstructuredJSONScheme, buf.Bytes())
 	if err != nil {
-		log.Logger.Error("could not serialize application manifest")
+		log.Logger.Error("could not decode object into unstructured.UnstructuredJSONScheme:", buf.String())
 		return err
 	}
-	unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
-	if err != nil {
-		log.Logger.Error("could not convert application manifest into unstructured object")
-		return err
-	}
-	unstructuredObj := &unstructured.Unstructured{Object: unstructuredMap}
 
-	// TODO: what to put for ctx?
-	// create application object
-	_, err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Apply(context.TODO(), releaseName, unstructuredObj, metav1.ApplyOptions{})
+	// apply application object to the K8s cluster
+	log.Logger.Debug("apply application object:", releaseName)
+	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
+	_, err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Apply(context.TODO(), releaseName, uncastObj.(*unstructured.Unstructured), metav1.ApplyOptions{})
 	if err != nil {
 		log.Logger.Error("could not create application:", releaseName)
 		return err
 	}
 
-	log.Logger.Debug("Release chart:", releaseName)
 	return nil
 }
 
-// deleteHelmRelease with a given release name
-var deleteHelmRelease = func(releaseName string, group string, namespace string) error {
-	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
+// deleteApplicationObject deletes an application object based on a given release name
+var deleteApplicationObject = func(releaseName string, releaseGroupSpecName string, namespace string) error {
+	log.Logger.Debug("delete application object:", releaseName)
 
+	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
 	err := k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
 	if err != nil {
 		log.Logger.Error("could not delete application:", releaseName)
 		return err
 	}
 
-	log.Logger.Debug("Delete chart:", releaseName)
 	return nil
 }
 
-// doChartAction iterates through a given spec group, and performs action for each spec
+// doChartAction iterates through a release group spec and performs apply/delete action for each release spec
 // action can be apply or delete
-func doChartAction(chartAction chartAction, group string, namespace string, releaseGroupSpec releaseGroupSpec, additionalValues map[string]string) error {
+func doChartAction(chartAction chartAction, releaseGroupSpecName string, namespace string, releaseGroupSpec releaseGroupSpec, additionalValues map[string]string) error {
 	// get group
 	var err error
 	for releaseSpecID, releaseSpec := range releaseGroupSpec.ReleaseSpecs {
 		// get release name
-		releaseName := getReleaseName(group, releaseSpecID)
+		releaseName := getReleaseName(releaseGroupSpecName, releaseSpecID)
+
 		// perform action for this release
 		switch chartAction {
 		case applyAction:
 			// if there is an error, keep going forward in the for loop
-			if err1 := applyHelmRelease(releaseName, group, releaseSpec, namespace, additionalValues); err1 != nil {
+			if err1 := applyApplicationObject(releaseName, releaseGroupSpecName, releaseSpec, namespace, additionalValues); err1 != nil {
 				err = errors.New("one or more Helm release applys failed")
 			}
+
 		case deleteAction:
 			// if there is an error, keep going forward in the for loop
-			if err1 := deleteHelmRelease(releaseName, group, namespace); err1 != nil {
+			if err1 := deleteApplicationObject(releaseName, releaseGroupSpecName, namespace); err1 != nil {
 				err = errors.New("one or more Helm release deletions failed")
 			}
 		}
@@ -211,6 +215,12 @@ func doChartAction(chartAction chartAction, group string, namespace string, rele
 }
 
 // pruneLabels will extract the labels that are relevant for autoX
+// currently, the important labels are:
+//
+//	autoXLabel   = "iter8.tools/autox"
+//	appLabel     = "app.kubernetes.io/name"
+//	versionLabel = "app.kubernetes.io/version"
+//	trackLabel   = "iter8.tools/track"
 func pruneLabels(labels map[string]string) map[string]string {
 	prunedLabels := map[string]string{}
 	for _, l := range []string{autoXLabel, appLabel, versionLabel, trackLabel} {
@@ -220,6 +230,7 @@ func pruneLabels(labels map[string]string) map[string]string {
 }
 
 // hasAutoXLabel checks if autoX label is present
+// autoX label is used to determine if any autoX functionality should be performed
 func hasAutoXLabel(labels map[string]string) bool {
 	_, ok := labels[autoXLabel]
 	return ok
@@ -239,6 +250,9 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 		return
 	}
 
+	// at this point, we know that we are really handling an even for the trigger object
+	// name, namespace, and GVR should all match
+
 	// namespace and GVR should already match trigger
 	ns := u.GetNamespace()
 	// Note: GVR is from the release group spec, not available through the obj
@@ -247,57 +261,31 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 	// get (client) object from cluster
 	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
 
-	// delete Helm releases if (client) object exists and no longer has autoX label
+	// if (client) object exists
+	// delete application objects if (client) object does not have autoX label
+	// then apply application objects if (client) object has autoX label
 	if clientU != nil {
 		// check if autoX label does not exist
 		clientLabels := clientU.GetLabels()
 		if !hasAutoXLabel(clientLabels) {
-			log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
+			log.Logger.Debugf("delete application objects for release group \"%s\"", releaseGroupSpecName)
 
 			_ = doChartAction(deleteAction, releaseGroupSpecName, ns, releaseGroupSpec, nil)
 
-			// if autoX label does not exist, there is no need to apply Helm releases, so return
+			// if autoX label does not exist, there is no need to apply application objects, so return
 			return
 		}
 
-		// delete Helm releases if (client) object does not exist
+		// apply application objects for the release group
+		log.Logger.Debugf("apply application objects for release group \"%s\"", releaseGroupSpecName)
+		clientPrunedLabels := pruneLabels(clientLabels)
+		_ = doChartAction(applyAction, releaseGroupSpecName, ns, releaseGroupSpec, clientPrunedLabels)
+
+		// delete application objects if (client) object does not exist
 	} else {
-		log.Logger.Debugf("delete Helm releases for release group \"%s\"", releaseGroupSpecName)
+		log.Logger.Debugf("delete application objects for release group \"%s\"", releaseGroupSpecName)
 
 		_ = doChartAction(deleteAction, releaseGroupSpecName, ns, releaseGroupSpec, nil)
-
-		// there is no (client) object, so return
-		return
-	}
-
-	// apply Helm releases if (client) object exists and has autoX label
-	// fetch (client) object from cluster
-	// clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
-	if clientU != nil {
-		clientName := clientU.GetName()
-		clientNs := clientU.GetNamespace()
-
-		// sanity check
-		if clientName != name {
-			log.Logger.Errorf("autoX expected Kubernetes object to have name \"%s\" but had name \"%s\" instead", name, clientName)
-			return
-		}
-		if clientNs != ns {
-			log.Logger.Errorf("autoX expected Kubernetes object to have name \"%s\" but had name \"%s\" instead", ns, clientNs)
-			return
-		}
-
-		// check if autoX label exists
-		clientLabels := clientU.GetLabels()
-		clientPrunedLabels := pruneLabels(clientLabels)
-		if !hasAutoXLabel(clientLabels) {
-			log.Logger.Debugf("do not apply Helm releases for release group \"%s\" because Kubernetes object \"%s\" in namespace \"%s\" does not have %s label", releaseGroupSpecName, clientName, clientNs, autoXLabel)
-			return
-		}
-
-		// apply Helm releases
-		log.Logger.Debugf("apply Helm releases for release group \"%s\"", releaseGroupSpecName)
-		_ = doChartAction(applyAction, releaseGroupSpecName, clientNs, releaseGroupSpec, clientPrunedLabels)
 	}
 }
 
@@ -343,9 +331,10 @@ func newIter8Watcher(autoXConfig config) *iter8Watcher {
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
-	// aggregate all triggers (namespaces and GVR) from the releaseGroupConfig
-	// triggers map has namespace as its key and the object GVRs within the namespace that it is watching as its value
-	// triggers := map[string][]schema.GroupVersionResource{}
+	// create a factory for each trigger
+	// there is a 1:1 correspondence between each trigger and release group spec
+	// effectively, we are creating one factory per trigger
+	// the key to the factories map is the name of the release group spec (releaseGroupSpecName)
 	for releaseGroupSpecName, releaseGroupSpec := range autoXConfig.Specs {
 		ns := releaseGroupSpec.Trigger.Namespace
 		gvr := getGVR(releaseGroupSpec)
