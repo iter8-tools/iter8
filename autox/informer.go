@@ -99,10 +99,10 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 	// ensure that only one secret is found
 	if secretsLen := len(secretList.Items); secretsLen == 0 {
-		log.Logger.Error("expected secret with label selector:", labelSelector, "but none were found")
+		log.Logger.Error("expected secret with label selector: ", labelSelector, "but none were found")
 		return err
 	} else if secretsLen > 1 {
-		log.Logger.Error("expected secret with label selector:", labelSelector, "but more than one were found")
+		log.Logger.Error("expected secret with label selector: ", labelSelector, "but more than one were found")
 		return err
 	}
 	secret := secretList.Items[0]
@@ -152,16 +152,16 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 	// source: https://github.com/kubernetes/client-go/blob/1ac8d459351e21458fd1041f41e43403eadcbdba/dynamic/simple.go#L186
 	uncastObj, err := runtime.Decode(unstructured.UnstructuredJSONScheme, buf.Bytes())
 	if err != nil {
-		log.Logger.Error("could not decode object into unstructured.UnstructuredJSONScheme:", buf.String())
+		log.Logger.Error("could not decode object into unstructured.UnstructuredJSONScheme: ", buf.String())
 		return err
 	}
 
 	// apply application object to the K8s cluster
-	log.Logger.Debug("apply application object:", releaseName)
+	log.Logger.Debug("apply application object: ", releaseName)
 	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
 	_, err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Apply(context.TODO(), releaseName, uncastObj.(*unstructured.Unstructured), metav1.ApplyOptions{})
 	if err != nil {
-		log.Logger.Error("could not create application:", releaseName)
+		log.Logger.Error("could not create application: ", releaseName)
 		return err
 	}
 
@@ -170,12 +170,12 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 // deleteApplicationObject deletes an application object based on a given release name
 var deleteApplicationObject = func(releaseName string, releaseGroupSpecName string, namespace string) error {
-	log.Logger.Debug("delete application object:", releaseName)
+	log.Logger.Debug("delete application object: ", releaseName)
 
 	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
 	err := k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
 	if err != nil {
-		log.Logger.Error("could not delete application:", releaseName)
+		log.Logger.Error("could not delete application: ", releaseName, err)
 		return err
 	}
 
@@ -302,21 +302,27 @@ func getGVR(releaseGroupSpec releaseGroupSpec) schema.GroupVersionResource {
 
 func addObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(obj interface{}) {
 	return func(obj interface{}) {
-		log.Logger.Debug("Add:", obj)
+		u := obj.(*unstructured.Unstructured)
+		log.Logger.Debug(fmt.Sprintf("detected add %s named \"%s\" in namespace \"%s\"", u.GetKind(), u.GetName(), u.GetNamespace()))
+
 		handle(obj, releaseGroupSpecName, releaseGroupSpec)
 	}
 }
 
 func updateObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(oldObj, obj interface{}) {
 	return func(oldObj, obj interface{}) {
-		log.Logger.Debug("Update:", obj)
+		u := obj.(*unstructured.Unstructured)
+		log.Logger.Debug(fmt.Sprintf("detected update %s named \"%s\" in namespace \"%s\"", u.GetKind(), u.GetName(), u.GetNamespace()))
+
 		handle(obj, releaseGroupSpecName, releaseGroupSpec)
 	}
 }
 
 func deleteObject(releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec) func(obj interface{}) {
 	return func(obj interface{}) {
-		log.Logger.Debug("Delete:", obj)
+		u := obj.(*unstructured.Unstructured)
+		log.Logger.Debug(fmt.Sprintf("detected delete %s named \"%s\" in namespace \"%s\"", u.GetKind(), u.GetName(), u.GetNamespace()))
+
 		handle(obj, releaseGroupSpecName, releaseGroupSpec)
 	}
 }
