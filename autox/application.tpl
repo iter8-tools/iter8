@@ -1,25 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ .name }}
-  namespace: {{ .namespace }}
+  name: {{ .Name }}
+  namespace: argocd
   ownerReferences:
   - apiVersion: v1
     kind: Secret
-    name: {{ .owner.name }}
-    uid: {{ .owner.uid }}
+    name: {{ .Owner.Name }}
+    uid: {{ .Owner.Uid }}
 spec:
   destination:
-    namespace: {{ .namespace }}
+    namespace: {{ .Namespace }}
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: {{ .chart.name }}
+    chart: {{ .Chart.Name }}
     helm:
-      values: 
-        {{ .chart.values | toYaml | indent 4 }}
+      values: |
+        {{ .Chart.Values | toYaml | indent 8 | trim }}
     repoURL: https://iter8-tools.github.io/hub
-    targetRevision: {{ .chart.version }}
+    targetRevision: {{ .Chart.Version }}
   syncPolicy:
     automated:
       prune: true
