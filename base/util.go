@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"text/template"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/Masterminds/sprig"
 	"github.com/iter8-tools/iter8/base/log"
@@ -18,6 +21,10 @@ var MajorMinor = "v0.12"
 // Version is the semantic version of Iter8 (with the `v` prefix)
 // Version is intended to be set using LDFLAGS at build time
 var Version = "v0.12.0"
+
+const (
+	toYAMLString = "toYaml"
+)
 
 // int64Pointer takes an int64 as input, creates a new variable with the input value, and returns a pointer to the variable
 func int64Pointer(i int64) *int64 {
@@ -86,5 +93,26 @@ func getTextTemplateFromURL(providerURL string) (*template.Template, error) {
 
 // CreateTemplate creates a template from a string
 func CreateTemplate(tplString string) (*template.Template, error) {
-	return template.New("provider template").Funcs(sprig.TxtFuncMap()).Parse(string(tplString))
+	return template.New("provider template").Funcs(FuncMapWithToYAML()).Parse(string(tplString))
+}
+
+// FuncMapWithToYAML return sprig text function map with a toYaml function
+func FuncMapWithToYAML() template.FuncMap {
+	f := sprig.TxtFuncMap()
+	f[toYAMLString] = ToYAML
+
+	return f
+}
+
+// ToYAML takes an interface, marshals it to yaml, and returns a string. It will
+// always return a string, even on marshal error (empty string).
+//
+// This is designed to be called from a template.
+func ToYAML(v interface{}) string {
+	data, err := yaml.Marshal(v)
+	if err != nil {
+		// Swallow errors inside of a template.
+		return ""
+	}
+	return strings.TrimSuffix(string(data), "\n")
 }
