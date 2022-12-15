@@ -22,7 +22,6 @@ spec:
     targetRevision: {{ .Chart.Version }}
   syncPolicy:
     automated:
-      prune: true
-      selfHeal: true
+      selfHeal: false
     syncOptions:
     - CreateNamespace=true
