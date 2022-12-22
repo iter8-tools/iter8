@@ -217,9 +217,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 		// apply application object to the K8s cluster
 		log.Logger.Debug("apply application object: ", releaseName)
 		gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
-		_, err = k8sClient.dynamic().Resource(gvr).Namespace(argocd).Apply(context.TODO(), releaseName, uncastObj.(*unstructured.Unstructured), metav1.ApplyOptions{
-			FieldManager: "autoX", // TODO: this is a required field
-		})
+		_, err = k8sClient.dynamic().Resource(gvr).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
 		if err != nil {
 			log.Logger.Error("could not create application: ", releaseName, err)
 			return err
