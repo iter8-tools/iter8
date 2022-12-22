@@ -15,7 +15,7 @@ import (
 func TestStart(t *testing.T) {
 	// autoX watcher will call on applyHelmRelease
 	applyHelmReleaseInvocations := 0
-	applyApplicationObject = func(releaseName string, group string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
+	applyApplicationObject = func(releaseName string, group string, releaseSpec releaseSpec, namespace string, additionalValues map[string]interface{}) error {
 		applyHelmReleaseInvocations++
 		return nil
 	}

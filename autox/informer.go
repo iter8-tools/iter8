@@ -8,16 +8,20 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"reflect"
 	"sync"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/yaml"
+
+	argo "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -39,6 +43,9 @@ const (
 	trackLabel          = "iter8.tools/track"
 
 	argocd = "argocd"
+
+	templateRevision = "templateRevision"
+	experimentYAML   = "experiment.yaml"
 )
 
 var m sync.Mutex
@@ -84,8 +91,50 @@ func getReleaseName(releaseGroupSpecName string, releaseSpecID string) string {
 	return fmt.Sprintf("autox-%s-%s", releaseGroupSpecName, releaseSpecID)
 }
 
+// shouldCreateApplication will return true if an application object should be created
+// an application object should be created if the values are different from those from the previous application object (if one exists)
+func shouldCreateApplication(values map[string]interface{}, releaseName string) (bool, error) {
+	var err error
+
+	// get application object
+	gvr2 := schema.GroupVersionResource{
+		Group:    "argoproj.io",
+		Version:  "v1",
+		Resource: "applications",
+	}
+	uPApp, _ := k8sClient.dynamicClient.Resource(gvr2).Namespace(argocd).Get(context.TODO(), releaseName, metav1.GetOptions{}) // *unstructured.Unstructured previous application
+	if uPApp != nil {
+		log.Logger.Debug(fmt.Sprintf("found previous application \"%s\"", releaseName))
+
+		// convert application unstructured.Unstructured to application object
+		// See: https://erwinvaneyk.nl/kubernetes-unstructured-to-typed/
+		var pApp argo.Application // previous application
+		err = runtime.DefaultUnstructuredConverter.FromUnstructured(uPApp.UnstructuredContent(), &pApp)
+		if err != nil {
+			log.Logger.Error(fmt.Sprintf("cannot parse preexisting application \"%s\"", releaseName), err)
+			// TODO: throw error?
+			return false, err
+		}
+
+		// parse string values from application
+		sPValues := pApp.Spec.Source.Helm.Values // string previous (application) values
+		pValues := map[string]interface{}{}      // previous (application) values
+		err = yaml.Unmarshal([]byte(sPValues), pValues)
+		if err != nil {
+			log.Logger.Error(fmt.Sprintf("cannot unmarshal values from previous application \"%s\": %s", releaseName, sPValues), err)
+			// TODO: throw error?
+			return false, err
+		}
+
+		// compare values from previous application to values for the pending one
+		return reflect.DeepEqual(pValues, values), nil
+	}
+
+	return false, nil
+}
+
 // applyApplicationObject will apply an application based on a release spec
-var applyApplicationObject = func(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]string) error {
+var applyApplicationObject = func(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]interface{}) error {
 	secretsClient := k8sClient.clientset.CoreV1().Secrets(argocd)
 
 	// get secret, based on autoX group label
@@ -108,7 +157,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 	}
 	secret := secretList.Items[0]
 
-	values := applicationValues{
+	tValues := applicationValues{ // template values
 		Name:      releaseName,
 		Namespace: namespace,
 
@@ -123,53 +172,65 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 	// add additionalValues to the values
 	// Argo CD will create a new experiment if it sees that the additionalValues are different from the previous experiment
 	// additionalValues will contain the pruned labels from the Kubernetes object
-	values.Chart.Values[autoXAdditionValues] = additionalValues
+	tValues.Chart.Values[autoXAdditionValues] = additionalValues
 
-	tpl, err := base.CreateTemplate(tplStr)
-	if err != nil {
-		log.Logger.Error("could not create application template: ", err)
-		return err
-	}
+	// check if the pending application will be different from the previous application, if it exists
+	// only create a new application if it will be different
+	if s, _ := shouldCreateApplication(tValues.Chart.Values, releaseName); s {
+		// execute application template
+		tpl, err := base.CreateTemplate(tplStr)
+		if err != nil {
+			log.Logger.Error("could not create application template: ", err)
+			return err
+		}
 
-	var buf bytes.Buffer
-	err = tpl.Execute(&buf, values)
-	if err != nil {
-		log.Logger.Error("could not execute application template: ", err)
-		return err
-	}
+		var buf bytes.Buffer
+		err = tpl.Execute(&buf, tValues)
+		if err != nil {
+			log.Logger.Error("could not execute application template: ", err)
+			return err
+		}
 
-	log.Logger.Debug("application template: ", buf.String())
+		jsonBytes, err := yaml.YAMLToJSON(buf.Bytes())
+		if err != nil {
+			log.Logger.Error("could not convert YAML to JSON: ", buf.String(), err)
+			return err
+		}
 
-	jsonBytes, err := yaml.YAMLToJSON(buf.Bytes())
-	if err != nil {
-		log.Logger.Error("could not convert YAML to JSON: ", buf.String(), err)
-		return err
-	}
+		// decode pending application object into unstructured.UnstructuredJSONScheme
+		// source: https://github.com/kubernetes/client-go/blob/1ac8d459351e21458fd1041f41e43403eadcbdba/dynamic/simple.go#L186
+		uncastObj, err := runtime.Decode(unstructured.UnstructuredJSONScheme, jsonBytes)
+		if err != nil {
+			log.Logger.Error("could not decode object into unstructured.UnstructuredJSONScheme: ", buf.String(), err)
+			return err
+		}
 
-	// decode object into unstructured.UnstructuredJSONScheme
-	// source: https://github.com/kubernetes/client-go/blob/1ac8d459351e21458fd1041f41e43403eadcbdba/dynamic/simple.go#L186
-	uncastObj, err := runtime.Decode(unstructured.UnstructuredJSONScheme, jsonBytes)
-	if err != nil {
-		log.Logger.Error("could not decode object into unstructured.UnstructuredJSONScheme: ", buf.String(), err)
-		return err
-	}
+		// // apply application object to the K8s cluster
+		// log.Logger.Debug("apply application object: ", releaseName)
+		// gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
+		// _, err = k8sClient.dynamic().Resource(gvr).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
+		// if err != nil {
+		// 	log.Logger.Error("could not create application: ", releaseName, err)
+		// 	return err
+		// }
 
-	// apply application object to the K8s cluster
-	log.Logger.Debug("apply application object: ", releaseName)
-	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
-	_, err = k8sClient.dynamic().Resource(gvr).Namespace(argocd).Apply(context.TODO(), releaseName, uncastObj.(*unstructured.Unstructured), metav1.ApplyOptions{
-		FieldManager: "autoX", // TODO: this is a required field
-	})
-	if err != nil {
-		log.Logger.Error("could not create application: ", releaseName, err)
-		return err
+		// apply application object to the K8s cluster
+		log.Logger.Debug("apply application object: ", releaseName)
+		gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
+		_, err = k8sClient.dynamic().Resource(gvr).Namespace(argocd).Apply(context.TODO(), releaseName, uncastObj.(*unstructured.Unstructured), metav1.ApplyOptions{
+			FieldManager: "autoX", // TODO: this is a required field
+		})
+		if err != nil {
+			log.Logger.Error("could not create application: ", releaseName, err)
+			return err
+		}
 	}
 
 	return nil
 }
 
 // deleteApplicationObject deletes an application object based on a given release name
-var deleteApplicationObject = func(releaseName string, releaseGroupSpecName string, namespace string) error {
+var deleteApplicationObject = func(releaseName string, releaseGroupSpecName string) error {
 	log.Logger.Debug("delete application object: ", releaseName)
 
 	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
@@ -184,7 +245,7 @@ var deleteApplicationObject = func(releaseName string, releaseGroupSpecName stri
 
 // doChartAction iterates through a release group spec and performs apply/delete action for each release spec
 // action can be apply or delete
-func doChartAction(chartAction chartAction, releaseGroupSpecName string, namespace string, releaseGroupSpec releaseGroupSpec, additionalValues map[string]string) error {
+func doChartAction(chartAction chartAction, releaseGroupSpecName string, releaseGroupSpec releaseGroupSpec, namespace string, additionalValues map[string]interface{}) error {
 	// get group
 	var err error
 	for releaseSpecID, releaseSpec := range releaseGroupSpec.ReleaseSpecs {
@@ -201,7 +262,7 @@ func doChartAction(chartAction chartAction, releaseGroupSpecName string, namespa
 
 		case deleteAction:
 			// if there is an error, keep going forward in the for loop
-			if err1 := deleteApplicationObject(releaseName, releaseGroupSpecName, namespace); err1 != nil {
+			if err1 := deleteApplicationObject(releaseName, releaseGroupSpecName); err1 != nil {
 				err = errors.New("one or more Helm release deletions failed")
 			}
 		}
@@ -221,8 +282,8 @@ func doChartAction(chartAction chartAction, releaseGroupSpecName string, namespa
 //	appLabel     = "app.kubernetes.io/name"
 //	versionLabel = "app.kubernetes.io/version"
 //	trackLabel   = "iter8.tools/track"
-func pruneLabels(labels map[string]string) map[string]string {
-	prunedLabels := map[string]string{}
+func pruneLabels(labels map[string]string) map[string]interface{} {
+	prunedLabels := map[string]interface{}{}
 	for _, l := range []string{autoXLabel, appLabel, versionLabel, trackLabel} {
 		prunedLabels[l] = labels[l]
 	}
@@ -259,14 +320,8 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 	// Note: GVR is from the release group spec, not available through the obj
 	gvr := getGVR(releaseGroupSpec)
 
-	// list, err := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).List(context.TODO(), metav1.ListOptions{})
-
-	// log.Logger.Debug("list: ", list, "err: ", err)
-
 	// get (client) object from cluster
-	clientU, err := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
-
-	log.Logger.Debug("clientU: ", clientU, "err: ", err)
+	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
 
 	// if (client) object exists
 	// delete application objects if (client) object does not have autoX label
@@ -277,7 +332,7 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 		if !hasAutoXLabel(clientLabels) {
 			log.Logger.Debugf("delete application objects for release group \"%s\" (no %s label)", releaseGroupSpecName, autoXLabel)
 
-			_ = doChartAction(deleteAction, releaseGroupSpecName, ns, releaseGroupSpec, nil)
+			_ = doChartAction(deleteAction, releaseGroupSpecName, releaseGroupSpec, "", nil)
 
 			// if autoX label does not exist, there is no need to apply application objects, so return
 			return
@@ -286,13 +341,13 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 		// apply application objects for the release group
 		log.Logger.Debugf("apply application objects for release group \"%s\"", releaseGroupSpecName)
 		clientPrunedLabels := pruneLabels(clientLabels)
-		_ = doChartAction(applyAction, releaseGroupSpecName, ns, releaseGroupSpec, clientPrunedLabels)
+		_ = doChartAction(applyAction, releaseGroupSpecName, releaseGroupSpec, ns, clientPrunedLabels)
 
 		// delete application objects if (client) object does not exist
 	} else {
 		log.Logger.Debugf("delete application objects for release group \"%s\" (client object not found)", releaseGroupSpecName)
 
-		_ = doChartAction(deleteAction, releaseGroupSpecName, ns, releaseGroupSpec, nil)
+		_ = doChartAction(deleteAction, releaseGroupSpecName, releaseGroupSpec, "", nil)
 	}
 }
 

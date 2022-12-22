@@ -15,6 +15,7 @@ import (
 	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/montanaflynn/stats"
 	"helm.sh/helm/v3/pkg/time"
+	"sigs.k8s.io/yaml"
 )
 
 // Task is the building block of an experiment spec
@@ -178,107 +179,107 @@ type taskMetaWith struct {
 	With map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
-// UnmarshalJSON will unmarshal an experiment spec from bytes
-// This is a custom JSON unmarshaler
-func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
-	var v []taskMetaWith
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
-	}
+// // UnmarshalJSON will unmarshal an experiment spec from bytes
+// // This is a custom JSON unmarshaler
+// func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
+// 	var v []taskMetaWith
+// 	if err := json.Unmarshal(data, &v); err != nil {
+// 		return err
+// 	}
 
-	log.Logger.Tracef("unmarshaled %v tasks into task meta", len(v))
+// 	log.Logger.Tracef("unmarshaled %v tasks into task meta", len(v))
 
-	for _, t := range v {
-		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
-			err := fmt.Errorf("invalid task found without a task name or a run command")
-			log.Logger.Error(err)
-			return err
-		}
+// 	for _, t := range v {
+// 		if (t.Task == nil || len(*t.Task) == 0) && (t.Run == nil) {
+// 			err := fmt.Errorf("invalid task found without a task name or a run command")
+// 			log.Logger.Error(err)
+// 			return err
+// 		}
 
-		// get byte data for this task
-		tBytes, _ := json.Marshal(t)
-		var tsk Task
-		// this is a run task
-		if t.Run != nil {
-			log.Logger.Debug("found run task: ", *t.Run)
-			rt := &runTask{}
-			if err := json.Unmarshal(tBytes, rt); err != nil {
-				e := errors.New("json unmarshal error")
-				log.Logger.WithStackTrace(err.Error()).Error(e)
-				return e
-			}
-			tsk = rt
-		} else {
-			// this is some other task
-			switch *t.Task {
-			case ReadinessTaskName:
-				rt := &readinessTask{}
-				if err := json.Unmarshal(tBytes, rt); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = rt
-			case CustomMetricsTaskName:
-				cdt := &customMetricsTask{}
-				if err := json.Unmarshal(tBytes, cdt); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = cdt
-			case CollectHTTPTaskName:
-				cht := &collectHTTPTask{}
-				if err := json.Unmarshal(tBytes, cht); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = cht
-			case CollectGRPCTaskName:
-				cgt := &collectGRPCTask{}
-				if err := json.Unmarshal(tBytes, cgt); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = cgt
-			case CollectABNMetricsTaskName:
-				cgt := &collectABNMetricsTask{}
-				if err := json.Unmarshal(tBytes, cgt); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = cgt
-			case AssessTaskName:
-				at := &assessTask{}
-				if err := json.Unmarshal(tBytes, at); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = at
-			case NotifyTaskName:
-				nt := &notifyTask{}
-				if err := json.Unmarshal(tBytes, nt); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = nt
-			default:
-				log.Logger.Error("unknown task: " + *t.Task)
-				return errors.New("unknown task: " + *t.Task)
-			}
-		}
-		n := append(*s, tsk)
-		*s = n
-		log.Logger.Trace("appended to experiment spec")
-	}
-	log.Logger.Trace("constructed experiment spec of length: ", len(*s))
-	return nil
-}
+// 		// get byte data for this task
+// 		tBytes, _ := json.Marshal(t)
+// 		var tsk Task
+// 		// this is a run task
+// 		if t.Run != nil {
+// 			log.Logger.Debug("found run task: ", *t.Run)
+// 			rt := &runTask{}
+// 			if err := json.Unmarshal(tBytes, rt); err != nil {
+// 				e := errors.New("json unmarshal error")
+// 				log.Logger.WithStackTrace(err.Error()).Error(e)
+// 				return e
+// 			}
+// 			tsk = rt
+// 		} else {
+// 			// this is some other task
+// 			switch *t.Task {
+// 			case ReadinessTaskName:
+// 				rt := &readinessTask{}
+// 				if err := json.Unmarshal(tBytes, rt); err != nil {
+// 					e := errors.New("json unmarshal error")
+// 					log.Logger.WithStackTrace(err.Error()).Error(e)
+// 					return e
+// 				}
+// 				tsk = rt
+// 			case CustomMetricsTaskName:
+// 				cdt := &customMetricsTask{}
+// 				if err := json.Unmarshal(tBytes, cdt); err != nil {
+// 					e := errors.New("json unmarshal error")
+// 					log.Logger.WithStackTrace(err.Error()).Error(e)
+// 					return e
+// 				}
+// 				tsk = cdt
+// 			case CollectHTTPTaskName:
+// 				cht := &collectHTTPTask{}
+// 				if err := json.Unmarshal(tBytes, cht); err != nil {
+// 					e := errors.New("json unmarshal error")
+// 					log.Logger.WithStackTrace(err.Error()).Error(e)
+// 					return e
+// 				}
+// 				tsk = cht
+// 			case CollectGRPCTaskName:
+// 				cgt := &collectGRPCTask{}
+// 				if err := json.Unmarshal(tBytes, cgt); err != nil {
+// 					e := errors.New("json unmarshal error")
+// 					log.Logger.WithStackTrace(err.Error()).Error(e)
+// 					return e
+// 				}
+// 				tsk = cgt
+// 			case CollectABNMetricsTaskName:
+// 				cgt := &collectABNMetricsTask{}
+// 				if err := json.Unmarshal(tBytes, cgt); err != nil {
+// 					e := errors.New("json unmarshal error")
+// 					log.Logger.WithStackTrace(err.Error()).Error(e)
+// 					return e
+// 				}
+// 				tsk = cgt
+// 			case AssessTaskName:
+// 				at := &assessTask{}
+// 				if err := json.Unmarshal(tBytes, at); err != nil {
+// 					e := errors.New("json unmarshal error")
+// 					log.Logger.WithStackTrace(err.Error()).Error(e)
+// 					return e
+// 				}
+// 				tsk = at
+// 			case NotifyTaskName:
+// 				nt := &notifyTask{}
+// 				if err := json.Unmarshal(tBytes, nt); err != nil {
+// 					e := errors.New("json unmarshal error")
+// 					log.Logger.WithStackTrace(err.Error()).Error(e)
+// 					return e
+// 				}
+// 				tsk = nt
+// 			default:
+// 				log.Logger.Error("unknown task: " + *t.Task)
+// 				return errors.New("unknown task: " + *t.Task)
+// 			}
+// 		}
+// 		n := append(*s, tsk)
+// 		*s = n
+// 		log.Logger.Trace("appended to experiment spec")
+// 	}
+// 	log.Logger.Trace("constructed experiment spec of length: ", len(*s))
+// 	return nil
+// }
 
 // metricTypeMatch checks if metric value is a match for its type
 func metricTypeMatch(t MetricType, val interface{}) bool {
@@ -895,7 +896,13 @@ func (exp *Experiment) run(driver Driver) error {
 		}
 
 		exp.incrementNumCompletedTasks()
+
+		b, _ := yaml.Marshal(exp)
+
+		log.Logger.Debug("exp:", string(b))
+
 		err = driver.Write(exp)
+
 		if err != nil {
 			return err
 		}
@@ -908,7 +915,7 @@ func (exp *Experiment) failExperiment() {
 	exp.Result.Failure = true
 }
 
-// incrementNumCompletedTasks increments the number of completed tasks in the experimeent
+// incrementNumCompletedTasks increments the number of completed tasks in the experiment
 func (exp *Experiment) incrementNumCompletedTasks() {
 	exp.Result.NumCompletedTasks++
 }

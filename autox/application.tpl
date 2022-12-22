@@ -8,6 +8,8 @@ metadata:
     kind: Secret
     name: {{ .Owner.Name }}
     uid: {{ .Owner.Uid }}
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   destination:
     namespace: {{ .Namespace }}
@@ -20,8 +22,16 @@ spec:
         {{ .Chart.Values | toYaml | indent 8 | trim }}
     repoURL: https://iter8-tools.github.io/hub
     targetRevision: {{ .Chart.Version }}
+  ignoreDifferences:
+  - group: ""
+    kind: "Secret"
+    name: {{ .Name }}
+    namespace: {{ .Namespace }}
+    jsonPointers:
+    - /data/experiment.yaml
   syncPolicy:
     automated:
-      selfHeal: false
+      selfHeal: true
     syncOptions:
     - CreateNamespace=true
+    - RespectIgnoreDifferences=true
