@@ -8,12 +8,16 @@ import (
 	"hash/maphash"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 var versionHasher maphash.Hash
 
 // lookupInternal is detailed implementation of gRPC method Lookup
 func lookupInternal(application string, user string) (*abnapp.Application, *string, error) {
+	log.Logger.Trace("lookupInternal called")
+	log.Logger.Trace("lookupInternal completed")
+
 	// if user is not provided, fail
 	if user == "" {
 		return nil, nil, errors.New("no user session provided")
@@ -21,11 +25,8 @@ func lookupInternal(application string, user string) (*abnapp.Application, *stri
 
 	// check that we have a record of the application
 	a, err := abnapp.Applications.Get(application)
-	if err != nil {
-		return nil, nil, fmt.Errorf("application not found: %s", err.Error())
-	}
-	if a == nil {
-		return nil, nil, errors.New("application not found")
+	if err != nil || a == nil {
+		return nil, nil, fmt.Errorf("application %s not found", application)
 	}
 
 	// use rendezvous hash to get track for user, fail if not present
@@ -57,6 +58,7 @@ func rendezvousGet(a *abnapp.Application, user string) string {
 
 	for track, version := range a.Tracks {
 		score := hash(version, user)
+		log.Logger.Debugf("hash(%s,%s) --> %d  --  %d", version, user, score, maxScore)
 		if score > maxScore || (score == maxScore && version > maxVersion) {
 			maxScore = score
 			maxVersion = version
