@@ -1,8 +1,24 @@
-resources:
-- group: apps
-  version: v1
-  resource: deployments
-- version: v1
-  resource: services
-namespaces:
-- default
+default:
+  backend:
+    maxNumCandidates: 2
+    resources:
+    - group: apps
+      version: v1
+      resource: deployments
+      condition: Available
+    - version: v1
+      resource: services
+  frontend:
+    maxNumCandidates: 1
+    resources:
+    - version: v1
+      resource: services
+test:
+  iter8:
+    maxNumCandidates: 1
+    resources:
+    - group: apps
+      version: v1
+      resource: deployments
+      condition: Available
+empty:
