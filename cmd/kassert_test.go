@@ -14,12 +14,21 @@ import (
 )
 
 func TestKAssert(t *testing.T) {
+	testAssert(t, id.ExperimentPath, "output/kassert.txt", false)
+
+}
+
+func TestKAssertFailsSLOs(t *testing.T) {
+	testAssert(t, "experiment_fails.yaml", "output/kassertfails.txt", true)
+}
+
+func testAssert(t *testing.T, experiment string, expectedOutputFile string, expectError bool) {
 	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k launch
 		{
 			name:   "k launch",
-			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../testdata/charts", "iter8")),
+			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http,assess} --set http.url=https://httpbin.org/get --set http.duration=2s", base.CompletePath("../testdata/charts", "iter8")),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 		// k run
@@ -29,9 +38,10 @@ func TestKAssert(t *testing.T) {
 		},
 		// k assert
 		{
-			name:   "k assert",
-			cmd:    "k assert -c completed -c nofailure -c slos",
-			golden: base.CompletePath("../testdata", "output/kassert.txt"),
+			name:      "k assert",
+			cmd:       "k assert -c completed -c nofailure -c slos",
+			golden:    base.CompletePath("../testdata", expectedOutputFile),
+			wantError: expectError,
 		},
 	}
 
@@ -39,7 +49,7 @@ func TestKAssert(t *testing.T) {
 	base.SetupWithMock(t)
 	// fake kube cluster
 	*kd = *id.NewFakeKubeDriver(settings)
-	byteArray, _ := os.ReadFile(base.CompletePath("../testdata", id.ExperimentPath))
+	byteArray, _ := os.ReadFile(base.CompletePath("../testdata", experiment))
 	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",

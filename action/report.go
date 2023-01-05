@@ -40,13 +40,6 @@ func NewReportOpts(kd *driver.KubeDriver) *ReportOpts {
 	}
 }
 
-// LocalRun generates report for a local experiment
-func (rOpts *ReportOpts) LocalRun(out io.Writer) error {
-	return rOpts.Run(&driver.FileDriver{
-		RunDir: rOpts.RunDir,
-	}, out)
-}
-
 // KubeRun generates report for a Kubernetes experiment
 func (rOpts *ReportOpts) KubeRun(out io.Writer) error {
 	if err := rOpts.KubeDriver.Init(); err != nil {

@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
+	"time"
 
 	ia "github.com/iter8-tools/iter8/action"
 	"github.com/iter8-tools/iter8/base/log"
@@ -55,4 +57,15 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 	addConditionFlag(cmd, &actor.Conditions)
 	addTimeoutFlag(cmd, &actor.Timeout)
 	return cmd
+}
+
+// addConditionFlag adds the condition flag to command
+func addConditionFlag(cmd *cobra.Command, conditionPtr *[]string) {
+	cmd.Flags().StringSliceVarP(conditionPtr, "condition", "c", nil, fmt.Sprintf("%v | %v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure, ia.SLOs))
+	_ = cmd.MarkFlagRequired("condition")
+}
+
+// addTimeoutFlag adds timeout flag to command
+func addTimeoutFlag(cmd *cobra.Command, timeoutPtr *time.Duration) {
+	cmd.Flags().DurationVar(timeoutPtr, "timeout", 0, "timeout duration (e.g., 5s)")
 }
