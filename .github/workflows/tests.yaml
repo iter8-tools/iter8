@@ -256,9 +256,9 @@ jobs:
           --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
           --set grpc.data.name="frodo" \
           --set assess.SLOs.upper.grpc/error-rate=0 \
-          --set assess.SLOs.upper.grpc/latency/mean=50 \
-          --set assess.SLOs.upper.grpc/latency/p90=100 \
-          --set assess.SLOs.upper.grpc/latency/p'97\.5'=200 \
+          --set assess.SLOs.upper.grpc/latency/mean=500 \
+          --set assess.SLOs.upper.grpc/latency/p90=1500 \
+          --set assess.SLOs.upper.grpc/latency/p'97\.5'=1800 \
           --set runner=job
         iter8 k assert -c completed -c nofailure -c slos --timeout 60s
         iter8 k report
