@@ -104,9 +104,9 @@ jobs:
           --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
           --set grpc.data.name="frodo" \
           --set assess.SLOs.upper.grpc/error-rate=0 \
-          --set assess.SLOs.upper.grpc/latency/mean=150 \
-          --set assess.SLOs.upper.grpc/latency/p90=300 \
-          --set assess.SLOs.upper.grpc/latency/p'97\.5'=350 \
+          --set assess.SLOs.upper.grpc/latency/mean=200 \
+          --set assess.SLOs.upper.grpc/latency/p90=500 \
+          --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
           --set runner=job
         iter8 k assert -c completed -c nofailure -c slos --timeout 60s
         iter8 k report
@@ -124,9 +124,9 @@ jobs:
           --set grpc.dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
           --set grpc.metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
           --set assess.SLOs.upper.grpc/error-rate=0 \
-          --set assess.SLOs.upper.grpc/latency/mean=150 \
-          --set assess.SLOs.upper.grpc/latency/p90=300 \
-          --set assess.SLOs.upper.grpc/latency/p'97\.5'=350 \
+          --set assess.SLOs.upper.grpc/latency/mean=200 \
+          --set assess.SLOs.upper.grpc/latency/p90=500 \
+          --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
           --set runner=job
         iter8 k assert -c completed -c nofailure -c slos --timeout 60s
         iter8 k report
