@@ -59,11 +59,11 @@ jobs:
           --set ready.timeout=60s \
           --set http.url=http://httpbin.default/get \
           --set http.duration="3s" \
-          --set assess.SLOs.upper.http/latency-p50=1200 \
-          --set assess.SLOs.upper.http/latency-p90=1500 \
+          --set assess.SLOs.upper.http/latency-p50=5 \
+          --set assess.SLOs.upper.http/latency-p90=10 \
           --set assess.SLOs.upper.http/error-count=0 \
           --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s  || true
+        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
         iter8 k report
         iter8 k delete
 
