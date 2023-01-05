@@ -19,11 +19,11 @@ import (
 // If sufficient objects created to match config, then Applications should contain suitable entry
 // Probably could test various combinations
 func TestAdd(t *testing.T) {
-	var svcConfigFile string = "../../testdata/abninputs/config.yaml"
-	var namespace string = "default"
-	var application string = "backend"
-	var track string = application
-	var version string = "v1"
+	var svcConfigFile = "../../testdata/abninputs/config.yaml"
+	var namespace = "default"
+	var application = "backend"
+	var track = application
+	var version = "v1"
 
 	// set up - initialize channel
 	done := make(chan struct{})
@@ -44,12 +44,12 @@ func TestAdd(t *testing.T) {
 
 // update version associated with track
 func TestUpdate(t *testing.T) {
-	var svcConfigFile string = "../../testdata/abninputs/config.yaml"
-	var namespace string = "default"
-	var application string = "backend"
-	var track string = application
-	var version string = "v1"
-	var version2 string = "v2"
+	var svcConfigFile = "../../testdata/abninputs/config.yaml"
+	var namespace = "default"
+	var application = "backend"
+	var track = application
+	var version = "v1"
+	var version2 = "v2"
 
 	// set up - initialize channel
 	done := make(chan struct{})
@@ -98,11 +98,11 @@ func assertV(t *testing.T, expected string, obj *unstructured.Unstructured) {
 
 // test deletion of application object does not remove it from Applications; BUT the track map should be cleared
 func TestDelete(t *testing.T) {
-	var svcConfigFile string = "../../testdata/abninputs/config.yaml"
-	var namespace string = "default"
-	var application string = "backend"
-	var track string = application
-	var version string = "v1"
+	var svcConfigFile = "../../testdata/abninputs/config.yaml"
+	var namespace = "default"
+	var application = "backend"
+	var track = application
+	var version = "v1"
 
 	// set up - initialize channel
 	done := make(chan struct{})

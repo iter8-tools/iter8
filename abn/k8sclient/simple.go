@@ -82,6 +82,7 @@ func NewSimpleDynamicClientWithCustomListKinds(scheme *runtime.Scheme, gvrToList
 	return cs
 }
 
+// FakeDynamicClient ...
 // Clientset implements clientset.Interface. Meant to be embedded into a
 // struct to get a default implementation. This makes faking out just the method
 // you want to test easier.
@@ -104,10 +105,12 @@ var (
 	_ testing.FakeClient = &FakeDynamicClient{}
 )
 
+// Tracker ...
 func (c *FakeDynamicClient) Tracker() testing.ObjectTracker {
 	return c.tracker
 }
 
+// Resource ...
 func (c *FakeDynamicClient) Resource(resource schema.GroupVersionResource) dynamic.NamespaceableResourceInterface {
 	return &dynamicResourceClient{client: c, resource: resource, listKind: c.gvrToListKind[resource]}
 }
@@ -343,7 +346,6 @@ func (c *dynamicResourceClient) List(ctx context.Context, opts metav1.ListOption
 	}
 
 	list := &unstructured.UnstructuredList{}
-	// list.SetResourceVersion(entireList.GetResourceVersion())
 	list.SetRemainingItemCount(entireList.GetRemainingItemCount())
 	list.SetResourceVersion(entireList.GetResourceVersion())
 	list.SetContinue(entireList.GetContinue())
@@ -413,7 +415,6 @@ func (c *dynamicResourceClient) Patch(ctx context.Context, name string, pt types
 	return ret, err
 }
 
-// MK start
 // TODO: opts are currently ignored.
 func (c *dynamicResourceClient) Apply(ctx context.Context, name string, obj *unstructured.Unstructured, options metav1.ApplyOptions, subresources ...string) (*unstructured.Unstructured, error) {
 	outBytes, err := runtime.Encode(unstructured.UnstructuredJSONScheme, obj)
@@ -456,44 +457,4 @@ func (c *dynamicResourceClient) Apply(ctx context.Context, name string, obj *uns
 
 func (c *dynamicResourceClient) ApplyStatus(ctx context.Context, name string, obj *unstructured.Unstructured, options metav1.ApplyOptions) (*unstructured.Unstructured, error) {
 	return c.Apply(ctx, name, obj, options, "status")
-}
-
-// MK end
-
-func convertObjectsToUnstructured(s *runtime.Scheme, objs []runtime.Object) ([]runtime.Object, error) {
-	ul := make([]runtime.Object, 0, len(objs))
-
-	for _, obj := range objs {
-		u, err := convertToUnstructured(s, obj)
-		if err != nil {
-			return nil, err
-		}
-
-		ul = append(ul, u)
-	}
-	return ul, nil
-}
-
-func convertToUnstructured(s *runtime.Scheme, obj runtime.Object) (runtime.Object, error) {
-	var (
-		err error
-		u   unstructured.Unstructured
-	)
-
-	u.Object, err = runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert to unstructured: %w", err)
-	}
-
-	gvk := u.GroupVersionKind()
-	if gvk.Group == "" || gvk.Kind == "" {
-		gvks, _, err := s.ObjectKinds(obj)
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert to unstructured - unable to get GVK %w", err)
-		}
-		apiv, k := gvks[0].ToAPIVersionAndKind()
-		u.SetAPIVersion(apiv)
-		u.SetKind(k)
-	}
-	return &u, nil
 }
