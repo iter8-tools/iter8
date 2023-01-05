@@ -269,7 +269,7 @@ func (t *tracker) addList(obj runtime.Object, replaceExisting bool) error {
 
 func (t *tracker) Delete(gvr schema.GroupVersionResource, ns, name string) error {
 	t.lock.Lock()
-	// MK defer t.lock.Unlock()
+	// defer t.lock.Unlock()
 
 	objs, ok := t.objects[gvr]
 	if !ok {
@@ -284,7 +284,8 @@ func (t *tracker) Delete(gvr schema.GroupVersionResource, ns, name string) error
 		return errors.NewNotFound(gvr.GroupResource(), name)
 	}
 
-	// MK additions
+	// additions for finalizers
+	// if finalizers, set DeletionTimestamp and convert to update, else delete
 	uObj := obj.(*unstructured.Unstructured)
 	if len(uObj.GetFinalizers()) > 0 {
 		now := metav1.Now()

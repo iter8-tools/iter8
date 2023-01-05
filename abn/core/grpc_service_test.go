@@ -169,9 +169,10 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	// populate watcher.Applications with test applications
 	abnapp.Applications.Clear()
 	a, err := yamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
-	ensureSecretCreated(a.Name)
 	assert.NoError(t, err)
 	abnapp.Applications.Put(a)
+	err = ensureSecretCreated(a.Name)
+	assert.NoError(t, err)
 
 	// 49152-65535 are recommended ports; we use a random one for testing
 	/* #nosec */

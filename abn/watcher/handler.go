@@ -33,13 +33,6 @@ func handle(action string, obj *unstructured.Unstructured, config serviceConfig,
 	log.Logger.Tracef("handle %s called", action)
 	defer log.Logger.Trace("handle completed")
 
-	// if action == "DELETE" {
-	// 	log.Logger.Fatalf("%+v", obj)
-	// }
-	// if obj.GetDeletionTimestamp() != nil {
-	// 	log.Logger.Fatal("delete timestamp")
-	// }
-
 	// get object from cluster (even through we have an unstructured.Unstructured, it is really only the metadata; to get the full object we need to fetch it from the cluster)
 	obj, err := getUnstructuredObject(obj)
 	if err != nil {
@@ -125,9 +118,8 @@ func getApplicationNameFromObjectName(name string) string {
 	locations := applicationNameRE.FindStringIndex(name)
 	if len(locations) == 0 {
 		return name
-	} else {
-		return name[:locations[0]]
 	}
+	return name[:locations[0]]
 }
 
 // getVersion gets application version from VERSION_LABEL label on an object
@@ -219,7 +211,7 @@ type trackObject struct {
 func getApplicationObjects(namespace string, application string, appConfig appDetails, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) map[string][]trackObject {
 
 	// initialize
-	var trackToObjectList map[string][]trackObject = map[string][]trackObject{}
+	var trackToObjectList = map[string][]trackObject{}
 	tracks := trackNames(application, appConfig)
 	for _, track := range tracks {
 		trackToObjectList[track] = []trackObject{}
@@ -265,7 +257,7 @@ func isTrackReady(track string, trackObjects []trackObject, expectedNumberTrackO
 	}
 
 	// single version identified on at least one object
-	var version string = ""
+	var version string
 	for _, to := range trackObjects {
 		v, ok := getVersion(to.object)
 		if ok {

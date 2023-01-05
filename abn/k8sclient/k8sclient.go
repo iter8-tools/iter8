@@ -15,6 +15,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/restmapper"
 
+	// packages for cloud authentication
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
