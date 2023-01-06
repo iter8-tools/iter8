@@ -21,10 +21,7 @@ require (
 	fortio.org/fortio v1.27.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.9.0
-	github.com/bojand/ghz v0.108.0
-	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
-	github.com/cncf/xds/go v0.0.0-20211130200136-a8f946100490 // indirect
-	github.com/envoyproxy/protoc-gen-validate v0.6.2 // indirect
+	github.com/bojand/ghz v0.111.0
 	github.com/imdario/mergo v0.3.12
 	github.com/itchyny/gojq v0.12.7
 	github.com/jarcoal/httpmock v1.1.0
