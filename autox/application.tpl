@@ -23,12 +23,12 @@ spec:
     repoURL: https://iter8-tools.github.io/hub
     targetRevision: {{ .Chart.Version }}
   ignoreDifferences:
-  - group: ""
-    kind: "Secret"
+  - kind: Secret
     name: {{ .Name }}
     namespace: {{ .Namespace }}
     jsonPointers:
-    - /data/experiment.yaml
+    - /data
+    - /metadata
   syncPolicy:
     automated:
       selfHeal: true

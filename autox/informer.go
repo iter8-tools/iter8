@@ -21,8 +21,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/yaml"
 
-	argo "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -47,6 +45,12 @@ const (
 	templateRevision = "templateRevision"
 	experimentYAML   = "experiment.yaml"
 )
+
+var applicationGVR = schema.GroupVersionResource{
+	Group:    "argoproj.io",
+	Version:  "v1alpha1",
+	Resource: "applications",
+}
 
 var m sync.Mutex
 
@@ -94,43 +98,60 @@ func getReleaseName(releaseGroupSpecName string, releaseSpecID string) string {
 // shouldCreateApplication will return true if an application object should be created
 // an application object should be created if the values are different from those from the previous application object (if one exists)
 func shouldCreateApplication(values map[string]interface{}, releaseName string) (bool, error) {
-	var err error
-
 	// get application object
-	gvr2 := schema.GroupVersionResource{
-		Group:    "argoproj.io",
-		Version:  "v1",
-		Resource: "applications",
-	}
-	uPApp, _ := k8sClient.dynamicClient.Resource(gvr2).Namespace(argocd).Get(context.TODO(), releaseName, metav1.GetOptions{}) // *unstructured.Unstructured previous application
+	uPApp, _ := k8sClient.dynamicClient.Resource(applicationGVR).Namespace(argocd).Get(context.TODO(), releaseName, metav1.GetOptions{}) // *unstructured.Unstructured previous application
 	if uPApp != nil {
 		log.Logger.Debug(fmt.Sprintf("found previous application \"%s\"", releaseName))
 
-		// convert application unstructured.Unstructured to application object
-		// See: https://erwinvaneyk.nl/kubernetes-unstructured-to-typed/
-		var pApp argo.Application // previous application
-		err = runtime.DefaultUnstructuredConverter.FromUnstructured(uPApp.UnstructuredContent(), &pApp)
+		pValuesString, ok, err := unstructured.NestedString(uPApp.UnstructuredContent(), "spec", "source", "helm", "values") // pValuesString previous values
 		if err != nil {
-			log.Logger.Error(fmt.Sprintf("cannot parse preexisting application \"%s\"", releaseName), err)
-			// TODO: throw error?
-			return false, err
+			log.Logger.Error(fmt.Sprintf("cannot extract values of previous application \"%s\": %s", releaseName, pValuesString), err)
+			return true, err // TODO: still return true?
 		}
 
-		// parse string values from application
-		sPValues := pApp.Spec.Source.Helm.Values // string previous (application) values
-		pValues := map[string]interface{}{}      // previous (application) values
-		err = yaml.Unmarshal([]byte(sPValues), pValues)
-		if err != nil {
-			log.Logger.Error(fmt.Sprintf("cannot unmarshal values from previous application \"%s\": %s", releaseName, sPValues), err)
-			// TODO: throw error?
-			return false, err
+		// if there is values in previous application
+		if ok {
+			var pValues map[string]interface{}
+
+			err = yaml.Unmarshal([]byte(pValuesString), &pValues)
+			if err != nil {
+				log.Logger.Error(fmt.Sprintf("cannot parse values of previous application \"%s\": %s", releaseName, pValuesString), err)
+				return true, err // TODO: still return true?
+			}
+
+			return reflect.DeepEqual(pValues, values), nil
 		}
 
-		// compare values from previous application to values for the pending one
-		return reflect.DeepEqual(pValues, values), nil
+		// // convert application unstructured.Unstructured to application object
+		// // See: https://erwinvaneyk.nl/kubernetes-unstructured-to-typed/
+		// var pApp argo.Application // previous application
+		// err = runtime.DefaultUnstructuredConverter.FromUnstructured(uPApp.UnstructuredContent(), &pApp)
+		// if err != nil {
+		// 	log.Logger.Error(fmt.Sprintf("cannot parse preexisting application \"%s\"", releaseName), err)
+		// 	// TODO: throw error?
+		// 	return false, err
+		// }
+
+		// log.Logger.Debug("parse string values: ", pApp.Spec.Source.Helm.Values)
+
+		// // parse string values from application
+		// sPValues := pApp.Spec.Source.Helm.Values // string previous (application) values
+		// pValues := map[string]interface{}{}      // previous (application) values
+		// err = yaml.Unmarshal([]byte(sPValues), pValues)
+		// if err != nil {
+		// 	log.Logger.Error(fmt.Sprintf("cannot unmarshal values from previous application \"%s\": %s", releaseName, sPValues), err)
+		// 	// TODO: throw error?
+		// 	return false, err
+		// }
+
+		// log.Logger.Debug("old values: ", pValues, " new values: ", values)
+
+		// // compare values from previous application to values for the pending one
+		// return reflect.DeepEqual(pValues, values), nil
 	}
 
-	return false, nil
+	// there is no preexisting application object, so should create one
+	return true, nil
 }
 
 // applyApplicationObject will apply an application based on a release spec
@@ -207,8 +228,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 		// // apply application object to the K8s cluster
 		// log.Logger.Debug("apply application object: ", releaseName)
-		// gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
-		// _, err = k8sClient.dynamic().Resource(gvr).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
+		// _, err = k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
 		// if err != nil {
 		// 	log.Logger.Error("could not create application: ", releaseName, err)
 		// 	return err
@@ -216,8 +236,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 		// apply application object to the K8s cluster
 		log.Logger.Debug("apply application object: ", releaseName)
-		gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
-		_, err = k8sClient.dynamic().Resource(gvr).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
+		_, err = k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
 		if err != nil {
 			log.Logger.Error("could not create application: ", releaseName, err)
 			return err
@@ -231,8 +250,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 var deleteApplicationObject = func(releaseName string, releaseGroupSpecName string) error {
 	log.Logger.Debug("delete application object: ", releaseName)
 
-	gvr := schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "applications"}
-	err := k8sClient.dynamic().Resource(gvr).Namespace(argocd).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
+	err := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
 	if err != nil {
 		log.Logger.Error("could not delete application: ", releaseName, err)
 		return err
@@ -337,14 +355,9 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 		}
 
 		// apply application objects for the release group
-		log.Logger.Debugf("apply application objects for release group \"%s\"", releaseGroupSpecName)
 		clientPrunedLabels := pruneLabels(clientLabels)
 		_ = doChartAction(applyAction, releaseGroupSpecName, releaseGroupSpec, ns, clientPrunedLabels)
-
-		// delete application objects if (client) object does not exist
-	} else {
-		log.Logger.Debugf("delete application objects for release group \"%s\" (client object not found)", releaseGroupSpecName)
-
+	} else { // delete application objects if (client) object does not exist
 		_ = doChartAction(deleteAction, releaseGroupSpecName, releaseGroupSpec, "", nil)
 	}
 }
