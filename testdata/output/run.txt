@@ -1,9 +1,9 @@
-time=1977-09-02 22:04:05 level=info msg=task 1: http : started
-time=1977-09-02 22:04:05 level=info msg=task 1: http : completed
-time=1977-09-02 22:04:05 level=info msg=task 2: assess : started
-time=1977-09-02 22:04:05 level=info msg=task 2: assess : completed
-time=1977-09-02 22:04:05 level=info msg=task 3: run : started
-time=1977-09-02 22:04:05 level=info msg=task 3: run : completed
-time=1977-09-02 22:04:05 level=info msg=task 4: run : started
-time=1977-09-02 22:04:05 level=info msg=task 4: run : skipped stack-trace=below ... 
+time=1977-09-02 22:04:05 level=info msg=task 1: http: started
+time=1977-09-02 22:04:05 level=info msg=task 1: http: completed
+time=1977-09-02 22:04:05 level=info msg=task 2: assess: started
+time=1977-09-02 22:04:05 level=info msg=task 2: assess: completed
+time=1977-09-02 22:04:05 level=info msg=task 3: run: started
+time=1977-09-02 22:04:05 level=info msg=task 3: run: completed
+time=1977-09-02 22:04:05 level=info msg=task 4: run: started
+time=1977-09-02 22:04:05 level=info msg=task 4: run: skipped stack-trace=below ... 
 ::Trace:: false condition: not SLOs()
