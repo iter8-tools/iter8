@@ -66,7 +66,7 @@ const (
 
 type owner struct {
 	Name string `json:"name" yaml:"name"`
-	Uid  string `json:"uid" yaml:"uid"`
+	UID  string `json:"uid" yaml:"uid"`
 }
 
 // applicationValues is the values for the (Argo CD) application template
@@ -167,7 +167,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 		Owner: owner{
 			Name: secret.Name,
-			Uid:  string(secret.GetUID()), // assign the release group spec secret as the owner of the application
+			UID:  string(secret.GetUID()), // assign the release group spec secret as the owner of the application
 		},
 
 		Chart: releaseSpec,
@@ -400,11 +400,15 @@ func newIter8Watcher(autoXConfig config) *iter8Watcher {
 		w.factories[releaseGroupSpecName] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sClient.dynamicClient, 0, ns, nil)
 
 		informer := w.factories[releaseGroupSpecName].ForResource(gvr)
-		informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 			AddFunc:    addObject(releaseGroupSpecName, releaseGroupSpec),
 			UpdateFunc: updateObject(releaseGroupSpecName, releaseGroupSpec),
 			DeleteFunc: deleteObject(releaseGroupSpecName, releaseGroupSpec),
 		})
+
+		if err != nil {
+			log.Logger.Error(fmt.Sprintf("cannot add event handler for namespace \"%s\" and GVR \"%s\": \"%s\"", ns, gvr, err))
+		}
 	}
 
 	return w

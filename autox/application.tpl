@@ -7,7 +7,7 @@ metadata:
   - apiVersion: v1
     kind: Secret
     name: {{ .Owner.Name }}
-    uid: {{ .Owner.Uid }}
+    uid: {{ .Owner.UID }}
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
