@@ -103,13 +103,14 @@ func shouldCreateApplication(values map[string]interface{}, releaseName string) 
 	if uPApp != nil {
 		log.Logger.Debug(fmt.Sprintf("found previous application \"%s\"", releaseName))
 
+		// extract values from previous application
 		pValuesString, ok, err := unstructured.NestedString(uPApp.UnstructuredContent(), applicationValuesPath...) // pValuesString previous values
 		if err != nil {
 			log.Logger.Error(fmt.Sprintf("cannot extract values of previous application \"%s\": %s: %s", releaseName, pValuesString, err))
 			return true, err // TODO: still return true?
 		}
 
-		// if there is values in previous application, check if they are the same as the values for the one that is about to be created
+		// if there are values in previous application, check if they are the same as the values for the one that is about to be created
 		if ok {
 			var pValues map[string]interface{}
 
@@ -178,7 +179,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 	tValues.Chart.Values[autoXAdditionValues] = additionalValues
 
 	// check if the pending application will be different from the previous application, if it exists
-	// only create a new application if it will be different
+	// only create a new application if it will be different (the values will be different)
 	if s, _ := shouldCreateApplication(tValues.Chart.Values, releaseName); s {
 		// delete previous application if it exists
 		uPApp, _ := k8sClient.dynamicClient.Resource(applicationGVR).Namespace(argocd).Get(context.TODO(), releaseName, metav1.GetOptions{}) // *unstructured.Unstructured previous application
@@ -209,7 +210,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 		jsonBytes, err := yaml.YAMLToJSON(buf.Bytes())
 		if err != nil {
-			log.Logger.Error(fmt.Sprintf("could not convert YAML to JSON: : \"%s\": \"%s\"", buf.String(), err))
+			log.Logger.Error(fmt.Sprintf("could not convert YAML to JSON: \"%s\": \"%s\"", buf.String(), err))
 			return err
 		}
 
@@ -217,7 +218,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 		// source: https://github.com/kubernetes/client-go/blob/1ac8d459351e21458fd1041f41e43403eadcbdba/dynamic/simple.go#L186
 		uncastObj, err := runtime.Decode(unstructured.UnstructuredJSONScheme, jsonBytes)
 		if err != nil {
-			log.Logger.Error(fmt.Sprintf("could not decode object into unstructured.UnstructuredJSONScheme: : \"%s\": \"%s\"", buf.String(), err))
+			log.Logger.Error(fmt.Sprintf("could not decode object into unstructured.UnstructuredJSONScheme: \"%s\": \"%s\"", buf.String(), err))
 			return err
 		}
 

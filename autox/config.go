@@ -1,6 +1,6 @@
 package autox
 
-// config.go - reading of configurtion (list of resources/namespaces to watch)
+// config.go - reading of configuration (list of resources/namespaces to watch)
 
 import (
 	"os"
@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// trigger specifies a Kubernetes resource object. When this Kubernetes resource object is created/updated/deleted, then the releaseGroupSpecs will be applied/deleted.
+// trigger specifies a Kubernetes resource object. When this Kubernetes resource object is created/updated/deleted, then the releaseGroupSpecs will be created/deleted.
 type trigger struct {
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 
