@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -41,9 +42,6 @@ const (
 	trackLabel          = "iter8.tools/track"
 
 	argocd = "argocd"
-
-	templateRevision = "templateRevision"
-	experimentYAML   = "experiment.yaml"
 )
 
 var applicationGVR = schema.GroupVersionResource{
@@ -51,6 +49,8 @@ var applicationGVR = schema.GroupVersionResource{
 	Version:  "v1alpha1",
 	Resource: "applications",
 }
+
+var applicationValuesPath = []string{"spec", "source", "helm", "values"}
 
 var m sync.Mutex
 
@@ -103,51 +103,33 @@ func shouldCreateApplication(values map[string]interface{}, releaseName string) 
 	if uPApp != nil {
 		log.Logger.Debug(fmt.Sprintf("found previous application \"%s\"", releaseName))
 
-		pValuesString, ok, err := unstructured.NestedString(uPApp.UnstructuredContent(), "spec", "source", "helm", "values") // pValuesString previous values
+		pValuesString, ok, err := unstructured.NestedString(uPApp.UnstructuredContent(), applicationValuesPath...) // pValuesString previous values
 		if err != nil {
-			log.Logger.Error(fmt.Sprintf("cannot extract values of previous application \"%s\": %s", releaseName, pValuesString), err)
+			log.Logger.Error(fmt.Sprintf("cannot extract values of previous application \"%s\": %s: %s", releaseName, pValuesString, err))
 			return true, err // TODO: still return true?
 		}
 
-		// if there is values in previous application
+		// if there is values in previous application, check if they are the same as the values for the one that is about to be created
 		if ok {
 			var pValues map[string]interface{}
 
 			err = yaml.Unmarshal([]byte(pValuesString), &pValues)
 			if err != nil {
-				log.Logger.Error(fmt.Sprintf("cannot parse values of previous application \"%s\": %s", releaseName, pValuesString), err)
+				log.Logger.Error(fmt.Sprintf("cannot parse values of previous application \"%s\": %s: %s", releaseName, pValuesString, err))
 				return true, err // TODO: still return true?
 			}
 
-			return reflect.DeepEqual(pValues, values), nil
+			log.Logger.Debug(fmt.Sprintf("previous values: \"%s\"\nnew values: \"%s\"", pValues, values))
+
+			shouldCreateApplication := !reflect.DeepEqual(pValues, values)
+			if shouldCreateApplication {
+				log.Logger.Debug(fmt.Sprintf("replace previous application \"%s\"", releaseName))
+			} else {
+				log.Logger.Debug(fmt.Sprintf("do not replace previous application \"%s\"", releaseName))
+			}
+
+			return shouldCreateApplication, nil
 		}
-
-		// // convert application unstructured.Unstructured to application object
-		// // See: https://erwinvaneyk.nl/kubernetes-unstructured-to-typed/
-		// var pApp argo.Application // previous application
-		// err = runtime.DefaultUnstructuredConverter.FromUnstructured(uPApp.UnstructuredContent(), &pApp)
-		// if err != nil {
-		// 	log.Logger.Error(fmt.Sprintf("cannot parse preexisting application \"%s\"", releaseName), err)
-		// 	// TODO: throw error?
-		// 	return false, err
-		// }
-
-		// log.Logger.Debug("parse string values: ", pApp.Spec.Source.Helm.Values)
-
-		// // parse string values from application
-		// sPValues := pApp.Spec.Source.Helm.Values // string previous (application) values
-		// pValues := map[string]interface{}{}      // previous (application) values
-		// err = yaml.Unmarshal([]byte(sPValues), pValues)
-		// if err != nil {
-		// 	log.Logger.Error(fmt.Sprintf("cannot unmarshal values from previous application \"%s\": %s", releaseName, sPValues), err)
-		// 	// TODO: throw error?
-		// 	return false, err
-		// }
-
-		// log.Logger.Debug("old values: ", pValues, " new values: ", values)
-
-		// // compare values from previous application to values for the pending one
-		// return reflect.DeepEqual(pValues, values), nil
 	}
 
 	// there is no preexisting application object, so should create one
@@ -156,9 +138,9 @@ func shouldCreateApplication(values map[string]interface{}, releaseName string) 
 
 // applyApplicationObject will apply an application based on a release spec
 var applyApplicationObject = func(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]interface{}) error {
+	// get release group spec secret, based on autoX group label
+	// secret is assigned as the owner of the application
 	secretsClient := k8sClient.clientset.CoreV1().Secrets(argocd)
-
-	// get secret, based on autoX group label
 	labelSelector := fmt.Sprintf("%s=%s", autoXGroupLabel, releaseGroupSpecName)
 	secretList, err := secretsClient.List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labelSelector,
@@ -198,6 +180,19 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 	// check if the pending application will be different from the previous application, if it exists
 	// only create a new application if it will be different
 	if s, _ := shouldCreateApplication(tValues.Chart.Values, releaseName); s {
+		// delete previous application if it exists
+		uPApp, _ := k8sClient.dynamicClient.Resource(applicationGVR).Namespace(argocd).Get(context.TODO(), releaseName, metav1.GetOptions{}) // *unstructured.Unstructured previous application
+		if uPApp != nil {
+			if err1 := deleteApplicationObject(releaseName, releaseGroupSpecName); err1 != nil {
+				log.Logger.Error(fmt.Sprintf("could not delete previous application: \"%s\": \"%s\"", releaseName, err))
+
+			}
+
+			// TODO: better solution?
+			// wait for deletion to finish
+			time.Sleep(5 * time.Second)
+		}
+
 		// execute application template
 		tpl, err := base.CreateTemplate(tplStr)
 		if err != nil {
@@ -214,7 +209,7 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 		jsonBytes, err := yaml.YAMLToJSON(buf.Bytes())
 		if err != nil {
-			log.Logger.Error("could not convert YAML to JSON: ", buf.String(), err)
+			log.Logger.Error(fmt.Sprintf("could not convert YAML to JSON: : \"%s\": \"%s\"", buf.String(), err))
 			return err
 		}
 
@@ -222,23 +217,15 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 		// source: https://github.com/kubernetes/client-go/blob/1ac8d459351e21458fd1041f41e43403eadcbdba/dynamic/simple.go#L186
 		uncastObj, err := runtime.Decode(unstructured.UnstructuredJSONScheme, jsonBytes)
 		if err != nil {
-			log.Logger.Error("could not decode object into unstructured.UnstructuredJSONScheme: ", buf.String(), err)
+			log.Logger.Error(fmt.Sprintf("could not decode object into unstructured.UnstructuredJSONScheme: : \"%s\": \"%s\"", buf.String(), err))
 			return err
 		}
 
-		// // apply application object to the K8s cluster
-		// log.Logger.Debug("apply application object: ", releaseName)
-		// _, err = k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
-		// if err != nil {
-		// 	log.Logger.Error("could not create application: ", releaseName, err)
-		// 	return err
-		// }
-
 		// apply application object to the K8s cluster
-		log.Logger.Debug("apply application object: ", releaseName)
+		log.Logger.Debug(fmt.Sprintf("apply application object \"%s\"", releaseName))
 		_, err = k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Create(context.TODO(), uncastObj.(*unstructured.Unstructured), metav1.CreateOptions{})
 		if err != nil {
-			log.Logger.Error("could not create application: ", releaseName, err)
+			log.Logger.Error(fmt.Sprintf("could not create application: \"%s\": \"%s\"", releaseName, err))
 			return err
 		}
 	}
@@ -248,11 +235,11 @@ var applyApplicationObject = func(releaseName string, releaseGroupSpecName strin
 
 // deleteApplicationObject deletes an application object based on a given release name
 var deleteApplicationObject = func(releaseName string, releaseGroupSpecName string) error {
-	log.Logger.Debug("delete application object: ", releaseName)
+	log.Logger.Debug(fmt.Sprintf("delete application object \"%s\"", releaseName))
 
 	err := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
 	if err != nil {
-		log.Logger.Error("could not delete application: ", releaseName, err)
+		log.Logger.Error(fmt.Sprintf("could not delete application: \"%s\": \"%s\"", releaseName, err))
 		return err
 	}
 

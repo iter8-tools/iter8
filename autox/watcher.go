@@ -85,8 +85,6 @@ func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 		return err
 	}
 
-	log.Logger.Debug("config (release group specs): ", config)
-
 	w := newIter8Watcher(config)
 	go w.start(stopCh)
 	return nil

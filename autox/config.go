@@ -64,8 +64,6 @@ func readConfig(fn string) (c config) {
 		return c // empty configuration
 	}
 
-	log.Logger.Debugf("read configuration\n%s", string(yfile))
-
 	err = yaml.Unmarshal(yfile, &c)
 	if err != nil {
 		log.Logger.Warnf("invalid configuration file %s: %s", fn, err.Error())

@@ -8,8 +8,8 @@ metadata:
     kind: Secret
     name: {{ .Owner.Name }}
     uid: {{ .Owner.Uid }}
-  annotations:
-    argocd.argoproj.io/sync-options: Replace=true
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     namespace: {{ .Namespace }}
