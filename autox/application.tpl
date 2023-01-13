@@ -10,6 +10,8 @@ metadata:
     uid: {{ .Owner.UID }}
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/managed-by: iter8
 spec:
   destination:
     namespace: {{ .Namespace }}

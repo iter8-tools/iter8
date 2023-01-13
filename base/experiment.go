@@ -891,7 +891,7 @@ func (exp *Experiment) run(driver Driver) error {
 			}
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "skipped")
 		}
 
 		exp.incrementNumCompletedTasks()
