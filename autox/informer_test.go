@@ -5,7 +5,6 @@ import (
 	// "github.com/iter8-tools/iter8/abn/k8sclient"
 
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -338,15 +337,6 @@ func TestNewIter8Watcher(t *testing.T) {
 	// trigger twice for each release spec
 	assert.Eventually(t, func() bool { return assert.Equal(t, 4, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
 	assert.Eventually(t, func() bool { return assert.Equal(t, 6, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
-}
-
-// convertApplicationValuesToMap is a helper function for converting applicationValues to map[string]interface{}
-func convertApplicationValuesToMap(values applicationValues) map[string]interface{} {
-	var myMap map[string]interface{}
-	data, _ := json.Marshal(values)
-	json.Unmarshal(data, &myMap)
-
-	return myMap
 }
 
 func newUnstructuredDeployment(namespace, application, version, track string, additionalLabels map[string]string) *unstructured.Unstructured {
