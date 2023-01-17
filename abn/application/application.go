@@ -46,17 +46,13 @@ func (a *Application) ClearTracks() {
 // If no corresponding version object exists, a new one will be created when allowNew is set to true
 // returns the version object and a boolean indicating whether or not a new version was created or not
 func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool) {
-	if version == "" {
-		log.Logger.WithStackTrace("GetVersion requires non empty field").Error("version is empty")
-		return nil, false
-	}
 	v, ok := a.Versions[version]
 	if !ok {
 		if allowNew {
 			v = &Version{
 				Metrics: map[string]*summarymetrics.SummaryMetric{},
 			}
-			log.Logger.Debugf("GetVersion no data found; returning %+v", v)
+			log.Logger.Debugf("GetVersion no data found; creating %+v", v)
 			a.Versions[version] = v
 			return v, true
 		}

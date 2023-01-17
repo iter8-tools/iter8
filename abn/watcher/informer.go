@@ -27,11 +27,11 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
-	handlerFunc := func(action string, validNames []string) func(obj interface{}) {
+	handlerFunc := func(action string, validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
 		return func(obj interface{}) {
 			o := obj.(*unstructured.Unstructured)
 			if containsString(validNames, o.GetName()) {
-				handle(action, o, c, w.factories)
+				handle(action, o, c, w.factories, gvr)
 			}
 		}
 	}
@@ -55,14 +55,14 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 		}
 
 		// create informer for each resource in namespace
-		for r, validNames := range byResource {
-			informer := w.factories[ns].ForResource(r)
+		for gvr, validNames := range byResource {
+			informer := w.factories[ns].ForResource(gvr)
 			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: handlerFunc("ADD", validNames),
+				AddFunc: handlerFunc("ADD", validNames, gvr),
 				UpdateFunc: func(oldObj, obj interface{}) {
-					handlerFunc("UPDATE", validNames)(obj)
+					handlerFunc("UPDATE", validNames, gvr)(obj)
 				},
-				DeleteFunc: handlerFunc("DELETE", validNames),
+				DeleteFunc: handlerFunc("DELETE", validNames, gvr),
 			})
 
 			if err != nil {

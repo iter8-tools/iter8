@@ -29,12 +29,12 @@ var (
 )
 
 // handle constructs the application object from the objects currently in the cluster
-func handle(action string, obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) {
+func handle(action string, obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory, gvr schema.GroupVersionResource) {
 	log.Logger.Tracef("handle %s called", action)
 	defer log.Logger.Trace("handle completed")
 
 	// get object from cluster (even through we have an unstructured.Unstructured, it is really only the metadata; to get the full object we need to fetch it from the cluster)
-	obj, err := getUnstructuredObject(obj)
+	obj, err := getUnstructuredObject(obj, gvr)
 	if err != nil {
 		log.Logger.Debug("unable to fetch object from cluster")
 		return
@@ -44,7 +44,7 @@ func handle(action string, obj *unstructured.Unstructured, config serviceConfig,
 	if obj.GetDeletionTimestamp() == nil && !containsString(obj.GetFinalizers(), iter8Finalizer) {
 		obj.SetFinalizers(append(obj.GetFinalizers(), iter8Finalizer))
 		log.Logger.Debug("adding Iter8 finalizer")
-		_, err := updateUnstructuredObject(obj)
+		_, err := updateUnstructuredObject(obj, gvr)
 		if err != nil {
 			log.Logger.Warn("unable to add finalizer: ", err.Error())
 		}
@@ -96,7 +96,7 @@ func handle(action string, obj *unstructured.Unstructured, config serviceConfig,
 		// do here (at end) after updating the ApplicationsMap
 		log.Logger.Debug("removing Iter8 finalizer")
 		obj.SetFinalizers(removeIter8Finalizer(obj.GetFinalizers()))
-		_, err := updateUnstructuredObject(obj)
+		_, err := updateUnstructuredObject(obj, gvr)
 		if err != nil {
 			log.Logger.Warn("unable to remove finalizer: ", err.Error())
 		}
@@ -285,14 +285,9 @@ func isTrackReady(track string, trackObjects []trackObject, expectedNumberTrackO
 	return version, true
 }
 
-func updateUnstructuredObject(uObj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	gvr, err := k8sclient.Client.GVR(uObj)
-	if err != nil {
-		return nil, err
-	}
-
+func updateUnstructuredObject(uObj *unstructured.Unstructured, gvr schema.GroupVersionResource) (*unstructured.Unstructured, error) {
 	updatedObj, err := k8sclient.Client.Dynamic().
-		Resource(*gvr).Namespace(uObj.GetNamespace()).
+		Resource(gvr).Namespace(uObj.GetNamespace()).
 		Update(
 			context.TODO(),
 			uObj,
@@ -302,14 +297,10 @@ func updateUnstructuredObject(uObj *unstructured.Unstructured) (*unstructured.Un
 	return updatedObj, err
 }
 
-func getUnstructuredObject(uObj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	gvr, err := k8sclient.Client.GVR(uObj)
-	if err != nil {
-		return nil, err
-	}
-
+func getUnstructuredObject(uObj *unstructured.Unstructured, gvr schema.GroupVersionResource) (*unstructured.Unstructured, error) {
 	obj, err := k8sclient.Client.Dynamic().
-		Resource(*gvr).Namespace(uObj.GetNamespace()).
+		// Resource(*gvr).Namespace(uObj.GetNamespace()).
+		Resource(gvr).Namespace(uObj.GetNamespace()).
 		Get(
 			context.TODO(),
 			uObj.GetName(),

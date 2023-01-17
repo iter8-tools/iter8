@@ -7,13 +7,8 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 
 	// Import to initialize client auth plugins.
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/restmapper"
 
 	// packages for cloud authentication
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -33,7 +28,6 @@ type KubeClient struct {
 	typedClient kubernetes.Interface
 	// dynamicClient enables unstructured interaction with a Kubernetes cluster
 	dynamicClient dynamic.Interface
-	gvrMapper     func(o *unstructured.Unstructured) (*schema.GroupVersionResource, error)
 }
 
 // NewKubeClient returns a KubeClient with the given settings.
@@ -69,37 +63,6 @@ func (c *KubeClient) Initialize() (err error) {
 			log.Logger.WithStackTrace(err.Error()).Error(e)
 			return e
 		}
-		c.gvrMapper = func(o *unstructured.Unstructured) (*schema.GroupVersionResource, error) {
-			if o == nil {
-				return nil, errors.New("no object provided")
-			}
-
-			// get GVK
-			gv, err := schema.ParseGroupVersion(o.GetAPIVersion())
-			if err != nil {
-				return nil, err
-			}
-			gvk := schema.GroupVersionKind{
-				Group:   gv.Group,
-				Version: gv.Version,
-				Kind:    o.GetKind(),
-			}
-
-			// convert GVK to GVR
-			// see https://ymmt2005.hatenablog.com/entry/2020/04/14/An_example_of_using_dynamic_client_of_k8s.io/client-go
-			dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
-			if err != nil {
-				return nil, err
-			}
-			mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-			mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-			if err != nil {
-				return nil, err
-			}
-			gvr := mapping.Resource
-
-			return &gvr, nil
-		}
 	}
 
 	return nil
@@ -113,9 +76,4 @@ func (c *KubeClient) Typed() kubernetes.Interface {
 // Dynamic is the dynamic (untyped) k8s client interface
 func (c *KubeClient) Dynamic() dynamic.Interface {
 	return c.dynamicClient
-}
-
-// GVR determines the GroupVersionResource of an object
-func (c *KubeClient) GVR(o *unstructured.Unstructured) (*schema.GroupVersionResource, error) {
-	return c.gvrMapper(o)
 }
