@@ -164,31 +164,33 @@ func TestNewIter8Watcher(t *testing.T) {
 	// autoX needs the config
 	autoXConfig := readConfig("../testdata/autox_inputs/config.example.yaml")
 
-	// autoX handler will call on applyHelmRelease and deleteHelmRelease
-	applyHelmReleaseInvocations := 0
-	applyApplication = func(releaseName string, specGroupName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]interface{}) error {
-		applyHelmReleaseInvocations++
-		return nil
-	}
-
-	deleteHelmReleaseInvocations := 0
-	deleteApplication = func(releaseName string) error {
-		deleteHelmReleaseInvocations++
-		return nil
-	}
-
 	gvr := schema.GroupVersionResource{
 		Group:    "apps",
 		Version:  "v1",
 		Resource: "deployments",
 	}
 	namespace := "default"
-	application := "myApp"
+	releaseSpecName := "myApp"
 	version := "v1"
 	track := ""
+	appName1 := "autox-myApp-name1"
+	appName2 := "autox-myApp-name2"
 
 	// define and start watcher
 	k8sClient = newFakeKubeClient(cli.New())
+
+	// create releaseSpec secret
+	releaseGroupSpecSecret := v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-secret",
+			Namespace: argocd,
+			Labels: map[string]string{
+				"iter8.tools/autox-group": releaseSpecName,
+			},
+		},
+	}
+	_, err := k8sClient.clientset.CoreV1().Secrets(argocd).Create(context.Background(), &releaseGroupSpecSecret, metav1.CreateOptions{})
+	assert.NoError(t, err)
 
 	w := newIter8Watcher(autoXConfig)
 	assert.NotNil(t, w)
@@ -196,10 +198,8 @@ func TestNewIter8Watcher(t *testing.T) {
 	defer close(done)
 	w.start(done)
 
-	// create object with random name and no autoX label
-	// this should not trigger any applyHelmRelease or deleteHelmRelease
-	assert.Equal(t, 0, applyHelmReleaseInvocations)
-	assert.Equal(t, 0, deleteHelmReleaseInvocations)
+	// 1) create object with random name and no autoX label
+	// no application should be created
 	objRandNameNoAutoXLabel, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
@@ -216,13 +216,14 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, objRandNameNoAutoXLabel)
 
-	// give handler time to execute
-	// this should trigger applyHelmRelease or deleteHelmRelease because the object does not have the trigger name
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	// no applications
+	assert.Eventually(t, func() bool {
+		list, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).List(context.Background(), metav1.ListOptions{})
+		return assert.Equal(t, len(list.Items), 0)
+	}, 5*time.Second, time.Second)
 
-	// create object with random name and autoX label
-	// this should not trigger any applyHelmRelease or deleteHelmRelease
+	// 2) create object with random name and autoX label
+	// no application should be created
 	objRandNameAutoXLabel, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
@@ -233,27 +234,28 @@ func TestNewIter8Watcher(t *testing.T) {
 				version,
 				track,
 				map[string]string{
-					autoXLabel: "myApp", // autoX label
+					autoXLabel: releaseSpecName, // autoX label
 				}),
 			metav1.CreateOptions{},
 		)
 	assert.NoError(t, err)
 	assert.NotNil(t, objRandNameAutoXLabel)
 
-	// give handler time to execute
-	// this should trigger applyHelmRelease or deleteHelmRelease because the object does not have the trigger name
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	// no applications
+	assert.Eventually(t, func() bool {
+		list, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).List(context.Background(), metav1.ListOptions{})
+		return assert.Equal(t, len(list.Items), 0)
+	}, 5*time.Second, time.Second)
 
-	// create object with trigger name and no autoX label
-	// this should trigger deleteHelmRelease
+	// 3) create object with trigger name and no autoX label
+	// no application should be created
 	objNoAutoXLabel, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),
 			newUnstructuredDeployment(
 				namespace,
-				application, // trigger name
+				releaseSpecName, // trigger name
 				version,
 				track,
 				map[string]string{}),
@@ -262,32 +264,31 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, objNoAutoXLabel)
 
-	// give handler time to execute
-	// this should trigger deleteHelmRelease because the object does not have the autoX label
-	// trigger twice for each release spec
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 2, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	// no applications
+	assert.Eventually(t, func() bool {
+		list, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).List(context.Background(), metav1.ListOptions{})
+		return assert.Equal(t, len(list.Items), 0)
+	}, 5*time.Second, time.Second)
 
 	// delete the object so we can recreate it with autoX label
-	err = k8sClient.dynamic().
-		Resource(gvr).Namespace(namespace).Delete(context.TODO(), application, metav1.DeleteOptions{})
+	err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseSpecName, metav1.DeleteOptions{})
 	assert.NoError(t, err)
 
-	assert.Eventually(t, func() bool { return assert.Equal(t, 0, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
-
-	// create object with trigger name and autoX label
+	// 4) create object with trigger name and autoX label
+	// 2 applications should be created
+	// one for each release spec in the config
+	// autox-myapp-name1 and autox-myapp-name2
 	createdObj, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Create(
 			context.TODO(),
 			newUnstructuredDeployment(
 				namespace,
-				application, // trigger name
+				releaseSpecName, // trigger name
 				version,
 				track,
 				map[string]string{
-					autoXLabel: "myApp", // autoX label
+					autoXLabel: "true", // autoX label
 				},
 			),
 			metav1.CreateOptions{},
@@ -295,34 +296,26 @@ func TestNewIter8Watcher(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, createdObj)
 
-	// give handler time to execute
-	// this should trigger applyHelmRelease but not deleteHelmRelease
-	// trigger twice for each release spec
-	assert.Eventually(t, func() bool { return assert.Equal(t, 2, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	// 2 applications
+	assert.Eventually(t, func() bool {
+		list, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).List(context.Background(), metav1.ListOptions{})
+		return assert.Equal(t, len(list.Items), 2)
+	}, 5*time.Second, time.Second)
 
-	// arbitrary update (but not the autoX label)
-	track = "track"
-	(createdObj.Object["metadata"].(map[string]interface{}))["annotations"].(map[string]interface{})[trackLabel] = track
-	updatedObj, err := k8sClient.dynamic().
-		Resource(gvr).Namespace(namespace).
-		Update(
-			context.TODO(),
-			createdObj,
-			metav1.UpdateOptions{},
-		)
-	assert.NoError(t, err)
-	assert.NotNil(t, updatedObj)
+	// check applications by name
+	assert.Eventually(t, func() bool {
+		app, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Get(context.Background(), appName1, metav1.GetOptions{})
+		return assert.NotNil(t, app)
+	}, 5*time.Second, time.Second)
+	assert.Eventually(t, func() bool {
+		app, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Get(context.Background(), appName2, metav1.GetOptions{})
+		return assert.NotNil(t, app)
+	}, 5*time.Second, time.Second)
 
-	// give handler time to execute
-	// this should trigger applyHelmRelease
-	// trigger twice for each release spec
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
-
-	// delete autoX label
+	// 5) delete autoX label
+	// all applications deleted
 	(createdObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[autoXLabel] = nil
-	updatedObj, err = k8sClient.dynamic().
+	_, err = k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Update(
 			context.TODO(),
@@ -330,13 +323,12 @@ func TestNewIter8Watcher(t *testing.T) {
 			metav1.UpdateOptions{},
 		)
 	assert.NoError(t, err)
-	assert.NotNil(t, updatedObj)
 
-	// give handler time to execute
-	// this should trigger deleteHelmRelease
-	// trigger twice for each release spec
-	assert.Eventually(t, func() bool { return assert.Equal(t, 4, applyHelmReleaseInvocations) }, 5*time.Second, time.Second)
-	assert.Eventually(t, func() bool { return assert.Equal(t, 6, deleteHelmReleaseInvocations) }, 5*time.Second, time.Second)
+	// 0 applications
+	assert.Eventually(t, func() bool {
+		list, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).List(context.Background(), metav1.ListOptions{})
+		return assert.Equal(t, len(list.Items), 0)
+	}, 5*time.Second, time.Second)
 }
 
 func newUnstructuredDeployment(namespace, application, version, track string, additionalLabels map[string]string) *unstructured.Unstructured {

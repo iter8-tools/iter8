@@ -38,15 +38,15 @@ const (
 	// there is a 1:1 mapping of secrets to release group specs
 	autoXGroupLabel = "iter8.tools/autox-group"
 
-	managedByLabel = "app.kubernetes.io/managed-by"
-	iter8          = "iter8"
-
-	autoXAdditionValues = "autoXAdditionalValues"
-	nameLabel           = "app.kubernetes.io/name"
-	versionLabel        = "app.kubernetes.io/version"
-	trackLabel          = "iter8.tools/track"
-
+	iter8  = "iter8"
 	argocd = "argocd"
+
+	autoXAdditionalValues = "autoXAdditionalValues"
+
+	nameLabel      = "app.kubernetes.io/name"
+	versionLabel   = "app.kubernetes.io/version"
+	managedByLabel = "app.kubernetes.io/managed-by"
+	trackLabel     = "iter8.tools/track"
 
 	timeout  = 15 * time.Second
 	interval = 1 * time.Second
@@ -104,7 +104,8 @@ func getReleaseName(releaseGroupSpecName string, releaseSpecID string) string {
 }
 
 // shouldCreateApplication will return true if an application should be created
-// an application should be created if the values are different from those from the previous application (if one exists)
+// an application should be created if there is no preexisting application or
+// if the values are different from those from the previous application
 func shouldCreateApplication(values map[string]interface{}, releaseName string) bool {
 	// get application
 	uPApp, _ := k8sClient.dynamicClient.Resource(applicationGVR).Namespace(argocd).Get(context.TODO(), releaseName, metav1.GetOptions{}) // *unstructured.Unstructured previous application
@@ -178,7 +179,7 @@ func executeApplicationTemplate(applicationTemplate string, values applicationVa
 }
 
 // applyApplication will apply an application based on a release spec
-var applyApplication = func(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]interface{}) error {
+func applyApplication(releaseName string, releaseGroupSpecName string, releaseSpec releaseSpec, namespace string, additionalValues map[string]interface{}) error {
 	// get release group spec secret, based on autoX group label
 	// secret is assigned as the owner of the application
 	labelSelector := fmt.Sprintf("%s=%s", autoXGroupLabel, releaseGroupSpecName)
@@ -217,7 +218,10 @@ var applyApplication = func(releaseName string, releaseGroupSpecName string, rel
 	// add additionalValues to the values
 	// Argo CD will create a new experiment if it sees that the additionalValues are different from the previous experiment
 	// additionalValues will contain the pruned labels from the Kubernetes object
-	values.Chart.Values[autoXAdditionValues] = additionalValues
+	if values.Chart.Values == nil {
+		values.Chart.Values = map[string]interface{}{}
+	}
+	values.Chart.Values[autoXAdditionalValues] = additionalValues
 
 	// check if the pending application will be different from the previous application, if it exists
 	// only create a new application if it will be different (the values will be different)
@@ -265,7 +269,7 @@ var applyApplication = func(releaseName string, releaseGroupSpecName string, rel
 }
 
 // deleteApplication deletes an application based on a given release name
-var deleteApplication = func(releaseName string) error {
+func deleteApplication(releaseName string) error {
 	log.Logger.Debug(fmt.Sprintf("delete application \"%s\"", releaseName))
 
 	err := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).Delete(context.TODO(), releaseName, metav1.DeleteOptions{})
@@ -345,7 +349,7 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 		return
 	}
 
-	// at this point, we know that we are really handling an even for the trigger object
+	// at this point, we know that we are really handling an event for the trigger object
 	// name, namespace, and GVR should all match
 	log.Logger.Debug(fmt.Sprintf("handle kubernetes resource object: name: \"%s\", namespace: \"%s\", kind: \"%s\", labels: \"%s\"", u.GetName(), u.GetNamespace(), u.GetKind(), u.GetLabels()))
 

@@ -1,5 +1,5 @@
 specs:
-  myApp: # the autox group label value will correspond to this
+  myApp:
     trigger:
       name: myApp
       namespace: default
@@ -7,17 +7,14 @@ specs:
       version:  "v1"
       resource: "deployments"
     releaseSpecs:
-      # when we chart is released, the release will be called
-      # autox-myApp-name1-832ab
-      # last random suffix at the end is generated based on (pruned) labels
       name1:
-        repo: abc
-        name: def
-        valuesFileUrl: abcdef.com/abcdef
+        name: abc
+        version: 1.0.0
       name2:
-        repo: ghi
-        name: jkl
-        valuesFileUrl: ghijkl.com/ghijkl
+        name: def
+        values:
+          hello: world
+        version: 1.0.0
   myApp2:
     trigger:
       name: myApp2
@@ -27,6 +24,5 @@ specs:
       resource: "deployments"
     releaseSpecs:
       name3: 
-        repo: mno
-        name: pqr
-        valuesFileUrl: mnopqr.com/mnopqr
+        name: ghi
+        version: 1.0.0

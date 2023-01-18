@@ -45,6 +45,7 @@ func newFakeKubeClient(s *cli.EnvSettings, objects ...runtime.Object) *kubeClien
 		runtime.NewScheme(),
 		map[schema.GroupVersionResource]string{
 			{Group: "apps", Version: "v1", Resource: "deployments"}: "DeploymentList",
+			applicationGVR: "ApplicationList",
 		},
 		objects...)
 
