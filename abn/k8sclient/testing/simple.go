@@ -1,4 +1,4 @@
-package k8sclient
+package testing
 
 // Mostly copied from https://github.com/kubernetes/client-go/blob/e7cd4ba474b5efc2882e377362c9aa8b407428d9/dynamic/fake/simple.go
 // Some unused methods not included

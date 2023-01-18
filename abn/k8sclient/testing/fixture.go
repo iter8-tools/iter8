@@ -1,4 +1,4 @@
-package k8sclient
+package testing
 
 // Mostly copied from https://github.com/kubernetes/client-go/blob/e7cd4ba474b5efc2882e377362c9aa8b407428d9/testing/fixture.go
 // Changes were made in Delete() method to handle finalizers; that is, to change delete to update if a finalizer exists
