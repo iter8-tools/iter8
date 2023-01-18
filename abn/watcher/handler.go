@@ -145,18 +145,15 @@ func isObjectReady(obj *unstructured.Unstructured, gvr schema.GroupVersionResour
 		return true
 	}
 
-	// condition not True
+	// condition not true
 	return false
 }
 
 // TODO rewrite using NestedStringMap
 func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*string, error) {
-
 	if obj == nil {
 		return nil, errors.New("no object")
 	}
-
-	obj.GetNamespace()
 
 	resultJSON, err := obj.MarshalJSON()
 	if err != nil {
@@ -209,7 +206,6 @@ type trackObject struct {
 
 // getApplicationObjects identifies a list of objects related to application based on the name
 func getApplicationObjects(namespace string, application string, appConfig appDetails, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) map[string][]trackObject {
-
 	// initialize
 	var trackToObjectList = map[string][]trackObject{}
 	tracks := trackNames(application, appConfig)
@@ -249,7 +245,6 @@ func getApplicationObjects(namespace string, application string, appConfig appDe
 
 // isTrackReady checks that all expected objects for the track exist, that the version is defined (consistently) and that the objects are ready
 func isTrackReady(track string, trackObjects []trackObject, expectedNumberTrackObjects int) (string, bool) {
-
 	// all objects exist
 	if len(trackObjects) != expectedNumberTrackObjects {
 		log.Logger.Debugf("expected %d objects; found %d (track: %s)", expectedNumberTrackObjects, len(trackObjects), track)

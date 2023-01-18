@@ -15,9 +15,6 @@ var versionHasher maphash.Hash
 
 // lookupInternal is detailed implementation of gRPC method Lookup
 func lookupInternal(application string, user string) (*abnapp.Application, *string, error) {
-	log.Logger.Trace("lookupInternal called")
-	log.Logger.Trace("lookupInternal completed")
-
 	// if user is not provided, fail
 	if user == "" {
 		return nil, nil, errors.New("no user session provided")
