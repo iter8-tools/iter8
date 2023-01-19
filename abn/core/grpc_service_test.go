@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,6 +20,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"helm.sh/helm/v3/pkg/cli"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 )
 
@@ -36,7 +39,7 @@ type Scenario struct {
 
 func TestLookup(t *testing.T) {
 	testcases := map[string]Scenario{
-		"no application": {application: "default/noapp", user: "foobar", errorSubstring: "application not found", track: ""},
+		"no application": {application: "default/noapp", user: "foobar", errorSubstring: "application default/noapp not found", track: ""},
 		"no user":        {application: "default/application", user: "", errorSubstring: "no user session provided", track: ""},
 		"valid":          {application: "default/application", user: "user", errorSubstring: "", track: "candidate"},
 	}
@@ -168,6 +171,8 @@ func setup(t *testing.T) (*pb.ABNClient, func()) {
 	a, err := yamlToApplication("default/application", "../../testdata", "abninputs/readtest.yaml")
 	assert.NoError(t, err)
 	abnapp.Applications.Put(a)
+	err = ensureSecretCreated(a.Name)
+	assert.NoError(t, err)
 
 	// 49152-65535 are recommended ports; we use a random one for testing
 	/* #nosec */
@@ -243,4 +248,51 @@ func getMetric(a *abnapp.Application, track, metric string) *summarymetrics.Summ
 	v, _ := a.GetVersion(version, true)
 	m, _ := v.GetMetric(metric, true)
 	return m
+}
+
+func ensureSecretCreated(application string) error {
+	namespace := namespaceFromKey(application)
+	name := secretNameFromKey(application)
+	_, err := k8sclient.Client.Typed().CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+		}
+		_, err = k8sclient.Client.Typed().CoreV1().Secrets(namespace).Create(context.Background(), secret, metav1.CreateOptions{})
+		return err
+	}
+	return nil
+}
+
+// nameFromKey returns the name from a key of the form "namespace/name"
+func nameFromKey(applicationKey string) string {
+	_, n := splitApplicationKey(applicationKey)
+	return n
+}
+
+// secretNameFromKey returns the name of the secret used to persist an applicatiob
+func secretNameFromKey(applicationKey string) string {
+	return nameFromKey(applicationKey) + "-metrics"
+}
+
+// namespaceFromKey returns the namespace from a key of the form "namespace/name"
+func namespaceFromKey(applicationKey string) string {
+	ns, _ := splitApplicationKey(applicationKey)
+	return ns
+}
+
+// splitApplicationKey is a utility function that returns the name and namespace from a key of the form "namespace/name"
+func splitApplicationKey(applicationKey string) (string, string) {
+	var name, namespace string
+	names := strings.Split(applicationKey, "/")
+	if len(names) > 1 {
+		namespace, name = names[0], names[1]
+	} else {
+		namespace, name = "default", names[0]
+	}
+
+	return namespace, name
 }

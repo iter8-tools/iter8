@@ -1,0 +1,14 @@
+backend:
+  maxNumCandidates: 2
+  resources:
+  - group: apps
+    version: v1
+    resource: deployments
+  - version: v1
+    resource: services
+frontend:
+  maxNumCandidates: 1
+  resources:
+  - group: serving.knative.dev
+    version: v1
+    resource: services

@@ -40,8 +40,7 @@ func Start(port int, stopCh chan struct{}) error {
 	}
 
 	// set up resource watching as defined by config
-	c := readConfig(abnConfigFile)
-	w := watcher.NewIter8Watcher(c.Resources, c.Namespaces)
+	w := watcher.NewIter8Watcher(abnConfigFile)
 
 	// start watchers
 	go w.Start(stopCh)
@@ -82,6 +81,9 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 // WriteMetric identifies the track with which a metric is associated (from user) and
 // writes the metric value (currently only supports summary metrics)
 func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
+	log.Logger.Trace("WriteMetric called")
+	defer log.Logger.Trace("WriteMetric completed")
+
 	err := writeMetricInternal(
 		metricMsg.GetApplication(),
 		metricMsg.GetUser(),

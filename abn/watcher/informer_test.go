@@ -2,7 +2,7 @@ package watcher
 
 import (
 	"context"
-	"strings"
+	"fmt"
 	"testing"
 	"time"
 
@@ -16,179 +16,143 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+// If sufficient objects created to match config, then Applications should contain suitable entry
+// Probably could test various combinations
 func TestAdd(t *testing.T) {
-	scenarios := map[string]struct {
-		iter8related string
-		namespace    string
-		application  string
-		version      string
-		track        string
-	}{
-		"iter8 not set":  {iter8related: "", namespace: "namespace", application: "name", version: "version", track: "track"},
-		"iter8 not true": {iter8related: "false", namespace: "namespace", application: "name", version: "version", track: "track"},
-		"no application": {iter8related: "true", namespace: "namespace", application: "", version: "version", track: "track"},
-		"no version":     {iter8related: "true", namespace: "namespace", application: "name", version: "", track: "track"},
-		"no track":       {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: ""},
-		"all":            {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track"},
-	}
+	var svcConfigFile = "../../testdata/abninputs/config.yaml"
+	var namespace = "default"
+	var application = "backend"
+	var track = application
+	var version = "v1"
 
-	for label, s := range scenarios {
-		t.Run(label, func(t *testing.T) {
-			gvr := schema.GroupVersionResource{
-				Group:    "apps",
-				Version:  "v1",
-				Resource: "deployments",
-			}
+	// set up - initialize channel
+	done := make(chan struct{})
+	defer close(done)
 
-			done := make(chan struct{})
-			defer close(done)
-			setup(t, gvr, s.namespace, done)
+	// set up - Applications and informers
+	setup(t, svcConfigFile, done)
 
-			createObject(t, gvr, s.iter8related, s.namespace, s.application, s.version, s.track)
+	// create objects in cluster
+	createObject(t, newUnstructuredDeployment(namespace, application, version))
+	createObject(t, newUnstructuredService(namespace, application, version))
 
-			assert.Eventually(
-				t,
-				func() bool {
-					r := true
-					// if any preconditions are not met, then no application added
-					if strings.ToLower(s.iter8related) != "true" ||
-						s.application == "" ||
-						s.version == "" {
-						r = r && abnapp.NumApplications(t, 0)
-						return r
-					}
-
-					// otherwise application created
-
-					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
-					r = r && assert.NoError(t, err)
-					r = r && assert.NotNil(t, a)
-
-					tracks := []string{}
-					if s.track != "" {
-						tracks = []string{s.track}
-					}
-					r = r && assertApplication(t, a, applicationAssertion{
-						namespace: s.namespace,
-						name:      s.application,
-						tracks:    tracks,
-						versions:  []string{s.version},
-					})
-					return r
-				},
-				10*time.Second,
-				100*time.Millisecond,
-			)
-		})
-	}
+	// creation of these objects should trigger handler which will add application to Applications map
+	assert.Eventually(t, func() bool {
+		return assertApplicationExists(t, namespace, application, []string{track}, []string{version})
+	}, 10*time.Second, 100*time.Millisecond)
 }
 
+// update version associated with track
 func TestUpdate(t *testing.T) {
-	scenarios := map[string]struct {
-		iter8related string
-		namespace    string
-		application  string
-		version      string
-		track        string
-	}{
-		"no application": {iter8related: "true", namespace: "namespace", application: "", version: "version", track: "track"},
-		"no version":     {iter8related: "true", namespace: "namespace", application: "name", version: "", track: "track"},
-		"no track":       {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: ""},
-		"all":            {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track"},
-	}
+	var svcConfigFile = "../../testdata/abninputs/config.yaml"
+	var namespace = "default"
+	var application = "backend"
+	var track = application
+	var version = "v1"
+	var version2 = "v2"
 
-	for label, s := range scenarios {
-		t.Run(label, func(t *testing.T) {
-			gvr := schema.GroupVersionResource{
-				Group:    "apps",
-				Version:  "v1",
-				Resource: "deployments",
-			}
+	// set up - initialize channel
+	done := make(chan struct{})
+	defer close(done)
 
-			done := make(chan struct{})
-			defer close(done)
-			setup(t, gvr, s.namespace, done)
-			existingObj := createObject(t, gvr, "true", "namespace", "name", "version", "")
-			// verify that existing object is as expected
-			assert.Eventually(
-				t,
-				func() bool {
-					r := true
-					a, err := abnapp.Applications.Get("namespace/name")
-					r = r && assert.NoError(t, err)
-					r = r && assert.NotNil(t, a)
-					r = r && assertApplication(t, a, applicationAssertion{
-						namespace: "namespace",
-						name:      "name",
-						tracks:    []string{},
-						versions:  []string{"version"},
-					})
-					return r
-				},
-				10*time.Second,
-				100*time.Millisecond,
-			)
+	// set up - Applications and informers
+	setup(t, svcConfigFile, done)
 
-			//update object labels
-			updateLabel(existingObj, iter8Label, s.iter8related)
-			updateLabel(existingObj, nameLabel, s.application)
-			updateLabel(existingObj, versionLabel, s.version)
-			updateLabel(existingObj, trackLabel, s.track)
+	// create objects in cluster
+	deployObj := createObject(t, newUnstructuredDeployment(namespace, application, version))
+	svcObj := createObject(t, newUnstructuredService(namespace, application, version))
 
-			updatedObj, err := k8sclient.Client.Dynamic().
-				Resource(gvr).Namespace(s.namespace).
-				Update(
-					context.TODO(),
-					existingObj,
-					metav1.UpdateOptions{},
-				)
-			assert.NoError(t, err)
-			assert.NotNil(t, updatedObj)
+	// creation of these objects should trigger handler which will add application to Applications map
+	assert.Eventually(t, func() bool {
+		return assertApplicationExists(t, namespace, application, []string{track}, []string{version})
+	}, 10*time.Second, 100*time.Millisecond)
 
-			assert.Eventually(
-				t,
-				func() bool {
-					r := true
-					// if any preconditions are not met, then no change was made to applications
-					if strings.ToLower(s.iter8related) != "true" ||
-						s.application == "" ||
-						s.version == "" {
-						// abnapp.NumApplications(t, 1)
-						a, err := abnapp.Applications.Get("namespace/name")
-						r = r && assert.NoError(t, err)
-						r = r && assert.NotNil(t, a)
-						r = r && assertApplication(t, a, applicationAssertion{
-							namespace: "namespace",
-							name:      "name",
-							tracks:    []string{},
-							versions:  []string{"version"},
-						})
-						return r
-					}
+	assertV(t, version, deployObj)
+	assertV(t, version, svcObj)
 
-					// otherwise application was possibility modified in some way
-					// at least this application exists since it was preexisting
-					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
-					r = r && assert.NoError(t, err)
-					r = r && assert.NotNil(t, a)
+	// update version on first object (so mismatch)
+	updateLabel(deployObj, versionLabel, version2)
+	assertV(t, version2, deployObj)
+	updateObject(t, deployObj)
 
-					tracks := []string{}
-					if s.track != "" {
-						tracks = []string{s.track}
-					}
-					r = r && assertApplication(t, a, applicationAssertion{
-						namespace: s.namespace,
-						name:      s.application,
-						tracks:    tracks,
-						versions:  []string{s.version},
-					})
-					return r
-				},
-				10*time.Second,
-				100*time.Millisecond,
-			)
-		})
-	}
+	// eventually track map cleared
+	assert.Eventually(t, func() bool { return assertApplicationExists(t, namespace, application, []string{}, []string{version}) }, 10*time.Second, 100*time.Millisecond)
+
+	// update version on second object (so match)
+	updateLabel(svcObj, versionLabel, version2)
+	assertV(t, version2, svcObj)
+	updateObject(t, svcObj)
+
+	// eventually track reset
+	assert.Eventually(t, func() bool {
+		return assertApplicationExists(t, namespace, application, []string{track}, []string{version, version2})
+	}, 10*time.Second, 100*time.Millisecond)
+}
+
+func assertV(t *testing.T, expected string, obj *unstructured.Unstructured) {
+	assert.NotNil(t, obj)
+	v, ok := getVersion(obj)
+	assert.True(t, ok)
+	assert.Equal(t, expected, v)
+}
+
+// test deletion of application object does not remove it from Applications; BUT the track map should be cleared
+func TestDelete(t *testing.T) {
+	var svcConfigFile = "../../testdata/abninputs/config.yaml"
+	var namespace = "default"
+	var application = "backend"
+	var track = application
+	var version = "v1"
+
+	// set up - initialize channel
+	done := make(chan struct{})
+	defer close(done)
+
+	// set up - Applications and informers
+	setup(t, svcConfigFile, done)
+
+	// create objects in cluster
+	createObject(t, newUnstructuredDeployment(namespace, application, version))
+	svcObj := createObject(t, newUnstructuredService(namespace, application, version))
+
+	// creation of these objects should trigger handler which will add application to Applications map
+	assert.Eventually(t, func() bool {
+		return assertApplicationExists(t, namespace, application, []string{track}, []string{version})
+	}, 10*time.Second, 100*time.Millisecond)
+
+	// delete one of the objects
+	deleteObject(t, svcObj)
+
+	// eventually track map cleared
+	assert.Eventually(t, func() bool { return assertApplicationExists(t, namespace, application, []string{}, []string{version}) }, 10*time.Second, 100*time.Millisecond)
+}
+
+func setup(t *testing.T, svcConfigFile string, done chan struct{}) {
+	// set up - clear ApplicationsMap
+	abnapp.Applications.Clear()
+
+	// set up - define watcher and start informers
+	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
+	w := NewIter8Watcher(svcConfigFile)
+	assert.NotNil(t, w)
+	w.Start(done)
+}
+
+func assertApplicationExists(t *testing.T, namespace, application string, tracks []string, versions []string) bool {
+	r := true
+
+	a, err := abnapp.Applications.Get(namespace + "/" + application)
+	r = r && assert.NoError(t, err)
+	r = r && assert.NotNil(t, a)
+
+	r = r && assertApplication(t, a, applicationAssertion{
+		namespace: namespace,
+		name:      application,
+		tracks:    tracks,
+		versions:  versions,
+	})
+
+	return r
 }
 
 func updateLabel(obj *unstructured.Unstructured, key string, value string) {
@@ -197,163 +161,94 @@ func updateLabel(obj *unstructured.Unstructured, key string, value string) {
 	} else {
 		(obj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[key] = value
 	}
-
 }
 
-func TestDelete(t *testing.T) {
-	scenarios := map[string]struct {
-		iter8related string
-		namespace    string
-		application  string
-		version      string
-		track        string
-	}{
-		"no track, ready": {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: ""},
-		"track, ready":    {iter8related: "true", namespace: "namespace", application: "name", version: "version", track: "track"},
-	}
-
-	for label, s := range scenarios {
-		t.Run(label, func(t *testing.T) {
-			gvr := schema.GroupVersionResource{
-				Group:    "apps",
-				Version:  "v1",
-				Resource: "deployments",
-			}
-
-			done := make(chan struct{})
-			defer close(done)
-			setup(t, gvr, s.namespace, done)
-
-			// add existing object (to delete)
-			createObject(t, gvr, "true", "namespace", "name", "version", "track")
-			// verify that existing object is as expected
-			assert.Eventually(
-				t,
-				func() bool {
-					r := true
-					a, err := abnapp.Applications.Get("namespace/name")
-					r = r && assert.NoError(t, err)
-					r = r && assert.NotNil(t, a)
-					r = r && assertApplication(t, a, applicationAssertion{
-						namespace: "namespace",
-						name:      "name",
-						tracks:    []string{"track"},
-						versions:  []string{"version"},
-					})
-					return r
-				},
-				10*time.Second,
-				100*time.Millisecond,
-			)
-
-			// delete object --> no track anymore
-			err := k8sclient.Client.Dynamic().
-				Resource(gvr).Namespace(s.namespace).
-				Delete(
-					context.TODO(),
-					s.application,
-					metav1.DeleteOptions{},
-				)
-			assert.NoError(t, err)
-
-			assert.Eventually(
-				t,
-				func() bool {
-					r := true
-					// if any preconditions are not met, then no change was made to applications
-					if strings.ToLower(s.iter8related) != "true" ||
-						s.application == "" ||
-						s.version == "" {
-						a, err := abnapp.Applications.Get("namespace/name")
-						r = r && assert.NoError(t, err)
-						r = r && assert.NotNil(t, a)
-						r = r && assertApplication(t, a, applicationAssertion{
-							namespace: "namespace",
-							name:      "name",
-							tracks:    []string{"track"},
-							versions:  []string{"version"},
-						})
-						return r
-					}
-
-					// otherwise application was possibility modified in some way
-					// at least this application exists since it was preexisting
-					a, err := abnapp.Applications.Get(s.namespace + "/" + s.application)
-					r = r && assert.NoError(t, err)
-					r = r && assert.NotNil(t, a)
-
-					r = r && assertApplication(t, a, applicationAssertion{
-						namespace: s.namespace,
-						name:      s.application,
-						tracks:    []string{},
-						versions:  []string{s.version},
-					})
-
-					return r
-				},
-				10*time.Second,
-				100*time.Millisecond,
-			)
-		})
+// for testing, way to get GVR from object
+func getGVR(uObj *unstructured.Unstructured) *schema.GroupVersionResource {
+	switch uObj.GetKind() {
+	case "Service":
+		return &schema.GroupVersionResource{Group: "", Version: "v1", Resource: "services"}
+	case "Deployment":
+		return &schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
+	default:
+		return nil
 	}
 }
 
-func setup(t *testing.T, gvr schema.GroupVersionResource, namespace string, done chan struct{}) {
-	// ensure global record of applications is empty
-	abnapp.Applications.Clear()
+func createObject(t *testing.T, uObj *unstructured.Unstructured) *unstructured.Unstructured {
 
-	// define watcher
-	k8sclient.Client = *k8sclient.NewFakeKubeClient(cli.New())
-	w := NewIter8Watcher(
-		[]schema.GroupVersionResource{gvr},
-		[]string{namespace},
-	)
-	assert.NotNil(t, w)
+	gvr := getGVR(uObj)
+	assert.NotNil(t, gvr)
 
-	// start informers
-	w.Start(done)
-}
-
-func createObject(t *testing.T, gvr schema.GroupVersionResource, iter8related, namespace, application, version, track string) *unstructured.Unstructured {
-	// create object; no track defined
 	createdObj, err := k8sclient.Client.Dynamic().
-		Resource(gvr).Namespace(namespace).
+		Resource(*gvr).Namespace(uObj.GetNamespace()).
 		Create(
 			context.TODO(),
-			newUnstructuredDeployment(iter8related, namespace, application, version, track),
+			uObj,
 			metav1.CreateOptions{},
 		)
 	assert.NoError(t, err)
 	assert.NotNil(t, createdObj)
+
 	return createdObj
 }
 
-func newUnstructuredDeployment(iter8related, namespace, application, version, track string) *unstructured.Unstructured {
-	labels := map[string]interface{}{}
-	if application != "" {
-		labels[nameLabel] = application
-	}
-	if version != "" {
-		labels[versionLabel] = version
-	}
-	if iter8related != "" {
-		labels[iter8Label] = iter8related
-	}
+func updateObject(t *testing.T, uObj *unstructured.Unstructured) *unstructured.Unstructured {
+	gvr := getGVR(uObj)
+	assert.NotNil(t, gvr)
 
-	if track != "" {
-		labels[trackLabel] = track
-	}
+	updatedObj, err := k8sclient.Client.Dynamic().
+		Resource(*gvr).Namespace(uObj.GetNamespace()).
+		Update(
+			context.TODO(),
+			uObj,
+			metav1.UpdateOptions{},
+		)
+	assert.NoError(t, err)
+	assert.NotNil(t, updatedObj)
 
-	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "apps/v1",
-			"kind":       "Deployment",
-			"metadata": map[string]interface{}{
-				"namespace": namespace,
-				"name":      application,
-				"labels":    labels,
-			},
-			"spec": application,
-		},
+	return updatedObj
+}
+
+func deleteObject(t *testing.T, uObj *unstructured.Unstructured) *unstructured.Unstructured {
+	gvr := getGVR(uObj)
+	assert.NotNil(t, gvr)
+
+	err := k8sclient.Client.Dynamic().
+		Resource(*gvr).Namespace(uObj.GetNamespace()).
+		Delete(
+			context.TODO(),
+			uObj.GetName(),
+			metav1.DeleteOptions{},
+		)
+	assert.NoError(t, err)
+
+	return nil
+}
+
+func TestTrackNames(t *testing.T) {
+	// also tests validObjectNames()
+	for _, tt := range []struct {
+		name          string
+		numCandidates int
+	}{
+		{"zero", 0},
+		{"one", 1},
+		{"two", 2},
+		{"ten", 10},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			names := getValidObjectNames(tt.name, tt.numCandidates)
+			assert.Equal(t, tt.numCandidates+1, len(names))
+			assert.Contains(t, names, tt.name)
+			if tt.numCandidates > 0 {
+				assert.Contains(t, names, fmt.Sprintf("%s-candidate-%d", tt.name, tt.numCandidates))
+			}
+		})
 	}
+}
+
+func TestContainsString(t *testing.T) {
+	assert.True(t, containsString([]string{"one", "two", "three"}, "one"))
+	assert.False(t, containsString([]string{"one", "two", "three"}, "four"))
 }

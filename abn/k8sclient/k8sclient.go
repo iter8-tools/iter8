@@ -7,10 +7,11 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 
 	// Import to initialize client auth plugins.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+
+	// packages for cloud authentication
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 // Client is a global variable. Before use, it must be assigned and initialized

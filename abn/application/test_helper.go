@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -8,14 +9,39 @@ import (
 	"testing"
 	"time"
 
+	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 )
 
 func yamlToSecret(folder, file, name string) error {
+	err := ensureSecretCreated(name)
+	if err != nil {
+		return err
+	}
 	a, _ := yamlToApplication(name, folder, file)
 	return Applications.Write(a)
+}
+
+func ensureSecretCreated(application string) error {
+	namespace := namespaceFromKey(application)
+	name := secretNameFromKey(application)
+	_, err := k8sclient.Client.Typed().CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err == nil {
+		return nil
+	}
+
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+	_, err = k8sclient.Client.Typed().CoreV1().Secrets(namespace).Create(context.Background(), secret, metav1.CreateOptions{})
+	return err
 }
 
 func readYamlFromFile(folder, file string) ([]byte, error) {

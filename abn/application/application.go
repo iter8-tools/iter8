@@ -49,10 +49,10 @@ func (a *Application) GetVersion(version string, allowNew bool) (*Version, bool)
 	v, ok := a.Versions[version]
 	if !ok {
 		if allowNew {
-			log.Logger.Debugf("GetVersion no data found; returning %+v", v)
 			v = &Version{
 				Metrics: map[string]*summarymetrics.SummaryMetric{},
 			}
+			log.Logger.Debugf("GetVersion no data found; creating %+v", v)
 			a.Versions[version] = v
 			return v, true
 		}
