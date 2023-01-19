@@ -32,6 +32,6 @@ spec:
     run: echo "SLOs not satisfied"
 result:
   failure: false
-  iter8Version: v0.12
+  iter8Version: v0.13
   numCompletedTasks: 4
   startTime: "2022-03-16T10:22:58.540897-04:00"
