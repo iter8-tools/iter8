@@ -238,7 +238,7 @@ func TestTrackNames(t *testing.T) {
 		{"ten", 10},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			names := validObjectNames(tt.name, tt.numCandidates)
+			names := getValidObjectNames(tt.name, tt.numCandidates)
 			assert.Equal(t, tt.numCandidates+1, len(names))
 			assert.Contains(t, names, tt.name)
 			if tt.numCandidates > 0 {

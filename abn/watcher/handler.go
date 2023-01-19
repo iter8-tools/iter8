@@ -29,8 +29,8 @@ var (
 )
 
 // handle constructs the application object from the objects currently in the cluster
-func handle(action string, obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory, gvr schema.GroupVersionResource) {
-	log.Logger.Tracef("handle %s called", action)
+func handle(obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory, gvr schema.GroupVersionResource) {
+	log.Logger.Tracef("handle called")
 	defer log.Logger.Trace("handle completed")
 
 	// get object from cluster (even through we have an unstructured.Unstructured, it is really only the metadata; to get the full object we need to fetch it from the cluster)
@@ -59,8 +59,8 @@ func handle(action string, obj *unstructured.Unstructured, config serviceConfig,
 	// get application configuration
 	appConfig := getApplicationConfig(namespace, application, config)
 	if appConfig == nil {
-		// we found a resource that is not part of an a/b/n test; ignore the object
-		log.Logger.Debugf("object for application %s/%s has no a/b/n configuration", namespace, application)
+		// we found a resource that is not part of an A/B/n test; ignore the object
+		log.Logger.Debugf("object for application %s/%s has no A/B/n configuration", namespace, application)
 		return
 	}
 
@@ -79,11 +79,11 @@ func handle(action string, obj *unstructured.Unstructured, config serviceConfig,
 	a.ClearTracks()
 
 	//   for each track, find the version (from cluster objects) and update the mapping
-	for _, track := range trackNames(application, *appConfig) {
+	for _, track := range getTrackNames(application, *appConfig) {
 		log.Logger.Trace("updateApplication for track ", track)
-		version, ok := isTrackReady(track, applicationObjs[track], len(appConfig.Resources))
-		log.Logger.Trace("updateApplication for track ", track, " found version ", version, " ", ok)
-		if ok {
+		version := isTrackReady(track, applicationObjs[track], len(appConfig.Resources))
+		log.Logger.Trace("updateApplication for track ", track, " found version ", version)
+		if version != "" {
 			a.GetVersion(version, true)
 			a.Tracks[track] = version
 		}
@@ -135,7 +135,6 @@ func isObjectReady(obj *unstructured.Unstructured, gvr schema.GroupVersionResour
 		return true
 	}
 
-	// get ConditionStatus
 	cs, err := getConditionStatus(obj, *condition)
 	if err != nil {
 		log.Logger.Error("unable to get status: ", err.Error())
@@ -208,7 +207,7 @@ type trackObject struct {
 func getApplicationObjects(namespace string, application string, appConfig appDetails, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) map[string][]trackObject {
 	// initialize
 	var trackToObjectList = map[string][]trackObject{}
-	tracks := trackNames(application, appConfig)
+	tracks := getTrackNames(application, appConfig)
 	for _, track := range tracks {
 		trackToObjectList[track] = []trackObject{}
 	}
@@ -244,11 +243,11 @@ func getApplicationObjects(namespace string, application string, appConfig appDe
 }
 
 // isTrackReady checks that all expected objects for the track exist, that the version is defined (consistently) and that the objects are ready
-func isTrackReady(track string, trackObjects []trackObject, expectedNumberTrackObjects int) (string, bool) {
+func isTrackReady(track string, trackObjects []trackObject, expectedNumberTrackObjects int) string {
 	// all objects exist
 	if len(trackObjects) != expectedNumberTrackObjects {
 		log.Logger.Debugf("expected %d objects; found %d (track: %s)", expectedNumberTrackObjects, len(trackObjects), track)
-		return "", false
+		return ""
 	}
 
 	// single version identified on at least one object
@@ -259,25 +258,25 @@ func isTrackReady(track string, trackObjects []trackObject, expectedNumberTrackO
 			if version != "" && version != v {
 				// different versions on resources of the same track
 				log.Logger.Debugf("inconsistent value for label %s (track: %s)", versionLabel, track)
-				return "", false
+				return ""
 			}
 			version = v
 		}
 	}
 	if version == "" {
 		log.Logger.Debugf("no value for label %s found (track: %s)", versionLabel, track)
-		return "", false
+		return ""
 	}
 
 	// all objects are ready
 	for _, to := range trackObjects {
 		if !isObjectReady(to.object, to.gvr, to.condition) {
 			log.Logger.Debugf("no object found of type %v (track: %s)", to.gvr, track)
-			return "", false
+			return ""
 		}
 	}
 
-	return version, true
+	return version
 }
 
 func updateUnstructuredObject(uObj *unstructured.Unstructured, gvr schema.GroupVersionResource) (*unstructured.Unstructured, error) {
@@ -294,7 +293,6 @@ func updateUnstructuredObject(uObj *unstructured.Unstructured, gvr schema.GroupV
 
 func getUnstructuredObject(uObj *unstructured.Unstructured, gvr schema.GroupVersionResource) (*unstructured.Unstructured, error) {
 	obj, err := k8sclient.Client.Dynamic().
-		// Resource(*gvr).Namespace(uObj.GetNamespace()).
 		Resource(gvr).Namespace(uObj.GetNamespace()).
 		Get(
 			context.TODO(),
