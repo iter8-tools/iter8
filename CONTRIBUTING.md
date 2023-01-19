@@ -11,7 +11,6 @@ As you get started, you are in the best position to give us feedback on key area
 If anything doesn't make sense, or doesn't work when you run it, please open a
 bug report and let us know!
 
-
 ## Ways to contribute
 
 We welcome many types of contributions including:
@@ -70,7 +69,6 @@ repository, you can amend your commit with the sign-off by running:
 
     git commit --amend -s 
 
-
 ## Development environment setup
 
 The Iter8 project consists of the following repos.
@@ -106,7 +104,6 @@ make tests
 make coverage
 make htmlcov
 ```
-
 
 ### iter8-tools/docs
 

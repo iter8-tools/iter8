@@ -3,7 +3,10 @@ package watcher
 // informer.go - informer(s) to watch desired resources/namespaces
 
 import (
+	"fmt"
+
 	"github.com/iter8-tools/iter8/abn/k8sclient"
+	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -33,13 +36,17 @@ func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []s
 		w.factories[ns] = dynamicinformer.NewFilteredDynamicSharedInformerFactory(k8sclient.Client.Dynamic(), 0, ns, nil)
 		for _, gvr := range resourceTypes {
 			informer := w.factories[ns].ForResource(gvr)
-			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 				AddFunc: handlerFunc,
 				UpdateFunc: func(oldObj, obj interface{}) {
 					handlerFunc(obj)
 				},
 				DeleteFunc: handlerFunc,
 			})
+
+			if err != nil {
+				log.Logger.Error(fmt.Sprintf("cannot add event handler for namespace \"%s\" and GVR \"%s\": \"%s\"", ns, gvr, err))
+			}
 		}
 	}
 	return w

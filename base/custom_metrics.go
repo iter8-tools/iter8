@@ -264,8 +264,8 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			err = template.Execute(&buf, values)
 			if err != nil {
 				log.Logger.Error("cannot execute metrics spec with values", err)
-				log.Logger.Error("metrics spec:", buf.String())
-				log.Logger.Error("values:", values)
+				log.Logger.Error("metrics spec: ", buf.String())
+				log.Logger.Error("values: ", values)
 				return err
 			}
 
@@ -274,7 +274,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			err = yaml.Unmarshal(bytes, &provider)
 			if err != nil {
 				log.Logger.Error("cannot unmarshal provider spec", err)
-				log.Logger.Error("provider spec:", string(bytes))
+				log.Logger.Error("provider spec: ", string(bytes))
 				return err
 			}
 			log.Logger.Debugf("provider spec %v for version %v\n", providerName, i)
@@ -319,7 +319,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 				valueString := fmt.Sprint(val)
 				floatValue, err := strconv.ParseFloat(valueString, 64)
 				if err != nil {
-					log.Logger.Error("could not parse string \""+valueString+"\" to float:", err)
+					log.Logger.Error("could not parse string \""+valueString+"\" to float: ", err)
 					continue
 				}
 
