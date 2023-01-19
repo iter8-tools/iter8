@@ -1,0 +1,28 @@
+specs:
+  myApp:
+    trigger:
+      name: myApp
+      namespace: default
+      group:    "apps"
+      version:  "v1"
+      resource: "deployments"
+    releaseSpecs:
+      name1:
+        name: abc
+        version: 1.0.0
+      name2:
+        name: def
+        values:
+          hello: world
+        version: 1.0.0
+  myApp2:
+    trigger:
+      name: myApp2
+      namespace: test
+      group:    "apps"
+      version:  "v1"
+      resource: "deployments"
+    releaseSpecs:
+      name3: 
+        name: ghi
+        version: 1.0.0

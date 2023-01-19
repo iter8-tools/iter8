@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 
+	testing "github.com/iter8-tools/iter8/abn/k8sclient/testing"
 	"helm.sh/helm/v3/pkg/cli"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	// dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
 )
@@ -45,7 +44,7 @@ func NewFakeKubeClient(s *cli.EnvSettings, objects ...runtime.Object) *KubeClien
 	fc.PrependReactor("update", "secrets", secretDataReactor)
 	fakeClient.typedClient = fc
 
-	fakeClient.dynamicClient = NewSimpleDynamicClientWithCustomListKinds(
+	fakeClient.dynamicClient = testing.NewSimpleDynamicClientWithCustomListKinds(
 		runtime.NewScheme(),
 		map[schema.GroupVersionResource]string{
 			{Group: "apps", Version: "v1", Resource: "deployments"}: "DeploymentList",

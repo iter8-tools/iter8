@@ -254,18 +254,17 @@ func ensureSecretCreated(application string) error {
 	namespace := namespaceFromKey(application)
 	name := secretNameFromKey(application)
 	_, err := k8sclient.Client.Typed().CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
-	if err == nil {
-		return nil
+	if err != nil {
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+		}
+		_, err = k8sclient.Client.Typed().CoreV1().Secrets(namespace).Create(context.Background(), secret, metav1.CreateOptions{})
+		return err
 	}
-
-	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-	}
-	_, err = k8sclient.Client.Typed().CoreV1().Secrets(namespace).Create(context.Background(), secret, metav1.CreateOptions{})
-	return err
+	return nil
 }
 
 // nameFromKey returns the name from a key of the form "namespace/name"

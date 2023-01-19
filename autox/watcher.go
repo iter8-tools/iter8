@@ -1,50 +1,91 @@
 package autox
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/iter8-tools/iter8/base/log"
 
-	// auth enables automatic authentication to various hosted clouds
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 const (
-	// Name of environment variable with file path to resource configuration yaml file
-	resourceConfigEnv = "RESOURCE_CONFIG"
-	// Name of environment variable with file path to chart group configuration yaml file
-	chartGroupConfigEnv = "CHART_GROUP_CONFIG"
+	// configEnv is the name of environment variable with file path to the config
+	configEnv = "CONFIG"
 )
 
-var iter8ResourceConfig resourceConfig
-var iter8ChartGroupConfig chartGroupConfig
+var k8sClient *kubeClient
+
+// validateConfig validates config, which contains all the release group specs
+func validateConfig(c config) error {
+	var err error
+
+	triggerStrings := map[string]bool{}
+
+	// iterate through all the release group specs
+	for releaseGroupSpecID, releaseGroupSpec := range c.Specs {
+		// validate trigger
+		if releaseGroupSpec.Trigger.Name == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a name", releaseGroupSpecID)
+			break
+		}
+
+		if releaseGroupSpec.Trigger.Namespace == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a namespace", releaseGroupSpecID)
+			break
+		}
+
+		if releaseGroupSpec.Trigger.Version == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a version", releaseGroupSpecID)
+			break
+		}
+
+		if releaseGroupSpec.Trigger.Resource == "" {
+			err = fmt.Errorf("trigger in spec group \"%s\" does not have a resource", releaseGroupSpecID)
+			break
+		}
+
+		// check for trigger uniqueness
+		triggerString := fmt.Sprintf("%s/%s/%s/%s/%s", releaseGroupSpec.Trigger.Name, releaseGroupSpec.Trigger.Namespace, releaseGroupSpec.Trigger.Group, releaseGroupSpec.Trigger.Version, releaseGroupSpec.Trigger.Resource)
+		if _, ok := triggerStrings[triggerString]; ok {
+			err = fmt.Errorf("multiple release specs with the same trigger: name: \"%s\", namespace: \"%s\", group: \"%s\", version: \"%s\", resource: \"%s\",", releaseGroupSpec.Trigger.Name, releaseGroupSpec.Trigger.Namespace, releaseGroupSpec.Trigger.Group, releaseGroupSpec.Trigger.Version, releaseGroupSpec.Trigger.Resource)
+			break
+		}
+		triggerStrings[triggerString] = true
+	}
+
+	return err
+}
 
 // Start is entry point to configure services and start them
-func Start(stopCh chan struct{}) error {
+func Start(stopCh chan struct{}, autoxK *kubeClient) error {
+	if autoxK == nil {
+		// get a default client
+		k8sClient = newKubeClient(cli.New())
+	} else {
+		// set it here
+		k8sClient = autoxK
+	}
+
 	// initialize kubernetes driver
 	if err := k8sClient.init(); err != nil {
 		log.Logger.Fatal("unable to init k8s client")
 	}
 
-	// read resource config (resources and namespaces to watch)
-	resourceConfigFile, ok := os.LookupEnv(resourceConfigEnv)
-	if !ok {
-		log.Logger.Fatal("resource configuration file is required")
-	}
-
-	// read group config (apps and helm charts to install)
-	chartGroupConfigFile, ok := os.LookupEnv(chartGroupConfigEnv)
+	// read release group specs
+	configFile, ok := os.LookupEnv(configEnv)
 	if !ok {
 		log.Logger.Fatal("group configuration file is required")
 	}
+	config := readConfig(configFile)
 
-	// set up resource watching as defined by config
-	iter8ResourceConfig = readResourceConfig(resourceConfigFile)
-	iter8ChartGroupConfig = readChartGroupConfig(chartGroupConfigFile)
+	// validate the release group specs
+	err := validateConfig(config)
+	if err != nil {
+		return err
+	}
 
-	log.Logger.Debug("chartGroupConfig:", iter8ChartGroupConfig)
-
-	w := newIter8Watcher()
+	w := newIter8Watcher(config)
 	go w.start(stopCh)
 	return nil
 }

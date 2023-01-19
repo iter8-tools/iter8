@@ -18,7 +18,7 @@ func ExperimentFromBytes(b []byte) (*base.Experiment, error) {
 	e := base.Experiment{}
 	err := yaml.Unmarshal(b, &e)
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment")
+		log.Logger.WithStackTrace(err.Error()).Error("unable to unmarshal experiment: ", string(b))
 		return nil, err
 	}
 	return &e, err

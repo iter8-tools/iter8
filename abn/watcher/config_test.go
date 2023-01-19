@@ -24,7 +24,6 @@ func TestReadServiceConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := readServiceConfig(completePath("../../testdata/abninputs", tt.file))
 			assert.Equal(t, tt.numNamespaces, len(c))
-			//assert.Equal(t, tt.numResources, len(c.resources()))
 		})
 	}
 }

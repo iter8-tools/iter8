@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/iter8-tools/iter8/abn/k8sclient"
+	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -18,7 +19,6 @@ type Iter8Watcher struct {
 }
 
 // NewIter8Watcher returns a watcher for iter8 related objects
-// func NewIter8Watcher(resourceTypes []schema.GroupVersionResource, namespaces []string) *Iter8Watcher {
 func NewIter8Watcher(configFile string) *Iter8Watcher {
 	c := readServiceConfig(configFile)
 
@@ -26,11 +26,11 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
-	handlerFunc := func(action string, validNames []string) func(obj interface{}) {
+	handlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
 		return func(obj interface{}) {
 			o := obj.(*unstructured.Unstructured)
 			if containsString(validNames, o.GetName()) {
-				handle(action, o, c, w.factories)
+				handle(o, c, w.factories, gvr)
 			}
 		}
 	}
@@ -47,22 +47,26 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 		// the resources will be used to create informers
 		// the list of names will be used to filter the objects that trigger the informer
 		for nm, details := range apps {
-			validNames := validObjectNames(nm, details.MaxNumCandidates)
+			validNames := getValidObjectNames(nm, details.MaxNumCandidates)
 			for _, r := range details.Resources {
 				byResource[r.GroupVersionResource] = append(byResource[r.GroupVersionResource], validNames...)
 			}
 		}
 
 		// create informer for each resource in namespace
-		for r, validNames := range byResource {
-			informer := w.factories[ns].ForResource(r)
-			informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: handlerFunc("ADD", validNames),
+		for gvr, validNames := range byResource {
+			informer := w.factories[ns].ForResource(gvr)
+			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+				AddFunc: handlerFunc(validNames, gvr),
 				UpdateFunc: func(oldObj, obj interface{}) {
-					handlerFunc("UPDATE", validNames)(obj)
+					handlerFunc(validNames, gvr)(obj)
 				},
-				DeleteFunc: handlerFunc("DELETE", validNames),
+				DeleteFunc: handlerFunc(validNames, gvr),
 			})
+
+			if err != nil {
+				log.Logger.Error(fmt.Sprintf("cannot add event handler for namespace \"%s\" and GVR \"%s\": \"%s\"", ns, gvr, err))
+			}
 		}
 	}
 	return w
@@ -79,7 +83,7 @@ func (watcher *Iter8Watcher) Start(stopChannel chan struct{}) {
 // based on the assumption that the names are of the form:
 //
 //	app, app-candidate-i for i = 1, 2, ..., maxNumCandidates
-func validObjectNames(application string, maxNum int) []string {
+func getValidObjectNames(application string, maxNum int) []string {
 	expectedObjectNames := make([]string, maxNum+1)
 	expectedObjectNames[0] = application
 	for i := 1; i <= maxNum; i++ {
@@ -88,10 +92,10 @@ func validObjectNames(application string, maxNum int) []string {
 	return expectedObjectNames
 }
 
-// trackNames creates list of expected trackNames
+// getTrackNames creates list of expected getTrackNames
 // based on the assumption that the track names are the same as the object names
-func trackNames(application string, appConfig appDetails) []string {
-	return validObjectNames(application, appConfig.MaxNumCandidates)
+func getTrackNames(application string, appConfig appDetails) []string {
+	return getValidObjectNames(application, appConfig.MaxNumCandidates)
 }
 
 // containsString determines if an array contains a specific string

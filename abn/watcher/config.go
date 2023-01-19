@@ -12,10 +12,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// // serviceConfig is an A/B/n service configuration. It is a map of namespace to a map of application details
+// serviceConfig is an A/B/n service configuration. It is a map of namespaces to a map of application details
 type serviceConfig map[string]apps
 
-// apps is a map of application name to service configuration details
+// apps is a map of application names to service configuration details
 type apps map[string]appDetails
 
 // appDetails are the service configuration details for an application: the resource types and the max number of candidates
@@ -29,7 +29,7 @@ type resourceInfo struct {
 	Condition *string `yaml:"condition,omitempty"`
 }
 
-// readServiceConfig reads yaml config file fn and converts to a Config object
+// readServiceConfig reads YAML config file fn and converts to a serviceConfig object
 func readServiceConfig(fn string) (c serviceConfig) {
 	log.Logger.Tracef("readConfig called with config file %s", fn)
 
@@ -59,13 +59,13 @@ func getApplicationConfig(namespace string, application string, c serviceConfig)
 	apps, ok := c[namespace]
 	if !ok {
 		// namespace not found, error
-		log.Logger.Errorf("unable to find application configuration for %s/%s", namespace, application)
+		log.Logger.Errorf("unable to find application configuration for %s/%s (namespace incorrect?)", namespace, application)
 		return nil
 	}
 
 	appConfig, ok := apps[application]
 	if !ok {
-		log.Logger.Warnf("unable to find application configuration for %s/%s", namespace, application)
+		log.Logger.Warnf("unable to find application configuration for %s/%s (application incorrect?)", namespace, application)
 		return nil
 	}
 
