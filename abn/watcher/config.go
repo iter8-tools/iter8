@@ -29,7 +29,7 @@ type resourceInfo struct {
 	Condition *string `yaml:"condition,omitempty"`
 }
 
-// readServiceConfig reads yaml config file fn and converts to a Config object
+// readServiceConfig reads YAML config file fn and converts to a serviceConfig object
 func readServiceConfig(fn string) (c serviceConfig) {
 	log.Logger.Tracef("readConfig called with config file %s", fn)
 
