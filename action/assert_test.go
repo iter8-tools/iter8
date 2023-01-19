@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
@@ -13,31 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-func TestLocalAssert(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	_ = driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputs/experiment.yaml"))
-	// fix aOpts
-	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
-
-	ok, err := aOpts.LocalRun()
-	assert.True(t, ok)
-	assert.NoError(t, err)
-}
-
-func TestLocalAssertFailing(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	_ = driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/assertinputsfail/experiment.yaml"))
-	// fix aOpts
-	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
-	aOpts.Timeout = 5 * time.Second
-
-	ok, err := aOpts.LocalRun()
-	assert.False(t, ok)
-	assert.NoError(t, err)
-}
 
 func TestKubeAssert(t *testing.T) {
 	_ = os.Chdir(t.TempDir())

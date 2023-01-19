@@ -1,0 +1,9 @@
+time=1977-09-02 22:04:05 level=info msg=experiment completed
+time=1977-09-02 22:04:05 level=info msg=experiment has no failure
+time=1977-09-02 22:04:05 level=info msg=SLOs are not satisfied
+time=1977-09-02 22:04:05 level=info msg=experiment completed
+time=1977-09-02 22:04:05 level=info msg=experiment has no failure
+time=1977-09-02 22:04:05 level=info msg=SLOs are not satisfied
+time=1977-09-02 22:04:05 level=info msg=not all conditions were satisfied
+time=1977-09-02 22:04:05 level=error msg=assert conditions failed
+time=1977-09-02 22:04:05 level=error msg=assert conditions failed

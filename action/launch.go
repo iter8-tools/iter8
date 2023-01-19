@@ -1,16 +1,11 @@
 package action
 
 import (
-	"os"
-	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/iter8-tools/iter8/base"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/driver"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 )
 
@@ -57,75 +52,6 @@ func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 
 func defaultChartVersion() string {
 	return strings.Replace(base.MajorMinor, "v", "", 1) + ".x"
-}
-
-// LocalRun launches a local experiment
-func (lOpts *LaunchOpts) LocalRun() error {
-	log.Logger.Debug("launch local run started...")
-
-	var gOpts GenOpts
-	if lOpts.LocalChart {
-		// local charts
-		gOpts = GenOpts{
-			Options:   lOpts.Options,
-			GenDir:    lOpts.RunDir,
-			ChartName: path.Join(filepath.Dir(lOpts.ChartName), filepath.Base(lOpts.ChartName)),
-		}
-	} else {
-		// non-local charts. download charts
-
-		// create temporary folder to store chart
-		chartsFolderName, err := os.MkdirTemp("", "iter8-")
-		if err != nil {
-			log.Logger.Error("failed to download chart")
-			return err
-		}
-		defer func() {
-			// ignore error value
-			_ = os.RemoveAll(chartsFolderName)
-		}()
-
-		// pull chart (and its dependencies)
-		client := action.NewPullWithOpts(action.WithConfig(&action.Configuration{}))
-		client.RepoURL = lOpts.RepoURL
-		client.Untar = true
-		client.UntarDir = chartsFolderName + "/charts"
-		client.Settings = cli.New()
-		log.Logger.Debug("client.UntarDir ", client.UntarDir)
-
-		_, err = client.Run(lOpts.ChartName)
-		if err != nil {
-			return err
-		}
-
-		log.Logger.Trace("chart pulled")
-
-		// gen experiment spec
-		gOpts = GenOpts{
-			Options:   lOpts.Options,
-			GenDir:    lOpts.RunDir,
-			ChartName: path.Join(client.UntarDir, lOpts.ChartName),
-		}
-	}
-
-	if err := gOpts.LocalRun(); err != nil {
-		return err
-	}
-	log.Logger.Debug("gen complete")
-
-	// all done if this is a dry run
-	if lOpts.DryRun {
-		log.Logger.Info("dry run complete")
-		return nil
-	}
-
-	// run experiment locally
-	log.Logger.Info("starting local experiment")
-	rOpts := &RunOpts{
-		RunDir:     lOpts.RunDir,
-		KubeDriver: lOpts.KubeDriver,
-	}
-	return rOpts.LocalRun()
 }
 
 // KubeRun launches a Kubernetes experiment

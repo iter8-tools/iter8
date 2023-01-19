@@ -13,17 +13,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestLocalRun(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	_ = driver.CopyFileToPwd(t, base.CompletePath("../", "testdata/experiment.yaml"))
-
-	base.SetupWithMock(t)
-	// fix rOpts
-	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
-	err := rOpts.LocalRun()
-	assert.NoError(t, err)
-}
-
 func TestKubeRun(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	base.SetupWithMock(t)

@@ -100,7 +100,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -130,7 +130,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -162,7 +162,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:
@@ -192,7 +192,7 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
       uses: helm/kind-action@v1.2.0
       with:

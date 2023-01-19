@@ -20,7 +20,7 @@ spec:
         - metric: "http/latency-p50"
           limit: 1000
         - metric: "http/latency-p50.0"
-          limit: 150
+          limit: 1
         - metric: "http/latency-p95.0"
           limit: 2500
         - metric: "http/latency-p99"
