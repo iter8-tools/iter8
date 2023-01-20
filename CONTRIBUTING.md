@@ -8,14 +8,13 @@ As you get started, you are in the best position to give us feedback on key area
 * Gaps in our getting started tutorial and other documentation
 * Bugs in our test and automation scripts
 
-If anything doesn't make sense, or doesn't work when you run it, please open a
-bug report and let us know!
+If anything doesn't make sense, or doesn't work when you run it, please open a bug report and let us know!
 
 ## Ways to contribute
 
 We welcome many types of contributions including:
 
-* [CLI and Iter8 experiment chart](#iter8-toolsiter8)
+* [CLI and Iter8 experiment charts](#iter8-toolsiter8)
 * [Docs](#iter8-toolsdocs)
 * CI, builds, and tests
 * Reviewing pull requests
@@ -73,9 +72,10 @@ repository, you can amend your commit with the sign-off by running:
 
 The Iter8 project consists of the following repos.
 
-1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI and experiment charts
-2. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
-3. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for the Iter8 CLI
+1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI
+2. [iter8-tools/hub](https://github.com/iter8-tools/hub): source for Iter8 experiment and supplementary charts
+3. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
+4. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for the Iter8 CLI
 
 ### iter8-tools/iter8
 
@@ -103,6 +103,27 @@ iter8 version
 make tests
 make coverage
 make htmlcov
+```
+
+#### Lint Iter8
+```shell
+make lint
+```
+
+#### Build and push Iter8 image
+
+Define a name for your Docker image
+
+```shell
+IMG=[Docker image name]
+```
+
+Build and push Iter8 image to Docker
+
+```shell
+make dist
+docker build -f Dockerfile.dev -t $IMG .
+docker push $IMG
 ```
 
 ### iter8-tools/docs
