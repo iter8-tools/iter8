@@ -88,7 +88,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_SECRET }}
     - uses: docker/build-push-action@v3
       with:
-        platforms: linux/amd64,linux/arm64,linux/arm/v7
+        platforms: linux/amd64,linux/arm64
         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest
         push: true
         build-args: |
