@@ -112,7 +112,7 @@ func TestDelete(t *testing.T) {
 	setup(t, svcConfigFile, done)
 
 	// create objects in cluster
-	createObject(t, newUnstructuredDeployment(namespace, application, version))
+	deployObj := createObject(t, newUnstructuredDeployment(namespace, application, version))
 	svcObj := createObject(t, newUnstructuredService(namespace, application, version))
 
 	// creation of these objects should trigger handler which will add application to Applications map
@@ -125,6 +125,13 @@ func TestDelete(t *testing.T) {
 
 	// eventually track map cleared
 	assert.Eventually(t, func() bool { return assertApplicationExists(t, namespace, application, []string{}, []string{version}) }, 10*time.Second, 100*time.Millisecond)
+
+	// delete other object
+	deleteObject(t, deployObj)
+	assert.Eventually(t, func() bool {
+		_, err := getUnstructuredObject(deployObj, schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"})
+		return assert.Nil(t, err)
+	}, 10*time.Second, 100*time.Millisecond)
 }
 
 func setup(t *testing.T, svcConfigFile string, done chan struct{}) {

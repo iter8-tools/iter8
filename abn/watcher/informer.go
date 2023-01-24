@@ -18,6 +18,12 @@ type Iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
+const (
+	addAction    = "ADD"
+	updateAction = "UPDATE"
+	deleteAction = "DELETE"
+)
+
 // NewIter8Watcher returns a watcher for iter8 related objects
 func NewIter8Watcher(configFile string) *Iter8Watcher {
 	c := readServiceConfig(configFile)
@@ -26,11 +32,29 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
-	handlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
+	addHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
 		return func(obj interface{}) {
 			o := obj.(*unstructured.Unstructured)
 			if containsString(validNames, o.GetName()) {
-				handle(o, c, w.factories, gvr)
+				handle(o, c, w.factories, gvr, addAction)
+			}
+		}
+	}
+
+	updateHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(oldObj, obj interface{}) {
+		return func(oldObj, obj interface{}) {
+			o := obj.(*unstructured.Unstructured)
+			if containsString(validNames, o.GetName()) {
+				handle(o, c, w.factories, gvr, updateAction)
+			}
+		}
+	}
+
+	deleteHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
+		return func(obj interface{}) {
+			o := obj.(*unstructured.Unstructured)
+			if containsString(validNames, o.GetName()) {
+				handle(o, c, w.factories, gvr, deleteAction)
 			}
 		}
 	}
@@ -57,11 +81,9 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 		for gvr, validNames := range byResource {
 			informer := w.factories[ns].ForResource(gvr)
 			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: handlerFunc(validNames, gvr),
-				UpdateFunc: func(oldObj, obj interface{}) {
-					handlerFunc(validNames, gvr)(obj)
-				},
-				DeleteFunc: handlerFunc(validNames, gvr),
+				AddFunc:    addHandlerFunc(validNames, gvr),
+				UpdateFunc: updateHandlerFunc(validNames, gvr),
+				DeleteFunc: deleteHandlerFunc(validNames, gvr),
 			})
 
 			if err != nil {
