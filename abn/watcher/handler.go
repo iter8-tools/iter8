@@ -29,10 +29,7 @@ var (
 )
 
 // handle constructs the application object from the objects currently in the cluster
-func handle(obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory, gvr schema.GroupVersionResource, action string) {
-	log.Logger.Tracef("handle %s called for %s/%s (%s)", action, obj.GetNamespace(), obj.GetName(), obj.GetKind())
-	defer log.Logger.Tracef("handle %s completed for %s/%s (%s)", action, obj.GetNamespace(), obj.GetName(), obj.GetKind())
-
+func handle(obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory, gvr schema.GroupVersionResource) {
 	// get object from cluster (even through we have an unstructured.Unstructured, it is really only the metadata; to get the full object we need to fetch it from the cluster)
 	obj, err := getUnstructuredObject(obj, gvr)
 	if err != nil {

@@ -18,12 +18,6 @@ type Iter8Watcher struct {
 	factories map[string]dynamicinformer.DynamicSharedInformerFactory
 }
 
-const (
-	addAction    = "ADD"
-	updateAction = "UPDATE"
-	deleteAction = "DELETE"
-)
-
 // NewIter8Watcher returns a watcher for iter8 related objects
 func NewIter8Watcher(configFile string) *Iter8Watcher {
 	c := readServiceConfig(configFile)
@@ -35,8 +29,11 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 	addHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
 		return func(obj interface{}) {
 			o := obj.(*unstructured.Unstructured)
+			log.Logger.Tracef("add handler called for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+			defer log.Logger.Tracef("add handler completed for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+
 			if containsString(validNames, o.GetName()) {
-				handle(o, c, w.factories, gvr, addAction)
+				handle(o, c, w.factories, gvr)
 			}
 		}
 	}
@@ -44,8 +41,11 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 	updateHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(oldObj, obj interface{}) {
 		return func(oldObj, obj interface{}) {
 			o := obj.(*unstructured.Unstructured)
+			log.Logger.Tracef("update handler called for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+			defer log.Logger.Tracef("update handler completed for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+
 			if containsString(validNames, o.GetName()) {
-				handle(o, c, w.factories, gvr, updateAction)
+				handle(o, c, w.factories, gvr)
 			}
 		}
 	}
@@ -53,8 +53,11 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 	deleteHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
 		return func(obj interface{}) {
 			o := obj.(*unstructured.Unstructured)
+			log.Logger.Tracef("delete handler called for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+			defer log.Logger.Tracef("delete handler completed for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+
 			if containsString(validNames, o.GetName()) {
-				handle(o, c, w.factories, gvr, deleteAction)
+				handle(o, c, w.factories, gvr)
 			}
 		}
 	}
