@@ -30,9 +30,6 @@ var (
 
 // handle constructs the application object from the objects currently in the cluster
 func handle(obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory, gvr schema.GroupVersionResource) {
-	log.Logger.Tracef("handle called")
-	defer log.Logger.Trace("handle completed")
-
 	// get object from cluster (even through we have an unstructured.Unstructured, it is really only the metadata; to get the full object we need to fetch it from the cluster)
 	obj, err := getUnstructuredObject(obj, gvr)
 	if err != nil {
@@ -66,7 +63,7 @@ func handle(obj *unstructured.Unstructured, config serviceConfig, informerFactor
 
 	// get the objects related to the application (using the appConfig as a guide)
 	applicationObjs := getApplicationObjects(namespace, application, *appConfig, informerFactories)
-	log.Logger.Debugf("identified %d related objects", len(applicationObjs))
+	log.Logger.Debugf("identified objects related to %d tracks", len(applicationObjs))
 
 	// update the application object by updating the mapping of track to version
 	//   get the current application
@@ -80,16 +77,14 @@ func handle(obj *unstructured.Unstructured, config serviceConfig, informerFactor
 
 	//   for each track, find the version (from cluster objects) and update the mapping
 	for _, track := range getTrackNames(application, *appConfig) {
-		log.Logger.Trace("updateApplication for track ", track)
 		version := isTrackReady(track, applicationObjs[track], len(appConfig.Resources))
-		log.Logger.Trace("updateApplication for track ", track, " found version ", version)
+		log.Logger.Debug("updating application for track ", track, "; found version ", version)
 		if version != "" {
 			a.GetVersion(version, true)
 			a.Tracks[track] = version
 		}
 	}
-
-	log.Logger.Debugf("updated application track map: %s/%s --> %v", namespace, application, a.Tracks)
+	log.Logger.Debugf("updated track map: %s/%s --> %v", namespace, application, a.Tracks)
 
 	if obj.GetDeletionTimestamp() != nil && containsString(obj.GetFinalizers(), iter8Finalizer) {
 		// if object is being deleted remove the Iter8 finalizer

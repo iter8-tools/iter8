@@ -26,9 +26,36 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 		factories: map[string]dynamicinformer.DynamicSharedInformerFactory{},
 	}
 
-	handlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
+	addHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
 		return func(obj interface{}) {
 			o := obj.(*unstructured.Unstructured)
+			log.Logger.Tracef("add handler called for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+			defer log.Logger.Tracef("add handler completed for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+
+			if containsString(validNames, o.GetName()) {
+				handle(o, c, w.factories, gvr)
+			}
+		}
+	}
+
+	updateHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(oldObj, obj interface{}) {
+		return func(oldObj, obj interface{}) {
+			o := obj.(*unstructured.Unstructured)
+			log.Logger.Tracef("update handler called for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+			defer log.Logger.Tracef("update handler completed for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+
+			if containsString(validNames, o.GetName()) {
+				handle(o, c, w.factories, gvr)
+			}
+		}
+	}
+
+	deleteHandlerFunc := func(validNames []string, gvr schema.GroupVersionResource) func(obj interface{}) {
+		return func(obj interface{}) {
+			o := obj.(*unstructured.Unstructured)
+			log.Logger.Tracef("delete handler called for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+			defer log.Logger.Tracef("delete handler completed for %s/%s (%s)", o.GetNamespace(), o.GetName(), o.GetKind())
+
 			if containsString(validNames, o.GetName()) {
 				handle(o, c, w.factories, gvr)
 			}
@@ -55,13 +82,13 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 
 		// create informer for each resource in namespace
 		for gvr, validNames := range byResource {
+			validNames := validNames
+			gvr := gvr
 			informer := w.factories[ns].ForResource(gvr)
 			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-				AddFunc: handlerFunc(validNames, gvr),
-				UpdateFunc: func(oldObj, obj interface{}) {
-					handlerFunc(validNames, gvr)(obj)
-				},
-				DeleteFunc: handlerFunc(validNames, gvr),
+				AddFunc:    addHandlerFunc(validNames, gvr),
+				UpdateFunc: updateHandlerFunc(validNames, gvr),
+				DeleteFunc: deleteHandlerFunc(validNames, gvr),
 			})
 
 			if err != nil {
