@@ -852,6 +852,8 @@ func (exp *Experiment) run(driver Driver) error {
 
 	exp.incrementNumLoops()
 	log.Logger.Debugf("experiment loop %d started ...", exp.Result.NumLoops)
+	exp.resetNumCompletedTasks()
+
 	err = driver.Write(exp)
 	if err != nil {
 		return err
@@ -912,6 +914,10 @@ func (exp *Experiment) failExperiment() {
 // incrementNumCompletedTasks increments the number of completed tasks in the experiment
 func (exp *Experiment) incrementNumCompletedTasks() {
 	exp.Result.NumCompletedTasks++
+}
+
+func (exp *Experiment) resetNumCompletedTasks() {
+	exp.Result.NumCompletedTasks = 0
 }
 
 // incrementNumLoops increments the number of loops (experiment iterations)
