@@ -6,6 +6,7 @@ Experiment summary:
   No task failures: true
   Total number of tasks: 4
   Number of completed tasks: 4
+  Number of completed loops: 0
 
 Whether or not service level objectives (SLOs) are satisfied:
 *************************************************************
