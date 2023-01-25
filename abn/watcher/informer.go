@@ -82,6 +82,7 @@ func NewIter8Watcher(configFile string) *Iter8Watcher {
 
 		// create informer for each resource in namespace
 		for gvr, validNames := range byResource {
+			validNames := validNames
 			gvr := gvr
 			informer := w.factories[ns].ForResource(gvr)
 			_, err := informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
