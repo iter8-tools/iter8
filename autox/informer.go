@@ -428,6 +428,9 @@ func newIter8Watcher(autoXConfig config) *iter8Watcher {
 	// effectively, we are creating one factory per trigger
 	// the key to the factories map is the name of the release group spec (releaseGroupSpecName)
 	for releaseGroupSpecName, releaseGroupSpec := range autoXConfig.Specs {
+		releaseGroupSpecName := releaseGroupSpecName
+		releaseGroupSpec := releaseGroupSpec
+
 		ns := releaseGroupSpec.Trigger.Namespace
 		gvr := getGVR(releaseGroupSpec)
 
