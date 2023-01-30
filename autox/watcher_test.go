@@ -54,7 +54,7 @@ func TestStart(t *testing.T) {
 				version,
 				track,
 				map[string]string{
-					autoXLabel: "true", // add the autoXLabel, which will allow applyApplication() to trigger
+					// autoXLabel: "true", // add the autoXLabel, which will allow applyApplication() to trigger
 				},
 			), metav1.CreateOptions{},
 		)
