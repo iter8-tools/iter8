@@ -164,17 +164,18 @@ func TestNewIter8Watcher(t *testing.T) {
 	// autoX needs the config
 	autoXConfig := readConfig("../testdata/autox_inputs/config.example.yaml")
 
-	gvr := schema.GroupVersionResource{
-		Group:    "apps",
-		Version:  "v1",
-		Resource: "deployments",
-	}
 	namespace := "default"
 	releaseSpecName := "myApp"
 	version := "v1"
 	track := ""
 	appName1 := "autox-myApp-name1"
 	appName2 := "autox-myApp-name2"
+
+	gvr := schema.GroupVersionResource{
+		Group:    "apps",
+		Version:  "v1",
+		Resource: "deployments",
+	}
 
 	// define and start watcher
 	k8sClient = newFakeKubeClient(cli.New())
@@ -198,7 +199,7 @@ func TestNewIter8Watcher(t *testing.T) {
 	defer close(done)
 	w.start(done)
 
-	// 1) create object with random name and no autoX label
+	// 1) create object with random name and no version label
 	// no application should be created
 	objRandNameNoAutoXLabel, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
@@ -207,9 +208,9 @@ func TestNewIter8Watcher(t *testing.T) {
 			newUnstructuredDeployment(
 				namespace,
 				"rand", // random name
-				version,
+				"",     // no version label
 				track,
-				map[string]string{}, // no autoX label
+				map[string]string{},
 			),
 			metav1.CreateOptions{},
 		)
@@ -222,7 +223,7 @@ func TestNewIter8Watcher(t *testing.T) {
 		return assert.Equal(t, len(list.Items), 0)
 	}, 5*time.Second, time.Second)
 
-	// 2) create object with random name and autoX label
+	// 2) create object with random name and version label
 	// no application should be created
 	objRandNameAutoXLabel, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
@@ -231,11 +232,10 @@ func TestNewIter8Watcher(t *testing.T) {
 			newUnstructuredDeployment(
 				namespace,
 				"rand2", // random name
-				version,
+				version, // version label
 				track,
-				map[string]string{
-					autoXLabel: releaseSpecName, // autoX label
-				}),
+				map[string]string{},
+			),
 			metav1.CreateOptions{},
 		)
 	assert.NoError(t, err)
@@ -247,7 +247,7 @@ func TestNewIter8Watcher(t *testing.T) {
 		return assert.Equal(t, len(list.Items), 0)
 	}, 5*time.Second, time.Second)
 
-	// 3) create object with trigger name and no autoX label
+	// 3) create object with trigger name and no version label
 	// no application should be created
 	objNoAutoXLabel, err := k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
@@ -256,7 +256,7 @@ func TestNewIter8Watcher(t *testing.T) {
 			newUnstructuredDeployment(
 				namespace,
 				releaseSpecName, // trigger name
-				version,
+				"",              // no version label
 				track,
 				map[string]string{}),
 			metav1.CreateOptions{},
@@ -274,7 +274,7 @@ func TestNewIter8Watcher(t *testing.T) {
 	err = k8sClient.dynamic().Resource(gvr).Namespace(namespace).Delete(context.TODO(), releaseSpecName, metav1.DeleteOptions{})
 	assert.NoError(t, err)
 
-	// 4) create object with trigger name and autoX label
+	// 4) create object with trigger name with version label
 	// 2 applications should be created
 	// one for each release spec in the config
 	// autox-myapp-name1 and autox-myapp-name2
@@ -285,11 +285,9 @@ func TestNewIter8Watcher(t *testing.T) {
 			newUnstructuredDeployment(
 				namespace,
 				releaseSpecName, // trigger name
-				version,
+				version,         // version label
 				track,
-				map[string]string{
-					autoXLabel: "true", // autoX label
-				},
+				map[string]string{},
 			),
 			metav1.CreateOptions{},
 		)
@@ -312,9 +310,9 @@ func TestNewIter8Watcher(t *testing.T) {
 		return assert.NotNil(t, app)
 	}, 5*time.Second, time.Second)
 
-	// 5) delete autoX label
+	// 5) delete version label
 	// all applications deleted
-	(createdObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[autoXLabel] = nil
+	(createdObj.Object["metadata"].(map[string]interface{}))["labels"].(map[string]interface{})[versionLabel] = nil
 	_, err = k8sClient.dynamic().
 		Resource(gvr).Namespace(namespace).
 		Update(

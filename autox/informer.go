@@ -28,11 +28,6 @@ import (
 )
 
 const (
-	// this label is used in trigger objects
-	// label always set to true when present
-	// AutoX controller will only check for the existence of this label, not its value
-	autoXLabel = "iter8.tools/autox"
-
 	// this label is used in secrets (to allow for ownership over the applications)
 	// label is set to the name of a release group spec (releaseGroupSpecName)
 	// there is a 1:1 mapping of secrets to release group specs
@@ -316,23 +311,21 @@ func doChartAction(chartAction chartAction, releaseGroupSpecName string, release
 // pruneLabels will extract the labels that are relevant for autoX
 // currently, the important labels are:
 //
-//	autoXLabel   = "iter8.tools/autox"
 //	nameLabel     = "app.kubernetes.io/name"
 //	versionLabel = "app.kubernetes.io/version"
 //	trackLabel   = "iter8.tools/track"
 func pruneLabels(labels map[string]string) map[string]interface{} {
 	prunedLabels := map[string]interface{}{}
-	for _, l := range []string{autoXLabel, nameLabel, versionLabel, trackLabel} {
+	for _, l := range []string{nameLabel, versionLabel, trackLabel} {
 		prunedLabels[l] = labels[l]
 	}
 	return prunedLabels
 }
 
-// hasAutoXLabel checks if autoX label is present
-// autoX label is used to determine if any autoX functionality should be performed
-func hasAutoXLabel(labels map[string]string) bool {
-	_, ok := labels[autoXLabel]
-	return ok
+// hasVersionLabel checks if version label is present
+func hasVersionLabel(labels map[string]string) bool {
+	version, ok := labels[versionLabel]
+	return ok && version != ""
 }
 
 // handle is the entry point to all (add, update, delete) event handlers
@@ -362,17 +355,17 @@ func handle(obj interface{}, releaseGroupSpecName string, releaseGroupSpec relea
 	clientU, _ := k8sClient.dynamicClient.Resource(gvr).Namespace(ns).Get(context.TODO(), name, metav1.GetOptions{})
 
 	// if (client) object exists
-	// delete applications if (client) object does not have autoX label
-	// then apply applications if (client) object has autoX label
+	// delete applications if (client) object does not have version label
+	// then apply applications if (client) object has version label
 	if clientU != nil {
-		// check if autoX label does not exist
+		// check if version label exists
 		clientLabels := clientU.GetLabels()
-		if !hasAutoXLabel(clientLabels) {
-			log.Logger.Debugf("delete applications for release group \"%s\" (no %s label)", releaseGroupSpecName, autoXLabel)
+		if !hasVersionLabel(clientLabels) {
+			log.Logger.Debugf("delete applications for release group \"%s\" (no %s label)", releaseGroupSpecName, versionLabel)
 
 			_ = doChartAction(deleteAction, releaseGroupSpecName, releaseGroupSpec, "", nil)
 
-			// if autoX label does not exist, there is no need to apply applications, so return
+			// if version label does not exist, there is no need to apply applications, so return
 			return
 		}
 
