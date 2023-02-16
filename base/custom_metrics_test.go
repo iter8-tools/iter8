@@ -82,6 +82,11 @@ const (
 		"  destination_workload_namespace=\"production\",\n" +
 		"  reporter=\"destination\",\n" +
 		"}[0s])) or on() vector(0))"
+	istioPromLatencyP90 = "histogram_quantile(0.90, sum(rate(istio_request_duration_milliseconds_bucket{\n" +
+		"  destination_workload=\"myApp\",\n" +
+		"  destination_workload_namespace=\"production\",\n" +
+		"  reporter=\"destination\",\n" +
+		"}[0s])) by (le))"
 )
 
 func getCustomMetricsTask(t *testing.T, providerName string, providerURL string) *customMetricsTask {
@@ -153,6 +158,7 @@ func TestIstioProm(t *testing.T) {
 
 	_ = os.Chdir(t.TempDir())
 	ct := getCustomMetricsTask(t, "istio-prom", istioPromProviderURL)
+	ct.With.Values = map[string]interface{}{"latencyPercentiles": []string{"90"}}
 	ct.With.VersionValues = []map[string]interface{}{{
 		"labels": map[string]interface{}{
 			"reporter":                       "destination",
@@ -240,6 +246,22 @@ func TestIstioProm(t *testing.T) {
 						}
 					}`), nil
 
+			case istioPromLatencyP90:
+				return httpmock.NewStringResponse(200, `{
+							"status": "success",
+							"data": {
+								"resultType": "vector",
+								"result": [
+									{
+										"metric": {},
+										"value": [
+											1945602108.839,
+											"64"
+										]
+									}
+								]
+							}
+						}`), nil
 			}
 
 			return nil, errors.New("")
@@ -262,6 +284,7 @@ func TestIstioProm(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/error-count"][0], float64(6))
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/error-rate"][0], 0.13953488372093023)
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/latency-mean"][0], float64(52))
+	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/latency-p90"][0], float64(64))
 }
 
 // basic test with one version, mimicking Code Engine

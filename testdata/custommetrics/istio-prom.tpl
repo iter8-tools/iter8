@@ -109,6 +109,6 @@ metrics:
     value: |
       histogram_quantile(0.{{ $p }}, sum(rate(istio_request_duration_milliseconds_bucket{
         {{- template "labels" $ }}
-      }[{{ .elapsedTimeSeconds }}s])) by (le))
+      }[{{ $.elapsedTimeSeconds }}s])) by (le))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- end }}
