@@ -29,6 +29,11 @@ method: GET
 #   startingTime                 string
 #
 # Note: elapsedTimeSeconds is produced by Iter8
+
+#
+# For testing purposes hardcoded elapsedTimeSeconds to 0
+#
+
 metrics:
 - name: request-count
   type: counter
@@ -41,7 +46,7 @@ metrics:
         {{- if .ibm_codeengine_revision_name }}
         ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
-      }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
+      }[0s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-count
   type: counter
@@ -55,7 +60,7 @@ metrics:
         {{- if .ibm_codeengine_revision_name }}
         ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
-      }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
+      }[0s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-rate
   type: gauge
@@ -69,9 +74,9 @@ metrics:
         {{- if .ibm_codeengine_revision_name }}
         ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
-      }[{{.elapsedTimeSeconds}}s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{
+      }[0s])) or on() vector(0)/sum(last_over_time(ibm_codeengine_application_requests_total{
         {{- if .ibm_codeengine_revision_name }}
         ibm_codeengine_revision_name="{{.ibm_codeengine_revision_name}}",
         {{- end }}
-      }[{{.elapsedTimeSeconds}}s])) or on() vector(0)
-  jqExpression: .data.result.[0].value.[1]
+      }[0s])) or on() vector(0)
+  jqExpression: .data.result.[0].value.[1] | tonumber

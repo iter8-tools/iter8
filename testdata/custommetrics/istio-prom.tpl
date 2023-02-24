@@ -30,6 +30,10 @@
 # For example, if this is set to [50,75,90,95],
 # then, latency-p50, latency-p75, latency-p90, latency-p95 metric specs are created.
 
+#
+# For testing purposes, hardcoded elapsedTimeSeconds to be 0
+#
+
 {{- define "labels"}}
 {{- range $key, $val := .labels }}
 {{- if or (eq (kindOf $val) "slice") (eq (kindOf $val) "map")}}
@@ -58,7 +62,7 @@ metrics:
     value: |
       sum(last_over_time(istio_requests_total{
         {{- template "labels" . }}
-      }[{{ .elapsedTimeSeconds }}s])) or on() vector(0)
+      }[0s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-count
   type: counter
@@ -70,7 +74,7 @@ metrics:
       sum(last_over_time(istio_requests_total{
         response_code=~'5..',
         {{- template "labels" . }}
-      }[{{ .elapsedTimeSeconds }}s])) or on() vector(0)
+      }[0s])) or on() vector(0)
   jqExpression: .data.result[0].value[1] | tonumber
 - name: error-rate
   type: gauge
@@ -82,10 +86,10 @@ metrics:
       (sum(last_over_time(istio_requests_total{
         response_code=~'5..',
         {{- template "labels" . }}
-      }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
+      }[0s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
         {{- template "labels" . }}
-      }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))
-  jqExpression: .data.result.[0].value.[1]
+      }[0s])) or on() vector(0))
+  jqExpression: .data.result.[0].value.[1] | tonumber
 - name: latency-mean
   type: gauge
   description: |
@@ -95,9 +99,9 @@ metrics:
     value: |
       (sum(last_over_time(istio_request_duration_milliseconds_sum{
         {{- template "labels" . }}
-      }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
+      }[0s])) or on() vector(0))/(sum(last_over_time(istio_requests_total{
         {{- template "labels" . }}
-      }[{{ .elapsedTimeSeconds }}s])) or on() vector(0))
+      }[0s])) or on() vector(0))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- range $i, $p := .latencyPercentiles }}
 - name: latency-p{{ $p }}
@@ -109,6 +113,6 @@ metrics:
     value: |
       histogram_quantile(0.{{ $p }}, sum(rate(istio_request_duration_milliseconds_bucket{
         {{- template "labels" $ }}
-      }[{{ $.elapsedTimeSeconds }}s])) by (le))
+      }[0s])) by (le))
   jqExpression: .data.result[0].value[1] | tonumber
 {{- end }}
