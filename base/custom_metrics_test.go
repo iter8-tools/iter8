@@ -287,6 +287,52 @@ func TestIstioProm(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NonHistMetricValues[0]["istio-prom/latency-p90"][0], float64(64))
 }
 
+func TestNaN(t *testing.T) {
+	dat, err := os.ReadFile(CompletePath("../testdata/custommetrics", "nan.tpl"))
+	assert.NoError(t, err)
+	tplString := string(dat)
+
+	_ = os.Chdir(t.TempDir())
+	ct := getCustomMetricsTask(t, "nan", "http://url")
+
+	// mock provider URL
+	httpmock.RegisterResponder("GET", "http://url",
+		httpmock.NewStringResponder(200, tplString))
+
+	// mock provider
+	httpmock.RegisterResponder("GET", "http://url/query",
+		func(req *http.Request) (*http.Response, error) {
+			queryParam := strings.TrimSpace(req.URL.Query().Get("query"))
+			t.Logf("queryParam = %s", queryParam)
+
+			switch queryParam {
+			case "query-tonumber":
+				return httpmock.NewStringResponse(200, `{"value": "NaN"}`), nil
+			case "query-no-tonumber":
+				return httpmock.NewStringResponse(200, `{"value": "NaN"}`), nil
+			}
+
+			return nil, errors.New("")
+		})
+
+	// experiment
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	_ = exp.Result.initInsightsWithNumVersions(1)
+
+	err = ct.run(exp)
+
+	// task run should not fail
+	assert.NoError(t, err)
+
+	// no metrics should be recorded
+	assert.NotContains(t, exp.Result.Insights.NonHistMetricValues[0], "nan/query-tonumber")
+	assert.NotContains(t, exp.Result.Insights.NonHistMetricValues[0], "nan/query-no-tonumber")
+}
+
 // basic test with one version, mimicking Code Engine
 // one version, three successful metrics
 func TestCEOneVersion(t *testing.T) {

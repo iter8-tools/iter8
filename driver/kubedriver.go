@@ -212,7 +212,11 @@ func (kd *KubeDriver) Read() (*base.Experiment, error) {
 
 // formExperimentSecret creates the experiment secret using the experiment
 func (kd *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secret, error) {
-	byteArray, _ := yaml.Marshal(e)
+	byteArray, err := yaml.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+	log.Logger.Debug(string(byteArray))
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: kd.getExperimentSecretName(),
