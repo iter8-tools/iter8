@@ -2,9 +2,11 @@ package base
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/bojand/ghz/runner"
+	"github.com/imdario/mergo"
 	log "github.com/iter8-tools/iter8/base/log"
 	gd "github.com/mcuadros/go-defaults"
 )
@@ -28,16 +30,22 @@ const (
 	insecureDefault = true
 )
 
+// collectHTTPInputs contain the inputs to the metrics collection task to be executed.
 type collectGRPCInputs struct {
 	runner.Config
+
 	// Warmup indicates if task execution is for warmup purposes; if so the results will be ignored
 	Warmup *bool `json:"warmup,omitempty" yaml:"warmup,omitempty"`
+
+	// Endpoints is used to define multiple endpoints to test
+	Endpoints map[string]runner.Config `json:"endpoints" yaml:"endpoints"`
 }
 
 // collectGRPCTask enables load testing of gRPC services.
 type collectGRPCTask struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
+
 	// With contains the inputs to this task
 	With collectGRPCInputs `json:"with" yaml:"with"`
 }
@@ -63,26 +71,91 @@ func (t *collectGRPCTask) validateInputs() error {
 	return nil
 }
 
+// // resultForVersion collects gRPC test result for a given version
+// func (t *collectGRPCTask) resultForVersion() (*runner.Report, error) {
+// 	// the main idea is to run ghz with proper options
+
+// 	opts := runner.WithConfig(&t.With)
+
+// 	// todo: supply all the allowed options
+// 	igr, err := runner.Run(t.With.Call, t.With.Host, opts)
+// 	if err != nil {
+// 		e := errors.New("ghz run failed")
+// 		log.Logger.WithStackTrace(err.Error()).Error(e)
+// 		if igr == nil {
+// 			e = errors.New("failed to get results since ghz run was aborted")
+// 			log.Logger.Error(e)
+// 		}
+// 		return nil, e
+// 	}
+// 	log.Logger.Trace("ran ghz gRPC test")
+// 	log.Logger.Trace(igr.ErrorDist)
+// 	return igr, err
+// }
+
 // resultForVersion collects gRPC test result for a given version
-func (t *collectGRPCTask) resultForVersion() (*runner.Report, error) {
+func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) {
 	// the main idea is to run ghz with proper options
 
 	opts := runner.WithConfig(&t.With.Config)
 
-	// todo: supply all the allowed options
-	igr, err := runner.Run(t.With.Call, t.With.Host, opts)
-	if err != nil {
-		e := errors.New("ghz run failed")
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		if igr == nil {
-			e = errors.New("failed to get results since ghz run was aborted")
-			log.Logger.Error(e)
+	results := map[string]*runner.Report{}
+	var err error
+
+	if len(t.With.Endpoints) > 0 {
+		for endpointID, endpoint := range t.With.Endpoints {
+			// default from baseline
+			call := t.With.Call
+			if endpoint.Call != "" {
+				call = endpoint.Call
+			}
+
+			host := t.With.Host
+			if endpoint.Host != "" {
+				host = endpoint.Host
+			}
+
+			// merge endpoint options with baseline options
+			eOpts := runner.WithConfig(&endpoint) // endpoint options
+			if err := mergo.Merge(&eOpts, opts); err != nil {
+				log.Logger.Error(fmt.Sprintf("could not merge Fortio options for endpoint \"%s\"", endpointID))
+				return nil, err
+			}
+
+			igr, err := runner.Run(call, host, eOpts)
+			if err != nil {
+				e := errors.New("ghz run failed")
+				log.Logger.WithStackTrace(err.Error()).Error(e)
+				if igr == nil {
+					e = errors.New("failed to get results since ghz run was aborted")
+					log.Logger.Error(e)
+				}
+				return nil, e
+			}
+			log.Logger.Trace("ran ghz gRPC test")
+			log.Logger.Trace(igr.ErrorDist)
+
+			results[gRPCMetricPrefix+"-"+endpointID] = igr
 		}
-		return nil, e
+	} else {
+		// todo: supply all the allowed options
+		igr, err := runner.Run(t.With.Call, t.With.Host, opts)
+		if err != nil {
+			e := errors.New("ghz run failed")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			if igr == nil {
+				e = errors.New("failed to get results since ghz run was aborted")
+				log.Logger.Error(e)
+			}
+			return nil, e
+		}
+		log.Logger.Trace("ran ghz gRPC test")
+		log.Logger.Trace(igr.ErrorDist)
+
+		results[gRPCMetricPrefix] = igr
 	}
-	log.Logger.Trace("ran ghz gRPC test")
-	log.Logger.Trace(igr.ErrorDist)
-	return igr, err
+
+	return results, err
 }
 
 // latencySample extracts a latency sample from ghz result details
@@ -129,10 +202,10 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 	in := exp.Result.Insights
 
 	// 4. Populate all metrics collected by this task
-	if data != nil { // assuming there is some raw ghz result to process
+	for provider, data := range data {
 		// populate grpc request count
 		// todo: this logic breaks for looped experiments. Fix when we get to loops.
-		m := gRPCMetricPrefix + "/" + gRPCRequestCountMetricName
+		m := provider + "/" + gRPCRequestCountMetricName
 		mm := MetricMeta{
 			Description: "number of gRPC requests sent",
 			Type:        CounterMetricType,
@@ -149,7 +222,7 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 
 		// populate count
 		// todo: This logic breaks for looped experiments. Fix when we get to loops.
-		m = gRPCMetricPrefix + "/" + gRPCErrorCountMetricName
+		m = provider + "/" + gRPCErrorCountMetricName
 		mm = MetricMeta{
 			Description: "number of responses that were errors",
 			Type:        CounterMetricType,
@@ -160,7 +233,7 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 
 		// populate rate
 		// todo: This logic breaks for looped experiments. Fix when we get to loops.
-		m = gRPCMetricPrefix + "/" + gRPCErrorRateMetricName
+		m = provider + "/" + gRPCErrorRateMetricName
 		rc := float64(data.Count)
 		if rc != 0 {
 			mm = MetricMeta{
@@ -173,7 +246,7 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 		}
 
 		// populate latency sample
-		m = gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName
+		m = provider + "/" + gRPCLatencySampleMetricName
 		mm = MetricMeta{
 			Description: "gRPC Latency Sample",
 			Type:        SampleMetricType,
@@ -184,5 +257,6 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 			return err
 		}
 	}
+
 	return nil
 }

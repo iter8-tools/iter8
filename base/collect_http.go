@@ -218,90 +218,11 @@ func getFortioOptions(c collectHTTPInputsHelper) (*fhttp.HTTPRunnerOptions, erro
 	return fo, nil
 }
 
-// // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
-// func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
-// 	fortioLog.SetOutput(io.Discard)
-// 	// basic runner
-// 	fo := &fhttp.HTTPRunnerOptions{
-// 		RunnerOptions: periodic.RunnerOptions{
-// 			RunType:     "Iter8 load test",
-// 			QPS:         float64(*t.With.QPS),
-// 			NumThreads:  *t.With.Connections,
-// 			Percentiles: t.With.Percentiles,
-// 			Out:         io.Discard,
-// 		},
-// 		HTTPOptions: fhttp.HTTPOptions{
-// 			URL: t.With.URL,
-// 		},
-// 	}
-
-// 	// num requests
-// 	if t.With.NumRequests != nil {
-// 		fo.RunnerOptions.Exactly = *t.With.NumRequests
-// 	}
-
-// 	// add duration
-// 	var duration time.Duration
-// 	var err error
-// 	if t.With.Duration != nil {
-// 		duration, err = time.ParseDuration(*t.With.Duration)
-// 		if err == nil {
-// 			fo.RunnerOptions.Duration = duration
-// 		} else {
-// 			log.Logger.WithStackTrace(err.Error()).Error("unable to parse duration")
-// 			return nil, err
-// 		}
-// 	}
-
-// 	// content type & payload
-// 	if t.With.ContentType != nil {
-// 		fo.ContentType = *t.With.ContentType
-// 	}
-// 	if t.With.PayloadStr != nil {
-// 		fo.Payload = []byte(*t.With.PayloadStr)
-// 	}
-// 	if t.With.PayloadFile != nil {
-// 		b, err := os.ReadFile(*t.With.PayloadFile)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		fo.Payload = b
-// 	}
-
-// 	// headers
-// 	for key, value := range t.With.Headers {
-// 		if err = fo.AddAndValidateExtraHeader(key + ":" + value); err != nil {
-// 			log.Logger.WithStackTrace("unable to add header").Error(err)
-// 			return nil, err
-// 		}
-// 	}
-
-// 	return fo, nil
-// }
-
 // getFortioResults collects Fortio run results
 // func (t *collectHTTPTask) getFortioResults() (*fhttp.HTTPRunnerResults, error) {
 // key is the metric prefix
 func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResults, error) {
-
 	// the main idea is to run Fortio with proper options
-
-	// // fo, err := t.getFortioOptions()
-	// fo, err := getFortioOptions(t.With.collectHTTPInputsHelper)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// log.Logger.Trace("got fortio options")
-	// log.Logger.Trace("URL: ", fo.URL)
-	// ifr, err := fhttp.RunHTTPTest(fo)
-	// if err != nil {
-	// 	log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
-	// 	if ifr == nil {
-	// 		log.Logger.Error("failed to get results since fortio run was aborted")
-	// 	}
-	// }
-	// log.Logger.Trace("ran fortio http test")
-	// return ifr, err
 
 	fo, err := getFortioOptions(t.With.collectHTTPInputsHelper)
 	if err != nil {
@@ -313,14 +234,16 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 	results := map[string]*fhttp.HTTPRunnerResults{}
 
 	if len(t.With.Endpoints) > 0 {
-
+		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
+			log.Logger.Trace(fmt.Sprintf("endpoint: %s", endpointID))
+
+			// merge endpoint options with baseline options
 			efo, err := getFortioOptions(endpoint) // endpoint Fortio options
 			if err != nil {
 				log.Logger.Error(fmt.Sprintf("could not get Fortio options for endpoint \"%s\"", endpointID))
 				return nil, err
 			}
-
 			if err := mergo.Merge(&efo, fo); err != nil {
 				log.Logger.Error(fmt.Sprintf("could not merge Fortio options for endpoint \"%s\"", endpointID))
 				return nil, err
@@ -328,7 +251,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 
 			log.Logger.Trace("got fortio options")
 			log.Logger.Trace("URL: ", fo.URL)
-			ifr, err := fhttp.RunHTTPTest(fo)
+			ifr, err := fhttp.RunHTTPTest(efo)
 
 			if err != nil {
 				log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
@@ -339,7 +262,6 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 
 			results[httpMetricPrefix+"-"+endpointID] = ifr
 		}
-
 	} else {
 		log.Logger.Trace("got fortio options")
 		log.Logger.Trace("URL: ", fo.URL)

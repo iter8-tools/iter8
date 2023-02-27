@@ -29,12 +29,14 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: collectGRPCInputs{Config: runner.Config{
-			Data: map[string]interface{}{"name": "bob"},
-			Call: "helloworld.Greeter.SayHello",
-			Host: internal.LocalHostPort,
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Data: map[string]interface{}{"name": "bob"},
+				Call: "helloworld.Greeter.SayHello",
+				Host: internal.LocalHostPort,
+			},
 		},
-		}}
+	}
 
 	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
 
@@ -84,17 +86,19 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: collectGRPCInputs{Config: runner.Config{
-			N:           100,
-			RPS:         20,
-			C:           1,
-			Timeout:     runner.Duration(20 * time.Second),
-			Data:        map[string]interface{}{"name": "bob"},
-			DialTimeout: runner.Duration(20 * time.Second),
-			Call:        "helloworld.Greeter.SayHello",
-			Host:        internal.LocalHostPort,
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				N:           100,
+				RPS:         20,
+				C:           1,
+				Timeout:     runner.Duration(20 * time.Second),
+				Data:        map[string]interface{}{"name": "bob"},
+				DialTimeout: runner.Duration(20 * time.Second),
+				Call:        "helloworld.Greeter.SayHello",
+				Host:        internal.LocalHostPort,
+			},
 		},
-		}}
+	}
 
 	at := &assessTask{
 		TaskMeta: TaskMeta{
