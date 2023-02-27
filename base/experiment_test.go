@@ -46,14 +46,18 @@ func TestRunningTasks(t *testing.T) {
 	SetupWithMock(t)
 
 	// valid collect task... should succeed
+	endpoints := map[string]collectHTTPInputsHelper{}
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("1s"),
-			Headers:  map[string]string{},
-			URL:      "https://httpbin.org/get",
+			collectHTTPInputsHelper{
+				Duration: StringPointer("1s"),
+				Headers:  map[string]string{},
+				URL:      "https://httpbin.org/get",
+			},
+			endpoints,
 		},
 	}
 

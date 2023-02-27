@@ -18,15 +18,19 @@ func TestRunCollectHTTP(t *testing.T) {
 		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
 
 	// valid collect HTTP task... should succeed
+	endpoints := map[string]collectHTTPInputsHelper{}
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration:    StringPointer("1s"),
-			PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
-			Headers:     map[string]string{},
-			URL:         "https://something.com",
+			collectHTTPInputsHelper{
+				Duration:    StringPointer("1s"),
+				PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
+				Headers:     map[string]string{},
+				URL:         "https://something.com",
+			},
+			endpoints,
 		},
 	}
 

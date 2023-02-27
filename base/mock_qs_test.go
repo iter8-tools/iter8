@@ -16,14 +16,18 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
 	// valid collect HTTP task... should succeed
+	endpoints := map[string]collectHTTPInputsHelper{}
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("2s"),
-			Headers:  map[string]string{},
-			URL:      testURL,
+			collectHTTPInputsHelper{
+				Duration: StringPointer("2s"),
+				Headers:  map[string]string{},
+				URL:      testURL,
+			},
+			endpoints,
 		},
 	}
 
@@ -65,14 +69,18 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 	testURL := fmt.Sprintf("http://localhost:%d/echo1/", addr.Port)
 
 	// valid collect HTTP task... should succeed
+	endpoints := map[string]collectHTTPInputsHelper{}
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("1s"),
-			Headers:  map[string]string{},
-			URL:      testURL,
+			collectHTTPInputsHelper{
+				Duration: StringPointer("1s"),
+				Headers:  map[string]string{},
+				URL:      testURL,
+			},
+			endpoints,
 		},
 	}
 
