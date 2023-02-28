@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"fortio.org/fortio/fhttp"
-	fortioLog "fortio.org/fortio/log"
 	"fortio.org/fortio/periodic"
 	"fortio.org/fortio/stats"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -45,6 +44,8 @@ type collectHTTPInputs struct {
 	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 	// URL to use for querying the app
 	URL string `json:"url" yaml:"url"`
+	// AllowInitialErrors allows and doesn't abort on initial warmup errors
+	AllowInitialErrors *bool `json:"allowInitialErrors,omitempty" yaml:"allowInitialErrors,omitempty"`
 }
 
 const (
@@ -81,6 +82,11 @@ var (
 
 // errorCode checks if a given code is an error code
 func (t *collectHTTPTask) errorCode(code int) bool {
+	// connection failure
+	if code == -1 {
+		return true
+	}
+	// HTTP errors
 	for _, lims := range t.With.ErrorRanges {
 		// if no lower limit (check upper)
 		if lims.Lower == nil && code <= *lims.Upper {
@@ -130,6 +136,9 @@ func (t *collectHTTPTask) initializeDefaults() {
 	for _, val := range tmp {
 		t.With.Percentiles = append(t.With.Percentiles, val.(float64))
 	}
+	if t.With.AllowInitialErrors == nil {
+		t.With.AllowInitialErrors = BoolPointer(false)
+	}
 }
 
 // validateInputs for this task
@@ -139,7 +148,6 @@ func (t *collectHTTPTask) validateInputs() error {
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
 func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
-	fortioLog.SetOutput(io.Discard)
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
@@ -152,6 +160,7 @@ func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
 		HTTPOptions: fhttp.HTTPOptions{
 			URL: t.With.URL,
 		},
+		AllowInitialErrors: *t.With.AllowInitialErrors,
 	}
 
 	// num requests
