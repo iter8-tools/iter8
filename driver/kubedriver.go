@@ -216,7 +216,7 @@ func (kd *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secret, 
 	if err != nil {
 		return nil, err
 	}
-	log.Logger.Debug(string(byteArray))
+	// log.Logger.Debug(string(byteArray))
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: kd.getExperimentSecretName(),
