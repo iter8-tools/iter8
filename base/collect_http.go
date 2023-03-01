@@ -224,35 +224,29 @@ func getFortioOptions(c collectHTTPInputsHelper) (*fhttp.HTTPRunnerOptions, erro
 func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResults, error) {
 	// the main idea is to run Fortio with proper options
 
-	fo, err := getFortioOptions(t.With.collectHTTPInputsHelper)
-	if err != nil {
-		log.Logger.Error("could not get Fortio options")
-
-		return nil, err
-	}
-
+	var err error
 	results := map[string]*fhttp.HTTPRunnerResults{}
-
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
 			log.Logger.Trace(fmt.Sprintf("endpoint: %s", endpointID))
 
-			// merge endpoint options with baseline options
-			efo, err := getFortioOptions(endpoint) // endpoint Fortio options
-			if err != nil {
-				log.Logger.Error(fmt.Sprintf("could not get Fortio options for endpoint \"%s\"", endpointID))
-				return nil, err
-			}
-			if err := mergo.Merge(&efo, fo); err != nil {
+			// merge endpoint config with baseline config
+			if err := mergo.Merge(&endpoint, t.With.collectHTTPInputsHelper); err != nil {
 				log.Logger.Error(fmt.Sprintf("could not merge Fortio options for endpoint \"%s\"", endpointID))
 				return nil, err
 			}
 
-			log.Logger.Trace("got fortio options")
-			log.Logger.Trace("URL: ", fo.URL)
-			ifr, err := fhttp.RunHTTPTest(efo)
+			efo, err := getFortioOptions(endpoint)
+			if err != nil {
+				log.Logger.Error(fmt.Sprintf("could not get Fortio options for endpoint \"%s\"", endpointID))
+				return nil, err
+			}
 
+			log.Logger.Trace("got fortio options")
+			log.Logger.Trace("URL: ", efo.URL)
+
+			ifr, err := fhttp.RunHTTPTest(efo)
 			if err != nil {
 				log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
 				if ifr == nil {
@@ -260,11 +254,20 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 				}
 			}
 
+			log.Logger.Trace("ran fortio http test")
+
 			results[httpMetricPrefix+"-"+endpointID] = ifr
 		}
 	} else {
+		fo, err := getFortioOptions(t.With.collectHTTPInputsHelper)
+		if err != nil {
+			log.Logger.Error("could not get Fortio options")
+			return nil, err
+		}
+
 		log.Logger.Trace("got fortio options")
 		log.Logger.Trace("URL: ", fo.URL)
+
 		ifr, err := fhttp.RunHTTPTest(fo)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
@@ -272,6 +275,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 				log.Logger.Error("failed to get results since fortio run was aborted")
 			}
 		}
+
 		log.Logger.Trace("ran fortio http test")
 
 		results[httpMetricPrefix] = ifr
@@ -396,7 +400,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 
 		// percentiles
 		for _, p := range data.DurationHistogram.Percentiles {
-			m = fmt.Sprintf("%v/%v%v", httpMetricPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
+			m = fmt.Sprintf("%v/%v%v", provider, builtInHTTPLatencyPercentilePrefix, p.Percentile)
 			mm = MetricMeta{
 				Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
 				Type:        GaugeMetricType,

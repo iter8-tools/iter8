@@ -71,39 +71,18 @@ func (t *collectGRPCTask) validateInputs() error {
 	return nil
 }
 
-// // resultForVersion collects gRPC test result for a given version
-// func (t *collectGRPCTask) resultForVersion() (*runner.Report, error) {
-// 	// the main idea is to run ghz with proper options
-
-// 	opts := runner.WithConfig(&t.With)
-
-// 	// todo: supply all the allowed options
-// 	igr, err := runner.Run(t.With.Call, t.With.Host, opts)
-// 	if err != nil {
-// 		e := errors.New("ghz run failed")
-// 		log.Logger.WithStackTrace(err.Error()).Error(e)
-// 		if igr == nil {
-// 			e = errors.New("failed to get results since ghz run was aborted")
-// 			log.Logger.Error(e)
-// 		}
-// 		return nil, e
-// 	}
-// 	log.Logger.Trace("ran ghz gRPC test")
-// 	log.Logger.Trace(igr.ErrorDist)
-// 	return igr, err
-// }
-
 // resultForVersion collects gRPC test result for a given version
 func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) {
 	// the main idea is to run ghz with proper options
 
-	opts := runner.WithConfig(&t.With.Config)
-
-	results := map[string]*runner.Report{}
 	var err error
+	results := map[string]*runner.Report{}
 
 	if len(t.With.Endpoints) > 0 {
+		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
+			log.Logger.Trace(fmt.Sprintf("endpoint: %s", endpointID))
+
 			// default from baseline
 			call := t.With.Call
 			if endpoint.Call != "" {
@@ -116,18 +95,18 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 			}
 
 			// merge endpoint options with baseline options
-			eOpts := runner.WithConfig(&endpoint) // endpoint options
-			if err := mergo.Merge(&eOpts, opts); err != nil {
+			if err := mergo.Merge(&endpoint, t.With.Config); err != nil {
 				log.Logger.Error(fmt.Sprintf("could not merge Fortio options for endpoint \"%s\"", endpointID))
 				return nil, err
 			}
+			eOpts := runner.WithConfig(&endpoint) // endpoint options
 
 			igr, err := runner.Run(call, host, eOpts)
 			if err != nil {
-				e := errors.New("ghz run failed")
+				e := fmt.Errorf("ghz run failed for endpoint \"%s\"", endpointID)
 				log.Logger.WithStackTrace(err.Error()).Error(e)
 				if igr == nil {
-					e = errors.New("failed to get results since ghz run was aborted")
+					e = fmt.Errorf("failed to get results for endpoint \"%s\" since ghz run was aborted", endpointID)
 					log.Logger.Error(e)
 				}
 				return nil, e
@@ -138,7 +117,9 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 			results[gRPCMetricPrefix+"-"+endpointID] = igr
 		}
 	} else {
-		// todo: supply all the allowed options
+		// TODO: supply all the allowed options
+		opts := runner.WithConfig(&t.With.Config)
+
 		igr, err := runner.Run(t.With.Call, t.With.Host, opts)
 		if err != nil {
 			e := errors.New("ghz run failed")
