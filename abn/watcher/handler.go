@@ -1,105 +1,299 @@
 package watcher
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"regexp"
+	"strings"
+
 	abnapp "github.com/iter8-tools/iter8/abn/application"
+	"github.com/iter8-tools/iter8/abn/k8sclient"
 	"github.com/iter8-tools/iter8/base/log"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 )
 
-// precond is set of preconditions that must hold true before an object is considered.
-// It must have:
-//   - label 'iter8.tools/abn' set to true indicating the resource should be inspected further
-//   - label 'app.kubernetes.io/name' identifying the name of the application to which the resource belongs
-//   - label 'app.kubernetes.io/version' identifying the name of the version  to which the resource belongs
-func precond(w watchedObject) bool {
-	var ok bool
+const (
+	versionLabel   = "app.kubernetes.io/version"
+	iter8Finalizer = "iter8.tools/finalizer"
+)
 
-	if !w.isIter8AbnRelated() {
-		return false
-	}
-
-	application, ok := w.getNamespacedName()
-	if !ok || application == "" {
-		return false
-	}
-
-	version, ok := w.getVersion()
-	if !ok || version == "" {
-		return false
-	}
-
-	return true
-}
+var (
+	applicationNameRE = regexp.MustCompile(`-candidate-[123456789]\d*$`)
+)
 
 // handle constructs the application object from the objects currently in the cluster
-func handle(w watchedObject, resourceTypes []schema.GroupVersionResource, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) {
-	application, _ := w.getNamespacedName()
-	namespace := w.getNamespace()
-	name, _ := w.getName()
-	version, _ := w.getVersion()
-	log.Logger.Tracef("handle called for %s (%s)", application, version)
+func handle(obj *unstructured.Unstructured, config serviceConfig, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory, gvr schema.GroupVersionResource) {
+	// get object from cluster (even through we have an unstructured.Unstructured, it is really only the metadata; to get the full object we need to fetch it from the cluster)
+	obj, err := getUnstructuredObject(obj, gvr)
+	if err != nil {
+		log.Logger.Debug("unable to fetch object from cluster")
+		return
+	}
 
-	applicationObjs := getApplicationObjects(namespace, name, resourceTypes, informerFactories)
-	// there is at least one object (w)
+	// add finalizer IF object not being deleted AND finalizer not already there
+	if obj.GetDeletionTimestamp() == nil && !containsString(obj.GetFinalizers(), iter8Finalizer) {
+		obj.SetFinalizers(append(obj.GetFinalizers(), iter8Finalizer))
+		log.Logger.Debug("adding Iter8 finalizer")
+		_, err := updateUnstructuredObject(obj, gvr)
+		if err != nil {
+			log.Logger.Warn("unable to add finalizer: ", err.Error())
+		}
+		return // UPDATE action will trigger handle() to do remaining work
+	}
 
-	a, _ := abnapp.Applications.Read(application)
+	application := getApplicationNameFromObjectName(obj.GetName())
+	namespace := obj.GetNamespace()
+	version, _ := getVersion(obj)
+	log.Logger.Tracef("handle called for %s/%s (%s))", namespace, application, version)
 
-	abnapp.Applications.Lock(application)
-	defer abnapp.Applications.Unlock(application)
-	// clear a.Tracks, a.Versions[*].Track
-	// this is necessary because  we keep old versions in memory
+	// get application configuration
+	appConfig := getApplicationConfig(namespace, application, config)
+	if appConfig == nil {
+		// we found a resource that is not part of an A/B/n test; ignore the object
+		log.Logger.Debugf("object for application %s/%s has no A/B/n configuration", namespace, application)
+		return
+	}
+
+	// get the objects related to the application (using the appConfig as a guide)
+	applicationObjs := getApplicationObjects(namespace, application, *appConfig, informerFactories)
+	log.Logger.Debugf("identified objects related to %d tracks", len(applicationObjs))
+
+	// update the application object by updating the mapping of track to version
+	//   get the current application
+	a, _ := abnapp.Applications.Read(namespace + "/" + application)
+
+	abnapp.Applications.Lock(namespace + "/" + application)
+	defer abnapp.Applications.Unlock(namespace + "/" + application)
+
+	//   clear the current mapping
 	a.ClearTracks()
 
-	for _, o := range applicationObjs {
-		version, _ := o.getVersion()
-		a.GetVersion(version, true) // make sure version object created
-		track := o.getTrack()
-		if track != "" {
+	//   for each track, find the version (from cluster objects) and update the mapping
+	for _, track := range getTrackNames(application, *appConfig) {
+		version := isTrackReady(track, applicationObjs[track], len(appConfig.Resources))
+		log.Logger.Debug("updating application for track ", track, "; found version ", version)
+		if version != "" {
+			a.GetVersion(version, true)
 			a.Tracks[track] = version
 		}
 	}
+	log.Logger.Debugf("updated track map: %s/%s --> %v", namespace, application, a.Tracks)
+
+	if obj.GetDeletionTimestamp() != nil && containsString(obj.GetFinalizers(), iter8Finalizer) {
+		// if object is being deleted remove the Iter8 finalizer
+		// do here (at end) after updating the ApplicationsMap
+		log.Logger.Debug("removing Iter8 finalizer")
+		obj.SetFinalizers(removeIter8Finalizer(obj.GetFinalizers()))
+		_, err := updateUnstructuredObject(obj, gvr)
+		if err != nil {
+			log.Logger.Warn("unable to remove finalizer: ", err.Error())
+		}
+	}
 }
 
-// getApplicationObjects gets all the objects related to the application based on label app.kubernetes.io/name
-func getApplicationObjects(namespace, name string, gvrs []schema.GroupVersionResource, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) []watchedObject {
-	// define selector
-	selector := labels.NewSelector()
-	reqSpec := []struct {
-		key  string
-		op   selection.Operator
-		vals []string
-	}{
-		{key: iter8Label, op: selection.Equals, vals: []string{"true"}},
-		{key: nameLabel, op: selection.Equals, vals: []string{name}},
-		{key: versionLabel, op: selection.Exists, vals: []string{}},
-	}
-	for _, rs := range reqSpec {
-		req, err := labels.NewRequirement(rs.key, rs.op, rs.vals)
-		if err != nil {
-			log.Logger.Warn(err)
-			return []watchedObject{}
+func removeIter8Finalizer(finalizers []string) []string {
+	for i, v := range finalizers {
+		if v == iter8Finalizer {
+			return append(finalizers[:i], finalizers[i+1:]...)
 		}
-		selector = selector.Add(*req)
+	}
+	return finalizers
+}
+
+// getApplicationFromObjectName converts the name of the object to the application name
+// it converts a name of the form: app[-candidate-index] to a name of the form: app
+func getApplicationNameFromObjectName(name string) string {
+	locations := applicationNameRE.FindStringIndex(name)
+	if len(locations) == 0 {
+		return name
+	}
+	return name[:locations[0]]
+}
+
+// getVersion gets application version from VERSION_LABEL label on an object
+func getVersion(obj *unstructured.Unstructured) (string, bool) {
+	labels := obj.GetLabels()
+	v, ok := labels[versionLabel]
+	return v, ok
+}
+
+func isObjectReady(obj *unstructured.Unstructured, gvr schema.GroupVersionResource, condition *string) bool {
+	// no condition to check; is ready
+	if condition == nil {
+		return true
 	}
 
-	watchedObjects := []watchedObject{}
-	for _, gvr := range gvrs {
-		lister := informerFactories[namespace].ForResource(gvr).Lister()
-		objs, err := lister.List(selector)
-		if err != nil {
-			log.Logger.Warn(err)
-			continue
+	cs, err := getConditionStatus(obj, *condition)
+	if err != nil {
+		log.Logger.Error("unable to get status: ", err.Error())
+		return false
+	}
+	if strings.EqualFold(*cs, string(corev1.ConditionTrue)) {
+		return true
+	}
+
+	// condition not true
+	return false
+}
+
+// TODO rewrite using NestedStringMap
+func getConditionStatus(obj *unstructured.Unstructured, conditionType string) (*string, error) {
+	if obj == nil {
+		return nil, errors.New("no object")
+	}
+
+	resultJSON, err := obj.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	resultObj := make(map[string]interface{})
+	err = json.Unmarshal(resultJSON, &resultObj)
+	if err != nil {
+		return nil, err
+	}
+
+	// get object status
+	objStatusInterface, ok := resultObj["status"]
+	if !ok {
+		return nil, errors.New("object does not contain a status")
+	}
+	objStatus := objStatusInterface.(map[string]interface{})
+
+	conditionsInterface, ok := objStatus["conditions"]
+	if !ok {
+		return nil, errors.New("object status does not contain conditions")
+	}
+	conditions := conditionsInterface.([]interface{})
+	for _, conditionInterface := range conditions {
+		condition := conditionInterface.(map[string]interface{})
+		cTypeInterface, ok := condition["type"]
+		if !ok {
+			return nil, errors.New("condition does not have a type")
 		}
-		for _, obj := range objs {
-			wo := watchedObject{Obj: obj.(*unstructured.Unstructured)}
-			if precond(wo) {
-				watchedObjects = append(watchedObjects, wo)
+		cType := cTypeInterface.(string)
+		if strings.EqualFold(cType, conditionType) {
+			conditionStatusInterface, ok := condition["status"]
+			if !ok {
+				return nil, fmt.Errorf("condition %s does not have a value", cType)
 			}
+			conditionStatus := conditionStatusInterface.(string)
+			return &conditionStatus, nil
 		}
 	}
-	return watchedObjects
+	return nil, errors.New("expected condition not found")
+}
+
+// trackObject is information about an object found to correspond to a track
+type trackObject struct {
+	gvr       schema.GroupVersionResource
+	condition *string
+	object    *unstructured.Unstructured
+}
+
+// getApplicationObjects identifies a list of objects related to application based on the name
+func getApplicationObjects(namespace string, application string, appConfig appDetails, informerFactories map[string]dynamicinformer.DynamicSharedInformerFactory) map[string][]trackObject {
+	// initialize
+	var trackToObjectList = map[string][]trackObject{}
+	tracks := getTrackNames(application, appConfig)
+	for _, track := range tracks {
+		trackToObjectList[track] = []trackObject{}
+	}
+
+	// get objects by resource type
+	for _, r := range appConfig.Resources {
+		lister := informerFactories[namespace].ForResource(r.GroupVersionResource).Lister()
+		objs, err := lister.List(labels.NewSelector())
+		if err != nil {
+			// no such objects; can happen if not deployed
+			continue
+		}
+		// reduce to only those that match expectedObjectNames
+		// all objects are of the same type but for different tracks
+		for _, obj := range objs {
+			ao := obj.(*unstructured.Unstructured)
+			if ao.GetDeletionTimestamp() != nil {
+				// if being deleted, ignore
+				continue
+			}
+			name := ao.GetName()
+			_, ok := trackToObjectList[name]
+			if !ok {
+				// object is not associated with a known track; ignore
+				continue
+			}
+			// create trackObject and add to list of objects for track
+			trackToObjectList[name] = append(trackToObjectList[name], trackObject{gvr: r.GroupVersionResource, condition: r.Condition, object: ao})
+		}
+	}
+
+	return trackToObjectList
+}
+
+// isTrackReady checks that all expected objects for the track exist, that the version is defined (consistently) and that the objects are ready
+func isTrackReady(track string, trackObjects []trackObject, expectedNumberTrackObjects int) string {
+	// all objects exist
+	if len(trackObjects) != expectedNumberTrackObjects {
+		log.Logger.Debugf("expected %d objects; found %d (track: %s)", expectedNumberTrackObjects, len(trackObjects), track)
+		return ""
+	}
+
+	// single version identified on at least one object
+	var version string
+	for _, to := range trackObjects {
+		v, ok := getVersion(to.object)
+		if ok {
+			if version != "" && version != v {
+				// different versions on resources of the same track
+				log.Logger.Debugf("inconsistent value for label %s (track: %s)", versionLabel, track)
+				return ""
+			}
+			version = v
+		}
+	}
+	if version == "" {
+		log.Logger.Debugf("no value for label %s found (track: %s)", versionLabel, track)
+		return ""
+	}
+
+	// all objects are ready
+	for _, to := range trackObjects {
+		if !isObjectReady(to.object, to.gvr, to.condition) {
+			log.Logger.Debugf("no object found of type %v (track: %s)", to.gvr, track)
+			return ""
+		}
+	}
+
+	return version
+}
+
+func updateUnstructuredObject(uObj *unstructured.Unstructured, gvr schema.GroupVersionResource) (*unstructured.Unstructured, error) {
+	updatedObj, err := k8sclient.Client.Dynamic().
+		Resource(gvr).Namespace(uObj.GetNamespace()).
+		Update(
+			context.TODO(),
+			uObj,
+			metav1.UpdateOptions{},
+		)
+
+	return updatedObj, err
+}
+
+func getUnstructuredObject(uObj *unstructured.Unstructured, gvr schema.GroupVersionResource) (*unstructured.Unstructured, error) {
+	obj, err := k8sclient.Client.Dynamic().
+		Resource(gvr).Namespace(uObj.GetNamespace()).
+		Get(
+			context.TODO(),
+			uObj.GetName(),
+			metav1.GetOptions{},
+		)
+
+	return obj, err
 }

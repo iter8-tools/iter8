@@ -12,8 +12,8 @@ jobs:
     - name: Install Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.17
-    - uses: actions/checkout@v2
+        go-version: 1.19
+    - uses: actions/checkout@v3
     - name: Build binaries
       run: |
         VERSION=${GITHUB_REF#refs/*/}
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: assets
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Get version
@@ -81,13 +81,14 @@ jobs:
           owner=iter8
         fi
         echo "OWNER=$owner" >> $GITHUB_ENV
-    - uses: docker/setup-buildx-action@v1
-    - uses: docker/login-action@v1
+    - uses: docker/setup-buildx-action@v2
+    - uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_SECRET }}
-    - uses: docker/build-push-action@v2
+    - uses: docker/build-push-action@v3
       with:
+        platforms: linux/amd64,linux/arm64
         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest
         push: true
         build-args: |
@@ -100,9 +101,9 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12.0-pre
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
-      uses: helm/kind-action@v1.2.0
+      uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
     - name: create app
@@ -130,9 +131,9 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12.0-pre
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
-      uses: helm/kind-action@v1.2.0
+      uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
     - name: create app
@@ -162,9 +163,9 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12.0-pre
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
-      uses: helm/kind-action@v1.2.0
+      uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
     - name: deploy resources to cluster
@@ -192,9 +193,9 @@ jobs:
     - build-and-push
     - assets
     steps:
-    - uses: iter8-tools/iter8@v0.12.0-pre
+    - uses: iter8-tools/iter8@v0.13
     - name: Start kind cluster
-      uses: helm/kind-action@v1.2.0
+      uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
     - name: deploy resources to cluster

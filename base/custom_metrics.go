@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -175,7 +176,7 @@ func queryDatabaseAndGetValue(template ProviderSpec, metric Metric) (interface{}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Logger.Error("could not request metric ", metric.Name, ": ", err)
+		log.Logger.Error("could not request metric ", metric.Name, ": ", err.Error())
 		return nil, false
 	}
 	defer func() {
@@ -264,8 +265,8 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			err = template.Execute(&buf, values)
 			if err != nil {
 				log.Logger.Error("cannot execute metrics spec with values", err)
-				log.Logger.Error("metrics spec:", buf.String())
-				log.Logger.Error("values:", values)
+				log.Logger.Error("metrics spec: ", buf.String())
+				log.Logger.Error("values: ", values)
 				return err
 			}
 
@@ -274,7 +275,7 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 			err = yaml.Unmarshal(bytes, &provider)
 			if err != nil {
 				log.Logger.Error("cannot unmarshal provider spec", err)
-				log.Logger.Error("provider spec:", string(bytes))
+				log.Logger.Error("provider spec: ", string(bytes))
 				return err
 			}
 			log.Logger.Debugf("provider spec %v for version %v\n", providerName, i)
@@ -290,13 +291,13 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 
 				// check if there were any issues querying database and extracting value
 				if !ok {
-					log.Logger.Error("could not query for metric ", metric.Name, ": ", err)
+					log.Logger.Error("could not query for metric ", metric.Name)
 					continue
 				}
 
 				// do not save value if it has no value
 				if val == nil {
-					log.Logger.Error("could not extract non-nil value for metric ", metric.Name, ": ", err)
+					log.Logger.Error("could not extract non-nil value for metric ", metric.Name)
 					continue
 				}
 
@@ -319,7 +320,12 @@ func (t *customMetricsTask) run(exp *Experiment) error {
 				valueString := fmt.Sprint(val)
 				floatValue, err := strconv.ParseFloat(valueString, 64)
 				if err != nil {
-					log.Logger.Error("could not parse string \""+valueString+"\" to float:", err)
+					log.Logger.Error("could not parse string \""+valueString+"\" to float: ", err)
+					continue
+				}
+
+				if math.IsNaN(floatValue) {
+					log.Logger.Debug("metric value is NaN", errors.New("metric value is NaN - ignored"))
 					continue
 				}
 

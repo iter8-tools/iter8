@@ -196,7 +196,8 @@ func (kd *KubeDriver) getExperimentSecret() (s *corev1.Secret, err error) {
 func (kd *KubeDriver) Read() (*base.Experiment, error) {
 	s, err := kd.getExperimentSecret()
 	if err != nil {
-		return nil, err
+		log.Logger.WithStackTrace(err.Error()).Error("unable to read experiment")
+		return nil, errors.New("unable to read experiment")
 	}
 
 	b, ok := s.Data[ExperimentPath]
@@ -211,7 +212,11 @@ func (kd *KubeDriver) Read() (*base.Experiment, error) {
 
 // formExperimentSecret creates the experiment secret using the experiment
 func (kd *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secret, error) {
-	byteArray, _ := yaml.Marshal(e)
+	byteArray, err := yaml.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+	// log.Logger.Debug(string(byteArray))
 	sec := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: kd.getExperimentSecretName(),
@@ -247,7 +252,8 @@ func (kd *KubeDriver) updateExperimentSecret(e *base.Experiment) error {
 // Write writes a Kubernetes experiment
 func (kd *KubeDriver) Write(e *base.Experiment) error {
 	if err := kd.updateExperimentSecret(e); err != nil {
-		return err
+		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
+		return errors.New("unable to write experiment")
 	}
 	return nil
 }

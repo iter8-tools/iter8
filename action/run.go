@@ -26,13 +26,6 @@ func NewRunOpts(kd *driver.KubeDriver) *RunOpts {
 	}
 }
 
-// LocalRun runs a local experiment
-func (rOpts *RunOpts) LocalRun() error {
-	return base.RunExperiment(rOpts.ReuseResult, &driver.FileDriver{
-		RunDir: rOpts.RunDir,
-	})
-}
-
 // KubeRun runs a Kubernetes experiment
 func (rOpts *RunOpts) KubeRun() error {
 	// initialize kube driver

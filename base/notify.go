@@ -161,7 +161,7 @@ func (t *notifyTask) run(exp *Experiment) error {
 	// create a new HTTP request
 	req, err := http.NewRequest(t.With.Method, t.With.URL, requestBody)
 	if err != nil {
-		log.Logger.Error("could not create HTTP request for notify task:", err)
+		log.Logger.Error("could not create HTTP request for notify task: ", err)
 
 		if t.With.SoftFailure {
 			return nil
@@ -187,7 +187,7 @@ func (t *notifyTask) run(exp *Experiment) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Logger.Error("could not send HTTP request for notify task:", err)
+		log.Logger.Error("could not send HTTP request for notify task: ", err)
 
 		if t.With.SoftFailure {
 			return nil

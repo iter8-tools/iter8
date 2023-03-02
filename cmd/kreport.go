@@ -41,3 +41,8 @@ func newKReportCmd(kd *driver.KubeDriver) *cobra.Command {
 	addOutputFormatFlag(cmd, &actor.OutputFormat)
 	return cmd
 }
+
+// addOutputFormatFlag adds output format flag to the report command
+func addOutputFormatFlag(cmd *cobra.Command, outputFormat *string) {
+	cmd.Flags().StringVarP(outputFormat, "outputFormat", "o", "text", "text | html")
+}

@@ -17,7 +17,7 @@ import (
 const (
 	// secretPostfix is the postfix added to an application name to create a secret name
 	/* #nosec */
-	secretPostfix string = ".iter8abnmetrics"
+	secretPostfix string = "-metrics"
 	// secretKey is the name of the key in the data field of a kubernetes secret in which the application will be written
 	secretKey string = "application.yaml"
 	// defaultBatchWriteInterval is the default value of BatchWriteInterval
@@ -183,20 +183,15 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 	secretNamespace := namespaceFromKey(a.Name)
 	secretName := secretNameFromKey(a.Name)
 
-	// determine if need to
-	exists := true
+	// get the current secret; it will have been created as part of install
 	secret, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
-		exists = false
-		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: secretNamespace,
-			},
-			Data:       map[string][]byte{},
-			StringData: map[string]string{},
-		}
-		log.Logger.Debug("secret does not exist; creating")
+		log.Logger.Error("secret does not exist; no metrics can be recorded")
+		return err
+	}
+
+	if secret.Data == nil {
+		secret.Data = map[string][]byte{}
 	}
 
 	secret.Data[secretKey] = rawData
@@ -204,21 +199,13 @@ func (m *ThreadSafeApplicationMap) Write(a *Application) error {
 		secret.StringData[secretKey] = string(rawData)
 	}
 
-	// create or update the secret
-	if exists {
-		// TBD do we need to merge what we have?
-		_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Update(
-			context.Background(),
-			secret,
-			metav1.UpdateOptions{},
-		)
-	} else {
-		_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Create(
-			context.Background(),
-			secret,
-			metav1.CreateOptions{},
-		)
-	}
+	// update the secret
+	// TBD do we need to merge what we have?
+	_, err = k8sclient.Client.Typed().CoreV1().Secrets(secretNamespace).Update(
+		context.Background(),
+		secret,
+		metav1.UpdateOptions{},
+	)
 	if err != nil {
 		log.Logger.WithError(err).Warn("unable to persist application")
 		return err

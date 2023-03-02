@@ -7,10 +7,11 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 
 	// Import to initialize client auth plugins.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+
+	// packages for cloud authentication
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 // Client is a global variable. Before use, it must be assigned and initialized
@@ -20,7 +21,7 @@ var Client = *NewKubeClient(cli.New())
 // enables interaction with a Kubernetes cluster through Kube APIs
 type KubeClient struct {
 	// EnvSettings provides generic Kubernets and Helm options; while Helm is not needed
-	// for A/B(/n) functionality, we use here since we do so in other places and it
+	// for A/B/n functionality, we use here since we do so in other places and it
 	// provides an easy way to get the Kubernetes configuration whether in cluster or not.
 	*cli.EnvSettings
 	// typedClient enables interaction with a Kubernetes cluster using structured types

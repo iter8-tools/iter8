@@ -16,7 +16,7 @@ Print the version of Iter8 CLI.
 
 The output may look as follows:
 
-	$ version.BuildInfo{Version:"v0.11.0", GitCommit:"fe51cd1e31e6a202cba7aliv9552a6d418ded79a", GoVersion:"go1.17.6"}
+	$ cmd.BuildInfo{Version:"v0.13.0", GitCommit:"f24e86f3d3eceb02eabbba54b40af2c940f55ad5", GoVersion:"go1.19.3"}
 
 In the sample output shown above:
 

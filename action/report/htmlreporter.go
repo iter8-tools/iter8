@@ -84,12 +84,15 @@ func (ht *HTMLReporter) RenderStr(what string) (string, error) {
 		if ht.NoFailure() {
 			failureStatus = "Experiment has no failures."
 		}
-		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", len(ht.Spec), ht.Result.NumCompletedTasks)
+		taskStatus := fmt.Sprintf("%v out of %v tasks are complete.", ht.Result.NumCompletedTasks, len(ht.Spec))
+		loopStatus := fmt.Sprintf("%d loops have completed.", ht.Result.NumLoops)
 		val = fmt.Sprint(completionStatus)
 		val += " "
 		val += fmt.Sprint(failureStatus)
 		val += " "
 		val += fmt.Sprint(taskStatus)
+		val += " "
+		val += fmt.Sprint(loopStatus)
 	default:
 		err = fmt.Errorf("do not know how to render %v", what)
 	}

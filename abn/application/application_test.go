@@ -302,8 +302,10 @@ func setupInMemoryNotInCluster(t *testing.T, applications ...applicationSource) 
 
 func writeVerify(t *testing.T, a *Application) *Application {
 	application := a.Name
+	err := ensureSecretCreated(application)
+	assert.NoError(t, err)
 	// write application to cluster (should create the secret, if not present)
-	err := Applications.Write(a)
+	err = Applications.Write(a)
 	assert.NoError(t, err)
 
 	// verify can read it back

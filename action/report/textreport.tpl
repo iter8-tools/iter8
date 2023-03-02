@@ -6,6 +6,7 @@ Experiment summary:
   No task failures: {{ .NoFailure }}
   Total number of tasks: {{ len .Spec }}
   Number of completed tasks: {{ .Result.NumCompletedTasks }}
+  Number of completed loops: {{ .Result.NumLoops }}
 
 {{- if .Result.Insights }}
 {{- if not (empty .Result.Insights.SLOs) }}

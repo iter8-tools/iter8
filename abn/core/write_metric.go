@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	abnapp "github.com/iter8-tools/iter8/abn/application"
@@ -10,10 +11,14 @@ import (
 
 // writeMetricInternal is detailed implementation of gRPC method WriteMetric
 func writeMetricInternal(application, user, metric, valueStr string) error {
+	log.Logger.Tracef("writeMetricInternal called for application, user: %s, %s", application, user)
+	defer log.Logger.Trace("writeMetricInternal completed")
+
 	a, track, err := lookupInternal(application, user)
 	if err != nil || track == nil {
 		return err
 	}
+	log.Logger.Debug(fmt.Sprintf("lookup(%s,%s) -> %s", application, user, *track))
 
 	// lock for write; we will modify the metric
 	abnapp.Applications.Lock(application)
@@ -23,9 +28,11 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	if !ok {
 		return errors.New("track not mapped to version")
 	}
+	log.Logger.Debugf("track %s --> version %s", *track, version)
 
 	v, _ := a.GetVersion(version, false)
 	if v == nil {
+		log.Logger.Warnf("unable to get version %s ", version)
 		return errors.New("unexpected: trying to write metrics for unknown version")
 	}
 

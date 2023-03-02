@@ -1,8 +1,8 @@
 ### iter8Image default iter8 image used for running Kubernetes experiments
-iter8Image: iter8/iter8:0.12-pre
+iter8Image: iter8/iter8:0.13
 
 ### majorMinor is the minor version of Iter8
-majorMinor: v0.12
+majorMinor: v0.13
 
 ### runner for Kubernetes experiments may be job, cronjob, or none
 runner: none

@@ -19,7 +19,7 @@ var (
 	logLevel = "info"
 	// Default Helm and Kubernetes settings
 	settings = cli.New()
-	// Kuberdriver used by Helm and Kubernetes clients
+	// KubeDriver used by actions package
 	kd = driver.NewKubeDriver(settings)
 	// output stream where log messages are printed
 	outStream io.Writer = os.Stdout
@@ -69,29 +69,14 @@ func init() {
 	// add abn
 	rootCmd.AddCommand(newAbnCmd())
 
-	// add assert
-	rootCmd.AddCommand(newAssertCmd(kd))
-
 	// add autox
 	rootCmd.AddCommand(newAutoXCmd())
 
 	// add docs
 	rootCmd.AddCommand(newDocsCmd())
 
-	// add gen
-	rootCmd.AddCommand(newGenCmd())
-
 	// add k
 	rootCmd.AddCommand(kcmd)
-
-	// add launch
-	rootCmd.AddCommand(newLaunchCmd(kd))
-
-	// add report
-	rootCmd.AddCommand(newReportCmd(kd))
-
-	// add run
-	rootCmd.AddCommand(newRunCmd(kd, os.Stdout))
 
 	// add version
 	rootCmd.AddCommand(newVersionCmd())

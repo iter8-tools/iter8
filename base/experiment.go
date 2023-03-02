@@ -852,6 +852,8 @@ func (exp *Experiment) run(driver Driver) error {
 
 	exp.incrementNumLoops()
 	log.Logger.Debugf("experiment loop %d started ...", exp.Result.NumLoops)
+	exp.resetNumCompletedTasks()
+
 	err = driver.Write(exp)
 	if err != nil {
 		return err
@@ -859,7 +861,7 @@ func (exp *Experiment) run(driver Driver) error {
 
 	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Spec))
 	for i, t := range exp.Spec {
-		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : started")
+		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": started")
 		shouldRun := true
 		// if task has a condition
 		if cond := getIf(t); cond != nil {
@@ -881,7 +883,7 @@ func (exp *Experiment) run(driver Driver) error {
 		if shouldRun {
 			err = t.run(exp)
 			if err != nil {
-				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "failure")
+				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "failure")
 				exp.failExperiment()
 				e := driver.Write(exp)
 				if e != nil {
@@ -889,13 +891,14 @@ func (exp *Experiment) run(driver Driver) error {
 				}
 				return err
 			}
-			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "completed")
+			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "completed")
 		} else {
-			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + " : " + "skipped")
+			log.Logger.WithStackTrace(fmt.Sprint("false condition: ", *getIf(t))).Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "skipped")
 		}
 
 		exp.incrementNumCompletedTasks()
 		err = driver.Write(exp)
+
 		if err != nil {
 			return err
 		}
@@ -908,9 +911,13 @@ func (exp *Experiment) failExperiment() {
 	exp.Result.Failure = true
 }
 
-// incrementNumCompletedTasks increments the number of completed tasks in the experimeent
+// incrementNumCompletedTasks increments the number of completed tasks in the experiment
 func (exp *Experiment) incrementNumCompletedTasks() {
 	exp.Result.NumCompletedTasks++
+}
+
+func (exp *Experiment) resetNumCompletedTasks() {
+	exp.Result.NumCompletedTasks = 0
 }
 
 // incrementNumLoops increments the number of loops (experiment iterations)

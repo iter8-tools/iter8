@@ -36,13 +36,6 @@ func NewAssertOpts(kd *driver.KubeDriver) *AssertOpts {
 	}
 }
 
-// LocalRun asserts conditions for a local experiment
-func (aOpts *AssertOpts) LocalRun() (bool, error) {
-	return aOpts.Run(&driver.FileDriver{
-		RunDir: aOpts.RunDir,
-	})
-}
-
 // KubeRun asserts conditions for a Kubernetes experiment
 func (aOpts *AssertOpts) KubeRun() (bool, error) {
 	if err := aOpts.KubeDriver.Init(); err != nil {
