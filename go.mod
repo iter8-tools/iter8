@@ -20,32 +20,32 @@ retract (
 require (
 	fortio.org/fortio v1.52.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
-	github.com/antonmedv/expr v1.9.0
-	github.com/bojand/ghz v0.111.0
+	github.com/antonmedv/expr v1.12.1
+	github.com/bojand/ghz v0.114.0
 	github.com/imdario/mergo v0.3.13
-	github.com/itchyny/gojq v0.12.7
-	github.com/jarcoal/httpmock v1.1.0
+	github.com/itchyny/gojq v0.12.12
+	github.com/jarcoal/httpmock v1.3.0
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mcuadros/go-defaults v1.2.0
-	github.com/montanaflynn/stats v0.6.6
+	github.com/montanaflynn/stats v0.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	golang.org/x/net v0.7.0
 	golang.org/x/text v0.7.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
 	helm.sh/helm/v3 v3.11.1
-	k8s.io/api v0.26.0
-	k8s.io/apimachinery v0.26.0
-	k8s.io/client-go v0.26.0
+	k8s.io/api v0.26.2
+	k8s.io/apimachinery v0.26.2
+	k8s.io/client-go v0.26.2
 	sigs.k8s.io/yaml v1.3.0
 )
 
 require (
-	cloud.google.com/go v0.107.0 // indirect
+	cloud.google.com/go/compute v1.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	fortio.org/dflag v1.5.2 // indirect
 	fortio.org/log v1.3.0 // indirect
@@ -66,7 +66,7 @@ require (
 	github.com/chai2010/gettext-go v1.0.2 // indirect
 	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
 	github.com/cncf/xds/go v0.0.0-20230105202645-06c439db220b // indirect
-	github.com/containerd/containerd v1.6.18 // indirect
+	github.com/containerd/containerd v1.6.15 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -77,7 +77,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/envoyproxy/go-control-plane v0.10.3 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.9.1 // indirect
@@ -104,21 +104,21 @@ require (
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
-	github.com/itchyny/timefmt-go v0.1.3 // indirect
+	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/jhump/protoreflect v1.9.0 // indirect
-	github.com/jinzhu/configor v1.1.1 // indirect
+	github.com/jinzhu/configor v1.2.1 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/klauspost/compress v1.11.13 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
@@ -139,7 +139,7 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rubenv/sql-migrate v1.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
@@ -150,7 +150,7 @@ require (
 	github.com/xlab/treeprint v1.1.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
