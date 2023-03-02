@@ -81,6 +81,7 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
+			endpoint := endpoint // prevent implicit memory aliasing
 			log.Logger.Trace(fmt.Sprintf("endpoint: %s", endpointID))
 
 			// default from baseline

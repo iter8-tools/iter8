@@ -229,6 +229,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
+			endpoint := endpoint // prevent implicit memory aliasing
 			log.Logger.Trace(fmt.Sprintf("endpoint: %s", endpointID))
 
 			// merge endpoint config with baseline config

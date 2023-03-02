@@ -13,6 +13,13 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	unary         = "unary"
+	server        = "server"
+	client        = "client"
+	bidirectional = "bidirectional"
+)
+
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
@@ -68,6 +75,133 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	assert.NoError(t, err)
 
 	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+}
+
+// Credit: Several of the tests in this file are based on
+// https://github.com/bojand/ghz/blob/master/runner/run_test.go
+func TestRunCollectGRPCEndpoints(t *testing.T) {
+	_ = os.Chdir(t.TempDir())
+	callType := helloworld.Unary
+	gs, s, err := internal.StartServer(false)
+	if err != nil {
+		assert.FailNow(t, err.Error())
+	}
+	t.Cleanup(s.Stop)
+
+	// valid collect GRPC task... should succeed
+	ct := &collectGRPCTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectGRPCTaskName),
+		},
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Host: internal.LocalHostPort,
+			},
+			Endpoints: map[string]runner.Config{
+				unary: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHello",
+				},
+				server: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHelloCS",
+				},
+				client: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHellos",
+				},
+				bidirectional: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHelloBidi",
+				},
+			},
+		},
+	}
+
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	err = ct.run(exp)
+
+	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+
+	assert.NoError(t, err)
+	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+
+	count := gs.GetCount(callType)
+	assert.Equal(t, 200, count)
+
+	// unary
+	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCErrorCountMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCLatencySampleMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	// server streaming
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCErrorCountMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCLatencySampleMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	// client streaming
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCErrorCountMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCLatencySampleMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	// bidirectional streaming
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCErrorCountMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCLatencySampleMetricName)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
 }
