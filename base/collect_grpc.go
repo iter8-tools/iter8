@@ -28,12 +28,18 @@ const (
 	insecureDefault = true
 )
 
+type collectGRPCInputs struct {
+	runner.Config
+	// Warmup indicates if task execution is for warmup purposes; if so the results will be ignored
+	Warmup *bool `json:"warmup,omitempty" yaml:"warmup,omitempty"`
+}
+
 // collectGRPCTask enables load testing of gRPC services.
 type collectGRPCTask struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
 	// With contains the inputs to this task
-	With runner.Config `json:"with" yaml:"with"`
+	With collectGRPCInputs `json:"with" yaml:"with"`
 }
 
 // initializeDefaults sets default values for the collect task
@@ -61,7 +67,7 @@ func (t *collectGRPCTask) validateInputs() error {
 func (t *collectGRPCTask) resultForVersion() (*runner.Report, error) {
 	// the main idea is to run ghz with proper options
 
-	opts := runner.WithConfig(&t.With)
+	opts := runner.WithConfig(&t.With.Config)
 
 	// todo: supply all the allowed options
 	igr, err := runner.Run(t.With.Call, t.With.Host, opts)
@@ -108,6 +114,12 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 	data, err := t.resultForVersion()
 	if err != nil {
 		return err
+	}
+
+	// ignore results if warmup
+	if t.With.Warmup != nil && *t.With.Warmup {
+		log.Logger.Debug("warmup: ignoring results")
+		return nil
 	}
 
 	// 3. Init insights with num versions: always 1 in this task
