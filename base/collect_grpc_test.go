@@ -137,73 +137,24 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
 
-	// unary
-	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCErrorCountMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+	grpcMethods := []string{unary, server, client, bidirectional}
+	for _, method := range grpcMethods {
+		mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCErrorCountMetricName)
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCLatencySampleMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName)
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + unary + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	// server streaming
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCErrorCountMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCLatencySampleMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + server + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	// client streaming
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCErrorCountMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCLatencySampleMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + client + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	// bidirectional streaming
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCErrorCountMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCLatencySampleMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + bidirectional + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
+	}
 }
 
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
