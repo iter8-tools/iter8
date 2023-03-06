@@ -22,8 +22,6 @@ const (
 )
 
 func TestRunCollectHTTP(t *testing.T) {
-	testDataPath := CompletePath("../", "testdata/payload/ukpolice.json")
-
 	mux, addr := fhttp.DynamicHTTPServer(false)
 
 	// /foo/ handler
@@ -31,7 +29,7 @@ func TestRunCollectHTTP(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		called = true
 		data, _ := io.ReadAll(r.Body)
-		testData, _ := os.ReadFile(testDataPath)
+		testData, _ := os.ReadFile(CompletePath("../", "testdata/payload/ukpolice.json"))
 
 		// assert that PayloadFile is working
 		assert.True(t, bytes.Equal(data, testData))
@@ -50,7 +48,7 @@ func TestRunCollectHTTP(t *testing.T) {
 		With: collectHTTPInputs{
 			collectHTTPInputsHelper: collectHTTPInputsHelper{
 				Duration:    StringPointer("1s"),
-				PayloadFile: StringPointer(testDataPath),
+				PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
 				Headers:     map[string]string{},
 				URL:         baseURL + foo,
 			},
