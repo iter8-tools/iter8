@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/spf13/cobra"
+
+	_ "embed"
 )
+
+//go:embed gitcommit.txt
+var gitCommit string
 
 // versionDesc is the description of the version command
 var versionDesc = `
@@ -25,11 +29,6 @@ In the sample output shown above:
 - GoVersion is the version of Go that was used to compile Iter8 CLI.
 `
 
-var (
-	// gitCommit is the git sha1
-	gitCommit = ""
-)
-
 // BuildInfo describes the compile time information.
 type BuildInfo struct {
 	// Version is the semantic version
@@ -42,7 +41,6 @@ type BuildInfo struct {
 
 // newVersionCmd creates the version command
 func newVersionCmd() *cobra.Command {
-	var short bool
 	// versionCmd represents the version command
 	cmd := &cobra.Command{
 		Use:           "version",
@@ -51,36 +49,21 @@ func newVersionCmd() *cobra.Command {
 		SilenceErrors: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			v := getBuildInfo()
-			if short {
-				if len(v.GitCommit) >= 7 {
-					fmt.Printf("%s+g%s", base.Version, v.GitCommit[:7])
-					fmt.Println()
-					return nil
-				}
-				fmt.Println(base.Version)
-				return nil
-			}
 			fmt.Printf("%#v", v)
+			fmt.Println()
+			fmt.Println(gitCommit)
 			fmt.Println()
 			return nil
 		},
 	}
-	addShortFlag(cmd, &short)
 	return cmd
 }
 
 // get returns build info
 func getBuildInfo() BuildInfo {
 	v := BuildInfo{
-		Version:   base.Version,
 		GitCommit: gitCommit,
 		GoVersion: runtime.Version(),
 	}
 	return v
-}
-
-// addShortFlag adds the short flag to the version command
-func addShortFlag(cmd *cobra.Command, shortPtr *bool) {
-	cmd.Flags().BoolVar(shortPtr, "short", false, "print abbreviated version info")
-	cmd.Flags().Lookup("short").NoOptDefVal = "true"
 }

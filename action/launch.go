@@ -1,9 +1,6 @@
 package action
 
 import (
-	"strings"
-
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/driver"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -40,7 +37,6 @@ func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 		DryRun: false,
 		ChartPathOptions: action.ChartPathOptions{
 			RepoURL: DefaultHelmRepository,
-			Version: defaultChartVersion(),
 		},
 		ChartName:  DefaultChartName,
 		Options:    values.Options{},
@@ -48,10 +44,6 @@ func NewLaunchOpts(kd *driver.KubeDriver) *LaunchOpts {
 		KubeDriver: kd,
 		LocalChart: false,
 	}
-}
-
-func defaultChartVersion() string {
-	return strings.Replace(base.MajorMinor, "v", "", 1) + ".x"
 }
 
 // KubeRun launches a Kubernetes experiment

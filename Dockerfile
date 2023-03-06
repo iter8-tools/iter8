@@ -1,20 +1,14 @@
-# Small linux image with iter8 binary
-FROM debian:buster-slim
-
-# Install curl
-RUN apt-get update && apt-get install -y curl
+# Golang linux image with iter8 binary
+FROM golang:1.20.1-alpine
 
 # Set Iter8 version from build args
 ARG TAG
-ENV TAG=${TAG:-v0.13.0}
+ENV TAG=${TAG:-v0.13.8}
 
 # Download iter8 compressed binary
-RUN curl -LO https://github.com/iter8-tools/iter8/releases/download/${TAG}/iter8-linux-amd64.tar.gz
+RUN go install github.com/iter8-tools/iter8@${TAG}
 
-# Extract iter8
-RUN tar -xvf iter8-linux-amd64.tar.gz && rm iter8-linux-amd64.tar.gz
-
-# Move iter8
-RUN mv linux-amd64/iter8 /bin/iter8
+# Download curl
+RUN apk --no-cache add curl
 
 WORKDIR /

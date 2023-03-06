@@ -152,3 +152,6 @@ iter8lib*.tgz
 # data
 payload.dat
 
+# ignore gitcommit
+gitcommit.txt
+

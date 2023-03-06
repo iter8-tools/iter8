@@ -1,0 +1,22 @@
+name: Release Drafter
+on:
+  push:
+
+jobs:
+  update-chart-and-gitcommit:
+    name: Update chart archive and gitcommit file
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    
+    steps:
+    - uses: actions/checkout@v3
+    - run: |
+        tar cvzf experimentchart.tgz experimentchart
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: update experiment chart archive
+    - run: |
+        echo "$(git rev-parse HEAD)" > cmd/gitcommit.txt
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: update git commit file

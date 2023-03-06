@@ -1,0 +1,97 @@
+package controllers
+
+import (
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestGetPodName(t *testing.T) {
+	var tests = []struct {
+		a string
+		b string
+		c bool
+	}{
+		{"x-0", "x-0", true},
+		{"x-y-0", "x-y-0", true},
+		{"x-1", "x-1", true},
+		{"x-y-1", "x-y-1", true},
+		{"x", "x", true},
+		{"", "", false},
+	}
+
+	for _, e := range tests {
+		os.Setenv(podNameEnvVariable, e.a)
+		podName, ok := getPodName()
+		assert.Equal(t, e.b, podName)
+		assert.Equal(t, e.c, ok)
+	}
+
+}
+
+func TestGetStatefulSetName(t *testing.T) {
+	var tests = []struct {
+		a string
+		b string
+		c bool
+	}{
+		{"x-0", "x", true},
+		{"x-y-0", "x-y", true},
+		{"x-1", "x", true},
+		{"x-y-1", "x-y", true},
+		{"x", "", false},
+		{"", "", false},
+	}
+
+	for _, e := range tests {
+		os.Setenv(podNameEnvVariable, e.a)
+		statefulSetName, ok := getStatefulSetName()
+		assert.Equal(t, e.b, statefulSetName)
+		assert.Equal(t, e.c, ok)
+	}
+
+}
+
+func TestLeaderName(t *testing.T) {
+	var tests = []struct {
+		a string
+		b string
+		c bool
+	}{
+		{"x-0", "x-0", true},
+		{"x-y-0", "x-y-0", true},
+		{"x-1", "x-0", true},
+		{"x-y-1", "x-y-0", true},
+		{"x", "", false},
+		{"", "", false},
+	}
+
+	for _, e := range tests {
+		os.Setenv(podNameEnvVariable, e.a)
+		leaderName, ok := getLeaderName()
+		assert.Equal(t, e.b, leaderName)
+		assert.Equal(t, e.c, ok)
+	}
+
+}
+
+func TestLeaderIsMe(t *testing.T) {
+	var tests = []struct {
+		a string
+		b bool
+	}{
+		{"x-0", true},
+		{"x-y-0", true},
+		{"x-1", false},
+		{"x-y-1", false},
+		{"x", false},
+		{"", false},
+	}
+
+	for _, e := range tests {
+		os.Setenv(podNameEnvVariable, e.a)
+		assert.Equal(t, e.b, leaderIsMe())
+	}
+
+}
