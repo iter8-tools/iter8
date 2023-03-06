@@ -24,7 +24,7 @@ type errorRange struct {
 type collectHTTPInputs struct {
 	// NumRequests is the number of requests to be sent to the app. Default value is 100.
 	NumRequests *int64 `json:"numRequests,omitempty" yaml:"numRequests,omitempty"`
-	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numQueries are specified, then duration is ignored.
+	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numRequests are specified, then duration is ignored.
 	Duration *string `json:"duration,omitempty" yaml:"duration,omitempty"`
 	// QPS is the number of requests per second sent to the app. Default value is 8.0.
 	QPS *float32 `json:"qps,omitempty" yaml:"qps,omitempty"`
@@ -46,6 +46,8 @@ type collectHTTPInputs struct {
 	URL string `json:"url" yaml:"url"`
 	// AllowInitialErrors allows and doesn't abort on initial warmup errors
 	AllowInitialErrors *bool `json:"allowInitialErrors,omitempty" yaml:"allowInitialErrors,omitempty"`
+	// Warmup indicates if task execution is for warmup purposes; if so the results will be ignored
+	Warmup *bool `json:"warmup,omitempty" yaml:"warmup,omitempty"`
 }
 
 const (
@@ -241,6 +243,12 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 	data, err := t.getFortioResults()
 	if err != nil {
 		return err
+	}
+
+	// ignore results if warmup
+	if t.With.Warmup != nil && *t.With.Warmup {
+		log.Logger.Debug("warmup: ignoring results")
+		return nil
 	}
 
 	// this task populates insights in the experiment
