@@ -1,11 +1,14 @@
 package base
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"testing"
 
-	"github.com/jarcoal/httpmock"
+	"fortio.org/fortio/fhttp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,18 +16,31 @@ const (
 	endpoint1 = "endpoint1"
 	endpoint2 = "endpoint2"
 
-	endpoint1URL = "https://something.com"
-	endpoint2URL = "http://example.com"
+	foo  = "foo"
+	bar  = "bar"
+	from = "from"
 )
 
 func TestRunCollectHTTP(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
+	testDataPath := CompletePath("../", "testdata/payload/ukpolice.json")
 
-	// // Exact URL match
-	// httpmock.RegisterResponder("POST", "https://something.com",
-	// 	httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
+	mux, addr := fhttp.DynamicHTTPServer(false)
+
+	// /foo/ handler
+	called := false // ensure that the /foo/ handler is called
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		data, _ := io.ReadAll(r.Body)
+		testData, _ := os.ReadFile(testDataPath)
+
+		// assert that PayloadFile is working
+		assert.True(t, bytes.Equal(data, testData))
+
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/"+foo, handler)
+
+	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -34,9 +50,9 @@ func TestRunCollectHTTP(t *testing.T) {
 		With: collectHTTPInputs{
 			collectHTTPInputsHelper: collectHTTPInputsHelper{
 				Duration:    StringPointer("1s"),
-				PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
+				PayloadFile: StringPointer(testDataPath),
 				Headers:     map[string]string{},
-				URL:         "https://something.com",
+				URL:         baseURL + foo,
 			},
 		},
 	}
@@ -48,6 +64,7 @@ func TestRunCollectHTTP(t *testing.T) {
 	exp.initResults(1)
 	err := ct.run(exp)
 	assert.NoError(t, err)
+	assert.True(t, called) // ensure that the /foo/ handler is called
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
 	mm, err := exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "/" + builtInHTTPLatencyMeanID)
@@ -60,26 +77,33 @@ func TestRunCollectHTTP(t *testing.T) {
 }
 
 func TestRunCollectHTTPSingleEndpoint(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
+	mux, addr := fhttp.DynamicHTTPServer(false)
 
-	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
+	// /foo/ handler
+	fooCalled := false // ensure that the /foo/ handler is called
+	fooHandler := func(w http.ResponseWriter, r *http.Request) {
+		fooCalled = true
 
-	// httpmock.RegisterResponder("GET", endpoint1URL,
-	// 	httpmock.NewStringResponder(200, ""))
+		// assert "from" header has value "foo"
+		assert.Equal(t, foo, r.Header.Get(from))
 
-	// httpmock.RegisterResponder("GET", endpoint2URL,
-	// 	httpmock.NewStringResponder(200, ""))
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/"+foo, fooHandler)
 
-	// httpmock.RegisterResponder("GET", "http://prometheus.istio-system:9090/api/v1/query",
-	// 	func(req *http.Request) (*http.Response, error) {
-	// 		if req.Header.Get(header1) == "" {
-	// 			return httpmock.NewStringResponse(400, "Need header1"), nil
-	// 		}
+	// /bar/ handler
+	barCalled := false // ensure that the /foo/ handler is called
+	barHandler := func(w http.ResponseWriter, r *http.Request) {
+		barCalled = true
 
-	// 		return httpmock.NewStringResponse(200, ""), nil
-	// 	})
+		// assert "from" header has value "bar"
+		assert.Equal(t, bar, r.Header.Get(from))
+
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/"+bar, barHandler)
+
+	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -92,10 +116,16 @@ func TestRunCollectHTTPSingleEndpoint(t *testing.T) {
 			},
 			Endpoints: map[string]collectHTTPInputsHelper{
 				endpoint1: {
-					URL: endpoint1URL,
+					URL: baseURL + foo,
+					Headers: map[string]string{
+						from: foo,
+					},
 				},
 				endpoint2: {
-					URL: endpoint2URL,
+					URL: baseURL + bar,
+					Headers: map[string]string{
+						from: bar,
+					},
 				},
 			},
 		},
@@ -108,13 +138,13 @@ func TestRunCollectHTTPSingleEndpoint(t *testing.T) {
 	exp.initResults(1)
 	err := ct.run(exp)
 	assert.NoError(t, err)
+	assert.True(t, fooCalled) // ensure that the /foo/ handler is called
+	assert.True(t, barCalled) // ensure that the /bar/ handler is called
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
 	mm, err := exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint1 + "/" + builtInHTTPLatencyMeanID)
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
-
-	fmt.Println(exp.Result)
 
 	mm, err = exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint1 + "/" + builtInHTTPLatencyPercentilePrefix + "50")
 	assert.NotNil(t, mm)
