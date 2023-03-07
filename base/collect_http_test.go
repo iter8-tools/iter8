@@ -74,7 +74,10 @@ func TestRunCollectHTTP(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestRunCollectHTTPSingleEndpoint(t *testing.T) {
+// Multiple endpoints are provided
+// Test both the /foo/ and /bar/ endpoints
+// Test both endpoints have their respective header values
+func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 	mux, addr := fhttp.DynamicHTTPServer(false)
 
 	// /foo/ handler
@@ -155,4 +158,108 @@ func TestRunCollectHTTPSingleEndpoint(t *testing.T) {
 	mm, err = exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint2 + "/" + builtInHTTPLatencyPercentilePrefix + "50")
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
+}
+
+// Multiple endpoints are provided but they share one URL
+// Test that the base-level URL is provided to each endpoint
+// Make multiple calls to the same URL but with different headers
+func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
+	mux, addr := fhttp.DynamicHTTPServer(false)
+
+	// handler
+	fooCalled := false // ensure that foo header is provided
+	barCalled := false // ensure that bar header is provided
+	fooHandler := func(w http.ResponseWriter, r *http.Request) {
+		from := r.Header.Get(from)
+		if from == foo {
+			fooCalled = true
+		} else if from == bar {
+			barCalled = true
+		}
+
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/", fooHandler)
+
+	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
+
+	// valid collect HTTP task... should succeed
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			collectHTTPInputsHelper: collectHTTPInputsHelper{
+				Duration: StringPointer("1s"),
+				URL:      baseURL,
+			},
+			Endpoints: map[string]collectHTTPInputsHelper{
+				endpoint1: {
+					Headers: map[string]string{
+						from: foo,
+					},
+				},
+				endpoint2: {
+					Headers: map[string]string{
+						from: bar,
+					},
+				},
+			},
+		},
+	}
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	err := ct.run(exp)
+	assert.NoError(t, err)
+	assert.True(t, fooCalled) // ensure that the /foo/ handler is called
+	assert.True(t, barCalled) // ensure that the /bar/ handler is called
+	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+
+	mm, err := exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint1 + "/" + builtInHTTPLatencyMeanID)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint1 + "/" + builtInHTTPLatencyPercentilePrefix + "50")
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint2 + "/" + builtInHTTPLatencyMeanID)
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+
+	mm, err = exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint2 + "/" + builtInHTTPLatencyPercentilePrefix + "50")
+	assert.NotNil(t, mm)
+	assert.NoError(t, err)
+}
+
+func TestErrorCode(t *testing.T) {
+	task := collectHTTPTask{}
+	assert.True(t, task.errorCode(-1))
+
+	// if no lower limit (check upper)
+	upper := 10
+	task.With.ErrorRanges = append(task.With.ErrorRanges, errorRange{
+		Upper: &upper,
+	})
+	assert.True(t, task.errorCode(5))
+
+	// if no upper limit (check lower)
+	task.With.ErrorRanges = []errorRange{}
+	lower := 1
+	task.With.ErrorRanges = append(task.With.ErrorRanges, errorRange{
+		Lower: &lower,
+	})
+	assert.True(t, task.errorCode(5))
+
+	// if both limits are present (check both)
+	task.With.ErrorRanges = []errorRange{}
+	task.With.ErrorRanges = append(task.With.ErrorRanges, errorRange{
+		Upper: &upper,
+		Lower: &lower,
+	})
+	assert.True(t, task.errorCode(5))
 }
