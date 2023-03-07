@@ -29,12 +29,12 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: runner.Config{
+		With: collectGRPCInputs{Config: runner.Config{
 			Data: map[string]interface{}{"name": "bob"},
 			Call: "helloworld.Greeter.SayHello",
 			Host: internal.LocalHostPort,
 		},
-	}
+		}}
 
 	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
 
@@ -84,7 +84,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: runner.Config{
+		With: collectGRPCInputs{Config: runner.Config{
 			N:           100,
 			RPS:         20,
 			C:           1,
@@ -94,7 +94,7 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 			Call:        "helloworld.Greeter.SayHello",
 			Host:        internal.LocalHostPort,
 		},
-	}
+		}}
 
 	at := &assessTask{
 		TaskMeta: TaskMeta{
