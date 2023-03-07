@@ -46,7 +46,7 @@ func TestRunCollectHTTP(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			collectHTTPInputsHelper: collectHTTPInputsHelper{
+			endpoint: endpoint{
 				Duration:    StringPointer("1s"),
 				PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
 				Headers:     map[string]string{},
@@ -112,10 +112,10 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			collectHTTPInputsHelper: collectHTTPInputsHelper{
+			endpoint: endpoint{
 				Duration: StringPointer("1s"),
 			},
-			Endpoints: map[string]collectHTTPInputsHelper{
+			Endpoints: map[string]endpoint{
 				endpoint1: {
 					URL: baseURL + foo,
 					Headers: map[string]string{
@@ -189,11 +189,11 @@ func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			collectHTTPInputsHelper: collectHTTPInputsHelper{
+			endpoint: endpoint{
 				Duration: StringPointer("1s"),
 				URL:      baseURL,
 			},
-			Endpoints: map[string]collectHTTPInputsHelper{
+			Endpoints: map[string]endpoint{
 				endpoint1: {
 					Headers: map[string]string{
 						from: foo,

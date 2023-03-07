@@ -51,7 +51,7 @@ func TestRunningTasks(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			collectHTTPInputsHelper: collectHTTPInputsHelper{
+			endpoint: endpoint{
 				Duration: StringPointer("1s"),
 				Headers:  map[string]string{},
 				URL:      "https://httpbin.org/get",

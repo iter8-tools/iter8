@@ -21,8 +21,8 @@ type errorRange struct {
 	Upper *int `json:"upper,omitempty" yaml:"upper,omitempty"`
 }
 
-// collectHTTPInputsHelper contains the inputs for one endpoint
-type collectHTTPInputsHelper struct {
+// endpoint contains the inputs for one endpoint
+type endpoint struct {
 	// NumRequests is the number of requests to be sent to the app. Default value is 100.
 	NumRequests *int64 `json:"numRequests,omitempty" yaml:"numRequests,omitempty"`
 	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numRequests are specified, then duration is ignored.
@@ -53,10 +53,10 @@ type collectHTTPInputsHelper struct {
 
 // collectHTTPInputs contain the inputs to the metrics collection task to be executed.
 type collectHTTPInputs struct {
-	collectHTTPInputsHelper
+	endpoint
 
 	// Endpoints is used to define multiple endpoints to test
-	Endpoints map[string]collectHTTPInputsHelper `json:"endpoints" yaml:"endpoints"`
+	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
 }
 
 const (
@@ -158,7 +158,7 @@ func (t *collectHTTPTask) validateInputs() error {
 }
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
-func getFortioOptions(c collectHTTPInputsHelper) (*fhttp.HTTPRunnerOptions, error) {
+func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
@@ -233,7 +233,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 			log.Logger.Trace(fmt.Sprintf("endpoint: %s", endpointID))
 
 			// merge endpoint config with baseline config
-			if err := mergo.Merge(&endpoint, t.With.collectHTTPInputsHelper); err != nil {
+			if err := mergo.Merge(&endpoint, t.With.endpoint); err != nil {
 				log.Logger.Error(fmt.Sprintf("could not merge Fortio options for endpoint \"%s\"", endpointID))
 				return nil, err
 			}
@@ -260,7 +260,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 			results[httpMetricPrefix+"-"+endpointID] = ifr
 		}
 	} else {
-		fo, err := getFortioOptions(t.With.collectHTTPInputsHelper)
+		fo, err := getFortioOptions(t.With.endpoint)
 		if err != nil {
 			log.Logger.Error("could not get Fortio options")
 			return nil, err
