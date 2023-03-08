@@ -9,6 +9,7 @@ import (
 	"fortio.org/fortio/fhttp"
 	"fortio.org/fortio/periodic"
 	"fortio.org/fortio/stats"
+	"github.com/imdario/mergo"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
@@ -20,8 +21,8 @@ type errorRange struct {
 	Upper *int `json:"upper,omitempty" yaml:"upper,omitempty"`
 }
 
-// collectHTTPInputs contain the inputs to the metrics collection task to be executed.
-type collectHTTPInputs struct {
+// endpoint contains the inputs for one endpoint
+type endpoint struct {
 	// NumRequests is the number of requests to be sent to the app. Default value is 100.
 	NumRequests *int64 `json:"numRequests,omitempty" yaml:"numRequests,omitempty"`
 	// Duration of this task. Specified in the Go duration string format (example, 5s). If both duration and numRequests are specified, then duration is ignored.
@@ -48,6 +49,14 @@ type collectHTTPInputs struct {
 	AllowInitialErrors *bool `json:"allowInitialErrors,omitempty" yaml:"allowInitialErrors,omitempty"`
 	// Warmup indicates if task execution is for warmup purposes; if so the results will be ignored
 	Warmup *bool `json:"warmup,omitempty" yaml:"warmup,omitempty"`
+}
+
+// collectHTTPInputs contain the inputs to the metrics collection task to be executed.
+type collectHTTPInputs struct {
+	endpoint
+
+	// Endpoints is used to define multiple endpoints to test
+	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
 }
 
 const (
@@ -149,32 +158,32 @@ func (t *collectHTTPTask) validateInputs() error {
 }
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
-func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
+func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
 			RunType:     "Iter8 load test",
-			QPS:         float64(*t.With.QPS),
-			NumThreads:  *t.With.Connections,
-			Percentiles: t.With.Percentiles,
+			QPS:         float64(*c.QPS),
+			NumThreads:  *c.Connections,
+			Percentiles: c.Percentiles,
 			Out:         io.Discard,
 		},
 		HTTPOptions: fhttp.HTTPOptions{
-			URL: t.With.URL,
+			URL: c.URL,
 		},
-		AllowInitialErrors: *t.With.AllowInitialErrors,
+		AllowInitialErrors: *c.AllowInitialErrors,
 	}
 
 	// num requests
-	if t.With.NumRequests != nil {
-		fo.RunnerOptions.Exactly = *t.With.NumRequests
+	if c.NumRequests != nil {
+		fo.RunnerOptions.Exactly = *c.NumRequests
 	}
 
 	// add duration
 	var duration time.Duration
 	var err error
-	if t.With.Duration != nil {
-		duration, err = time.ParseDuration(*t.With.Duration)
+	if c.Duration != nil {
+		duration, err = time.ParseDuration(*c.Duration)
 		if err == nil {
 			fo.RunnerOptions.Duration = duration
 		} else {
@@ -184,14 +193,14 @@ func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
 	}
 
 	// content type & payload
-	if t.With.ContentType != nil {
-		fo.ContentType = *t.With.ContentType
+	if c.ContentType != nil {
+		fo.ContentType = *c.ContentType
 	}
-	if t.With.PayloadStr != nil {
-		fo.Payload = []byte(*t.With.PayloadStr)
+	if c.PayloadStr != nil {
+		fo.Payload = []byte(*c.PayloadStr)
 	}
-	if t.With.PayloadFile != nil {
-		b, err := os.ReadFile(*t.With.PayloadFile)
+	if c.PayloadFile != nil {
+		b, err := os.ReadFile(*c.PayloadFile)
 		if err != nil {
 			return nil, err
 		}
@@ -199,7 +208,7 @@ func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
 	}
 
 	// headers
-	for key, value := range t.With.Headers {
+	for key, value := range c.Headers {
 		if err = fo.AddAndValidateExtraHeader(key + ":" + value); err != nil {
 			log.Logger.WithStackTrace("unable to add header").Error(err)
 			return nil, err
@@ -210,24 +219,70 @@ func (t *collectHTTPTask) getFortioOptions() (*fhttp.HTTPRunnerOptions, error) {
 }
 
 // getFortioResults collects Fortio run results
-func (t *collectHTTPTask) getFortioResults() (*fhttp.HTTPRunnerResults, error) {
+// func (t *collectHTTPTask) getFortioResults() (*fhttp.HTTPRunnerResults, error) {
+// key is the metric prefix
+func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResults, error) {
 	// the main idea is to run Fortio with proper options
 
-	fo, err := t.getFortioOptions()
-	if err != nil {
-		return nil, err
-	}
-	log.Logger.Trace("got fortio options")
-	log.Logger.Trace("URL: ", fo.URL)
-	ifr, err := fhttp.RunHTTPTest(fo)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
-		if ifr == nil {
-			log.Logger.Error("failed to get results since fortio run was aborted")
+	var err error
+	results := map[string]*fhttp.HTTPRunnerResults{}
+	if len(t.With.Endpoints) > 0 {
+		log.Logger.Trace("multiple endpoints")
+		for endpointID, endpoint := range t.With.Endpoints {
+			endpoint := endpoint // prevent implicit memory aliasing
+			log.Logger.Trace(fmt.Sprintf("endpoint: %s", endpointID))
+
+			// merge endpoint config with baseline config
+			if err := mergo.Merge(&endpoint, t.With.endpoint); err != nil {
+				log.Logger.Error(fmt.Sprintf("could not merge Fortio options for endpoint \"%s\"", endpointID))
+				return nil, err
+			}
+
+			efo, err := getFortioOptions(endpoint)
+			if err != nil {
+				log.Logger.Error(fmt.Sprintf("could not get Fortio options for endpoint \"%s\"", endpointID))
+				return nil, err
+			}
+
+			log.Logger.Trace("got fortio options")
+			log.Logger.Trace("URL: ", efo.URL)
+
+			ifr, err := fhttp.RunHTTPTest(efo)
+			if err != nil {
+				log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
+				if ifr == nil {
+					log.Logger.Error("failed to get results since fortio run was aborted")
+				}
+			}
+
+			log.Logger.Trace("ran fortio http test")
+
+			results[httpMetricPrefix+"-"+endpointID] = ifr
 		}
+	} else {
+		fo, err := getFortioOptions(t.With.endpoint)
+		if err != nil {
+			log.Logger.Error("could not get Fortio options")
+			return nil, err
+		}
+
+		log.Logger.Trace("got fortio options")
+		log.Logger.Trace("URL: ", fo.URL)
+
+		ifr, err := fhttp.RunHTTPTest(fo)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
+			if ifr == nil {
+				log.Logger.Error("failed to get results since fortio run was aborted")
+			}
+		}
+
+		log.Logger.Trace("ran fortio http test")
+
+		results[httpMetricPrefix] = ifr
 	}
-	log.Logger.Trace("ran fortio http test")
-	return ifr, err
+
+	return results, err
 }
 
 // run executes this task
@@ -259,9 +314,9 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 	}
 	in := exp.Result.Insights
 
-	if data != nil {
+	for provider, data := range data {
 		// request count
-		m := httpMetricPrefix + "/" + builtInHTTPRequestCountID
+		m := provider + "/" + builtInHTTPRequestCountID
 		mm := MetricMeta{
 			Description: "number of requests sent",
 			Type:        CounterMetricType,
@@ -278,7 +333,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 			}
 		}
 		// error count
-		m = httpMetricPrefix + "/" + builtInHTTPErrorCountID
+		m = provider + "/" + builtInHTTPErrorCountID
 		mm = MetricMeta{
 			Description: "number of responses that were errors",
 			Type:        CounterMetricType,
@@ -288,7 +343,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		}
 
 		// error-rate
-		m = httpMetricPrefix + "/" + builtInHTTPErrorRateID
+		m = provider + "/" + builtInHTTPErrorRateID
 		rc := float64(data.DurationHistogram.Count)
 		if rc != 0 {
 			mm = MetricMeta{
@@ -301,7 +356,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		}
 
 		// mean-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyMeanID
+		m = provider + "/" + builtInHTTPLatencyMeanID
 		mm = MetricMeta{
 			Description: "mean of observed latency values",
 			Type:        GaugeMetricType,
@@ -312,7 +367,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		}
 
 		// stddev-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyStdDevID
+		m = provider + "/" + builtInHTTPLatencyStdDevID
 		mm = MetricMeta{
 			Description: "standard deviation of observed latency values",
 			Type:        GaugeMetricType,
@@ -323,7 +378,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		}
 
 		// min-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyMinID
+		m = provider + "/" + builtInHTTPLatencyMinID
 		mm = MetricMeta{
 			Description: "minimum of observed latency values",
 			Type:        GaugeMetricType,
@@ -334,7 +389,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		}
 
 		// max-latency
-		m = httpMetricPrefix + "/" + builtInHTTPLatencyMaxID
+		m = provider + "/" + builtInHTTPLatencyMaxID
 		mm = MetricMeta{
 			Description: "maximum of observed latency values",
 			Type:        GaugeMetricType,
@@ -346,7 +401,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 
 		// percentiles
 		for _, p := range data.DurationHistogram.Percentiles {
-			m = fmt.Sprintf("%v/%v%v", httpMetricPrefix, builtInHTTPLatencyPercentilePrefix, p.Percentile)
+			m = fmt.Sprintf("%v/%v%v", provider, builtInHTTPLatencyPercentilePrefix, p.Percentile)
 			mm = MetricMeta{
 				Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
 				Type:        GaugeMetricType,

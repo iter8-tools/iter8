@@ -13,6 +13,13 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	unary         = "unary"
+	server        = "server"
+	client        = "client"
+	bidirectional = "bidirectional"
+)
+
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
@@ -29,12 +36,14 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: collectGRPCInputs{Config: runner.Config{
-			Data: map[string]interface{}{"name": "bob"},
-			Call: "helloworld.Greeter.SayHello",
-			Host: internal.LocalHostPort,
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Data: map[string]interface{}{"name": "bob"},
+				Call: "helloworld.Greeter.SayHello",
+				Host: internal.LocalHostPort,
+			},
 		},
-		}}
+	}
 
 	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
 
@@ -70,6 +79,84 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Credit: Several of the tests in this file are based on
+// https://github.com/bojand/ghz/blob/master/runner/run_test.go
+func TestRunCollectGRPCEndpoints(t *testing.T) {
+	_ = os.Chdir(t.TempDir())
+	callType := helloworld.Unary
+	gs, s, err := internal.StartServer(false)
+	if err != nil {
+		assert.FailNow(t, err.Error())
+	}
+	t.Cleanup(s.Stop)
+
+	// valid collect GRPC task... should succeed
+	ct := &collectGRPCTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectGRPCTaskName),
+		},
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Host: internal.LocalHostPort,
+			},
+			Endpoints: map[string]runner.Config{
+				unary: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHello",
+				},
+				server: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHelloCS",
+				},
+				client: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHellos",
+				},
+				bidirectional: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHelloBidi",
+				},
+			},
+		},
+	}
+
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	err = ct.run(exp)
+
+	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+
+	assert.NoError(t, err)
+	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+
+	count := gs.GetCount(callType)
+	assert.Equal(t, 200, count)
+
+	grpcMethods := []string{unary, server, client, bidirectional}
+	for _, method := range grpcMethods {
+		mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCErrorCountMetricName)
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
+
+		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName)
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
+
+		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
+
+		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+		assert.NotNil(t, mm)
+		assert.NoError(t, err)
+	}
+}
+
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
@@ -84,17 +171,19 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		TaskMeta: TaskMeta{
 			Task: StringPointer(CollectGRPCTaskName),
 		},
-		With: collectGRPCInputs{Config: runner.Config{
-			N:           100,
-			RPS:         20,
-			C:           1,
-			Timeout:     runner.Duration(20 * time.Second),
-			Data:        map[string]interface{}{"name": "bob"},
-			DialTimeout: runner.Duration(20 * time.Second),
-			Call:        "helloworld.Greeter.SayHello",
-			Host:        internal.LocalHostPort,
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				N:           100,
+				RPS:         20,
+				C:           1,
+				Timeout:     runner.Duration(20 * time.Second),
+				Data:        map[string]interface{}{"name": "bob"},
+				DialTimeout: runner.Duration(20 * time.Second),
+				Call:        "helloworld.Greeter.SayHello",
+				Host:        internal.LocalHostPort,
+			},
 		},
-		}}
+	}
 
 	at := &assessTask{
 		TaskMeta: TaskMeta{
