@@ -21,9 +21,11 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("2s"),
-			Headers:  map[string]string{},
-			URL:      testURL,
+			endpoint: endpoint{
+				Duration: StringPointer("2s"),
+				Headers:  map[string]string{},
+				URL:      testURL,
+			},
 		},
 	}
 
@@ -70,9 +72,11 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 			Task: StringPointer(CollectHTTPTaskName),
 		},
 		With: collectHTTPInputs{
-			Duration: StringPointer("1s"),
-			Headers:  map[string]string{},
-			URL:      testURL,
+			endpoint: endpoint{
+				Duration: StringPointer("1s"),
+				Headers:  map[string]string{},
+				URL:      testURL,
+			},
 		},
 	}
 
