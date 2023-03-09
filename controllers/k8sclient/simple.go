@@ -19,9 +19,8 @@ type Client struct {
 }
 
 // New creates a new kubernetes client
-func New() (*Client, error) {
-	// default Helm and Kubernetes settings
-	settings := cli.New()
+func New(settings *cli.EnvSettings) (*Client, error) {
+	log.Logger.Trace("kubernetes client creation invoked ...")
 
 	// get rest config
 	restConfig, err := settings.RESTClientGetter().ToRESTConfig()
@@ -46,6 +45,8 @@ func New() (*Client, error) {
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return nil, e
 	}
+
+	log.Logger.Trace("returning kubernetes client ... ")
 
 	return &Client{
 		Clientset:     clientset,

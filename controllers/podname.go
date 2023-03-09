@@ -3,6 +3,8 @@ package controllers
 import (
 	"os"
 	"strings"
+
+	"github.com/iter8-tools/iter8/base/log"
 )
 
 const podNameEnvVariable = "PODNAME"
@@ -42,9 +44,13 @@ func getLeaderName() (string, bool) {
 }
 
 func leaderIsMe() bool {
+	log.Logger.Trace("invoking get pod name ...")
 	podName, ok := getPodName()
+	log.Logger.Trace("invoked get pod name ...")
 	if !ok {
+		log.Logger.Error("unable to retrieve pod name ...")
 		return false
 	}
+	log.Logger.Trace("found podName: ", podName)
 	return strings.HasSuffix(podName, leaderSuffix)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/informers/internalinterfaces"
 	"k8s.io/client-go/tools/cache"
@@ -30,32 +31,34 @@ func startSubjectCMController(stopCh chan struct{}, config *Config, client k8scl
 		return e
 	}
 
-	// required labels on configmaps that are being watched
-	requiredLabels := map[string]string{
-		iter8ManagedByLabel: iter8ManagedByValue,
-		iter8KindLabel:      iter8KindValue,
-		iter8VersionLabel:   iter8VersionValue,
-	}
-	labelSelector := metav1.SetAsLabelSelector(requiredLabels)
+	// specify required labels on configmaps that are being watched
 	tlo := internalinterfaces.TweakListOptionsFunc(func(opts *metav1.ListOptions) {
-		opts.LabelSelector = labelSelector.String()
+		opts.LabelSelector = labels.Set(map[string]string{
+			iter8ManagedByLabel: iter8ManagedByValue,
+			iter8KindLabel:      iter8KindValue,
+			iter8VersionLabel:   iter8VersionValue,
+		}).String()
 	})
 
 	// fire up subject-configmap informer
 	// config.AppNamespace could equal metav1.NamespaceAll ("") or a specific namespace
 	factory := informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(config.AppNamespace), informers.WithTweakListOptions(tlo))
+	// factory := informers.NewSharedInformerFactory(client, defaultResync)
 	inf := factory.Core().V1().ConfigMaps().Informer()
 	inf.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(cmObj interface{}) {
-			allSubs.makeSubject(cmObj)
+		AddFunc: func(obj interface{}) {
+			allSubs.makeSubject(obj)
 		},
-		UpdateFunc: func(oldCMObj interface{}, newCMObj interface{}) {
-			allSubs.makeSubject(newCMObj)
+		UpdateFunc: func(old, new interface{}) {
+			allSubs.makeSubject(new)
 		},
-		DeleteFunc: func(cmObj interface{}) {
-			allSubs.deleteSubject(cmObj)
+		DeleteFunc: func(obj interface{}) {
+			allSubs.deleteSubject(obj)
 		},
 	})
+
+	log.Logger.Trace("starting subject cm informer factory ...")
 	factory.Start(stopCh)
+	log.Logger.Trace("started subject cm informer factory ...")
 	return nil
 }

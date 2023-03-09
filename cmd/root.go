@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/iter8-tools/iter8/driver"
 
 	"github.com/iter8-tools/iter8/base/log"
@@ -23,6 +24,8 @@ var (
 	kd = driver.NewKubeDriver(settings)
 	// output stream where log messages are printed
 	outStream io.Writer = os.Stdout
+	// kubeclient is the client used for controllers package
+	kubeClient k8sclient.Interface
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -81,4 +84,6 @@ func init() {
 	// add version
 	rootCmd.AddCommand(newVersionCmd())
 
+	// add controllers
+	rootCmd.AddCommand(newControllersCmd(kubeClient))
 }

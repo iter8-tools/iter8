@@ -19,7 +19,7 @@ var allSubs = make(allSubjects)
 // one per gvr known to Iter8
 var appInformers = make(map[string]informers.GenericInformer)
 
-func initAppInformers(stopCh chan struct{}, config *Config, client k8sclient.Interface) error {
+func initAppInformers(stopCh <-chan struct{}, config *Config, client k8sclient.Interface) error {
 	// get defaultResync duration
 	defaultResync, err := time.ParseDuration(config.DefaultResync)
 	if err != nil {
@@ -40,6 +40,7 @@ func initAppInformers(stopCh chan struct{}, config *Config, client k8sclient.Int
 	// fire up informers
 	// config.AppNamespace could equal metav1.NamespaceAll ("") or a specific namespace
 	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, defaultResync, config.AppNamespace, tlo)
+	// factory := dynamicinformer.NewDynamicSharedInformerFactory(client, defaultResync)
 	// this map contains an informer for each gvr watched by the controller
 
 	for gvkrShort, gvkr := range config.KnownGVKRs {
@@ -49,7 +50,9 @@ func initAppInformers(stopCh chan struct{}, config *Config, client k8sclient.Int
 			Resource: gvkr.Resource,
 		})
 	}
+	log.Logger.Trace("starting app informers factory ...")
 	factory.Start(stopCh)
+	log.Logger.Trace("started app informers factory ...")
 	return nil
 }
 
@@ -69,15 +72,22 @@ func Start(stopCh chan struct{}, client k8sclient.Interface) error {
 	// for e.g.,
 	// go startABnController(stopCh, config, client)
 
+	log.Logger.Trace("starting app informers ... ")
 	initAppInformers(stopCh, config, client)
+	log.Logger.Trace("started app informers ... ")
 
+	log.Logger.Trace("spawning subject cm controller ... ")
 	go startSubjectCMController(stopCh, config, client)
+	log.Logger.Trace("spawned subject cm controller ... ")
 
+	log.Logger.Trace("checking if leader is me ...")
 	// Only the leader pod starts SSA controller
 	if leaderIsMe() {
+		log.Logger.Trace("leader is me ... ")
 
+		log.Logger.Trace("invoking add SSA event handlers ... ")
 		// add server-side apply event handlers
-		return addSSAEventHandlers(stopCh, config, client)
+		return addSSAEventHandlers(config, client)
 
 	}
 

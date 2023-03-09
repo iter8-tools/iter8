@@ -13,7 +13,7 @@ const (
 	iter8DetectValue = "true"
 )
 
-func addSSAEventHandlers(stopCh chan struct{}, config *Config, client k8sclient.Interface) error {
+func addSSAEventHandlers(config *Config, client k8sclient.Interface) error {
 	for gvkrShort, _ := range config.KnownGVKRs {
 		if _, ok := appInformers[gvkrShort]; !ok {
 			err := errors.New("appInformers map does not have an informer for type: " + gvkrShort)
