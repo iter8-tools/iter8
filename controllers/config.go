@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -15,10 +16,16 @@ const (
 )
 
 type GroupVersionKindResource struct {
-	Group    string `json:"group,omitempty"`
-	Version  string `json:"version,omitempty"`
-	Resource string `json:"resource,omitempty"`
-	Kind     string `json:"kind,omitempty"`
+	Group      string      `json:"group,omitempty"`
+	Version    string      `json:"version,omitempty"`
+	Resource   string      `json:"resource,omitempty"`
+	Kind       string      `json:"kind,omitempty"`
+	Conditions []Condition `json:"conditions,omitempty"`
+}
+
+type Condition struct {
+	Name   string `json:"name"`
+	Status string `json:"name"`
 }
 
 // placeholders
@@ -74,4 +81,13 @@ func (c *Config) mapGVKToGVR(gvk schema.GroupVersionKind) (*schema.GroupVersionR
 	err := errors.New("unable to map gvk to gvr: " + gvk.String())
 	log.Logger.Error(err)
 	return nil, err
+}
+
+func (g *GroupVersionKindResource) matches(u *unstructured.Unstructured) bool {
+	return g.Kind == u.GetKind() &&
+		u.GetAPIVersion() ==
+			(schema.GroupVersion{
+				Group:   g.Group,
+				Version: g.Version,
+			}).String()
 }

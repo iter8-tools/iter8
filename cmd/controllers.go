@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,10 +26,10 @@ func newControllersCmd(kClient k8sclient.Interface) *cobra.Command {
 		Short: "Start Iter8 controllers",
 		Long:  abnDesc,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			stopCh := make(chan struct{})
-			defer close(stopCh)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
 
-			if err := controllers.Start(stopCh, kClient); err != nil {
+			if err := controllers.Start(ctx.Done(), kClient); err != nil {
 				log.Logger.Error("controllers did not start ... ")
 				return err
 			}
