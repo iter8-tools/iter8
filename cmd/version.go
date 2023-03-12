@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"runtime"
+	"runtime/debug"
 
 	"github.com/spf13/cobra"
 
@@ -53,6 +54,8 @@ func newVersionCmd() *cobra.Command {
 			fmt.Println()
 			fmt.Println(gitCommit)
 			fmt.Println()
+			info, _ := debug.ReadBuildInfo()
+			fmt.Println(info)
 			return nil
 		},
 	}

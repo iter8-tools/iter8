@@ -29,6 +29,15 @@ func newControllersCmd(kClient k8sclient.Interface) *cobra.Command {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
+			if kClient == nil {
+				var err error
+				kClient, err = k8sclient.New(settings)
+				if err != nil {
+					log.Logger.Error("could not obtain Kube client ... ")
+					return err
+				}
+			}
+
 			if err := controllers.Start(ctx.Done(), kClient); err != nil {
 				log.Logger.Error("controllers did not start ... ")
 				return err
