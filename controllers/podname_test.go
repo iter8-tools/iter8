@@ -80,18 +80,23 @@ func TestLeaderIsMe(t *testing.T) {
 	var tests = []struct {
 		a string
 		b bool
+		c bool
 	}{
-		{"x-0", true},
-		{"x-y-0", true},
-		{"x-1", false},
-		{"x-y-1", false},
-		{"x", false},
-		{"", false},
+		{"x-0", true, false},
+		{"x-y-0", true, false},
+		{"x-1", false, false},
+		{"x-y-1", false, false},
+		{"x", false, false},
+		{"", false, true},
 	}
 
 	for _, e := range tests {
 		os.Setenv(podNameEnvVariable, e.a)
-		assert.Equal(t, e.b, leaderIsMe())
+		leaderStatus, err := leaderIsMe()
+		assert.Equal(t, e.b, leaderStatus)
+		if e.c {
+			assert.Error(t, err)
+		}
 	}
 
 }

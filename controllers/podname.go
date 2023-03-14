@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -43,14 +44,15 @@ func getLeaderName() (string, bool) {
 	return statefulSetName + statefulSetSep + "0", true
 }
 
-func leaderIsMe() bool {
+func leaderIsMe() (bool, error) {
 	log.Logger.Trace("invoking get pod name ...")
 	podName, ok := getPodName()
 	log.Logger.Trace("invoked get pod name ...")
 	if !ok {
-		log.Logger.Error("unable to retrieve pod name ...")
-		return false
+		e := errors.New("unable to retrieve pod name")
+		log.Logger.Error(e)
+		return false, e
 	}
 	log.Logger.Trace("found podName: ", podName)
-	return strings.HasSuffix(podName, leaderSuffix)
+	return strings.HasSuffix(podName, leaderSuffix), nil
 }

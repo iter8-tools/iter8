@@ -1,1 +1,14 @@
-defaultResync: 20s
+defaultResync: 30s
+knownGVRs:
+  deploy:
+    group: apps
+    version: v1
+    resource: deployments
+  svc:
+    group: ""
+    version: v1
+    resource: services
+  vs:
+    group: networking.istio.io
+    version: v1beta1
+    resource: virtualservices    

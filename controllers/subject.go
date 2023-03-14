@@ -15,22 +15,22 @@ type subject struct {
 	Variants          []variant      `json:"variants,omitempty"`
 	SSAs              map[string]ssa `json:"ssas,omitempty"`
 	weights           []uint32
-	normalizedWeights []uint32
+	NormalizedWeights []uint32
 }
 
 type variant struct {
 	Resources []resource `json:"resources,omitempty"`
-	Weight    *uint32    `json:"resources,omitempty"`
+	Weight    *uint32    `json:"weight,omitempty"`
 }
 
 type resource struct {
-	GVKRShort string `json:"gvkrShort"`
-	Name      string `json:"name"`
+	GVRShort string `json:"gvrShort"`
+	Name     string `json:"name"`
 }
 
 type ssa struct {
-	GVKRShort string `json:"gvkrShort"`
-	Template  string `json:"template"`
+	GVRShort string `json:"gvrShort"`
+	Template string `json:"template"`
 }
 
 /* types: end */

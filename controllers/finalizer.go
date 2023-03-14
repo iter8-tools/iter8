@@ -2,88 +2,120 @@ package controllers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
-	"golang.org/x/exp/slices"
+	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/util/retry"
 )
 
-func addFinalizer(obj interface{}, gvkrShort string, client k8sclient.Interface, config *Config) {
+func addFinalizer(name string, namespace string, gvrShort string, client k8sclient.Interface, config *Config) {
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		u := obj.(*unstructured.Unstructured)
-		// check if there's a deletionTimeStamp
-		// if not, add finalizer
-		finalizers := append(u.GetFinalizers(), iter8FinalizerStr)
-		update := false
-		if u.GetDeletionTimestamp() == nil {
-			for _, f := range finalizers {
-				if f == iter8FinalizerStr {
-					break
-				}
-			}
-			update = true
+		// first, get the object
+		u, e := client.Resource(schema.GroupVersionResource{
+			Group:    config.KnownGVRs[gvrShort].Group,
+			Version:  config.KnownGVRs[gvrShort].Version,
+			Resource: config.KnownGVRs[gvrShort].Resource,
+		}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		if e != nil {
+			return e
 		}
 
-		if update {
-			finalizers = append(finalizers, iter8FinalizerStr)
+		// get old and new finalizers
+		oldFinalizers := map[string]bool{}
+		newFinalizers := map[string]bool{}
+		if u.GetDeletionTimestamp() == nil {
+			for _, f := range u.GetFinalizers() {
+				oldFinalizers[f] = true
+				newFinalizers[f] = true
+			}
+			// insert Iter8 finalizer
+			newFinalizers[iter8FinalizerStr] = true
+		}
+
+		// the only way newFinalizers could be of a different length is if
+		// oldFinalizers didn't have iter8FinalizerStr
+		if len(oldFinalizers) != len(newFinalizers) {
+			log.Logger.Trace("oldFinalizers: ", oldFinalizers)
+			log.Logger.Trace("newFinalizers: ", newFinalizers)
+			finalizers := []string{}
+			for key := range newFinalizers {
+				finalizers = append(finalizers, key)
+			}
 			u.SetFinalizers(finalizers)
+			log.Logger.Trace("attempting to update resource with finalizer")
 			_, e := client.Resource(schema.GroupVersionResource{
-				Group:    config.KnownGVKRs[gvkrShort].Group,
-				Version:  config.KnownGVKRs[gvkrShort].Version,
-				Resource: config.KnownGVKRs[gvkrShort].Resource,
+				Group:    config.KnownGVRs[gvrShort].Group,
+				Version:  config.KnownGVRs[gvrShort].Version,
+				Resource: config.KnownGVRs[gvrShort].Resource,
 			}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
-			log.Logger.WithStackTrace("failed to add finalizer").Error(e)
+			if e != nil {
+				log.Logger.WithStackTrace(e.Error()).Error("error while updating resource with finalizer")
+			}
 			return e
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.Logger.WithStackTrace("failed to add finalizer with retry").Error(err)
+		if kubeerrors.IsNotFound(err) {
+			log.Logger.Debug(err)
+		} else {
+			log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to add finalizer with retry"))
+		}
 	}
 }
 
-func removeFinalizer(obj interface{}, gvkrShort string, client k8sclient.Interface, config *Config) {
+func removeFinalizer(name string, namespace string, gvrShort string, client k8sclient.Interface, config *Config) {
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		u := obj.(*unstructured.Unstructured)
-		finalizers := make([]string, len(u.GetFinalizers()))
-		copy(finalizers, u.GetFinalizers())
-
-		for oneMoreLoop := true; oneMoreLoop; {
-			// have elements been deleted from finalizers in this loop? No to begin with
-			deleted := false
-			// go through finalizers and delete iter8 finalizer string if found
-			for i, s := range finalizers {
-				if s == iter8FinalizerStr {
-					slices.Delete(finalizers, i, i+1)
-					// deleted something
-					deleted = true
-					// this loop is over
-					break
-				}
-			}
-			// start over if deleted an item in this loop
-			// iter8FinalizerStr may be repeated in the slice
-			oneMoreLoop = deleted
-		}
-
-		if len(finalizers) != len(u.GetFinalizers()) {
-			u.SetFinalizers(finalizers)
-			_, e := client.Resource(schema.GroupVersionResource{
-				Group:    config.KnownGVKRs[gvkrShort].Group,
-				Version:  config.KnownGVKRs[gvkrShort].Version,
-				Resource: config.KnownGVKRs[gvkrShort].Resource,
-			}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
-			log.Logger.WithStackTrace("failed finalizers deletion").Error(e)
+		// first, get the object
+		u, e := client.Resource(schema.GroupVersionResource{
+			Group:    config.KnownGVRs[gvrShort].Group,
+			Version:  config.KnownGVRs[gvrShort].Version,
+			Resource: config.KnownGVRs[gvrShort].Resource,
+		}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		if e != nil && kubeerrors.IsNotFound(e) {
+			return nil
+		} else if e != nil {
 			return e
 		}
-		return nil
+
+		if u.GetDeletionTimestamp() == nil {
+			log.Logger.Trace("object not terminating; will not remove finalizer")
+			return nil
+		}
+
+		// remove iter8 finalizer
+		finalizersMap := map[string]bool{}
+		for _, f := range u.GetFinalizers() {
+			if f != iter8FinalizerStr {
+				finalizersMap[f] = true
+			}
+		}
+		finalizers := make([]string, len(finalizersMap))
+		for key := range finalizersMap {
+			finalizers = append(finalizers, key)
+		}
+
+		// set new finalizers
+		u.SetFinalizers(finalizers)
+		_, e = client.Resource(schema.GroupVersionResource{
+			Group:    config.KnownGVRs[gvrShort].Group,
+			Version:  config.KnownGVRs[gvrShort].Version,
+			Resource: config.KnownGVRs[gvrShort].Resource,
+		}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
+
+		if e != nil && kubeerrors.IsNotFound(e) {
+			return nil
+		}
+		return e
 	})
+
 	if err != nil {
-		log.Logger.WithStackTrace("failed finalizers deletion with retry").Error(err)
+		log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to delete finalizer with retry"))
 	}
+
 }
