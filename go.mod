@@ -36,6 +36,7 @@ require (
 	golang.org/x/net v0.7.0
 	golang.org/x/text v0.7.0
 	google.golang.org/grpc v1.53.0
+	google.golang.org/grpc/examples v1.53.0
 	google.golang.org/protobuf v1.28.1
 	helm.sh/helm/v3 v3.11.1
 	k8s.io/api v0.26.0
@@ -45,7 +46,7 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.107.0 // indirect
+	cloud.google.com/go/compute v1.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	fortio.org/dflag v1.5.2 // indirect
 	fortio.org/log v1.3.0 // indirect
