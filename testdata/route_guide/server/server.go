@@ -37,8 +37,8 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/kalantar/iter8/testdata/data"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/examples/data"
 
 	"github.com/golang/protobuf/proto"
 

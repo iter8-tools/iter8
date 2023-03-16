@@ -30,11 +30,11 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/kalantar/iter8/testdata/data"
 	pb "github.com/kalantar/iter8/testdata/route_guide/routeguide"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/examples/data"
 )
 
 var (
