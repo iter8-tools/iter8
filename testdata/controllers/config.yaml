@@ -1,5 +1,5 @@
 defaultResync: 30s
-knownGVRs:
+resourceTypes:
   deploy:
     group: apps
     version: v1
@@ -8,7 +8,11 @@ knownGVRs:
     group: ""
     version: v1
     resource: services
+  isvc:
+    group: serving.kserve.io
+    version: v1beta1
+    resource: inferenceservices
   vs:
     group: networking.istio.io
     version: v1beta1
-    resource: virtualservices    
+    resource: virtualservices

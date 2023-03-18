@@ -16,9 +16,9 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		// first, get the object
 		u, e := client.Resource(schema.GroupVersionResource{
-			Group:    config.KnownGVRs[gvrShort].Group,
-			Version:  config.KnownGVRs[gvrShort].Version,
-			Resource: config.KnownGVRs[gvrShort].Resource,
+			Group:    config.ResourceTypes[gvrShort].Group,
+			Version:  config.ResourceTypes[gvrShort].Version,
+			Resource: config.ResourceTypes[gvrShort].Resource,
 		}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 		if e != nil {
 			return e
@@ -48,9 +48,9 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 			u.SetFinalizers(finalizers)
 			log.Logger.Trace("attempting to update resource with finalizer")
 			_, e := client.Resource(schema.GroupVersionResource{
-				Group:    config.KnownGVRs[gvrShort].Group,
-				Version:  config.KnownGVRs[gvrShort].Version,
-				Resource: config.KnownGVRs[gvrShort].Resource,
+				Group:    config.ResourceTypes[gvrShort].Group,
+				Version:  config.ResourceTypes[gvrShort].Version,
+				Resource: config.ResourceTypes[gvrShort].Resource,
 			}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
 			if e != nil {
 				log.Logger.WithStackTrace(e.Error()).Error("error while updating resource with finalizer")
@@ -73,9 +73,9 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		// first, get the object
 		u, e := client.Resource(schema.GroupVersionResource{
-			Group:    config.KnownGVRs[gvrShort].Group,
-			Version:  config.KnownGVRs[gvrShort].Version,
-			Resource: config.KnownGVRs[gvrShort].Resource,
+			Group:    config.ResourceTypes[gvrShort].Group,
+			Version:  config.ResourceTypes[gvrShort].Version,
+			Resource: config.ResourceTypes[gvrShort].Resource,
 		}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 		if e != nil && kubeerrors.IsNotFound(e) {
 			return nil
@@ -103,9 +103,9 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 		// set new finalizers
 		u.SetFinalizers(finalizers)
 		_, e = client.Resource(schema.GroupVersionResource{
-			Group:    config.KnownGVRs[gvrShort].Group,
-			Version:  config.KnownGVRs[gvrShort].Version,
-			Resource: config.KnownGVRs[gvrShort].Resource,
+			Group:    config.ResourceTypes[gvrShort].Group,
+			Version:  config.ResourceTypes[gvrShort].Version,
+			Resource: config.ResourceTypes[gvrShort].Resource,
 		}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
 
 		if e != nil && kubeerrors.IsNotFound(e) {

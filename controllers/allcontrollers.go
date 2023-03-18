@@ -54,16 +54,11 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 
 	// fire up informers
 	// config.AppNamespace could equal nil or a specific namespace
-	var factory dynamicinformer.DynamicSharedInformerFactory
-	if config.AppNamespace == nil {
-		factory = dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, defaultResync, metav1.NamespaceAll, tlo)
-	} else {
-		factory = dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, defaultResync, *config.AppNamespace, tlo)
-	}
+	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, defaultResync, metav1.NamespaceAll, tlo)
 	// factory := dynamicinformer.NewDynamicSharedInformerFactory(client, defaultResync)
 	// this map contains an informer for each gvr watched by the controller
 
-	for gvrShort, gvr := range config.KnownGVRs {
+	for gvrShort, gvr := range config.ResourceTypes {
 		gvrShort := gvrShort
 		appInformers[gvrShort] = factory.ForResource(schema.GroupVersionResource{
 			Group:    gvr.Group,
@@ -144,12 +139,7 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 
 	// fire up subject-configmap informer
 	// config.AppNamespace could equal metav1.NamespaceAll ("") or a specific namespace
-	var factory informers.SharedInformerFactory
-	if config.AppNamespace == nil {
-		factory = informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(metav1.NamespaceAll), informers.WithTweakListOptions(tlo))
-	} else {
-		factory = informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(*config.AppNamespace), informers.WithTweakListOptions(tlo))
-	}
+	factory := informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(metav1.NamespaceAll), informers.WithTweakListOptions(tlo))
 	si := factory.Core().V1().ConfigMaps()
 	si.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -160,7 +150,6 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 				log.Logger.Error("unable to create subject from configmap; ", "namespace: ", obj.(*corev1.ConfigMap).Namespace, "; name: ", obj.(*corev1.ConfigMap).Name)
 				return
 			}
-			log.Logger.Trace("made subject: ", s)
 			s.reconcile(config, client)
 		},
 		UpdateFunc: func(oldObj interface{}, newObj interface{}) {

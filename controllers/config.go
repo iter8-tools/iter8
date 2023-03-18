@@ -27,9 +27,8 @@ type Condition struct {
 
 // placeholders
 type Config struct {
-	AppNamespace *string `json:"appNamespace,omitempty"`
 	// map from shortnames of Kubernetes API resources to their GVRs
-	KnownGVRs map[string]GroupVersionResourceConditions `json:"knownGVRs,omitempty"`
+	ResourceTypes map[string]GroupVersionResourceConditions `json:"resourceTypes,omitempty"`
 	// Default Resync period for controller watch functions
 	DefaultResync string `json:"defaultResync,omitempty"`
 }
