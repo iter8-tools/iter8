@@ -89,19 +89,20 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 		}
 
 		// remove iter8 finalizer
-		finalizersMap := map[string]bool{}
+		var finalizers []string = nil
 		for _, f := range u.GetFinalizers() {
 			if f != iter8FinalizerStr {
-				finalizersMap[f] = true
+				finalizers = append(finalizers, f)
 			}
 		}
-		finalizers := make([]string, len(finalizersMap))
-		for key := range finalizersMap {
-			finalizers = append(finalizers, key)
+
+		// but if the finalizers have length null, remove
+		if len(finalizers) == 0 {
+			u.SetFinalizers(nil)
+		} else {
+			u.SetFinalizers(finalizers)
 		}
 
-		// set new finalizers
-		u.SetFinalizers(finalizers)
 		_, e = client.Resource(schema.GroupVersionResource{
 			Group:    config.ResourceTypes[gvrShort].Group,
 			Version:  config.ResourceTypes[gvrShort].Version,

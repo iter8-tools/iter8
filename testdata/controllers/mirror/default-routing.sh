@@ -74,7 +74,7 @@ data:
                   host: httpbin
                   subset: v1
                 weight: 100
-              {{- if gt (index .NormalizedWeights 1) 0 }}
+              {{- if gt (index .Weights 1) 0 }}
               mirror:
                 host: httpbin
                 subset: v2
