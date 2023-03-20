@@ -1,3 +1,5 @@
+# Start iter8 controller
+PODNAME=blue-leader-0 CONFIG_FILE=testdata/controllers/config.yaml go run main.go controllers -l trace
 # initialize primary v1
 ./initialize.sh
 # query
@@ -16,10 +18,4 @@ source query.sh
 
 # promote v2
 ./promote-v2.sh
-kubectl delete isvc wisdom-candidate
-
-# candidate v3
-./v3-candidate.sh
-
-# delete v3
 kubectl delete isvc wisdom-candidate
