@@ -58,7 +58,7 @@ data:
         namespace: candidate
     # routing templates
     ssas:
-      mirror-wisdom:
+      wisdom:
         gvrShort: vs
         template: |
           apiVersion: networking.istio.io/v1beta1
@@ -68,24 +68,40 @@ data:
           spec:
             gateways:
             - mesh
-            - knative-serving/knative-ingress-gateway
-            - knative-serving/knative-local-gateway
             hosts:
             - wisdom.default
+            - wisdom.default.svc
             - wisdom.default.svc.cluster.local
             http:
             - route:
               - destination:
-                  host: knative-local-gateway.istio-system.svc.cluster.local
-                headers:
-                  request:
-                    set:
-                      Host: wisdom-predictor-default.primary.svc.cluster.local
+                  host: wisdom-predictor-default.primary.svc.cluster.local
+              rewrite:
+                authority: wisdom-predictor-default.primary.svc.cluster.local
               {{- if gt (index .Weights 1) 0 }}
               mirror:
-                host: wisdom-predictor-default-00001.candidate
+                host: knative-local-gateway.istio-system.svc.cluster.local
               mirrorPercentage:
                 value: {{ index .Weights 1 }}
               {{- end }}
-immutable: true            
+immutable: true
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: wisdom-mirror
+spec:
+  gateways:
+  - knative-serving/knative-local-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - authority:
+        prefix: wisdom-predictor-default.primary.svc.cluster.local-shadow
+    route:
+    - destination:
+        host: wisdom-predictor-default.candidate.svc.cluster.local
+    rewrite:
+      authority: wisdom-predictor-default.candidate.svc.cluster.local
 EOF
