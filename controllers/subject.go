@@ -213,6 +213,14 @@ func (s *subject) reconcile(config *Config, client k8sclient.Interface) {
 							Resource: gvrc.Resource,
 						}
 						result := buf.String()
+						if len(result) == 0 || result == "<nil>" {
+							log.Logger.Debug("template execution did not yield result: ", ssaName)
+							continue
+						}
+						if obj.GetName() == "" {
+							log.Logger.Error("template execution yielded object with no name")
+							continue
+						}
 						if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(result), metav1.PatchOptions{
 							FieldManager: "iter8-controller",
 							Force:        base.BoolPointer(true),

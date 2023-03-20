@@ -154,6 +154,10 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 		},
 		UpdateFunc: func(oldObj interface{}, newObj interface{}) {
 			s := allSubjects.makeAndUpdateWith(newObj.(*corev1.ConfigMap))
+			if s == nil {
+				log.Logger.Error("unable to create subject from configmap; ", "namespace: ", newObj.(*corev1.ConfigMap).Namespace, "; name: ", newObj.(*corev1.ConfigMap).Name)
+				return
+			}
 			s.reconcile(config, client)
 		},
 		DeleteFunc: func(obj interface{}) {
