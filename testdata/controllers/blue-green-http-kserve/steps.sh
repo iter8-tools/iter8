@@ -12,8 +12,7 @@ source query.sh
 ./v2-candidate.sh
 
 # bump up traffic for candidate v2
-kubectl annotate --overwrite isvc wisdom-primary iter8.tools/weight='20'
-kubectl annotate --overwrite isvc wisdom-candidate iter8.tools/weight='80'
+./bumpweights.sh
 
 # promote v2
 ./promote-v2.sh

@@ -13,4 +13,4 @@ source query.sh
 
 # promote v2
 ./promote-v2.sh
-kubectl delete ns candidate
+kubectl delete isvc wisdom-candidate

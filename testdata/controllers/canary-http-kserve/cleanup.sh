@@ -1,6 +1,6 @@
 #!/bin/sh
-kubectl delete ns primary candidate
+kubectl delete isvc wisdom-primary wisdom-candidate
 kubectl delete deploy sleep
 kubectl delete svc wisdom
-kubectl delete vs wisdom wisdom-mirror
+kubectl delete vs wisdom
 kubectl delete cm wisdom wisdom-input
