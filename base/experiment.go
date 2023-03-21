@@ -141,6 +141,8 @@ type Rewards struct {
 	// Min is list of reward metrics where the version with the minimum value wins
 	Min []string `json:"min,omitempty" yaml:"min,omitempty"`
 }
+
+// RewardsWinners are indices of the best versions for each reward metric
 type RewardsWinners struct {
 	// Max rewards
 	// Max[i] specifies the index of the winner of reward metric Rewards.Max[i]

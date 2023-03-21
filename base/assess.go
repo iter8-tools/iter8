@@ -106,8 +106,8 @@ func evaluateRewards(exp *Experiment, rewards []string, max bool) []int {
 }
 
 func identifyWinner(e *Experiment, reward string, max bool) int {
-	var currentWinner int = -1
-	var currentWinningValue *float64 = nil
+	currentWinner := -1
+	var currentWinningValue *float64
 
 	for j := 0; j < e.Result.Insights.NumVersions; j++ {
 		val := e.Result.Insights.ScalarMetricValue(j, reward)
