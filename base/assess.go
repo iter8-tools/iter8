@@ -77,14 +77,19 @@ func (t *assessTask) run(exp *Experiment) error {
 	}
 
 	// set SLOsSatisfied
-	exp.Result.Insights.SLOsSatisfied = &SLOResults{
-		Upper: evaluateSLOs(exp, t.With.SLOs.Upper, true),
-		Lower: evaluateSLOs(exp, t.With.SLOs.Lower, false),
+	if t.With.SLOs != nil {
+		exp.Result.Insights.SLOsSatisfied = &SLOResults{
+			Upper: evaluateSLOs(exp, t.With.SLOs.Upper, true),
+			Lower: evaluateSLOs(exp, t.With.SLOs.Lower, false),
+		}
 	}
 
-	exp.Result.Insights.RewardsWinners = &RewardsWinners{
-		Max: evaluateRewards(exp, t.With.Rewards.Max, true),
-		Min: evaluateRewards(exp, t.With.Rewards.Min, false),
+	// set RewardsWinners
+	if t.With.Rewards != nil {
+		exp.Result.Insights.RewardsWinners = &RewardsWinners{
+			Max: evaluateRewards(exp, t.With.Rewards.Max, true),
+			Min: evaluateRewards(exp, t.With.Rewards.Min, false),
+		}
 	}
 
 	return err

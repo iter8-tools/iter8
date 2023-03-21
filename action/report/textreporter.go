@@ -241,9 +241,14 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 
 // given list of metric names, get list of reward winners
 func getBestVersions(metrics []string, in *base.Insights) []string {
+	results := make([]string, len(metrics))
+	if in.Rewards == nil {
+		return results
+	}
+
 	rewards := *in.Rewards
 	winners := *in.RewardsWinners
-	results := make([]string, len(metrics))
+
 	for i, mn := range metrics {
 		j := indexString(rewards.Max, mn)
 		if j >= 0 {

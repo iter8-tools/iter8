@@ -11,6 +11,12 @@ spec:
   # the metrics collected in the above task
   - task: assess
     with:
+      rewards:
+        max:
+        - "http/latency-mean"
+        - "http/latency-p50"
+        min:
+        - "http/error-rate"
       SLOs:
         Upper:
         - metric: "http/error-rate"
@@ -41,10 +47,10 @@ result:
       - "http/error-rate"
     rewardsWinners:
       max:
-      - "current"
-      - "current"
+      - 0
+      - 0
       min:
-      - "current"
+      - 0
     SLOs:
       upper:
       - metric: "http/error-rate"
