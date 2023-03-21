@@ -2,7 +2,6 @@ package base
 
 import (
 	"errors"
-	"math"
 
 	"github.com/iter8-tools/iter8/base/log"
 )
@@ -102,11 +101,8 @@ func evaluateRewards(exp *Experiment, rewards []string, max bool) []int {
 }
 
 func identifyWinner(e *Experiment, reward string, max bool) int {
-	currentWinner := -1
-	currentWinningValue := -1 * math.MaxFloat64
-	if !max {
-		currentWinningValue = math.MaxFloat64
-	}
+	var currentWinner int = -1
+	var currentWinningValue *float64 = nil
 
 	for j := 0; j < e.Result.Insights.NumVersions; j++ {
 		val := e.Result.Insights.ScalarMetricValue(j, reward)
@@ -114,8 +110,8 @@ func identifyWinner(e *Experiment, reward string, max bool) int {
 			log.Logger.Warnf("unable to find value for version %v and metric %s", j, reward)
 			continue
 		}
-		if j == 0 || (max && *val > currentWinningValue) || (!max && *val < currentWinningValue) {
-			currentWinningValue = *val
+		if currentWinningValue == nil || (max && *val > *currentWinningValue) || (!max && *val < *currentWinningValue) {
+			currentWinningValue = val
 			currentWinner = j
 		}
 	}

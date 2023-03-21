@@ -247,11 +247,19 @@ func getBestVersions(metrics []string, in *base.Insights) []string {
 	for i, mn := range metrics {
 		j := indexString(rewards.Max, mn)
 		if j >= 0 {
-			results[i] = in.TrackVersionStr(winners.Max[j])
+			if winners.Max[j] == -1 {
+				results[i] = "insufficient data"
+			} else {
+				results[i] = in.TrackVersionStr(winners.Max[j])
+			}
 		} else {
 			j = indexString(rewards.Min, mn)
 			if j >= 0 {
-				results[i] = in.TrackVersionStr(winners.Min[j])
+				if winners.Min[j] == -1 {
+					results[i] = "insufficient data"
+				} else {
+					results[i] = in.TrackVersionStr(winners.Min[j])
+				}
 			} else {
 				results[i] = "n/a"
 			}
