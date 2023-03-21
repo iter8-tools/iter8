@@ -228,7 +228,7 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 			for j := 0; j < in.NumVersions; j++ {
 				fmt.Fprintf(w, "\t %v", tr.ScalarMetricValueStr(j, mn))
 			}
-			if in.Rewards != nil {
+			if in.NumVersions > 1 && in.Rewards != nil {
 				fmt.Fprintf(w, "\t %s", bestVersions[i])
 			}
 			fmt.Fprintln(w)
