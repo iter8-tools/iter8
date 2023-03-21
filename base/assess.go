@@ -2,12 +2,16 @@ package base
 
 import (
 	"errors"
+	"math"
 
 	"github.com/iter8-tools/iter8/base/log"
 )
 
 // assessInputs contain the inputs to the assess-app-versions task to be executed.
 type assessInputs struct {
+	// Rewards are the reward metrics
+	Rewards *Rewards `json:"rewards,omitempty" yaml:"rewards,omitempty"`
+
 	// SLOs are the SLO limits
 	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
 }
@@ -55,6 +59,12 @@ func (t *assessTask) run(exp *Experiment) error {
 		return nil
 	}
 
+	// set rewards (if needed)
+	err = exp.Result.Insights.setRewards(t.With.Rewards)
+	if err != nil {
+		return err
+	}
+
 	// set SLOs (if needed)
 	err = exp.Result.Insights.setSLOs(t.With.SLOs)
 	if err != nil {
@@ -73,7 +83,44 @@ func (t *assessTask) run(exp *Experiment) error {
 		Lower: evaluateSLOs(exp, t.With.SLOs.Lower, false),
 	}
 
+	exp.Result.Insights.RewardsWinners = &RewardsWinners{
+		Max: evaluateRewards(exp, t.With.Rewards.Max, true),
+		Min: evaluateRewards(exp, t.With.Rewards.Min, false),
+	}
+
 	return err
+}
+
+func evaluateRewards(exp *Experiment, rewards []string, max bool) []int {
+	winners := make([]int, len(rewards))
+	for i := 0; i < len(rewards); i++ {
+		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
+			winners[i] = identifyWinner(exp, rewards[i], max)
+		}
+	}
+	return winners
+}
+
+func identifyWinner(e *Experiment, reward string, max bool) int {
+	currentWinner := -1
+	currentWinningValue := -1 * math.MaxFloat64
+	if !max {
+		currentWinningValue = math.MaxFloat64
+	}
+
+	for j := 0; j < e.Result.Insights.NumVersions; j++ {
+		val := e.Result.Insights.ScalarMetricValue(j, reward)
+		if val == nil {
+			log.Logger.Warnf("unable to find value for version %v and metric %s", j, reward)
+			continue
+		}
+		if j == 0 || (max && *val > currentWinningValue) || (!max && *val < currentWinningValue) {
+			currentWinningValue = *val
+			currentWinner = j
+		}
+	}
+
+	return currentWinner
 }
 
 // evaluate SLOs and output the boolean SLO X version matrix

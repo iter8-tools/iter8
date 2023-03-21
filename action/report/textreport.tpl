@@ -8,7 +8,7 @@ Experiment summary:
   Number of completed tasks: {{ .Result.NumCompletedTasks }}
   Number of completed loops: {{ .Result.NumLoops }}
 
-{{- if .Result.Insights }}
+{{- if .Result.Insights}}
 {{- if not (empty .Result.Insights.SLOs) }}
 
 Whether or not service level objectives (SLOs) are satisfied:

@@ -107,6 +107,12 @@ type Insights struct {
 
 	// SLOsSatisfied indicator matrices that show if upper and lower SLO limits are satisfied
 	SLOsSatisfied *SLOResults `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
+
+	// Rewards involed in this experiment
+	Rewards *Rewards `json:"rewards,omitempty" yaml:"rewards,omitempty"`
+
+	// RewardsWinners indicate the winners
+	RewardsWinners *RewardsWinners `json:"rewardsWinners,omitempty" yaml:"rewardsWinners,omitempty"`
 }
 
 // MetricMeta describes a metric
@@ -126,6 +132,22 @@ type VersionInfo struct {
 
 	// Track identifier assigned to version
 	Track string `json:"track" yaml:"track"`
+}
+
+// Rewards specify max and min rewards
+type Rewards struct {
+	// Max is list of reward metrics where the version with the maximum value wins
+	Max []string `json:"max,omitempty" yaml:"max,omitempty"`
+	// Min is list of reward metrics where the version with the minimum value wins
+	Min []string `json:"min,omitempty" yaml:"min,omitempty"`
+}
+type RewardsWinners struct {
+	// Max rewards
+	// Max[i] specifies the index of the winner of reward metric Rewards.Max[i]
+	Max []int `json:"max,omitempty" yaml:"max,omitempty"`
+	// Min rewards
+	// Min[i] specifies the index of the winner of reward metric Rewards.Min[i]
+	Min []int `json:"min,omitempty" yaml:"min,omitempty"`
 }
 
 // SLO is a service level objective
@@ -367,6 +389,23 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 		err := fmt.Errorf("unknown metric type %v", mm.Type)
 		log.Logger.Error(err)
 	}
+	return nil
+}
+
+// setRewards sets the Rewards field in insights
+// if this function is called multiple times (example, due to looping), then
+// it is intended to be called with the same argument each time
+func (in *Insights) setRewards(rewards *Rewards) error {
+	if in.SLOs != nil {
+		if reflect.DeepEqual(in.Rewards, rewards) {
+			return nil
+		}
+		e := fmt.Errorf("old and new value of rewards conflict")
+		log.Logger.WithStackTrace(fmt.Sprint("old: ", in.Rewards, "new: ", rewards)).Error(e)
+		return e
+	}
+	// LHS will be nil
+	in.Rewards = rewards
 	return nil
 }
 

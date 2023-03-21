@@ -48,6 +48,14 @@ func (tr *TextReporter) Gen(out io.Writer) error {
 	return nil
 }
 
+// // PrintRewardsText returns rewards section of the text report as a string
+// func (tr *TextReporter) PrintRewardsText() string {
+// 	var b bytes.Buffer
+// 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)
+// 	tr.printRewardsText(w)
+// 	return b.String()
+// }
+
 // PrintSLOsText returns SLOs section of the text report as a string
 func (tr *TextReporter) PrintSLOsText() string {
 	var b bytes.Buffer
@@ -87,6 +95,43 @@ func (tr *TextReporter) printVersions(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "\t %s", in.TrackVersionStr(i))
 	}
 }
+
+// // printRewardsText prints all rewards into tab writer
+// func (tr *TextReporter) printRewardsText(w *tabwriter.Writer) {
+// 	in := tr.Result.Insights
+// 	fmt.Fprint(w, "Rewards")
+// 	fmt.Fprintf(w, "\t Winner")
+// 	fmt.Fprintln(w)
+// 	fmt.Fprint(w, "-------")
+// 	fmt.Fprint(w, "\t ------")
+// 	fmt.Fprintln(w)
+
+// 	if in.Rewards != nil {
+// 		for i := 0; i < len(in.Rewards.Max); i++ {
+// 			log.Logger.Debug("Max Reward ", i)
+// 			str, err := tr.MetricWithUnits(in.Rewards.Max[i])
+// 			if err == nil {
+// 				fmt.Fprintf(w, "%s \t %d", str, in.RewardsWinners.Max[i])
+// 				fmt.Fprintln(w)
+// 			} else {
+// 				log.Logger.Error("unable to extract reward winner")
+// 			}
+// 		}
+
+// 		for i := 0; i < len(in.Rewards.Min); i++ {
+// 			log.Logger.Debug("Max Reward ", i)
+// 			str, err := tr.MetricWithUnits(in.Rewards.Min[i])
+// 			if err == nil {
+// 				fmt.Fprintf(w, "%s \t %d", str, in.RewardsWinners.Min[i])
+// 				fmt.Fprintln(w)
+// 			} else {
+// 				log.Logger.Error("unable to extract reward winner")
+// 			}
+// 		}
+// 	}
+
+// 	_ = w.Flush()
+// }
 
 // printSLOsText prints all SLOs into tab writer
 func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
@@ -154,6 +199,9 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	fmt.Fprint(w, "Metric")
 	if in.NumVersions > 1 {
 		tr.printVersions(w)
+		if in.Rewards != nil {
+			fmt.Fprintf(w, "\t Best")
+		}
 	} else {
 		fmt.Fprintf(w, "\t value")
 	}
@@ -162,12 +210,16 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	for i := 0; i < in.NumVersions; i++ {
 		fmt.Fprint(w, "\t -----")
 	}
+	if in.NumVersions > 1 && in.Rewards != nil {
+		fmt.Fprint(w, "\t ----")
+	}
 	fmt.Fprintln(w)
 
 	// keys contain normalized scalar metric names in sorted order
 	keys := tr.SortedScalarAndSLOMetrics()
+	bestVersions := getBestVersions(keys, *in.Rewards, *in.RewardsWinners)
 
-	for _, mn := range keys {
+	for i, mn := range keys {
 		mwu, err := tr.MetricWithUnits(mn)
 		if err == nil {
 			// add metric name with units
@@ -176,10 +228,41 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 			for j := 0; j < in.NumVersions; j++ {
 				fmt.Fprintf(w, "\t %v", tr.ScalarMetricValueStr(j, mn))
 			}
+			if in.Rewards != nil {
+				fmt.Fprintf(w, "\t %d", bestVersions[i])
+			}
 			fmt.Fprintln(w)
 		} else {
 			log.Logger.Error(err)
 		}
 	}
 	_ = w.Flush()
+}
+
+// given list of metric names, get list of reward winners
+func getBestVersions(metrics []string, rewards base.Rewards, winners base.RewardsWinners) []int {
+	results := make([]int, len(metrics))
+	for i, mn := range metrics {
+		j := indexString(rewards.Max, mn)
+		if j >= 0 {
+			results[i] = winners.Max[j]
+		} else {
+			j = indexString(rewards.Min, mn)
+			if j >= 0 {
+				results[i] = winners.Min[j]
+			} else {
+				results[i] = -1
+			}
+		}
+	}
+	return results
+}
+
+func indexString(keys []string, item string) int {
+	for i, key := range keys {
+		if key == item {
+			return i
+		}
+	}
+	return -1
 }
