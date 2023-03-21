@@ -217,7 +217,7 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 
 	// keys contain normalized scalar metric names in sorted order
 	keys := tr.SortedScalarAndSLOMetrics()
-	bestVersions := getBestVersions(keys, *in.Rewards, *in.RewardsWinners)
+	bestVersions := getBestVersions(keys, in)
 
 	for i, mn := range keys {
 		mwu, err := tr.MetricWithUnits(mn)
@@ -229,7 +229,7 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 				fmt.Fprintf(w, "\t %v", tr.ScalarMetricValueStr(j, mn))
 			}
 			if in.Rewards != nil {
-				fmt.Fprintf(w, "\t %d", bestVersions[i])
+				fmt.Fprintf(w, "\t %s", bestVersions[i])
 			}
 			fmt.Fprintln(w)
 		} else {
@@ -240,18 +240,20 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 }
 
 // given list of metric names, get list of reward winners
-func getBestVersions(metrics []string, rewards base.Rewards, winners base.RewardsWinners) []int {
-	results := make([]int, len(metrics))
+func getBestVersions(metrics []string, in *base.Insights) []string {
+	rewards := *in.Rewards
+	winners := *in.RewardsWinners
+	results := make([]string, len(metrics))
 	for i, mn := range metrics {
 		j := indexString(rewards.Max, mn)
 		if j >= 0 {
-			results[i] = winners.Max[j]
+			results[i] = in.TrackVersionStr(winners.Max[j])
 		} else {
 			j = indexString(rewards.Min, mn)
 			if j >= 0 {
-				results[i] = winners.Min[j]
+				results[i] = in.TrackVersionStr(winners.Min[j])
 			} else {
-				results[i] = -1
+				results[i] = "n/a"
 			}
 		}
 	}
