@@ -35,6 +35,9 @@ func TestRunAssess(t *testing.T) {
 				Limit:  20.0,
 			}},
 		},
+		Rewards: &Rewards{
+			Max: []string{"a/b"},
+		},
 	}
 	err = task.run(exp)
 	assert.NoError(t, err)

@@ -48,14 +48,6 @@ func (tr *TextReporter) Gen(out io.Writer) error {
 	return nil
 }
 
-// // PrintRewardsText returns rewards section of the text report as a string
-// func (tr *TextReporter) PrintRewardsText() string {
-// 	var b bytes.Buffer
-// 	w := tabwriter.NewWriter(&b, 0, 0, 1, ' ', tabwriter.Debug)
-// 	tr.printRewardsText(w)
-// 	return b.String()
-// }
-
 // PrintSLOsText returns SLOs section of the text report as a string
 func (tr *TextReporter) PrintSLOsText() string {
 	var b bytes.Buffer
@@ -95,43 +87,6 @@ func (tr *TextReporter) printVersions(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "\t %s", in.TrackVersionStr(i))
 	}
 }
-
-// // printRewardsText prints all rewards into tab writer
-// func (tr *TextReporter) printRewardsText(w *tabwriter.Writer) {
-// 	in := tr.Result.Insights
-// 	fmt.Fprint(w, "Rewards")
-// 	fmt.Fprintf(w, "\t Winner")
-// 	fmt.Fprintln(w)
-// 	fmt.Fprint(w, "-------")
-// 	fmt.Fprint(w, "\t ------")
-// 	fmt.Fprintln(w)
-
-// 	if in.Rewards != nil {
-// 		for i := 0; i < len(in.Rewards.Max); i++ {
-// 			log.Logger.Debug("Max Reward ", i)
-// 			str, err := tr.MetricWithUnits(in.Rewards.Max[i])
-// 			if err == nil {
-// 				fmt.Fprintf(w, "%s \t %d", str, in.RewardsWinners.Max[i])
-// 				fmt.Fprintln(w)
-// 			} else {
-// 				log.Logger.Error("unable to extract reward winner")
-// 			}
-// 		}
-
-// 		for i := 0; i < len(in.Rewards.Min); i++ {
-// 			log.Logger.Debug("Max Reward ", i)
-// 			str, err := tr.MetricWithUnits(in.Rewards.Min[i])
-// 			if err == nil {
-// 				fmt.Fprintf(w, "%s \t %d", str, in.RewardsWinners.Min[i])
-// 				fmt.Fprintln(w)
-// 			} else {
-// 				log.Logger.Error("unable to extract reward winner")
-// 			}
-// 		}
-// 	}
-
-// 	_ = w.Flush()
-// }
 
 // printSLOsText prints all SLOs into tab writer
 func (tr *TextReporter) printSLOsText(w *tabwriter.Writer) {
