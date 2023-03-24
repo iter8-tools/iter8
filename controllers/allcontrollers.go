@@ -72,6 +72,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 				namespace := obj.(*unstructured.Unstructured).GetNamespace()
 				log.Logger.Debug("add called for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
 				addFinalizer(name, namespace, gvrShort, client, config)
+				defer removeFinalizer(name, namespace, gvrShort, client, config)
 				if s := allSubjects.getSubFromObj(obj, gvrShort); s == nil {
 					log.Logger.Trace("subject not found; gvr: ",
 						gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
@@ -79,7 +80,6 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 				} else {
 					s.reconcile(config, client)
 				}
-				defer removeFinalizer(name, namespace, gvrShort, client, config)
 			},
 			UpdateFunc: func(oldObj interface{}, newObj interface{}) {
 				name := newObj.(*unstructured.Unstructured).GetName()
@@ -87,6 +87,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 				log.Logger.Debug("update called for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
 				log.Logger.Debug("finalizers in new obj: ", newObj.(*unstructured.Unstructured).GetFinalizers())
 				addFinalizer(name, namespace, gvrShort, client, config)
+				defer removeFinalizer(name, namespace, gvrShort, client, config)
 				if s := allSubjects.getSubFromObj(newObj, gvrShort); s == nil {
 					log.Logger.Trace("subject not found; gvr: ",
 						gvrShort, "; object name: ", newObj.(*unstructured.Unstructured).GetName(),
@@ -94,12 +95,12 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 				} else {
 					s.reconcile(config, client)
 				}
-				defer removeFinalizer(name, namespace, gvrShort, client, config)
 			},
 			DeleteFunc: func(obj interface{}) {
 				name := obj.(*unstructured.Unstructured).GetName()
 				namespace := obj.(*unstructured.Unstructured).GetNamespace()
 				log.Logger.Debug("delete called for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
+				defer removeFinalizer(name, namespace, gvrShort, client, config)
 				if s := allSubjects.getSubFromObj(obj, gvrShort); s == nil {
 					log.Logger.Trace("subject not found; gvr: ",
 						gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
@@ -107,7 +108,6 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 				} else {
 					s.reconcile(config, client)
 				}
-				defer removeFinalizer(name, namespace, gvrShort, client, config)
 			},
 		})
 	}
