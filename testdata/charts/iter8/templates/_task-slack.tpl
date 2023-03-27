@@ -1,4 +1,4 @@
-{{- define "task.slack" -}}
+git add {{- define "task.slack" -}}
 {{- /* Validate values */ -}}
 {{- if not . }}
 {{- fail "slack notify values object is nil" }}
