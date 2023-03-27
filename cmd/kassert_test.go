@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"fortio.org/fortio/fhttp"
@@ -77,7 +78,7 @@ func testAssert(t *testing.T, experiment string, url string, expectedOutputFile 
 	*kd = *id.NewFakeKubeDriver(settings)
 
 	// read experiment from file created by caller
-	byteArray, _ := os.ReadFile(experiment)
+	byteArray, _ := os.ReadFile(filepath.Clean(experiment))
 	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",

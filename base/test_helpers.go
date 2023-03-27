@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -31,6 +32,7 @@ func (m *mockDriver) GetRevision() int {
 	return 0
 }
 
+// CreateExperimentYaml creates an experiment.yaml file from a template and a URL
 func CreateExperimentYaml(t *testing.T, template string, url string, output string) {
 
 	values := struct {
@@ -39,7 +41,7 @@ func CreateExperimentYaml(t *testing.T, template string, url string, output stri
 		URL: url,
 	}
 
-	byteArray, err := os.ReadFile(template)
+	byteArray, err := os.ReadFile(filepath.Clean(template))
 	assert.NoError(t, err)
 
 	tpl, err := CreateTemplate(string(byteArray))
@@ -49,10 +51,12 @@ func CreateExperimentYaml(t *testing.T, template string, url string, output stri
 	err = tpl.Execute(&buf, values)
 	assert.NoError(t, err)
 
-	err = os.WriteFile(output, buf.Bytes(), 0644)
+	err = os.WriteFile(output, buf.Bytes(), 0600)
 	assert.NoError(t, err)
 }
 
+// GetTrackingHandler creates a handler for fhttp.DynamicHTTPServer that sets a variable to true
+// This can be used to verify that the handler was called.
 func GetTrackingHandler(breadcrumb *bool) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		*breadcrumb = true
