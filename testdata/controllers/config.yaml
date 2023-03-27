@@ -12,6 +12,9 @@ resourceTypes:
     group: serving.kserve.io
     version: v1beta1
     resource: inferenceservices
+    conditions:
+    - name: Ready
+      status: "True"
   vs:
     group: networking.istio.io
     version: v1beta1

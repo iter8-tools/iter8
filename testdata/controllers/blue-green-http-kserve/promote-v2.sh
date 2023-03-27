@@ -1,4 +1,5 @@
 #!/bin/sh
+# replace primary
 cat <<EOF | kubectl replace -f -
 apiVersion: "serving.kserve.io/v1beta1"
 kind: "InferenceService"
@@ -17,3 +18,5 @@ spec:
       runtime: kserve-mlserver
       storageUri: "gs://seldon-models/sklearn/mms/lr_model"            
 EOF
+# delete candidate
+kubectl delete isvc wisdom-candidate
