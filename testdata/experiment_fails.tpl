@@ -6,7 +6,7 @@ spec:
       duration: 2s
       errorRanges:
       - lower: 500
-      url: https://httpbin.org/get
+      url: {{ .URL }}
   # task 2: validate service level objectives for app using
   # the metrics collected in the above task
   - task: assess

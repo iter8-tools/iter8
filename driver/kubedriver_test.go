@@ -2,9 +2,11 @@ package driver
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
+	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/action"
@@ -65,12 +67,20 @@ func TestKOps(t *testing.T) {
 
 func TestKubeRun(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	base.SetupWithMock(t)
+
+	// create and configure HTTP endpoint for testing
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
+	var verifyHandlerCalled bool
+	mux.HandleFunc("/get", base.GetTrackingHandler(&verifyHandlerCalled))
+
+	// create experiment.yaml
+	base.CreateExperimentYaml(t, base.CompletePath("../testdata/drivertests", "experiment.tpl"), url, ExperimentPath)
 
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
+	byteArray, _ := os.ReadFile(ExperimentPath)
 	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
@@ -92,6 +102,8 @@ func TestKubeRun(t *testing.T) {
 
 	err := base.RunExperiment(false, kd)
 	assert.NoError(t, err)
+	// sanity check -- handler was called
+	assert.True(t, verifyHandlerCalled)
 
 	// check results
 	exp, err := base.BuildExperiment(kd)
@@ -101,8 +113,6 @@ func TestKubeRun(t *testing.T) {
 
 func TestLogs(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	base.SetupWithMock(t)
-
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
