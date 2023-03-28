@@ -72,7 +72,7 @@ func TestNormalizeWeights_sum_zero(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel() // cancel when we are finished consuming integers
 
-		initAppResourceInformers(ctx.Done(), testConfig, fake.New())
+		_ = initAppResourceInformers(ctx.Done(), testConfig, fake.New())
 		testSubject.normalizeWeights(testConfig)
 		assert.Equal(t, e.b, testSubject.Weights())
 	}

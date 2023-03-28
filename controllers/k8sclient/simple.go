@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// Client provides structured and dynamic Kubernetes clients
 type Client struct {
 	*kubernetes.Clientset
 	*dynamic.DynamicClient

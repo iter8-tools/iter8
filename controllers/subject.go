@@ -154,7 +154,7 @@ func (s *subject) getWeightOverrides(config *Config) []*uint32 {
 						log.Logger.Error("invalid weight annotation")
 					}
 				} else {
-					log.Logger.Trace("no weight annotation for variant resouce 1")
+					log.Logger.Trace("no weight annotation for variant resource 1")
 				}
 			}
 		}
@@ -220,46 +220,47 @@ func (s *subject) reconcile(config *Config, client k8sclient.Interface) {
 	if leaderStatus, err := leaderIsMe(); leaderStatus && err == nil {
 		for ssaName, ssa := range s.SSAs {
 			t := template.New(ssaName)
-			if tpl, err := t.Parse(string(ssa.Template)); err != nil {
+			var tpl *template.Template
+			var err error
+			if tpl, err = t.Parse(string(ssa.Template)); err != nil {
 				log.Logger.WithStackTrace("invalid and unparseable ssa template").Error(err)
 				return
+			}
+			buf := &bytes.Buffer{}
+			if err := tpl.Execute(buf, s); err != nil {
+				log.Logger.WithStackTrace("invalid and unexecutable ssa template").Error(err)
 			} else {
-				buf := &bytes.Buffer{}
-				if err := tpl.Execute(buf, s); err != nil {
-					log.Logger.WithStackTrace("invalid and unexecutable ssa template").Error(err)
+				// decode YAML manifest into unstructured.Unstructured
+				obj := &unstructured.Unstructured{}
+				if err := yaml.Unmarshal(buf.Bytes(), obj); err != nil {
+					log.Logger.WithStackTrace("invalid and unmarshalable ssa template").Error(err)
 				} else {
-					// decode YAML manifest into unstructured.Unstructured
-					obj := &unstructured.Unstructured{}
-					if err := yaml.Unmarshal(buf.Bytes(), obj); err != nil {
-						log.Logger.WithStackTrace("invalid and unmarshalable ssa template").Error(err)
+					gvrc, ok := config.ResourceTypes[ssa.GVRShort]
+					if !ok {
+						log.Logger.Error("unknown gvr: ", ssa.GVRShort)
+						continue
+					}
+					gvr := schema.GroupVersionResource{
+						Group:    gvrc.Group,
+						Version:  gvrc.Version,
+						Resource: gvrc.Resource,
+					}
+					result := buf.String()
+					if len(result) == 0 || result == "<nil>" {
+						log.Logger.Debug("template execution did not yield result: ", ssaName)
+						continue
+					}
+					if obj.GetName() == "" {
+						log.Logger.Error("template execution yielded object with no name")
+						continue
+					}
+					if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(result), metav1.PatchOptions{
+						FieldManager: "iter8-controller",
+						Force:        base.BoolPointer(true),
+					}); err != nil {
+						log.Logger.WithStackTrace("cannot server-side-apply SSA template result: " + "\n" + result).Error(err)
 					} else {
-						gvrc, ok := config.ResourceTypes[ssa.GVRShort]
-						if !ok {
-							log.Logger.Error("unknown gvr: ", ssa.GVRShort)
-							continue
-						}
-						gvr := schema.GroupVersionResource{
-							Group:    gvrc.Group,
-							Version:  gvrc.Version,
-							Resource: gvrc.Resource,
-						}
-						result := buf.String()
-						if len(result) == 0 || result == "<nil>" {
-							log.Logger.Debug("template execution did not yield result: ", ssaName)
-							continue
-						}
-						if obj.GetName() == "" {
-							log.Logger.Error("template execution yielded object with no name")
-							continue
-						}
-						if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(result), metav1.PatchOptions{
-							FieldManager: "iter8-controller",
-							Force:        base.BoolPointer(true),
-						}); err != nil {
-							log.Logger.WithStackTrace("cannot server-side-apply SSA template result: " + "\n" + result).Error(err)
-						} else {
-							log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
-						}
+						log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
 					}
 				}
 			}

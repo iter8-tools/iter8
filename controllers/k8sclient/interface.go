@@ -1,3 +1,4 @@
+// Package k8sclient provides the Kubernetes client for the controllers package
 package k8sclient
 
 import (

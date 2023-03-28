@@ -1,3 +1,4 @@
+// Package controllers provides Iter8 controller for reconciling Iter8 subject resources
 package controllers
 
 import (
@@ -66,7 +67,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 			Resource: gvr.Resource,
 		})
 
-		appInformers[gvrShort].Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		if _, err = appInformers[gvrShort].Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				name := obj.(*unstructured.Unstructured).GetName()
 				namespace := obj.(*unstructured.Unstructured).GetNamespace()
@@ -109,7 +110,11 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 					s.reconcile(config, client)
 				}
 			},
-		})
+		}); err != nil {
+			e := errors.New("unable to create event handlers for app informers")
+			log.Logger.WithStackTrace(err.Error()).Error(e)
+			return e
+		}
 	}
 	log.Logger.Trace("starting app informers factory ...")
 	factory.Start(stopCh)
@@ -141,7 +146,7 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 	// config.AppNamespace could equal metav1.NamespaceAll ("") or a specific namespace
 	factory := informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(metav1.NamespaceAll), informers.WithTweakListOptions(tlo))
 	si := factory.Core().V1().ConfigMaps()
-	si.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	if _, err = si.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			log.Logger.Trace("in subject add func")
 			log.Logger.Trace("making and updating subject")
@@ -163,7 +168,11 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 		DeleteFunc: func(obj interface{}) {
 			allSubjects.delete(obj.(*corev1.ConfigMap), config, client)
 		},
-	})
+	}); err != nil {
+		e := errors.New("unable to add event handlers for subject informer")
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
 
 	log.Logger.Trace("starting app informers factory ...")
 	factory.Start(stopCh)
@@ -184,18 +193,22 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	}
 
 	// get leaderStatus
-	if leaderStatus, err := leaderIsMe(); err != nil {
+	var leaderStatus bool
+	if leaderStatus, err = leaderIsMe(); err != nil {
 		return err
-	} else {
-		log.Logger.Info("leader: ", leaderStatus)
 	}
+	log.Logger.Info("leader: ", leaderStatus)
 
 	log.Logger.Trace("initing app informers ... ")
-	initAppResourceInformers(stopCh, config, client)
+	if err = initAppResourceInformers(stopCh, config, client); err != nil {
+		return err
+	}
 	log.Logger.Trace("inited app informers ... ")
 
 	log.Logger.Trace("initing subject informer ... ")
-	initSubjectCMInformer(stopCh, config, client)
+	if err = initSubjectCMInformer(stopCh, config, client); err != nil {
+		return err
+	}
 	log.Logger.Trace("inited subject informer ... ")
 
 	return nil

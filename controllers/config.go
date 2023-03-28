@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"k8s.io/apimachinery/pkg/util/yaml"
@@ -13,6 +14,7 @@ const (
 	configEnv = "CONFIG_FILE"
 )
 
+// GroupVersionResourceConditions is a Kubernetes resource type along with a list of conditions
 type GroupVersionResourceConditions struct {
 	Group      string      `json:"group,omitempty"`
 	Version    string      `json:"version,omitempty"`
@@ -20,19 +22,23 @@ type GroupVersionResourceConditions struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 }
 
+// Condition is the condition within resource status
 type Condition struct {
-	Name   string `json:"name"`
+	// Name of the condition
+	Name string `json:"name"`
+	// Status of the condition
 	Status string `json:"status"`
 }
 
-// placeholders
+// Config defines the configuration of the controllers
 type Config struct {
-	// map from shortnames of Kubernetes API resources to their GVRs
+	// ResourceTypes map from shortnames of Kubernetes API resources to their GVRs with conditions
 	ResourceTypes map[string]GroupVersionResourceConditions `json:"resourceTypes,omitempty"`
-	// Default Resync period for controller watch functions
+	// DefaultResync period for controller watch functions
 	DefaultResync string `json:"defaultResync,omitempty"`
 }
 
+// readConfig reads configuration information from file
 func readConfig() (*Config, error) {
 	// read controller config
 	configFile, ok := os.LookupEnv(configEnv)
@@ -42,7 +48,9 @@ func readConfig() (*Config, error) {
 		return nil, e
 	}
 
-	dat, err := os.ReadFile(configFile)
+	filePath := filepath.Clean(configFile)
+	dat, err := os.ReadFile(filePath)
+
 	if err != nil {
 		e := errors.New("cannot read config file: " + configFile)
 		log.Logger.WithStackTrace(err.Error()).Error(e)
@@ -60,6 +68,8 @@ func readConfig() (*Config, error) {
 	return &conf, nil
 }
 
+// validate the config
+// no-op for now
 func (c *Config) validate() error {
 	return nil
 }

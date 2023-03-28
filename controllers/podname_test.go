@@ -22,7 +22,7 @@ func TestGetPodName(t *testing.T) {
 	}
 
 	for _, e := range tests {
-		os.Setenv(podNameEnvVariable, e.a)
+		_ = os.Setenv(podNameEnvVariable, e.a)
 		podName, ok := getPodName()
 		assert.Equal(t, e.b, podName)
 		assert.Equal(t, e.c, ok)
@@ -45,7 +45,7 @@ func TestGetStatefulSetName(t *testing.T) {
 	}
 
 	for _, e := range tests {
-		os.Setenv(podNameEnvVariable, e.a)
+		_ = os.Setenv(podNameEnvVariable, e.a)
 		statefulSetName, ok := getStatefulSetName()
 		assert.Equal(t, e.b, statefulSetName)
 		assert.Equal(t, e.c, ok)
@@ -68,7 +68,7 @@ func TestLeaderName(t *testing.T) {
 	}
 
 	for _, e := range tests {
-		os.Setenv(podNameEnvVariable, e.a)
+		_ = os.Setenv(podNameEnvVariable, e.a)
 		leaderName, ok := getLeaderName()
 		assert.Equal(t, e.b, leaderName)
 		assert.Equal(t, e.c, ok)
@@ -91,7 +91,7 @@ func TestLeaderIsMe(t *testing.T) {
 	}
 
 	for _, e := range tests {
-		os.Setenv(podNameEnvVariable, e.a)
+		_ = os.Setenv(podNameEnvVariable, e.a)
 		leaderStatus, err := leaderIsMe()
 		assert.Equal(t, e.b, leaderStatus)
 		if e.c {
