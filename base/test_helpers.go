@@ -1,19 +1,15 @@
 package base
 
 import (
+	"bytes"
+	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
-	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
 )
-
-// SetupWithMock mocks an HTTP endpoint and registers and cleanup function
-func SetupWithMock(t *testing.T) {
-	httpmock.Activate()
-	// Exact URL match
-	httpmock.RegisterResponder("GET", "https://httpbin.org/get",
-		httpmock.NewStringResponder(200, `[{"id": 1, "name": "My Great Thing"}]`))
-	t.Cleanup(httpmock.DeactivateAndReset)
-}
 
 // mockDriver is a mock driver that can be used to run experiments
 type mockDriver struct {
@@ -34,4 +30,37 @@ func (m *mockDriver) Write(e *Experiment) error {
 // GetRevision gets experiment revision
 func (m *mockDriver) GetRevision() int {
 	return 0
+}
+
+// CreateExperimentYaml creates an experiment.yaml file from a template and a URL
+func CreateExperimentYaml(t *testing.T, template string, url string, output string) {
+
+	values := struct {
+		URL string
+	}{
+		URL: url,
+	}
+
+	byteArray, err := os.ReadFile(filepath.Clean(template))
+	assert.NoError(t, err)
+
+	tpl, err := CreateTemplate(string(byteArray))
+	assert.NoError(t, err)
+
+	var buf bytes.Buffer
+	err = tpl.Execute(&buf, values)
+	assert.NoError(t, err)
+
+	err = os.WriteFile(output, buf.Bytes(), 0600)
+	assert.NoError(t, err)
+}
+
+// GetTrackingHandler creates a handler for fhttp.DynamicHTTPServer that sets a variable to true
+// This can be used to verify that the handler was called.
+func GetTrackingHandler(breadcrumb *bool) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		*breadcrumb = true
+		time.Sleep(100 * time.Millisecond)
+		w.WriteHeader(200)
+	}
 }

@@ -43,6 +43,17 @@
     condition: Ready
 {{- include "task.ready.tn" . }}
 {{- end }}
+{{- if .Values.ready.isvc }}
+# task: determine if KServe InferenceService exists and is ready
+- task: ready
+  with:
+    name: {{ .Values.ready.isvc | quote }}
+    group: serving.kserve.io
+    version: v1beta1
+    resource: inferenceservices
+    condition: Ready
+{{- include "task.ready.tn" . }}
+{{- end }}
 {{- if .Values.ready.chaosengine }}
 # task: determine if chaos engine resource exists
 - task: ready

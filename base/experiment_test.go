@@ -1,9 +1,11 @@
 package base
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
+	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
 	"sigs.k8s.io/yaml"
@@ -43,7 +45,12 @@ func TestReadExperiment(t *testing.T) {
 
 func TestRunningTasks(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	SetupWithMock(t)
+
+	// create and configure HTTP endpoint for testing
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
+	var verifyHandlerCalled bool
+	mux.HandleFunc("/get", GetTrackingHandler(&verifyHandlerCalled))
 
 	// valid collect task... should succeed
 	ct := &collectHTTPTask{
@@ -54,7 +61,7 @@ func TestRunningTasks(t *testing.T) {
 			endpoint: endpoint{
 				Duration: StringPointer("1s"),
 				Headers:  map[string]string{},
-				URL:      "https://httpbin.org/get",
+				URL:      url,
 			},
 		},
 	}
@@ -82,6 +89,8 @@ func TestRunningTasks(t *testing.T) {
 	err := ct.run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+	// sanity check -- handler was called
+	assert.True(t, verifyHandlerCalled)
 
 	err = at.run(exp)
 	assert.NoError(t, err)
@@ -94,9 +103,17 @@ func TestRunningTasks(t *testing.T) {
 
 func TestRunExperiment(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	SetupWithMock(t)
 
-	b, err := os.ReadFile(CompletePath("../testdata", "experiment.yaml"))
+	// create and configure HTTP endpoint for testing
+	mux, addr := fhttp.DynamicHTTPServer(false)
+	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
+	var verifyHandlerCalled bool
+	mux.HandleFunc("/get", GetTrackingHandler(&verifyHandlerCalled))
+
+	// create experiment.yaml
+	CreateExperimentYaml(t, CompletePath("../testdata", "experiment.tpl"), url, "experiment.yaml")
+	b, err := os.ReadFile("experiment.yaml")
+
 	assert.NoError(t, err)
 	e := &Experiment{}
 	err = yaml.Unmarshal(b, e)
@@ -105,6 +122,8 @@ func TestRunExperiment(t *testing.T) {
 
 	err = RunExperiment(false, &mockDriver{e})
 	assert.NoError(t, err)
+	// sanity check -- handler was called
+	assert.True(t, verifyHandlerCalled)
 
 	assert.True(t, e.Completed())
 	assert.True(t, e.NoFailure())

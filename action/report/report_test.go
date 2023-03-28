@@ -11,7 +11,7 @@ import (
 
 func TestReportText(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	_ = driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experiment.yaml"))
+	_ = copyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experiment.yaml"))
 
 	fd := driver.FileDriver{
 		RunDir: ".",
@@ -29,7 +29,7 @@ func TestReportText(t *testing.T) {
 
 func TestReportTextWithLowerSLOs(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	_ = driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experimentWithLowerSLOs.yaml"))
+	_ = copyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experimentWithLowerSLOs.yaml"))
 	_ = os.Rename("experimentWithLowerSLOs.yaml", "experiment.yaml")
 
 	fd := driver.FileDriver{
@@ -48,7 +48,7 @@ func TestReportTextWithLowerSLOs(t *testing.T) {
 
 func TestReportHTMLWithLowerSLOs(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	_ = driver.CopyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experimentWithLowerSLOs.yaml"))
+	_ = copyFileToPwd(t, base.CompletePath("../../", "testdata/assertinputs/experimentWithLowerSLOs.yaml"))
 	_ = os.Rename("experimentWithLowerSLOs.yaml", "experiment.yaml")
 	fd := driver.FileDriver{
 		RunDir: ".",
