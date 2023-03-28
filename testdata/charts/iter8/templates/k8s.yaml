@@ -1,10 +1,12 @@
 {{ include "k.secret" . }}
+{{- if not .Values.serviceAccountName }}
 ---
 {{ include "k.role" . }}
 ---
 {{ include "k.serviceaccount" . }}
 ---
 {{ include "k.rolebinding" . }}
+{{- end}}
 ---
 {{- if eq "job" .Values.runner }}
 {{ include "k.job" . }}

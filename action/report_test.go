@@ -15,7 +15,6 @@ import (
 
 func TestKubeReportText(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 
@@ -34,7 +33,6 @@ func TestKubeReportText(t *testing.T) {
 
 func TestKubeReportHTML(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.OutputFormat = HTMLOutputFormatKey
@@ -54,7 +52,6 @@ func TestKubeReportHTML(t *testing.T) {
 
 func TestKubeReportInvalid(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	base.SetupWithMock(t)
 	// fix rOpts
 	rOpts := NewReportOpts(driver.NewFakeKubeDriver(cli.New()))
 	rOpts.OutputFormat = "invalid"

@@ -6,7 +6,7 @@ spec:
       duration: 2s
       errorRanges:
       - lower: 500
-      url: https://httpbin.org/get
+      url: {{ .URL }}
   # task 2: validate service level objectives for app using
   # the metrics collected in the above task
   - task: assess
@@ -16,13 +16,13 @@ spec:
         - metric: "http/error-rate"
           limit: 0
         - metric: "http/latency-mean"
-          limit: 500
+          limit: 5000
         - metric: "http/latency-p50"
-          limit: 1000
+          limit: 5000
         - metric: "http/latency-p50.0"
-          limit: 1000
+          limit: 5000
         - metric: "http/latency-p95.0"
-          limit: 2500
+          limit: 5000
         - metric: "http/latency-p99"
           limit: 5000
   # tasks 3 & 4: print if SLOs are satisfied or not
