@@ -10,7 +10,6 @@ PODNAME=blue-leader-0 CONFIG_FILE=testdata/controllers/config.yaml go run main.g
 cd wisdom
 source query.sh
 
-
 # Explore what the initialization step entailed ... templated virtual service
 less initialize.sh
 

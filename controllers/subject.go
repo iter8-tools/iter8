@@ -61,39 +61,70 @@ type subjectsMap struct {
 /* types: end */
 
 const (
-	subjectStrSpec   = "strSpec"
-	weightAnnotation = "iter8.tools/weight"
+	subjectStrSpec       = "strSpec"
+	weightAnnotation     = "iter8.tools/weight"
+	defaultVariantWeight = uint32(1)
 )
 
+// Weights provide the relative weights for traffic routing between variants
 func (s *subject) Weights() []uint32 {
 	return s.normalizedWeights
 }
 
+// normalizeWeights sets the normalized weights for each variant of the subject
+//
+// the inputs for normalizedWeights include:
+// 1. Whether or not variants are available; if a version is unavailable, its derivedWeight is set to zero
+// 2. derivedWeights also get inputs from resource annotations
+// 3. derivedWeights can also be directly set in the variant definition within the subject
+// 4. derivedWeight is defaulted to 1 for each variant
+//
+// normalizedWeights are the same as derivedWeights with one exception.
+// When derivedWeights sum up to zero, we set normalizedWeights[0] to 1
+// (i.e., variant 1 gets non-zero normalizedWeight)
 func (s *subject) normalizeWeights(config *Config) {
-	s.normalizedWeights = make([]uint32, len(s.Variants))
+	derivedWeights := make([]uint32, len(s.Variants))
 	available := s.getAvailableVariants(config)
+	// overrides from variant resource annotation
 	override := s.getWeightOverrides(config)
+
 	for i, v := range s.Variants {
 		if available[i] {
 			// first, attempt to weight from the variant spec
 			if v.Weight != nil {
-				s.normalizedWeights[i] = *v.Weight
+				derivedWeights[i] = *v.Weight
 			} else {
-				// no variant weight specified; initialize to 1
-				s.normalizedWeights[i] = 1
+				// no variant weight specified; default
+				derivedWeights[i] = defaultVariantWeight
 			}
 			// next, attempt to override weight from object annotations
 			if override[i] != nil {
 				// found weight override for this variant
-				s.normalizedWeights[i] = *override[i]
+				derivedWeights[i] = *override[i]
 			}
 		} else {
 			// this variant is not available; set weight to 0
-			s.normalizedWeights[i] = 0
+			derivedWeights[i] = 0
 		}
 	}
+
+	// if derivedWeights sum up to zero, set normalizedWeight[0] to (the non-zero) default
+	total := uint32(0)
+	for _, v := range derivedWeights {
+		total += v
+	}
+	if total == 0 {
+		// at this point, subject is validated and guaranteed to have at least one variant
+		derivedWeights[0] = defaultVariantWeight
+	}
+	s.normalizedWeights = derivedWeights
+
 }
 
+// getWeightOverrides is looking for weights in the object annotations
+// override pointer for a variant may be nil, if there are no valid weight annotation for the variant
+// if a variant has multiple resources,
+// this function looks for the override in the first resource only
 func (s *subject) getWeightOverrides(config *Config) []*uint32 {
 	override := make([]*uint32, len(s.Variants))
 	for i, v := range s.Variants {
@@ -312,6 +343,13 @@ func extractSubject(confMap *corev1.ConfigMap) (*subject, error) {
 	if err := yaml.Unmarshal([]byte(strSpec), &s); err != nil {
 		e := errors.New("cannot unmarshal subject configmap spec")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return nil, e
+	}
+
+	// subject must have at least one variant
+	if len(s.Variants) == 0 {
+		e := errors.New("subject must at least one variant")
+		log.Logger.WithStackTrace(e.Error()).Error(e)
 		return nil, e
 	}
 
