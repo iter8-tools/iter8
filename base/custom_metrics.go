@@ -145,8 +145,6 @@ func queryDatabaseAndGetValue(template ProviderSpec, metric Metric) (interface{}
 	var requestBody io.Reader
 	if metric.Body != nil {
 		requestBody = strings.NewReader(*metric.Body)
-	} else {
-		requestBody = nil
 	}
 
 	// create a new HTTP request

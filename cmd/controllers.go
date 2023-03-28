@@ -20,7 +20,7 @@ Start Iter8 controllers.
 `
 
 // newControllersCmd creates the Iter8 controllers
-func newControllersCmd(kClient k8sclient.Interface) *cobra.Command {
+func newControllersCmd(client k8sclient.Interface) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "controllers",
 		Short:        "Start Iter8 controllers",
@@ -30,16 +30,16 @@ func newControllersCmd(kClient k8sclient.Interface) *cobra.Command {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			if kClient == nil {
+			if client == nil {
 				var err error
-				kClient, err = k8sclient.New(settings)
+				client, err = k8sclient.New(settings)
 				if err != nil {
 					log.Logger.Error("could not obtain Kube client ... ")
 					return err
 				}
 			}
 
-			if err := controllers.Start(ctx.Done(), kClient); err != nil {
+			if err := controllers.Start(ctx.Done(), client); err != nil {
 				log.Logger.Error("controllers did not start ... ")
 				return err
 			}

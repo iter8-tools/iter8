@@ -89,7 +89,7 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 		}
 
 		// remove iter8 finalizer
-		var finalizers []string = nil
+		var finalizers []string
 		for _, f := range u.GetFinalizers() {
 			if f != iter8FinalizerStr {
 				finalizers = append(finalizers, f)
