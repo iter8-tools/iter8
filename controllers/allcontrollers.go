@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/iter8-tools/iter8/base/log"
@@ -18,11 +19,12 @@ import (
 )
 
 const (
-	iter8FinalizerStr     = "iter8.tools/finalizer"
-	iter8WatchLabel       = "iter8.tools/watch"
-	iter8WatchValue       = "true"
-	iter8PatchLabel       = "iter8.tools/patch"
-	iter8PatchValue       = "true"
+	// for application resources
+	iter8FinalizerStr = "iter8.tools/finalizer"
+	iter8WatchLabel   = "iter8.tools/watch"
+	iter8WatchValue   = "true"
+
+	// for subject resource
 	iter8ManagedByLabel   = "app.kubernetes.io/managed-by"
 	iter8ManagedByValue   = "iter8"
 	iter8KindLabel        = "iter8.tools/kind"
@@ -32,9 +34,10 @@ const (
 )
 
 // informers used to watch application resources,
-// one per gvr known to Iter8
+// one per resource type
 var appInformers = make(map[string]informers.GenericInformer)
 
+// initAppResourceInformers initializes app resource informers
 func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8sclient.Interface) error {
 	// get defaultResync duration
 	defaultResync, err := time.ParseDuration(config.DefaultResync)
@@ -44,7 +47,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 		return e
 	}
 
-	// required labels on application resources that are being watched
+	// required labels on application resources that will be watched
 	tlo := dynamicinformer.TweakListOptionsFunc(func(opts *metav1.ListOptions) {
 		opts.LabelSelector = metav1.FormatLabelSelector(&metav1.LabelSelector{
 			MatchLabels: map[string]string{
@@ -53,12 +56,40 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 		})
 	})
 
-	// fire up informers
-	// config.AppNamespace could equal nil or a specific namespace
-	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, defaultResync, metav1.NamespaceAll, tlo)
-	// factory := dynamicinformer.NewDynamicSharedInformerFactory(client, defaultResync)
-	// this map contains an informer for each gvr watched by the controller
+	// factory is used to create informers
+	// factory will be cluster-scoped or namespace-scoped as specified in config
+	var factory dynamicinformer.DynamicSharedInformerFactory
+	var ns string
+	if config.ClusterScoped {
+		ns = metav1.NamespaceAll
+	} else {
+		// namespace scoped
+		var ok bool
+		if ns, ok = os.LookupEnv(podNamespaceEnvVariable); !ok {
+			return errors.New("unable to get pod namespace")
+		}
+	}
+	factory = dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, defaultResync, ns, tlo)
 
+	// handle is an idempotent handler function that is used for any app resource related event
+	// 1. deal with app resource finalizers
+	// 2. reconcile subject corresponding to this resource
+	handle := func(obj interface{}, gvrShort string, event string) {
+		name := obj.(*unstructured.Unstructured).GetName()
+		namespace := obj.(*unstructured.Unstructured).GetNamespace()
+		log.Logger.Debug(event+" occurred for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
+		addFinalizer(name, namespace, gvrShort, client, config)
+		defer removeFinalizer(name, namespace, gvrShort, client, config)
+		if s := allSubjects.getSubFromObj(obj, gvrShort); s == nil {
+			log.Logger.Trace("subject not found; gvr: ",
+				gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
+				"; namespace: ", obj.(*unstructured.Unstructured).GetNamespace())
+		} else {
+			s.reconcile(config, client)
+		}
+	}
+
+	// create an informer per gvr specified in Iter8 config
 	for gvrShort, gvr := range config.ResourceTypes {
 		gvrShort := gvrShort
 		appInformers[gvrShort] = factory.ForResource(schema.GroupVersionResource{
@@ -67,48 +98,16 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 			Resource: gvr.Resource,
 		})
 
+		// add event handler for the newly minted informer
 		if _, err = appInformers[gvrShort].Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				name := obj.(*unstructured.Unstructured).GetName()
-				namespace := obj.(*unstructured.Unstructured).GetNamespace()
-				log.Logger.Debug("add called for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
-				addFinalizer(name, namespace, gvrShort, client, config)
-				defer removeFinalizer(name, namespace, gvrShort, client, config)
-				if s := allSubjects.getSubFromObj(obj, gvrShort); s == nil {
-					log.Logger.Trace("subject not found; gvr: ",
-						gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
-						"; namespace: ", obj.(*unstructured.Unstructured).GetNamespace())
-				} else {
-					s.reconcile(config, client)
-				}
+				handle(obj, gvrShort, "add")
 			},
 			UpdateFunc: func(oldObj interface{}, newObj interface{}) {
-				name := newObj.(*unstructured.Unstructured).GetName()
-				namespace := newObj.(*unstructured.Unstructured).GetNamespace()
-				log.Logger.Debug("update called for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
-				log.Logger.Debug("finalizers in new obj: ", newObj.(*unstructured.Unstructured).GetFinalizers())
-				addFinalizer(name, namespace, gvrShort, client, config)
-				defer removeFinalizer(name, namespace, gvrShort, client, config)
-				if s := allSubjects.getSubFromObj(newObj, gvrShort); s == nil {
-					log.Logger.Trace("subject not found; gvr: ",
-						gvrShort, "; object name: ", newObj.(*unstructured.Unstructured).GetName(),
-						"; namespace: ", newObj.(*unstructured.Unstructured).GetNamespace())
-				} else {
-					s.reconcile(config, client)
-				}
+				handle(newObj, gvrShort, "update")
 			},
 			DeleteFunc: func(obj interface{}) {
-				name := obj.(*unstructured.Unstructured).GetName()
-				namespace := obj.(*unstructured.Unstructured).GetNamespace()
-				log.Logger.Debug("delete called for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
-				defer removeFinalizer(name, namespace, gvrShort, client, config)
-				if s := allSubjects.getSubFromObj(obj, gvrShort); s == nil {
-					log.Logger.Trace("subject not found; gvr: ",
-						gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
-						"; namespace: ", obj.(*unstructured.Unstructured).GetNamespace())
-				} else {
-					s.reconcile(config, client)
-				}
+				handle(obj, gvrShort, "delete")
 			},
 		}); err != nil {
 			e := errors.New("unable to create event handlers for app informers")
@@ -117,11 +116,13 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 		}
 	}
 	log.Logger.Trace("starting app informers factory ...")
+	// start all informers
 	factory.Start(stopCh)
 	log.Logger.Trace("started app informers factory ...")
 	return nil
 }
 
+// initSubjectCMInformer initializes subject configmap informers
 func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8sclient.Interface) error {
 	// get defaultResync duration
 	defaultResync, err := time.ParseDuration(config.DefaultResync)
@@ -131,7 +132,7 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 		return e
 	}
 
-	// required labels on application resources that are being watched
+	// required labels on subject configmaps that will be watched
 	tlo := internalinterfaces.TweakListOptionsFunc(func(opts *metav1.ListOptions) {
 		opts.LabelSelector = metav1.FormatLabelSelector(&metav1.LabelSelector{
 			MatchLabels: map[string]string{
@@ -142,41 +143,56 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 		})
 	})
 
-	// fire up subject-configmap informer
-	// config.AppNamespace could equal metav1.NamespaceAll ("") or a specific namespace
-	factory := informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(metav1.NamespaceAll), informers.WithTweakListOptions(tlo))
+	// factory is used to create subject informer
+	// factory can be cluster-scoped or namespace-scoped
+	var factory informers.SharedInformerFactory
+	var ns string
+	if config.ClusterScoped {
+		ns = metav1.NamespaceAll
+	} else {
+		// namespace scoped
+		var ok bool
+		if ns, ok = os.LookupEnv(podNamespaceEnvVariable); !ok {
+			return errors.New("unable to get pod namespace")
+		}
+	}
+	factory = informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(ns), informers.WithTweakListOptions(tlo))
+
+	// handle is used during creation and update of subject configmaps
+	// 1. make and update the subject in the allSubjects map
+	// 2. reconcile subject
+	// unlike app resource handle func, subject handle func is not used for delete events
+	handle := func(obj interface{}, event string) {
+		log.Logger.Trace(event + " event for subject")
+		s := allSubjects.makeAndUpdateWith(obj.(*corev1.ConfigMap), config)
+		if s == nil {
+			log.Logger.Error("unable to create subject from configmap; ", "namespace: ", obj.(*corev1.ConfigMap).Namespace, "; name: ", obj.(*corev1.ConfigMap).Name)
+			return
+		}
+		s.reconcile(config, client)
+	}
+
+	// create a subject informer and add handler func
 	si := factory.Core().V1().ConfigMaps()
 	if _, err = si.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			log.Logger.Trace("in subject add func")
-			log.Logger.Trace("making and updating subject")
-			s := allSubjects.makeAndUpdateWith(obj.(*corev1.ConfigMap))
-			if s == nil {
-				log.Logger.Error("unable to create subject from configmap; ", "namespace: ", obj.(*corev1.ConfigMap).Namespace, "; name: ", obj.(*corev1.ConfigMap).Name)
-				return
-			}
-			s.reconcile(config, client)
+			handle(obj, "add")
 		},
 		UpdateFunc: func(oldObj interface{}, newObj interface{}) {
-			s := allSubjects.makeAndUpdateWith(newObj.(*corev1.ConfigMap))
-			if s == nil {
-				log.Logger.Error("unable to create subject from configmap; ", "namespace: ", newObj.(*corev1.ConfigMap).Namespace, "; name: ", newObj.(*corev1.ConfigMap).Name)
-				return
-			}
-			s.reconcile(config, client)
+			handle(newObj, "update")
 		},
 		DeleteFunc: func(obj interface{}) {
 			allSubjects.delete(obj.(*corev1.ConfigMap), config, client)
 		},
 	}); err != nil {
-		e := errors.New("unable to add event handlers for subject informer")
+		e := errors.New("unable to create event handlers for subject informer")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
 
-	log.Logger.Trace("starting app informers factory ...")
+	log.Logger.Trace("starting subject informer factory ...")
 	factory.Start(stopCh)
-	log.Logger.Trace("started app informers factory ...")
+	log.Logger.Trace("started subject informer factory ...")
 	return nil
 }
 
@@ -191,13 +207,6 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	if err := config.validate(); err != nil {
 		return err
 	}
-
-	// get leaderStatus
-	var leaderStatus bool
-	if leaderStatus, err = leaderIsMe(); err != nil {
-		return err
-	}
-	log.Logger.Info("leader: ", leaderStatus)
 
 	log.Logger.Trace("initing app informers ... ")
 	if err = initAppResourceInformers(stopCh, config, client); err != nil {

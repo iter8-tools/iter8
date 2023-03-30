@@ -12,6 +12,7 @@ import (
 	"k8s.io/client-go/util/retry"
 )
 
+// add Iter8 finalizer to an application resource
 func addFinalizer(name string, namespace string, gvrShort string, client k8sclient.Interface, config *Config) {
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		// first, get the object
@@ -60,6 +61,7 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 
 		return nil
 	})
+
 	if err != nil {
 		if kubeerrors.IsNotFound(err) {
 			log.Logger.Debug(err)
@@ -69,6 +71,7 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 	}
 }
 
+// remove Iter8 finalizer from an application resource
 func removeFinalizer(name string, namespace string, gvrShort string, client k8sclient.Interface, config *Config) {
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		// first, get the object
@@ -88,7 +91,7 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 			return nil
 		}
 
-		// remove iter8 finalizer
+		// remove iter8 finalizer if present
 		var finalizers []string
 		for _, f := range u.GetFinalizers() {
 			if f != iter8FinalizerStr {
@@ -96,19 +99,22 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 			}
 		}
 
-		// but if the finalizers have length null, remove
+		// update finalizers in the object
+		// we do not want to remove non-Iter8 finalizers
 		if len(finalizers) == 0 {
 			u.SetFinalizers(nil)
 		} else {
 			u.SetFinalizers(finalizers)
 		}
 
+		// update object
 		_, e = client.Resource(schema.GroupVersionResource{
 			Group:    config.ResourceTypes[gvrShort].Group,
 			Version:  config.ResourceTypes[gvrShort].Version,
 			Resource: config.ResourceTypes[gvrShort].Resource,
 		}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
 
+		// if object has been deleted, return
 		if e != nil && kubeerrors.IsNotFound(e) {
 			return nil
 		}
@@ -116,7 +122,7 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 	})
 
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to delete finalizer with retry"))
+		log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to delete Iter8 finalizer"))
 	}
 
 }

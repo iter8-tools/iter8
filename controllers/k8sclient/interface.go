@@ -7,6 +7,7 @@ import (
 )
 
 // Interface enables interaction with a Kubernetes cluster
+// Can be mocked in unit tests with fake implementation
 type Interface interface {
 	kubernetes.Interface
 	dynamic.Interface

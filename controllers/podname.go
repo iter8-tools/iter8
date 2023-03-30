@@ -8,26 +8,36 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 )
 
-const podNameEnvVariable = "PODNAME"
-const statefulSetSep = "-"
-const leaderSuffix = "-0"
+const (
+	podNameEnvVariable      = "POD_NAME"
+	podNamespaceEnvVariable = "POD_NAMESPACE"
+	statefulSetSep          = "-"
+	leaderSuffix            = "-0"
+)
 
+// getPodName returns the name of this pod
 func getPodName() (string, bool) {
 	podName, ok := os.LookupEnv(podNameEnvVariable)
+	// missing env variable is unacceptable
 	if !ok {
 		return "", false
 	}
+	// empty podName is unacceptable
 	if len(podName) == 0 {
 		return "", false
 	}
 	return podName, true
 }
 
+// getStatefulSetName returns the name of this statefulset
 func getStatefulSetName() (string, bool) {
 	podName, ok := getPodName()
 	if !ok {
 		return "", false
 	}
+	// if statefulset name is x, then
+	// podName is x-i, where i is the pod index (integer)
+	// hence, statefulset name is simple the prefix of the pod name
 	slice := strings.Split(podName, statefulSetSep)
 	if len(slice) < 2 {
 		return "", false
@@ -36,6 +46,8 @@ func getStatefulSetName() (string, bool) {
 	return strings.Join(slice, statefulSetSep), true
 }
 
+// getLeaderName returns the name of the leader pod in this statefulset
+// leader pod is the pod with index 0
 func getLeaderName() (string, bool) {
 	statefulSetName, ok := getStatefulSetName()
 	if !ok {
@@ -44,15 +56,13 @@ func getLeaderName() (string, bool) {
 	return statefulSetName + statefulSetSep + "0", true
 }
 
+// leaderIsMe is true if this pod has the leaderSuffix ("-0")
 func leaderIsMe() (bool, error) {
-	log.Logger.Trace("invoking get pod name ...")
 	podName, ok := getPodName()
-	log.Logger.Trace("invoked get pod name ...")
 	if !ok {
 		e := errors.New("unable to retrieve pod name")
 		log.Logger.Error(e)
 		return false, e
 	}
-	log.Logger.Trace("found podName: ", podName)
 	return strings.HasSuffix(podName, leaderSuffix), nil
 }

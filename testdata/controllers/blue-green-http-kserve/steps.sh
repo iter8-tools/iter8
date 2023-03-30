@@ -1,5 +1,5 @@
 # Start iter8 controller
-PODNAME=blue-leader-0 CONFIG_FILE=testdata/controllers/config.yaml go run main.go controllers -l trace
+POD_NAME=blue-leader-0 CONFIG_FILE=testdata/controllers/config.yaml go run main.go controllers -l trace
 # initialize primary v1
 ./initialize.sh
 # query

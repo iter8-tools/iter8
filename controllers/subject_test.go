@@ -9,6 +9,7 @@ import (
 	"github.com/iter8-tools/iter8/controllers/k8sclient/fake"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // normalizeWeights sets the normalized weights for each variant of the subject
@@ -51,9 +52,11 @@ func TestNormalizeWeights_sum_zero(t *testing.T) {
 	testConfig := &Config{
 		ResourceTypes: map[string]GroupVersionResourceConditions{
 			"svc": {
-				Group:    "",
-				Version:  "v1",
-				Resource: "services",
+				GroupVersionResource: schema.GroupVersionResource{
+					Group:    "",
+					Version:  "v1",
+					Resource: "services",
+				},
 			},
 		},
 		DefaultResync: "30s",

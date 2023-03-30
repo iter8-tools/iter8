@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -16,9 +17,7 @@ const (
 
 // GroupVersionResourceConditions is a Kubernetes resource type along with a list of conditions
 type GroupVersionResourceConditions struct {
-	Group      string      `json:"group,omitempty"`
-	Version    string      `json:"version,omitempty"`
-	Resource   string      `json:"resource,omitempty"`
+	schema.GroupVersionResource
 	Conditions []Condition `json:"conditions,omitempty"`
 }
 
@@ -36,6 +35,8 @@ type Config struct {
 	ResourceTypes map[string]GroupVersionResourceConditions `json:"resourceTypes,omitempty"`
 	// DefaultResync period for controller watch functions
 	DefaultResync string `json:"defaultResync,omitempty"`
+	// ClusterScoped is true if Iter8 controller is cluster-scoped
+	ClusterScoped bool `json:"clusterScoped,omitempty"`
 }
 
 // readConfig reads configuration information from file

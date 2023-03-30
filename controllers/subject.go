@@ -16,7 +16,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -27,7 +26,8 @@ type subject struct {
 	// Todo: prune this down to agra.ObjectMeta instead of metav1.ObjectMeta
 	mutex             sync.RWMutex
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Variants          []variant      `json:"variants,omitempty"`
+	Variants          []variant `json:"variants,omitempty"`
+	// ToDo: PartialKubeResourceTemplates instead of SSAs
 	SSAs              map[string]ssa `json:"ssas,omitempty"`
 	normalizedWeights []uint32
 }
@@ -210,57 +210,66 @@ variantLoop:
 	return variantsAvailable
 }
 
+// reconcile a subject
 func (s *subject) reconcile(config *Config, client k8sclient.Interface) {
+	// lock for reading and later unlock
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
+	// normalize variant weights
 	s.normalizeWeights(config)
 
-	// if leader, perform server side applies
+	// if leader, compute routing policy and perform server side apply
 	if leaderStatus, err := leaderIsMe(); leaderStatus && err == nil {
+		// for each routing template specified in the subject
 		for ssaName, ssa := range s.SSAs {
-			t := template.New(ssaName)
-			var tpl *template.Template
+			// create a template
+			tpl := template.New(ssaName)
 			var err error
-			if tpl, err = t.Parse(string(ssa.Template)); err != nil {
-				log.Logger.WithStackTrace("invalid and unparseable ssa template").Error(err)
+			// parse template string
+			// ensure no parse errors
+			if tpl, err = tpl.Option("missingkey=zero").Parse(string(ssa.Template)); err != nil {
+				log.Logger.WithStackTrace("invalid and unparseable routing template").Error(err)
 				return
 			}
 			buf := &bytes.Buffer{}
+			// ensure no template execution errors
 			if err := tpl.Execute(buf, s); err != nil {
 				log.Logger.WithStackTrace("invalid and unexecutable ssa template").Error(err)
 			} else {
-				// decode YAML manifest into unstructured.Unstructured
-				obj := &unstructured.Unstructured{}
-				if err := yaml.Unmarshal(buf.Bytes(), obj); err != nil {
-					log.Logger.WithStackTrace("invalid and unmarshalable ssa template").Error(err)
+				// ensure non-empty result from template execution
+				result := buf.Bytes()
+				if len(result) == 0 {
+					log.Logger.Debug("template execution did not yield result: ", ssaName)
 				} else {
-					gvrc, ok := config.ResourceTypes[ssa.GVRShort]
-					if !ok {
-						log.Logger.Error("unknown gvr: ", ssa.GVRShort)
-						continue
-					}
-					gvr := schema.GroupVersionResource{
-						Group:    gvrc.Group,
-						Version:  gvrc.Version,
-						Resource: gvrc.Resource,
-					}
-					result := buf.String()
-					if len(result) == 0 || result == "<nil>" {
-						log.Logger.Debug("template execution did not yield result: ", ssaName)
-						continue
-					}
-					if obj.GetName() == "" {
-						log.Logger.Error("template execution yielded object with no name")
-						continue
-					}
-					if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(result), metav1.PatchOptions{
-						FieldManager: "iter8-controller",
-						Force:        base.BoolPointer(true),
-					}); err != nil {
-						log.Logger.WithStackTrace("cannot server-side-apply SSA template result: " + "\n" + result).Error(err)
+					// result should be a YAML manifest serialized as bytes
+					// unmarshal result into unstructured.Unstructured object
+					obj := &unstructured.Unstructured{}
+					if err := yaml.Unmarshal(result, obj); err != nil {
+						log.Logger.WithStackTrace("invalid and unmarshalable ssa template").Error(err)
 					} else {
-						log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
+						// ensure object has name and kind
+						if obj.GetName() == "" || obj.GetKind() == "" {
+							log.Logger.Error("template execution yielded invalid object")
+						} else {
+							// eusure resource type for the object is known
+							gvrc, ok := config.ResourceTypes[ssa.GVRShort]
+							if !ok {
+								log.Logger.Error("unknown gvr: ", ssa.GVRShort)
+							} else {
+								// at this point we known resource we can server-side apply
+								gvr := gvrc.GroupVersionResource
+
+								if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(result), metav1.PatchOptions{
+									FieldManager: "iter8-controller",
+									Force:        base.BoolPointer(true),
+								}); err != nil {
+									log.Logger.WithStackTrace("cannot server-side-apply SSA template result: " + "\n" + string(result)).Error(err)
+								} else {
+									log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
+								}
+							}
+						}
 					}
 				}
 			}
@@ -270,41 +279,50 @@ func (s *subject) reconcile(config *Config, client k8sclient.Interface) {
 	}
 }
 
-// the rest of this file has functions derived from ...
+// conditionsSatisfied checks if conditions specific in the config are satisfied in an object
+// this function is derived from:
 // https://github.com/kubernetes/kubectl/blob/master/pkg/cmd/wait/wait.go
 func conditionsSatisfied(u *unstructured.Unstructured, gvrShort string, config *Config) bool {
+	// loop through conditions specified in config for this gvr
 	for _, c := range config.ResourceTypes[gvrShort].Conditions {
 		conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
-		if err != nil {
+		if err != nil || !found {
 			log.Logger.Info("conditions not found in object")
 			return false
 		}
-		if !found {
-			log.Logger.Info("conditions not found in object")
-			return false
-		}
+		// loop through conditions in the status section of the object
+		// attempt to match status condition with config condition
 		for _, conditionUncast := range conditions {
-			condition := conditionUncast.(map[string]interface{})
+			condition, ok := conditionUncast.(map[string]interface{})
+			if !ok {
+				log.Logger.Info("unable to cast condition to map[string]interface{}")
+				return false
+			}
 			name, found, err := unstructured.NestedString(condition, "type")
 			if !found || err != nil || !strings.EqualFold(name, c.Name) {
-				log.Logger.Trace("cannot find condition type")
+				log.Logger.Trace("condition with no type")
 				continue
 			}
 			status, found, err := unstructured.NestedString(condition, "status")
 			if !found || err != nil {
-				log.Logger.Trace("cannot find condition status")
+				log.Logger.Trace("condition with no status")
 				continue
 			}
+
+			// found a match between config condition and status condition
 			generation, found, _ := unstructured.NestedInt64(u.Object, "metadata", "generation")
 			if found {
 				observedGeneration, found := getObservedGeneration(u, condition)
 				if found && observedGeneration < generation {
-					log.Logger.Info("found condition for earlier generation of resource")
+					// condition generation does not equal resource generation
+					log.Logger.Trace("condition not satisfied")
 					return false
 				}
 			}
+
+			// check if condition status equals the required value specified in config
 			if !strings.EqualFold(status, c.Status) {
-				log.Logger.Info("status in resource condition does not equal required status")
+				log.Logger.Info("condition not satisfied")
 				return false
 			}
 		}
@@ -312,6 +330,11 @@ func conditionsSatisfied(u *unstructured.Unstructured, gvrShort string, config *
 	return true
 }
 
+// getObservedGeneration attempts to get the observed generation value from a condition field
+// this is best effort and assumes api conventions are followed
+// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
+// this function is derived from:
+// https://github.com/kubernetes/kubectl/blob/master/pkg/cmd/wait/wait.go
 func getObservedGeneration(obj *unstructured.Unstructured, condition map[string]interface{}) (int64, bool) {
 	conditionObservedGeneration, found, _ := unstructured.NestedInt64(condition, "observedGeneration")
 	if found {
@@ -321,7 +344,9 @@ func getObservedGeneration(obj *unstructured.Unstructured, condition map[string]
 	return statusObservedGeneration, found
 }
 
+// validate subject CM
 func validateSubjectCM(confMap *corev1.ConfigMap) error {
+	// subject confMap must be immutable
 	if confMap.Immutable == nil || !(*confMap.Immutable) {
 		err := errors.New("subject configmap is not immutable")
 		log.Logger.Error(err)
@@ -330,8 +355,35 @@ func validateSubjectCM(confMap *corev1.ConfigMap) error {
 	return nil
 }
 
-func extractSubject(confMap *corev1.ConfigMap) (*subject, error) {
-	// get strSpec
+// validateSubject validates a given sbject
+func validateSubject(s *subject, config *Config) (*subject, error) {
+	// subject must have at least one variant
+	if len(s.Variants) == 0 {
+		e := errors.New("subject must at least one variant")
+		log.Logger.Error(e)
+		return nil, e
+	}
+
+	// if !clusterScoped, variant resource namespace should be nil or equal subject namespace
+	if !config.ClusterScoped {
+		for _, v := range s.Variants {
+			for _, r := range v.Resources {
+				if r.Namespace != nil && *r.Namespace != s.Namespace {
+					e := errors.New("expected variant resource namespace to match subject namespace")
+					log.Logger.Error(e)
+					return nil, e
+				}
+			}
+		}
+	}
+
+	return s, nil
+}
+
+// extractSubject from a given configmap
+// subject is also validated
+func extractSubject(confMap *corev1.ConfigMap, config *Config) (*subject, error) {
+	// get strSpec from the configmap
 	strSpec, ok := confMap.Data[subjectStrSpec]
 	if !ok {
 		err := errors.New("unable to find subject spec key in configmap")
@@ -339,7 +391,7 @@ func extractSubject(confMap *corev1.ConfigMap) (*subject, error) {
 		return nil, err
 	}
 
-	// unmarshal the subject
+	// unmarshal the subject from strSpec
 	s := subject{}
 	if err := yaml.Unmarshal([]byte(strSpec), &s); err != nil {
 		e := errors.New("cannot unmarshal subject configmap spec")
@@ -347,15 +399,9 @@ func extractSubject(confMap *corev1.ConfigMap) (*subject, error) {
 		return nil, e
 	}
 
-	// subject must have at least one variant
-	if len(s.Variants) == 0 {
-		e := errors.New("subject must at least one variant")
-		log.Logger.WithStackTrace(e.Error()).Error(e)
-		return nil, e
-	}
-
-	// add metadata
+	// transfer configmap metadata to subject
 	s.ObjectMeta = confMap.ObjectMeta
 
-	return &s, nil
+	// validate and return
+	return validateSubject(&s, config)
 }
