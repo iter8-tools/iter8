@@ -22,13 +22,12 @@ import (
 
 /* types: begin */
 
-type subject struct {
+type routemap struct {
 	// Todo: prune this down to agra.ObjectMeta instead of metav1.ObjectMeta
 	mutex             sync.RWMutex
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Variants          []variant `json:"variants,omitempty"`
-	// ToDo: PartialKubeResourceTemplates instead of SSAs
-	SSAs              map[string]ssa `json:"ssas,omitempty"`
+	Variants          []variant                  `json:"variants,omitempty"`
+	RoutingTemplates  map[string]routingTemplate `json:"routingTemplates,omitempty"`
 	normalizedWeights []uint32
 }
 
@@ -43,46 +42,46 @@ type resource struct {
 	Namespace *string `json:"namespace"`
 }
 
-type ssa struct {
+type routingTemplate struct {
 	GVRShort string `json:"gvrShort"`
 	Template string `json:"template"`
 }
 
-// subjects by their name
-type subjectsMapByName map[string]*subject
+// routemaps by their name
+type routemapsByName map[string]*routemap
 
-// subjectsMap contain all subjects known to Iter8
-type subjectsMap struct {
+// routemaps contain every routemap known to Iter8
+type routemaps struct {
 	mutex sync.RWMutex
-	// map each namespace to its subjectsByName
-	nsSub map[string]subjectsMapByName
+	// map each namespace to its routemapsByName
+	nsRoutemap map[string]routemapsByName
 }
 
 /* types: end */
 
 const (
-	subjectStrSpec       = "strSpec"
+	routemapStrSpec      = "strSpec"
 	weightAnnotation     = "iter8.tools/weight"
 	defaultVariantWeight = uint32(1)
 )
 
 // Weights provide the relative weights for traffic routing between variants
-func (s *subject) Weights() []uint32 {
+func (s *routemap) Weights() []uint32 {
 	return s.normalizedWeights
 }
 
-// normalizeWeights sets the normalized weights for each variant of the subject
+// normalizeWeights sets the normalized weights for each variant of the routemap
 //
 // the inputs for normalizedWeights include:
 // 1. Whether or not variants are available; if a version is unavailable, its derivedWeight is set to zero
 // 2. derivedWeights also get inputs from resource annotations
-// 3. derivedWeights can also be directly set in the variant definition within the subject
+// 3. derivedWeights can also be directly set in the variant definition within the routemap
 // 4. derivedWeight is defaulted to 1 for each variant
 //
 // normalizedWeights are the same as derivedWeights with one exception.
 // When derivedWeights sum up to zero, we set normalizedWeights[0] to 1
 // (i.e., variant 1 gets non-zero normalizedWeight)
-func (s *subject) normalizeWeights(config *Config) {
+func (s *routemap) normalizeWeights(config *Config) {
 	derivedWeights := make([]uint32, len(s.Variants))
 	available := s.getAvailableVariants(config)
 	// overrides from variant resource annotation
@@ -114,7 +113,7 @@ func (s *subject) normalizeWeights(config *Config) {
 		total += v
 	}
 	if total == 0 {
-		// at this point, subject is validated and guaranteed to have at least one variant
+		// at this point, routemap is validated and guaranteed to have at least one variant
 		derivedWeights[0] = defaultVariantWeight
 	}
 	s.normalizedWeights = derivedWeights
@@ -125,7 +124,7 @@ func (s *subject) normalizeWeights(config *Config) {
 // override pointer for a variant may be nil, if there are no valid weight annotation for the variant
 // if a variant has multiple resources,
 // this function looks for the override in the first resource only
-func (s *subject) getWeightOverrides(config *Config) []*uint32 {
+func (s *routemap) getWeightOverrides(config *Config) []*uint32 {
 	override := make([]*uint32, len(s.Variants))
 	for i, v := range s.Variants {
 		if len(v.Resources) > 0 {
@@ -162,8 +161,8 @@ func (s *subject) getWeightOverrides(config *Config) []*uint32 {
 	return override
 }
 
-func (s *subject) getAvailableVariants(config *Config) []bool {
-	// initialize all variants for this subject as available
+func (s *routemap) getAvailableVariants(config *Config) []bool {
+	// initialize all variants for this routemap as available
 	// if any resource for a variant is unavailable, mark that variant as unavailable
 	variantsAvailable := make([]bool, len(s.Variants))
 	for i := range variantsAvailable {
@@ -210,8 +209,8 @@ variantLoop:
 	return variantsAvailable
 }
 
-// reconcile a subject
-func (s *subject) reconcile(config *Config, client k8sclient.Interface) {
+// reconcile a routemap
+func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 	// lock for reading and later unlock
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -221,41 +220,41 @@ func (s *subject) reconcile(config *Config, client k8sclient.Interface) {
 
 	// if leader, compute routing policy and perform server side apply
 	if leaderStatus, err := leaderIsMe(); leaderStatus && err == nil {
-		// for each routing template specified in the subject
-		for ssaName, ssa := range s.SSAs {
+		// for each routing template specified in the routemap
+		for rtName, rt := range s.RoutingTemplates {
 			// create a template
-			tpl := template.New(ssaName)
+			tpl := template.New(rtName)
 			var err error
 			// parse template string
 			// ensure no parse errors
-			if tpl, err = tpl.Option("missingkey=zero").Parse(string(ssa.Template)); err != nil {
+			if tpl, err = tpl.Option("missingkey=zero").Parse(string(rt.Template)); err != nil {
 				log.Logger.WithStackTrace("invalid and unparseable routing template").Error(err)
 				return
 			}
 			buf := &bytes.Buffer{}
 			// ensure no template execution errors
 			if err := tpl.Execute(buf, s); err != nil {
-				log.Logger.WithStackTrace("invalid and unexecutable ssa template").Error(err)
+				log.Logger.WithStackTrace("invalid and unexecutable routing template").Error(err)
 			} else {
 				// ensure non-empty result from template execution
 				result := buf.Bytes()
 				if len(result) == 0 {
-					log.Logger.Debug("template execution did not yield result: ", ssaName)
+					log.Logger.Debug("template execution did not yield result: ", rtName)
 				} else {
 					// result should be a YAML manifest serialized as bytes
 					// unmarshal result into unstructured.Unstructured object
 					obj := &unstructured.Unstructured{}
 					if err := yaml.Unmarshal(result, obj); err != nil {
-						log.Logger.WithStackTrace("invalid and unmarshalable ssa template").Error(err)
+						log.Logger.WithStackTrace("invalid and unmarshalable routing template").Error(err)
 					} else {
 						// ensure object has name and kind
 						if obj.GetName() == "" || obj.GetKind() == "" {
 							log.Logger.Error("template execution yielded invalid object")
 						} else {
 							// eusure resource type for the object is known
-							gvrc, ok := config.ResourceTypes[ssa.GVRShort]
+							gvrc, ok := config.ResourceTypes[rt.GVRShort]
 							if !ok {
-								log.Logger.Error("unknown gvr: ", ssa.GVRShort)
+								log.Logger.Error("unknown gvr: ", rt.GVRShort)
 							} else {
 								// at this point we known resource we can server-side apply
 								gvr := gvrc.GroupVersionResource
@@ -264,7 +263,7 @@ func (s *subject) reconcile(config *Config, client k8sclient.Interface) {
 									FieldManager: "iter8-controller",
 									Force:        base.BoolPointer(true),
 								}); err != nil {
-									log.Logger.WithStackTrace("cannot server-side-apply SSA template result: " + "\n" + string(result)).Error(err)
+									log.Logger.WithStackTrace("cannot server-side-apply routing template result: " + "\n" + string(result)).Error(err)
 								} else {
 									log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
 								}
@@ -344,32 +343,32 @@ func getObservedGeneration(obj *unstructured.Unstructured, condition map[string]
 	return statusObservedGeneration, found
 }
 
-// validate subject CM
-func validateSubjectCM(confMap *corev1.ConfigMap) error {
-	// subject confMap must be immutable
+// validate routemap CM
+func validateRoutemapCM(confMap *corev1.ConfigMap) error {
+	// routemap CM must be immutable
 	if confMap.Immutable == nil || !(*confMap.Immutable) {
-		err := errors.New("subject configmap is not immutable")
+		err := errors.New("routemap CM is not immutable")
 		log.Logger.Error(err)
 		return err
 	}
 	return nil
 }
 
-// validateSubject validates a given sbject
-func validateSubject(s *subject, config *Config) (*subject, error) {
-	// subject must have at least one variant
+// validateRoutemap validates a given sbject
+func validateRoutemap(s *routemap, config *Config) (*routemap, error) {
+	// routemap must have at least one variant
 	if len(s.Variants) == 0 {
-		e := errors.New("subject must at least one variant")
+		e := errors.New("routemap must at least one variant")
 		log.Logger.Error(e)
 		return nil, e
 	}
 
-	// if !clusterScoped, variant resource namespace should be nil or equal subject namespace
+	// if !clusterScoped, variant resource namespace should be nil or equal routemap namespace
 	if !config.ClusterScoped {
 		for _, v := range s.Variants {
 			for _, r := range v.Resources {
 				if r.Namespace != nil && *r.Namespace != s.Namespace {
-					e := errors.New("expected variant resource namespace to match subject namespace")
+					e := errors.New("expected variant resource namespace to match routemap namespace")
 					log.Logger.Error(e)
 					return nil, e
 				}
@@ -380,28 +379,28 @@ func validateSubject(s *subject, config *Config) (*subject, error) {
 	return s, nil
 }
 
-// extractSubject from a given configmap
-// subject is also validated
-func extractSubject(confMap *corev1.ConfigMap, config *Config) (*subject, error) {
+// extractRoutemap from a given configmap
+// routemap is also validated
+func extractRoutemap(confMap *corev1.ConfigMap, config *Config) (*routemap, error) {
 	// get strSpec from the configmap
-	strSpec, ok := confMap.Data[subjectStrSpec]
+	strSpec, ok := confMap.Data[routemapStrSpec]
 	if !ok {
-		err := errors.New("unable to find subject spec key in configmap")
+		err := errors.New("unable to find routemap spec key in configmap")
 		log.Logger.Error(err)
 		return nil, err
 	}
 
-	// unmarshal the subject from strSpec
-	s := subject{}
+	// unmarshal the routemap from strSpec
+	s := routemap{}
 	if err := yaml.Unmarshal([]byte(strSpec), &s); err != nil {
-		e := errors.New("cannot unmarshal subject configmap spec")
+		e := errors.New("cannot unmarshal routemap CM spec")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return nil, e
 	}
 
-	// transfer configmap metadata to subject
+	// transfer configmap metadata to routemap
 	s.ObjectMeta = confMap.ObjectMeta
 
 	// validate and return
-	return validateSubject(&s, config)
+	return validateRoutemap(&s, config)
 }

@@ -42,7 +42,7 @@ metadata:
   name: wisdom
   labels:
     app.kubernetes.io/managed-by: iter8
-    iter8.tools/kind: subject
+    iter8.tools/kind: routemap
     iter8.tools/version: v0.14
 data:
   strSpec: |
@@ -57,7 +57,7 @@ data:
         name: wisdom
         namespace: candidate
     # routing templates
-    ssas:
+    routingTemplates:
       wisdom:
         gvrShort: vs
         template: |

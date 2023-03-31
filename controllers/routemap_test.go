@@ -12,17 +12,17 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// normalizeWeights sets the normalized weights for each variant of the subject
+// normalizeWeights sets the normalized weights for each variant of the routemap
 // the inputs for normalizedWeights include:
 // 1. Whether or not variants are available
 // 2. Weights set using annotations
-// 3. Weights set in the subject for each variant
+// 3. Weights set in the routemap for each variant
 // 4. Default weight of 1 for each variant
 func TestNormalizeWeights_sum_zero(t *testing.T) {
-	// 1. Create a subject with variants
-	testSubject := subject{
+	// 1. Create a routemap with variants
+	testRoutemap := routemap{
 		mutex:      sync.RWMutex{},
-		ObjectMeta: metav1.ObjectMeta{Name: "testSubject", Namespace: "default"},
+		ObjectMeta: metav1.ObjectMeta{Name: "testRoutemap", Namespace: "default"},
 		Variants: []variant{
 			{
 				Resources: []resource{{
@@ -76,7 +76,7 @@ func TestNormalizeWeights_sum_zero(t *testing.T) {
 		defer cancel() // cancel when we are finished consuming integers
 
 		_ = initAppResourceInformers(ctx.Done(), testConfig, fake.New())
-		testSubject.normalizeWeights(testConfig)
-		assert.Equal(t, e.b, testSubject.Weights())
+		testRoutemap.normalizeWeights(testConfig)
+		assert.Equal(t, e.b, testRoutemap.Weights())
 	}
 }

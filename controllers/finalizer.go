@@ -47,6 +47,7 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 				finalizers = append(finalizers, key)
 			}
 			u.SetFinalizers(finalizers)
+
 			log.Logger.Trace("attempting to update resource with finalizer")
 			_, e := client.Resource(schema.GroupVersionResource{
 				Group:    config.ResourceTypes[gvrShort].Group,

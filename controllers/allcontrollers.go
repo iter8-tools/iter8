@@ -1,4 +1,4 @@
-// Package controllers provides Iter8 controller for reconciling Iter8 subject resources
+// Package controllers provides Iter8 controller for reconciling Iter8 routemap resources
 package controllers
 
 import (
@@ -24,13 +24,13 @@ const (
 	iter8WatchLabel   = "iter8.tools/watch"
 	iter8WatchValue   = "true"
 
-	// for subject resource
-	iter8ManagedByLabel   = "app.kubernetes.io/managed-by"
-	iter8ManagedByValue   = "iter8"
-	iter8KindLabel        = "iter8.tools/kind"
-	iter8KindSubjectValue = "subject"
-	iter8VersionLabel     = "iter8.tools/version"
-	iter8VersionValue     = "v0.14"
+	// for routemap resource
+	iter8ManagedByLabel    = "app.kubernetes.io/managed-by"
+	iter8ManagedByValue    = "iter8"
+	iter8KindLabel         = "iter8.tools/kind"
+	iter8KindRoutemapValue = "routemap"
+	iter8VersionLabel      = "iter8.tools/version"
+	iter8VersionValue      = "v0.14"
 )
 
 // informers used to watch application resources,
@@ -73,15 +73,15 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 
 	// handle is an idempotent handler function that is used for any app resource related event
 	// 1. deal with app resource finalizers
-	// 2. reconcile subject corresponding to this resource
+	// 2. reconcile routemap corresponding to this resource
 	handle := func(obj interface{}, gvrShort string, event string) {
 		name := obj.(*unstructured.Unstructured).GetName()
 		namespace := obj.(*unstructured.Unstructured).GetNamespace()
 		log.Logger.Debug(event+" occurred for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
 		addFinalizer(name, namespace, gvrShort, client, config)
 		defer removeFinalizer(name, namespace, gvrShort, client, config)
-		if s := allSubjects.getSubFromObj(obj, gvrShort); s == nil {
-			log.Logger.Trace("subject not found; gvr: ",
+		if s := allRoutemaps.getRoutemapFromObj(obj, gvrShort); s == nil {
+			log.Logger.Trace("routemap not found; gvr: ",
 				gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
 				"; namespace: ", obj.(*unstructured.Unstructured).GetNamespace())
 		} else {
@@ -122,8 +122,8 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 	return nil
 }
 
-// initSubjectCMInformer initializes subject configmap informers
-func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8sclient.Interface) error {
+// initRoutemapCMInformer initializes routemap informers
+func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8sclient.Interface) error {
 	// get defaultResync duration
 	defaultResync, err := time.ParseDuration(config.DefaultResync)
 	if err != nil {
@@ -132,18 +132,18 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 		return e
 	}
 
-	// required labels on subject configmaps that will be watched
+	// required labels on routemaps that will be watched
 	tlo := internalinterfaces.TweakListOptionsFunc(func(opts *metav1.ListOptions) {
 		opts.LabelSelector = metav1.FormatLabelSelector(&metav1.LabelSelector{
 			MatchLabels: map[string]string{
 				iter8ManagedByLabel: iter8ManagedByValue,
-				iter8KindLabel:      iter8KindSubjectValue,
+				iter8KindLabel:      iter8KindRoutemapValue,
 				iter8VersionLabel:   iter8VersionValue,
 			},
 		})
 	})
 
-	// factory is used to create subject informer
+	// factory is used to create routemap informer
 	// factory can be cluster-scoped or namespace-scoped
 	var factory informers.SharedInformerFactory
 	var ns string
@@ -158,21 +158,21 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 	}
 	factory = informers.NewSharedInformerFactoryWithOptions(client, defaultResync, informers.WithNamespace(ns), informers.WithTweakListOptions(tlo))
 
-	// handle is used during creation and update of subject configmaps
-	// 1. make and update the subject in the allSubjects map
-	// 2. reconcile subject
-	// unlike app resource handle func, subject handle func is not used for delete events
+	// handle is used during creation and update of routemaps
+	// 1. make and update the routemap in allRoutemaps
+	// 2. reconcile routemap
+	// unlike app resource handle func, routemap handle func is not used for delete events
 	handle := func(obj interface{}, event string) {
-		log.Logger.Trace(event + " event for subject")
-		s := allSubjects.makeAndUpdateWith(obj.(*corev1.ConfigMap), config)
+		log.Logger.Trace(event + " event for routemap")
+		s := allRoutemaps.makeAndUpdateWith(obj.(*corev1.ConfigMap), config)
 		if s == nil {
-			log.Logger.Error("unable to create subject from configmap; ", "namespace: ", obj.(*corev1.ConfigMap).Namespace, "; name: ", obj.(*corev1.ConfigMap).Name)
+			log.Logger.Error("unable to create routemap from configmap; ", "namespace: ", obj.(*corev1.ConfigMap).Namespace, "; name: ", obj.(*corev1.ConfigMap).Name)
 			return
 		}
 		s.reconcile(config, client)
 	}
 
-	// create a subject informer and add handler func
+	// create a routemap informer and add handler func
 	si := factory.Core().V1().ConfigMaps()
 	if _, err = si.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -182,17 +182,17 @@ func initSubjectCMInformer(stopCh <-chan struct{}, config *Config, client k8scli
 			handle(newObj, "update")
 		},
 		DeleteFunc: func(obj interface{}) {
-			allSubjects.delete(obj.(*corev1.ConfigMap), config, client)
+			allRoutemaps.delete(obj.(*corev1.ConfigMap), config, client)
 		},
 	}); err != nil {
-		e := errors.New("unable to create event handlers for subject informer")
+		e := errors.New("unable to create event handlers for routemap informer")
 		log.Logger.WithStackTrace(err.Error()).Error(e)
 		return e
 	}
 
-	log.Logger.Trace("starting subject informer factory ...")
+	log.Logger.Trace("starting routemap informer factory ...")
 	factory.Start(stopCh)
-	log.Logger.Trace("started subject informer factory ...")
+	log.Logger.Trace("started routemap informer factory ...")
 	return nil
 }
 
@@ -214,11 +214,11 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	}
 	log.Logger.Trace("inited app informers ... ")
 
-	log.Logger.Trace("initing subject informer ... ")
-	if err = initSubjectCMInformer(stopCh, config, client); err != nil {
+	log.Logger.Trace("initing routemap informer ... ")
+	if err = initRoutemapCMInformer(stopCh, config, client); err != nil {
 		return err
 	}
-	log.Logger.Trace("inited subject informer ... ")
+	log.Logger.Trace("inited routemap informer ... ")
 
 	return nil
 }

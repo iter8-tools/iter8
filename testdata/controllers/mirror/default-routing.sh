@@ -48,7 +48,7 @@ metadata:
   name: httpbin
   labels:
     app.kubernetes.io/managed-by: iter8
-    iter8.tools/kind: subject
+    iter8.tools/kind: routemap
     iter8.tools/version: v0.14        
 data:
   strSpec: |
@@ -58,7 +58,7 @@ data:
     - resources:
       - gvrShort: deploy
         name: httpbin-v2
-    ssas:
+    routingTemplates:
       # templates for server-side apply of resources
       mirror-httpbin:
         gvrShort: vs
