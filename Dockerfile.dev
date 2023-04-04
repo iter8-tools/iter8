@@ -1,15 +1,15 @@
-# Small linux image with iter8 binary
-FROM debian:buster-slim
+# Small Linux image with Iter8 binary
+FROM debian:stable-slim
 
 # Install curl
 RUN apt-get update && apt-get install -y curl
 
-# Download iter8 compressed binary
+# Download Iter8 compressed binary
 # use COPY instead of wget
 COPY _dist/iter8-linux-amd64.tar.gz iter8-linux-amd64.tar.gz
 
-# Extract iter8
+# Extract Iter8
 RUN tar -xvf iter8-linux-amd64.tar.gz
 
-# Extract iter8
+# Extract Iter8
 RUN mv linux-amd64/iter8 /bin/iter8
