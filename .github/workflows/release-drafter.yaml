@@ -1,4 +1,5 @@
-name: Release Drafter
+name: Release drafter
+
 on:
   push:
     # branches to consider in the event; optional, defaults to all
