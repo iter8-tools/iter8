@@ -9,4 +9,4 @@ If you are starting to use Iter8, we would love to see you in the list below. Pl
 | IBM Cloud (Code Engine) | [Doug Davis](https://github.com/duglin) |
 | ChaosNative(LitmusChaos) | [Shubham Chaudhary](https://github.com/ispeakc0de) |
 | Seldon Core | [Clive Cox](https://github.com/cliveseldon) |
-
+| Datagrate, Inc. (jetic.io) | [Mert Öztürk](https://github.com/mertdotcc) |
