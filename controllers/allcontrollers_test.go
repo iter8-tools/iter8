@@ -22,9 +22,9 @@ func TestStart(t *testing.T) {
 	// log everything
 	log.Logger.SetLevel(logrus.ErrorLevel)
 	// set pod name
-	os.Setenv(podNameEnvVariable, "pod-0")
+	_ = os.Setenv(podNameEnvVariable, "pod-0")
 	// set pod namespace
-	os.Setenv(podNamespaceEnvVariable, "default")
+	_ = os.Setenv(podNamespaceEnvVariable, "default")
 
 	// make a routemap that manages replicas for deployment
 	cm := corev1.ConfigMap{
@@ -81,7 +81,7 @@ routingTemplates:
 	}
 
 	// create fake client with unstructured objects ... and start
-	os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
+	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

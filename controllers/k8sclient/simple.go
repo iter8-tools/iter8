@@ -8,11 +8,12 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"helm.sh/helm/v3/pkg/cli"
 
-	// Import to initialize client auth plugins.
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+
+	// Import to initialize client auth plugins.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/client-go/dynamic"
@@ -27,6 +28,7 @@ type Client struct {
 	*dynamic.DynamicClient
 }
 
+// Patch performs a server-side apply of GVR
 func (cl *Client) Patch(gvr schema.GroupVersionResource, objNamespace string, objName string, jsonBytes []byte) (*unstructured.Unstructured, error) {
 	return cl.DynamicClient.Resource(gvr).Namespace(objNamespace).Patch(context.TODO(), objName, types.ApplyPatchType, jsonBytes, metav1.PatchOptions{
 		FieldManager: "iter8-controller",
