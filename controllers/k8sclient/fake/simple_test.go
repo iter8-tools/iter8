@@ -29,7 +29,7 @@ func TestNew(t *testing.T) {
 	}
 
 	for _, e := range tests {
-		client := New(e.a...)
+		client := New(nil, e.a)
 		assert.NotNil(t, client)
 	}
 }

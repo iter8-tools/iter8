@@ -2,21 +2,19 @@ package controllers
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"html/template"
 	"strconv"
 	"strings"
 	"sync"
 
-	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
+	seriyaml "k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -244,28 +242,40 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 					// result should be a YAML manifest serialized as bytes
 					// unmarshal result into unstructured.Unstructured object
 					obj := &unstructured.Unstructured{}
-					if err := yaml.Unmarshal(result, obj); err != nil {
-						log.Logger.WithStackTrace("invalid and unmarshalable routing template").Error(err)
+					var decUnstructured = seriyaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+					if _, _, err := decUnstructured.Decode(result, nil, obj); err != nil {
+						log.Logger.WithStackTrace(err.Error()).Error("invalid and unmarshalable routing template")
 					} else {
 						// ensure object has name and kind
-						if obj.GetName() == "" || obj.GetKind() == "" {
+						// if obj.GetName() == "" || obj.GetKind() == "" {
+						// ensure object has kind
+						if obj.GetKind() == "" {
 							log.Logger.Error("template execution yielded invalid object")
 						} else {
-							// eusure resource type for the object is known
+							// ensure resource type for the object is known
 							gvrc, ok := config.ResourceTypes[rt.GVRShort]
 							if !ok {
 								log.Logger.Error("unknown gvr: ", rt.GVRShort)
 							} else {
-								// at this point we known resource we can server-side apply
+								// at this point we have a known resource we can server-side apply
 								gvr := gvrc.GroupVersionResource
 
-								if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(result), metav1.PatchOptions{
-									FieldManager: "iter8-controller",
-									Force:        base.BoolPointer(true),
-								}); err != nil {
-									log.Logger.WithStackTrace("cannot server-side-apply routing template result: " + "\n" + string(result)).Error(err)
+								// get its JSON serialization
+								jsonBytes, err := obj.MarshalJSON()
+								if err != nil {
+									log.Logger.Error("error marshaling obj into JSON: ", err)
 								} else {
-									log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
+									// if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(jsonBytes), metav1.PatchOptions{
+									// 	FieldManager: "iter8-controller",
+									// 	Force:        base.BoolPointer(true),
+									// }); err != nil {
+									if _, err := client.Patch(gvr, s.Namespace, obj.GetName(), jsonBytes); err != nil {
+										log.Logger.WithStackTrace(err.Error()).Error("cannot server-side-apply routing template result")
+										log.Logger.Error("unstructured patch obj: ", obj)
+										log.Logger.Error("unstructured obj json: ", string(jsonBytes))
+									} else {
+										log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
+									}
 								}
 							}
 						}

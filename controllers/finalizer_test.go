@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -26,7 +27,7 @@ func TestAddFinalizer(t *testing.T) {
 	}
 
 	// 1. Create a test k8sclient.Interface object with a k8s resource
-	client := fake.New(u)
+	client := fake.New(nil, []runtime.Object{u})
 
 	gvr := schema.GroupVersionResource{
 		Group:    "",
@@ -101,7 +102,7 @@ func TestRemoveFinalizer(t *testing.T) {
 
 	for i, tc := range tt {
 		// 1. Create a test k8sclient.Interface object with a k8s resource
-		client := fake.New(tc.u)
+		client := fake.New(nil, []runtime.Object{tc.u})
 
 		// 2. Call remove finalizer
 		removeFinalizer(tc.u.GetName(), tc.u.GetNamespace(), "pod", client, config)

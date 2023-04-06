@@ -4,7 +4,7 @@ defaultResync: 30s
 resourceTypes:
   deploy:
     Group: apps
-    Gersion: v1
+    Version: v1
     Resource: deployments
   svc:
     Group: ""

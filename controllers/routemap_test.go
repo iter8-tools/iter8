@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"context"
+	"os"
 	"sync"
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/controllers/k8sclient/fake"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -75,8 +77,65 @@ func TestNormalizeWeights_sum_zero(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel() // cancel when we are finished consuming integers
 
-		_ = initAppResourceInformers(ctx.Done(), testConfig, fake.New())
+		_ = initAppResourceInformers(ctx.Done(), testConfig, fake.New(nil, nil))
 		testRoutemap.normalizeWeights(testConfig)
 		assert.Equal(t, e.b, testRoutemap.Weights())
 	}
 }
+
+func TestExtractRouteMap(t *testing.T) {
+	// get config
+	os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
+	conf, err := readConfig()
+	assert.NoError(t, err)
+
+	// make cm
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "default",
+			Labels: map[string]string{
+				iter8ManagedByLabel: iter8ManagedByValue,
+				iter8KindLabel:      iter8KindRoutemapValue,
+				iter8VersionLabel:   iter8VersionValue,
+			},
+		},
+		Immutable: base.BoolPointer(true),
+		Data: map[string]string{
+			"strSpec": `
+variants:
+- resources: []
+  weight: 1
+`,
+		},
+		BinaryData: map[string][]byte{},
+	}
+
+	// get routemap from cm
+	rm, err := extractRoutemap(&cm, conf)
+	assert.NoError(t, err)
+	assert.NotNil(t, rm)
+}
+
+/*
+variants:
+- resources:
+	- gvrShort: deploy
+		name: test
+		namespace: default
+routingTemplates:
+	test:
+		gvrShort: deploy
+		template: |
+			apiVersion: apps/v1
+			kind: Deployment
+			metadata:
+				name: test
+				namespace: default
+			spec:
+				replicas: 2
+*/
