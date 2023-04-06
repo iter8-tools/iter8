@@ -9,15 +9,15 @@ import (
 )
 
 const (
-	podNameEnvVariable      = "POD_NAME"
-	podNamespaceEnvVariable = "POD_NAMESPACE"
+	PodNameEnvVariable      = "POD_NAME"
+	PodNamespaceEnvVariable = "POD_NAMESPACE"
 	statefulSetSep          = "-"
 	leaderSuffix            = "-0"
 )
 
 // getPodName returns the name of this pod
 func getPodName() (string, bool) {
-	podName, ok := os.LookupEnv(podNameEnvVariable)
+	podName, ok := os.LookupEnv(PodNameEnvVariable)
 	// missing env variable is unacceptable
 	if !ok {
 		return "", false

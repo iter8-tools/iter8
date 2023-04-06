@@ -85,5 +85,6 @@ func init() {
 	rootCmd.AddCommand(newVersionCmd())
 
 	// add controllers
-	rootCmd.AddCommand(newControllersCmd(kubeClient))
+	rootCmd.AddCommand(newControllersCmd(nil, kubeClient))
+
 }

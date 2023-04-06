@@ -19,9 +19,11 @@ import (
 
 func TestStart(t *testing.T) {
 	// set pod name
-	_ = os.Setenv(podNameEnvVariable, "pod-0")
+	_ = os.Setenv(PodNameEnvVariable, "pod-0")
 	// set pod namespace
-	_ = os.Setenv(podNamespaceEnvVariable, "default")
+	_ = os.Setenv(PodNamespaceEnvVariable, "default")
+	// set config file
+	_ = os.Setenv(ConfigEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 
 	// make a routemap that manages replicas for deployment
 	cm := corev1.ConfigMap{
@@ -76,9 +78,6 @@ routingTemplates:
 			},
 		},
 	}
-
-	// create fake client with unstructured objects ... and start
-	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

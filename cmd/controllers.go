@@ -2,9 +2,6 @@ package cmd
 
 import (
 	"context"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -20,15 +17,19 @@ Start Iter8 controllers.
 `
 
 // newControllersCmd creates the Iter8 controllers
-func newControllersCmd(client k8sclient.Interface) *cobra.Command {
+func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "controllers",
 		Short:        "Start Iter8 controllers",
 		Long:         controllersDesc,
+		Args:         cobra.NoArgs,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
+			if stopCh == nil {
+				stopCh = ctx.Done()
+			}
 
 			if client == nil {
 				var err error
@@ -39,17 +40,17 @@ func newControllersCmd(client k8sclient.Interface) *cobra.Command {
 				}
 			}
 
-			if err := controllers.Start(ctx.Done(), client); err != nil {
+			if err := controllers.Start(stopCh, client); err != nil {
 				log.Logger.Error("controllers did not start ... ")
 				return err
 			}
 			log.Logger.Debug("started controllers ... ")
 
-			sigCh := make(chan os.Signal, 1)
-			signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
-			<-sigCh
+			// sigCh := make(chan os.Signal, 1)
+			// signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
+			// <-sigCh
 
-			log.Logger.Warn("SIGTERM ... ")
+			// log.Logger.Warn("SIGTERM ... ")
 
 			return nil
 		},

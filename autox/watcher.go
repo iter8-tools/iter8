@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	// configEnv is the name of environment variable with file path to the config
-	configEnv = "CONFIG"
+	// ConfigEnv is the name of environment variable with file path to the config
+	ConfigEnv = "CONFIG"
 )
 
 var k8sClient *kubeClient
@@ -73,7 +73,7 @@ func Start(stopCh chan struct{}, autoxK *kubeClient) error {
 	}
 
 	// read release group specs
-	configFile, ok := os.LookupEnv(configEnv)
+	configFile, ok := os.LookupEnv(ConfigEnv)
 	if !ok {
 		log.Logger.Fatal("group configuration file is required")
 	}

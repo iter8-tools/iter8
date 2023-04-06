@@ -10,7 +10,7 @@ import (
 )
 
 func TestReadConfig(t *testing.T) {
-	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
+	_ = os.Setenv(ConfigEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 	c, e := readConfig()
 	assert.NoError(t, e)
 	assert.Equal(t, "30s", c.DefaultResync)
