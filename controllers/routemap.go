@@ -265,10 +265,6 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 								if err != nil {
 									log.Logger.Error("error marshaling obj into JSON: ", err)
 								} else {
-									// if _, err := client.Resource(gvr).Namespace(s.Namespace).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, []byte(jsonBytes), metav1.PatchOptions{
-									// 	FieldManager: "iter8-controller",
-									// 	Force:        base.BoolPointer(true),
-									// }); err != nil {
 									if _, err := client.Patch(gvr, s.Namespace, obj.GetName(), jsonBytes); err != nil {
 										log.Logger.WithStackTrace(err.Error()).Error("cannot server-side-apply routing template result")
 										log.Logger.Error("unstructured patch obj: ", obj)

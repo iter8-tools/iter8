@@ -9,7 +9,6 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient/fake"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,8 +18,6 @@ import (
 )
 
 func TestStart(t *testing.T) {
-	// log everything
-	log.Logger.SetLevel(logrus.ErrorLevel)
 	// set pod name
 	_ = os.Setenv(podNameEnvVariable, "pod-0")
 	// set pod namespace
