@@ -1,0 +1,7 @@
+this is not a 
+. real yaml .
+if you try : this or 
+some thing equally bad
+( yaml parsing breaks)
+{ real bad }
+[ in fact ]
