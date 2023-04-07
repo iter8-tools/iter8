@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	// ConfigEnv is the name of environment variable with config file path
-	ConfigEnv = "CONFIG_FILE"
+	// configEnv is the name of environment variable with config file path
+	configEnv = "CONFIG_FILE"
 )
 
 // GroupVersionResourceConditions is a Kubernetes resource type along with a list of conditions
@@ -42,9 +42,9 @@ type Config struct {
 // readConfig reads configuration information from file
 func readConfig() (*Config, error) {
 	// read controller config
-	configFile, ok := os.LookupEnv(ConfigEnv)
+	configFile, ok := os.LookupEnv(configEnv)
 	if !ok {
-		e := errors.New("cannot lookup config env variable: " + ConfigEnv)
+		e := errors.New("cannot lookup config env variable: " + configEnv)
 		log.Logger.Error(e)
 		return nil, e
 	}

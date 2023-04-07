@@ -64,7 +64,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 	} else {
 		// namespace scoped
 		var ok bool
-		if ns, ok = os.LookupEnv(PodNamespaceEnvVariable); !ok {
+		if ns, ok = os.LookupEnv(podNamespaceEnvVariable); !ok {
 			return errors.New("unable to get pod namespace")
 		}
 	}
@@ -151,7 +151,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 	} else {
 		// namespace scoped
 		var ok bool
-		if ns, ok = os.LookupEnv(PodNamespaceEnvVariable); !ok {
+		if ns, ok = os.LookupEnv(podNamespaceEnvVariable); !ok {
 			return errors.New("unable to get pod namespace")
 		}
 	}

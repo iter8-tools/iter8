@@ -19,11 +19,11 @@ import (
 
 func TestStart(t *testing.T) {
 	// set pod name
-	_ = os.Setenv(PodNameEnvVariable, "pod-0")
+	_ = os.Setenv(podNameEnvVariable, "pod-0")
 	// set pod namespace
-	_ = os.Setenv(PodNamespaceEnvVariable, "default")
+	_ = os.Setenv(podNamespaceEnvVariable, "default")
 	// set config file
-	_ = os.Setenv(ConfigEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
+	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 
 	// make a routemap that manages replicas for deployment
 	cm := corev1.ConfigMap{

@@ -87,7 +87,7 @@ func TestNormalizeWeights_sum_zero(t *testing.T) {
 
 func TestExtractRouteMap(t *testing.T) {
 	// get config
-	_ = os.Setenv(ConfigEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
+	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 	conf, err := readConfig()
 	assert.NoError(t, err)
 

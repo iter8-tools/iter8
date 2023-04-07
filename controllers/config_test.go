@@ -22,9 +22,9 @@ func TestReadConfig(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		_ = os.Unsetenv(ConfigEnv)
+		_ = os.Unsetenv(configEnv)
 		if tt.confEnv {
-			_ = os.Setenv(ConfigEnv, tt.confFile)
+			_ = os.Setenv(configEnv, tt.confFile)
 		}
 
 		c, err := readConfig()

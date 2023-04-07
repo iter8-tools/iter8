@@ -9,17 +9,17 @@ import (
 )
 
 const (
-	// PodNameEnvVariable is the name of the environment variable with pod name
-	PodNameEnvVariable = "POD_NAME"
-	// PodNamespaceEnvVariable is the name of the environment variable with pod namespace
-	PodNamespaceEnvVariable = "POD_NAMESPACE"
+	// podNameEnvVariable is the name of the environment variable with pod name
+	podNameEnvVariable = "POD_NAME"
+	// podNamespaceEnvVariable is the name of the environment variable with pod namespace
+	podNamespaceEnvVariable = "POD_NAMESPACE"
 	// leaderSuffix is used to determine the leader pod
 	leaderSuffix = "-0"
 )
 
 // getPodName returns the name of this pod
 func getPodName() (string, bool) {
-	podName, ok := os.LookupEnv(PodNameEnvVariable)
+	podName, ok := os.LookupEnv(podNameEnvVariable)
 	// missing env variable is unacceptable
 	if !ok {
 		return "", false
