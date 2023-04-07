@@ -373,7 +373,7 @@ func validateRoutemapCM(confMap *corev1.ConfigMap) error {
 	return nil
 }
 
-// validateRoutemap validates a given sbject
+// validateRoutemap validates a given routemap
 func validateRoutemap(s *routemap, config *Config) (*routemap, error) {
 	// routemap must have at least one variant
 	if len(s.Variants) == 0 {
