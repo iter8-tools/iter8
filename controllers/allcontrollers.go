@@ -182,7 +182,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 			handle(newObj, "update")
 		},
 		DeleteFunc: func(obj interface{}) {
-			allRoutemaps.delete(obj.(*corev1.ConfigMap), config, client)
+			allRoutemaps.delete(obj.(*corev1.ConfigMap))
 		},
 	}); err != nil {
 		e := errors.New("unable to create event handlers for routemap informer")

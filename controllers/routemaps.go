@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -25,7 +24,7 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routem
 
 	// attempt to return the routemap
 	// ToDo: speed up this quadruple-nested for loop
-	for _, rmByName := range allRoutemaps.nsRoutemap {
+	for _, rmByName := range s.nsRoutemap {
 		for _, rm := range rmByName {
 			for _, v := range rm.Variants {
 				for _, r := range v.Resources {
@@ -42,20 +41,20 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routem
 }
 
 // delete a routemap from routemaps
-func (s *routemaps) delete(cm *corev1.ConfigMap, config *Config, client k8sclient.Interface) {
+func (s *routemaps) delete(cm *corev1.ConfigMap) {
 	// lock for writing and later unlock
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	// delete from nsRoutemap first
-	if m, ok1 := allRoutemaps.nsRoutemap[cm.Namespace]; ok1 {
+	if m, ok1 := s.nsRoutemap[cm.Namespace]; ok1 {
 		_, ok2 := m[cm.Name]
 		if ok2 {
 			delete(m, cm.Name)
 			if len(m) == 0 {
 				log.Logger.Debug("no routemaps in namespace ", cm.Namespace)
-				delete(allRoutemaps.nsRoutemap, cm.Namespace)
-				log.Logger.Debug("deleted namespace ", cm.Namespace, " from allRoutemaps")
+				delete(s.nsRoutemap, cm.Namespace)
+				log.Logger.Debug("deleted namespace ", cm.Namespace, " from routemaps")
 			}
 		}
 	}

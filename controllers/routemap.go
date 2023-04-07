@@ -290,8 +290,11 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 func conditionsSatisfied(u *unstructured.Unstructured, gvrShort string, config *Config) bool {
 	// loop through conditions specified in config for this gvr
 	for _, c := range config.ResourceTypes[gvrShort].Conditions {
+		log.Logger.Info("found condition: ", c)
+		// this condition is currently not satified
+		satisfied := false
 		conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
-		if err != nil || !found {
+		if err != nil || !found || conditions == nil {
 			log.Logger.Info("conditions not found in object")
 			return false
 		}
@@ -329,7 +332,13 @@ func conditionsSatisfied(u *unstructured.Unstructured, gvrShort string, config *
 			if !strings.EqualFold(status, c.Status) {
 				log.Logger.Info("condition not satisfied")
 				return false
+			} else {
+				satisfied = true
 			}
+		}
+		if !satisfied {
+			// this condition is still not satisfied
+			return false
 		}
 	}
 	return true

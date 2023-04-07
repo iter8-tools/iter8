@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -121,21 +122,55 @@ variants:
 	assert.NotNil(t, rm)
 }
 
-/*
-variants:
-- resources:
-	- gvrShort: deploy
-		name: test
-		namespace: default
-routingTemplates:
-	test:
-		gvrShort: deploy
-		template: |
-			apiVersion: apps/v1
-			kind: Deployment
-			metadata:
-				name: test
-				namespace: default
-			spec:
-				replicas: 2
-*/
+func TestConditionsSatisfied(t *testing.T) {
+	u := &unstructured.Unstructured{
+		Object: map[string]interface{}{},
+	}
+	u.SetGeneration(13)
+	config := &Config{
+		ResourceTypes: map[string]GroupVersionResourceConditions{"foo": {
+			Conditions: []Condition{{
+				Name:   "bar",
+				Status: "True",
+			}},
+		}},
+	}
+	var gen12 = int64(12)
+	var gen13 = int64(13)
+
+	var tests = []struct {
+		conditions []interface{}
+		satisfied  bool
+	}{
+		{nil, false},
+		{[]interface{}{"a", "b"}, false},
+		{[]interface{}{map[string]interface{}{
+			"status": "got it",
+		}}, false},
+		{[]interface{}{map[string]interface{}{
+			"type": "bar",
+		}}, false},
+		{[]interface{}{map[string]interface{}{
+			"type":               "bar",
+			"status":             "True",
+			"observedGeneration": gen12,
+		}}, false},
+		{[]interface{}{map[string]interface{}{
+			"type":               "bar",
+			"status":             "False",
+			"observedGeneration": gen13,
+		}}, false},
+		{[]interface{}{map[string]interface{}{
+			"type":               "bar",
+			"status":             "True",
+			"observedGeneration": gen13,
+		}}, true},
+	}
+
+	for _, tt := range tests {
+		unstructured.SetNestedMap(u.Object, make(map[string]interface{}), "status")
+		unstructured.SetNestedSlice(u.Object, tt.conditions, "status", "conditions")
+		sat := conditionsSatisfied(u, "foo", config)
+		assert.Equal(t, tt.satisfied, sat)
+	}
+}
