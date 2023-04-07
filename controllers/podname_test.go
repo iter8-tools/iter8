@@ -30,52 +30,6 @@ func TestGetPodName(t *testing.T) {
 
 }
 
-func TestGetStatefulSetName(t *testing.T) {
-	var tests = []struct {
-		a string
-		b string
-		c bool
-	}{
-		{"x-0", "x", true},
-		{"x-y-0", "x-y", true},
-		{"x-1", "x", true},
-		{"x-y-1", "x-y", true},
-		{"x", "", false},
-		{"", "", false},
-	}
-
-	for _, e := range tests {
-		_ = os.Setenv(PodNameEnvVariable, e.a)
-		statefulSetName, ok := getStatefulSetName()
-		assert.Equal(t, e.b, statefulSetName)
-		assert.Equal(t, e.c, ok)
-	}
-
-}
-
-func TestLeaderName(t *testing.T) {
-	var tests = []struct {
-		a string
-		b string
-		c bool
-	}{
-		{"x-0", "x-0", true},
-		{"x-y-0", "x-y-0", true},
-		{"x-1", "x-0", true},
-		{"x-y-1", "x-y-0", true},
-		{"x", "", false},
-		{"", "", false},
-	}
-
-	for _, e := range tests {
-		_ = os.Setenv(PodNameEnvVariable, e.a)
-		leaderName, ok := getLeaderName()
-		assert.Equal(t, e.b, leaderName)
-		assert.Equal(t, e.c, ok)
-	}
-
-}
-
 func TestLeaderIsMe(t *testing.T) {
 	var tests = []struct {
 		a string

@@ -37,7 +37,7 @@ func TestStart(t *testing.T) {
 			Labels: map[string]string{
 				iter8ManagedByLabel: iter8ManagedByValue,
 				iter8KindLabel:      iter8KindRoutemapValue,
-				iter8VersionLabel:   iter8VersionValue,
+				iter8VersionLabel:   base.MajorMinor,
 			},
 		},
 		Immutable: base.BoolPointer(true),

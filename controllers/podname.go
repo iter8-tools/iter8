@@ -13,8 +13,6 @@ const (
 	PodNameEnvVariable = "POD_NAME"
 	// PodNamespaceEnvVariable is the name of the environment variable with pod namespace
 	PodNamespaceEnvVariable = "POD_NAMESPACE"
-	// statefulSetSep the separator for stateful set pod ids
-	statefulSetSep = "-"
 	// leaderSuffix is used to determine the leader pod
 	leaderSuffix = "-0"
 )
@@ -31,33 +29,6 @@ func getPodName() (string, bool) {
 		return "", false
 	}
 	return podName, true
-}
-
-// getStatefulSetName returns the name of this statefulset
-func getStatefulSetName() (string, bool) {
-	podName, ok := getPodName()
-	if !ok {
-		return "", false
-	}
-	// if statefulset name is x, then
-	// podName is x-i, where i is the pod index (integer)
-	// hence, statefulset name is simple the prefix of the pod name
-	slice := strings.Split(podName, statefulSetSep)
-	if len(slice) < 2 {
-		return "", false
-	}
-	slice = slice[:len(slice)-1]
-	return strings.Join(slice, statefulSetSep), true
-}
-
-// getLeaderName returns the name of the leader pod in this statefulset
-// leader pod is the pod with index 0
-func getLeaderName() (string, bool) {
-	statefulSetName, ok := getStatefulSetName()
-	if !ok {
-		return "", false
-	}
-	return statefulSetName + statefulSetSep + "0", true
 }
 
 // leaderIsMe is true if this pod has the leaderSuffix ("-0")

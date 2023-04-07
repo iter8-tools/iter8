@@ -35,8 +35,13 @@ type variant struct {
 }
 
 type resource struct {
-	GVRShort  string  `json:"gvrShort"`
-	Name      string  `json:"name"`
+	// GVRShort for the resource
+	GVRShort string `json:"gvrShort"`
+	// Name of the resource
+	Name string `json:"name"`
+	// Namespace of the resource
+	// if this field is nil,
+	// controllers will treat namespace of the routemap as the namespace of this resource
 	Namespace *string `json:"namespace"`
 }
 

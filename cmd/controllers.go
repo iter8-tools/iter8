@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -17,6 +20,10 @@ Start Iter8 controllers.
 `
 
 // newControllersCmd creates the Iter8 controllers
+// when invoking this function for real, set stopCh to nil
+// this will block the controller from exiting until an os.Interrupt;
+// when invoking this function in a unit test, set stopCh to ctx.Done()
+// this will exit the controller when cancel() is called by the parent function;
 func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "controllers",
@@ -25,10 +32,17 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 		Args:         cobra.NoArgs,
 		SilenceUsage: true,
 		RunE: func(_ *cobra.Command, _ []string) error {
+			// createSigCh indicates if we should create sigCh (channel) that fires on interrupt
+			createSigCh := false
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
+			// if stopCh is nil, create sigCh to exit this func on interrupt,
+			// and use ctx.Done() to clean up controllers when exiting;
+			// otherwise, simply use stopCh for both
 			if stopCh == nil {
 				stopCh = ctx.Done()
+				createSigCh = true
 			}
 
 			if client == nil {
@@ -46,11 +60,13 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 			}
 			log.Logger.Debug("started controllers ... ")
 
-			// sigCh := make(chan os.Signal, 1)
-			// signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
-			// <-sigCh
-
-			// log.Logger.Warn("SIGTERM ... ")
+			// if createSigCh, then block until there is an os.Interrupt
+			if createSigCh {
+				sigCh := make(chan os.Signal, 1)
+				signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
+				<-sigCh
+				log.Logger.Warn("SIGTERM ... ")
+			}
 
 			return nil
 		},

@@ -28,7 +28,12 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routem
 		for _, rm := range rmByName {
 			for _, v := range rm.Variants {
 				for _, r := range v.Resources {
+					// go through every resource in every variant in every routemap in every namespace
+					// check for name match between routemap-resource and unstructured-resource
+					// check for gvrShort match between routemap-resource and unstructured-resource
 					if r.GVRShort == gvrShort && r.Name == u.GetName() {
+						// if routemap specifies the resource namespace
+						// check for namespace match between routemap-resource and unstructured-resource
 						if r.Namespace == nil || *r.Namespace == u.GetNamespace() {
 							return rm
 						}

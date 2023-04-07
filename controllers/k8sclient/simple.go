@@ -28,10 +28,12 @@ type Client struct {
 	*dynamic.DynamicClient
 }
 
+const iter8ControllerFieldManager = "iter8-controller"
+
 // Patch performs a server-side apply of GVR
 func (cl *Client) Patch(gvr schema.GroupVersionResource, objNamespace string, objName string, jsonBytes []byte) (*unstructured.Unstructured, error) {
 	return cl.DynamicClient.Resource(gvr).Namespace(objNamespace).Patch(context.TODO(), objName, types.ApplyPatchType, jsonBytes, metav1.PatchOptions{
-		FieldManager: "iter8-controller",
+		FieldManager: iter8ControllerFieldManager,
 		Force:        base.BoolPointer(true),
 	})
 }

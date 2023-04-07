@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
@@ -20,9 +21,8 @@ import (
 
 const (
 	// for application resources
-	iter8FinalizerStr = "iter8.tools/finalizer"
-	iter8WatchLabel   = "iter8.tools/watch"
-	iter8WatchValue   = "true"
+	iter8WatchLabel = "iter8.tools/watch"
+	iter8WatchValue = "true"
 
 	// for routemap resource
 	iter8ManagedByLabel    = "app.kubernetes.io/managed-by"
@@ -30,7 +30,6 @@ const (
 	iter8KindLabel         = "iter8.tools/kind"
 	iter8KindRoutemapValue = "routemap"
 	iter8VersionLabel      = "iter8.tools/version"
-	iter8VersionValue      = "v0.14"
 )
 
 // informers used to watch application resources,
@@ -138,7 +137,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 			MatchLabels: map[string]string{
 				iter8ManagedByLabel: iter8ManagedByValue,
 				iter8KindLabel:      iter8KindRoutemapValue,
-				iter8VersionLabel:   iter8VersionValue,
+				iter8VersionLabel:   base.MajorMinor,
 			},
 		})
 	})

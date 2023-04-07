@@ -12,6 +12,11 @@ import (
 	"k8s.io/client-go/util/retry"
 )
 
+const (
+	// for application resources
+	iter8FinalizerStr = "iter8.tools/finalizer"
+)
+
 // add Iter8 finalizer to an application resource
 func addFinalizer(name string, namespace string, gvrShort string, client k8sclient.Interface, config *Config) {
 	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {

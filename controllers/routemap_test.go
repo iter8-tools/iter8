@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient/fake"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -102,7 +103,7 @@ func TestExtractRouteMap(t *testing.T) {
 			Labels: map[string]string{
 				iter8ManagedByLabel: iter8ManagedByValue,
 				iter8KindLabel:      iter8KindRoutemapValue,
-				iter8VersionLabel:   iter8VersionValue,
+				iter8VersionLabel:   base.MajorMinor,
 			},
 		},
 		Immutable: base.BoolPointer(true),
@@ -172,5 +173,44 @@ func TestConditionsSatisfied(t *testing.T) {
 		_ = unstructured.SetNestedSlice(u.Object, tt.conditions, "status", "conditions")
 		sat := conditionsSatisfied(u, "foo", config)
 		assert.Equal(t, tt.satisfied, sat)
+	}
+}
+
+func TestGetObservedGeneration(t *testing.T) {
+	u := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"status": map[string]interface{}{},
+		},
+	}
+	condition := map[string]interface{}{}
+
+	gen1 := int64(1)
+	gen2 := int64(2)
+
+	var tests = []struct {
+		conditionGen *int64
+		statusGen    *int64
+		val          int64
+		ok           bool
+	}{
+		{&gen1, nil, 1, true},
+		{nil, &gen2, 2, true},
+		{&gen1, &gen2, 1, true},
+		{nil, nil, 0, false},
+	}
+
+	for _, tt := range tests {
+		delete(condition, "observedGeneration")
+		delete(u.Object["status"].(map[string]interface{}), "observedGeneration")
+		if tt.conditionGen != nil {
+			condition["observedGeneration"] = *tt.conditionGen
+		}
+		if tt.statusGen != nil {
+			u.Object["status"].(map[string]interface{})["observedGeneration"] = *tt.statusGen
+		}
+		v, o := getObservedGeneration(u, condition)
+		log.Logger.Info(tt)
+		assert.Equal(t, tt.val, v)
+		assert.Equal(t, tt.ok, o)
 	}
 }
