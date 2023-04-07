@@ -69,6 +69,7 @@ const (
 )
 
 // Weights provide the relative weights for traffic routing between variants
+// Intended for use in routemap templates
 func (s *routemap) Weights() []uint32 {
 	return s.normalizedWeights
 }
