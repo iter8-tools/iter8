@@ -332,9 +332,8 @@ func conditionsSatisfied(u *unstructured.Unstructured, gvrShort string, config *
 			if !strings.EqualFold(status, c.Status) {
 				log.Logger.Info("condition not satisfied")
 				return false
-			} else {
-				satisfied = true
 			}
+			satisfied = true
 		}
 		if !satisfied {
 			// this condition is still not satisfied

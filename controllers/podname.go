@@ -9,10 +9,14 @@ import (
 )
 
 const (
-	PodNameEnvVariable      = "POD_NAME"
+	// PodNameEnvVariable is the name of the environment variable with pod name
+	PodNameEnvVariable = "POD_NAME"
+	// PodNamespaceEnvVariable is the name of the environment variable with pod namespace
 	PodNamespaceEnvVariable = "POD_NAMESPACE"
-	statefulSetSep          = "-"
-	leaderSuffix            = "-0"
+	// statefulSetSep the separator for stateful set pod ids
+	statefulSetSep = "-"
+	// leaderSuffix is used to determine the leader pod
+	leaderSuffix = "-0"
 )
 
 // getPodName returns the name of this pod

@@ -168,8 +168,8 @@ func TestConditionsSatisfied(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		unstructured.SetNestedMap(u.Object, make(map[string]interface{}), "status")
-		unstructured.SetNestedSlice(u.Object, tt.conditions, "status", "conditions")
+		_ = unstructured.SetNestedMap(u.Object, make(map[string]interface{}), "status")
+		_ = unstructured.SetNestedSlice(u.Object, tt.conditions, "status", "conditions")
 		sat := conditionsSatisfied(u, "foo", config)
 		assert.Equal(t, tt.satisfied, sat)
 	}
