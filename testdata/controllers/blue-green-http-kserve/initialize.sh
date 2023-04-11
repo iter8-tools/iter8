@@ -35,7 +35,7 @@ metadata:
     iter8.tools/version: v0.14
 data:
   strSpec: |
-    variants: 
+    versions: 
     - weight: 60
       resources:
       - gvrShort: isvc

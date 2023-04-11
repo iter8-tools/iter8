@@ -46,7 +46,7 @@ metadata:
     iter8.tools/version: v0.14
 data:
   strSpec: |
-    variants: 
+    versions: 
     - resources:
       - gvrShort: isvc
         name: wisdom

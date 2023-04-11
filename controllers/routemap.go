@@ -24,12 +24,12 @@ type routemap struct {
 	// Todo: prune this down to agra.ObjectMeta instead of metav1.ObjectMeta
 	mutex             sync.RWMutex
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Variants          []variant                  `json:"variants,omitempty"`
+	Versions          []version                  `json:"versions,omitempty"`
 	RoutingTemplates  map[string]routingTemplate `json:"routingTemplates,omitempty"`
 	normalizedWeights []uint32
 }
 
-type variant struct {
+type version struct {
 	Resources []resource `json:"resources,omitempty"`
 	Weight    *uint32    `json:"weight,omitempty"`
 }
@@ -65,48 +65,48 @@ type routemaps struct {
 const (
 	routemapStrSpec      = "strSpec"
 	weightAnnotation     = "iter8.tools/weight"
-	defaultVariantWeight = uint32(1)
+	defaultVersionWeight = uint32(1)
 )
 
-// Weights provide the relative weights for traffic routing between variants
+// Weights provide the relative weights for traffic routing between versions
 // Intended for use in routemap templates
 func (s *routemap) Weights() []uint32 {
 	return s.normalizedWeights
 }
 
-// normalizeWeights sets the normalized weights for each variant of the routemap
+// normalizeWeights sets the normalized weights for each version of the routemap
 //
 // the inputs for normalizedWeights include:
-// 1. Whether or not variants are available; if a version is unavailable, its derivedWeight is set to zero
+// 1. Whether or not versions are available; if a version is unavailable, its derivedWeight is set to zero
 // 2. derivedWeights also get inputs from resource annotations
-// 3. derivedWeights can also be directly set in the variant definition within the routemap
-// 4. derivedWeight is defaulted to 1 for each variant
+// 3. derivedWeights can also be directly set in the version definition within the routemap
+// 4. derivedWeight is defaulted to 1 for each version
 //
 // normalizedWeights are the same as derivedWeights with one exception.
 // When derivedWeights sum up to zero, we set normalizedWeights[0] to 1
-// (i.e., variant 1 gets non-zero normalizedWeight)
+// (i.e., version 1 gets non-zero normalizedWeight)
 func (s *routemap) normalizeWeights(config *Config) {
-	derivedWeights := make([]uint32, len(s.Variants))
-	available := s.getAvailableVariants(config)
-	// overrides from variant resource annotation
+	derivedWeights := make([]uint32, len(s.Versions))
+	available := s.getAvailableVersions(config)
+	// overrides from version resource annotation
 	override := s.getWeightOverrides(config)
 
-	for i, v := range s.Variants {
+	for i, v := range s.Versions {
 		if available[i] {
-			// first, attempt to weight from the variant spec
+			// first, attempt to weight from the version spec
 			if v.Weight != nil {
 				derivedWeights[i] = *v.Weight
 			} else {
-				// no variant weight specified; default
-				derivedWeights[i] = defaultVariantWeight
+				// no version weight specified; default
+				derivedWeights[i] = defaultVersionWeight
 			}
 			// next, attempt to override weight from object annotations
 			if override[i] != nil {
-				// found weight override for this variant
+				// found weight override for this version
 				derivedWeights[i] = *override[i]
 			}
 		} else {
-			// this variant is not available; set weight to 0
+			// this version is not available; set weight to 0
 			derivedWeights[i] = 0
 		}
 	}
@@ -117,20 +117,20 @@ func (s *routemap) normalizeWeights(config *Config) {
 		total += v
 	}
 	if total == 0 {
-		// at this point, routemap is validated and guaranteed to have at least one variant
-		derivedWeights[0] = defaultVariantWeight
+		// at this point, routemap is validated and guaranteed to have at least one version
+		derivedWeights[0] = defaultVersionWeight
 	}
 	s.normalizedWeights = derivedWeights
 
 }
 
 // getWeightOverrides is looking for weights in the object annotations
-// override pointer for a variant may be nil, if there are no valid weight annotation for the variant
-// if a variant has multiple resources,
+// override pointer for a version may be nil, if there are no valid weight annotation for the version
+// if a version has multiple resources,
 // this function looks for the override in the first resource only
 func (s *routemap) getWeightOverrides(config *Config) []*uint32 {
-	override := make([]*uint32, len(s.Variants))
-	for i, v := range s.Variants {
+	override := make([]*uint32, len(s.Versions))
+	for i, v := range s.Versions {
 		if len(v.Resources) > 0 {
 			r := v.Resources[0]
 			// get informer for resource, else mark this resource as unavailable
@@ -157,7 +157,7 @@ func (s *routemap) getWeightOverrides(config *Config) []*uint32 {
 						log.Logger.Error("invalid weight annotation")
 					}
 				} else {
-					log.Logger.Trace("no weight annotation for variant resource 1")
+					log.Logger.Trace("no weight annotation for version resource 1")
 				}
 			}
 		}
@@ -165,21 +165,21 @@ func (s *routemap) getWeightOverrides(config *Config) []*uint32 {
 	return override
 }
 
-func (s *routemap) getAvailableVariants(config *Config) []bool {
-	// initialize all variants for this routemap as available
-	// if any resource for a variant is unavailable, mark that variant as unavailable
-	variantsAvailable := make([]bool, len(s.Variants))
-	for i := range variantsAvailable {
-		variantsAvailable[i] = true
+func (s *routemap) getAvailableVersions(config *Config) []bool {
+	// initialize all versions for this routemap as available
+	// if any resource for a version is unavailable, mark that version as unavailable
+	versionsAvailable := make([]bool, len(s.Versions))
+	for i := range versionsAvailable {
+		versionsAvailable[i] = true
 	}
-variantLoop:
-	for i, v := range s.Variants {
+versionLoop:
+	for i, v := range s.Versions {
 		for _, r := range v.Resources {
 			// get informer for resource, else mark this resource as unavailable
 			if _, ok := appInformers[r.GVRShort]; !ok {
 				log.Logger.Error("found resource spec with unknown gvrShort: ", r.GVRShort)
-				variantsAvailable[i] = false
-				continue variantLoop
+				versionsAvailable[i] = false
+				continue versionLoop
 			}
 			var obj runtime.Object
 			var err error
@@ -191,26 +191,26 @@ variantLoop:
 			if obj, err = appInformers[r.GVRShort].Lister().ByNamespace(ns).Get(r.Name); err != nil {
 				log.Logger.Trace("could not get resource: ", r.Name, " with gvrShort: ", r.GVRShort)
 				log.Logger.Trace(err)
-				variantsAvailable[i] = false
-				continue variantLoop
+				versionsAvailable[i] = false
+				continue versionLoop
 			}
 			// check deletionTimestamp
 			u := obj.(*unstructured.Unstructured)
 			if u.GetDeletionTimestamp() != nil {
 				log.Logger.Trace("resource with deletion timestamp: ", r.Name, " with gvrShort: ", r.GVRShort)
-				variantsAvailable[i] = false
-				continue variantLoop
+				versionsAvailable[i] = false
+				continue versionLoop
 			}
 			// check readiness condition using kubectl logic
 			// this should implement both status/condition and json path conditions
 			if !conditionsSatisfied(u, r.GVRShort, config) {
 				log.Logger.Trace("resource does not satisfy condition: ", r.Name, " with gvrShort: ", r.GVRShort)
-				variantsAvailable[i] = false
-				continue variantLoop
+				versionsAvailable[i] = false
+				continue versionLoop
 			}
 		}
 	}
-	return variantsAvailable
+	return versionsAvailable
 }
 
 // reconcile a routemap
@@ -219,7 +219,7 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	// normalize variant weights
+	// normalize version weights
 	s.normalizeWeights(config)
 
 	// if leader, compute routing policy and perform server side apply
@@ -376,19 +376,19 @@ func validateRoutemapCM(confMap *corev1.ConfigMap) error {
 
 // validateRoutemap validates a given routemap
 func validateRoutemap(s *routemap, config *Config) (*routemap, error) {
-	// routemap must have at least one variant
-	if len(s.Variants) == 0 {
-		e := errors.New("routemap must at least one variant")
+	// routemap must have at least one version
+	if len(s.Versions) == 0 {
+		e := errors.New("routemap must at least one version")
 		log.Logger.Error(e)
 		return nil, e
 	}
 
-	// if !clusterScoped, variant resource namespace should be nil or equal routemap namespace
+	// if !clusterScoped, version resource namespace should be nil or equal routemap namespace
 	if !config.ClusterScoped {
-		for _, v := range s.Variants {
+		for _, v := range s.Versions {
 			for _, r := range v.Resources {
 				if r.Namespace != nil && *r.Namespace != s.Namespace {
-					e := errors.New("expected variant resource namespace to match routemap namespace")
+					e := errors.New("expected version resource namespace to match routemap namespace")
 					log.Logger.Error(e)
 					return nil, e
 				}
