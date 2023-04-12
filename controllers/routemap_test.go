@@ -16,18 +16,18 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// normalizeWeights sets the normalized weights for each variant of the routemap
+// normalizeWeights sets the normalized weights for each version of the routemap
 // the inputs for normalizedWeights include:
-// 1. Whether or not variants are available
+// 1. Whether or not versions are available
 // 2. Weights set using annotations
-// 3. Weights set in the routemap for each variant
-// 4. Default weight of 1 for each variant
+// 3. Weights set in the routemap for each version
+// 4. Default weight of 1 for each version
 func TestNormalizeWeights_sum_zero(t *testing.T) {
-	// 1. Create a routemap with variants
+	// 1. Create a routemap with versions
 	testRoutemap := routemap{
 		mutex:      sync.RWMutex{},
 		ObjectMeta: metav1.ObjectMeta{Name: "testRoutemap", Namespace: "default"},
-		Variants: []variant{
+		Versions: []version{
 			{
 				Resources: []resource{{
 					GVRShort:  "svc",
@@ -67,12 +67,12 @@ func TestNormalizeWeights_sum_zero(t *testing.T) {
 	}
 
 	// 3. For each entry in table driven tests
-	// //	1. Create mock appinformers with variants in different states
+	// //	1. Create mock appinformers with versions in different states
 	// // 2. Get normalize weight
 	var tests = []struct {
 		b []uint32
 	}{
-		{[]uint32{defaultVariantWeight, 0, 0}},
+		{[]uint32{defaultVersionWeight, 0, 0}},
 	}
 
 	for _, e := range tests {
@@ -109,7 +109,7 @@ func TestExtractRouteMap(t *testing.T) {
 		Immutable: base.BoolPointer(true),
 		Data: map[string]string{
 			"strSpec": `
-variants:
+versions:
 - resources: []
   weight: 1
 `,

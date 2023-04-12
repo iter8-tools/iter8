@@ -11,7 +11,7 @@ var allRoutemaps = routemaps{
 	nsRoutemap: make(map[string]routemapsByName),
 }
 
-// getRoutemapFromObj extracts a routemap which contains the given object as a variant resource
+// getRoutemapFromObj extracts a routemap which contains the given object as a version resource
 // ToDo: this function assumes that there is at most one routemap that contains a source;
 // a more general idea would be to return a routemap list instead
 func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routemap {
@@ -26,9 +26,9 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routem
 	// ToDo: speed up this quadruple-nested for loop
 	for _, rmByName := range s.nsRoutemap {
 		for _, rm := range rmByName {
-			for _, v := range rm.Variants {
+			for _, v := range rm.Versions {
 				for _, r := range v.Resources {
-					// go through every resource in every variant in every routemap in every namespace
+					// go through every resource in every version in every routemap in every namespace
 					// check for name match between routemap-resource and unstructured-resource
 					// check for gvrShort match between routemap-resource and unstructured-resource
 					if r.GVRShort == gvrShort && r.Name == u.GetName() {

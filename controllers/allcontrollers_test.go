@@ -43,7 +43,7 @@ func TestStart(t *testing.T) {
 		Immutable: base.BoolPointer(true),
 		Data: map[string]string{
 			"strSpec": `
-variants:
+versions:
 - resources:
   - gvrShort: deploy
     name: test

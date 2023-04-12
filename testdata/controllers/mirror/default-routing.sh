@@ -52,8 +52,8 @@ metadata:
     iter8.tools/version: v0.14        
 data:
   strSpec: |
-    variants: 
-    # variant 1 is left unspecified since it does not have a role in routing
+    versions: 
+    # version 1 is left unspecified since it does not have a role in routing
     - 
     - resources:
       - gvrShort: deploy
