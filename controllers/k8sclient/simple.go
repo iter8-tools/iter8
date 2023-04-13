@@ -40,7 +40,7 @@ func (cl *Client) Patch(gvr schema.GroupVersionResource, objNamespace string, ob
 
 // New creates a new kubernetes client
 func New(settings *cli.EnvSettings) (*Client, error) {
-	log.Logger.Trace("kubernetes client creation invoked ...")
+	log.Logger.Trace("kubernetes client creation invoked...")
 
 	// get rest config
 	restConfig, err := settings.RESTClientGetter().ToRESTConfig()
@@ -66,7 +66,7 @@ func New(settings *cli.EnvSettings) (*Client, error) {
 		return nil, e
 	}
 
-	log.Logger.Trace("returning kubernetes client ... ")
+	log.Logger.Trace("returning kubernetes client... ")
 
 	return &Client{
 		Clientset:     clientset,

@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"os"
 	"time"
@@ -10,13 +11,17 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/informers/internalinterfaces"
+	typedv1core "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 )
 
 const (
@@ -114,10 +119,42 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 			return e
 		}
 	}
-	log.Logger.Trace("starting app informers factory ...")
+
+	log.Logger.Trace("starting app informers factory...")
 	// start all informers
 	factory.Start(stopCh)
-	log.Logger.Trace("started app informers factory ...")
+	log.Logger.Trace("started app informers factory...")
+
+	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
+	if !ok {
+		log.Logger.Errorf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
+		return nil
+	}
+
+	name, ok := os.LookupEnv(podNameEnvVariable)
+	if !ok {
+		log.Logger.Errorf("could not get pod name from environment variable %s", podNameEnvVariable)
+		return nil
+	}
+
+	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		log.Logger.Errorf("could not get pod with name %s in namespace %s", name, ns)
+		return nil
+	}
+
+	scheme := runtime.NewScheme()
+	_ = corev1.AddToScheme(scheme)
+
+	// all the good events stuff is here
+	eventBroadcaster := record.NewBroadcaster()
+	eventBroadcaster.StartStructuredLogging(4)
+	eventBroadcaster.StartRecordingToSink(&typedv1core.EventSinkImpl{Interface: client.CoreV1().Events("")})
+	eventRecorder := eventBroadcaster.NewRecorder(scheme, v1.EventSource{})
+
+	eventRecorder.Event(pod, corev1.EventTypeNormal, "Started app informers", "Started app informers")
+	eventBroadcaster.Shutdown()
+
 	return nil
 }
 
@@ -189,9 +226,9 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 		return e
 	}
 
-	log.Logger.Trace("starting routemap informer factory ...")
+	log.Logger.Trace("starting routemap informer factory...")
 	factory.Start(stopCh)
-	log.Logger.Trace("started routemap informer factory ...")
+	log.Logger.Trace("started routemap informer factory...")
 	return nil
 }
 
@@ -207,17 +244,17 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 		return err
 	}
 
-	log.Logger.Trace("initing app informers ... ")
+	log.Logger.Trace("initing app informers... ")
 	if err = initAppResourceInformers(stopCh, config, client); err != nil {
 		return err
 	}
-	log.Logger.Trace("inited app informers ... ")
+	log.Logger.Trace("inited app informers... ")
 
-	log.Logger.Trace("initing routemap informer ... ")
+	log.Logger.Trace("initing routemap informer... ")
 	if err = initRoutemapCMInformer(stopCh, config, client); err != nil {
 		return err
 	}
-	log.Logger.Trace("inited routemap informer ... ")
+	log.Logger.Trace("inited routemap informer... ")
 
 	return nil
 }
