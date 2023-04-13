@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: 1.19
     - uses: actions/checkout@v3
@@ -52,7 +52,7 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
     - name: Update Homebrew formula
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/repository-dispatch@v2
       with:
         token: ${{ secrets.PERSONAL_TOKEN }}
         repository: iter8-tools/homebrew-iter8
@@ -86,7 +86,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_SECRET }}
-    - uses: docker/build-push-action@v3
+    - uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest

@@ -57,8 +57,9 @@ func TestAddFinalizer(t *testing.T) {
 func TestRemoveFinalizer(t *testing.T) {
 
 	type test struct {
-		u        *unstructured.Unstructured
-		contains bool
+		u                     *unstructured.Unstructured
+		contains              bool
+		expectedNumFinalizers int
 	}
 
 	tt := []test{
@@ -72,7 +73,20 @@ func TestRemoveFinalizer(t *testing.T) {
 					"finalizers": []any{iter8FinalizerStr},
 				},
 			},
-		}, true}, {&unstructured.Unstructured{
+		}, true, 1}, // deletionTimestamp not present --> no deletion
+		{&unstructured.Unstructured{
+			Object: map[string]any{
+				"apiVersion": "v1",
+				"kind":       "Pod",
+				"metadata": map[string]any{
+					"namespace":         "myns",
+					"name":              "myname1",
+					"finalizers":        []any{"notIter8Finalizer"},
+					"deletionTimestamp": "2020-10-22T21:30:34Z",
+				},
+			},
+		}, false, 1}, // not Iter8 finalizer --> no deletion
+		{&unstructured.Unstructured{
 			Object: map[string]any{
 				"apiVersion": "v1",
 				"kind":       "Pod",
@@ -83,7 +97,7 @@ func TestRemoveFinalizer(t *testing.T) {
 					"deletionTimestamp": "2020-10-22T21:30:34Z",
 				},
 			},
-		}, false}}
+		}, false, 0}} // Iter8 finalizer + deletionTimestamp --> deletion
 
 	// pod gvr
 	gvr := schema.GroupVersionResource{
@@ -112,6 +126,7 @@ func TestRemoveFinalizer(t *testing.T) {
 
 		// 4. Test for finalizer string
 		assert.NoError(t, err)
+		assert.Equal(t, tc.expectedNumFinalizers, len(u1.GetFinalizers()), fmt.Sprintf("iteration: %d", i))
 		if tc.contains {
 			assert.Contains(t, u1.GetFinalizers(), iter8FinalizerStr, fmt.Sprintf("iteration: %d", i))
 		} else {
