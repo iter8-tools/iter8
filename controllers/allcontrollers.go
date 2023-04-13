@@ -41,6 +41,38 @@ const (
 // one per resource type
 var appInformers = make(map[string]informers.GenericInformer)
 
+// broadcastEvent broadcasts an event to the controller
+func broadcastEvent(eventtype, reason, message string, client k8sclient.Interface) {
+	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
+	if !ok {
+		log.Logger.Errorf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
+		return
+	}
+
+	name, ok := os.LookupEnv(podNameEnvVariable)
+	if !ok {
+		log.Logger.Errorf("could not get pod name from environment variable %s", podNameEnvVariable)
+		return
+	}
+
+	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		log.Logger.Errorf("could not get pod with name %s in namespace %s", name, ns)
+		return
+	}
+
+	scheme := runtime.NewScheme()
+	_ = corev1.AddToScheme(scheme)
+
+	eventBroadcaster := record.NewBroadcaster()
+	eventBroadcaster.StartStructuredLogging(4)
+	eventBroadcaster.StartRecordingToSink(&typedv1core.EventSinkImpl{Interface: client.CoreV1().Events("")})
+	eventRecorder := eventBroadcaster.NewRecorder(scheme, v1.EventSource{})
+
+	eventRecorder.Event(pod, eventtype, reason, message)
+	eventBroadcaster.Shutdown()
+}
+
 // initAppResourceInformers initializes app resource informers
 func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8sclient.Interface) error {
 	// get defaultResync duration
@@ -125,35 +157,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 	factory.Start(stopCh)
 	log.Logger.Trace("started app informers factory...")
 
-	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
-	if !ok {
-		log.Logger.Errorf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
-		return nil
-	}
-
-	name, ok := os.LookupEnv(podNameEnvVariable)
-	if !ok {
-		log.Logger.Errorf("could not get pod name from environment variable %s", podNameEnvVariable)
-		return nil
-	}
-
-	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
-	if err != nil {
-		log.Logger.Errorf("could not get pod with name %s in namespace %s", name, ns)
-		return nil
-	}
-
-	scheme := runtime.NewScheme()
-	_ = corev1.AddToScheme(scheme)
-
-	// all the good events stuff is here
-	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartStructuredLogging(4)
-	eventBroadcaster.StartRecordingToSink(&typedv1core.EventSinkImpl{Interface: client.CoreV1().Events("")})
-	eventRecorder := eventBroadcaster.NewRecorder(scheme, v1.EventSource{})
-
-	eventRecorder.Event(pod, corev1.EventTypeNormal, "Started app informers", "Started app informers")
-	eventBroadcaster.Shutdown()
+	broadcastEvent(corev1.EventTypeNormal, "Started app informers", "Started app informers", client)
 
 	return nil
 }
