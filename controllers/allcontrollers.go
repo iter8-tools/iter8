@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"os"
 	"time"
@@ -120,7 +121,22 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 	factory.Start(stopCh)
 	log.Logger.Trace("started app informers factory...")
 
-	broadcastEvent(corev1.EventTypeNormal, "Started app informers", "Started app informers", client)
+	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
+	if !ok {
+		log.Logger.Warnf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
+		return nil
+	}
+	name, ok := os.LookupEnv(podNameEnvVariable)
+	if !ok {
+		log.Logger.Warnf("could not get pod name from environment variable %s", podNameEnvVariable)
+		return nil
+	}
+	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
+		return nil
+	}
+	broadcastEvent(pod, corev1.EventTypeNormal, "Started app informers", "Started app informers", client)
 
 	return nil
 }
