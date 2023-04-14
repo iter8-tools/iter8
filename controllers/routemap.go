@@ -275,8 +275,12 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 										log.Logger.WithStackTrace(err.Error()).Error("cannot server-side-apply routing template result")
 										log.Logger.Error("unstructured patch obj: ", obj)
 										log.Logger.Error("unstructured obj json: ", string(jsonBytes))
+
+										broadcastEvent(obj, corev1.EventTypeWarning, "Failed to apply template to routemap", "Failed to apply template to routemap", client)
 									} else {
 										log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
+
+										broadcastEvent(obj, corev1.EventTypeNormal, "Applied template to routemap", "Applied template to routemap", client)
 									}
 								}
 							}

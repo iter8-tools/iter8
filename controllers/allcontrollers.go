@@ -121,23 +121,6 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 	factory.Start(stopCh)
 	log.Logger.Trace("started app informers factory...")
 
-	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
-	if !ok {
-		log.Logger.Warnf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
-		return nil
-	}
-	name, ok := os.LookupEnv(podNameEnvVariable)
-	if !ok {
-		log.Logger.Warnf("could not get pod name from environment variable %s", podNameEnvVariable)
-		return nil
-	}
-	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
-	if err != nil {
-		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
-		return nil
-	}
-	broadcastEvent(pod, corev1.EventTypeNormal, "Started app informers", "Started app informers", client)
-
 	return nil
 }
 
@@ -227,14 +210,35 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 		return err
 	}
 
+	// get pod for event broadcasting
+	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
+	if !ok {
+		log.Logger.Warnf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
+		return nil
+	}
+	name, ok := os.LookupEnv(podNameEnvVariable)
+	if !ok {
+		log.Logger.Warnf("could not get pod name from environment variable %s", podNameEnvVariable)
+		return nil
+	}
+	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
+		return nil
+	}
+
 	log.Logger.Trace("initing app informers... ")
 	if err = initAppResourceInformers(stopCh, config, client); err != nil {
+		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start app informers", "Failed to start app informers", client)
+
 		return err
 	}
 	log.Logger.Trace("inited app informers... ")
 
 	log.Logger.Trace("initing routemap informer... ")
 	if err = initRoutemapCMInformer(stopCh, config, client); err != nil {
+		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start Routemap informers", "Failed to start Routemap informers", client)
+
 		return err
 	}
 	log.Logger.Trace("inited routemap informer... ")

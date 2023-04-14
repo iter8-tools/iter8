@@ -6,6 +6,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
+	corev1 "k8s.io/api/core/v1"
 	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -68,12 +69,27 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 		return nil
 	})
 
+	// get resource for event broadcasting
+	r, err := client.Resource(schema.GroupVersionResource{
+		Group:    config.ResourceTypes[gvrShort].Group,
+		Version:  config.ResourceTypes[gvrShort].Version,
+		Resource: config.ResourceTypes[gvrShort].Resource,
+	}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
+		return
+	}
+
 	if err != nil {
 		if kubeerrors.IsNotFound(err) {
 			log.Logger.Debug(err)
 		} else {
 			log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to add finalizer with retry"))
+
+			broadcastEvent(r, corev1.EventTypeWarning, "Failed to add Iter8 finalizer for resource", "Failed to add Iter8 finalizer for resource", client)
 		}
+	} else {
+		broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer for resource", "Added Iter8 finalizer for resource", client)
 	}
 }
 
@@ -127,8 +143,22 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 		return e
 	})
 
+	// get resource for event broadcasting
+	r, err := client.Resource(schema.GroupVersionResource{
+		Group:    config.ResourceTypes[gvrShort].Group,
+		Version:  config.ResourceTypes[gvrShort].Version,
+		Resource: config.ResourceTypes[gvrShort].Resource,
+	}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to delete Iter8 finalizer"))
+		log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
+		return
 	}
 
+	if err != nil {
+		log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to delete Iter8 finalizer"))
+
+		broadcastEvent(r, corev1.EventTypeWarning, "Failed to delete Iter8 finalizer for resource", "Failed to delete Iter8 finalizer for resource", client)
+	} else {
+		broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer for resource", "Deleted Iter8 finalizer for resource", client)
+	}
 }
