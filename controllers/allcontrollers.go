@@ -2,7 +2,6 @@
 package controllers
 
 import (
-	"context"
 	"errors"
 	"os"
 	"time"
@@ -11,17 +10,13 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/informers/internalinterfaces"
-	typedv1core "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 )
 
 const (
@@ -40,38 +35,6 @@ const (
 // informers used to watch application resources,
 // one per resource type
 var appInformers = make(map[string]informers.GenericInformer)
-
-// broadcastEvent broadcasts an event to the controller
-func broadcastEvent(eventtype, reason, message string, client k8sclient.Interface) {
-	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
-	if !ok {
-		log.Logger.Errorf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
-		return
-	}
-
-	name, ok := os.LookupEnv(podNameEnvVariable)
-	if !ok {
-		log.Logger.Errorf("could not get pod name from environment variable %s", podNameEnvVariable)
-		return
-	}
-
-	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
-	if err != nil {
-		log.Logger.Errorf("could not get pod with name %s in namespace %s", name, ns)
-		return
-	}
-
-	scheme := runtime.NewScheme()
-	_ = corev1.AddToScheme(scheme)
-
-	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartStructuredLogging(4)
-	eventBroadcaster.StartRecordingToSink(&typedv1core.EventSinkImpl{Interface: client.CoreV1().Events("")})
-	eventRecorder := eventBroadcaster.NewRecorder(scheme, v1.EventSource{})
-
-	eventRecorder.Event(pod, eventtype, reason, message)
-	eventBroadcaster.Shutdown()
-}
 
 // initAppResourceInformers initializes app resource informers
 func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8sclient.Interface) error {
