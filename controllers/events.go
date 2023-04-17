@@ -10,7 +10,6 @@ import (
 
 // broadcastEvent broadcasts an event to the controller
 func broadcastEvent(object runtime.Object, eventtype, reason, message string, client k8sclient.Interface) {
-
 	scheme := runtime.NewScheme()
 	_ = corev1.AddToScheme(scheme)
 
