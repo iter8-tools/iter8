@@ -62,6 +62,20 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 			}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
 			if e != nil {
 				log.Logger.WithStackTrace(e.Error()).Error("error while updating resource with finalizer")
+			} else {
+				// broadcast event
+
+				// get resource for event broadcasting
+				r, err := client.Resource(schema.GroupVersionResource{
+					Group:    config.ResourceTypes[gvrShort].Group,
+					Version:  config.ResourceTypes[gvrShort].Version,
+					Resource: config.ResourceTypes[gvrShort].Resource,
+				}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+				if err != nil {
+					log.Logger.Warnf("could not get pod with name %s in namespace %s", name, namespace)
+				}
+
+				broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer for resource", "Added Iter8 finalizer for resource", client)
 			}
 			return e
 		}
@@ -69,27 +83,24 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 		return nil
 	})
 
-	// get resource for event broadcasting
-	r, err2 := client.Resource(schema.GroupVersionResource{
-		Group:    config.ResourceTypes[gvrShort].Group,
-		Version:  config.ResourceTypes[gvrShort].Version,
-		Resource: config.ResourceTypes[gvrShort].Resource,
-	}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-	if err2 != nil {
-		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, namespace)
-	}
-
 	if err != nil {
 		if kubeerrors.IsNotFound(err) {
 			log.Logger.Debug(err)
 		} else {
 			log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to add finalizer with retry"))
 
+			// get resource for event broadcasting
+			r, err := client.Resource(schema.GroupVersionResource{
+				Group:    config.ResourceTypes[gvrShort].Group,
+				Version:  config.ResourceTypes[gvrShort].Version,
+				Resource: config.ResourceTypes[gvrShort].Resource,
+			}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+			if err != nil {
+				log.Logger.Warnf("could not get pod with name %s in namespace %s", name, namespace)
+			}
+
 			broadcastEvent(r, corev1.EventTypeWarning, "Failed to add Iter8 finalizer for resource", "Failed to add Iter8 finalizer for resource", client)
 		}
-	} else {
-
-		broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer for resource", "Added Iter8 finalizer for resource", client)
 	}
 }
 
@@ -121,43 +132,60 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 			}
 		}
 
-		// update finalizers in the object
-		// we do not want to remove non-Iter8 finalizers
-		if len(finalizers) == 0 {
-			u.SetFinalizers(nil)
-		} else {
-			u.SetFinalizers(finalizers)
+		if len(finalizers) < len(u.GetFinalizers()) {
+			// update finalizers in the object
+			// we do not want to remove non-Iter8 finalizers
+			if len(finalizers) == 0 {
+				u.SetFinalizers(nil)
+			} else {
+				u.SetFinalizers(finalizers)
+			}
+
+			// update object
+			_, e = client.Resource(schema.GroupVersionResource{
+				Group:    config.ResourceTypes[gvrShort].Group,
+				Version:  config.ResourceTypes[gvrShort].Version,
+				Resource: config.ResourceTypes[gvrShort].Resource,
+			}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
+
+			if e != nil {
+				// if object has been deleted, return
+				if kubeerrors.IsNotFound(e) {
+					return nil
+				}
+			} else {
+				// broadcast event
+
+				// get resource for event broadcasting
+				r, err := client.Resource(schema.GroupVersionResource{
+					Group:    config.ResourceTypes[gvrShort].Group,
+					Version:  config.ResourceTypes[gvrShort].Version,
+					Resource: config.ResourceTypes[gvrShort].Resource,
+				}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+				if err != nil {
+					log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
+				}
+
+				broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer for resource", "Deleted Iter8 finalizer for resource", client)
+			}
 		}
 
-		// update object
-		_, e = client.Resource(schema.GroupVersionResource{
-			Group:    config.ResourceTypes[gvrShort].Group,
-			Version:  config.ResourceTypes[gvrShort].Version,
-			Resource: config.ResourceTypes[gvrShort].Resource,
-		}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
-
-		// if object has been deleted, return
-		if e != nil && kubeerrors.IsNotFound(e) {
-			return nil
-		}
 		return e
 	})
-
-	// get resource for event broadcasting
-	r, err2 := client.Resource(schema.GroupVersionResource{
-		Group:    config.ResourceTypes[gvrShort].Group,
-		Version:  config.ResourceTypes[gvrShort].Version,
-		Resource: config.ResourceTypes[gvrShort].Resource,
-	}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-	if err2 != nil {
-		log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
-	}
 
 	if err != nil {
 		log.Logger.WithStackTrace(err.Error()).Error(errors.New("failed to delete Iter8 finalizer"))
 
+		// get resource for event broadcasting
+		r, err := client.Resource(schema.GroupVersionResource{
+			Group:    config.ResourceTypes[gvrShort].Group,
+			Version:  config.ResourceTypes[gvrShort].Version,
+			Resource: config.ResourceTypes[gvrShort].Resource,
+		}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		if err != nil {
+			log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
+		}
+
 		broadcastEvent(r, corev1.EventTypeWarning, "Failed to delete Iter8 finalizer for resource", "Failed to delete Iter8 finalizer for resource", client)
-	} else {
-		broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer for resource", "Deleted Iter8 finalizer for resource", client)
 	}
 }

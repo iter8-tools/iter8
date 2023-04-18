@@ -271,16 +271,18 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 								if err != nil {
 									log.Logger.Error("error marshaling obj into JSON: ", err)
 								} else {
+									// Add namespace to the obj or else broadcast event will use default namespace
+									obj.SetNamespace(s.Namespace)
 									if _, err := client.Patch(gvr, s.Namespace, obj.GetName(), jsonBytes); err != nil {
 										log.Logger.WithStackTrace(err.Error()).Error("cannot server-side-apply routing template result")
 										log.Logger.Error("unstructured patch obj: ", obj)
 										log.Logger.Error("unstructured obj json: ", string(jsonBytes))
 
-										broadcastEvent(obj, corev1.EventTypeWarning, "Failed to apply template to routemap", "Failed to apply template to routemap", client)
+										broadcastEvent(obj, corev1.EventTypeWarning, "Failed to apply template specified in routemap", "Failed to apply template specified in routemap", client)
 									} else {
 										log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
 
-										broadcastEvent(obj, corev1.EventTypeNormal, "Applied template to routemap", "Applied template to routemap", client)
+										broadcastEvent(obj, corev1.EventTypeNormal, "Applied template specified in routemap", "Applied template specified in routemap", client)
 									}
 								}
 							}
