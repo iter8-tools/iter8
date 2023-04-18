@@ -10,15 +10,17 @@ import (
 
 // broadcastEvent broadcasts an event to the controller
 func broadcastEvent(object runtime.Object, eventtype, reason, message string, client k8sclient.Interface) {
-	scheme := runtime.NewScheme()
-	_ = corev1.AddToScheme(scheme)
+	if object != nil {
+		scheme := runtime.NewScheme()
+		_ = corev1.AddToScheme(scheme)
 
-	// TODO: Do we want to reuse the event broadcaster?
-	eventBroadcaster := record.NewBroadcaster()
-	eventBroadcaster.StartStructuredLogging(4)
-	eventBroadcaster.StartRecordingToSink(&typedv1core.EventSinkImpl{Interface: client.CoreV1().Events("")})
-	eventRecorder := eventBroadcaster.NewRecorder(scheme, corev1.EventSource{})
+		// TODO: Do we want to reuse the event broadcaster?
+		eventBroadcaster := record.NewBroadcaster()
+		eventBroadcaster.StartStructuredLogging(4)
+		eventBroadcaster.StartRecordingToSink(&typedv1core.EventSinkImpl{Interface: client.CoreV1().Events("")})
+		eventRecorder := eventBroadcaster.NewRecorder(scheme, corev1.EventSource{})
 
-	eventRecorder.Event(object, eventtype, reason, message)
-	eventBroadcaster.Shutdown()
+		eventRecorder.Event(object, eventtype, reason, message)
+		eventBroadcaster.Shutdown()
+	}
 }

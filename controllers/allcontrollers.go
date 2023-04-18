@@ -214,17 +214,14 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
 	if !ok {
 		log.Logger.Warnf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
-		return nil
 	}
 	name, ok := os.LookupEnv(podNameEnvVariable)
 	if !ok {
 		log.Logger.Warnf("could not get pod name from environment variable %s", podNameEnvVariable)
-		return nil
 	}
 	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
-		return nil
 	}
 
 	log.Logger.Trace("initing app informers... ")
