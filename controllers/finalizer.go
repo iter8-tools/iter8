@@ -75,7 +75,7 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 					log.Logger.Warnf("could not get pod with name %s in namespace %s", name, namespace)
 				}
 
-				broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer for resource", "Added Iter8 finalizer for resource", client)
+				broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer", "Added Iter8 finalizer for resource", client)
 			}
 			return e
 		}
@@ -99,7 +99,7 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 				log.Logger.Warnf("could not get pod with name %s in namespace %s", name, namespace)
 			}
 
-			broadcastEvent(r, corev1.EventTypeWarning, "Failed to add Iter8 finalizer for resource", "Failed to add Iter8 finalizer for resource", client)
+			broadcastEvent(r, corev1.EventTypeWarning, "Failed to add Iter8 finalizer", "Failed to add Iter8 finalizer for resource", client)
 		}
 	}
 }
@@ -166,7 +166,7 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 					log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
 				}
 
-				broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer for resource", "Deleted Iter8 finalizer for resource", client)
+				broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer", "Deleted Iter8 finalizer for resource", client)
 			}
 		}
 
@@ -186,6 +186,6 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 			log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
 		}
 
-		broadcastEvent(r, corev1.EventTypeWarning, "Failed to delete Iter8 finalizer for resource", "Failed to delete Iter8 finalizer for resource", client)
+		broadcastEvent(r, corev1.EventTypeWarning, "Failed to delete Iter8 finalizer", "Failed to delete Iter8 finalizer for resource", client)
 	}
 }

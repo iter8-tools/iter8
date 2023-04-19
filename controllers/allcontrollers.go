@@ -226,7 +226,7 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 
 	log.Logger.Trace("initing app informers... ")
 	if err = initAppResourceInformers(stopCh, config, client); err != nil {
-		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start app informers", "Failed to start app informers", client)
+		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start Iter8 app informers", "Failed to start Iter8 app informers", client)
 
 		return err
 	}
@@ -234,7 +234,7 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 
 	log.Logger.Trace("initing routemap informer... ")
 	if err = initRoutemapCMInformer(stopCh, config, client); err != nil {
-		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start Routemap informers", "Failed to start Routemap informers", client)
+		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start Iter8 routemap informers", "Failed to start Iter8 routemap informers", client)
 
 		return err
 	}

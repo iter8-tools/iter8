@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"strconv"
 	"strings"
@@ -278,11 +279,11 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 										log.Logger.Error("unstructured patch obj: ", obj)
 										log.Logger.Error("unstructured obj json: ", string(jsonBytes))
 
-										broadcastEvent(obj, corev1.EventTypeWarning, "Failed to apply template specified in routemap", "Failed to apply template specified in routemap", client)
+										broadcastEvent(obj, corev1.EventTypeWarning, "Failed to apply template", fmt.Sprintf("Failed to apply template specified in Iter8 routemap %s", rtName), client)
 									} else {
 										log.Logger.Info("performed server side apply for: ", s.Name, "; in namespace: ", s.Namespace)
 
-										broadcastEvent(obj, corev1.EventTypeNormal, "Applied template specified in routemap", "Applied template specified in routemap", client)
+										broadcastEvent(obj, corev1.EventTypeNormal, "Applied template", fmt.Sprintf("Applied template specified in Iter8 routemap %s", rtName), client)
 									}
 								}
 							}
