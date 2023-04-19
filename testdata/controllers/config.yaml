@@ -1,4 +1,4 @@
-defaultResync: 30s
+defaultResync: 15m
 # by default, Iter8 controller is namespace scoped
 # clusterScoped: true
 resourceTypes:
