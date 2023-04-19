@@ -66,7 +66,6 @@ func TestPatch(t *testing.T) {
 	})
 
 	myDeployment, err := client.FakeDynamicClient.Resource(gvr).Namespace(myns).Get(context.TODO(), myname, v1.GetOptions{})
-
 	assert.NoError(t, err)
 	assert.NotNil(t, myDeployment)
 	// myDeployment should not have the hello: world label yet
@@ -83,7 +82,6 @@ func TestPatch(t *testing.T) {
 
 	// Patch myDeployment
 	patchedDeployment, err := client.Patch(gvr, myns, myname, newDeploymentBytes)
-
 	assert.NoError(t, err)
 	assert.NotNil(t, patchedDeployment)
 	// Patched myDeployment should now have the hello: world label
