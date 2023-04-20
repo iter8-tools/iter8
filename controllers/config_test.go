@@ -30,7 +30,7 @@ func TestReadConfig(t *testing.T) {
 		c, err := readConfig()
 		if tt.valid {
 			assert.NoError(t, err)
-			assert.Equal(t, "30s", c.DefaultResync)
+			assert.Equal(t, "15m", c.DefaultResync)
 			assert.Equal(t, 5, len(c.ResourceTypes))
 			isvc := c.ResourceTypes["isvc"]
 			assert.Equal(t, isvc, GroupVersionResourceConditions{

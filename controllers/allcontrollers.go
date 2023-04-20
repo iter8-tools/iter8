@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"os"
 	"time"
@@ -114,10 +115,12 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 			return e
 		}
 	}
-	log.Logger.Trace("starting app informers factory ...")
+
+	log.Logger.Trace("starting app informers factory...")
 	// start all informers
 	factory.Start(stopCh)
-	log.Logger.Trace("started app informers factory ...")
+	log.Logger.Trace("started app informers factory...")
+
 	return nil
 }
 
@@ -189,9 +192,9 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 		return e
 	}
 
-	log.Logger.Trace("starting routemap informer factory ...")
+	log.Logger.Trace("starting routemap informer factory...")
 	factory.Start(stopCh)
-	log.Logger.Trace("started routemap informer factory ...")
+	log.Logger.Trace("started routemap informer factory...")
 	return nil
 }
 
@@ -207,17 +210,35 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 		return err
 	}
 
-	log.Logger.Trace("initing app informers ... ")
-	if err = initAppResourceInformers(stopCh, config, client); err != nil {
-		return err
+	// get pod for event broadcasting
+	ns, ok := os.LookupEnv(podNamespaceEnvVariable)
+	if !ok {
+		log.Logger.Warnf("could not get pod namespace from environment variable %s", podNamespaceEnvVariable)
 	}
-	log.Logger.Trace("inited app informers ... ")
+	name, ok := os.LookupEnv(podNameEnvVariable)
+	if !ok {
+		log.Logger.Warnf("could not get pod name from environment variable %s", podNameEnvVariable)
+	}
+	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
+	}
 
-	log.Logger.Trace("initing routemap informer ... ")
-	if err = initRoutemapCMInformer(stopCh, config, client); err != nil {
+	log.Logger.Trace("initing app informers... ")
+	if err = initAppResourceInformers(stopCh, config, client); err != nil {
+		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start Iter8 app informers", "Failed to start Iter8 app informers", client)
+
 		return err
 	}
-	log.Logger.Trace("inited routemap informer ... ")
+	log.Logger.Trace("inited app informers... ")
+
+	log.Logger.Trace("initing routemap informer... ")
+	if err = initRoutemapCMInformer(stopCh, config, client); err != nil {
+		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start Iter8 routemap informers", "Failed to start Iter8 routemap informers", client)
+
+		return err
+	}
+	log.Logger.Trace("inited routemap informer... ")
 
 	return nil
 }

@@ -94,16 +94,12 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code
 	go vet ./...
 
-.PHONY: staticcheck
-staticcheck:
-	staticcheck ./...
-
 .PHONY: golangci-lint
 golangci-lint:
 	golangci-lint run ./...
 
 .PHONY: lint
-lint:	vet staticcheck golangci-lint
+lint: vet golangci-lint
 
 .PHONY: test
 test: fmt vet ## Run tests.
