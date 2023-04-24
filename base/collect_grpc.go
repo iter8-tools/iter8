@@ -1,7 +1,6 @@
 package base
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -102,18 +101,12 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 			}
 			eOpts := runner.WithConfig(&endpoint) // endpoint options
 
+			log.Logger.Trace("run ghz gRPC test")
 			igr, err := runner.Run(call, host, eOpts)
 			if err != nil {
-				e := fmt.Errorf("ghz run failed for endpoint \"%s\"", endpointID)
-				log.Logger.WithStackTrace(err.Error()).Error(e)
-				if igr == nil {
-					e = fmt.Errorf("failed to get results for endpoint \"%s\" since ghz run was aborted", endpointID)
-					log.Logger.Error(e)
-				}
-				return nil, e
+				log.Logger.WithStackTrace(err.Error()).Error(err)
+				continue
 			}
-			log.Logger.Trace("ran ghz gRPC test")
-			log.Logger.Trace(igr.ErrorDist)
 
 			results[gRPCMetricPrefix+"-"+endpointID] = igr
 		}
@@ -121,18 +114,12 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 		// TODO: supply all the allowed options
 		opts := runner.WithConfig(&t.With.Config)
 
+		log.Logger.Trace("run ghz gRPC test")
 		igr, err := runner.Run(t.With.Call, t.With.Host, opts)
 		if err != nil {
-			e := errors.New("ghz run failed")
-			log.Logger.WithStackTrace(err.Error()).Error(e)
-			if igr == nil {
-				e = errors.New("failed to get results since ghz run was aborted")
-				log.Logger.Error(e)
-			}
-			return nil, e
+			log.Logger.WithStackTrace(err.Error()).Error(err)
+			return results, err
 		}
-		log.Logger.Trace("ran ghz gRPC test")
-		log.Logger.Trace(igr.ErrorDist)
 
 		results[gRPCMetricPrefix] = igr
 	}
