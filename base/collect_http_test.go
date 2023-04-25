@@ -74,6 +74,38 @@ func TestRunCollectHTTP(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// If the endpoint does not exist, fail gracefully
+// Should not return an nil pointer deference error (see #1451)
+func TestRunCollectHTTPNoEndpoint(t *testing.T) {
+	_, addr := fhttp.DynamicHTTPServer(false)
+
+	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
+
+	// valid collect HTTP task... should succeed
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			endpoint: endpoint{
+				Duration:    StringPointer("1s"),
+				PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
+				Headers:     map[string]string{},
+				URL:         baseURL,
+			},
+		},
+	}
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	err := ct.run(exp)
+
+	assert.EqualError(t, err, fmt.Sprintf("error 404 for %s (176 bytes)", baseURL))
+}
+
 // Multiple endpoints are provided
 // Test both the /foo/ and /bar/ endpoints
 // Test both endpoints have their respective header values
@@ -234,6 +266,53 @@ func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
 	mm, err = exp.Result.Insights.GetMetricsInfo(httpMetricPrefix + "-" + endpoint2 + "/" + builtInHTTPLatencyPercentilePrefix + "50")
 	assert.NotNil(t, mm)
 	assert.NoError(t, err)
+}
+
+// If the endpoints cannot be reached, then do not throw an error
+// Should not return an nil pointer deference error (see #1451)
+func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
+	_, addr := fhttp.DynamicHTTPServer(false)
+
+	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
+
+	// valid collect HTTP task... should succeed
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			endpoint: endpoint{
+				Duration: StringPointer("1s"),
+			},
+			Endpoints: map[string]endpoint{
+				endpoint1: {
+					URL: baseURL + foo,
+					Headers: map[string]string{
+						from: foo,
+					},
+				},
+				endpoint2: {
+					URL: baseURL + bar,
+					Headers: map[string]string{
+						from: bar,
+					},
+				},
+			},
+		},
+	}
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	err := ct.run(exp)
+	assert.NoError(t, err)
+
+	// No metrics should be collected
+	assert.Equal(t, 0, len(exp.Result.Insights.NonHistMetricValues[0]))
+	assert.Equal(t, 0, len(exp.Result.Insights.HistMetricValues[0]))
+	assert.Equal(t, 0, len(exp.Result.Insights.SummaryMetricValues[0]))
 }
 
 func TestErrorCode(t *testing.T) {

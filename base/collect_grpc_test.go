@@ -79,6 +79,35 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// If the endpoint does not exist, fail gracefully
+// Should not return an nil pointer deference error (see #1451)
+func TestRunCollectGRPCUnaryNoEndpoint(t *testing.T) {
+	// valid collect GRPC task... should succeed
+	ct := &collectGRPCTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectGRPCTaskName),
+		},
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Data: map[string]interface{}{"name": "bob"},
+				Call: "helloworld.Greeter.SayHello",
+				Host: internal.LocalHostPort,
+			},
+		},
+	}
+
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	err := ct.run(exp)
+
+	assert.EqualError(t, err, "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:12345: connect: connection refused\"")
+}
+
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCEndpoints(t *testing.T) {
@@ -155,6 +184,55 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 		assert.NotNil(t, mm)
 		assert.NoError(t, err)
 	}
+}
+
+// If the endpoints cannot be reached, then do not throw an error
+// Should not return an nil pointer deference error (see #1451)
+func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
+	// valid collect GRPC task... should succeed
+	ct := &collectGRPCTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectGRPCTaskName),
+		},
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Host: internal.LocalHostPort,
+			},
+			Endpoints: map[string]runner.Config{
+				unary: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHello",
+				},
+				server: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHelloCS",
+				},
+				client: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHellos",
+				},
+				bidirectional: {
+					Data: map[string]interface{}{"name": "bob"},
+					Call: "helloworld.Greeter.SayHelloBidi",
+				},
+			},
+		},
+	}
+
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+	}
+	exp.initResults(1)
+	err := ct.run(exp)
+	assert.NoError(t, err)
+
+	// No metrics should be collected
+	assert.Equal(t, 0, len(exp.Result.Insights.NonHistMetricValues[0]))
+	assert.Equal(t, 0, len(exp.Result.Insights.HistMetricValues[0]))
+	assert.Equal(t, 0, len(exp.Result.Insights.SummaryMetricValues[0]))
 }
 
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
