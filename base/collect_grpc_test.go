@@ -2,6 +2,7 @@ package base
 
 import (
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -80,7 +81,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 }
 
 // If the endpoint does not exist, fail gracefully
-// Should not return an nil pointer deference error (see #1451)
+// Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectGRPCUnaryNoEndpoint(t *testing.T) {
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
@@ -105,7 +106,9 @@ func TestRunCollectGRPCUnaryNoEndpoint(t *testing.T) {
 	exp.initResults(1)
 	err := ct.run(exp)
 
-	assert.EqualError(t, err, "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:12345: connect: connection refused\"")
+	// Error should be a connection error, not a nil pointer dereference error
+	// Test written like this because of conversion between localhost and 127.0.0.1
+	assert.True(t, strings.HasPrefix(err.Error(), "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp"))
 }
 
 // Credit: Several of the tests in this file are based on
@@ -187,7 +190,7 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 }
 
 // If the endpoints cannot be reached, then do not throw an error
-// Should not return an nil pointer deference error (see #1451)
+// Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{

@@ -75,7 +75,7 @@ func TestRunCollectHTTP(t *testing.T) {
 }
 
 // If the endpoint does not exist, fail gracefully
-// Should not return an nil pointer deference error (see #1451)
+// Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectHTTPNoEndpoint(t *testing.T) {
 	_, addr := fhttp.DynamicHTTPServer(false)
 
@@ -269,7 +269,7 @@ func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
 }
 
 // If the endpoints cannot be reached, then do not throw an error
-// Should not return an nil pointer deference error (see #1451)
+// Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 	_, addr := fhttp.DynamicHTTPServer(false)
 
