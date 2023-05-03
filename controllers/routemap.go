@@ -93,6 +93,7 @@ func (s *routemap) normalizeWeights(config *Config) {
 	override := s.getWeightOverrides(config)
 
 	for i, v := range s.Versions {
+		log.Logger.Debugf("version %d is available? %t", i, available[i])
 		if available[i] {
 			// first, attempt to weight from the version spec
 			if v.Weight != nil {
@@ -110,6 +111,7 @@ func (s *routemap) normalizeWeights(config *Config) {
 			// this version is not available; set weight to 0
 			derivedWeights[i] = 0
 		}
+		log.Logger.Debugf("   > derviedWeight is %d", derivedWeights[i])
 	}
 
 	// if derivedWeights sum up to zero, set normalizedWeight[0] to (the non-zero) default
@@ -248,6 +250,7 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 				} else {
 					// result should be a YAML manifest serialized as bytes
 					// unmarshal result into unstructured.Unstructured object
+					log.Logger.Debugf("maifest to apply: \n, %s", string(result))
 					obj := &unstructured.Unstructured{}
 					var decUnstructured = seriyaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 					if _, _, err := decUnstructured.Decode(result, nil, obj); err != nil {
