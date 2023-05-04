@@ -157,7 +157,7 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 				// broadcast event
 
 				// get resource for event broadcasting
-				r, err := client.Resource(schema.GroupVersionResource{
+				_, err := client.Resource(schema.GroupVersionResource{
 					Group:    config.ResourceTypes[gvrShort].Group,
 					Version:  config.ResourceTypes[gvrShort].Version,
 					Resource: config.ResourceTypes[gvrShort].Resource,
@@ -166,7 +166,8 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 					log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
 				}
 
-				broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer", "Deleted Iter8 finalizer for resource", client)
+				// removed because of panic event (see https://github.com/iter8-tools/iter8/issues/1455)
+				// broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer", "Deleted Iter8 finalizer for resource", client)
 			}
 		}
 
