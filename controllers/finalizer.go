@@ -153,18 +153,6 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 				if kubeerrors.IsNotFound(e) {
 					return nil
 				}
-			} else {
-				// broadcast event
-
-				// get resource for event broadcasting
-				_, err := client.Resource(schema.GroupVersionResource{
-					Group:    config.ResourceTypes[gvrShort].Group,
-					Version:  config.ResourceTypes[gvrShort].Version,
-					Resource: config.ResourceTypes[gvrShort].Resource,
-				}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-				if err != nil {
-					log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
-				}
 			}
 		}
 
