@@ -165,9 +165,6 @@ func removeFinalizer(name string, namespace string, gvrShort string, client k8sc
 				if err != nil {
 					log.Logger.Warnf("could not get resource with name %s in namespace %s", name, namespace)
 				}
-
-				// removed because of panic event (see https://github.com/iter8-tools/iter8/issues/1455)
-				// broadcastEvent(r, corev1.EventTypeNormal, "Deleted Iter8 finalizer", "Deleted Iter8 finalizer for resource", client)
 			}
 		}
 
