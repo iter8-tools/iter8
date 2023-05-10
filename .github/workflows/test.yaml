@@ -3,7 +3,7 @@ name: Test experiment charts
 on:
   pull_request:
     branches:
-      - master
+    - master
 
 # Kind versions used to test Iter8 on different versions of Kubernetes
 # From: https://github.com/kubernetes-sigs/kind/releases

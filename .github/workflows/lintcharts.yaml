@@ -3,7 +3,7 @@ name: Lint Helm charts
 on:
   pull_request:
     branches:
-      - master
+    - master
 
 jobs:
   # Get the paths for the Helm charts to lint
@@ -11,30 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-      - name: Get the paths for Helm charts to lint
-        id: set-matrix
-        run: |
-          # Get paths (in string form)
-          stringPaths=$(find -maxdepth 2 -path './charts/*')
+    - name: Get the paths for Helm charts to lint
+      id: set-matrix
+      run: |
+        # Get paths (in string form)
+        stringPaths=$(find -maxdepth 2 -path './charts/*')
 
-          # Check paths (length greater than 0)
-          stringPathsLength=$(echo ${#stringPaths})
-          if (( stringPathsLength == 0 ));
-          then
-            echo "No paths to check"
-            exit 1
-          fi
+        # Check paths (length greater than 0)
+        stringPathsLength=$(echo ${#stringPaths})
+        if (( stringPathsLength == 0 ));
+        then
+          echo "No paths to check"
+          exit 1
+        fi
 
-          # Serialize paths into JSON array
-          paths=$(jq -ncR '[inputs]' <<< "$stringPaths")
+        # Serialize paths into JSON array
+        paths=$(jq -ncR '[inputs]' <<< "$stringPaths")
 
-          # Output serialized paths
-          echo "matrix=$paths" >> $GITHUB_OUTPUT
-          echo $paths
+        # Output serialized paths
+        echo "matrix=$paths" >> $GITHUB_OUTPUT
+        echo $paths
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}

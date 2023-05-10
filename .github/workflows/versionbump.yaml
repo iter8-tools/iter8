@@ -3,7 +3,7 @@ name: Version bump check
 on:
   pull_request:
     branches:
-      - master
+    - master
 
 jobs:
   # Get the paths for the Helm charts to version check
@@ -11,30 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-      - name: Get the paths for Helm charts to version check
-        id: set-matrix
-        run: |
-          # Get paths (in string form)
-          stringPaths=$(find -maxdepth 2 -path './charts/*')
+    - name: Get the paths for Helm charts to version check
+      id: set-matrix
+      run: |
+        # Get paths (in string form)
+        stringPaths=$(find -maxdepth 2 -path './charts/*')
 
-          # Check paths (length greater than 0)
-          stringPathsLength=$(echo ${#stringPaths})
-          if (( stringPathsLength == 0 ));
-          then
-            echo "No paths to check"
-            exit 1
-          fi
+        # Check paths (length greater than 0)
+        stringPathsLength=$(echo ${#stringPaths})
+        if (( stringPathsLength == 0 ));
+        then
+          echo "No paths to check"
+          exit 1
+        fi
 
-          # Serialize paths into JSON array
-          paths=$(jq -ncR '[inputs]' <<< "$stringPaths")
-          echo $paths
+        # Serialize paths into JSON array
+        paths=$(jq -ncR '[inputs]' <<< "$stringPaths")
+        echo $paths
 
-          # Output serialized paths
-          echo "matrix=$paths" >> $GITHUB_OUTPUT
+        # Output serialized paths
+        echo "matrix=$paths" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -48,41 +48,41 @@ jobs:
       matrix:
         version: ${{ fromJson(needs.get_paths.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-      - name: Get modified files in the ${{ matrix.version }} folder
-        id: modified-files
-        uses: tj-actions/changed-files@v35
-        with:
-          files: ${{ matrix.version }}
+    - name: Get modified files in the ${{ matrix.version }} folder
+      id: modified-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: ${{ matrix.version }}
 
-      - name: Run step if any file(s) in the ${{ matrix.version }} folder was modified
-        if: steps.modified-files.outputs.any_modified == 'true'
-        run: |
-          # Remove ./ prefix from raw matrix version (i.e. ./charts/iter8 -> charts/iter8)
-          version=$(echo ${{ matrix.version }} | sed s/".\/"//)
+    - name: Run step if any file(s) in the ${{ matrix.version }} folder was modified
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        # Remove ./ prefix from raw matrix version (i.e. ./charts/iter8 -> charts/iter8)
+        version=$(echo ${{ matrix.version }} | sed s/".\/"//)
 
-          # Get chart file
-          chartFile="$version/Chart.yaml"
+        # Get chart file
+        chartFile="$version/Chart.yaml"
 
-          # Get git diff of the Chart.yaml between the main branch and PR branch
-          gitDiff=$(git diff origin/main..HEAD -- $chartFile)
-          echo $gitDiff
+        # Get git diff of the Chart.yaml between the main branch and PR branch
+        gitDiff=$(git diff origin/main..HEAD -- $chartFile)
+        echo $gitDiff
 
-          # Addition in Chart.yaml
-          addChart="+++ b/$add$chartFile"
-          echo $addChart
+        # Addition in Chart.yaml
+        addChart="+++ b/$add$chartFile"
+        echo $addChart
 
-          # Addition of version in Chart.yaml
-          addVersion="+version:"
-          echo $addVersion
+        # Addition of version in Chart.yaml
+        addVersion="+version:"
+        echo $addVersion
 
-          if [[ "$gitDiff" == *"$addChart"* ]] && [[ "$gitDiff" == *$addVersion* ]]; 
-          then
-            echo "version in $chartFile has been modified"
-          else
-            echo "version in $chartFile needs to be modified"
-            exit 1
-          fi
+        if [[ "$gitDiff" == *"$addChart"* ]] && [[ "$gitDiff" == *$addVersion* ]]; 
+        then
+          echo "version in $chartFile has been modified"
+        else
+          echo "version in $chartFile needs to be modified"
+          exit 1
+        fi

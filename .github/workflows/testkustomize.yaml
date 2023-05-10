@@ -3,7 +3,7 @@ name: Test kustomize experiments
 on:
   pull_request:
     branches:
-      - master
+    - master
 
 # Kind versions used to test Iter8 on different versions of Kubernetes
 # From: https://github.com/kubernetes-sigs/kind/releases
@@ -24,15 +24,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get the different Kind versions
-        id: set-matrix
-        run: |
-          # Serialize versions into JSON array
-          jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
-          echo $jsonVersions
+    - name: Get the different Kind versions
+      id: set-matrix
+      run: |
+        # Serialize versions into JSON array
+        jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
+        echo $jsonVersions
 
-          # Output serialized jsonVersions
-          echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
+        # Output serialized jsonVersions
+        echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}

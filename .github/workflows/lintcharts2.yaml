@@ -7,7 +7,7 @@ name: Additional Helm chart linting
 on:
   pull_request:
     branches:
-      - master
+    - master
 
 jobs:
   http-experiment:
