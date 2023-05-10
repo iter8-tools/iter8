@@ -139,7 +139,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
+        sleep 120
         iter8 k assert -c nofailure --timeout 60s
         iter8 k report
         iter8 k log
@@ -251,7 +251,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
+        sleep 120
         iter8 k assert -c nofailure --timeout 60s
         iter8 k report
         iter8 k log
@@ -345,7 +345,7 @@ jobs:
     - name: Start A/B/n service
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm install abn charts/abn \                     
+        helm install abn charts/abn \
         --set "apps.default.backend.resources={service,deployment}"
 
     - name: Check A/B/n service
