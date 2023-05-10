@@ -22,7 +22,7 @@ spec:
     helm:
       values: |
         {{ .Chart.Values | toYaml | indent 8 | trim }}
-    repoURL: https://iter8-tools.github.io/iter8
+    repoURL: https://alan-cha.github.io/iter8
     targetRevision: {{ .Chart.Version }}
   ignoreDifferences:
   - kind: Secret
