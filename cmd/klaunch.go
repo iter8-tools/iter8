@@ -91,7 +91,7 @@ func addLocalChartFlag(cmd *cobra.Command, localChartPtr *bool) {
 // cmd.Flags().StringVar(&c.Version, "version", "", "specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 1.1.1) or it may reference a valid range (e.g. ^2.0.0). If this is not specified, the latest version is used")
 // cmd.Flags().BoolVar(&c.Verify, "verify", false, "verify the package before using it")
 // cmd.Flags().StringVar(&c.Keyring, "keyring", defaultKeyring(), "location of public keys used for verification")
-// cmd.Flags().StringVar(&c.RepoURL, "repo", "https://iter8-tools.github.io/hub", "chart repository url where to locate the requested chart")
+// cmd.Flags().StringVar(&c.RepoURL, "repo", "https://iter8-tools.github.io/iter8", "chart repository url where to locate the requested chart")
 // cmd.Flags().StringVar(&c.Username, "username", "", "chart repository username where to locate the requested chart")
 // cmd.Flags().StringVar(&c.Password, "password", "", "chart repository password where to locate the requested chart")
 // cmd.Flags().StringVar(&c.CertFile, "cert-file", "", "identify HTTPS client using this SSL certificate file")

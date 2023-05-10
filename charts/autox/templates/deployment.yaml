@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: argocd
+  {{ template "iter8-autox.labels" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "iter8-autox.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "iter8-autox.name" . }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+      - name: iter8-autox
+        image: {{ .Values.image }}
+        imagePullPolicy: Always
+        command: ["/bin/iter8"]
+        args: ["autox", "-l", "{{ .Values.logLevel }}"]
+        env:
+        - name: CONFIG
+          value: /config/config.yaml
+        volumeMounts:
+        - name: autox-config
+          mountPath: "/config"
+          readOnly: true
+        resources:
+          {{ toYaml .Values.resources | indent 10 | trim }}
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+      volumes:
+      - name: autox-config
+        secret:
+          secretName: {{ .Release.Name }}

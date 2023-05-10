@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: iter8-traffic
+spec:
+  serviceName: iter8-traffic
+  template:
+    spec:
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: iter8-traffic
+      containers:
+      - name: iter8-traffic
+        image: iter8/iter8:0.13
+        imagePullPolicy: Always
+        command: ["/bin/iter8"]
+        args: ["controllers", "-l", "info"]
+        env:
+        - name: CONFIG_FILE
+          value: /config/config.yaml
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 250m
+            memory: 64Mi
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+      volumes:
+        - name: config
+          configMap:
+            name: iter8-traffic

@@ -1,0 +1,18 @@
+apiVersion: v2
+name: abn
+version: 0.2.3
+description: Iter8 ABn support service
+type: application
+keywords:
+- Iter8
+- AB
+- ABn
+- experiment
+home: https://iter8.tools
+sources:
+- https://github.com/iter8-tools/iter8
+maintainers:
+- name: Iter8
+  email: iter8-tools@gmail.com
+icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+appVersion: v0.13

@@ -1,0 +1,10 @@
+resources:
+- configmap.yaml
+- headlessservice.yaml
+- serviceaccount.yaml
+- statefulset.yaml
+
+commonLabels:
+  app.kubernetes.io/name: traffic
+  app.kubernetes.io/instance: iter8-traffic
+  app.kubernetes.io/version: v0.13

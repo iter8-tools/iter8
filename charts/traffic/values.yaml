@@ -1,0 +1,13 @@
+### AutoX service image
+image: iter8/iter8:0.13
+
+logLevel: info
+
+### Resource limits
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "128Mi"
+    cpu: "500m"
