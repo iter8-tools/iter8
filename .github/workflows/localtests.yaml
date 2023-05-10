@@ -1,4 +1,4 @@
-name: Test experiment charts
+name: Test experiment charts using local charts
 
 on:
   pull_request:
