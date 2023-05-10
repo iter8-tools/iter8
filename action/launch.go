@@ -11,7 +11,7 @@ import (
 
 const (
 	// DefaultHelmRepository is the URL of the default Helm repository
-	DefaultHelmRepository = "https://alan-cha.github.io/iter8"
+	DefaultHelmRepository = "https://iter8-tools.github.io/iter8"
 	// DefaultChartName is the default name of the Iter8 chart
 	DefaultChartName = "iter8"
 )
