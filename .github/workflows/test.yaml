@@ -24,15 +24,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get the different Kind versions
-        id: set-matrix
-        run: |
-          # Serialize versions into JSON array
-          jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
-          echo $jsonVersions
+    - name: Get the different Kind versions
+      id: set-matrix
+      run: |
+        # Serialize versions into JSON array
+        jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
+        echo $jsonVersions
 
-          # Output serialized jsonVersions
-          echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
+        # Output serialized jsonVersions
+        echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -199,7 +199,6 @@ jobs:
         iter8 k report
         iter8 k log
         iter8 k delete
-
 
   grpc-looped-experiment:
     name: gRPC looped load test
