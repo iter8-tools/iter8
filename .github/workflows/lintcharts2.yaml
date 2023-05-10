@@ -1,0 +1,154 @@
+name: Additional Helm chart linting
+# Like lintcharts.yaml, the other lint Helm chart workflow, this workflow uses kube-linter
+# kube-linter checks Helm templates but it does not check what is contained in {{ define ... }} blocks
+# This workflow builds on the other workflow by producing Kubernetes YAML files from the templates and running kube-linter on those files
+# See iter8-tools/iter8#1452
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  http-experiment:
+    name: Lint HTTP experiment
+    runs-on: ubuntu-latest
+
+    steps:    
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Get modified files in the charts/iter8 folder
+      id: modified-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: charts/iter8
+
+    - uses: azure/setup-helm@v3
+      if: steps.modified-files.outputs.any_modified == 'true'
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        helm template charts/iter8 \
+        --set "tasks={ready,http,assess}" \
+        --set ready.deploy=httpbin \
+        --set ready.service=httpbin \
+        --set ready.timeout=60s \
+        --set http.url=http://httpbin.default/get \
+        --set assess.SLOs.upper.http/latency-mean=50 \
+        --set assess.SLOs.upper.http/error-count=0 \
+        --set runner=job >> iter8.yaml
+
+    - name: Lint Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      uses: stackrox/kube-linter-action@v1
+      with:
+        directory: iter8.yaml
+
+  http-looped-experiment:
+    name: Lint HTTP looped experiment
+    runs-on: ubuntu-latest
+
+    steps:    
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Get modified files in the charts/iter8 folder
+      id: modified-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: charts/iter8
+
+    - uses: azure/setup-helm@v3
+      if: steps.modified-files.outputs.any_modified == 'true'
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        helm template charts/iter8 \
+        --set tasks={http} \
+        --set http.url="http://httpbin.default/get" \
+        --set runner=cronjob \
+        --set cronjobSchedule="*/1 * * * *" >> iter8.yaml
+
+    - name: Lint Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      uses: stackrox/kube-linter-action@v1
+      with:
+        directory: iter8.yaml
+
+  grpc-experiment:
+    name: Lint gRPC experiment
+    runs-on: ubuntu-latest
+
+    steps:    
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Get modified files in the charts/iter8 folder
+      id: modified-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: charts/iter8
+
+    - uses: azure/setup-helm@v3
+      if: steps.modified-files.outputs.any_modified == 'true'
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        helm template charts/iter8 \
+        --set tasks={grpc} \
+        --set grpc.host="hello.default:50051" \
+        --set grpc.call="helloworld.Greeter.SayHello" \
+        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+        --set runner=job >> iter8.yaml
+
+    - name: Lint Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      uses: stackrox/kube-linter-action@v1
+      with:
+        directory: iter8.yaml
+
+  grpc-looped-experiment:
+    name: Lint gRPC looped experiment
+    runs-on: ubuntu-latest
+
+    steps:    
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Get modified files in the charts/iter8 folder
+      id: modified-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: charts/iter8
+
+    - uses: azure/setup-helm@v3
+      if: steps.modified-files.outputs.any_modified == 'true'
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        helm template charts/iter8 \
+        --set tasks={grpc} \
+        --set grpc.host="hello.default:50051" \
+        --set grpc.call="helloworld.Greeter.SayHello" \
+        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+        --set runner=cronjob \
+        --set cronjobSchedule="*/1 * * * *" >> iter8.yaml
+
+    - name: Lint Kubernetes YAML file
+      if: steps.modified-files.outputs.any_modified == 'true'
+      uses: stackrox/kube-linter-action@v1
+      with:
+        directory: iter8.yaml
