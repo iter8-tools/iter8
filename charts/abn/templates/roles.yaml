@@ -1,0 +1,114 @@
+{{- range $ns, $apps := .Values.apps }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ $ns }}
+  name: {{ $.Release.Name }}-lister
+  {{ template "iter8-abn.labels" $ }}
+rules:
+{{- range $nm, $config := $apps }}
+  {{- range $r := $config.resources }}
+  {{- if eq $r "deployment" }}
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+  {{- else if eq $r "service" }}
+  - apiGroups: [""]
+    resources: ["services"]
+  {{- else if eq $r "ksvc"}}
+  - apiGroup: ["serving.knative.dev"]
+    resources: ["services"]
+  {{- end }}
+    verbs: ["list", "watch"]
+  {{- end }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $.Release.Name }}-lister
+  namespace: {{ $ns }}
+  {{ template "iter8-abn.labels" $ }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ $.Release.Name }}-lister
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ $ns }}
+  name: {{ $.Release.Name }}-watcher
+  {{ template "iter8-abn.labels" $ }}
+rules:
+{{- range $nm, $config := $apps }}
+  {{- range $r := $config.resources }}
+  {{- if eq $r "deployment" }}
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+  {{- else if eq $r "service" }}
+  - apiGroups: [""]
+    resources: ["services"]
+  {{- else if eq $r "ksvc"}}
+  - apiGroup: ["serving.knative.dev"]
+    resources: ["services"]
+  {{- end }}
+    verbs: ["get", "update"]
+    resourceNames:
+    - {{ $nm }}
+    {{- $foo := untilStep 1 (int (add 1 (default 1 $config.maxNumCandidates))) 1 }}
+    {{- range $i, $v := $foo }}
+    - {{ $nm }}-candidate-{{ $v }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $.Release.Name }}-watcher
+  namespace: {{ $ns }}
+  {{ template "iter8-abn.labels" $ }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ $.Release.Name }}-watcher
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $.Release.Name }}-metrics
+  namespace: {{ $ns }}
+  {{ template "iter8-abn.labels" $ }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames:
+  {{- range $nm, $config := $apps }}
+  - {{ $nm }}-metrics
+  {{- end }}
+  verbs: ["get", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $.Release.Name }}-metrics
+  namespace: {{ $ns }}
+  {{ template "iter8-abn.labels" $ }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ $.Release.Name }}-metrics
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

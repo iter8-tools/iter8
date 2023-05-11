@@ -1,0 +1,19 @@
+apiVersion: v2
+name: autox
+version: 0.1.7
+description: Iter8 autoX controller
+type: application
+keywords:
+- Iter8
+- autox
+- experiment
+home: https://iter8.tools
+sources:
+- https://github.com/iter8-tools/iter8
+maintainers:
+- name: Alan Cha
+  email: alan.cha1@ibm.com
+- name: Iter8
+  email: iter8-tools@gmail.com
+icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+appVersion: v0.13

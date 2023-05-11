@@ -1,0 +1,46 @@
+apiVersion: rbac.authorization.k8s.io/v1
+{{- if .Values.clusterScoped }}
+kind: ClusterRole
+{{- else }}
+kind: Role
+{{- end }}
+metadata:
+  name: {{ $.Release.Name }}
+  {{ template "iter8-traffic.labels" $ }}
+rules:
+{{- range $typeName, $type := .Values.resourceTypes }}
+{{- if not $type.Resource }}
+{{- fail (print "resourceType \"" (print $typeName "\" does not have a resource parameter")) }}
+{{- end }}
+- apiGroups: ["{{- $type.Group -}}"]
+  resources: ["{{- $type.Resource -}}"]
+  verbs: ["get", "list", "watch", "patch", "update"]
+{{- end }}
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "create"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+{{- if .Values.clusterScoped }}
+kind: ClusterRoleBinding
+{{- else }}
+kind: RoleBinding
+{{- end }}
+metadata:
+  name: {{ $.Release.Name }}
+  {{ template "iter8-traffic.labels" $ }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+roleRef:
+{{- if .Values.clusterScoped }}
+  kind: ClusterRole
+{{- else }}
+  kind: Role
+{{- end }}
+  name: {{ $.Release.Name }}
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  {{ template "iter8-traffic.labels" . }}
+spec:
+  serviceName: {{ .Release.Name }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "iter8-traffic.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "iter8-traffic.name" . }}
+    spec:
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+      - name: iter8-traffic
+        image: {{ .Values.image }}
+        imagePullPolicy: Always
+        command: ["/bin/iter8"]
+        args: ["controllers", "-l", "{{ .Values.logLevel }}"]
+        env:
+        - name: CONFIG_FILE
+          value: /config/config.yaml
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+        resources:
+          {{ toYaml .Values.resources | indent 10 | trim }}
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}

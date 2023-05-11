@@ -1,4 +1,4 @@
-name: tests
+name: Test experiment charts using testdata charts
 
 on:
   pull_request:

@@ -137,7 +137,6 @@ Chart.lock
 
 bin/
 _dist/
-iter8
 **/ghz.proto
 **/ghz-call-data.json
 **/ghz-call-data.bin

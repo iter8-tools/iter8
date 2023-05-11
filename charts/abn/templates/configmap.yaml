@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+  {{ template "iter8-abn.labels" . }}
+data:
+  abn-config.yaml: | 
+  {{- range $ns, $apps := .Values.apps }}
+    {{ $ns }}:
+      {{- range $nm, $config := $apps }}
+      {{ $nm }}:
+        maxNumCandidates: {{ default 1 $config.maxNumCandidates }}
+        resources: 
+        {{- range $r := $config.resources }}
+        {{- if eq $r "deployment" }}
+        - group: apps
+          version: v1
+          resource: deployments
+          condition: Available
+        {{- else if eq $r "service" }}
+        - version: v1
+          resource: services
+        {{- else if eq $r "ksvc" }}
+        - group: serving.knative.dev
+          version: v1
+          resource: services
+          condition: Ready
+        {{- end }}
+        {{- end }}
+      {{- end }}
+  {{- end }}

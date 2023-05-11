@@ -1,0 +1,8 @@
+# Type of kubernetes workload
+appkind: deployment
+
+# Total Chaos Duration: keep killing pods for an hour
+totalChaosDuration: "3600"
+
+# Chaos Interval: kill a pod every 10 seconds
+chaosInterval: "10"

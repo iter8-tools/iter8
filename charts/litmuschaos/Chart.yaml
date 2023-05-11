@@ -1,0 +1,19 @@
+apiVersion: v1
+appVersion: "2.13.0"
+description: A Helm chart to perform Litmus Chaos experiments
+name: litmuschaos
+version: 0.0.4
+home: https://litmuschaos.io
+sources:
+  - https://github.com/litmuschaos/litmus
+keywords:
+  - chaos-engineering
+  - resiliency
+  - kubernetes
+  - pod
+maintainers:
+  - name: Shubham Chaudhary
+    email: shubham.chaudhary@harness.io
+  - name: Srinivasan Parthasarathy
+    email: spartha@us.ibm.com
+icon: https://raw.githubusercontent.com/litmuschaos/icons/master/litmus.png
