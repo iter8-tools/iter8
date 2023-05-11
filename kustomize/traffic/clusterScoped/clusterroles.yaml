@@ -10,7 +10,7 @@ rules:
   resources: ["inferenceservices"]
   verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: [""]
-  resources: ["services"]
+  resources: ["services","configmaps"]
   verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: ["networking.istio.io"]
   resources: ["virtualservices"]
@@ -29,7 +29,6 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: iter8-traffic
-  namespace: default
 roleRef:
   kind: ClusterRole
   name: iter8-traffic

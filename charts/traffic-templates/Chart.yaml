@@ -1,18 +1,20 @@
 apiVersion: v2
-name: traffic
-version: 0.1.4
-description: Iter8 traffic controller
+name: traffic-templates
+version: 0.1.2
+description: Iter8 traffic templates
 type: application
 keywords:
 - Iter8
 - traffic
-- experiment
+- blue-green
+- canary
+- mirroring
 home: https://iter8.tools
 sources:
 - https://github.com/iter8-tools/iter8
 maintainers:
-- name: Alan Cha
-  email: alan.cha1@ibm.com
+- name: Michael Kalantar
+  email: kalantar@us.ibm.com
 - name: Iter8
   email: iter8-tools@gmail.com
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
