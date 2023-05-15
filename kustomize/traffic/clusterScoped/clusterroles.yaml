@@ -29,6 +29,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: iter8-traffic
+  namespace: default
 roleRef:
   kind: ClusterRole
   name: iter8-traffic
