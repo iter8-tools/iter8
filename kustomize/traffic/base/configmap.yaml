@@ -8,6 +8,10 @@ data:
     image: iter8/iter8:0.13
     logLevel: info
     resourceTypes:
+      cm:
+        Group: ""
+        Resource: configmaps
+        Version: v1
       deploy:
         Group: apps
         Resource: deployments
@@ -16,6 +20,9 @@ data:
         Group: serving.kserve.io
         Resource: inferenceservices
         Version: v1beta1
+        conditions:
+        - name: Ready
+          status: "True"
       svc:
         Group: ""
         Resource: services

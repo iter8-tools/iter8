@@ -2,8 +2,6 @@ name: Test kustomize experiments
 
 on:
   pull_request:
-    branches:
-    - master
 
 # Kind versions used to test Iter8 on different versions of Kubernetes
 # From: https://github.com/kubernetes-sigs/kind/releases
@@ -19,20 +17,20 @@ env:
     kindest/node:v1.27.0@sha256:c6b22e613523b1af67d4bc8a0c38a4c3ea3a2b8fbc5b367ae36345c9cb844518
 
 jobs:
-  # Get the different Kind versions
+  # Get the paths for the Helm charts to lint
   get_versions:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Get the different Kind versions
-      id: set-matrix
-      run: |
-        # Serialize versions into JSON array
-        jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
-        echo $jsonVersions
+      - name: Get the paths for Helm charts to lint
+        id: set-matrix
+        run: |
+          # Serialize versions into JSON array
+          jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
+          echo $jsonVersions
 
-        # Output serialized jsonVersions
-        echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
+          # Output serialized jsonVersions
+          echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -76,7 +74,7 @@ jobs:
         kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-traffic
 
   traffic-clusterScoped:
-    name: Traffic test
+    name: Traffic cluster scoped test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:

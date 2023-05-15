@@ -3,6 +3,9 @@ kind: Role
 metadata:
   name: iter8-traffic
 rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["get", "list", "watch", "patch", "update"]
@@ -29,7 +32,6 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: iter8-traffic
-  namespace: default
 roleRef:
   kind: Role
   name: iter8-traffic
