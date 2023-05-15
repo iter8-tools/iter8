@@ -53,7 +53,8 @@ jobs:
       with:
         files: charts/traffic
 
-    - uses: iter8-tools/iter8@v0.13
+    - name: Install Iter8
+      run: go install github.com/iter8-tools/iter8@v0.13
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
@@ -91,7 +92,8 @@ jobs:
       with:
         files: charts/traffic
 
-    - uses: iter8-tools/iter8@v0.13
+    - name: Install Iter8
+      run: go install github.com/iter8-tools/iter8@v0.13
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
