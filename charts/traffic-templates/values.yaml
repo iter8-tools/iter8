@@ -1,6 +1,6 @@
 # iter8Version is the minor version of Iter8
 # should be specified as the value of the iter8.tools/version label on all routemaps
-iter8Version: v0.13
+iter8Version: v0.14
 
 # default model mesh serving endpoint details
 modelmeshServingService: modelmesh-serving

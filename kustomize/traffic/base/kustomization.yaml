@@ -9,4 +9,4 @@ namespace: default
 commonLabels:
   app.kubernetes.io/name: traffic
   app.kubernetes.io/instance: iter8-traffic
-  app.kubernetes.io/version: v0.13
+  app.kubernetes.io/version: v0.14

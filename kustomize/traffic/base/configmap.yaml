@@ -5,7 +5,7 @@ metadata:
 data:
   config.yaml: |
     defaultResync: 15m
-    image: iter8/iter8:0.13
+    image: iter8/iter8:0.14
     logLevel: info
     resourceTypes:
       cm:
