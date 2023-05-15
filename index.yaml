@@ -94,6 +94,29 @@ entries:
   traffic:
   - apiVersion: v2
     appVersion: v0.13
+    created: "2023-05-15T13:57:31.514004112Z"
+    description: Iter8 traffic controller
+    digest: 2ca3f33886630c78e413b3b459e1ae6e906940b0d1eeb7c15848bb6cd78df181
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-0.1.4/traffic-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: v0.13
     created: "2023-05-11T14:13:45.950686242Z"
     description: Iter8 traffic controller
     digest: ba969ead21050b97c6ff78639170451ed94e6b1d2bce478626a113d7cf9a306f
@@ -115,4 +138,30 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-0.1.3/traffic-0.1.3.tgz
     version: 0.1.3
-generated: "2023-05-11T14:13:45.950691542Z"
+  traffic-templates:
+  - apiVersion: v2
+    appVersion: v0.13
+    created: "2023-05-15T13:57:31.668471136Z"
+    description: Iter8 traffic templates
+    digest: 038c99aec229e169903ef94e07792364e97805d20f788e999a1a5608531c7f9a
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic-templates
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
+    version: 0.1.2
+generated: "2023-05-15T13:57:31.668487137Z"
