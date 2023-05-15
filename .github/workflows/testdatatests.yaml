@@ -27,7 +27,7 @@ jobs:
         fi
 
   kubernetes-load-test-http:
-    name: http load test (with readiness) at the edge of Kubernetes
+    name: HTTP load test (with readiness) at the edge of Kubernetes
     runs-on: ubuntu-latest
     steps:
     - name: Install Go

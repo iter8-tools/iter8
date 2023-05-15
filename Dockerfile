@@ -1,4 +1,4 @@
-# Small linux image with iter8 binary
+# Small Linux image with Iter8 binary
 FROM golang:buster
 
 # Install curl
