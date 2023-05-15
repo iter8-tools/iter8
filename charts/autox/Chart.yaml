@@ -1,6 +1,6 @@
 apiVersion: v2
 name: autox
-version: 0.1.7
+version: 0.1.8
 description: Iter8 autoX controller
 type: application
 keywords:

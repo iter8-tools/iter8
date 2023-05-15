@@ -1,6 +1,6 @@
 apiVersion: v2
 name: traffic-templates
-version: 0.1.2
+version: 0.1.3
 description: Iter8 traffic templates
 type: application
 keywords:
