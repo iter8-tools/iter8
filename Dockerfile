@@ -5,6 +5,6 @@ FROM golang:buster
 RUN apt-get update && apt-get install -y golang-go
 
 # Install Iter8
-RUN go install github.com/iter8-tools/iter8@v0.14
+RUN GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
 
 WORKDIR /
