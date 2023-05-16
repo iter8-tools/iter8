@@ -54,7 +54,6 @@ jobs:
         files: charts/traffic
 
     - name: Install Iter8
-    - name: Install Iter8
       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
       if: steps.modified-files.outputs.any_modified == 'true'
 
@@ -93,7 +92,6 @@ jobs:
       with:
         files: charts/traffic
 
-    - name: Install Iter8
     - name: Install Iter8
       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
       if: steps.modified-files.outputs.any_modified == 'true'
