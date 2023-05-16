@@ -46,12 +46,12 @@ jobs:
     - build-and-push
     steps:
     - name: Install Iter8
-      run: go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: create app
+    - name: Create app
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
@@ -76,12 +76,12 @@ jobs:
     - build-and-push
     steps:
     - name: Install Iter8
-      run: go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: create app
+    - name: Create app
       run: |
         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
         kubectl expose deploy hello --port=50051
@@ -108,7 +108,7 @@ jobs:
     - build-and-push
     steps:
     - name: Install Iter8
-      run: go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -138,7 +138,7 @@ jobs:
     - build-and-push
     steps:
     - name: Install Iter8
-      run: go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
