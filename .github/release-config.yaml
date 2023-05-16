@@ -1,5 +1,6 @@
 name-template: 'Version $NEXT_PATCH_VERSION of Iter8'
 tag-template: 'v$NEXT_PATCH_VERSION'
+tag-prefix: 'v0'
 categories:
 - title: '🚀 Features'
   labels:
