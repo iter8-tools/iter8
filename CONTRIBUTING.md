@@ -75,7 +75,6 @@ The Iter8 project consists of the following repos.
 
 1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI and experiment charts
 2. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
-3. [iter8-tools/homebrew-iter8](https://github.com/iter8-tools/homebrew-iter8): Homebrew formula for the Iter8 CLI
 
 ### iter8-tools/iter8
 

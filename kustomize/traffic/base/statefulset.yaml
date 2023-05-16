@@ -10,7 +10,7 @@ spec:
       serviceAccountName: iter8-traffic
       containers:
       - name: iter8-traffic
-        image: iter8/iter8:0.13
+        image: iter8/iter8:0.14
         imagePullPolicy: Always
         command: ["/bin/iter8"]
         args: ["controllers", "-l", "info"]

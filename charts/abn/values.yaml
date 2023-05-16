@@ -1,5 +1,5 @@
 ### ABn service image
-image: iter8/iter8:0.13
+image: iter8/iter8:0.14
 
 service: 
   port: 50051

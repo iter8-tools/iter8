@@ -312,7 +312,7 @@ jobs:
         --set 'groups.httpbin.specs.iter8.values.http.url=http://httpbin.default/get' \
         --set 'groups.httpbin.specs.iter8.values.assess.SLOs.upper.http/error-count=0' \
         --set 'groups.httpbin.specs.iter8.values.assess.SLOs.upper.http/latency-mean=50' \
-        --set 'groups.httpbin.specs.iter8.version=0.13.0' \
+        --set 'groups.httpbin.specs.iter8.version=0.14.0' \
         --set 'groups.httpbin.specs.iter8.values.runner=job'
 
     - name: Check AutoX controller

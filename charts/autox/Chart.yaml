@@ -1,6 +1,6 @@
 apiVersion: v2
 name: autox
-version: 0.1.7
+version: 0.1.8
 description: Iter8 autoX controller
 type: application
 keywords:
@@ -16,4 +16,4 @@ maintainers:
 - name: Iter8
   email: iter8-tools@gmail.com
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
-appVersion: v0.13
+appVersion: v0.14

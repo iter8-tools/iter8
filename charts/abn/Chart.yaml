@@ -1,6 +1,6 @@
 apiVersion: v2
 name: abn
-version: 0.2.3
+version: 0.2.4
 description: Iter8 ABn support service
 type: application
 keywords:
@@ -15,4 +15,4 @@ maintainers:
 - name: Iter8
   email: iter8-tools@gmail.com
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
-appVersion: v0.13
+appVersion: v0.14
