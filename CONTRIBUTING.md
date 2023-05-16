@@ -8,14 +8,13 @@ As you get started, you are in the best position to give us feedback on key area
 * Gaps in our getting started tutorial and other documentation
 * Bugs in our test and automation scripts
 
-If anything doesn't make sense, or doesn't work when you run it, please open a
-bug report and let us know!
+If anything doesn't make sense, or doesn't work when you run it, please open a bug report and let us know!
 
 ## Ways to contribute
 
 We welcome many types of contributions including:
 
-* [CLI and Iter8 experiment chart](#iter8-toolsiter8)
+* [CLI and Iter8 experiment charts](#iter8-toolsiter8)
 * [Docs](#iter8-toolsdocs)
 * CI, builds, and tests
 * Reviewing pull requests
@@ -73,7 +72,7 @@ repository, you can amend your commit with the sign-off by running:
 
 The Iter8 project consists of the following repos.
 
-1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI and experiment charts
+1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI
 2. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
 
 ### iter8-tools/iter8
@@ -102,6 +101,44 @@ iter8 version
 make tests
 make coverage
 make htmlcov
+```
+
+#### Lint Iter8
+```shell
+make lint
+```
+
+#### Build and push Iter8 image
+
+Define a name for your Docker image
+
+```shell
+IMG=[Docker image name]
+```
+
+Build and push Iter8 image to Docker
+
+```shell
+cat << EOF > Dockerfile.dev
+# Small linux image with iter8 binary
+FROM debian:buster-slim
+
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
+# Download iter8 compressed binary
+# use COPY instead of wget
+COPY _dist/iter8-linux-amd64.tar.gz iter8-linux-amd64.tar.gz
+
+# Extract iter8
+RUN tar -xvf iter8-linux-amd64.tar.gz
+
+# Extract iter8
+RUN mv linux-amd64/iter8 /bin/iter8
+EOF
+make dist
+docker build -f Dockerfile.dev -t $IMG .
+docker push $IMG
 ```
 
 ### iter8-tools/docs
