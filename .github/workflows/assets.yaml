@@ -88,9 +88,7 @@ jobs:
 
   kubernetes-http-experiment:
     name: Kubernetes HTTP load test
-    needs:
-    - assets
-    - build-and-push
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
     - name: Install Iter8
@@ -119,9 +117,7 @@ jobs:
 
   kubernetes-grpc-experiment:
     name: Kubernetes gRPC load test
-    needs:
-    - assets
-    - build-and-push
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
     - name: Install Iter8
@@ -152,9 +148,7 @@ jobs:
 
   readiness:
     name: Kubernetes readiness test
-    needs:
-    - assets
-    - build-and-push
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
     - name: Install Iter8
@@ -183,9 +177,7 @@ jobs:
 
   readiness-with-namespace:
     name: Kubernetes readiness test with namespace
-    needs:
-    - assets
-    - build-and-push
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
     - name: Install Iter8
