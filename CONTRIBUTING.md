@@ -72,7 +72,7 @@ repository, you can amend your commit with the sign-off by running:
 
 The Iter8 project consists of the following repos.
 
-1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI
+1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI, experiment, and controller charts
 2. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
 
 ### iter8-tools/iter8
