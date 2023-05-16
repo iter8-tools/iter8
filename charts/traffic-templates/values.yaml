@@ -1,0 +1,79 @@
+# iter8Version is the minor version of Iter8
+# should be specified as the value of the iter8.tools/version label on all routemaps
+iter8Version: v0.14
+
+# default model mesh serving endpoint details
+modelmeshServingService: modelmesh-serving
+modelmeshServingNamespace: modelmesh-serving
+modelmeshServingPort: 8033
+
+# default Istio Gateway name
+externalGateway: mm-gateway
+
+
+### templateName is the name of template to apply
+### valid values are: 'initialize' and 'modify-weights'
+#$$ these are documented below
+
+###########################################################
+### initializes model rollout for a given traffic pattern
+# templateName: initialize-rollout
+###
+
+### required fields are:
+
+# model serving environment. valid values are 'kserve' and 'kserve-modelmesh' 
+# targetEnv:
+# rollout traffic strategy. valid values are 'blue-green', 'canary', 'mirror'
+# trafficStrategy:
+# name of model
+# modelName:
+
+### optional fields are:
+
+# list of model versions
+# modelVersions:
+# name of model version InferenceService
+# when not specified, names are assumed to be of the form 'modelName-i' where i = 0 is the primary model
+#   name:
+# namespace where model inferenceservice is deployed
+# default is 'modelmesh-serving'
+#   namespace:
+# portion of inference requests sent to this version
+# weights are relative to other weights
+# only relevant when 'trafficStrategy: blue-green'
+#   weight:
+# a set of criterion to be met in order for the rule to be applied to the inference request
+# is a HTTPMatchRequest (https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest)
+# only relevant when 'trafficStrategy: canary'
+#   match:
+
+###########################################################
+###
+# template: modify-weights
+###
+
+### required fields are:
+
+# model serving environment. valid values are 'kserve' and 'kserve-modelmesh' 
+# targetEnv:
+# rollout traffic strategy. valid values are 'blue-green' or 'mirror'
+# trafficStrategy:
+# name of model
+# modelName:
+
+
+### optional fields are:
+
+# list of model versions
+# modelVersions:
+# when not specified, names are assumed to be of the form 'modelName-i' where i = 0 is the primary model
+#   name:
+# namespace where model inferenceservice is deployed
+# default is 'modelmesh-serving'
+#   namespace:
+# percentage of inference requests that should also be sent to the candidate version of the model
+# only used if trafficStrategy is set to 'mirror'
+# default is 100
+# mirrorPercentage: 100
+

@@ -1,4 +1,4 @@
-name: tests
+name: Test experiment charts using testdata charts
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: 1.19
     - name: Check out code into the Go module directory
@@ -27,11 +27,11 @@ jobs:
         fi
 
   kubernetes-load-test-http:
-    name: http load test (with readiness) at the edge of Kubernetes
+    name: HTTP load test (with readiness) at the edge of Kubernetes
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: 1.19
     - name: Check out code into the Go module directory
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: 1.19
     - name: Check out code into the Go module directory

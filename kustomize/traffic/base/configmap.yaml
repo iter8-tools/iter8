@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iter8-traffic
+data:
+  config.yaml: |
+    defaultResync: 15m
+    image: iter8/iter8:0.14
+    logLevel: info
+    resourceTypes:
+      cm:
+        Group: ""
+        Resource: configmaps
+        Version: v1
+      deploy:
+        Group: apps
+        Resource: deployments
+        Version: v1
+      isvc:
+        Group: serving.kserve.io
+        Resource: inferenceservices
+        Version: v1beta1
+        conditions:
+        - name: Ready
+          status: "True"
+      svc:
+        Group: ""
+        Resource: services
+        Version: v1
+      vs:
+        Group: networking.istio.io
+        Resource: virtualservices
+        Version: v1beta1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 250m
+        memory: 64Mi

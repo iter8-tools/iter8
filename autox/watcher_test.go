@@ -2,6 +2,7 @@ package autox
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -68,4 +69,88 @@ func TestStart(t *testing.T) {
 		list, _ := k8sClient.dynamic().Resource(applicationGVR).Namespace(argocd).List(context.Background(), metav1.ListOptions{})
 		return assert.Equal(t, len(list.Items), 2)
 	}, 5*time.Second, time.Second)
+}
+
+func TestValidateConfig(t *testing.T) {
+	tests := []struct {
+		c   config
+		err string
+	}{
+		{
+			config{
+				Specs: map[string]releaseGroupSpec{
+					"test": {},
+				},
+			},
+			"trigger in spec group \"test\" does not have a name",
+		},
+		{
+			config{
+				Specs: map[string]releaseGroupSpec{
+					"test": {
+						Trigger: trigger{
+							Name: "test",
+						},
+					},
+				},
+			},
+			"trigger in spec group \"test\" does not have a namespace",
+		},
+		{
+			config{
+				Specs: map[string]releaseGroupSpec{
+					"test": {
+						Trigger: trigger{
+							Name:      "test",
+							Namespace: "default",
+						},
+					},
+				},
+			},
+			"trigger in spec group \"test\" does not have a version",
+		},
+		{
+			config{
+				Specs: map[string]releaseGroupSpec{
+					"test": {
+						Trigger: trigger{
+							Name:      "test",
+							Namespace: "default",
+							Version:   "v1",
+						},
+					},
+				},
+			},
+			"trigger in spec group \"test\" does not have a resource",
+		},
+		{
+			config{
+				Specs: map[string]releaseGroupSpec{
+					"test": {
+						Trigger: trigger{
+							Name:      "test",
+							Namespace: "default",
+							Version:   "v1",
+							Resource:  "deployments",
+						},
+					},
+					"test2": {
+						Trigger: trigger{
+							Name:      "test",
+							Namespace: "default",
+							Version:   "v1",
+							Resource:  "deployments",
+						},
+					},
+				},
+			},
+			"multiple release specs with the same trigger: name: \"test\", namespace: \"default\", group: \"\", version: \"v1\", resource: \"deployments\",",
+		},
+	}
+
+	for _, e := range tests {
+		err := validateConfig(e.c)
+		fmt.Println(err)
+		assert.EqualError(t, err, e.err)
+	}
 }

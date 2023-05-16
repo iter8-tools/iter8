@@ -1,0 +1,19 @@
+### ABn service image
+image: iter8/iter8:0.14
+
+service: 
+  port: 50051
+
+### map of applications
+apps: null
+
+logLevel: info
+
+### Resource limits
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "128Mi"
+    cpu: "500m"

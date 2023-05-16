@@ -1,0 +1,18 @@
+defaultResync: 15m
+resourceTypes:
+  deploy:
+    Group: apps
+    Version: v1
+    Resource: deployments
+  svc:
+    Group: ""
+    Version: v1
+    Resource: services
+  isvc:
+    Group: serving.kserve.io
+    Version: v1beta1
+    Resource: inferenceservices
+  vs:
+    Group: networking.istio.io
+    Version: v1beta1
+    Resource: virtualservices

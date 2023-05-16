@@ -1,7 +1,7 @@
 BINDIR      := $(CURDIR)/bin
 INSTALL_PATH ?= /usr/local/bin
 DIST_DIRS   := find * -type d -exec
-TARGETS     ?= darwin/amd64 linux/amd64 linux/386 windows/amd64
+TARGETS     ?= linux/amd64
 BINNAME     ?= iter8
 
 GOBIN         = $(shell go env GOBIN)
@@ -94,16 +94,12 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code
 	go vet ./...
 
-.PHONY: staticcheck
-staticcheck:
-	staticcheck ./...
-
 .PHONY: golangci-lint
 golangci-lint:
 	golangci-lint run ./...
 
 .PHONY: lint
-lint:	vet staticcheck golangci-lint
+lint: vet golangci-lint
 
 .PHONY: test
 test: fmt vet ## Run tests.

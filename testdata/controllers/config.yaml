@@ -1,0 +1,27 @@
+defaultResync: 15m
+# by default, Iter8 controller is namespace scoped
+# clusterScoped: true
+resourceTypes:
+  svc:
+    Group: ""
+    Version: v1
+    Resource: services
+  cm:
+    Group: ""
+    Version: v1
+    Resource: configmaps
+  deploy:
+    Group: apps
+    Version: v1
+    Resource: deployments
+  isvc:
+    Group: serving.kserve.io
+    Version: v1beta1
+    Resource: inferenceservices
+    conditions:
+    - name: Ready
+      status: "True"
+  vs:
+    Group: networking.istio.io
+    Version: v1beta1
+    Resource: virtualservices

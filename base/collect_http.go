@@ -247,15 +247,12 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 			log.Logger.Trace("got fortio options")
 			log.Logger.Trace("URL: ", efo.URL)
 
+			log.Logger.Trace("run fortio HTTP test")
 			ifr, err := fhttp.RunHTTPTest(efo)
 			if err != nil {
 				log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
-				if ifr == nil {
-					log.Logger.Error("failed to get results since fortio run was aborted")
-				}
+				continue
 			}
-
-			log.Logger.Trace("ran fortio http test")
 
 			results[httpMetricPrefix+"-"+endpointID] = ifr
 		}
@@ -269,15 +266,12 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 		log.Logger.Trace("got fortio options")
 		log.Logger.Trace("URL: ", fo.URL)
 
+		log.Logger.Trace("run fortio HTTP test")
 		ifr, err := fhttp.RunHTTPTest(fo)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
-			if ifr == nil {
-				log.Logger.Error("failed to get results since fortio run was aborted")
-			}
+			return results, err
 		}
-
-		log.Logger.Trace("ran fortio http test")
 
 		results[httpMetricPrefix] = ifr
 	}
@@ -424,6 +418,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 			return err
 		}
 	}
+
 	return nil
 }
 

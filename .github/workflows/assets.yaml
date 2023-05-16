@@ -1,4 +1,4 @@
-name: Publish binaries, Brew formula, and Docker image
+name: Publish binaries and Docker image
 
 on:
   release:
@@ -6,11 +6,11 @@ on:
 
 jobs:
   assets:
-    name: Publish binaries and Brew formula
+    name: Publish binaries
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: 1.19
     - uses: actions/checkout@v3
@@ -27,8 +27,7 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
-    - name: create-checksum
-      id: create-checksum
+    - name: Create checksum
       run: |
         VERSION=${GITHUB_REF#refs/*/}
         echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -51,18 +50,11 @@ jobs:
         file: checksum.txt
         tag: ${{ github.ref }}
         overwrite: true
-    - name: Update Homebrew formula
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.PERSONAL_TOKEN }}
-        repository: iter8-tools/homebrew-iter8
-        event-type: release
-        client-payload: '{"ref": "${{ env.VERSION }}", "sha": "${{ github.sha }}", "shaformac": "${{ env.SHAFORMAC }}"}'
 
-  # Push Iter8 image to dockerhub
   build-and-push:
-    runs-on: ubuntu-latest
+    name: Push Iter8 image to Docker Hub
     needs: assets
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
@@ -86,7 +78,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_SECRET }}
-    - uses: docker/build-push-action@v3
+    - uses: docker/build-push-action@v4
       with:
         platforms: linux/amd64,linux/arm64
         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest
@@ -95,18 +87,17 @@ jobs:
           TAG=v${{ env.VERSION }}
 
   kubernetes-http-experiment:
-    name: Kubernetes http load test    
+    name: Kubernetes HTTP load test
+    needs: build-and-push
     runs-on: ubuntu-latest
-    needs: 
-    - build-and-push
-    - assets
     steps:
-    - uses: iter8-tools/iter8@v0.13
+    - name: Install Iter8
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: create app
+    - name: Create app
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
@@ -126,17 +117,16 @@ jobs:
 
   kubernetes-grpc-experiment:
     name: Kubernetes gRPC load test
+    needs: build-and-push
     runs-on: ubuntu-latest
-    needs: 
-    - build-and-push
-    - assets
     steps:
-    - uses: iter8-tools/iter8@v0.13
+    - name: Install Iter8
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: create app
+    - name: Create app
       run: |
         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
         kubectl expose deploy hello --port=50051
@@ -158,17 +148,16 @@ jobs:
 
   readiness:
     name: Kubernetes readiness test
+    needs: build-and-push
     runs-on: ubuntu-latest
-    needs: 
-    - build-and-push
-    - assets
     steps:
-    - uses: iter8-tools/iter8@v0.13
+    - name: Install Iter8
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: deploy resources to cluster
+    - name: Deploy resources to cluster
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
@@ -188,17 +177,16 @@ jobs:
 
   readiness-with-namespace:
     name: Kubernetes readiness test with namespace
+    needs: build-and-push
     runs-on: ubuntu-latest
-    needs: 
-    - build-and-push
-    - assets
     steps:
-    - uses: iter8-tools/iter8@v0.13
+    - name: Install Iter8
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: deploy resources to cluster
+    - name: Deploy resources to cluster
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80

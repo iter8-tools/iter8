@@ -1,0 +1,45 @@
+{{- $versions := include "resolve.modelVersions" . | mustFromJson }}
+
+{{- if eq "initialize-rollout" .Values.templateName }}
+  {{ include "initial.gateway" . }}
+---
+  {{ include "initial.virtualservice" . }}
+---
+  {{ include "initial.serviceentry" . }}
+---
+  {{- if eq "blue-green" .Values.trafficStrategy }}
+    {{ include "routemap-bluegreen" . }}
+  {{- else if eq "canary" .Values.trafficStrategy }}
+    {{ include "routemap-canary" . }}
+  {{- else if eq "mirror" .Values.trafficStrategy }}
+    {{ include "routemap-mirror" . }}
+  {{- else }}
+    {{ fail "Unknown trafficStrategy"}}
+  {{- end }}
+---
+  {{- if eq "blue-green" .Values.trafficStrategy }}
+    {{- range $i, $v := $versions }}
+      {{ include "create.weight-config" (unset $v "weight") }}
+---
+    {{- end }}
+  {{- else if eq "mirror" .Values.trafficStrategy }}
+    {{- range $i, $v := (rest $versions) }}
+      {{ include "create.weight-config" (unset $v "weight") }}
+---
+    {{- end }}
+  {{- end }}
+
+{{- else if eq "modify-weights" .Values.templateName }}
+  {{- if eq "blue-green" .Values.trafficStrategy }}
+    {{- range $i, $v := .Values.modelVersions }}
+      {{ include "create.weight-config" $v }}
+---
+    {{- end }}
+  {{- else if eq "mirror" .Values.trafficStrategy }}
+    {{- range $i, $v := (rest $versions) }}
+      {{ include "create.weight-config" (set $v "weight" $.Values.mirrorPercentage) }}
+---
+    {{- end }}
+  {{- end }}
+
+{{- end }}

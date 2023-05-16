@@ -1,0 +1,52 @@
+### Controller image
+image: iter8/iter8:0.14
+
+### default resync time for controller
+defaultResync: 15m
+
+### flag indicating whether installed as cluster scoped or (default) namespace scoped
+# clusterScoped: true
+
+### list of resource types to watch. For each resource type, an Iter8 shortname is mapped to a group, version, and resource.
+### to add types to watch, any shortname can be used
+### Where a condition is identified, it identifies the status condition on an object that should be inspected to determine 
+### if the resource is "ready".
+resourceTypes:
+  svc:
+    Group: ""
+    Version: v1
+    Resource: services
+  cm:
+    Group: ""
+    Version: v1
+    Resource: configmaps
+  deploy:
+    Group: apps
+    Version: v1
+    Resource: deployments
+    conditions:
+    - name: Available
+      status: "True"
+  isvc:
+    Group: serving.kserve.io
+    Version: v1beta1
+    Resource: inferenceservices
+    conditions:
+    - name: Ready
+      status: "True"
+  vs:
+    Group: networking.istio.io
+    Version: v1beta1
+    Resource: virtualservices
+
+### log level. Must be one of trace, debug, info, warning, error
+logLevel: info
+
+### Resource limits
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "128Mi"
+    cpu: "500m"
