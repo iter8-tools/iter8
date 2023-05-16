@@ -7,6 +7,7 @@ metadata:
 spec:
   gateways:
   - {{ .Values.externalGateway }}
+  - mesh
   hosts:
   - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}
   - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}.svc

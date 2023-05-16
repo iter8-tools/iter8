@@ -5,6 +5,8 @@
 ---
   {{ include "initial.virtualservice" . }}
 ---
+  {{ include "initial.serviceentry" . }}
+---
   {{- if eq "blue-green" .Values.trafficStrategy }}
     {{ include "routemap-bluegreen" . }}
   {{- else if eq "canary" .Values.trafficStrategy }}
