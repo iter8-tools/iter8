@@ -1,5 +1,25 @@
 bases:
-- ../base
+- ../namespaceScoped
 
-resources:
-- clusterroles.yaml
+patches:
+- patch: |-
+    - op: replace
+      path: /kind
+      value: ClusterRole
+  target:
+    kind: Role
+  
+# Order matters
+# /roleRef/kind patch should happen before /kind patch
+- patch: |-
+    - op: replace
+      path: /roleRef/kind
+      value: ClusterRole
+  target:
+    kind: RoleBinding
+- patch: |-
+    - op: replace
+      path: /kind
+      value: ClusterRoleBinding
+  target:
+    kind: RoleBinding
