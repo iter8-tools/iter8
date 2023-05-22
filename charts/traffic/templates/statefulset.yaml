@@ -22,6 +22,8 @@ spec:
         command: ["/bin/iter8"]
         args: ["controllers", "-l", "{{ .Values.logLevel }}"]
         env:
+        - name: CONFIG_FILE
+          value: /config/config.yaml
         - name: POD_NAME
           valueFrom:
             fieldRef:

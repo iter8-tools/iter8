@@ -51,8 +51,6 @@ resources:
     memory: "128Mi"
     cpu: "500m"
 
-### StorageClass parameters
-storageClass:
-  provisioner: kubernetes.io/aws-ebs
-  parameters:
-    type: gp2
+### PersistentVolumeClaim parameters
+storage: 50Mi
+storageClassName: standard
