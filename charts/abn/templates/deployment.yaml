@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   {{ template "iter8-abn.labels" . }}
@@ -38,5 +38,5 @@ spec:
           runAsUser: 1000
       volumes:
       - name: abn-config
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name }}
+        configMap:
+          name: {{ .Release.Name }}
