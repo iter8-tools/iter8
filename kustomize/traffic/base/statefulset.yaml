@@ -15,8 +15,6 @@ spec:
         command: ["/bin/iter8"]
         args: ["controllers", "-l", "info"]
         env:
-        - name: CONFIG_FILE
-          value: /config/config.yaml
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -42,5 +40,5 @@ spec:
           runAsUser: 1000
       volumes:
         - name: config
-          configMap:
-            name: iter8-traffic
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}

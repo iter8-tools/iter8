@@ -50,3 +50,9 @@ resources:
   limits:
     memory: "128Mi"
     cpu: "500m"
+
+### StorageClass parameters
+storageClass:
+  provisioner: kubernetes.io/aws-ebs
+  parameters:
+    type: gp2
