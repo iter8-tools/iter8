@@ -196,6 +196,29 @@ entries:
   traffic:
   - apiVersion: v2
     appVersion: v0.14
+    created: "2023-05-23T18:40:29.181360719Z"
+    description: Iter8 traffic controller
+    digest: 2f4b997a1f3f67f01489be6b866fc0409b56cfe9557f6021d287053a4173d899
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-0.1.7/traffic-0.1.7.tgz
+    version: 0.1.7
+  - apiVersion: v2
+    appVersion: v0.14
     created: "2023-05-22T19:08:06.318119718Z"
     description: Iter8 traffic controller
     digest: 85f49b8fdbed3a6be68a63a1d36ba2cbf5bfc4eb2c0402adcb55b852b6bf964c
@@ -362,4 +385,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-05-22T19:08:06.318153719Z"
+generated: "2023-05-23T18:40:29.18139802Z"
