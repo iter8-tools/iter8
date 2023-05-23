@@ -50,3 +50,7 @@ resources:
   limits:
     memory: "128Mi"
     cpu: "500m"
+
+### PersistentVolumeClaim parameters
+storage: 50Mi
+storageClassName: standard
