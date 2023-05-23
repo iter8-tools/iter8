@@ -36,8 +36,10 @@ spec:
         - name: config
           mountPath: "/config"
           readOnly: true
+        {{- if .Values.persist }}
         - name: metrics
           mountPath: "/metrics"
+        {{- end }}
         resources:
           {{ toYaml .Values.resources | indent 10 | trim }}
         securityContext:
@@ -48,6 +50,8 @@ spec:
         - name: config
           configMap:
             name: {{ .Release.Name }}
+        {{- if .Values.persist }}
         - name: metrics
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}
+        {{- end }}
