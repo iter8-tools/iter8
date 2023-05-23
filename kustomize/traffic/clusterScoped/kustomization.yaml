@@ -1,6 +1,8 @@
 bases:
 - ../namespaceScoped
 
+namespace: default
+
 patches:
 - patch: |-
     - op: replace
