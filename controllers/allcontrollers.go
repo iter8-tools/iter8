@@ -231,6 +231,7 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	}
 
 	if config.Persist {
+		// TODO: expose badgerDB options in config?
 		dbClient, err := badgerdb.GetClient(badger.DefaultOptions(metricsPath))
 
 		fmt.Println(dbClient, err)
