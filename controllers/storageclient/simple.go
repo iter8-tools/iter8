@@ -3,6 +3,7 @@ package storageclient
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/dgraph-io/badger"
 )
@@ -13,12 +14,20 @@ type Client struct {
 
 // Start initializes BadgerDB instance
 func (cl *Client) Start(path string, opts interface{}) error {
+	// Check if path exists (if volume has been mounted)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		fmt.Println("does not exist")
+		return errors.New("path does not exist; volume has not been mounted")
+	}
+
+	// cast interface{} into BadgerDB options
 	dbOpts, ok := opts.(badger.Options)
 	if !ok {
 		return errors.New("cannot cast opts into BadgerDB options")
 	}
+	dbOpts.Dir = path // add path to BadgerDB options
 
-	dbOpts.Dir = path
+	// intialize BadgerDB instance at path
 	db, err := badger.Open(dbOpts)
 	if err != nil {
 		return errors.New("cannot open BadgerDB")
