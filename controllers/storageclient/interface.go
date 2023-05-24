@@ -8,5 +8,5 @@ type Interface interface {
 	// GetMetric(name string) (interface{}, error)
 	// DeleteMetric(name string) (interface{}, error)
 
-	Size() (int, int, error) // current capacity and max capacity TODO: units?
+	Size() (int64, int64, error) // current capacity and max capacity TODO: units?
 }

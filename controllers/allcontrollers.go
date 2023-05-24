@@ -4,12 +4,15 @@ package controllers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
+	"github.com/dgraph-io/badger"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
+	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -31,6 +34,9 @@ const (
 	iter8KindLabel         = "iter8.tools/kind"
 	iter8KindRoutemapValue = "routemap"
 	iter8VersionLabel      = "iter8.tools/version"
+
+	// for persistent volume
+	metricsPath = "/metrics"
 )
 
 // informers used to watch application resources,
@@ -222,6 +228,12 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	pod, err := client.CoreV1().Pods(ns).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
+	}
+
+	if config.Persist {
+		dbClient, err := badgerdb.GetClient(badger.DefaultOptions(metricsPath))
+
+		fmt.Println(dbClient, err)
 	}
 
 	log.Logger.Trace("initing app informers... ")
