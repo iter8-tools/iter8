@@ -1,8 +1,11 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   name: iter8-traffic
 rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["get", "list", "watch", "patch", "update"]
@@ -10,7 +13,7 @@ rules:
   resources: ["inferenceservices"]
   verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: [""]
-  resources: ["services","configmaps"]
+  resources: ["services"]
   verbs: ["get", "list", "watch", "patch", "update"]
 - apiGroups: ["networking.istio.io"]
   resources: ["virtualservices"]
@@ -21,16 +24,3 @@ rules:
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: iter8-traffic
-subjects:
-- kind: ServiceAccount
-  name: iter8-traffic
-  namespace: default
-roleRef:
-  kind: ClusterRole
-  name: iter8-traffic
-  apiGroup: rbac.authorization.k8s.io

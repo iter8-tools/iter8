@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: iter8-traffic
+subjects:
+- kind: ServiceAccount
+  name: iter8-traffic
+roleRef:
+  kind: Role
+  name: iter8-traffic
+  apiGroup: rbac.authorization.k8s.io
