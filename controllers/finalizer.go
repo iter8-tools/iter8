@@ -62,20 +62,6 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 			}).Namespace(u.GetNamespace()).Update(context.TODO(), u, metav1.UpdateOptions{})
 			if e != nil {
 				log.Logger.WithStackTrace(e.Error()).Error("error while updating resource with finalizer")
-			} else {
-				// broadcast event
-
-				// get resource for event broadcasting
-				r, err := client.Resource(schema.GroupVersionResource{
-					Group:    config.ResourceTypes[gvrShort].Group,
-					Version:  config.ResourceTypes[gvrShort].Version,
-					Resource: config.ResourceTypes[gvrShort].Resource,
-				}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-				if err != nil {
-					log.Logger.Warnf("could not get pod with name %s in namespace %s", name, namespace)
-				}
-
-				broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer", "Added Iter8 finalizer for resource", client)
 			}
 			return e
 		}
