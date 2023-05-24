@@ -4,9 +4,9 @@ package storageclient
 // Interface enables interaction with a storage entity
 // Can be mocked in unit tests with fake implementation
 type Interface interface {
-	Start(path string, opts interface{}) error
-	CreateMetric(name string, value interface{}) error
-	GetMetric(name string) (interface{}, error)
-	DeleteMetric(name string) (interface{}, error)
+	// CreateMetric(name string, value interface{}) error
+	// GetMetric(name string) (interface{}, error)
+	// DeleteMetric(name string) (interface{}, error)
+
 	Size() (int, int, error) // current capacity and max capacity TODO: units?
 }
