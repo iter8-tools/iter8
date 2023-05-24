@@ -1,3 +1,4 @@
+// Package badgerdb provides a client for BadgerDB
 package badgerdb
 
 import (
@@ -8,10 +9,12 @@ import (
 	"github.com/imdario/mergo"
 )
 
+// Client is a client for the BadgerDB
 type Client struct {
 	db *badger.DB
 }
 
+// GetClient gets a client for the BadgerDB
 func GetClient(opts badger.Options) (*Client, error) {
 	// check if Dir and ValueDir are set and are equal
 	dir := opts.Dir           // Dir is the path of the directory where key data will be stored in.
@@ -48,6 +51,7 @@ func GetClient(opts badger.Options) (*Client, error) {
 	return &client, nil
 }
 
+// Size gets the current size and the maximum size of the BadgerDB
 func (cl Client) Size() (int64, int64, error) {
 	lsm, vlog := cl.db.Size()
 
