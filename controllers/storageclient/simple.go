@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/dgraph-io/badger"
+	"github.com/imdario/mergo"
 )
 
 type Client struct {
@@ -25,10 +26,19 @@ func (cl *Client) Start(path string, opts interface{}) error {
 	if !ok {
 		return errors.New("cannot cast opts into BadgerDB options")
 	}
-	dbOpts.Dir = path // add path to BadgerDB options
 
-	// intialize BadgerDB instance at path
-	db, err := badger.Open(dbOpts)
+	// set default options
+	mergedOpts := badger.DefaultOptions(path)
+	if err := mergo.Merge(&mergedOpts, dbOpts); err != nil {
+		return errors.New("cannot configure default options for BadgerDB")
+	}
+
+	// set directory and value directory to path
+	mergedOpts.Dir = path
+	mergedOpts.ValueDir = path
+
+	// intialize BadgerDB instance
+	db, err := badger.Open(mergedOpts)
 	if err != nil {
 		return errors.New("cannot open BadgerDB")
 	}
