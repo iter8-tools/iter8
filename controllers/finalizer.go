@@ -73,9 +73,9 @@ func addFinalizer(name string, namespace string, gvrShort string, client k8sclie
 				}).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 				if err != nil {
 					log.Logger.Warnf("could not get pod with name %s in namespace %s", name, namespace)
+				} else {
+					broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer", "Added Iter8 finalizer for resource", client)
 				}
-
-				broadcastEvent(r, corev1.EventTypeNormal, "Added Iter8 finalizer", "Added Iter8 finalizer for resource", client)
 			}
 			return e
 		}
