@@ -14,7 +14,10 @@ func TestGetClient(t *testing.T) {
 
 	client, err := GetClient(badger.DefaultOptions(tempDirPath))
 	assert.NoError(t, err)
-	defer client.db.Close()
 
 	assert.NotNil(t, client)
+	assert.NotNil(t, client.db)
+
+	err = client.db.Close()
+	assert.NoError(t, err)
 }

@@ -36,10 +36,10 @@ const (
 	iter8KindLabel         = "iter8.tools/kind"
 	iter8KindRoutemapValue = "routemap"
 	iter8VersionLabel      = "iter8.tools/version"
-)
 
-// for persistent volume
-var MetricsPath = "/metrics"
+	// MetricsPath is the path of the persistent volume
+	MetricsPath = "/metrics"
+)
 
 // informers used to watch application resources,
 // one per resource type
