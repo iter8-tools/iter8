@@ -12,6 +12,7 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
+	"github.com/iter8-tools/iter8/controllers/storageclient"
 	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -232,6 +233,7 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 
 	if config.Persist {
 		// TODO: expose badgerDB options in config?
+		var dbClient storageclient.Interface
 		dbClient, err := badgerdb.GetClient(badger.DefaultOptions(metricsPath))
 
 		fmt.Println(dbClient, err)
