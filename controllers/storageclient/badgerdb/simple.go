@@ -1,4 +1,4 @@
-// Package badgerdb provides a client for BadgerDB
+// Package badgerdb implements the storageclient interface with BadgerDB
 package badgerdb
 
 import (
@@ -49,12 +49,4 @@ func GetClient(opts badger.Options) (*Client, error) {
 	client.db = db
 
 	return &client, nil
-}
-
-// Size gets the current size and the maximum size of the BadgerDB
-func (cl Client) Size() (int64, int64, error) {
-	lsm, vlog := cl.db.Size()
-
-	// TODO: get total storage of DB
-	return lsm + vlog, -1, nil
 }

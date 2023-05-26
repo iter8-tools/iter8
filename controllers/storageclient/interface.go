@@ -7,6 +7,4 @@ type Interface interface {
 	// CreateMetric(name string, value interface{}) error
 	// GetMetric(name string) (interface{}, error)
 	// DeleteMetric(name string) (interface{}, error)
-
-	Size() (int64, int64, error) // current capacity and max capacity TODO: units?
 }

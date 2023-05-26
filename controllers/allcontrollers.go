@@ -13,6 +13,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
+	"golang.org/x/sys/unix"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -254,4 +255,20 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	log.Logger.Trace("inited routemap informer... ")
 
 	return nil
+}
+
+// getVolumeUsage gets the available and total capacity of a volume, in that order
+func getVolumeUsage(path string) (uint64, uint64, error) {
+	var stat unix.Statfs_t
+	err := unix.Statfs(path, &stat)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	// Available blocks * size per block = available space in bytes
+	availableBytes := stat.Bavail * uint64(stat.Bsize)
+	// Total blocks * size per block = available space in bytes
+	totalBytes := stat.Blocks * uint64(stat.Bsize)
+
+	return availableBytes, totalBytes, nil
 }

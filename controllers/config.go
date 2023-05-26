@@ -39,10 +39,6 @@ type Config struct {
 	ClusterScoped bool `json:"clusterScoped,omitempty"`
 	// Persist is true if Iter8 controller should have a persistent volume
 	Persist bool `json:"persist,omitempty"`
-	// Storage is the minimum amount of space that can be requested for the persistent volume
-	Storage string `json:"storage,omitempty"`
-	// StorageClassName is the provisioner for the persistent volume
-	StorageClassName string `json:"storageClassName,omitempty"`
 }
 
 // readConfig reads configuration information from file
