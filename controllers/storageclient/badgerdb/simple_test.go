@@ -1,7 +1,6 @@
 package badgerdb
 
 import (
-	"os"
 	"testing"
 
 	"github.com/dgraph-io/badger/v4"
@@ -10,13 +9,12 @@ import (
 
 func TestGetClient(t *testing.T) {
 	tempDirPath := t.TempDir()
-	_ = os.Chdir(tempDirPath)
 
 	client, err := GetClient(badger.DefaultOptions(tempDirPath))
 	assert.NoError(t, err)
 
 	assert.NotNil(t, client)
-	assert.NotNil(t, client.db)
+	assert.NotNil(t, client.db) // BadgerDB should exist
 
 	err = client.db.Close()
 	assert.NoError(t, err)
