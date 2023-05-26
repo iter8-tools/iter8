@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
 )
 
