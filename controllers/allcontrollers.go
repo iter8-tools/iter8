@@ -14,6 +14,7 @@ import (
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/iter8-tools/iter8/controllers/storageclient"
 	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
+	"golang.org/x/sys/unix"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,10 +36,10 @@ const (
 	iter8KindLabel         = "iter8.tools/kind"
 	iter8KindRoutemapValue = "routemap"
 	iter8VersionLabel      = "iter8.tools/version"
-
-	// for persistent volume
-	metricsPath = "/metrics"
 )
+
+// for persistent volume
+var MetricsPath = "/metrics"
 
 // informers used to watch application resources,
 // one per resource type
@@ -232,10 +233,12 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	}
 
 	if config.Persist {
+		availableBytes, totalBytes, err := GetVolumeUsage(MetricsPath)
+		fmt.Println(availableBytes, totalBytes, err)
+
 		// TODO: expose badgerDB options in config?
 		var dbClient storageclient.Interface
-		dbClient, err := badgerdb.GetClient(badger.DefaultOptions(metricsPath))
-
+		dbClient, err = badgerdb.GetClient(badger.DefaultOptions(MetricsPath))
 		fmt.Println(dbClient, err)
 	}
 
@@ -258,18 +261,18 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	return nil
 }
 
-// // getVolumeUsage gets the available and total capacity of a volume, in that order
-// func getVolumeUsage(path string) (uint64, uint64, error) {
-// 	var stat unix.Statfs_t
-// 	err := unix.Statfs(path, &stat)
-// 	if err != nil {
-// 		return 0, 0, err
-// 	}
+// GetVolumeUsage gets the available and total capacity of a volume, in that order
+func GetVolumeUsage(path string) (uint64, uint64, error) {
+	var stat unix.Statfs_t
+	err := unix.Statfs(path, &stat)
+	if err != nil {
+		return 0, 0, err
+	}
 
-// 	// Available blocks * size per block = available space in bytes
-// 	availableBytes := stat.Bavail * uint64(stat.Bsize)
-// 	// Total blocks * size per block = available space in bytes
-// 	totalBytes := stat.Blocks * uint64(stat.Bsize)
+	// Available blocks * size per block = available space in bytes
+	availableBytes := stat.Bavail * uint64(stat.Bsize)
+	// Total blocks * size per block = available space in bytes
+	totalBytes := stat.Blocks * uint64(stat.Bsize)
 
-// 	return availableBytes, totalBytes, nil
-// }
+	return availableBytes, totalBytes, nil
+}

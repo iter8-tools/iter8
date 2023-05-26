@@ -128,3 +128,14 @@ routingTemplates:
 		return false
 	}, time.Second*2, time.Millisecond*100)
 }
+
+func TestGetVolumeUsage(t *testing.T) {
+	tempDirPath := t.TempDir()
+	_ = os.Chdir(tempDirPath)
+
+	availableBytes, totalBytes, err := GetVolumeUsage(tempDirPath)
+	assert.NoError(t, err)
+
+	assert.NotEqual(t, 0, availableBytes)
+	assert.NotEqual(t, 0, totalBytes)
+}
