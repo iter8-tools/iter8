@@ -4,16 +4,12 @@ package controllers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
-	"github.com/dgraph-io/badger/v4"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
-	"github.com/iter8-tools/iter8/controllers/storageclient"
-	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 	"golang.org/x/sys/unix"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -232,15 +228,15 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
 	}
 
-	if config.Persist {
-		availableBytes, totalBytes, err := GetVolumeUsage(MetricsPath)
-		fmt.Println(availableBytes, totalBytes, err)
+	// if config.Persist {
+	// 	availableBytes, totalBytes, err := GetVolumeUsage(MetricsPath)
+	// 	fmt.Println(availableBytes, totalBytes, err)
 
-		// TODO: expose badgerDB options in config?
-		var dbClient storageclient.Interface
-		dbClient, err = badgerdb.GetClient(badger.DefaultOptions(MetricsPath))
-		fmt.Println(dbClient, err)
-	}
+	// 	// TODO: expose badgerDB options in config?
+	// 	var dbClient storageclient.Interface
+	// 	dbClient, err = badgerdb.GetClient(badger.DefaultOptions(MetricsPath))
+	// 	fmt.Println(dbClient, err)
+	// }
 
 	log.Logger.Trace("initing app informers... ")
 	if err = initAppResourceInformers(stopCh, config, client); err != nil {
