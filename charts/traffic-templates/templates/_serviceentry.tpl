@@ -5,9 +5,9 @@ metadata:
   name: {{ .Values.modelName }}
 spec:
   hosts:
-  - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}
-  - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}.svc
-  - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}.svc.cluster.local
+  - {{ .Values.modelName }}.{{ .Release.Namespace }}
+  - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc
+  - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc.cluster.local
   location: MESH_INTERNAL
   ports:
   - number: {{ .Values.modelmeshServingPort }}
