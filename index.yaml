@@ -196,6 +196,29 @@ entries:
   traffic:
   - apiVersion: v2
     appVersion: v0.14
+    created: "2023-05-30T17:48:48.438228026Z"
+    description: Iter8 traffic controller
+    digest: 615f4c48e85523dcde767b721fdf748a19c3a459d945c1cffdc1298a1fd6fa89
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-0.1.8/traffic-0.1.8.tgz
+    version: 0.1.8
+  - apiVersion: v2
+    appVersion: v0.14
     created: "2023-05-23T18:40:29.181360719Z"
     description: Iter8 traffic controller
     digest: 2f4b997a1f3f67f01489be6b866fc0409b56cfe9557f6021d287053a4173d899
@@ -312,6 +335,31 @@ entries:
   traffic-templates:
   - apiVersion: v2
     appVersion: v0.14
+    created: "2023-05-30T17:48:48.583968685Z"
+    description: Iter8 traffic templates
+    digest: da27590d122c3544ebb1c1bca3e34ff1e91284f36ef39a8845e658b1073f2716
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic-templates
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.5/traffic-templates-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: v0.14
     created: "2023-05-16T15:22:41.109054226Z"
     description: Iter8 traffic templates
     digest: 41d1b3dce3817155d98ca6cca49fe59b33ca8657f67d1812bf927618c2a1c2c5
@@ -385,4 +433,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-05-23T18:40:29.18139802Z"
+generated: "2023-05-30T17:48:48.584011286Z"
