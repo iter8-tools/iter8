@@ -37,6 +37,8 @@ type Config struct {
 	DefaultResync string `json:"defaultResync,omitempty"`
 	// ClusterScoped is true if Iter8 controller is cluster-scoped
 	ClusterScoped bool `json:"clusterScoped,omitempty"`
+	// Persist is true if Iter8 controller should have a persistent volume
+	Persist bool `json:"persist,omitempty"`
 }
 
 // readConfig reads configuration information from file
