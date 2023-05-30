@@ -30,9 +30,9 @@ data:
             - {{ .Values.externalGateway }}
             - mesh
             hosts:
-            - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}
-            - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}.svc
-            - {{ .Values.modelName }}.{{ .Values.modelmeshServingNamespace }}.svc.cluster.local
+            - {{ .Values.modelName }}.{{ .Release.Namespace }}
+            - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc
+            - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc.cluster.local
             http:
             {{- /* For candidate versions, ensure mm-model header is required in all matches */}}
             {{- range $i, $v := (rest $versions) }}
@@ -53,7 +53,7 @@ data:
               {{- end }}
               route:
               - destination:
-                  host: {{ $.Values.modelmeshServingService }}.{{ $.Values.modelmeshServingNamespace }}.svc.cluster.local
+                  host: {{ $.Values.modelmeshServingService }}.{{ $.Release.Namespace }}.svc.cluster.local
                   port:
                     number: {{ $.Values.modelmeshServingPort }}
                 headers:
@@ -64,7 +64,7 @@ data:
             {{- end }}
             - route:
               - destination:
-                  host: {{ $.Values.modelmeshServingService }}.{{ $.Values.modelmeshServingNamespace }}.svc.cluster.local
+                  host: {{ $.Values.modelmeshServingService }}.{{ $.Release.Namespace }}.svc.cluster.local
                   port:
                     number: {{ $.Values.modelmeshServingPort }}
                 headers:

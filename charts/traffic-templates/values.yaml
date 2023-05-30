@@ -4,7 +4,6 @@ iter8Version: v0.14
 
 # default model mesh serving endpoint details
 modelmeshServingService: modelmesh-serving
-modelmeshServingNamespace: modelmesh-serving
 modelmeshServingPort: 8033
 
 # default Istio Gateway name
@@ -36,9 +35,6 @@ externalGateway: mm-gateway
 # name of model version InferenceService
 # when not specified, names are assumed to be of the form 'modelName-i' where i = 0 is the primary model
 #   name:
-# namespace where model inferenceservice is deployed
-# default is 'modelmesh-serving'
-#   namespace:
 # portion of inference requests sent to this version
 # weights are relative to other weights
 # only relevant when 'trafficStrategy: blue-green'
@@ -69,9 +65,6 @@ externalGateway: mm-gateway
 # modelVersions:
 # when not specified, names are assumed to be of the form 'modelName-i' where i = 0 is the primary model
 #   name:
-# namespace where model inferenceservice is deployed
-# default is 'modelmesh-serving'
-#   namespace:
 # percentage of inference requests that should also be sent to the candidate version of the model
 # only used if trafficStrategy is set to 'mirror'
 # default is 100

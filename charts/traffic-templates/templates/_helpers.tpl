@@ -10,7 +10,7 @@
 {{- define "resolve.modelVersions" }}
 {{- /* produce a list of versions with all fields filled in with user specified values or defaults */}}
   {{- /* default values for fields depend on trafficStrategy */}}
-  {{- $defaultNamespace := "modelmesh-serving" }}
+  {{- $defaultNamespace := .Release.Namespace }}
   {{- $defaultWeight := ternary "100" "50" (eq .Values.trafficStrategy "mirror") }}
   {{- $defaultMatch := ternary (list (dict "headers" (dict "traffic" (dict "exact" "test")))) (dict) (eq .Values.trafficStrategy "canary") }}
 
