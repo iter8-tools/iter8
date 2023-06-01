@@ -21,5 +21,20 @@
 {{- end }}
 {{- end }}
 {{- end }}
+{{- if .rewards }}
+    rewards:
+{{- if .rewards.max }}
+      max:
+{{- range $r, $val := .rewards.max }}
+      - {{ $val }}
+{{- end }}
+{{- end }}
+{{- if .rewards.min }}
+      min:
+{{- range $r, $val := .rewards.min }}
+      - {{ $val }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
