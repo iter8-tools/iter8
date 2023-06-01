@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/mitchellh/hashstructure/v2"
 	corev1 "k8s.io/api/core/v1"
@@ -32,9 +33,10 @@ type routemap struct {
 }
 
 type version struct {
-	Resources []resource `json:"resources,omitempty"`
-	Weight    *uint32    `json:"weight,omitempty"`
-	Signature *uint64    `json:"signature,omitempty"`
+	Resources []resource                               `json:"resources,omitempty"`
+	Weight    *uint32                                  `json:"weight,omitempty"`
+	Signature *uint64                                  `json:"signature,omitempty"`
+	Metrics   map[string]*summarymetrics.SummaryMetric `json:"metrics,omitempty"`
 }
 
 type resource struct {
