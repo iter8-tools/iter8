@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,8 +32,10 @@ type routemap struct {
 }
 
 type version struct {
-	Resources []resource `json:"resources,omitempty"`
-	Weight    *uint32    `json:"weight,omitempty"`
+	Resources []resource                               `json:"resources,omitempty"`
+	Weight    *uint32                                  `json:"weight,omitempty"`
+	Metrics   map[string]*summarymetrics.SummaryMetric `json:"metrics,omitempty"`
+	Label     *string                                  `json:"label,omitempty"`
 }
 
 type resource struct {

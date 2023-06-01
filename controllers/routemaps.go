@@ -45,6 +45,19 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routem
 	return nil
 }
 
+// getRoutemapFromNamespaceName extracts a routemap which contains the given object as a version resource
+func (s *routemaps) getRoutemapFromNamespaceName(namespace string, name string) *routemap {
+	// lock for reading and later unlock
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	rmByName, ok := s.nsRoutemap[namespace]
+	if ok {
+		return rmByName[name]
+	}
+	return nil
+}
+
 // delete a routemap from routemaps
 func (s *routemaps) delete(cm *corev1.ConfigMap) {
 	// lock for writing and later unlock

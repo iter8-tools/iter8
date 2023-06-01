@@ -38,6 +38,10 @@ func (cl *Client) Patch(gvr schema.GroupVersionResource, objNamespace string, ob
 	})
 }
 
+func (cl *Client) ClientSet() *kubernetes.Clientset {
+	return cl.Clientset
+}
+
 // New creates a new kubernetes client
 func New(settings *cli.EnvSettings) (*Client, error) {
 	log.Logger.Trace("kubernetes client creation invoked...")

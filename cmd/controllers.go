@@ -8,8 +8,10 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
+	"github.com/iter8-tools/iter8/controllers/abn"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 )
 
 // controllersDesc is the description of controllers cmd
@@ -59,6 +61,9 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 				return err
 			}
 			log.Logger.Debug("started controllers ... ")
+
+			// launch gRPC server to respond to frontend requests
+			go abn.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
 
 			// if createSigCh, then block until there is an os.Interrupt
 			if createSigCh {
