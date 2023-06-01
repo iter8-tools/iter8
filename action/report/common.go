@@ -92,3 +92,45 @@ func (r *Reporter) MetricWithUnits(metricName string) (string, error) {
 	}
 	return str, nil
 }
+
+func (r *Reporter) GetBestVersions(metrics []string, in *base.Insights) []string {
+	results := make([]string, len(metrics))
+	if in.Rewards == nil {
+		return results
+	}
+
+	rewards := *in.Rewards
+	winners := *in.RewardsWinners
+
+	for i, mn := range metrics {
+		j := indexString(rewards.Max, mn)
+		if j >= 0 {
+			if winners.Max[j] == -1 {
+				results[i] = "insufficient data"
+			} else {
+				results[i] = in.TrackVersionStr(winners.Max[j])
+			}
+		} else {
+			j = indexString(rewards.Min, mn)
+			if j >= 0 {
+				if winners.Min[j] == -1 {
+					results[i] = "insufficient data"
+				} else {
+					results[i] = in.TrackVersionStr(winners.Min[j])
+				}
+			} else {
+				results[i] = "n/a"
+			}
+		}
+	}
+	return results
+}
+
+func indexString(keys []string, item string) int {
+	for i, key := range keys {
+		if key == item {
+			return i
+		}
+	}
+	return -1
+}
