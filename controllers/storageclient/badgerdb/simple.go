@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
@@ -52,17 +53,11 @@ func GetClient(opts badger.Options) (*Client, error) {
 	return &client, nil
 }
 
-func getSignatureKey(applicationName string, version int) string {
-	return fmt.Sprintf("kt-signature::%s::%d", applicationName, version)
-}
-
-// Key 1: kt-signature::my-app::0 (get the signature of the last version)
-func (cl Client) GetSignature(applicationName string, version int) (string, error) {
+func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
 	var valCopy []byte
 
-	err := cl.db.View(func(txn *badger.Txn) error {
+	err := db.View(func(txn *badger.Txn) error {
 		// query for key/value
-		key := getSignatureKey(applicationName, version)
 		item, err := txn.Get([]byte(key))
 		if err != nil {
 			return fmt.Errorf("cannot get signature with key \"%s\": %w", key, err)
@@ -80,10 +75,24 @@ func (cl Client) GetSignature(applicationName string, version int) (string, erro
 	})
 
 	if err != nil {
+		return []byte{}, err
+	}
+
+	return valCopy, nil
+}
+
+func getSignatureKey(applicationName string, version int) string {
+	return fmt.Sprintf("kt-signature::%s::%d", applicationName, version)
+}
+
+// Key 1: kt-signature::my-app::0 (get the signature of the last version)
+func (cl Client) GetSignature(applicationName string, version int) (string, error) {
+	val, err := getValueFromBadgerDB(cl.db, getSignatureKey(applicationName, version))
+	if err != nil {
 		return "", err
 	}
 
-	return string(valCopy), nil
+	return string(val), nil
 }
 
 func (cl Client) SetSignature(applicationName string, version int, signature string) error {
@@ -98,7 +107,18 @@ func getMetricKey(applicationName string, version int, signature, metric, user s
 
 // Key 2: kt-metric::my-app::0::my-signature::my-metric::my-user (get the metric value with all the provided information)
 func (cl Client) GetMetric(applicationName string, version int, signature, metric, user string) (float64, error) {
-	return -1, nil
+	key := getMetricKey(applicationName, version, signature, metric, user)
+	val, err := getValueFromBadgerDB(cl.db, key)
+	if err != nil {
+		return 0, err
+	}
+
+	f, err := strconv.ParseFloat(string(val), 64)
+	if err != nil {
+		return 0, fmt.Errorf("cannot parse metric into float64 with key \"%s\": %w", key, err)
+	}
+
+	return f, nil
 }
 
 func (cl Client) SetMetric(applicationName string, version int, signature, metric, user string, metricValue float64) error {
