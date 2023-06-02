@@ -81,33 +81,13 @@ func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
 	return valCopy, nil
 }
 
-func getSignatureKey(applicationName string, version int) string {
-	return fmt.Sprintf("kt-signature::%s::%d", applicationName, version)
+func getMetricKey(applicationName string, version int, signature, metric, user, transaction string) string {
+	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metric, user, transaction)
 }
 
-// Key 1: kt-signature::my-app::0 (get the signature of the last version)
-func (cl Client) GetSignature(applicationName string, version int) (string, error) {
-	val, err := getValueFromBadgerDB(cl.db, getSignatureKey(applicationName, version))
-	if err != nil {
-		return "", err
-	}
-
-	return string(val), nil
-}
-
-func (cl Client) SetSignature(applicationName string, version int, signature string) error {
-	// set signature
-
-	return nil
-}
-
-func getMetricKey(applicationName string, version int, signature, metric, user string) string {
-	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s", applicationName, version, signature, metric, user)
-}
-
-// Key 2: kt-metric::my-app::0::my-signature::my-metric::my-user (get the metric value with all the provided information)
-func (cl Client) GetMetric(applicationName string, version int, signature, metric, user string) (float64, error) {
-	key := getMetricKey(applicationName, version, signature, metric, user)
+// Key 2: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> metric-value
+func (cl Client) GetMetric(applicationName string, version int, signature, metric, user, transaction string) (float64, error) {
+	key := getMetricKey(applicationName, version, signature, metric, user, transaction)
 	val, err := getValueFromBadgerDB(cl.db, key)
 	if err != nil {
 		return 0, err
@@ -121,8 +101,8 @@ func (cl Client) GetMetric(applicationName string, version int, signature, metri
 	return f, nil
 }
 
-func (cl Client) SetMetric(applicationName string, version int, signature, metric, user string, metricValue float64) error {
-	key := getMetricKey(applicationName, version, signature, metric, user)
+func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {
+	key := getMetricKey(applicationName, version, signature, metric, user, transaction)
 
 	err := cl.db.Update(func(txn *badger.Txn) error {
 		// set TTL
@@ -131,38 +111,48 @@ func (cl Client) SetMetric(applicationName string, version int, signature, metri
 		return err
 	})
 
-	// set metric
 	// update metrics?
-	// update signature?
-	// update versions?
-	// set user?
+	// update user?
 
 	return err
 }
 
-func getMetricsKey(applicationName string) string {
-	return fmt.Sprintf("kt-app-metrics::%s", applicationName)
+func getMetricsKey(applicationName, metric string) string {
+	return fmt.Sprintf("kt-app-metrics::%s::%s", applicationName, metric)
 }
 
-// Key 3: kt-app-metrics::my-app (get a list of metrics associated with my-app)
-func (cl Client) GetMetrics(applicationName string) ([]string, error) {
-	return []string{}, nil
+// Key 3: kt-app-metrics::my-app::my-metric -> true
+func (cl Client) SetMetrics(applicationName, metric string) error {
+	key := getMetricsKey(applicationName, metric)
+
+	return cl.db.Update(func(txn *badger.Txn) error {
+		// set TTL
+		e := badger.NewEntry([]byte(key), []byte("true"))
+		err := txn.SetEntry(e)
+		return err
+	})
 }
 
-func getVersionsKey(applicationName string) string {
-	return fmt.Sprintf("kt-app-versions::%s", applicationName)
-}
-
-// Key 4: kt-app-versions::my-app (get a number of versions for my-app)
-func (cl Client) GetVersions(applicationName string) (int, error) {
-	return -1, nil
-}
+// func (cl Client) GetMetrics(applicationName string) ([]string, error) {
+// 	return []string{}, nil
+// }
 
 func getUsersKey(applicationName string, version int, signature, user string) string {
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s", applicationName, version, signature, user)
 }
 
-// Key 5: kt-users::my-app::0::my-signature::my-user -> true (get all users for a particular app version) (getDistinctUserCt())
-func (cl Client) GetUsers(applicationName string, version int, signature, user string) ([]string, error) {
-	return []string{}, nil
+// Key 5: kt-users::my-app::0::my-signature::my-user -> true
+func (cl Client) SetUsers(applicationName string, version int, signature, user string) error {
+	key := getUsersKey(applicationName, version, signature, user)
+
+	return cl.db.Update(func(txn *badger.Txn) error {
+		// set TTL
+		e := badger.NewEntry([]byte(key), []byte("true"))
+		err := txn.SetEntry(e)
+		return err
+	})
 }
+
+// func (cl Client) GetUsers(applicationName string, version int, signature, user string) ([]string, error) {
+// 	return []string{}, nil
+// }
