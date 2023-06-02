@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
@@ -14,6 +15,12 @@ import (
 // Client is a client for the BadgerDB
 type Client struct {
 	db *badger.DB
+
+	additionalOptions AdditionalOptions
+}
+
+type AdditionalOptions struct {
+	TTL time.Duration
 }
 
 // GetClient gets a client for the BadgerDB
@@ -126,8 +133,12 @@ func (cl Client) SetMetrics(applicationName, metric string) error {
 	key := getMetricsKey(applicationName, metric)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
+		ttl := cl.additionalOptions.TTL
+		if ttl == nil {
+			ttl = time.Hour
+		}
 		// set TTL
-		e := badger.NewEntry([]byte(key), []byte("true"))
+		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(ttl)
 		err := txn.SetEntry(e)
 		return err
 	})
