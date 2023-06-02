@@ -30,6 +30,13 @@ spec:
               iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} -l {{ .Values.logLevel }} --reuseResult
             resources:
               {{ toYaml .Values.resources | indent 14 | trim }}
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              runAsNonRoot: true
+              runAsUser: 1001040000
           restartPolicy: Never
       backoffLimit: 0
 {{- end }}

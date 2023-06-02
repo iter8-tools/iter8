@@ -21,14 +21,14 @@
 {{- if $vals.payloadURL }}
 # task: download payload from payload URL
 - run: |
-    curl -o payload.dat {{ $vals.payloadURL }}
-{{- $_ := set $vals "payloadFile" "payload.dat" }}
+    curl -o /tmp/payload.dat {{ $vals.payloadURL }}
+{{- $_ := set $vals "payloadFile" "/tmp/payload.dat" }}
 {{- end }}
 {{- /**************************/ -}}
 {{- /* Repeat above for each endpoint */ -}}
 {{- range $endpointID, $endpoint := $vals.endpoints }}
 {{- if $endpoint.payloadURL }}
-{{- $payloadFile := print $endpointID "_payload.dat" }}
+{{- $payloadFile := print "/tmp/" $endpointID "_payload.dat" }}
 # task: download payload from payload URL for endpoint
 - run: |
     curl -o {{ $payloadFile }} {{ $endpoint.payloadURL }}

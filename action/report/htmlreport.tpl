@@ -155,14 +155,19 @@
                 {{- if ge .Result.Insights.NumVersions 2 }}
                 {{- range until .Result.Insights.NumVersions }}
                 <th scope="col" class="text-center">{{ $.Result.Insights.TrackVersionStr . }}</th>
-                {{- end}}              
-                {{- else }} 
+                {{- end}}
+                {{- if .Result.Insights.Rewards }}
+                <th scope="col" class="text-center">Best</th>
+                {{- end }}
+                {{- else }}
                 <th scope="col" class="text-center">Value</th>
                 {{- end }}
               </tr>
             </thead>
             <tbody>
-                {{- range $ind, $mn := .SortedScalarAndSLOMetrics }}
+                {{- $metrics := .SortedScalarAndSLOMetrics }}
+                {{- $bestVersions := .GetBestVersions $metrics .Result.Insights }}
+                {{- range $ind, $mn := $metrics }}
                 <tr scope="row">
                   <td>
                     <a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="{{ $.MetricDescriptionHTML $mn }}">
@@ -172,6 +177,11 @@
                   {{- range until $.Result.Insights.NumVersions }}
                   <td class="text-center">
                   {{ $.ScalarMetricValueStr . $mn }}
+                  </td>
+                  {{- end }}
+                  {{- if $.Result.Insights.Rewards }}
+                  <td class="text-center">
+                  {{ index $bestVersions $ind }}
                   </td>
                   {{- end }}
                 </tr>

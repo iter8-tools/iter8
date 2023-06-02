@@ -154,6 +154,9 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	fmt.Fprint(w, "Metric")
 	if in.NumVersions > 1 {
 		tr.printVersions(w)
+		if in.Rewards != nil {
+			fmt.Fprintf(w, "\t Best")
+		}
 	} else {
 		fmt.Fprintf(w, "\t value")
 	}
@@ -162,12 +165,16 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 	for i := 0; i < in.NumVersions; i++ {
 		fmt.Fprint(w, "\t -----")
 	}
+	if in.NumVersions > 1 && in.Rewards != nil {
+		fmt.Fprint(w, "\t ----")
+	}
 	fmt.Fprintln(w)
 
 	// keys contain normalized scalar metric names in sorted order
 	keys := tr.SortedScalarAndSLOMetrics()
+	bestVersions := tr.GetBestVersions(keys, in)
 
-	for _, mn := range keys {
+	for i, mn := range keys {
 		mwu, err := tr.MetricWithUnits(mn)
 		if err == nil {
 			// add metric name with units
@@ -175,6 +182,9 @@ func (tr *TextReporter) printMetricsText(w *tabwriter.Writer) {
 			// add value
 			for j := 0; j < in.NumVersions; j++ {
 				fmt.Fprintf(w, "\t %v", tr.ScalarMetricValueStr(j, mn))
+			}
+			if in.NumVersions > 1 && in.Rewards != nil {
+				fmt.Fprintf(w, "\t %s", bestVersions[i])
 			}
 			fmt.Fprintln(w)
 		} else {
