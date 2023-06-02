@@ -26,6 +26,9 @@ spec:
           iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} -l {{ .Values.logLevel }}
         resources:
           {{ toYaml .Values.resources | indent 10 | trim }}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
       restartPolicy: Never
   backoffLimit: 0
 {{- end }}
