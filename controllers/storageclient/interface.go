@@ -15,4 +15,21 @@ type Interface interface {
 	// GetSummaryMetrics returns versionMetricSummary for each version of the application
 	// GetSummaryMetrics is called by Iter8 experiments
 	GetSummaryMetrics(applicationName string) (map[int]versionMetricSummary, error)
+
+	// Key 1: kt-signature::my-app::0 (get the signature of the last version)
+	GetSignature(applicationName string, version int) (string, error)
+	SetSignature(applicationName string, version int, signature string) error
+
+	// Key 2: kt-metric::my-app::0::my-signature::my-metric::my-user (get the metric value with all the provided information)
+	GetMetric(applicationName string, version int, signature, metric, user string) (float64, error)
+	SetMetric(applicationName string, version int, signature, metric, user string, metricValue float64) error
+
+	// Key 3: kt-app-metrics::my-app (get a list of metrics associated with my-app)
+	GetMetrics(applicationName string) ([]string, error)
+
+	// Key 4: kt-app-versions::my-app (get a number of versions for my-app)
+	GetVersions(applicationName string) (int, error)
+
+	// Key 5: kt-users::my-app::0::my-signature::my-user -> true (get all users for a particular app version) (getDistinctUserCt())
+	GetUsers(applicationName string, version int, signature, user string) ([]string, error)
 }

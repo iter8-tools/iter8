@@ -3,6 +3,7 @@ package badgerdb
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/dgraph-io/badger/v4"
@@ -49,4 +50,90 @@ func GetClient(opts badger.Options) (*Client, error) {
 	client.db = db
 
 	return &client, nil
+}
+
+func getSignatureKey(applicationName string, version int) string {
+	return fmt.Sprintf("kt-signature::%s::%d", applicationName, version)
+}
+
+// Key 1: kt-signature::my-app::0 (get the signature of the last version)
+func (cl Client) GetSignature(applicationName string, version int) (string, error) {
+	var valCopy []byte
+
+	err := cl.db.View(func(txn *badger.Txn) error {
+		// query for key/value
+		key := getSignatureKey(applicationName, version)
+		item, err := txn.Get([]byte(key))
+		if err != nil {
+			return fmt.Errorf("cannot get signature with key \"%s\": %w", key, err)
+		}
+
+		// copy value
+		item.Value(func(val []byte) error {
+			// Copying or parsing val is valid.
+			valCopy = append([]byte{}, val...)
+
+			return nil
+		})
+
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(valCopy), nil
+}
+
+func (cl Client) SetSignature(applicationName string, version int, signature string) error {
+	// set signature
+
+	return nil
+}
+
+func getMetricKey(applicationName string, version int, signature, metric, user string) string {
+	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s", applicationName, version, signature, metric, user)
+}
+
+// Key 2: kt-metric::my-app::0::my-signature::my-metric::my-user (get the metric value with all the provided information)
+func (cl Client) GetMetric(applicationName string, version int, signature, metric, user string) (float64, error) {
+	return -1, nil
+}
+
+func (cl Client) SetMetric(applicationName string, version int, signature, metric, user string, metricValue float64) error {
+	// set metric
+	// update metrics?
+	// update signature?
+	// update versions?
+	// set user?
+
+	return nil
+}
+
+func getMetricsKey(applicationName string) string {
+	return fmt.Sprintf("kt-app-metrics::%s", applicationName)
+}
+
+// Key 3: kt-app-metrics::my-app (get a list of metrics associated with my-app)
+func (cl Client) GetMetrics(applicationName string) ([]string, error) {
+	return []string{}, nil
+}
+
+func getVersionsKey(applicationName string) string {
+	return fmt.Sprintf("kt-app-versions::%s", applicationName)
+}
+
+// Key 4: kt-app-versions::my-app (get a number of versions for my-app)
+func (cl Client) GetVersions(applicationName string) (int, error) {
+	return -1, nil
+}
+
+func getUsersKey(applicationName string, version int, signature, user string) string {
+	return fmt.Sprintf("kt-metric::%s::%d::%s::%s", applicationName, version, signature, user)
+}
+
+// Key 5: kt-users::my-app::0::my-signature::my-user -> true (get all users for a particular app version) (getDistinctUserCt())
+func (cl Client) GetUsers(applicationName string, version int, signature, user string) ([]string, error) {
+	return []string{}, nil
 }
