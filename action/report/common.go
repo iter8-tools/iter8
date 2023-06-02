@@ -93,6 +93,7 @@ func (r *Reporter) MetricWithUnits(metricName string) (string, error) {
 	return str, nil
 }
 
+// GetBestVersions returns list of best versions for each metric
 func (r *Reporter) GetBestVersions(metrics []string, in *base.Insights) []string {
 	results := make([]string, len(metrics))
 	if in.Rewards == nil {

@@ -172,37 +172,3 @@ func (ht *HTMLReporter) VectorMetricValue(i int, m string) []float64 {
 	// this is a hist metric
 	return sampleHist(in.HistMetricValues[i][m])
 }
-
-func (ht *HTMLReporter) BestVersions() []string {
-	metrics := ht.SortedScalarAndSLOMetrics()
-	in := ht.Result.Insights
-
-	results := make([]string, len(metrics))
-
-	rewards := in.Rewards
-	winners := in.RewardsWinners
-
-	for i, mn := range metrics {
-		j := indexString(rewards.Max, mn)
-		if j >= 0 {
-			if winners.Max[j] == -1 {
-				results[i] = "insufficient data"
-			} else {
-				results[i] = in.TrackVersionStr(winners.Max[j])
-			}
-		} else {
-			j = indexString(rewards.Min, mn)
-			if j >= 0 {
-				if winners.Min[j] == -1 {
-					results[i] = "insufficient data"
-				} else {
-					results[i] = in.TrackVersionStr(winners.Min[j])
-				}
-			} else {
-				results[i] = "n/a"
-			}
-		}
-	}
-
-	return results
-}
