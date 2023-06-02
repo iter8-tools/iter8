@@ -122,13 +122,22 @@ func (cl Client) GetMetric(applicationName string, version int, signature, metri
 }
 
 func (cl Client) SetMetric(applicationName string, version int, signature, metric, user string, metricValue float64) error {
+	key := getMetricKey(applicationName, version, signature, metric, user)
+
+	err := cl.db.Update(func(txn *badger.Txn) error {
+		// set TTL
+		e := badger.NewEntry([]byte(key), []byte(fmt.Sprintf("%f", metricValue)))
+		err := txn.SetEntry(e)
+		return err
+	})
+
 	// set metric
 	// update metrics?
 	// update signature?
 	// update versions?
 	// set user?
 
-	return nil
+	return err
 }
 
 func getMetricsKey(applicationName string) string {
