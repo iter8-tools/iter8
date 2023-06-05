@@ -25,6 +25,7 @@ type Client struct {
 	additionalOptions AdditionalOptions
 }
 
+// AdditionalOptions are additional options for setting up BadgerDB
 type AdditionalOptions struct {
 	TTL time.Duration
 }
@@ -65,7 +66,10 @@ func GetClient(opts badger.Options, additionalOptions AdditionalOptions) (*Clien
 
 	// add additionalOptions
 	var a = getDefaultAdditionalOptions()
-	mergo.Merge(a, additionalOptions)
+	err = mergo.Merge(a, additionalOptions)
+	if err != nil {
+		return nil, errors.New("cannot merge additionalOptions with defaultOptions for BadgerDB")
+	}
 	client.additionalOptions = a
 
 	return &client, nil
@@ -88,14 +92,14 @@ func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
 		}
 
 		// copy value
-		item.Value(func(val []byte) error {
+		err = item.Value(func(val []byte) error {
 			// Copying or parsing val is valid.
 			valCopy = append([]byte{}, val...)
 
 			return nil
 		})
 
-		return nil
+		return err
 	})
 
 	if err != nil {
@@ -133,6 +137,7 @@ func getMetricKey(applicationName string, version int, signature, metricType, us
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metricType, user, transaction), nil
 }
 
+// GetMetric gets a metric based on the app name, version, signature, metric type, user, and transaction ID from BadgerDB
 // Example key/value: kt-metric::my-app::0::my-signature::my-metric-type::my-user::my-transaction-id -> my-metric-value
 func (cl Client) GetMetric(applicationName string, version int, signature, metricType, user, transaction string) (float64, error) {
 	key, err := getMetricKey(applicationName, version, signature, metricType, user, transaction)
@@ -153,6 +158,7 @@ func (cl Client) GetMetric(applicationName string, version int, signature, metri
 	return f, nil
 }
 
+// SetMetric sets a metric based on the app name, version, signature, metric type, user name, transaction ID, and metric value with BadgerDB
 func (cl Client) SetMetric(applicationName string, version int, signature, metricType, user, transaction string, metricValue float64) error {
 	key, err := getMetricKey(applicationName, version, signature, metricType, user, transaction)
 	if err != nil {
@@ -184,6 +190,7 @@ func getMetricTypeKey(applicationName, metricType string) string {
 	return fmt.Sprintf("kt-metric-types::%s::%s", applicationName, metricType)
 }
 
+// SetMetricType sets a metric based on the app name and metric type with BadgerDB
 // Example key/value: kt-metric-types::my-app::my-metric -> true
 func (cl Client) SetMetricType(applicationName, metricType string) error {
 	key := getMetricTypeKey(applicationName, metricType)
@@ -203,6 +210,7 @@ func getUserKey(applicationName string, version int, signature, user string) str
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s", applicationName, version, signature, user)
 }
 
+// SetUser sets a user based on the app name, version, signature, and user name with BadgerDB
 // Example key/value: kt-users::my-app::0::my-signature::my-user -> true
 func (cl Client) SetUser(applicationName string, version int, signature, user string) error {
 	key := getUserKey(applicationName, version, signature, user)
@@ -218,6 +226,7 @@ func (cl Client) SetUser(applicationName string, version int, signature, user st
 // 	return []string{}, nil
 // }
 
+// GetSummaryMetrics gets a summary of all the metrics from all versions of an application
 func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
 	metrics := map[string]float64{}
 
@@ -270,7 +279,7 @@ func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclie
 
 	// loop through metrics and aggregate data for result
 	result := map[int]storageclient.VersionMetricSummary{}
-	for key, _ := range metrics {
+	for key := range metrics {
 		s := storageclient.VersionMetricSummary{}
 
 		// check if the number of tokens is correct (7)

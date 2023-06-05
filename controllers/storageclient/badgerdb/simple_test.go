@@ -47,7 +47,7 @@ func TestSetMetric(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
 
-		item.Value(func(val []byte) error {
+		err = item.Value(func(val []byte) error {
 			// parse val into float64
 			fval, err := strconv.ParseFloat(string(val), 64)
 			assert.NoError(t, err)
@@ -56,6 +56,7 @@ func TestSetMetric(t *testing.T) {
 			assert.Equal(t, value, fval)
 			return nil
 		})
+		assert.NoError(t, err)
 
 		return nil
 	})
@@ -68,11 +69,12 @@ func TestSetMetric(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
 
-		item.Value(func(val []byte) error {
+		err = item.Value(func(val []byte) error {
 			// metric type should be set to "true"
 			assert.Equal(t, "true", string(val))
 			return nil
 		})
+		assert.NoError(t, err)
 
 		return nil
 	})
@@ -85,11 +87,12 @@ func TestSetMetric(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
 
-		item.Value(func(val []byte) error {
+		err = item.Value(func(val []byte) error {
 			// user should be set to "true"
 			assert.Equal(t, "true", string(val))
 			return nil
 		})
+		assert.NoError(t, err)
 
 		return nil
 	})
@@ -138,11 +141,12 @@ func TestSetMetricType(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
 
-		item.Value(func(val []byte) error {
+		err = item.Value(func(val []byte) error {
 			// metric type should be set to "true"
 			assert.Equal(t, "true", string(val))
 			return nil
 		})
+		assert.NoError(t, err)
 
 		return nil
 	})
@@ -170,11 +174,12 @@ func TestSetUser(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
 
-		item.Value(func(val []byte) error {
+		err = item.Value(func(val []byte) error {
 			// metric type should be set to "true"
 			assert.Equal(t, "true", string(val))
 			return nil
 		})
+		assert.NoError(t, err)
 
 		return nil
 	})
