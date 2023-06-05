@@ -65,10 +65,10 @@ func GetClient(opts badger.Options, additionalOptions AdditionalOptions) (*Clien
 	client.db = db
 
 	// add additionalOptions
-	var a = getDefaultAdditionalOptions()
-	err = mergo.Merge(a, additionalOptions)
+	a := getDefaultAdditionalOptions()
+	err = mergo.Merge(&a, additionalOptions)
 	if err != nil {
-		return nil, errors.New("cannot merge additionalOptions with defaultOptions for BadgerDB")
+		return nil, fmt.Errorf("cannot merge additionalOptions with defaultOptions for BadgerDB: %e", err)
 	}
 	client.additionalOptions = a
 
