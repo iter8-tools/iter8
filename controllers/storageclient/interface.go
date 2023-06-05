@@ -14,13 +14,8 @@ type Interface interface {
 	GetSummaryMetrics(applicationName string) (map[int]VersionMetricSummary, error)
 
 	// called by the A/B/n SDK gRPC API implementation (SDK for application clients)
-	// Example key: kt-metric::my-app::0::my-signature::my-metric-type::my-user::my-transaction-id -> my-metric-value (get the metric value with all the provided information)
+	// Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value (get the metric value with all the provided information)
 	SetMetric(applicationName string, version int, signature, metric, user string, metricValue float64) error
-
-	// Example key: kt-metric-types::my-app::my-metric -> true
-	SetMetricType(applicationName, metric string) error
-
-	// GetMetrics(applicationName string) ([]string, error)
 
 	// Example key: kt-users::my-app::0::my-signature::my-user -> true
 	SetUser(applicationName string, version int, signature, user string) error

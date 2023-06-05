@@ -116,15 +116,15 @@ func validateKeyToken(s string) error {
 	return nil
 }
 
-func getMetricKey(applicationName string, version int, signature, metricType, user, transaction string) (string, error) {
+func getMetricKey(applicationName string, version int, signature, metric, user, transaction string) (string, error) {
 	if err := validateKeyToken(applicationName); err != nil {
 		return "", errors.New("application name cannot have \":\"")
 	}
 	if err := validateKeyToken(signature); err != nil {
 		return "", errors.New("signature cannot have \":\"")
 	}
-	if err := validateKeyToken(metricType); err != nil {
-		return "", errors.New("metric type cannot have \":\"")
+	if err := validateKeyToken(metric); err != nil {
+		return "", errors.New("metric name cannot have \":\"")
 	}
 	if err := validateKeyToken(user); err != nil {
 		return "", errors.New("user name cannot have \":\"")
@@ -133,13 +133,13 @@ func getMetricKey(applicationName string, version int, signature, metricType, us
 		return "", errors.New("transaction ID cannot have \":\"")
 	}
 
-	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metricType, user, transaction), nil
+	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metric, user, transaction), nil
 }
 
 // GetMetric gets a metric based on the app name, version, signature, metric type, user, and transaction ID from BadgerDB
-// Example key/value: kt-metric::my-app::0::my-signature::my-metric-type::my-user::my-transaction-id -> my-metric-value
-func (cl Client) GetMetric(applicationName string, version int, signature, metricType, user, transaction string) (float64, error) {
-	key, err := getMetricKey(applicationName, version, signature, metricType, user, transaction)
+// Example key/value: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
+func (cl Client) GetMetric(applicationName string, version int, signature, metric, user, transaction string) (float64, error) {
+	key, err := getMetricKey(applicationName, version, signature, metric, user, transaction)
 	if err != nil {
 		return 0, err
 	}
@@ -158,8 +158,8 @@ func (cl Client) GetMetric(applicationName string, version int, signature, metri
 }
 
 // SetMetric sets a metric based on the app name, version, signature, metric type, user name, transaction ID, and metric value with BadgerDB
-func (cl Client) SetMetric(applicationName string, version int, signature, metricType, user, transaction string, metricValue float64) error {
-	key, err := getMetricKey(applicationName, version, signature, metricType, user, transaction)
+func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {
+	key, err := getMetricKey(applicationName, version, signature, metric, user, transaction)
 	if err != nil {
 		return err
 	}
@@ -173,37 +173,11 @@ func (cl Client) SetMetric(applicationName string, version int, signature, metri
 		return fmt.Errorf("cannot set metric with key \"%s\": %w", key, err)
 	}
 
-	// update metrics
-	err = cl.SetMetricType(applicationName, metricType)
-	if err != nil {
-		return err
-	}
-
 	// update user
 	err = cl.SetUser(applicationName, version, signature, user)
 
 	return err
 }
-
-func getMetricTypeKey(applicationName, metricType string) string {
-	return fmt.Sprintf("kt-metric-types::%s::%s", applicationName, metricType)
-}
-
-// SetMetricType sets a metric based on the app name and metric type with BadgerDB
-// Example key/value: kt-metric-types::my-app::my-metric -> true
-func (cl Client) SetMetricType(applicationName, metricType string) error {
-	key := getMetricTypeKey(applicationName, metricType)
-
-	return cl.db.Update(func(txn *badger.Txn) error {
-		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
-		err := txn.SetEntry(e)
-		return err
-	})
-}
-
-// func (cl Client) GetMetrics(applicationName string) ([]string, error) {
-// 	return []string{}, nil
-// }
 
 func getUserKey(applicationName string, version int, signature, user string) string {
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s", applicationName, version, signature, user)

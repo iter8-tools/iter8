@@ -30,17 +30,17 @@ func TestSetMetric(t *testing.T) {
 	app := "my-application"
 	version := 0
 	signature := "my-signature"
-	metricType := "my-metric-type"
+	metric := "my-metric"
 	user := "my-user"
 	transaction := "my-transaction"
 	value := 50.0
 
-	err = client.SetMetric(app, version, signature, metricType, user, transaction, value)
+	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
 	assert.NoError(t, err)
 
 	// get metric
 	err = client.db.View(func(txn *badger.Txn) error {
-		key, err := getMetricKey(app, version, signature, metricType, user, transaction)
+		key, err := getMetricKey(app, version, signature, metric, user, transaction)
 		assert.NoError(t, err)
 
 		item, err := txn.Get([]byte(key))
@@ -54,24 +54,6 @@ func TestSetMetric(t *testing.T) {
 
 			// assert metric value is the same as the provided one
 			assert.Equal(t, value, fval)
-			return nil
-		})
-		assert.NoError(t, err)
-
-		return nil
-	})
-	assert.NoError(t, err)
-
-	// SetMetric() should also add a metric type
-	err = client.db.View(func(txn *badger.Txn) error {
-		key := getMetricTypeKey(app, metricType)
-		item, err := txn.Get([]byte(key))
-		assert.NoError(t, err)
-		assert.NotNil(t, item)
-
-		err = item.Value(func(val []byte) error {
-			// metric type should be set to "true"
-			assert.Equal(t, "true", string(val))
 			return nil
 		})
 		assert.NoError(t, err)
@@ -108,49 +90,18 @@ func TestGetMetric(t *testing.T) {
 	app := "my-application"
 	version := 0
 	signature := "my-signature"
-	metricType := "my-metric-type"
+	metric := "my-metric"
 	user := "my-user"
 	transaction := "my-transaction"
 	value := 50.0
 
-	err = client.SetMetric(app, version, signature, metricType, user, transaction, value)
+	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
 	assert.NoError(t, err)
 
 	// get metric
-	dbval, err := client.GetMetric(app, version, signature, metricType, user, transaction)
+	dbval, err := client.GetMetric(app, version, signature, metric, user, transaction)
 	assert.NoError(t, err)
 	assert.Equal(t, dbval, value)
-}
-
-func TestSetMetricType(t *testing.T) {
-	tempDirPath := t.TempDir()
-
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
-	assert.NoError(t, err)
-
-	app := "my-application"
-	metricType := "my-metric-type"
-
-	err = client.SetMetricType(app, metricType)
-	assert.NoError(t, err)
-
-	// get metric type
-	err = client.db.View(func(txn *badger.Txn) error {
-		key := getMetricTypeKey(app, metricType)
-		item, err := txn.Get([]byte(key))
-		assert.NoError(t, err)
-		assert.NotNil(t, item)
-
-		err = item.Value(func(val []byte) error {
-			// metric type should be set to "true"
-			assert.Equal(t, "true", string(val))
-			return nil
-		})
-		assert.NoError(t, err)
-
-		return nil
-	})
-	assert.NoError(t, err)
 }
 
 func TestSetUser(t *testing.T) {
