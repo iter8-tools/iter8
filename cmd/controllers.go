@@ -8,7 +8,6 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
-	"github.com/iter8-tools/iter8/controllers/abn"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -20,6 +19,9 @@ Start Iter8 controllers.
 
 	iter8 controllers
 `
+
+// port number on which A/B/n gRPC service listens
+var port int
 
 // newControllersCmd creates the Iter8 controllers
 // when invoking this function for real, set stopCh to nil
@@ -63,7 +65,7 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 			log.Logger.Debug("started controllers ... ")
 
 			// launch gRPC server to respond to frontend requests
-			go abn.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
+			go controllers.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
 
 			// if createSigCh, then block until there is an os.Interrupt
 			if createSigCh {
@@ -77,4 +79,9 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 		},
 	}
 	return cmd
+}
+
+// addTimeoutFlag adds timeout flag to command
+func addPortFlag(cmd *cobra.Command, portPtr *int) {
+	cmd.Flags().IntVar(portPtr, "port", 50051, "service port")
 }
