@@ -11,12 +11,11 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
-	"github.com/iter8-tools/iter8/controllers/storageclient"
 )
 
-const (
-	builtInUserCountID = "user-count"
-)
+// const (
+// 	builtInUserCountID = "user-count"
+// )
 
 // Client is a client for the BadgerDB
 type Client struct {
@@ -222,119 +221,119 @@ func (cl Client) SetUser(applicationName string, version int, signature, user st
 	})
 }
 
-// func (cl Client) GetUsers(applicationName string, version int, signature, user string) ([]string, error) {
+// func (cl Client) GetUsers(applicationName string, version int, signature string) ([]string, error) {
 // 	return []string{}, nil
 // }
 
-// GetSummaryMetrics gets a summary of all the metrics from all versions of an application
-func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
-	metrics := map[string]float64{}
+// // GetSummaryMetrics gets a summary of all the metrics from all versions of an application
+// func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
+// 	metrics := map[string]float64{}
 
-	// prefix scan of metrics using applicationName
-	err := cl.db.View(func(txn *badger.Txn) error {
-		it := txn.NewIterator(badger.DefaultIteratorOptions)
-		defer it.Close()
-		prefix := []byte(fmt.Sprintf("kt-metric::%s", applicationName))
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			item := it.Item()
-			key := item.Key()
+// 	// prefix scan of metrics using applicationName
+// 	err := cl.db.View(func(txn *badger.Txn) error {
+// 		it := txn.NewIterator(badger.DefaultIteratorOptions)
+// 		defer it.Close()
+// 		prefix := []byte(fmt.Sprintf("kt-metric::%s", applicationName))
+// 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+// 			item := it.Item()
+// 			key := item.Key()
 
-			// save data
-			err := item.Value(func(val []byte) error {
-				fmt.Printf("key=%s, value=%s\n", key, val)
+// 			// save data
+// 			err := item.Value(func(val []byte) error {
+// 				fmt.Printf("key=%s, value=%s\n", key, val)
 
-				fval, err := strconv.ParseFloat(string(val), 64)
-				if err != nil {
-					return fmt.Errorf("cannot parse float from metric \"%s\": \"%s\": %w", key, string(val), err)
-				}
+// 				fval, err := strconv.ParseFloat(string(val), 64)
+// 				if err != nil {
+// 					return fmt.Errorf("cannot parse float from metric \"%s\": \"%s\": %w", key, string(val), err)
+// 				}
 
-				metrics[string(key)] = fval
-				return nil
-			})
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
+// 				metrics[string(key)] = fval
+// 				return nil
+// 			})
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// prefix scan of users using applicationName
-	users := []string{}
-	err = cl.db.View(func(txn *badger.Txn) error {
-		it := txn.NewIterator(badger.DefaultIteratorOptions)
-		defer it.Close()
-		prefix := []byte(fmt.Sprintf("kt-users::%s", applicationName))
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			// save data
-			users = append(users, string(it.Item().Key()))
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
+// 	// prefix scan of users using applicationName
+// 	users := []string{}
+// 	err = cl.db.View(func(txn *badger.Txn) error {
+// 		it := txn.NewIterator(badger.DefaultIteratorOptions)
+// 		defer it.Close()
+// 		prefix := []byte(fmt.Sprintf("kt-users::%s", applicationName))
+// 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+// 			// save data
+// 			users = append(users, string(it.Item().Key()))
+// 		}
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// loop through metrics and aggregate data for result
-	result := map[int]storageclient.VersionMetricSummary{}
-	for key := range metrics {
-		s := storageclient.VersionMetricSummary{}
+// 	// loop through metrics and aggregate data for result
+// 	result := map[int]storageclient.VersionMetricSummary{}
+// 	for key := range metrics {
+// 		s := storageclient.VersionMetricSummary{}
 
-		// check if the number of tokens is correct (7)
-		tokens := strings.Split(key, "::")
-		if len(tokens) != 7 {
-			return nil, fmt.Errorf("incorrect number of tokens in metric key: \"%s\": %w", key, err)
-		}
-		version := tokens[2]
+// 		// check if the number of tokens is correct (7)
+// 		tokens := strings.Split(key, "::")
+// 		if len(tokens) != 7 {
+// 			return nil, fmt.Errorf("incorrect number of tokens in metric key: \"%s\": %w", key, err)
+// 		}
+// 		version := tokens[2]
 
-		// convert version to integer
-		iversion, err := strconv.Atoi(version)
-		if err != nil {
-			return nil, fmt.Errorf("cannot parse version number from metric key \"%s\" into integer: %w", key, err)
-		}
+// 		// convert version to integer
+// 		iversion, err := strconv.Atoi(version)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("cannot parse version number from metric key \"%s\" into integer: %w", key, err)
+// 		}
 
-		// TODO: compute summary
+// 		// TODO: compute summary
 
-		result[iversion] = s
-	}
-	if err != nil {
-		return nil, err
-	}
+// 		result[iversion] = s
+// 	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// loop through users and add user count for result
-	for _, user := range users {
-		// check if the number of tokens is correct (5)
-		tokens := strings.Split(user, "::")
-		if len(tokens) != 5 {
-			return nil, fmt.Errorf("incorrect number of tokens in user key: \"%s\": %w", user, err)
-		}
-		version := tokens[2]
+// 	// loop through users and add user count for result
+// 	for _, user := range users {
+// 		// check if the number of tokens is correct (5)
+// 		tokens := strings.Split(user, "::")
+// 		if len(tokens) != 5 {
+// 			return nil, fmt.Errorf("incorrect number of tokens in user key: \"%s\": %w", user, err)
+// 		}
+// 		version := tokens[2]
 
-		// convert version to integer
-		iversion, err := strconv.Atoi(version)
-		if err != nil {
-			return nil, fmt.Errorf("cannot parse version number from user key \"%s\" into integer: %w", version, err)
-		}
+// 		// convert version to integer
+// 		iversion, err := strconv.Atoi(version)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("cannot parse version number from user key \"%s\" into integer: %w", version, err)
+// 		}
 
-		// TODO: increment userCount
-		x := result[iversion][builtInUserCountID]
-		x.Add(1)
-	}
-	if err != nil {
-		return nil, err
-	}
+// 		// TODO: increment userCount
+// 		x := result[iversion][builtInUserCountID]
+// 		x.Add(1)
+// 	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// validate result
-	// loop through result to ensure that each summary has a user count
-	for version, versionMetricSummary := range result {
-		_, ok := versionMetricSummary[builtInUserCountID]
+// 	// validate result
+// 	// loop through result to ensure that each summary has a user count
+// 	for version, versionMetricSummary := range result {
+// 		_, ok := versionMetricSummary[builtInUserCountID]
 
-		if !ok {
-			return nil, fmt.Errorf("summary with version number \"%d\" does not contain user count: %w", version, err)
-		}
-	}
+// 		if !ok {
+// 			return nil, fmt.Errorf("summary with version number \"%d\" does not contain user count: %w", version, err)
+// 		}
+// 	}
 
-	return &result, nil
-}
+// 	return &result, nil
+// }
