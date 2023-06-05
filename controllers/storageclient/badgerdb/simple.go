@@ -264,5 +264,7 @@ func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclie
 
 	// loop through users and add user count for result
 
+	// loop through result to ensure that each summary has a user count
+
 	return &result, nil
 }
