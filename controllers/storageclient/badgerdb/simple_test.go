@@ -10,7 +10,7 @@ import (
 func TestGetClient(t *testing.T) {
 	tempDirPath := t.TempDir()
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath))
+	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
 	assert.NoError(t, err)
 
 	assert.NotNil(t, client)

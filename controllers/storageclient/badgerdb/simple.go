@@ -10,6 +10,7 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
+	"github.com/iter8-tools/iter8/controllers/storageclient"
 )
 
 // Client is a client for the BadgerDB
@@ -24,7 +25,7 @@ type AdditionalOptions struct {
 }
 
 // GetClient gets a client for the BadgerDB
-func GetClient(opts badger.Options) (*Client, error) {
+func GetClient(opts badger.Options, additionalOptions AdditionalOptions) (*Client, error) {
 	// check if Dir and ValueDir are set and are equal
 	dir := opts.Dir           // Dir is the path of the directory where key data will be stored in.
 	valueDir := opts.ValueDir // ValueDir is the path of the directory where value data will be stored in.
@@ -57,7 +58,18 @@ func GetClient(opts badger.Options) (*Client, error) {
 	}
 	client.db = db
 
+	// add additionalOptions
+	var a = getDefaultAdditionalOptions()
+	mergo.Merge(a, additionalOptions)
+	client.additionalOptions = a
+
 	return &client, nil
+}
+
+func getDefaultAdditionalOptions() AdditionalOptions {
+	return AdditionalOptions{
+		TTL: time.Hour * 24,
+	}
 }
 
 func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
@@ -112,14 +124,20 @@ func (cl Client) SetMetric(applicationName string, version int, signature, metri
 	key := getMetricKey(applicationName, version, signature, metric, user, transaction)
 
 	err := cl.db.Update(func(txn *badger.Txn) error {
-		// set TTL
-		e := badger.NewEntry([]byte(key), []byte(fmt.Sprintf("%f", metricValue)))
+		e := badger.NewEntry([]byte(key), []byte(fmt.Sprintf("%f", metricValue))).WithTTL(cl.additionalOptions.TTL)
 		err := txn.SetEntry(e)
 		return err
 	})
 
-	// update metrics?
-	// update user?
+	if err != nil {
+		return fmt.Errorf("cannot set metric with key \"%s\": %w", key, err)
+	}
+
+	// check if this metric exists in the metrics database
+	// update metrics
+
+	// check if this user exists in the user database
+	// update user
 
 	return err
 }
@@ -133,12 +151,7 @@ func (cl Client) SetMetrics(applicationName, metric string) error {
 	key := getMetricsKey(applicationName, metric)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
-		ttl := cl.additionalOptions.TTL
-		if ttl == nil {
-			ttl = time.Hour
-		}
-		// set TTL
-		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(ttl)
+		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
 		err := txn.SetEntry(e)
 		return err
 	})
@@ -157,8 +170,7 @@ func (cl Client) SetUsers(applicationName string, version int, signature, user s
 	key := getUsersKey(applicationName, version, signature, user)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
-		// set TTL
-		e := badger.NewEntry([]byte(key), []byte("true"))
+		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
 		err := txn.SetEntry(e)
 		return err
 	})
@@ -167,3 +179,66 @@ func (cl Client) SetUsers(applicationName string, version int, signature, user s
 // func (cl Client) GetUsers(applicationName string, version int, signature, user string) ([]string, error) {
 // 	return []string{}, nil
 // }
+
+func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
+	metrics := map[string]float64{}
+
+	// prefix scan of metrics using applicationName
+	err := cl.db.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+		prefix := []byte(fmt.Sprintf("kt-metric::%s", applicationName))
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			item := it.Item()
+			k := item.Key()
+
+			// save data
+			err := item.Value(func(v []byte) error {
+				fmt.Printf("key=%s, value=%s\n", k, v)
+
+				fv, err := strconv.ParseFloat(string(v), 64)
+
+				if err != nil {
+					return fmt.Errorf("cannot parse float from metric \"%s\": \"%s\": %w", k, string(v), err)
+				}
+
+				metrics[string(k)] = fv
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	users := []string{}
+
+	// prefix scan of users using applicationName
+	err = cl.db.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+		prefix := []byte(fmt.Sprintf("kt-users::%s", applicationName))
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			// save data
+			users = append(users, string(it.Item().Key()))
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := map[int]storageclient.VersionMetricSummary{}
+
+	// loop through metrics and aggregate data for result
+	// loop through users and add user count for result
+
+	return &result, nil
+}
