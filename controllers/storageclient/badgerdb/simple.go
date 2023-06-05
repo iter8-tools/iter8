@@ -14,6 +14,10 @@ import (
 	"github.com/iter8-tools/iter8/controllers/storageclient"
 )
 
+const (
+	builtInUserCountID = "user-count"
+)
+
 // Client is a client for the BadgerDB
 type Client struct {
 	db *badger.DB
@@ -105,7 +109,7 @@ func getMetricKey(applicationName string, version int, signature, metric, user, 
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metric, user, transaction)
 }
 
-// Key 2: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> metric-value
+// Example key/value: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
 func (cl Client) GetMetric(applicationName string, version int, signature, metric, user, transaction string) (float64, error) {
 	key := getMetricKey(applicationName, version, signature, metric, user, transaction)
 	val, err := getValueFromBadgerDB(cl.db, key)
@@ -147,7 +151,7 @@ func getMetricsKey(applicationName, metric string) string {
 	return fmt.Sprintf("kt-app-metrics::%s::%s", applicationName, metric)
 }
 
-// Key 3: kt-app-metrics::my-app::my-metric -> true
+// Example key/value: kt-app-metrics::my-app::my-metric -> true
 func (cl Client) SetMetrics(applicationName, metric string) error {
 	key := getMetricsKey(applicationName, metric)
 
@@ -166,7 +170,7 @@ func getUsersKey(applicationName string, version int, signature, user string) st
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s", applicationName, version, signature, user)
 }
 
-// Key 5: kt-users::my-app::0::my-signature::my-user -> true
+// Example key/value: kt-users::my-app::0::my-signature::my-user -> true
 func (cl Client) SetUsers(applicationName string, version int, signature, user string) error {
 	key := getUsersKey(applicationName, version, signature, user)
 
@@ -198,7 +202,6 @@ func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclie
 				fmt.Printf("key=%s, value=%s\n", key, val)
 
 				fval, err := strconv.ParseFloat(string(val), 64)
-
 				if err != nil {
 					return fmt.Errorf("cannot parse float from metric \"%s\": \"%s\": %w", key, string(val), err)
 				}
@@ -206,21 +209,18 @@ func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclie
 				metrics[string(key)] = fval
 				return nil
 			})
-
 			if err != nil {
 				return err
 			}
 		}
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
-	users := []string{}
-
 	// prefix scan of users using applicationName
+	users := []string{}
 	err = cl.db.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
@@ -231,40 +231,68 @@ func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclie
 		}
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
-	result := map[int]storageclient.VersionMetricSummary{}
-
 	// loop through metrics and aggregate data for result
+	result := map[int]storageclient.VersionMetricSummary{}
 	for key, _ := range metrics {
 		s := storageclient.VersionMetricSummary{}
 
-		tokens := strings.Split(key, "::")
-
 		// check if the number of tokens is correct (7)
+		tokens := strings.Split(key, "::")
+		if len(tokens) != 7 {
+			return nil, fmt.Errorf("incorrect number of tokens in metric key: \"%s\": %w", key, err)
+		}
 		version := tokens[2]
 
 		// convert version to integer
 		iversion, err := strconv.Atoi(version)
 		if err != nil {
-			return nil, fmt.Errorf("cannot parse version number from key \"%s\" into integer : %w", key, err)
+			return nil, fmt.Errorf("cannot parse version number from metric key \"%s\" into integer: %w", key, err)
 		}
 
-		// compute summary
+		// TODO: compute summary
 
 		result[iversion] = s
 	}
-
 	if err != nil {
 		return nil, err
 	}
 
 	// loop through users and add user count for result
+	for _, user := range users {
+		// check if the number of tokens is correct (5)
+		tokens := strings.Split(user, "::")
+		if len(tokens) != 5 {
+			return nil, fmt.Errorf("incorrect number of tokens in user key: \"%s\": %w", user, err)
+		}
+		version := tokens[2]
 
+		// convert version to integer
+		iversion, err := strconv.Atoi(version)
+		if err != nil {
+			return nil, fmt.Errorf("cannot parse version number from user key \"%s\" into integer: %w", version, err)
+		}
+
+		// TODO: increment userCount
+		x := result[iversion][builtInUserCountID]
+		x.Add(1)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// validate result
 	// loop through result to ensure that each summary has a user count
+	for version, versionMetricSummary := range result {
+		_, ok := versionMetricSummary[builtInUserCountID]
+
+		if !ok {
+			return nil, fmt.Errorf("summary with version number \"%d\" does not contain user count: %w", version, err)
+		}
+	}
 
 	return &result, nil
 }
