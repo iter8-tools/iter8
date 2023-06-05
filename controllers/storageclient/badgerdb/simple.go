@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
@@ -190,19 +191,19 @@ func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclie
 		prefix := []byte(fmt.Sprintf("kt-metric::%s", applicationName))
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
-			k := item.Key()
+			key := item.Key()
 
 			// save data
-			err := item.Value(func(v []byte) error {
-				fmt.Printf("key=%s, value=%s\n", k, v)
+			err := item.Value(func(val []byte) error {
+				fmt.Printf("key=%s, value=%s\n", key, val)
 
-				fv, err := strconv.ParseFloat(string(v), 64)
+				fval, err := strconv.ParseFloat(string(val), 64)
 
 				if err != nil {
-					return fmt.Errorf("cannot parse float from metric \"%s\": \"%s\": %w", k, string(v), err)
+					return fmt.Errorf("cannot parse float from metric \"%s\": \"%s\": %w", key, string(val), err)
 				}
 
-				metrics[string(k)] = fv
+				metrics[string(key)] = fval
 				return nil
 			})
 
@@ -238,6 +239,29 @@ func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclie
 	result := map[int]storageclient.VersionMetricSummary{}
 
 	// loop through metrics and aggregate data for result
+	for key, _ := range metrics {
+		s := storageclient.VersionMetricSummary{}
+
+		tokens := strings.Split(key, "::")
+
+		// check if the number of tokens is correct (7)
+		version := tokens[2]
+
+		// convert version to integer
+		iversion, err := strconv.Atoi(version)
+		if err != nil {
+			return nil, fmt.Errorf("cannot parse version number from key \"%s\" into integer : %w", key, err)
+		}
+
+		// compute summary
+
+		result[iversion] = s
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
 	// loop through users and add user count for result
 
 	return &result, nil
