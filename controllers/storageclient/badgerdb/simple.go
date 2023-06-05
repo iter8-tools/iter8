@@ -105,13 +105,13 @@ func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
 	return valCopy, nil
 }
 
-func getMetricKey(applicationName string, version int, signature, metric, user, transaction string) string {
-	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metric, user, transaction)
+func getMetricKey(applicationName string, version int, signature, metricType, user, transaction string) string {
+	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metricType, user, transaction)
 }
 
-// Example key/value: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
-func (cl Client) GetMetric(applicationName string, version int, signature, metric, user, transaction string) (float64, error) {
-	key := getMetricKey(applicationName, version, signature, metric, user, transaction)
+// Example key/value: kt-metric::my-app::0::my-signature::my-metric-type::my-user::my-transaction-id -> my-metric-value
+func (cl Client) GetMetric(applicationName string, version int, signature, metricType, user, transaction string) (float64, error) {
+	key := getMetricKey(applicationName, version, signature, metricType, user, transaction)
 	val, err := getValueFromBadgerDB(cl.db, key)
 	if err != nil {
 		return 0, err
@@ -125,35 +125,37 @@ func (cl Client) GetMetric(applicationName string, version int, signature, metri
 	return f, nil
 }
 
-func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {
-	key := getMetricKey(applicationName, version, signature, metric, user, transaction)
+func (cl Client) SetMetric(applicationName string, version int, signature, metricType, user, transaction string, metricValue float64) error {
+	key := getMetricKey(applicationName, version, signature, metricType, user, transaction)
 
 	err := cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte(fmt.Sprintf("%f", metricValue))).WithTTL(cl.additionalOptions.TTL)
 		err := txn.SetEntry(e)
 		return err
 	})
-
 	if err != nil {
 		return fmt.Errorf("cannot set metric with key \"%s\": %w", key, err)
 	}
 
-	// check if this metric exists in the metrics database
 	// update metrics
+	err = cl.SetMetricType(applicationName, metricType)
+	if err != nil {
+		return err
+	}
 
-	// check if this user exists in the user database
 	// update user
+	err = cl.SetUser(applicationName, version, signature, user)
 
 	return err
 }
 
-func getMetricsKey(applicationName, metric string) string {
-	return fmt.Sprintf("kt-app-metrics::%s::%s", applicationName, metric)
+func getMetricTypeKey(applicationName, metricType string) string {
+	return fmt.Sprintf("kt-metric-types::%s::%s", applicationName, metricType)
 }
 
-// Example key/value: kt-app-metrics::my-app::my-metric -> true
-func (cl Client) SetMetrics(applicationName, metric string) error {
-	key := getMetricsKey(applicationName, metric)
+// Example key/value: kt-metric-types::my-app::my-metric -> true
+func (cl Client) SetMetricType(applicationName, metricType string) error {
+	key := getMetricTypeKey(applicationName, metricType)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
@@ -166,13 +168,13 @@ func (cl Client) SetMetrics(applicationName, metric string) error {
 // 	return []string{}, nil
 // }
 
-func getUsersKey(applicationName string, version int, signature, user string) string {
+func getUserKey(applicationName string, version int, signature, user string) string {
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s", applicationName, version, signature, user)
 }
 
 // Example key/value: kt-users::my-app::0::my-signature::my-user -> true
-func (cl Client) SetUsers(applicationName string, version int, signature, user string) error {
-	key := getUsersKey(applicationName, version, signature, user)
+func (cl Client) SetUser(applicationName string, version int, signature, user string) error {
+	key := getUserKey(applicationName, version, signature, user)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
