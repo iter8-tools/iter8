@@ -5,13 +5,56 @@ import (
 	"fmt"
 	"time"
 
-	abnapp "github.com/iter8-tools/iter8/abn/application"
-	pb "github.com/iter8-tools/iter8/abn/grpc"
 	log "github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/base/summarymetrics"
+	pb "github.com/iter8-tools/iter8/controllers/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
+
+// applicatoon is an legacy object capturing application details
+type legacyApplication struct {
+	// Name is of the form namespace/Name where the Name is the value of the label app.kubernetes.io/Name
+	Name string `json:"name" yaml:"name"`
+	// Tracks is map from application track identifier to version name
+	Tracks legacyTracks `json:"tracks" yaml:"tracks"`
+	// Versions maps version name to version data (a set of metrics)
+	Versions legacyVersions `json:"versions" yaml:"versions"`
+}
+
+// legacyVersions is a map of the version name to a version object
+type legacyVersions map[string]*legacyVersion
+
+// legacyTracks is map of track identifiers to version names
+type legacyTracks map[string]string
+
+// legacyVersion is information about versions of an application in a Kubernetes cluster
+type legacyVersion struct {
+	// List of (summary) metrics for a version
+	Metrics map[string]*summarymetrics.SummaryMetric `json:"metrics" yaml:"metrics"`
+}
+
+// GetVersion returns the Version object corresponding to a given version name
+// If no corresponding version object exists, a new one will be created when allowNew is set to true
+// returns the version object and a boolean indicating whether or not a new version was created or not
+func (a *legacyApplication) GetVersion(version string, allowNew bool) (*legacyVersion, bool) {
+	v, ok := a.Versions[version]
+	if !ok {
+		if allowNew {
+			v = &legacyVersion{
+				Metrics: map[string]*summarymetrics.SummaryMetric{},
+			}
+			log.Logger.Debugf("GetVersion no data found; creating %+v", v)
+			a.Versions[version] = v
+			return v, true
+		}
+		return nil, false
+	}
+
+	log.Logger.Debugf("GetVersion returning %+v", v)
+	return v, false
+}
 
 // abnClientInterface is interface for calling gRPC services
 type abnClientInterface interface {
@@ -105,7 +148,7 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	}
 
 	// convert to Application
-	a := &abnapp.Application{}
+	a := &legacyApplication{}
 	err = yaml.Unmarshal([]byte(applicationJSON), a)
 	if err != nil {
 		return err

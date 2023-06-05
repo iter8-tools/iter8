@@ -69,9 +69,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
 	rootCmd.SilenceErrors = true // will get printed in Execute() (by cobra.CheckErr())
 
-	// add abn
-	rootCmd.AddCommand(newAbnCmd())
-
 	// add autox
 	rootCmd.AddCommand(newAutoXCmd())
 

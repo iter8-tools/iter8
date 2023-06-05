@@ -12,7 +12,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/iter8-tools/iter8/base/log"
-	pb "github.com/iter8-tools/iter8/controllers/abn/grpc"
+	pb "github.com/iter8-tools/iter8/controllers/grpc"
 
 	// auth package is necessary to enable authentication with various cloud providers
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -38,10 +38,10 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	if err != nil || track == nil {
 		return nil, err
 	}
-	log.Logger.Debug(fmt.Sprintf("lookup(%s,%s) -> %s", appMsg.GetName(), appMsg.GetUser(), *track))
+	log.Logger.Debugf("lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), *track)
 
 	return &pb.Session{
-		Track: *track,
+		Track: fmt.Sprintf("%d", *track),
 	}, err
 }
 
@@ -72,7 +72,7 @@ func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *p
 }
 
 // launchGRPCServer starts gRPC server
-func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh chan struct{}) {
+func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}) {
 	log.Logger.Tracef("starting gRPC service on port %d", port)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
