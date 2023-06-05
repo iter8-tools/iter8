@@ -40,7 +40,9 @@ func TestSetMetric(t *testing.T) {
 
 	// get metric
 	err = client.db.View(func(txn *badger.Txn) error {
-		key := getMetricKey(app, version, signature, metricType, user, transaction)
+		key, err := getMetricKey(app, version, signature, metricType, user, transaction)
+		assert.NoError(t, err)
+
 		item, err := txn.Get([]byte(key))
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
@@ -177,4 +179,24 @@ func TestSetUser(t *testing.T) {
 		return nil
 	})
 	assert.NoError(t, err)
+}
+
+func TestValidateKeyToken(t *testing.T) {
+	err := validateKeyToken("hello")
+	assert.NoError(t, err)
+
+	err = validateKeyToken("::")
+	assert.Error(t, err)
+
+	err = validateKeyToken("hello::world")
+	assert.Error(t, err)
+
+	err = validateKeyToken("hello :: world")
+	assert.Error(t, err)
+
+	err = validateKeyToken("hello:world")
+	assert.Error(t, err)
+
+	err = validateKeyToken("hello : world")
+	assert.Error(t, err)
 }

@@ -105,13 +105,41 @@ func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
 	return valCopy, nil
 }
 
-func getMetricKey(applicationName string, version int, signature, metricType, user, transaction string) string {
-	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metricType, user, transaction)
+func validateKeyToken(s string) error {
+	if strings.Contains(s, ":") {
+		return errors.New("key token contains \":\"")
+	}
+
+	return nil
+}
+
+func getMetricKey(applicationName string, version int, signature, metricType, user, transaction string) (string, error) {
+	if err := validateKeyToken(applicationName); err != nil {
+		return "", errors.New("application name cannot have \":\"")
+	}
+	if err := validateKeyToken(signature); err != nil {
+		return "", errors.New("signature cannot have \":\"")
+	}
+	if err := validateKeyToken(metricType); err != nil {
+		return "", errors.New("metric type cannot have \":\"")
+	}
+	if err := validateKeyToken(user); err != nil {
+		return "", errors.New("user name cannot have \":\"")
+	}
+	if err := validateKeyToken(transaction); err != nil {
+		return "", errors.New("transaction ID cannot have \":\"")
+	}
+
+	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metricType, user, transaction), nil
 }
 
 // Example key/value: kt-metric::my-app::0::my-signature::my-metric-type::my-user::my-transaction-id -> my-metric-value
 func (cl Client) GetMetric(applicationName string, version int, signature, metricType, user, transaction string) (float64, error) {
-	key := getMetricKey(applicationName, version, signature, metricType, user, transaction)
+	key, err := getMetricKey(applicationName, version, signature, metricType, user, transaction)
+	if err != nil {
+		return 0, err
+	}
+
 	val, err := getValueFromBadgerDB(cl.db, key)
 	if err != nil {
 		return 0, err
@@ -126,9 +154,12 @@ func (cl Client) GetMetric(applicationName string, version int, signature, metri
 }
 
 func (cl Client) SetMetric(applicationName string, version int, signature, metricType, user, transaction string, metricValue float64) error {
-	key := getMetricKey(applicationName, version, signature, metricType, user, transaction)
+	key, err := getMetricKey(applicationName, version, signature, metricType, user, transaction)
+	if err != nil {
+		return err
+	}
 
-	err := cl.db.Update(func(txn *badger.Txn) error {
+	err = cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte(fmt.Sprintf("%f", metricValue))).WithTTL(cl.additionalOptions.TTL)
 		err := txn.SetEntry(e)
 		return err
