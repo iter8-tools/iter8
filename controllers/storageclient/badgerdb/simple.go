@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -81,33 +80,33 @@ func getDefaultAdditionalOptions() AdditionalOptions {
 	}
 }
 
-func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
-	var valCopy []byte
+// func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
+// 	var valCopy []byte
 
-	err := db.View(func(txn *badger.Txn) error {
-		// query for key/value
-		item, err := txn.Get([]byte(key))
-		if err != nil {
-			return fmt.Errorf("cannot get signature with key \"%s\": %w", key, err)
-		}
+// 	err := db.View(func(txn *badger.Txn) error {
+// 		// query for key/value
+// 		item, err := txn.Get([]byte(key))
+// 		if err != nil {
+// 			return fmt.Errorf("cannot get signature with key \"%s\": %w", key, err)
+// 		}
 
-		// copy value
-		err = item.Value(func(val []byte) error {
-			// Copying or parsing val is valid.
-			valCopy = append([]byte{}, val...)
+// 		// copy value
+// 		err = item.Value(func(val []byte) error {
+// 			// Copying or parsing val is valid.
+// 			valCopy = append([]byte{}, val...)
 
-			return nil
-		})
+// 			return nil
+// 		})
 
-		return err
-	})
+// 		return err
+// 	})
 
-	if err != nil {
-		return []byte{}, err
-	}
+// 	if err != nil {
+// 		return []byte{}, err
+// 	}
 
-	return valCopy, nil
-}
+// 	return valCopy, nil
+// }
 
 func validateKeyToken(s string) error {
 	if strings.Contains(s, ":") {
@@ -137,26 +136,26 @@ func getMetricKey(applicationName string, version int, signature, metric, user, 
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metric, user, transaction), nil
 }
 
-// GetMetric gets a metric based on the app name, version, signature, metric type, user, and transaction ID from BadgerDB
-// Example key/value: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
-func (cl Client) GetMetric(applicationName string, version int, signature, metric, user, transaction string) (float64, error) {
-	key, err := getMetricKey(applicationName, version, signature, metric, user, transaction)
-	if err != nil {
-		return 0, err
-	}
+// // GetMetric gets a metric based on the app name, version, signature, metric type, user, and transaction ID from BadgerDB
+// // Example key/value: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
+// func (cl Client) GetMetric(applicationName string, version int, signature, metric, user, transaction string) (float64, error) {
+// 	key, err := getMetricKey(applicationName, version, signature, metric, user, transaction)
+// 	if err != nil {
+// 		return 0, err
+// 	}
 
-	val, err := getValueFromBadgerDB(cl.db, key)
-	if err != nil {
-		return 0, err
-	}
+// 	val, err := getValueFromBadgerDB(cl.db, key)
+// 	if err != nil {
+// 		return 0, err
+// 	}
 
-	f, err := strconv.ParseFloat(string(val), 64)
-	if err != nil {
-		return 0, fmt.Errorf("cannot parse metric into float64 with key \"%s\": %w", key, err)
-	}
+// 	f, err := strconv.ParseFloat(string(val), 64)
+// 	if err != nil {
+// 		return 0, fmt.Errorf("cannot parse metric into float64 with key \"%s\": %w", key, err)
+// 	}
 
-	return f, nil
-}
+// 	return f, nil
+// }
 
 // SetMetric sets a metric based on the app name, version, signature, metric type, user name, transaction ID, and metric value with BadgerDB
 func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {

@@ -81,28 +81,28 @@ func TestSetMetric(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestGetMetric(t *testing.T) {
-	tempDirPath := t.TempDir()
+// func TestGetMetric(t *testing.T) {
+// 	tempDirPath := t.TempDir()
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
-	assert.NoError(t, err)
+// 	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+// 	assert.NoError(t, err)
 
-	app := "my-application"
-	version := 0
-	signature := "my-signature"
-	metric := "my-metric"
-	user := "my-user"
-	transaction := "my-transaction"
-	value := 50.0
+// 	app := "my-application"
+// 	version := 0
+// 	signature := "my-signature"
+// 	metric := "my-metric"
+// 	user := "my-user"
+// 	transaction := "my-transaction"
+// 	value := 50.0
 
-	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
-	assert.NoError(t, err)
+// 	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
+// 	assert.NoError(t, err)
 
-	// get metric
-	dbval, err := client.GetMetric(app, version, signature, metric, user, transaction)
-	assert.NoError(t, err)
-	assert.Equal(t, dbval, value)
-}
+// 	// get metric
+// 	dbval, err := client.GetMetric(app, version, signature, metric, user, transaction)
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, dbval, value)
+// }
 
 func TestSetUser(t *testing.T) {
 	tempDirPath := t.TempDir()
