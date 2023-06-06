@@ -11,6 +11,7 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
+	"github.com/iter8-tools/iter8/controllers/storageclient"
 )
 
 // const (
@@ -198,6 +199,11 @@ func (cl Client) SetUser(applicationName string, version int, signature, user st
 // func (cl Client) GetUsers(applicationName string, version int, signature string) ([]string, error) {
 // 	return []string{}, nil
 // }
+
+// GetSummaryMetrics gets a summary of all the metrics from all versions of an application
+func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
+	return nil, nil
+}
 
 // // GetSummaryMetrics gets a summary of all the metrics from all versions of an application
 // func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
