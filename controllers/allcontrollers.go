@@ -238,7 +238,7 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 
 		// TODO: expose badgerDB options in config?
 		var dbClient storageclient.Interface
-		dbClient, err = badgerdb.GetClient(badger.DefaultOptions(MetricsPath))
+		dbClient, err = badgerdb.GetClient(badger.DefaultOptions(MetricsPath), badgerdb.AdditionalOptions{})
 		fmt.Println(dbClient, err)
 	}
 
