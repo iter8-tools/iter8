@@ -19,6 +19,4 @@ type Interface interface {
 
 	// Example key: kt-users::my-app::0::my-signature::my-user -> true
 	SetUser(applicationName string, version int, signature, user string) error
-
-	// GetUsers(applicationName string, version int, signature) ([]string, error)
 }

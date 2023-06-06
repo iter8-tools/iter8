@@ -13,10 +13,6 @@ import (
 	"github.com/iter8-tools/iter8/controllers/storageclient"
 )
 
-// const (
-// 	builtInUserCountID = "user-count"
-// )
-
 // Client is a client for the BadgerDB
 type Client struct {
 	db *badger.DB
@@ -80,34 +76,6 @@ func getDefaultAdditionalOptions() AdditionalOptions {
 	}
 }
 
-// func getValueFromBadgerDB(db *badger.DB, key string) ([]byte, error) {
-// 	var valCopy []byte
-
-// 	err := db.View(func(txn *badger.Txn) error {
-// 		// query for key/value
-// 		item, err := txn.Get([]byte(key))
-// 		if err != nil {
-// 			return fmt.Errorf("cannot get signature with key \"%s\": %w", key, err)
-// 		}
-
-// 		// copy value
-// 		err = item.Value(func(val []byte) error {
-// 			// Copying or parsing val is valid.
-// 			valCopy = append([]byte{}, val...)
-
-// 			return nil
-// 		})
-
-// 		return err
-// 	})
-
-// 	if err != nil {
-// 		return []byte{}, err
-// 	}
-
-// 	return valCopy, nil
-// }
-
 func validateKeyToken(s string) error {
 	if strings.Contains(s, ":") {
 		return errors.New("key token contains \":\"")
@@ -135,27 +103,6 @@ func getMetricKey(applicationName string, version int, signature, metric, user, 
 
 	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metric, user, transaction), nil
 }
-
-// // GetMetric gets a metric based on the app name, version, signature, metric type, user, and transaction ID from BadgerDB
-// // Example key/value: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
-// func (cl Client) GetMetric(applicationName string, version int, signature, metric, user, transaction string) (float64, error) {
-// 	key, err := getMetricKey(applicationName, version, signature, metric, user, transaction)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	val, err := getValueFromBadgerDB(cl.db, key)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	f, err := strconv.ParseFloat(string(val), 64)
-// 	if err != nil {
-// 		return 0, fmt.Errorf("cannot parse metric into float64 with key \"%s\": %w", key, err)
-// 	}
-
-// 	return f, nil
-// }
 
 // SetMetric sets a metric based on the app name, version, signature, metric type, user name, transaction ID, and metric value with BadgerDB
 func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {
@@ -195,124 +142,7 @@ func (cl Client) SetUser(applicationName string, version int, signature, user st
 	})
 }
 
-// func (cl Client) GetUsers(applicationName string, version int, signature string) ([]string, error) {
-// 	return []string{}, nil
-// }
-
 // GetSummaryMetrics gets a summary of all the metrics from all versions of an application
 func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
 	return nil, nil
 }
-
-// // GetSummaryMetrics gets a summary of all the metrics from all versions of an application
-// func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
-// 	metrics := map[string]float64{}
-
-// 	// prefix scan of metrics using applicationName
-// 	err := cl.db.View(func(txn *badger.Txn) error {
-// 		it := txn.NewIterator(badger.DefaultIteratorOptions)
-// 		defer it.Close()
-// 		prefix := []byte(fmt.Sprintf("kt-metric::%s", applicationName))
-// 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-// 			item := it.Item()
-// 			key := item.Key()
-
-// 			// save data
-// 			err := item.Value(func(val []byte) error {
-// 				fmt.Printf("key=%s, value=%s\n", key, val)
-
-// 				fval, err := strconv.ParseFloat(string(val), 64)
-// 				if err != nil {
-// 					return fmt.Errorf("cannot parse float from metric \"%s\": \"%s\": %w", key, string(val), err)
-// 				}
-
-// 				metrics[string(key)] = fval
-// 				return nil
-// 			})
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-// 		return nil
-// 	})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// prefix scan of users using applicationName
-// 	users := []string{}
-// 	err = cl.db.View(func(txn *badger.Txn) error {
-// 		it := txn.NewIterator(badger.DefaultIteratorOptions)
-// 		defer it.Close()
-// 		prefix := []byte(fmt.Sprintf("kt-users::%s", applicationName))
-// 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-// 			// save data
-// 			users = append(users, string(it.Item().Key()))
-// 		}
-// 		return nil
-// 	})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// loop through metrics and aggregate data for result
-// 	result := map[int]storageclient.VersionMetricSummary{}
-// 	for key := range metrics {
-// 		s := storageclient.VersionMetricSummary{}
-
-// 		// check if the number of tokens is correct (7)
-// 		tokens := strings.Split(key, "::")
-// 		if len(tokens) != 7 {
-// 			return nil, fmt.Errorf("incorrect number of tokens in metric key: \"%s\": %w", key, err)
-// 		}
-// 		version := tokens[2]
-
-// 		// convert version to integer
-// 		iversion, err := strconv.Atoi(version)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("cannot parse version number from metric key \"%s\" into integer: %w", key, err)
-// 		}
-
-// 		// TODO: compute summary
-
-// 		result[iversion] = s
-// 	}
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// loop through users and add user count for result
-// 	for _, user := range users {
-// 		// check if the number of tokens is correct (5)
-// 		tokens := strings.Split(user, "::")
-// 		if len(tokens) != 5 {
-// 			return nil, fmt.Errorf("incorrect number of tokens in user key: \"%s\": %w", user, err)
-// 		}
-// 		version := tokens[2]
-
-// 		// convert version to integer
-// 		iversion, err := strconv.Atoi(version)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("cannot parse version number from user key \"%s\" into integer: %w", version, err)
-// 		}
-
-// 		// TODO: increment userCount
-// 		x := result[iversion][builtInUserCountID]
-// 		x.Add(1)
-// 	}
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// validate result
-// 	// loop through result to ensure that each summary has a user count
-// 	for version, versionMetricSummary := range result {
-// 		_, ok := versionMetricSummary[builtInUserCountID]
-
-// 		if !ok {
-// 			return nil, fmt.Errorf("summary with version number \"%d\" does not contain user count: %w", version, err)
-// 		}
-// 	}
-
-// 	return &result, nil
-// }
