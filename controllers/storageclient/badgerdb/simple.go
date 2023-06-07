@@ -130,7 +130,7 @@ func (cl Client) SetMetric(applicationName string, version int, signature, metri
 }
 
 func getUserKey(applicationName string, version int, signature, user string) string {
-	return fmt.Sprintf("kt-metric::%s::%d::%s::%s", applicationName, version, signature, user)
+	return fmt.Sprintf("kt-users::%s::%d::%s::%s", applicationName, version, signature, user)
 }
 
 // SetUser sets a user based on the app name, version, signature, and user name with BadgerDB
@@ -147,30 +147,30 @@ func (cl Client) SetUser(applicationName string, version int, signature, user st
 
 // this will use GetAppMetricNames, to fetch the metric values ... and summarize them into the VersionMetricSummary data structure
 func (cl Client) GetSummaryMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetricSummary, error) {
-	var vms storageclient.VersionMetricSummary
-
-	// used to capture all the metric values for the current metric
-	var overUserData []float64
-	var overTransactionData []float64
-
-	// used to determine what the previous user and metric are in the previous iteration
-	var previousUser string
-	var previousMetric string
+	vms := storageclient.VersionMetricSummary{
+		MetricSummaries: map[string]storageclient.MetricSummary{},
+	}
 
 	// iter8 over all metrics with the provided application name, version, and signature
 	err := cl.db.View(func(txn *badger.Txn) error {
+		// used to capture all the metric values for the current metric
+		var overUserData []float64        // cumulative metric value for a particular user
+		var overTransactionData []float64 // all metric values
+
+		// used to determine what the previous user and metric are in the previous iteration
+		var previousUser string
+		var previousMetric string
+
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 
-		prefix := []byte(fmt.Sprintf("kt-metric::%s::%d::%s", applicationName, version, signature))
+		prefix := []byte(fmt.Sprintf("kt-metric::%s::%d::%s::", applicationName, version, signature))
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 
 			// get key
 			key := string(item.Key())
 			err := item.Value(func(v []byte) error {
-				fmt.Printf("key=%s, value=%s\n", key, v)
-
 				// get value
 				val := string(v)
 				fval, err := strconv.ParseFloat(val, 64)
@@ -179,30 +179,43 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 				}
 
 				// break down key into tokens
-				tokens := strings.Split(key[len(prefix)-1:], "::")
+				tokens := strings.Split(key[len(prefix):], "::")
 				if len(tokens) != 3 {
-					return fmt.Errorf("incorrect number of tokens in metric key \"%s\"", key)
+					return fmt.Errorf("incorrect number of tokens in metric key \"%s\"; expected 7 tokens", key)
+				}
+
+				currentMetric := tokens[0]
+				currentUser := tokens[1]
+
+				// initial case
+				if previousMetric == "" {
+					previousMetric = currentMetric
+					previousUser = currentUser
+
+					overTransactionData = []float64{fval}
+					overUserData = []float64{fval}
+
+					return nil
 				}
 
 				// calculate overUserData
-				currentUser := tokens[1]
 				if currentUser == previousUser {
-					overUserData[len(overUserData)-1] += fval
+					overUserData[len(overUserData)-1] += fval // cumulative metric value for a particular user
 				} else {
 					previousUser = currentUser
-					overUserData = append(overUserData, fval)
+					overUserData = append(overUserData, fval) // add new entry when the user changes
 				}
 
 				// calculate overTransactionData or calculate summarizedMetric
-				currentMetric := tokens[0]
 				if currentMetric == previousMetric {
-					overTransactionData = append(overTransactionData, fval)
+					overTransactionData = append(overTransactionData, fval) // always add new entry
 				} else {
 					vms.MetricSummaries[currentMetric] = storageclient.MetricSummary{
 						SummaryOverTransactions: calculateSummarizedMetric(overTransactionData),
 						SummaryOverUsers:        calculateSummarizedMetric(overUserData),
 					}
 
+					previousUser = currentUser
 					previousMetric = currentMetric
 
 					// reset data
@@ -217,6 +230,13 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 				return err
 			}
 		}
+
+		// flush last sequence of metric data
+		vms.MetricSummaries[previousMetric] = storageclient.MetricSummary{
+			SummaryOverTransactions: calculateSummarizedMetric(overTransactionData),
+			SummaryOverUsers:        calculateSummarizedMetric(overUserData),
+		}
+
 		return nil
 	})
 
