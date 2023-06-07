@@ -4,7 +4,9 @@ package badgerdb
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -105,6 +107,7 @@ func getMetricKey(applicationName string, version int, signature, metric, user, 
 }
 
 // SetMetric sets a metric based on the app name, version, signature, metric type, user name, transaction ID, and metric value with BadgerDB
+// Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
 func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {
 	key, err := getMetricKey(applicationName, version, signature, metric, user, transaction)
 	if err != nil {
@@ -142,7 +145,125 @@ func (cl Client) SetUser(applicationName string, version int, signature, user st
 	})
 }
 
-// GetSummaryMetrics gets a summary of all the metrics from all versions of an application
-func (cl Client) GetSummaryMetrics(applicationName string) (*map[int]storageclient.VersionMetricSummary, error) {
-	return nil, nil
+// this will use GetAppMetricNames, to fetch the metric values ... and summarize them into the VersionMetricSummary data structure
+func (cl Client) GetSummaryMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetricSummary, error) {
+	var vms storageclient.VersionMetricSummary
+
+	// used to capture all the metric values for the current metric
+	var overUserData []float64
+	var overTransactionData []float64
+
+	// used to determine what the previous user and metric are in the previous iteration
+	var previousUser string
+	var previousMetric string
+
+	// iter8 over all metrics with the provided application name, version, and signature
+	err := cl.db.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+
+		prefix := []byte(fmt.Sprintf("kt-metric::%s::%d::%s", applicationName, version, signature))
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			item := it.Item()
+
+			// get key
+			key := string(item.Key())
+			err := item.Value(func(v []byte) error {
+				fmt.Printf("key=%s, value=%s\n", key, v)
+
+				// get value
+				val := string(v)
+				fval, err := strconv.ParseFloat(val, 64)
+				if err != nil {
+					return fmt.Errorf("cannot convert metric value \"%s\" into float64", val)
+				}
+
+				// break down key into tokens
+				tokens := strings.Split(key[len(prefix)-1:], "::")
+				if len(tokens) != 3 {
+					return fmt.Errorf("incorrect number of tokens in metric key \"%s\"", key)
+				}
+
+				// calculate overUserData
+				currentUser := tokens[1]
+				if currentUser == previousUser {
+					overUserData[len(overUserData)-1] += fval
+				} else {
+					previousUser = currentUser
+					overUserData = append(overUserData, fval)
+				}
+
+				// calculate overTransactionData or calculate summarizedMetric
+				currentMetric := tokens[0]
+				if currentMetric == previousMetric {
+					overTransactionData = append(overTransactionData, fval)
+				} else {
+					vms.MetricSummaries[currentMetric] = storageclient.MetricSummary{
+						SummaryOverTransactions: calculateSummarizedMetric(overTransactionData),
+						SummaryOverUsers:        calculateSummarizedMetric(overUserData),
+					}
+
+					previousMetric = currentMetric
+
+					// reset data
+					overUserData = []float64{fval}
+					overTransactionData = []float64{fval}
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &vms, nil
+}
+
+func calculateSummarizedMetric(data []float64) storageclient.SummarizedMetric {
+	if len(data) == 0 {
+		return storageclient.SummarizedMetric{}
+	}
+
+	count := len(data)
+
+	// calculate sum, min, and max
+	sum := 0.0
+	min := data[0]
+	max := data[0]
+	for _, f := range data {
+		sum += f
+
+		if f < min {
+			min = f
+		}
+
+		if f > max {
+			max = f
+		}
+	}
+
+	mean := sum / float64(count)
+
+	// calculate stdDev
+	stdDev := 0.0
+	for _, f := range data {
+		stdDev += math.Pow(f-mean, 2)
+	}
+	stdDev = math.Sqrt(stdDev / float64(count))
+
+	return storageclient.SummarizedMetric{
+		Count:  uint(count),
+		Mean:   mean,
+		StdDev: stdDev,
+		Min:    min,
+		Max:    max,
+	}
 }
