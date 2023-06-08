@@ -4,6 +4,7 @@ package fake
 import (
 	"context"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -29,6 +30,16 @@ instead of server-side apply as in the real client, we perform of merge patch in
 */
 func (cl *Client) Patch(gvr schema.GroupVersionResource, objNamespace string, objName string, jsonBytes []byte) (*unstructured.Unstructured, error) {
 	return cl.FakeDynamicClient.Resource(gvr).Namespace(objNamespace).Patch(context.TODO(), objName, types.MergePatchType, jsonBytes, metav1.PatchOptions{})
+}
+
+// GetSecret returns the typed Secret namespace/name
+func (cl *Client) GetSecret(namespace, name string) (*corev1.Secret, error) {
+	return cl.Clientset.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+}
+
+// UpdateSecret updates the secret in the cluster
+func (cl *Client) UpdateSecret(s *corev1.Secret) (*corev1.Secret, error) {
+	return cl.Clientset.CoreV1().Secrets(s.Namespace).Update(context.Background(), s, metav1.UpdateOptions{})
 }
 
 // New returns a new fake Kubernetes client populated with runtime objects
@@ -62,6 +73,11 @@ func New(sObjs []runtime.Object, unsObjs []runtime.Object) *Client {
 				Version:  "v1beta1",
 				Resource: "inferenceservices",
 			}: "InferenceServiceList",
+			{
+				Group:    "",
+				Version:  "v1",
+				Resource: "secrets",
+			}: "SecretList",
 		}, unsObjs...),
 	}
 }
