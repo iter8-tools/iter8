@@ -191,13 +191,15 @@ func TestGetSummaryMetrics(t *testing.T) {
 	vms, err := client.GetSummaryMetrics(app, version, signature)
 	assert.NoError(t, err)
 
-	assert.Equal(t, uint(6), vms.MetricSummaries[metric].SummaryOverTransactions.Count)
+	assert.Equal(t, uint64(3), vms.NumUsers)
+
+	assert.Equal(t, uint64(6), vms.MetricSummaries[metric].SummaryOverTransactions.Count)
 	assert.Equal(t, 20.333333333333332, vms.MetricSummaries[metric].SummaryOverTransactions.Mean)
 	assert.Equal(t, 16.940254491070146, vms.MetricSummaries[metric].SummaryOverTransactions.StdDev)
 	assert.Equal(t, 0.5, vms.MetricSummaries[metric].SummaryOverTransactions.Min)
 	assert.Equal(t, 50.0, vms.MetricSummaries[metric].SummaryOverTransactions.Max)
 
-	assert.Equal(t, uint(3), vms.MetricSummaries[metric].SummaryOverUsers.Count)
+	assert.Equal(t, uint64(3), vms.MetricSummaries[metric].SummaryOverUsers.Count)
 	assert.Equal(t, 40.666666666666664, vms.MetricSummaries[metric].SummaryOverUsers.Mean)
 	assert.Equal(t, 28.534579412043595, vms.MetricSummaries[metric].SummaryOverUsers.StdDev)
 	assert.Equal(t, 2.0, vms.MetricSummaries[metric].SummaryOverUsers.Min)

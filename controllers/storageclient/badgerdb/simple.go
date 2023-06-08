@@ -86,6 +86,10 @@ func validateKeyToken(s string) error {
 	return nil
 }
 
+func getMetricPrefix(applicationName string, version int, signature string) string {
+	return fmt.Sprintf("kt-metric::%s::%d::%s::", applicationName, version, signature)
+}
+
 func getMetricKey(applicationName string, version int, signature, metric, user, transaction string) (string, error) {
 	if err := validateKeyToken(applicationName); err != nil {
 		return "", errors.New("application name cannot have \":\"")
@@ -103,7 +107,7 @@ func getMetricKey(applicationName string, version int, signature, metric, user, 
 		return "", errors.New("transaction ID cannot have \":\"")
 	}
 
-	return fmt.Sprintf("kt-metric::%s::%d::%s::%s::%s::%s", applicationName, version, signature, metric, user, transaction), nil
+	return fmt.Sprintf("%s%s::%s::%s", getMetricPrefix(applicationName, version, signature), metric, user, transaction), nil
 }
 
 // SetMetric sets a metric based on the app name, version, signature, metric type, user name, transaction ID, and metric value with BadgerDB
@@ -129,14 +133,21 @@ func (cl Client) SetMetric(applicationName string, version int, signature, metri
 	return err
 }
 
+func getUserPrefix(applicationName string, version int, signature string) string {
+	return fmt.Sprintf("kt-users::%s::%d::%s::", applicationName, version, signature)
+}
+
 func getUserKey(applicationName string, version int, signature, user string) string {
-	return fmt.Sprintf("kt-users::%s::%d::%s::%s", applicationName, version, signature, user)
+	// getUserKey() is just getUserPrefix() with the user appended at the end
+	return fmt.Sprintf("%s%s", getUserPrefix(applicationName, version, signature), user)
 }
 
 // SetUser sets a user based on the app name, version, signature, and user name with BadgerDB
 // Example key/value: kt-users::my-app::0::my-signature::my-user -> true
 func (cl Client) SetUser(applicationName string, version int, signature, user string) error {
 	key := getUserKey(applicationName, version, signature, user)
+
+	fmt.Println(key)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
@@ -145,14 +156,44 @@ func (cl Client) SetUser(applicationName string, version int, signature, user st
 	})
 }
 
-// this will use GetAppMetricNames, to fetch the metric values ... and summarize them into the VersionMetricSummary data structure
+// getUserCount gets the number of users
+func (cl Client) getUserCount(applicationName string, version int, signature string) (uint64, error) {
+	count := uint64(0)
+
+	err := cl.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = false
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		prefix := []byte(getUserPrefix(applicationName, version, signature))
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			count++
+		}
+		return nil
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+// GetSummaryMetrics gets summarized metrics for a particular application, version, and signature
 func (cl Client) GetSummaryMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetricSummary, error) {
+	count, err := cl.getUserCount(applicationName, version, signature)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get user count: %e", err)
+	}
+
 	vms := storageclient.VersionMetricSummary{
+		NumUsers:        count,
 		MetricSummaries: map[string]storageclient.MetricSummary{},
 	}
 
+	// get metric summaries
 	// iter8 over all metrics with the provided application name, version, and signature
-	err := cl.db.View(func(txn *badger.Txn) error {
+	err = cl.db.View(func(txn *badger.Txn) error {
 		// used to capture all the metric values for the current metric
 		var overUserData []float64        // cumulative metric value for a particular user
 		var overTransactionData []float64 // all metric values
@@ -164,7 +205,7 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 
-		prefix := []byte(fmt.Sprintf("kt-metric::%s::%d::%s::", applicationName, version, signature))
+		prefix := []byte(getMetricPrefix(applicationName, version, signature))
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 
@@ -239,7 +280,6 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -247,12 +287,14 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 	return &vms, nil
 }
 
+// calculateSummarizedMetric calculates a metric summary for a particular collection of data
 func calculateSummarizedMetric(data []float64) storageclient.SummarizedMetric {
 	if len(data) == 0 {
 		return storageclient.SummarizedMetric{}
 	}
 
-	count := len(data)
+	// NOTE: len() does not produce a uint64
+	count := uint64(len(data))
 
 	// calculate sum, min, and max
 	sum := 0.0
@@ -280,7 +322,7 @@ func calculateSummarizedMetric(data []float64) storageclient.SummarizedMetric {
 	stdDev = math.Sqrt(stdDev / float64(count))
 
 	return storageclient.SummarizedMetric{
-		Count:  uint(count),
+		Count:  count,
 		Mean:   mean,
 		StdDev: stdDev,
 		Min:    min,

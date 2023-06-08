@@ -1,26 +1,29 @@
 // Package storageclient provides the storage client for the controllers package
 package storageclient
 
-// SummarizedMetric is a summarization
+// SummarizedMetric is a metric summary
 type SummarizedMetric struct {
-	Count  uint
+	Count  uint64
 	Mean   float64
 	StdDev float64
 	Min    float64
 	Max    float64
 }
 
-// MetricSummary
+// MetricSummary contains metric summary for all metrics as well as cumulative metrics per user
 type MetricSummary struct {
-	SummaryOverUsers        SummarizedMetric
+	// all transactions
 	SummaryOverTransactions SummarizedMetric
+
+	// cumulative metrics per user
+	SummaryOverUsers SummarizedMetric
 }
 
-// VersionMetricSummary is a summarization of metrics for a given version
+// VersionMetricSummary is a metric summary for a given app version
 type VersionMetricSummary struct {
 	NumUsers uint64
 
-	// key = metric name; value is the summary value of the metric
+	// key = metric name; value is the metric summary
 	MetricSummaries map[string]MetricSummary
 }
 
