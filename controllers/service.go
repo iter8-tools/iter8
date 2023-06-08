@@ -13,6 +13,8 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	pb "github.com/iter8-tools/iter8/controllers/grpc"
+	"github.com/iter8-tools/iter8/controllers/k8sclient"
+	"helm.sh/helm/v3/pkg/cli"
 
 	// auth package is necessary to enable authentication with various cloud providers
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -51,11 +53,18 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 	log.Logger.Trace("WriteMetric called")
 	defer log.Logger.Trace("WriteMetric completed")
 
-	err := writeMetricInternal(
+	client, err := k8sclient.New(cli.New())
+	if err != nil {
+		log.Logger.Error("could not obtain Kubernetes client")
+		return &emptypb.Empty{}, err
+	}
+
+	err = writeMetricInternal(
 		metricMsg.GetApplication(),
 		metricMsg.GetUser(),
 		metricMsg.GetName(),
 		metricMsg.GetValue(),
+		client,
 	)
 
 	return &emptypb.Empty{}, err
