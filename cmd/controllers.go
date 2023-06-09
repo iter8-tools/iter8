@@ -65,7 +65,12 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 			log.Logger.Debug("started controllers ... ")
 
 			// launch gRPC server to respond to frontend requests
-			go controllers.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
+			go func() {
+				err := controllers.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
+				if err != nil {
+					log.Logger.Error("cound not start A/B/n service")
+				}
+			}()
 
 			// if createSigCh, then block until there is an os.Interrupt
 			if createSigCh {
@@ -78,6 +83,7 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 			return nil
 		},
 	}
+	addPortFlag(cmd, &port)
 	return cmd
 }
 

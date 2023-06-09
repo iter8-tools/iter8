@@ -4,17 +4,18 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/iter8-tools/iter8/controllers/k8sclient/fake"
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
+// tests that we get the same result for the same inputs
 func TestLookupInternal(t *testing.T) {
 	namespace, name := "default", "test"
 
-	// setup: add desired routemaps to allRoutemaps
+	// setup: add desired routemaps to allRoutemaps; first clear all routemaps
+	allRoutemaps = routemaps{
+		nsRoutemap: make(map[string]routemapsByName),
+	}
 	addRouteMapForTest(namespace, name, &routemap{
 		mutex: sync.RWMutex{},
 		ObjectMeta: metav1.ObjectMeta{
@@ -41,73 +42,34 @@ func TestLookupInternal(t *testing.T) {
 	}
 }
 
-func TestWriteMetricInternal(t *testing.T) {
+func TestGetApplicationDataInternal(t *testing.T) {
 	namespace, name := "default", "test"
-	// setup: add desired routemaps to allRoutemaps
-	addRouteMapForTest(namespace, name, &routemap{
-		mutex: sync.RWMutex{},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
-		Versions:          make([]version, 2),
-		RoutingTemplates:  map[string]routingTemplate{},
-		normalizedWeights: []uint32{},
-	})
 
-	// setup: create secret
-	secret := corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
-	}
+	// setup
+	client := setupRouteMaps(t, namespace, name)
 
-	// setup: create a (fake) client
-	client := fake.New([]runtime.Object{&secret}, nil)
-
-	// when we create a secret, Data[secretKey] is nil
-	s, err := client.GetSecret(namespace, name)
+	// add a metric value
+	err := writeMetricInternal(namespace+"/"+name, "user", "metric", "45", client)
 	assert.NoError(t, err)
-	assert.NotNil(t, s)
-	rawData := s.Data[secretKey]
-	assert.Nil(t, rawData)
-
-	err = writeMetricInternal(namespace+"/"+name, "user", "metric", "45", client)
-	assert.NoError(t, err)
-
-	// as a side effect, one of the versions of the routemap will have a metric value
-	rm := allRoutemaps.getRoutemapFromNamespaceName(namespace, name)
-	assert.NotNil(t, rm)
-	assert.Equal(t, 1, len(rm.Versions[0].Metrics)+len(rm.Versions[1].Metrics))
-
-	// verify we have written to the secret: Data[secretKey] is no longer empty
-	s, err = client.GetSecret(namespace, name)
-	assert.NoError(t, err)
-	assert.NotNil(t, s)
-	rawData = s.Data[secretKey]
-	assert.NotNil(t, rawData)
 
 	// add a second value to metric
 	err = writeMetricInternal(namespace+"/"+name, "user", "metric", "55", client)
 	assert.NoError(t, err)
 
-	// verify that we updated it correctly
-	rm = allRoutemaps.getRoutemapFromNamespaceName(namespace, name)
-	assert.NotNil(t, rm)
-	assert.Equal(t, 1, len(rm.Versions[0].Metrics)+len(rm.Versions[1].Metrics))
-	for i := range [2]int{} {
-		if rm.Versions[i].Metrics != nil {
-			m := rm.Versions[i].Metrics["metric"]
-			assert.Equal(t, uint32(2), m.Count())
-			assert.Equal(t, float64(45), m.Min())
-			assert.Equal(t, float64(55), m.Max())
-			assert.Equal(t, float64(100), m.Sum())
-		}
+	_, tr, err := lookupInternal("default/test", "user")
+	assert.NoError(t, err)
+	assert.NotNil(t, tr)
+
+	// get data from secret
+	app, err := getApplicationDataInternal(namespace + "/" + name)
+	assert.NoError(t, err)
+	assert.NotNil(t, app)
+
+	// verify result
+	if *tr == 0 {
+		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":{\"metric\":[2,100,45,55,5050]}},\"1\":{\"metrics\":null}}}", app)
+	} else {
+		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":null},\"1\":{\"metrics\":{\"metric\":[2,100,45,55,5050]}}}}", app)
 	}
 }
 

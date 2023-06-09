@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"sync"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -80,20 +79,19 @@ func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *p
 	}, err
 }
 
-// launchGRPCServer starts gRPC server
-func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}) {
+// LaunchGRPCServer starts gRPC server
+func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}) error {
 	log.Logger.Tracef("starting gRPC service on port %d", port)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
-		log.Logger.WithError(err).Fatal("failed to listen")
+		log.Logger.WithError(err).Error("service failed to listen")
+		return err
 	}
 
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterABNServer(grpcServer, newServer())
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
 	go func() {
 		<-stopCh
 		log.Logger.Warnf("stop channel closed, shutting down")
@@ -102,8 +100,9 @@ func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}
 
 	err = grpcServer.Serve(lis)
 	if err != nil {
-		log.Logger.WithError(err).Fatal("failed to start service")
+		log.Logger.WithError(err).Error("failed to start service")
+		return err
 	}
-	wg.Wait()
-	log.Logger.Trace("service shutdown")
+
+	return nil
 }

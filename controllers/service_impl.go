@@ -235,9 +235,6 @@ func write(client k8sclient.Interface, a legacyApplication) error {
 		return err
 	}
 
-	// // update last write time for application
-	// now := time.Now()
-	// m.lastWriteTimes[a.Name] = &now
 	return nil
 }
 
