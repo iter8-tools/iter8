@@ -102,7 +102,7 @@ func TestWriteMetricInternal(t *testing.T) {
 	assert.Equal(t, 1, len(rm.Versions[0].Metrics)+len(rm.Versions[1].Metrics))
 	for i := range [2]int{} {
 		if rm.Versions[i].Metrics != nil {
-			m := rm.Versions[0].Metrics["metric"]
+			m := rm.Versions[i].Metrics["metric"]
 			assert.Equal(t, uint32(2), m.Count())
 			assert.Equal(t, float64(45), m.Min())
 			assert.Equal(t, float64(55), m.Max())
