@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -16,6 +17,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	seriyaml "k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -36,6 +38,7 @@ type version struct {
 	Weight    *uint32                                  `json:"weight,omitempty"`
 	Metrics   map[string]*summarymetrics.SummaryMetric `json:"metrics,omitempty"`
 	Label     *string                                  `json:"label,omitempty"`
+	Signature string                                   `json:"signature"` // TODO: should this be omitempty? It should never be empty?
 }
 
 type resource struct {
@@ -127,7 +130,6 @@ func (s *routemap) normalizeWeights(config *Config) {
 		derivedWeights[0] = defaultVersionWeight
 	}
 	s.normalizedWeights = derivedWeights
-
 }
 
 // getWeightOverrides is looking for weights in the object annotations
@@ -219,6 +221,43 @@ versionLoop:
 	return versionsAvailable
 }
 
+func removeStatusAndIter8Labels(u *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+	// copy provided object
+	copy := u.DeepCopy()
+
+	// remove status
+
+	// remove iter8 labels
+
+	return copy, nil
+}
+
+func (s *routemap) calculateSignature(v version, client k8sclient.Interface) error {
+	// get all uResources of a version
+	resources := []*unstructured.Unstructured{}
+	for _, resource := range v.Resources {
+		u, err := client.Resource(schema.GroupVersionResource{}).Namespace(*resource.Namespace).Get(context.Background(), resource.Name, metav1.GetOptions{}) // TODO: GVRShort to GVR
+		if err != nil {
+			// TODO: "cannot get resource"
+			return err
+		}
+
+		cu, err := removeStatusAndIter8Labels(u)
+		if err != nil {
+			// TODO: "cannot remove status and Iter8 labels from resource"
+			// TODO: is it necessary to remove the labels from the resource?
+			return err
+		}
+
+		resources = append(resources, cu)
+	}
+
+	// hash resources
+	// potential package: https://pkg.go.dev/github.com/mitchellh/hashstructure
+
+	return nil
+}
+
 // reconcile a routemap
 func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 	// lock for reading and later unlock
@@ -227,6 +266,14 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 
 	// normalize version weights
 	s.normalizeWeights(config)
+
+	// calculate the signature for the version
+	for _, version := range s.Versions {
+		err := s.calculateSignature(version, client)
+		if err != nil {
+			// TODO: "cannot calculate signature for version"
+		}
+	}
 
 	// if leader, compute routing policy and perform server side apply
 	if leaderStatus, err := leaderIsMe(); leaderStatus && err == nil {

@@ -13,7 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-// applicatoon is an legacy object capturing application details
+// application is an legacy object capturing application details
 type legacyApplication struct {
 	// Name is of the form namespace/Name where the Name is the value of the label app.kubernetes.io/Name
 	Name string `json:"name" yaml:"name"`
