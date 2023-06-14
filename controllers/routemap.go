@@ -34,7 +34,7 @@ type routemap struct {
 type version struct {
 	Resources []resource `json:"resources,omitempty"`
 	Weight    *uint32    `json:"label,omitempty"`
-	Signature string
+	Signature uint64
 }
 
 type resource struct {
