@@ -49,6 +49,7 @@ func (cl *Client) UpdateSecret(s *corev1.Secret) (*corev1.Secret, error) {
 	return cl.Clientset.CoreV1().Secrets(s.Namespace).Update(context.Background(), s, metav1.UpdateOptions{})
 }
 
+// ClientSet returns the client set
 func (cl *Client) ClientSet() *kubernetes.Clientset {
 	return cl.Clientset
 }

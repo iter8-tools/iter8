@@ -289,9 +289,7 @@ func (i testInformer) Informer() cache.SharedIndexInformer {
 }
 
 func (i testInformer) Lister() cache.GenericLister {
-	return testLister{
-		o: i.o,
-	}
+	return testLister(i)
 }
 
 type testLister struct {
@@ -307,9 +305,7 @@ func (l testLister) Get(name string) (runtime.Object, error) {
 }
 
 func (l testLister) ByNamespace(namespace string) cache.GenericNamespaceLister {
-	return testGenericLister{
-		o: l.o,
-	}
+	return testGenericLister(l)
 }
 
 type testGenericLister struct {

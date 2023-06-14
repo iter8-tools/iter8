@@ -80,8 +80,3 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 	}
 	return cmd
 }
-
-// addTimeoutFlag adds timeout flag to command
-func addPortFlag(cmd *cobra.Command, portPtr *int) {
-	cmd.Flags().IntVar(portPtr, "port", 50051, "service port")
-}

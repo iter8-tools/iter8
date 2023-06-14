@@ -80,7 +80,7 @@ func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *p
 	}, err
 }
 
-// launchGRPCServer starts gRPC server
+// LaunchGRPCServer starts gRPC server
 func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}) {
 	log.Logger.Tracef("starting gRPC service on port %d", port)
 
