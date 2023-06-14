@@ -5,7 +5,7 @@ import (
 	"github.com/iter8-tools/iter8/base/summarymetrics"
 )
 
-// LegacyApplicatoon is an legacy object capturing application details
+// LegacyApplication is an legacy object capturing application details
 // Deprecated: LegacyApplication will be removed when support for alternative metric stores is added.
 type LegacyApplication struct {
 	// Name is of the form namespace/Name where the Name is the value of the label app.kubernetes.io/Name
