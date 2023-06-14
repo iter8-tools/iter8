@@ -13,7 +13,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/cache"
 )
 
 // normalizeWeights sets the normalized weights for each version of the routemap
@@ -213,4 +216,141 @@ func TestGetObservedGeneration(t *testing.T) {
 		assert.Equal(t, tt.val, v)
 		assert.Equal(t, tt.ok, o)
 	}
+}
+
+func TestCleanUnstructured(t *testing.T) {
+	deployment := unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "apps/v1",
+			"kind":       "Deployment",
+			"metadata": map[string]interface{}{
+				"namespace": "myNamespace",
+				"name":      "myName", // remove name
+				"labels": map[string]interface{}{
+					"myLabel":        "myLabelValue",
+					weightAnnotation: "50", // remove weightAnnotation
+				},
+				"finalizers": []interface{}{ // remove finalizers
+					"finalizer.extensions/v1beta1",
+				},
+			},
+			"spec": map[string]interface{}{
+				"containers": []map[string]interface{}{
+					{
+						"command": []string{
+							"/bin/iter8",
+						},
+					},
+				},
+			},
+			"status": map[string]interface{}{ // remove status
+				"startTime": "2023-05-22T18:07:51Z",
+			},
+		},
+	}
+
+	cleaned := cleanUnstructured(&deployment)
+
+	expected := unstructured.Unstructured(
+		unstructured.Unstructured{
+			Object: map[string]interface{}{
+				"apiVersion": "apps/v1",
+				"kind":       "Deployment",
+				"metadata": map[string]interface{}{
+					"namespace": "myNamespace",
+					"labels": map[string]interface{}{
+						"myLabel": "myLabelValue",
+					},
+					"finalizers": []interface{}{},
+				},
+				"spec": map[string]interface{}{
+					"containers": []map[string]interface{}{
+						{
+							"command": []string{
+								"/bin/iter8",
+							},
+						},
+					},
+				},
+				"status": map[string]interface{}{},
+			},
+		},
+	)
+
+	assert.Equal(t, &expected, cleaned)
+}
+
+type testInformer struct {
+	o runtime.Object
+}
+
+func (i testInformer) Informer() cache.SharedIndexInformer {
+	return nil
+}
+
+func (i testInformer) Lister() cache.GenericLister {
+	return testLister{
+		o: i.o,
+	}
+}
+
+type testLister struct {
+	o runtime.Object
+}
+
+func (l testLister) List(selector labels.Selector) (ret []runtime.Object, err error) {
+	return nil, nil
+}
+
+func (l testLister) Get(name string) (runtime.Object, error) {
+	return nil, nil
+}
+
+func (l testLister) ByNamespace(namespace string) cache.GenericNamespaceLister {
+	return testGenericLister{
+		o: l.o,
+	}
+}
+
+type testGenericLister struct {
+	o runtime.Object
+}
+
+func (gl testGenericLister) List(selector labels.Selector) (ret []runtime.Object, err error) {
+	return nil, nil
+}
+
+func (gl testGenericLister) Get(name string) (runtime.Object, error) {
+	return gl.o, nil
+}
+
+func TestComputeSignature(t *testing.T) {
+	gvrShort := "myGVRShort"
+	name := "myName"
+	namespace := "myNamespace"
+
+	u := unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"namespace": namespace,
+				"name":      name,
+			},
+		},
+	}
+
+	appInformers[gvrShort] = testInformer{
+		o: u.DeepCopyObject(),
+	}
+
+	signature, err := computeSignature(version{
+		Resources: []resource{
+			{
+				GVRShort:  gvrShort,
+				Name:      name,
+				Namespace: &namespace,
+			},
+		},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, uint64(7930650859921608258), signature)
 }
