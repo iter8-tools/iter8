@@ -34,7 +34,7 @@ type routemap struct {
 type version struct {
 	Resources []resource `json:"resources,omitempty"`
 	Weight    *uint32    `json:"label,omitempty"`
-	Signature uint64
+	Signature *uint64    `json:"signature,omitempty"`
 }
 
 type resource struct {
@@ -70,9 +70,6 @@ const (
 	weightAnnotation     = "iter8.tools/weight"
 	defaultVersionWeight = uint32(1)
 	spec                 = "spec"
-	status               = "status"
-	metadata             = "metadata"
-	resourceVersion      = "resourceVersion"
 )
 
 // Weights provide the relative weights for traffic routing between versions
@@ -232,10 +229,10 @@ func computeSignature(v version) (uint64, error) {
 			return 0, fmt.Errorf("cannot get resource: %e", err)
 		}
 
-		// TODO: NestedFieldCopy() or NestedFieldNoCopy()?
 		// extract spec section from resource, if applicable
 		specSection, _, err := unstructured.NestedFieldNoCopy(obj.(*unstructured.Unstructured).Object, spec)
 		if err != nil {
+			// error here does not mean no spec, it means cannot traverse the object (to find if there is a spec)
 			return 0, fmt.Errorf("cannot traverse resource: %e", err)
 		}
 
@@ -264,11 +261,11 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 	for _, version := range s.Versions {
 		signature, err := computeSignature(version)
 		if err != nil {
-			// TODO: throw error?
-			log.Logger.Error("cannot calculate signature for version: ", version)
+			log.Logger.WithStackTrace(err.Error()).Error("cannot calculate signature for version")
+			return
 		}
 
-		version.Signature = signature
+		version.Signature = &signature
 	}
 
 	// if leader, compute routing policy and perform server side apply

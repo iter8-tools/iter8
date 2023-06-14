@@ -346,8 +346,8 @@ func TestComputeSignature(t *testing.T) {
 				},
 			},
 		})
-		assert.NoError(t, err)
 
+		assert.NoError(t, err)
 		assert.Equal(t, test.expectedSignature, signature)
 	}
 }
