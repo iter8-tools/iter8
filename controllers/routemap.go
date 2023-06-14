@@ -95,7 +95,7 @@ func (s *routemap) normalizeWeights(config *Config) {
 	derivedWeights := make([]uint32, len(s.Versions))
 	available := s.getAvailableVersions(config)
 	// overrides from version resource annotation
-	override := s.getWeightOverrides(config)
+	override := s.getWeightOverrides()
 
 	for i, v := range s.Versions {
 		log.Logger.Debugf("version %d is available? %t", i, available[i])
@@ -135,7 +135,7 @@ func (s *routemap) normalizeWeights(config *Config) {
 // override pointer for a version may be nil, if there are no valid weight annotation for the version
 // if a version has multiple resources,
 // this function looks for the override in the first resource only
-func (s *routemap) getWeightOverrides(config *Config) []*uint32 {
+func (s *routemap) getWeightOverrides() []*uint32 {
 	override := make([]*uint32, len(s.Versions))
 	for i, v := range s.Versions {
 		if len(v.Resources) > 0 {
