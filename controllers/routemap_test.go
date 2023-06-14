@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"sync"
 	"testing"
@@ -218,68 +219,6 @@ func TestGetObservedGeneration(t *testing.T) {
 	}
 }
 
-func TestCleanUnstructured(t *testing.T) {
-	deployment := unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "apps/v1",
-			"kind":       "Deployment",
-			"metadata": map[string]interface{}{
-				"namespace": "myNamespace",
-				"name":      "myName", // remove name
-				"labels": map[string]interface{}{
-					"myLabel":        "myLabelValue",
-					weightAnnotation: "50", // remove weightAnnotation
-				},
-				"finalizers": []interface{}{ // remove finalizers
-					"finalizer.extensions/v1beta1",
-				},
-			},
-			"spec": map[string]interface{}{
-				"containers": []map[string]interface{}{
-					{
-						"command": []string{
-							"/bin/iter8",
-						},
-					},
-				},
-			},
-			"status": map[string]interface{}{ // remove status
-				"startTime": "2023-05-22T18:07:51Z",
-			},
-		},
-	}
-
-	cleaned := cleanUnstructured(&deployment)
-
-	expected := unstructured.Unstructured(
-		unstructured.Unstructured{
-			Object: map[string]interface{}{
-				"apiVersion": "apps/v1",
-				"kind":       "Deployment",
-				"metadata": map[string]interface{}{
-					"namespace": "myNamespace",
-					"labels": map[string]interface{}{
-						"myLabel": "myLabelValue",
-					},
-					"finalizers": []interface{}{},
-				},
-				"spec": map[string]interface{}{
-					"containers": []map[string]interface{}{
-						{
-							"command": []string{
-								"/bin/iter8",
-							},
-						},
-					},
-				},
-				"status": map[string]interface{}{},
-			},
-		},
-	)
-
-	assert.Equal(t, &expected, cleaned)
-}
-
 type testInformer struct {
 	o runtime.Object
 }
@@ -321,32 +260,172 @@ func (gl testGenericLister) Get(name string) (runtime.Object, error) {
 }
 
 func TestComputeSignature(t *testing.T) {
-	gvrShort := "myGVRShort"
+	noSpecSignature := uint64(17263656795266626102)
+
 	name := "myName"
 	namespace := "myNamespace"
 
-	u := unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"metadata": map[string]interface{}{
-				"namespace": namespace,
-				"name":      name,
+	var tests = []struct {
+		u                 unstructured.Unstructured
+		expectedSignature uint64
+	}{
+		{
+			u: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"namespace": namespace,
+						"name":      name,
+					},
+				},
+			},
+			expectedSignature: noSpecSignature,
+		},
+		{
+			u: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "apps/v1",
+					"kind":       "Deployment",
+					"metadata": map[string]interface{}{
+						"namespace": namespace,
+						"name":      name,
+						"labels": map[string]interface{}{
+							"myLabel":        "myLabelValue",
+							weightAnnotation: "50",
+						},
+						"finalizers": []interface{}{
+							"finalizer.extensions/v1beta1",
+						},
+					},
+					"status": map[string]interface{}{
+						"startTime": "2023-05-22T18:07:51Z",
+					},
+				},
+			},
+			expectedSignature: noSpecSignature,
+		},
+		{
+			u: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "apps/v1",
+					"kind":       "Deployment",
+					"metadata": map[string]interface{}{
+						"namespace": namespace,
+						"name":      name,
+						"labels": map[string]interface{}{
+							"myLabel":        "myLabelValue",
+							weightAnnotation: "50",
+						},
+						"finalizers": []interface{}{
+							"finalizer.extensions/v1beta1",
+						},
+					},
+					"spec": "mySpec",
+					"status": map[string]interface{}{
+						"startTime": "2023-05-22T18:07:51Z",
+					},
+				},
+			},
+			expectedSignature: uint64(1223096949950699965),
+		},
+	}
+
+	for index, test := range tests {
+		// gvrShort is what connects the appInformer to computeSignature()
+		gvrShort := fmt.Sprint(index)
+
+		appInformers[gvrShort] = testInformer{
+			o: test.u.DeepCopyObject(),
+		}
+
+		signature, err := computeSignature(version{
+			Resources: []resource{
+				{
+					GVRShort:  gvrShort,
+					Name:      name,
+					Namespace: &namespace,
+				},
+			},
+		})
+		assert.NoError(t, err)
+
+		assert.Equal(t, test.expectedSignature, signature)
+	}
+}
+
+func TestComputeSignatureMultipleResources(t *testing.T) {
+	name := "myName"
+	namespace := "myNamespace"
+
+	var resources = []unstructured.Unstructured{
+		{
+			Object: map[string]interface{}{
+				"metadata": map[string]interface{}{
+					"namespace": namespace,
+					"name":      name,
+				},
+			},
+		},
+		{
+			Object: map[string]interface{}{
+				"apiVersion": "apps/v1",
+				"kind":       "Deployment",
+				"metadata": map[string]interface{}{
+					"namespace": namespace,
+					"name":      name,
+					"labels": map[string]interface{}{
+						"myLabel":        "myLabelValue",
+						weightAnnotation: "50",
+					},
+					"finalizers": []interface{}{
+						"finalizer.extensions/v1beta1",
+					},
+				},
+				"status": map[string]interface{}{
+					"startTime": "2023-05-22T18:07:51Z",
+				},
+			},
+		},
+		{
+			Object: map[string]interface{}{
+				"apiVersion": "apps/v1",
+				"kind":       "Deployment",
+				"metadata": map[string]interface{}{
+					"namespace": namespace,
+					"name":      name,
+					"labels": map[string]interface{}{
+						"myLabel":        "myLabelValue",
+						weightAnnotation: "50",
+					},
+					"finalizers": []interface{}{
+						"finalizer.extensions/v1beta1",
+					},
+				},
+				"spec": "mySpec",
+				"status": map[string]interface{}{
+					"startTime": "2023-05-22T18:07:51Z",
+				},
 			},
 		},
 	}
 
-	appInformers[gvrShort] = testInformer{
-		o: u.DeepCopyObject(),
+	v := version{}
+
+	for i, r := range resources {
+		// gvrShort is what connects the appInformer to computeSignature()
+		gvrShort := fmt.Sprint(i)
+
+		appInformers[gvrShort] = testInformer{
+			o: r.DeepCopyObject(),
+		}
+
+		v.Resources = append(v.Resources, resource{
+			GVRShort:  gvrShort,
+			Name:      name,
+			Namespace: &namespace,
+		})
 	}
 
-	signature, err := computeSignature(version{
-		Resources: []resource{
-			{
-				GVRShort:  gvrShort,
-				Name:      name,
-				Namespace: &namespace,
-			},
-		},
-	})
+	signature, err := computeSignature(v)
 	assert.NoError(t, err)
-	assert.Equal(t, uint64(7930650859921608258), signature)
+	assert.Equal(t, uint64(10542172099898397181), signature)
 }

@@ -69,6 +69,7 @@ const (
 	routemapStrSpec      = "strSpec"
 	weightAnnotation     = "iter8.tools/weight"
 	defaultVersionWeight = uint32(1)
+	spec                 = "spec"
 	status               = "status"
 	metadata             = "metadata"
 	resourceVersion      = "resourceVersion"
@@ -220,64 +221,25 @@ versionLoop:
 	return versionsAvailable
 }
 
-// cleanUnstructured removes the name, status, finalizers, weightAnnotation label, resource version
-func cleanUnstructured(u *unstructured.Unstructured) *unstructured.Unstructured {
-	// remove name
-	u.SetName("")
-
-	// remove status
-	_, ok := u.Object[status]
-	if ok {
-		u.Object[status] = map[string]interface{}{}
-	}
-
-	// remove finalizers
-	u.SetFinalizers([]string{})
-
-	// remove weightAnnotation label
-	labels := u.GetLabels()
-	if labels != nil {
-		newLabels := map[string]string{}
-		for name, value := range labels {
-			// skip weightAnnotation label
-			if name == weightAnnotation {
-				continue
-			}
-
-			newLabels[name] = value
-		}
-
-		u.SetLabels(newLabels)
-	}
-
-	// remove resource version
-	rM, ok := u.Object[metadata]
-	if ok {
-		cM, ok := rM.(map[string]interface{})
-		if ok {
-			_, ok := cM[resourceVersion]
-			if ok {
-				cM[resourceVersion] = ""
-			}
-		}
-	}
-
-	return u
-}
-
 // computeSignature computes and sets the signature for a particular version
+// signature is based on the spec section
 func computeSignature(v version) (uint64, error) {
-	// get all uResources of a version
-	resources := []*unstructured.Unstructured{}
+	// get all resources of a version
+	resources := []interface{}{}
 	for _, resource := range v.Resources {
 		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
 		if err != nil {
 			return 0, fmt.Errorf("cannot get resource: %e", err)
 		}
 
-		cu := cleanUnstructured(obj.(*unstructured.Unstructured))
+		// TODO: NestedFieldCopy() or NestedFieldNoCopy()?
+		// extract spec section from resource, if applicable
+		specSection, _, err := unstructured.NestedFieldNoCopy(obj.(*unstructured.Unstructured).Object, spec)
+		if err != nil {
+			return 0, fmt.Errorf("cannot traverse resource: %e", err)
+		}
 
-		resources = append(resources, cu)
+		resources = append(resources, specSection)
 	}
 
 	// hash resources
