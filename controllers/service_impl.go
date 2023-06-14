@@ -12,6 +12,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/base/summarymetrics"
+	"github.com/iter8-tools/iter8/controllers/abn"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
@@ -153,52 +154,29 @@ func writeMetricInternal(application, user, metric, valueStr string, client k8sc
 	return write(client, legacyApp)
 }
 
-// applicatoon is an legacy object capturing application details
-type legacyApplication struct {
-	// Name is of the form namespace/Name where the Name is the value of the label app.kubernetes.io/Name
-	Name string `json:"name" yaml:"name"`
-	// Tracks is map from application track identifier to version name
-	Tracks legacyTracks `json:"tracks" yaml:"tracks"`
-	// Versions maps version name to version data (a set of metrics)
-	Versions legacyVersions `json:"versions" yaml:"versions"`
-}
+func routemapToLegacyApplication(s *routemap) abn.LegacyApplication {
 
-// legacyVersions is a map of the version name to a version object
-type legacyVersions map[string]*legacyVersion
-
-// legacyTracks is map of track identifiers to version names
-type legacyTracks map[string]string
-
-// legacyVersion is information about versions of an application in a Kubernetes cluster
-type legacyVersion struct {
-	// List of (summary) metrics for a version
-	Metrics map[string]*summarymetrics.SummaryMetric `json:"metrics" yaml:"metrics"`
-}
-
-func routemapToLegacyApplication(s *routemap) legacyApplication {
-
-	tracks := make(legacyTracks, len(s.Versions))
-	versions := make(legacyVersions, len(s.Versions))
+	tracks := make(abn.LegacyTracks, len(s.Versions))
+	versions := make(abn.LegacyVersions, len(s.Versions))
 	for t, v := range s.Versions {
 		asStr := fmt.Sprintf("%d", t)
 		tracks[asStr] = asStr
-		versions[asStr] = &legacyVersion{
+		versions[asStr] = &abn.LegacyVersion{
 			Metrics: v.Metrics,
 		}
 	}
 
-	a := legacyApplication{
+	a := abn.LegacyApplication{
 		Name:     s.Namespace + "/" + s.Name,
 		Tracks:   tracks,
 		Versions: versions,
 	}
-
 	return a
 }
 
 const secretKey string = "application.yaml"
 
-func write(client k8sclient.Interface, a legacyApplication) error {
+func write(client k8sclient.Interface, a abn.LegacyApplication) error {
 	var secret *corev1.Secret
 
 	// marshal to byte array
