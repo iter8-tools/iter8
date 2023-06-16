@@ -1,4 +1,4 @@
-// package abn contains deprecated legacy data structures used by the A/B/n service
+// package application contains deprecated legacy data structures used by the A/B/n service
 // They will be removed when a replacement for storing metrics in secrets is implemented
 package abn
 

@@ -291,7 +291,7 @@ routingTemplates:
 	namespace := "default"
 
 	assert.Eventually(t, func() bool {
-		signature, err := computeSignature(version{
+		signature, err := computeSignature(Version{
 			Resources: []resource{
 				{
 					GVRShort:  gvrShort,
@@ -396,7 +396,7 @@ routingTemplates:
 	namespace := "default"
 
 	assert.Eventually(t, func() bool {
-		signature, err := computeSignature(version{
+		signature, err := computeSignature(Version{
 			Resources: []resource{
 				{
 					GVRShort:  "deploy",
