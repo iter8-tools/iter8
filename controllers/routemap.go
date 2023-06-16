@@ -235,7 +235,7 @@ versionLoop:
 
 // computeSignature computes and sets the signature for a particular version
 // signature is based on the spec section
-func computeSignature(v version) (uint64, error) {
+func computeSignature(v Version) (uint64, error) {
 	// get all resources of a version
 	resources := []interface{}{}
 	for _, resource := range v.Resources {
