@@ -5,6 +5,7 @@ import (
 	"os"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -13,6 +14,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -213,4 +215,202 @@ func TestGetObservedGeneration(t *testing.T) {
 		assert.Equal(t, tt.val, v)
 		assert.Equal(t, tt.ok, o)
 	}
+}
+
+func TestComputeSignature(t *testing.T) {
+	// set pod name
+	_ = os.Setenv(podNameEnvVariable, "pod-0")
+	// set pod namespace
+	_ = os.Setenv(podNamespaceEnvVariable, "default")
+	// set config file
+	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
+
+	// make a routemap that manages replicas for deployment
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "default",
+			Labels: map[string]string{
+				iter8ManagedByLabel: iter8ManagedByValue,
+				iter8KindLabel:      iter8KindRoutemapValue,
+				iter8VersionLabel:   base.MajorMinor,
+			},
+		},
+		Immutable: base.BoolPointer(true),
+		Data: map[string]string{
+			"strSpec": `
+versions:
+- resources:
+  - gvrShort: deploy
+    name: test
+    namespace: default
+routingTemplates:
+  test:
+    gvrShort: deploy
+    template: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: test
+        namespace: default
+      spec:
+        replicas: 2
+`,
+		},
+		BinaryData: map[string][]byte{},
+	}
+
+	depu := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "apps/v1",
+			"kind":       "Deployment",
+			"metadata": map[string]interface{}{
+				"name":      "test",
+				"namespace": "default",
+				"labels": map[string]interface{}{
+					iter8WatchLabel: iter8WatchValue,
+				},
+			},
+		},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	client := fake.New([]runtime.Object{&cm}, []runtime.Object{depu})
+	err := Start(ctx.Done(), client)
+	assert.NoError(t, err)
+
+	// gvrShort is what connects the appInformer to computeSignature()
+	gvrShort := "deploy"
+	name := "test"
+	namespace := "default"
+
+	assert.Eventually(t, func() bool {
+		signature, err := computeSignature(version{
+			Resources: []resource{
+				{
+					GVRShort:  gvrShort,
+					Name:      name,
+					Namespace: &namespace,
+				},
+			},
+		})
+
+		return assert.NoError(t, err) && assert.Equal(t, uint64(417661632797200593), signature)
+	}, time.Second*2, time.Millisecond*100)
+}
+
+// TestComputeSignatureMultiple tests computeSignature with multiple resources (deploy and svc)
+func TestComputeSignatureMultiple(t *testing.T) {
+	// set pod name
+	_ = os.Setenv(podNameEnvVariable, "pod-0")
+	// set pod namespace
+	_ = os.Setenv(podNamespaceEnvVariable, "default")
+	// set config file
+	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
+
+	// make a routemap that manages replicas for deployment
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "default",
+			Labels: map[string]string{
+				iter8ManagedByLabel: iter8ManagedByValue,
+				iter8KindLabel:      iter8KindRoutemapValue,
+				iter8VersionLabel:   base.MajorMinor,
+			},
+		},
+		Immutable: base.BoolPointer(true),
+		Data: map[string]string{
+			"strSpec": `
+versions:
+- resources:
+  - gvrShort: deploy
+    name: test
+    namespace: default
+  - gvrShort: svc
+    name: test
+    namespace: default
+routingTemplates:
+  test:
+    gvrShort: deploy
+    template: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: test
+        namespace: default
+      spec:
+        replicas: 2
+`,
+		},
+		BinaryData: map[string][]byte{},
+	}
+
+	depu := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "apps/v1",
+			"kind":       "Deployment",
+			"metadata": map[string]interface{}{
+				"name":      "test",
+				"namespace": "default",
+				"labels": map[string]interface{}{
+					iter8WatchLabel: iter8WatchValue,
+				},
+			},
+		},
+	}
+
+	depu2 := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "v1",
+			"kind":       "Service",
+			"metadata": map[string]interface{}{
+				"name":      "test",
+				"namespace": "default",
+				"labels": map[string]interface{}{
+					iter8WatchLabel: iter8WatchValue,
+				},
+			},
+		},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	client := fake.New([]runtime.Object{&cm}, []runtime.Object{depu, depu2})
+	err := Start(ctx.Done(), client)
+	assert.NoError(t, err)
+
+	// gvrShort is what connects the appInformer to computeSignature()
+	name := "test"
+	namespace := "default"
+
+	assert.Eventually(t, func() bool {
+		signature, err := computeSignature(version{
+			Resources: []resource{
+				{
+					GVRShort:  "deploy",
+					Name:      name,
+					Namespace: &namespace,
+				},
+				{
+					GVRShort:  "svc",
+					Name:      name,
+					Namespace: &namespace,
+				},
+			},
+		})
+
+		return assert.NoError(t, err) && assert.Equal(t, uint64(11451027137128994800), signature)
+	}, time.Second*2, time.Millisecond*100)
 }

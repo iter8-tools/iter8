@@ -11,6 +11,7 @@ import (
 
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
+	"github.com/mitchellh/hashstructure/v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -33,6 +34,7 @@ type routemap struct {
 type version struct {
 	Resources []resource `json:"resources,omitempty"`
 	Weight    *uint32    `json:"weight,omitempty"`
+	Signature *uint64    `json:"signature,omitempty"`
 }
 
 type resource struct {
@@ -67,6 +69,7 @@ const (
 	routemapStrSpec      = "strSpec"
 	weightAnnotation     = "iter8.tools/weight"
 	defaultVersionWeight = uint32(1)
+	spec                 = "spec"
 )
 
 // Weights provide the relative weights for traffic routing between versions
@@ -124,7 +127,6 @@ func (s *routemap) normalizeWeights(config *Config) {
 		derivedWeights[0] = defaultVersionWeight
 	}
 	s.normalizedWeights = derivedWeights
-
 }
 
 // getWeightOverrides is looking for weights in the object annotations
@@ -216,6 +218,42 @@ versionLoop:
 	return versionsAvailable
 }
 
+// computeSignature computes and sets the signature for a particular version
+// signature is based on the spec section
+func computeSignature(v version) (uint64, error) {
+	// get all resources of a version
+	resources := []interface{}{}
+	for _, resource := range v.Resources {
+		if _, ok := appInformers[resource.GVRShort]; !ok {
+			return 0, fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
+		}
+
+		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
+		if err != nil {
+			return 0, fmt.Errorf("cannot get resource: %e", err)
+		}
+
+		// extract spec section from resource, if applicable
+		specSection, _, err := unstructured.NestedFieldNoCopy(obj.(*unstructured.Unstructured).Object, spec)
+		if err != nil {
+			// error here does not mean no spec, it means cannot traverse the object (to find if there is a spec)
+			return 0, fmt.Errorf("cannot traverse resource: %e", err)
+		}
+
+		resources = append(resources, specSection)
+	}
+
+	fmt.Println(resources)
+
+	// hash resources
+	hash, err := hashstructure.Hash(resources, hashstructure.FormatV2, nil)
+	if err != nil {
+		return 0, fmt.Errorf("cannot hash resources: %e", err)
+	}
+
+	return hash, nil
+}
+
 // reconcile a routemap
 func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 	// lock for reading and later unlock
@@ -224,6 +262,17 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 
 	// normalize version weights
 	s.normalizeWeights(config)
+
+	// calculate the signature for the version
+	for _, version := range s.Versions {
+		signature, err := computeSignature(version)
+		if err != nil {
+			log.Logger.WithStackTrace(err.Error()).Error("cannot calculate signature for version")
+			return
+		}
+
+		version.Signature = &signature
+	}
 
 	// if leader, compute routing policy and perform server side apply
 	if leaderStatus, err := leaderIsMe(); leaderStatus && err == nil {
