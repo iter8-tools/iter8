@@ -10,13 +10,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/iter8-tools/iter8/controllers"
-	"github.com/iter8-tools/iter8/controllers/k8sclient"
-	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/yaml"
 )
 
 //
@@ -91,18 +89,6 @@ func hash(track, user string) uint64 {
 	return versionHasher.Sum64()
 }
 
-// nameFromKey returns the name from a key of the form "namespace/name"
-func nameFromKey(applicationKey string) string {
-	_, n := splitApplicationKey(applicationKey)
-	return n
-}
-
-// namespaceFromKey returns the namespace from a key of the form "namespace/name"
-func namespaceFromKey(applicationKey string) string {
-	ns, _ := splitApplicationKey(applicationKey)
-	return ns
-}
-
 // splitApplicationKey is a utility function that returns the name and namespace from a key of the form "namespace/name"
 func splitApplicationKey(applicationKey string) (string, string) {
 	var name, namespace string
@@ -121,105 +107,69 @@ func splitApplicationKey(applicationKey string) (string, string) {
 //
 
 // writeMetricInternal is detailed implementation of gRPC method WriteMetric
-func writeMetricInternal(application, user, metric, valueStr string, client k8sclient.Interface) error {
+func writeMetricInternal(application, user, metric, valueStr string) error {
 	log.Logger.Tracef("writeMetricInternal called for application, user: %s, %s", application, user)
 	defer log.Logger.Trace("writeMetricInternal completed")
 
 	s, track, err := lookupInternal(application, user)
 	if err != nil || track == nil {
+		log.Logger.Warnf("lookupInternal failed for application=%s, user=%s", application, user)
 		return err
 	}
-	log.Logger.Debugf("lookup(%s,%s) -> %d", application, user, *track)
-
-	s.Lock()
-	defer s.Unlock()
-
-	if s.Versions[*track].Metrics == nil {
-		s.Versions[*track].Metrics = map[string]*summarymetrics.SummaryMetric{}
-	}
-	m, ok := s.Versions[*track].Metrics[metric]
-	if !ok {
-		m = summarymetrics.EmptySummaryMetric()
-		s.Versions[*track].Metrics[metric] = m
-	}
+	log.Logger.Debugf("lookupInternal(%s,%s) -> %d", application, user, *track)
 
 	value, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
 		log.Logger.Warn("Unable to parse metric value ", valueStr)
 		return err
 	}
-	m.Add(value)
 
-	// persist updated metric
-	legacyApp := routemapToLegacyApplication(s)
-	return write(client, legacyApp)
+	v := s.Versions[*track]
+	transaction := uuid.NewString()
+
+	metricsClient.SetMetric(
+		s.Namespace+"/"+s.Name, *track, *v.Signature,
+		metric, user, transaction,
+		value)
+
+	return nil
 }
 
-func routemapToLegacyApplication(s *controllers.Routemap) abnapp.LegacyApplication {
-
+func toLegacyApplication(s *controllers.Routemap) *abnapp.LegacyApplication {
+	name := s.Namespace + "/" + s.Name
 	tracks := make(abnapp.LegacyTracks, len(s.Versions))
 	versions := make(abnapp.LegacyVersions, len(s.Versions))
 	for t, v := range s.Versions {
 		asStr := fmt.Sprintf("%d", t)
 		tracks[asStr] = asStr
+
+		vms, err := metricsClient.GetSummaryMetrics(name, t, *v.Signature)
+		if err != nil {
+			return nil
+		}
+		metrics := make(map[string]*summarymetrics.SummaryMetric, len(vms.MetricSummaries))
+		for metric, summary := range vms.MetricSummaries {
+			metrics[metric] = &summarymetrics.SummaryMetric{
+				float64(summary.SummaryOverTransactions.Count),
+				float64(summary.SummaryOverTransactions.Count) * summary.SummaryOverTransactions.Mean,
+				summary.SummaryOverTransactions.Min,
+				summary.SummaryOverTransactions.Max,
+				summary.SummaryOverTransactions.StdDev, // should be sum of squares
+			}
+		}
+
 		versions[asStr] = &abnapp.LegacyVersion{
-			Metrics: v.Metrics,
+			Metrics: metrics,
 		}
 	}
 
-	a := abnapp.LegacyApplication{
-		Name:     s.Namespace + "/" + s.Name,
+	a := &abnapp.LegacyApplication{
+		Name:     name,
 		Tracks:   tracks,
 		Versions: versions,
 	}
 	return a
 }
-
-const secretKey string = "application.yaml"
-
-func write(client k8sclient.Interface, a abnapp.LegacyApplication) error {
-	var secret *corev1.Secret
-
-	// marshal to byte array
-	// note that this uses a custom MarshalJSON that removes untracked
-	// versions if the application data is too large
-	rawData, err := yaml.Marshal(a)
-	if err != nil {
-		return err
-	}
-
-	secretNamespace := namespaceFromKey(a.Name)
-	secretName := nameFromKey(a.Name)
-
-	// get the current secret; it will have been created as part of install
-	secret, err = client.GetSecret(secretNamespace, secretName)
-	if err != nil {
-		log.Logger.Error("cannot get secret; no metrics can be recorded: ", err)
-		return err
-	}
-
-	if secret.Data == nil {
-		secret.Data = map[string][]byte{}
-	}
-
-	secret.Data[secretKey] = rawData
-	if secret.StringData != nil {
-		secret.StringData[secretKey] = string(rawData)
-	}
-
-	// update the secret
-	_, err = client.UpdateSecret(secret)
-	if err != nil {
-		log.Logger.WithError(err).Warn("unable to persist app data")
-		return err
-	}
-
-	return nil
-}
-
-//
-//
-//
 
 // getApplicationDataInternal is detailed implementation of gRPC method GetApplicationData
 func getApplicationDataInternal(application string) (string, error) {
@@ -230,7 +180,7 @@ func getApplicationDataInternal(application string) (string, error) {
 		return "", fmt.Errorf("routemap not found for application %s", application)
 	}
 
-	legacyApp := routemapToLegacyApplication(s)
+	legacyApp := toLegacyApplication(s)
 
 	jsonBytes, err := json.Marshal(legacyApp)
 	if err != nil {

@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/mitchellh/hashstructure/v2"
 	corev1 "k8s.io/api/core/v1"
@@ -36,10 +35,9 @@ type Routemap struct {
 
 // Version is details about a routemap version
 type Version struct {
-	Resources []resource                               `json:"resources,omitempty"`
-	Weight    *uint32                                  `json:"weight,omitempty"`
-	Signature *uint64                                  `json:"signature,omitempty"`
-	Metrics   map[string]*summarymetrics.SummaryMetric `json:"metrics,omitempty"`
+	Resources []resource `json:"resources,omitempty"`
+	Weight    *uint32    `json:"weight,omitempty"`
+	Signature *string    `json:"signature,omitempty"`
 }
 
 type resource struct {
@@ -235,24 +233,24 @@ versionLoop:
 
 // computeSignature computes and sets the signature for a particular version
 // signature is based on the spec section
-func computeSignature(v Version) (uint64, error) {
+func computeSignature(v Version) (string, error) {
 	// get all resources of a version
 	resources := []interface{}{}
 	for _, resource := range v.Resources {
 		if _, ok := appInformers[resource.GVRShort]; !ok {
-			return 0, fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
+			return "", fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
 		}
 
 		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
 		if err != nil {
-			return 0, fmt.Errorf("cannot get resource: %e", err)
+			return "", fmt.Errorf("cannot get resource: %e", err)
 		}
 
 		// extract spec section from resource, if applicable
 		specSection, _, err := unstructured.NestedFieldNoCopy(obj.(*unstructured.Unstructured).Object, spec)
 		if err != nil {
 			// error here does not mean no spec, it means cannot traverse the object (to find if there is a spec)
-			return 0, fmt.Errorf("cannot traverse resource: %e", err)
+			return "", fmt.Errorf("cannot traverse resource: %e", err)
 		}
 
 		resources = append(resources, specSection)
@@ -263,10 +261,10 @@ func computeSignature(v Version) (uint64, error) {
 	// hash resources
 	hash, err := hashstructure.Hash(resources, hashstructure.FormatV2, nil)
 	if err != nil {
-		return 0, fmt.Errorf("cannot hash resources: %e", err)
+		return "", fmt.Errorf("cannot hash resources: %e", err)
 	}
 
-	return hash, nil
+	return fmt.Sprintf("%d", hash), nil
 }
 
 // reconcile a routemap

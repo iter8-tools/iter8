@@ -8,16 +8,30 @@ import (
 	"fmt"
 	"net"
 
+	"golang.org/x/sys/unix"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 
+	"github.com/dgraph-io/badger/v4"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/controllers/k8sclient"
-	"helm.sh/helm/v3/pkg/cli"
+	"github.com/iter8-tools/iter8/controllers/storageclient"
+	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 
 	// auth package is necessary to enable authentication with various cloud providers
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+)
+
+const (
+	// defaultMetricsPath is the default path of the persistent volume
+	defaultMetricsPath = "/metrics"
+)
+
+var (
+	// MetricsPath is the path of the persistent volume
+	metricsPath = defaultMetricsPath
+	// MetricsClient is the metrics client
+	metricsClient storageclient.Interface
 )
 
 // newServer returns a new gRPC server
@@ -63,21 +77,13 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 	log.Logger.Trace("WriteMetric called")
 	defer log.Logger.Trace("WriteMetric completed")
 
-	client, err := k8sclient.New(cli.New())
-	if err != nil {
-		log.Logger.Error("could not obtain Kubernetes client")
-		return &emptypb.Empty{}, err
-	}
-
-	err = writeMetricInternal(
-		metricMsg.GetApplication(),
-		metricMsg.GetUser(),
-		metricMsg.GetName(),
-		metricMsg.GetValue(),
-		client,
-	)
-
-	return &emptypb.Empty{}, err
+	return &emptypb.Empty{},
+		writeMetricInternal(
+			metricMsg.GetApplication(),
+			metricMsg.GetUser(),
+			metricMsg.GetName(),
+			metricMsg.GetValue(),
+		)
 }
 
 func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *pb.ApplicationRequest) (*pb.ApplicationData, error) {
@@ -103,6 +109,15 @@ func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterABNServer(grpcServer, newServer())
 
+	// configure metricsClient
+	// if config.Persist {
+	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
+	if err != nil {
+		log.Logger.Error("Unable to configure metrics storage client ", err)
+		return err
+	}
+	// }
+
 	go func() {
 		<-stopCh
 		log.Logger.Warnf("stop channel closed, shutting down")
@@ -116,4 +131,20 @@ func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}
 	}
 
 	return nil
+}
+
+// GetVolumeUsage gets the available and total capacity of a volume, in that order
+func GetVolumeUsage(path string) (uint64, uint64, error) {
+	var stat unix.Statfs_t
+	err := unix.Statfs(path, &stat)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	// Available blocks * size per block = available space in bytes
+	availableBytes := stat.Bavail * uint64(stat.Bsize)
+	// Total blocks * size per block = available space in bytes
+	totalBytes := stat.Blocks * uint64(stat.Bsize)
+
+	return availableBytes, totalBytes, nil
 }

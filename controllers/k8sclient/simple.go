@@ -8,7 +8,6 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"helm.sh/helm/v3/pkg/cli"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -37,16 +36,6 @@ func (cl *Client) Patch(gvr schema.GroupVersionResource, objNamespace string, ob
 		FieldManager: iter8ControllerFieldManager,
 		Force:        base.BoolPointer(true),
 	})
-}
-
-// GetSecret returns the typed Secret namespace/name
-func (cl *Client) GetSecret(namespace, name string) (*corev1.Secret, error) {
-	return cl.Clientset.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
-}
-
-// UpdateSecret updates the secret in the cluster
-func (cl *Client) UpdateSecret(s *corev1.Secret) (*corev1.Secret, error) {
-	return cl.Clientset.CoreV1().Secrets(s.Namespace).Update(context.Background(), s, metav1.UpdateOptions{})
 }
 
 // New creates a new kubernetes client

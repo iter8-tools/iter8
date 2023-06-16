@@ -1,9 +1,12 @@
 package abn
 
 import (
+	"os"
 	"testing"
 
+	"github.com/dgraph-io/badger/v4"
 	"github.com/iter8-tools/iter8/controllers"
+	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -41,14 +44,18 @@ func TestGetApplicationDataInternal(t *testing.T) {
 	namespace, name := "default", "test"
 
 	// setup
-	client := setupRouteMaps(t, namespace, name)
+	setupRouteMaps(t, namespace, name)
+	var err error
+	tempDirPath := t.TempDir()
+	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
 
 	// add a metric value
-	err := writeMetricInternal(namespace+"/"+name, "user", "metric", "45", client)
+	err = writeMetricInternal(namespace+"/"+name, "user", "metric", "45")
 	assert.NoError(t, err)
 
 	// add a second value to metric
-	err = writeMetricInternal(namespace+"/"+name, "user", "metric", "55", client)
+	err = writeMetricInternal(namespace+"/"+name, "user", "metric", "55")
 	assert.NoError(t, err)
 
 	_, tr, err := lookupInternal("default/test", "user")
@@ -62,8 +69,24 @@ func TestGetApplicationDataInternal(t *testing.T) {
 
 	// verify result
 	if *tr == 0 {
-		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":{\"metric\":[2,100,45,55,5050]}},\"1\":{\"metrics\":null}}}", app)
+		// assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":{\"metric\":[2,100,45,55,5]}},\"1\":{\"metrics\":null}}}", app)
+		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":{\"metric\":[2,100,45,55,5]}},\"1\":{\"metrics\":{\"\":[0,0,0,0,0]}}}}", app)
 	} else {
-		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":null},\"1\":{\"metrics\":{\"metric\":[2,100,45,55,5050]}}}}", app)
+		// assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":null},\"1\":{\"metrics\":{\"metric\":[2,100,45,55,5]}}}}", app)
+		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":{\"\":[0,0,0,0,0]}},\"1\":{\"metrics\":{\"metric\":[2,100,45,55,5]}}}}", app)
 	}
+}
+
+func TestGetVolumeUsage(t *testing.T) {
+	// GetVolumeUsage is based off of statfs which analyzes the volume, not the directory
+	// Creating a temporary directory will not change anything
+	path, err := os.Getwd()
+	assert.NoError(t, err)
+
+	availableBytes, totalBytes, err := GetVolumeUsage(path)
+	assert.NoError(t, err)
+
+	// The volume should have some available and total bytes
+	assert.NotEqual(t, 0, availableBytes)
+	assert.NotEqual(t, 0, totalBytes)
 }

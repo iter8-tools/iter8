@@ -8,16 +8,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dgraph-io/badger/v4"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
+	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/controllers"
-	"github.com/iter8-tools/iter8/controllers/k8sclient"
-	"github.com/iter8-tools/iter8/controllers/k8sclient/fake"
+	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type Scenario struct {
@@ -91,9 +90,9 @@ func TestWriteMetric(t *testing.T) {
 
 func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) {
 	// get current count of metric
-	var oldCount uint32
+	var oldCount uint64
 
-	k8sClient := setupRouteMaps(t, "default", "application")
+	setupRouteMaps(t, "default", "application")
 
 	if scenario.metric != "" {
 		rm, track, err := lookupInternal(scenario.namespace+"/"+scenario.name, scenario.user)
@@ -101,7 +100,7 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 		assert.NotNil(t, rm)
 		assert.NotNil(t, track)
 
-		oldCount = getMetricCount(t, scenario.namespace, scenario.name, *track, scenario.metric)
+		oldCount = getMetricCountUint64(t, scenario.namespace, scenario.name, *track, scenario.metric)
 	}
 
 	if scenario.errorSubstring != "" {
@@ -120,7 +119,7 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 		)
 		assert.ErrorContains(t, err, scenario.errorSubstring)
 	} else {
-		err := writeMetricInternal(scenario.namespace+"/"+scenario.name, scenario.user, scenario.metric, scenario.value, k8sClient)
+		err := writeMetricInternal(scenario.namespace+"/"+scenario.name, scenario.user, scenario.metric, scenario.value)
 		assert.NoError(t, err)
 	}
 
@@ -131,7 +130,7 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 		assert.NotNil(t, rm)
 		assert.NotNil(t, track)
 
-		assert.Equal(t, oldCount+1, getMetricCount(t, scenario.namespace, scenario.name, *track, scenario.metric))
+		assert.Equal(t, oldCount+1, getMetricCountUint64(t, scenario.namespace, scenario.name, *track, scenario.metric))
 	}
 }
 
@@ -154,7 +153,7 @@ func TestGetApplicationData(t *testing.T) {
 
 }
 
-func setupRouteMaps(t *testing.T, namespace string, name string) k8sclient.Interface {
+func setupRouteMaps(t *testing.T, namespace string, name string) {
 	controllers.AllRoutemaps.Clear()
 
 	rm := &controllers.Routemap{
@@ -162,29 +161,14 @@ func setupRouteMaps(t *testing.T, namespace string, name string) k8sclient.Inter
 			Namespace: namespace,
 			Name:      name,
 		},
-		Versions: make([]controllers.Version, 2),
+		// Versions: make([]controllers.Version, 2),
+		Versions: []controllers.Version{
+			{Signature: util.StringPointer("123456789")},
+			{Signature: util.StringPointer("987654321")},
+		},
 	}
 
 	controllers.AllRoutemaps.AddRouteMap(namespace, name, rm)
-
-	// create (fake) k8sclient with secret
-	secret := corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
-	}
-	client := fake.New([]runtime.Object{&secret}, nil)
-
-	// write routemap as legacyApplication
-	err := write(client, routemapToLegacyApplication(rm))
-	assert.NoError(t, err)
-
-	return client
 }
 
 func setupGRPCService(t *testing.T) (*pb.ABNClient, func()) {
@@ -199,6 +183,9 @@ func setupGRPCService(t *testing.T) (*pb.ABNClient, func()) {
 	serverOptions := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(serverOptions...)
 	pb.RegisterABNServer(grpcServer, newServer())
+	tempDirPath := t.TempDir()
+	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
 	go func() {
 		_ = grpcServer.Serve(lis)
 	}()
@@ -219,24 +206,26 @@ func setupGRPCService(t *testing.T) (*pb.ABNClient, func()) {
 
 }
 
-func getMetricCount(t *testing.T, namespace string, name string, track int, metric string) uint32 {
-	var count uint32
-
+func getMetricCountUint64(t *testing.T, namespace string, name string, track int, metric string) uint64 {
 	rm := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
 	assert.Less(t, track, len(rm.Versions))
-	if rm.Versions[track].Metrics == nil {
-		count = uint32(0)
-	} else {
-		m := rm.Versions[track].Metrics[metric]
-		count = m.Count()
-	}
-	return count
+
+	vms, err := metricsClient.GetSummaryMetrics(
+		namespace+"/"+name,
+		track,
+		*rm.Versions[track].Signature,
+	)
+	assert.NoError(t, err)
+	ms := vms.MetricSummaries[metric]
+
+	return ms.SummaryOverTransactions.Count
 }
 
 func TestLaunchGRPCServer(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	metricsPath = t.TempDir()
 	err := LaunchGRPCServer(50051, []grpc.ServerOption{}, ctx.Done())
 	assert.NoError(t, err)
 }
