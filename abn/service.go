@@ -1,3 +1,4 @@
+// Package abn contains the implementation of the A/B/n service (via gRPC)
 package abn
 
 // service.go - entry point for A/B/n service
