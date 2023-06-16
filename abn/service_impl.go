@@ -127,10 +127,14 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	v := s.Versions[*track]
 	transaction := uuid.NewString()
 
-	metricsClient.SetMetric(
+	err = metricsClient.SetMetric(
 		s.Namespace+"/"+s.Name, *track, *v.Signature,
 		metric, user, transaction,
 		value)
+
+	if err != nil {
+		log.Logger.Warnf("Unable to set metric %s for application=%s, user=%s", metric, application, metric)
+	}
 
 	return nil
 }
