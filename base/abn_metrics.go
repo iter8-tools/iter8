@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	abnapp "github.com/iter8-tools/iter8/abn/application"
+	pb "github.com/iter8-tools/iter8/abn/grpc"
 	log "github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/controllers/abn"
-	pb "github.com/iter8-tools/iter8/controllers/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/apimachinery/pkg/util/yaml"
@@ -105,7 +105,7 @@ func (t *collectABNMetricsTask) run(exp *Experiment) error {
 	}
 
 	// convert to Application
-	a := &abn.LegacyApplication{}
+	a := &abnapp.LegacyApplication{}
 	err = yaml.Unmarshal([]byte(applicationJSON), a)
 	if err != nil {
 		return err

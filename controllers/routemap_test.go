@@ -26,10 +26,10 @@ import (
 // 4. Default weight of 1 for each version
 func TestNormalizeWeights_sum_zero(t *testing.T) {
 	// 1. Create a routemap with versions
-	testRoutemap := routemap{
+	testRoutemap := Routemap{
 		mutex:      sync.RWMutex{},
 		ObjectMeta: metav1.ObjectMeta{Name: "testRoutemap", Namespace: "default"},
-		Versions: []version{
+		Versions: []Version{
 			{
 				Resources: []resource{{
 					GVRShort:  "svc",

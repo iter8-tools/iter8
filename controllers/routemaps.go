@@ -6,15 +6,23 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// allRoutemaps contains all the routemaps known to the controller
-var allRoutemaps = routemaps{
+// AllRoutemaps contains all the routemaps known to the controller
+var AllRoutemaps = routemaps{
 	nsRoutemap: make(map[string]routemapsByName),
+}
+
+// Clear removes all routemaps from AllRoutemaps
+func (s *routemaps) Clear() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	AllRoutemaps.nsRoutemap = make(map[string]routemapsByName)
 }
 
 // getRoutemapFromObj extracts a routemap which contains the given object as a version resource
 // ToDo: this function assumes that there is at most one routemap that contains a source;
 // a more general idea would be to return a routemap list instead
-func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routemap {
+func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *Routemap {
 	// lock for reading and later unlock
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -45,8 +53,8 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routem
 	return nil
 }
 
-// getRoutemapFromNamespaceName extracts a routemap which contains the given object as a version resource
-func (s *routemaps) getRoutemapFromNamespaceName(namespace string, name string) *routemap {
+// GetRoutemapFromNamespaceName extracts a routemap which contains the given object as a version resource
+func (s *routemaps) GetRoutemapFromNamespaceName(namespace string, name string) *Routemap {
 	// lock for reading and later unlock
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -79,7 +87,7 @@ func (s *routemaps) delete(cm *corev1.ConfigMap) {
 }
 
 // makeAndUpdateWith makes a routemap from a configmap and updates routemaps with it
-func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *routemap {
+func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *Routemap {
 	// lock for writing and later unlock
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -92,7 +100,7 @@ func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *rou
 	log.Logger.Trace("routemap cm is valid")
 
 	// make/update routemap with uninitialized status
-	var rm *routemap
+	var rm *Routemap
 	var err error
 	if rm, err = extractRoutemap(cm, config); err != nil {
 		return nil
@@ -105,4 +113,14 @@ func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *rou
 	s.nsRoutemap[cm.Namespace][cm.Name] = rm
 
 	return rm
+}
+
+func (s *routemaps) AddRouteMap(namespace string, name string, rm *Routemap) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if _, ok := s.nsRoutemap[namespace]; !ok {
+		s.nsRoutemap[namespace] = make(routemapsByName)
+	}
+	(s.nsRoutemap[namespace])[name] = rm
 }

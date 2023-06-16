@@ -1,4 +1,4 @@
-package controllers
+package abn
 
 // lookup.go -(internal) implementation of gRPC Lookup method
 
@@ -10,9 +10,10 @@ import (
 	"strconv"
 	"strings"
 
+	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/base/summarymetrics"
-	"github.com/iter8-tools/iter8/controllers/abn"
+	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
@@ -26,7 +27,7 @@ var versionHasher maphash.Hash
 
 // lookupInternal is detailed implementation of gRPC method Lookup
 // application is a namespacedname, "namespace/name"
-func lookupInternal(application string, user string) (*routemap, *int, error) {
+func lookupInternal(application string, user string) (*controllers.Routemap, *int, error) {
 	// if user is not provided, fail
 	if user == "" {
 		return nil, nil, errors.New("no user session provided")
@@ -38,7 +39,7 @@ func lookupInternal(application string, user string) (*routemap, *int, error) {
 	}
 
 	ns, name := splitApplicationKey(application)
-	s := allRoutemaps.getRoutemapFromNamespaceName(ns, name)
+	s := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(ns, name)
 	if s == nil {
 		return nil, nil, fmt.Errorf("routemap not found for application %s", application)
 	}
@@ -60,7 +61,7 @@ func lookupInternal(application string, user string) (*routemap, *int, error) {
 // and no change to the track mapping.
 // We select the version, user pair with the largest hash value ("score").
 // Inspired by https://github.com/tysonmote/rendezvous/blob/master/rendezvous.go
-func rendezvousGet(s *routemap, user string) *int {
+func rendezvousGet(s *controllers.Routemap, user string) *int {
 	// current maximimum score as computed by the hash function
 	var maxScore uint64
 	// maxTrack is the track with the current maximum score
@@ -128,10 +129,10 @@ func writeMetricInternal(application, user, metric, valueStr string, client k8sc
 	if err != nil || track == nil {
 		return err
 	}
-	log.Logger.Debug(fmt.Sprintf("lookup(%s,%s) -> %d", application, user, *track))
+	log.Logger.Debugf("lookup(%s,%s) -> %d", application, user, *track)
 
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 
 	if s.Versions[*track].Metrics == nil {
 		s.Versions[*track].Metrics = map[string]*summarymetrics.SummaryMetric{}
@@ -154,19 +155,19 @@ func writeMetricInternal(application, user, metric, valueStr string, client k8sc
 	return write(client, legacyApp)
 }
 
-func routemapToLegacyApplication(s *routemap) abn.LegacyApplication {
+func routemapToLegacyApplication(s *controllers.Routemap) abnapp.LegacyApplication {
 
-	tracks := make(abn.LegacyTracks, len(s.Versions))
-	versions := make(abn.LegacyVersions, len(s.Versions))
+	tracks := make(abnapp.LegacyTracks, len(s.Versions))
+	versions := make(abnapp.LegacyVersions, len(s.Versions))
 	for t, v := range s.Versions {
 		asStr := fmt.Sprintf("%d", t)
 		tracks[asStr] = asStr
-		versions[asStr] = &abn.LegacyVersion{
+		versions[asStr] = &abnapp.LegacyVersion{
 			Metrics: v.Metrics,
 		}
 	}
 
-	a := abn.LegacyApplication{
+	a := abnapp.LegacyApplication{
 		Name:     s.Namespace + "/" + s.Name,
 		Tracks:   tracks,
 		Versions: versions,
@@ -176,7 +177,7 @@ func routemapToLegacyApplication(s *routemap) abn.LegacyApplication {
 
 const secretKey string = "application.yaml"
 
-func write(client k8sclient.Interface, a abn.LegacyApplication) error {
+func write(client k8sclient.Interface, a abnapp.LegacyApplication) error {
 	var secret *corev1.Secret
 
 	// marshal to byte array
@@ -193,7 +194,7 @@ func write(client k8sclient.Interface, a abn.LegacyApplication) error {
 	// get the current secret; it will have been created as part of install
 	secret, err = client.GetSecret(secretNamespace, secretName)
 	if err != nil {
-		log.Logger.Error("secret does not exist; no metrics can be recorded")
+		log.Logger.Error("cannot get secret; no metrics can be recorded: ", err)
 		return err
 	}
 
@@ -224,7 +225,7 @@ func write(client k8sclient.Interface, a abn.LegacyApplication) error {
 func getApplicationDataInternal(application string) (string, error) {
 
 	namespace, name := splitApplicationKey(application)
-	s := allRoutemaps.getRoutemapFromNamespaceName(namespace, name)
+	s := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
 	if s == nil {
 		return "", fmt.Errorf("routemap not found for application %s", application)
 	}

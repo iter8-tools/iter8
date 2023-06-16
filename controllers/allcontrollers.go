@@ -88,7 +88,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 		log.Logger.Debug(event+" occurred for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
 		addFinalizer(name, namespace, gvrShort, client, config)
 		defer removeFinalizer(name, namespace, gvrShort, client, config)
-		if s := allRoutemaps.getRoutemapFromObj(obj, gvrShort); s == nil {
+		if s := AllRoutemaps.getRoutemapFromObj(obj, gvrShort); s == nil {
 			log.Logger.Trace("routemap not found; gvr: ",
 				gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
 				"; namespace: ", obj.(*unstructured.Unstructured).GetNamespace())
@@ -174,7 +174,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 	// unlike app resource handle func, routemap handle func is not used for delete events
 	handle := func(obj interface{}, event string) {
 		log.Logger.Trace(event + " event for routemap")
-		s := allRoutemaps.makeAndUpdateWith(obj.(*corev1.ConfigMap), config)
+		s := AllRoutemaps.makeAndUpdateWith(obj.(*corev1.ConfigMap), config)
 		if s == nil {
 			log.Logger.Error("unable to create routemap from configmap; ", "namespace: ", obj.(*corev1.ConfigMap).Namespace, "; name: ", obj.(*corev1.ConfigMap).Name)
 			return
@@ -192,7 +192,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 			handle(newObj, "update")
 		},
 		DeleteFunc: func(obj interface{}) {
-			allRoutemaps.delete(obj.(*corev1.ConfigMap))
+			AllRoutemaps.delete(obj.(*corev1.ConfigMap))
 		},
 	}); err != nil {
 		e := errors.New("unable to create event handlers for routemap informer")

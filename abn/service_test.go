@@ -1,15 +1,15 @@
-package controllers
+package abn
 
 import (
 	"context"
 	"fmt"
 	"math/rand"
 	"net"
-	"sync"
 	"testing"
 	"time"
 
-	pb "github.com/iter8-tools/iter8/controllers/grpc"
+	pb "github.com/iter8-tools/iter8/abn/grpc"
+	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/iter8-tools/iter8/controllers/k8sclient/fake"
 	"github.com/stretchr/testify/assert"
@@ -155,22 +155,17 @@ func TestGetApplicationData(t *testing.T) {
 }
 
 func setupRouteMaps(t *testing.T, namespace string, name string) k8sclient.Interface {
-	allRoutemaps = routemaps{
-		nsRoutemap: make(map[string]routemapsByName),
-	}
+	controllers.AllRoutemaps.Clear()
 
-	rm := &routemap{
-		mutex: sync.RWMutex{},
+	rm := &controllers.Routemap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 		},
-		Versions:          make([]version, 2),
-		RoutingTemplates:  map[string]routingTemplate{},
-		normalizedWeights: []uint32{},
+		Versions: make([]controllers.Version, 2),
 	}
 
-	addRouteMapForTest(namespace, name, rm)
+	controllers.AllRoutemaps.AddRouteMap(namespace, name, rm)
 
 	// create (fake) k8sclient with secret
 	secret := corev1.Secret{
@@ -227,7 +222,7 @@ func setupGRPCService(t *testing.T) (*pb.ABNClient, func()) {
 func getMetricCount(t *testing.T, namespace string, name string, track int, metric string) uint32 {
 	var count uint32
 
-	rm := allRoutemaps.getRoutemapFromNamespaceName(namespace, name)
+	rm := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
 	assert.Less(t, track, len(rm.Versions))
 	if rm.Versions[track].Metrics == nil {
 		count = uint32(0)

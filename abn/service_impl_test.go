@@ -1,9 +1,9 @@
-package controllers
+package abn
 
 import (
-	"sync"
 	"testing"
 
+	"github.com/iter8-tools/iter8/controllers"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -13,18 +13,13 @@ func TestLookupInternal(t *testing.T) {
 	namespace, name := "default", "test"
 
 	// setup: add desired routemaps to allRoutemaps; first clear all routemaps
-	allRoutemaps = routemaps{
-		nsRoutemap: make(map[string]routemapsByName),
-	}
-	addRouteMapForTest(namespace, name, &routemap{
-		mutex: sync.RWMutex{},
+	controllers.AllRoutemaps.Clear()
+	controllers.AllRoutemaps.AddRouteMap(namespace, name, &controllers.Routemap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 		},
-		Versions:          make([]version, 2),
-		RoutingTemplates:  map[string]routingTemplate{},
-		normalizedWeights: []uint32{},
+		Versions: make([]controllers.Version, 2),
 	})
 
 	tries := 20 // needs to be big enough to find at least one problem; this is probably overkill
@@ -71,14 +66,4 @@ func TestGetApplicationDataInternal(t *testing.T) {
 	} else {
 		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":null},\"1\":{\"metrics\":{\"metric\":[2,100,45,55,5050]}}}}", app)
 	}
-}
-
-func addRouteMapForTest(ns string, n string, s *routemap) {
-	// make sure nsRoutemap has entry for namespace ns
-	_, ok := allRoutemaps.nsRoutemap[ns]
-	if !ok {
-		allRoutemaps.nsRoutemap[ns] = make(map[string]*routemap)
-	}
-	// add (or replace) routemap for n
-	(allRoutemaps.nsRoutemap[ns])[n] = s
 }

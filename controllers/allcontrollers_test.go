@@ -142,3 +142,28 @@ func TestGetVolumeUsage(t *testing.T) {
 	assert.NotEqual(t, 0, availableBytes)
 	assert.NotEqual(t, 0, totalBytes)
 }
+
+func TestClear(t *testing.T) {
+	AllRoutemaps.Clear()
+	AllRoutemaps.mutex.RLock()
+	assert.Empty(t, AllRoutemaps.nsRoutemap)
+	AllRoutemaps.mutex.RUnlock()
+
+	namespace, name := "namespace", "test"
+	AllRoutemaps.AddRouteMap(namespace, name,
+		&Routemap{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      name,
+			},
+			Versions: make([]Version, 2),
+		})
+	AllRoutemaps.mutex.RLock()
+	assert.NotEmpty(t, AllRoutemaps.nsRoutemap)
+	AllRoutemaps.mutex.RUnlock()
+
+	AllRoutemaps.Clear()
+	AllRoutemaps.mutex.RLock()
+	assert.Empty(t, AllRoutemaps.nsRoutemap)
+	AllRoutemaps.mutex.RUnlock()
+}

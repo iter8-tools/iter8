@@ -18,7 +18,7 @@ func TestRouteMaps_Delete(t *testing.T) {
 				"test": {
 					mutex:             sync.RWMutex{},
 					ObjectMeta:        metav1.ObjectMeta{},
-					Versions:          []version{},
+					Versions:          []Version{},
 					RoutingTemplates:  map[string]routingTemplate{},
 					normalizedWeights: []uint32{},
 				},

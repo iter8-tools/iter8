@@ -1,4 +1,4 @@
-package controllers
+package abn
 
 // service.go - entry point for A/B/n service
 
@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 
+	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/base/log"
-	pb "github.com/iter8-tools/iter8/controllers/grpc"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"helm.sh/helm/v3/pkg/cli"
 
@@ -31,14 +31,24 @@ type abnServer struct {
 // Lookup identifies a track that should be used for a given user
 // This method is exposed to gRPC clients
 func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.Session, error) {
+	log.Logger.Tracef("Lookup called for application=%s, user=%s", appMsg.GetName(), appMsg.GetUser())
+	defer log.Logger.Trace("Lookup completed")
+
 	_, track, err := lookupInternal(
 		appMsg.GetName(),
 		appMsg.GetUser(),
 	)
 
-	if err != nil || track == nil {
+	if err != nil {
+		log.Logger.Warn("Lookup failed: ", err)
 		return nil, err
 	}
+
+	if track == nil {
+		log.Logger.Warn("lookup returned nil")
+		return nil, err
+	}
+
 	log.Logger.Debugf("lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), *track)
 
 	return &pb.Session{

@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/iter8-tools/iter8/abn"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
@@ -66,7 +67,7 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 
 			// launch gRPC server to respond to frontend requests
 			go func() {
-				err := controllers.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
+				err := abn.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
 				if err != nil {
 					log.Logger.Error("cound not start A/B/n service")
 				}
