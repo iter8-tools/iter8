@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -14,10 +14,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/cache"
 )
 
 // normalizeWeights sets the normalized weights for each version of the routemap
@@ -219,124 +217,80 @@ func TestGetObservedGeneration(t *testing.T) {
 	}
 }
 
-type testInformer struct {
-	o runtime.Object
-}
-
-func (i testInformer) Informer() cache.SharedIndexInformer {
-	return nil
-}
-
-func (i testInformer) Lister() cache.GenericLister {
-	return testLister(i)
-}
-
-type testLister struct {
-	o runtime.Object
-}
-
-func (l testLister) List(selector labels.Selector) (ret []runtime.Object, err error) {
-	return nil, nil
-}
-
-func (l testLister) Get(name string) (runtime.Object, error) {
-	return nil, nil
-}
-
-func (l testLister) ByNamespace(namespace string) cache.GenericNamespaceLister {
-	return testGenericLister(l)
-}
-
-type testGenericLister struct {
-	o runtime.Object
-}
-
-func (gl testGenericLister) List(selector labels.Selector) (ret []runtime.Object, err error) {
-	return nil, nil
-}
-
-func (gl testGenericLister) Get(name string) (runtime.Object, error) {
-	return gl.o, nil
-}
-
 func TestComputeSignature(t *testing.T) {
-	noSpecSignature := uint64(17263656795266626102)
+	// set pod name
+	_ = os.Setenv(podNameEnvVariable, "pod-0")
+	// set pod namespace
+	_ = os.Setenv(podNamespaceEnvVariable, "default")
+	// set config file
+	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 
-	name := "myName"
-	namespace := "myNamespace"
+	// make a routemap that manages replicas for deployment
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "default",
+			Labels: map[string]string{
+				iter8ManagedByLabel: iter8ManagedByValue,
+				iter8KindLabel:      iter8KindRoutemapValue,
+				iter8VersionLabel:   base.MajorMinor,
+			},
+		},
+		Immutable: base.BoolPointer(true),
+		Data: map[string]string{
+			"strSpec": `
+versions:
+- resources:
+  - gvrShort: deploy
+    name: test
+    namespace: default
+routingTemplates:
+  test:
+    gvrShort: deploy
+    template: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: test
+        namespace: default
+      spec:
+        replicas: 2
+`,
+		},
+		BinaryData: map[string][]byte{},
+	}
 
-	var tests = []struct {
-		u                 unstructured.Unstructured
-		expectedSignature uint64
-	}{
-		{
-			u: unstructured.Unstructured{
-				Object: map[string]interface{}{
-					"metadata": map[string]interface{}{
-						"namespace": namespace,
-						"name":      name,
-					},
+	depu := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "apps/v1",
+			"kind":       "Deployment",
+			"metadata": map[string]interface{}{
+				"name":      "test",
+				"namespace": "default",
+				"labels": map[string]interface{}{
+					iter8WatchLabel: iter8WatchValue,
 				},
 			},
-			expectedSignature: noSpecSignature,
-		},
-		{
-			u: unstructured.Unstructured{
-				Object: map[string]interface{}{
-					"apiVersion": "apps/v1",
-					"kind":       "Deployment",
-					"metadata": map[string]interface{}{
-						"namespace": namespace,
-						"name":      name,
-						"labels": map[string]interface{}{
-							"myLabel":        "myLabelValue",
-							weightAnnotation: "50",
-						},
-						"finalizers": []interface{}{
-							"finalizer.extensions/v1beta1",
-						},
-					},
-					"status": map[string]interface{}{
-						"startTime": "2023-05-22T18:07:51Z",
-					},
-				},
-			},
-			expectedSignature: noSpecSignature,
-		},
-		{
-			u: unstructured.Unstructured{
-				Object: map[string]interface{}{
-					"apiVersion": "apps/v1",
-					"kind":       "Deployment",
-					"metadata": map[string]interface{}{
-						"namespace": namespace,
-						"name":      name,
-						"labels": map[string]interface{}{
-							"myLabel":        "myLabelValue",
-							weightAnnotation: "50",
-						},
-						"finalizers": []interface{}{
-							"finalizer.extensions/v1beta1",
-						},
-					},
-					"spec": "mySpec",
-					"status": map[string]interface{}{
-						"startTime": "2023-05-22T18:07:51Z",
-					},
-				},
-			},
-			expectedSignature: uint64(1223096949950699965),
 		},
 	}
 
-	for index, test := range tests {
-		// gvrShort is what connects the appInformer to computeSignature()
-		gvrShort := fmt.Sprint(index)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-		appInformers[gvrShort] = testInformer{
-			o: test.u.DeepCopyObject(),
-		}
+	client := fake.New([]runtime.Object{&cm}, []runtime.Object{depu})
+	err := Start(ctx.Done(), client)
+	assert.NoError(t, err)
 
+	// gvrShort is what connects the appInformer to computeSignature()
+	gvrShort := "deploy"
+	name := "test"
+	namespace := "default"
+
+	assert.Eventually(t, func() bool {
 		signature, err := computeSignature(version{
 			Resources: []resource{
 				{
@@ -347,85 +301,116 @@ func TestComputeSignature(t *testing.T) {
 			},
 		})
 
-		assert.NoError(t, err)
-		assert.Equal(t, test.expectedSignature, signature)
-	}
+		return assert.NoError(t, err) && assert.Equal(t, uint64(417661632797200593), signature)
+	}, time.Second*2, time.Millisecond*100)
 }
 
-func TestComputeSignatureMultipleResources(t *testing.T) {
-	name := "myName"
-	namespace := "myNamespace"
+// TestComputeSignatureMultiple tests computeSignature with multiple resources (deploy and svc)
+func TestComputeSignatureMultiple(t *testing.T) {
+	// set pod name
+	_ = os.Setenv(podNameEnvVariable, "pod-0")
+	// set pod namespace
+	_ = os.Setenv(podNamespaceEnvVariable, "default")
+	// set config file
+	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
 
-	var resources = []unstructured.Unstructured{
-		{
-			Object: map[string]interface{}{
-				"metadata": map[string]interface{}{
-					"namespace": namespace,
-					"name":      name,
-				},
+	// make a routemap that manages replicas for deployment
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "default",
+			Labels: map[string]string{
+				iter8ManagedByLabel: iter8ManagedByValue,
+				iter8KindLabel:      iter8KindRoutemapValue,
+				iter8VersionLabel:   base.MajorMinor,
 			},
 		},
-		{
-			Object: map[string]interface{}{
-				"apiVersion": "apps/v1",
-				"kind":       "Deployment",
-				"metadata": map[string]interface{}{
-					"namespace": namespace,
-					"name":      name,
-					"labels": map[string]interface{}{
-						"myLabel":        "myLabelValue",
-						weightAnnotation: "50",
-					},
-					"finalizers": []interface{}{
-						"finalizer.extensions/v1beta1",
-					},
-				},
-				"status": map[string]interface{}{
-					"startTime": "2023-05-22T18:07:51Z",
-				},
-			},
+		Immutable: base.BoolPointer(true),
+		Data: map[string]string{
+			"strSpec": `
+versions:
+- resources:
+  - gvrShort: deploy
+    name: test
+    namespace: default
+  - gvrShort: svc
+    name: test
+    namespace: default
+routingTemplates:
+  test:
+    gvrShort: deploy
+    template: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: test
+        namespace: default
+      spec:
+        replicas: 2
+`,
 		},
-		{
-			Object: map[string]interface{}{
-				"apiVersion": "apps/v1",
-				"kind":       "Deployment",
-				"metadata": map[string]interface{}{
-					"namespace": namespace,
-					"name":      name,
-					"labels": map[string]interface{}{
-						"myLabel":        "myLabelValue",
-						weightAnnotation: "50",
-					},
-					"finalizers": []interface{}{
-						"finalizer.extensions/v1beta1",
-					},
-				},
-				"spec": "mySpec",
-				"status": map[string]interface{}{
-					"startTime": "2023-05-22T18:07:51Z",
+		BinaryData: map[string][]byte{},
+	}
+
+	depu := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "apps/v1",
+			"kind":       "Deployment",
+			"metadata": map[string]interface{}{
+				"name":      "test",
+				"namespace": "default",
+				"labels": map[string]interface{}{
+					iter8WatchLabel: iter8WatchValue,
 				},
 			},
 		},
 	}
 
-	v := version{}
-
-	for i, r := range resources {
-		// gvrShort is what connects the appInformer to computeSignature()
-		gvrShort := fmt.Sprint(i)
-
-		appInformers[gvrShort] = testInformer{
-			o: r.DeepCopyObject(),
-		}
-
-		v.Resources = append(v.Resources, resource{
-			GVRShort:  gvrShort,
-			Name:      name,
-			Namespace: &namespace,
-		})
+	depu2 := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "v1",
+			"kind":       "Service",
+			"metadata": map[string]interface{}{
+				"name":      "test",
+				"namespace": "default",
+				"labels": map[string]interface{}{
+					iter8WatchLabel: iter8WatchValue,
+				},
+			},
+		},
 	}
 
-	signature, err := computeSignature(v)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	client := fake.New([]runtime.Object{&cm}, []runtime.Object{depu, depu2})
+	err := Start(ctx.Done(), client)
 	assert.NoError(t, err)
-	assert.Equal(t, uint64(10542172099898397181), signature)
+
+	// gvrShort is what connects the appInformer to computeSignature()
+	name := "test"
+	namespace := "default"
+
+	assert.Eventually(t, func() bool {
+		signature, err := computeSignature(version{
+			Resources: []resource{
+				{
+					GVRShort:  "deploy",
+					Name:      name,
+					Namespace: &namespace,
+				},
+				{
+					GVRShort:  "svc",
+					Name:      name,
+					Namespace: &namespace,
+				},
+			},
+		})
+
+		return assert.NoError(t, err) && assert.Equal(t, uint64(11451027137128994800), signature)
+	}, time.Second*2, time.Millisecond*100)
 }

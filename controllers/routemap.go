@@ -224,6 +224,10 @@ func computeSignature(v version) (uint64, error) {
 	// get all resources of a version
 	resources := []interface{}{}
 	for _, resource := range v.Resources {
+		if _, ok := appInformers[resource.GVRShort]; !ok {
+			return 0, fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
+		}
+
 		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
 		if err != nil {
 			return 0, fmt.Errorf("cannot get resource: %e", err)
@@ -238,6 +242,8 @@ func computeSignature(v version) (uint64, error) {
 
 		resources = append(resources, specSection)
 	}
+
+	fmt.Println(resources)
 
 	// hash resources
 	hash, err := hashstructure.Hash(resources, hashstructure.FormatV2, nil)
