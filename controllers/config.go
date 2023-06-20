@@ -41,8 +41,8 @@ type Config struct {
 	Persist bool `json:"persist,omitempty"`
 }
 
-// readConfig reads configuration information from file
-func readConfig() (*Config, error) {
+// ReadConfig reads configuration information from file
+func ReadConfig() (*Config, error) {
 	// read controller config
 	configFile, ok := os.LookupEnv(configEnv)
 	if !ok {

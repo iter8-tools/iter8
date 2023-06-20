@@ -75,7 +75,7 @@ const (
 	spec                 = "spec"
 )
 
-// Lock the mutex associated with a routemap
+// Lock the mutex associated with a routemap for writing
 func (s *Routemap) Lock() {
 	s.mutex.Lock()
 }
@@ -83,6 +83,16 @@ func (s *Routemap) Lock() {
 // Unlock the mutex associated with a routemap
 func (s *Routemap) Unlock() {
 	s.mutex.Unlock()
+}
+
+// RLock the mutex associated with a routemap for reading
+func (s *Routemap) RLock() {
+	s.mutex.RLock()
+}
+
+// RUnlock the mutex associated with a routemap
+func (s *Routemap) RUnlock() {
+	s.mutex.RUnlock()
 }
 
 // Weights provide the relative weights for traffic routing between versions
@@ -243,7 +253,7 @@ func computeSignature(v Version) (string, error) {
 
 		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
 		if err != nil {
-			return "", fmt.Errorf("cannot get resource: %e", err)
+			return "", fmt.Errorf("cannot get resource: %s", err.Error())
 		}
 
 		// extract spec section from resource, if applicable
@@ -255,8 +265,6 @@ func computeSignature(v Version) (string, error) {
 
 		resources = append(resources, specSection)
 	}
-
-	fmt.Println(resources)
 
 	// hash resources
 	hash, err := hashstructure.Hash(resources, hashstructure.FormatV2, nil)
@@ -277,14 +285,16 @@ func (s *Routemap) reconcile(config *Config, client k8sclient.Interface) {
 	s.normalizeWeights(config)
 
 	// calculate the signature for the version
-	for _, version := range s.Versions {
-		signature, err := computeSignature(version)
+	for v := range s.Versions {
+		signature, err := computeSignature(s.Versions[v])
 		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("cannot calculate signature for version")
-			return
+			// not all version need be present; if the resources aren't available, proceed
+			if !strings.Contains(err.Error(), "cannot get resource") {
+				log.Logger.WithStackTrace(err.Error()).Error("cannot calculate signature for version")
+				return
+			}
 		}
-
-		version.Signature = &signature
+		s.Versions[v].Signature = &signature
 	}
 
 	// if leader, compute routing policy and perform server side apply

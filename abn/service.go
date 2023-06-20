@@ -15,6 +15,7 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/base/log"
+	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/controllers/storageclient"
 	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 
@@ -109,14 +110,20 @@ func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterABNServer(grpcServer, newServer())
 
-	// configure metricsClient
-	// if config.Persist {
-	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
+	config, err := controllers.ReadConfig()
 	if err != nil {
-		log.Logger.Error("Unable to configure metrics storage client ", err)
+		log.Logger.Error("Unable to read configuration", err)
 		return err
 	}
-	// }
+
+	// configure metricsClient if needed
+	if config.Persist {
+		metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
+		if err != nil {
+			log.Logger.Error("Unable to configure metrics storage client ", err)
+			return err
+		}
+	}
 
 	go func() {
 		<-stopCh

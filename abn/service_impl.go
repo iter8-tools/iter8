@@ -70,8 +70,14 @@ func rendezvousGet(s *controllers.Routemap, user string) *int {
 		return nil
 	}
 
-	for track := range s.Versions {
-		score := hash(fmt.Sprintf("%d", track), user)
+	s.RLock()
+	defer s.RUnlock()
+
+	for track, version := range s.Versions {
+		if version.Signature == nil {
+			log.Logger.Errorf("rendezvousGet version %d: signature is nil; should be set", track)
+		}
+		score := hash(fmt.Sprintf("%d", track), *version.Signature, user)
 		log.Logger.Debugf("hash(%d,%s) --> %d  --  %d", track, user, score, maxScore)
 		if score >= maxScore {
 			maxScore = score
@@ -82,9 +88,10 @@ func rendezvousGet(s *controllers.Routemap, user string) *int {
 }
 
 // hash computes the score for a version, user combination
-func hash(track, user string) uint64 {
+func hash(track, signature, user string) uint64 {
 	versionHasher.Reset()
 	_, _ = versionHasher.WriteString(user)
+	_, _ = versionHasher.WriteString(signature)
 	_, _ = versionHasher.WriteString(track)
 	return versionHasher.Sum64()
 }

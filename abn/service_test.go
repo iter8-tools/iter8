@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -226,6 +228,11 @@ func TestLaunchGRPCServer(t *testing.T) {
 	defer cancel()
 
 	metricsPath = t.TempDir()
-	err := LaunchGRPCServer(50051, []grpc.ServerOption{}, ctx.Done())
+
+	configFile := filepath.Clean(util.CompletePath("../testdata", "abninputs/config.yaml"))
+	err := os.Setenv("CONFIG_FILE", configFile)
+	assert.NoError(t, err)
+
+	err = LaunchGRPCServer(50051, []grpc.ServerOption{}, ctx.Done())
 	assert.NoError(t, err)
 }

@@ -56,3 +56,7 @@ storage: 50Mi
 storageClassName: standard
 
 persist: false
+
+### A/B/n service port
+service:
+  port: 50051

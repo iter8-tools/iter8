@@ -10,7 +10,7 @@ runner: none
 logLevel: info
 
 abnmetrics:
-  endpoint: iter8-abn:50051
+  endpoint: iter8:50051
 
 ### Resource limits
 resources:

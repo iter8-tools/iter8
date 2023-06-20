@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/dgraph-io/badger/v4"
+	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,10 @@ func TestLookupInternal(t *testing.T) {
 			Namespace: namespace,
 			Name:      name,
 		},
-		Versions: make([]controllers.Version, 2),
+		Versions: []controllers.Version{
+			{Signature: util.StringPointer("123456789")},
+			{Signature: util.StringPointer("987654321")},
+		},
 	})
 
 	tries := 20 // needs to be big enough to find at least one problem; this is probably overkill
