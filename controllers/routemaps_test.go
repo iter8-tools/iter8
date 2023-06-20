@@ -20,7 +20,7 @@ func TestRouteMaps_Delete(t *testing.T) {
 					ObjectMeta:        metav1.ObjectMeta{},
 					Versions:          []Version{},
 					RoutingTemplates:  map[string]routingTemplate{},
-					normalizedWeights: []uint32{},
+					NormalizedWeights: []uint32{},
 				},
 			},
 		},

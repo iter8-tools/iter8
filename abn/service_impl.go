@@ -32,19 +32,19 @@ func lookupInternal(application string, user string) (*controllers.Routemap, *in
 	}
 
 	// check that we have a record of the application
-	if application == "" {
-		return nil, nil, fmt.Errorf("application %s not found", application)
+	if application == "/" {
+		return nil, nil, errors.New("no application provided")
 	}
 
 	ns, name := splitApplicationKey(application)
 	s := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(ns, name)
 	if s == nil {
-		return nil, nil, fmt.Errorf("routemap not found for application %s", application)
+		return nil, nil, fmt.Errorf("routemap not found for application %s", ns+"/"+name)
 	}
 
 	track := rendezvousGet(s, user)
 	if track == nil {
-		return nil, nil, fmt.Errorf("no versions in routemap for application %s", application)
+		return nil, nil, fmt.Errorf("no versions in routemap for application %s", ns+"/"+name)
 	}
 
 	return s, track, nil
@@ -66,16 +66,14 @@ func rendezvousGet(s *controllers.Routemap, user string) *int {
 	var maxTrack int
 
 	// no versions
-	if len(s.Versions) == 0 {
-		return nil
-	}
+	processedVersions := 0
 
 	s.RLock()
 	defer s.RUnlock()
 
 	for track, version := range s.Versions {
-		if version.Signature == nil {
-			log.Logger.Errorf("rendezvousGet version %d: signature is nil; should be set", track)
+		if s.Weights()[track] == 0 {
+			continue
 		}
 		score := hash(fmt.Sprintf("%d", track), *version.Signature, user)
 		log.Logger.Debugf("hash(%d,%s) --> %d  --  %d", track, user, score, maxScore)
@@ -83,6 +81,12 @@ func rendezvousGet(s *controllers.Routemap, user string) *int {
 			maxScore = score
 			maxTrack = track
 		}
+		processedVersions++
+	}
+
+	// if no versions (available; ie, non-zero weight)
+	if processedVersions == 0 {
+		return nil
 	}
 	return &maxTrack
 }
@@ -188,7 +192,7 @@ func getApplicationDataInternal(application string) (string, error) {
 	namespace, name := splitApplicationKey(application)
 	s := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
 	if s == nil {
-		return "", fmt.Errorf("routemap not found for application %s", application)
+		return "", fmt.Errorf("routemap not found for application %s", namespace+"/"+name)
 	}
 
 	legacyApp := toLegacyApplication(s)

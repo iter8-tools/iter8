@@ -27,6 +27,7 @@ func TestLookupInternal(t *testing.T) {
 			{Signature: util.StringPointer("123456789")},
 			{Signature: util.StringPointer("987654321")},
 		},
+		NormalizedWeights: []uint32{1, 1},
 	})
 
 	tries := 20 // needs to be big enough to find at least one problem; this is probably overkill

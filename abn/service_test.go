@@ -35,9 +35,10 @@ type Scenario struct {
 
 func TestLookup(t *testing.T) {
 	testcases := map[string]Scenario{
-		"no application": {namespace: "default", name: "noapp", user: "user", errorSubstring: "routemap not found for application default/noapp"},
-		"no user":        {namespace: "default", name: "application", user: "", errorSubstring: "no user session provided"},
-		"valid":          {namespace: "default", name: "application", user: "user", errorSubstring: ""},
+		"no such app": {namespace: "default", name: "noapp", user: "user", errorSubstring: "routemap not found for application default/noapp"},
+		"no app":      {namespace: "", name: "", user: "user", errorSubstring: "no application provided"},
+		"no user":     {namespace: "default", name: "application", user: "", errorSubstring: "no user session provided"},
+		"valid":       {namespace: "default", name: "application", user: "user", errorSubstring: ""},
 	}
 
 	for label, scenario := range testcases {
@@ -73,7 +74,7 @@ func testLookup(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) {
 
 func TestWriteMetric(t *testing.T) {
 	testcases := map[string]Scenario{
-		"no application": {namespace: "", name: "", user: "user", errorSubstring: "routemap not found for application", metric: "", value: "76"},
+		"no application": {namespace: "", name: "", user: "user", errorSubstring: "no application provided", metric: "", value: "76"},
 		"no user":        {namespace: "default", name: "application", user: "", errorSubstring: "no user session provided", metric: "", value: "76"},
 		"invalid value":  {namespace: "default", name: "application", user: "user", errorSubstring: "strconv.ParseFloat: parsing \"abc\": invalid syntax", metric: "", value: "abc"},
 		"valid":          {namespace: "default", name: "application", user: "user", errorSubstring: "", metric: "metric1", value: "76"},
@@ -168,6 +169,7 @@ func setupRouteMaps(t *testing.T, namespace string, name string) {
 			{Signature: util.StringPointer("123456789")},
 			{Signature: util.StringPointer("987654321")},
 		},
+		NormalizedWeights: []uint32{1, 1},
 	}
 
 	controllers.AllRoutemaps.AddRouteMap(namespace, name, rm)

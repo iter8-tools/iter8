@@ -30,7 +30,7 @@ type Routemap struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 	Versions          []Version                  `json:"versions,omitempty"`
 	RoutingTemplates  map[string]routingTemplate `json:"routingTemplates,omitempty"`
-	normalizedWeights []uint32
+	NormalizedWeights []uint32
 }
 
 // Version is details about a routemap version
@@ -98,7 +98,7 @@ func (s *Routemap) RUnlock() {
 // Weights provide the relative weights for traffic routing between versions
 // Intended for use in routemap templates
 func (s *Routemap) Weights() []uint32 {
-	return s.normalizedWeights
+	return s.NormalizedWeights
 }
 
 // normalizeWeights sets the normalized weights for each version of the routemap
@@ -149,7 +149,7 @@ func (s *Routemap) normalizeWeights(config *Config) {
 		// at this point, routemap is validated and guaranteed to have at least one version
 		derivedWeights[0] = defaultVersionWeight
 	}
-	s.normalizedWeights = derivedWeights
+	s.NormalizedWeights = derivedWeights
 }
 
 // getWeightOverrides is looking for weights in the object annotations
