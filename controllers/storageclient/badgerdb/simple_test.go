@@ -1,6 +1,7 @@
 package badgerdb
 
 import (
+	"encoding/json"
 	"strconv"
 	"testing"
 
@@ -204,4 +205,29 @@ func TestGetSummaryMetrics(t *testing.T) {
 	assert.Equal(t, 28.534579412043595, vms.MetricSummaries[metric].SummaryOverUsers.StdDev)
 	assert.Equal(t, 2.0, vms.MetricSummaries[metric].SummaryOverUsers.Min)
 	assert.Equal(t, 70.0, vms.MetricSummaries[metric].SummaryOverUsers.Max)
+}
+
+func TestGetMetrics(t *testing.T) {
+	tempDirPath := t.TempDir()
+
+	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	assert.NoError(t, err)
+
+	err = client.SetMetric("my-application", 0, "my-signature", "my-metric", "my-user", "my-transaction", 50.0)
+	assert.NoError(t, err)
+	err = client.SetMetric("my-application", 0, "my-signature", "my-metric", "my-user2", "my-transaction2", 10.0)
+	assert.NoError(t, err)
+	err = client.SetMetric("my-application", 1, "my-signature2", "my-metric2", "my-user", "my-transaction3", 20.0)
+	assert.NoError(t, err)
+	err = client.SetMetric("my-application", 2, "my-signature3", "my-metric3", "my-user2", "my-transaction4", 30.0)
+	assert.NoError(t, err)
+	err = client.SetMetric("my-application", 2, "my-signature3", "my-metric3", "my-user2", "my-transaction4", 40.0) // overwrites the previous set
+	assert.NoError(t, err)
+
+	metrics, err := client.GetMetrics()
+	assert.NoError(t, err)
+
+	jsonMetrics, err := json.Marshal(metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"my-application\":{\"0\":{\"my-signature\":{\"my-metric\":{\"my-user\":{\"my-transaction\":50},\"my-user2\":{\"my-transaction2\":10}}}},\"1\":{\"my-signature2\":{\"my-metric2\":{\"my-user\":{\"my-transaction3\":20}}}},\"2\":{\"my-signature3\":{\"my-metric3\":{\"my-user2\":{\"my-transaction4\":40}}}}}}", string(jsonMetrics))
 }
