@@ -1,5 +1,5 @@
-// Package storageclient provides the storage client for the controllers package
-package storageclient
+// Package storage provides the storage client for the controllers package
+package storage
 
 // SummarizedMetric is a metric summary
 type SummarizedMetric struct {

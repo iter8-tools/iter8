@@ -11,7 +11,6 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
-	"github.com/iter8-tools/iter8/controllers/storageclient"
 )
 
 // Client is a client for the BadgerDB

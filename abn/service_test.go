@@ -14,7 +14,7 @@ import (
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/controllers"
-	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
+	"github.com/iter8-tools/iter8/storage/badgerdb"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

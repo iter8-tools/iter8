@@ -16,8 +16,8 @@ import (
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
-	"github.com/iter8-tools/iter8/controllers/storageclient"
-	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
+	"github.com/iter8-tools/iter8/storage"
+	"github.com/iter8-tools/iter8/storage/badgerdb"
 
 	// auth package is necessary to enable authentication with various cloud providers
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -32,7 +32,7 @@ var (
 	// MetricsPath is the path of the persistent volume
 	metricsPath = defaultMetricsPath
 	// MetricsClient is the metrics client
-	metricsClient storageclient.Interface
+	metricsClient storage.Interface
 )
 
 // newServer returns a new gRPC server

@@ -7,7 +7,7 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/controllers"
-	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
+	"github.com/iter8-tools/iter8/storage/badgerdb"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

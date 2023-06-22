@@ -9,17 +9,76 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type Scenario struct {
+	create   bool
+	override bool
+	dir      string
+	valueDir string
+}
+
 func TestGetClient(t *testing.T) {
-	tempDirPath := t.TempDir()
+	for label, scenario := range map[string]Scenario{
+		"exists": {
+			create:   true,
+			override: true,
+		},
+		"does not exist": {
+			create:   true,
+			override: false,
+			dir:      "invalid",
+			valueDir: "invalid",
+		},
+		"empty dir": {
+			create:   false,
+			dir:      "",
+			valueDir: "valueDir",
+		},
+		"empty valuesDir": {
+			create:   false,
+			dir:      "dir",
+			valueDir: "",
+		},
+		"different dirs": {
+			create:   false,
+			dir:      "dir",
+			valueDir: "valueDir",
+		},
+	} {
+		t.Run(label, func(t *testing.T) {
+			opts := badger.DefaultOptions(scenario.dir)
+			opts.ValueDir = scenario.valueDir
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
-	assert.NoError(t, err)
+			if scenario.create {
+				tempDirPath := t.TempDir()
+				if scenario.override {
+					opts.Dir = tempDirPath
+					opts.ValueDir = tempDirPath
+				}
+			}
 
-	assert.NotNil(t, client)
-	assert.NotNil(t, client.db) // BadgerDB should exist
+			client, err := GetClient(opts, AdditionalOptions{})
 
-	err = client.db.Close()
-	assert.NoError(t, err)
+			if !scenario.override {
+				if scenario.dir == "" {
+					assert.ErrorContains(t, err, "dir not set")
+				} else if scenario.valueDir == "" {
+					assert.ErrorContains(t, err, "valueDir not set")
+				} else if scenario.dir != scenario.valueDir {
+					assert.ErrorContains(t, err, "dir and valueDir are different values")
+				}
+				return
+			}
+
+			if scenario.create {
+				if !scenario.override {
+					assert.ErrorContains(t, err, "path does not exist")
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, client)
+				}
+			}
+		})
+	}
 }
 
 func TestSetMetric(t *testing.T) {
