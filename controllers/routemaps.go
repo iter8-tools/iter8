@@ -11,18 +11,10 @@ var AllRoutemaps = routemaps{
 	nsRoutemap: make(map[string]routemapsByName),
 }
 
-// Clear removes all routemaps from AllRoutemaps
-func (s *routemaps) Clear() {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	AllRoutemaps.nsRoutemap = make(map[string]routemapsByName)
-}
-
 // getRoutemapFromObj extracts a routemap which contains the given object as a version resource
 // ToDo: this function assumes that there is at most one routemap that contains a source;
 // a more general idea would be to return a routemap list instead
-func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *Routemap {
+func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routemap {
 	// lock for reading and later unlock
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -54,7 +46,7 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *Routem
 }
 
 // GetRoutemapFromNamespaceName extracts a routemap which contains the given object as a version resource
-func (s *routemaps) GetRoutemapFromNamespaceName(namespace string, name string) *Routemap {
+func (s *routemaps) GetRoutemapFromNamespaceName(namespace string, name string) RoutemapInterface {
 	// lock for reading and later unlock
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -87,7 +79,7 @@ func (s *routemaps) delete(cm *corev1.ConfigMap) {
 }
 
 // makeAndUpdateWith makes a routemap from a configmap and updates routemaps with it
-func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *Routemap {
+func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *routemap {
 	// lock for writing and later unlock
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -100,7 +92,7 @@ func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *Rou
 	log.Logger.Trace("routemap cm is valid")
 
 	// make/update routemap with uninitialized status
-	var rm *Routemap
+	var rm *routemap
 	var err error
 	if rm, err = extractRoutemap(cm, config); err != nil {
 		return nil
@@ -113,14 +105,4 @@ func (s *routemaps) makeAndUpdateWith(cm *corev1.ConfigMap, config *Config) *Rou
 	s.nsRoutemap[cm.Namespace][cm.Name] = rm
 
 	return rm
-}
-
-func (s *routemaps) AddRouteMap(namespace string, name string, rm *Routemap) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	if _, ok := s.nsRoutemap[namespace]; !ok {
-		s.nsRoutemap[namespace] = make(routemapsByName)
-	}
-	(s.nsRoutemap[namespace])[name] = rm
 }

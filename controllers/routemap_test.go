@@ -26,10 +26,10 @@ import (
 // 4. Default weight of 1 for each version
 func TestNormalizeWeights_sum_zero(t *testing.T) {
 	// 1. Create a routemap with versions
-	testRoutemap := Routemap{
+	testRoutemap := routemap{
 		mutex:      sync.RWMutex{},
 		ObjectMeta: metav1.ObjectMeta{Name: "testRoutemap", Namespace: "default"},
-		Versions: []Version{
+		Versions: []version{
 			{
 				Resources: []resource{{
 					GVRShort:  "svc",
@@ -90,7 +90,7 @@ func TestNormalizeWeights_sum_zero(t *testing.T) {
 func TestExtractRouteMap(t *testing.T) {
 	// get config
 	_ = os.Setenv(configEnv, base.CompletePath("../", "testdata/controllers/config.yaml"))
-	conf, err := ReadConfig()
+	conf, err := readConfig()
 	assert.NoError(t, err)
 
 	// make cm
@@ -291,7 +291,7 @@ routingTemplates:
 	namespace := "default"
 
 	assert.Eventually(t, func() bool {
-		signature, err := computeSignature(Version{
+		signature, err := computeSignature(version{
 			Resources: []resource{
 				{
 					GVRShort:  gvrShort,
@@ -396,7 +396,7 @@ routingTemplates:
 	namespace := "default"
 
 	assert.Eventually(t, func() bool {
-		signature, err := computeSignature(Version{
+		signature, err := computeSignature(version{
 			Resources: []resource{
 				{
 					GVRShort:  "deploy",

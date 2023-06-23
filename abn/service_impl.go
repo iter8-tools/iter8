@@ -25,7 +25,7 @@ var versionHasher maphash.Hash
 
 // lookupInternal is detailed implementation of gRPC method Lookup
 // application is a namespacedname, "namespace/name"
-func lookupInternal(application string, user string) (*controllers.Routemap, *int, error) {
+func lookupInternal(application string, user string, routemaps controllers.RoutemapsInterface) (controllers.RoutemapInterface, *int, error) {
 	// if user is not provided, fail
 	if user == "" {
 		return nil, nil, errors.New("no user session provided")
@@ -37,7 +37,7 @@ func lookupInternal(application string, user string) (*controllers.Routemap, *in
 	}
 
 	ns, name := splitApplicationKey(application)
-	s := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(ns, name)
+	s := routemaps.GetRoutemapFromNamespaceName(ns, name)
 	if s == nil {
 		return nil, nil, fmt.Errorf("routemap not found for application %s", ns+"/"+name)
 	}
@@ -59,7 +59,7 @@ func lookupInternal(application string, user string) (*controllers.Routemap, *in
 // and no change to the track mapping.
 // We select the version, user pair with the largest hash value ("score").
 // Inspired by https://github.com/tysonmote/rendezvous/blob/master/rendezvous.go
-func rendezvousGet(s *controllers.Routemap, user string) *int {
+func rendezvousGet(s controllers.RoutemapInterface, user string) *int {
 	// current maximimum score as computed by the hash function
 	var maxScore uint64
 	// maxTrack is the track with the current maximum score
@@ -71,11 +71,11 @@ func rendezvousGet(s *controllers.Routemap, user string) *int {
 	s.RLock()
 	defer s.RUnlock()
 
-	for track, version := range s.Versions {
+	for track, version := range s.GetVersions() {
 		if s.Weights()[track] == 0 {
 			continue
 		}
-		score := hash(fmt.Sprintf("%d", track), *version.Signature, user)
+		score := hash(fmt.Sprintf("%d", track), *version.GetSignature(), user)
 		log.Logger.Debugf("hash(%d,%s) --> %d  --  %d", track, user, score, maxScore)
 		if score >= maxScore {
 			maxScore = score
@@ -118,11 +118,11 @@ func splitApplicationKey(applicationKey string) (string, string) {
 //
 
 // writeMetricInternal is detailed implementation of gRPC method WriteMetric
-func writeMetricInternal(application, user, metric, valueStr string) error {
+func writeMetricInternal(application, user, metric, valueStr string, routemaps controllers.RoutemapsInterface) error {
 	log.Logger.Tracef("writeMetricInternal called for application, user: %s, %s", application, user)
 	defer log.Logger.Trace("writeMetricInternal completed")
 
-	s, track, err := lookupInternal(application, user)
+	s, track, err := lookupInternal(application, user, routemaps)
 	if err != nil || track == nil {
 		log.Logger.Warnf("lookupInternal failed for application=%s, user=%s", application, user)
 		return err
@@ -135,11 +135,11 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 		return err
 	}
 
-	v := s.Versions[*track]
+	v := s.GetVersions()[*track]
 	transaction := uuid.NewString()
 
 	err = metricsClient.SetMetric(
-		s.Namespace+"/"+s.Name, *track, *v.Signature,
+		s.GetNamespace()+"/"+s.GetName(), *track, *v.GetSignature(),
 		metric, user, transaction,
 		value)
 
@@ -150,15 +150,15 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	return nil
 }
 
-func toLegacyApplication(s *controllers.Routemap) *abnapp.LegacyApplication {
-	name := s.Namespace + "/" + s.Name
-	tracks := make(abnapp.LegacyTracks, len(s.Versions))
-	versions := make(abnapp.LegacyVersions, len(s.Versions))
-	for t, v := range s.Versions {
+func toLegacyApplication(s controllers.RoutemapInterface) *abnapp.LegacyApplication {
+	name := s.GetNamespace() + "/" + s.GetName()
+	tracks := make(abnapp.LegacyTracks, len(s.GetVersions()))
+	versions := make(abnapp.LegacyVersions, len(s.GetVersions()))
+	for t, v := range s.GetVersions() {
 		asStr := fmt.Sprintf("%d", t)
 		tracks[asStr] = asStr
 
-		vms, err := metricsClient.GetSummaryMetrics(name, t, *v.Signature)
+		vms, err := metricsClient.GetSummaryMetrics(name, t, *v.GetSignature())
 		if err != nil {
 			return nil
 		}
@@ -187,10 +187,10 @@ func toLegacyApplication(s *controllers.Routemap) *abnapp.LegacyApplication {
 }
 
 // getApplicationDataInternal is detailed implementation of gRPC method GetApplicationData
-func getApplicationDataInternal(application string) (string, error) {
+func getApplicationDataInternal(application string, routemaps controllers.RoutemapsInterface) (string, error) {
 
 	namespace, name := splitApplicationKey(application)
-	s := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
+	s := routemaps.GetRoutemapFromNamespaceName(namespace, name)
 	if s == nil {
 		return "", fmt.Errorf("routemap not found for application %s", namespace+"/"+name)
 	}

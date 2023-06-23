@@ -22,19 +22,19 @@ import (
 
 /* types: begin */
 
-// Routemap identifies a set of versions that comprise and application or ML model
+// routemap identifies a set of versions that comprise and application or ML model
 // and associates them with a set of routing templates
-type Routemap struct {
+type routemap struct {
 	// Todo: prune this down to agra.ObjectMeta instead of metav1.ObjectMeta
 	mutex             sync.RWMutex
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Versions          []Version                  `json:"versions,omitempty"`
+	Versions          []version                  `json:"versions,omitempty"`
 	RoutingTemplates  map[string]routingTemplate `json:"routingTemplates,omitempty"`
-	NormalizedWeights []uint32
+	normalizedWeights []uint32
 }
 
-// Version is details about a routemap version
-type Version struct {
+// version is details about a routemap version
+type version struct {
 	Resources []resource `json:"resources,omitempty"`
 	Weight    *uint32    `json:"weight,omitempty"`
 	Signature *string    `json:"signature,omitempty"`
@@ -57,7 +57,7 @@ type routingTemplate struct {
 }
 
 // routemaps by their name
-type routemapsByName map[string]*Routemap
+type routemapsByName map[string]*routemap
 
 // routemaps contain every routemap known to Iter8
 type routemaps struct {
@@ -76,29 +76,53 @@ const (
 )
 
 // Lock the mutex associated with a routemap for writing
-func (s *Routemap) Lock() {
+func (s *routemap) Lock() {
 	s.mutex.Lock()
 }
 
 // Unlock the mutex associated with a routemap
-func (s *Routemap) Unlock() {
+func (s *routemap) Unlock() {
 	s.mutex.Unlock()
 }
 
 // RLock the mutex associated with a routemap for reading
-func (s *Routemap) RLock() {
+func (s *routemap) RLock() {
 	s.mutex.RLock()
 }
 
 // RUnlock the mutex associated with a routemap
-func (s *Routemap) RUnlock() {
+func (s *routemap) RUnlock() {
 	s.mutex.RUnlock()
+}
+
+// GetNamespace returns namespace of implementing ConfigMap
+func (s *routemap) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetName returns name of implementing ConfigMap
+func (s *routemap) GetName() string {
+	return s.Name
 }
 
 // Weights provide the relative weights for traffic routing between versions
 // Intended for use in routemap templates
-func (s *Routemap) Weights() []uint32 {
-	return s.NormalizedWeights
+func (s *routemap) Weights() []uint32 {
+	return s.normalizedWeights
+}
+
+// GetVersions returns list of versions
+func (s *routemap) GetVersions() []VersionInterface {
+	result := make([]VersionInterface, len(s.Versions))
+	for i := range s.Versions {
+		v := s.Versions[i]
+		result[i] = VersionInterface(&v)
+	}
+	return result
+}
+
+func (v *version) GetSignature() *string {
+	return v.Signature
 }
 
 // normalizeWeights sets the normalized weights for each version of the routemap
@@ -112,7 +136,7 @@ func (s *Routemap) Weights() []uint32 {
 // normalizedWeights are the same as derivedWeights with one exception.
 // When derivedWeights sum up to zero, we set normalizedWeights[0] to 1
 // (i.e., version 1 gets non-zero normalizedWeight)
-func (s *Routemap) normalizeWeights(config *Config) {
+func (s *routemap) normalizeWeights(config *Config) {
 	derivedWeights := make([]uint32, len(s.Versions))
 	available := s.getAvailableVersions(config)
 	// overrides from version resource annotation
@@ -149,14 +173,14 @@ func (s *Routemap) normalizeWeights(config *Config) {
 		// at this point, routemap is validated and guaranteed to have at least one version
 		derivedWeights[0] = defaultVersionWeight
 	}
-	s.NormalizedWeights = derivedWeights
+	s.normalizedWeights = derivedWeights
 }
 
 // getWeightOverrides is looking for weights in the object annotations
 // override pointer for a version may be nil, if there are no valid weight annotation for the version
 // if a version has multiple resources,
 // this function looks for the override in the first resource only
-func (s *Routemap) getWeightOverrides() []*uint32 {
+func (s *routemap) getWeightOverrides() []*uint32 {
 	override := make([]*uint32, len(s.Versions))
 	for i, v := range s.Versions {
 		if len(v.Resources) > 0 {
@@ -193,7 +217,7 @@ func (s *Routemap) getWeightOverrides() []*uint32 {
 	return override
 }
 
-func (s *Routemap) getAvailableVersions(config *Config) []bool {
+func (s *routemap) getAvailableVersions(config *Config) []bool {
 	// initialize all versions for this routemap as available
 	// if any resource for a version is unavailable, mark that version as unavailable
 	versionsAvailable := make([]bool, len(s.Versions))
@@ -243,7 +267,7 @@ versionLoop:
 
 // computeSignature computes and sets the signature for a particular version
 // signature is based on the spec section
-func computeSignature(v Version) (string, error) {
+func computeSignature(v version) (string, error) {
 	// get all resources of a version
 	resources := []interface{}{}
 	for _, resource := range v.Resources {
@@ -276,7 +300,7 @@ func computeSignature(v Version) (string, error) {
 }
 
 // reconcile a routemap
-func (s *Routemap) reconcile(config *Config, client k8sclient.Interface) {
+func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 	// lock for reading and later unlock
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -457,7 +481,7 @@ func validateRoutemapCM(confMap *corev1.ConfigMap) error {
 }
 
 // validateRoutemap validates a given routemap
-func validateRoutemap(s *Routemap, config *Config) (*Routemap, error) {
+func validateRoutemap(s *routemap, config *Config) (*routemap, error) {
 	// routemap must have at least one version
 	if len(s.Versions) == 0 {
 		e := errors.New("routemap must at least one version")
@@ -483,7 +507,7 @@ func validateRoutemap(s *Routemap, config *Config) (*Routemap, error) {
 
 // extractRoutemap from a given configmap
 // routemap is also validated
-func extractRoutemap(confMap *corev1.ConfigMap, config *Config) (*Routemap, error) {
+func extractRoutemap(confMap *corev1.ConfigMap, config *Config) (*routemap, error) {
 	// get strSpec from the configmap
 	strSpec, ok := confMap.Data[routemapStrSpec]
 	if !ok {
@@ -493,7 +517,7 @@ func extractRoutemap(confMap *corev1.ConfigMap, config *Config) (*Routemap, erro
 	}
 
 	// unmarshal the routemap from strSpec
-	s := Routemap{}
+	s := routemap{}
 	if err := yaml.Unmarshal([]byte(strSpec), &s); err != nil {
 		e := errors.New("cannot unmarshal routemap CM spec")
 		log.Logger.WithStackTrace(err.Error()).Error(e)

@@ -27,7 +27,7 @@ func TestReadConfig(t *testing.T) {
 			_ = os.Setenv(configEnv, tt.confFile)
 		}
 
-		c, err := ReadConfig()
+		c, err := readConfig()
 		if tt.valid {
 			assert.NoError(t, err)
 			assert.Equal(t, "15m", c.DefaultResync)

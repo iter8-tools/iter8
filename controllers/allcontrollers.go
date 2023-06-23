@@ -200,7 +200,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 
 // Start starts all Iter8 controllers if this pod is the leader
 func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
-	config, err := ReadConfig()
+	config, err := readConfig()
 	if err != nil {
 		return err
 	}

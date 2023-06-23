@@ -53,6 +53,7 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	_, track, err := lookupInternal(
 		appMsg.GetName(),
 		appMsg.GetUser(),
+		&controllers.AllRoutemaps,
 	)
 
 	if err != nil {
@@ -84,12 +85,14 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 			metricMsg.GetUser(),
 			metricMsg.GetName(),
 			metricMsg.GetValue(),
+			&controllers.AllRoutemaps,
 		)
 }
 
 func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *pb.ApplicationRequest) (*pb.ApplicationData, error) {
 	jsonStr, err := getApplicationDataInternal(
 		metricReqMsg.GetApplication(),
+		&controllers.AllRoutemaps,
 	)
 
 	return &pb.ApplicationData{
@@ -110,19 +113,12 @@ func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterABNServer(grpcServer, newServer())
 
-	config, err := controllers.ReadConfig()
-	if err != nil {
-		log.Logger.Error("Unable to read configuration", err)
-		return err
-	}
-
 	// configure metricsClient if needed
-	if config.Persist {
-		metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
-		if err != nil {
-			log.Logger.Error("Unable to configure metrics storage client ", err)
-			return err
-		}
+
+	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
+	if err != nil {
+		log.Logger.Error("Unable to configure metrics storage client ", err)
+		return err
 	}
 
 	go func() {
