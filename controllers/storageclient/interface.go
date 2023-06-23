@@ -32,6 +32,23 @@ type VersionMetricSummary struct {
 type Interface interface {
 	GetSummaryMetrics(applicationName string, version int, signature string) (*VersionMetricSummary, error)
 
+	// Returns a nested map of the metrics data
+	// Example:
+	// {
+	// 	"my-app": {
+	// 		"0": {
+	// 			"my-signature": {
+	// 				"my-metric": {
+	// 					"my-user": {
+	// 						"my-transaction-id": 5.0
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+	GetMetrics() (map[string]map[string]map[string]map[string]map[string]map[string]float64, error)
+
 	// called by the A/B/n SDK gRPC API implementation (SDK for application clients)
 	// Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value (get the metric value with all the provided information)
 	SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error

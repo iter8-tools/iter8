@@ -287,6 +287,87 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 	return &vms, nil
 }
 
+// GetMetrics returns a nested map of the metrics data
+// Example:
+//
+//	{
+//		"my-app": {
+//			"0": {
+//				"my-signature": {
+//					"my-metric": {
+//						"my-user": {
+//							"my-transaction-id": 5.0
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
+func (cl Client) GetMetrics() (map[string]map[string]map[string]map[string]map[string]map[string]float64, error) {
+	metrics := map[string]map[string]map[string]map[string]map[string]map[string]float64{}
+
+	err := cl.db.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+		prefix := []byte("kt-metric")
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			item := it.Item()
+			key := string(item.Key())
+
+			tokens := strings.Split(key, "::")
+			if len(tokens) != 7 {
+				return fmt.Errorf("incorrect number of tokens in metrics key: \"%s\": should be 7 (example: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id)", key)
+			}
+			app := tokens[1]
+			version := tokens[2]
+			signature := tokens[3]
+			metric := tokens[4]
+			user := tokens[5]
+			transaction := tokens[6]
+
+			if _, ok := metrics[app]; !ok {
+				metrics[app] = map[string]map[string]map[string]map[string]map[string]float64{}
+			}
+
+			if _, ok := metrics[app][version]; !ok {
+				metrics[app][version] = map[string]map[string]map[string]map[string]float64{}
+			}
+
+			if _, ok := metrics[app][version][signature]; !ok {
+				metrics[app][version][signature] = map[string]map[string]map[string]float64{}
+			}
+
+			if _, ok := metrics[app][version][signature][metric]; !ok {
+				metrics[app][version][signature][metric] = map[string]map[string]float64{}
+			}
+
+			if _, ok := metrics[app][version][signature][metric][user]; !ok {
+				metrics[app][version][signature][metric][user] = map[string]float64{}
+			}
+
+			err := item.Value(func(v []byte) error {
+				floatValue, err := strconv.ParseFloat(string(v), 64)
+				if err != nil {
+					return err
+				}
+
+				// TODO: check if there is a preexisting transaction ID?
+				metrics[app][version][signature][metric][user][transaction] = floatValue
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return metrics, nil
+}
+
 // calculateSummarizedMetric calculates a metric summary for a particular collection of data
 func calculateSummarizedMetric(data []float64) storageclient.SummarizedMetric {
 	if len(data) == 0 {
