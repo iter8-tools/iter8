@@ -32,9 +32,9 @@ type VersionMetricSummary struct {
 type Interface interface {
 	GetSummaryMetrics(applicationName string, version int, signature string) (*VersionMetricSummary, error)
 
-	// Returns a nested map of the metrics data for a particular application, user, and transaction
+	// Returns a nested map of the metrics data for a particular application, version, and transaction
 	// Example:
-	//	{
+	//	{s
 	//		"my-metric": {
 	//			"my-user": {
 	//				"my-transaction-id": 5.0
