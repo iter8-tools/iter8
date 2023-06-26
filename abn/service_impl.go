@@ -3,7 +3,6 @@ package abn
 // lookup.go -(internal) implementation of gRPC Lookup method
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"hash/maphash"
@@ -11,9 +10,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	abnapp "github.com/iter8-tools/iter8/abn/application"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/base/summarymetrics"
 	"github.com/iter8-tools/iter8/controllers"
 )
 
@@ -150,57 +147,7 @@ func writeMetricInternal(application, user, metric, valueStr string, routemaps c
 	return nil
 }
 
-func toLegacyApplication(s controllers.RoutemapInterface) *abnapp.LegacyApplication {
-	name := s.GetNamespace() + "/" + s.GetName()
-	tracks := make(abnapp.LegacyTracks, len(s.GetVersions()))
-	versions := make(abnapp.LegacyVersions, len(s.GetVersions()))
-	for t, v := range s.GetVersions() {
-		asStr := fmt.Sprintf("%d", t)
-		tracks[asStr] = asStr
-
-		vms, err := metricsClient.GetSummaryMetrics(name, t, *v.GetSignature())
-		if err != nil {
-			return nil
-		}
-		metrics := make(map[string]*summarymetrics.SummaryMetric, len(vms.MetricSummaries))
-		for metric, summary := range vms.MetricSummaries {
-			metrics[metric] = &summarymetrics.SummaryMetric{
-				float64(summary.SummaryOverTransactions.Count),
-				float64(summary.SummaryOverTransactions.Count) * summary.SummaryOverTransactions.Mean,
-				summary.SummaryOverTransactions.Min,
-				summary.SummaryOverTransactions.Max,
-				summary.SummaryOverTransactions.StdDev, // should be sum of squares
-			}
-		}
-
-		versions[asStr] = &abnapp.LegacyVersion{
-			Metrics: metrics,
-		}
-	}
-
-	a := &abnapp.LegacyApplication{
-		Name:     name,
-		Tracks:   tracks,
-		Versions: versions,
-	}
-	return a
-}
-
 // getApplicationDataInternal is detailed implementation of gRPC method GetApplicationData
 func getApplicationDataInternal(application string, routemaps controllers.RoutemapsInterface) (string, error) {
-
-	namespace, name := splitApplicationKey(application)
-	s := routemaps.GetRoutemapFromNamespaceName(namespace, name)
-	if s == nil {
-		return "", fmt.Errorf("routemap not found for application %s", namespace+"/"+name)
-	}
-
-	legacyApp := toLegacyApplication(s)
-
-	jsonBytes, err := json.Marshal(legacyApp)
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonBytes), nil
+	return "", fmt.Errorf("not supported")
 }

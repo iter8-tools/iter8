@@ -53,16 +53,9 @@ func TestGetApplicationDataInternal(t *testing.T) {
 	assert.NotNil(t, tr)
 
 	// get data from storage; fails because
-	app, err := getApplicationDataInternal(namespace+"/"+name, &allroutemaps)
-	assert.NoError(t, err)
-	assert.NotNil(t, app)
-
-	// verify result
-	if *tr == 0 {
-		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":{\"metric\":[2,100,45,55,5]}},\"1\":{\"metrics\":{\"\":[0,0,0,0,0]}}}}", app)
-	} else {
-		assert.Equal(t, "{\"name\":\"default/test\",\"tracks\":{\"0\":\"0\",\"1\":\"1\"},\"versions\":{\"0\":{\"metrics\":{\"\":[0,0,0,0,0]}},\"1\":{\"metrics\":{\"metric\":[2,100,45,55,5]}}}}", app)
-	}
+	_, err = getApplicationDataInternal(namespace+"/"+name, &allroutemaps)
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "not supported")
 }
 
 func TestGetVolumeUsage(t *testing.T) {
