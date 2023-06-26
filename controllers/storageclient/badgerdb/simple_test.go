@@ -224,10 +224,17 @@ func TestGetMetrics(t *testing.T) {
 	err = client.SetMetric("my-application", 2, "my-signature3", "my-metric3", "my-user2", "my-transaction4", 40.0) // overwrites the previous set
 	assert.NoError(t, err)
 
-	metrics, err := client.GetMetrics()
+	metrics, err := client.GetMetrics("my-application", 0, "my-signature")
 	assert.NoError(t, err)
 
 	jsonMetrics, err := json.Marshal(metrics)
 	assert.NoError(t, err)
-	assert.Equal(t, "{\"my-application\":{\"0\":{\"my-signature\":{\"my-metric\":{\"my-user\":{\"my-transaction\":50},\"my-user2\":{\"my-transaction2\":10}}}},\"1\":{\"my-signature2\":{\"my-metric2\":{\"my-user\":{\"my-transaction3\":20}}}},\"2\":{\"my-signature3\":{\"my-metric3\":{\"my-user2\":{\"my-transaction4\":40}}}}}}", string(jsonMetrics))
+	assert.Equal(t, "{\"my-metric\":{\"my-user\":{\"my-transaction\":50},\"my-user2\":{\"my-transaction2\":10}}}", string(jsonMetrics))
+
+	metrics, err = client.GetMetrics("my-application", 2, "my-signature3")
+	assert.NoError(t, err)
+
+	jsonMetrics, err = json.Marshal(metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"my-metric3\":{\"my-user2\":{\"my-transaction4\":40}}}", string(jsonMetrics))
 }

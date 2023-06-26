@@ -287,29 +287,23 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 	return &vms, nil
 }
 
-// GetMetrics returns a nested map of the metrics data
+// GetMetrics returns a nested map of the metrics data for a particular application, user, and transaction
 // Example:
 //
 //	{
-//		"my-app": {
-//			"0": {
-//				"my-signature": {
-//					"my-metric": {
-//						"my-user": {
-//							"my-transaction-id": 5.0
-//						}
-//					}
-//				}
+//		"my-metric": {
+//			"my-user": {
+//				"my-transaction-id": 5.0
 //			}
 //		}
 //	}
-func (cl Client) GetMetrics() (map[string]map[string]map[string]map[string]map[string]map[string]float64, error) {
-	metrics := map[string]map[string]map[string]map[string]map[string]map[string]float64{}
+func (cl Client) GetMetrics(applicationName string, version int, signature string) (map[string]map[string]map[string]float64, error) {
+	metrics := map[string]map[string]map[string]float64{}
 
 	err := cl.db.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
-		prefix := []byte("kt-metric")
+		prefix := []byte(getMetricPrefix(applicationName, version, signature))
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			key := string(item.Key())
@@ -318,31 +312,16 @@ func (cl Client) GetMetrics() (map[string]map[string]map[string]map[string]map[s
 			if len(tokens) != 7 {
 				return fmt.Errorf("incorrect number of tokens in metrics key: \"%s\": should be 7 (example: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id)", key)
 			}
-			app := tokens[1]
-			version := tokens[2]
-			signature := tokens[3]
 			metric := tokens[4]
 			user := tokens[5]
 			transaction := tokens[6]
 
-			if _, ok := metrics[app]; !ok {
-				metrics[app] = map[string]map[string]map[string]map[string]map[string]float64{}
+			if _, ok := metrics[metric]; !ok {
+				metrics[metric] = map[string]map[string]float64{}
 			}
 
-			if _, ok := metrics[app][version]; !ok {
-				metrics[app][version] = map[string]map[string]map[string]map[string]float64{}
-			}
-
-			if _, ok := metrics[app][version][signature]; !ok {
-				metrics[app][version][signature] = map[string]map[string]map[string]float64{}
-			}
-
-			if _, ok := metrics[app][version][signature][metric]; !ok {
-				metrics[app][version][signature][metric] = map[string]map[string]float64{}
-			}
-
-			if _, ok := metrics[app][version][signature][metric][user]; !ok {
-				metrics[app][version][signature][metric][user] = map[string]float64{}
+			if _, ok := metrics[metric][user]; !ok {
+				metrics[metric][user] = map[string]float64{}
 			}
 
 			err := item.Value(func(v []byte) error {
@@ -352,7 +331,7 @@ func (cl Client) GetMetrics() (map[string]map[string]map[string]map[string]map[s
 				}
 
 				// TODO: check if there is a preexisting transaction ID?
-				metrics[app][version][signature][metric][user][transaction] = floatValue
+				metrics[metric][user][transaction] = floatValue
 				return nil
 			})
 			if err != nil {
