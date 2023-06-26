@@ -11,6 +11,12 @@ import (
 
 // tests that we get the same result for the same inputs
 func TestLookupInternal(t *testing.T) {
+	var err error
+	// set up test metrics db for recording users
+	tempDirPath := t.TempDir()
+	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
+
 	// setup: add desired routemaps to allRoutemaps
 	allroutemaps := setupRoutemaps(t, *getTestRM("default", "test"))
 

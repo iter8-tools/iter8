@@ -44,6 +44,9 @@ func lookupInternal(application string, user string, routemaps controllers.Route
 		return nil, nil, fmt.Errorf("no versions in routemap for application %s", ns+"/"+name)
 	}
 
+	// record user; ignore error if any; this is best effort
+	_ = metricsClient.SetUser(application, *track, *s.GetVersions()[*track].GetSignature(), user)
+
 	return s, track, nil
 }
 
