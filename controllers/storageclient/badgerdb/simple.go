@@ -287,7 +287,7 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 	return &vms, nil
 }
 
-// GetMetrics returns a nested map of the metrics data for a particular application, version, and transaction
+// GetMetrics returns a nested map of the metrics data for a particular application, version, and signature
 // Example:
 //
 //	{
