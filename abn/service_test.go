@@ -177,7 +177,7 @@ func setupGRPCService(t *testing.T) (*pb.ABNClient, func()) {
 	grpcServer := grpc.NewServer(serverOptions...)
 	pb.RegisterABNServer(grpcServer, newServer())
 	tempDirPath := t.TempDir()
-	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
 	go func() {
 		_ = grpcServer.Serve(lis)

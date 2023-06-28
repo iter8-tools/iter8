@@ -10,6 +10,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
+	"github.com/iter8-tools/iter8/metrics"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
@@ -70,6 +71,14 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 				err := abn.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
 				if err != nil {
 					log.Logger.Error("cound not start A/B/n service")
+				}
+			}()
+
+			// launch metrics HTTP server to respond to support Grafana visualization
+			go func() {
+				err := metrics.Start()
+				if err != nil {
+					log.Logger.Error("count not start A/B/n metrics service")
 				}
 			}()
 

@@ -32,7 +32,7 @@ var (
 	// MetricsPath is the path of the persistent volume
 	metricsPath = defaultMetricsPath
 	// MetricsClient is the metrics client
-	metricsClient storage.Interface
+	MetricsClient storage.Interface
 )
 
 // newServer returns a new gRPC server
@@ -104,7 +104,7 @@ func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}
 
 	// configure metricsClient if needed
 
-	metricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
+	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
 	if err != nil {
 		log.Logger.Error("Unable to configure metrics storage client ", err)
 		return err

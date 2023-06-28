@@ -45,7 +45,7 @@ func lookupInternal(application string, user string, routemaps controllers.Route
 	}
 
 	// record user; ignore error if any; this is best effort
-	_ = metricsClient.SetUser(application, *track, *s.GetVersions()[*track].GetSignature(), user)
+	_ = MetricsClient.SetUser(application, *track, *s.GetVersions()[*track].GetSignature(), user)
 
 	return s, track, nil
 }
@@ -138,7 +138,7 @@ func writeMetricInternal(application, user, metric, valueStr string, routemaps c
 	v := s.GetVersions()[*track]
 	transaction := uuid.NewString()
 
-	err = metricsClient.SetMetric(
+	err = MetricsClient.SetMetric(
 		s.GetNamespace()+"/"+s.GetName(), *track, *v.GetSignature(),
 		metric, user, transaction,
 		value)
