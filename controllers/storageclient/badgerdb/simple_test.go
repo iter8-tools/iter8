@@ -226,15 +226,25 @@ func TestGetMetrics(t *testing.T) {
 
 	metrics, err := client.GetMetrics("my-application", 0, "my-signature")
 	assert.NoError(t, err)
-
 	jsonMetrics, err := json.Marshal(metrics)
 	assert.NoError(t, err)
-	assert.Equal(t, "{\"my-metric\":{\"my-user\":{\"my-transaction\":50},\"my-user2\":{\"my-transaction2\":10}}}", string(jsonMetrics))
+	assert.Equal(t, "{\"my-metric\":{\"MetricsOverTransactions\":[10,50],\"MetricsOverUsers\":[10,50]}}", string(jsonMetrics))
+
+	metrics, err = client.GetMetrics("my-application", 1, "my-signature2")
+	assert.NoError(t, err)
+	jsonMetrics, err = json.Marshal(metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"my-metric2\":{\"MetricsOverTransactions\":[20],\"MetricsOverUsers\":[20]}}", string(jsonMetrics))
 
 	metrics, err = client.GetMetrics("my-application", 2, "my-signature3")
 	assert.NoError(t, err)
-
 	jsonMetrics, err = json.Marshal(metrics)
 	assert.NoError(t, err)
-	assert.Equal(t, "{\"my-metric3\":{\"my-user2\":{\"my-transaction4\":40}}}", string(jsonMetrics))
+	assert.Equal(t, "{\"my-metric3\":{\"MetricsOverTransactions\":[40],\"MetricsOverUsers\":[40]}}", string(jsonMetrics))
+
+	metrics, err = client.GetMetrics("my-application", 3, "my-signature")
+	assert.NoError(t, err)
+	jsonMetrics, err = json.Marshal(metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, "{}", string(jsonMetrics))
 }
