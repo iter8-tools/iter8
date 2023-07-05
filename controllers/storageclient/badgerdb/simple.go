@@ -185,6 +185,17 @@ func (cl Client) getUserCount(applicationName string, version int, signature str
 //			"MetricsOverUsers": [2, 7, 5]
 //		}
 //	}
+//
+// NOTE: for users that have not produced any metrics (for example, via lookup()), GetMetrics() will add 0s for the extra users in metricsOverUsers
+//
+// Example, given 5 total users:
+//
+//	{
+//		"my-metric": {
+//			"MetricsOverTransactions": [1, 1, 3, 4, 5]
+//			"MetricsOverUsers": [2, 7, 5, 0, 0]
+//		}
+//	}
 func (cl Client) GetMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetrics, error) {
 	metrics := storageclient.VersionMetrics{}
 
