@@ -43,8 +43,10 @@ type VersionMetrics map[string]struct {
 	MetricsOverUsers        []float64
 }
 
+// GrafanaHistogram represents the histogram in the Grafana Iter8 dashboard
 type GrafanaHistogram []GrafanaHistogramBucket
 
+// GrafanaHistogramBucket represents a bucket in thhe histogram in the Grafana Iter8 dashboard
 type GrafanaHistogramBucket struct {
 	// Version is the version of the application
 	Version string
@@ -168,8 +170,6 @@ func GetGrafanaHistogram(versionMetrics map[string][]float64, numBuckets int, de
 		// append the minimum and maximum across all versions
 		// allows all the buckets to be the same across versions
 		values = append(values, versionMin, versionMax)
-
-		fmt.Println(values)
 
 		h, err := plotter.NewHist(values, numBuckets)
 		if err != nil {
