@@ -46,7 +46,7 @@ type VersionMetrics map[string]struct {
 // GrafanaHistogram represents the histogram in the Grafana Iter8 dashboard
 type GrafanaHistogram []GrafanaHistogramBucket
 
-// GrafanaHistogramBucket represents a bucket in thhe histogram in the Grafana Iter8 dashboard
+// GrafanaHistogramBucket represents a bucket in the histogram in the Grafana Iter8 dashboard
 type GrafanaHistogramBucket struct {
 	// Version is the version of the application
 	Version string
@@ -62,14 +62,12 @@ type GrafanaHistogramBucket struct {
 // Interface enables interaction with a storage entity
 // Can be mocked in unit tests with fake implementation
 type Interface interface {
-	GetSummaryMetrics(applicationName string, version int, signature string) (*VersionMetricSummary, error)
-
 	// Returns a nested map of the metrics data for a particular application, version, and signature
 	// Example:
 	//	{
 	//		"my-metric": {
 	//			"MetricsOverTransactions": [1, 1, 3, 4, 5]
-	//			"MetricsOverUsers": [2, 7, 5]
+	//			"MetricsOverUsers": [2, 7, 5, 0, 0]
 	//		}
 	//	}
 	GetMetrics(applicationName string, version int, signature string) (*VersionMetrics, error)
@@ -120,7 +118,7 @@ func CalculateSummarizedMetric(data []float64) (SummarizedMetric, error) {
 	}, nil
 }
 
-// GetGrafanaHistogram creates histograms for multiple versions
+// CalculateHistogram creates histograms for multiple versions
 // the histograms have the same buckets so they can be displayed together
 // numBuckets is the number of buckets in the histogram
 // decimalPlace is the number of decimal places that the histogram labels should be rounded to
@@ -128,7 +126,7 @@ func CalculateSummarizedMetric(data []float64) (SummarizedMetric, error) {
 //	For example: "-0.24178488465151116 - 0.24782423875427073" -> "-0.242 - 0.248"
 //
 // TODO: defaults for numBuckets/decimalPlace?
-func GetGrafanaHistogram(versionMetrics map[string][]float64, numBuckets int, decimalPlace float64) (GrafanaHistogram, error) {
+func CalculateHistogram(versionMetrics map[string][]float64, numBuckets int, decimalPlace float64) (GrafanaHistogram, error) {
 	if numBuckets == 0 {
 		numBuckets = 20
 	}

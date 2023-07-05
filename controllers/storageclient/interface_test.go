@@ -2,6 +2,9 @@ package storageclient
 
 import (
 	"encoding/json"
+	"regexp"
+	"sort"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -75,8 +78,54 @@ func TestGetGrafanaHistogram(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		summarizedMetric, err := GetGrafanaHistogram(test.data, test.numBuckets, test.decimalPlace)
+		summarizedMetric, err := CalculateHistogram(test.data, test.numBuckets, test.decimalPlace)
 		assert.NoError(t, err)
+
+		// Sort summarizedMetric
+		// Even though the buckets in each version is sorted, the order of the versions may not
+		sort.Slice(summarizedMetric, func(i, j int) bool {
+			iVersion := summarizedMetric[i].Version
+			ifVersion, err := strconv.ParseFloat(iVersion, 64)
+			if err != nil {
+				assert.Fail(t, "cannot parse string \"%s\" into float64", iVersion)
+			}
+
+			jVersion := summarizedMetric[j].Version
+			jfVersion, err := strconv.ParseFloat(jVersion, 64)
+			if err != nil {
+				assert.Fail(t, "cannot parse string \"%s\" into float64", jVersion)
+			}
+
+			if ifVersion == jfVersion {
+				// Compare the buckets
+				iBucket := summarizedMetric[i].Bucket
+				jBucket := summarizedMetric[j].Bucket
+
+				re := regexp.MustCompile("[0-9.]+")
+				iBucketMin := re.FindAllString(iBucket, 1)
+				jBucketMin := re.FindAllString(jBucket, 1)
+
+				if iBucketMin == nil {
+					assert.Fail(t, "cannot parse find number in string \"%s\"", iBucket)
+				} else if jBucketMin == nil {
+					assert.Fail(t, "cannot parse find number in string \"%s\"", jBucket)
+				}
+
+				ifBucketMin, err := strconv.ParseFloat(iBucketMin[0], 64)
+				if err != nil {
+					assert.Fail(t, "cannot parse string \"%s\" into float64", iBucketMin)
+				}
+
+				jfBucketMin, err := strconv.ParseFloat(jBucketMin[0], 64)
+				if err != nil {
+					assert.Fail(t, "cannot parse string \"%s\" into float64", jBucketMin)
+				}
+
+				return ifBucketMin < jfBucketMin
+			} else {
+				return ifVersion < jfVersion
+			}
+		})
 
 		jsonSummarizeMetric, err := json.Marshal(summarizedMetric)
 		assert.NoError(t, err)
