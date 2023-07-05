@@ -122,9 +122,9 @@ func TestGetGrafanaHistogram(t *testing.T) {
 				}
 
 				return ifBucketMin < jfBucketMin
-			} else {
-				return ifVersion < jfVersion
 			}
+
+			return ifVersion < jfVersion
 		})
 
 		jsonSummarizeMetric, err := json.Marshal(summarizedMetric)
