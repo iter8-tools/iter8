@@ -310,19 +310,5 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 		return nil, err
 	}
 
-	// userCount, err := cl.getUserCount(applicationName, version, signature)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// for i, _ := range metrics {
-	// 	metricsOverUsers := metrics[i].MetricsOverUsers
-	// 	if uint64(len(metricsOverUsers)) < userCount {
-	// 		for j := 0; j < 10; j++ {
-
-	// 		}
-	// 	}
-	// }
-
 	return &metrics, nil
 }
