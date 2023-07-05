@@ -39,7 +39,7 @@ func TestCalculateSummarizedMetric(t *testing.T) {
 	assert.Equal(t, uint64(0), summarizedMetric.Count)
 }
 
-func TestGetGrafanaHistogram(t *testing.T) {
+func TestCalculateHistogram(t *testing.T) {
 	tests := []struct {
 		data         map[string][]float64
 		numBuckets   int

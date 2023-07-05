@@ -176,131 +176,6 @@ func (cl Client) getUserCount(applicationName string, version int, signature str
 	return count, nil
 }
 
-// GetSummaryMetrics gets summarized metrics for a particular application, version, and signature
-func (cl Client) GetSummaryMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetricSummary, error) {
-	count, err := cl.getUserCount(applicationName, version, signature)
-	if err != nil {
-		return nil, fmt.Errorf("cannot get user count: %e", err)
-	}
-
-	vms := storageclient.VersionMetricSummary{
-		NumUsers:        count,
-		MetricSummaries: map[string]storageclient.MetricSummary{},
-	}
-
-	// get metric summaries
-	// iter8 over all metrics with the provided application name, version, and signature
-	err = cl.db.View(func(txn *badger.Txn) error {
-		// used to capture all the metric values for the current metric
-		var overUserData []float64        // cumulative metric value for a particular user
-		var overTransactionData []float64 // all metric values
-
-		// used to determine what the previous user and metric are in the previous iteration
-		var previousUser string
-		var previousMetric string
-
-		it := txn.NewIterator(badger.DefaultIteratorOptions)
-		defer it.Close()
-
-		prefix := []byte(getMetricPrefix(applicationName, version, signature))
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			item := it.Item()
-
-			// get key
-			key := string(item.Key())
-			err := item.Value(func(v []byte) error {
-				// get value
-				val := string(v)
-				fval, err := strconv.ParseFloat(val, 64)
-				if err != nil {
-					return fmt.Errorf("cannot convert metric value \"%s\" into float64", val)
-				}
-
-				// break down key into tokens
-				tokens := strings.Split(key[len(prefix):], "::")
-				if len(tokens) != 3 {
-					return fmt.Errorf("incorrect number of tokens in metric key \"%s\"; expected 7 tokens", key)
-				}
-
-				currentMetric := tokens[0]
-				currentUser := tokens[1]
-
-				// initial case
-				if previousMetric == "" {
-					previousMetric = currentMetric
-					previousUser = currentUser
-
-					overTransactionData = []float64{fval}
-					overUserData = []float64{fval}
-
-					return nil
-				}
-
-				// calculate overUserData
-				if currentUser == previousUser {
-					overUserData[len(overUserData)-1] += fval // cumulative metric value for a particular user
-				} else {
-					previousUser = currentUser
-					overUserData = append(overUserData, fval) // add new entry when the user changes
-				}
-
-				// calculate overTransactionData or calculate summarizedMetric
-				if currentMetric == previousMetric {
-					overTransactionData = append(overTransactionData, fval) // always add new entry
-				} else {
-					summaryOverTransactions, err := storageclient.CalculateSummarizedMetric(overTransactionData)
-					if err != nil {
-						return fmt.Errorf("cannot calculate summarized metric: %e", err)
-					}
-					summaryOverUsers, err := storageclient.CalculateSummarizedMetric(overUserData)
-					if err != nil {
-						return fmt.Errorf("cannot calculate summarized metric: %e", err)
-					}
-					vms.MetricSummaries[currentMetric] = storageclient.MetricSummary{
-						SummaryOverTransactions: summaryOverTransactions,
-						SummaryOverUsers:        summaryOverUsers,
-					}
-
-					previousUser = currentUser
-					previousMetric = currentMetric
-
-					// reset data
-					overUserData = []float64{fval}
-					overTransactionData = []float64{fval}
-				}
-
-				return nil
-			})
-
-			if err != nil {
-				return err
-			}
-		}
-
-		summaryOverTransactions, err := storageclient.CalculateSummarizedMetric(overTransactionData)
-		if err != nil {
-			return fmt.Errorf("cannot calculate summarized metric: %e", err)
-		}
-		summaryOverUsers, err := storageclient.CalculateSummarizedMetric(overUserData)
-		if err != nil {
-			return fmt.Errorf("cannot calculate summarized metric: %e", err)
-		}
-
-		// flush last sequence of metric data
-		vms.MetricSummaries[previousMetric] = storageclient.MetricSummary{
-			SummaryOverTransactions: summaryOverTransactions,
-			SummaryOverUsers:        summaryOverUsers,
-		}
-
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &vms, nil
-}
-
 // GetMetrics returns a nested map of the metrics data for a particular application, version, and signature
 // Example:
 //
@@ -313,7 +188,12 @@ func (cl Client) GetSummaryMetrics(applicationName string, version int, signatur
 func (cl Client) GetMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetrics, error) {
 	metrics := storageclient.VersionMetrics{}
 
-	err := cl.db.View(func(txn *badger.Txn) error {
+	userCount, err := cl.getUserCount(applicationName, version, signature)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cl.db.View(func(txn *badger.Txn) error {
 		// used to determine what the previous user and metric are in the previous iteration
 		var currentMetric string
 		var currentUser string
@@ -346,6 +226,17 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 				}
 
 				if metric != currentMetric && currentMetric != "" {
+					metricsOverUsers = append(metricsOverUsers, cumulativeUserValue)
+
+					// add 0s for all the users that did not produce metrics
+					// for example, via lookup()
+					if uint64(len(metricsOverUsers)) < userCount {
+						diff := userCount - uint64(len(metricsOverUsers))
+						for j := uint64(0); j < diff; j++ {
+							metricsOverUsers = append(metricsOverUsers, 0)
+						}
+					}
+
 					metrics[currentMetric] = struct {
 						MetricsOverTransactions []float64
 						MetricsOverUsers        []float64
@@ -383,6 +274,16 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 		// flush last sequence of metric data
 		if currentMetric != "" || currentUser != "" {
 			metricsOverUsers = append(metricsOverUsers, cumulativeUserValue)
+
+			// add 0s for all the users that did not produce metrics
+			// for example, via lookup()
+			if uint64(len(metricsOverUsers)) < userCount {
+				diff := userCount - uint64(len(metricsOverUsers))
+				for j := uint64(0); j < diff; j++ {
+					metricsOverUsers = append(metricsOverUsers, 10)
+				}
+			}
+
 			metrics[currentMetric] = struct {
 				MetricsOverTransactions []float64
 				MetricsOverUsers        []float64
@@ -397,6 +298,20 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 	if err != nil {
 		return nil, err
 	}
+
+	// userCount, err := cl.getUserCount(applicationName, version, signature)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// for i, _ := range metrics {
+	// 	metricsOverUsers := metrics[i].MetricsOverUsers
+	// 	if uint64(len(metricsOverUsers)) < userCount {
+	// 		for j := 0; j < 10; j++ {
+
+	// 		}
+	// 	}
+	// }
 
 	return &metrics, nil
 }
