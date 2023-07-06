@@ -135,25 +135,6 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 	}
 }
 
-func TestGetApplicationData(t *testing.T) {
-	grpcClient, teardown := setupGRPCService(t)
-	defer teardown()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	s, err := (*grpcClient).GetApplicationData(
-		ctx,
-		&pb.ApplicationRequest{
-			Application: "namespace/doesnotexist",
-		},
-	)
-
-	assert.Error(t, err)
-	assert.Nil(t, s)
-
-}
-
 func setupRoutemaps(t *testing.T, initialroutemaps ...testroutemap) testroutemaps {
 	routemaps := testroutemaps{
 		nsRoutemap: make(map[string]testroutemapsByName),

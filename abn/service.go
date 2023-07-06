@@ -89,17 +89,6 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 		)
 }
 
-func (server *abnServer) GetApplicationData(ctx context.Context, metricReqMsg *pb.ApplicationRequest) (*pb.ApplicationData, error) {
-	jsonStr, err := getApplicationDataInternal(
-		metricReqMsg.GetApplication(),
-		&controllers.AllRoutemaps,
-	)
-
-	return &pb.ApplicationData{
-		ApplicationJson: jsonStr,
-	}, err
-}
-
 // LaunchGRPCServer starts gRPC server
 func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}) error {
 	log.Logger.Tracef("starting gRPC service on port %d", port)
