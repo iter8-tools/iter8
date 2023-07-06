@@ -16,6 +16,18 @@ import (
 	"gonum.org/v1/plot/plotter"
 )
 
+type ConfigMaps interface {
+	GetAllConfigMaps() controllers.RoutemapsInterface
+}
+
+type DefaultConfigMaps struct{}
+
+func (cm *DefaultConfigMaps) GetAllConfigMaps() controllers.RoutemapsInterface {
+	return &controllers.AllRoutemaps
+}
+
+var allConfigMaps ConfigMaps = &DefaultConfigMaps{}
+
 // Start starts the HTTP server
 func Start() error {
 	http.HandleFunc("/metrics", getMetrics)
@@ -46,8 +58,8 @@ type GrafanaHistogramBucket struct {
 	// For example: 8-12
 	Bucket string
 
-	// Count is the number of points in this bucket
-	Count float64
+	// Value is the number of points in this bucket
+	Value float64
 }
 
 // MetricSummary is result for a metric
@@ -78,7 +90,8 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 
 	// identify the routemap for the application
 	namespace, name := splitApplicationKey(application)
-	rm := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
+	rm := allConfigMaps.GetAllConfigMaps().GetRoutemapFromNamespaceName(namespace, name)
+	// rm := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
 	if rm == nil {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
 		return
@@ -314,7 +327,7 @@ func calculateHistogram(versionMetrics map[string][]float64, numBuckets int, dec
 			grafanaHistogram = append(grafanaHistogram, GrafanaHistogramBucket{
 				Version: version,
 				Bucket:  bucketLabel(bin.Min, bin.Max, decimalPlace),
-				Count:   count,
+				Value:   count,
 			})
 		}
 	}

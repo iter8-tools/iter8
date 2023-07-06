@@ -2,13 +2,108 @@ package metrics
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"sort"
 	"strconv"
 	"testing"
 
+	"github.com/dgraph-io/badger/v4"
+	"github.com/iter8-tools/iter8/abn"
+	util "github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/controllers"
+	"github.com/iter8-tools/iter8/storage/badgerdb"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestGetMetricsInvalidMethod(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/metrics", nil)
+	getMetrics(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
+}
+
+func TestGetMetricsMissingParameter(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	getMetrics(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+}
+
+func TestGetMetricsNoRouteMap(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/metrics?application=default%2Ftest", nil)
+	getMetrics(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+}
+
+type testConfigMaps struct {
+	allroutemaps testroutemaps
+}
+
+func (cm *testConfigMaps) GetAllConfigMaps() controllers.RoutemapsInterface {
+	return &cm.allroutemaps
+}
+
+func TestGetMetrics(t *testing.T) {
+	testCM := testConfigMaps{
+		allroutemaps: setupRoutemaps(t, *getTestRM("default", "test")),
+	}
+	allConfigMaps = &testCM
+
+	tempDirPath := t.TempDir()
+
+	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
+
+	app := "default/test"
+	version := 0
+	signature := "123456789"
+	metric := "my-metric"
+	user := "my-user"
+	transaction := "my-transaction"
+	value := 50.0
+
+	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
+	assert.NoError(t, err)
+
+	app = "default/test"
+	version = 1
+	signature = "987654321"
+	metric = "my-metric"
+	user = "my-user"
+	transaction = "my-transaction-1"
+	value = 75.0
+
+	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
+	assert.NoError(t, err)
+
+	abn.MetricsClient = client
+
+	w := httptest.NewRecorder()
+	rm := allConfigMaps.GetAllConfigMaps().GetRoutemapFromNamespaceName("default", "test")
+	assert.NotNil(t, rm)
+	req := httptest.NewRequest(http.MethodGet, "/metrics?application=default%2Ftest", nil)
+	getMetrics(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+
+	data, err := ioutil.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.NotNil(t, data)
+	assert.NotEmpty(t, data)
+	//assert.Equal(t, "", string(data))
+
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+}
 
 func TestCalculateSummarizedMetric(t *testing.T) {
 	summarizedMetric, err := calculateSummarizedMetric([]float64{1, 2, 3, 4, 5})
@@ -132,4 +227,33 @@ func TestCalculateHistogram(t *testing.T) {
 		assert.Equal(t, test.result, string(jsonSummarizeMetric))
 
 	}
+}
+
+func setupRoutemaps(t *testing.T, initialroutemaps ...testroutemap) testroutemaps {
+	routemaps := testroutemaps{
+		nsRoutemap: make(map[string]testroutemapsByName),
+	}
+
+	for i := range initialroutemaps {
+
+		if _, ok := routemaps.nsRoutemap[initialroutemaps[i].namespace]; !ok {
+			routemaps.nsRoutemap[initialroutemaps[i].namespace] = make(testroutemapsByName)
+		}
+		(routemaps.nsRoutemap[initialroutemaps[i].namespace])[initialroutemaps[i].name] = &initialroutemaps[i]
+	}
+
+	return routemaps
+}
+
+func getTestRM(namespace, name string) *testroutemap {
+	return &testroutemap{
+		namespace: namespace,
+		name:      name,
+		versions: []testversion{
+			{signature: util.StringPointer("123456789")},
+			{signature: util.StringPointer("987654321")},
+		},
+		normalizedWeights: []uint32{1, 1},
+	}
+
 }
