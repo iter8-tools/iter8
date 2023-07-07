@@ -34,22 +34,6 @@ type VersionMetrics map[string]struct {
 	MetricsOverUsers        []float64
 }
 
-// GrafanaHistogram represents the histogram in the Grafana Iter8 dashboard
-type GrafanaHistogram []GrafanaHistogramBucket
-
-// GrafanaHistogramBucket represents a bucket in the histogram in the Grafana Iter8 dashboard
-type GrafanaHistogramBucket struct {
-	// Version is the version of the application
-	Version string
-
-	// Bucket is the bucket of the histogram
-	// For example: 8-12
-	Bucket string
-
-	// Count is the number of points in this bucket
-	Count float64
-}
-
 // Interface enables interaction with a storage entity
 // Can be mocked in unit tests with fake implementation
 type Interface interface {
