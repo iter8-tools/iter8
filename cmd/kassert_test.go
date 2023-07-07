@@ -57,7 +57,7 @@ func testAssert(t *testing.T, experiment string, url string, expectedOutputFile 
 		// k launch
 		{
 			name:   "k launch",
-			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http,assess} --set http.url=%s --set http.duration=2s", base.CompletePath("../testdata/charts", "iter8"), url),
+			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http,assess} --set http.url=%s --set http.duration=2s", base.CompletePath("../charts", "iter8"), url),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 		// k run

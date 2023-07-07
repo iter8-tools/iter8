@@ -52,7 +52,7 @@ jobs:
     - name: load-test-http in Kubernetes
       run: |
         iter8 k launch --localChart \
-          --chartName testdata/charts/iter8 \
+          --chartName charts/iter8 \
           --set "tasks={ready,http,assess}" \
           --set ready.deploy=httpbin \
           --set ready.service=httpbin \
@@ -95,7 +95,7 @@ jobs:
         set -e
         export LOG_LEVEL=trace
         iter8 k launch --localChart \
-          --chartName testdata/charts/iter8 \
+          --chartName charts/iter8 \
           --set "tasks={ready,grpc,assess}" \
           --set ready.service=hello \
           --set ready.timeout=60s \
@@ -116,7 +116,7 @@ jobs:
       run: |
         set -e
         iter8 k launch --localChart -l trace \
-          --chartName testdata/charts/iter8 \
+          --chartName charts/iter8 \
           --set "tasks={grpc,assess}" \
           --set grpc.host="hello.default:50051" \
           --set grpc.call="helloworld.Greeter.SayHello" \
