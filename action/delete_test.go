@@ -14,7 +14,7 @@ func TestKubeDelete(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.ChartName = base.CompletePath("../testdata/charts", "iter8")
+	lOpts.ChartName = base.CompletePath("../charts", "iter8")
 	lOpts.LocalChart = true
 	lOpts.Values = []string{"tasks={http}", "http.url=https://iter8.tools", "http.duration=2s"}
 
