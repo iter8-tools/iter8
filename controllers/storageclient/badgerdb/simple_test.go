@@ -115,6 +115,42 @@ func TestSetUser(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// TestGetMetricsWithExtraUsers tests if GetMetrics adds 0 for all users that did not produce metrics
+func TestGetMetricsWithExtraUsers(t *testing.T) {
+	tempDirPath := t.TempDir()
+
+	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	assert.NoError(t, err)
+
+	app := "my-application"
+	version := 0
+	signature := "my-signature"
+	extraUser := "my-extra-user"
+
+	err = client.SetUser(app, version, signature, extraUser) // extra user
+	assert.NoError(t, err)
+
+	metric := "my-metric"
+	user := "my-user"
+	transaction := "my-transaction"
+
+	err = client.SetMetric(app, version, signature, metric, user, transaction, 25)
+	assert.NoError(t, err)
+
+	metric2 := "my-metric2"
+
+	err = client.SetMetric(app, version, signature, metric2, user, transaction, 50)
+	assert.NoError(t, err)
+
+	metrics, err := client.GetMetrics(app, version, signature)
+	assert.NoError(t, err)
+
+	jsonMetrics, err := json.Marshal(metrics)
+	assert.NoError(t, err)
+	// 0s have been added to the MetricsOverUsers due to extraUser, [50,0]
+	assert.Equal(t, "{\"my-metric\":{\"MetricsOverTransactions\":[25],\"MetricsOverUsers\":[25,10]},\"my-metric2\":{\"MetricsOverTransactions\":[50],\"MetricsOverUsers\":[50,0]}}", string(jsonMetrics))
+}
+
 func TestValidateKeyToken(t *testing.T) {
 	err := validateKeyToken("hello")
 	assert.NoError(t, err)
@@ -135,78 +171,6 @@ func TestValidateKeyToken(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestGetSummaryMetrics(t *testing.T) {
-	// MetricName: sales
-	// user u1; transaction t1: 30
-	// user u1; transaction t2: 20
-	// user u1; transaction t3: 20
-
-	// user u2; transaction t4: 50
-
-	// user u3: transaction t5: 0.5
-	// user u3: transaction t6: 1.5
-
-	// summaryOverTransactions = {
-	// 	Count: 6
-	// 	Mean: (30 + 20 + 20 + 50 + 0.5 + 1.5)/6
-	// 	StdDev: ...
-	// 	Min: 0.5
-	// 	Max: 50
-	// }
-
-	// // metric values are added for a given user
-	// summaryOverUsers = {
-	// 	Count: 3
-	// 	Mean: (30 + 20 + 20 + 50 + 0.5 + 1.5)/3
-	// 	StdDev: ...
-	// 	Min: 2.0
-	// 	Max: 70
-	// }
-
-	tempDirPath := t.TempDir()
-
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
-	assert.NoError(t, err)
-
-	app := "my-application"
-	version := 0
-	signature := "my-signature"
-	metric := "sales"
-	user1 := "u1"
-	user2 := "u2"
-	user3 := "u3"
-
-	err = client.SetMetric(app, version, signature, metric, user1, "t1", 30)
-	assert.NoError(t, err)
-	err = client.SetMetric(app, version, signature, metric, user1, "t2", 20)
-	assert.NoError(t, err)
-	err = client.SetMetric(app, version, signature, metric, user1, "t3", 20)
-	assert.NoError(t, err)
-	err = client.SetMetric(app, version, signature, metric, user2, "t4", 50)
-	assert.NoError(t, err)
-	err = client.SetMetric(app, version, signature, metric, user3, "t5", 0.5)
-	assert.NoError(t, err)
-	err = client.SetMetric(app, version, signature, metric, user3, "t6", 1.5)
-	assert.NoError(t, err)
-
-	vms, err := client.GetSummaryMetrics(app, version, signature)
-	assert.NoError(t, err)
-
-	assert.Equal(t, uint64(3), vms.NumUsers)
-
-	assert.Equal(t, uint64(6), vms.MetricSummaries[metric].SummaryOverTransactions.Count)
-	assert.Equal(t, 20.333333333333332, vms.MetricSummaries[metric].SummaryOverTransactions.Mean)
-	assert.Equal(t, 16.940254491070146, vms.MetricSummaries[metric].SummaryOverTransactions.StdDev)
-	assert.Equal(t, 0.5, vms.MetricSummaries[metric].SummaryOverTransactions.Min)
-	assert.Equal(t, 50.0, vms.MetricSummaries[metric].SummaryOverTransactions.Max)
-
-	assert.Equal(t, uint64(3), vms.MetricSummaries[metric].SummaryOverUsers.Count)
-	assert.Equal(t, 40.666666666666664, vms.MetricSummaries[metric].SummaryOverUsers.Mean)
-	assert.Equal(t, 28.534579412043595, vms.MetricSummaries[metric].SummaryOverUsers.StdDev)
-	assert.Equal(t, 2.0, vms.MetricSummaries[metric].SummaryOverUsers.Min)
-	assert.Equal(t, 70.0, vms.MetricSummaries[metric].SummaryOverUsers.Max)
-}
-
 func TestGetMetrics(t *testing.T) {
 	tempDirPath := t.TempDir()
 
@@ -224,10 +188,27 @@ func TestGetMetrics(t *testing.T) {
 	err = client.SetMetric("my-application", 2, "my-signature3", "my-metric3", "my-user2", "my-transaction4", 40.0) // overwrites the previous set
 	assert.NoError(t, err)
 
-	metrics, err := client.GetMetrics()
+	metrics, err := client.GetMetrics("my-application", 0, "my-signature")
 	assert.NoError(t, err)
-
 	jsonMetrics, err := json.Marshal(metrics)
 	assert.NoError(t, err)
-	assert.Equal(t, "{\"my-application\":{\"0\":{\"my-signature\":{\"my-metric\":{\"my-user\":{\"my-transaction\":50},\"my-user2\":{\"my-transaction2\":10}}}},\"1\":{\"my-signature2\":{\"my-metric2\":{\"my-user\":{\"my-transaction3\":20}}}},\"2\":{\"my-signature3\":{\"my-metric3\":{\"my-user2\":{\"my-transaction4\":40}}}}}}", string(jsonMetrics))
+	assert.Equal(t, "{\"my-metric\":{\"MetricsOverTransactions\":[10,50],\"MetricsOverUsers\":[10,50]}}", string(jsonMetrics))
+
+	metrics, err = client.GetMetrics("my-application", 1, "my-signature2")
+	assert.NoError(t, err)
+	jsonMetrics, err = json.Marshal(metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"my-metric2\":{\"MetricsOverTransactions\":[20],\"MetricsOverUsers\":[20]}}", string(jsonMetrics))
+
+	metrics, err = client.GetMetrics("my-application", 2, "my-signature3")
+	assert.NoError(t, err)
+	jsonMetrics, err = json.Marshal(metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"my-metric3\":{\"MetricsOverTransactions\":[40],\"MetricsOverUsers\":[40]}}", string(jsonMetrics))
+
+	metrics, err = client.GetMetrics("my-application", 3, "my-signature")
+	assert.NoError(t, err)
+	jsonMetrics, err = json.Marshal(metrics)
+	assert.NoError(t, err)
+	assert.Equal(t, "{}", string(jsonMetrics))
 }

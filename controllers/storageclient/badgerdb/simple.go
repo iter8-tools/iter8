@@ -4,7 +4,6 @@ package badgerdb
 import (
 	"errors"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -147,8 +146,6 @@ func getUserKey(applicationName string, version int, signature, user string) str
 func (cl Client) SetUser(applicationName string, version int, signature, user string) error {
 	key := getUserKey(applicationName, version, signature, user)
 
-	fmt.Println(key)
-
 	return cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
 		err := txn.SetEntry(e)
@@ -179,171 +176,59 @@ func (cl Client) getUserCount(applicationName string, version int, signature str
 	return count, nil
 }
 
-// GetSummaryMetrics gets summarized metrics for a particular application, version, and signature
-func (cl Client) GetSummaryMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetricSummary, error) {
-	count, err := cl.getUserCount(applicationName, version, signature)
-	if err != nil {
-		return nil, fmt.Errorf("cannot get user count: %e", err)
-	}
+// GetMetrics returns a nested map of the metrics data for a particular application, version, and signature
+// Example:
+//
+//	{
+//		"my-metric": {
+//			"MetricsOverTransactions": [1, 1, 3, 4, 5]
+//			"MetricsOverUsers": [2, 7, 5]
+//		}
+//	}
+//
+// NOTE: for users that have not produced any metrics (for example, via lookup()), GetMetrics() will add 0s for the extra users in metricsOverUsers
+//
+// Example, given 5 total users:
+//
+//	{
+//		"my-metric": {
+//			"MetricsOverTransactions": [1, 1, 3, 4, 5]
+//			"MetricsOverUsers": [2, 7, 5, 0, 0]
+//		}
+//	}
+func (cl Client) GetMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetrics, error) {
+	metrics := storageclient.VersionMetrics{}
 
-	vms := storageclient.VersionMetricSummary{
-		NumUsers:        count,
-		MetricSummaries: map[string]storageclient.MetricSummary{},
-	}
-
-	// get metric summaries
-	// iter8 over all metrics with the provided application name, version, and signature
-	err = cl.db.View(func(txn *badger.Txn) error {
-		// used to capture all the metric values for the current metric
-		var overUserData []float64        // cumulative metric value for a particular user
-		var overTransactionData []float64 // all metric values
-
-		// used to determine what the previous user and metric are in the previous iteration
-		var previousUser string
-		var previousMetric string
-
-		it := txn.NewIterator(badger.DefaultIteratorOptions)
-		defer it.Close()
-
-		prefix := []byte(getMetricPrefix(applicationName, version, signature))
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			item := it.Item()
-
-			// get key
-			key := string(item.Key())
-			err := item.Value(func(v []byte) error {
-				// get value
-				val := string(v)
-				fval, err := strconv.ParseFloat(val, 64)
-				if err != nil {
-					return fmt.Errorf("cannot convert metric value \"%s\" into float64", val)
-				}
-
-				// break down key into tokens
-				tokens := strings.Split(key[len(prefix):], "::")
-				if len(tokens) != 3 {
-					return fmt.Errorf("incorrect number of tokens in metric key \"%s\"; expected 7 tokens", key)
-				}
-
-				currentMetric := tokens[0]
-				currentUser := tokens[1]
-
-				// initial case
-				if previousMetric == "" {
-					previousMetric = currentMetric
-					previousUser = currentUser
-
-					overTransactionData = []float64{fval}
-					overUserData = []float64{fval}
-
-					return nil
-				}
-
-				// calculate overUserData
-				if currentUser == previousUser {
-					overUserData[len(overUserData)-1] += fval // cumulative metric value for a particular user
-				} else {
-					previousUser = currentUser
-					overUserData = append(overUserData, fval) // add new entry when the user changes
-				}
-
-				// calculate overTransactionData or calculate summarizedMetric
-				if currentMetric == previousMetric {
-					overTransactionData = append(overTransactionData, fval) // always add new entry
-				} else {
-					vms.MetricSummaries[currentMetric] = storageclient.MetricSummary{
-						SummaryOverTransactions: calculateSummarizedMetric(overTransactionData),
-						SummaryOverUsers:        calculateSummarizedMetric(overUserData),
-					}
-
-					previousUser = currentUser
-					previousMetric = currentMetric
-
-					// reset data
-					overUserData = []float64{fval}
-					overTransactionData = []float64{fval}
-				}
-
-				return nil
-			})
-
-			if err != nil {
-				return err
-			}
-		}
-
-		// flush last sequence of metric data
-		vms.MetricSummaries[previousMetric] = storageclient.MetricSummary{
-			SummaryOverTransactions: calculateSummarizedMetric(overTransactionData),
-			SummaryOverUsers:        calculateSummarizedMetric(overUserData),
-		}
-
-		return nil
-	})
+	userCount, err := cl.getUserCount(applicationName, version, signature)
 	if err != nil {
 		return nil, err
 	}
 
-	return &vms, nil
-}
+	err = cl.db.View(func(txn *badger.Txn) error {
+		// used to determine what the previous user and metric are in the previous iteration
+		var currentMetric string
+		var currentUser string
 
-// GetMetrics returns a nested map of the metrics data
-// Example:
-//
-//	{
-//		"my-app": {
-//			"0": {
-//				"my-signature": {
-//					"my-metric": {
-//						"my-user": {
-//							"my-transaction-id": 5.0
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-func (cl Client) GetMetrics() (map[string]map[string]map[string]map[string]map[string]map[string]float64, error) {
-	metrics := map[string]map[string]map[string]map[string]map[string]map[string]float64{}
+		var cumulativeUserValue float64
 
-	err := cl.db.View(func(txn *badger.Txn) error {
+		var metricsOverTransactions []float64
+		var metricsOverUsers []float64
+
+		// iterate over all metrics of a particular application name, version, and signature
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
-		prefix := []byte("kt-metric")
+		prefix := []byte(getMetricPrefix(applicationName, version, signature))
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			key := string(item.Key())
 
+			// extract metric and user name from the key
 			tokens := strings.Split(key, "::")
 			if len(tokens) != 7 {
 				return fmt.Errorf("incorrect number of tokens in metrics key: \"%s\": should be 7 (example: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id)", key)
 			}
-			app := tokens[1]
-			version := tokens[2]
-			signature := tokens[3]
 			metric := tokens[4]
 			user := tokens[5]
-			transaction := tokens[6]
-
-			if _, ok := metrics[app]; !ok {
-				metrics[app] = map[string]map[string]map[string]map[string]map[string]float64{}
-			}
-
-			if _, ok := metrics[app][version]; !ok {
-				metrics[app][version] = map[string]map[string]map[string]map[string]float64{}
-			}
-
-			if _, ok := metrics[app][version][signature]; !ok {
-				metrics[app][version][signature] = map[string]map[string]map[string]float64{}
-			}
-
-			if _, ok := metrics[app][version][signature][metric]; !ok {
-				metrics[app][version][signature][metric] = map[string]map[string]float64{}
-			}
-
-			if _, ok := metrics[app][version][signature][metric][user]; !ok {
-				metrics[app][version][signature][metric][user] = map[string]float64{}
-			}
 
 			err := item.Value(func(v []byte) error {
 				floatValue, err := strconv.ParseFloat(string(v), 64)
@@ -351,62 +236,79 @@ func (cl Client) GetMetrics() (map[string]map[string]map[string]map[string]map[s
 					return err
 				}
 
-				// TODO: check if there is a preexisting transaction ID?
-				metrics[app][version][signature][metric][user][transaction] = floatValue
+				if metric != currentMetric && currentMetric != "" {
+					metricsOverUsers = append(metricsOverUsers, cumulativeUserValue)
+
+					// add 0s for all the users that did not produce metrics
+					// for example, via lookup()
+					if uint64(len(metricsOverUsers)) < userCount {
+						diff := userCount - uint64(len(metricsOverUsers))
+						for j := uint64(0); j < diff; j++ {
+							metricsOverUsers = append(metricsOverUsers, 0)
+						}
+					}
+
+					metrics[currentMetric] = struct {
+						MetricsOverTransactions []float64
+						MetricsOverUsers        []float64
+					}{
+						MetricsOverTransactions: metricsOverTransactions,
+						MetricsOverUsers:        metricsOverUsers,
+					}
+
+					currentMetric = ""
+					currentUser = ""
+					cumulativeUserValue = 0
+					metricsOverTransactions = []float64{}
+					metricsOverUsers = []float64{}
+				}
+
+				metricsOverTransactions = append(metricsOverTransactions, floatValue)
+				if user != currentUser && currentUser != "" {
+					metricsOverUsers = append(metricsOverUsers, cumulativeUserValue)
+
+					cumulativeUserValue = 0
+				}
+				cumulativeUserValue += floatValue
+
+				currentMetric = metric
+				currentUser = user
+
 				return nil
 			})
 			if err != nil {
 				return err
 			}
+
 		}
+
+		// flush last sequence of metric data
+		if currentMetric != "" || currentUser != "" {
+			metricsOverUsers = append(metricsOverUsers, cumulativeUserValue)
+
+			// add 0s for all the users that did not produce metrics
+			// for example, via lookup()
+			if uint64(len(metricsOverUsers)) < userCount {
+				diff := userCount - uint64(len(metricsOverUsers))
+				for j := uint64(0); j < diff; j++ {
+					metricsOverUsers = append(metricsOverUsers, 10)
+				}
+			}
+
+			metrics[currentMetric] = struct {
+				MetricsOverTransactions []float64
+				MetricsOverUsers        []float64
+			}{
+				MetricsOverTransactions: metricsOverTransactions,
+				MetricsOverUsers:        metricsOverUsers,
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return metrics, nil
-}
-
-// calculateSummarizedMetric calculates a metric summary for a particular collection of data
-func calculateSummarizedMetric(data []float64) storageclient.SummarizedMetric {
-	if len(data) == 0 {
-		return storageclient.SummarizedMetric{}
-	}
-
-	// NOTE: len() does not produce a uint64
-	count := uint64(len(data))
-
-	// calculate sum, min, and max
-	sum := 0.0
-	min := data[0]
-	max := data[0]
-	for _, f := range data {
-		sum += f
-
-		if f < min {
-			min = f
-		}
-
-		if f > max {
-			max = f
-		}
-	}
-
-	mean := sum / float64(count)
-
-	// calculate stdDev
-	stdDev := 0.0
-	for _, f := range data {
-		stdDev += math.Pow(f-mean, 2)
-	}
-	stdDev = math.Sqrt(stdDev / float64(count))
-
-	return storageclient.SummarizedMetric{
-		Count:  count,
-		Mean:   mean,
-		StdDev: stdDev,
-		Min:    min,
-		Max:    max,
-	}
+	return &metrics, nil
 }
