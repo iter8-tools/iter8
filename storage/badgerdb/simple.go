@@ -11,6 +11,7 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
+	"github.com/iter8-tools/iter8/storage"
 )
 
 // Client is a client for the BadgerDB
@@ -195,8 +196,8 @@ func (cl Client) getUserCount(applicationName string, version int, signature str
 //			"MetricsOverUsers": [2, 7, 5, 0, 0]
 //		}
 //	}
-func (cl Client) GetMetrics(applicationName string, version int, signature string) (*storageclient.VersionMetrics, error) {
-	metrics := storageclient.VersionMetrics{}
+func (cl Client) GetMetrics(applicationName string, version int, signature string) (*storage.VersionMetrics, error) {
+	metrics := storage.VersionMetrics{}
 
 	userCount, err := cl.getUserCount(applicationName, version, signature)
 	if err != nil {
