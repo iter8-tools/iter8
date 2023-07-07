@@ -16,17 +16,17 @@ import (
 	"gonum.org/v1/plot/plotter"
 )
 
-type ConfigMaps interface {
-	GetAllConfigMaps() controllers.RoutemapsInterface
+type configMaps interface {
+	getAllConfigMaps() controllers.RoutemapsInterface
 }
 
-type DefaultConfigMaps struct{}
+type defaultConfigMaps struct{}
 
-func (cm *DefaultConfigMaps) GetAllConfigMaps() controllers.RoutemapsInterface {
+func (cm *defaultConfigMaps) getAllConfigMaps() controllers.RoutemapsInterface {
 	return &controllers.AllRoutemaps
 }
 
-var allConfigMaps ConfigMaps = &DefaultConfigMaps{}
+var allConfigMaps configMaps = &defaultConfigMaps{}
 
 // Start starts the HTTP server
 func Start() error {
@@ -90,7 +90,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 
 	// identify the routemap for the application
 	namespace, name := splitApplicationKey(application)
-	rm := allConfigMaps.GetAllConfigMaps().GetRoutemapFromNamespaceName(namespace, name)
+	rm := allConfigMaps.getAllConfigMaps().GetRoutemapFromNamespaceName(namespace, name)
 	// rm := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
 	if rm == nil {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
