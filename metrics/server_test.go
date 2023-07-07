@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/iter8-tools/iter8/abn"
@@ -16,6 +18,14 @@ import (
 	"github.com/iter8-tools/iter8/storage/badgerdb"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestStart(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	err := Start(ctx.Done())
+	assert.Equal(t, err, http.ErrServerClosed)
+}
 
 func TestGetMetricsInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()

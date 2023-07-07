@@ -76,7 +76,7 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 
 			// launch metrics HTTP server to respond to support Grafana visualization
 			go func() {
-				err := metrics.Start()
+				err := metrics.Start(stopCh)
 				if err != nil {
 					log.Logger.Error("count not start A/B/n metrics service")
 				}

@@ -1,12 +1,14 @@
 package metrics
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/iter8-tools/iter8/abn"
 	"github.com/iter8-tools/iter8/base/log"
@@ -29,10 +31,23 @@ func (cm *defaultConfigMaps) getAllConfigMaps() controllers.RoutemapsInterface {
 var allConfigMaps configMaps = &defaultConfigMaps{}
 
 // Start starts the HTTP server
-func Start() error {
+func Start(stopCh <-chan struct{}) error {
 	http.HandleFunc("/metrics", getMetrics)
-	// http.HandleFunc("/summarymetrics", getSummaryMetrics)
-	err := http.ListenAndServe(":8080", nil)
+	server := &http.Server{
+		Addr:              ":8080",
+		ReadHeaderTimeout: 3 * time.Second,
+	}
+
+	go func() {
+		<-stopCh
+		log.Logger.Warnf("stop channel closed, shutting down")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_ = server.Shutdown(ctx)
+	}()
+
+	err := server.ListenAndServe()
 	if err != nil {
 		log.Logger.Errorf("unable to start metrics service: %s", err.Error())
 		return err
