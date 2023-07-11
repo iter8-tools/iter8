@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -25,6 +26,7 @@ type configMaps interface {
 type defaultConfigMaps struct{}
 
 func (cm *defaultConfigMaps) getAllConfigMaps() controllers.RoutemapsInterface {
+	log.Logger.Debug("getAllConfigMaps returning controllers.AllRoutemaps")
 	return &controllers.AllRoutemaps
 }
 
@@ -107,14 +109,14 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	namespace, name := splitApplicationKey(application)
 	rm := allConfigMaps.getAllConfigMaps().GetRoutemapFromNamespaceName(namespace, name)
 	// rm := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
-	if rm == nil {
+	if reflect.ValueOf(rm).IsNil() {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
 		return
 	}
-	log.Logger.Trace("getMetrics found routemap ", rm)
+	log.Logger.Tracef("getMetrics found routemap %v", rm)
 
 	// initialize result
-	result := make(map[string]MetricSummary, 0)
+	result := make(map[string]*MetricSummary, 0)
 	byMetricOverTransactions := make(map[string](map[string][]float64), 0)
 	byMetricOverUsers := make(map[string](map[string][]float64), 0)
 
@@ -122,7 +124,6 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	//   get metrics
 	//   for each metric, compute summary for metric, version
 	//   prepare for histogram computation
-	numVersions := len(rm.GetVersions())
 	for v, version := range rm.GetVersions() {
 		signature := version.GetSignature()
 		if signature == nil {
@@ -140,23 +141,25 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 			_, ok := result[metric]
 			if !ok {
 				// no entry for metric result; create empty entry
-				result[metric] = MetricSummary{
+				result[metric] = &MetricSummary{
 					HistogramsOverTransactions: nil,
 					HistogramsOverUsers:        nil,
-					SummaryOverTransactions:    make([]*VersionSummarizedMetric, numVersions),
-					SummaryOverUsers:           make([]*VersionSummarizedMetric, numVersions),
+					SummaryOverTransactions:    []*VersionSummarizedMetric{},
+					SummaryOverUsers:           []*VersionSummarizedMetric{},
 				}
 			}
+
+			entry := result[metric]
 
 			smT, err := calculateSummarizedMetric(metrics.MetricsOverTransactions)
 			if err != nil {
 				log.Logger.Debugf("unable to compute summaried metrics over transactions for application %s (version %d; signature %s)", application, v, *signature)
 				continue
 			} else {
-				result[metric].SummaryOverTransactions[v] = &VersionSummarizedMetric{
+				entry.SummaryOverTransactions = append(entry.SummaryOverTransactions, &VersionSummarizedMetric{
 					Version:          v,
 					SummarizedMetric: smT,
-				}
+				})
 			}
 
 			smU, err := calculateSummarizedMetric(metrics.MetricsOverUsers)
@@ -164,10 +167,11 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 				log.Logger.Debugf("unable to compute summaried metrics over users for application %s (version %d; signature %s)", application, v, *signature)
 				continue
 			}
-			result[metric].SummaryOverUsers[v] = &VersionSummarizedMetric{
+			entry.SummaryOverUsers = append(entry.SummaryOverUsers, &VersionSummarizedMetric{
 				Version:          v,
 				SummarizedMetric: smU,
-			}
+			})
+			result[metric] = entry
 
 			// copy data into structure for histogram calculation (to be done later)
 			// over transaction data
