@@ -1,4 +1,4 @@
-name: Test experiment charts using local charts
+name: Tests to ensure that changes to charts do not break user experience
 
 on:
   pull_request:
