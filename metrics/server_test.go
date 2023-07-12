@@ -23,7 +23,7 @@ func TestStart(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	err := Start(ctx.Done())
+	err := Start(8080, ctx.Done())
 	assert.Equal(t, err, http.ErrServerClosed)
 }
 

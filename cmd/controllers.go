@@ -22,8 +22,11 @@ Start Iter8 controllers.
 	iter8 controllers
 `
 
-// port number on which A/B/n gRPC service listens
-var port int
+// abnPort is the port (number) on which A/B/n gRPC service listens
+var abnPort int
+
+// metricsPort is the port (number) on which the metrics service listens
+var metricsPort int
 
 // newControllersCmd creates the Iter8 controllers
 // when invoking this function for real, set stopCh to nil
@@ -68,7 +71,7 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 
 			// launch gRPC server to respond to frontend requests
 			go func() {
-				err := abn.LaunchGRPCServer(port, []grpc.ServerOption{}, stopCh)
+				err := abn.LaunchGRPCServer(abnPort, []grpc.ServerOption{}, stopCh)
 				if err != nil {
 					log.Logger.Error("cound not start A/B/n service")
 				}
@@ -76,7 +79,7 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 
 			// launch metrics HTTP server to respond to support Grafana visualization
 			go func() {
-				err := metrics.Start(stopCh)
+				err := metrics.Start(metricsPort, stopCh)
 				if err != nil {
 					log.Logger.Error("count not start A/B/n metrics service")
 				}
@@ -93,11 +96,17 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 			return nil
 		},
 	}
-	addPortFlag(cmd, &port)
+	addAbnPortFlag(cmd, &abnPort)
+	addMetricsPortFlag(cmd, &abnPort)
 	return cmd
 }
 
-// addTimeoutFlag adds timeout flag to command
-func addPortFlag(cmd *cobra.Command, portPtr *int) {
-	cmd.Flags().IntVar(portPtr, "port", 50051, "service port")
+// addAbnPortFlag adds port for A/B/n service
+func addAbnPortFlag(cmd *cobra.Command, portPtr *int) {
+	cmd.Flags().IntVar(portPtr, "abnPort", 50051, "A/B/n service port number")
+}
+
+// addMetricsPortFlag adds port for metrics service
+func addMetricsPortFlag(cmd *cobra.Command, portPtr *int) {
+	cmd.Flags().IntVar(portPtr, "metricsPort", 8080, "Metrics service port number")
 }

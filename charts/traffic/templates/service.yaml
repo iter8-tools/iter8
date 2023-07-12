@@ -7,8 +7,8 @@ spec:
     app.kubernetes.io/name: {{ template "iter8-traffic.name" . }}
   ports:
   - name: grpc
-    port: {{ .Values.service.port }}
-    targetPort: {{ .Values.service.port }}
+    port: {{ .Values.abn.port }}
+    targetPort: {{ .Values.abn.port }}
   - name: http
-    port: 8080
-    targetPort: 8080
+    port: {{ .Values.metrics.port }}
+    targetPort: {{ .Values.metrics.port }}

@@ -33,10 +33,10 @@ func (cm *defaultConfigMaps) getAllConfigMaps() controllers.RoutemapsInterface {
 var allConfigMaps configMaps = &defaultConfigMaps{}
 
 // Start starts the HTTP server
-func Start(stopCh <-chan struct{}) error {
+func Start(port int, stopCh <-chan struct{}) error {
 	http.HandleFunc("/metrics", getMetrics)
 	server := &http.Server{
-		Addr:              ":8080",
+		Addr:              fmt.Sprintf(":%d", port),
 		ReadHeaderTimeout: 3 * time.Second,
 	}
 
@@ -108,7 +108,6 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	// identify the routemap for the application
 	namespace, name := splitApplicationKey(application)
 	rm := allConfigMaps.getAllConfigMaps().GetRoutemapFromNamespaceName(namespace, name)
-	// rm := controllers.AllRoutemaps.GetRoutemapFromNamespaceName(namespace, name)
 	if reflect.ValueOf(rm).IsNil() {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
 		return

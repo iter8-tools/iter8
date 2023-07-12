@@ -14,14 +14,10 @@ import (
 	"github.com/iter8-tools/iter8/controllers"
 )
 
-//
-//
-//
-
 var versionHasher maphash.Hash
 
 // lookupInternal is detailed implementation of gRPC method Lookup
-// application is a namespacedname, "namespace/name"
+// application is a of the form "namespace/name"
 func lookupInternal(application string, user string, routemaps controllers.RoutemapsInterface) (controllers.RoutemapInterface, *int, error) {
 	// if user is not provided, fail
 	if user == "" {
@@ -112,10 +108,6 @@ func splitApplicationKey(applicationKey string) (string, string) {
 
 	return namespace, name
 }
-
-//
-//
-//
 
 // writeMetricInternal is detailed implementation of gRPC method WriteMetric
 func writeMetricInternal(application, user, metric, valueStr string, routemaps controllers.RoutemapsInterface) error {

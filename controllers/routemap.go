@@ -291,6 +291,7 @@ func computeSignature(v version) (string, error) {
 	}
 
 	// hash resources
+	log.Logger.Debugf("computeSignature hashing over %+v", resources)
 	hash, err := hashstructure.Hash(resources, hashstructure.FormatV2, nil)
 	if err != nil {
 		return "", fmt.Errorf("cannot hash resources: %e", err)
@@ -319,6 +320,7 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 			}
 		}
 		s.Versions[v].Signature = &signature
+		log.Logger.Debugf("computed signature for version %d: %s", v, signature)
 	}
 
 	// if leader, compute routing policy and perform server side apply

@@ -57,16 +57,16 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	)
 
 	if err != nil {
-		log.Logger.Warn("Lookup failed: ", err)
+		log.Logger.Warnf("Lookup(%s,%s) failed: %s", appMsg.GetName(), appMsg.GetUser(), err.Error())
 		return nil, err
 	}
 
 	if track == nil {
-		log.Logger.Warn("lookup returned nil")
+		log.Logger.Warnf("Lookup(%s,%s) returned nil", appMsg.GetName(), appMsg.GetUser())
 		return nil, err
 	}
 
-	log.Logger.Debugf("lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), *track)
+	log.Logger.Tracef("Lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), *track)
 
 	return &pb.Session{
 		Track: fmt.Sprintf("%d", *track),
