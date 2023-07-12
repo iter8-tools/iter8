@@ -12,12 +12,24 @@ import (
 	"time"
 
 	"github.com/iter8-tools/iter8/abn"
+	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/storage"
 	"github.com/montanaflynn/stats"
 	"gonum.org/v1/plot/plotter"
 )
+
+const (
+	configEnv         = "METRICS_CONFIG_FILE"
+	defaultPortNumber = 8080
+)
+
+// metricsConfig defines the configuration of the controllers
+type metricsConfig struct {
+	// Port is port number on which the metrics service should listen
+	Port *int `json:"port,omitempty"`
+}
 
 type configMaps interface {
 	getAllConfigMaps() controllers.RoutemapsInterface
@@ -33,13 +45,27 @@ func (cm *defaultConfigMaps) getAllConfigMaps() controllers.RoutemapsInterface {
 var allConfigMaps configMaps = &defaultConfigMaps{}
 
 // Start starts the HTTP server
-func Start(port int, stopCh <-chan struct{}) error {
-	http.HandleFunc("/metrics", getMetrics)
-	server := &http.Server{
-		Addr:              fmt.Sprintf(":%d", port),
-		ReadHeaderTimeout: 3 * time.Second,
+func Start(stopCh <-chan struct{}) error {
+	// read configutation for metrics service
+	conf := &metricsConfig{}
+	err := util.ReadConfig(configEnv, conf, func() {
+		if nil == conf.Port {
+			conf.Port = util.IntPointer(defaultPortNumber)
+		}
+	})
+	if err != nil {
+		log.Logger.Errorf("unable to read metrics configuration: %s", err.Error())
+		return err
 	}
 
+	// configure endpoints
+	http.HandleFunc("/metrics", getMetrics)
+
+	// configure HTTP server
+	server := &http.Server{
+		Addr:              fmt.Sprintf(":%d", *conf.Port),
+		ReadHeaderTimeout: 3 * time.Second,
+	}
 	go func() {
 		<-stopCh
 		log.Logger.Warnf("stop channel closed, shutting down")
@@ -49,11 +75,13 @@ func Start(port int, stopCh <-chan struct{}) error {
 		_ = server.Shutdown(ctx)
 	}()
 
-	err := server.ListenAndServe()
+	// start HTTP server
+	err = server.ListenAndServe()
 	if err != nil {
 		log.Logger.Errorf("unable to start metrics service: %s", err.Error())
 		return err
 	}
+
 	return nil
 }
 
@@ -87,7 +115,7 @@ type MetricSummary struct {
 	SummaryOverUsers           []*VersionSummarizedMetric
 }
 
-// getMetrics handles POST /metrics
+// getMetrics handles GET /metrics with query parameter application=namespace/name
 func getMetrics(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getMetrics called")
 	defer log.Logger.Trace("getMetrics completed")
@@ -108,7 +136,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	// identify the routemap for the application
 	namespace, name := splitApplicationKey(application)
 	rm := allConfigMaps.getAllConfigMaps().GetRoutemapFromNamespaceName(namespace, name)
-	if reflect.ValueOf(rm).IsNil() {
+	if rm == nil || reflect.ValueOf(rm).IsNil() {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
 		return
 	}

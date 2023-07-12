@@ -221,9 +221,9 @@ func TestLaunchGRPCServer(t *testing.T) {
 	metricsPath = t.TempDir()
 
 	configFile := filepath.Clean(util.CompletePath("../testdata", "abninputs/config.yaml"))
-	err := os.Setenv("CONFIG_FILE", configFile)
+	err := os.Setenv("ABN_CONFIG_FILE", configFile)
 	assert.NoError(t, err)
 
-	err = LaunchGRPCServer(50051, []grpc.ServerOption{}, ctx.Done())
+	err = LaunchGRPCServer([]grpc.ServerOption{}, ctx.Done())
 	assert.NoError(t, err)
 }

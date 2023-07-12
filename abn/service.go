@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"net"
 
-	"golang.org/x/sys/unix"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/dgraph-io/badger/v4"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
+	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/storage"
@@ -89,11 +89,32 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 		)
 }
 
-// LaunchGRPCServer starts gRPC server
-func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}) error {
-	log.Logger.Tracef("starting gRPC service on port %d", port)
+const (
+	configEnv         = "ABN_CONFIG_FILE"
+	defaultPortNumber = 50051
+)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
+// abnConfig defines the configuration of the controllers
+type abnConfig struct {
+	// Port is port number on which the abn gRPC service should listen
+	Port *int `json:"port,omitempty"`
+}
+
+// LaunchGRPCServer starts gRPC server
+func LaunchGRPCServer(opts []grpc.ServerOption, stopCh <-chan struct{}) error {
+	// read configutation for metrics service
+	conf := &abnConfig{}
+	err := util.ReadConfig(configEnv, conf, func() {
+		if nil == conf.Port {
+			conf.Port = util.IntPointer(defaultPortNumber)
+		}
+	})
+	if err != nil {
+		log.Logger.Errorf("unable to read metrics configuration: %s", err.Error())
+		return err
+	}
+
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *conf.Port))
 	if err != nil {
 		log.Logger.WithError(err).Error("service failed to listen")
 		return err
@@ -123,20 +144,4 @@ func LaunchGRPCServer(port int, opts []grpc.ServerOption, stopCh <-chan struct{}
 	}
 
 	return nil
-}
-
-// GetVolumeUsage gets the available and total capacity of a volume, in that order
-func GetVolumeUsage(path string) (uint64, uint64, error) {
-	var stat unix.Statfs_t
-	err := unix.Statfs(path, &stat)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	// Available blocks * size per block = available space in bytes
-	availableBytes := stat.Bavail * uint64(stat.Bsize)
-	// Total blocks * size per block = available space in bytes
-	totalBytes := stat.Blocks * uint64(stat.Bsize)
-
-	return availableBytes, totalBytes, nil
 }

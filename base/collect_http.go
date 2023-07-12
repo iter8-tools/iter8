@@ -86,7 +86,7 @@ const (
 
 var (
 	// defaultErrorRanges is set so that status codes 400 and above are considered errors
-	defaultErrorRanges = []errorRange{{Lower: intPointer(400)}}
+	defaultErrorRanges = []errorRange{{Lower: IntPointer(400)}}
 	// defaultPercentiles are the default latency percentiles computed by this task
 	defaultPercentiles = [...]float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9}
 )
@@ -132,7 +132,7 @@ func (t *collectHTTPTask) initializeDefaults() {
 		t.With.QPS = float32Pointer(defaultQPS)
 	}
 	if t.With.Connections == nil {
-		t.With.Connections = intPointer(defaultHTTPConnections)
+		t.With.Connections = IntPointer(defaultHTTPConnections)
 	}
 	if t.With.ErrorRanges == nil {
 		t.With.ErrorRanges = defaultErrorRanges

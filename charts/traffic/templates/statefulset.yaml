@@ -24,6 +24,10 @@ spec:
         env:
         - name: CONFIG_FILE
           value: /config/config.yaml
+        - name: METRICS_CONFIG_FILE
+          value: /config/metrics.yaml
+        - name: ABN_CONFIG_FILE
+          value: /config/abn.yaml
         - name: POD_NAME
           valueFrom:
             fieldRef:

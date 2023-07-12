@@ -3,8 +3,10 @@ package metrics
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -23,8 +25,65 @@ func TestStart(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	err := Start(8080, ctx.Done())
+	file, err := os.CreateTemp(".", "test")
+	assert.NoError(t, err)
+	defer func() {
+		err := os.Remove(file.Name())
+		assert.NoError(t, err)
+	}()
+
+	err = os.Setenv("METRICS_CONFIG_FILE", file.Name())
+	assert.NoError(t, err)
+
+	err = Start(ctx.Done())
 	assert.Equal(t, err, http.ErrServerClosed)
+}
+
+func TestReadConfigDefaultPort(t *testing.T) {
+	file, err := os.CreateTemp(".", "test")
+	assert.NoError(t, err)
+	defer func() {
+		err := os.Remove(file.Name())
+		assert.NoError(t, err)
+	}()
+
+	err = os.Setenv("METRICS_CONFIG_FILE", file.Name())
+	assert.NoError(t, err)
+	conf := &metricsConfig{}
+	err = util.ReadConfig(configEnv, conf, func() {
+		if nil == conf.Port {
+			conf.Port = util.IntPointer(defaultPortNumber)
+		}
+	})
+	assert.NoError(t, err)
+
+	assert.Equal(t, defaultPortNumber, *conf.Port)
+}
+
+func TestReadConfigSetPort(t *testing.T) {
+	expectedPortNumber := 8888
+
+	file, err := os.CreateTemp(".", "test")
+	assert.NoError(t, err)
+	defer func() {
+		err := os.Remove(file.Name())
+		assert.NoError(t, err)
+	}()
+
+	_, err = file.Write([]byte(fmt.Sprintf("port: %d", expectedPortNumber)))
+	assert.NoError(t, err)
+
+	err = os.Setenv("METRICS_CONFIG_FILE", file.Name())
+	assert.NoError(t, err)
+	conf := &metricsConfig{}
+	err = util.ReadConfig(configEnv, conf, func() {
+		if nil == conf.Port {
+			conf.Port = util.IntPointer(defaultPortNumber)
+		}
+	})
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedPortNumber, *conf.Port)
 }
 
 func TestGetMetricsInvalidMethod(t *testing.T) {

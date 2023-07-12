@@ -4,4 +4,8 @@ metadata:
   name: {{ .Release.Name }}
 data:
   config.yaml: |
-    {{ toYaml .Values | indent 4 | trim }}
+    {{ omit .Values "metrics" "abn" | toYaml | indent 4 | trim }}
+  metrics.yaml: |
+    {{ toYaml .Values.metrics | indent 4 | trim }}
+  abn.yaml: |
+    {{ toYaml .Values.abn | indent 4 | trim }}

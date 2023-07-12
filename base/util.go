@@ -1,8 +1,10 @@
 package base
 
 import (
+	"errors"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -31,8 +33,8 @@ func int64Pointer(i int64) *int64 {
 	return &i
 }
 
-// intPointer takes an int as input, creates a new variable with the input value, and returns a pointer to the variable
-func intPointer(i int) *int {
+// IntPointer takes an int as input, creates a new variable with the input value, and returns a pointer to the variable
+func IntPointer(i int) *int {
 	return &i
 }
 
@@ -115,4 +117,37 @@ func ToYAML(v interface{}) string {
 		return ""
 	}
 	return strings.TrimSuffix(string(data), "\n")
+}
+
+// ReadConfig reads yaml formatted configuration information into conf
+// from the file specified by environment variable configEnv
+// The function setDefaults is called to set any default values if desired
+func ReadConfig(configEnv string, conf interface{}, setDefaults func()) error {
+	// read controller config
+	configFile, ok := os.LookupEnv(configEnv)
+	if !ok {
+		e := errors.New("cannot lookup config env variable: " + configEnv)
+		log.Logger.Error(e)
+		return e
+	}
+
+	filePath := filepath.Clean(configFile)
+	dat, err := os.ReadFile(filePath)
+
+	if err != nil {
+		e := errors.New("cannot read config file: " + configFile)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	// conf := Config{}
+	err = yaml.Unmarshal(dat, &conf)
+	if err != nil {
+		e := errors.New("cannot unmarshal YAML config file: " + configFile)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	setDefaults()
+	return nil
 }
