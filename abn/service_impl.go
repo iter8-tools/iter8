@@ -23,7 +23,6 @@ var versionHasher maphash.Hash
 // lookupInternal is detailed implementation of gRPC method Lookup
 // application is a of the form "namespace/name"
 func lookupInternal(application string, user string) (controllers.RoutemapInterface, *int, error) {
-	// func lookupInternal(application string, user string, routemaps controllers.RoutemapsInterface) (controllers.RoutemapInterface, *int, error) {
 	// if user is not provided, fail
 	if user == "" {
 		return nil, nil, errors.New("no user session provided")
