@@ -19,7 +19,7 @@ const (
 	exampleRequestBody    = "example request body\n"
 
 	// the provider URL is mocked
-	cePromProviderURL  = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-ce.metrics.yaml"
+	cePromProviderURL  = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/custommetrics/test-ce.tpl"
 	testCE             = "test-ce"
 	testCEPromURL      = `test-database.com/prometheus/api/v1/query`
 	testCERequestCount = "sum(last_over_time(ibm_codeengine_application_requests_total{\n" +
@@ -46,7 +46,7 @@ const (
 		"}[0s])) or on() vector(0)\n"
 
 	// the provider URL is mocked
-	testProviderURL = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/test-request-body.metrics.yaml"
+	testProviderURL = "https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/custommetrics/test-request-body.tpl"
 	testRequestBody = "test-request-body"
 
 	// the provider URL is mocked
