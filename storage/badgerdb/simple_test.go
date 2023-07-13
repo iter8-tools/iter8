@@ -2,6 +2,7 @@ package badgerdb
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -9,17 +10,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type testgetclient struct {
+	dir      string
+	valueDir string
+	errStr   string
+}
+
 func TestGetClient(t *testing.T) {
 	tempDirPath := t.TempDir()
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
-	assert.NoError(t, err)
-
-	assert.NotNil(t, client)
-	assert.NotNil(t, client.db) // BadgerDB should exist
-
-	err = client.db.Close()
-	assert.NoError(t, err)
+	for _, s := range []testgetclient{
+		{dir: "", valueDir: tempDirPath, errStr: "dir not set"},
+		{dir: tempDirPath, valueDir: "", errStr: "valueDir not set"},
+		{dir: "dir", valueDir: "valueDir", errStr: "different values"},
+		{dir: "/does/not/exist", valueDir: "/does/not/exist", errStr: "path does not exist"},
+		{dir: tempDirPath, valueDir: tempDirPath, errStr: ""},
+	} {
+		client, err := GetClient(badger.DefaultOptions(s.dir).WithValueDir(s.valueDir), AdditionalOptions{})
+		if s.errStr == "" {
+			assert.NoError(t, err)
+			assert.NotNil(t, client)
+			assert.NotNil(t, client.db) // BadgerDB should exist
+			err = client.db.Close()
+			assert.NoError(t, err)
+		} else {
+			assert.ErrorContains(t, err, s.errStr)
+		}
+	}
 }
 
 func TestSetMetric(t *testing.T) {
@@ -80,6 +97,16 @@ func TestSetMetric(t *testing.T) {
 		return nil
 	})
 	assert.NoError(t, err)
+}
+
+func TestSetMetricInvalid(t *testing.T) {
+	tempDirPath := t.TempDir()
+
+	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	assert.NoError(t, err)
+
+	err = client.SetMetric("invalid:application", 0, "signature", "metric", "user", "transaction", float64(0))
+	assert.Error(t, err)
 }
 
 func TestSetUser(t *testing.T) {
@@ -149,6 +176,39 @@ func TestGetMetricsWithExtraUsers(t *testing.T) {
 	assert.NoError(t, err)
 	// 0s have been added to the MetricsOverUsers due to extraUser, [50,0]
 	assert.Equal(t, "{\"my-metric\":{\"MetricsOverTransactions\":[25],\"MetricsOverUsers\":[25,10]},\"my-metric2\":{\"MetricsOverTransactions\":[50],\"MetricsOverUsers\":[50,0]}}", string(jsonMetrics))
+}
+
+type testmetrickey struct {
+	valid       bool
+	application string
+	signature   string
+	metric      string
+	user        string
+	transaction string
+}
+
+func TestGetMetricKey(t *testing.T) {
+	for _, s := range []testmetrickey{
+		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
+		{valid: false, application: "invalid:application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
+		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
+		{valid: false, application: "application", signature: "invalid:signature", metric: "metric", user: "user", transaction: "transaction"},
+		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
+		{valid: false, application: "application", signature: "signature", metric: "invalid:metric", user: "user", transaction: "transaction"},
+		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
+		{valid: false, application: "application", signature: "signature", metric: "metric", user: "invalid:user", transaction: "transaction"},
+		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
+		{valid: false, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "invalid:transaction"},
+	} {
+		key, err := getMetricKey(s.application, 0, s.signature, s.metric, s.user, s.transaction)
+		if s.valid {
+			assert.NoError(t, err)
+			assert.Equal(t, fmt.Sprintf("%s%s::%s::%s", getMetricPrefix(s.application, 0, s.signature), s.metric, s.user, s.transaction), key)
+		} else {
+			assert.Error(t, err)
+			assert.Equal(t, "", key)
+		}
+	}
 }
 
 func TestValidateKeyToken(t *testing.T) {

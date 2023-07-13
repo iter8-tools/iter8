@@ -2,6 +2,7 @@ package base
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -126,7 +127,7 @@ func ReadConfig(configEnv string, conf interface{}, setDefaults func()) error {
 	// read controller config
 	configFile, ok := os.LookupEnv(configEnv)
 	if !ok {
-		e := errors.New("cannot lookup config env variable: " + configEnv)
+		e := fmt.Errorf("environment variable %s not set", configEnv)
 		log.Logger.Error(e)
 		return e
 	}

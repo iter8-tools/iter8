@@ -17,6 +17,11 @@ func TestGetVolumeUsage(t *testing.T) {
 	assert.NoError(t, err)
 
 	// The volume should have some available and total bytes
-	assert.NotEqual(t, 0, availableBytes)
-	assert.NotEqual(t, 0, totalBytes)
+	assert.NotEqual(t, uint64(0), availableBytes)
+	assert.NotEqual(t, uint64(0), totalBytes)
+
+	availableBytes, totalBytes, err = GetVolumeUsage("non/existant/path")
+	assert.Error(t, err)
+	assert.Equal(t, uint64(0), totalBytes)
+	assert.Equal(t, uint64(0), availableBytes)
 }
