@@ -28,6 +28,8 @@ spec:
           value: /config/metrics.yaml
         - name: ABN_CONFIG_FILE
           value: /config/abn.yaml
+        - name: METRICS_DIR
+          value: /metrics
         - name: POD_NAME
           valueFrom:
             fieldRef:

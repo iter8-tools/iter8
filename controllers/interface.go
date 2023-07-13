@@ -27,3 +27,16 @@ type VersionInterface interface {
 	// GetSignature returns a signature of a version
 	GetSignature() *string
 }
+
+// AllRouteMapsInterface is interface defines way to get all routemaps
+type AllRouteMapsInterface interface {
+	GetAllRoutemaps() RoutemapsInterface
+}
+
+// DefaultRoutemaps is default implementation
+type DefaultRoutemaps struct{}
+
+// GetAllRoutemaps is default implementation that returns package local map
+func (cm *DefaultRoutemaps) GetAllRoutemaps() RoutemapsInterface {
+	return &AllRoutemaps
+}

@@ -54,3 +54,11 @@ func (s *testroutemap) GetVersions() []controllers.VersionInterface {
 	}
 	return result
 }
+
+type testRoutemaps struct {
+	allroutemaps testroutemaps
+}
+
+func (cm *testRoutemaps) GetAllRoutemaps() controllers.RoutemapsInterface {
+	return &cm.allroutemaps
+}

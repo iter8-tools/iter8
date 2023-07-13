@@ -31,18 +31,7 @@ type metricsConfig struct {
 	Port *int `json:"port,omitempty"`
 }
 
-type configMaps interface {
-	getAllConfigMaps() controllers.RoutemapsInterface
-}
-
-type defaultConfigMaps struct{}
-
-func (cm *defaultConfigMaps) getAllConfigMaps() controllers.RoutemapsInterface {
-	log.Logger.Debug("getAllConfigMaps returning controllers.AllRoutemaps")
-	return &controllers.AllRoutemaps
-}
-
-var allConfigMaps configMaps = &defaultConfigMaps{}
+var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
 
 // Start starts the HTTP server
 func Start(stopCh <-chan struct{}) error {
@@ -135,7 +124,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 
 	// identify the routemap for the application
 	namespace, name := splitApplicationKey(application)
-	rm := allConfigMaps.getAllConfigMaps().GetRoutemapFromNamespaceName(namespace, name)
+	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, name)
 	if rm == nil || reflect.ValueOf(rm).IsNil() {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
 		return

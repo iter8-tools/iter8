@@ -17,13 +17,16 @@ func TestLookupInternal(t *testing.T) {
 	assert.NoError(t, err)
 
 	// setup: add desired routemaps to allRoutemaps
-	allroutemaps := setupRoutemaps(t, *getTestRM("default", "test"))
+	testRM := testRoutemaps{
+		allroutemaps: setupRoutemaps(t, *getTestRM("default", "test")),
+	}
+	allRoutemaps = &testRM
 
 	tries := 20 // needs to be big enough to find at least one problem; this is probably overkill
 	// do lookup tries times
 	tracks := make([]*int, tries)
 	for i := 0; i < tries; i++ {
-		_, tr, err := lookupInternal("default/test", "user", &allroutemaps)
+		_, tr, err := lookupInternal("default/test", "user")
 		assert.NoError(t, err)
 		tracks[i] = tr
 	}
@@ -32,33 +35,4 @@ func TestLookupInternal(t *testing.T) {
 	for i := 1; i < tries; i++ {
 		assert.Equal(t, *tr, *tracks[i])
 	}
-}
-
-func TestGetApplicationDataInternal(t *testing.T) {
-	namespace, name := "default", "test"
-
-	// setup: add desired routemaps to allRoutemaps
-	allroutemaps := setupRoutemaps(t, *getTestRM(namespace, name))
-
-	var err error
-	tempDirPath := t.TempDir()
-	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
-	assert.NoError(t, err)
-
-	// add a metric value
-	err = writeMetricInternal(namespace+"/"+name, "user", "metric", "45", &allroutemaps)
-	assert.NoError(t, err)
-
-	// add a second value to metric
-	err = writeMetricInternal(namespace+"/"+name, "user", "metric", "55", &allroutemaps)
-	assert.NoError(t, err)
-
-	_, tr, err := lookupInternal(namespace+"/"+name, "user", &allroutemaps)
-	assert.NoError(t, err)
-	assert.NotNil(t, tr)
-
-	// get data from storage; fails because
-	_, err = getApplicationDataInternal(namespace+"/"+name, &allroutemaps)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "not supported")
 }

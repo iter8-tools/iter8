@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -15,7 +16,6 @@ import (
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/storage"
 	"github.com/iter8-tools/iter8/storage/badgerdb"
 
@@ -24,13 +24,11 @@ import (
 )
 
 const (
-	// defaultMetricsPath is the default path of the persistent volume
-	defaultMetricsPath = "/metrics"
+	// metricsDirEnv is the environment variable identifying the directory with metrics storage
+	metricsDirEnv = "METRICS_DIR"
 )
 
 var (
-	// MetricsPath is the path of the persistent volume
-	metricsPath = defaultMetricsPath
 	// MetricsClient is the metrics client
 	MetricsClient storage.Interface
 )
@@ -53,7 +51,6 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 	_, track, err := lookupInternal(
 		appMsg.GetName(),
 		appMsg.GetUser(),
-		&controllers.AllRoutemaps,
 	)
 
 	if err != nil {
@@ -85,7 +82,6 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 			metricMsg.GetUser(),
 			metricMsg.GetName(),
 			metricMsg.GetValue(),
-			&controllers.AllRoutemaps,
 		)
 }
 
@@ -124,8 +120,7 @@ func LaunchGRPCServer(opts []grpc.ServerOption, stopCh <-chan struct{}) error {
 	pb.RegisterABNServer(grpcServer, newServer())
 
 	// configure metricsClient if needed
-
-	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(metricsPath), badgerdb.AdditionalOptions{})
+	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(os.Getenv(metricsDirEnv)), badgerdb.AdditionalOptions{})
 	if err != nil {
 		log.Logger.Error("Unable to configure metrics storage client ", err)
 		return err

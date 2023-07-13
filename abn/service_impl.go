@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"hash/maphash"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -14,11 +15,15 @@ import (
 	"github.com/iter8-tools/iter8/controllers"
 )
 
+var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
+
+// versionHasher is hash used for selecting versions
 var versionHasher maphash.Hash
 
 // lookupInternal is detailed implementation of gRPC method Lookup
 // application is a of the form "namespace/name"
-func lookupInternal(application string, user string, routemaps controllers.RoutemapsInterface) (controllers.RoutemapInterface, *int, error) {
+func lookupInternal(application string, user string) (controllers.RoutemapInterface, *int, error) {
+	// func lookupInternal(application string, user string, routemaps controllers.RoutemapsInterface) (controllers.RoutemapInterface, *int, error) {
 	// if user is not provided, fail
 	if user == "" {
 		return nil, nil, errors.New("no user session provided")
@@ -30,8 +35,8 @@ func lookupInternal(application string, user string, routemaps controllers.Route
 	}
 
 	ns, name := splitApplicationKey(application)
-	s := routemaps.GetRoutemapFromNamespaceName(ns, name)
-	if s == nil {
+	s := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(ns, name)
+	if s == nil || reflect.ValueOf(s).IsNil() {
 		return nil, nil, fmt.Errorf("routemap not found for application %s", ns+"/"+name)
 	}
 
@@ -110,11 +115,11 @@ func splitApplicationKey(applicationKey string) (string, string) {
 }
 
 // writeMetricInternal is detailed implementation of gRPC method WriteMetric
-func writeMetricInternal(application, user, metric, valueStr string, routemaps controllers.RoutemapsInterface) error {
+func writeMetricInternal(application, user, metric, valueStr string) error {
 	log.Logger.Tracef("writeMetricInternal called for application, user: %s, %s", application, user)
 	defer log.Logger.Trace("writeMetricInternal completed")
 
-	s, track, err := lookupInternal(application, user, routemaps)
+	s, track, err := lookupInternal(application, user)
 	if err != nil || track == nil {
 		log.Logger.Warnf("lookupInternal failed for application=%s, user=%s", application, user)
 		return err
@@ -140,9 +145,4 @@ func writeMetricInternal(application, user, metric, valueStr string, routemaps c
 	}
 
 	return nil
-}
-
-// getApplicationDataInternal is detailed implementation of gRPC method GetApplicationData
-func getApplicationDataInternal(application string, routemaps controllers.RoutemapsInterface) (string, error) {
-	return "", fmt.Errorf("not supported")
 }

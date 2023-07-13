@@ -122,19 +122,19 @@ func TestGetMetricsNoRouteMap(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 }
 
-type testConfigMaps struct {
+type testRoutemaps struct {
 	allroutemaps testroutemaps
 }
 
-func (cm *testConfigMaps) getAllConfigMaps() controllers.RoutemapsInterface {
+func (cm *testRoutemaps) GetAllRoutemaps() controllers.RoutemapsInterface {
 	return &cm.allroutemaps
 }
 
 func TestGetMetrics(t *testing.T) {
-	testCM := testConfigMaps{
+	testRM := testRoutemaps{
 		allroutemaps: setupRoutemaps(t, *getTestRM("default", "test")),
 	}
-	allConfigMaps = &testCM
+	allRoutemaps = &testRM
 
 	tempDirPath := t.TempDir()
 
@@ -166,7 +166,7 @@ func TestGetMetrics(t *testing.T) {
 	abn.MetricsClient = client
 
 	w := httptest.NewRecorder()
-	rm := allConfigMaps.getAllConfigMaps().GetRoutemapFromNamespaceName("default", "test")
+	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName("default", "test")
 	assert.NotNil(t, rm)
 	req := httptest.NewRequest(http.MethodGet, "/metrics?application=default%2Ftest", nil)
 	getMetrics(w, req)
