@@ -267,14 +267,6 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 					return e
 				}
 				tsk = cgt
-			case CollectABNMetricsTaskName:
-				cgt := &collectABNMetricsTask{}
-				if err := json.Unmarshal(tBytes, cgt); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = cgt
 			case AssessTaskName:
 				at := &assessTask{}
 				if err := json.Unmarshal(tBytes, at); err != nil {

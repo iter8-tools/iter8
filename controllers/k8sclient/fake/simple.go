@@ -62,6 +62,11 @@ func New(sObjs []runtime.Object, unsObjs []runtime.Object) *Client {
 				Version:  "v1beta1",
 				Resource: "inferenceservices",
 			}: "InferenceServiceList",
+			{
+				Group:    "",
+				Version:  "v1",
+				Resource: "secrets",
+			}: "SecretList",
 		}, unsObjs...),
 	}
 }

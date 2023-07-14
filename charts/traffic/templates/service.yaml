@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ template "iter8-traffic.name" . }}
+  ports:
+  - name: grpc
+    port: {{ .Values.abn.port }}
+    targetPort: {{ .Values.abn.port }}
+  - name: http
+    port: {{ .Values.metrics.port }}
+    targetPort: {{ .Values.metrics.port }}

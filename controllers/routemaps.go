@@ -6,8 +6,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// allRoutemaps contains all the routemaps known to the controller
-var allRoutemaps = routemaps{
+// AllRoutemaps contains all the routemaps known to the controller
+var AllRoutemaps = routemaps{
 	nsRoutemap: make(map[string]routemapsByName),
 }
 
@@ -41,6 +41,19 @@ func (s *routemaps) getRoutemapFromObj(obj interface{}, gvrShort string) *routem
 				}
 			}
 		}
+	}
+	return nil
+}
+
+// GetRoutemapFromNamespaceName extracts a routemap which contains the given object as a version resource
+func (s *routemaps) GetRoutemapFromNamespaceName(namespace string, name string) RoutemapInterface {
+	// lock for reading and later unlock
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	rmByName, ok := s.nsRoutemap[namespace]
+	if ok {
+		return rmByName[name]
 	}
 	return nil
 }

@@ -301,7 +301,7 @@ routingTemplates:
 			},
 		})
 
-		return assert.NoError(t, err) && assert.Equal(t, uint64(417661632797200593), signature)
+		return assert.NoError(t, err) && assert.Equal(t, "417661632797200593", signature)
 	}, time.Second*2, time.Millisecond*100)
 }
 
@@ -411,6 +411,6 @@ routingTemplates:
 			},
 		})
 
-		return assert.NoError(t, err) && assert.Equal(t, uint64(11451027137128994800), signature)
+		return assert.NoError(t, err) && assert.Equal(t, "11451027137128994800", signature)
 	}, time.Second*2, time.Millisecond*100)
 }

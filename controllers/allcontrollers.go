@@ -4,17 +4,12 @@ package controllers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
-	"github.com/dgraph-io/badger/v4"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
-	"github.com/iter8-tools/iter8/controllers/storageclient"
-	"github.com/iter8-tools/iter8/controllers/storageclient/badgerdb"
-	"golang.org/x/sys/unix"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -36,9 +31,6 @@ const (
 	iter8KindLabel         = "iter8.tools/kind"
 	iter8KindRoutemapValue = "routemap"
 	iter8VersionLabel      = "iter8.tools/version"
-
-	// MetricsPath is the path of the persistent volume
-	MetricsPath = "/metrics"
 )
 
 // informers used to watch application resources,
@@ -88,7 +80,7 @@ func initAppResourceInformers(stopCh <-chan struct{}, config *Config, client k8s
 		log.Logger.Debug(event+" occurred for resource; gvr: ", gvrShort, "; namespace: ", namespace, "; name: ", name)
 		addFinalizer(name, namespace, gvrShort, client, config)
 		defer removeFinalizer(name, namespace, gvrShort, client, config)
-		if s := allRoutemaps.getRoutemapFromObj(obj, gvrShort); s == nil {
+		if s := AllRoutemaps.getRoutemapFromObj(obj, gvrShort); s == nil {
 			log.Logger.Trace("routemap not found; gvr: ",
 				gvrShort, "; object name: ", obj.(*unstructured.Unstructured).GetName(),
 				"; namespace: ", obj.(*unstructured.Unstructured).GetNamespace())
@@ -174,7 +166,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 	// unlike app resource handle func, routemap handle func is not used for delete events
 	handle := func(obj interface{}, event string) {
 		log.Logger.Trace(event + " event for routemap")
-		s := allRoutemaps.makeAndUpdateWith(obj.(*corev1.ConfigMap), config)
+		s := AllRoutemaps.makeAndUpdateWith(obj.(*corev1.ConfigMap), config)
 		if s == nil {
 			log.Logger.Error("unable to create routemap from configmap; ", "namespace: ", obj.(*corev1.ConfigMap).Namespace, "; name: ", obj.(*corev1.ConfigMap).Name)
 			return
@@ -192,7 +184,7 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 			handle(newObj, "update")
 		},
 		DeleteFunc: func(obj interface{}) {
-			allRoutemaps.delete(obj.(*corev1.ConfigMap))
+			AllRoutemaps.delete(obj.(*corev1.ConfigMap))
 		},
 	}); err != nil {
 		e := errors.New("unable to create event handlers for routemap informer")
@@ -232,16 +224,6 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 		log.Logger.Warnf("could not get pod with name %s in namespace %s", name, ns)
 	}
 
-	if config.Persist {
-		availableBytes, totalBytes, err := GetVolumeUsage(MetricsPath)
-		fmt.Println(availableBytes, totalBytes, err)
-
-		// TODO: expose badgerDB options in config?
-		var dbClient storageclient.Interface
-		dbClient, err = badgerdb.GetClient(badger.DefaultOptions(MetricsPath), badgerdb.AdditionalOptions{})
-		fmt.Println(dbClient, err)
-	}
-
 	log.Logger.Trace("initing app informers... ")
 	if err = initAppResourceInformers(stopCh, config, client); err != nil {
 		broadcastEvent(pod, corev1.EventTypeWarning, "Failed to start Iter8 app informers", "Failed to start Iter8 app informers", client)
@@ -259,20 +241,4 @@ func Start(stopCh <-chan struct{}, client k8sclient.Interface) error {
 	log.Logger.Trace("inited routemap informer... ")
 
 	return nil
-}
-
-// GetVolumeUsage gets the available and total capacity of a volume, in that order
-func GetVolumeUsage(path string) (uint64, uint64, error) {
-	var stat unix.Statfs_t
-	err := unix.Statfs(path, &stat)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	// Available blocks * size per block = available space in bytes
-	availableBytes := stat.Bavail * uint64(stat.Bsize)
-	// Total blocks * size per block = available space in bytes
-	totalBytes := stat.Blocks * uint64(stat.Bsize)
-
-	return availableBytes, totalBytes, nil
 }

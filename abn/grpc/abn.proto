@@ -11,17 +11,14 @@ package main;
 // for more information, see https://github.com/iter8-tools/iter8/issues/1257
 
 service ABN {
-  // Identify a track the caller should send a request to.
+  // Identify a version (index) the caller should send a request to.
   // Should be called for each request (transaction).
-  rpc Lookup(Application) returns(Session) {}
+  rpc Lookup(Application) returns(VersionRecommendation) {}
 
   // Write a metric value to metrics database.
   // The metric value is explicitly associated with a list of transactions that contributed to its computation.
   // The user is expected to identify these transactions.
   rpc WriteMetric(MetricValue) returns (google.protobuf.Empty) {}
-
-  // Get application data (tracks, versions and metrics for each)
-  rpc GetApplicationData(ApplicationRequest) returns (ApplicationData) {}
 }
 
 message Application {
@@ -33,10 +30,9 @@ message Application {
   string user = 2;
 }
 
-message Session {
-  // Track identifier of an application version
-  // If this is not available, it will be the empty string
-  string track = 1;
+message VersionRecommendation {
+  // versionNumber index of an application version
+  int32 versionNumber = 1;
 }
 
 message MetricValue {
@@ -48,16 +44,6 @@ message MetricValue {
   string application = 3;
   // User or user session identifier
   string user = 4;
-}
-
-message ApplicationRequest {
-  // name of application
-  string application = 1;
-}
-
-message ApplicationData {
-  // JSON string of application
-  string applicationJson = 1;
 }
 
 // https://developers.google.com/protocol-buffers/docs/proto3

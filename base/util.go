@@ -1,8 +1,11 @@
 package base
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -31,8 +34,8 @@ func int64Pointer(i int64) *int64 {
 	return &i
 }
 
-// intPointer takes an int as input, creates a new variable with the input value, and returns a pointer to the variable
-func intPointer(i int) *int {
+// IntPointer takes an int as input, creates a new variable with the input value, and returns a pointer to the variable
+func IntPointer(i int) *int {
 	return &i
 }
 
@@ -115,4 +118,51 @@ func ToYAML(v interface{}) string {
 		return ""
 	}
 	return strings.TrimSuffix(string(data), "\n")
+}
+
+// ReadConfig reads yaml formatted configuration information into conf
+// from the file specified by environment variable configEnv
+// The function setDefaults is called to set any default values if desired
+func ReadConfig(configEnv string, conf interface{}, setDefaults func()) error {
+	// identify location of config file from environment variable
+	configFile, ok := os.LookupEnv(configEnv)
+	if !ok {
+		e := fmt.Errorf("environment variable %s not set", configEnv)
+		log.Logger.Error(e)
+		return e
+	}
+
+	// read the config file
+	filePath := filepath.Clean(configFile)
+	dat, err := os.ReadFile(filePath)
+
+	if err != nil {
+		e := errors.New("cannot read config file: " + configFile)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	// convert to yaml
+	err = yaml.Unmarshal(dat, &conf)
+	if err != nil {
+		e := errors.New("cannot unmarshal YAML config file: " + configFile)
+		log.Logger.WithStackTrace(err.Error()).Error(e)
+		return e
+	}
+
+	// set any defaults for unset values
+	setDefaults()
+	return nil
+}
+
+// SplitApplication is a utility function that returns the namespace and name from a key of the form "namespace/name"
+func SplitApplication(applicationKey string) (namespace string, name string) {
+	names := strings.Split(applicationKey, "/")
+	if len(names) > 1 {
+		namespace, name = names[0], names[1]
+	} else {
+		namespace, name = "default", names[0]
+	}
+
+	return namespace, name
 }

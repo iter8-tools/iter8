@@ -1,13 +1,8 @@
 package controllers
 
 import (
-	"errors"
-	"os"
-	"path/filepath"
-
-	"github.com/iter8-tools/iter8/base/log"
+	util "github.com/iter8-tools/iter8/base"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 const (
@@ -37,38 +32,13 @@ type Config struct {
 	DefaultResync string `json:"defaultResync,omitempty"`
 	// ClusterScoped is true if Iter8 controller is cluster-scoped
 	ClusterScoped bool `json:"clusterScoped,omitempty"`
-	// Persist is true if Iter8 controller should have a persistent volume
-	Persist bool `json:"persist,omitempty"`
 }
 
 // readConfig reads configuration information from file
 func readConfig() (*Config, error) {
-	// read controller config
-	configFile, ok := os.LookupEnv(configEnv)
-	if !ok {
-		e := errors.New("cannot lookup config env variable: " + configEnv)
-		log.Logger.Error(e)
-		return nil, e
-	}
-
-	filePath := filepath.Clean(configFile)
-	dat, err := os.ReadFile(filePath)
-
-	if err != nil {
-		e := errors.New("cannot read config file: " + configFile)
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return nil, e
-	}
-
-	conf := Config{}
-	err = yaml.Unmarshal(dat, &conf)
-	if err != nil {
-		e := errors.New("cannot unmarshal YAML config file: " + configFile)
-		log.Logger.WithStackTrace(err.Error()).Error(e)
-		return nil, e
-	}
-
-	return &conf, nil
+	conf := &Config{}
+	err := util.ReadConfig(configEnv, conf, func() {})
+	return conf, err
 }
 
 // validate the config

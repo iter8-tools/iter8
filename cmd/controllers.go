@@ -6,10 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/iter8-tools/iter8/abn"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
+	"github.com/iter8-tools/iter8/metrics"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 )
 
 // controllersDesc is the description of controllers cmd
@@ -59,6 +62,22 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 				return err
 			}
 			log.Logger.Debug("started controllers ... ")
+
+			// launch gRPC server to respond to frontend requests
+			go func() {
+				err := abn.LaunchGRPCServer([]grpc.ServerOption{}, stopCh)
+				if err != nil {
+					log.Logger.Error("cound not start A/B/n service")
+				}
+			}()
+
+			// launch metrics HTTP server to respond to support Grafana visualization
+			go func() {
+				err := metrics.Start(stopCh)
+				if err != nil {
+					log.Logger.Error("count not start A/B/n metrics service")
+				}
+			}()
 
 			// if createSigCh, then block until there is an os.Interrupt
 			if createSigCh {

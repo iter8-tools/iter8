@@ -55,4 +55,9 @@ resources:
 storage: 50Mi
 storageClassName: standard
 
-persist: false
+### A/B/n service port
+abn:
+  port: 50051
+### Metrics service port
+metrics:
+  port: 8080

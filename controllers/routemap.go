@@ -22,6 +22,8 @@ import (
 
 /* types: begin */
 
+// routemap identifies a set of versions that comprise and application or ML model
+// and associates them with a set of routing templates
 type routemap struct {
 	// Todo: prune this down to agra.ObjectMeta instead of metav1.ObjectMeta
 	mutex             sync.RWMutex
@@ -31,10 +33,11 @@ type routemap struct {
 	normalizedWeights []uint32
 }
 
+// version is details about a routemap version
 type version struct {
 	Resources []resource `json:"resources,omitempty"`
 	Weight    *uint32    `json:"weight,omitempty"`
-	Signature *uint64    `json:"signature,omitempty"`
+	Signature *string    `json:"signature,omitempty"`
 }
 
 type resource struct {
@@ -72,10 +75,54 @@ const (
 	spec                 = "spec"
 )
 
+// Lock the mutex associated with a routemap for writing
+func (s *routemap) Lock() {
+	s.mutex.Lock()
+}
+
+// Unlock the mutex associated with a routemap
+func (s *routemap) Unlock() {
+	s.mutex.Unlock()
+}
+
+// RLock the mutex associated with a routemap for reading
+func (s *routemap) RLock() {
+	s.mutex.RLock()
+}
+
+// RUnlock the mutex associated with a routemap
+func (s *routemap) RUnlock() {
+	s.mutex.RUnlock()
+}
+
+// GetNamespace returns namespace of implementing ConfigMap
+func (s *routemap) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetName returns name of implementing ConfigMap
+func (s *routemap) GetName() string {
+	return s.Name
+}
+
 // Weights provide the relative weights for traffic routing between versions
 // Intended for use in routemap templates
 func (s *routemap) Weights() []uint32 {
 	return s.normalizedWeights
+}
+
+// GetVersions returns list of versions
+func (s *routemap) GetVersions() []VersionInterface {
+	result := make([]VersionInterface, len(s.Versions))
+	for i := range s.Versions {
+		v := s.Versions[i]
+		result[i] = VersionInterface(&v)
+	}
+	return result
+}
+
+func (v *version) GetSignature() *string {
+	return v.Signature
 }
 
 // normalizeWeights sets the normalized weights for each version of the routemap
@@ -93,7 +140,7 @@ func (s *routemap) normalizeWeights(config *Config) {
 	derivedWeights := make([]uint32, len(s.Versions))
 	available := s.getAvailableVersions(config)
 	// overrides from version resource annotation
-	override := s.getWeightOverrides(config)
+	override := s.getWeightOverrides()
 
 	for i, v := range s.Versions {
 		log.Logger.Debugf("version %d is available? %t", i, available[i])
@@ -133,7 +180,7 @@ func (s *routemap) normalizeWeights(config *Config) {
 // override pointer for a version may be nil, if there are no valid weight annotation for the version
 // if a version has multiple resources,
 // this function looks for the override in the first resource only
-func (s *routemap) getWeightOverrides(config *Config) []*uint32 {
+func (s *routemap) getWeightOverrides() []*uint32 {
 	override := make([]*uint32, len(s.Versions))
 	for i, v := range s.Versions {
 		if len(v.Resources) > 0 {
@@ -220,38 +267,37 @@ versionLoop:
 
 // computeSignature computes and sets the signature for a particular version
 // signature is based on the spec section
-func computeSignature(v version) (uint64, error) {
+func computeSignature(v version) (string, error) {
 	// get all resources of a version
 	resources := []interface{}{}
 	for _, resource := range v.Resources {
 		if _, ok := appInformers[resource.GVRShort]; !ok {
-			return 0, fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
+			return "", fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
 		}
 
 		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
 		if err != nil {
-			return 0, fmt.Errorf("cannot get resource: %e", err)
+			return "", fmt.Errorf("cannot get resource: %s", err.Error())
 		}
 
 		// extract spec section from resource, if applicable
 		specSection, _, err := unstructured.NestedFieldNoCopy(obj.(*unstructured.Unstructured).Object, spec)
 		if err != nil {
 			// error here does not mean no spec, it means cannot traverse the object (to find if there is a spec)
-			return 0, fmt.Errorf("cannot traverse resource: %e", err)
+			return "", fmt.Errorf("cannot traverse resource: %e", err)
 		}
 
 		resources = append(resources, specSection)
 	}
 
-	fmt.Println(resources)
-
 	// hash resources
+	log.Logger.Debugf("computeSignature hashing over %+v", resources)
 	hash, err := hashstructure.Hash(resources, hashstructure.FormatV2, nil)
 	if err != nil {
-		return 0, fmt.Errorf("cannot hash resources: %e", err)
+		return "", fmt.Errorf("cannot hash resources: %e", err)
 	}
 
-	return hash, nil
+	return fmt.Sprintf("%d", hash), nil
 }
 
 // reconcile a routemap
@@ -264,14 +310,17 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 	s.normalizeWeights(config)
 
 	// calculate the signature for the version
-	for _, version := range s.Versions {
-		signature, err := computeSignature(version)
+	for v := range s.Versions {
+		signature, err := computeSignature(s.Versions[v])
 		if err != nil {
-			log.Logger.WithStackTrace(err.Error()).Error("cannot calculate signature for version")
-			return
+			// not all version need be present; if the resources aren't available, proceed
+			if !strings.Contains(err.Error(), "cannot get resource") {
+				log.Logger.WithStackTrace(err.Error()).Error("cannot calculate signature for version")
+				return
+			}
 		}
-
-		version.Signature = &signature
+		s.Versions[v].Signature = &signature
+		log.Logger.Debugf("computed signature for version %d: %s", v, signature)
 	}
 
 	// if leader, compute routing policy and perform server side apply
