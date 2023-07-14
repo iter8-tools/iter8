@@ -94,6 +94,25 @@ entries:
     version: 0.1.7
   iter8:
   - apiVersion: v2
+    created: "2023-07-14T21:23:16.097848628Z"
+    description: Iter8 experiment chart
+    digest: 403e14bb5e9e11060b2842ab840bc769e4eeb37916a3657d93458c43d2664069
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    maintainers:
+    - email: spartha@us.ibm.com
+      name: Srinivasan Parthasarathy
+      url: https://researcher.watson.ibm.com/researcher/view.php?person=us-spartha
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    name: iter8
+    sources:
+    - https://github.com/iter8-tools/hub
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/iter8-0.14.3/iter8-0.14.3.tgz
+    version: 0.14.3
+  - apiVersion: v2
     created: "2023-06-02T17:26:29.738726915Z"
     description: Iter8 experiment chart
     digest: d61452ea0e5d9d5ac095099accaaf80c784424163f5b018bb2adf9c91120afc9
@@ -213,6 +232,29 @@ entries:
     - https://github.com/iter8-tools/iter8/releases/download/litmuschaos-0.0.4/litmuschaos-0.0.4.tgz
     version: 0.0.4
   traffic:
+  - apiVersion: v2
+    appVersion: v0.14
+    created: "2023-07-14T21:23:16.290301717Z"
+    description: Iter8 traffic controller
+    digest: bb7e336aff1a59db37d1292742ac11ee5e68a6555bcdf064b5b08c062aa36ae9
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-0.1.9/traffic-0.1.9.tgz
+    version: 0.1.9
   - apiVersion: v2
     appVersion: v0.14
     created: "2023-05-30T17:48:48.438228026Z"
@@ -452,4 +494,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-06-02T17:26:29.738756115Z"
+generated: "2023-07-14T21:23:16.290481819Z"
