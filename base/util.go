@@ -124,7 +124,7 @@ func ToYAML(v interface{}) string {
 // from the file specified by environment variable configEnv
 // The function setDefaults is called to set any default values if desired
 func ReadConfig(configEnv string, conf interface{}, setDefaults func()) error {
-	// read controller config
+	// identify location of config file from environment variable
 	configFile, ok := os.LookupEnv(configEnv)
 	if !ok {
 		e := fmt.Errorf("environment variable %s not set", configEnv)
@@ -132,6 +132,7 @@ func ReadConfig(configEnv string, conf interface{}, setDefaults func()) error {
 		return e
 	}
 
+	// read the config file
 	filePath := filepath.Clean(configFile)
 	dat, err := os.ReadFile(filePath)
 
@@ -141,7 +142,7 @@ func ReadConfig(configEnv string, conf interface{}, setDefaults func()) error {
 		return e
 	}
 
-	// conf := Config{}
+	// convert to yaml
 	err = yaml.Unmarshal(dat, &conf)
 	if err != nil {
 		e := errors.New("cannot unmarshal YAML config file: " + configFile)
@@ -149,6 +150,19 @@ func ReadConfig(configEnv string, conf interface{}, setDefaults func()) error {
 		return e
 	}
 
+	// set any defaults for unset values
 	setDefaults()
 	return nil
+}
+
+// SplitApplication is a utility function that returns the namespace and name from a key of the form "namespace/name"
+func SplitApplication(applicationKey string) (namespace string, name string) {
+	names := strings.Split(applicationKey, "/")
+	if len(names) > 1 {
+		namespace, name = names[0], names[1]
+	} else {
+		namespace, name = "default", names[0]
+	}
+
+	return namespace, name
 }

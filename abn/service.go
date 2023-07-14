@@ -58,15 +58,15 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 		return nil, err
 	}
 
-	if versionNumber == nil {
+	if versionNumber < 0 {
 		log.Logger.Warnf("Lookup(%s,%s) returned nil", appMsg.GetName(), appMsg.GetUser())
 		return nil, err
 	}
 
-	log.Logger.Tracef("Lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), *versionNumber)
+	log.Logger.Tracef("Lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), versionNumber)
 
 	return &pb.VersionRecommendation{
-		VersionNumber: int32(*versionNumber),
+		VersionNumber: int32(versionNumber),
 	}, err
 }
 
@@ -101,7 +101,7 @@ func LaunchGRPCServer(opts []grpc.ServerOption, stopCh <-chan struct{}) error {
 	// read configutation for metrics service
 	conf := &abnConfig{}
 	err := util.ReadConfig(configEnv, conf, func() {
-		if nil == conf.Port {
+		if conf.Port == nil {
 			conf.Port = util.IntPointer(defaultPortNumber)
 		}
 	})

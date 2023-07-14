@@ -64,3 +64,17 @@ func TestReadConfigNoFile(t *testing.T) {
 	})
 	assert.Error(t, err)
 }
+
+func TestSplitApplication(t *testing.T) {
+	ns, n := SplitApplication("namespace/name")
+	assert.Equal(t, "namespace", ns)
+	assert.Equal(t, "name", n)
+
+	ns, n = SplitApplication("namespace/name/ignored")
+	assert.Equal(t, "namespace", ns)
+	assert.Equal(t, "name", n)
+
+	ns, n = SplitApplication("name")
+	assert.Equal(t, "default", ns)
+	assert.Equal(t, "name", n)
+}

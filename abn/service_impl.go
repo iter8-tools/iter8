@@ -8,9 +8,9 @@ import (
 	"hash/maphash"
 	"reflect"
 	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
+	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
 )
@@ -20,32 +20,34 @@ var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutema
 // versionHasher is hash used for selecting versions
 var versionHasher maphash.Hash
 
+const invalidVersion int = -1
+
 // lookupInternal is detailed implementation of gRPC method Lookup
 // application is a of the form "namespace/name"
-func lookupInternal(application string, user string) (controllers.RoutemapInterface, *int, error) {
+func lookupInternal(application string, user string) (controllers.RoutemapInterface, int, error) {
 	// if user is not provided, fail
 	if user == "" {
-		return nil, nil, errors.New("no user session provided")
+		return nil, invalidVersion, errors.New("no user session provided")
 	}
 
 	// check that we have a record of the application
 	if application == "/" {
-		return nil, nil, errors.New("no application provided")
+		return nil, invalidVersion, errors.New("no application provided")
 	}
 
-	ns, name := splitApplicationKey(application)
+	ns, name := util.SplitApplication(application)
 	s := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(ns, name)
 	if s == nil || reflect.ValueOf(s).IsNil() {
-		return nil, nil, fmt.Errorf("routemap not found for application %s", ns+"/"+name)
+		return nil, invalidVersion, fmt.Errorf("routemap not found for application %s", ns+"/"+name)
 	}
 
 	versionNumber := rendezvousGet(s, user)
-	if versionNumber == nil {
-		return nil, nil, fmt.Errorf("no versions in routemap for application %s", ns+"/"+name)
+	if versionNumber == invalidVersion {
+		return nil, invalidVersion, fmt.Errorf("no versions in routemap for application %s", ns+"/"+name)
 	}
 
 	// record user; ignore error if any; this is best effort
-	_ = MetricsClient.SetUser(application, *versionNumber, *s.GetVersions()[*versionNumber].GetSignature(), user)
+	_ = MetricsClient.SetUser(application, versionNumber, *s.GetVersions()[versionNumber].GetSignature(), user)
 
 	return s, versionNumber, nil
 }
@@ -59,7 +61,7 @@ func lookupInternal(application string, user string) (controllers.RoutemapInterf
 // and no change to the version number mapping.
 // We select the version, user pair with the largest hash value ("score").
 // Inspired by https://github.com/tysonmote/rendezvous/blob/master/rendezvous.go
-func rendezvousGet(s controllers.RoutemapInterface, user string) *int {
+func rendezvousGet(s controllers.RoutemapInterface, user string) int {
 	// current maximimum score as computed by the hash function
 	var maxScore uint64
 	// maxVersionNumber is the version index with the current maximum score
@@ -86,9 +88,9 @@ func rendezvousGet(s controllers.RoutemapInterface, user string) *int {
 
 	// if no versions (available; ie, non-zero weight)
 	if processedVersions == 0 {
-		return nil
+		return invalidVersion
 	}
-	return &maxVersionNumber
+	return maxVersionNumber
 }
 
 // hash computes the score for a version, user combination
@@ -100,30 +102,17 @@ func hash(version, signature, user string) uint64 {
 	return versionHasher.Sum64()
 }
 
-// splitApplicationKey is a utility function that returns the name and namespace from a key of the form "namespace/name"
-func splitApplicationKey(applicationKey string) (string, string) {
-	var name, namespace string
-	names := strings.Split(applicationKey, "/")
-	if len(names) > 1 {
-		namespace, name = names[0], names[1]
-	} else {
-		namespace, name = "default", names[0]
-	}
-
-	return namespace, name
-}
-
 // writeMetricInternal is detailed implementation of gRPC method WriteMetric
 func writeMetricInternal(application, user, metric, valueStr string) error {
 	log.Logger.Tracef("writeMetricInternal called for application, user: %s, %s", application, user)
 	defer log.Logger.Trace("writeMetricInternal completed")
 
 	s, versionNumber, err := lookupInternal(application, user)
-	if err != nil || versionNumber == nil {
+	if err != nil || versionNumber == invalidVersion {
 		log.Logger.Warnf("lookupInternal failed for application=%s, user=%s", application, user)
 		return err
 	}
-	log.Logger.Debugf("lookupInternal(%s,%s) -> %d", application, user, *versionNumber)
+	log.Logger.Debugf("lookupInternal(%s,%s) -> %d", application, user, versionNumber)
 
 	value, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
@@ -131,11 +120,11 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 		return err
 	}
 
-	v := s.GetVersions()[*versionNumber]
+	v := s.GetVersions()[versionNumber]
 	transaction := uuid.NewString()
 
 	err = MetricsClient.SetMetric(
-		s.GetNamespace()+"/"+s.GetName(), *versionNumber, *v.GetSignature(),
+		s.GetNamespace()+"/"+s.GetName(), versionNumber, *v.GetSignature(),
 		metric, user, transaction,
 		value)
 

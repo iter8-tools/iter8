@@ -24,15 +24,15 @@ func TestLookupInternal(t *testing.T) {
 
 	tries := 20 // needs to be big enough to find at least one problem; this is probably overkill
 	// do lookup tries times
-	versionNumbers := make([]*int, tries)
+	versionNumbers := make([]int, tries)
 	for i := 0; i < tries; i++ {
-		_, tr, err := lookupInternal("default/test", "user")
+		_, v, err := lookupInternal("default/test", "user")
 		assert.NoError(t, err)
-		versionNumbers[i] = tr
+		versionNumbers[i] = v
 	}
 
 	tr := versionNumbers[0]
 	for i := 1; i < tries; i++ {
-		assert.Equal(t, *tr, *versionNumbers[i])
+		assert.Equal(t, tr, versionNumbers[i])
 	}
 }

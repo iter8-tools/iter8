@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/iter8-tools/iter8/abn"
@@ -123,7 +122,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getMetrics called for application %s", application)
 
 	// identify the routemap for the application
-	namespace, name := splitApplicationKey(application)
+	namespace, name := util.SplitApplication(application)
 	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, name)
 	if rm == nil || reflect.ValueOf(rm).IsNil() {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
@@ -192,12 +191,14 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 			// copy data into structure for histogram calculation (to be done later)
 			// over transaction data
 			vStr := fmt.Sprintf("%d", v)
+			// over transaction data
 			_, ok = byMetricOverTransactions[metric]
 			if !ok {
 				byMetricOverTransactions[metric] = make(map[string][]float64, 0)
 			}
 			(byMetricOverTransactions[metric])[vStr] = metrics.MetricsOverTransactions
 
+			// over user data
 			_, ok = byMetricOverUsers[metric]
 			if !ok {
 				byMetricOverUsers[metric] = make(map[string][]float64, 0)
@@ -241,19 +242,6 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	// finally, send response
 	w.Header().Add("Content-Type", "application/json")
 	_, _ = w.Write(b)
-}
-
-// splitApplicationKey is a utility function that returns the name and namespace from a key of the form "namespace/name"
-func splitApplicationKey(applicationKey string) (string, string) {
-	var name, namespace string
-	names := strings.Split(applicationKey, "/")
-	if len(names) > 1 {
-		namespace, name = names[0], names[1]
-	} else {
-		namespace, name = "default", names[0]
-	}
-
-	return namespace, name
 }
 
 // calculateSummarizedMetric calculates a metric summary for a particular collection of data
@@ -304,10 +292,10 @@ func calculateSummarizedMetric(data []float64) (storage.SummarizedMetric, error)
 // TODO: defaults for numBuckets/decimalPlace?
 func calculateHistogram(versionMetrics map[string][]float64, numBuckets int, decimalPlace float64) (GrafanaHistogram, error) {
 	if numBuckets == 0 {
-		numBuckets = 20
+		numBuckets = 10
 	}
 	if decimalPlace == 0 {
-		decimalPlace = 3
+		decimalPlace = 1
 	}
 
 	mins := []float64{}

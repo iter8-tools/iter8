@@ -108,7 +108,7 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 		assert.NotNil(t, rm)
 		assert.NotNil(t, versionNumber)
 
-		oldCount = getMetricsCount(t, scenario.namespace, scenario.name, *versionNumber, scenario.metric)
+		oldCount = getMetricsCount(t, scenario.namespace, scenario.name, versionNumber, scenario.metric)
 	}
 
 	if scenario.errorSubstring != "" {
@@ -138,7 +138,7 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 		assert.NotNil(t, rm)
 		assert.NotNil(t, versionNumber)
 
-		currentCount := getMetricsCount(t, scenario.namespace, scenario.name, *versionNumber, scenario.metric)
+		currentCount := getMetricsCount(t, scenario.namespace, scenario.name, versionNumber, scenario.metric)
 		assert.Equal(t, oldCount+1, currentCount)
 	}
 }
