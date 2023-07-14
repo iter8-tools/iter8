@@ -39,31 +39,31 @@ func lookupInternal(application string, user string) (controllers.RoutemapInterf
 		return nil, nil, fmt.Errorf("routemap not found for application %s", ns+"/"+name)
 	}
 
-	track := rendezvousGet(s, user)
-	if track == nil {
+	versionNumber := rendezvousGet(s, user)
+	if versionNumber == nil {
 		return nil, nil, fmt.Errorf("no versions in routemap for application %s", ns+"/"+name)
 	}
 
 	// record user; ignore error if any; this is best effort
-	_ = MetricsClient.SetUser(application, *track, *s.GetVersions()[*track].GetSignature(), user)
+	_ = MetricsClient.SetUser(application, *versionNumber, *s.GetVersions()[*versionNumber].GetSignature(), user)
 
-	return s, track, nil
+	return s, versionNumber, nil
 }
 
 // rendezvousGet is an implementation of rendezvous hashing (cf. https://en.wikipedia.org/wiki/Rendezvous_hashing)
-// It returns a consistent track for a given application and user combination.
-// The track is chosen uniformly at random from among the current set of tracks
+// It returns a consistent versionNumber (index) for a given application and user combination.
+// The version number is chosen uniformly at random from among the current set of versions
 // associated with an application.
-// We want to always return the same track for the same user so long as the
+// We want to always return the same version number for the same user so long as the
 // application remains unchanged -- there are no change in the set of versions
-// and no change to the track mapping.
+// and no change to the version number mapping.
 // We select the version, user pair with the largest hash value ("score").
 // Inspired by https://github.com/tysonmote/rendezvous/blob/master/rendezvous.go
 func rendezvousGet(s controllers.RoutemapInterface, user string) *int {
 	// current maximimum score as computed by the hash function
 	var maxScore uint64
-	// maxTrack is the track with the current maximum score
-	var maxTrack int
+	// maxVersionNumber is the version index with the current maximum score
+	var maxVersionNumber int
 
 	// no versions
 	processedVersions := 0
@@ -71,15 +71,15 @@ func rendezvousGet(s controllers.RoutemapInterface, user string) *int {
 	s.RLock()
 	defer s.RUnlock()
 
-	for track, version := range s.GetVersions() {
-		if s.Weights()[track] == 0 {
+	for versionNumber, version := range s.GetVersions() {
+		if s.Weights()[versionNumber] == 0 {
 			continue
 		}
-		score := hash(fmt.Sprintf("%d", track), *version.GetSignature(), user)
-		log.Logger.Debugf("hash(%d,%s) --> %d  --  %d", track, user, score, maxScore)
+		score := hash(fmt.Sprintf("%d", versionNumber), *version.GetSignature(), user)
+		log.Logger.Debugf("hash(%d,%s) --> %d  --  %d", versionNumber, user, score, maxScore)
 		if score >= maxScore {
 			maxScore = score
-			maxTrack = track
+			maxVersionNumber = versionNumber
 		}
 		processedVersions++
 	}
@@ -88,15 +88,15 @@ func rendezvousGet(s controllers.RoutemapInterface, user string) *int {
 	if processedVersions == 0 {
 		return nil
 	}
-	return &maxTrack
+	return &maxVersionNumber
 }
 
 // hash computes the score for a version, user combination
-func hash(track, signature, user string) uint64 {
+func hash(version, signature, user string) uint64 {
 	versionHasher.Reset()
 	_, _ = versionHasher.WriteString(user)
 	_, _ = versionHasher.WriteString(signature)
-	_, _ = versionHasher.WriteString(track)
+	_, _ = versionHasher.WriteString(version)
 	return versionHasher.Sum64()
 }
 
@@ -118,12 +118,12 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	log.Logger.Tracef("writeMetricInternal called for application, user: %s, %s", application, user)
 	defer log.Logger.Trace("writeMetricInternal completed")
 
-	s, track, err := lookupInternal(application, user)
-	if err != nil || track == nil {
+	s, versionNumber, err := lookupInternal(application, user)
+	if err != nil || versionNumber == nil {
 		log.Logger.Warnf("lookupInternal failed for application=%s, user=%s", application, user)
 		return err
 	}
-	log.Logger.Debugf("lookupInternal(%s,%s) -> %d", application, user, *track)
+	log.Logger.Debugf("lookupInternal(%s,%s) -> %d", application, user, *versionNumber)
 
 	value, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
@@ -131,11 +131,11 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 		return err
 	}
 
-	v := s.GetVersions()[*track]
+	v := s.GetVersions()[*versionNumber]
 	transaction := uuid.NewString()
 
 	err = MetricsClient.SetMetric(
-		s.GetNamespace()+"/"+s.GetName(), *track, *v.GetSignature(),
+		s.GetNamespace()+"/"+s.GetName(), *versionNumber, *v.GetSignature(),
 		metric, user, transaction,
 		value)
 

@@ -11,9 +11,9 @@ package main;
 // for more information, see https://github.com/iter8-tools/iter8/issues/1257
 
 service ABN {
-  // Identify a track the caller should send a request to.
+  // Identify a version (index) the caller should send a request to.
   // Should be called for each request (transaction).
-  rpc Lookup(Application) returns(Session) {}
+  rpc Lookup(Application) returns(VersionRecommendation) {}
 
   // Write a metric value to metrics database.
   // The metric value is explicitly associated with a list of transactions that contributed to its computation.
@@ -30,10 +30,9 @@ message Application {
   string user = 2;
 }
 
-message Session {
-  // Track identifier of an application version
-  // If this is not available, it will be the empty string
-  string track = 1;
+message VersionRecommendation {
+  // versionNumber index of an application version
+  int32 versionNumber = 1;
 }
 
 message MetricValue {

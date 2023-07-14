@@ -23,9 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ABNClient interface {
-	// Identify a track the caller should send a request to.
+	// Identify a version (index) the caller should send a request to.
 	// Should be called for each request (transaction).
-	Lookup(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Session, error)
+	Lookup(ctx context.Context, in *Application, opts ...grpc.CallOption) (*VersionRecommendation, error)
 	// Write a metric value to metrics database.
 	// The metric value is explicitly associated with a list of transactions that contributed to its computation.
 	// The user is expected to identify these transactions.
@@ -40,8 +40,8 @@ func NewABNClient(cc grpc.ClientConnInterface) ABNClient {
 	return &aBNClient{cc}
 }
 
-func (c *aBNClient) Lookup(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Session, error) {
-	out := new(Session)
+func (c *aBNClient) Lookup(ctx context.Context, in *Application, opts ...grpc.CallOption) (*VersionRecommendation, error) {
+	out := new(VersionRecommendation)
 	err := c.cc.Invoke(ctx, "/main.ABN/Lookup", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -62,9 +62,9 @@ func (c *aBNClient) WriteMetric(ctx context.Context, in *MetricValue, opts ...gr
 // All implementations must embed UnimplementedABNServer
 // for forward compatibility
 type ABNServer interface {
-	// Identify a track the caller should send a request to.
+	// Identify a version (index) the caller should send a request to.
 	// Should be called for each request (transaction).
-	Lookup(context.Context, *Application) (*Session, error)
+	Lookup(context.Context, *Application) (*VersionRecommendation, error)
 	// Write a metric value to metrics database.
 	// The metric value is explicitly associated with a list of transactions that contributed to its computation.
 	// The user is expected to identify these transactions.
@@ -76,7 +76,7 @@ type ABNServer interface {
 type UnimplementedABNServer struct {
 }
 
-func (UnimplementedABNServer) Lookup(context.Context, *Application) (*Session, error) {
+func (UnimplementedABNServer) Lookup(context.Context, *Application) (*VersionRecommendation, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Lookup not implemented")
 }
 func (UnimplementedABNServer) WriteMetric(context.Context, *MetricValue) (*emptypb.Empty, error) {

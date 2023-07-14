@@ -42,13 +42,13 @@ type abnServer struct {
 	pb.UnimplementedABNServer
 }
 
-// Lookup identifies a track that should be used for a given user
+// Lookup identifies a versionNumber (index to list of versions) that should be used for a given user
 // This method is exposed to gRPC clients
-func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.Session, error) {
+func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.VersionRecommendation, error) {
 	log.Logger.Tracef("Lookup called for application=%s, user=%s", appMsg.GetName(), appMsg.GetUser())
 	defer log.Logger.Trace("Lookup completed")
 
-	_, track, err := lookupInternal(
+	_, versionNumber, err := lookupInternal(
 		appMsg.GetName(),
 		appMsg.GetUser(),
 	)
@@ -58,20 +58,20 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 		return nil, err
 	}
 
-	if track == nil {
+	if versionNumber == nil {
 		log.Logger.Warnf("Lookup(%s,%s) returned nil", appMsg.GetName(), appMsg.GetUser())
 		return nil, err
 	}
 
-	log.Logger.Tracef("Lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), *track)
+	log.Logger.Tracef("Lookup(%s,%s) -> %d", appMsg.GetName(), appMsg.GetUser(), *versionNumber)
 
-	return &pb.Session{
-		Track: fmt.Sprintf("%d", *track),
+	return &pb.VersionRecommendation{
+		VersionNumber: int32(*versionNumber),
 	}, err
 }
 
-// WriteMetric identifies the track with which a metric is associated (from user) and
-// writes the metric value (currently only supports summary metrics)
+// WriteMetric identifies the version with which a metric is associated (from user) and
+// writes the metric value
 func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
 	log.Logger.Trace("WriteMetric called")
 	defer log.Logger.Trace("WriteMetric completed")

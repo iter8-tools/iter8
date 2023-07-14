@@ -103,12 +103,12 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 	allRoutemaps = &testCM
 
 	if scenario.metric != "" {
-		rm, track, err := lookupInternal(scenario.namespace+"/"+scenario.name, scenario.user)
+		rm, versionNumber, err := lookupInternal(scenario.namespace+"/"+scenario.name, scenario.user)
 		assert.NoError(t, err)
 		assert.NotNil(t, rm)
-		assert.NotNil(t, track)
+		assert.NotNil(t, versionNumber)
 
-		oldCount = getMetricsCount(t, scenario.namespace, scenario.name, *track, scenario.metric)
+		oldCount = getMetricsCount(t, scenario.namespace, scenario.name, *versionNumber, scenario.metric)
 	}
 
 	if scenario.errorSubstring != "" {
@@ -133,12 +133,12 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 
 	// verify that metric count has increased by 1
 	if scenario.metric != "" {
-		rm, track, err := lookupInternal(scenario.namespace+"/"+scenario.name, scenario.user)
+		rm, versionNumber, err := lookupInternal(scenario.namespace+"/"+scenario.name, scenario.user)
 		assert.NoError(t, err)
 		assert.NotNil(t, rm)
-		assert.NotNil(t, track)
+		assert.NotNil(t, versionNumber)
 
-		currentCount := getMetricsCount(t, scenario.namespace, scenario.name, *track, scenario.metric)
+		currentCount := getMetricsCount(t, scenario.namespace, scenario.name, *versionNumber, scenario.metric)
 		assert.Equal(t, oldCount+1, currentCount)
 	}
 }
