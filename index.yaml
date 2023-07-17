@@ -47,6 +47,29 @@ entries:
     version: 0.2.3
   autox:
   - apiVersion: v2
+    appVersion: v0.15
+    created: "2023-07-17T15:02:37.122403113Z"
+    description: Iter8 autoX controller
+    digest: b6c8200f4ccced6856db428d5aeeec1503a287733abcd8b788a1ef405c9f82a6
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - autox
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: autox
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/autox-0.1.9/autox-0.1.9.tgz
+    version: 0.1.9
+  - apiVersion: v2
     appVersion: v0.14
     created: "2023-05-16T02:56:53.677251134Z"
     description: Iter8 autoX controller
@@ -93,6 +116,25 @@ entries:
     - https://github.com/iter8-tools/iter8/releases/download/autox-0.1.7/autox-0.1.7.tgz
     version: 0.1.7
   iter8:
+  - apiVersion: v2
+    created: "2023-07-17T15:02:37.287237203Z"
+    description: Iter8 experiment chart
+    digest: 2dcd8933868d38ae2f8a4317897d46c4e6fa624927fbd4665fb080fe93a3ad46
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    maintainers:
+    - email: spartha@us.ibm.com
+      name: Srinivasan Parthasarathy
+      url: https://researcher.watson.ibm.com/researcher/view.php?person=us-spartha
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    name: iter8
+    sources:
+    - https://github.com/iter8-tools/hub
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/iter8-0.15.0/iter8-0.15.0.tgz
+    version: 0.15.0
   - apiVersion: v2
     created: "2023-07-14T21:23:16.097848628Z"
     description: Iter8 experiment chart
@@ -232,6 +274,29 @@ entries:
     - https://github.com/iter8-tools/iter8/releases/download/litmuschaos-0.0.4/litmuschaos-0.0.4.tgz
     version: 0.0.4
   traffic:
+  - apiVersion: v2
+    appVersion: v0.15
+    created: "2023-07-17T15:02:37.483811942Z"
+    description: Iter8 traffic controller
+    digest: 8f9c0bf21a93ae9545a528525cf91bced11d5c4d516b07e2b354691dfec29120
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-0.1.10/traffic-0.1.10.tgz
+    version: 0.1.10
   - apiVersion: v2
     appVersion: v0.14
     created: "2023-07-14T21:23:16.290301717Z"
@@ -395,6 +460,31 @@ entries:
     version: 0.1.3
   traffic-templates:
   - apiVersion: v2
+    appVersion: v0.15
+    created: "2023-07-17T15:02:37.650752149Z"
+    description: Iter8 traffic templates
+    digest: 9dbb3f63f4949fd5ce4347a050c2c3117e31c56742b3916b6813ed978263d77c
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: traffic-templates
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.6/traffic-templates-0.1.6.tgz
+    version: 0.1.6
+  - apiVersion: v2
     appVersion: v0.14
     created: "2023-05-30T17:48:48.583968685Z"
     description: Iter8 traffic templates
@@ -494,4 +584,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-07-14T21:23:16.290481819Z"
+generated: "2023-07-17T15:02:37.65081975Z"
