@@ -1,5 +1,5 @@
 ### AutoX service image
-image: iter8/iter8:0.14
+image: iter8/iter8:0.15
 
 logLevel: info
 
