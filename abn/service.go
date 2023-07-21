@@ -24,8 +24,11 @@ import (
 )
 
 const (
-	// metricsDirEnv is the environment variable identifying the directory with metrics storage
-	metricsDirEnv = "METRICS_DIR"
+	// MetricsDirEnv is the environment variable identifying the directory with metrics storage
+	MetricsDirEnv = "METRICS_DIR"
+
+	configEnv         = "ABN_CONFIG_FILE"
+	defaultPortNumber = 50051
 )
 
 var (
@@ -85,11 +88,6 @@ func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricVa
 		)
 }
 
-const (
-	configEnv         = "ABN_CONFIG_FILE"
-	defaultPortNumber = 50051
-)
-
 // abnConfig defines the configuration of the controllers
 type abnConfig struct {
 	// Port is port number on which the abn gRPC service should listen
@@ -119,8 +117,8 @@ func LaunchGRPCServer(opts []grpc.ServerOption, stopCh <-chan struct{}) error {
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterABNServer(grpcServer, newServer())
 
-	// configure metricsClient if needed
-	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(os.Getenv(metricsDirEnv)), badgerdb.AdditionalOptions{})
+	// configure MetricsClient if needed
+	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(os.Getenv(MetricsDirEnv)), badgerdb.AdditionalOptions{})
 	if err != nil {
 		log.Logger.Error("Unable to configure metrics storage client ", err)
 		return err

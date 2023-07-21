@@ -33,6 +33,9 @@ spec:
             - ALL
           runAsNonRoot: true
           runAsUser: 1001040000
+        env:
+        - name: METRICS_SERVER_URL
+          value: "{{ .Values.metricsServerURL }}"
       restartPolicy: Never
   backoffLimit: 0
 {{- end }}

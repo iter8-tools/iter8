@@ -33,8 +33,16 @@ type Task interface {
 // ExperimentSpec specifies the set of tasks in this experiment
 type ExperimentSpec []Task
 
+type ExperimentMetadata struct {
+	Name string
+
+	Namespace string
+}
+
 // Experiment struct containing spec and result
 type Experiment struct {
+	Metadata ExperimentMetadata
+
 	// Spec is the sequence of tasks that constitute this experiment
 	Spec ExperimentSpec `json:"spec" yaml:"spec"`
 

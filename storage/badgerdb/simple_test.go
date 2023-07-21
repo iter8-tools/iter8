@@ -272,3 +272,52 @@ func TestGetMetrics(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "{}", string(jsonMetrics))
 }
+
+func TestSetResult(t *testing.T) {
+	tempDirPath := t.TempDir()
+
+	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	assert.NoError(t, err)
+
+	namespace := "my-namespace"
+	experiment := "my-experiment"
+	data := "hello world"
+
+	err = client.SetResult(namespace, experiment, []byte(data))
+	assert.NoError(t, err)
+
+	// get result
+	err = client.db.View(func(txn *badger.Txn) error {
+		key := getResultKey(namespace, experiment)
+		item, err := txn.Get([]byte(key))
+		assert.NoError(t, err)
+		assert.NotNil(t, item)
+
+		err = item.Value(func(val []byte) error {
+			assert.Equal(t, data, string(val))
+			return nil
+		})
+		assert.NoError(t, err)
+
+		return nil
+	})
+	assert.NoError(t, err)
+}
+
+func TestGetResult(t *testing.T) {
+	tempDirPath := t.TempDir()
+
+	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	assert.NoError(t, err)
+
+	namespace := "my-namespace"
+	experiment := "my-experiment"
+	data := "hello world"
+
+	err = client.SetResult(namespace, experiment, []byte(data))
+	assert.NoError(t, err)
+
+	result, err := client.GetResult(namespace, experiment)
+	assert.NoError(t, err)
+	assert.Equal(t, data, string(result))
+}

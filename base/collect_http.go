@@ -1,8 +1,12 @@
 package base
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -59,6 +63,15 @@ type collectHTTPInputs struct {
 	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
 }
 
+// FortioResult
+type FortioResult struct {
+	// key is the endpoint
+	EndpointResults map[string]fhttp.HTTPRunnerResults
+
+	// TODO: add type
+	Summary interface{}
+}
+
 const (
 	// CollectHTTPTaskName is the name of this task which performs load generation and metrics collection.
 	CollectHTTPTaskName = "http"
@@ -82,6 +95,10 @@ const (
 	// prefix used in latency percentile metric names
 	// example: latency-p75.0 is the 75th percentile latency
 	builtInHTTPLatencyPercentilePrefix = "latency-p"
+
+	// TODO: move elsewhere, abn/service seems to produce cyclical dependency
+	// MetricsServerURL is the URL of the metrics server
+	MetricsServerURL = "METRICS_SERVER_URL"
 )
 
 var (
@@ -97,6 +114,7 @@ func (t *collectHTTPTask) errorCode(code int) bool {
 	if code == -1 {
 		return true
 	}
+
 	// HTTP errors
 	for _, lims := range t.With.ErrorRanges {
 		// if no lower limit (check upper)
@@ -218,14 +236,59 @@ func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
 	return fo, nil
 }
 
+// TODO: rename to /performanceResult
+// putResultToMetricsService
+func putResultToMetricsService(metricsServerURL, namespace, experiment string, data interface{}) error {
+	// handle URL and URL parameters
+	u, _ := url.ParseRequestURI(metricsServerURL + "/result")
+	params := url.Values{}
+	params.Add("namespace", namespace)
+	params.Add("experiment", experiment)
+	u.RawQuery = params.Encode()
+	urlStr := fmt.Sprintf("%v", u)
+
+	log.Logger.Trace(fmt.Sprintf("PUT request URL: %s", urlStr))
+
+	// handle payload
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		log.Logger.Error("cannot JSON marshal data for metrics server request: ", err)
+		return err
+	}
+
+	// create request
+	req, err := http.NewRequest(http.MethodPut, urlStr, bytes.NewBuffer(dataBytes))
+	if err != nil {
+		log.Logger.Error("cannot create new HTTP request metrics server: ", err)
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	log.Logger.Trace("sending request")
+
+	// send request
+	client := &http.Client{}
+	_, err = client.Do(req)
+	if err != nil {
+		log.Logger.Error("could not send request to metrics server: ", err)
+		return err
+	}
+
+	log.Logger.Trace("sent request")
+
+	return nil
+}
+
 // getFortioResults collects Fortio run results
 // func (t *collectHTTPTask) getFortioResults() (*fhttp.HTTPRunnerResults, error) {
 // key is the metric prefix
-func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResults, error) {
+// key is the endpoint
+func (t *collectHTTPTask) getFortioResults() (map[string]fhttp.HTTPRunnerResults, error) {
 	// the main idea is to run Fortio with proper options
 
 	var err error
-	results := map[string]*fhttp.HTTPRunnerResults{}
+	results := map[string]fhttp.HTTPRunnerResults{}
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
@@ -254,7 +317,12 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 				continue
 			}
 
-			results[httpMetricPrefix+"-"+endpointID] = ifr
+			// TODO: does ifr need to be a pointer?
+			// results[httpMetricPrefix+"-"+endpointID] = ifr
+			results[endpoint.URL] = *ifr
+
+			// TODO: namespace and experiment name
+			// putData(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, ifr)
 		}
 	} else {
 		fo, err := getFortioOptions(t.With.endpoint)
@@ -273,10 +341,19 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 			return results, err
 		}
 
-		results[httpMetricPrefix] = ifr
+		// TODO: does ifr need to be a pointer?
+		// results[httpMetricPrefix] = ifr
+		results[t.With.endpoint.URL] = *ifr
 	}
 
 	return results, err
+}
+
+type fortioResult struct {
+	// key is the endpoint
+	EndpointResults map[string]fhttp.HTTPRunnerResults
+
+	Summary interface{}
 }
 
 // run executes this task
@@ -294,6 +371,12 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		return err
 	}
 
+	// TODO: warmup option
+	// // ignore results if warmup
+	// if t.With.Warmup != nil && *t.With.Warmup {
+	// 	log.Logger.Debug("warmup: ignoring results")
+	// 	return nil
+	// }
 	// ignore results if warmup
 	if t.With.Warmup != nil && *t.With.Warmup {
 		log.Logger.Debug("warmup: ignoring results")
@@ -308,6 +391,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 	}
 	in := exp.Result.Insights
 
+	// TODO: delete
 	for provider, data := range data {
 		// request count
 		m := provider + "/" + builtInHTTPRequestCountID
@@ -418,6 +502,26 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 			return err
 		}
 	}
+
+	// push data to metrics service
+	fortioResult := fortioResult{
+		EndpointResults: data,
+		Summary:         exp.Result.Insights,
+	}
+
+	// get URL of metrics server from environment variable
+	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
+	if !ok {
+		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+		log.Logger.Error(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	// TODO: remove
+	fortioResultBytes, _ := json.Marshal(fortioResult)
+	log.Logger.Trace(string(fortioResultBytes))
+
+	putResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult)
 
 	return nil
 }

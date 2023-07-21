@@ -52,16 +52,16 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 				var err error
 				client, err = k8sclient.New(settings)
 				if err != nil {
-					log.Logger.Error("could not obtain Kube client ... ")
+					log.Logger.Error("could not obtain Kube client... ")
 					return err
 				}
 			}
 
 			if err := controllers.Start(stopCh, client); err != nil {
-				log.Logger.Error("controllers did not start ... ")
+				log.Logger.Error("controllers did not start... ")
 				return err
 			}
-			log.Logger.Debug("started controllers ... ")
+			log.Logger.Debug("started controllers... ")
 
 			// launch gRPC server to respond to frontend requests
 			go func() {
@@ -84,7 +84,7 @@ func newControllersCmd(stopCh <-chan struct{}, client k8sclient.Interface) *cobr
 				sigCh := make(chan os.Signal, 1)
 				signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
 				<-sigCh
-				log.Logger.Warn("SIGTERM ... ")
+				log.Logger.Warn("SIGTERM... ")
 			}
 
 			return nil

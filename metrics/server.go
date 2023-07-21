@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"reflect"
@@ -17,6 +18,9 @@ import (
 	"github.com/iter8-tools/iter8/storage"
 	"github.com/montanaflynn/stats"
 	"gonum.org/v1/plot/plotter"
+
+	"fortio.org/fortio/fhttp"
+	fstats "fortio.org/fortio/stats"
 )
 
 const (
@@ -28,6 +32,55 @@ const (
 type metricsConfig struct {
 	// Port is port number on which the metrics service should listen
 	Port *int `json:"port,omitempty"`
+}
+
+// versionSummarizedMetric adds version to summary data
+type versionSummarizedMetric struct {
+	Version int
+	storage.SummarizedMetric
+}
+
+// grafanaHistogram represents the histogram in the Grafana Iter8 dashboard
+type grafanaHistogram []grafanaHistogramBucket
+
+// grafanaHistogramBucket represents a bucket in the histogram in the Grafana Iter8 dashboard
+type grafanaHistogramBucket struct {
+	// Version is the version of the application
+	Version string
+
+	// Bucket is the bucket of the histogram
+	// For example: 8-12
+	Bucket string
+
+	// Value is the number of points in this bucket
+	Value float64
+}
+
+// metricSummary is result for a metric
+type metricSummary struct {
+	HistogramsOverTransactions *grafanaHistogram
+	HistogramsOverUsers        *grafanaHistogram
+	SummaryOverTransactions    []*versionSummarizedMetric
+	SummaryOverUsers           []*versionSummarizedMetric
+}
+
+// httpEndpointPanel is the data needed to produce a single panel for
+type httpEndpointPanel struct {
+	Durations  grafanaHistogram
+	Statistics storage.SummarizedMetric
+
+	ErrorDurations  grafanaHistogram         `json:"Error durations"`
+	ErrorStatistics storage.SummarizedMetric `json:"Error statistics"`
+
+	ReturnCodes map[int]int64 `json:"Return codes"`
+}
+
+type httpDashboard struct {
+	// key is the endpoint
+	Endpoints map[string]httpEndpointPanel
+
+	// TODO: add type
+	Summary interface{}
 }
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
@@ -48,6 +101,8 @@ func Start(stopCh <-chan struct{}) error {
 
 	// configure endpoints
 	http.HandleFunc("/metrics", getMetrics)
+	http.HandleFunc("/result", putResult)
+	http.HandleFunc("/HTTPGrafana", getHTTPGrafana)
 
 	// configure HTTP server
 	server := &http.Server{
@@ -71,36 +126,6 @@ func Start(stopCh <-chan struct{}) error {
 	}
 
 	return nil
-}
-
-// VersionSummarizedMetric adds version to summary data
-type VersionSummarizedMetric struct {
-	Version int
-	storage.SummarizedMetric
-}
-
-// GrafanaHistogram represents the histogram in the Grafana Iter8 dashboard
-type GrafanaHistogram []GrafanaHistogramBucket
-
-// GrafanaHistogramBucket represents a bucket in the histogram in the Grafana Iter8 dashboard
-type GrafanaHistogramBucket struct {
-	// Version is the version of the application
-	Version string
-
-	// Bucket is the bucket of the histogram
-	// For example: 8-12
-	Bucket string
-
-	// Value is the number of points in this bucket
-	Value float64
-}
-
-// MetricSummary is result for a metric
-type MetricSummary struct {
-	HistogramsOverTransactions *GrafanaHistogram
-	HistogramsOverUsers        *GrafanaHistogram
-	SummaryOverTransactions    []*VersionSummarizedMetric
-	SummaryOverUsers           []*VersionSummarizedMetric
 }
 
 // getMetrics handles GET /metrics with query parameter application=namespace/name
@@ -131,7 +156,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getMetrics found routemap %v", rm)
 
 	// initialize result
-	result := make(map[string]*MetricSummary, 0)
+	result := make(map[string]*metricSummary, 0)
 	byMetricOverTransactions := make(map[string](map[string][]float64), 0)
 	byMetricOverUsers := make(map[string](map[string][]float64), 0)
 
@@ -156,11 +181,11 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 			_, ok := result[metric]
 			if !ok {
 				// no entry for metric result; create empty entry
-				result[metric] = &MetricSummary{
+				result[metric] = &metricSummary{
 					HistogramsOverTransactions: nil,
 					HistogramsOverUsers:        nil,
-					SummaryOverTransactions:    []*VersionSummarizedMetric{},
-					SummaryOverUsers:           []*VersionSummarizedMetric{},
+					SummaryOverTransactions:    []*versionSummarizedMetric{},
+					SummaryOverUsers:           []*versionSummarizedMetric{},
 				}
 			}
 
@@ -171,7 +196,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 				log.Logger.Debugf("unable to compute summaried metrics over transactions for application %s (version %d; signature %s)", application, v, *signature)
 				continue
 			} else {
-				entry.SummaryOverTransactions = append(entry.SummaryOverTransactions, &VersionSummarizedMetric{
+				entry.SummaryOverTransactions = append(entry.SummaryOverTransactions, &versionSummarizedMetric{
 					Version:          v,
 					SummarizedMetric: smT,
 				})
@@ -182,14 +207,13 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 				log.Logger.Debugf("unable to compute summaried metrics over users for application %s (version %d; signature %s)", application, v, *signature)
 				continue
 			}
-			entry.SummaryOverUsers = append(entry.SummaryOverUsers, &VersionSummarizedMetric{
+			entry.SummaryOverUsers = append(entry.SummaryOverUsers, &versionSummarizedMetric{
 				Version:          v,
 				SummarizedMetric: smU,
 			})
 			result[metric] = entry
 
 			// copy data into structure for histogram calculation (to be done later)
-			// over transaction data
 			vStr := fmt.Sprintf("%d", v)
 			// over transaction data
 			_, ok = byMetricOverTransactions[metric]
@@ -290,7 +314,7 @@ func calculateSummarizedMetric(data []float64) (storage.SummarizedMetric, error)
 //	For example: "-0.24178488465151116 - 0.24782423875427073" -> "-0.242 - 0.248"
 //
 // TODO: defaults for numBuckets/decimalPlace?
-func calculateHistogram(versionMetrics map[string][]float64, numBuckets int, decimalPlace float64) (GrafanaHistogram, error) {
+func calculateHistogram(versionMetrics map[string][]float64, numBuckets int, decimalPlace float64) (grafanaHistogram, error) {
 	if numBuckets == 0 {
 		numBuckets = 10
 	}
@@ -322,7 +346,7 @@ func calculateHistogram(versionMetrics map[string][]float64, numBuckets int, dec
 		return nil, fmt.Errorf("cannot create version maximum: %e", err)
 	}
 
-	grafanaHistogram := GrafanaHistogram{}
+	grafanaHistogram := grafanaHistogram{}
 
 	for version, metrics := range versionMetrics {
 		// convert the raw values to the gonum plot values
@@ -347,7 +371,7 @@ func calculateHistogram(versionMetrics map[string][]float64, numBuckets int, dec
 				count--
 			}
 
-			grafanaHistogram = append(grafanaHistogram, GrafanaHistogramBucket{
+			grafanaHistogram = append(grafanaHistogram, grafanaHistogramBucket{
 				Version: version,
 				Bucket:  bucketLabel(bin.Min, bin.Max, decimalPlace),
 				Value:   count,
@@ -369,4 +393,170 @@ func roundDecimal(x float64, decimalPlace float64) float64 {
 // bucketLabel return a label for a histogram bucket
 func bucketLabel(min, max float64, decimalPlace float64) string {
 	return fmt.Sprintf("%s - %s", strconv.FormatFloat(roundDecimal(min, decimalPlace), 'f', -1, 64), strconv.FormatFloat(roundDecimal(max, decimalPlace), 'f', -1, 64))
+}
+
+// calculateHistogram creates histograms based on Fortio result
+func getFortioCalculateHistogram(fortioHistogram []fstats.Bucket, decimalPlace float64) grafanaHistogram {
+	grafanaHistogram := grafanaHistogram{}
+
+	for _, bucket := range fortioHistogram {
+		grafanaHistogram = append(grafanaHistogram, grafanaHistogramBucket{
+			Version: "0",
+			Bucket:  bucketLabel(bucket.Start*1000, bucket.End*1000, decimalPlace),
+			Value:   float64(bucket.Count),
+		})
+	}
+
+	return grafanaHistogram
+}
+
+func getFortioHistogramStats(fortioHistogram *fstats.HistogramData, decimalPlace float64) storage.SummarizedMetric {
+	return storage.SummarizedMetric{
+		Count:  uint64(fortioHistogram.Count),
+		Mean:   fortioHistogram.Avg * 1000,
+		StdDev: fortioHistogram.StdDev * 1000,
+		Min:    fortioHistogram.Min * 1000,
+		Max:    fortioHistogram.Max * 1000,
+	}
+}
+
+func getFortioEndpointPanel(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpointPanel {
+	result := httpEndpointPanel{}
+	if httpRunnerResults.DurationHistogram != nil {
+		result.Durations = getFortioCalculateHistogram(httpRunnerResults.DurationHistogram.Data, 1)
+		result.Statistics = getFortioHistogramStats(httpRunnerResults.DurationHistogram, 1)
+	}
+
+	if httpRunnerResults.ErrorsDurationHistogram != nil {
+		result.ErrorDurations = getFortioCalculateHistogram(httpRunnerResults.ErrorsDurationHistogram.Data, 1)
+		result.ErrorStatistics = getFortioHistogramStats(httpRunnerResults.ErrorsDurationHistogram, 1)
+	}
+
+	result.ReturnCodes = httpRunnerResults.RetCodes
+
+	return result
+}
+
+func getFortioDashboard(fortioResult util.FortioResult) httpDashboard {
+	// add endpoint results
+	dashboard := httpDashboard{
+		Endpoints: map[string]httpEndpointPanel{},
+	}
+
+	for endpoint, endpointResult := range fortioResult.EndpointResults {
+		// TODO: endpointResult := endpointResult?
+		dashboard.Endpoints[endpoint] = getFortioEndpointPanel(&endpointResult)
+	}
+
+	// add summary
+	dashboard.Summary = fortioResult.Summary
+
+	return dashboard
+}
+
+// putResult handles PUT /result with query parameter application=namespace/name
+func putResult(w http.ResponseWriter, r *http.Request) {
+	log.Logger.Trace("putResult called")
+	defer log.Logger.Trace("putResult completed")
+
+	// verify method
+	if r.Method != http.MethodPut {
+		http.Error(w, "expected PUT", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// verify request (query parameter)
+	// Key: kt-result::my-namespace::my-experiment-name::my-endpoint
+	// Should namespace and experiment name come from application?
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		http.Error(w, "no namespace specified", http.StatusBadRequest)
+	}
+
+	experiment := r.URL.Query().Get("experiment")
+	if experiment == "" {
+		http.Error(w, "no experiment specified", http.StatusBadRequest)
+	}
+
+	log.Logger.Tracef("putResult called for namespace %s and experiment %s", namespace, experiment)
+
+	defer r.Body.Close()
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot read request body: %e", err)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+
+	// TODO: 201 for new resource, 200 for update
+	err = abn.MetricsClient.SetResult(namespace, experiment, body)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot store result in storage client: %s: %e", string(body), err)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+}
+
+// getHTTPGrafana handles GET /getHTTPGrafana with query parameter application=namespace/name
+func getHTTPGrafana(w http.ResponseWriter, r *http.Request) {
+	log.Logger.Trace("getHTTPGrafana called")
+	defer log.Logger.Trace("getHTTPGrafana completed")
+
+	// verify method
+	if r.Method != http.MethodGet {
+		http.Error(w, "expected GET", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// verify request (query parameter)
+	// Key: kt-result::my-namespace::my-experiment-name::my-endpoint
+	// Should namespace and experiment name come from application?
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		http.Error(w, "no namespace specified", http.StatusBadRequest)
+		return
+	}
+
+	experiment := r.URL.Query().Get("experiment")
+	if experiment == "" {
+		http.Error(w, "no experiment specified", http.StatusBadRequest)
+		return
+	}
+
+	log.Logger.Tracef("getHTTPGrafana called for namespace %s and experiment %s", namespace, experiment)
+
+	// get result from metrics client
+	result, err := abn.MetricsClient.GetResult(namespace, experiment)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot get result with namespace %s, experiment %s", namespace, experiment)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+
+	// TODO: should these functions belong in collect_http.go? Or be somewhere closeby?
+	// These functions are only for the purpose of processing the results of collect_http.go
+	fortioResult := util.FortioResult{}
+	err = json.Unmarshal(result, &fortioResult)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot JSON unmarshal result into FortioResult: \"%s\"", string(result))
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+
+	// JSON marshal the dashboard
+	dashboardBytes, err := json.Marshal(getFortioDashboard(fortioResult))
+	if err != nil {
+		errorMessage := "cannot JSON marshal HTTP dashboard"
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
+		return
+	}
+
+	// finally, send response
+	w.Header().Add("Content-Type", "application/json")
+	_, _ = w.Write(dashboardBytes)
 }

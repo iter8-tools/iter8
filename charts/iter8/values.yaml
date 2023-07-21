@@ -9,7 +9,10 @@ runner: none
 
 logLevel: info
 
-### Resource limits
+abnmetrics:
+  endpoint: iter8-abn:50051
+
+### resources are the resource limits for the pods
 resources:
   requests:
     memory: "64Mi"
@@ -17,3 +20,6 @@ resources:
   limits:
     memory: "128Mi"
     cpu: "500m"
+
+### metricsServerURL is the URL to the Metrics server 
+metricsServerURL: http://iter8.default:8080

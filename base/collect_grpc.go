@@ -1,7 +1,9 @@
 package base
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/bojand/ghz/runner"
@@ -96,7 +98,7 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 
 			// merge endpoint options with baseline options
 			if err := mergo.Merge(&endpoint, t.With.Config); err != nil {
-				log.Logger.Error(fmt.Sprintf("could not merge Fortio options for endpoint \"%s\"", endpointID))
+				log.Logger.Error(fmt.Sprintf("could not merge ghz options for endpoint \"%s\"", endpointID))
 				return nil, err
 			}
 			eOpts := runner.WithConfig(&endpoint) // endpoint options
@@ -120,6 +122,13 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 			log.Logger.WithStackTrace(err.Error()).Error(err)
 			return results, err
 		}
+
+		igrJSON, _ := json.Marshal(igr)
+		f, _ := os.Create("ghz.json")
+		defer f.Close()
+		f.Write(igrJSON)
+
+		f.Sync()
 
 		results[gRPCMetricPrefix] = igr
 	}

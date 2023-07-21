@@ -37,7 +37,7 @@ type VersionMetrics map[string]struct {
 // Interface enables interaction with a storage entity
 // Can be mocked in unit tests with fake implementation
 type Interface interface {
-	// Returns a nested map of the metrics data for a particular application, version, and signature
+	// returns a nested map of the metrics data for a particular application, version, and signature
 	// Example:
 	//	{
 	//		"my-metric": {
@@ -63,4 +63,10 @@ type Interface interface {
 
 	// Example key: kt-users::my-app::0::my-signature::my-user -> true
 	SetUser(applicationName string, version int, signature, user string) error
+
+	// returns the HTTP/gRPC results for a particular namespace and experiment
+	GetResult(namespace, experiment string) ([]byte, error)
+
+	// Example key: kt-result::my-namespace::my-experiment-name -> per endpoint JSON data + summary
+	SetResult(namespace, experiment string, data []byte) error
 }
