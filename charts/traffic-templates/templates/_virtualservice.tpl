@@ -22,4 +22,7 @@ spec:
         request:
           set:
             mm-vmodel-id: {{ (index $versions 0).name }}
+        response:
+          add:
+            mm-vmodel-id: "{{ (index $versions 0).name }}"
 {{- end }}

@@ -51,6 +51,9 @@ data:
                   request:
                     set:
                       mm-vmodel-id: "{{ (index $versions 0).name }}" 
+                  response:
+                    add:
+                      mm-vmodel-id: "{{ (index $versions 0).name }}"
               # other models
               {{- range $i, $v := (rest $versions) }}
               {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
@@ -62,7 +65,10 @@ data:
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}" 
+                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
+                  resppnse:
+                    add:
+                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
               {{ `{{- end }}`}}     
               {{- end }}
 immutable: true

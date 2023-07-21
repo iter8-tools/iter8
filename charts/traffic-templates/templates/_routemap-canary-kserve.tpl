@@ -1,4 +1,4 @@
-{{- define "routemap-canary" }}
+{{- define "routemap-canary-kserve" }}
 {{- $versions := include "resolve.modelVersions" . | mustFromJson }}
 apiVersion: v1
 kind: ConfigMap
@@ -27,7 +27,8 @@ data:
             name: {{ .Values.modelName }}
           spec:
             gateways:
-            - {{ .Values.externalGateway }}
+            - knative-serving/knative-ingress-gateway
+            - knative-serving/knative-local-gateway
             - mesh
             hosts:
             - {{ .Values.modelName }}.{{ .Release.Namespace }}
@@ -38,7 +39,8 @@ data:
             {{- range $i, $v := (rest $versions) }}
             {{- /* continue only if candidate is ready (weight > 0) */}}
             {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
-            - match:
+            - name: {{ (index $versions (add1 $i)).name }}
+              match:
               {{- /* A match may have several ORd clauses */}}
               {{- range $j, $m := $v.match }}
               {{- /* include any other header requirements */}}
@@ -51,29 +53,30 @@ data:
 {{ toYaml (omit $m "headers") | indent 16 }}
                 {{- end }}
               {{- end }}
+              rewrite:
+                uri: /v2/models/{{ (index $versions (add1 $i)).name }}/infer
               route:
               - destination:
-                  host: {{ $.Values.modelmeshServingService }}.{{ $.Release.Namespace }}.svc.cluster.local
-                  port:
-                    number: {{ $.Values.modelmeshServingPort }}
+                  host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
+                      Host: {{ (index $versions (add1 $i)).name }}-predictor-default.{{ $.Release.Namespace }}.svc.cluster.local
                   response:
                     add:
                       mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
             {{ `{{- end }}`}}
             {{- end }}
-            - route:
+            - name: {{ (index $versions 0).name }}
+              rewrite:
+                uri: /v2/models/{{ (index $versions 0).name }}/infer
+              route:
               - destination:
-                  host: {{ $.Values.modelmeshServingService }}.{{ $.Release.Namespace }}.svc.cluster.local
-                  port:
-                    number: {{ $.Values.modelmeshServingPort }}
+                  host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
+                      Host: {{ (index $versions 0).name }}-predictor-default.{{ .Release.Namespace }}.svc.cluster.local
                   response:
                     add:
                       mm-vmodel-id: "{{ (index $versions 0).name }}"
