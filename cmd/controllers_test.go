@@ -25,5 +25,4 @@ func TestControllers(t *testing.T) {
 	cmd := newControllersCmd(ctx.Done(), kubeClient)
 	err := cmd.RunE(cmd, nil)
 	assert.NoError(t, err)
-
 }

@@ -18,7 +18,7 @@ retract (
 )
 
 require (
-	fortio.org/fortio v1.54.0
+	fortio.org/fortio v1.57.3
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/antonmedv/expr v1.12.5
 	github.com/bojand/ghz v0.114.0
@@ -40,7 +40,7 @@ require (
 	golang.org/x/sys v0.10.0
 	golang.org/x/text v0.11.0
 	gonum.org/v1/plot v0.13.0
-	google.golang.org/grpc v1.56.1
+	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
 	helm.sh/helm/v3 v3.11.2
 	k8s.io/api v0.26.3
@@ -53,8 +53,8 @@ require (
 	cloud.google.com/go/compute v1.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	fortio.org/dflag v1.5.2 // indirect
-	fortio.org/log v1.3.0 // indirect
-	fortio.org/sets v1.0.2 // indirect
+	fortio.org/log v1.7.0 // indirect
+	fortio.org/sets v1.0.3 // indirect
 	fortio.org/version v1.0.2 // indirect
 	git.sr.ht/~sbinet/gg v0.4.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect

@@ -2,6 +2,9 @@
 {{- if not .Values.tasks }}
 {{- fail ".Values.tasks is empty" }}
 {{- end }}
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   {{- range .Values.tasks }}
   {{- if eq "assess" . }}

@@ -312,3 +312,41 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 
 	return &metrics, nil
 }
+
+func getResultKey(namespace, experiment string) string {
+	// getResultKey() is just getUserPrefix() with the user appended at the end
+	return fmt.Sprintf("kt-result::%s::%s", namespace, experiment)
+}
+
+// SetResult sets the result of a particular HTTP/gRPC run for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for HTTP and gRPC
+func (cl Client) SetResult(namespace, experiment string, data []byte) error {
+	key := getResultKey(namespace, experiment)
+
+	return cl.db.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte(key), data).WithTTL(cl.additionalOptions.TTL)
+		err := txn.SetEntry(e)
+		return err
+	})
+}
+
+// GetMetrics returns the result of a particular HTTP/gRPC run for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for HTTP and gRPC
+func (cl Client) GetResult(namespace, experiment string) ([]byte, error) {
+	var valCopy []byte
+	err := cl.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(getResultKey(namespace, experiment)))
+		if err != nil {
+			return err
+		}
+
+		valCopy, err = item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return valCopy, err
+}
