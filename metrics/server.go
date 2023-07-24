@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/iter8-tools/iter8/abn"
+	"github.com/iter8-tools/iter8/base"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -79,8 +80,7 @@ type httpDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]httpEndpointPanel
 
-	// TODO: add type
-	Summary interface{}
+	Summary base.Insights
 }
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
@@ -395,8 +395,7 @@ func bucketLabel(min, max float64, decimalPlace float64) string {
 	return fmt.Sprintf("%s - %s", strconv.FormatFloat(roundDecimal(min, decimalPlace), 'f', -1, 64), strconv.FormatFloat(roundDecimal(max, decimalPlace), 'f', -1, 64))
 }
 
-// calculateHistogram creates histograms based on Fortio result
-func getFortioCalculateHistogram(fortioHistogram []fstats.Bucket, decimalPlace float64) grafanaHistogram {
+func getHTTPHistogram(fortioHistogram []fstats.Bucket, decimalPlace float64) grafanaHistogram {
 	grafanaHistogram := grafanaHistogram{}
 
 	for _, bucket := range fortioHistogram {
@@ -410,7 +409,7 @@ func getFortioCalculateHistogram(fortioHistogram []fstats.Bucket, decimalPlace f
 	return grafanaHistogram
 }
 
-func getFortioHistogramStats(fortioHistogram *fstats.HistogramData, decimalPlace float64) storage.SummarizedMetric {
+func getHTTPStatistics(fortioHistogram *fstats.HistogramData, decimalPlace float64) storage.SummarizedMetric {
 	return storage.SummarizedMetric{
 		Count:  uint64(fortioHistogram.Count),
 		Mean:   fortioHistogram.Avg * 1000,
@@ -420,16 +419,16 @@ func getFortioHistogramStats(fortioHistogram *fstats.HistogramData, decimalPlace
 	}
 }
 
-func getFortioEndpointPanel(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpointPanel {
+func getHTTPEndpointPanel(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpointPanel {
 	result := httpEndpointPanel{}
 	if httpRunnerResults.DurationHistogram != nil {
-		result.Durations = getFortioCalculateHistogram(httpRunnerResults.DurationHistogram.Data, 1)
-		result.Statistics = getFortioHistogramStats(httpRunnerResults.DurationHistogram, 1)
+		result.Durations = getHTTPHistogram(httpRunnerResults.DurationHistogram.Data, 1)
+		result.Statistics = getHTTPStatistics(httpRunnerResults.DurationHistogram, 1)
 	}
 
 	if httpRunnerResults.ErrorsDurationHistogram != nil {
-		result.ErrorDurations = getFortioCalculateHistogram(httpRunnerResults.ErrorsDurationHistogram.Data, 1)
-		result.ErrorStatistics = getFortioHistogramStats(httpRunnerResults.ErrorsDurationHistogram, 1)
+		result.ErrorDurations = getHTTPHistogram(httpRunnerResults.ErrorsDurationHistogram.Data, 1)
+		result.ErrorStatistics = getHTTPStatistics(httpRunnerResults.ErrorsDurationHistogram, 1)
 	}
 
 	result.ReturnCodes = httpRunnerResults.RetCodes
@@ -437,7 +436,7 @@ func getFortioEndpointPanel(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndp
 	return result
 }
 
-func getFortioDashboard(fortioResult util.FortioResult) httpDashboard {
+func getHTTPDashboardHelper(fortioResult util.FortioResult) httpDashboard {
 	// add endpoint results
 	dashboard := httpDashboard{
 		Endpoints: map[string]httpEndpointPanel{},
@@ -445,7 +444,7 @@ func getFortioDashboard(fortioResult util.FortioResult) httpDashboard {
 
 	for endpoint, endpointResult := range fortioResult.EndpointResults {
 		endpointResult := endpointResult
-		dashboard.Endpoints[endpoint] = getFortioEndpointPanel(&endpointResult)
+		dashboard.Endpoints[endpoint] = getHTTPEndpointPanel(&endpointResult)
 	}
 
 	// add summary
@@ -556,7 +555,7 @@ func getHTTPGrafana(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getFortioDashboard(fortioResult))
+	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(fortioResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal HTTP dashboard"
 		log.Logger.Error(errorMessage)

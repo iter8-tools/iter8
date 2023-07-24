@@ -68,13 +68,13 @@ type collectHTTPInputs struct {
 	grafana bool
 }
 
-// FortioResult
+// FortioResult is the raw data sent to the metrics server
+// This data will be transformed into httpDashboard when getHTTPGrafana is called
 type FortioResult struct {
 	// key is the endpoint
 	EndpointResults map[string]fhttp.HTTPRunnerResults
 
-	// TODO: add type
-	Summary interface{}
+	Summary Insights
 }
 
 const (
@@ -357,13 +357,6 @@ func (t *collectHTTPTask) getFortioResults() (map[string]fhttp.HTTPRunnerResults
 	return results, err
 }
 
-type fortioResult struct {
-	// key is the endpoint
-	EndpointResults map[string]fhttp.HTTPRunnerResults
-
-	Summary interface{}
-}
-
 // run executes this task
 func (t *collectHTTPTask) run(exp *Experiment) error {
 	err := t.validateInputs()
@@ -513,9 +506,9 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 
 	if t.With.grafana {
 		// push data to metrics service
-		fortioResult := fortioResult{
+		fortioResult := FortioResult{
 			EndpointResults: data,
-			Summary:         exp.Result.Insights,
+			Summary:         *exp.Result.Insights,
 		}
 
 		// get URL of metrics server from environment variable
