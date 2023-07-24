@@ -521,7 +521,9 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 	fortioResultBytes, _ := json.Marshal(fortioResult)
 	log.Logger.Trace(string(fortioResultBytes))
 
-	putResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult)
+	if err = putResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
+		return err
+	}
 
 	return nil
 }

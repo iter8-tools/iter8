@@ -33,9 +33,13 @@ type Task interface {
 // ExperimentSpec specifies the set of tasks in this experiment
 type ExperimentSpec []Task
 
+// ExperimentMetadata species the name and namespace of the experiment
+// Used in http and grpc tasks to send the name and namespace to the metrics server
 type ExperimentMetadata struct {
+	// Name is the name of the experiment
 	Name string
 
+	// Namespace is the namespace the experiment was deployed in
 	Namespace string
 }
 

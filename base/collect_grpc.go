@@ -1,9 +1,7 @@
 package base
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/bojand/ghz/runner"
@@ -122,13 +120,6 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 			log.Logger.WithStackTrace(err.Error()).Error(err)
 			return results, err
 		}
-
-		igrJSON, _ := json.Marshal(igr)
-		f, _ := os.Create("ghz.json")
-		defer f.Close()
-		f.Write(igrJSON)
-
-		f.Sync()
 
 		results[gRPCMetricPrefix] = igr
 	}

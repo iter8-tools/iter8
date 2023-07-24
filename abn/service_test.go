@@ -236,7 +236,7 @@ func TestLaunchGRPCServer(t *testing.T) {
 	defer cancel()
 
 	// define METRICS_DIR
-	err := os.Setenv(metricsDirEnv, t.TempDir())
+	err := os.Setenv(MetricsDirEnv, t.TempDir())
 	assert.NoError(t, err)
 
 	configFile := filepath.Clean(util.CompletePath("../testdata", "abninputs/config.yaml"))

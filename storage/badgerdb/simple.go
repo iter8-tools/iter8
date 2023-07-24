@@ -330,7 +330,7 @@ func (cl Client) SetResult(namespace, experiment string, data []byte) error {
 	})
 }
 
-// GetMetrics returns the result of a particular HTTP/gRPC run for a particular namespace and experiment name
+// GetResult returns the result of a particular HTTP/gRPC run for a particular namespace and experiment name
 // the data is []byte in order to make this function reusable for HTTP and gRPC
 func (cl Client) GetResult(namespace, experiment string) ([]byte, error) {
 	var valCopy []byte
