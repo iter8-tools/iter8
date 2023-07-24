@@ -444,7 +444,7 @@ func getFortioDashboard(fortioResult util.FortioResult) httpDashboard {
 	}
 
 	for endpoint, endpointResult := range fortioResult.EndpointResults {
-		// TODO: endpointResult := endpointResult?
+		endpointResult := endpointResult
 		dashboard.Endpoints[endpoint] = getFortioEndpointPanel(&endpointResult)
 	}
 
@@ -480,7 +480,15 @@ func putResult(w http.ResponseWriter, r *http.Request) {
 
 	log.Logger.Tracef("putResult called for namespace %s and experiment %s", namespace, experiment)
 
-	defer r.Body.Close()
+	defer func() {
+		err := r.Body.Close()
+		if err != nil {
+			errorMessage := fmt.Sprintf("cannot close request body: %e", err)
+			log.Logger.Error(errorMessage)
+			http.Error(w, errorMessage, http.StatusBadRequest)
+			return
+		}
+	}()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot read request body: %e", err)
