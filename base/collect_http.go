@@ -62,9 +62,9 @@ type collectHTTPInputs struct {
 	// Endpoints is used to define multiple endpoints to test
 	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
 
-	// TODO: remove
 	// Determines if Grafana dashboard should be created
 	// dasboard vs report/assess tasks
+	// TODO: remove
 	grafana bool
 }
 
@@ -101,9 +101,11 @@ const (
 	// example: latency-p75.0 is the 75th percentile latency
 	builtInHTTPLatencyPercentilePrefix = "latency-p"
 
-	// TODO: move elsewhere, abn/service seems to produce cyclical dependency
 	// MetricsServerURL is the URL of the metrics server
+	// TODO: move elsewhere, abn/service seems to produce cyclical dependency, also needed by gRPC
 	MetricsServerURL = "METRICS_SERVER_URL"
+
+	PerformanceResultPath = "/performanceResult"
 )
 
 var (
@@ -241,11 +243,9 @@ func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
 	return fo, nil
 }
 
-// TODO: rename to /performanceResult
-// putResultToMetricsService
-func putResultToMetricsService(metricsServerURL, namespace, experiment string, data interface{}) error {
+func putPerformanceResultToMetricsService(metricsServerURL, namespace, experiment string, data interface{}) error {
 	// handle URL and URL parameters
-	u, _ := url.ParseRequestURI(metricsServerURL + "/result")
+	u, _ := url.ParseRequestURI(metricsServerURL + PerformanceResultPath)
 	params := url.Values{}
 	params.Add("namespace", namespace)
 	params.Add("experiment", experiment)
@@ -519,11 +519,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 			return fmt.Errorf(errorMessage)
 		}
 
-		// TODO: remove
-		fortioResultBytes, _ := json.Marshal(fortioResult)
-		log.Logger.Trace(string(fortioResultBytes))
-
-		if err = putResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
+		if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
 			return err
 		}
 	}

@@ -101,8 +101,8 @@ func Start(stopCh <-chan struct{}) error {
 
 	// configure endpoints
 	http.HandleFunc("/metrics", getMetrics)
-	http.HandleFunc("/result", putResult)
-	http.HandleFunc("/HTTPGrafana", getHTTPGrafana)
+	http.HandleFunc(base.PerformanceResultPath, putResult)
+	http.HandleFunc("/httpDashboard", getHTTPDashboard)
 
 	// configure HTTP server
 	server := &http.Server{
@@ -506,8 +506,8 @@ func putResult(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// getHTTPGrafana handles GET /getHTTPGrafana with query parameter application=namespace/name
-func getHTTPGrafana(w http.ResponseWriter, r *http.Request) {
+// getHTTPDashboard handles GET /getHTTPDashboard with query parameter application=namespace/name
+func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getHTTPGrafana called")
 	defer log.Logger.Trace("getHTTPGrafana completed")
 
