@@ -61,6 +61,11 @@ type collectHTTPInputs struct {
 
 	// Endpoints is used to define multiple endpoints to test
 	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
+
+	// TODO: remove
+	// Determines if Grafana dashboard should be created
+	// dasboard vs report/assess tasks
+	grafana bool
 }
 
 // FortioResult
@@ -318,11 +323,11 @@ func (t *collectHTTPTask) getFortioResults() (map[string]fhttp.HTTPRunnerResults
 			}
 
 			// TODO: does ifr need to be a pointer?
-			// results[httpMetricPrefix+"-"+endpointID] = ifr
-			results[endpoint.URL] = *ifr
-
-			// TODO: namespace and experiment name
-			// putData(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, ifr)
+			resultsKey := httpMetricPrefix + "-" + endpointID
+			if t.With.grafana {
+				resultsKey = endpoint.URL
+			}
+			results[resultsKey] = *ifr
 		}
 	} else {
 		fo, err := getFortioOptions(t.With.endpoint)
@@ -338,12 +343,15 @@ func (t *collectHTTPTask) getFortioResults() (map[string]fhttp.HTTPRunnerResults
 		ifr, err := fhttp.RunHTTPTest(fo)
 		if err != nil {
 			log.Logger.WithStackTrace(err.Error()).Error("fortio failed")
-			return results, err
+			return nil, err
 		}
 
 		// TODO: does ifr need to be a pointer?
-		// results[httpMetricPrefix] = ifr
-		results[t.With.endpoint.URL] = *ifr
+		resultsKey := httpMetricPrefix
+		if t.With.grafana {
+			resultsKey = t.With.endpoint.URL
+		}
+		results[resultsKey] = *ifr
 	}
 
 	return results, err
@@ -503,26 +511,28 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		}
 	}
 
-	// push data to metrics service
-	fortioResult := fortioResult{
-		EndpointResults: data,
-		Summary:         exp.Result.Insights,
-	}
+	if t.With.grafana {
+		// push data to metrics service
+		fortioResult := fortioResult{
+			EndpointResults: data,
+			Summary:         exp.Result.Insights,
+		}
 
-	// get URL of metrics server from environment variable
-	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
-	if !ok {
-		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
-		log.Logger.Error(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
+		// get URL of metrics server from environment variable
+		metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
+		if !ok {
+			errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+			log.Logger.Error(errorMessage)
+			return fmt.Errorf(errorMessage)
+		}
 
-	// TODO: remove
-	fortioResultBytes, _ := json.Marshal(fortioResult)
-	log.Logger.Trace(string(fortioResultBytes))
+		// TODO: remove
+		fortioResultBytes, _ := json.Marshal(fortioResult)
+		log.Logger.Trace(string(fortioResultBytes))
 
-	if err = putResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
-		return err
+		if err = putResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
+			return err
+		}
 	}
 
 	return nil

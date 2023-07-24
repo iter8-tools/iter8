@@ -34,7 +34,6 @@ func (m *mockDriver) GetRevision() int {
 
 // CreateExperimentYaml creates an experiment.yaml file from a template and a URL
 func CreateExperimentYaml(t *testing.T, template string, url string, output string) {
-
 	values := struct {
 		URL string
 	}{
