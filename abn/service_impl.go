@@ -74,7 +74,7 @@ func rendezvousGet(s controllers.RoutemapInterface, user string) int {
 	defer s.RUnlock()
 
 	sumW := uint32(0)
-	for versionNumber, _ := range s.GetVersions() {
+	for versionNumber := range s.GetVersions() {
 		sumW += s.Weights()[versionNumber]
 	}
 
