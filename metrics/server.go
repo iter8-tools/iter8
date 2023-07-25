@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/iter8-tools/iter8/abn"
-	"github.com/iter8-tools/iter8/base"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -80,7 +79,7 @@ type httpDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]httpEndpointPanel
 
-	Summary base.Insights
+	Summary util.Insights
 }
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
@@ -101,7 +100,7 @@ func Start(stopCh <-chan struct{}) error {
 
 	// configure endpoints
 	http.HandleFunc("/metrics", getMetrics)
-	http.HandleFunc(base.PerformanceResultPath, putResult)
+	http.HandleFunc(util.PerformanceResultPath, putResult)
 	http.HandleFunc("/httpDashboard", getHTTPDashboard)
 
 	// configure HTTP server
