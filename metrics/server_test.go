@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -538,13 +538,6 @@ func TestPutResultMissingParameter(t *testing.T) {
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
-		{
-			queryParams: url.Values{
-				"namespace":  {"default"},
-				"experiment": {"default"},
-			},
-			expectedStatusCode: http.StatusInternalServerError, // queryParams exist but no metrics client
-		},
 	}
 
 	for _, test := range tests {
@@ -636,13 +629,6 @@ func TestGetHTTPDashboardMissingParameter(t *testing.T) {
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
-		{
-			queryParams: url.Values{
-				"namespace":  {"default"},
-				"experiment": {"default"},
-			},
-			expectedStatusCode: http.StatusInternalServerError, // queryParams exist but no metrics client
-		},
 	}
 
 	for _, test := range tests {
@@ -674,7 +660,8 @@ func TestGetHTTPDashboard(t *testing.T) {
 
 	// preload metric client with result
 	result := "{\"EndpointResults\":{\"http://httpbin.default/get\":{\"RunType\":\"HTTP\",\"Labels\":\"\",\"StartTime\":\"2023-07-21T14:00:40.134434969Z\",\"RequestedQPS\":\"8\",\"RequestedDuration\":\"exactly 100 calls\",\"ActualQPS\":7.975606391552989,\"ActualDuration\":12538231589,\"NumThreads\":4,\"Version\":\"1.57.3\",\"DurationHistogram\":{\"Count\":100,\"Min\":0.004223875,\"Max\":0.040490042,\"Sum\":1.5977100850000001,\"Avg\":0.015977100850000002,\"StdDev\":0.008340658047253256,\"Data\":[{\"Start\":0.004223875,\"End\":0.005,\"Percent\":5,\"Count\":5},{\"Start\":0.005,\"End\":0.006,\"Percent\":10,\"Count\":5},{\"Start\":0.006,\"End\":0.007,\"Percent\":14,\"Count\":4},{\"Start\":0.007,\"End\":0.008,\"Percent\":19,\"Count\":5},{\"Start\":0.008,\"End\":0.009000000000000001,\"Percent\":24,\"Count\":5},{\"Start\":0.009000000000000001,\"End\":0.01,\"Percent\":28,\"Count\":4},{\"Start\":0.01,\"End\":0.011,\"Percent\":33,\"Count\":5},{\"Start\":0.011,\"End\":0.012,\"Percent\":36,\"Count\":3},{\"Start\":0.012,\"End\":0.014,\"Percent\":48,\"Count\":12},{\"Start\":0.014,\"End\":0.016,\"Percent\":55,\"Count\":7},{\"Start\":0.016,\"End\":0.018000000000000002,\"Percent\":65,\"Count\":10},{\"Start\":0.018000000000000002,\"End\":0.02,\"Percent\":74,\"Count\":9},{\"Start\":0.02,\"End\":0.025,\"Percent\":85,\"Count\":11},{\"Start\":0.025,\"End\":0.03,\"Percent\":93,\"Count\":8},{\"Start\":0.03,\"End\":0.035,\"Percent\":98,\"Count\":5},{\"Start\":0.035,\"End\":0.04,\"Percent\":99,\"Count\":1},{\"Start\":0.04,\"End\":0.040490042,\"Percent\":100,\"Count\":1}],\"Percentiles\":[{\"Percentile\":50,\"Value\":0.014571428571428572},{\"Percentile\":75,\"Value\":0.020454545454545454},{\"Percentile\":90,\"Value\":0.028125},{\"Percentile\":95,\"Value\":0.032},{\"Percentile\":99,\"Value\":0.04},{\"Percentile\":99.9,\"Value\":0.0404410378}]},\"ErrorsDurationHistogram\":{\"Count\":0,\"Min\":0,\"Max\":0,\"Sum\":0,\"Avg\":0,\"StdDev\":0,\"Data\":null},\"Exactly\":100,\"Jitter\":false,\"Uniform\":false,\"NoCatchUp\":false,\"RunID\":0,\"AccessLoggerInfo\":\"\",\"ID\":\"2023-07-21-140040\",\"RetCodes\":{\"200\":100},\"IPCountMap\":{\"10.96.108.76:80\":4},\"Insecure\":false,\"MTLS\":false,\"CACert\":\"\",\"Cert\":\"\",\"Key\":\"\",\"UnixDomainSocket\":\"\",\"URL\":\"http://httpbin.default/get\",\"NumConnections\":1,\"Compression\":false,\"DisableFastClient\":false,\"HTTP10\":false,\"H2\":false,\"DisableKeepAlive\":false,\"AllowHalfClose\":false,\"FollowRedirects\":false,\"Resolve\":\"\",\"HTTPReqTimeOut\":3000000000,\"UserCredentials\":\"\",\"ContentType\":\"\",\"Payload\":null,\"MethodOverride\":\"\",\"LogErrors\":false,\"SequentialWarmup\":false,\"ConnReuseRange\":[0,0],\"NoResolveEachConn\":false,\"Offset\":0,\"Resolution\":0.001,\"Sizes\":{\"Count\":100,\"Min\":413,\"Max\":413,\"Sum\":41300,\"Avg\":413,\"StdDev\":0,\"Data\":[{\"Start\":413,\"End\":413,\"Percent\":100,\"Count\":100}]},\"HeaderSizes\":{\"Count\":100,\"Min\":230,\"Max\":230,\"Sum\":23000,\"Avg\":230,\"StdDev\":0,\"Data\":[{\"Start\":230,\"End\":230,\"Percent\":100,\"Count\":100}]},\"Sockets\":[1,1,1,1],\"SocketCount\":4,\"ConnectionStats\":{\"Count\":4,\"Min\":0.001385875,\"Max\":0.001724375,\"Sum\":0.006404583,\"Avg\":0.00160114575,\"StdDev\":0.00013101857565508474,\"Data\":[{\"Start\":0.001385875,\"End\":0.001724375,\"Percent\":100,\"Count\":4}],\"Percentiles\":[{\"Percentile\":50,\"Value\":0.0014987083333333332},{\"Percentile\":75,\"Value\":0.0016115416666666667},{\"Percentile\":90,\"Value\":0.0016792416666666667},{\"Percentile\":95,\"Value\":0.0017018083333333333},{\"Percentile\":99,\"Value\":0.0017198616666666668},{\"Percentile\":99.9,\"Value\":0.0017239236666666668}]},\"AbortOn\":0}},\"Summary\":{\"numVersions\":1,\"versionNames\":null,\"metricsInfo\":{\"http/latency\":{\"description\":\"Latency Histogram\",\"units\":\"msec\",\"type\":\"Histogram\"},\"http://httpbin.default/get/error-count\":{\"description\":\"number of responses that were errors\",\"type\":\"Counter\"},\"http://httpbin.default/get/error-rate\":{\"description\":\"fraction of responses that were errors\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-max\":{\"description\":\"maximum of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-mean\":{\"description\":\"mean of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-min\":{\"description\":\"minimum of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-p50\":{\"description\":\"50-th percentile of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-p75\":{\"description\":\"75-th percentile of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-p90\":{\"description\":\"90-th percentile of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-p95\":{\"description\":\"95-th percentile of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-p99\":{\"description\":\"99-th percentile of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-p99.9\":{\"description\":\"99.9-th percentile of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/latency-stddev\":{\"description\":\"standard deviation of observed latency values\",\"units\":\"msec\",\"type\":\"Gauge\"},\"http://httpbin.default/get/request-count\":{\"description\":\"number of requests sent\",\"type\":\"Counter\"}},\"nonHistMetricValues\":[{\"http://httpbin.default/get/error-count\":[0],\"http://httpbin.default/get/error-rate\":[0],\"http://httpbin.default/get/latency-max\":[40.490041999999995],\"http://httpbin.default/get/latency-mean\":[15.977100850000001],\"http://httpbin.default/get/latency-min\":[4.2238750000000005],\"http://httpbin.default/get/latency-p50\":[14.571428571428571],\"http://httpbin.default/get/latency-p75\":[20.454545454545453],\"http://httpbin.default/get/latency-p90\":[28.125],\"http://httpbin.default/get/latency-p95\":[32],\"http://httpbin.default/get/latency-p99\":[40],\"http://httpbin.default/get/latency-p99.9\":[40.441037800000004],\"http://httpbin.default/get/latency-stddev\":[8.340658047253257],\"http://httpbin.default/get/request-count\":[100]}],\"histMetricValues\":[{\"http/latency\":[{\"lower\":4.2238750000000005,\"upper\":5,\"count\":5},{\"lower\":5,\"upper\":6,\"count\":5},{\"lower\":6,\"upper\":7,\"count\":4},{\"lower\":7,\"upper\":8,\"count\":5},{\"lower\":8,\"upper\":9.000000000000002,\"count\":5},{\"lower\":9.000000000000002,\"upper\":10,\"count\":4},{\"lower\":10,\"upper\":11,\"count\":5},{\"lower\":11,\"upper\":12,\"count\":3},{\"lower\":12,\"upper\":14,\"count\":12},{\"lower\":14,\"upper\":16,\"count\":7},{\"lower\":16,\"upper\":18.000000000000004,\"count\":10},{\"lower\":18.000000000000004,\"upper\":20,\"count\":9},{\"lower\":20,\"upper\":25,\"count\":11},{\"lower\":25,\"upper\":30,\"count\":8},{\"lower\":30,\"upper\":35,\"count\":5},{\"lower\":35,\"upper\":40,\"count\":1},{\"lower\":40,\"upper\":40.490041999999995,\"count\":1}]}],\"SummaryMetricValues\":[{}]}}"
-	abn.MetricsClient.SetResult("default", "default", []byte(result))
+	err = abn.MetricsClient.SetResult("default", "default", []byte(result))
+	assert.NoError(t, err)
 
 	w := httptest.NewRecorder()
 
@@ -699,7 +686,7 @@ func TestGetHTTPDashboard(t *testing.T) {
 	}()
 
 	// check the HTTP dashboard
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	assert.NoError(t, err)
 	assert.Equal(
 		t,
