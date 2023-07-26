@@ -385,62 +385,64 @@ func TestPutPerformanceResultToMetricsService(t *testing.T) {
 	assert.True(t, called)
 }
 
-// func TestRunCollectHTTPGrafana(t *testing.T) {
-// 	startHTTPMock(t)
+func TestRunCollectHTTPGrafana(t *testing.T) {
+	// METRICS_SERVER_URL must be provided
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv("METRICS_SERVER_URL", metricsServerURL)
+	assert.NoError(t, err)
 
-// 	metricsServerURL := "http://iter8.default:8080"
-// 	namespace := "default"
-// 	experiment := "default"
+	// mock metrics server
+	metricsServerCalled := false
+	namespace := "default"
+	experiment := "default"
+	startHTTPMock(t)
+	httpmock.RegisterResponder(http.MethodPut, metricsServerURL+PerformanceResultPath,
+		func(req *http.Request) (*http.Response, error) {
+			metricsServerCalled = true
 
-// 	err := os.Setenv("METRICS_SERVER_URL", metricsServerURL)
-// 	assert.NoError(t, err)
+			assert.Equal(t, namespace, req.URL.Query().Get("namespace"))
+			assert.Equal(t, experiment, req.URL.Query().Get("experiment"))
 
-// 	metricsServerCalled := false
-// 	httpmock.RegisterResponder(http.MethodPut, metricsServerURL+PerformanceResultPath,
-// 		func(req *http.Request) (*http.Response, error) {
-// 			metricsServerCalled = true
+			return httpmock.NewStringResponse(200, "success"), nil
+		})
 
-// 			assert.Equal(t, namespace, req.URL.Query().Get("namespace"))
-// 			assert.Equal(t, experiment, req.URL.Query().Get("experiment"))
+	mux, addr := fhttp.DynamicHTTPServer(false)
 
-// 			// body, err := io.ReadAll(req.Body)
-// 			// assert.NoError(t, err)
-// 			// assert.Equal(t, "{\"hello\":\"world\"}", string(body))
+	// mock endpoint
+	endpointCalled := false
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		endpointCalled = true
 
-// 			return httpmock.NewStringResponse(200, "success"), nil
-// 		})
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/"+foo, handler)
 
-// 	endpointURL := "http://foo.com"
-// 	endpointCalled := false
-// 	httpmock.RegisterResponder(http.MethodGet, endpointURL,
-// 		httpmock.NewStringResponder(200, "success"))
+	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
 
-// 	// valid collect HTTP task... should succeed
-// 	ct := &collectHTTPTask{
-// 		TaskMeta: TaskMeta{
-// 			Task: StringPointer(CollectHTTPTaskName),
-// 		},
-// 		With: collectHTTPInputs{
-// 			endpoint: endpoint{
-// 				URL: endpointURL,
-// 			},
-// 			Grafana: true,
-// 		},
-// 	}
-// 	httpmock.RegisterResponder(http.MethodPut, metricsServerURL+PerformanceResultPath,
-// 		func(req *http.Request) (*http.Response, error) {
-// 			endpointCalled = true
-// 			return httpmock.NewStringResponse(200, "success"), nil
-// 		})
+	// valid collect HTTP task... should succeed
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			endpoint: endpoint{
+				URL: baseURL + foo,
+			},
+			Grafana: true,
+		},
+	}
 
-// 	exp := &Experiment{
-// 		Spec:   []Task{ct},
-// 		Result: &ExperimentResult{},
-// 	}
-// 	exp.initResults(1)
-// 	err = ct.run(exp)
-// 	// assert.NoError(t, err)
-// 	assert.True(t, metricsServerCalled) // ensure that the /foo/ handler is called
-// 	assert.True(t, endpointCalled)      // ensure that the /foo/ handler is called
-// 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
-// }
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Namespace: "default",
+			Name:      "default",
+		},
+	}
+	exp.initResults(1)
+	err = ct.run(exp)
+	assert.NoError(t, err)
+	assert.True(t, metricsServerCalled)
+	assert.True(t, endpointCalled)
+}

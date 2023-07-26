@@ -286,7 +286,9 @@ func putPerformanceResultToMetricsService(metricsServerURL, namespace, experimen
 	}
 	defer func() {
 		err = resp.Body.Close()
-		log.Logger.Error("could not close response body: ", err)
+		if err != nil {
+			log.Logger.Error("could not close response body: ", err)
+		}
 	}()
 
 	log.Logger.Trace("sent request")
