@@ -212,16 +212,24 @@ func getMetricsCount(t *testing.T, namespace string, name string, version int, m
 	if rm == nil || reflect.ValueOf(rm).IsNil() {
 		return 0
 	}
+
 	assert.Less(t, version, len(rm.GetVersions()))
 	v := rm.GetVersions()[version]
 	signature := v.GetSignature()
+
 	if nil == signature {
+		return 0
+	}
+
+	// TODO: better error handling when there is no metrics client
+	if MetricsClient == nil {
 		return 0
 	}
 	versionmetrics, err := MetricsClient.GetMetrics(namespace+"/"+name, version, *signature)
 	if err != nil {
 		return 0
 	}
+
 	metrics, ok := (*versionmetrics)[metric]
 	if !ok {
 		return 0
