@@ -170,6 +170,10 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		if abn.MetricsClient == nil {
+			log.Logger.Error("no metrics client")
+			continue
+		}
 		versionmetrics, err := abn.MetricsClient.GetMetrics(application, v, *signature)
 		if err != nil {
 			log.Logger.Debugf("no metrics found for application %s (version %d; signature %s)", application, v, *signature)
@@ -469,11 +473,13 @@ func putResult(w http.ResponseWriter, r *http.Request) {
 	namespace := r.URL.Query().Get("namespace")
 	if namespace == "" {
 		http.Error(w, "no namespace specified", http.StatusBadRequest)
+		return
 	}
 
 	experiment := r.URL.Query().Get("experiment")
 	if experiment == "" {
 		http.Error(w, "no experiment specified", http.StatusBadRequest)
+		return
 	}
 
 	log.Logger.Tracef("putResult called for namespace %s and experiment %s", namespace, experiment)
@@ -495,14 +501,19 @@ func putResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: 201 for new resource, 200 for update
+	if abn.MetricsClient == nil {
+		http.Error(w, "no metrics client", http.StatusInternalServerError)
+		return
+	}
 	err = abn.MetricsClient.SetResult(namespace, experiment, body)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot store result in storage client: %s: %e", string(body), err)
 		log.Logger.Error(errorMessage)
-		http.Error(w, errorMessage, http.StatusBadRequest)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
 		return
 	}
+
+	// TODO: 201 for new resource, 200 for update
 }
 
 // getHTTPDashboard handles GET /getHTTPDashboard with query parameter application=namespace/name
@@ -534,6 +545,10 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getHTTPGrafana called for namespace %s and experiment %s", namespace, experiment)
 
 	// get result from metrics client
+	if abn.MetricsClient == nil {
+		http.Error(w, "no metrics client", http.StatusInternalServerError)
+		return
+	}
 	result, err := abn.MetricsClient.GetResult(namespace, experiment)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot get result with namespace %s, experiment %s", namespace, experiment)
@@ -549,7 +564,7 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot JSON unmarshal result into FortioResult: \"%s\"", string(result))
 		log.Logger.Error(errorMessage)
-		http.Error(w, errorMessage, http.StatusBadRequest)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
 		return
 	}
 
