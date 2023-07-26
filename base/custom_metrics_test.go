@@ -1,7 +1,6 @@
 package base
 
 import (
-	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -89,7 +88,7 @@ const (
 		"}[0s])) by (le))"
 )
 
-func getCustomMetricsTask(t *testing.T, providerName string, providerURL string) *customMetricsTask {
+func getCustomMetricsTask(providerName string, providerURL string) *customMetricsTask {
 	// valid collect database task... should succeed
 	ct := &customMetricsTask{
 		TaskMeta: TaskMeta{
@@ -99,10 +98,6 @@ func getCustomMetricsTask(t *testing.T, providerName string, providerURL string)
 			Templates: map[string]string{providerName: providerURL},
 		},
 	}
-
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
-	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
 	return ct
 }
 
@@ -157,7 +152,8 @@ func TestIstioProm(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "istio-prom", istioPromProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask("istio-prom", istioPromProviderURL)
 	ct.With.Values = map[string]interface{}{"latencyPercentiles": []string{"90"}}
 	ct.With.VersionValues = []map[string]interface{}{{
 		"labels": map[string]interface{}{
@@ -169,11 +165,11 @@ func TestIstioProm(t *testing.T) {
 	}}
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	// mock Istio Prometheus server
-	httpmock.RegisterResponder("GET", "http://prometheus.istio-system:9090/api/v1/query",
+	httpmock.RegisterResponder(http.MethodGet, "http://prometheus.istio-system:9090/api/v1/query",
 		func(req *http.Request) (*http.Response, error) {
 			queryParam := strings.TrimSpace(req.URL.Query().Get("query"))
 
@@ -264,7 +260,7 @@ func TestIstioProm(t *testing.T) {
 						}`), nil
 			}
 
-			return nil, errors.New("")
+			return nil, nil
 		})
 
 	exp := &Experiment{
@@ -293,14 +289,15 @@ func TestNaN(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, "nan", "http://url")
+	startHTTPMock(t)
+	ct := getCustomMetricsTask("nan", "http://url")
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", "http://url",
+	httpmock.RegisterResponder(http.MethodGet, "http://url",
 		httpmock.NewStringResponder(200, tplString))
 
 	// mock provider
-	httpmock.RegisterResponder("GET", "http://url/query",
+	httpmock.RegisterResponder(http.MethodGet, "http://url/query",
 		func(req *http.Request) (*http.Response, error) {
 			queryParam := strings.TrimSpace(req.URL.Query().Get("query"))
 			t.Logf("queryParam = %s", queryParam)
@@ -312,7 +309,7 @@ func TestNaN(t *testing.T) {
 				return httpmock.NewStringResponse(200, `{"value": "NaN"}`), nil
 			}
 
-			return nil, errors.New("")
+			return nil, nil
 		})
 
 	// experiment
@@ -341,14 +338,15 @@ func TestCEOneVersion(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask(testCE, cePromProviderURL)
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCERequestCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -366,7 +364,7 @@ func TestCEOneVersion(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -384,7 +382,7 @@ func TestCEOneVersion(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -427,10 +425,11 @@ func TestCEVersionValues(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask(testCE, cePromProviderURL)
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	ct.With.VersionValues = []map[string]interface{}{{
@@ -438,7 +437,7 @@ func TestCEVersionValues(t *testing.T) {
 	}}
 
 	// request-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCountWithRevisionName),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCERequestCountWithRevisionName),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -456,7 +455,7 @@ func TestCEVersionValues(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCountWithRevisionName),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorCountWithRevisionName),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -474,7 +473,7 @@ func TestCEVersionValues(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRateWithRevisionName),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorRateWithRevisionName),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -517,22 +516,23 @@ func TestCEUnauthorized(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask(testCE, cePromProviderURL)
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCERequestCount),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(401, `Unauthorized`))
 
 	exp := &Experiment{
@@ -559,14 +559,15 @@ func TestCESomeValues(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask(testCE, cePromProviderURL)
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -575,7 +576,7 @@ func TestCESomeValues(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -593,7 +594,7 @@ func TestCESomeValues(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -639,16 +640,17 @@ func TestCEMultipleVersions(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask(testCE, cePromProviderURL)
 
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -657,7 +659,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -675,7 +677,7 @@ func TestCEMultipleVersions(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -723,16 +725,17 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testCE, cePromProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask(testCE, cePromProviderURL)
 
 	ct.With.VersionValues = []map[string]interface{}{{}, {}}
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCERequestCount), httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
 					"resultType": "vector",
@@ -741,7 +744,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			}`))
 
 	// error-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorCount),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -759,7 +762,7 @@ func TestCEMultipleVersionsAndMetrics(t *testing.T) {
 			}`))
 
 	// error-rate
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(testCEErrorRate),
 		httpmock.NewStringResponder(200, `{
 				"status": "success",
 				"data": {
@@ -806,14 +809,15 @@ func TestRequestBody(t *testing.T) {
 	tplString := string(dat)
 
 	_ = os.Chdir(t.TempDir())
-	ct := getCustomMetricsTask(t, testRequestBody, testProviderURL)
+	startHTTPMock(t)
+	ct := getCustomMetricsTask(testRequestBody, testProviderURL)
 
 	// mock provider URL
-	httpmock.RegisterResponder("GET", istioPromProviderURL,
+	httpmock.RegisterResponder(http.MethodGet, istioPromProviderURL,
 		httpmock.NewStringResponder(200, tplString))
 
 	// request-count
-	httpmock.RegisterResponder("GET", testCEPromURL+queryString+url.QueryEscape(exampleQueryParameter),
+	httpmock.RegisterResponder(http.MethodGet, testCEPromURL+queryString+url.QueryEscape(exampleQueryParameter),
 		func(req *http.Request) (*http.Response, error) {
 			if req.Body != nil {
 				b, err := io.ReadAll(req.Body)
@@ -840,7 +844,7 @@ func TestRequestBody(t *testing.T) {
 				}
 			}
 
-			return nil, errors.New("")
+			return nil, nil
 		})
 
 	exp := &Experiment{
