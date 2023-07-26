@@ -63,7 +63,7 @@ func lookupInternal(application string, user string) (controllers.RoutemapInterf
 // Inspired by https://github.com/tysonmote/rendezvous/blob/master/rendezvous.go
 func rendezvousGet(s controllers.RoutemapInterface, user string) int {
 	// current maximimum score as computed by the hash function
-	var maxScore uint64
+	var maxScore float64
 	// maxVersionNumber is the version index with the current maximum score
 	var maxVersionNumber int
 
@@ -73,12 +73,20 @@ func rendezvousGet(s controllers.RoutemapInterface, user string) int {
 	s.RLock()
 	defer s.RUnlock()
 
+	sumW := uint32(0)
+	for versionNumber := range s.GetVersions() {
+		sumW += s.Weights()[versionNumber]
+	}
+
 	for versionNumber, version := range s.GetVersions() {
-		if s.Weights()[versionNumber] == 0 {
+		w := s.Weights()[versionNumber]
+		if w == 0 {
 			continue
 		}
-		score := hash(fmt.Sprintf("%d", versionNumber), *version.GetSignature(), user)
-		log.Logger.Debugf("hash(%d,%s) --> %d  --  %d", versionNumber, user, score, maxScore)
+		wFactor := float64(w) / float64(sumW)
+		h := hash(fmt.Sprintf("%d", versionNumber), *version.GetSignature(), user)
+		score := wFactor * float64(h)
+		log.Logger.Debugf("hash(%d,%s) --> %f  --  %f", versionNumber, user, score, maxScore)
 		if score >= maxScore {
 			maxScore = score
 			maxVersionNumber = versionNumber
