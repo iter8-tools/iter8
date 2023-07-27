@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/abn"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
@@ -82,6 +83,24 @@ type httpDashboard struct {
 	Summary util.Insights
 }
 
+type ghzStatistics struct {
+	Count      uint64
+	ErrorCount float64
+}
+
+type ghzEndpointPanel struct {
+	Durations              grafanaHistogram
+	Statistics             ghzStatistics
+	StatusCodeDistribution map[string]int `json:"Status codes"`
+}
+
+type ghzDashboard struct {
+	// key is the endpoint
+	Endpoints map[string]ghzEndpointPanel
+
+	Summary util.Insights
+}
+
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
 
 // Start starts the HTTP server
@@ -102,6 +121,7 @@ func Start(stopCh <-chan struct{}) error {
 	http.HandleFunc("/metrics", getMetrics)
 	http.HandleFunc(util.PerformanceResultPath, putResult)
 	http.HandleFunc("/httpDashboard", getHTTPDashboard)
+	http.HandleFunc("/ghzDashboard", getGHZDashboard)
 
 	// configure HTTP server
 	server := &http.Server{
@@ -425,22 +445,21 @@ func getHTTPStatistics(fortioHistogram *fstats.HistogramData, decimalPlace float
 func getHTTPEndpointRow(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpointRow {
 	result := httpEndpointRow{}
 	if httpRunnerResults.DurationHistogram != nil {
-		result.Durations = getHTTPHistogram(httpRunnerResults.DurationHistogram.Data, 1)
-		result.Statistics = getHTTPStatistics(httpRunnerResults.DurationHistogram, 1)
+		panel.Durations = getHTTPHistogram(httpRunnerResults.DurationHistogram.Data, 1)
+		panel.Statistics = getHTTPStatistics(httpRunnerResults.DurationHistogram, 1)
 	}
 
 	if httpRunnerResults.ErrorsDurationHistogram != nil {
-		result.ErrorDurations = getHTTPHistogram(httpRunnerResults.ErrorsDurationHistogram.Data, 1)
-		result.ErrorStatistics = getHTTPStatistics(httpRunnerResults.ErrorsDurationHistogram, 1)
+		panel.ErrorDurations = getHTTPHistogram(httpRunnerResults.ErrorsDurationHistogram.Data, 1)
+		panel.ErrorStatistics = getHTTPStatistics(httpRunnerResults.ErrorsDurationHistogram, 1)
 	}
 
-	result.ReturnCodes = httpRunnerResults.RetCodes
+	panel.ReturnCodes = httpRunnerResults.RetCodes
 
-	return result
+	return panel
 }
 
 func getHTTPDashboardHelper(fortioResult util.FortioResult) httpDashboard {
-	// add endpoint results
 	dashboard := httpDashboard{
 		Endpoints: map[string]httpEndpointRow{},
 	}
@@ -528,8 +547,8 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// verify request (query parameter)
+	// required namespace and experiment name
 	// Key: kt-result::my-namespace::my-experiment-name::my-endpoint
-	// Should namespace and experiment name come from application?
 	namespace := r.URL.Query().Get("namespace")
 	if namespace == "" {
 		http.Error(w, "no namespace specified", http.StatusBadRequest)
@@ -557,8 +576,6 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: should these functions belong in collect_http.go? Or be somewhere closeby?
-	// These functions are only for the purpose of processing the results of collect_http.go
 	fortioResult := util.FortioResult{}
 	err = json.Unmarshal(result, &fortioResult)
 	if err != nil {
@@ -572,6 +589,124 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(fortioResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal HTTP dashboard"
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
+		return
+	}
+
+	// finally, send response
+	w.Header().Add("Content-Type", "application/json")
+	_, _ = w.Write(dashboardBytes)
+}
+
+func getGHZHistogram(ghzHistogram []runner.Bucket, decimalPlace float64) grafanaHistogram {
+	grafanaHistogram := grafanaHistogram{}
+
+	for _, bucket := range ghzHistogram {
+		grafanaHistogram = append(grafanaHistogram, grafanaHistogramBucket{
+			Version: "0",
+			Bucket:  fmt.Sprint(roundDecimal(bucket.Mark*1000, 3)),
+			Value:   float64(bucket.Count),
+		})
+	}
+
+	return grafanaHistogram
+}
+
+func getGHZStatistics(ghzRunnerReport runner.Report) ghzStatistics {
+	// populate error count & rate
+	ec := float64(0)
+	for _, count := range ghzRunnerReport.ErrorDist {
+		ec += float64(count)
+	}
+
+	return ghzStatistics{
+		Count:      ghzRunnerReport.Count,
+		ErrorCount: ec,
+	}
+}
+
+func getGHZEndpointPanel(ghzRunnerReport runner.Report) ghzEndpointPanel {
+	panel := ghzEndpointPanel{}
+
+	if ghzRunnerReport.Histogram != nil {
+		panel.Durations = getGHZHistogram(ghzRunnerReport.Histogram, 3)
+		panel.Statistics = getGHZStatistics(ghzRunnerReport)
+	}
+
+	panel.StatusCodeDistribution = ghzRunnerReport.StatusCodeDist
+
+	return panel
+}
+
+func getGHZDashboardHelper(ghzResult util.GHZResult) ghzDashboard {
+	dashboard := ghzDashboard{
+		Endpoints: map[string]ghzEndpointPanel{},
+	}
+
+	for endpoint, endpointResult := range ghzResult.EndpointResults {
+		endpointResult := endpointResult
+		dashboard.Endpoints[endpoint] = getGHZEndpointPanel(endpointResult)
+	}
+
+	dashboard.Summary = ghzResult.Summary
+
+	return dashboard
+}
+
+func getGHZDashboard(w http.ResponseWriter, r *http.Request) {
+	log.Logger.Trace("getGHZDashboard called")
+	defer log.Logger.Trace("getGHZDashboard completed")
+
+	// verify method
+	if r.Method != http.MethodGet {
+		http.Error(w, "expected GET", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// verify request (query parameter)
+	// required namespace and experiment name
+	// Key: kt-result::my-namespace::my-experiment-name::my-endpoint
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		http.Error(w, "no namespace specified", http.StatusBadRequest)
+		return
+	}
+
+	experiment := r.URL.Query().Get("experiment")
+	if experiment == "" {
+		http.Error(w, "no experiment specified", http.StatusBadRequest)
+		return
+	}
+
+	log.Logger.Tracef("getGHZDashboard called for namespace %s and experiment %s", namespace, experiment)
+
+	// get result from metrics client
+	if abn.MetricsClient == nil {
+		http.Error(w, "no metrics client", http.StatusInternalServerError)
+		return
+	}
+	result, err := abn.MetricsClient.GetResult(namespace, experiment)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot get result with namespace %s, experiment %s", namespace, experiment)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+
+	ghzResult := util.GHZResult{}
+	err = json.Unmarshal(result, &ghzResult)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot JSON unmarshal result into GHZResult: \"%s\"", string(result))
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
+		return
+	}
+
+	// JSON marshal the dashboard
+	dashboardBytes, err := json.Marshal(getGHZDashboardHelper(ghzResult))
+	if err != nil {
+		errorMessage := "cannot JSON marshal ghz dashboard"
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusInternalServerError)
 		return
