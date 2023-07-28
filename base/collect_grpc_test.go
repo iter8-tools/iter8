@@ -1,6 +1,8 @@
 package base
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -266,60 +268,17 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		},
 	}
 
-	at := &assessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(AssessTaskName),
-		},
-		With: assessInputs{
-			SLOs: &SLOLimits{
-				Lower: []SLO{{
-					Metric: "grpc/request-count",
-					Limit:  100,
-				}},
-				Upper: []SLO{{
-					Metric: "grpc/latency/mean",
-					Limit:  100,
-				}, {
-					Metric: "grpc/latency/p95.00",
-					Limit:  200,
-				}, {
-					Metric: "grpc/latency/stddev",
-					Limit:  20,
-				}, {
-					Metric: "grpc/latency/max",
-					Limit:  200,
-				}, {
-					Metric: "grpc/error-count",
-					Limit:  0,
-				}, {
-					Metric: "grpc/request-count",
-					Limit:  100,
-				}},
-			},
-		},
-	}
 	exp := &Experiment{
-		Spec: []Task{ct, at},
+		Spec: []Task{ct},
 	}
 
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 	err = exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Spec[1].run(exp)
-	assert.NoError(t, err)
 
-	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
-		for _, b := range v {
-			assert.True(t, b)
-		}
-	}
-	for _, v := range exp.Result.Insights.SLOsSatisfied.Lower {
-		for _, b := range v {
-			assert.True(t, b)
-		}
-	}
+	expjson, _ := json.Marshal(exp)
+	fmt.Println(string(expjson))
 
 	expBytes, _ := yaml.Marshal(exp)
 	log.Logger.Debug("\n" + string(expBytes))

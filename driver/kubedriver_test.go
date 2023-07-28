@@ -108,7 +108,7 @@ func TestKubeRun(t *testing.T) {
 	// check results
 	exp, err := base.BuildExperiment(kd)
 	assert.NoError(t, err)
-	assert.True(t, exp.Completed() && exp.NoFailure() && exp.SLOs())
+	assert.True(t, exp.Completed() && exp.NoFailure())
 }
 
 func TestLogs(t *testing.T) {

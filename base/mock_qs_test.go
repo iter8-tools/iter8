@@ -29,35 +29,14 @@ func TestMockQuickStartWithSLOs(t *testing.T) {
 		},
 	}
 
-	at := &assessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(AssessTaskName),
-		},
-		With: assessInputs{
-			SLOs: &SLOLimits{
-				Upper: []SLO{{
-					Metric: "http/latency-mean",
-					Limit:  100,
-				}},
-			},
-		},
-	}
 	exp := &Experiment{
-		Spec: []Task{ct, at},
+		Spec: []Task{ct},
 	}
 
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 	err := exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Spec[1].run(exp)
-	assert.NoError(t, err)
-	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
-		for _, b := range v {
-			assert.True(t, b)
-		}
-	}
 }
 
 func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
@@ -80,36 +59,12 @@ func TestMockQuickStartWithSLOsAndPercentiles(t *testing.T) {
 		},
 	}
 
-	at := &assessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(AssessTaskName),
-		},
-		With: assessInputs{
-			SLOs: &SLOLimits{
-				Upper: []SLO{{
-					Metric: "http/latency-mean",
-					Limit:  100,
-				}, {
-					Metric: "http/latency-p95.00",
-					Limit:  200,
-				}},
-			},
-		},
-	}
 	exp := &Experiment{
-		Spec: []Task{ct, at},
+		Spec: []Task{ct},
 	}
 
 	exp.initResults(1)
 	_ = exp.Result.initInsightsWithNumVersions(1)
 	err := exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-	err = exp.Spec[1].run(exp)
-	assert.NoError(t, err)
-	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
-		for _, b := range v {
-			assert.True(t, b)
-		}
-	}
 }

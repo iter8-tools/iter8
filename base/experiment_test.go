@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"fortio.org/fortio/fhttp"
-	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
 	"sigs.k8s.io/yaml"
 )
@@ -59,23 +58,8 @@ func TestRunningTasks(t *testing.T) {
 		},
 	}
 
-	// valid assess task... should succeed
-	at := &assessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(AssessTaskName),
-		},
-		With: assessInputs{
-			SLOs: &SLOLimits{
-				Upper: []SLO{{
-					Metric: httpMetricPrefix + "/" + builtInHTTPErrorCountID,
-					Limit:  0,
-				}},
-			},
-		},
-	}
-
 	exp := &Experiment{
-		Spec:   []Task{ct, at},
+		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
 	}
 	exp.initResults(1)
@@ -84,14 +68,6 @@ func TestRunningTasks(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
-
-	err = at.run(exp)
-	assert.NoError(t, err)
-
-	// SLOs should be satisfied by app
-	for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ { // i^th SLO
-		assert.True(t, exp.Result.Insights.SLOsSatisfied.Upper[i][0]) // satisfied by only version
-	}
 }
 
 func TestRunExperiment(t *testing.T) {
@@ -120,9 +96,6 @@ func TestRunExperiment(t *testing.T) {
 
 	assert.True(t, e.Completed())
 	assert.True(t, e.NoFailure())
-	expBytes, _ := yaml.Marshal(e)
-	log.Logger.Debug("\n" + string(expBytes))
-	assert.True(t, e.SLOs())
 }
 
 func TestFailExperiment(t *testing.T) {

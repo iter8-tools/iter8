@@ -50,6 +50,5 @@ func TestKubeRun(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, exp.Completed())
 	assert.True(t, exp.NoFailure())
-	assert.True(t, exp.SLOs())
 	assert.Equal(t, 4, exp.Result.NumCompletedTasks)
 }

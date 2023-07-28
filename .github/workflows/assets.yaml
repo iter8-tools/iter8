@@ -205,7 +205,7 @@ jobs:
     - name: k launch with readiness checks
       run: |
         iter8 k launch \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
@@ -235,7 +235,7 @@ jobs:
     - name: k launch with readiness checks
       run: |
         iter8 k launch -n experiments \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=60s \

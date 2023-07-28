@@ -582,6 +582,10 @@ jobs:
         --set 'groups.httpbin.trigger.version=v1' \
         --set 'groups.httpbin.trigger.resource=deployments' \
         --set 'groups.httpbin.specs.iter8.name=iter8' \
+        --set 'groups.httpbin.specs.iter8.values.tasks={ready,http}' \
+        --set 'groups.httpbin.specs.iter8.values.ready.deploy=httpbin' \
+        --set 'groups.httpbin.specs.iter8.values.ready.service=httpbin' \
+        --set 'groups.httpbin.specs.iter8.values.ready.timeout=60s' \
         --set 'groups.httpbin.specs.iter8.values.http.url=http://httpbin.default/get' \
         --set 'groups.httpbin.specs.iter8.version=0.15.0' \
         --set 'groups.httpbin.specs.iter8.values.runner=job'

@@ -33,7 +33,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         helm template charts/iter8 \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
         --set ready.timeout=60s \

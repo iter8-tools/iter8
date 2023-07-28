@@ -113,18 +113,6 @@ type Insights struct {
 	// the outer slice must be the same length as the number of tracks
 	// the map key must match the name of the summary metric in MetricsInfo
 	SummaryMetricValues []map[string]summarymetrics.SummaryMetric
-
-	// SLOs involved in this experiment
-	SLOs *SLOLimits `json:"SLOs,omitempty" yaml:"SLOs,omitempty"`
-
-	// SLOsSatisfied indicator matrices that show if upper and lower SLO limits are satisfied
-	SLOsSatisfied *SLOResults `json:"SLOsSatisfied,omitempty" yaml:"SLOsSatisfied,omitempty"`
-
-	// Rewards involed in this experiment
-	Rewards *Rewards `json:"rewards,omitempty" yaml:"rewards,omitempty"`
-
-	// RewardsWinners indicate the winners
-	RewardsWinners *RewardsWinners `json:"rewardsWinners,omitempty" yaml:"rewardsWinners,omitempty"`
 }
 
 // MetricMeta describes a metric
@@ -279,14 +267,6 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 					return e
 				}
 				tsk = cgt
-			case AssessTaskName:
-				at := &assessTask{}
-				if err := json.Unmarshal(tBytes, at); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = at
 			case NotifyTaskName:
 				nt := &notifyTask{}
 				if err := json.Unmarshal(tBytes, nt); err != nil {
@@ -398,40 +378,6 @@ func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}
 	return nil
 }
 
-// setRewards sets the Rewards field in insights
-// if this function is called multiple times (example, due to looping), then
-// it is intended to be called with the same argument each time
-func (in *Insights) setRewards(rewards *Rewards) error {
-	if in.SLOs != nil {
-		if reflect.DeepEqual(in.Rewards, rewards) {
-			return nil
-		}
-		e := fmt.Errorf("old and new value of rewards conflict")
-		log.Logger.WithStackTrace(fmt.Sprint("old: ", in.Rewards, "new: ", rewards)).Error(e)
-		return e
-	}
-	// LHS will be nil
-	in.Rewards = rewards
-	return nil
-}
-
-// setSLOs sets the SLOs field in insights
-// if this function is called multiple times (example, due to looping), then
-// it is intended to be called with the same argument each time
-func (in *Insights) setSLOs(slos *SLOLimits) error {
-	if in.SLOs != nil {
-		if reflect.DeepEqual(in.SLOs, slos) {
-			return nil
-		}
-		e := fmt.Errorf("old and new value of slos conflict")
-		log.Logger.WithStackTrace(fmt.Sprint("old: ", in.SLOs, "new: ", slos)).Error(e)
-		return e
-	}
-	// LHS will be nil
-	in.SLOs = slos
-	return nil
-}
-
 // TrackVersionStr creates a string of version name/track for display purposes
 func (in *Insights) TrackVersionStr(i int) string {
 	// if VersionNames not defined or all fields empty return default "version i"
@@ -452,29 +398,6 @@ func (in *Insights) TrackVersionStr(i int) string {
 	}
 
 	return in.VersionNames[i].Track + " (" + in.VersionNames[i].Version + ")"
-}
-
-// initializeSLOsSatisfied initializes the SLOs satisfied field
-func (exp *Experiment) initializeSLOsSatisfied() error {
-	if exp.Result.Insights.SLOsSatisfied != nil {
-		return nil // already initialized
-	}
-	// LHS will be nil
-	exp.Result.Insights.SLOsSatisfied = &SLOResults{
-		Upper: make([][]bool, 0),
-		Lower: make([][]bool, 0),
-	}
-	if exp.Result.Insights.SLOs != nil {
-		exp.Result.Insights.SLOsSatisfied.Upper = make([][]bool, len(exp.Result.Insights.SLOs.Upper))
-		for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ {
-			exp.Result.Insights.SLOsSatisfied.Upper[i] = make([]bool, exp.Result.Insights.NumVersions)
-		}
-		exp.Result.Insights.SLOsSatisfied.Lower = make([][]bool, len(exp.Result.Insights.SLOs.Lower))
-		for i := 0; i < len(exp.Result.Insights.SLOs.Lower); i++ {
-			exp.Result.Insights.SLOsSatisfied.Lower[i] = make([]bool, exp.Result.Insights.NumVersions)
-		}
-	}
-	return nil
 }
 
 // initResults initializes the results section of an experiment
@@ -819,68 +742,6 @@ func (exp *Experiment) Completed() bool {
 // NoFailure returns true if no task in the experiment has failed
 func (exp *Experiment) NoFailure() bool {
 	return exp != nil && exp.Result != nil && !exp.Result.Failure
-}
-
-// getSLOsSatisfiedBy returns the set of versions which satisfy SLOs
-func (exp *Experiment) getSLOsSatisfiedBy() []int {
-	if exp == nil {
-		log.Logger.Warning("nil experiment")
-		return nil
-	}
-	if exp.Result == nil {
-		log.Logger.Warning("nil experiment result")
-		return nil
-	}
-	if exp.Result.Insights == nil {
-		log.Logger.Warning("nil insights in experiment result")
-		return nil
-	}
-	if exp.Result.Insights.NumVersions == 0 {
-		log.Logger.Warning("experiment does not involve any versions")
-		return nil
-	}
-	if exp.Result.Insights.SLOs == nil {
-		log.Logger.Info("experiment does not involve any SLOs")
-		sat := []int{}
-		for j := 0; j < exp.Result.Insights.NumVersions; j++ {
-			sat = append(sat, j)
-		}
-		return sat
-	}
-	log.Logger.Debug("experiment involves at least one version and at least one SLO")
-	log.Logger.Trace(exp.Result.Insights.SLOs)
-	log.Logger.Trace(exp.Result.Insights.SLOsSatisfied)
-	log.Logger.Trace(exp.Result.Insights.NonHistMetricValues)
-	sat := []int{}
-	for j := 0; j < exp.Result.Insights.NumVersions; j++ {
-		satThis := true
-		for i := 0; i < len(exp.Result.Insights.SLOs.Upper); i++ {
-			satThis = satThis && exp.Result.Insights.SLOsSatisfied.Upper[i][j]
-			if !satThis {
-				break
-			}
-		}
-		for i := 0; i < len(exp.Result.Insights.SLOs.Lower); i++ {
-			satThis = satThis && exp.Result.Insights.SLOsSatisfied.Lower[i][j]
-			if !satThis {
-				break
-			}
-		}
-		if satThis {
-			sat = append(sat, j)
-		}
-	}
-	return sat
-}
-
-// SLOs returns true if all versions satisfy SLOs
-func (exp *Experiment) SLOs() bool {
-	if exp == nil || exp.Result == nil || exp.Result.Insights == nil {
-		log.Logger.Warning("experiment, or result, or insights is nil")
-		return false
-	}
-	sby := exp.getSLOsSatisfiedBy()
-	return exp.Result.Insights.NumVersions == len(sby)
 }
 
 // run the experiment
