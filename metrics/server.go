@@ -64,8 +64,8 @@ type metricSummary struct {
 	SummaryOverUsers           []*versionSummarizedMetric
 }
 
-// httpEndpointPanel is the data needed to produce a single panel for
-type httpEndpointPanel struct {
+// httpEndpointRow is the data needed to produce a single row in the Iter8 Grafana dashboard
+type httpEndpointRow struct {
 	Durations  grafanaHistogram
 	Statistics storage.SummarizedMetric
 
@@ -77,7 +77,7 @@ type httpEndpointPanel struct {
 
 type httpDashboard struct {
 	// key is the endpoint
-	Endpoints map[string]httpEndpointPanel
+	Endpoints map[string]httpEndpointRow
 
 	Summary util.Insights
 }
@@ -422,8 +422,8 @@ func getHTTPStatistics(fortioHistogram *fstats.HistogramData, decimalPlace float
 	}
 }
 
-func getHTTPEndpointPanel(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpointPanel {
-	result := httpEndpointPanel{}
+func getHTTPEndpointRow(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpointRow {
+	result := httpEndpointRow{}
 	if httpRunnerResults.DurationHistogram != nil {
 		result.Durations = getHTTPHistogram(httpRunnerResults.DurationHistogram.Data, 1)
 		result.Statistics = getHTTPStatistics(httpRunnerResults.DurationHistogram, 1)
@@ -442,12 +442,12 @@ func getHTTPEndpointPanel(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpoi
 func getHTTPDashboardHelper(fortioResult util.FortioResult) httpDashboard {
 	// add endpoint results
 	dashboard := httpDashboard{
-		Endpoints: map[string]httpEndpointPanel{},
+		Endpoints: map[string]httpEndpointRow{},
 	}
 
 	for endpoint, endpointResult := range fortioResult.EndpointResults {
 		endpointResult := endpointResult
-		dashboard.Endpoints[endpoint] = getHTTPEndpointPanel(&endpointResult)
+		dashboard.Endpoints[endpoint] = getHTTPEndpointRow(endpointResult)
 	}
 
 	// add summary

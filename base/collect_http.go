@@ -72,7 +72,7 @@ type collectHTTPInputs struct {
 // This data will be transformed into httpDashboard when getHTTPGrafana is called
 type FortioResult struct {
 	// key is the endpoint
-	EndpointResults map[string]fhttp.HTTPRunnerResults
+	EndpointResults map[string]*fhttp.HTTPRunnerResults
 
 	Summary Insights
 }
@@ -300,11 +300,11 @@ func putPerformanceResultToMetricsService(metricsServerURL, namespace, experimen
 // func (t *collectHTTPTask) getFortioResults() (*fhttp.HTTPRunnerResults, error) {
 // key is the metric prefix
 // key is the endpoint
-func (t *collectHTTPTask) getFortioResults() (map[string]fhttp.HTTPRunnerResults, error) {
+func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResults, error) {
 	// the main idea is to run Fortio with proper options
 
 	var err error
-	results := map[string]fhttp.HTTPRunnerResults{}
+	results := map[string]*fhttp.HTTPRunnerResults{}
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
@@ -338,7 +338,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]fhttp.HTTPRunnerResults
 			if t.With.Grafana {
 				resultsKey = endpoint.URL
 			}
-			results[resultsKey] = *ifr
+			results[resultsKey] = ifr
 		}
 	} else {
 		fo, err := getFortioOptions(t.With.endpoint)
@@ -362,7 +362,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]fhttp.HTTPRunnerResults
 		if t.With.Grafana {
 			resultsKey = t.With.endpoint.URL
 		}
-		results[resultsKey] = *ifr
+		results[resultsKey] = ifr
 	}
 
 	return results, err
@@ -383,12 +383,6 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		return err
 	}
 
-	// TODO: warmup option
-	// // ignore results if warmup
-	// if t.With.Warmup != nil && *t.With.Warmup {
-	// 	log.Logger.Debug("warmup: ignoring results")
-	// 	return nil
-	// }
 	// ignore results if warmup
 	if t.With.Warmup != nil && *t.With.Warmup {
 		log.Logger.Debug("warmup: ignoring results")
