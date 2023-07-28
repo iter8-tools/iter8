@@ -67,8 +67,6 @@ func TestKOps(t *testing.T) {
 
 func TestKubeRun(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	err := os.Setenv(base.MetricsServerURL, "http://iter8.default:8080")
-	assert.NoError(t, err)
 
 	// create and configure HTTP endpoint for testing
 	mux, addr := fhttp.DynamicHTTPServer(false)
@@ -102,7 +100,7 @@ func TestKubeRun(t *testing.T) {
 		},
 	}, metav1.CreateOptions{})
 
-	err = base.RunExperiment(false, kd)
+	err := base.RunExperiment(false, kd)
 	assert.NoError(t, err)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)

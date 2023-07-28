@@ -45,7 +45,7 @@ type ExperimentMetadata struct {
 
 // Experiment struct containing spec and result
 type Experiment struct {
-	Metadata ExperimentMetadata
+	Metadata ExperimentMetadata `json:"metadata" yaml:"metadata"`
 
 	// Spec is the sequence of tasks that constitute this experiment
 	Spec ExperimentSpec `json:"spec" yaml:"spec"`

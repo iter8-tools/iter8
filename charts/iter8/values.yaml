@@ -9,9 +9,6 @@ runner: none
 
 logLevel: info
 
-abnmetrics:
-  endpoint: iter8-abn:50051
-
 ### resources are the resource limits for the pods
 resources:
   requests:
