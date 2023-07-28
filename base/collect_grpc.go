@@ -59,7 +59,7 @@ type collectGRPCTask struct {
 // This data will be transformed into httpDashboard when getGHZGrafana is called
 type GHZResult struct {
 	// key is the endpoint
-	EndpointResults map[string]runner.Report
+	EndpointResults map[string]*runner.Report
 
 	Summary Insights
 }
@@ -86,11 +86,11 @@ func (t *collectGRPCTask) validateInputs() error {
 }
 
 // resultForVersion collects gRPC test result for a given version
-func (t *collectGRPCTask) resultForVersion() (map[string]runner.Report, error) {
+func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) {
 	// the main idea is to run ghz with proper options
 
 	var err error
-	results := map[string]runner.Report{}
+	results := map[string]*runner.Report{}
 
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
@@ -127,7 +127,7 @@ func (t *collectGRPCTask) resultForVersion() (map[string]runner.Report, error) {
 			if t.With.Grafana {
 				resultsKey = endpoint.Call
 			}
-			results[resultsKey] = *igr
+			results[resultsKey] = igr
 		}
 	} else {
 		// TODO: supply all the allowed options
@@ -144,7 +144,7 @@ func (t *collectGRPCTask) resultForVersion() (map[string]runner.Report, error) {
 		if t.With.Grafana {
 			resultsKey = t.With.Call
 		}
-		results[resultsKey] = *igr
+		results[resultsKey] = igr
 	}
 
 	return results, err
