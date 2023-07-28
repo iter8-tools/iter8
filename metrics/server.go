@@ -65,7 +65,7 @@ type metricSummary struct {
 	SummaryOverUsers           []*versionSummarizedMetric
 }
 
-// httpEndpointRow is the data needed to produce a single row in the Iter8 Grafana dashboard
+// httpEndpointRow is the data needed to produce a single row for an HTTP experiment in the Iter8 Grafana dashboard
 type httpEndpointRow struct {
 	Durations  grafanaHistogram
 	Statistics storage.SummarizedMetric
@@ -88,7 +88,8 @@ type ghzStatistics struct {
 	ErrorCount float64
 }
 
-type ghzEndpointPanel struct {
+// ghzEndpointRow is the data needed to produce a single row for an gRPC experiment in the Iter8 Grafana dashboard
+type ghzEndpointRow struct {
 	Durations              grafanaHistogram
 	Statistics             ghzStatistics
 	StatusCodeDistribution map[string]int `json:"Status codes"`
@@ -96,7 +97,7 @@ type ghzEndpointPanel struct {
 
 type ghzDashboard struct {
 	// key is the endpoint
-	Endpoints map[string]ghzEndpointPanel
+	Endpoints map[string]ghzEndpointRow
 
 	Summary util.Insights
 }
@@ -443,20 +444,20 @@ func getHTTPStatistics(fortioHistogram *fstats.HistogramData, decimalPlace float
 }
 
 func getHTTPEndpointRow(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpointRow {
-	result := httpEndpointRow{}
+	row := httpEndpointRow{}
 	if httpRunnerResults.DurationHistogram != nil {
-		panel.Durations = getHTTPHistogram(httpRunnerResults.DurationHistogram.Data, 1)
-		panel.Statistics = getHTTPStatistics(httpRunnerResults.DurationHistogram, 1)
+		row.Durations = getHTTPHistogram(httpRunnerResults.DurationHistogram.Data, 1)
+		row.Statistics = getHTTPStatistics(httpRunnerResults.DurationHistogram, 1)
 	}
 
 	if httpRunnerResults.ErrorsDurationHistogram != nil {
-		panel.ErrorDurations = getHTTPHistogram(httpRunnerResults.ErrorsDurationHistogram.Data, 1)
-		panel.ErrorStatistics = getHTTPStatistics(httpRunnerResults.ErrorsDurationHistogram, 1)
+		row.ErrorDurations = getHTTPHistogram(httpRunnerResults.ErrorsDurationHistogram.Data, 1)
+		row.ErrorStatistics = getHTTPStatistics(httpRunnerResults.ErrorsDurationHistogram, 1)
 	}
 
-	panel.ReturnCodes = httpRunnerResults.RetCodes
+	row.ReturnCodes = httpRunnerResults.RetCodes
 
-	return panel
+	return row
 }
 
 func getHTTPDashboardHelper(fortioResult util.FortioResult) httpDashboard {
@@ -626,27 +627,27 @@ func getGHZStatistics(ghzRunnerReport runner.Report) ghzStatistics {
 	}
 }
 
-func getGHZEndpointPanel(ghzRunnerReport runner.Report) ghzEndpointPanel {
-	panel := ghzEndpointPanel{}
+func getGHZEndpointRow(ghzRunnerReport runner.Report) ghzEndpointRow {
+	row := ghzEndpointRow{}
 
 	if ghzRunnerReport.Histogram != nil {
-		panel.Durations = getGHZHistogram(ghzRunnerReport.Histogram, 3)
-		panel.Statistics = getGHZStatistics(ghzRunnerReport)
+		row.Durations = getGHZHistogram(ghzRunnerReport.Histogram, 3)
+		row.Statistics = getGHZStatistics(ghzRunnerReport)
 	}
 
-	panel.StatusCodeDistribution = ghzRunnerReport.StatusCodeDist
+	row.StatusCodeDistribution = ghzRunnerReport.StatusCodeDist
 
-	return panel
+	return row
 }
 
 func getGHZDashboardHelper(ghzResult util.GHZResult) ghzDashboard {
 	dashboard := ghzDashboard{
-		Endpoints: map[string]ghzEndpointPanel{},
+		Endpoints: map[string]ghzEndpointRow{},
 	}
 
 	for endpoint, endpointResult := range ghzResult.EndpointResults {
 		endpointResult := endpointResult
-		dashboard.Endpoints[endpoint] = getGHZEndpointPanel(endpointResult)
+		dashboard.Endpoints[endpoint] = getGHZEndpointRow(endpointResult)
 	}
 
 	dashboard.Summary = ghzResult.Summary
