@@ -614,7 +614,7 @@ func getGHZHistogram(ghzHistogram []runner.Bucket, decimalPlace float64) grafana
 	return grafanaHistogram
 }
 
-func getGHZStatistics(ghzRunnerReport runner.Report) ghzStatistics {
+func getGHZStatistics(ghzRunnerReport *runner.Report) ghzStatistics {
 	// populate error count & rate
 	ec := float64(0)
 	for _, count := range ghzRunnerReport.ErrorDist {
@@ -627,7 +627,7 @@ func getGHZStatistics(ghzRunnerReport runner.Report) ghzStatistics {
 	}
 }
 
-func getGHZEndpointRow(ghzRunnerReport runner.Report) ghzEndpointRow {
+func getGHZEndpointRow(ghzRunnerReport *runner.Report) ghzEndpointRow {
 	row := ghzEndpointRow{}
 
 	if ghzRunnerReport.Histogram != nil {
