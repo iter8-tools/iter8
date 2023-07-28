@@ -122,7 +122,7 @@ func Start(stopCh <-chan struct{}) error {
 	http.HandleFunc("/metrics", getMetrics)
 	http.HandleFunc(util.PerformanceResultPath, putResult)
 	http.HandleFunc("/httpDashboard", getHTTPDashboard)
-	http.HandleFunc("/ghzDashboard", getGHZDashboard)
+	http.HandleFunc("/grpcDashboard", getGRPCDashboard)
 
 	// configure HTTP server
 	server := &http.Server{
@@ -600,7 +600,7 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(dashboardBytes)
 }
 
-func getGHZHistogram(ghzHistogram []runner.Bucket, decimalPlace float64) grafanaHistogram {
+func getGRPCHistogram(ghzHistogram []runner.Bucket, decimalPlace float64) grafanaHistogram {
 	grafanaHistogram := grafanaHistogram{}
 
 	for _, bucket := range ghzHistogram {
@@ -614,7 +614,7 @@ func getGHZHistogram(ghzHistogram []runner.Bucket, decimalPlace float64) grafana
 	return grafanaHistogram
 }
 
-func getGHZStatistics(ghzRunnerReport *runner.Report) ghzStatistics {
+func getGRPCStatistics(ghzRunnerReport *runner.Report) ghzStatistics {
 	// populate error count & rate
 	ec := float64(0)
 	for _, count := range ghzRunnerReport.ErrorDist {
@@ -627,12 +627,12 @@ func getGHZStatistics(ghzRunnerReport *runner.Report) ghzStatistics {
 	}
 }
 
-func getGHZEndpointRow(ghzRunnerReport *runner.Report) ghzEndpointRow {
+func getGRPCEndpointRow(ghzRunnerReport *runner.Report) ghzEndpointRow {
 	row := ghzEndpointRow{}
 
 	if ghzRunnerReport.Histogram != nil {
-		row.Durations = getGHZHistogram(ghzRunnerReport.Histogram, 3)
-		row.Statistics = getGHZStatistics(ghzRunnerReport)
+		row.Durations = getGRPCHistogram(ghzRunnerReport.Histogram, 3)
+		row.Statistics = getGRPCStatistics(ghzRunnerReport)
 	}
 
 	row.StatusCodeDistribution = ghzRunnerReport.StatusCodeDist
@@ -640,14 +640,14 @@ func getGHZEndpointRow(ghzRunnerReport *runner.Report) ghzEndpointRow {
 	return row
 }
 
-func getGHZDashboardHelper(ghzResult util.GHZResult) ghzDashboard {
+func getGRPCDashboardHelper(ghzResult util.GHZResult) ghzDashboard {
 	dashboard := ghzDashboard{
 		Endpoints: map[string]ghzEndpointRow{},
 	}
 
 	for endpoint, endpointResult := range ghzResult.EndpointResults {
 		endpointResult := endpointResult
-		dashboard.Endpoints[endpoint] = getGHZEndpointRow(endpointResult)
+		dashboard.Endpoints[endpoint] = getGRPCEndpointRow(endpointResult)
 	}
 
 	dashboard.Summary = ghzResult.Summary
@@ -655,7 +655,7 @@ func getGHZDashboardHelper(ghzResult util.GHZResult) ghzDashboard {
 	return dashboard
 }
 
-func getGHZDashboard(w http.ResponseWriter, r *http.Request) {
+func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getGHZDashboard called")
 	defer log.Logger.Trace("getGHZDashboard completed")
 
@@ -705,7 +705,7 @@ func getGHZDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getGHZDashboardHelper(ghzResult))
+	dashboardBytes, err := json.Marshal(getGRPCDashboardHelper(ghzResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal ghz dashboard"
 		log.Logger.Error(errorMessage)

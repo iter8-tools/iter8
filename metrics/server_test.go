@@ -362,7 +362,7 @@ func TestGetGHZDashboardHelper(t *testing.T) {
 	err := json.Unmarshal([]byte(ghzResultJSON), &ghzResult)
 	assert.NoError(t, err)
 
-	dashboard := getGHZDashboardHelper(ghzResult)
+	dashboard := getGRPCDashboardHelper(ghzResult)
 
 	assert.NotNil(t, dashboard)
 	dashboardBytes, err := json.Marshal(dashboard)
@@ -1336,7 +1336,7 @@ func TestGetGHZDashboard(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, urlStr, nil)
 
 	// get ghz dashboard based on result in metrics client
-	getGHZDashboard(w, req)
+	getGRPCDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
