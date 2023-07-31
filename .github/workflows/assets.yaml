@@ -210,7 +210,6 @@ jobs:
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default \
-        --set assess.SLOs.upper.http/latency-mean=50 \
         --set runner=job
     - name: k assert experiment completed without failures
       run: |
@@ -241,7 +240,6 @@ jobs:
         --set ready.timeout=60s \
         --set ready.namespace=default \
         --set http.url=http://httpbin.default/get \
-        --set assess.SLOs.upper.http/latency-mean=50 \
         --set runner=job
     - name: k assert experiment completed without failures
       run: |

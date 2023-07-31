@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"io"
-	"os"
-
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/iter8-tools/iter8/driver"
 
@@ -22,8 +19,6 @@ var (
 	settings = cli.New()
 	// KubeDriver used by actions package
 	kd = driver.NewKubeDriver(settings)
-	// output stream where log messages are printed
-	outStream io.Writer = os.Stdout
 	// kubeclient is the client used for controllers package
 	kubeClient k8sclient.Interface
 )

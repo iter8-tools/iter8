@@ -1,22 +1,9 @@
 spec:
-  # task 1: collect custom metrics
-  - task: custommetrics
-    with:
-      templates:
-        kfserving: https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/kfserving.metrics.yaml
-      values:
-        namespace_name: ns-candidate
-        startingTime: Jan 2, 2006 at 3:04pm (MST)
-  # task 2: validate service level objectives for app using
-  # the metrics collected in the above task
-  - task: assess
-    with:
-      SLOs:
-        Upper: 
-        - metric: "kfserving/request-count"
-          limit: 0
-  # tasks 3 & 4: print if SLOs are satisfied or not
-  - if: SLOs()
-    run: echo "SLOs satisfied"
-  - if: not SLOs()
-    run: echo "SLOs not satisfied"
+# task 1: collect custom metrics
+- task: custommetrics
+  with:
+    templates:
+      kfserving: https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/kfserving.metrics.yaml
+    values:
+      namespace_name: ns-candidate
+      startingTime: Jan 2, 2006 at 3:04pm (MST)

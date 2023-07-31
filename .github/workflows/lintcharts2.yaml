@@ -38,8 +38,6 @@ jobs:
         --set ready.service=httpbin \
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/get \
-        --set assess.SLOs.upper.http/latency-mean=50 \
-        --set assess.SLOs.upper.http/error-count=0 \
         --set runner=job >> iter8.yaml
 
     - name: Lint Kubernetes YAML file

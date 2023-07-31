@@ -18,21 +18,21 @@ func TestReadExperiment(t *testing.T) {
 	e := &Experiment{}
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 4, len(e.Spec))
+	assert.Equal(t, 1, len(e.Spec))
 
 	b, err = os.ReadFile(CompletePath("../testdata", "experiment_grpc.yaml"))
 	assert.NoError(t, err)
 	e = &Experiment{}
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 3, len(e.Spec))
+	assert.Equal(t, 1, len(e.Spec))
 
 	b, err = os.ReadFile(CompletePath("../testdata", "experiment_db.yaml"))
 	assert.NoError(t, err)
 	e = &Experiment{}
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 4, len(e.Spec))
+	assert.Equal(t, 1, len(e.Spec))
 }
 
 func TestRunningTasks(t *testing.T) {
@@ -87,7 +87,7 @@ func TestRunExperiment(t *testing.T) {
 	e := &Experiment{}
 	err = yaml.Unmarshal(b, e)
 	assert.NoError(t, err)
-	assert.Equal(t, 4, len(e.Spec))
+	assert.Equal(t, 1, len(e.Spec))
 
 	err = RunExperiment(false, &mockDriver{e})
 	assert.NoError(t, err)

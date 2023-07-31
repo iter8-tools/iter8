@@ -1,6 +1,0 @@
-http:
-  url: "https://httpbin.org/get"
-assess:
-  SLOs:
-    upper:
-      http/latency-mean: 500
