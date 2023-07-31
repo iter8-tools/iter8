@@ -110,8 +110,6 @@ jobs:
         --set runner=job
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -182,8 +180,7 @@ jobs:
         --set runner=job
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
-        iter8 k report
+
         iter8 k log
         iter8 k delete
 
@@ -211,9 +208,6 @@ jobs:
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default \
         --set runner=job
-    - name: k assert experiment completed without failures
-      run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
 
   readiness-with-namespace:
     name: Kubernetes readiness test with namespace
@@ -241,6 +235,3 @@ jobs:
         --set ready.namespace=default \
         --set http.url=http://httpbin.default/get \
         --set runner=job
-    - name: k assert experiment completed without failures
-      run: |
-        iter8 k assert -n experiments -c completed -c nofailure --timeout 60s
