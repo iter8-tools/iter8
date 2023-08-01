@@ -7,9 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   {{- range .Values.tasks }}
-  {{- if eq "custommetrics" . }}
-  {{- include "task.custommetrics" $.Values.custommetrics -}}
-  {{- else if eq "grpc" . }}
+  {{- if eq "grpc" . }}
   {{- include "task.grpc" $.Values.grpc -}}
   {{- else if eq "http" . }}
   {{- include "task.http" $.Values.http -}}
@@ -20,7 +18,7 @@ spec:
   {{- else if eq "github" . }}
   {{- include "task.github" $.Values.github -}}
   {{- else }}
-  {{- fail "task name must be one of custommetrics, grpc, http, ready, github, or slack" -}}
+  {{- fail "task name must be one of grpc, http, ready, github, or slack" -}}
   {{- end }}
   {{- end }}
 result:

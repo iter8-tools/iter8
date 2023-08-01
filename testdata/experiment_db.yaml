@@ -1,9 +1,0 @@
-spec:
-# task 1: collect custom metrics
-- task: custommetrics
-  with:
-    templates:
-      kfserving: https://raw.githubusercontent.com/iter8-tools/iter8/master/testdata/metrics/kfserving.metrics.yaml
-    values:
-      namespace_name: ns-candidate
-      startingTime: Jan 2, 2006 at 3:04pm (MST)

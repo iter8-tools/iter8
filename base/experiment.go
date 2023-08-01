@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -243,14 +242,6 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 					return e
 				}
 				tsk = rt
-			case CustomMetricsTaskName:
-				cdt := &customMetricsTask{}
-				if err := json.Unmarshal(tBytes, cdt); err != nil {
-					e := errors.New("json unmarshal error")
-					log.Logger.WithStackTrace(err.Error()).Error(e)
-					return e
-				}
-				tsk = cdt
 			case CollectHTTPTaskName:
 				cht := &collectHTTPTask{}
 				if err := json.Unmarshal(tBytes, cht); err != nil {
@@ -285,96 +276,6 @@ func (s *ExperimentSpec) UnmarshalJSON(data []byte) error {
 		log.Logger.Trace("appended to experiment spec")
 	}
 	log.Logger.Trace("constructed experiment spec of length: ", len(*s))
-	return nil
-}
-
-// metricTypeMatch checks if metric value is a match for its type
-func metricTypeMatch(t MetricType, val interface{}) bool {
-	switch v := val.(type) {
-	case float64:
-		return t == CounterMetricType || t == GaugeMetricType
-	case []float64:
-		return t == SampleMetricType
-	case []HistBucket:
-		return t == HistogramMetricType
-	case *summarymetrics.SummaryMetric:
-		return t == SummaryMetricType
-	default:
-		log.Logger.Error("unsupported type for metric value: ", v)
-		return false
-	}
-}
-
-// updateMetricValueScalar updates a scalar metric value for a given version
-func (in *Insights) updateMetricValueScalar(m string, i int, val float64) {
-	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val)
-}
-
-// updateMetricValueVector updates a vector metric value for a given version
-func (in *Insights) updateMetricValueVector(m string, i int, val []float64) {
-	in.NonHistMetricValues[i][m] = append(in.NonHistMetricValues[i][m], val...)
-}
-
-// updateMetricValueHist updates a histogram metric value for a given version
-func (in *Insights) updateMetricValueHist(m string, i int, val []HistBucket) {
-	in.HistMetricValues[i][m] = append(in.HistMetricValues[i][m], val...)
-}
-
-// updateSummaryMetric updates a summary metric value for a given version
-func (in *Insights) updateSummaryMetric(m string, i int, val *summarymetrics.SummaryMetric) {
-	in.SummaryMetricValues[i][m] = *val
-}
-
-// registerMetric registers a new metric by adding its meta data
-func (in *Insights) registerMetric(m string, mm MetricMeta) error {
-	if old, ok := in.MetricsInfo[m]; ok && !reflect.DeepEqual(old, mm) {
-		err := fmt.Errorf("old and new metric meta for %v differ", m)
-		log.Logger.WithStackTrace(fmt.Sprintf("old: %v \nnew: %v", old, mm)).Error(err)
-		return err
-	}
-	in.MetricsInfo[m] = mm
-	return nil
-}
-
-// updateMetric registers a metric and adds a metric value for a given version
-// metric names will be normalized
-func (in *Insights) updateMetric(m string, mm MetricMeta, i int, val interface{}) error {
-	var err error
-	if !metricTypeMatch(mm.Type, val) {
-		err = fmt.Errorf("metric value and type are incompatible; name: %v meta: %v version: %v value: %v", m, mm, i, val)
-		log.Logger.Error(err)
-		return err
-	}
-
-	if in.NumVersions <= i {
-		err := fmt.Errorf("insufficient number of versions %v with version index %v", in.NumVersions, i)
-		log.Logger.Error(err)
-		return err
-	}
-
-	nm, err := NormalizeMetricName(m)
-	if err != nil {
-		return err
-	}
-
-	err = in.registerMetric(nm, mm)
-	if err != nil {
-		return err
-	}
-
-	switch mm.Type {
-	case CounterMetricType, GaugeMetricType:
-		in.updateMetricValueScalar(nm, i, val.(float64))
-	case SampleMetricType:
-		in.updateMetricValueVector(nm, i, val.([]float64))
-	case HistogramMetricType:
-		in.updateMetricValueHist(nm, i, val.([]HistBucket))
-	case SummaryMetricType:
-		in.updateSummaryMetric(nm, i, val.(*summarymetrics.SummaryMetric))
-	default:
-		err := fmt.Errorf("unknown metric type %v", mm.Type)
-		log.Logger.Error(err)
-	}
 	return nil
 }
 
@@ -416,17 +317,18 @@ func (exp *Experiment) initResults(revision int) {
 // insights data structure contains metrics data structures, so this will also
 // init metrics
 func (r *ExperimentResult) initInsightsWithNumVersions(n int) error {
-	if r.Insights != nil {
+	if r.Insights == nil {
+		r.Insights = &Insights{
+			NumVersions: n,
+		}
+	} else {
 		if r.Insights.NumVersions != n {
 			err := fmt.Errorf("inconsistent number for app versions; old (%v); new (%v)", r.Insights.NumVersions, n)
 			log.Logger.Error(err)
 			return err
 		}
-	} else {
-		r.Insights = &Insights{
-			NumVersions: n,
-		}
 	}
+
 	return r.Insights.initMetrics()
 }
 
