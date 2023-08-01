@@ -63,21 +63,21 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
 
-	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCErrorCountMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+	// mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCErrorCountMetricName)
+	// assert.NotNil(t, mm)
+	// assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+	// mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName)
+	// assert.NotNil(t, mm)
+	// assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+	// mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	// assert.NotNil(t, mm)
+	// assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+	// mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	// assert.NotNil(t, mm)
+	// assert.NoError(t, err)
 }
 
 // If the endpoint does not exist, fail gracefully
@@ -169,24 +169,24 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
 
-	grpcMethods := []string{unary, server, client, bidirectional}
-	for _, method := range grpcMethods {
-		mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCErrorCountMetricName)
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
+	// grpcMethods := []string{unary, server, client, bidirectional}
+	// for _, method := range grpcMethods {
+	// 	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCErrorCountMetricName)
+	// 	assert.NotNil(t, mm)
+	// 	assert.NoError(t, err)
 
-		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName)
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
+	// 	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName)
+	// 	assert.NotNil(t, mm)
+	// 	assert.NoError(t, err)
 
-		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
+	// 	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
+	// 	assert.NotNil(t, mm)
+	// 	assert.NoError(t, err)
 
-		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
-	}
+	// 	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
+	// 	assert.NotNil(t, mm)
+	// 	assert.NoError(t, err)
+	// }
 }
 
 // If the endpoints cannot be reached, then do not throw an error
@@ -232,10 +232,10 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 	err := ct.run(exp)
 	assert.NoError(t, err)
 
-	// No metrics should be collected
-	assert.Equal(t, 0, len(exp.Result.Insights.NonHistMetricValues[0]))
-	assert.Equal(t, 0, len(exp.Result.Insights.HistMetricValues[0]))
-	assert.Equal(t, 0, len(exp.Result.Insights.SummaryMetricValues[0]))
+	// // No metrics should be collected
+	// assert.Equal(t, 0, len(exp.Result.Insights.NonHistMetricValues[0]))
+	// assert.Equal(t, 0, len(exp.Result.Insights.HistMetricValues[0]))
+	// assert.Equal(t, 0, len(exp.Result.Insights.SummaryMetricValues[0]))
 }
 
 func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {

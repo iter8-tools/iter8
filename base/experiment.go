@@ -4,15 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/base/summarymetrics"
-	"github.com/montanaflynn/stats"
 	"helm.sh/helm/v3/pkg/time"
 )
 
@@ -91,27 +87,6 @@ type Insights struct {
 
 	// VersionNames is list of version identifiers if known
 	VersionNames []VersionInfo `json:"versionNames" yaml:"versionNames"`
-
-	// MetricsInfo identifies the metrics involved in this experiment
-	MetricsInfo map[string]MetricMeta `json:"metricsInfo,omitempty" yaml:"metricsInfo,omitempty"`
-
-	// NonHistMetricValues:
-	// the outer slice must be the same length as the number of app versions
-	// the map key must match name of a metric in MetricsInfo
-	// the inner slice contains the list of all observed metric values for given version and given metric; float value [i]["foo/bar"][k] is the [k]th observation for version [i] for the metric bar under backend foo.
-	// this struct is meant exclusively for metrics of type other than histogram
-	NonHistMetricValues []map[string][]float64 `json:"nonHistMetricValues,omitempty" yaml:"nonHistMetricValues,omitempty"`
-
-	// HistMetricValues:
-	// the outer slice must be the same length as the number of app versions
-	// the map key must match name of a histogram metric in MetricsInfo
-	// the inner slice contains the list of all observed histogram buckets for a given version and given metric; value [i]["foo/bar"][k] is the [k]th observed bucket for version [i] for the hist metric `bar` under backend `foo`.
-	HistMetricValues []map[string][]HistBucket `json:"histMetricValues,omitempty" yaml:"histMetricValues,omitempty"`
-
-	// SummaryMetricValues:
-	// the outer slice must be the same length as the number of tracks
-	// the map key must match the name of the summary metric in MetricsInfo
-	SummaryMetricValues []map[string]summarymetrics.SummaryMetric
 }
 
 // MetricMeta describes a metric
@@ -329,196 +304,6 @@ func (r *ExperimentResult) initInsightsWithNumVersions(n int) error {
 		}
 	}
 
-	return r.Insights.initMetrics()
-}
-
-// initMetrics initializes the data structes inside insights that will hold metrics
-func (in *Insights) initMetrics() error {
-	if in.NonHistMetricValues != nil ||
-		in.HistMetricValues != nil ||
-		in.SummaryMetricValues != nil {
-		if len(in.NonHistMetricValues) != in.NumVersions ||
-			len(in.HistMetricValues) != in.NumVersions ||
-			len(in.SummaryMetricValues) != in.NumVersions {
-			err := fmt.Errorf("inconsistent number for app versions in non hist metric values (%v), hist metric values (%v), num versions (%v)", len(in.NonHistMetricValues), len(in.HistMetricValues), in.NumVersions)
-			log.Logger.Error(err)
-			return err
-		}
-		if len(in.NonHistMetricValues[0])+len(in.HistMetricValues[0])+len(in.SummaryMetricValues[0]) != len(in.MetricsInfo) {
-			err := fmt.Errorf("inconsistent number for metrics in non hist metric values (%v), hist metric values (%v), metrics info (%v)", len(in.NonHistMetricValues[0]), len(in.HistMetricValues[0]), len(in.MetricsInfo))
-			log.Logger.Error(err)
-			return err
-		}
-		return nil
-	}
-	// at this point, there are no known metrics, but there are in.NumVersions
-	// initialize metrics info
-	in.MetricsInfo = make(map[string]MetricMeta)
-	// initialize non hist metric values for each version
-	in.NonHistMetricValues = make([]map[string][]float64, in.NumVersions)
-	// initialize hist metric values for each version
-	in.HistMetricValues = make([]map[string][]HistBucket, in.NumVersions)
-	// initialize summary metric values for each version
-	in.SummaryMetricValues = make([]map[string]summarymetrics.SummaryMetric, in.NumVersions)
-	for i := 0; i < in.NumVersions; i++ {
-		in.NonHistMetricValues[i] = make(map[string][]float64)
-		in.HistMetricValues[i] = make(map[string][]HistBucket)
-		in.SummaryMetricValues[i] = make(map[string]summarymetrics.SummaryMetric)
-	}
-	return nil
-}
-
-// getCounterOrGaugeMetricFromValuesMap gets the value of the given counter or gauge metric, for the given version, from metric values map
-func (in *Insights) getCounterOrGaugeMetricFromValuesMap(i int, m string) *float64 {
-	if mm, ok := in.MetricsInfo[m]; ok {
-		log.Logger.Tracef("found metric info for %v", m)
-		if (mm.Type != CounterMetricType) && (mm.Type != GaugeMetricType) {
-			log.Logger.Errorf("metric %v is not of type counter or gauge", m)
-			return nil
-		}
-		l := len(in.NonHistMetricValues)
-		if l <= i {
-			log.Logger.Warnf("metric values not found for version %v; initialized for %v versions", i, l)
-			return nil
-		}
-		log.Logger.Tracef("metric values found for version %v", i)
-		// grab the metric value and return
-		if vals, ok := in.NonHistMetricValues[i][m]; ok {
-			log.Logger.Tracef("found metric value for version %v and metric %v", i, m)
-			if len(vals) > 0 {
-				return float64Pointer(vals[len(vals)-1])
-			}
-		}
-		log.Logger.Infof("could not find metric value for version %v and metric %v", i, m)
-	}
-	log.Logger.Infof("could not find metric info for %v", m)
-	return nil
-}
-
-// getSampleAggregation aggregates the given base metric for the given version (i) with the given aggregation (a)
-func (in *Insights) getSampleAggregation(i int, baseMetric string, a string) *float64 {
-	at := AggregationType(a)
-	vals := in.NonHistMetricValues[i][baseMetric]
-	if len(vals) == 0 {
-		log.Logger.Infof("metric %v for version %v has no sample", baseMetric, i)
-		return nil
-	}
-	if len(vals) == 1 {
-		log.Logger.Warnf("metric %v for version %v has sample of size 1", baseMetric, i)
-		return float64Pointer(vals[0])
-	}
-	switch at {
-	case MeanAggregator:
-		agg, err := stats.Mean(vals)
-		if err == nil {
-			return float64Pointer(agg)
-		}
-		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error for version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-		return nil
-	case StdDevAggregator:
-		agg, err := stats.StandardDeviation(vals)
-		if err == nil {
-			return float64Pointer(agg)
-		}
-		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-		return nil
-	case MinAggregator:
-		agg, err := stats.Min(vals)
-		if err == nil {
-			return float64Pointer(agg)
-		}
-		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-		return nil
-	case MaxAggregator:
-		agg, err := stats.Max(vals)
-		if err == nil {
-			return float64Pointer(agg)
-		}
-		log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-		return nil
-	default: // don't do anything
-	}
-
-	// at this point, 'a' must be a percentile aggregator
-	var percent float64
-	var err error
-	if strings.HasPrefix(a, "p") {
-		b := strings.TrimPrefix(a, "p")
-		// b must be a percent
-		if match, _ := regexp.MatchString(decimalRegex, b); match {
-			// extract percent
-			if percent, err = strconv.ParseFloat(b, 64); err != nil {
-				log.Logger.WithStackTrace(err.Error()).Errorf("error extracting percent from aggregation func %v", a)
-				return nil
-			}
-			// compute percentile
-			agg, err := stats.Percentile(vals, percent)
-			if err == nil {
-				return float64Pointer(agg)
-			}
-			log.Logger.WithStackTrace(err.Error()).Errorf("aggregation error version %v, metric %v, and aggregation func %v", i, baseMetric, a)
-			return nil
-		}
-		log.Logger.Errorf("unable to extract percent from agggregation func %v", a)
-		return nil
-	}
-	log.Logger.Errorf("invalid aggregation %v", a)
-	return nil
-}
-
-// getSummaryAggregation aggregates the given base metric for the given version (i) with the given aggregation (a)
-func (in *Insights) getSummaryAggregation(i int, baseMetric string, a string) *float64 {
-	at := AggregationType(a)
-	m, ok := in.SummaryMetricValues[i][baseMetric]
-	if !ok { // metric not in list
-		log.Logger.Errorf("invalid metric %s", baseMetric)
-		return nil
-	}
-
-	switch at {
-	case CountAggregator:
-		return float64Pointer(float64(m.Count()))
-	case MeanAggregator:
-		return float64Pointer(m.Sum() / float64(m.Count()))
-	case StdDevAggregator:
-		// sample variance (bessel's correction)
-		// ss / (count -1) - mean^2 * count / (count -1)
-		mean := m.Sum() / float64(m.Count())
-		nMinus1 := float64(m.Count() - 1)
-		return float64Pointer(math.Sqrt((m.SumSquares() / nMinus1) - (mean*mean*float64(m.Count()))/nMinus1))
-	case MinAggregator:
-		return float64Pointer(m.Min())
-	case MaxAggregator:
-		return float64Pointer(m.Max())
-	default:
-		// unknown, do nothing
-	}
-	log.Logger.Errorf("invalid aggregation %v", a)
-	return nil
-}
-
-// aggregateMetric returns the aggregated metric value for a given version and metric
-func (in *Insights) aggregateMetric(i int, m string) *float64 {
-	s := strings.Split(m, "/")
-	if len(s) != 3 {
-		// should not have been called
-		log.Logger.Errorf("metric name %v not valid for aggregation", m)
-		return nil
-	}
-	baseMetric := s[0] + "/" + s[1]
-	if m, ok := in.MetricsInfo[baseMetric]; ok {
-		log.Logger.Tracef("found metric %v used for aggregation", baseMetric)
-		if m.Type == SampleMetricType {
-			log.Logger.Tracef("metric %v used for aggregation is a sample metric", baseMetric)
-			return in.getSampleAggregation(i, baseMetric, s[2])
-		} else if m.Type == SummaryMetricType {
-			log.Logger.Tracef("metric %v used for aggregation is a summary metric", baseMetric)
-			return in.getSummaryAggregation(i, baseMetric, s[2])
-		}
-		log.Logger.Errorf("metric %v used for aggregation is not a sample or summary metric", baseMetric)
-		return nil
-	}
-	log.Logger.Warnf("could not find metric %v used for aggregation", baseMetric)
 	return nil
 }
 
@@ -546,75 +331,6 @@ func NormalizeMetricName(m string) (string, error) {
 	}
 	// already normalized
 	return m, nil
-}
-
-// ScalarMetricValue gets the value of the given scalar metric for the given version
-func (in *Insights) ScalarMetricValue(i int, m string) *float64 {
-	s := strings.Split(m, "/")
-	if len(s) == 3 {
-		log.Logger.Tracef("%v is an aggregated metric", m)
-		return in.aggregateMetric(i, m)
-	} else if len(s) == 2 { // this appears to be a non-aggregated metric
-		var nm string
-		var err error
-		if nm, err = NormalizeMetricName(m); err != nil {
-			return nil
-		}
-		return in.getCounterOrGaugeMetricFromValuesMap(i, nm)
-	} else {
-		log.Logger.Errorf("invalid metric name %v", m)
-		log.Logger.Error("metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function")
-		return nil
-	}
-}
-
-// GetMetricsInfo gets metric meta for the given normalized metric name
-func (in *Insights) GetMetricsInfo(nm string) (*MetricMeta, error) {
-	s := strings.Split(nm, "/")
-
-	// this is an aggregated metric
-	if len(s) == 3 {
-		log.Logger.Tracef("%v is an aggregated metric", nm)
-		vm := s[0] + "/" + s[1]
-		mm, ok := in.MetricsInfo[vm]
-		if !ok {
-			err := fmt.Errorf("unable to find info for vector metric: %v", vm)
-			log.Logger.Error(err)
-			return nil, err
-		}
-		// determine type of aggregation
-		aggType := CounterMetricType
-		if AggregationType(s[2]) != CountAggregator {
-			aggType = GaugeMetricType
-		}
-		// format aggregator text
-		formattedAggregator := s[2] + " value"
-		if strings.HasPrefix(s[2], PercentileAggregatorPrefix) {
-			percent := strings.TrimPrefix(s[2], PercentileAggregatorPrefix)
-			formattedAggregator = fmt.Sprintf("%v-th percentile value", percent)
-		}
-		// return metrics meta
-		return &MetricMeta{
-			Description: fmt.Sprintf("%v of %v", formattedAggregator, vm),
-			Units:       mm.Units,
-			Type:        aggType,
-		}, nil
-	}
-
-	// this is a non-aggregated metric
-	if len(s) == 2 {
-		mm, ok := in.MetricsInfo[nm]
-		if !ok {
-			err := fmt.Errorf("unable to find info for scalar metric: %v", nm)
-			log.Logger.Error(err)
-			return nil, err
-		}
-		return &mm, nil
-	}
-
-	err := fmt.Errorf("invalid metric name %v; metric names must be of the form a/b or a/b/c, where a is the id of the metrics backend, b is the id of a metric name, and c is a valid aggregation function", nm)
-	log.Logger.Error(err)
-	return nil, err
 }
 
 // Driver enables interacting with experiment result stored externally
