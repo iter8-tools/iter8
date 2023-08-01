@@ -1,8 +1,6 @@
 package base
 
 import (
-	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -276,9 +274,6 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 	_ = exp.Result.initInsightsWithNumVersions(1)
 	err = exp.Spec[0].run(exp)
 	assert.NoError(t, err)
-
-	expjson, _ := json.Marshal(exp)
-	fmt.Println(string(expjson))
 
 	expBytes, _ := yaml.Marshal(exp)
 	log.Logger.Debug("\n" + string(expBytes))

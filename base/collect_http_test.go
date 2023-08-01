@@ -428,7 +428,6 @@ func TestRunCollectHTTPGrafana(t *testing.T) {
 			endpoint: endpoint{
 				URL: baseURL + foo,
 			},
-			Grafana: true,
 		},
 	}
 

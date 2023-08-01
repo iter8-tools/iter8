@@ -12,7 +12,6 @@ import (
 
 	"fortio.org/fortio/fhttp"
 	"fortio.org/fortio/periodic"
-	"fortio.org/fortio/stats"
 	"github.com/imdario/mergo"
 	log "github.com/iter8-tools/iter8/base/log"
 )
@@ -61,11 +60,6 @@ type collectHTTPInputs struct {
 
 	// Endpoints is used to define multiple endpoints to test
 	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
-
-	// Determines if Grafana dashboard should be created
-	// dasboard vs report/assess tasks
-	// TODO: remove
-	Grafana bool `json:"grafana" yaml:"grafana"`
 }
 
 // FortioResult is the raw data sent to the metrics server
@@ -333,12 +327,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 				continue
 			}
 
-			// TODO: does ifr need to be a pointer?
-			resultsKey := httpMetricPrefix + "-" + endpointID
-			if t.With.Grafana {
-				resultsKey = endpoint.URL
-			}
-			results[resultsKey] = ifr
+			results[endpoint.URL] = ifr
 		}
 	} else {
 		fo, err := getFortioOptions(t.With.endpoint)
@@ -357,12 +346,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 			return nil, err
 		}
 
-		// TODO: does ifr need to be a pointer?
-		resultsKey := httpMetricPrefix
-		if t.With.Grafana {
-			resultsKey = t.With.endpoint.URL
-		}
-		results[resultsKey] = ifr
+		results[t.With.endpoint.URL] = ifr
 	}
 
 	return results, err
@@ -395,151 +379,24 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 	if err != nil {
 		return err
 	}
-	in := exp.Result.Insights
 
-	if t.With.Grafana {
-		// push data to metrics service
-		fortioResult := FortioResult{
-			EndpointResults: data,
-			Summary:         *exp.Result.Insights,
-		}
+	// push data to metrics service
+	fortioResult := FortioResult{
+		EndpointResults: data,
+		Summary:         *exp.Result.Insights,
+	}
 
-		// get URL of metrics server from environment variable
-		metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
-		if !ok {
-			errorMessage := "could not look up METRICS_SERVER_URL environment variable"
-			log.Logger.Error(errorMessage)
-			return fmt.Errorf(errorMessage)
-		}
+	// get URL of metrics server from environment variable
+	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
+	if !ok {
+		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+		log.Logger.Error(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
 
-		if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
-			return err
-		}
-	} else {
-		for provider, data := range data {
-			// request count
-			m := provider + "/" + builtInHTTPRequestCountID
-			mm := MetricMeta{
-				Description: "number of requests sent",
-				Type:        CounterMetricType,
-			}
-			if err = in.updateMetric(m, mm, 0, float64(data.DurationHistogram.Count)); err != nil {
-				return err
-			}
-
-			// error count & rate
-			val := float64(0)
-			for code, count := range data.RetCodes {
-				if t.errorCode(code) {
-					val += float64(count)
-				}
-			}
-			// error count
-			m = provider + "/" + builtInHTTPErrorCountID
-			mm = MetricMeta{
-				Description: "number of responses that were errors",
-				Type:        CounterMetricType,
-			}
-			if err = in.updateMetric(m, mm, 0, val); err != nil {
-				return err
-			}
-
-			// error-rate
-			m = provider + "/" + builtInHTTPErrorRateID
-			rc := float64(data.DurationHistogram.Count)
-			if rc != 0 {
-				mm = MetricMeta{
-					Description: "fraction of responses that were errors",
-					Type:        GaugeMetricType,
-				}
-				if err = in.updateMetric(m, mm, 0, val/rc); err != nil {
-					return err
-				}
-			}
-
-			// mean-latency
-			m = provider + "/" + builtInHTTPLatencyMeanID
-			mm = MetricMeta{
-				Description: "mean of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Avg); err != nil {
-				return err
-			}
-
-			// stddev-latency
-			m = provider + "/" + builtInHTTPLatencyStdDevID
-			mm = MetricMeta{
-				Description: "standard deviation of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.StdDev); err != nil {
-				return err
-			}
-
-			// min-latency
-			m = provider + "/" + builtInHTTPLatencyMinID
-			mm = MetricMeta{
-				Description: "minimum of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Min); err != nil {
-				return err
-			}
-
-			// max-latency
-			m = provider + "/" + builtInHTTPLatencyMaxID
-			mm = MetricMeta{
-				Description: "maximum of observed latency values",
-				Type:        GaugeMetricType,
-				Units:       StringPointer("msec"),
-			}
-			if err = in.updateMetric(m, mm, 0, 1000.0*data.DurationHistogram.Max); err != nil {
-				return err
-			}
-
-			// percentiles
-			for _, p := range data.DurationHistogram.Percentiles {
-				m = fmt.Sprintf("%v/%v%v", provider, builtInHTTPLatencyPercentilePrefix, p.Percentile)
-				mm = MetricMeta{
-					Description: fmt.Sprintf("%v-th percentile of observed latency values", p.Percentile),
-					Type:        GaugeMetricType,
-					Units:       StringPointer("msec"),
-				}
-				if err = in.updateMetric(m, mm, 0, 1000.0*p.Value); err != nil {
-					return err
-				}
-			}
-
-			// latency histogram
-			m = httpMetricPrefix + "/" + builtInHTTPLatencyHistID
-			mm = MetricMeta{
-				Description: "Latency Histogram",
-				Type:        HistogramMetricType,
-				Units:       StringPointer("msec"),
-			}
-			lh := latencyHist(data.DurationHistogram)
-			if err = in.updateMetric(m, mm, 0, lh); err != nil {
-				return err
-			}
-		}
+	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
+		return err
 	}
 
 	return nil
-}
-
-// compute latency histogram by resampling
-func latencyHist(hd *stats.HistogramData) []HistBucket {
-	buckets := []HistBucket{}
-	for _, v := range hd.Data {
-		buckets = append(buckets, HistBucket{
-			Lower: v.Start * 1000.0, // sec to msec
-			Upper: v.End * 1000.0,
-			Count: uint64(v.Count),
-		})
-	}
-	return buckets
 }

@@ -39,11 +39,6 @@ type collectGRPCInputs struct {
 
 	// Endpoints is used to define multiple endpoints to test
 	Endpoints map[string]runner.Config `json:"endpoints" yaml:"endpoints"`
-
-	// Determines if Grafana dashboard should be created
-	// dasboard vs report/assess tasks
-	// TODO: remove
-	Grafana bool `json:"grafana" yaml:"grafana"`
 }
 
 // collectGRPCTask enables load testing of gRPC services.
@@ -123,11 +118,7 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 				continue
 			}
 
-			resultsKey := gRPCMetricPrefix + "-" + endpointID
-			if t.With.Grafana {
-				resultsKey = endpoint.Call
-			}
-			results[resultsKey] = igr
+			results[endpoint.Call] = igr
 		}
 	} else {
 		// TODO: supply all the allowed options
@@ -140,11 +131,7 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 			return results, err
 		}
 
-		resultsKey := gRPCMetricPrefix
-		if t.With.Grafana {
-			resultsKey = t.With.Call
-		}
-		results[resultsKey] = igr
+		results[t.With.Call] = igr
 	}
 
 	return results, err
@@ -191,83 +178,23 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 	if err = exp.Result.initInsightsWithNumVersions(1); err != nil {
 		return err
 	}
-	in := exp.Result.Insights
 
-	if t.With.Grafana {
-		// push data to metrics service
-		ghzResult := GHZResult{
-			EndpointResults: data,
-			Summary:         *exp.Result.Insights,
-		}
+	// push data to metrics service
+	ghzResult := GHZResult{
+		EndpointResults: data,
+		Summary:         *exp.Result.Insights,
+	}
 
-		// get URL of metrics server from environment variable
-		metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
-		if !ok {
-			errorMessage := "could not look up METRICS_SERVER_URL environment variable"
-			log.Logger.Error(errorMessage)
-			return fmt.Errorf(errorMessage)
-		}
+	// get URL of metrics server from environment variable
+	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
+	if !ok {
+		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+		log.Logger.Error(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
 
-		if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, ghzResult); err != nil {
-			return err
-		}
-	} else {
-		// 4. Populate all metrics collected by this task
-		for provider, data := range data {
-			// populate grpc request count
-			// todo: this logic breaks for looped experiments. Fix when we get to loops.
-			m := provider + "/" + gRPCRequestCountMetricName
-			mm := MetricMeta{
-				Description: "number of gRPC requests sent",
-				Type:        CounterMetricType,
-			}
-			if err = in.updateMetric(m, mm, 0, float64(data.Count)); err != nil {
-				return err
-			}
-
-			// populate error count & rate
-			ec := float64(0)
-			for _, count := range data.ErrorDist {
-				ec += float64(count)
-			}
-
-			// populate count
-			// todo: This logic breaks for looped experiments. Fix when we get to loops.
-			m = provider + "/" + gRPCErrorCountMetricName
-			mm = MetricMeta{
-				Description: "number of responses that were errors",
-				Type:        CounterMetricType,
-			}
-			if err = in.updateMetric(m, mm, 0, ec); err != nil {
-				return err
-			}
-
-			// populate rate
-			// todo: This logic breaks for looped experiments. Fix when we get to loops.
-			m = provider + "/" + gRPCErrorRateMetricName
-			rc := float64(data.Count)
-			if rc != 0 {
-				mm = MetricMeta{
-					Description: "fraction of responses that were errors",
-					Type:        GaugeMetricType,
-				}
-				if err = in.updateMetric(m, mm, 0, ec/rc); err != nil {
-					return err
-				}
-			}
-
-			// populate latency sample
-			m = provider + "/" + gRPCLatencySampleMetricName
-			mm = MetricMeta{
-				Description: "gRPC Latency Sample",
-				Type:        SampleMetricType,
-				Units:       StringPointer("msec"),
-			}
-			lh := latencySample(data.Details)
-			if err = in.updateMetric(m, mm, 0, lh); err != nil {
-				return err
-			}
-		}
+	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, ghzResult); err != nil {
+		return err
 	}
 
 	return nil
