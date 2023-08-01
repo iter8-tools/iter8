@@ -10,9 +10,7 @@
 ---
 {{- if eq "job" .Values.runner }}
 {{ include "k.job" . }}
-{{- else if eq "cronjob" .Values.runner }}
-{{ include "k.cronjob" . }}
 {{- else if eq "none" .Values.runner }}
 {{- else }}
-{{- fail "runner must be one of job, cronjob, or none" }}
+{{- fail "runner must be one of job or none" }}
 {{- end }}

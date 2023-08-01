@@ -337,7 +337,16 @@ func getTestRM(namespace, name string) *testroutemap {
 		},
 		normalizedWeights: []uint32{1, 1},
 	}
+}
 
+func TestTestRM(t *testing.T) {
+	namespace := "default"
+	name := "test"
+	rm := getTestRM(namespace, name)
+
+	assert.Equal(t, namespace, rm.GetNamespace())
+	assert.Equal(t, name, rm.GetName())
+	assert.Equal(t, []uint32{1, 1}, rm.Weights())
 }
 
 func TestGetHTTPDashboardHelper(t *testing.T) {
