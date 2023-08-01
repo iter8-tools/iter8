@@ -495,7 +495,7 @@ func (kd *KubeDriver) GetExperimentLogs() (string, error) {
 		req := podsClient.GetLogs(p.Name, &corev1.PodLogOptions{})
 		podLogs, err := req.Stream(context.TODO())
 		if err != nil {
-			e := errors.New("error in opening log stream")
+			e := fmt.Errorf("error in opening log stream: %e", err)
 			log.Logger.Error(e)
 			return "", e
 		}
@@ -507,7 +507,7 @@ func (kd *KubeDriver) GetExperimentLogs() (string, error) {
 		buf := new(bytes.Buffer)
 		_, err = io.Copy(buf, podLogs)
 		if err != nil {
-			e := errors.New("error in copy information from podLogs to buf")
+			e := fmt.Errorf("error in copy information from podLogs to buf: %e", err)
 			log.Logger.Error(e)
 			return "", e
 		}
