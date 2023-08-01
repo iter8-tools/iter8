@@ -180,7 +180,6 @@ jobs:
         --set runner=job
     - name: try other iter8 k commands
       run: |
-
         iter8 k log
         iter8 k delete
 
