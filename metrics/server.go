@@ -121,8 +121,8 @@ func Start(stopCh <-chan struct{}) error {
 	// configure endpoints
 	http.HandleFunc("/metrics", getMetrics)
 	http.HandleFunc(util.PerformanceResultPath, putResult)
-	http.HandleFunc("/httpDashboard", getHTTPDashboard)
-	http.HandleFunc("/grpcDashboard", getGRPCDashboard)
+	http.HandleFunc(util.HTTPDashboardPath, getHTTPDashboard)
+	http.HandleFunc(util.GRPCDashboardPath, getGRPCDashboard)
 
 	// configure HTTP server
 	server := &http.Server{

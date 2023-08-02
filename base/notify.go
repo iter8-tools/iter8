@@ -115,9 +115,9 @@ func (t *notifyTask) initializeDefaults() {
 	// set default HTTP method
 	if t.With.Method == "" {
 		if t.With.PayloadTemplateURL != "" {
-			t.With.Method = "POST"
+			t.With.Method = http.MethodPost
 		} else {
-			t.With.Method = "GET"
+			t.With.Method = http.MethodGet
 		}
 	}
 }

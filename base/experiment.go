@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -305,32 +303,6 @@ func (r *ExperimentResult) initInsightsWithNumVersions(n int) error {
 	}
 
 	return nil
-}
-
-// NormalizeMetricName normalizes percentile values in metric names
-func NormalizeMetricName(m string) (string, error) {
-	preHTTP := httpMetricPrefix + "/" + builtInHTTPLatencyPercentilePrefix
-	preGRPC := gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix
-	pre := ""
-	if strings.HasPrefix(m, preHTTP) { // built-in http percentile metric
-		pre = preHTTP
-	} else if strings.HasPrefix(m, preGRPC) { // built-in gRPC percentile metric
-		pre = preGRPC
-	}
-	if len(pre) > 0 {
-		var percent float64
-		var e error
-		remainder := strings.TrimPrefix(m, pre)
-		if percent, e = strconv.ParseFloat(remainder, 64); e != nil {
-			err := fmt.Errorf("cannot extract percent from metric %v", m)
-			log.Logger.WithStackTrace(e.Error()).Error(err)
-			return m, err
-		}
-		// return percent normalized metric name
-		return fmt.Sprintf("%v%v", pre, percent), nil
-	}
-	// already normalized
-	return m, nil
 }
 
 // Driver enables interacting with experiment result stored externally

@@ -476,7 +476,7 @@ func TestPutResult(t *testing.T) {
 
 func TestGetHTTPDashboardInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/httpDashboard", nil)
+	req := httptest.NewRequest(http.MethodPost, util.GRPCDashboardPath, nil)
 	getHTTPDashboard(w, req)
 	res := w.Result()
 	defer func() {

@@ -80,27 +80,16 @@ const (
 	defaultHTTPNumRequests = int64(100)
 	// defaultHTTPConnections is the default number of connections (parallel go routines)
 	defaultHTTPConnections = 4
-	// httpMetricPrefix is the prefix for all metrics collected by this task
-	httpMetricPrefix = "http"
-	// the following are a list of names for metrics collected by this task
-	builtInHTTPRequestCountID  = "request-count"
-	builtInHTTPErrorCountID    = "error-count"
-	builtInHTTPErrorRateID     = "error-rate"
-	builtInHTTPLatencyMeanID   = "latency-mean"
-	builtInHTTPLatencyStdDevID = "latency-stddev"
-	builtInHTTPLatencyMinID    = "latency-min"
-	builtInHTTPLatencyMaxID    = "latency-max"
-	builtInHTTPLatencyHistID   = "latency"
-	// prefix used in latency percentile metric names
-	// example: latency-p75.0 is the 75th percentile latency
-	builtInHTTPLatencyPercentilePrefix = "latency-p"
 
 	// MetricsServerURL is the URL of the metrics server
-	// TODO: move elsewhere, abn/service seems to produce cyclical dependency, also needed by gRPC
+	// TODO: move elsewhere because also needed by gRPC
 	MetricsServerURL = "METRICS_SERVER_URL"
-
 	// PerformanceResultPath is the path to the PUT performanceResult/ endpoint
+	// TODO: move elsewhere because also needed by gRPC
 	PerformanceResultPath = "/performanceResult"
+
+	// HTTPDashboardPath is the path to the GET httpDashboard/ endpoint
+	HTTPDashboardPath = "/httpDashboard"
 )
 
 var (
