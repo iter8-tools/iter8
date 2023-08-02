@@ -43,20 +43,6 @@ func TestRunningTasks(t *testing.T) {
 	var verifyHandlerCalled bool
 	mux.HandleFunc("/get", GetTrackingHandler(&verifyHandlerCalled))
 
-	// valid collect task... should succeed
-	ct := &collectHTTPTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectHTTPTaskName),
-		},
-		With: collectHTTPInputs{
-			endpoint: endpoint{
-				Duration: StringPointer("1s"),
-				Headers:  map[string]string{},
-				URL:      url,
-			},
-		},
-	}
-
 	// mock metrics server
 	startHTTPMock(t)
 	metricsServerCalled := false
@@ -87,6 +73,20 @@ func TestRunningTasks(t *testing.T) {
 	})
 
 	_ = os.Chdir(t.TempDir())
+
+	// valid collect task... should succeed
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			endpoint: endpoint{
+				Duration: StringPointer("1s"),
+				Headers:  map[string]string{},
+				URL:      url,
+			},
+		},
+	}
 
 	exp := &Experiment{
 		Spec:   []Task{ct},
