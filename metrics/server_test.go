@@ -1111,7 +1111,7 @@ const ghzResultJSON = `{
 	}
 }`
 
-const ghzDashboardJSON = `{"Endpoints":{"routeguide.RouteGuide.GetFeature":{"Durations":[{"Version":"0","Bucket":"0.032","Value":1},{"Version":"0","Bucket":"19.603","Value":167},{"Version":"0","Bucket":"39.174","Value":0},{"Version":"0","Bucket":"58.744","Value":0},{"Version":"0","Bucket":"78.315","Value":0},{"Version":"0","Bucket":"97.886","Value":3},{"Version":"0","Bucket":"117.457","Value":13},{"Version":"0","Bucket":"137.028","Value":0},{"Version":"0","Bucket":"156.599","Value":0},{"Version":"0","Bucket":"176.17","Value":0},{"Version":"0","Bucket":"195.74","Value":16}],"Statistics":{"Count":200,"ErrorCount":200},"Status codes":{"Unavailable":200}}},"Summary":{"numVersions":0,"versionNames":null,"SummaryMetricValues":null}}`
+const ghzDashboardJSON = `{"Endpoints":{"routeguide.RouteGuide.GetFeature":{"Durations":[{"Version":"0","Bucket":"0.032","Value":1},{"Version":"0","Bucket":"19.603","Value":167},{"Version":"0","Bucket":"39.174","Value":0},{"Version":"0","Bucket":"58.744","Value":0},{"Version":"0","Bucket":"78.315","Value":0},{"Version":"0","Bucket":"97.886","Value":3},{"Version":"0","Bucket":"117.457","Value":13},{"Version":"0","Bucket":"137.028","Value":0},{"Version":"0","Bucket":"156.599","Value":0},{"Version":"0","Bucket":"176.17","Value":0},{"Version":"0","Bucket":"195.74","Value":16}],"Statistics":{"Count":200,"ErrorCount":200},"Status codes":{"Unavailable":200}}},"Summary":{"numVersions":0,"versionNames":null}}`
 
 func TestGetGHZDashboard(t *testing.T) {
 	// instantiate metrics client
