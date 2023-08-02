@@ -1,7 +1,10 @@
 package base
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"testing"
 
@@ -29,7 +32,10 @@ func TestReadExperiment(t *testing.T) {
 }
 
 func TestRunningTasks(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
 	// create and configure HTTP endpoint for testing
 	mux, addr := fhttp.DynamicHTTPServer(false)
@@ -51,26 +57,96 @@ func TestRunningTasks(t *testing.T) {
 		},
 	}
 
+	// mock metrics server
+	startHTTPMock(t)
+	metricsServerCalled := false
+	mockMetricsServer(mockMetricsServerInput{
+		metricsServerURL: metricsServerURL,
+		performanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := FortioResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain url: %s", url))
+			}
+		},
+	})
+
+	_ = os.Chdir(t.TempDir())
+
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
 	}
 	exp.initResults(1)
-	err := ct.run(exp)
+	err = ct.run(exp)
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+	assert.True(t, metricsServerCalled)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 }
 
 func TestRunExperiment(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
 	// create and configure HTTP endpoint for testing
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
 	var verifyHandlerCalled bool
 	mux.HandleFunc("/get", GetTrackingHandler(&verifyHandlerCalled))
+
+	// mock metrics server
+	startHTTPMock(t)
+	metricsServerCalled := false
+	mockMetricsServer(mockMetricsServerInput{
+		metricsServerURL: metricsServerURL,
+		performanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := FortioResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain url: %s", url))
+			}
+		},
+	})
+
+	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
 	CreateExperimentYaml(t, CompletePath("../testdata", "experiment.tpl"), url, "experiment.yaml")
@@ -84,6 +160,7 @@ func TestRunExperiment(t *testing.T) {
 
 	err = RunExperiment(false, &mockDriver{e})
 	assert.NoError(t, err)
+	assert.True(t, metricsServerCalled)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 

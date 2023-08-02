@@ -30,10 +30,10 @@ type ExperimentSpec []Task
 // Used in http and grpc tasks to send the name and namespace to the metrics server
 type ExperimentMetadata struct {
 	// Name is the name of the experiment
-	Name string
+	Name string `json:"name" yaml:"name"`
 
 	// Namespace is the namespace the experiment was deployed in
-	Namespace string
+	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
 // Experiment struct containing spec and result
