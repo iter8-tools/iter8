@@ -14,16 +14,13 @@ import (
 const (
 	// CollectGRPCTaskName is the name of this task which performs load generation and metrics collection for gRPC services.
 	CollectGRPCTaskName = "grpc"
-	// gRPC metric prefix
-	gRPCMetricPrefix = "grpc"
-	// gRPCErrorCountMetricName is name of the gRPC error count metric
-	gRPCErrorCountMetricName = "error-count"
-	// gRPCLatencySampleMetricName is name of the gRPC latency sample metric
-	gRPCLatencySampleMetricName = "latency"
 	// countErrorsDefault is the default value which indicates if errors are counted
 	countErrorsDefault = true
 	// insucureDefault is the default value which indicates that plaintext and insecure connection should be used
 	insecureDefault = true
+
+	// GRPCDashboardPath is the path to the GET grpcDashboard/ endpoint
+	GRPCDashboardPath = "/grpcDashboard"
 )
 
 // collectHTTPInputs contain the inputs to the metrics collection task to be executed.

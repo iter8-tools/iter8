@@ -1,17 +1,19 @@
 package base
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/base/internal"
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -24,6 +26,42 @@ const (
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	call := "helloworld.Greeter.SayHello"
+
+	// mock metrics server
+	startHTTPMock(t)
+	metricsServerCalled := false
+	mockMetricsServer(mockMetricsServerInput{
+		metricsServerURL: metricsServerURL,
+		performanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := FortioResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			if _, ok := bodyFortioResult.EndpointResults[call]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", call))
+			}
+		},
+	})
+
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
@@ -40,7 +78,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		With: collectGRPCInputs{
 			Config: runner.Config{
 				Data: map[string]interface{}{"name": "bob"},
-				Call: "helloworld.Greeter.SayHello",
+				Call: call,
 				Host: internal.LocalHostPort,
 			},
 		},
@@ -51,6 +89,10 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
 	}
 	exp.initResults(1)
 	err = ct.run(exp)
@@ -59,25 +101,10 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+	assert.True(t, metricsServerCalled)
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
-
-	// mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCErrorCountMetricName)
-	// assert.NotNil(t, mm)
-	// assert.NoError(t, err)
-
-	// mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName)
-	// assert.NotNil(t, mm)
-	// assert.NoError(t, err)
-
-	// mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	// assert.NotNil(t, mm)
-	// assert.NoError(t, err)
-
-	// mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	// assert.NotNil(t, mm)
-	// assert.NoError(t, err)
 }
 
 // If the endpoint does not exist, fail gracefully
@@ -114,6 +141,57 @@ func TestRunCollectGRPCUnaryNoEndpoint(t *testing.T) {
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCEndpoints(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	unaryCall := "helloworld.Greeter.SayHello"
+	serverCall := "helloworld.Greeter.SayHelloCS"
+	clientCall := "helloworld.Greeter.SayHellos"
+	bidirectionalCall := "helloworld.Greeter.SayHelloBidi"
+
+	// mock metrics server
+	startHTTPMock(t)
+	metricsServerCalled := false
+	mockMetricsServer(mockMetricsServerInput{
+		metricsServerURL: metricsServerURL,
+		performanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := FortioResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			if _, ok := bodyFortioResult.EndpointResults[unaryCall]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", unaryCall))
+			}
+
+			if _, ok := bodyFortioResult.EndpointResults[serverCall]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", serverCall))
+			}
+
+			if _, ok := bodyFortioResult.EndpointResults[clientCall]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", clientCall))
+			}
+
+			if _, ok := bodyFortioResult.EndpointResults[bidirectionalCall]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", bidirectionalCall))
+			}
+		},
+	})
+
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
@@ -134,19 +212,19 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 			Endpoints: map[string]runner.Config{
 				unary: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHello",
+					Call: unaryCall,
 				},
 				server: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHelloCS",
+					Call: serverCall,
 				},
 				client: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHellos",
+					Call: clientCall,
 				},
 				bidirectional: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHelloBidi",
+					Call: bidirectionalCall,
 				},
 			},
 		},
@@ -157,6 +235,10 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
 	}
 	exp.initResults(1)
 	err = ct.run(exp)
@@ -165,33 +247,50 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+	assert.True(t, metricsServerCalled)
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
-
-	// grpcMethods := []string{unary, server, client, bidirectional}
-	// for _, method := range grpcMethods {
-	// 	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCErrorCountMetricName)
-	// 	assert.NotNil(t, mm)
-	// 	assert.NoError(t, err)
-
-	// 	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName)
-	// 	assert.NotNil(t, mm)
-	// 	assert.NoError(t, err)
-
-	// 	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	// 	assert.NotNil(t, mm)
-	// 	assert.NoError(t, err)
-
-	// 	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	// 	assert.NotNil(t, mm)
-	// 	assert.NoError(t, err)
-	// }
 }
 
 // If the endpoints cannot be reached, then do not throw an error
 // Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	unaryCall := "helloworld.Greeter.SayHello"
+	serverCall := "helloworld.Greeter.SayHelloCS"
+	clientCall := "helloworld.Greeter.SayHellos"
+	bidirectionalCall := "helloworld.Greeter.SayHelloBidi"
+
+	// mock metrics server
+	startHTTPMock(t)
+	metricsServerCalled := false
+	mockMetricsServer(mockMetricsServerInput{
+		metricsServerURL: metricsServerURL,
+		performanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := FortioResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.Equal(t, `{"EndpointResults":{},"Summary":{"numVersions":1,"versionNames":null}}`, string(body))
+		},
+	})
+
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
 		TaskMeta: TaskMeta{
@@ -204,19 +303,19 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 			Endpoints: map[string]runner.Config{
 				unary: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHello",
+					Call: unaryCall,
 				},
 				server: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHelloCS",
+					Call: serverCall,
 				},
 				client: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHellos",
+					Call: clientCall,
 				},
 				bidirectional: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHelloBidi",
+					Call: bidirectionalCall,
 				},
 			},
 		},
@@ -227,57 +326,13 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
-	}
-	exp.initResults(1)
-	err := ct.run(exp)
-	assert.NoError(t, err)
-
-	// // No metrics should be collected
-	// assert.Equal(t, 0, len(exp.Result.Insights.NonHistMetricValues[0]))
-	// assert.Equal(t, 0, len(exp.Result.Insights.HistMetricValues[0]))
-	// assert.Equal(t, 0, len(exp.Result.Insights.SummaryMetricValues[0]))
-}
-
-func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	callType := helloworld.Unary
-	gs, s, err := internal.StartServer(false)
-	if err != nil {
-		assert.FailNow(t, err.Error())
-	}
-	t.Cleanup(s.Stop)
-
-	// valid collect GRPC task... should succeed
-	ct := &collectGRPCTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectGRPCTaskName),
-		},
-		With: collectGRPCInputs{
-			Config: runner.Config{
-				N:           100,
-				RPS:         20,
-				C:           1,
-				Timeout:     runner.Duration(20 * time.Second),
-				Data:        map[string]interface{}{"name": "bob"},
-				DialTimeout: runner.Duration(20 * time.Second),
-				Call:        "helloworld.Greeter.SayHello",
-				Host:        internal.LocalHostPort,
-			},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
 		},
 	}
-
-	exp := &Experiment{
-		Spec: []Task{ct},
-	}
-
 	exp.initResults(1)
-	_ = exp.Result.initInsightsWithNumVersions(1)
-	err = exp.Spec[0].run(exp)
+	err = ct.run(exp)
 	assert.NoError(t, err)
-
-	expBytes, _ := yaml.Marshal(exp)
-	log.Logger.Debug("\n" + string(expBytes))
-
-	count := gs.GetCount(callType)
-	assert.Equal(t, int(ct.With.N), count)
+	assert.True(t, metricsServerCalled)
 }

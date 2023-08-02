@@ -395,11 +395,11 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 
 	// mock metrics server
 	startHTTPMock(t)
-	// metricsServerCalled := false
+	metricsServerCalled := false
 	mockMetricsServer(mockMetricsServerInput{
 		metricsServerURL: metricsServerURL,
 		performanceResultCallback: func(req *http.Request) {
-			// metricsServerCalled = true
+			metricsServerCalled = true
 
 			// check query parameters
 			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
@@ -457,6 +457,7 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 	exp.initResults(1)
 	err = ct.run(exp)
 	assert.NoError(t, err)
+	assert.True(t, metricsServerCalled)
 }
 
 func TestErrorCode(t *testing.T) {
