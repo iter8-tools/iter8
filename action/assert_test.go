@@ -17,7 +17,7 @@ func TestKubeAssert(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	// fix aOpts
 	aOpts := NewAssertOpts(driver.NewFakeKubeDriver(cli.New()))
-	aOpts.Conditions = []string{Completed, NoFailure, SLOs}
+	aOpts.Conditions = []string{Completed, NoFailure}
 
 	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/assertinputs", driver.ExperimentPath))
 	_, _ = aOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{

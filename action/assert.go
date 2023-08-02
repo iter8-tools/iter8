@@ -15,8 +15,6 @@ const (
 	Completed = "completed"
 	// NoFailure states that none of the tasks in the experiment have failed
 	NoFailure = "nofailure"
-	// SLOs states that all app versions participating in the experiment satisfy SLOs
-	SLOs = "slos"
 )
 
 // AssertOpts are the options used for asserting experiment results
