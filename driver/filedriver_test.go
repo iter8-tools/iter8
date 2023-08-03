@@ -10,7 +10,6 @@ import (
 
 	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/base"
-	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,12 +17,6 @@ const (
 	myName      = "myName"
 	myNamespace = "myNamespace"
 )
-
-func startHTTPMock(t *testing.T) {
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
-	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
-}
 
 func TestLocalRun(t *testing.T) {
 	// define METRICS_SERVER_URL
