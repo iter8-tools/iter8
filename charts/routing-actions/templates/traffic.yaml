@@ -3,17 +3,17 @@
 {{- /* validate values for action */}}
 {{- if not (has .Values.action (list "initialize" "modify-weights")) }}
   {{- printf "Unknown action: '%s'" .Values.action | fail }}
-{{- end}}
+{{- end }}
 
 {{- /* validate values for appType */}}
 {{- if not (has .Values.appType (list "kserve-modelmesh" "kserve")) }}
   {{- printf "Unknown appType: '%s'" .Values.appType | fail }}
-{{- end}}
+{{- end }}
 
 {{- /* validate values for strategy */}}
 {{- if not (has .Values.strategy (list "blue-green" "canary")) }}
   {{- printf "Unknown strategy: '%s'" .Values.strategy | fail }}
-{{- end}}
+{{- end }}
 
 {{- /* handle initialize */}}
 {{- if eq "initialize" .Values.action }}
