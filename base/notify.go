@@ -110,7 +110,7 @@ func (t *notifyTask) getPayload(exp *Experiment) (string, error) {
 	return "", nil
 }
 
-// initializeDefaults sets default values for the custom metrics task
+// initializeDefaults sets default values
 func (t *notifyTask) initializeDefaults() {
 	// set default HTTP method
 	if t.With.Method == "" {
