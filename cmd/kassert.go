@@ -17,14 +17,14 @@ Assert if the result of a Kubernetes experiment satisfies the specified conditio
 
 Assertions are especially useful for automation inside CI/CD/GitOps pipelines.
 
-Supported conditions are 'completed', 'nofailure', 'slos', which indicate that the experiment has completed, none of the tasks have failed, and the SLOs are satisfied.
+Supported conditions are 'completed' and 'nofailure' which indicate that the experiment has completed and none of the tasks have failed.
 
-	iter8 k assert -c completed -c nofailure -c slos
-	# same as iter8 k assert -c completed,nofailure,slos
+	iter8 k assert -c completed -c nofailure
+	# same as iter8 k assert -c completed,nofailure
 
 You can optionally specify a timeout, which is the maximum amount of time to wait for the conditions to be satisfied:
 
-	iter8 k assert -c completed,nofailure,slos -t 5s
+	iter8 k assert -c completed,nofailure -t 5s
 `
 
 // newAssertCmd creates the Kubernetes assert command

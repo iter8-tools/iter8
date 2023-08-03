@@ -9,7 +9,7 @@ import (
 func TestDocs(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
-		// assert, SLOs
+		// assert
 		{
 			name: "create docs",
 			cmd:  fmt.Sprintf("docs --commandDocsDir %v", t.TempDir()),

@@ -75,10 +75,7 @@ type ExperimentResult struct {
 	Iter8Version string `json:"iter8Version" yaml:"iter8Version"`
 }
 
-// Insights records the number of versions in this experiment,
-// metric values and SLO indicators for each version,
-// metrics metadata for all metrics, and
-// SLO definitions for all SLOs
+// Insights records the number of versions in this experiment
 type Insights struct {
 	// NumVersions is the number of app versions detected by Iter8
 	NumVersions int `json:"numVersions" yaml:"numVersions"`
@@ -114,35 +111,6 @@ type RewardsWinners struct {
 	Min []int `json:"min,omitempty" yaml:"min,omitempty"`
 }
 
-// SLO is a service level objective
-type SLO struct {
-	// Metric is the fully qualified metric name in the backendName/metricName format
-	Metric string `json:"metric" yaml:"metric"`
-
-	// Limit is the acceptable limit for this metric
-	Limit float64 `json:"limit" yaml:"limit"`
-}
-
-// SLOLimits specify upper or lower limits for metrics
-type SLOLimits struct {
-	// Upper limits for metrics
-	Upper []SLO `json:"upper,omitempty" yaml:"upper,omitempty"`
-
-	// Lower limits for metrics
-	Lower []SLO `json:"lower,omitempty" yaml:"lower,omitempty"`
-}
-
-// SLOResults specify the results of SLO evaluations
-type SLOResults struct {
-	// Upper limits for metrics
-	// Upper[i][j] specifies if upper SLO i is satisfied by version j
-	Upper [][]bool `json:"upper,omitempty" yaml:"upper,omitempty"`
-
-	// Lower limits for metrics
-	// Lower[i][j] specifies if lower SLO i is satisfied by version j
-	Lower [][]bool `json:"lower,omitempty" yaml:"lower,omitempty"`
-}
-
 // TaskMeta provides common fields used across all tasks
 type TaskMeta struct {
 	// Task is the name of the task
@@ -152,7 +120,6 @@ type TaskMeta struct {
 	Run *string `json:"run,omitempty" yaml:"run,omitempty"`
 	// If is the condition used to determine if this task needs to run
 	// If the condition is not satisfied, then it is skipped in an experiment
-	// Example: SLOs()
 	If *string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
