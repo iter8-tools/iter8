@@ -13,7 +13,6 @@ import (
 	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/base"
 	id "github.com/iter8-tools/iter8/driver"
-	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -24,65 +23,6 @@ const (
 	myName      = "myName"
 	myNamespace = "myNamespace"
 )
-
-// TODO: duplicated from collect_http_test.go
-func startHTTPMock(t *testing.T) {
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
-	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
-}
-
-type DashboardCallback func(req *http.Request)
-
-type mockMetricsServerInput struct {
-	metricsServerURL string
-
-	// GET /httpDashboard
-	httpDashboardCallback DashboardCallback
-	// GET /grpcDashboard
-	gRPCDashboardCallback DashboardCallback
-	// PUT /performanceResult
-	performanceResultCallback DashboardCallback
-}
-
-func mockMetricsServer(input mockMetricsServerInput) {
-	// GET /httpDashboard
-	httpmock.RegisterResponder(
-		http.MethodGet,
-		input.metricsServerURL+base.HTTPDashboardPath,
-		func(req *http.Request) (*http.Response, error) {
-			if input.httpDashboardCallback != nil {
-				input.httpDashboardCallback(req)
-			}
-
-			return httpmock.NewStringResponse(200, "success"), nil
-		},
-	)
-
-	// GET /grpcDashboard
-	httpmock.RegisterResponder(
-		http.MethodGet,
-		input.metricsServerURL+base.GRPCDashboardPath,
-		func(req *http.Request) (*http.Response, error) {
-			if input.gRPCDashboardCallback != nil {
-				input.gRPCDashboardCallback(req)
-			}
-			return httpmock.NewStringResponse(200, "success"), nil
-		},
-	)
-
-	// PUT /performanceResult
-	httpmock.RegisterResponder(
-		http.MethodPut,
-		input.metricsServerURL+base.PerformanceResultPath,
-		func(req *http.Request) (*http.Response, error) {
-			if input.performanceResultCallback != nil {
-				input.performanceResultCallback(req)
-			}
-			return httpmock.NewStringResponse(200, "success"), nil
-		},
-	)
-}
 
 func TestKAssert(t *testing.T) {
 	// define METRICS_SERVER_URL
