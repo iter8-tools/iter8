@@ -93,24 +93,6 @@ type VersionInfo struct {
 	Track string `json:"track" yaml:"track"`
 }
 
-// Rewards specify max and min rewards
-type Rewards struct {
-	// Max is list of reward metrics where the version with the maximum value wins
-	Max []string `json:"max,omitempty" yaml:"max,omitempty"`
-	// Min is list of reward metrics where the version with the minimum value wins
-	Min []string `json:"min,omitempty" yaml:"min,omitempty"`
-}
-
-// RewardsWinners are indices of the best versions for each reward metric
-type RewardsWinners struct {
-	// Max rewards
-	// Max[i] specifies the index of the winner of reward metric Rewards.Max[i]
-	Max []int `json:"max,omitempty" yaml:"max,omitempty"`
-	// Min rewards
-	// Min[i] specifies the index of the winner of reward metric Rewards.Min[i]
-	Min []int `json:"min,omitempty" yaml:"min,omitempty"`
-}
-
 // TaskMeta provides common fields used across all tasks
 type TaskMeta struct {
 	// Task is the name of the task
