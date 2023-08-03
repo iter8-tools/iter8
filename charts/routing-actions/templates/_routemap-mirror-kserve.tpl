@@ -51,7 +51,7 @@ data:
                       Host: {{ (index $versions 0).name }}-predictor-default.{{ $.Release.Namespace }}.svc.cluster.local
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
+                      app-version: "{{ (index $versions 0).name }}"
               mirror:
                 host: knative-local-gateway.istio-system.svc.cluster.local
               mirrorPercentage: 
@@ -60,7 +60,7 @@ data:
                     set: Host: {{ (index $versions 1).name }}-predictor-default.{{ $.Release.Namespace }}.svc.cluster.local
                   response:
                     add:
-                      mm-vmodel-id: {{ (index $versions 1).name }}
+                      app-version: {{ (index $versions 1).name }}
             {{ `{{- end }}`}}
             {{- end }}
             - name: {{ (index $versions 0).name }}
@@ -75,6 +75,6 @@ data:
                       Host: {{ (index $versions 0).name }}-predictor-default.{{ .Release.Namespace }}.svc.cluster.local
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
+                      app-version: "{{ (index $versions 0).name }}"
 immutable: true
 {{- end }}

@@ -26,5 +26,5 @@ spec:
             Host: {{ (index $versions 0).name }}-predictor-default.{{ .Release.Namespace }}.svc.cluster.local
         response:
           add:
-            mm-vmodel-id: {{ (index $versions 0).name }}
+            app-version: {{ (index $versions 0).name }}
 {{- end }}

@@ -33,7 +33,7 @@ spec:
           - branch
         response:
           add:
-            mm-vmodel-id: {{ (index $versions 0).name }}
+            app-version: {{ (index $versions 0).name }}
   - name: split
     route:
     - destination:

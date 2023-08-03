@@ -64,7 +64,7 @@ data:
                       Host: {{ (index $versions (add1 $i)).name }}-predictor-default.{{ $.Release.Namespace }}.svc.cluster.local
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
+                      app-version: "{{ (index $versions (add1 $i)).name }}"
             {{ `{{- end }}`}}
             {{- end }}
             - name: {{ (index $versions 0).name }}
@@ -79,6 +79,6 @@ data:
                       Host: {{ (index $versions 0).name }}-predictor-default.{{ .Release.Namespace }}.svc.cluster.local
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
+                      app-version: "{{ (index $versions 0).name }}"
 immutable: true
 {{- end }}

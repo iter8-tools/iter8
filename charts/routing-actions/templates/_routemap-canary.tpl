@@ -62,7 +62,7 @@ data:
                       mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
+                      app-version: "{{ (index $versions (add1 $i)).name }}"
             {{ `{{- end }}`}}
             {{- end }}
             - route:
@@ -76,6 +76,6 @@ data:
                       mm-vmodel-id: "{{ (index $versions 0).name }}"
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
+                      app-version: "{{ (index $versions 0).name }}"
 immutable: true
 {{- end }}

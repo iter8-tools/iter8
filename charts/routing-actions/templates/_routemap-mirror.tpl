@@ -51,7 +51,7 @@ data:
                       mm-vmodel-id: "{{ (index $versions 0).name }}"
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
+                      app-version: "{{ (index $versions 0).name }}"
               {{ `{{- if gt (index .Weights ` }} 1 {{ `) 0 }}`}}
               mirror:
                 host: {{ .Values.modelmeshServingService }}.{{ .Release.Namespace }}.svc.cluster.local
@@ -65,7 +65,7 @@ data:
                       mm-vmodel-id: "{{ (index $versions 1).name }}"
                   response:
                     add:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
+                      app-version: "{{ (index $versions 0).name }}"
               {{ `{{- end }}`}}
 immutable: true
 {{- end }}
