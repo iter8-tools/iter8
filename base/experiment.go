@@ -87,16 +87,6 @@ type Insights struct {
 	VersionNames []VersionInfo `json:"versionNames" yaml:"versionNames"`
 }
 
-// MetricMeta describes a metric
-type MetricMeta struct {
-	// Description is a human readable description of the metric
-	Description string `json:"description" yaml:"description"`
-	// Units for this metric (if any)
-	Units *string `json:"units,omitempty" yaml:"units,omitempty"`
-	// Type of the metric. Example: counter
-	Type MetricType `json:"type" yaml:"type"`
-}
-
 // VersionInfo is basic information about a version
 type VersionInfo struct {
 	// Version name
