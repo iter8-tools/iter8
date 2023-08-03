@@ -65,25 +65,32 @@ func GetTrackingHandler(breadcrumb *bool) func(w http.ResponseWriter, r *http.Re
 	}
 }
 
+// StartHTTPMock activates and cleanups httpmock
 func StartHTTPMock(t *testing.T) {
 	httpmock.Activate()
 	t.Cleanup(httpmock.DeactivateAndReset)
 	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
 }
 
-type DashboardCallback func(req *http.Request)
+// MetricsServerCallback is a callback function for when the particular metrics server endpoint
+// is called
+type MetricsServerCallback func(req *http.Request)
 
+// MockMetricsServerInput is the input for MockMetricsServer()
+// allows the user to provide callbacks when particular endpoints are called
 type MockMetricsServerInput struct {
 	MetricsServerURL string
 
 	// GET /httpDashboard
-	HTTPDashboardCallback DashboardCallback
+	HTTPDashboardCallback MetricsServerCallback
 	// GET /grpcDashboard
-	GRPCDashboardCallback DashboardCallback
+	GRPCDashboardCallback MetricsServerCallback
 	// PUT /performanceResult
-	PerformanceResultCallback DashboardCallback
+	PerformanceResultCallback MetricsServerCallback
 }
 
+// MockMetricsServer is a mock metrics server
+// use the callback functions in the MockMetricsServerInput to test if those endpoints are called
 func MockMetricsServer(input MockMetricsServerInput) {
 	// GET /httpDashboard
 	httpmock.RegisterResponder(
