@@ -30,11 +30,11 @@ func TestKRun(t *testing.T) {
 	mux.HandleFunc("/get", base.GetTrackingHandler(&verifyHandlerCalled))
 
 	// mock metrics server
-	startHTTPMock(t)
+	base.StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	base.MockMetricsServer(base.MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters

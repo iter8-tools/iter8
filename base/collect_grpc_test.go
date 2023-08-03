@@ -34,11 +34,11 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	call := "helloworld.Greeter.SayHello"
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -152,11 +152,11 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 	bidirectionalCall := "helloworld.Greeter.SayHelloBidi"
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -267,11 +267,11 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 	bidirectionalCall := "helloworld.Greeter.SayHelloBidi"
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters

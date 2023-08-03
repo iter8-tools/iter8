@@ -26,64 +26,6 @@ const (
 	myNamespace = "myNamespace"
 )
 
-func startHTTPMock(t *testing.T) {
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
-	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
-}
-
-type DashboardCallback func(req *http.Request)
-
-type mockMetricsServerInput struct {
-	metricsServerURL string
-
-	// GET /httpDashboard
-	httpDashboardCallback DashboardCallback
-	// GET /grpcDashboard
-	gRPCDashboardCallback DashboardCallback
-	// PUT /performanceResult
-	performanceResultCallback DashboardCallback
-}
-
-func mockMetricsServer(input mockMetricsServerInput) {
-	// GET /httpDashboard
-	httpmock.RegisterResponder(
-		http.MethodGet,
-		input.metricsServerURL+HTTPDashboardPath,
-		func(req *http.Request) (*http.Response, error) {
-			if input.httpDashboardCallback != nil {
-				input.httpDashboardCallback(req)
-			}
-
-			return httpmock.NewStringResponse(200, "success"), nil
-		},
-	)
-
-	// GET /grpcDashboard
-	httpmock.RegisterResponder(
-		http.MethodGet,
-		input.metricsServerURL+GRPCDashboardPath,
-		func(req *http.Request) (*http.Response, error) {
-			if input.gRPCDashboardCallback != nil {
-				input.gRPCDashboardCallback(req)
-			}
-			return httpmock.NewStringResponse(200, "success"), nil
-		},
-	)
-
-	// PUT /performanceResult
-	httpmock.RegisterResponder(
-		http.MethodPut,
-		input.metricsServerURL+PerformanceResultPath,
-		func(req *http.Request) (*http.Response, error) {
-			if input.performanceResultCallback != nil {
-				input.performanceResultCallback(req)
-			}
-			return httpmock.NewStringResponse(200, "success"), nil
-		},
-	)
-}
-
 func TestRunCollectHTTP(t *testing.T) {
 	// define METRICS_SERVER_URL
 	metricsServerURL := "http://iter8.default:8080"
@@ -109,11 +51,11 @@ func TestRunCollectHTTP(t *testing.T) {
 	url := fmt.Sprintf("http://localhost:%d/", addr.Port) + foo
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -240,11 +182,11 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 	endpoint2URL := baseURL + bar
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -394,11 +336,11 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 	endpoint2URL := baseURL + bar
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -489,7 +431,7 @@ func TestErrorCode(t *testing.T) {
 }
 
 func TestPutPerformanceResultToMetricsService(t *testing.T) {
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	metricsServerURL := "http://my-server.com"
 	namespace := "my-namespace"
@@ -533,7 +475,7 @@ func TestRunCollectHTTPGrafana(t *testing.T) {
 	metricsServerCalled := false
 	namespace := "default"
 	experiment := "default"
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	httpmock.RegisterResponder(http.MethodPut, metricsServerURL+PerformanceResultPath,
 		func(req *http.Request) (*http.Response, error) {
 			metricsServerCalled = true

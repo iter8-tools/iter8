@@ -30,7 +30,7 @@ func getNotifyTask(t *testing.T, n notifyInputs) *notifyTask {
 // GET method
 func TestNotify(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	nt := getNotifyTask(t, notifyInputs{
 		URL:         testNotifyURL,
@@ -63,7 +63,7 @@ type testNotification struct {
 // POST method and PayloadTemplateURL
 func TestNotifyWithPayload(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	nt := getNotifyTask(t, notifyInputs{
 		Method:             http.MethodPost,
@@ -133,7 +133,7 @@ func TestNotifyWithPayload(t *testing.T) {
 // GET method and headers and query parameters
 func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	nt := getNotifyTask(t, notifyInputs{
 		URL: testNotifyURL,
@@ -177,7 +177,7 @@ func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 // bad method and SoftFailure
 func TestNotifyBadMethod(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	nt := getNotifyTask(t, notifyInputs{
 		URL:         testNotifyURL,
@@ -197,7 +197,7 @@ func TestNotifyBadMethod(t *testing.T) {
 	// test should fail
 	assert.Error(t, err)
 
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	nt = getNotifyTask(t, notifyInputs{
 		URL:         testNotifyURL,
@@ -221,7 +221,7 @@ func TestNotifyBadMethod(t *testing.T) {
 // default to POST method with PayloadTemplateURL
 func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	nt := getNotifyTask(t, notifyInputs{
 		URL:                testNotifyURL,
@@ -269,7 +269,7 @@ func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 // No URL
 func TestNotifyNoURL(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
-	startHTTPMock(t)
+	StartHTTPMock(t)
 
 	nt := getNotifyTask(t, notifyInputs{
 		SoftFailure: false,

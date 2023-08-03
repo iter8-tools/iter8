@@ -44,11 +44,11 @@ func TestRunningTasks(t *testing.T) {
 	mux.HandleFunc("/get", GetTrackingHandler(&verifyHandlerCalled))
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -118,11 +118,11 @@ func TestRunExperiment(t *testing.T) {
 	mux.HandleFunc("/get", GetTrackingHandler(&verifyHandlerCalled))
 
 	// mock metrics server
-	startHTTPMock(t)
+	StartHTTPMock(t)
 	metricsServerCalled := false
-	mockMetricsServer(mockMetricsServerInput{
-		metricsServerURL: metricsServerURL,
-		performanceResultCallback: func(req *http.Request) {
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters

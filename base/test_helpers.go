@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,4 +63,62 @@ func GetTrackingHandler(breadcrumb *bool) func(w http.ResponseWriter, r *http.Re
 		time.Sleep(100 * time.Millisecond)
 		w.WriteHeader(200)
 	}
+}
+
+func StartHTTPMock(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.DeactivateAndReset)
+	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
+}
+
+type DashboardCallback func(req *http.Request)
+
+type MockMetricsServerInput struct {
+	MetricsServerURL string
+
+	// GET /httpDashboard
+	HTTPDashboardCallback DashboardCallback
+	// GET /grpcDashboard
+	GRPCDashboardCallback DashboardCallback
+	// PUT /performanceResult
+	PerformanceResultCallback DashboardCallback
+}
+
+func MockMetricsServer(input MockMetricsServerInput) {
+	// GET /httpDashboard
+	httpmock.RegisterResponder(
+		http.MethodGet,
+		input.MetricsServerURL+HTTPDashboardPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.HTTPDashboardCallback != nil {
+				input.HTTPDashboardCallback(req)
+			}
+
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
+	// GET /grpcDashboard
+	httpmock.RegisterResponder(
+		http.MethodGet,
+		input.MetricsServerURL+GRPCDashboardPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.GRPCDashboardCallback != nil {
+				input.GRPCDashboardCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
+	// PUT /performanceResult
+	httpmock.RegisterResponder(
+		http.MethodPut,
+		input.MetricsServerURL+PerformanceResultPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.PerformanceResultCallback != nil {
+				input.PerformanceResultCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
 }
