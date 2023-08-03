@@ -61,7 +61,7 @@ func newKAssertCmd(kd *driver.KubeDriver) *cobra.Command {
 
 // addConditionFlag adds the condition flag to command
 func addConditionFlag(cmd *cobra.Command, conditionPtr *[]string) {
-	cmd.Flags().StringSliceVarP(conditionPtr, "condition", "c", nil, fmt.Sprintf("%v | %v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure, ia.SLOs))
+	cmd.Flags().StringSliceVarP(conditionPtr, "condition", "c", nil, fmt.Sprintf("%v | %v; can specify multiple or separate conditions with commas;", ia.Completed, ia.NoFailure))
 	_ = cmd.MarkFlagRequired("condition")
 }
 

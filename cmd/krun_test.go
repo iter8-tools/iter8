@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"testing"
 
@@ -15,13 +18,49 @@ import (
 )
 
 func TestKRun(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(base.MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
 	// create and configure HTTP endpoint for testing
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
 	var verifyHandlerCalled bool
 	mux.HandleFunc("/get", base.GetTrackingHandler(&verifyHandlerCalled))
+
+	// mock metrics server
+	startHTTPMock(t)
+	metricsServerCalled := false
+	mockMetricsServer(mockMetricsServerInput{
+		metricsServerURL: metricsServerURL,
+		performanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := base.FortioResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			fmt.Println(string(body))
+
+			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", url))
+			}
+		},
+	})
+
+	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
 	base.CreateExperimentYaml(t, base.CompletePath("../testdata", "experiment.tpl"), url, id.ExperimentPath)
@@ -51,5 +90,5 @@ func TestKRun(t *testing.T) {
 	runTestActionCmd(t, tests)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
-
+	assert.True(t, metricsServerCalled)
 }

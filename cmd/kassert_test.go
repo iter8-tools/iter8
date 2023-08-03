@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -10,44 +13,128 @@ import (
 	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/base"
 	id "github.com/iter8-tools/iter8/driver"
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	myName      = "myName"
+	myNamespace = "myNamespace"
+)
+
+// TODO: duplicated from collect_http_test.go
+func startHTTPMock(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.DeactivateAndReset)
+	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
+}
+
+type DashboardCallback func(req *http.Request)
+
+type mockMetricsServerInput struct {
+	metricsServerURL string
+
+	// GET /httpDashboard
+	httpDashboardCallback DashboardCallback
+	// GET /grpcDashboard
+	gRPCDashboardCallback DashboardCallback
+	// PUT /performanceResult
+	performanceResultCallback DashboardCallback
+}
+
+func mockMetricsServer(input mockMetricsServerInput) {
+	// GET /httpDashboard
+	httpmock.RegisterResponder(
+		http.MethodGet,
+		input.metricsServerURL+base.HTTPDashboardPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.httpDashboardCallback != nil {
+				input.httpDashboardCallback(req)
+			}
+
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
+	// GET /grpcDashboard
+	httpmock.RegisterResponder(
+		http.MethodGet,
+		input.metricsServerURL+base.GRPCDashboardPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.gRPCDashboardCallback != nil {
+				input.gRPCDashboardCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
+	// PUT /performanceResult
+	httpmock.RegisterResponder(
+		http.MethodPut,
+		input.metricsServerURL+base.PerformanceResultPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.performanceResultCallback != nil {
+				input.performanceResultCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+}
+
 func TestKAssert(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(base.MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
 	// create and configure HTTP endpoint for testing
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
 	var verifyHandlerCalled bool
 	mux.HandleFunc("/get", base.GetTrackingHandler(&verifyHandlerCalled))
+
+	// mock metrics server
+	startHTTPMock(t)
+	metricsServerCalled := false
+	mockMetricsServer(mockMetricsServerInput{
+		metricsServerURL: metricsServerURL,
+		performanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := base.FortioResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			fmt.Println(string(body))
+
+			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", url))
+			}
+		},
+	})
+
+	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
 	base.CreateExperimentYaml(t, base.CompletePath("../testdata", "experiment.tpl"), url, id.ExperimentPath)
 
 	// run test
 	testAssert(t, id.ExperimentPath, url, "output/kassert.txt", false)
-	// sanity check -- handler was called
-	assert.True(t, verifyHandlerCalled)
-}
-
-func TestKAssertFailsSLOs(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-
-	// create and configure HTTP endpoint for testing
-	mux, addr := fhttp.DynamicHTTPServer(false)
-	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
-	var verifyHandlerCalled bool
-	mux.HandleFunc("/get", base.GetTrackingHandler(&verifyHandlerCalled))
-
-	// create experiment.yaml
-	base.CreateExperimentYaml(t, base.CompletePath("../testdata", "experiment_fails.tpl"), url, id.ExperimentPath)
-
-	// run test
-	testAssert(t, id.ExperimentPath, url, "output/kassertfails.txt", true)
+	assert.True(t, metricsServerCalled)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 }
@@ -57,7 +144,7 @@ func testAssert(t *testing.T, experiment string, url string, expectedOutputFile 
 		// k launch
 		{
 			name:   "k launch",
-			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http,assess} --set http.url=%s --set http.duration=2s", base.CompletePath("../charts", "iter8"), url),
+			cmd:    fmt.Sprintf("k launch -c %v --localChart --set tasks={http} --set http.url=%s --set http.duration=2s", base.CompletePath("../charts", "iter8"), url),
 			golden: base.CompletePath("../testdata", "output/klaunch.txt"),
 		},
 		// k run
@@ -68,7 +155,7 @@ func testAssert(t *testing.T, experiment string, url string, expectedOutputFile 
 		// k assert
 		{
 			name:      "k assert",
-			cmd:       "k assert -c completed -c nofailure -c slos",
+			cmd:       "k assert -c completed -c nofailure",
 			golden:    base.CompletePath("../testdata", expectedOutputFile),
 			wantError: expectError,
 		},
