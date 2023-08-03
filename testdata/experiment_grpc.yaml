@@ -1,6 +1,6 @@
 spec:
-  # task 1: generate gRPC requests for application
-  # collect Iter8's built-in gRPC latency and error-related metrics
+# task 1: generate gRPC requests for application
+# collect Iter8's built-in gRPC latency and error-related metrics
 - task: grpc
   with:
     total: 200
