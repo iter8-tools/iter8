@@ -1,0 +1,81 @@
+{{- $versions := include "resolve.appVersions" . | mustFromJson }}
+
+{{- /* validate values for action */}}
+{{- if not (has .Values.action (list "initialize" "modify-weights")) }}
+  {{- printf "Unknown action: '%s'" .Values.action | fail }}
+{{- end}}
+
+{{- /* validate values for appType */}}
+{{- if not (has .Values.appType (list "kserve-modelmesh" "kserve")) }}
+  {{- printf "Unknown appType: '%s'" .Values.appType | fail }}
+{{- end}}
+
+{{- /* validate values for strategy */}}
+{{- if not (has .Values.strategy (list "blue-green" "canary")) }}
+  {{- printf "Unknown strategy: '%s'" .Values.strategy | fail }}
+{{- end}}
+
+{{- /* handle initialize */}}
+{{- if eq "initialize" .Values.action }}
+
+  {{- /* gateway needed only for kserve-modelmesh */}}
+  {{- if eq "kserve-modelmesh" .Values.appType }}
+    {{ include "initial.gateway" . }}
+  {{- end }}
+---
+  {{- if eq "kserve-modelmesh" .Values.appType }}
+    {{ include "initial.virtualservice" . }}
+  {{- else }} {{- /* eq "kserve" .Values.appType */}}
+    {{- if eq "blue-green" .Values.strategy }}
+      {{ include "initial.virtualservice-kserve-bg" . }}
+    {{- else }} {{- /* eq "canary" .Values.strategy */}}
+      {{ include "initial.virtualservice-kserve-canary" . }}
+    {{- end }}
+  {{- end }}
+---
+  {{- if eq "kserve-modelmesh" .Values.appType }}
+    {{ include "initial.serviceentry" . }}
+  {{- else }} {{- /* eq "kserve" .Values.appType */}}
+    {{ include "initial.service-kserve" . }}
+  {{- end }}
+---
+  {{- if eq "kserve-modelmesh" .Values.appType }}
+    {{- if eq "blue-green" .Values.strategy }}
+      {{ include "routemap-bluegreen" . }}
+    {{- else }} {{- /* eq "canary" .Values.strategy */}}
+      {{ include "routemap-canary" . }}
+    {{- end }}
+  {{- else }} {{- /* eq "kserve" .Values.appType */}}
+    {{- if eq "blue-green" .Values.strategy }}
+      {{ include "routemap-bluegreen-kserve" . }}
+    {{- else }} {{- /* eq "canary" .Values.strategy */}}
+      {{ include "routemap-canary-kserve" . }}
+    {{- end }}
+  {{- end }}
+---
+  {{- if eq "blue-green" .Values.strategy }}
+    {{- range $i, $v := $versions }}
+      {{ include "create.weight-config" (unset $v "weight") }}
+---
+    {{- end }}
+  {{- else if eq "mirror" .Values.strategy }}
+    {{- range $i, $v := (rest $versions) }}
+      {{ include "create.weight-config" (unset $v "weight") }}
+---
+    {{- end }}
+  {{- end }}
+
+{{- else if eq "modify-weights" .Values.action }}
+  {{- if eq "blue-green" .Values.strategy }}
+    {{- range $i, $v := .Values.appVersions }}
+      {{ include "create.weight-config" $v }}
+---
+    {{- end }}
+  {{- else if eq "mirror" .Values.strategy }}
+    {{- range $i, $v := (rest $versions) }}
+      {{ include "create.weight-config" (set $v "weight" $.Values.mirrorPercentage) }}
+---
+    {{- end }}
+  {{- end }}
+
+{{- end }}

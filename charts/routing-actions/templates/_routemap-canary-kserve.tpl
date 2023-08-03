@@ -1,9 +1,9 @@
-{{- define "routemap-canary" }}
-{{- $versions := include "resolve.modelVersions" . | mustFromJson }}
+{{- define "routemap-canary-kserve" }}
+{{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.modelName }}-routemap
+  name: {{ .Values.appName }}-routemap
   labels:
     app.kubernetes.io/managed-by: iter8
     iter8.tools/kind: routemap
@@ -14,31 +14,33 @@ data:
     {{- range $i, $v := $versions }}
     - resources:
       - gvrShort: isvc
-        name: {{ default (printf "%s-%d" $.Values.modelName $i) $v.name }}
+        name: {{ default (printf "%s-%d" $.Values.appName $i) $v.name }}
         namespace: {{ default "modelmesh-serving" $v.namespace }}
     {{- end }}
     routingTemplates:
-      {{ .Values.trafficStrategy }}:
+      {{ .Values.strategy }}:
         gvrShort: vs
         template: |
           apiVersion: networking.istio.io/v1beta1
           kind: VirtualService
           metadata:
-            name: {{ .Values.modelName }}
+            name: {{ .Values.appName }}
           spec:
             gateways:
-            - {{ .Values.externalGateway }}
+            - knative-serving/knative-ingress-gateway
+            - knative-serving/knative-local-gateway
             - mesh
             hosts:
-            - {{ .Values.modelName }}.{{ .Release.Namespace }}
-            - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc
-            - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc.cluster.local
+            - {{ .Values.appName }}.{{ .Release.Namespace }}
+            - {{ .Values.appName }}.{{ .Release.Namespace }}.svc
+            - {{ .Values.appName }}.{{ .Release.Namespace }}.svc.cluster.local
             http:
             {{- /* For candidate versions, ensure mm-model header is required in all matches */}}
             {{- range $i, $v := (rest $versions) }}
             {{- /* continue only if candidate is ready (weight > 0) */}}
             {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
-            - match:
+            - name: {{ (index $versions (add1 $i)).name }}
+              match:
               {{- /* A match may have several ORd clauses */}}
               {{- range $j, $m := $v.match }}
               {{- /* include any other header requirements */}}
@@ -51,25 +53,32 @@ data:
 {{ toYaml (omit $m "headers") | indent 16 }}
                 {{- end }}
               {{- end }}
+              rewrite:
+                uri: /v2/models/{{ (index $versions (add1 $i)).name }}/infer
               route:
               - destination:
-                  host: {{ $.Values.modelmeshServingService }}.{{ $.Release.Namespace }}.svc.cluster.local
-                  port:
-                    number: {{ $.Values.modelmeshServingPort }}
+                  host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
+                      Host: {{ (index $versions (add1 $i)).name }}-predictor-default.{{ $.Release.Namespace }}.svc.cluster.local
+                  response:
+                    add:
                       mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
             {{ `{{- end }}`}}
             {{- end }}
-            - route:
+            - name: {{ (index $versions 0).name }}
+              rewrite:
+                uri: /v2/models/{{ (index $versions 0).name }}/infer
+              route:
               - destination:
-                  host: {{ $.Values.modelmeshServingService }}.{{ $.Release.Namespace }}.svc.cluster.local
-                  port:
-                    number: {{ $.Values.modelmeshServingPort }}
+                  host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
+                      Host: {{ (index $versions 0).name }}-predictor-default.{{ .Release.Namespace }}.svc.cluster.local
+                  response:
+                    add:
                       mm-vmodel-id: "{{ (index $versions 0).name }}"
 immutable: true
 {{- end }}

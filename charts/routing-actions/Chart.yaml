@@ -1,7 +1,7 @@
 apiVersion: v2
-name: traffic-templates
-version: 0.1.5
-description: Iter8 traffic templates
+name: routing-actions
+version: 0.1.0
+description: Iter8 routing actions
 type: application
 keywords:
 - Iter8
@@ -18,4 +18,4 @@ maintainers:
 - name: Iter8
   email: iter8-tools@gmail.com
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
-appVersion: v0.14
+appVersion: v0.15

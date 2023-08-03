@@ -1,9 +1,9 @@
 {{- define "routemap-bluegreen" }}
-{{- $versions := include "resolve.modelVersions" . | mustFromJson }}
+{{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.modelName }}-routemap
+  name: {{ .Values.appName }}-routemap
   labels:
     app.kubernetes.io/managed-by: iter8
     iter8.tools/kind: routemap
@@ -22,21 +22,21 @@ data:
         namespace: {{ $v.namespace }}
     {{- end }}
     routingTemplates:
-      {{ .Values.trafficStrategy }}:
+      {{ .Values.strategy }}:
         gvrShort: vs
         template: |
           apiVersion: networking.istio.io/v1beta1
           kind: VirtualService
           metadata:
-            name: {{ .Values.modelName }}
+            name: {{ .Values.appName }}
           spec:
             gateways:
             - {{ .Values.externalGateway }}
             - mesh
             hosts:
-            - {{ .Values.modelName }}.{{ .Release.Namespace }}
-            - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc
-            - {{ .Values.modelName }}.{{ .Release.Namespace }}.svc.cluster.local
+            - {{ .Values.appName }}.{{ .Release.Namespace }}
+            - {{ .Values.appName }}.{{ .Release.Namespace }}.svc
+            - {{ .Values.appName }}.{{ .Release.Namespace }}.svc.cluster.local
             http:
             - route:
               # primary model
@@ -51,6 +51,9 @@ data:
                   request:
                     set:
                       mm-vmodel-id: "{{ (index $versions 0).name }}" 
+                  response:
+                    add:
+                      mm-vmodel-id: "{{ (index $versions 0).name }}"
               # other models
               {{- range $i, $v := (rest $versions) }}
               {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
@@ -62,7 +65,10 @@ data:
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}" 
+                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
+                  resppnse:
+                    add:
+                      mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
               {{ `{{- end }}`}}     
               {{- end }}
 immutable: true
