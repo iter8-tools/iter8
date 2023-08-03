@@ -178,3 +178,30 @@ func TestFailExperiment(t *testing.T) {
 	exp.failExperiment()
 	assert.False(t, exp.NoFailure())
 }
+
+func TestUnmarshalJSONError(t *testing.T) {
+	tests := []struct {
+		specBytes  string
+		errMessage string
+	}{
+		{
+			specBytes:  "hello world",
+			errMessage: `invalid character 'h' looking for beginning of value`,
+		},
+		{
+			specBytes:  "[{}]",
+			errMessage: `invalid task found without a task name or a run command`,
+		},
+		{
+			specBytes:  `[{"task":"hello world"}]`,
+			errMessage: `unknown task: hello world`,
+		},
+	}
+
+	for _, test := range tests {
+		exp := ExperimentSpec{}
+		err := exp.UnmarshalJSON([]byte(test.specBytes))
+		assert.Error(t, err)
+		assert.EqualError(t, err, test.errMessage)
+	}
+}
