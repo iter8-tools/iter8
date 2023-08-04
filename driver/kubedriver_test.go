@@ -30,7 +30,7 @@ func TestKOps(t *testing.T) {
 
 	// install
 	err = kd.install(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
-		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
+		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
 
@@ -45,7 +45,7 @@ func TestKOps(t *testing.T) {
 
 	// upgrade
 	err = kd.upgrade(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
-		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
+		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
 

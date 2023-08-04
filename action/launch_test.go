@@ -16,7 +16,7 @@ func TestKubeLaunch(t *testing.T) {
 
 	// fix lOpts
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
-	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
+	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)
@@ -35,7 +35,7 @@ func TestKubeLaunchLocalChart(t *testing.T) {
 	lOpts := NewLaunchOpts(driver.NewFakeKubeDriver(cli.New()))
 	lOpts.ChartName = base.CompletePath("../charts", "iter8")
 	lOpts.LocalChart = true
-	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s", "runner=job"}
+	lOpts.Values = []string{"tasks={http}", "http.url=https://httpbin.org/get", "http.duration=2s"}
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)

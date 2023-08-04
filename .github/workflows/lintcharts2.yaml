@@ -34,8 +34,7 @@ jobs:
       run: |
         helm template charts/iter8 \
         --set tasks={http} \
-        --set http.url=http://httpbin.default/get \
-        --set runner=job >> iter8.yaml
+        --set http.url=http://httpbin.default/get >> iter8.yaml
 
     - name: Lint Kubernetes YAML file
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -69,8 +68,7 @@ jobs:
         --set tasks={grpc} \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
-        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        --set runner=job >> iter8.yaml
+        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" >> iter8.yaml
 
     - name: Lint Kubernetes YAML file
       if: steps.modified-files.outputs.any_modified == 'true'

@@ -8,9 +8,4 @@
 {{ include "k.rolebinding" . }}
 {{- end}}
 ---
-{{- if eq "job" .Values.runner }}
 {{ include "k.job" . }}
-{{- else if eq "none" .Values.runner }}
-{{- else }}
-{{- fail "runner must be one of job or none" }}
-{{- end }}
