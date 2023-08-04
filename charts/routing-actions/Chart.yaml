@@ -1,7 +1,7 @@
 apiVersion: v2
-name: traffic-templates
-version: 0.1.7
-description: Iter8 traffic templates
+name: routing-actions
+version: 0.1.0
+description: Iter8 routing actions
 type: application
 keywords:
 - Iter8
