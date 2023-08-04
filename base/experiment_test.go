@@ -61,7 +61,7 @@ func TestRunningTasks(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := FortioResult{}
+			bodyFortioResult := HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
@@ -135,7 +135,7 @@ func TestRunExperiment(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := FortioResult{}
+			bodyFortioResult := HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)

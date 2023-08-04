@@ -18,9 +18,6 @@ const (
 	countErrorsDefault = true
 	// insucureDefault is the default value which indicates that plaintext and insecure connection should be used
 	insecureDefault = true
-
-	// GRPCDashboardPath is the path to the GET grpcDashboard/ endpoint
-	GRPCDashboardPath = "/grpcDashboard"
 )
 
 // collectHTTPInputs contain the inputs to the metrics collection task to be executed.

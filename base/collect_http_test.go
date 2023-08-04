@@ -68,10 +68,12 @@ func TestRunCollectHTTP(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := FortioResult{}
+			bodyFortioResult := HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
+
+			fmt.Println(string(body))
 
 			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
 				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain url: %s", url))
@@ -178,6 +180,8 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 	mux.HandleFunc("/"+bar, barHandler)
 
 	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
+	endpoint1 := "endpoint1"
+	endpoint2 := "endpoint2"
 	endpoint1URL := baseURL + foo
 	endpoint2URL := baseURL + bar
 
@@ -199,17 +203,17 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := FortioResult{}
+			bodyFortioResult := HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[endpoint1URL]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain url: %s", endpoint1URL))
+			if _, ok := bodyFortioResult.EndpointResults[endpoint1]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint1))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[endpoint2URL]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain url: %s", endpoint2URL))
+			if _, ok := bodyFortioResult.EndpointResults[endpoint2]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint2))
 			}
 		},
 	})
@@ -257,69 +261,110 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 }
 
-// TODO: this test is broken because the FortioResult.EndpointResults uses URL
-// as the key but in this case, there are two endpoints with the same URL but
-// different headers.
-//
-// // Multiple endpoints are provided but they share one URL
-// // Test that the base-level URL is provided to each endpoint
-// // Make multiple calls to the same URL but with different headers
-// func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
-// 	mux, addr := fhttp.DynamicHTTPServer(false)
+// Multiple endpoints are provided but they share one URL
+// Test that the base-level URL is provided to each endpoint
+// Make multiple calls to the same URL but with different headers
+func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
-// 	// handler
-// 	fooCalled := false // ensure that foo header is provided
-// 	barCalled := false // ensure that bar header is provided
-// 	fooHandler := func(w http.ResponseWriter, r *http.Request) {
-// 		from := r.Header.Get(from)
-// 		if from == foo {
-// 			fooCalled = true
-// 		} else if from == bar {
-// 			barCalled = true
-// 		}
+	mux, addr := fhttp.DynamicHTTPServer(false)
 
-// 		w.WriteHeader(200)
-// 	}
-// 	mux.HandleFunc("/", fooHandler)
+	// handler
+	fooCalled := false // ensure that foo header is provided
+	barCalled := false // ensure that bar header is provided
+	fooHandler := func(w http.ResponseWriter, r *http.Request) {
+		from := r.Header.Get(from)
+		if from == foo {
+			fooCalled = true
+		} else if from == bar {
+			barCalled = true
+		}
 
-// 	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/", fooHandler)
 
-// 	// valid collect HTTP task... should succeed
-// 	ct := &collectHTTPTask{
-// 		TaskMeta: TaskMeta{
-// 			Task: StringPointer(CollectHTTPTaskName),
-// 		},
-// 		With: collectHTTPInputs{
-// 			endpoint: endpoint{
-// 				Duration: StringPointer("1s"),
-// 				URL:      baseURL,
-// 			},
-// 			Endpoints: map[string]endpoint{
-// 				endpoint1: {
-// 					Headers: map[string]string{
-// 						from: foo,
-// 					},
-// 				},
-// 				endpoint2: {
-// 					Headers: map[string]string{
-// 						from: bar,
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
+	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
+	endpoint1 := "endpoint1"
+	endpoint2 := "endpoint2"
 
-// 	exp := &Experiment{
-// 		Spec:   []Task{ct},
-// 		Result: &ExperimentResult{},
-// 	}
-// 	exp.initResults(1)
-// 	err := ct.run(exp)
-// 	assert.NoError(t, err)
-// 	assert.True(t, fooCalled) // ensure that the /foo/ handler is called
-// 	assert.True(t, barCalled) // ensure that the /bar/ handler is called
-// 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
-// }
+	// mock metrics server
+	StartHTTPMock(t)
+	metricsServerCalled := false
+	MockMetricsServer(MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		PerformanceResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyFortioResult := HTTPResult{}
+			err = json.Unmarshal(body, &bodyFortioResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			if _, ok := bodyFortioResult.EndpointResults[endpoint1]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint1))
+			}
+
+			if _, ok := bodyFortioResult.EndpointResults[endpoint2]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint2))
+			}
+		},
+	})
+
+	// valid collect HTTP task... should succeed
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			endpoint: endpoint{
+				Duration: StringPointer("1s"),
+				URL:      baseURL,
+			},
+			Endpoints: map[string]endpoint{
+				endpoint1: {
+					Headers: map[string]string{
+						from: foo,
+					},
+				},
+				endpoint2: {
+					Headers: map[string]string{
+						from: bar,
+					},
+				},
+			},
+		},
+	}
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
+	}
+	exp.initResults(1)
+	err = ct.run(exp)
+	assert.NoError(t, err)
+	assert.True(t, fooCalled) // ensure that the /foo/ handler is called
+	assert.True(t, barCalled) // ensure that the /bar/ handler is called
+	assert.True(t, metricsServerCalled)
+	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+}
 
 // If the endpoints cannot be reached, then do not throw an error
 // Should not return an nil pointer dereference error (see #1451)
@@ -353,7 +398,7 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := FortioResult{}
+			bodyFortioResult := HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
 

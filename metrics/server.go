@@ -460,7 +460,7 @@ func getHTTPEndpointRow(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpoint
 	return row
 }
 
-func getHTTPDashboardHelper(fortioResult util.FortioResult) httpDashboard {
+func getHTTPDashboardHelper(fortioResult util.HTTPResult) httpDashboard {
 	dashboard := httpDashboard{
 		Endpoints: map[string]httpEndpointRow{},
 	}
@@ -577,7 +577,7 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fortioResult := util.FortioResult{}
+	fortioResult := util.HTTPResult{}
 	err = json.Unmarshal(result, &fortioResult)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot JSON unmarshal result into FortioResult: \"%s\"", string(result))

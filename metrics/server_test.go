@@ -350,7 +350,7 @@ func TestTestRM(t *testing.T) {
 }
 
 func TestGetHTTPDashboardHelper(t *testing.T) {
-	fortioResult := util.FortioResult{}
+	fortioResult := util.HTTPResult{}
 	err := json.Unmarshal([]byte(fortioResultJSON), &fortioResult)
 	assert.NoError(t, err)
 

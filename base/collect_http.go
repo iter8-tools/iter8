@@ -62,9 +62,9 @@ type collectHTTPInputs struct {
 	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
 }
 
-// FortioResult is the raw data sent to the metrics server
+// HTTPResult is the raw data sent to the metrics server
 // This data will be transformed into httpDashboard when getHTTPGrafana is called
-type FortioResult struct {
+type HTTPResult struct {
 	// key is the endpoint
 	EndpointResults map[string]*fhttp.HTTPRunnerResults
 
@@ -80,16 +80,6 @@ const (
 	defaultHTTPNumRequests = int64(100)
 	// defaultHTTPConnections is the default number of connections (parallel go routines)
 	defaultHTTPConnections = 4
-
-	// MetricsServerURL is the URL of the metrics server
-	// TODO: move elsewhere because also needed by gRPC
-	MetricsServerURL = "METRICS_SERVER_URL"
-	// PerformanceResultPath is the path to the PUT performanceResult/ endpoint
-	// TODO: move elsewhere because also needed by gRPC
-	PerformanceResultPath = "/performanceResult"
-
-	// HTTPDashboardPath is the path to the GET httpDashboard/ endpoint
-	HTTPDashboardPath = "/httpDashboard"
 )
 
 var (
@@ -316,7 +306,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 				continue
 			}
 
-			results[endpoint.URL] = ifr
+			results[endpointID] = ifr
 		}
 	} else {
 		fo, err := getFortioOptions(t.With.endpoint)
@@ -335,7 +325,7 @@ func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResult
 			return nil, err
 		}
 
-		results[t.With.endpoint.URL] = ifr
+		results[t.With.URL] = ifr
 	}
 
 	return results, err
@@ -370,7 +360,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 	}
 
 	// push data to metrics service
-	fortioResult := FortioResult{
+	fortioResult := HTTPResult{
 		EndpointResults: data,
 		Summary:         *exp.Result.Insights,
 	}

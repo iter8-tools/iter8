@@ -54,12 +54,10 @@ func TestKAssert(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := base.FortioResult{}
+			bodyFortioResult := base.HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
-
-			fmt.Println(string(body))
 
 			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
 				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", url))

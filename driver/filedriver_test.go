@@ -48,7 +48,7 @@ func TestLocalRun(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := base.FortioResult{}
+			bodyFortioResult := base.HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
