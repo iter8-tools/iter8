@@ -106,7 +106,7 @@ jobs:
       run: |
         iter8 k launch \
         --set tasks={http} \
-        --set http.url="http://httpbin.default/get" \
+        --set http.url="http://httpbin.default/get"
     - name: try other iter8 k commands
       run: |
         iter8 k assert -c completed -c nofailure --timeout 60s
@@ -176,7 +176,7 @@ jobs:
         --set tasks={grpc} \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
-        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
     - name: try other iter8 k commands
       run: |
         iter8 k assert -c completed -c nofailure --timeout 60s
@@ -205,7 +205,7 @@ jobs:
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
-        --set http.url=http://httpbin.default \
+        --set http.url=http://httpbin.default
     - name: k assert experiment completed without failures
       run: |
         iter8 k assert -c completed -c nofailure --timeout 60s
@@ -234,7 +234,7 @@ jobs:
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
         --set ready.namespace=default \
-        --set http.url=http://httpbin.default/get \
+        --set http.url=http://httpbin.default/get
     - name: k assert experiment completed without failures
       run: |
         iter8 k assert -n experiments -c completed -c nofailure --timeout 60s
