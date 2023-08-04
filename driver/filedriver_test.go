@@ -54,7 +54,7 @@ func TestLocalRun(t *testing.T) {
 			assert.NotNil(t, body)
 
 			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain url: %s", url))
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", url))
 			}
 		},
 	})

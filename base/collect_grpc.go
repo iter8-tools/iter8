@@ -108,7 +108,7 @@ func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) 
 				continue
 			}
 
-			results[endpoint.Call] = igr
+			results[endpointID] = igr
 		}
 	} else {
 		// TODO: supply all the allowed options

@@ -57,7 +57,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 			assert.NotNil(t, body)
 
 			if _, ok := bodyFortioResult.EndpointResults[call]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", call))
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", call))
 			}
 		},
 	})
@@ -146,11 +146,6 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 	err := os.Setenv(MetricsServerURL, metricsServerURL)
 	assert.NoError(t, err)
 
-	unaryCall := "helloworld.Greeter.SayHello"
-	serverCall := "helloworld.Greeter.SayHelloCS"
-	clientCall := "helloworld.Greeter.SayHellos"
-	bidirectionalCall := "helloworld.Greeter.SayHelloBidi"
-
 	// mock metrics server
 	StartHTTPMock(t)
 	metricsServerCalled := false
@@ -174,20 +169,20 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[unaryCall]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", unaryCall))
+			if _, ok := bodyFortioResult.EndpointResults[unary]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", unary))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[serverCall]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", serverCall))
+			if _, ok := bodyFortioResult.EndpointResults[server]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", server))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[clientCall]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", clientCall))
+			if _, ok := bodyFortioResult.EndpointResults[client]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", client))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[bidirectionalCall]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain call: %s", bidirectionalCall))
+			if _, ok := bodyFortioResult.EndpointResults[bidirectional]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", bidirectional))
 			}
 		},
 	})
@@ -212,19 +207,19 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 			Endpoints: map[string]runner.Config{
 				unary: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: unaryCall,
+					Call: "helloworld.Greeter.SayHello",
 				},
 				server: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: serverCall,
+					Call: "helloworld.Greeter.SayHelloCS",
 				},
 				client: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: clientCall,
+					Call: "helloworld.Greeter.SayHellos",
 				},
 				bidirectional: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: bidirectionalCall,
+					Call: "helloworld.Greeter.SayHelloBidi",
 				},
 			},
 		},
