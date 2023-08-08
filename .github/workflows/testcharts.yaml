@@ -92,7 +92,7 @@ jobs:
         iter8 k delete
 
   http-payload-experiment:
-    name: HTTP load test
+    name: HTTP load test with payload
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -147,7 +147,7 @@ jobs:
         iter8 k delete
 
   http-multiple-experiment:
-    name: HTTP load test
+    name: HTTP load test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -318,7 +318,7 @@ jobs:
         iter8 k delete
 
   grpc-multiple-experiment:
-    name: gRPC load test
+    name: gRPC load test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -378,7 +378,7 @@ jobs:
         iter8 k delete
 
   grpc-experiment2:
-    name: gRPC load test
+    name: gRPC load test 2
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
