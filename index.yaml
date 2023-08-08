@@ -276,6 +276,31 @@ entries:
   routing-actions:
   - apiVersion: v2
     appVersion: v0.15
+    created: "2023-08-08T17:44:44.541514657Z"
+    description: Iter8 routing actions
+    digest: c33c3dd16c00f0e41d081444f9042e4d3a96c967db4d3e7b72a2a8c1e7d1828e
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: routing-actions
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/routing-actions-0.1.1/routing-actions-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: v0.15
     created: "2023-08-04T13:05:04.34650508Z"
     description: Iter8 routing actions
     digest: 34535bbecfa4824ebbd5a7cd3abb40dacc8b25c7113ad91faf7040525d0cc8d9
@@ -635,4 +660,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-08-04T13:05:04.509990993Z"
+generated: "2023-08-08T17:44:44.541556757Z"
