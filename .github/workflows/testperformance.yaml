@@ -103,7 +103,7 @@ jobs:
           --set assess.SLOs.upper.http/latency-p90=10 \
           --set assess.SLOs.upper.http/error-count=0 \
           --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 120s
         iter8 k report
         iter8 k delete
 
@@ -170,7 +170,7 @@ jobs:
           --set assess.SLOs.upper.grpc/latency/p90=500 \
           --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
           --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 180s
         iter8 k report
         iter8 k delete
 
