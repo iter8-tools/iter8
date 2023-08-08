@@ -35,8 +35,6 @@ spec:
               capabilities:
                 drop:
                 - ALL
-              runAsNonRoot: true
-              runAsUser: 1001040000
           restartPolicy: Never
       backoffLimit: 0
 {{- end }}
