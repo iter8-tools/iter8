@@ -66,7 +66,7 @@ data:
                   request:
                     set:
                       mm-vmodel-id: "{{ (index $versions (add1 $i)).name }}"
-                  resppnse:
+                  response:
                     add:
                       app-version: "{{ (index $versions (add1 $i)).name }}"
               {{ `{{- end }}`}}     
