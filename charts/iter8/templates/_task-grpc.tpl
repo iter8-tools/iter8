@@ -58,28 +58,28 @@
 {{- /* Repeat above for each endpoint */ -}}
 {{- range $endpointID, $endpoint := $vals.endpoints }}
 {{- if $endpoint.protoURL }}
-{{- $protoFile := print "/tmp" $endpointID "_ghz.proto" }}
+{{- $protoFile := print "/tmp/" $endpointID "_ghz.proto" }}
 # task: download proto file from URL for endpoint
 - run: |
     curl -o {{ $protoFile }} {{ $endpoint.protoURL }}
 {{- $_ := set $endpoint "proto" $protoFile }}
 {{- end }}
 {{- if $endpoint.dataURL }}
-{{- $dataFile := print "/tmp" $endpointID "_data.json" }}
+{{- $dataFile := print "/tmp/" $endpointID "_data.json" }}
 # task: download JSON data file from URL for endpoint
 - run: |
     curl -o {{ $dataFile }} {{ $endpoint.dataURL }}
 {{- $_ := set $endpoint "data-file" $dataFile }}
 {{- end }}
 {{- if $endpoint.binaryDataURL }}
-{{- $binDataFile := print "/tmp" $endpointID "_data.bin" }}
+{{- $binDataFile := print "/tmp/" $endpointID "_data.bin" }}
 # task: download binary data file from URL for endpoint
 - run: |
     curl -o {{ $binDataFile }} {{ $endpoint.binaryDataURL }}
 {{- $_ := set $endpoint "binary-file" $binDataFile }}
 {{- end }}
 {{- if $endpoint.metadataURL }}
-{{- $metadataFile := print "/tmp" $endpointID "_metadata.json" }}
+{{- $metadataFile := print "/tmp/" $endpointID "_metadata.json" }}
 # task: download metadata JSON file from URL for endpoint
 - run: |
     curl -o {{ $metadataFile }} {{ $endpoint.metadataURL }}
