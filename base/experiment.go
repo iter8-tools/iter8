@@ -53,6 +53,12 @@ type Experiment struct {
 
 // ExperimentResult defines the current results from the experiment
 type ExperimentResult struct {
+	// Name is the name of this experiment
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+
+	// Namespace is the namespace of this experiment
+	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
+
 	// Revision of this experiment
 	Revision int `json:"revision,omitempty" yaml:"revision,omitempty"`
 
@@ -216,6 +222,8 @@ func (in *Insights) TrackVersionStr(i int) string {
 // initResults initializes the results section of an experiment
 func (exp *Experiment) initResults(revision int) {
 	exp.Result = &ExperimentResult{
+		Name:              exp.Metadata.Name,
+		Namespace:         exp.Metadata.Namespace,
 		Revision:          revision,
 		StartTime:         time.Now(),
 		NumLoops:          0,
