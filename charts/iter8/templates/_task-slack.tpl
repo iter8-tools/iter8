@@ -8,9 +8,6 @@
 {{- end }}
 # task: send a Slack notification
 - task: notify
-{{- if .if }}
-  if: {{ .if | quote }}
-{{- end }}
   with:
     url: {{ .url }}
     method: POST
