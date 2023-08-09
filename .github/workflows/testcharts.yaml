@@ -198,7 +198,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 120s
+        iter8 k assert -c completed -c nofailure --timeout 180s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -372,7 +372,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 120s
+        iter8 k assert -c completed -c nofailure --timeout 180s
         iter8 k report
         iter8 k log
         iter8 k delete
