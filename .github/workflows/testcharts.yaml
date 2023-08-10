@@ -296,6 +296,11 @@ jobs:
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
         
+    - name: Check routeguide
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        kubectl logs service/routeguide
+  
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -354,6 +359,11 @@ jobs:
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
         
+    - name: Check routeguide
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        kubectl logs service/routeguide
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |

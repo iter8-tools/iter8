@@ -134,6 +134,10 @@ jobs:
         -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
+
+    - name: Check routeguide
+      run: |
+        kubectl logs service/routeguide
         
     - name: load test grpc service with protoURL
       run: |
