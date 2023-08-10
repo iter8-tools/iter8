@@ -1,4 +1,4 @@
-{{- define "routemap-bluegreen-kserve" }}
+{{- define "kserve.routemap-bluegreen" }}
 {{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: v1
 kind: ConfigMap

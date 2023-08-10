@@ -1,4 +1,4 @@
-{{- define "routemap-mirror" }}
+{{- define "deployment.routemap-bluegreen" }}
 {{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: v1
 kind: ConfigMap
@@ -11,18 +11,16 @@ metadata:
 data:
   strSpec: |
     versions: 
-{{- range $i, $v := $versions }}
+    {{- range $i, $v := $versions }}
     - weight: {{ $v.weight }}
       resources:
-      {{- if gt $i 0 }}
       - gvrShort: cm
         name: {{ $v.name }}-weight-config
         namespace: {{ $v.namespace }}
-      {{- end }}
-      - gvrShort: isvc
+      - gvrShort: deploy
         name: {{ $v.name }}
         namespace: {{ $v.namespace }}
-{{- end }}
+    {{- end }}
     routingTemplates:
       {{ .Values.strategy }}:
         gvrShort: vs
@@ -41,31 +39,35 @@ data:
             - {{ .Values.appName }}.{{ .Release.Namespace }}.svc.cluster.local
             http:
             - route:
+              # primary model
               - destination:
-                  host: {{ .Values.modelmeshServingService }}.{{ .Release.Namespace }}.svc.cluster.local
+                  host: {{ (index $versions 0).name }}.{{ .Release.Namespace }}.svc.cluster.local
+                  {{- if .Values.appPort }}
                   port:
-                    number: {{ $.Values.modelmeshServingPort }}
+                    number: {{ $.Values.appPort }}
+                  {{- end }}
+                {{ `{{- if gt (index .Weights 1) 0 }}` }}
+                weight: {{ `{{ index .Weights 0 }}` }}
+                {{ `{{- end }}`}}
+                headers: 
+                  response:
+                    add:
+                      app-version: {{ (index $versions 0).name }}
+              # other models
+              {{- range $i, $v := (rest $versions) }}
+              {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
+              - destination:
+                  host: {{ (index $versions (add1 $i)).name }}.{{ $.Release.Namespace }}.svc.cluster.local
+                  {{- if $.Values.appPort }}
+                  port:
+                    number: {{ $.Values.appPort }}
+                  {{- end }}
+                weight: {{ `{{ index .Weights `}}{{ print (add1 $i) }}{{` }}`}}
                 headers:
-                  request:
-                    set:
-                      mm-vmodel-id: "{{ (index $versions 0).name }}"
                   response:
                     add:
-                      app-version: "{{ (index $versions 0).name }}"
-              {{ `{{- if gt (index .Weights ` }} 1 {{ `) 0 }}`}}
-              mirror:
-                host: {{ .Values.modelmeshServingService }}.{{ .Release.Namespace }}.svc.cluster.local
-                port:
-                  number: {{ $.Values.modelmeshServingPort }}
-              mirrorPercentage:
-                value: {{ `{{ index .Weights `}} 1 {{` }}`}}
-              headers:
-                  request:
-                    set:
-                      mm-vmodel-id: "{{ (index $versions 1).name }}"
-                  response:
-                    add:
-                      app-version: "{{ (index $versions 0).name }}"
-              {{ `{{- end }}`}}
+                      app-version: {{ (index $versions (add1 $i)).name }}
+              {{ `{{- end }}`}}     
+              {{- end }}
 immutable: true
 {{- end }}

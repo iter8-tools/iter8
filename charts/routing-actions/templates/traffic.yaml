@@ -6,7 +6,7 @@
 {{- end }}
 
 {{- /* validate values for appType */}}
-{{- if not (has .Values.appType (list "kserve-modelmesh" "kserve")) }}
+{{- if not (has .Values.appType (list "kserve-modelmesh" "kserve" "deployment")) }}
   {{- printf "Unknown appType: '%s'" .Values.appType | fail }}
 {{- end }}
 
@@ -18,38 +18,48 @@
 {{- /* handle initialize */}}
 {{- if eq "initialize" .Values.action }}
 
-  {{- /* gateway needed only for kserve-modelmesh */}}
-  {{- if eq "kserve-modelmesh" .Values.appType }}
+  {{- /* gateway needed for kserve-modelmesh, deployment */}}
+  {{- if has .Values.appType (list "kserve-modelmesh" "deployment") }}
     {{ include "initial.gateway" . }}
   {{- end }}
 ---
-  {{- if eq "kserve-modelmesh" .Values.appType }}
-    {{ include "initial.virtualservice" . }}
+  {{- if eq "deployment" .Values.appType }}
+    {{ include "deployment.virtualservice" . }}
+  {{- else if eq "kserve-modelmesh" .Values.appType }}
+    {{ include "mm.virtualservice" . }}
   {{- else }} {{- /* eq "kserve" .Values.appType */}}
     {{- if eq "blue-green" .Values.strategy }}
-      {{ include "initial.virtualservice-kserve-bg" . }}
+      {{ include "kserve.virtualservice-bluegreen" . }}
     {{- else }} {{- /* eq "canary" .Values.strategy */}}
-      {{ include "initial.virtualservice-kserve-canary" . }}
+      {{ include "kserve.virtualservice-canary" . }}
     {{- end }}
   {{- end }}
 ---
-  {{- if eq "kserve-modelmesh" .Values.appType }}
-    {{ include "initial.serviceentry" . }}
+  {{- if eq "deployment" .Values.appType }}
+    {{ include "deployment.service" . }}
+  {{- else if eq "kserve-modelmesh" .Values.appType }}
+    {{ include "mm.serviceentry" . }}
   {{- else }} {{- /* eq "kserve" .Values.appType */}}
-    {{ include "initial.service-kserve" . }}
+    {{ include "kserve.service" . }}
   {{- end }}
 ---
-  {{- if eq "kserve-modelmesh" .Values.appType }}
+  {{- if eq "deployment" .Values.appType }}
     {{- if eq "blue-green" .Values.strategy }}
-      {{ include "routemap-bluegreen" . }}
+      {{ include "deployment.routemap-bluegreen" . }}
     {{- else }} {{- /* eq "canary" .Values.strategy */}}
-      {{ include "routemap-canary" . }}
+      {{ include "deployment.routemap-canary" . }}
+    {{- end }}
+  {{- else if eq "kserve-modelmesh" .Values.appType }}
+    {{- if eq "blue-green" .Values.strategy }}
+      {{ include "mm.routemap-bluegreen" . }}
+    {{- else }} {{- /* eq "canary" .Values.strategy */}}
+      {{ include "mm.routemap-canary" . }}
     {{- end }}
   {{- else }} {{- /* eq "kserve" .Values.appType */}}
     {{- if eq "blue-green" .Values.strategy }}
-      {{ include "routemap-bluegreen-kserve" . }}
+      {{ include "kserve.routemap-bluegreen" . }}
     {{- else }} {{- /* eq "canary" .Values.strategy */}}
-      {{ include "routemap-canary-kserve" . }}
+      {{ include "kserve.routemap-canary" . }}
     {{- end }}
   {{- end }}
 ---

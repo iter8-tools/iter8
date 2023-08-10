@@ -1,4 +1,4 @@
-{{- define "initial.virtualservice" }}
+{{- define "deployment.virtualservice" }}
 {{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -15,14 +15,13 @@ spec:
   http:
   - route:
     - destination:
-        host: {{ .Values.modelmeshServingService }}.{{ .Release.Namespace }}.svc.cluster.local
+        host: {{ (index $versions 0).name }}.{{ .Release.Namespace }}.svc.cluster.local
+        {{- if .Values.appPort }}
         port:
-          number: {{ .Values.modelmeshServingPort }}
+          number: {{ .Values.appPort }}
+        {{- end }}
       headers:
-        request:
-          set:
-            mm-vmodel-id: {{ (index $versions 0).name }}
         response:
           add:
-            app-version: "{{ (index $versions 0).name }}"
+            app-version: {{ (index $versions 0).name }}
 {{- end }}

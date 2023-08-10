@@ -1,10 +1,10 @@
-{{- define "initial.service-kserve" }}
+{{- define "deployment.service" }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.appName }}
 spec:
-  externalName: knative-local-gateway.istio-system.svc.cluster.local
+  externalName: istio-ingressgateway.istio-system.svc.cluster.local
   sessionAffinity: None
   type: ExternalName
 {{- end }}
