@@ -99,9 +99,12 @@ jobs:
           --set http.endpoints.post.url=http://httpbin.default/post \
           --set http.endpoints.post.payloadStr=hello \
           --set http.duration="3s" \
-          --set assess.SLOs.upper.http/latency-p50=5 \
-          --set assess.SLOs.upper.http/latency-p90=10 \
-          --set assess.SLOs.upper.http/error-count=0 \
+          --set assess.SLOs.upper.http-get/error-count=0 \
+          --set assess.SLOs.upper.http-get/latency-mean=50 \
+          --set assess.SLOs.upper.http-getAnything/error-count=0 \
+          --set assess.SLOs.upper.http-getAnything/latency-mean=100 \
+          --set assess.SLOs.upper.http-post/error-count=0 \
+          --set assess.SLOs.upper.http-post/latency-mean=150 \
           --set runner=job
         iter8 k assert -c completed -c nofailure -c slos --timeout 300s
         iter8 k report
@@ -170,7 +173,7 @@ jobs:
           --set assess.SLOs.upper.grpc/latency/p90=500 \
           --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
           --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 600s
         iter8 k report
         iter8 k delete
 

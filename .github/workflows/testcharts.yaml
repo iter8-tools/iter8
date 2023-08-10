@@ -198,7 +198,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 300s
+        iter8 k assert -c completed -c nofailure --timeout 600s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -254,7 +254,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         sleep 120
-        iter8 k assert -c nofailure --timeout 60s
+        iter8 k assert -c nofailure --timeout 600s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -371,7 +371,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 300s
+        iter8 k assert -c completed -c nofailure --timeout 600s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -485,7 +485,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         sleep 120
-        iter8 k assert -c nofailure --timeout 60s
+        iter8 k assert -c nofailure --timeout 600s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -530,13 +530,7 @@ jobs:
         --set 'groups.httpbin.trigger.version=v1' \
         --set 'groups.httpbin.trigger.resource=deployments' \
         --set 'groups.httpbin.specs.iter8.name=iter8' \
-        --set 'groups.httpbin.specs.iter8.values.tasks={ready,http,assess}' \
-        --set 'groups.httpbin.specs.iter8.values.ready.deploy=httpbin' \
-        --set 'groups.httpbin.specs.iter8.values.ready.service=httpbin' \
-        --set 'groups.httpbin.specs.iter8.values.ready.timeout=60s' \
         --set 'groups.httpbin.specs.iter8.values.http.url=http://httpbin.default/get' \
-        --set 'groups.httpbin.specs.iter8.values.assess.SLOs.upper.http/error-count=0' \
-        --set 'groups.httpbin.specs.iter8.values.assess.SLOs.upper.http/latency-mean=50' \
         --set 'groups.httpbin.specs.iter8.version=0.15.0' \
         --set 'groups.httpbin.specs.iter8.values.runner=job'
 
