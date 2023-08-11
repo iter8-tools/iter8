@@ -79,14 +79,17 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={http} \
+        --set tasks={http,assess} \
         --set http.url="http://httpbin.default/get" \
+        --set assess.SLOs.upper.http/latency-p50=5 \
+        --set assess.SLOs.upper.http/latency-p90=10 \
+        --set assess.SLOs.upper.http/error-count=0 \
         --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -133,15 +136,18 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http}" \
+        --set "tasks={http,assess}" \
         --set http.url="http://httpbin.default/get" \
         --set http.payloadStr=hello \
+        --set assess.SLOs.upper.http/latency-p50=5 \
+        --set assess.SLOs.upper.http/latency-p90=10 \
+        --set assess.SLOs.upper.http/error-count=0 \
         --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -188,17 +194,23 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http}" \
+        --set "tasks={http,assess}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
+        --set assess.SLOs.upper.http-get/error-count=0 \
+        --set assess.SLOs.upper.http-get/latency-mean=50 \
+        --set assess.SLOs.upper.http-getAnything/error-count=0 \
+        --set assess.SLOs.upper.http-getAnything/latency-mean=100 \
+        --set assess.SLOs.upper.http-post/error-count=0 \
+        --set assess.SLOs.upper.http-post/latency-mean=150 \
         --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 600s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -245,8 +257,11 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={http} \
+        --set tasks={http,assess} \
         --set http.url="http://httpbin.default/get" \
+        --set assess.SLOs.upper.http/latency-p50=5 \
+        --set assess.SLOs.upper.http/latency-p90=10 \
+        --set assess.SLOs.upper.http/error-count=0 \
         --set runner=cronjob \
         --set cronjobSchedule="*/1 * * * *"
 
@@ -307,17 +322,21 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc} \
+        --set tasks={grpc,assess} \
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
+        --set assess.SLOs.upper.grpc/error-rate=0 \
+        --set assess.SLOs.upper.grpc/latency/mean=200 \
+        --set assess.SLOs.upper.grpc/latency/p90=500 \
+        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
         --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -370,19 +389,23 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc} \
+        --set tasks={grpc,assess} \
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.endpoints.getFeature.call=routeguide.RouteGuide.GetFeature \
         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
+        --set assess.SLOs.upper.grpc-getFeature/error-rate=0 \
+        --set assess.SLOs.upper.grpc-getFeature/latency/mean=50 \
+        --set assess.SLOs.upper.grpc-listFeatures/error-rate=0 \
+        --set assess.SLOs.upper.grpc-listFeatures/latency/mean=100 \
         --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 600s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -429,16 +452,20 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc} \
+        --set tasks={grpc,assess} \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+        --set assess.SLOs.upper.grpc/error-rate=0 \
+        --set assess.SLOs.upper.grpc/latency/mean=200 \
+        --set assess.SLOs.upper.grpc/latency/p90=500 \
+        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
         --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
+        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -485,10 +512,14 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc} \
+        --set tasks={grpc,assess} \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+        --set assess.SLOs.upper.grpc/error-rate=0 \
+        --set assess.SLOs.upper.grpc/latency/mean=200 \
+        --set assess.SLOs.upper.grpc/latency/p90=500 \
+        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
         --set runner=cronjob \
         --set cronjobSchedule="*/1 * * * *"
 
@@ -496,7 +527,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         sleep 120
-        iter8 k assert -c nofailure --timeout 600s
+        iter8 k assert -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
