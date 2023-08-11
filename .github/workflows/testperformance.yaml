@@ -134,7 +134,7 @@ jobs:
     - name: Deploy gRPC service in the Kubernetes cluster
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; cd grpc-go/examples/route_guide; go run server/server.go"
+        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; echo done cloning; cd grpc-go/examples/route_guide; echo go into route_guide; go run server/server.go; echo run server"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
 
@@ -180,6 +180,10 @@ jobs:
         iter8 k log
         iter8 k delete
         
+    - name: Check routeguide again
+      run: |
+        kubectl logs service/routeguide
+      
     - name: load test grpc service with protoURL 2
       run: |
         set -e
@@ -202,6 +206,10 @@ jobs:
         iter8 k report
         iter8 k log
         iter8 k delete
+
+    - name: Check routeguide again
+      run: |
+        kubectl logs service/routeguide
 
     - name: load test grpc service with multiple endpoints
       run: |
@@ -240,6 +248,10 @@ jobs:
         iter8 k report
         iter8 k log
         iter8 k delete
+
+    - name: Check routeguide again
+      run: |
+        kubectl logs service/routeguide
 
     - name: load test grpc service with multiple endpoints 2
       run: |

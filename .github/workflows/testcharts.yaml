@@ -307,7 +307,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; cd grpc-go/examples/route_guide; go run server/server.go"
+        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; echo done cloning; cd grpc-go/examples/route_guide; echo go into route_guide; go run server/server.go; echo run server"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
         
@@ -332,6 +332,10 @@ jobs:
         --set assess.SLOs.upper.grpc/latency/p90=500 \
         --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
         --set runner=job
+
+    - name: Check routeguide again
+      run: |
+        kubectl logs service/routeguide
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -374,7 +378,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; cd grpc-go/examples/route_guide; go run server/server.go"
+        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; echo done cloning; cd grpc-go/examples/route_guide; echo go into route_guide; go run server/server.go; echo run server"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
         
@@ -401,6 +405,10 @@ jobs:
         --set assess.SLOs.upper.grpc-listFeatures/error-rate=0 \
         --set assess.SLOs.upper.grpc-listFeatures/latency/mean=100 \
         --set runner=job
+
+    - name: Check routeguide again
+      run: |
+        kubectl logs service/routeguide
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
