@@ -137,7 +137,7 @@ jobs:
         --localChart \
         --chartName charts/iter8 \
         --set "tasks={http,assess}" \
-        --set http.url="http://httpbin.default/get" \
+        --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
         --set assess.SLOs.upper.http/latency-p50=5 \
         --set assess.SLOs.upper.http/latency-p90=10 \
