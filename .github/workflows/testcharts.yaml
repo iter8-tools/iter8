@@ -136,7 +136,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set ""tasks={http,assess}"" \
+        --set "tasks={http,assess}" \
         --set http.url="http://httpbin.default/get" \
         --set http.payloadStr=hello \
         --set assess.SLOs.upper.http/latency-p50=5 \
@@ -194,7 +194,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set ""tasks={http,assess}"" \
+        --set "tasks={http,assess}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
