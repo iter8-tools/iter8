@@ -1,4 +1,4 @@
-{{- define "initial.virtualservice-kserve-canary" }}
+{{- define "kserve.virtualservice-canary" }}
 {{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService

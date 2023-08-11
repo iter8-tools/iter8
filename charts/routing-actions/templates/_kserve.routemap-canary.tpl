@@ -1,4 +1,4 @@
-{{- define "routemap-canary-kserve" }}
+{{- define "kserve.routemap-canary" }}
 {{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: v1
 kind: ConfigMap

@@ -1,4 +1,4 @@
-{{- define "initial.virtualservice-kserve-bg" }}
+{{- define "kserve.virtualservice-bluegreen" }}
 {{- $versions := include "resolve.appVersions" . | mustFromJson }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService

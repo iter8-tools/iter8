@@ -23,12 +23,14 @@ externalGateway: mm-gateway
 
 ### required fields are:
 
-# Application type. Valid values are 'kserve' and 'kserve-modelmesh' 
+# Application type. Valid values are 'deployment', 'kserve' and 'kserve-modelmesh' 
 # appType:
 # Traffic strategy. Valid values are 'blue-green' or 'canary'
 # strategy:
 # application (or model) name
 # appName:
+# application port number
+# appPort:
 
 ### optional fields are:
 
@@ -57,7 +59,8 @@ externalGateway: mm-gateway
 # strategy:
 # application (or model) name
 # appName:
-
+# application port number
+# appPort:
 
 ### optional fields are:
 

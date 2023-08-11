@@ -1,4 +1,4 @@
-{{- define "initial.serviceentry" }}
+{{- define "mm.serviceentry" }}
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
