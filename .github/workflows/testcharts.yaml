@@ -79,7 +79,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={http,assess} \
+        --set "tasks={http,assess}" \
         --set http.url="http://httpbin.default/get" \
         --set assess.SLOs.upper.http/latency-p50=5 \
         --set assess.SLOs.upper.http/latency-p90=10 \
@@ -136,7 +136,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set ""tasks={http,assess}"" \
         --set http.url="http://httpbin.default/get" \
         --set http.payloadStr=hello \
         --set assess.SLOs.upper.http/latency-p50=5 \
@@ -194,7 +194,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set ""tasks={http,assess}"" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
@@ -257,7 +257,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={http,assess} \
+        --set "tasks={http,assess}" \
         --set http.url="http://httpbin.default/get" \
         --set assess.SLOs.upper.http/latency-p50=5 \
         --set assess.SLOs.upper.http/latency-p90=10 \
@@ -322,7 +322,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc,assess} \
+        --set "tasks={grpc,assess}" \
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
@@ -389,7 +389,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc,assess} \
+        --set "tasks={grpc,assess}" \
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.endpoints.getFeature.call=routeguide.RouteGuide.GetFeature \
@@ -452,7 +452,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc,assess} \
+        --set "tasks={grpc,assess}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
@@ -512,7 +512,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set tasks={grpc,assess} \
+        --set "tasks={grpc,assess}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
