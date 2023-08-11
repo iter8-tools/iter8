@@ -307,7 +307,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; echo done cloning; cd grpc-go/examples/route_guide; echo go into route_guide; go run server/server.go; echo run server"
+        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go && echo done cloning && cd grpc-go/examples/route_guide && echo go into route_guide && go run server/server.go"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
         
@@ -378,7 +378,7 @@ jobs:
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go; echo done cloning; cd grpc-go/examples/route_guide; echo go into route_guide; go run server/server.go; echo run server"
+        -- bash -c "git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go && echo done cloning && cd grpc-go/examples/route_guide && echo go into route_guide && go run server/server.go"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
         
