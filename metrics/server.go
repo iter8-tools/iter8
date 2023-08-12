@@ -13,6 +13,7 @@ import (
 
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/abn"
+	"github.com/iter8-tools/iter8/base"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -80,7 +81,7 @@ type httpDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]httpEndpointRow
 
-	Summary util.Insights
+	Summary base.ExperimentResult
 }
 
 type ghzStatistics struct {
@@ -99,7 +100,7 @@ type ghzDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]ghzEndpointRow
 
-	Summary util.Insights
+	Summary base.ExperimentResult
 }
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}

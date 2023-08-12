@@ -46,7 +46,7 @@ type GHZResult struct {
 	// key is the endpoint
 	EndpointResults map[string]*runner.Report
 
-	Summary Insights
+	Summary ExperimentResult
 }
 
 // initializeDefaults sets default values for the collect task
@@ -163,7 +163,7 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 	// push data to metrics service
 	ghzResult := GHZResult{
 		EndpointResults: data,
-		Summary:         *exp.Result.Insights,
+		Summary:         *exp.Result,
 	}
 
 	// get URL of metrics server from environment variable
