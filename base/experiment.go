@@ -65,9 +65,6 @@ type ExperimentResult struct {
 	// StartTime is the time when the experiment run started
 	StartTime time.Time `json:"startTime" yaml:"startTime"`
 
-	// NumLoops is the number of iterations this experiment has been running for
-	NumLoops int `json:"numLoops" yaml:"numLoops"`
-
 	// NumCompletedTasks is the number of completed tasks
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
 
@@ -226,7 +223,6 @@ func (exp *Experiment) initResults(revision int) {
 		Namespace:         exp.Metadata.Namespace,
 		Revision:          revision,
 		StartTime:         time.Now(),
-		NumLoops:          0,
 		NumCompletedTasks: 0,
 		Failure:           false,
 		Iter8Version:      MajorMinor,
@@ -293,10 +289,6 @@ func (exp *Experiment) run(driver Driver) error {
 
 	log.Logger.Debug("exp result exists now ... ")
 
-	exp.incrementNumLoops()
-	log.Logger.Debugf("experiment loop %d started ...", exp.Result.NumLoops)
-	exp.resetNumCompletedTasks()
-
 	err = driver.Write(exp)
 	if err != nil {
 		return err
@@ -359,15 +351,6 @@ func (exp *Experiment) incrementNumCompletedTasks() {
 	exp.Result.NumCompletedTasks++
 }
 
-func (exp *Experiment) resetNumCompletedTasks() {
-	exp.Result.NumCompletedTasks = 0
-}
-
-// incrementNumLoops increments the number of loops (experiment iterations)
-func (exp *Experiment) incrementNumLoops() {
-	exp.Result.NumLoops++
-}
-
 // getIf returns the condition (if any) which determine
 // whether of not if this task needs to run
 func getIf(t Task) *string {
@@ -417,7 +400,13 @@ func RunExperiment(driver Driver) error {
 		return err
 	}
 
+	result, _ := json.Marshal(exp.Result)
+	log.Logger.Trace("Initializing result", string(result))
+
 	exp.initResults(driver.GetRevision())
+
+	result, _ = json.Marshal(exp.Result)
+	log.Logger.Trace("initialized result", string(result))
 
 	return exp.run(driver)
 }

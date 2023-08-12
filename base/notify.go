@@ -63,9 +63,6 @@ type Report struct {
 	// NumCompletedTasks is the number of completed tasks in the experiment
 	NumCompletedTasks int `json:"numCompletedTasks" yaml:"numCompletedTasks"`
 
-	// NumLoops is the current loop of the experiment
-	NumLoops int `json:"numLoops" yaml:"numLoops"`
-
 	// Experiment is the experiment struct
 	Experiment *Experiment `json:"experiment" yaml:"experiment"`
 }
@@ -79,7 +76,6 @@ func getReport(exp *Experiment) map[string]Report {
 			NoTaskFailures:    exp.NoFailure(),
 			NumTasks:          len(exp.Spec),
 			NumCompletedTasks: exp.Result.NumCompletedTasks,
-			NumLoops:          exp.Result.NumLoops,
 			Experiment:        exp,
 		},
 	}
