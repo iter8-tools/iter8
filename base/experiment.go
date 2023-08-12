@@ -410,14 +410,14 @@ func BuildExperiment(driver Driver) (*Experiment, error) {
 }
 
 // RunExperiment runs an experiment
-func RunExperiment(reuseResult bool, driver Driver) error {
+func RunExperiment(driver Driver) error {
 	var exp *Experiment
 	var err error
 	if exp, err = BuildExperiment(driver); err != nil {
 		return err
 	}
-	if !reuseResult {
-		exp.initResults(driver.GetRevision())
-	}
+
+	exp.initResults(driver.GetRevision())
+
 	return exp.run(driver)
 }

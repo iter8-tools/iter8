@@ -158,7 +158,7 @@ func TestRunExperiment(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(e.Spec))
 
-	err = RunExperiment(false, &mockDriver{e})
+	err = RunExperiment(&mockDriver{e})
 	assert.NoError(t, err)
 	assert.True(t, metricsServerCalled)
 	// sanity check -- handler was called

@@ -136,7 +136,7 @@ func TestKubeRun(t *testing.T) {
 	// 	},
 	// }, metav1.CreateOptions{})
 
-	err = base.RunExperiment(false, kd)
+	err = base.RunExperiment(kd)
 	assert.NoError(t, err)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)

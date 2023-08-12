@@ -67,7 +67,7 @@ func TestLocalRun(t *testing.T) {
 	fd := FileDriver{
 		RunDir: ".",
 	}
-	err = base.RunExperiment(false, &fd)
+	err = base.RunExperiment(&fd)
 	assert.NoError(t, err)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
