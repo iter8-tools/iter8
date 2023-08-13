@@ -28,6 +28,7 @@ import (
 const (
 	configEnv         = "METRICS_CONFIG_FILE"
 	defaultPortNumber = 8080
+	timeFormat        = "02 Jan 06 15:04 MST"
 )
 
 // metricsConfig defines the configuration of the controllers
@@ -66,6 +67,33 @@ type metricSummary struct {
 	SummaryOverUsers           []*versionSummarizedMetric
 }
 
+// dashboardSummary is a properly capitalized version of ExperimentResult
+type dashboardSummary struct {
+	// Name is the name of this experiment
+	Name string
+
+	// Namespace is the namespace of this experiment
+	Namespace string
+
+	// Revision of this experiment
+	Revision int
+
+	// StartTime is the time when the experiment run started
+	StartTime string `json:"Start time"`
+
+	// NumCompletedTasks is the number of completed tasks
+	NumCompletedTasks int `json:"Completed tasks"`
+
+	// Failure is true if any of its tasks failed
+	Failure bool
+
+	// Insights produced in this experiment
+	Insights *base.Insights
+
+	// Iter8Version is the version of Iter8 CLI that created this result object
+	Iter8Version string `json:"Iter8 version"`
+}
+
 // httpEndpointRow is the data needed to produce a single row for an HTTP experiment in the Iter8 Grafana dashboard
 type httpEndpointRow struct {
 	Durations  grafanaHistogram
@@ -81,7 +109,7 @@ type httpDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]httpEndpointRow
 
-	Summary base.ExperimentResult
+	Summary dashboardSummary
 }
 
 type ghzStatistics struct {
@@ -100,7 +128,7 @@ type ghzDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]ghzEndpointRow
 
-	Summary base.ExperimentResult
+	Summary dashboardSummary
 }
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
@@ -472,7 +500,16 @@ func getHTTPDashboardHelper(fortioResult util.HTTPResult) httpDashboard {
 	}
 
 	// add summary
-	dashboard.Summary = fortioResult.Summary
+	dashboard.Summary = dashboardSummary{
+		Name:              fortioResult.Summary.Name,
+		Namespace:         fortioResult.Summary.Namespace,
+		Revision:          fortioResult.Summary.Revision,
+		StartTime:         fortioResult.Summary.StartTime.Time.Format(timeFormat),
+		NumCompletedTasks: fortioResult.Summary.NumCompletedTasks,
+		Failure:           fortioResult.Summary.Failure,
+		Insights:          fortioResult.Summary.Insights,
+		Iter8Version:      fortioResult.Summary.Iter8Version,
+	}
 
 	return dashboard
 }
@@ -651,7 +688,17 @@ func getGRPCDashboardHelper(ghzResult util.GHZResult) ghzDashboard {
 		dashboard.Endpoints[endpoint] = getGRPCEndpointRow(endpointResult)
 	}
 
-	dashboard.Summary = ghzResult.Summary
+	// add summary
+	dashboard.Summary = dashboardSummary{
+		Name:              ghzResult.Summary.Name,
+		Namespace:         ghzResult.Summary.Namespace,
+		Revision:          ghzResult.Summary.Revision,
+		StartTime:         ghzResult.Summary.StartTime.Time.Format(timeFormat),
+		NumCompletedTasks: ghzResult.Summary.NumCompletedTasks,
+		Failure:           ghzResult.Summary.Failure,
+		Insights:          ghzResult.Summary.Insights,
+		Iter8Version:      ghzResult.Summary.Iter8Version,
+	}
 
 	return dashboard
 }
