@@ -2,6 +2,7 @@
 package badgerdb
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/storage"
 )
 
@@ -313,15 +315,15 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 	return &metrics, nil
 }
 
-func getResultKey(namespace, experiment string) string {
+func getDataKey(namespace, experiment string) string {
 	// getResultKey() is just getUserPrefix() with the user appended at the end
-	return fmt.Sprintf("kt-result::%s::%s", namespace, experiment)
+	return fmt.Sprintf("kt-data::%s::%s", namespace, experiment)
 }
 
-// SetResult sets the result of a particular HTTP/gRPC run for a particular namespace and experiment name
-// the data is []byte in order to make this function reusable for HTTP and gRPC
-func (cl Client) SetResult(namespace, experiment string, data []byte) error {
-	key := getResultKey(namespace, experiment)
+// SetData sets arbitrary data (such as HTTP/gRPC results) for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for different tasks
+func (cl Client) SetData(namespace, experiment string, data []byte) error {
+	key := getDataKey(namespace, experiment)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), data).WithTTL(cl.additionalOptions.TTL)
@@ -330,9 +332,50 @@ func (cl Client) SetResult(namespace, experiment string, data []byte) error {
 	})
 }
 
-// GetResult returns the result of a particular HTTP/gRPC run for a particular namespace and experiment name
-// the data is []byte in order to make this function reusable for HTTP and gRPC
-func (cl Client) GetResult(namespace, experiment string) ([]byte, error) {
+// GetData returns arbitrary data (such as HTTP/gRPC results) for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for different tasks
+func (cl Client) GetData(namespace, experiment string) ([]byte, error) {
+	var valCopy []byte
+	err := cl.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(getDataKey(namespace, experiment)))
+		if err != nil {
+			return err
+		}
+
+		valCopy, err = item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return valCopy, err
+}
+
+func getResultKey(namespace, experiment string) string {
+	// getResultKey() is just getUserPrefix() with the user appended at the end
+	return fmt.Sprintf("kt-result::%s::%s", namespace, experiment)
+}
+
+// SetResult sets the experiment result for a particular namespace and experiment name
+func (cl Client) SetResult(namespace, experiment string, experimentResult *base.ExperimentResult) error {
+	key := getResultKey(namespace, experiment)
+
+	experimentResultJSON, err := json.Marshal(experimentResult)
+	if err != nil {
+		return err
+	}
+
+	return cl.db.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte(key), []byte(experimentResultJSON)).WithTTL(cl.additionalOptions.TTL)
+		err := txn.SetEntry(e)
+		return err
+	})
+}
+
+// GetData returns the experiment result for a particular namespace and experiment name
+func (cl Client) GetResults(namespace, experiment string) (*base.ExperimentResult, error) {
 	var valCopy []byte
 	err := cl.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(getResultKey(namespace, experiment)))
@@ -347,6 +390,15 @@ func (cl Client) GetResult(namespace, experiment string) ([]byte, error) {
 
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	return valCopy, err
+	experimentResult := base.ExperimentResult{}
+	err = json.Unmarshal(valCopy, &experimentResult)
+	if err != nil {
+		return nil, err
+	}
+
+	return &experimentResult, err
 }
