@@ -336,10 +336,6 @@ jobs:
         --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
         --set runner=job
 
-    - name: Check routeguide again
-      run: |
-        kubectl logs service/routeguide
-
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -384,6 +380,14 @@ jobs:
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
 
+    - name: Test gRPC service with grpcurl
+      if: steps.modified-files.outputs.any_modified == 'true'
+      run: |
+        curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
+        kubectl apply -f grpcurl-routeguide.yaml
+        sleep 120
+        kubectl logs deploy/sleep
+        
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -402,10 +406,6 @@ jobs:
         --set assess.SLOs.upper.grpc-listFeatures/error-rate=0 \
         --set assess.SLOs.upper.grpc-listFeatures/latency/mean=100 \
         --set runner=job
-
-    - name: Check routeguide again
-      run: |
-        kubectl logs service/routeguide
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
