@@ -138,7 +138,8 @@ jobs:
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
 
-    - run: |
+    - name: Test gRPC service with grpcurl
+      run: |
         curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
         kubectl apply -f grpcurl-routeguide.yaml
         sleep 120

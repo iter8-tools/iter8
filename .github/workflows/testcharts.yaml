@@ -303,18 +303,21 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Create app
+    - name: Deploy gRPC service in the Kubernetes cluster
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "echo 1 && echo 2 && echo 3 && git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go && echo done cloning && cd grpc-go/examples/route_guide && echo go into route_guide && go run server/server.go"
+        -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
-        
-    - name: Check routeguide
+
+    - name: Test gRPC service with grpcurl
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl logs service/routeguide
+        curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
+        kubectl apply -f grpcurl-routeguide.yaml
+        sleep 120
+        kubectl logs deploy/sleep
   
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -374,18 +377,12 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
+    - name: Deploy gRPC service in the Kubernetes cluster
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "echo 1 && echo 2 && echo 3 && git clone -b iter8-example --depth 1 https://github.com/Alan-Cha/grpc-go && echo done cloning && cd grpc-go/examples/route_guide && echo go into route_guide && go run server/server.go"
+        -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
-        
-    - name: Check routeguide
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl logs service/routeguide
 
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
