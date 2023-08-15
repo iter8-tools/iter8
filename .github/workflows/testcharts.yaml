@@ -268,8 +268,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 120
-        iter8 k assert -c nofailure --timeout 600s
+        iter8 k assert -c nofailure --timeout 300s
         iter8 k report
         iter8 k log
         iter8 k delete
@@ -316,7 +315,7 @@ jobs:
       run: |
         curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
         kubectl apply -f grpcurl-routeguide.yaml
-        sleep 120
+        sleep 180
         kubectl logs deploy/sleep
   
     - name: iter8 k launch
@@ -325,7 +324,10 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={grpc,assess}" \
+        --set "tasks={ready,grpc,assess}" \
+        --set ready.deploy=routeguide \
+        --set ready.service=routeguide \
+        --set ready.timeout=60s \
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
@@ -385,7 +387,7 @@ jobs:
       run: |
         curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
         kubectl apply -f grpcurl-routeguide.yaml
-        sleep 120
+        sleep 180
         kubectl logs deploy/sleep
         
     - name: iter8 k launch
@@ -394,7 +396,10 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={grpc,assess}" \
+        --set "tasks={ready,grpc,assess}" \
+        --set ready.deploy=routeguide \
+        --set ready.service=routeguide \
+        --set ready.timeout=60s \
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.endpoints.getFeature.call=routeguide.RouteGuide.GetFeature \
@@ -531,7 +536,6 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 120
         iter8 k assert -c nofailure -c slos --timeout 300s
         iter8 k report
         iter8 k log
