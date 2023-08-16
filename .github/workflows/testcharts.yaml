@@ -376,6 +376,7 @@ jobs:
         node_image: ${{ matrix.version }}
 
     - name: Deploy gRPC service in the Kubernetes cluster
+      if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
         -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
