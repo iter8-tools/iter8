@@ -143,7 +143,7 @@ jobs:
     - name: iter8 k launch
       run: |
         iter8 k launch \
-        --set tasks={assess} \
+        --set tasks={grpc} \
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
