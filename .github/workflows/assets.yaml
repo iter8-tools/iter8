@@ -119,6 +119,7 @@ jobs:
     name: Kubernetes gRPC load test
     needs: build-and-push
     runs-on: ubuntu-latest
+    steps:
     - name: Install Iter8
       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
     - name: Start kind cluster
