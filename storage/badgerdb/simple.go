@@ -316,7 +316,7 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 }
 
 func getDataKey(namespace, experiment string) string {
-	// getResultKey() is just getUserPrefix() with the user appended at the end
+	// getDataKey() is just getUserPrefix() with the user appended at the end
 	return fmt.Sprintf("kt-data::%s::%s", namespace, experiment)
 }
 
@@ -353,14 +353,14 @@ func (cl Client) GetData(namespace, experiment string) ([]byte, error) {
 	return valCopy, err
 }
 
-func getResultKey(namespace, experiment string) string {
-	// getResultKey() is just getUserPrefix() with the user appended at the end
+func getExperimentResultKey(namespace, experiment string) string {
+	// getExperimentResultKey() is just getUserPrefix() with the user appended at the end
 	return fmt.Sprintf("kt-result::%s::%s", namespace, experiment)
 }
 
 // SetResult sets the experiment result for a particular namespace and experiment name
 func (cl Client) SetResult(namespace, experiment string, experimentResult *base.ExperimentResult) error {
-	key := getResultKey(namespace, experiment)
+	key := getExperimentResultKey(namespace, experiment)
 
 	experimentResultJSON, err := json.Marshal(experimentResult)
 	if err != nil {
@@ -374,11 +374,82 @@ func (cl Client) SetResult(namespace, experiment string, experimentResult *base.
 	})
 }
 
-// GetData returns the experiment result for a particular namespace and experiment name
-func (cl Client) GetResults(namespace, experiment string) (*base.ExperimentResult, error) {
+// // GetData returns the experiment result for a particular namespace and experiment name
+// func (cl Client) GetExperimentResult(namespace, experiment string) (*base.ExperimentResult, error) {
+// 	var valCopy []byte
+// 	err := cl.db.View(func(txn *badger.Txn) error {
+// 		item, err := txn.Get([]byte(getExperimentResultKey(namespace, experiment)))
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		valCopy, err = item.ValueCopy(nil)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	experimentResult := base.ExperimentResult{}
+// 	err = json.Unmarshal(valCopy, &experimentResult)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &experimentResult, err
+// }
+
+// // GetData returns the experiment result for a particular namespace and experiment name
+// func (cl Client) GetExperimentResult(namespace, experiment string) ([]byte, error) {
+// 	var valCopy []byte
+// 	err := cl.db.View(func(txn *badger.Txn) error {
+// 		item, err := txn.Get([]byte(getExperimentResultKey(namespace, experiment)))
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		valCopy, err = item.ValueCopy(nil)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	experimentResult := base.ExperimentResult{}
+// 	err = json.Unmarshal(valCopy, &experimentResult)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &experimentResult, err
+// }
+
+// SetExperimentResult sets arbitrary data (such as HTTP/gRPC results) for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for different tasks
+func (cl Client) SetExperimentResult(namespace, experiment string, data []byte) error {
+	key := getExperimentResultKey(namespace, experiment)
+
+	return cl.db.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte(key), data).WithTTL(cl.additionalOptions.TTL)
+		err := txn.SetEntry(e)
+		return err
+	})
+}
+
+// GetExperimentResult returns arbitrary data (such as HTTP/gRPC results) for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for different tasks
+func (cl Client) GetExperimentResult(namespace, experiment string) ([]byte, error) {
 	var valCopy []byte
 	err := cl.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(getResultKey(namespace, experiment)))
+		item, err := txn.Get([]byte(getExperimentResultKey(namespace, experiment)))
 		if err != nil {
 			return err
 		}
@@ -390,15 +461,6 @@ func (cl Client) GetResults(namespace, experiment string) (*base.ExperimentResul
 
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	experimentResult := base.ExperimentResult{}
-	err = json.Unmarshal(valCopy, &experimentResult)
-	if err != nil {
-		return nil, err
-	}
-
-	return &experimentResult, err
+	return valCopy, err
 }

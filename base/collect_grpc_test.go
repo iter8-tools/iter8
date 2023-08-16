@@ -57,8 +57,8 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[call]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", call))
+			if _, ok := bodyFortioResult[call]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", call))
 			}
 		},
 	})
@@ -170,20 +170,20 @@ func TestRunCollectGRPCMultipleEndpoints(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[unary]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", unary))
+			if _, ok := bodyFortioResult[unary]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", unary))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[server]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", server))
+			if _, ok := bodyFortioResult[server]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", server))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[client]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", client))
+			if _, ok := bodyFortioResult[client]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", client))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[bidirectional]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", bidirectional))
+			if _, ok := bodyFortioResult[bidirectional]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", bidirectional))
 			}
 		},
 	})
@@ -283,7 +283,7 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 			bodyFortioResult := HTTPResult{}
 			err = json.Unmarshal(body, &bodyFortioResult)
 			assert.NoError(t, err)
-			assert.Equal(t, `{"EndpointResults":{},"Summary":{"numVersions":1,"versionNames":null}}`, string(body))
+			assert.Equal(t, `{}`, string(body))
 		},
 	})
 
@@ -364,12 +364,12 @@ func TestRunCollectGRPCSingleEndpointMultipleCalls(t *testing.T) {
 
 			fmt.Println(string(body))
 
-			if _, ok := bodyFortioResult.EndpointResults[unary]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", unary))
+			if _, ok := bodyFortioResult[unary]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", unary))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[unary2]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", unary2))
+			if _, ok := bodyFortioResult[unary2]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", unary2))
 			}
 		},
 	})

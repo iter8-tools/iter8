@@ -283,12 +283,12 @@ func TestSetResult(t *testing.T) {
 	experiment := "my-experiment"
 	data := "hello world"
 
-	err = client.SetResult(namespace, experiment, []byte(data))
+	err = client.SetData(namespace, experiment, []byte(data))
 	assert.NoError(t, err)
 
 	// get result
 	err = client.db.View(func(txn *badger.Txn) error {
-		key := getResultKey(namespace, experiment)
+		key := getDataKey(namespace, experiment)
 		item, err := txn.Get([]byte(key))
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
@@ -314,10 +314,10 @@ func TestGetResult(t *testing.T) {
 	experiment := "my-experiment"
 	data := "hello world"
 
-	err = client.SetResult(namespace, experiment, []byte(data))
+	err = client.SetData(namespace, experiment, []byte(data))
 	assert.NoError(t, err)
 
-	result, err := client.GetResult(namespace, experiment)
+	result, err := client.GetData(namespace, experiment)
 	assert.NoError(t, err)
 	assert.Equal(t, data, string(result))
 }

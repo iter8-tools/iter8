@@ -52,9 +52,30 @@ func TestKRun(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", url))
+			if _, ok := bodyFortioResult[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
 			}
+		},
+		ExperimentResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyExperimentResult := base.ExperimentResult{}
+
+			err = json.Unmarshal(body, &bodyExperimentResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+			assert.Equal(t, myName, bodyExperimentResult.Name)
+			assert.Equal(t, myNamespace, bodyExperimentResult.Namespace)
 		},
 	})
 

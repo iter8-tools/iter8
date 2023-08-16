@@ -42,12 +42,8 @@ type collectGRPCTask struct {
 
 // GHZResult is the raw data sent to the metrics server
 // This data will be transformed into httpDashboard when getGHZGrafana is called
-type GHZResult struct {
-	// key is the endpoint
-	EndpointResults map[string]*runner.Report
-
-	Summary ExperimentResult
-}
+// Key is the endpoint
+type GHZResult map[string]*runner.Report
 
 // initializeDefaults sets default values for the collect task
 func (t *collectGRPCTask) initializeDefaults() {
@@ -160,12 +156,6 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 		return err
 	}
 
-	// push data to metrics service
-	ghzResult := GHZResult{
-		EndpointResults: data,
-		Summary:         *exp.Result,
-	}
-
 	// get URL of metrics server from environment variable
 	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
 	if !ok {
@@ -174,7 +164,7 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 		return fmt.Errorf(errorMessage)
 	}
 
-	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, ghzResult); err != nil {
+	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, data); err != nil {
 		return err
 	}
 

@@ -67,8 +67,8 @@ type metricSummary struct {
 	SummaryOverUsers           []*versionSummarizedMetric
 }
 
-// dashboardSummary is a properly capitalized version of ExperimentResult
-type dashboardSummary struct {
+// dashboardExperimentResult is a capitalized version of ExperimentResult used to display data in Grafana
+type dashboardExperimentResult struct {
 	// Name is the name of this experiment
 	Name string
 
@@ -109,7 +109,7 @@ type httpDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]httpEndpointRow
 
-	Summary dashboardSummary
+	ExperimentResult dashboardExperimentResult
 }
 
 type ghzStatistics struct {
@@ -128,7 +128,7 @@ type ghzDashboard struct {
 	// key is the endpoint
 	Endpoints map[string]ghzEndpointRow
 
-	Summary dashboardSummary
+	ExperimentResult dashboardExperimentResult
 }
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
@@ -148,8 +148,10 @@ func Start(stopCh <-chan struct{}) error {
 	}
 
 	// configure endpoints
-	http.HandleFunc("/metrics", getMetrics)
-	http.HandleFunc(util.PerformanceResultPath, putResult)
+	http.HandleFunc(util.MetricsPath, getMetrics)
+
+	http.HandleFunc(util.PerformanceResultPath, putPerformanceResult)
+	http.HandleFunc(util.ExperimentResultPath, putExperimentResult)
 	http.HandleFunc(util.HTTPDashboardPath, getHTTPDashboard)
 	http.HandleFunc(util.GRPCDashboardPath, getGRPCDashboard)
 
@@ -188,7 +190,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// verify request (query parameter)
+	// verify request (query parameters)
 	application := r.URL.Query().Get("application")
 	if application == "" {
 		http.Error(w, "no application specified", http.StatusBadRequest)
@@ -489,33 +491,93 @@ func getHTTPEndpointRow(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpoint
 	return row
 }
 
-func getHTTPDashboardHelper(fortioResult util.HTTPResult) httpDashboard {
+func getHTTPDashboardHelper(fortioResult util.HTTPResult, experimentResult base.ExperimentResult) httpDashboard {
 	dashboard := httpDashboard{
 		Endpoints: map[string]httpEndpointRow{},
 	}
 
-	for endpoint, endpointResult := range fortioResult.EndpointResults {
+	for endpoint, endpointResult := range fortioResult {
 		endpointResult := endpointResult
 		dashboard.Endpoints[endpoint] = getHTTPEndpointRow(endpointResult)
 	}
 
-	// add summary
-	dashboard.Summary = dashboardSummary{
-		Name:              fortioResult.Summary.Name,
-		Namespace:         fortioResult.Summary.Namespace,
-		Revision:          fortioResult.Summary.Revision,
-		StartTime:         fortioResult.Summary.StartTime.Time.Format(timeFormat),
-		NumCompletedTasks: fortioResult.Summary.NumCompletedTasks,
-		Failure:           fortioResult.Summary.Failure,
-		Insights:          fortioResult.Summary.Insights,
-		Iter8Version:      fortioResult.Summary.Iter8Version,
+	experimentResultJSON, _ := json.Marshal(experimentResult)
+	fmt.Println(string(experimentResultJSON))
+
+	dashboard.ExperimentResult = dashboardExperimentResult{
+		Name:              experimentResult.Name,
+		Namespace:         experimentResult.Namespace,
+		Revision:          experimentResult.Revision,
+		StartTime:         experimentResult.StartTime.Time.Format(timeFormat),
+		NumCompletedTasks: experimentResult.NumCompletedTasks,
+		Failure:           experimentResult.Failure,
+		Insights:          experimentResult.Insights,
+		Iter8Version:      experimentResult.Iter8Version,
 	}
 
 	return dashboard
 }
 
-// putResult handles PUT /result with query parameter application=namespace/name
-func putResult(w http.ResponseWriter, r *http.Request) {
+// putPerformanceResult handles PUT /performanceResult with query parameter application=namespace/name
+func putPerformanceResult(w http.ResponseWriter, r *http.Request) {
+	log.Logger.Trace("putPerformanceResult called")
+	defer log.Logger.Trace("putPerformanceResult completed")
+
+	// verify method
+	if r.Method != http.MethodPut {
+		http.Error(w, "expected PUT", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// verify request (query parameters)
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		http.Error(w, "no namespace specified", http.StatusBadRequest)
+		return
+	}
+
+	experiment := r.URL.Query().Get("experiment")
+	if experiment == "" {
+		http.Error(w, "no experiment specified", http.StatusBadRequest)
+		return
+	}
+
+	log.Logger.Tracef("putPerformanceResult called for namespace %s and experiment %s", namespace, experiment)
+
+	defer func() {
+		err := r.Body.Close()
+		if err != nil {
+			errorMessage := fmt.Sprintf("cannot close request body: %e", err)
+			log.Logger.Error(errorMessage)
+			http.Error(w, errorMessage, http.StatusBadRequest)
+			return
+		}
+	}()
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot read request body: %e", err)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+
+	if abn.MetricsClient == nil {
+		http.Error(w, "no metrics client", http.StatusInternalServerError)
+		return
+	}
+	err = abn.MetricsClient.SetData(namespace, experiment, body)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot store result in storage client: %s: %e", string(body), err)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: 201 for new resource, 200 for update
+}
+
+// putExperimentResult handles PUT /experimentResult with query parameter application=namespace/name
+func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("putResult called")
 	defer log.Logger.Trace("putResult completed")
 
@@ -525,9 +587,7 @@ func putResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// verify request (query parameter)
-	// Key: kt-result::my-namespace::my-experiment-name::my-endpoint
-	// Should namespace and experiment name come from application?
+	// verify request (query parameters)
 	namespace := r.URL.Query().Get("namespace")
 	if namespace == "" {
 		http.Error(w, "no namespace specified", http.StatusBadRequest)
@@ -563,7 +623,8 @@ func putResult(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
-	err = abn.MetricsClient.SetResult(namespace, experiment, body)
+
+	err = abn.MetricsClient.SetExperimentResult(namespace, experiment, body)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot store result in storage client: %s: %e", string(body), err)
 		log.Logger.Error(errorMessage)
@@ -585,9 +646,7 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// verify request (query parameter)
-	// required namespace and experiment name
-	// Key: kt-result::my-namespace::my-experiment-name::my-endpoint
+	// verify request (query parameters)
 	namespace := r.URL.Query().Get("namespace")
 	if namespace == "" {
 		http.Error(w, "no namespace specified", http.StatusBadRequest)
@@ -602,30 +661,48 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 
 	log.Logger.Tracef("getHTTPGrafana called for namespace %s and experiment %s", namespace, experiment)
 
-	// get result from metrics client
+	// get fortioResult from metrics client
 	if abn.MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
-	result, err := abn.MetricsClient.GetResult(namespace, experiment)
+	fortioResultsBytes, err := abn.MetricsClient.GetData(namespace, experiment)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot get result with namespace %s, experiment %s", namespace, experiment)
+		errorMessage := fmt.Sprintf("cannot get Fortio result with namespace %s, experiment %s", namespace, experiment)
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusBadRequest)
 		return
 	}
 
 	fortioResult := util.HTTPResult{}
-	err = json.Unmarshal(result, &fortioResult)
+	err = json.Unmarshal(fortioResultsBytes, &fortioResult)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot JSON unmarshal result into FortioResult: \"%s\"", string(result))
+		errorMessage := fmt.Sprintf("cannot JSON unmarshal FortioResult: \"%s\"", string(fortioResultsBytes))
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
+		return
+	}
+
+	// get experimentResult from metrics client
+	experimentResultBytes, err := abn.MetricsClient.GetExperimentResult(namespace, experiment)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, experiment %s", namespace, experiment)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+
+	experimentResult := util.ExperimentResult{}
+	err = json.Unmarshal(experimentResultBytes, &experimentResult)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot JSON unmarshal ExperimentResult: \"%s\"", string(experimentResultBytes))
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusInternalServerError)
 		return
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(fortioResult))
+	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(fortioResult, experimentResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal HTTP dashboard"
 		log.Logger.Error(errorMessage)
@@ -678,34 +755,33 @@ func getGRPCEndpointRow(ghzRunnerReport *runner.Report) ghzEndpointRow {
 	return row
 }
 
-func getGRPCDashboardHelper(ghzResult util.GHZResult) ghzDashboard {
+func getGRPCDashboardHelper(ghzResult util.GHZResult, experimentResult base.ExperimentResult) ghzDashboard {
 	dashboard := ghzDashboard{
 		Endpoints: map[string]ghzEndpointRow{},
 	}
 
-	for endpoint, endpointResult := range ghzResult.EndpointResults {
+	for endpoint, endpointResult := range ghzResult {
 		endpointResult := endpointResult
 		dashboard.Endpoints[endpoint] = getGRPCEndpointRow(endpointResult)
 	}
 
-	// add summary
-	dashboard.Summary = dashboardSummary{
-		Name:              ghzResult.Summary.Name,
-		Namespace:         ghzResult.Summary.Namespace,
-		Revision:          ghzResult.Summary.Revision,
-		StartTime:         ghzResult.Summary.StartTime.Time.Format(timeFormat),
-		NumCompletedTasks: ghzResult.Summary.NumCompletedTasks,
-		Failure:           ghzResult.Summary.Failure,
-		Insights:          ghzResult.Summary.Insights,
-		Iter8Version:      ghzResult.Summary.Iter8Version,
+	dashboard.ExperimentResult = dashboardExperimentResult{
+		Name:              experimentResult.Name,
+		Namespace:         experimentResult.Namespace,
+		Revision:          experimentResult.Revision,
+		StartTime:         experimentResult.StartTime.Time.Format(timeFormat),
+		NumCompletedTasks: experimentResult.NumCompletedTasks,
+		Failure:           experimentResult.Failure,
+		Insights:          experimentResult.Insights,
+		Iter8Version:      experimentResult.Iter8Version,
 	}
 
 	return dashboard
 }
 
 func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
-	log.Logger.Trace("getGHZDashboard called")
-	defer log.Logger.Trace("getGHZDashboard completed")
+	log.Logger.Trace("getGRPCDashboard called")
+	defer log.Logger.Trace("getGRPCDashboard completed")
 
 	// verify method
 	if r.Method != http.MethodGet {
@@ -713,9 +789,7 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// verify request (query parameter)
-	// required namespace and experiment name
-	// Key: kt-result::my-namespace::my-experiment-name::my-endpoint
+	// verify request (query parameters)
 	namespace := r.URL.Query().Get("namespace")
 	if namespace == "" {
 		http.Error(w, "no namespace specified", http.StatusBadRequest)
@@ -728,34 +802,52 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Logger.Tracef("getGHZDashboard called for namespace %s and experiment %s", namespace, experiment)
+	log.Logger.Tracef("getGRPCDashboard called for namespace %s and experiment %s", namespace, experiment)
 
-	// get result from metrics client
+	// get ghz result from metrics client
 	if abn.MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
-	result, err := abn.MetricsClient.GetResult(namespace, experiment)
+	ghzResultBytes, err := abn.MetricsClient.GetData(namespace, experiment)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot get result with namespace %s, experiment %s", namespace, experiment)
+		errorMessage := fmt.Sprintf("cannot get ghz result with namespace %s, experiment %s", namespace, experiment)
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusBadRequest)
 		return
 	}
 
 	ghzResult := util.GHZResult{}
-	err = json.Unmarshal(result, &ghzResult)
+	err = json.Unmarshal(ghzResultBytes, &ghzResult)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot JSON unmarshal result into GHZResult: \"%s\"", string(result))
+		errorMessage := fmt.Sprintf("cannot JSON unmarshal GHZResult: \"%s\"", string(ghzResultBytes))
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusInternalServerError)
+		return
+	}
+
+	// get experimentResult from metrics client
+	experimentResultBytes, err := abn.MetricsClient.GetExperimentResult(namespace, experiment)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, experiment %s", namespace, experiment)
+		log.Logger.Error(errorMessage)
+		http.Error(w, errorMessage, http.StatusBadRequest)
+		return
+	}
+
+	experimentResult := util.ExperimentResult{}
+	err = json.Unmarshal(experimentResultBytes, &experimentResult)
+	if err != nil {
+		errorMessage := fmt.Sprintf("cannot JSON unmarshal ExperimentResult: \"%s\"", string(experimentResultBytes))
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusInternalServerError)
 		return
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getGRPCDashboardHelper(ghzResult))
+	dashboardBytes, err := json.Marshal(getGRPCDashboardHelper(ghzResult, experimentResult))
 	if err != nil {
-		errorMessage := "cannot JSON marshal ghz dashboard"
+		errorMessage := "cannot JSON marshal gRPC dashboard"
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusInternalServerError)
 		return

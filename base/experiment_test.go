@@ -66,8 +66,8 @@ func TestRunningTasks(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", url))
+			if _, ok := bodyFortioResult[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
 			}
 		},
 	})
@@ -140,8 +140,8 @@ func TestRunExperiment(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", url))
+			if _, ok := bodyFortioResult[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
 			}
 		},
 	})

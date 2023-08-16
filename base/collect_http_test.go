@@ -75,8 +75,8 @@ func TestRunCollectHTTP(t *testing.T) {
 
 			fmt.Println(string(body))
 
-			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", url))
+			if _, ok := bodyFortioResult[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
 			}
 		},
 	})
@@ -208,12 +208,12 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[endpoint1]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint1))
+			if _, ok := bodyFortioResult[endpoint1]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint1))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[endpoint2]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint2))
+			if _, ok := bodyFortioResult[endpoint2]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint2))
 			}
 		},
 	})
@@ -314,12 +314,12 @@ func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[endpoint1]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint1))
+			if _, ok := bodyFortioResult[endpoint1]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint1))
 			}
 
-			if _, ok := bodyFortioResult.EndpointResults[endpoint2]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", endpoint2))
+			if _, ok := bodyFortioResult[endpoint2]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint2))
 			}
 		},
 	})
@@ -403,7 +403,7 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 			assert.NoError(t, err)
 
 			// no EndpointResults because endpoints cannot be reached
-			assert.Equal(t, `{"EndpointResults":{},"Summary":{"numVersions":1,"versionNames":null}}`, string(body))
+			assert.Equal(t, `{}`, string(body))
 		},
 	})
 

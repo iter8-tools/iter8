@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -253,6 +254,7 @@ type Driver interface {
 	// Read the experiment
 	Read() (*Experiment, error)
 
+	// deprecated
 	// Write the experiment
 	Write(e *Experiment) error
 
@@ -280,23 +282,28 @@ func (exp *Experiment) NoFailure() bool {
 // run the experiment
 func (exp *Experiment) run(driver Driver) error {
 	var err error
+
+	// TODO: reduce repetition, create package local variable and do validation
+	// get URL of metrics server from environment variable
+	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
+	if !ok {
+		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+		log.Logger.Error(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
 	exp.driver = driver
 	if exp.Result == nil {
 		err = errors.New("experiment with nil result section cannot be run")
 		log.Logger.Error(err)
 		return err
 	}
-
 	log.Logger.Debug("exp result exists now ... ")
-
-	err = driver.Write(exp)
-	if err != nil {
-		return err
-	}
 
 	log.Logger.Debugf("attempting to execute %v tasks", len(exp.Spec))
 	for i, t := range exp.Spec {
 		log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": started")
+
 		shouldRun := true
 		// if task has a condition
 		if cond := getIf(t); cond != nil {
@@ -320,9 +327,15 @@ func (exp *Experiment) run(driver Driver) error {
 			if err != nil {
 				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "failure")
 				exp.failExperiment()
-				e := driver.Write(exp)
-				if e != nil {
-					return e
+
+				// TODO: remove
+				err = driver.Write(exp)
+				if err != nil {
+					return err
+				}
+				err = putExperimentResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, exp.Result)
+				if err != nil {
+					return err
 				}
 				return err
 			}
@@ -332,8 +345,13 @@ func (exp *Experiment) run(driver Driver) error {
 		}
 
 		exp.incrementNumCompletedTasks()
-		err = driver.Write(exp)
 
+		// TODO: remove
+		err = driver.Write(exp)
+		if err != nil {
+			return err
+		}
+		err = putExperimentResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, exp.Result)
 		if err != nil {
 			return err
 		}

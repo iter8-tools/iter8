@@ -53,8 +53,8 @@ func TestLocalRun(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
 
-			if _, ok := bodyFortioResult.EndpointResults[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult.EndpointResult does not contain endpoint: %s", url))
+			if _, ok := bodyFortioResult[url]; !ok {
+				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
 			}
 		},
 	})
@@ -75,6 +75,11 @@ func TestLocalRun(t *testing.T) {
 	// check results
 	exp, err := base.BuildExperiment(&fd)
 	assert.NoError(t, err)
+
+	x, _ := json.Marshal(exp)
+	fmt.Println(string(x))
+	fmt.Println(err, exp.Completed(), exp.NoFailure())
+
 	assert.True(t, exp.Completed() && exp.NoFailure())
 	assert.True(t, metricsServerCalled)
 }

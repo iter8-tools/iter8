@@ -81,17 +81,43 @@ type MetricsServerCallback func(req *http.Request)
 type MockMetricsServerInput struct {
 	MetricsServerURL string
 
-	// GET /httpDashboard
-	HTTPDashboardCallback MetricsServerCallback
-	// GET /grpcDashboard
-	GRPCDashboardCallback MetricsServerCallback
 	// PUT /performanceResult
 	PerformanceResultCallback MetricsServerCallback
+	// PUT /experimentResult
+	ExperimentResultCallback MetricsServerCallback
+	// GET /grpcDashboard
+	GRPCDashboardCallback MetricsServerCallback
+	// GET /httpDashboard
+	HTTPDashboardCallback MetricsServerCallback
 }
 
 // MockMetricsServer is a mock metrics server
 // use the callback functions in the MockMetricsServerInput to test if those endpoints are called
 func MockMetricsServer(input MockMetricsServerInput) {
+	// PUT /performanceResult
+	httpmock.RegisterResponder(
+		http.MethodPut,
+		input.MetricsServerURL+PerformanceResultPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.PerformanceResultCallback != nil {
+				input.PerformanceResultCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
+	// PUT /experimentResult
+	httpmock.RegisterResponder(
+		http.MethodPut,
+		input.MetricsServerURL+ExperimentResultPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.ExperimentResultCallback != nil {
+				input.ExperimentResultCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
 	// GET /httpDashboard
 	httpmock.RegisterResponder(
 		http.MethodGet,
@@ -112,18 +138,6 @@ func MockMetricsServer(input MockMetricsServerInput) {
 		func(req *http.Request) (*http.Response, error) {
 			if input.GRPCDashboardCallback != nil {
 				input.GRPCDashboardCallback(req)
-			}
-			return httpmock.NewStringResponse(200, "success"), nil
-		},
-	)
-
-	// PUT /performanceResult
-	httpmock.RegisterResponder(
-		http.MethodPut,
-		input.MetricsServerURL+PerformanceResultPath,
-		func(req *http.Request) (*http.Response, error) {
-			if input.PerformanceResultCallback != nil {
-				input.PerformanceResultCallback(req)
 			}
 			return httpmock.NewStringResponse(200, "success"), nil
 		},

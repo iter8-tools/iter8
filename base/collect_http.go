@@ -61,12 +61,8 @@ type collectHTTPInputs struct {
 
 // HTTPResult is the raw data sent to the metrics server
 // This data will be transformed into httpDashboard when getHTTPGrafana is called
-type HTTPResult struct {
-	// key is the endpoint
-	EndpointResults map[string]*fhttp.HTTPRunnerResults
-
-	Summary ExperimentResult
-}
+// Key is the endpoint
+type HTTPResult map[string]*fhttp.HTTPRunnerResults
 
 const (
 	// CollectHTTPTaskName is the name of this task which performs load generation and metrics collection.
@@ -307,15 +303,6 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 	result, _ := json.Marshal(exp.Result)
 	log.Logger.Trace("before fortioResult", string(result))
 
-	// push data to metrics service
-	fortioResult := HTTPResult{
-		EndpointResults: data,
-		Summary:         *exp.Result,
-	}
-
-	fortioResultJson, _ := json.Marshal(fortioResult)
-	log.Logger.Trace("fortioResultJson", string(fortioResultJson))
-
 	// get URL of metrics server from environment variable
 	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
 	if !ok {
@@ -324,7 +311,7 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		return fmt.Errorf(errorMessage)
 	}
 
-	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, fortioResult); err != nil {
+	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, data); err != nil {
 		return err
 	}
 

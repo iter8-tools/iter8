@@ -13,39 +13,45 @@ import (
 const (
 	// MetricsServerURL is the URL of the metrics server
 	MetricsServerURL = "METRICS_SERVER_URL"
-	// PerformanceResultPath is the path to the PUT performanceResult/ endpoint
-	PerformanceResultPath = "/performanceResult"
 
-	// HTTPDashboardPath is the path to the GET httpDashboard/ endpoint
+	// MetricsPath is the path to the GET /metrics endpoint
+	MetricsPath = "/metrics"
+
+	// PerformanceResultPath is the path to the PUT /performanceResult endpoint
+	PerformanceResultPath = "/performanceResult"
+	// ExperimentResultPath is the path to the PUT /experimentResult endpoint
+	ExperimentResultPath = "/experimentResult"
+	// HTTPDashboardPath is the path to the GET /httpDashboard endpoint
 	HTTPDashboardPath = "/httpDashboard"
-	// GRPCDashboardPath is the path to the GET grpcDashboard/ endpoint
+	// GRPCDashboardPath is the path to the GET /grpcDashboard endpoint
 	GRPCDashboardPath = "/grpcDashboard"
 )
 
-func putPerformanceResultToMetricsService(metricsServerURL, namespace, experiment string, data interface{}) error {
+func callMetricsService(method, metricsServerURL, path string, queryParams map[string]string, payload interface{}) error {
 	// handle URL and URL parameters
-	u, err := url.ParseRequestURI(metricsServerURL + PerformanceResultPath)
+	u, err := url.ParseRequestURI(metricsServerURL + path)
 	if err != nil {
 		return err
 	}
 
 	params := url.Values{}
-	params.Add("namespace", namespace)
-	params.Add("experiment", experiment)
+	for paramKey, paramValue := range queryParams {
+		params.Add(paramKey, paramValue)
+	}
 	u.RawQuery = params.Encode()
 	urlStr := fmt.Sprintf("%v", u)
 
-	log.Logger.Trace(fmt.Sprintf("performance result URL: %s", urlStr))
+	log.Logger.Trace(fmt.Sprintf("call metrics service URL: %s", urlStr))
 
 	// handle payload
-	dataBytes, err := json.Marshal(data)
+	dataBytes, err := json.Marshal(payload)
 	if err != nil {
 		log.Logger.Error("cannot JSON marshal data for metrics server request: ", err)
 		return err
 	}
 
 	// create request
-	req, err := http.NewRequest(http.MethodPut, urlStr, bytes.NewBuffer(dataBytes))
+	req, err := http.NewRequest(method, urlStr, bytes.NewBuffer(dataBytes))
 	if err != nil {
 		log.Logger.Error("cannot create new HTTP request metrics server: ", err)
 		return err
@@ -72,4 +78,18 @@ func putPerformanceResultToMetricsService(metricsServerURL, namespace, experimen
 	log.Logger.Trace("sent request")
 
 	return nil
+}
+
+func putPerformanceResultToMetricsService(metricsServerURL, namespace, experiment string, data interface{}) error {
+	return callMetricsService(http.MethodPut, metricsServerURL, PerformanceResultPath, map[string]string{
+		"namespace":  namespace,
+		"experiment": experiment,
+	}, data)
+}
+
+func putExperimentResultToMetricsService(metricsServerURL, namespace, experiment string, experimentResult *ExperimentResult) error {
+	return callMetricsService(http.MethodPut, metricsServerURL, ExperimentResultPath, map[string]string{
+		"namespace":  namespace,
+		"experiment": experiment,
+	}, experimentResult)
 }

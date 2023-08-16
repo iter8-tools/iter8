@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -20,6 +21,12 @@ func TestKubeLaunch(t *testing.T) {
 
 	err = lOpts.KubeRun()
 	assert.NoError(t, err)
+
+	// x, _ := json.Marshal(lOpts)
+	// fmt.Println(string(x))
+
+	fmt.Println(lOpts.Group)
+	fmt.Println(lOpts.Releases)
 
 	rel, err := lOpts.Releases.Last(lOpts.Group)
 	assert.NotNil(t, rel)
