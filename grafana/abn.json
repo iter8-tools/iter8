@@ -1,0 +1,596 @@
+{
+    "__inputs": [
+        {
+            "name": "DS_ITER8",
+            "label": "Iter8",
+            "description": "",
+            "type": "datasource",
+            "pluginId": "marcusolsson-json-datasource",
+            "pluginName": "JSON API"
+        }
+    ],
+    "__elements": {},
+    "__requires": [
+        {
+            "type": "panel",
+            "id": "barchart",
+            "name": "Bar chart",
+            "version": ""
+        },
+        {
+            "type": "grafana",
+            "id": "grafana",
+            "name": "Grafana",
+            "version": "10.0.1"
+        },
+        {
+            "type": "datasource",
+            "id": "marcusolsson-json-datasource",
+            "name": "JSON API",
+            "version": "1.3.6"
+        },
+        {
+            "type": "panel",
+            "id": "table",
+            "name": "Table",
+            "version": ""
+        }
+    ],
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 8,
+            "panels": [],
+            "repeat": "metric",
+            "repeatDirection": "h",
+            "title": "${metric}",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_ITER8}"
+            },
+            "description": "Statistics that describe the overall shape of the data for each metric and version, on a per transaction level.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false,
+                        "minWidth": 50
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 12,
+                "x": 0,
+                "y": 1
+            },
+            "id": 13,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "enablePagination": false,
+                    "fields": [],
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "frameIndex": 0,
+                "showHeader": true
+            },
+            "pluginVersion": "10.0.1",
+            "targets": [
+                {
+                    "cacheDurationSeconds": 0,
+                    "datasource": {
+                        "type": "marcusolsson-json-datasource",
+                        "uid": "${DS_ITER8}"
+                    },
+                    "fields": [
+                        {
+                            "jsonPath": "$.${metric}.SummaryOverTransactions[*]"
+                        }
+                    ],
+                    "method": "GET",
+                    "queryParams": "",
+                    "refId": "A",
+                    "urlPath": ""
+                }
+            ],
+            "title": "Summary over transactions",
+            "transformations": [
+                {
+                    "id": "extractFields",
+                    "options": {
+                        "replace": true,
+                        "source": "*"
+                    }
+                }
+            ],
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_ITER8}"
+            },
+            "description": "Statistics that describes the overall shape of the data for each metric and version, on a per user level.\n\nIn other words, metrics are tallied up for every user in the calculation of these statistics.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false,
+                        "minWidth": 50
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 12,
+                "x": 12,
+                "y": 1
+            },
+            "id": 66,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "enablePagination": false,
+                    "fields": [],
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "frameIndex": 0,
+                "showHeader": true
+            },
+            "pluginVersion": "10.0.1",
+            "targets": [
+                {
+                    "cacheDurationSeconds": 0,
+                    "datasource": {
+                        "type": "marcusolsson-json-datasource",
+                        "uid": "${DS_ITER8}"
+                    },
+                    "fields": [
+                        {
+                            "jsonPath": "$.${metric}.SummaryOverUsers[*]"
+                        }
+                    ],
+                    "method": "GET",
+                    "queryParams": "",
+                    "refId": "A",
+                    "urlPath": ""
+                }
+            ],
+            "title": "Summary over users",
+            "transformations": [
+                {
+                    "id": "extractFields",
+                    "options": {
+                        "replace": true,
+                        "source": "*"
+                    }
+                }
+            ],
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_ITER8}"
+            },
+            "description": "Histograms that show how the metric is shaped over different versions.\n\nEach color represents a version, which is clarified in the legend. The labels on the X-axis represents the buckets of the histogram.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Value"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "yellow",
+                                    "mode": "palette-classic"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 12,
+                "x": 0,
+                "y": 6
+            },
+            "id": 54,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xField": "Bucket",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 100
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "cacheDurationSeconds": 0,
+                    "datasource": {
+                        "type": "marcusolsson-json-datasource",
+                        "uid": "${DS_ITER8}"
+                    },
+                    "fields": [
+                        {
+                            "jsonPath": "$.${metric}.HistogramsOverTransactions[*]"
+                        }
+                    ],
+                    "hide": false,
+                    "method": "GET",
+                    "queryParams": "",
+                    "refId": "A",
+                    "urlPath": ""
+                }
+            ],
+            "title": "Data over transactions",
+            "transformations": [
+                {
+                    "id": "extractFields",
+                    "options": {
+                        "replace": true,
+                        "source": "*"
+                    }
+                },
+                {
+                    "id": "partitionByValues",
+                    "options": {
+                        "fields": [
+                            "Version"
+                        ]
+                    }
+                },
+                {
+                    "id": "concatenate",
+                    "options": {
+                        "frameNameLabel": "frame",
+                        "frameNameMode": "drop"
+                    }
+                },
+                {
+                    "disabled": true,
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "A 1": false,
+                            "A 2": false,
+                            "A · Label 1": false,
+                            "A · Label 2": false
+                        },
+                        "indexByName": {},
+                        "renameByName": {}
+                    }
+                }
+            ],
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_ITER8}"
+            },
+            "description": "Histograms that show how the metric is shaped over different versions, grouped by user.\n\nn other words, metrics are tallied up for every user in the calculation of the histogram.\n\nEach color represents a version, which is clarified in the legend. The labels on the X-axis represents the buckets of the histogram.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Value"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "blue",
+                                    "mode": "palette-classic"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 12,
+                "x": 12,
+                "y": 6
+            },
+            "id": 60,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xField": "Bucket",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 100
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "cacheDurationSeconds": 0,
+                    "datasource": {
+                        "type": "marcusolsson-json-datasource",
+                        "uid": "${DS_ITER8}"
+                    },
+                    "fields": [
+                        {
+                            "jsonPath": "$.${metric}.HistogramsOverUsers[*]"
+                        }
+                    ],
+                    "hide": false,
+                    "method": "GET",
+                    "queryParams": "",
+                    "refId": "A",
+                    "urlPath": ""
+                }
+            ],
+            "title": "Data over users",
+            "transformations": [
+                {
+                    "id": "extractFields",
+                    "options": {
+                        "replace": true,
+                        "source": "*"
+                    }
+                },
+                {
+                    "id": "partitionByValues",
+                    "options": {
+                        "fields": [
+                            "Version"
+                        ]
+                    }
+                },
+                {
+                    "id": "concatenate",
+                    "options": {
+                        "frameNameLabel": "frame",
+                        "frameNameMode": "drop"
+                    }
+                }
+            ],
+            "type": "barchart"
+        }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {},
+                "datasource": {
+                    "type": "marcusolsson-json-datasource",
+                    "uid": "${DS_ITER8}"
+                },
+                "definition": "$keys($)",
+                "hide": 0,
+                "includeAll": true,
+                "multi": true,
+                "name": "metric",
+                "options": [],
+                "query": {
+                    "cacheDurationSeconds": 0,
+                    "fields": [
+                        {
+                            "jsonPath": "$keys($)",
+                            "language": "jsonata"
+                        }
+                    ],
+                    "method": "GET",
+                    "queryParams": "",
+                    "urlPath": ""
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Iter8",
+    "uid": "cdfc5c3a-9097-41f4-b279-3b8e370a7145",
+    "version": 2,
+    "weekStart": ""
+}
