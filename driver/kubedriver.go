@@ -250,10 +250,18 @@ func (kd *KubeDriver) updateExperimentSecret(e *base.Experiment) error {
 }
 
 // Write writes a Kubernetes experiment
-func (kd *KubeDriver) Write(e *base.Experiment) error {
-	if err := kd.updateExperimentSecret(e); err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
-		return errors.New("unable to write experiment")
+func (kd *KubeDriver) Write(exp *base.Experiment) error {
+	// get URL of metrics server from environment variable
+	metricsServerURL, ok := os.LookupEnv(base.MetricsServerURL)
+	if !ok {
+		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+		log.Logger.Error(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	err := base.PutExperimentResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, exp.Result)
+	if err != nil {
+		return err
 	}
 	return nil
 }

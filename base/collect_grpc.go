@@ -2,7 +2,6 @@ package base
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/bojand/ghz/runner"
@@ -67,11 +66,11 @@ func (t *collectGRPCTask) validateInputs() error {
 }
 
 // resultForVersion collects gRPC test result for a given version
-func (t *collectGRPCTask) resultForVersion() (map[string]*runner.Report, error) {
+func (t *collectGRPCTask) resultForVersion() (GHZResult, error) {
 	// the main idea is to run ghz with proper options
 
 	var err error
-	results := map[string]*runner.Report{}
+	results := GHZResult{}
 
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
@@ -151,22 +150,13 @@ func (t *collectGRPCTask) run(exp *Experiment) error {
 		return nil
 	}
 
-	// 3. Init insights with num versions: always 1 in this task
+	// 3. init insights with num versions: always 1 in this task
 	if err = exp.Result.initInsightsWithNumVersions(1); err != nil {
 		return err
 	}
 
-	// get URL of metrics server from environment variable
-	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
-	if !ok {
-		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
-		log.Logger.Error(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, data); err != nil {
-		return err
-	}
+	// 4. write data to Insights
+	exp.Result.Insights.TaskData[CollectGRPCTaskName] = data
 
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/dgraph-io/badger/v4"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -273,7 +274,7 @@ func TestGetMetrics(t *testing.T) {
 	assert.Equal(t, "{}", string(jsonMetrics))
 }
 
-func TestSetResult(t *testing.T) {
+func TestGetExperimentResult(t *testing.T) {
 	tempDirPath := t.TempDir()
 
 	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
@@ -281,43 +282,16 @@ func TestSetResult(t *testing.T) {
 
 	namespace := "my-namespace"
 	experiment := "my-experiment"
-	data := "hello world"
 
-	err = client.SetData(namespace, experiment, []byte(data))
+	experimentResult := base.ExperimentResult{
+		Name:      experiment,
+		Namespace: namespace,
+	}
+
+	err = client.SetExperimentResult(namespace, experiment, &experimentResult)
 	assert.NoError(t, err)
 
-	// get result
-	err = client.db.View(func(txn *badger.Txn) error {
-		key := getDataKey(namespace, experiment)
-		item, err := txn.Get([]byte(key))
-		assert.NoError(t, err)
-		assert.NotNil(t, item)
-
-		err = item.Value(func(val []byte) error {
-			assert.Equal(t, data, string(val))
-			return nil
-		})
-		assert.NoError(t, err)
-
-		return nil
-	})
+	result, err := client.GetExperimentResult(namespace, experiment)
 	assert.NoError(t, err)
-}
-
-func TestGetResult(t *testing.T) {
-	tempDirPath := t.TempDir()
-
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
-	assert.NoError(t, err)
-
-	namespace := "my-namespace"
-	experiment := "my-experiment"
-	data := "hello world"
-
-	err = client.SetData(namespace, experiment, []byte(data))
-	assert.NoError(t, err)
-
-	result, err := client.GetData(namespace, experiment)
-	assert.NoError(t, err)
-	assert.Equal(t, data, string(result))
+	assert.Equal(t, &experimentResult, result)
 }

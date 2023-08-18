@@ -17,8 +17,6 @@ const (
 	// MetricsPath is the path to the GET /metrics endpoint
 	MetricsPath = "/metrics"
 
-	// PerformanceResultPath is the path to the PUT /performanceResult endpoint
-	PerformanceResultPath = "/performanceResult"
 	// ExperimentResultPath is the path to the PUT /experimentResult endpoint
 	ExperimentResultPath = "/experimentResult"
 	// HTTPDashboardPath is the path to the GET /httpDashboard endpoint
@@ -80,14 +78,7 @@ func callMetricsService(method, metricsServerURL, path string, queryParams map[s
 	return nil
 }
 
-func putPerformanceResultToMetricsService(metricsServerURL, namespace, experiment string, data interface{}) error {
-	return callMetricsService(http.MethodPut, metricsServerURL, PerformanceResultPath, map[string]string{
-		"namespace":  namespace,
-		"experiment": experiment,
-	}, data)
-}
-
-func putExperimentResultToMetricsService(metricsServerURL, namespace, experiment string, experimentResult *ExperimentResult) error {
+func PutExperimentResultToMetricsService(metricsServerURL, namespace, experiment string, experimentResult *ExperimentResult) error {
 	return callMetricsService(http.MethodPut, metricsServerURL, ExperimentResultPath, map[string]string{
 		"namespace":  namespace,
 		"experiment": experiment,

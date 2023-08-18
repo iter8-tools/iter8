@@ -1,6 +1,8 @@
 // Package storage provides the storage client for the controllers package
 package storage
 
+import "github.com/iter8-tools/iter8/base"
+
 // SummarizedMetric is a metric summary
 type SummarizedMetric struct {
 	Count  uint64
@@ -64,23 +66,10 @@ type Interface interface {
 	// Example key: kt-users::my-app::0::my-signature::my-user -> true
 	SetUser(applicationName string, version int, signature, user string) error
 
-	// returns arbitrary data (such as HTTP/gRPC results) for a particular namespace and experiment
-	GetData(namespace, experiment string) ([]byte, error)
-
-	// Example key: kt-data::my-namespace::my-experiment-name -> per endpoint JSON data + summary
-	SetData(namespace, experiment string, data []byte) error
-
-	// // get ExperimentResult for a particular namespace and experiment
-	// GetResults(namespace, experiment string) (*base.ExperimentResult, error)
-
-	// // called by the A/B/n SDK gRPC API implementation (SDK for application clients)
-	// // Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value (get the metric value with all the provided information)
-	// SetResult(namespace, experiment string, experimentResult *base.ExperimentResult) error
-
 	// get ExperimentResult for a particular namespace and experiment
-	GetExperimentResult(namespace, experiment string) ([]byte, error)
+	GetExperimentResult(namespace, experiment string) (*base.ExperimentResult, error)
 
 	// called by the A/B/n SDK gRPC API implementation (SDK for application clients)
 	// Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value (get the metric value with all the provided information)
-	SetExperimentResult(namespace, experiment string, data []byte) error
+	SetExperimentResult(namespace, experiment string, data *base.ExperimentResult) error
 }

@@ -1,7 +1,6 @@
 package base
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -81,31 +80,6 @@ var (
 	// defaultPercentiles are the default latency percentiles computed by this task
 	defaultPercentiles = [...]float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9}
 )
-
-// errorCode checks if a given code is an error code
-func (t *collectHTTPTask) errorCode(code int) bool {
-	// connection failure
-	if code == -1 {
-		return true
-	}
-
-	// HTTP errors
-	for _, lims := range t.With.ErrorRanges {
-		// if no lower limit (check upper)
-		if lims.Lower == nil && code <= *lims.Upper {
-			return true
-		}
-		// if no upper limit (check lower)
-		if lims.Upper == nil && code >= *lims.Lower {
-			return true
-		}
-		// if both limits are present (check both)
-		if lims.Upper != nil && lims.Lower != nil && code <= *lims.Upper && code >= *lims.Lower {
-			return true
-		}
-	}
-	return false
-}
 
 // collectHTTPTask enables load testing of HTTP services.
 type collectHTTPTask struct {
@@ -214,11 +188,11 @@ func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
 // func (t *collectHTTPTask) getFortioResults() (*fhttp.HTTPRunnerResults, error) {
 // key is the metric prefix
 // key is the endpoint
-func (t *collectHTTPTask) getFortioResults() (map[string]*fhttp.HTTPRunnerResults, error) {
+func (t *collectHTTPTask) getFortioResults() (HTTPResult, error) {
 	// the main idea is to run Fortio with proper options
 
 	var err error
-	results := map[string]*fhttp.HTTPRunnerResults{}
+	results := HTTPResult{}
 	if len(t.With.Endpoints) > 0 {
 		log.Logger.Trace("multiple endpoints")
 		for endpointID, endpoint := range t.With.Endpoints {
@@ -300,20 +274,8 @@ func (t *collectHTTPTask) run(exp *Experiment) error {
 		return err
 	}
 
-	result, _ := json.Marshal(exp.Result)
-	log.Logger.Trace("before fortioResult", string(result))
-
-	// get URL of metrics server from environment variable
-	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
-	if !ok {
-		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
-		log.Logger.Error(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
-	if err = putPerformanceResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, data); err != nil {
-		return err
-	}
+	// write data to Insights
+	exp.Result.Insights.TaskData[CollectHTTPTaskName] = data
 
 	return nil
 }

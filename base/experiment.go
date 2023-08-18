@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/antonmedv/expr"
 	log "github.com/iter8-tools/iter8/base/log"
@@ -86,6 +85,9 @@ type Insights struct {
 
 	// VersionNames is list of version identifiers if known
 	VersionNames []VersionInfo `json:"versionNames" yaml:"versionNames"`
+
+	// TaskData is a map of task names to the data produced by said task
+	TaskData map[string]interface{} `json:"taskData" yaml:"taskData"`
 }
 
 // VersionInfo is basic information about a version
@@ -283,15 +285,6 @@ func (exp *Experiment) NoFailure() bool {
 func (exp *Experiment) run(driver Driver) error {
 	var err error
 
-	// TODO: reduce repetition, create package local variable and do validation
-	// get URL of metrics server from environment variable
-	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
-	if !ok {
-		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
-		log.Logger.Error(errorMessage)
-		return fmt.Errorf(errorMessage)
-	}
-
 	exp.driver = driver
 	if exp.Result == nil {
 		err = errors.New("experiment with nil result section cannot be run")
@@ -328,16 +321,10 @@ func (exp *Experiment) run(driver Driver) error {
 				log.Logger.Error("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "failure")
 				exp.failExperiment()
 
-				// TODO: remove
 				err = driver.Write(exp)
 				if err != nil {
 					return err
 				}
-				err = putExperimentResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, exp.Result)
-				if err != nil {
-					return err
-				}
-				return err
 			}
 			log.Logger.Info("task " + fmt.Sprintf("%v: %v", i+1, *getName(t)) + ": " + "completed")
 		} else {
@@ -346,12 +333,7 @@ func (exp *Experiment) run(driver Driver) error {
 
 		exp.incrementNumCompletedTasks()
 
-		// TODO: remove
 		err = driver.Write(exp)
-		if err != nil {
-			return err
-		}
-		err = putExperimentResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, exp.Result)
 		if err != nil {
 			return err
 		}
