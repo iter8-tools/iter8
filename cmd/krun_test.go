@@ -17,6 +17,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	myName      = "myName"
+	myNamespace = "myNamespace"
+)
+
 func TestKRun(t *testing.T) {
 	// define METRICS_SERVER_URL
 	metricsServerURL := "http://iter8.default:8080"

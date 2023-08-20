@@ -40,9 +40,6 @@ func init() {
 		os.Exit(1)
 	}
 
-	// add k assert
-	kcmd.AddCommand(newKAssertCmd(kd))
-
 	// add k delete
 	kcmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
 
