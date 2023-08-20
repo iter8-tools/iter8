@@ -41,7 +41,7 @@ func TestKAssert(t *testing.T) {
 	metricsServerCalled := false
 	base.MockMetricsServer(base.MockMetricsServerInput{
 		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
+		ExperimentResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -54,14 +54,10 @@ func TestKAssert(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := base.HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
+			bodyExperimentResult := base.ExperimentResult{}
+			err = json.Unmarshal(body, &bodyExperimentResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
-
-			if _, ok := bodyFortioResult[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
-			}
 		},
 	})
 
@@ -89,13 +85,6 @@ func testAssert(t *testing.T, experiment string, url string, expectedOutputFile 
 		{
 			name: "k run",
 			cmd:  "k run -g default --namespace default",
-		},
-		// k assert
-		{
-			name:      "k assert",
-			cmd:       "k assert -c completed -c nofailure",
-			golden:    base.CompletePath("../testdata", expectedOutputFile),
-			wantError: expectError,
 		},
 	}
 

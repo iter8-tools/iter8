@@ -507,12 +507,20 @@ func getHTTPDashboardHelper(experimentResult *base.ExperimentResult) httpDashboa
 	// get raw data from ExperimentResult
 	httpTaskData := experimentResult.Insights.TaskData[util.CollectHTTPTaskName]
 	if httpTaskData == nil {
+		log.Logger.Error("cannot get http task data from Insights")
 		return dashboard
 	}
 
-	// cast the raw data (task data) into HTTPResult
-	httpResult, ok := httpTaskData.(util.HTTPResult)
-	if !ok {
+	httpTaskDataBytes, err := json.Marshal(httpTaskData)
+	if err != nil {
+		log.Logger.Error("cannot marshal http task data")
+		return dashboard
+	}
+
+	httpResult := base.HTTPResult{}
+	err = json.Unmarshal(httpTaskDataBytes, &httpResult)
+	if err != nil {
+		log.Logger.Error("cannot unmarshal http task data into HTTPResult")
 		return dashboard
 	}
 
@@ -635,14 +643,21 @@ func getGRPCDashboardHelper(experimentResult *base.ExperimentResult) ghzDashboar
 	}
 
 	// get raw data from ExperimentResult
-	httpTaskData := experimentResult.Insights.TaskData[util.CollectHTTPTaskName]
-	if httpTaskData == nil {
+	ghzTaskData := experimentResult.Insights.TaskData[util.CollectGRPCTaskName]
+	if ghzTaskData == nil {
 		return dashboard
 	}
 
-	// cast the raw data (task data) into HTTPResult
-	ghzResult, ok := httpTaskData.(util.GHZResult)
-	if !ok {
+	ghzTaskDataBytes, err := json.Marshal(ghzTaskData)
+	if err != nil {
+		log.Logger.Error("cannot marshal ghz task data")
+		return dashboard
+	}
+
+	ghzResult := base.GHZResult{}
+	err = json.Unmarshal(ghzTaskDataBytes, &ghzResult)
+	if err != nil {
+		log.Logger.Error("cannot unmarshal ghz task data into GHZResult")
 		return dashboard
 	}
 

@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"fortio.org/fortio/fhttp"
-	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,37 +49,6 @@ func TestRunCollectHTTP(t *testing.T) {
 
 	url := fmt.Sprintf("http://localhost:%d/", addr.Port) + foo
 
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			fmt.Println(string(body))
-
-			if _, ok := bodyFortioResult[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
-			}
-		},
-	})
-
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
@@ -107,9 +75,20 @@ func TestRunCollectHTTP(t *testing.T) {
 	exp.initResults(1)
 	err = ct.run(exp)
 	assert.NoError(t, err)
-	assert.True(t, metricsServerCalled) // ensure that the metrics server is called
-	assert.True(t, called)              // ensure that the /foo/ handler is called
+	assert.True(t, called) // ensure that the /foo/ handler is called
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+
+	taskData := exp.Result.Insights.TaskData[CollectHTTPTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	httpResult := HTTPResult{}
+	err = json.Unmarshal(taskDataBytes, &httpResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 1, len(httpResult))
+	assert.NotNil(t, httpResult[url])
 }
 
 // If the endpoint does not exist, fail gracefully
@@ -185,39 +164,6 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 	endpoint1URL := baseURL + foo
 	endpoint2URL := baseURL + bar
 
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			if _, ok := bodyFortioResult[endpoint1]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint1))
-			}
-
-			if _, ok := bodyFortioResult[endpoint2]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint2))
-			}
-		},
-	})
-
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
 		TaskMeta: TaskMeta{
@@ -255,10 +201,22 @@ func TestRunCollectHTTPMultipleEndpoints(t *testing.T) {
 	exp.initResults(1)
 	err = ct.run(exp)
 	assert.NoError(t, err)
-	assert.True(t, metricsServerCalled) // ensure that the metrics server is called
-	assert.True(t, fooCalled)           // ensure that the /foo/ handler is called
-	assert.True(t, barCalled)           // ensure that the /bar/ handler is called
+	assert.True(t, fooCalled) // ensure that the /foo/ handler is called
+	assert.True(t, barCalled) // ensure that the /bar/ handler is called
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+
+	taskData := exp.Result.Insights.TaskData[CollectHTTPTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	httpResult := HTTPResult{}
+	err = json.Unmarshal(taskDataBytes, &httpResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 2, len(httpResult))
+	assert.NotNil(t, httpResult[endpoint1])
+	assert.NotNil(t, httpResult[endpoint2])
 }
 
 // Multiple endpoints are provided but they share one URL
@@ -290,39 +248,6 @@ func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
 	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
 	endpoint1 := "endpoint1"
 	endpoint2 := "endpoint2"
-
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			if _, ok := bodyFortioResult[endpoint1]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint1))
-			}
-
-			if _, ok := bodyFortioResult[endpoint2]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", endpoint2))
-			}
-		},
-	})
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -362,10 +287,25 @@ func TestRunCollectHTTPSingleEndpointMultipleCalls(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, fooCalled) // ensure that the /foo/ handler is called
 	assert.True(t, barCalled) // ensure that the /bar/ handler is called
-	assert.True(t, metricsServerCalled)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
+
+	taskData := exp.Result.Insights.TaskData[CollectHTTPTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	httpResult := HTTPResult{}
+	err = json.Unmarshal(taskDataBytes, &httpResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 2, len(httpResult))
+	assert.NotNil(t, httpResult[endpoint1])
+	assert.NotNil(t, httpResult[endpoint2])
 }
 
+// TODO: should this still return insights even though the endpoints cannot be reached?
+// This would mean no Grafana dashboard would be produced
+//
 // If the endpoints cannot be reached, then do not throw an error
 // Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
@@ -379,33 +319,6 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
 	endpoint1URL := baseURL + foo
 	endpoint2URL := baseURL + bar
-
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-
-			// no EndpointResults because endpoints cannot be reached
-			assert.Equal(t, `{}`, string(body))
-		},
-	})
 
 	// valid collect HTTP task... should succeed
 	ct := &collectHTTPTask{
@@ -444,7 +357,17 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 	exp.initResults(1)
 	err = ct.run(exp)
 	assert.NoError(t, err)
-	assert.True(t, metricsServerCalled)
+
+	taskData := exp.Result.Insights.TaskData[CollectHTTPTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	httpResult := HTTPResult{}
+	err = json.Unmarshal(taskDataBytes, &httpResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 0, len(httpResult))
 }
 
 func TestErrorCode(t *testing.T) {
@@ -473,100 +396,4 @@ func TestErrorCode(t *testing.T) {
 		Lower: &lower,
 	})
 	assert.True(t, task.errorCode(5))
-}
-
-func TestPutPerformanceResultToMetricsService(t *testing.T) {
-	StartHTTPMock(t)
-
-	metricsServerURL := "http://my-server.com"
-	namespace := "my-namespace"
-	experiment := "my-experiment"
-	data := map[string]string{
-		"hello": "world",
-	}
-
-	called := false
-	httpmock.RegisterResponder(http.MethodPut, metricsServerURL+PerformanceResultPath,
-		func(req *http.Request) (*http.Response, error) {
-			called = true
-
-			assert.Equal(t, namespace, req.URL.Query().Get("namespace"))
-			assert.Equal(t, experiment, req.URL.Query().Get("experiment"))
-
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.Equal(t, "{\"hello\":\"world\"}", string(body))
-
-			return httpmock.NewStringResponse(200, "success"), nil
-		})
-
-	err := putPerformanceResultToMetricsService(
-		metricsServerURL,
-		namespace,
-		experiment,
-		data,
-	)
-	assert.NoError(t, err)
-	assert.True(t, called)
-}
-
-func TestRunCollectHTTPGrafana(t *testing.T) {
-	// METRICS_SERVER_URL must be provided
-	metricsServerURL := "http://iter8.default:8080"
-	err := os.Setenv("METRICS_SERVER_URL", metricsServerURL)
-	assert.NoError(t, err)
-
-	// mock metrics server
-	metricsServerCalled := false
-	namespace := "default"
-	experiment := "default"
-	StartHTTPMock(t)
-	httpmock.RegisterResponder(http.MethodPut, metricsServerURL+PerformanceResultPath,
-		func(req *http.Request) (*http.Response, error) {
-			metricsServerCalled = true
-
-			assert.Equal(t, namespace, req.URL.Query().Get("namespace"))
-			assert.Equal(t, experiment, req.URL.Query().Get("experiment"))
-
-			return httpmock.NewStringResponse(200, "success"), nil
-		})
-
-	mux, addr := fhttp.DynamicHTTPServer(false)
-
-	// mock endpoint
-	endpointCalled := false
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		endpointCalled = true
-
-		w.WriteHeader(200)
-	}
-	mux.HandleFunc("/"+foo, handler)
-
-	baseURL := fmt.Sprintf("http://localhost:%d/", addr.Port)
-
-	// valid collect HTTP task... should succeed
-	ct := &collectHTTPTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(CollectHTTPTaskName),
-		},
-		With: collectHTTPInputs{
-			endpoint: endpoint{
-				URL: baseURL + foo,
-			},
-		},
-	}
-
-	exp := &Experiment{
-		Spec:   []Task{ct},
-		Result: &ExperimentResult{},
-		Metadata: ExperimentMetadata{
-			Namespace: "default",
-			Name:      "default",
-		},
-	}
-	exp.initResults(1)
-	err = ct.run(exp)
-	assert.NoError(t, err)
-	assert.True(t, metricsServerCalled)
-	assert.True(t, endpointCalled)
 }

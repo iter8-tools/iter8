@@ -2,9 +2,6 @@ package base
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -33,35 +30,6 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	assert.NoError(t, err)
 
 	call := "helloworld.Greeter.SayHello"
-
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			if _, ok := bodyFortioResult[call]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", call))
-			}
-		},
-	})
 
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
@@ -102,10 +70,21 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
-	assert.True(t, metricsServerCalled)
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
+
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 1, len(ghzResult))
+	assert.NotNil(t, ghzResult[call])
 }
 
 // If the endpoint does not exist, fail gracefully
@@ -146,47 +125,6 @@ func TestRunCollectGRPCMultipleEndpoints(t *testing.T) {
 	metricsServerURL := "http://iter8.default:8080"
 	err := os.Setenv(MetricsServerURL, metricsServerURL)
 	assert.NoError(t, err)
-
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			if _, ok := bodyFortioResult[unary]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", unary))
-			}
-
-			if _, ok := bodyFortioResult[server]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", server))
-			}
-
-			if _, ok := bodyFortioResult[client]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", client))
-			}
-
-			if _, ok := bodyFortioResult[bidirectional]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", bidirectional))
-			}
-		},
-	})
 
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
@@ -243,12 +181,29 @@ func TestRunCollectGRPCMultipleEndpoints(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
-	assert.True(t, metricsServerCalled)
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
+
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 4, len(ghzResult))
+	assert.NotNil(t, ghzResult[unary])
+	assert.NotNil(t, ghzResult[server])
+	assert.NotNil(t, ghzResult[client])
+	assert.NotNil(t, ghzResult[bidirectional])
 }
 
+// TODO: should this still return insights even though the endpoints cannot be reached?
+// This would mean no Grafana dashboard would be produced
+//
 // If the endpoints cannot be reached, then do not throw an error
 // Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
@@ -261,31 +216,6 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 	serverCall := "helloworld.Greeter.SayHelloCS"
 	clientCall := "helloworld.Greeter.SayHellos"
 	bidirectionalCall := "helloworld.Greeter.SayHelloBidi"
-
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-			assert.Equal(t, `{}`, string(body))
-		},
-	})
 
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
@@ -330,7 +260,17 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 	exp.initResults(1)
 	err = ct.run(exp)
 	assert.NoError(t, err)
-	assert.True(t, metricsServerCalled)
+
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 0, len(ghzResult))
 }
 
 func TestRunCollectGRPCSingleEndpointMultipleCalls(t *testing.T) {
@@ -338,41 +278,6 @@ func TestRunCollectGRPCSingleEndpointMultipleCalls(t *testing.T) {
 	metricsServerURL := "http://iter8.default:8080"
 	err := os.Setenv(MetricsServerURL, metricsServerURL)
 	assert.NoError(t, err)
-
-	// mock metrics server
-	StartHTTPMock(t)
-	metricsServerCalled := false
-	MockMetricsServer(MockMetricsServerInput{
-		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
-			metricsServerCalled = true
-
-			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
-			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
-
-			// check payload
-			body, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			// check payload content
-			bodyFortioResult := HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
-			assert.NoError(t, err)
-			assert.NotNil(t, body)
-
-			fmt.Println(string(body))
-
-			if _, ok := bodyFortioResult[unary]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", unary))
-			}
-
-			if _, ok := bodyFortioResult[unary2]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", unary2))
-			}
-		},
-	})
 
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
@@ -420,8 +325,20 @@ func TestRunCollectGRPCSingleEndpointMultipleCalls(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
-	assert.True(t, metricsServerCalled)
 
 	count := gs.GetCount(callType)
 	assert.Equal(t, 400, count)
+
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 2, len(ghzResult))
+	assert.NotNil(t, ghzResult[unary])
+	assert.NotNil(t, ghzResult[unary2])
 }

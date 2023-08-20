@@ -872,7 +872,7 @@ func TestGetGRPCDashboardHelper(t *testing.T) {
 		NumCompletedTasks: 5,
 		Insights: &util.Insights{
 			TaskData: map[string]interface{}{
-				util.CollectHTTPTaskName: ghzResult,
+				util.CollectGRPCTaskName: ghzResult,
 			},
 		},
 	}
@@ -995,7 +995,7 @@ func TestPutExperimentResult(t *testing.T) {
 
 func TestGetHTTPDashboardInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, util.GRPCDashboardPath, nil)
+	req := httptest.NewRequest(http.MethodPost, util.HTTPDashboardPath, nil)
 	getHTTPDashboard(w, req)
 	res := w.Result()
 	defer func() {
@@ -1105,111 +1105,114 @@ func TestGetHTTPDashboard(t *testing.T) {
 	)
 }
 
-// func TestGetGRPCDashboardInvalidMethod(t *testing.T) {
-// 	w := httptest.NewRecorder()
-// 	req := httptest.NewRequest(http.MethodPost, util.PerformanceResultPath, nil)
-// 	putPerformanceResult(w, req)
-// 	res := w.Result()
-// 	defer func() {
-// 		err := res.Body.Close()
-// 		assert.NoError(t, err)
-// 	}()
-// 	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
-// }
+func TestGetGRPCDashboardInvalidMethod(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, util.GRPCDashboardPath, nil)
+	getGRPCDashboard(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
+	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
+}
 
-// func TestGetGRPCDashboardMissingParameter(t *testing.T) {
-// 	tests := []struct {
-// 		queryParams        url.Values
-// 		expectedStatusCode int
-// 	}{
-// 		{
-// 			expectedStatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			queryParams: url.Values{
-// 				"namespace": {"default"},
-// 			},
-// 			expectedStatusCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			queryParams: url.Values{
-// 				"experiment": {"default"},
-// 			},
-// 			expectedStatusCode: http.StatusBadRequest,
-// 		},
-// 	}
+func TestGetGRPCDashboardMissingParameter(t *testing.T) {
+	tests := []struct {
+		queryParams        url.Values
+		expectedStatusCode int
+	}{
+		{
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"namespace": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"experiment": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
 
-// 	for _, test := range tests {
-// 		w := httptest.NewRecorder()
+	for _, test := range tests {
+		w := httptest.NewRecorder()
 
-// 		u, err := url.ParseRequestURI(util.PerformanceResultPath)
-// 		assert.NoError(t, err)
-// 		u.RawQuery = test.queryParams.Encode()
-// 		urlStr := fmt.Sprintf("%v", u)
+		u, err := url.ParseRequestURI(util.GRPCDashboardPath)
+		assert.NoError(t, err)
+		u.RawQuery = test.queryParams.Encode()
+		urlStr := fmt.Sprintf("%v", u)
 
-// 		req := httptest.NewRequest(http.MethodPut, urlStr, nil)
+		req := httptest.NewRequest(http.MethodGet, urlStr, nil)
 
-// 		putPerformanceResult(w, req)
-// 		res := w.Result()
-// 		defer func() {
-// 			err := res.Body.Close()
-// 			assert.NoError(t, err)
-// 		}()
+		getGRPCDashboard(w, req)
+		res := w.Result()
+		defer func() {
+			err := res.Body.Close()
+			assert.NoError(t, err)
+		}()
 
-// 		assert.Equal(t, test.expectedStatusCode, res.StatusCode)
-// 	}
-// }
+		assert.Equal(t, test.expectedStatusCode, res.StatusCode)
+	}
+}
 
-// func TestGetGRPCDashboard(t *testing.T) {
-// 	// instantiate metrics client
-// 	tempDirPath := t.TempDir()
-// 	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
-// 	assert.NoError(t, err)
-// 	abn.MetricsClient = client
+func TestGetGRPCDashboard(t *testing.T) {
+	// instantiate metrics client
+	tempDirPath := t.TempDir()
+	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
+	abn.MetricsClient = client
 
-// 	// preload metric client with ghz result
-// 	err = abn.MetricsClient.SetData("default", "default", []byte(ghzResultJSON))
-// 	assert.NoError(t, err)
+	// preload metric client with experiment result
+	ghzResult := util.GHZResult{}
+	err = json.Unmarshal([]byte(ghzResultJSON), &ghzResult)
+	assert.NoError(t, err)
 
-// 	// preload metric client with experiment result
-// 	experimentResult := util.ExperimentResult{
-// 		Name:              myName,
-// 		Namespace:         myNamespace,
-// 		NumCompletedTasks: 5,
-// 	}
-// 	experimentResultBytes, err := json.Marshal(experimentResult)
-// 	assert.NoError(t, err)
-// 	err = abn.MetricsClient.SetExperimentResult("default", "default", []byte(experimentResultBytes))
-// 	assert.NoError(t, err)
+	experimentResult := util.ExperimentResult{
+		Name:              myName,
+		Namespace:         myNamespace,
+		NumCompletedTasks: 5,
+		Insights: &util.Insights{
+			TaskData: map[string]interface{}{
+				util.CollectGRPCTaskName: ghzResult,
+			},
+		},
+	}
 
-// 	w := httptest.NewRecorder()
+	err = abn.MetricsClient.SetExperimentResult("default", "default", &experimentResult)
+	assert.NoError(t, err)
+	w := httptest.NewRecorder()
 
-// 	// construct inputs to getGRPCDashboard
-// 	u, err := url.ParseRequestURI(util.PerformanceResultPath)
-// 	assert.NoError(t, err)
-// 	params := url.Values{
-// 		"namespace":  {"default"},
-// 		"experiment": {"default"},
-// 	}
-// 	u.RawQuery = params.Encode()
-// 	urlStr := fmt.Sprintf("%v", u)
+	// construct inputs to getGRPCDashboard
+	u, err := url.ParseRequestURI(util.GRPCDashboardPath)
+	assert.NoError(t, err)
+	params := url.Values{
+		"namespace":  {"default"},
+		"experiment": {"default"},
+	}
+	u.RawQuery = params.Encode()
+	urlStr := fmt.Sprintf("%v", u)
 
-// 	req := httptest.NewRequest(http.MethodGet, urlStr, nil)
+	req := httptest.NewRequest(http.MethodGet, urlStr, nil)
 
-// 	// get ghz dashboard based on result in metrics client
-// 	getGRPCDashboard(w, req)
-// 	res := w.Result()
-// 	defer func() {
-// 		err := res.Body.Close()
-// 		assert.NoError(t, err)
-// 	}()
+	// get ghz dashboard based on result in metrics client
+	getGRPCDashboard(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
 
-// 	// check the ghz dashboard
-// 	body, err := io.ReadAll(res.Body)
-// 	assert.NoError(t, err)
-// 	assert.Equal(
-// 		t,
-// 		ghzDashboardJSON,
-// 		string(body),
-// 	)
-// }
+	// check the ghz dashboard
+	body, err := io.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(
+		t,
+		ghzDashboardJSON,
+		string(body),
+	)
+}

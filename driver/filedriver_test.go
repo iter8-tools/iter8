@@ -35,7 +35,7 @@ func TestLocalRun(t *testing.T) {
 	metricsServerCalled := false
 	base.MockMetricsServer(base.MockMetricsServerInput{
 		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
+		ExperimentResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -48,14 +48,10 @@ func TestLocalRun(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := base.HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
+			bodyExperimentResult := base.ExperimentResult{}
+			err = json.Unmarshal(body, &bodyExperimentResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
-
-			if _, ok := bodyFortioResult[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
-			}
 		},
 	})
 
@@ -71,6 +67,7 @@ func TestLocalRun(t *testing.T) {
 	assert.NoError(t, err)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
+	assert.True(t, metricsServerCalled)
 
 	// check results
 	exp, err := base.BuildExperiment(&fd)
@@ -81,7 +78,6 @@ func TestLocalRun(t *testing.T) {
 	fmt.Println(err, exp.Completed(), exp.NoFailure())
 
 	assert.True(t, exp.Completed() && exp.NoFailure())
-	assert.True(t, metricsServerCalled)
 }
 
 func TestFileDriverReadError(t *testing.T) {

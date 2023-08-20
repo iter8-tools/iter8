@@ -239,6 +239,7 @@ func (r *ExperimentResult) initInsightsWithNumVersions(n int) error {
 	if r.Insights == nil {
 		r.Insights = &Insights{
 			NumVersions: n,
+			TaskData:    map[string]interface{}{},
 		}
 	} else {
 		if r.Insights.NumVersions != n {

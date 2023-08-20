@@ -2,12 +2,14 @@ package base
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	log "github.com/iter8-tools/iter8/base/log"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,8 +25,21 @@ func (m *mockDriver) Read() (*Experiment, error) {
 }
 
 // Write an experiment
-func (m *mockDriver) Write(e *Experiment) error {
-	m.Experiment = e
+func (m *mockDriver) Write(exp *Experiment) error {
+	m.Experiment = exp
+
+	// get URL of metrics server from environment variable
+	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
+	if !ok {
+		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+		log.Logger.Error(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	err := PutExperimentResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, exp.Result)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

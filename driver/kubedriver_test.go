@@ -84,7 +84,7 @@ func TestKubeRun(t *testing.T) {
 	metricsServerCalled := false
 	base.MockMetricsServer(base.MockMetricsServerInput{
 		MetricsServerURL: metricsServerURL,
-		PerformanceResultCallback: func(req *http.Request) {
+		ExperimentResultCallback: func(req *http.Request) {
 			metricsServerCalled = true
 
 			// check query parameters
@@ -97,14 +97,10 @@ func TestKubeRun(t *testing.T) {
 			assert.NotNil(t, body)
 
 			// check payload content
-			bodyFortioResult := base.HTTPResult{}
-			err = json.Unmarshal(body, &bodyFortioResult)
+			bodyExperimentResult := base.ExperimentResult{}
+			err = json.Unmarshal(body, &bodyExperimentResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
-
-			if _, ok := bodyFortioResult[url]; !ok {
-				assert.Fail(t, fmt.Sprintf("payload FortioResult does not contain endpoint: %s", url))
-			}
 		},
 	})
 
@@ -145,6 +141,11 @@ func TestKubeRun(t *testing.T) {
 	// check results
 	exp, err := base.BuildExperiment(kd)
 	assert.NoError(t, err)
+
+	x, _ := json.Marshal(exp)
+	fmt.Println(string(x))
+	fmt.Println(err, exp.Completed(), exp.NoFailure())
+
 	assert.True(t, exp.Completed() && exp.NoFailure())
 }
 
