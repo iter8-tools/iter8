@@ -63,7 +63,7 @@ jobs:
     - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/controller/namespaceScoped
+        kubectl apply -k kustomize/iter8/namespaceScoped
 
     - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -98,7 +98,7 @@ jobs:
     - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/controller/clusterScoped
+        kubectl apply -k kustomize/iter8/clusterScoped
 
     - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
