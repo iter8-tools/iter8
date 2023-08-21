@@ -52,44 +52,32 @@ jobs:
     - name: load-test-http in Kubernetes
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/get \
         --set http.duration="3s" \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
  
     - name: load-test-http with payload in Kubernetes
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/post \
         --set http.payloadStr=hello \
         --set http.duration="3s" \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
     - name: load-test-http with multiple endpoints in Kubernetes
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
         --set ready.timeout=60s \
@@ -98,15 +86,6 @@ jobs:
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
         --set http.duration="3s" \
-        --set assess.SLOs.upper.http-get/error-count=0 \
-        --set assess.SLOs.upper.http-get/latency-mean=50 \
-        --set assess.SLOs.upper.http-getAnything/error-count=0 \
-        --set assess.SLOs.upper.http-getAnything/latency-mean=100 \
-        --set assess.SLOs.upper.http-post/error-count=0 \
-        --set assess.SLOs.upper.http-post/latency-mean=150 \
-        --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -145,7 +124,7 @@ jobs:
     - name: load test grpc service
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
         --set ready.timeout=60s \
@@ -153,19 +132,13 @@ jobs:
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=800 \
-        --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
     - name: load test grpc service with multiple endpoints
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
         --set ready.timeout=60s \
@@ -175,13 +148,6 @@ jobs:
         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
-        --set assess.SLOs.upper.grpc-getFeature/error-rate=0 \
-        --set assess.SLOs.upper.grpc-getFeature/latency/mean=50 \
-        --set assess.SLOs.upper.grpc-listFeatures/error-rate=0 \
-        --set assess.SLOs.upper.grpc-listFeatures/latency/mean=100 \
-        --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -211,7 +177,7 @@ jobs:
     - name: load test grpc service with protoURL
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=hello \
         --set ready.service=hello \
         --set ready.timeout=60s \
@@ -219,21 +185,13 @@ jobs:
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
         --set grpc.data.name="frodo" \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
         
     - name: load test grpc service with proto/data/metadata URLs
       run: |
-        iter8 k launch --localChart -l trace \
-        --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        iter8 k launch --localChart --chartName charts/iter8 \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=hello \
         --set ready.service=hello \
         --set ready.timeout=60s \
@@ -242,12 +200,5 @@ jobs:
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
         --set grpc.dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
         --set grpc.metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=job
-        iter8 k assert -c completed -c nofailure -c slos --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete

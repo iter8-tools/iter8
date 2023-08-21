@@ -79,18 +79,12 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -136,19 +130,13 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -194,82 +182,15 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set "tasks={http}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
-        --set assess.SLOs.upper.http-get/error-count=0 \
-        --set assess.SLOs.upper.http-get/latency-mean=50 \
-        --set assess.SLOs.upper.http-getAnything/error-count=0 \
-        --set assess.SLOs.upper.http-getAnything/latency-mean=100 \
-        --set assess.SLOs.upper.http-post/error-count=0 \
-        --set assess.SLOs.upper.http-post/latency-mean=150 \
-        --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
-        iter8 k log
-        iter8 k delete
-      
-  http-looped-experiment:
-    name: HTTP looped load test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
-
-    steps:    
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
-
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
-      if: steps.modified-files.outputs.any_modified == 'true'
-
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
-
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deployment httpbin --image=kennethreitz/httpbin
-        kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
-
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
-        --set http.url="http://httpbin.default/get" \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=cronjob \
-        --set cronjobSchedule="*/1 * * * *"
-
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k assert -c nofailure --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -324,7 +245,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
         --set ready.timeout=60s \
@@ -332,17 +253,10 @@ jobs:
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -397,7 +311,7 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
         --set ready.timeout=60s \
@@ -407,17 +321,10 @@ jobs:
         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
-        --set assess.SLOs.upper.grpc-getFeature/error-rate=0 \
-        --set assess.SLOs.upper.grpc-getFeature/latency/mean=50 \
-        --set assess.SLOs.upper.grpc-listFeatures/error-rate=0 \
-        --set assess.SLOs.upper.grpc-listFeatures/latency/mean=100 \
-        --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -463,136 +370,16 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={grpc,assess}" \
+        --set "tasks={grpc}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=job
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
-
-  grpc-looped-experiment:
-    name: gRPC looped load test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
-
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
-    
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
-      if: steps.modified-files.outputs.any_modified == 'true'
-
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
-
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
-        kubectl expose deploy hello --port=50051
-        kubectl wait --for=condition=available --timeout=60s deploy/hello
-        
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={grpc,assess}" \
-        --set grpc.host="hello.default:50051" \
-        --set grpc.call="helloworld.Greeter.SayHello" \
-        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=cronjob \
-        --set cronjobSchedule="*/1 * * * *"
-
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k assert -c nofailure -c slos --timeout 300s
-        iter8 k report
-        iter8 k log
-        iter8 k delete
-
-  autox:
-    name: AutoX test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
-
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Get modified files in the charts/autox folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/autox
-
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
-
-    - name: Create namespace
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create namespace argocd
-        
-    - name: Start AutoX controller
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        helm install autox charts/autox \
-        --set 'groups.httpbin.trigger.name=httpbin' \
-        --set 'groups.httpbin.trigger.namespace=default' \
-        --set 'groups.httpbin.trigger.group=apps' \
-        --set 'groups.httpbin.trigger.version=v1' \
-        --set 'groups.httpbin.trigger.resource=deployments' \
-        --set 'groups.httpbin.specs.iter8.name=iter8' \
-        --set 'groups.httpbin.specs.iter8.values.tasks={ready,http}' \
-        --set 'groups.httpbin.specs.iter8.values.ready.deploy=httpbin' \
-        --set 'groups.httpbin.specs.iter8.values.ready.service=httpbin' \
-        --set 'groups.httpbin.specs.iter8.values.ready.timeout=60s' \
-        --set 'groups.httpbin.specs.iter8.values.http.url=http://httpbin.default/get' \
-        --set 'groups.httpbin.specs.iter8.version=0.15.0' \
-        --set 'groups.httpbin.specs.iter8.values.runner=job'
-
-    - name: Check AutoX controller
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: kubectl wait --for=condition=available --timeout=60s deploy/autox -n argocd
 
   traffic:
     name: Traffic test

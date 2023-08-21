@@ -109,7 +109,6 @@ jobs:
         --set http.url="http://httpbin.default/get"
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
         iter8 k log
         iter8 k delete
 
@@ -146,11 +145,8 @@ jobs:
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
-        --set runner=job
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
@@ -179,7 +175,6 @@ jobs:
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
     - name: try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
         iter8 k log
         iter8 k delete
 
@@ -206,9 +201,6 @@ jobs:
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default
-    - name: k assert experiment completed without failures
-      run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
 
   readiness-with-namespace:
     name: Kubernetes readiness test with namespace
@@ -235,6 +227,3 @@ jobs:
         --set ready.timeout=60s \
         --set ready.namespace=default \
         --set http.url=http://httpbin.default/get
-    - name: k assert experiment completed without failures
-      run: |
-        iter8 k assert -n experiments -c completed -c nofailure --timeout 60s
