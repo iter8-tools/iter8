@@ -109,6 +109,7 @@ jobs:
         --set http.url="http://httpbin.default/get"
     - name: try other iter8 k commands
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -147,6 +148,7 @@ jobs:
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
     - name: try other iter8 k commands
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -175,6 +177,7 @@ jobs:
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
     - name: try other iter8 k commands
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 

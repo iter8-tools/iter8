@@ -85,6 +85,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -137,6 +138,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -191,6 +193,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -257,6 +260,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -325,6 +329,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -378,6 +383,7 @@ jobs:
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
+        sleep 60
         iter8 k log
         iter8 k delete
 

@@ -25,6 +25,7 @@ const (
 	GRPCDashboardPath = "/grpcDashboard"
 )
 
+// callMetricsService is a general function that can be used to send data to the metrics service
 func callMetricsService(method, metricsServerURL, path string, queryParams map[string]string, payload interface{}) error {
 	// handle URL and URL parameters
 	u, err := url.ParseRequestURI(metricsServerURL + path)
@@ -78,6 +79,7 @@ func callMetricsService(method, metricsServerURL, path string, queryParams map[s
 	return nil
 }
 
+// PutExperimentResultToMetricsService sends the experiment result to the metrics service
 func PutExperimentResultToMetricsService(metricsServerURL, namespace, experiment string, experimentResult *ExperimentResult) error {
 	return callMetricsService(http.MethodPut, metricsServerURL, ExperimentResultPath, map[string]string{
 		"namespace":  namespace,

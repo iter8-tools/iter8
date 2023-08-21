@@ -5,6 +5,7 @@ on:
 
 jobs:
   unit-test:
+    name: Unit test
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
@@ -57,7 +58,8 @@ jobs:
         --set ready.service=httpbin \
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/get \
-        --set http.duration="3s" \
+        --set http.duration="3s"
+        sleep 60
         iter8 k log
         iter8 k delete
  
@@ -70,7 +72,8 @@ jobs:
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/post \
         --set http.payloadStr=hello \
-        --set http.duration="3s" \
+        --set http.duration="3s"
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -85,7 +88,8 @@ jobs:
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
-        --set http.duration="3s" \
+        --set http.duration="3s"
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -131,7 +135,8 @@ jobs:
         --set grpc.host=routeguide.default:50051 \
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
-        --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
+        --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -147,7 +152,8 @@ jobs:
         --set grpc.endpoints.getFeature.call=routeguide.RouteGuide.GetFeature \
         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
-        --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
+        --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json
+        sleep 60
         iter8 k log
         iter8 k delete
 
@@ -184,7 +190,8 @@ jobs:
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        --set grpc.data.name="frodo" \
+        --set grpc.data.name="frodo"
+        sleep 60
         iter8 k log
         iter8 k delete
         
@@ -199,6 +206,7 @@ jobs:
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
         --set grpc.dataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
-        --set grpc.metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json" \
+        --set grpc.metadataURL="https://gist.githubusercontent.com/sriumcp/3f3178f4b698af6696c925832e51b0ba/raw/d02aa698d34aa2067f7a2f6afb4ceb616b0db822/name.json"
+        sleep 60
         iter8 k log
         iter8 k delete
