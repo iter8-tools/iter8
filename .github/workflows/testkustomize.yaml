@@ -63,12 +63,12 @@ jobs:
     - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/iter8/namespaceScoped
+        kubectl apply -k kustomize/controller/namespaceScoped
 
     - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-controller
+        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8
 
   controller-clusterScoped:
     name: Controller cluster scoped test
@@ -98,9 +98,9 @@ jobs:
     - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/iter8/clusterScoped
+        kubectl apply -k kustomize/controller/clusterScoped
 
     - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-controller
+        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8
