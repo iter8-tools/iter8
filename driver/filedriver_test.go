@@ -52,6 +52,9 @@ func TestLocalRun(t *testing.T) {
 			err = json.Unmarshal(body, &bodyExperimentResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
+
+			// no experiment failure
+			assert.False(t, bodyExperimentResult.Failure)
 		},
 	})
 
@@ -68,16 +71,6 @@ func TestLocalRun(t *testing.T) {
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 	assert.True(t, metricsServerCalled)
-
-	// check results
-	exp, err := base.BuildExperiment(&fd)
-	assert.NoError(t, err)
-
-	x, _ := json.Marshal(exp)
-	fmt.Println(string(x))
-	fmt.Println(err, exp.Completed(), exp.NoFailure())
-
-	assert.True(t, exp.Completed() && exp.NoFailure())
 }
 
 func TestFileDriverReadError(t *testing.T) {

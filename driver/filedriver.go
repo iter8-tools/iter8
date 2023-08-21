@@ -8,7 +8,6 @@ import (
 
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	"sigs.k8s.io/yaml"
 )
 
 // FileDriver enables reading and writing experiment spec and result files
@@ -45,13 +44,6 @@ func (f *FileDriver) Write(exp *base.Experiment) error {
 		return fmt.Errorf(errorMessage)
 	}
 
-	// write to file
-	b, _ := yaml.Marshal(exp)
-	err = os.WriteFile(path.Join(f.RunDir, ExperimentPath), b, 0600)
-	if err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
-		return errors.New("unable to write experiment")
-	}
 	return nil
 }
 

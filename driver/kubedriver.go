@@ -31,7 +31,6 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/yaml"
 
 	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -210,45 +209,6 @@ func (kd *KubeDriver) Read() (*base.Experiment, error) {
 	return ExperimentFromBytes(b)
 }
 
-// formExperimentSecret creates the experiment secret using the experiment
-func (kd *KubeDriver) formExperimentSecret(e *base.Experiment) (*corev1.Secret, error) {
-	byteArray, err := yaml.Marshal(e)
-	if err != nil {
-		return nil, err
-	}
-	// log.Logger.Debug(string(byteArray))
-	sec := corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: kd.getExperimentSecretName(),
-			Annotations: map[string]string{
-				"iter8.tools/group": kd.Group,
-			},
-		},
-		StringData: map[string]string{ExperimentPath: string(byteArray)},
-	}
-	// formed experiment secret ...
-	return &sec, nil
-}
-
-// updateExperimentSecret updates the experiment secret
-// as opposed to patch, update is an atomic operation
-func (kd *KubeDriver) updateExperimentSecret(e *base.Experiment) error {
-	if sec, err := kd.formExperimentSecret(e); err == nil {
-		secretsClient := kd.Clientset.CoreV1().Secrets(kd.Namespace())
-		_, err1 := secretsClient.Update(context.Background(), sec, metav1.UpdateOptions{})
-		// TODO: Evaluate if result secret update requires retries.
-		// Probably not. Conflicts will be avoided if cronjob avoids parallel jobs.
-		if err1 != nil {
-			err2 := fmt.Errorf("unable to update secret %v", sec.Name)
-			log.Logger.WithStackTrace(err1.Error()).Error(err2)
-			return err2
-		}
-	} else {
-		return err
-	}
-	return nil
-}
-
 // Write writes a Kubernetes experiment
 func (kd *KubeDriver) Write(exp *base.Experiment) error {
 	// write to metrics server
@@ -267,11 +227,6 @@ func (kd *KubeDriver) Write(exp *base.Experiment) error {
 		return fmt.Errorf(errorMessage)
 	}
 
-	// write to secret
-	if err := kd.updateExperimentSecret(exp); err != nil {
-		log.Logger.WithStackTrace(err.Error()).Error("unable to write experiment")
-		return errors.New("unable to write experiment")
-	}
 	return nil
 }
 

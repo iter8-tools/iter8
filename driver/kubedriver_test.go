@@ -101,6 +101,9 @@ func TestKubeRun(t *testing.T) {
 			err = json.Unmarshal(body, &bodyExperimentResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
+
+			// no experiment failure
+			assert.False(t, bodyExperimentResult.Failure)
 		},
 	})
 
@@ -121,32 +124,11 @@ func TestKubeRun(t *testing.T) {
 		StringData: map[string]string{ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	// _, _ = kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		Name:      "default-1-job",
-	// 		Namespace: "default",
-	// 		Annotations: map[string]string{
-	// 			"iter8.tools/group":    "default",
-	// 			"iter8.tools/revision": "1",
-	// 		},
-	// 	},
-	// }, metav1.CreateOptions{})
-
 	err = base.RunExperiment(kd)
 	assert.NoError(t, err)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 	assert.True(t, metricsServerCalled)
-
-	// check results
-	exp, err := base.BuildExperiment(kd)
-	assert.NoError(t, err)
-
-	x, _ := json.Marshal(exp)
-	fmt.Println(string(x))
-	fmt.Println(err, exp.Completed(), exp.NoFailure())
-
-	assert.True(t, exp.Completed() && exp.NoFailure())
 }
 
 func TestLogs(t *testing.T) {
