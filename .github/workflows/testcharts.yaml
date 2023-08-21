@@ -387,8 +387,8 @@ jobs:
         iter8 k log
         iter8 k delete
 
-  traffic:
-    name: Traffic test
+  controller:
+    name: Controller test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -399,11 +399,11 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/traffic folder
+    - name: Get modified files in the charts/controller folder
       id: modified-files
       uses: tj-actions/changed-files@v35
       with:
-        files: charts/traffic
+        files: charts/controller
 
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
@@ -412,12 +412,12 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
         
-    - name: Start traffic
+    - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm install traffic charts/traffic -f charts/traffic/testdata/values.yaml
+        helm install controller charts/controller -f charts/controller/testdata/values.yaml
 
-    - name: Check traffic
+    - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/traffic
+        kubectl rollout status --watch --timeout=60s statefulset.apps/controller

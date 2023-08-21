@@ -35,8 +35,8 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  traffic:
-    name: Traffic test
+  controller:
+    name: Controller test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -47,11 +47,11 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/traffic folder
+    - name: Get modified files in the charts/controller folder
       id: modified-files
       uses: tj-actions/changed-files@v35
       with:
-        files: charts/traffic
+        files: charts/controller
 
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
@@ -60,18 +60,18 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
         
-    - name: Start traffic
+    - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/traffic/namespaceScoped
+        kubectl apply -k kustomize/controller/namespaceScoped
 
-    - name: Check traffic
+    - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-traffic
+        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-controller
 
-  traffic-clusterScoped:
-    name: Traffic cluster scoped test
+  controller-clusterScoped:
+    name: Controller cluster scoped test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -82,11 +82,11 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/traffic folder
+    - name: Get modified files in the charts/controller folder
       id: modified-files
       uses: tj-actions/changed-files@v35
       with:
-        files: charts/traffic
+        files: charts/controller
 
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
@@ -95,12 +95,12 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
         
-    - name: Start traffic
+    - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/traffic/clusterScoped
+        kubectl apply -k kustomize/controller/clusterScoped
 
-    - name: Check traffic
+    - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-traffic
+        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-controller

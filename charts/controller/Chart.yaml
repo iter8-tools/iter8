@@ -1,11 +1,11 @@
 apiVersion: v2
-name: traffic
+name: controller
 version: 0.1.10
-description: Iter8 traffic controller
+description: Iter8 controller controller
 type: application
 keywords:
 - Iter8
-- traffic
+- controller
 - experiment
 home: https://iter8.tools
 sources:

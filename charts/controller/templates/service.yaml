@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}
 spec:
   selector:
-    app.kubernetes.io/name: {{ template "iter8-traffic.name" . }}
+    app.kubernetes.io/name: {{ template "iter8-controller.name" . }}
   ports:
   - name: grpc
     port: {{ .Values.abn.port }}

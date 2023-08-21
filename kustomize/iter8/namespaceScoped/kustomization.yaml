@@ -8,5 +8,5 @@ resources:
 - statefulset.yaml
 
 commonLabels:
-  app.kubernetes.io/name: traffic
+  app.kubernetes.io/name: controller
   app.kubernetes.io/version: v0.15
