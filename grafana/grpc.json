@@ -139,7 +139,7 @@
                     },
                     "fields": [
                         {
-                            "jsonPath": "$.Summary.Failure"
+                            "jsonPath": "$.ExperimentResult.Failure"
                         }
                     ],
                     "method": "GET",
@@ -209,7 +209,7 @@
                     },
                     "fields": [
                         {
-                            "jsonPath": "$.Summary.Completed tasks"
+                            "jsonPath": "$.ExperimentResult.Completed tasks"
                         }
                     ],
                     "method": "GET",
@@ -294,7 +294,7 @@
                     },
                     "fields": [
                         {
-                            "jsonPath": "$.Summary"
+                            "jsonPath": "$.ExperimentResult"
                         }
                     ],
                     "method": "GET",
@@ -309,7 +309,7 @@
                     "id": "extractFields",
                     "options": {
                         "replace": true,
-                        "source": "Summary"
+                        "source": "ExperimentResult"
                     }
                 },
                 {
