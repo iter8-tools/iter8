@@ -1,0 +1,93 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  assets:
+    name: Publish binaries
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.19
+    - uses: actions/checkout@v3
+    - name: Build binaries
+      run: |
+        VERSION=${GITHUB_REF#refs/*/}
+        echo "Version: ${VERSION}"
+        GITHUB_REF=${{ env.GITHUB_REF }}
+        echo "GITHUB_REF: ${GITHUB_REF}"
+        OWNER=${{ env.OWNER }}
+        echo "OWNER: ${OWNER}"
+        OWNER2=${OWNER}
+        echo "OWNER2: ${OWNER2}"
+    # - name: Upload binaries to release
+    #   uses: svenstaro/upload-release-action@v2
+    #   with:
+    #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #     file: _dist/iter8-*.tar.gz
+    #     tag: ${{ github.ref }}
+    #     overwrite: true
+    #     file_glob: true
+    # - name: Create checksum
+    #   run: |
+    #     VERSION=${GITHUB_REF#refs/*/}
+    #     echo "VERSION=$VERSION" >> $GITHUB_ENV
+    #     wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.zip
+    #     sha256sum ${VERSION}.zip > checksum.txt
+    #     wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.tar.gz
+    #     sha256sum ${VERSION}.tar.gz >> checksum.txt
+    #     cd _dist
+    #     for f in iter8-*.tar.gz
+    #     do
+    #       sha256sum ${f} >> ../checksum.txt
+    #     done
+    #     # pick up darwin checksum and export it
+    #     echo "SHAFORMAC=$(grep darwin ../checksum.txt | awk '{print $1}')" >> $GITHUB_ENV
+    # - name: Upload checksum to release
+    #   uses: svenstaro/upload-release-action@v2
+    #   with:
+    #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #     asset_name: checksum.txt
+    #     file: checksum.txt
+    #     tag: ${{ github.ref }}
+    #     overwrite: true
+
+#   build-and-push:
+#     name: Push Iter8 image to Docker Hub
+#     needs: assets
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v3
+#       with:
+#         fetch-depth: 0
+#     - name: Get version
+#       run: |
+#         tagref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+#         # Strip "v" prefix from tagref
+#         echo "VERSION=$(echo $tagref | sed -e 's/^v//')" >> $GITHUB_ENV
+#         echo "MAJOR_MINOR_VERSION=$(echo $tagref | sed -e 's/^v//' -e 's,\([0-9]*\.[0-9]*\)\.\([0-9]*\),\1,')" >> $GITHUB_ENV
+#     - name: Get owner
+#       run: |
+#         ownerrepo=${{ github.repository }}
+#         owner=$(echo $ownerrepo | cut -f1 -d/)
+#         if [[ "$owner" == "iter8-tools" ]]; then
+#           owner=iter8
+#         fi
+#         echo "OWNER=$owner" >> $GITHUB_ENV
+#     - uses: docker/setup-buildx-action@v2
+#     - uses: docker/login-action@v2
+#       with:
+#         username: ${{ secrets.DOCKERHUB_USERNAME }}
+#         password: ${{ secrets.DOCKERHUB_SECRET }}
+#     - uses: docker/build-push-action@v4
+#       with:
+#         platforms: linux/amd64,linux/arm64
+#         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest
+#         push: true
+#         build-args: |
+#           TAG=v${{ env.VERSION }}
