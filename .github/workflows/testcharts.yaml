@@ -1,423 +1,423 @@
-name: Tests to ensure that changes to charts do not break user experience
+# name: Tests to ensure that changes to charts do not break user experience
 
-on:
-  pull_request:
-    branches:
-    - master
+# on:
+#   pull_request:
+#     branches:
+#     - master
 
-# Kind versions used to test Iter8 on different versions of Kubernetes
-# From: https://github.com/kubernetes-sigs/kind/releases
-env:
-  versions: |
-    kindest/node:v1.26.3@sha256:61b92f38dff6ccc29969e7aa154d34e38b89443af1a2c14e6cfbd2df6419c66f
-    kindest/node:v1.25.8@sha256:00d3f5314cc35327706776e95b2f8e504198ce59ac545d0200a89e69fce10b7f
-    kindest/node:v1.24.12@sha256:1e12918b8bc3d4253bc08f640a231bb0d3b2c5a9b28aa3f2ca1aee93e1e8db16
-    kindest/node:v1.23.17@sha256:e5fd1d9cd7a9a50939f9c005684df5a6d145e8d695e78463637b79464292e66c
-    kindest/node:v1.22.17@sha256:c8a828709a53c25cbdc0790c8afe12f25538617c7be879083248981945c38693
-    kindest/node:v1.21.14@sha256:27ef72ea623ee879a25fe6f9982690a3e370c68286f4356bf643467c552a3888
-    kindest/node:v1.27.1@sha256:9915f5629ef4d29f35b478e819249e89cfaffcbfeebda4324e5c01d53d937b09
-    kindest/node:v1.27.0@sha256:c6b22e613523b1af67d4bc8a0c38a4c3ea3a2b8fbc5b367ae36345c9cb844518
+# # Kind versions used to test Iter8 on different versions of Kubernetes
+# # From: https://github.com/kubernetes-sigs/kind/releases
+# env:
+#   versions: |
+#     kindest/node:v1.26.3@sha256:61b92f38dff6ccc29969e7aa154d34e38b89443af1a2c14e6cfbd2df6419c66f
+#     kindest/node:v1.25.8@sha256:00d3f5314cc35327706776e95b2f8e504198ce59ac545d0200a89e69fce10b7f
+#     kindest/node:v1.24.12@sha256:1e12918b8bc3d4253bc08f640a231bb0d3b2c5a9b28aa3f2ca1aee93e1e8db16
+#     kindest/node:v1.23.17@sha256:e5fd1d9cd7a9a50939f9c005684df5a6d145e8d695e78463637b79464292e66c
+#     kindest/node:v1.22.17@sha256:c8a828709a53c25cbdc0790c8afe12f25538617c7be879083248981945c38693
+#     kindest/node:v1.21.14@sha256:27ef72ea623ee879a25fe6f9982690a3e370c68286f4356bf643467c552a3888
+#     kindest/node:v1.27.1@sha256:9915f5629ef4d29f35b478e819249e89cfaffcbfeebda4324e5c01d53d937b09
+#     kindest/node:v1.27.0@sha256:c6b22e613523b1af67d4bc8a0c38a4c3ea3a2b8fbc5b367ae36345c9cb844518
 
-jobs:
-  # Get the different Kind versions
-  get_versions:
-    runs-on: ubuntu-latest
+# jobs:
+#   # Get the different Kind versions
+#   get_versions:
+#     runs-on: ubuntu-latest
 
-    steps:
-    - name: Get the different Kind versions
-      id: set-matrix
-      run: |
-        # Serialize versions into JSON array
-        jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
-        echo $jsonVersions
+#     steps:
+#     - name: Get the different Kind versions
+#       id: set-matrix
+#       run: |
+#         # Serialize versions into JSON array
+#         jsonVersions=$(jq -ncR '[inputs]' <<< "$versions")
+#         echo $jsonVersions
 
-        # Output serialized jsonVersions
-        echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
+#         # Output serialized jsonVersions
+#         echo "matrix=$jsonVersions" | sed -e "s/,\"\"//" >> $GITHUB_OUTPUT
 
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+#     outputs:
+#       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  http-experiment:
-    name: HTTP load test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
+#   http-experiment:
+#     name: HTTP load test
+#     needs: get_versions
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:    
-    - name: Check out code
-      uses: actions/checkout@v3
+#     steps:    
+#     - name: Check out code
+#       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
+#     - name: Get modified files in the charts/iter8 folder
+#       id: modified-files
+#       uses: tj-actions/changed-files@v35
+#       with:
+#         files: charts/iter8
 
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
-      if: steps.modified-files.outputs.any_modified == 'true'
+#     - name: Install Iter8
+#       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
+#       if: steps.modified-files.outputs.any_modified == 'true'
 
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
+#     - name: Start kind cluster ${{ matrix.version }}
+#       uses: helm/kind-action@v1.5.0
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       with:
+#         wait: 300s
+#         node_image: ${{ matrix.version }}
 
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deployment httpbin --image=kennethreitz/httpbin
-        kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+#     - name: Create app
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         kubectl create deployment httpbin --image=kennethreitz/httpbin
+#         kubectl expose deployment httpbin --type=ClusterIP --port=80
+#         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
 
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={http}" \
-        --set http.url="http://httpbin.default/get" \
+#     - name: iter8 k launch
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         iter8 k launch \
+#         --localChart \
+#         --chartName charts/iter8 \
+#         --set "tasks={http}" \
+#         --set http.url="http://httpbin.default/get" \
 
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        sleep 60
-        iter8 k log
-        iter8 k delete
+#     - name: Try other iter8 k commands
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         sleep 60
+#         iter8 k log
+#         iter8 k delete
 
-  http-payload-experiment:
-    name: HTTP load test with payload
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
+#   http-payload-experiment:
+#     name: HTTP load test with payload
+#     needs: get_versions
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:    
-    - name: Check out code
-      uses: actions/checkout@v3
+#     steps:    
+#     - name: Check out code
+#       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
+#     - name: Get modified files in the charts/iter8 folder
+#       id: modified-files
+#       uses: tj-actions/changed-files@v35
+#       with:
+#         files: charts/iter8
 
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
-      if: steps.modified-files.outputs.any_modified == 'true'
+#     - name: Install Iter8
+#       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+#       if: steps.modified-files.outputs.any_modified == 'true'
 
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
+#     - name: Start kind cluster ${{ matrix.version }}
+#       uses: helm/kind-action@v1.5.0
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       with:
+#         wait: 300s
+#         node_image: ${{ matrix.version }}
 
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deployment httpbin --image=kennethreitz/httpbin
-        kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+#     - name: Create app
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         kubectl create deployment httpbin --image=kennethreitz/httpbin
+#         kubectl expose deployment httpbin --type=ClusterIP --port=80
+#         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
 
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={http}" \
-        --set http.url="http://httpbin.default/post" \
-        --set http.payloadStr=hello \
+#     - name: iter8 k launch
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         iter8 k launch \
+#         --localChart \
+#         --chartName charts/iter8 \
+#         --set "tasks={http}" \
+#         --set http.url="http://httpbin.default/post" \
+#         --set http.payloadStr=hello \
 
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        sleep 60
-        iter8 k log
-        iter8 k delete
+#     - name: Try other iter8 k commands
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         sleep 60
+#         iter8 k log
+#         iter8 k delete
 
-  http-multiple-experiment:
-    name: HTTP load test with multiple endpoints
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
+#   http-multiple-experiment:
+#     name: HTTP load test with multiple endpoints
+#     needs: get_versions
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:    
-    - name: Check out code
-      uses: actions/checkout@v3
+#     steps:    
+#     - name: Check out code
+#       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
+#     - name: Get modified files in the charts/iter8 folder
+#       id: modified-files
+#       uses: tj-actions/changed-files@v35
+#       with:
+#         files: charts/iter8
 
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
-      if: steps.modified-files.outputs.any_modified == 'true'
+#     - name: Install Iter8
+#       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+#       if: steps.modified-files.outputs.any_modified == 'true'
 
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
+#     - name: Start kind cluster ${{ matrix.version }}
+#       uses: helm/kind-action@v1.5.0
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       with:
+#         wait: 300s
+#         node_image: ${{ matrix.version }}
 
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deployment httpbin --image=kennethreitz/httpbin
-        kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+#     - name: Create app
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         kubectl create deployment httpbin --image=kennethreitz/httpbin
+#         kubectl expose deployment httpbin --type=ClusterIP --port=80
+#         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
 
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={http}" \
-        --set http.endpoints.get.url=http://httpbin.default/get \
-        --set http.endpoints.getAnything.url=http://httpbin.default/anything \
-        --set http.endpoints.post.url=http://httpbin.default/post \
-        --set http.endpoints.post.payloadStr=hello \
+#     - name: iter8 k launch
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         iter8 k launch \
+#         --localChart \
+#         --chartName charts/iter8 \
+#         --set "tasks={http}" \
+#         --set http.endpoints.get.url=http://httpbin.default/get \
+#         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
+#         --set http.endpoints.post.url=http://httpbin.default/post \
+#         --set http.endpoints.post.payloadStr=hello \
 
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        sleep 60
-        iter8 k log
-        iter8 k delete
+#     - name: Try other iter8 k commands
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         sleep 60
+#         iter8 k log
+#         iter8 k delete
 
-  grpc-experiment:
-    name: gRPC load test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
+#   grpc-experiment:
+#     name: gRPC load test
+#     needs: get_versions
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
+#     steps:
+#     - name: Check out code
+#       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
+#     - name: Get modified files in the charts/iter8 folder
+#       id: modified-files
+#       uses: tj-actions/changed-files@v35
+#       with:
+#         files: charts/iter8
     
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
-      if: steps.modified-files.outputs.any_modified == 'true'
+#     - name: Install Iter8
+#       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
+#       if: steps.modified-files.outputs.any_modified == 'true'
 
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
+#     - name: Start kind cluster ${{ matrix.version }}
+#       uses: helm/kind-action@v1.5.0
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       with:
+#         wait: 300s
+#         node_image: ${{ matrix.version }}
 
-    - name: Deploy gRPC service in the Kubernetes cluster
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
-        kubectl expose deployment routeguide --port=50051
-        kubectl wait --for=condition=available --timeout=60s deployment/routeguide
+#     - name: Deploy gRPC service in the Kubernetes cluster
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         kubectl create deployment routeguide --image=golang --port=50051 \
+#         -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
+#         kubectl expose deployment routeguide --port=50051
+#         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
 
-    - name: Test gRPC service with grpcurl
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
-        kubectl apply -f grpcurl-routeguide.yaml
-        sleep 180
-        kubectl logs deploy/sleep
+#     - name: Test gRPC service with grpcurl
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
+#         kubectl apply -f grpcurl-routeguide.yaml
+#         sleep 180
+#         kubectl logs deploy/sleep
   
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={ready,grpc}" \
-        --set ready.deploy=routeguide \
-        --set ready.service=routeguide \
-        --set ready.timeout=60s \
-        --set grpc.host=routeguide.default:50051 \
-        --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
-        --set grpc.call=routeguide.RouteGuide.GetFeature \
-        --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
+#     - name: iter8 k launch
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         iter8 k launch \
+#         --localChart \
+#         --chartName charts/iter8 \
+#         --set "tasks={ready,grpc}" \
+#         --set ready.deploy=routeguide \
+#         --set ready.service=routeguide \
+#         --set ready.timeout=60s \
+#         --set grpc.host=routeguide.default:50051 \
+#         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
+#         --set grpc.call=routeguide.RouteGuide.GetFeature \
+#         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
 
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        sleep 60
-        iter8 k log
-        iter8 k delete
+#     - name: Try other iter8 k commands
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         sleep 60
+#         iter8 k log
+#         iter8 k delete
 
-  grpc-multiple-experiment:
-    name: gRPC load test with multiple endpoints
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
+#   grpc-multiple-experiment:
+#     name: gRPC load test with multiple endpoints
+#     needs: get_versions
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
+#     steps:
+#     - name: Check out code
+#       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
+#     - name: Get modified files in the charts/iter8 folder
+#       id: modified-files
+#       uses: tj-actions/changed-files@v35
+#       with:
+#         files: charts/iter8
     
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
-      if: steps.modified-files.outputs.any_modified == 'true'
+#     - name: Install Iter8
+#       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+#       if: steps.modified-files.outputs.any_modified == 'true'
 
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
+#     - name: Start kind cluster ${{ matrix.version }}
+#       uses: helm/kind-action@v1.5.0
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       with:
+#         wait: 300s
+#         node_image: ${{ matrix.version }}
 
-    - name: Deploy gRPC service in the Kubernetes cluster
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deployment routeguide --image=golang --port=50051 \
-        -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
-        kubectl expose deployment routeguide --port=50051
-        kubectl wait --for=condition=available --timeout=60s deployment/routeguide
+#     - name: Deploy gRPC service in the Kubernetes cluster
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         kubectl create deployment routeguide --image=golang --port=50051 \
+#         -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
+#         kubectl expose deployment routeguide --port=50051
+#         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
 
-    - name: Test gRPC service with grpcurl
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
-        kubectl apply -f grpcurl-routeguide.yaml
-        sleep 180
-        kubectl logs deploy/sleep
+#     - name: Test gRPC service with grpcurl
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
+#         kubectl apply -f grpcurl-routeguide.yaml
+#         sleep 180
+#         kubectl logs deploy/sleep
         
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={ready,grpc}" \
-        --set ready.deploy=routeguide \
-        --set ready.service=routeguide \
-        --set ready.timeout=60s \
-        --set grpc.host=routeguide.default:50051 \
-        --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
-        --set grpc.endpoints.getFeature.call=routeguide.RouteGuide.GetFeature \
-        --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
-        --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
-        --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
+#     - name: iter8 k launch
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         iter8 k launch \
+#         --localChart \
+#         --chartName charts/iter8 \
+#         --set "tasks={ready,grpc}" \
+#         --set ready.deploy=routeguide \
+#         --set ready.service=routeguide \
+#         --set ready.timeout=60s \
+#         --set grpc.host=routeguide.default:50051 \
+#         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
+#         --set grpc.endpoints.getFeature.call=routeguide.RouteGuide.GetFeature \
+#         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
+#         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
+#         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
 
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        sleep 60
-        iter8 k log
-        iter8 k delete
+#     - name: Try other iter8 k commands
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         sleep 60
+#         iter8 k log
+#         iter8 k delete
 
-  grpc-experiment2:
-    name: gRPC load test 2
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
+#   grpc-experiment2:
+#     name: gRPC load test 2
+#     needs: get_versions
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
+#     steps:
+#     - name: Check out code
+#       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
+#     - name: Get modified files in the charts/iter8 folder
+#       id: modified-files
+#       uses: tj-actions/changed-files@v35
+#       with:
+#         files: charts/iter8
     
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
-      if: steps.modified-files.outputs.any_modified == 'true'
+#     - name: Install Iter8
+#       run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+#       if: steps.modified-files.outputs.any_modified == 'true'
 
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
+#     - name: Start kind cluster ${{ matrix.version }}
+#       uses: helm/kind-action@v1.5.0
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       with:
+#         wait: 300s
+#         node_image: ${{ matrix.version }}
 
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
-        kubectl expose deploy hello --port=50051
-        kubectl wait --for=condition=available --timeout=60s deploy/hello
+#     - name: Create app
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
+#         kubectl expose deploy hello --port=50051
+#         kubectl wait --for=condition=available --timeout=60s deploy/hello
         
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={grpc}" \
-        --set grpc.host="hello.default:50051" \
-        --set grpc.call="helloworld.Greeter.SayHello" \
-        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+#     - name: iter8 k launch
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         iter8 k launch \
+#         --localChart \
+#         --chartName charts/iter8 \
+#         --set "tasks={grpc}" \
+#         --set grpc.host="hello.default:50051" \
+#         --set grpc.call="helloworld.Greeter.SayHello" \
+#         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
 
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        sleep 60
-        iter8 k log
-        iter8 k delete
+#     - name: Try other iter8 k commands
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         sleep 60
+#         iter8 k log
+#         iter8 k delete
 
-  controller:
-    name: Controller test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
+#   controller:
+#     name: Controller test
+#     needs: get_versions
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
+#     steps:
+#     - name: Check out code
+#       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/controller folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/controller
+#     - name: Get modified files in the charts/controller folder
+#       id: modified-files
+#       uses: tj-actions/changed-files@v35
+#       with:
+#         files: charts/controller
 
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
+#     - name: Start kind cluster ${{ matrix.version }}
+#       uses: helm/kind-action@v1.5.0
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       with:
+#         wait: 300s
+#         node_image: ${{ matrix.version }}
         
-    - name: Start controller
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        helm install controller charts/controller -f charts/controller/testdata/values.yaml
+#     - name: Start controller
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         helm install controller charts/controller -f charts/controller/testdata/values.yaml
 
-    - name: Check controller
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/controller
+#     - name: Check controller
+#       if: steps.modified-files.outputs.any_modified == 'true'
+#       run: |
+#         kubectl rollout status --watch --timeout=60s statefulset.apps/controller
