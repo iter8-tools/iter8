@@ -7,7 +7,7 @@ on:
 
 jobs:
   assets:
-    name: Publish binaries
+    name: Build and push test Docker image
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
@@ -87,7 +87,7 @@ jobs:
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: run httpbin
+    - name: Create httpbin application
       run: |
         set -e
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
@@ -111,7 +111,8 @@ jobs:
     - name: check GET /httpDashboard
       run: |
         kubectl port-forward service/iter8 8080:8080 &
-        curl http://localhost:8080/httpDashboard?namespace=default&experiment=default -f
+        sleep 30
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
     # - name: Upload binaries to release
     #   uses: svenstaro/upload-release-action@v2
     #   with:
