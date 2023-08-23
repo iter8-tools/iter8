@@ -115,7 +115,7 @@ jobs:
       run: |
         kubectl get all
         kubectl get service/iter8
-        kubectl get kubectl logs job.batch/default-1-job
+        kubectl logs job.batch/default-1-job
     - name: check GET /httpDashboard
       run: |
         kubectl port-forward service/iter8 8080:8080 &
