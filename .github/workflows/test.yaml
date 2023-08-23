@@ -35,12 +35,13 @@ jobs:
     - name: Get version and tag
       run: |
         # GitHub ref name
-        echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+        VERSION=${GITHUB_REF_NAME}
         echo $VERSION
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-        # Docker image tag
-        echo "IMAGE_TAG=puffinmuffin/iter8-grafana" >> $GITHUB_ENV
+        IMAGE_TAG=$puffinmuffin/iter8-grafana
         echo $IMAGE_TAG
+        echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
 
     # - name: Get owner
     #   run: |
