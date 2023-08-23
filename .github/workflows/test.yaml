@@ -89,12 +89,15 @@ jobs:
         wait: 300s
     - name: Create httpbin application
       run: |
-        set -e
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
-    - name: install controller
+    - name: Install controller
       run: |
         helm install iter8 charts/controller --set image=${{needs.assets.outputs.IMAGE_TAG}} --set logLevel=trace
+    - name: Controller log
+      run: |
+        kubectl get all
+        kubectl get service/iter8
     - name: load-test-http in Kubernetes
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
@@ -106,8 +109,13 @@ jobs:
         --set http.url=http://httpbin.default/get \
         --set http.duration="3s"
         sleep 60
-        iter8 k log
-        iter8 k delete
+        # iter8 k log
+        # iter8 k delete
+    - name: Controller log
+      run: |
+        kubectl get all
+        kubectl get service/iter8
+        kubectl get kubectl logs job.batch/default-1-job
     - name: check GET /httpDashboard
       run: |
         kubectl port-forward service/iter8 8080:8080 &
