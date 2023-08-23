@@ -62,17 +62,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_SECRET }}
-    # - uses: docker/build-push-action@v4
-    #   with:
-    #     platforms: linux/amd64
-    #     tags: ${{ env.IMAGE_TAG }}
-    #     push: true
-    #     build-args: |
-    #       TAG=v${{ env.VERSION }}
-    #     file: "{context}/Dockerfile.dev"
-    # outputs:
-    #   VERSION: ${{ steps.versionTag.outputs.VERSION }}
-    #   IMAGE_TAG: ${{ steps.imageTag.outputs.IMAGE_TAG }}
+    - uses: docker/build-push-action@v4
+      with:
+        platforms: linux/amd64
+        tags: ${{ env.IMAGE_TAG }}
+        push: true
+        file: "{context}/Dockerfile.dev"
+    outputs:
+      VERSION: ${{ steps.versionTag.outputs.VERSION }}
+      IMAGE_TAG: ${{ steps.imageTag.outputs.IMAGE_TAG }}
 
   kubernetes-load-test-http:
     name: HTTP load test (with readiness) at the edge of Kubernetes
