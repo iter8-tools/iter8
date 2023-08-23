@@ -37,12 +37,12 @@ jobs:
       run: |
         # GitHub ref name
         VERSION=${GITHUB_REF_NAME}
-        echo $VERSION
+        echo "VERSION: $VERSION"
         echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
         echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
 
         IMAGE_TAG=puffinmuffin/iter8-grafana
-        echo $IMAGE_TAG
+        echo "IMAGE_TAG: $IMAGE_TAG"
         echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
         echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
     # - name: Get owner
@@ -75,12 +75,6 @@ jobs:
     needs: assets
     runs-on: ubuntu-latest
     steps:
-    - env:
-        VERSION: ${{needs.assets.outputs.VERSION}}
-        IMAGE_TAG: ${{needs.assets.outputs.IMAGE_TAG}}
-      run: |
-        echo $IMAGE_TAG
-        env | sort
     - name: Install Go
       uses: actions/setup-go@v4
       with:
@@ -100,11 +94,11 @@ jobs:
         kubectl expose deploy httpbin --port=80
     - name: install controller
       run: |
-        helm install iter8 charts/controller --set image=${IMAGE_TAG} --set logLevel=trace
+        helm install iter8 charts/controller --set image=${{needs.assets.outputs.IMAGE_TAG}} --set logLevel=trace
     - name: load-test-http in Kubernetes
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
-        --set iter8Image=${IMAGE_TAG} \
+        --set iter8Image=${{needs.assets.outputs.IMAGE_TAG}} \
         --set "tasks={ready,http}" \
         --set ready.deploy=httpbin \
         --set ready.service=httpbin \
