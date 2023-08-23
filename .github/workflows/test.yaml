@@ -33,16 +33,18 @@ jobs:
         # Extract iter8
         RUN mv linux-amd64/iter8 /bin/iter8" > Dockerfile.dev
     - name: Get version and tag
+      id: versionImageTag
       run: |
         # GitHub ref name
         VERSION=${GITHUB_REF_NAME}
         echo $VERSION
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+        echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
 
         IMAGE_TAG=puffinmuffin/iter8-grafana
         echo $IMAGE_TAG
-        echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
-
+        echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
+        echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
     # - name: Get owner
     #   run: |
     #     ownerrepo=${{ github.repository }}
@@ -64,14 +66,19 @@ jobs:
     #     build-args: |
     #       TAG=v${{ env.VERSION }}
     #     file: "{context}/Dockerfile.dev"
+    outputs:
+      VERSION: ${{ steps.versionImageTag.outputs.VERSION }}
+      IMAGE_TAG: ${{ steps.versionImageTag.outputs.IMAGE_TAG }}
 
   kubernetes-load-test-http:
     name: HTTP load test (with readiness) at the edge of Kubernetes
     needs: assets
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        echo ${{ env.IMAGE_TAG }}
+    - env:
+        VERSION: ${{needs.assets.outputs.VERSION}}
+        IMAGE_TAG: ${{needs.assets.outputs.IMAGE_TAG}}
+      run: |
         echo $IMAGE_TAG
         env | sort
     - name: Install Go
