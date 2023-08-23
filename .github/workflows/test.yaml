@@ -95,11 +95,7 @@ jobs:
     - name: Install controller
       run: |
         helm install iter8 charts/controller --set image=${{needs.assets.outputs.IMAGE_TAG}} --set logLevel=trace
-        kubectl rollout status --watch --timeout=60s statefulset/iter8 
-    - name: Controller log
-      run: |
-        kubectl get all
-        kubectl get service/iter8
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
     - name: load-test-http in Kubernetes
       run: |
         iter8 k launch --localChart --chartName charts/iter8 \
@@ -112,19 +108,15 @@ jobs:
         --set http.duration="3s" \
         --set logLevel=trace
         sleep 60
-        # iter8 k log
-        # iter8 k delete
-    - name: Controller log
+    - name: Test additional Iter8 commands
       run: |
-        kubectl get all
-    - run: |
-        kubectl logs job.batch/default-1-job
-    - run: |
-        kubectl logs service/iter8
-    - name: check GET /httpDashboard
+        iter8 k log
+        iter8 k delete
+    - name: Expose metrics service
       run: |
         kubectl port-forward service/iter8 8080:8080 &
-        sleep 30
+    - name: Check GET /httpDashboard
+      run: |
         curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
     # - name: Upload binaries to release
     #   uses: svenstaro/upload-release-action@v2
