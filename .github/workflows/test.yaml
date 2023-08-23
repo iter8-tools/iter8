@@ -91,9 +91,11 @@ jobs:
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
+        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
     - name: Install controller
       run: |
         helm install iter8 charts/controller --set image=${{needs.assets.outputs.IMAGE_TAG}} --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8 
     - name: Controller log
       run: |
         kubectl get all
