@@ -14,24 +14,24 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.19
-    - uses: actions/checkout@v3
-    - name: Create Dockerfile.dev
-      run: |
-        echo "# Small linux image with iter8 binary
-        FROM debian:buster-slim
+    # - uses: actions/checkout@v3
+    # - name: Create Dockerfile.dev
+    #   run: |
+    #     echo "# Small linux image with iter8 binary
+    #     FROM debian:buster-slim
         
-        # Install curl
-        RUN apt-get update && apt-get install -y curl
+    #     # Install curl
+    #     RUN apt-get update && apt-get install -y curl
         
-        # Download iter8 compressed binary
-        # use COPY instead of wget
-        COPY _dist/iter8-linux-amd64.tar.gz iter8-linux-amd64.tar.gz
+    #     # Download iter8 compressed binary
+    #     # use COPY instead of wget
+    #     COPY _dist/iter8-linux-amd64.tar.gz iter8-linux-amd64.tar.gz
         
-        # Extract iter8
-        RUN tar -xvf iter8-linux-amd64.tar.gz
+    #     # Extract iter8
+    #     RUN tar -xvf iter8-linux-amd64.tar.gz
         
-        # Extract iter8
-        RUN mv linux-amd64/iter8 /bin/iter8" > Dockerfile.dev
+    #     # Extract iter8
+    #     RUN mv linux-amd64/iter8 /bin/iter8" > Dockerfile.dev
     - name: Get version and tag
       id: versionImageTag
       run: |
@@ -107,15 +107,18 @@ jobs:
         --set ready.service=httpbin \
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/get \
-        --set http.duration="3s"
+        --set http.duration="3s" \
+        --set logLevel=trace
         sleep 60
         # iter8 k log
         # iter8 k delete
     - name: Controller log
       run: |
         kubectl get all
-        kubectl get service/iter8
+    - run: |
         kubectl logs job.batch/default-1-job
+    - run: |
+        kubectl logs service/iter8
     - name: check GET /httpDashboard
       run: |
         kubectl port-forward service/iter8 8080:8080 &
