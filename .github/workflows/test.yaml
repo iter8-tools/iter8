@@ -45,21 +45,62 @@ jobs:
           owner=iter8
         fi
         echo "OWNER=$owner" >> $GITHUB_ENV
-    - uses: docker/setup-buildx-action@v2
-    - uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_SECRET }}
-    - uses: docker/build-push-action@v4
-      with:
-        platforms: linux/amd64
-        tags: ${{ env.OWNER }}/iter8-pr:${{ env.VERSION }}
-        push: true
-        build-args: |
-          TAG=v${{ env.VERSION }}
-        file: "{context}/Dockerfile.dev"
+    # - uses: docker/setup-buildx-action@v2
+    # - uses: docker/login-action@v2
+    #   with:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_SECRET }}
+    # - uses: docker/build-push-action@v4
+    #   with:
+    #     platforms: linux/amd64
+    #     tags: ${{ env.OWNER }}/iter8-pr:${{ env.VERSION }}
+    #     push: true
+    #     build-args: |
+    #       TAG=v${{ env.VERSION }}
+    #     file: "{context}/Dockerfile.dev"
 
-    
+  kubernetes-load-test-http:
+    name: HTTP load test (with readiness) at the edge of Kubernetes
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.19
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+    - name: Build and install Iter8
+      run: make install
+    - name: Start kind cluster
+      uses: helm/kind-action@v1.5.0
+      with:
+        wait: 300s
+    - run: |
+        echo $(${{ env.OWNER }}/iter8-pr:${{ env.VERSION }})
+        echo ${{ env.OWNER }}/iter8-pr:${{ env.VERSION }}
+        env | sort
+    - name: run httpbin
+      run: |
+        set -e
+        kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
+        kubectl expose deploy httpbin --port=80
+    - name: install controller
+      run: |
+        helm install iter8 charts/controller --set image=puffinmuffin/iter8-grafana --set logLevel=trace
+    - name: load-test-http in Kubernetes
+      run: |
+        iter8 k launch --localChart --chartName charts/iter8 \
+        --set iter8Image=puffinmuffin/iter8-grafana \
+        --set "tasks={ready,http}" \
+        --set ready.deploy=httpbin \
+        --set ready.service=httpbin \
+        --set ready.timeout=60s \
+        --set http.url=http://httpbin.default/get \
+        --set http.duration="3s"
+        sleep 60
+        iter8 k log
+        iter8 k delete
+    - name: 
     # - name: Upload binaries to release
     #   uses: svenstaro/upload-release-action@v2
     #   with:
