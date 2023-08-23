@@ -100,7 +100,10 @@ jobs:
         sleep 60
         iter8 k log
         iter8 k delete
-    - name: 
+    - name: check GET /httpDashboard
+      run: |
+        kubectl port-forward service/iter8 8080:8080
+        curl http://localhost:8080/httpDashboard?namespace=default&experiment=default -f
     # - name: Upload binaries to release
     #   uses: svenstaro/upload-release-action@v2
     #   with:
