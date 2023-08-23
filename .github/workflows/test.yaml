@@ -39,7 +39,7 @@ jobs:
         echo $VERSION
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-        IMAGE_TAG=$puffinmuffin/iter8-grafana
+        IMAGE_TAG=puffinmuffin/iter8-grafana
         echo $IMAGE_TAG
         echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
 
@@ -71,8 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo ${{ env.OWNER }}/iter8-pr:${{ env.VERSION }}
-        echo $(${{ env.OWNER }}/iter8-pr:${{ env.VERSION }})
+        echo ${{ env.IMAGE_TAG }}
         echo $IMAGE_TAG
         env | sort
     - name: Install Go
