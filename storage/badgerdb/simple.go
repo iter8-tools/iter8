@@ -2,6 +2,7 @@
 package badgerdb
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/imdario/mergo"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/storage"
 )
 
@@ -311,4 +313,55 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 	}
 
 	return &metrics, nil
+}
+
+func getExperimentResultKey(namespace, experiment string) string {
+	// getExperimentResultKey() is just getUserPrefix() with the user appended at the end
+	return fmt.Sprintf("kt-result::%s::%s", namespace, experiment)
+}
+
+// SetExperimentResult sets the experiment result for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for different tasks
+func (cl Client) SetExperimentResult(namespace, experiment string, data *base.ExperimentResult) error {
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("cannot JSON marshal ExperimentResult: %e", err)
+	}
+
+	key := getExperimentResultKey(namespace, experiment)
+	return cl.db.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte(key), dataBytes).WithTTL(cl.additionalOptions.TTL)
+		err := txn.SetEntry(e)
+		return err
+	})
+}
+
+// GetExperimentResult sets the experiment result for a particular namespace and experiment name
+// the data is []byte in order to make this function reusable for different tasks
+func (cl Client) GetExperimentResult(namespace, experiment string) (*base.ExperimentResult, error) {
+	var valCopy []byte
+	err := cl.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(getExperimentResultKey(namespace, experiment)))
+		if err != nil {
+			return fmt.Errorf("cannot get ExperimentResult with name: \"%s\" and namespace: %s: %e", experiment, namespace, err)
+		}
+
+		valCopy, err = item.ValueCopy(nil)
+		if err != nil {
+			return fmt.Errorf("cannot copy value of ExperimentResult with name: \"%s\" and namespace: %s: %e", experiment, namespace, err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	experimentResult := base.ExperimentResult{}
+	err = json.Unmarshal(valCopy, &experimentResult)
+	if err != nil {
+		return nil, fmt.Errorf("cannot JSON unmarshal ExperimentResult: \"%s\": %e", string(valCopy), err)
+	}
+
+	return &experimentResult, err
 }

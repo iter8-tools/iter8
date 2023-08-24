@@ -145,7 +145,7 @@
                     },
                     "fields": [
                         {
-                            "jsonPath": "$.Summary.Failure"
+                            "jsonPath": "$.ExperimentResult.Failure"
                         }
                     ],
                     "method": "GET",
@@ -215,7 +215,7 @@
                     },
                     "fields": [
                         {
-                            "jsonPath": "$.Summary.Completed tasks"
+                            "jsonPath": "$.ExperimentResult.Completed tasks"
                         }
                     ],
                     "method": "GET",
@@ -285,8 +285,8 @@
                     "values": false
                 },
                 "text": {
-                    "titleSize": 30,
-                    "valueSize": 30
+                    "titleSize": 20,
+                    "valueSize": 20
                 },
                 "textMode": "auto"
             },
@@ -300,7 +300,7 @@
                     },
                     "fields": [
                         {
-                            "jsonPath": "$.Summary"
+                            "jsonPath": "$.ExperimentResult"
                         }
                     ],
                     "method": "GET",
@@ -315,7 +315,7 @@
                     "id": "extractFields",
                     "options": {
                         "replace": true,
-                        "source": "Summary"
+                        "source": "ExperimentResult"
                     }
                 },
                 {
@@ -847,6 +847,6 @@
     "timezone": "",
     "title": "HTTP Performance",
     "uid": "e8758667-b4e1-41c2-9bf4-446dc7c1fd27",
-    "version": 8,
+    "version": 4,
     "weekStart": ""
 }

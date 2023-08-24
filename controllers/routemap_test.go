@@ -414,3 +414,72 @@ routingTemplates:
 		return assert.NoError(t, err) && assert.Equal(t, "11451027137128994800", signature)
 	}, time.Second*2, time.Millisecond*100)
 }
+
+func TestGetNamespace(t *testing.T) {
+	a := "a"
+	b := "b"
+	c := "c"
+	myName := "myName"
+	myNamespace := "myNamespace"
+
+	rm := routemap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
+		Versions: []version{
+			{Signature: &a},
+			{Signature: &b},
+			{Signature: &c},
+		},
+	}
+
+	assert.Equal(t, myNamespace, rm.GetNamespace())
+}
+
+func TestGetName(t *testing.T) {
+	a := "a"
+	b := "b"
+	c := "c"
+	myName := "myName"
+	myNamespace := "myNamespace"
+
+	rm := routemap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
+		Versions: []version{
+			{Signature: &a},
+			{Signature: &b},
+			{Signature: &c},
+		},
+	}
+
+	assert.Equal(t, myName, rm.GetName())
+}
+
+func TestGetVersions(t *testing.T) {
+	a := "a"
+	b := "b"
+	c := "c"
+
+	rm := routemap{
+		Versions: []version{
+			{Signature: &a},
+			{Signature: &b},
+			{Signature: &c},
+		},
+	}
+
+	versions := rm.GetVersions()
+	assert.Equal(t, 3, len(versions))
+}
+
+func TestGetSignature(t *testing.T) {
+	a := "a"
+
+	v := version{Signature: &a}
+
+	assert.Equal(t, &a, v.GetSignature())
+}

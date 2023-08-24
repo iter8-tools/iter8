@@ -32,12 +32,5 @@ func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
 		},
 	}
 	addExperimentGroupFlag(cmd, &actor.Group)
-	addReuseResult(cmd, &actor.ReuseResult)
 	return cmd
-}
-
-// addReuseResult allows the experiment to reuse the experiment result for
-// looping experiments
-func addReuseResult(cmd *cobra.Command, reuseResultPtr *bool) {
-	cmd.Flags().BoolVar(reuseResultPtr, "reuseResult", false, "reuse experiment result; useful for experiments with multiple loops such as Kubernetes experiments with a cronjob runner")
 }

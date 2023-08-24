@@ -78,3 +78,32 @@ func TestSplitApplication(t *testing.T) {
 	assert.Equal(t, "default", ns)
 	assert.Equal(t, "name", n)
 }
+
+type testType struct {
+	S      string
+	I      int
+	Nested struct {
+		S string
+		I int
+	}
+}
+
+func TestToYAML(t *testing.T) {
+	obj := testType{
+		S: "hello world",
+		I: 3,
+		Nested: struct {
+			S string
+			I int
+		}{
+			S: "nested",
+		},
+	}
+
+	objString := ToYAML(obj)
+	assert.Equal(t, `I: 3
+Nested:
+  I: 0
+  S: nested
+S: hello world`, string(objString))
+}

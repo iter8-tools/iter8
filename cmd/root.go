@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"io"
-	"os"
-
 	"github.com/iter8-tools/iter8/controllers/k8sclient"
 	"github.com/iter8-tools/iter8/driver"
 
@@ -22,8 +19,6 @@ var (
 	settings = cli.New()
 	// KubeDriver used by actions package
 	kd = driver.NewKubeDriver(settings)
-	// output stream where log messages are printed
-	outStream io.Writer = os.Stdout
 	// kubeclient is the client used for controllers package
 	kubeClient k8sclient.Interface
 )
@@ -68,9 +63,6 @@ func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "trace, debug, info, warning, error, fatal, panic")
 	rootCmd.SilenceErrors = true // will get printed in Execute() (by cobra.CheckErr())
-
-	// add autox
-	rootCmd.AddCommand(newAutoXCmd())
 
 	// add docs
 	rootCmd.AddCommand(newDocsCmd())

@@ -1,9 +1,15 @@
 name: Link checker
 
+# Only runs when there are markdown changes and intermittently
+
+# Check links across markdown files
+
 on:
   pull_request:
     branches:
     - master
+    paths:
+    - '**.md'
   schedule:
   - cron: "0 0 1 * *"
 

@@ -1,9 +1,15 @@
 name: Lint Helm charts
 
+# Only runs when charts have changed
+
+# Lint Helm charts
+
 on:
   pull_request:
     branches:
     - master
+    paths:
+    - charts/**
 
 jobs:
   # Get the paths for the Helm charts to lint

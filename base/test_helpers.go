@@ -2,12 +2,15 @@ package base
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	log "github.com/iter8-tools/iter8/base/log"
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,8 +25,21 @@ func (m *mockDriver) Read() (*Experiment, error) {
 }
 
 // Write an experiment
-func (m *mockDriver) Write(e *Experiment) error {
-	m.Experiment = e
+func (m *mockDriver) Write(exp *Experiment) error {
+	m.Experiment = exp
+
+	// get URL of metrics server from environment variable
+	metricsServerURL, ok := os.LookupEnv(MetricsServerURL)
+	if !ok {
+		errorMessage := "could not look up METRICS_SERVER_URL environment variable"
+		log.Logger.Error(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	err := PutExperimentResultToMetricsService(metricsServerURL, exp.Metadata.Namespace, exp.Metadata.Name, exp.Result)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -34,7 +50,6 @@ func (m *mockDriver) GetRevision() int {
 
 // CreateExperimentYaml creates an experiment.yaml file from a template and a URL
 func CreateExperimentYaml(t *testing.T, template string, url string, output string) {
-
 	values := struct {
 		URL string
 	}{
@@ -63,4 +78,69 @@ func GetTrackingHandler(breadcrumb *bool) func(w http.ResponseWriter, r *http.Re
 		time.Sleep(100 * time.Millisecond)
 		w.WriteHeader(200)
 	}
+}
+
+// StartHTTPMock activates and cleanups httpmock
+func StartHTTPMock(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.DeactivateAndReset)
+	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
+}
+
+// MetricsServerCallback is a callback function for when the particular metrics server endpoint
+// is called
+type MetricsServerCallback func(req *http.Request)
+
+// MockMetricsServerInput is the input for MockMetricsServer()
+// allows the user to provide callbacks when particular endpoints are called
+type MockMetricsServerInput struct {
+	MetricsServerURL string
+
+	// PUT /experimentResult
+	ExperimentResultCallback MetricsServerCallback
+	// GET /grpcDashboard
+	GRPCDashboardCallback MetricsServerCallback
+	// GET /httpDashboard
+	HTTPDashboardCallback MetricsServerCallback
+}
+
+// MockMetricsServer is a mock metrics server
+// use the callback functions in the MockMetricsServerInput to test if those endpoints are called
+func MockMetricsServer(input MockMetricsServerInput) {
+	// PUT /experimentResult
+	httpmock.RegisterResponder(
+		http.MethodPut,
+		input.MetricsServerURL+ExperimentResultPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.ExperimentResultCallback != nil {
+				input.ExperimentResultCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
+	// GET /httpDashboard
+	httpmock.RegisterResponder(
+		http.MethodGet,
+		input.MetricsServerURL+HTTPDashboardPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.HTTPDashboardCallback != nil {
+				input.HTTPDashboardCallback(req)
+			}
+
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
+
+	// GET /grpcDashboard
+	httpmock.RegisterResponder(
+		http.MethodGet,
+		input.MetricsServerURL+GRPCDashboardPath,
+		func(req *http.Request) (*http.Response, error) {
+			if input.GRPCDashboardCallback != nil {
+				input.GRPCDashboardCallback(req)
+			}
+			return httpmock.NewStringResponse(200, "success"), nil
+		},
+	)
 }

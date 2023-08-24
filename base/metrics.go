@@ -1,48 +1,88 @@
 package base
 
-// HistBucket is a single bucket in a histogram
-type HistBucket struct {
-	// Lower endpoint of a histogram bucket
-	Lower float64 `json:"lower" yaml:"lower"`
-	// Upper endpoint of a histogram bucket
-	Upper float64 `json:"upper" yaml:"upper"`
-	// Count is the frequency count of the bucket
-	Count uint64 `json:"count" yaml:"count"`
-}
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
 
-// MetricType identifies the type of the metric.
-type MetricType string
-
-// AggregationType identifies the type of the metric aggregator.
-type AggregationType string
+	log "github.com/iter8-tools/iter8/base/log"
+)
 
 const (
-	// CounterMetricType corresponds to Prometheus Counter metric type
-	CounterMetricType MetricType = "Counter"
-	// GaugeMetricType corresponds to Prometheus Gauge metric type
-	GaugeMetricType MetricType = "Gauge"
-	// HistogramMetricType corresponds to a Histogram metric type
-	HistogramMetricType MetricType = "Histogram"
-	// SampleMetricType corresponds to a Sample metric type
-	SampleMetricType MetricType = "Sample"
-	// SummaryMetricType corresponds to a Summary metric type
-	SummaryMetricType MetricType = "Summary"
+	// MetricsServerURL is the URL of the metrics server
+	MetricsServerURL = "METRICS_SERVER_URL"
 
-	// decimalRegex is the regex used to identify percentiles
-	decimalRegex = `^([\d]+(\.[\d]*)?|\.[\d]+)$`
+	// MetricsPath is the path to the GET /metrics endpoint
+	MetricsPath = "/metrics"
 
-	// CountAggregator corresponds to aggregation of type count
-	CountAggregator AggregationType = "count"
-	// MeanAggregator corresponds to aggregation of type mean
-	MeanAggregator AggregationType = "mean"
-	// StdDevAggregator corresponds to aggregation of type stddev
-	StdDevAggregator AggregationType = "stddev"
-	// MinAggregator corresponds to aggregation of type min
-	MinAggregator AggregationType = "min"
-	// MaxAggregator corresponds to aggregation of type max
-	MaxAggregator AggregationType = "max"
-	// PercentileAggregator corresponds to aggregation of type max
-	PercentileAggregator AggregationType = "percentile"
-	// PercentileAggregatorPrefix corresponds to prefix for percentiles
-	PercentileAggregatorPrefix = "p"
+	// ExperimentResultPath is the path to the PUT /experimentResult endpoint
+	ExperimentResultPath = "/experimentResult"
+	// HTTPDashboardPath is the path to the GET /httpDashboard endpoint
+	HTTPDashboardPath = "/httpDashboard"
+	// GRPCDashboardPath is the path to the GET /grpcDashboard endpoint
+	GRPCDashboardPath = "/grpcDashboard"
 )
+
+// callMetricsService is a general function that can be used to send data to the metrics service
+func callMetricsService(method, metricsServerURL, path string, queryParams map[string]string, payload interface{}) error {
+	// handle URL and URL parameters
+	u, err := url.ParseRequestURI(metricsServerURL + path)
+	if err != nil {
+		return err
+	}
+
+	params := url.Values{}
+	for paramKey, paramValue := range queryParams {
+		params.Add(paramKey, paramValue)
+	}
+	u.RawQuery = params.Encode()
+	urlStr := fmt.Sprintf("%v", u)
+
+	log.Logger.Trace(fmt.Sprintf("call metrics service URL: %s", urlStr))
+
+	// handle payload
+	dataBytes, err := json.Marshal(payload)
+	if err != nil {
+		log.Logger.Error("cannot JSON marshal data for metrics server request: ", err)
+		return err
+	}
+
+	// create request
+	req, err := http.NewRequest(method, urlStr, bytes.NewBuffer(dataBytes))
+	if err != nil {
+		log.Logger.Error("cannot create new HTTP request metrics server: ", err)
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	log.Logger.Trace("sending request")
+
+	// send request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Logger.Error("could not send request to metrics server: ", err)
+		return err
+	}
+	defer func() {
+		err = resp.Body.Close()
+		if err != nil {
+			log.Logger.Error("could not close response body: ", err)
+		}
+	}()
+
+	log.Logger.Trace("sent request")
+
+	return nil
+}
+
+// PutExperimentResultToMetricsService sends the experiment result to the metrics service
+func PutExperimentResultToMetricsService(metricsServerURL, namespace, experiment string, experimentResult *ExperimentResult) error {
+	return callMetricsService(http.MethodPut, metricsServerURL, ExperimentResultPath, map[string]string{
+		"namespace":  namespace,
+		"experiment": experiment,
+	}, experimentResult)
+}

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/dgraph-io/badger/v4"
+	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -271,4 +272,26 @@ func TestGetMetrics(t *testing.T) {
 	jsonMetrics, err = json.Marshal(metrics)
 	assert.NoError(t, err)
 	assert.Equal(t, "{}", string(jsonMetrics))
+}
+
+func TestGetExperimentResult(t *testing.T) {
+	tempDirPath := t.TempDir()
+
+	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	assert.NoError(t, err)
+
+	namespace := "my-namespace"
+	experiment := "my-experiment"
+
+	experimentResult := base.ExperimentResult{
+		Name:      experiment,
+		Namespace: namespace,
+	}
+
+	err = client.SetExperimentResult(namespace, experiment, &experimentResult)
+	assert.NoError(t, err)
+
+	result, err := client.GetExperimentResult(namespace, experiment)
+	assert.NoError(t, err)
+	assert.Equal(t, &experimentResult, result)
 }

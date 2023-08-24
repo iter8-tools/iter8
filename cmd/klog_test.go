@@ -10,11 +10,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	id "github.com/iter8-tools/iter8/driver"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/iter8-tools/iter8/base"
 )
 
 func TestKLog(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(base.MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
 	_ = os.Chdir(t.TempDir())
 	tests := []cmdTestCase{
 		// k launch

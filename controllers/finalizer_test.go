@@ -14,7 +14,6 @@ import (
 )
 
 func TestAddFinalizer(t *testing.T) {
-
 	u := &unstructured.Unstructured{
 		Object: map[string]interface{}{
 			"apiVersion": "v1",

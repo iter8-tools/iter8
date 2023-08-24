@@ -1,5 +1,10 @@
 name: Publish binaries and Docker image
 
+# Runs when a release is published
+
+# Build and publish binaries and release Docker image
+# Test Docker image
+
 on:
   release:
     types: [published]
@@ -97,23 +102,28 @@ jobs:
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: Create app
+    - name: Create httpbin application
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+    - name: Install controller
+      run: |
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
     - name: iter8 k launch
       run: |
         iter8 k launch \
         --set tasks={http} \
-        --set http.url="http://httpbin.default/get" \
-        --set runner=job
-    - name: try other iter8 k commands
+        --set http.url="http://httpbin.default/get"
+        sleep 60
+    - name: Try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
+    - name: Check GET /httpDashboard
+      run: |
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   kubernetes-grpc-experiment:
     name: Kubernetes gRPC load test
@@ -126,20 +136,22 @@ jobs:
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: Create app
+    - name: Create routeguide application
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
         -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
         kubectl expose deployment routeguide --port=50051
         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
-
+    - name: Install controller
+      run: |
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
     - name: Test gRPC service with grpcurl
       run: |
         curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
         kubectl apply -f grpcurl-routeguide.yaml
         sleep 180
         kubectl logs deploy/sleep
-  
     - name: iter8 k launch
       run: |
         iter8 k launch \
@@ -148,13 +160,14 @@ jobs:
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
-        --set runner=job
-    - name: try other iter8 k commands
+        sleep 60
+    - name: Try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
+    - name: Check GET /grpcDashboard
+      run: |
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   kubernetes-grpc-experiment2:
     name: Kubernetes gRPC load test 2
@@ -167,25 +180,30 @@ jobs:
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: Create app
+    - name: Create hello application
       run: |
         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
         kubectl expose deploy hello --port=50051
         kubectl wait --for=condition=available --timeout=60s deploy/hello
+    - name: Install controller
+      run: |
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
     - name: iter8 k launch
       run: |
         iter8 k launch \
         --set tasks={grpc} \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
-        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        --set runner=job
-    - name: try other iter8 k commands
+        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"
+        sleep 60
+    - name: Try other iter8 k commands
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
-        iter8 k report
         iter8 k log
         iter8 k delete
+    - name: Check GET /grpcDashboard
+      run: |
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   readiness:
     name: Kubernetes readiness test
@@ -198,23 +216,26 @@ jobs:
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: Deploy resources to cluster
+    - name: Create httpbin application
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
+    - name: Install controller
+      run: |
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
     - name: k launch with readiness checks
       run: |
         iter8 k launch \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
-        --set http.url=http://httpbin.default \
-        --set assess.SLOs.upper.http/latency-mean=50 \
-        --set runner=job
-    - name: k assert experiment completed without failures
+        --set http.url=http://httpbin.default/get
+        sleep 60
+    - name: Check GET /httpDashboard
       run: |
-        iter8 k assert -c completed -c nofailure --timeout 60s
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   readiness-with-namespace:
     name: Kubernetes readiness test with namespace
@@ -227,22 +248,25 @@ jobs:
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
-    - name: Deploy resources to cluster
+    - name: Create httpbin application
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
         kubectl create namespace experiments
+    - name: Install controller
+      run: |
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
     - name: k launch with readiness checks
       run: |
         iter8 k launch -n experiments \
-        --set "tasks={ready,http,assess}" \
+        --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
         --set ready.namespace=default \
-        --set http.url=http://httpbin.default/get \
-        --set assess.SLOs.upper.http/latency-mean=50 \
-        --set runner=job
-    - name: k assert experiment completed without failures
+        --set http.url=http://httpbin.default/get
+        sleep 60
+    - name: Check GET /httpDashboard
       run: |
-        iter8 k assert -n experiments -c completed -c nofailure --timeout 60s
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f

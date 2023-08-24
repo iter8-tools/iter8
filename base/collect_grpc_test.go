@@ -1,21 +1,21 @@
 package base
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/base/internal"
 	"github.com/iter8-tools/iter8/base/internal/helloworld/helloworld"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/stretchr/testify/assert"
-	"sigs.k8s.io/yaml"
 )
 
 const (
 	unary         = "unary"
+	unary2        = "unary2"
 	server        = "server"
 	client        = "client"
 	bidirectional = "bidirectional"
@@ -24,6 +24,13 @@ const (
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
 func TestRunCollectGRPCUnary(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	call := "helloworld.Greeter.SayHello"
+
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
@@ -40,7 +47,7 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 		With: collectGRPCInputs{
 			Config: runner.Config{
 				Data: map[string]interface{}{"name": "bob"},
-				Call: "helloworld.Greeter.SayHello",
+				Call: call,
 				Host: internal.LocalHostPort,
 			},
 		},
@@ -51,6 +58,10 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
 	}
 	exp.initResults(1)
 	err = ct.run(exp)
@@ -63,21 +74,17 @@ func TestRunCollectGRPCUnary(t *testing.T) {
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
 
-	mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCErrorCountMetricName)
-	assert.NotNil(t, mm)
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
 	assert.NoError(t, err)
 
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName)
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
-
-	mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-	assert.NotNil(t, mm)
-	assert.NoError(t, err)
+	assert.Equal(t, 1, len(ghzResult))
+	assert.NotNil(t, ghzResult[call])
 }
 
 // If the endpoint does not exist, fail gracefully
@@ -113,7 +120,12 @@ func TestRunCollectGRPCUnaryNoEndpoint(t *testing.T) {
 
 // Credit: Several of the tests in this file are based on
 // https://github.com/bojand/ghz/blob/master/runner/run_test.go
-func TestRunCollectGRPCEndpoints(t *testing.T) {
+func TestRunCollectGRPCMultipleEndpoints(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
@@ -157,6 +169,10 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
 	}
 	exp.initResults(1)
 	err = ct.run(exp)
@@ -169,29 +185,38 @@ func TestRunCollectGRPCEndpoints(t *testing.T) {
 	count := gs.GetCount(callType)
 	assert.Equal(t, 200, count)
 
-	grpcMethods := []string{unary, server, client, bidirectional}
-	for _, method := range grpcMethods {
-		mm, err := exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCErrorCountMetricName)
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
 
-		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName)
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
+	assert.NoError(t, err)
 
-		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + string(MaxAggregator))
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
-
-		mm, err = exp.Result.Insights.GetMetricsInfo(gRPCMetricPrefix + "-" + method + "/" + gRPCLatencySampleMetricName + "/" + PercentileAggregatorPrefix + "50")
-		assert.NotNil(t, mm)
-		assert.NoError(t, err)
-	}
+	assert.Equal(t, 4, len(ghzResult))
+	assert.NotNil(t, ghzResult[unary])
+	assert.NotNil(t, ghzResult[server])
+	assert.NotNil(t, ghzResult[client])
+	assert.NotNil(t, ghzResult[bidirectional])
 }
 
+// TODO: should this still return insights even though the endpoints cannot be reached?
+// This would mean no Grafana dashboard would be produced
+//
 // If the endpoints cannot be reached, then do not throw an error
 // Should not return an nil pointer dereference error (see #1451)
 func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	unaryCall := "helloworld.Greeter.SayHello"
+	serverCall := "helloworld.Greeter.SayHelloCS"
+	clientCall := "helloworld.Greeter.SayHellos"
+	bidirectionalCall := "helloworld.Greeter.SayHelloBidi"
+
 	// valid collect GRPC task... should succeed
 	ct := &collectGRPCTask{
 		TaskMeta: TaskMeta{
@@ -204,19 +229,19 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 			Endpoints: map[string]runner.Config{
 				unary: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHello",
+					Call: unaryCall,
 				},
 				server: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHelloCS",
+					Call: serverCall,
 				},
 				client: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHellos",
+					Call: clientCall,
 				},
 				bidirectional: {
 					Data: map[string]interface{}{"name": "bob"},
-					Call: "helloworld.Greeter.SayHelloBidi",
+					Call: bidirectionalCall,
 				},
 			},
 		},
@@ -227,18 +252,33 @@ func TestRunCollectGRPCMultipleNoEndpoints(t *testing.T) {
 	exp := &Experiment{
 		Spec:   []Task{ct},
 		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
 	}
 	exp.initResults(1)
-	err := ct.run(exp)
+	err = ct.run(exp)
 	assert.NoError(t, err)
 
-	// No metrics should be collected
-	assert.Equal(t, 0, len(exp.Result.Insights.NonHistMetricValues[0]))
-	assert.Equal(t, 0, len(exp.Result.Insights.HistMetricValues[0]))
-	assert.Equal(t, 0, len(exp.Result.Insights.SummaryMetricValues[0]))
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 0, len(ghzResult))
 }
 
-func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
+func TestRunCollectGRPCSingleEndpointMultipleCalls(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
 	_ = os.Chdir(t.TempDir())
 	callType := helloworld.Unary
 	gs, s, err := internal.StartServer(false)
@@ -254,76 +294,51 @@ func TestMockGRPCWithSLOsAndPercentiles(t *testing.T) {
 		},
 		With: collectGRPCInputs{
 			Config: runner.Config{
-				N:           100,
-				RPS:         20,
-				C:           1,
-				Timeout:     runner.Duration(20 * time.Second),
-				Data:        map[string]interface{}{"name": "bob"},
-				DialTimeout: runner.Duration(20 * time.Second),
-				Call:        "helloworld.Greeter.SayHello",
-				Host:        internal.LocalHostPort,
+				Host: internal.LocalHostPort,
+				Call: "helloworld.Greeter.SayHello",
+			},
+			Endpoints: map[string]runner.Config{
+				unary: {
+					Data: map[string]interface{}{"name": "bob"},
+				},
+				unary2: {
+					Data: map[string]interface{}{"name": "charles"},
+				},
 			},
 		},
 	}
 
-	at := &assessTask{
-		TaskMeta: TaskMeta{
-			Task: StringPointer(AssessTaskName),
-		},
-		With: assessInputs{
-			SLOs: &SLOLimits{
-				Lower: []SLO{{
-					Metric: "grpc/request-count",
-					Limit:  100,
-				}},
-				Upper: []SLO{{
-					Metric: "grpc/latency/mean",
-					Limit:  100,
-				}, {
-					Metric: "grpc/latency/p95.00",
-					Limit:  200,
-				}, {
-					Metric: "grpc/latency/stddev",
-					Limit:  20,
-				}, {
-					Metric: "grpc/latency/max",
-					Limit:  200,
-				}, {
-					Metric: "grpc/error-count",
-					Limit:  0,
-				}, {
-					Metric: "grpc/request-count",
-					Limit:  100,
-				}},
-			},
-		},
-	}
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
 	exp := &Experiment{
-		Spec: []Task{ct, at},
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
 	}
-
 	exp.initResults(1)
-	_ = exp.Result.initInsightsWithNumVersions(1)
-	err = exp.Spec[0].run(exp)
-	assert.NoError(t, err)
-	err = exp.Spec[1].run(exp)
-	assert.NoError(t, err)
+	err = ct.run(exp)
 
-	// assert SLOs are satisfied
-	for _, v := range exp.Result.Insights.SLOsSatisfied.Upper {
-		for _, b := range v {
-			assert.True(t, b)
-		}
-	}
-	for _, v := range exp.Result.Insights.SLOsSatisfied.Lower {
-		for _, b := range v {
-			assert.True(t, b)
-		}
-	}
+	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
 
-	expBytes, _ := yaml.Marshal(exp)
-	log.Logger.Debug("\n" + string(expBytes))
+	assert.NoError(t, err)
+	assert.Equal(t, exp.Result.Insights.NumVersions, 1)
 
 	count := gs.GetCount(callType)
-	assert.Equal(t, int(ct.With.N), count)
+	assert.Equal(t, 400, count)
+
+	taskData := exp.Result.Insights.TaskData[CollectGRPCTaskName]
+	assert.NotNil(t, taskData)
+
+	taskDataBytes, err := json.Marshal(taskData)
+	assert.NoError(t, err)
+	ghzResult := GHZResult{}
+	err = json.Unmarshal(taskDataBytes, &ghzResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 2, len(ghzResult))
+	assert.NotNil(t, ghzResult[unary])
+	assert.NotNil(t, ghzResult[unary2])
 }

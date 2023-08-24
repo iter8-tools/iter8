@@ -1,7 +1,15 @@
 name: golangci-lint
 
+# Only runs when there are golang code changes
+
+# Lint golang files
+
 on:
   pull_request:
+    branches:
+    - master
+    paths:
+    - '**.go'
 
 permissions:
   contents: read

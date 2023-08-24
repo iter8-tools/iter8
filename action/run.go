@@ -32,5 +32,6 @@ func (rOpts *RunOpts) KubeRun() error {
 	if err := rOpts.KubeDriver.InitKube(); err != nil {
 		return err
 	}
-	return base.RunExperiment(rOpts.ReuseResult, rOpts.KubeDriver)
+
+	return base.RunExperiment(rOpts.KubeDriver)
 }

@@ -1,11 +1,14 @@
 package metrics
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"regexp"
 	"sort"
@@ -20,6 +23,490 @@ import (
 	"github.com/iter8-tools/iter8/storage/badgerdb"
 	"github.com/stretchr/testify/assert"
 )
+
+const (
+	myName      = "my-name"
+	myNamespace = "my-namespace"
+)
+
+const fortioResultJSON = `{
+	"http://httpbin.default/get": {
+		"RunType": "HTTP",
+		"Labels": "",
+		"StartTime": "2023-07-21T14:00:40.134434969Z",
+		"RequestedQPS": "8",
+		"RequestedDuration": "exactly 100 calls",
+		"ActualQPS": 7.975606391552989,
+		"ActualDuration": 12538231589,
+		"NumThreads": 4,
+		"Version": "1.57.3",
+		"DurationHistogram": {
+			"Count": 100,
+			"Min": 0.004223875,
+			"Max": 0.040490042,
+			"Sum": 1.5977100850000001,
+			"Avg": 0.015977100850000002,
+			"StdDev": 0.008340658047253256,
+			"Data": [
+				{
+					"Start": 0.004223875,
+					"End": 0.005,
+					"Percent": 5,
+					"Count": 5
+				},
+				{
+					"Start": 0.005,
+					"End": 0.006,
+					"Percent": 10,
+					"Count": 5
+				},
+				{
+					"Start": 0.006,
+					"End": 0.007,
+					"Percent": 14,
+					"Count": 4
+				},
+				{
+					"Start": 0.007,
+					"End": 0.008,
+					"Percent": 19,
+					"Count": 5
+				},
+				{
+					"Start": 0.008,
+					"End": 0.009000000000000001,
+					"Percent": 24,
+					"Count": 5
+				},
+				{
+					"Start": 0.009000000000000001,
+					"End": 0.01,
+					"Percent": 28,
+					"Count": 4
+				},
+				{
+					"Start": 0.01,
+					"End": 0.011,
+					"Percent": 33,
+					"Count": 5
+				},
+				{
+					"Start": 0.011,
+					"End": 0.012,
+					"Percent": 36,
+					"Count": 3
+				},
+				{
+					"Start": 0.012,
+					"End": 0.014,
+					"Percent": 48,
+					"Count": 12
+				},
+				{
+					"Start": 0.014,
+					"End": 0.016,
+					"Percent": 55,
+					"Count": 7
+				},
+				{
+					"Start": 0.016,
+					"End": 0.018000000000000002,
+					"Percent": 65,
+					"Count": 10
+				},
+				{
+					"Start": 0.018000000000000002,
+					"End": 0.02,
+					"Percent": 74,
+					"Count": 9
+				},
+				{
+					"Start": 0.02,
+					"End": 0.025,
+					"Percent": 85,
+					"Count": 11
+				},
+				{
+					"Start": 0.025,
+					"End": 0.03,
+					"Percent": 93,
+					"Count": 8
+				},
+				{
+					"Start": 0.03,
+					"End": 0.035,
+					"Percent": 98,
+					"Count": 5
+				},
+				{
+					"Start": 0.035,
+					"End": 0.04,
+					"Percent": 99,
+					"Count": 1
+				},
+				{
+					"Start": 0.04,
+					"End": 0.040490042,
+					"Percent": 100,
+					"Count": 1
+				}
+			],
+			"Percentiles": [
+				{
+					"Percentile": 50,
+					"Value": 0.014571428571428572
+				},
+				{
+					"Percentile": 75,
+					"Value": 0.020454545454545454
+				},
+				{
+					"Percentile": 90,
+					"Value": 0.028125
+				},
+				{
+					"Percentile": 95,
+					"Value": 0.032
+				},
+				{
+					"Percentile": 99,
+					"Value": 0.04
+				},
+				{
+					"Percentile": 99.9,
+					"Value": 0.0404410378
+				}
+			]
+		},
+		"ErrorsDurationHistogram": {
+			"Count": 0,
+			"Min": 0,
+			"Max": 0,
+			"Sum": 0,
+			"Avg": 0,
+			"StdDev": 0,
+			"Data": null
+		},
+		"Exactly": 100,
+		"Jitter": false,
+		"Uniform": false,
+		"NoCatchUp": false,
+		"RunID": 0,
+		"AccessLoggerInfo": "",
+		"ID": "2023-07-21-140040",
+		"RetCodes": {
+			"200": 100
+		},
+		"IPCountMap": {
+			"10.96.108.76:80": 4
+		},
+		"Insecure": false,
+		"MTLS": false,
+		"CACert": "",
+		"Cert": "",
+		"Key": "",
+		"UnixDomainSocket": "",
+		"URL": "http://httpbin.default/get",
+		"NumConnections": 1,
+		"Compression": false,
+		"DisableFastClient": false,
+		"HTTP10": false,
+		"H2": false,
+		"DisableKeepAlive": false,
+		"AllowHalfClose": false,
+		"FollowRedirects": false,
+		"Resolve": "",
+		"HTTPReqTimeOut": 3000000000,
+		"UserCredentials": "",
+		"ContentType": "",
+		"Payload": null,
+		"MethodOverride": "",
+		"LogErrors": false,
+		"SequentialWarmup": false,
+		"ConnReuseRange": [
+			0,
+			0
+		],
+		"NoResolveEachConn": false,
+		"Offset": 0,
+		"Resolution": 0.001,
+		"Sizes": {
+			"Count": 100,
+			"Min": 413,
+			"Max": 413,
+			"Sum": 41300,
+			"Avg": 413,
+			"StdDev": 0,
+			"Data": [
+				{
+					"Start": 413,
+					"End": 413,
+					"Percent": 100,
+					"Count": 100
+				}
+			]
+		},
+		"HeaderSizes": {
+			"Count": 100,
+			"Min": 230,
+			"Max": 230,
+			"Sum": 23000,
+			"Avg": 230,
+			"StdDev": 0,
+			"Data": [
+				{
+					"Start": 230,
+					"End": 230,
+					"Percent": 100,
+					"Count": 100
+				}
+			]
+		},
+		"Sockets": [
+			1,
+			1,
+			1,
+			1
+		],
+		"SocketCount": 4,
+		"ConnectionStats": {
+			"Count": 4,
+			"Min": 0.001385875,
+			"Max": 0.001724375,
+			"Sum": 0.006404583,
+			"Avg": 0.00160114575,
+			"StdDev": 0.00013101857565508474,
+			"Data": [
+				{
+					"Start": 0.001385875,
+					"End": 0.001724375,
+					"Percent": 100,
+					"Count": 4
+				}
+			],
+			"Percentiles": [
+				{
+					"Percentile": 50,
+					"Value": 0.0014987083333333332
+				},
+				{
+					"Percentile": 75,
+					"Value": 0.0016115416666666667
+				},
+				{
+					"Percentile": 90,
+					"Value": 0.0016792416666666667
+				},
+				{
+					"Percentile": 95,
+					"Value": 0.0017018083333333333
+				},
+				{
+					"Percentile": 99,
+					"Value": 0.0017198616666666668
+				},
+				{
+					"Percentile": 99.9,
+					"Value": 0.0017239236666666668
+				}
+			]
+		},
+		"AbortOn": 0
+	}
+}`
+
+const fortioDashboardJSON = `{"Endpoints":{"http://httpbin.default/get":{"Durations":[{"Version":"0","Bucket":"4.2 - 5","Value":5},{"Version":"0","Bucket":"5 - 6","Value":5},{"Version":"0","Bucket":"6 - 7","Value":4},{"Version":"0","Bucket":"7 - 8","Value":5},{"Version":"0","Bucket":"8 - 9","Value":5},{"Version":"0","Bucket":"9 - 10","Value":4},{"Version":"0","Bucket":"10 - 11","Value":5},{"Version":"0","Bucket":"11 - 12","Value":3},{"Version":"0","Bucket":"12 - 14","Value":12},{"Version":"0","Bucket":"14 - 16","Value":7},{"Version":"0","Bucket":"16 - 18","Value":10},{"Version":"0","Bucket":"18 - 20","Value":9},{"Version":"0","Bucket":"20 - 25","Value":11},{"Version":"0","Bucket":"25 - 30","Value":8},{"Version":"0","Bucket":"30 - 35","Value":5},{"Version":"0","Bucket":"35 - 40","Value":1},{"Version":"0","Bucket":"40 - 40.4","Value":1}],"Statistics":{"Count":100,"Mean":15.977100850000001,"StdDev":8.340658047253257,"Min":4.2238750000000005,"Max":40.490041999999995},"Error durations":[],"Error statistics":{"Count":0,"Mean":0,"StdDev":0,"Min":0,"Max":0},"Return codes":{"200":100}}},"ExperimentResult":{"Name":"my-name","Namespace":"my-namespace","Revision":0,"Start time":"01 Jan 01 00:00 UTC","Completed tasks":5,"Failure":false,"Insights":null,"Iter8 version":""}}`
+
+const ghzResultJSON = `{
+	"routeguide.RouteGuide.GetFeature": {
+		"date": "2023-07-17T12:23:56Z",
+		"endReason": "normal",
+		"options": {
+			"call": "routeguide.RouteGuide.GetFeature",
+			"host": "routeguide.default:50051",
+			"proto": "/tmp/ghz.proto",
+			"import-paths": [
+				"/tmp",
+				"."
+			],
+			"insecure": true,
+			"load-schedule": "const",
+			"load-start": 0,
+			"load-end": 0,
+			"load-step": 0,
+			"load-step-duration": 0,
+			"load-max-duration": 0,
+			"concurrency": 50,
+			"concurrency-schedule": "const",
+			"concurrency-start": 1,
+			"concurrency-end": 0,
+			"concurrency-step": 0,
+			"concurrency-step-duration": 0,
+			"concurrency-max-duration": 0,
+			"total": 200,
+			"connections": 1,
+			"dial-timeout": 10000000000,
+			"data": {
+				"latitude": 407838351,
+				"longitude": -746143763
+			},
+			"binary": false,
+			"CPUs": 5,
+			"count-errors": true
+		},
+		"count": 200,
+		"total": 592907667,
+		"average": 25208185,
+		"fastest": 32375,
+		"slowest": 195740917,
+		"rps": 337.3206506368217,
+		"errorDistribution": {
+			"rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"": 200
+		},
+		"statusCodeDistribution": {
+			"Unavailable": 200
+		},
+		"latencyDistribution": [
+			{
+				"percentage": 10,
+				"latency": 35584
+			},
+			{
+				"percentage": 25,
+				"latency": 39958
+			},
+			{
+				"percentage": 50,
+				"latency": 86208
+			},
+			{
+				"percentage": 75,
+				"latency": 12777625
+			},
+			{
+				"percentage": 90,
+				"latency": 106714334
+			},
+			{
+				"percentage": 95,
+				"latency": 189847000
+			},
+			{
+				"percentage": 99,
+				"latency": 195400792
+			}
+		],
+		"histogram": [
+			{
+				"mark": 0.000032375,
+				"count": 1,
+				"frequency": 0.005
+			},
+			{
+				"mark": 0.0196032292,
+				"count": 167,
+				"frequency": 0.835
+			},
+			{
+				"mark": 0.0391740834,
+				"count": 0,
+				"frequency": 0
+			},
+			{
+				"mark": 0.05874493759999999,
+				"count": 0,
+				"frequency": 0
+			},
+			{
+				"mark": 0.07831579179999999,
+				"count": 0,
+				"frequency": 0
+			},
+			{
+				"mark": 0.097886646,
+				"count": 3,
+				"frequency": 0.015
+			},
+			{
+				"mark": 0.11745750019999998,
+				"count": 13,
+				"frequency": 0.065
+			},
+			{
+				"mark": 0.1370283544,
+				"count": 0,
+				"frequency": 0
+			},
+			{
+				"mark": 0.15659920859999998,
+				"count": 0,
+				"frequency": 0
+			},
+			{
+				"mark": 0.17617006279999997,
+				"count": 0,
+				"frequency": 0
+			},
+			{
+				"mark": 0.195740917,
+				"count": 16,
+				"frequency": 0.08
+			}
+		],
+		"details": [
+			{
+				"timestamp": "2023-07-17T12:23:56.089998719Z",
+				"latency": 14490041,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			},
+			{
+				"timestamp": "2023-07-17T12:23:56.090471886Z",
+				"latency": 13759125,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			},
+			{
+				"timestamp": "2023-07-17T12:23:56.090528678Z",
+				"latency": 194468542,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			},
+			{
+				"timestamp": "2023-07-17T12:23:56.090079886Z",
+				"latency": 105031291,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			},
+			{
+				"timestamp": "2023-07-17T12:23:56.090224928Z",
+				"latency": 100337083,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			},
+			{
+				"timestamp": "2023-07-17T12:23:56.091097053Z",
+				"latency": 12463750,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			},
+			{
+				"timestamp": "2023-07-17T12:23:56.091135844Z",
+				"latency": 12603875,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			},
+			{
+				"timestamp": "2023-07-17T12:23:56.478469636Z",
+				"latency": 86208,
+				"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.20.53:50051: connect: connection refused\"",
+				"status": "Unavailable"
+			}
+		]
+	}
+}`
+
+const ghzDashboardJSON = `{"Endpoints":{"routeguide.RouteGuide.GetFeature":{"Durations":[{"Version":"0","Bucket":"0.032","Value":1},{"Version":"0","Bucket":"19.603","Value":167},{"Version":"0","Bucket":"39.174","Value":0},{"Version":"0","Bucket":"58.744","Value":0},{"Version":"0","Bucket":"78.315","Value":0},{"Version":"0","Bucket":"97.886","Value":3},{"Version":"0","Bucket":"117.457","Value":13},{"Version":"0","Bucket":"137.028","Value":0},{"Version":"0","Bucket":"156.599","Value":0},{"Version":"0","Bucket":"176.17","Value":0},{"Version":"0","Bucket":"195.74","Value":16}],"Statistics":{"Count":200,"ErrorCount":200},"Status codes":{"Unavailable":200}}},"ExperimentResult":{"Name":"my-name","Namespace":"my-namespace","Revision":0,"Start time":"01 Jan 01 00:00 UTC","Completed tasks":5,"Failure":false,"Insights":null,"Iter8 version":""}}`
 
 func TestStart(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -334,5 +821,398 @@ func getTestRM(namespace, name string) *testroutemap {
 		},
 		normalizedWeights: []uint32{1, 1},
 	}
+}
 
+func TestTestRM(t *testing.T) {
+	namespace := "default"
+	name := "test"
+	rm := getTestRM(namespace, name)
+
+	assert.Equal(t, namespace, rm.GetNamespace())
+	assert.Equal(t, name, rm.GetName())
+	assert.Equal(t, []uint32{1, 1}, rm.Weights())
+}
+
+func TestGetHTTPDashboardHelper(t *testing.T) {
+	fortioResult := util.HTTPResult{}
+	err := json.Unmarshal([]byte(fortioResultJSON), &fortioResult)
+	assert.NoError(t, err)
+
+	experimentResult := util.ExperimentResult{
+		Name:              myName,
+		Namespace:         myNamespace,
+		NumCompletedTasks: 5,
+		Insights: &util.Insights{
+			TaskData: map[string]interface{}{
+				util.CollectHTTPTaskName: fortioResult,
+			},
+		},
+	}
+
+	dashboard := getHTTPDashboardHelper(&experimentResult)
+	assert.NotNil(t, dashboard)
+	dashboardBytes, err := json.Marshal(dashboard)
+	assert.NoError(t, err)
+
+	assert.Equal(
+		t,
+		fortioDashboardJSON,
+		string(dashboardBytes),
+	)
+}
+
+func TestGetGRPCDashboardHelper(t *testing.T) {
+	ghzResult := util.GHZResult{}
+	err := json.Unmarshal([]byte(ghzResultJSON), &ghzResult)
+	assert.NoError(t, err)
+
+	experimentResult := util.ExperimentResult{
+		Name:              myName,
+		Namespace:         myNamespace,
+		NumCompletedTasks: 5,
+		Insights: &util.Insights{
+			TaskData: map[string]interface{}{
+				util.CollectGRPCTaskName: ghzResult,
+			},
+		},
+	}
+
+	dashboard := getGRPCDashboardHelper(&experimentResult)
+
+	assert.NotNil(t, dashboard)
+	dashboardBytes, err := json.Marshal(dashboard)
+	assert.NoError(t, err)
+	assert.Equal(
+		t,
+		ghzDashboardJSON,
+		string(dashboardBytes),
+	)
+}
+
+func TestPutExperimentResultInvalidMethod(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, util.ExperimentResultPath, nil)
+	putExperimentResult(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
+	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
+}
+
+func TestPutExperimentResultMissingParameter(t *testing.T) {
+	tests := []struct {
+		queryParams        url.Values
+		expectedStatusCode int
+	}{
+		{
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"namespace": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"experiment": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, test := range tests {
+		w := httptest.NewRecorder()
+
+		u, err := url.ParseRequestURI(util.ExperimentResultPath)
+		assert.NoError(t, err)
+		u.RawQuery = test.queryParams.Encode()
+		urlStr := fmt.Sprintf("%v", u)
+
+		req := httptest.NewRequest(http.MethodPut, urlStr, nil)
+
+		putExperimentResult(w, req)
+		res := w.Result()
+		defer func() {
+			err := res.Body.Close()
+			assert.NoError(t, err)
+		}()
+
+		assert.Equal(t, test.expectedStatusCode, res.StatusCode)
+	}
+}
+
+func TestPutExperimentResult(t *testing.T) {
+	// instantiate metrics client
+	tempDirPath := t.TempDir()
+	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
+	abn.MetricsClient = client
+
+	w := httptest.NewRecorder()
+
+	// construct inputs to putExperimentResult
+	u, err := url.ParseRequestURI(util.ExperimentResultPath)
+	assert.NoError(t, err)
+	params := url.Values{
+		"namespace":  {"default"},
+		"experiment": {"default"},
+	}
+	u.RawQuery = params.Encode()
+	urlStr := fmt.Sprintf("%v", u)
+
+	experimentResult := util.ExperimentResult{
+		Name:              myName,
+		Namespace:         myNamespace,
+		NumCompletedTasks: 5,
+		Insights: &util.Insights{
+			TaskData: map[string]interface{}{
+				util.CollectHTTPTaskName: "hello world",
+			},
+		},
+	}
+
+	experimentResultBytes, err := json.Marshal(experimentResult)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPut, urlStr, bytes.NewBuffer(experimentResultBytes))
+
+	// put result into the metrics client
+	putExperimentResult(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
+
+	// check to see if the result is stored in the metrics client
+	result, err := abn.MetricsClient.GetExperimentResult("default", "default")
+	assert.NoError(t, err)
+	assert.Equal(t, &experimentResult, result)
+}
+
+func TestGetHTTPDashboardInvalidMethod(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, util.HTTPDashboardPath, nil)
+	getHTTPDashboard(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
+	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
+}
+
+func TestGetHTTPDashboardMissingParameter(t *testing.T) {
+	tests := []struct {
+		queryParams        url.Values
+		expectedStatusCode int
+	}{
+		{
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"namespace": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"experiment": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, test := range tests {
+		w := httptest.NewRecorder()
+
+		u, err := url.ParseRequestURI(util.HTTPDashboardPath)
+		assert.NoError(t, err)
+		u.RawQuery = test.queryParams.Encode()
+		urlStr := fmt.Sprintf("%v", u)
+		req := httptest.NewRequest(http.MethodGet, urlStr, nil)
+
+		getHTTPDashboard(w, req)
+		res := w.Result()
+		defer func() {
+			err := res.Body.Close()
+			assert.NoError(t, err)
+		}()
+
+		assert.Equal(t, test.expectedStatusCode, res.StatusCode)
+	}
+}
+
+func TestGetHTTPDashboard(t *testing.T) {
+	// instantiate metrics client
+	tempDirPath := t.TempDir()
+	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
+	abn.MetricsClient = client
+
+	// preload metric client with experiment result
+	fortioResult := util.HTTPResult{}
+	err = json.Unmarshal([]byte(fortioResultJSON), &fortioResult)
+	assert.NoError(t, err)
+
+	experimentResult := util.ExperimentResult{
+		Name:              myName,
+		Namespace:         myNamespace,
+		NumCompletedTasks: 5,
+		Insights: &util.Insights{
+			TaskData: map[string]interface{}{
+				util.CollectHTTPTaskName: fortioResult,
+			},
+		},
+	}
+
+	err = abn.MetricsClient.SetExperimentResult("default", "default", &experimentResult)
+	assert.NoError(t, err)
+
+	w := httptest.NewRecorder()
+
+	// construct inputs to getHTTPDashboard
+	u, err := url.ParseRequestURI(util.HTTPDashboardPath)
+	assert.NoError(t, err)
+	params := url.Values{
+		"namespace":  {"default"},
+		"experiment": {"default"},
+	}
+	u.RawQuery = params.Encode()
+	urlStr := fmt.Sprintf("%v", u)
+
+	req := httptest.NewRequest(http.MethodGet, urlStr, nil)
+
+	// get HTTP dashboard based on result in metrics client
+	getHTTPDashboard(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
+
+	// check the HTTP dashboard
+	body, err := io.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(
+		t,
+		fortioDashboardJSON,
+		string(body),
+	)
+}
+
+func TestGetGRPCDashboardInvalidMethod(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, util.GRPCDashboardPath, nil)
+	getGRPCDashboard(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
+	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
+}
+
+func TestGetGRPCDashboardMissingParameter(t *testing.T) {
+	tests := []struct {
+		queryParams        url.Values
+		expectedStatusCode int
+	}{
+		{
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"namespace": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			queryParams: url.Values{
+				"experiment": {"default"},
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, test := range tests {
+		w := httptest.NewRecorder()
+
+		u, err := url.ParseRequestURI(util.GRPCDashboardPath)
+		assert.NoError(t, err)
+		u.RawQuery = test.queryParams.Encode()
+		urlStr := fmt.Sprintf("%v", u)
+
+		req := httptest.NewRequest(http.MethodGet, urlStr, nil)
+
+		getGRPCDashboard(w, req)
+		res := w.Result()
+		defer func() {
+			err := res.Body.Close()
+			assert.NoError(t, err)
+		}()
+
+		assert.Equal(t, test.expectedStatusCode, res.StatusCode)
+	}
+}
+
+func TestGetGRPCDashboard(t *testing.T) {
+	// instantiate metrics client
+	tempDirPath := t.TempDir()
+	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	assert.NoError(t, err)
+	abn.MetricsClient = client
+
+	// preload metric client with experiment result
+	ghzResult := util.GHZResult{}
+	err = json.Unmarshal([]byte(ghzResultJSON), &ghzResult)
+	assert.NoError(t, err)
+
+	experimentResult := util.ExperimentResult{
+		Name:              myName,
+		Namespace:         myNamespace,
+		NumCompletedTasks: 5,
+		Insights: &util.Insights{
+			TaskData: map[string]interface{}{
+				util.CollectGRPCTaskName: ghzResult,
+			},
+		},
+	}
+
+	err = abn.MetricsClient.SetExperimentResult("default", "default", &experimentResult)
+	assert.NoError(t, err)
+	w := httptest.NewRecorder()
+
+	// construct inputs to getGRPCDashboard
+	u, err := url.ParseRequestURI(util.GRPCDashboardPath)
+	assert.NoError(t, err)
+	params := url.Values{
+		"namespace":  {"default"},
+		"experiment": {"default"},
+	}
+	u.RawQuery = params.Encode()
+	urlStr := fmt.Sprintf("%v", u)
+
+	req := httptest.NewRequest(http.MethodGet, urlStr, nil)
+
+	// get ghz dashboard based on result in metrics client
+	getGRPCDashboard(w, req)
+	res := w.Result()
+	defer func() {
+		err := res.Body.Close()
+		assert.NoError(t, err)
+	}()
+
+	// check the ghz dashboard
+	body, err := io.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(
+		t,
+		ghzDashboardJSON,
+		string(body),
+	)
 }

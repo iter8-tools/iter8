@@ -1,5 +1,9 @@
 name: Spell check markdown
 
+# Runs during pull request
+
+# Spell check markdown
+
 on:
   pull_request:
     branches:

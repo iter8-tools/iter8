@@ -58,12 +58,12 @@ func runTestActionCmd(t *testing.T, tests []cmdTestCase) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			store := storageFixture()
 			_, out, err := executeActionCommandC(store, tt.cmd)
 			if (err != nil) != tt.wantError {
 				t.Errorf("want error = %v, got '%v'", tt.wantError, err)
 			}
+
 			if tt.golden != "" {
 				AssertGoldenString(t, out, tt.golden)
 			}
@@ -91,7 +91,6 @@ func executeActionCommandStdinC(store *storage.Storage, in *os.File, cmd string)
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs(args)
 	log.Logger.Out = buf
-	outStream = buf
 
 	oldStdin := os.Stdin
 	if in != nil {
@@ -205,7 +204,7 @@ func compare(actual []byte, filename string) error {
 	}
 	expected = normalize(expected)
 	if !bytes.Equal(expected, actual) {
-		return errors.Errorf("does not match golden file %s WANT: '%s' GOT: '%s'", filename, expected, actual)
+		return errors.Errorf("does not match golden file %s WANT: '%s'\nGOT: '%s'", filename, expected, actual)
 	}
 	return nil
 }

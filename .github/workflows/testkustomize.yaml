@@ -1,7 +1,16 @@
-name: Test kustomize experiments
+name: Check changes to kustomize do not break user experience
+
+# Only runs when kustomize have changed
+
+# Test changes to kustomize against released images
+# TODO: test if changes to charts have been replicated for kustomize
 
 on:
   pull_request:
+    branches:
+      - master
+    paths:
+      - kustomize/**
 
 # Kind versions used to test Iter8 on different versions of Kubernetes
 # From: https://github.com/kubernetes-sigs/kind/releases
@@ -35,8 +44,10 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  traffic:
-    name: Traffic test
+# TODO: add check to verify when a change is made to charts, a similar change is made to kustomize
+
+  controller-namespaceScoped:
+    name: Controller namespace scoped test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -47,11 +58,11 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/traffic folder
+    - name: Get modified files in the kustomize/controller folder
       id: modified-files
       uses: tj-actions/changed-files@v35
       with:
-        files: charts/traffic
+        files: kustomize/controller
 
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
@@ -60,18 +71,18 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
         
-    - name: Start traffic
+    - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/traffic/namespaceScoped
+        kubectl apply -k kustomize/controller/namespaceScoped
 
-    - name: Check traffic
+    - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-traffic
+        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8
 
-  traffic-clusterScoped:
-    name: Traffic cluster scoped test
+  controller-clusterScoped:
+    name: Controller cluster scoped test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -82,11 +93,11 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v3
 
-    - name: Get modified files in the charts/traffic folder
+    - name: Get modified files in the kustomize/controller folder
       id: modified-files
       uses: tj-actions/changed-files@v35
       with:
-        files: charts/traffic
+        files: kustomize/controller
 
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
@@ -95,12 +106,12 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
         
-    - name: Start traffic
+    - name: Start controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl apply -k kustomize/traffic/clusterScoped
+        kubectl apply -k kustomize/controller/clusterScoped
 
-    - name: Check traffic
+    - name: Check controller
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8-traffic
+        kubectl rollout status --watch --timeout=60s statefulset.apps/iter8

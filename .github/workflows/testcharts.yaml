@@ -1,22 +1,27 @@
-name: Tests to ensure that changes to charts do not break user experience
+name: Check changes to charts do not break user experience
+
+# Only runs when charts have changed
+
+# Test changes to charts against released images
+# TODO: test if changes to kustomize have been replicated for charts
+# NOTE: charts/controller is being tested in all of the http and grpc tests
 
 on:
   pull_request:
     branches:
-    - master
+      - master
+    paths:
+      - charts/**
 
 # Kind versions used to test Iter8 on different versions of Kubernetes
 # From: https://github.com/kubernetes-sigs/kind/releases
 env:
   versions: |
-    kindest/node:v1.26.3@sha256:61b92f38dff6ccc29969e7aa154d34e38b89443af1a2c14e6cfbd2df6419c66f
-    kindest/node:v1.25.8@sha256:00d3f5314cc35327706776e95b2f8e504198ce59ac545d0200a89e69fce10b7f
-    kindest/node:v1.24.12@sha256:1e12918b8bc3d4253bc08f640a231bb0d3b2c5a9b28aa3f2ca1aee93e1e8db16
-    kindest/node:v1.23.17@sha256:e5fd1d9cd7a9a50939f9c005684df5a6d145e8d695e78463637b79464292e66c
-    kindest/node:v1.22.17@sha256:c8a828709a53c25cbdc0790c8afe12f25538617c7be879083248981945c38693
-    kindest/node:v1.21.14@sha256:27ef72ea623ee879a25fe6f9982690a3e370c68286f4356bf643467c552a3888
-    kindest/node:v1.27.1@sha256:9915f5629ef4d29f35b478e819249e89cfaffcbfeebda4324e5c01d53d937b09
-    kindest/node:v1.27.0@sha256:c6b22e613523b1af67d4bc8a0c38a4c3ea3a2b8fbc5b367ae36345c9cb844518
+    kindest/node:v1.28.0@sha256:b7a4cad12c197af3ba43202d3efe03246b3f0793f162afb40a33c923952d5b31
+    kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
+    kindest/node:v1.26.6@sha256:6e2d8b28a5b601defe327b98bd1c2d1930b49e5d8c512e1895099e4504007adb
+    kindest/node:v1.25.11@sha256:227fa11ce74ea76a0474eeefb84cb75d8dad1b08638371ecf0e86259b35be0c8
+    kindest/node:v1.24.15@sha256:7db4f8bea3e14b82d12e044e25e34bd53754b7f2b0e9d56df21774e6f66a70ab
 
 jobs:
   # Get the different Kind versions
@@ -36,6 +41,8 @@ jobs:
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  # TODO: add check to verify when a change is made to kustomize, a similar change is made to charts
 
   http-experiment:
     name: HTTP load test
@@ -66,12 +73,17 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Create app
+    - name: Create httpbin application
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -79,20 +91,23 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=job
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /httpDashboard
+      run: |
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   http-payload-experiment:
     name: HTTP load test with payload
@@ -123,12 +138,17 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Create app
+    - name: Create httpbin application
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -136,21 +156,24 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=job
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /httpDashboard
+      run: |
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   http-multiple-experiment:
     name: HTTP load test with multiple endpoints
@@ -181,12 +204,17 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Create app
+    - name: Create httpbin application
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment httpbin --image=kennethreitz/httpbin
         kubectl expose deployment httpbin --type=ClusterIP --port=80
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -194,84 +222,26 @@ jobs:
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
+        --set "tasks={http}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
-        --set assess.SLOs.upper.http-get/error-count=0 \
-        --set assess.SLOs.upper.http-get/latency-mean=50 \
-        --set assess.SLOs.upper.http-getAnything/error-count=0 \
-        --set assess.SLOs.upper.http-getAnything/latency-mean=100 \
-        --set assess.SLOs.upper.http-post/error-count=0 \
-        --set assess.SLOs.upper.http-post/latency-mean=150 \
-        --set runner=job
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
-      
-  http-looped-experiment:
-    name: HTTP looped load test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
 
-    steps:    
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
-
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
-      if: steps.modified-files.outputs.any_modified == 'true'
-
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
-
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
+    - name: Expose metrics service
       run: |
-        kubectl create deployment httpbin --image=kennethreitz/httpbin
-        kubectl expose deployment httpbin --type=ClusterIP --port=80
-        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+        kubectl port-forward service/iter8 8080:8080 &
 
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
+    - name: Check GET /httpDashboard
       run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={http,assess}" \
-        --set http.url="http://httpbin.default/get" \
-        --set assess.SLOs.upper.http/latency-p50=5 \
-        --set assess.SLOs.upper.http/latency-p90=10 \
-        --set assess.SLOs.upper.http/error-count=0 \
-        --set runner=cronjob \
-        --set cronjobSchedule="*/1 * * * *"
-
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k assert -c nofailure --timeout 300s
-        iter8 k report
-        iter8 k log
-        iter8 k delete
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   grpc-experiment:
     name: gRPC load test
@@ -302,7 +272,7 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Deploy gRPC service in the Kubernetes cluster
+    - name: Create routeguide application
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
@@ -317,14 +287,19 @@ jobs:
         kubectl apply -f grpcurl-routeguide.yaml
         sleep 180
         kubectl logs deploy/sleep
-  
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
         --set ready.timeout=60s \
@@ -332,19 +307,21 @@ jobs:
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=job
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /grpcDashboard
+      run: |
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   grpc-multiple-experiment:
     name: gRPC load test with multiple endpoints
@@ -375,7 +352,7 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Deploy gRPC service in the Kubernetes cluster
+    - name: Create routeguide application
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deployment routeguide --image=golang --port=50051 \
@@ -390,14 +367,19 @@ jobs:
         kubectl apply -f grpcurl-routeguide.yaml
         sleep 180
         kubectl logs deploy/sleep
-        
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={ready,grpc,assess}" \
+        --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
         --set ready.timeout=60s \
@@ -407,19 +389,21 @@ jobs:
         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
-        --set assess.SLOs.upper.grpc-getFeature/error-rate=0 \
-        --set assess.SLOs.upper.grpc-getFeature/latency/mean=50 \
-        --set assess.SLOs.upper.grpc-listFeatures/error-rate=0 \
-        --set assess.SLOs.upper.grpc-listFeatures/latency/mean=100 \
-        --set runner=job
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /grpcDashboard
+      run: |
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   grpc-experiment2:
     name: gRPC load test 2
@@ -450,177 +434,40 @@ jobs:
         wait: 300s
         node_image: ${{ matrix.version }}
 
-    - name: Create app
+    - name: Create hello application
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
         kubectl expose deploy hello --port=50051
         kubectl wait --for=condition=available --timeout=60s deploy/hello
-        
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         iter8 k launch \
         --localChart \
         --chartName charts/iter8 \
-        --set "tasks={grpc,assess}" \
+        --set "tasks={grpc}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=job
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k assert -c completed -c nofailure -c slos --timeout 300s
-        iter8 k report
         iter8 k log
         iter8 k delete
 
-  grpc-looped-experiment:
-    name: gRPC looped load test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
-
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Get modified files in the charts/iter8 folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/iter8
-    
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
-      if: steps.modified-files.outputs.any_modified == 'true'
-
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
-
-    - name: Create app
-      if: steps.modified-files.outputs.any_modified == 'true'
+    - name: Expose metrics service
       run: |
-        kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
-        kubectl expose deploy hello --port=50051
-        kubectl wait --for=condition=available --timeout=60s deploy/hello
-        
-    - name: iter8 k launch
-      if: steps.modified-files.outputs.any_modified == 'true'
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /grpcDashboard
       run: |
-        iter8 k launch \
-        --localChart \
-        --chartName charts/iter8 \
-        --set "tasks={grpc,assess}" \
-        --set grpc.host="hello.default:50051" \
-        --set grpc.call="helloworld.Greeter.SayHello" \
-        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        --set assess.SLOs.upper.grpc/error-rate=0 \
-        --set assess.SLOs.upper.grpc/latency/mean=200 \
-        --set assess.SLOs.upper.grpc/latency/p90=500 \
-        --set assess.SLOs.upper.grpc/latency/p'97\.5'=600 \
-        --set runner=cronjob \
-        --set cronjobSchedule="*/1 * * * *"
-
-    - name: Try other iter8 k commands
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        iter8 k assert -c nofailure -c slos --timeout 300s
-        iter8 k report
-        iter8 k log
-        iter8 k delete
-
-  autox:
-    name: AutoX test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
-
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Get modified files in the charts/autox folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/autox
-
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
-
-    - name: Create namespace
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl create namespace argocd
-        
-    - name: Start AutoX controller
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        helm install autox charts/autox \
-        --set 'groups.httpbin.trigger.name=httpbin' \
-        --set 'groups.httpbin.trigger.namespace=default' \
-        --set 'groups.httpbin.trigger.group=apps' \
-        --set 'groups.httpbin.trigger.version=v1' \
-        --set 'groups.httpbin.trigger.resource=deployments' \
-        --set 'groups.httpbin.specs.iter8.name=iter8' \
-        --set 'groups.httpbin.specs.iter8.values.http.url=http://httpbin.default/get' \
-        --set 'groups.httpbin.specs.iter8.version=0.15.0' \
-        --set 'groups.httpbin.specs.iter8.values.runner=job'
-
-    - name: Check AutoX controller
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: kubectl wait --for=condition=available --timeout=60s deploy/autox -n argocd
-
-  traffic:
-    name: Traffic test
-    needs: get_versions
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ${{ fromJson(needs.get_versions.outputs.matrix) }}
-
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Get modified files in the charts/traffic folder
-      id: modified-files
-      uses: tj-actions/changed-files@v35
-      with:
-        files: charts/traffic
-
-    - name: Start kind cluster ${{ matrix.version }}
-      uses: helm/kind-action@v1.5.0
-      if: steps.modified-files.outputs.any_modified == 'true'
-      with:
-        wait: 300s
-        node_image: ${{ matrix.version }}
-        
-    - name: Start traffic
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        helm install traffic charts/traffic -f charts/traffic/testdata/values.yaml
-
-    - name: Check traffic
-      if: steps.modified-files.outputs.any_modified == 'true'
-      run: |
-        kubectl rollout status --watch --timeout=60s statefulset.apps/traffic
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f

@@ -24,23 +24,21 @@ func getNotifyTask(t *testing.T, n notifyInputs) *notifyTask {
 		},
 		With: n,
 	}
-
-	httpmock.Activate()
-	t.Cleanup(httpmock.DeactivateAndReset)
-	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
 	return nt
 }
 
 // GET method
 func TestNotify(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
+	StartHTTPMock(t)
+
 	nt := getNotifyTask(t, notifyInputs{
 		URL:         testNotifyURL,
 		SoftFailure: false,
 	})
 
 	// notify endpoint
-	httpmock.RegisterResponder("GET", testNotifyURL,
+	httpmock.RegisterResponder(http.MethodGet, testNotifyURL,
 		httpmock.NewStringResponder(200, "success"))
 
 	exp := &Experiment{
@@ -65,15 +63,17 @@ type testNotification struct {
 // POST method and PayloadTemplateURL
 func TestNotifyWithPayload(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
+	StartHTTPMock(t)
+
 	nt := getNotifyTask(t, notifyInputs{
-		Method:             "POST",
+		Method:             http.MethodPost,
 		URL:                testNotifyURL,
 		PayloadTemplateURL: testNotifyURL + templatePath,
 		SoftFailure:        false,
 	})
 
 	// payload template endpoint
-	httpmock.RegisterResponder("GET", testNotifyURL+templatePath,
+	httpmock.RegisterResponder(http.MethodGet, testNotifyURL+templatePath,
 		httpmock.NewStringResponder(200, `{
 	"text": "hello world",
 	"textReport": "{{ regexReplaceAll "\"" (regexReplaceAll "\n" (.Report | toPrettyJson) "\\n") "\\\""}}",
@@ -82,7 +82,7 @@ func TestNotifyWithPayload(t *testing.T) {
 
 	// notify endpoint
 	httpmock.RegisterResponder(
-		"POST",
+		http.MethodPost,
 		testNotifyURL,
 		func(req *http.Request) (*http.Response, error) {
 			buf := new(bytes.Buffer)
@@ -133,6 +133,8 @@ func TestNotifyWithPayload(t *testing.T) {
 // GET method and headers and query parameters
 func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
+	StartHTTPMock(t)
+
 	nt := getNotifyTask(t, notifyInputs{
 		URL: testNotifyURL,
 		Headers: map[string]string{
@@ -146,7 +148,7 @@ func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 
 	// notify endpoint
 	httpmock.RegisterResponder(
-		"GET",
+		http.MethodGet,
 		testNotifyURL,
 		func(req *http.Request) (*http.Response, error) {
 			// check headers
@@ -175,6 +177,8 @@ func TestNotifyWithHeadersAndQueryParams(t *testing.T) {
 // bad method and SoftFailure
 func TestNotifyBadMethod(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
+	StartHTTPMock(t)
+
 	nt := getNotifyTask(t, notifyInputs{
 		URL:         testNotifyURL,
 		Method:      "abc",
@@ -192,6 +196,8 @@ func TestNotifyBadMethod(t *testing.T) {
 
 	// test should fail
 	assert.Error(t, err)
+
+	StartHTTPMock(t)
 
 	nt = getNotifyTask(t, notifyInputs{
 		URL:         testNotifyURL,
@@ -215,6 +221,8 @@ func TestNotifyBadMethod(t *testing.T) {
 // default to POST method with PayloadTemplateURL
 func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
+	StartHTTPMock(t)
+
 	nt := getNotifyTask(t, notifyInputs{
 		URL:                testNotifyURL,
 		PayloadTemplateURL: testNotifyURL + templatePath,
@@ -222,12 +230,12 @@ func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 	})
 
 	// payload template endpoint
-	httpmock.RegisterResponder("GET", testNotifyURL+templatePath,
+	httpmock.RegisterResponder(http.MethodGet, testNotifyURL+templatePath,
 		httpmock.NewStringResponder(200, `hello world`))
 
 	// notify endpoint
 	httpmock.RegisterResponder(
-		"GET",
+		http.MethodGet,
 		testNotifyURL,
 		func(req *http.Request) (*http.Response, error) {
 			assert.Fail(t, "notify task did not default to POST method with PayloadTemplateURL")
@@ -238,7 +246,7 @@ func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 
 	// notify endpoint
 	httpmock.RegisterResponder(
-		"POST",
+		http.MethodPost,
 		testNotifyURL,
 		func(req *http.Request) (*http.Response, error) {
 			return httpmock.NewStringResponse(200, "success"), nil
@@ -261,6 +269,8 @@ func TestNotifyPayloadTemplateURLDefaultMethod(t *testing.T) {
 // No URL
 func TestNotifyNoURL(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
+	StartHTTPMock(t)
+
 	nt := getNotifyTask(t, notifyInputs{
 		SoftFailure: false,
 	})

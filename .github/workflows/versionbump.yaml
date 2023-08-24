@@ -1,9 +1,15 @@
 name: Version bump check
 
+# Only runs when charts have changed
+
+# Check if the version number of changed charts have been bumped
+
 on:
   pull_request:
     branches:
     - master
+    paths:
+    - charts/**
 
 jobs:
   # Get the paths for the Helm charts to version check

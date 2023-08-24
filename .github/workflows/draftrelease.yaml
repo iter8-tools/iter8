@@ -1,8 +1,9 @@
 name: Release drafter
 
+# Runs when changes are pushed
+
 on:
   push:
-    # branches to consider in the event; optional, defaults to all
     branches:
     - master
 

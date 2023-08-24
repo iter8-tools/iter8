@@ -2,7 +2,10 @@ package action
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"testing"
 
@@ -15,14 +18,52 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	myName      = "myName"
+	myNamespace = "myNamespace"
+)
+
 func TestKubeRun(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(base.MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
 	// create and configure HTTP endpoint for testing
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
 	var verifyHandlerCalled bool
 	mux.HandleFunc("/get", base.GetTrackingHandler(&verifyHandlerCalled))
+
+	// mock metrics server
+	base.StartHTTPMock(t)
+	metricsServerCalled := false
+	base.MockMetricsServer(base.MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		ExperimentResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyExperimentResult := base.ExperimentResult{}
+			err = json.Unmarshal(body, &bodyExperimentResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// no experiment failure
+			assert.False(t, bodyExperimentResult.Failure)
+		},
+	})
+
+	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
 	base.CreateExperimentYaml(t, base.CompletePath("../testdata", "experiment.tpl"), url, driver.ExperimentPath)
@@ -40,16 +81,9 @@ func TestKubeRun(t *testing.T) {
 		StringData: map[string]string{driver.ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	err := rOpts.KubeRun()
+	err = rOpts.KubeRun()
 	assert.NoError(t, err)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
-
-	// check results
-	exp, err := base.BuildExperiment(rOpts.KubeDriver)
-	assert.NoError(t, err)
-	assert.True(t, exp.Completed())
-	assert.True(t, exp.NoFailure())
-	assert.True(t, exp.SLOs())
-	assert.Equal(t, 4, exp.Result.NumCompletedTasks)
+	assert.True(t, metricsServerCalled)
 }

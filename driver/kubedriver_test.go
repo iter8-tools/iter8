@@ -2,7 +2,10 @@ package driver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"testing"
 
@@ -12,7 +15,6 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -28,7 +30,7 @@ func TestKOps(t *testing.T) {
 
 	// install
 	err = kd.install(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
-		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
+		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
 
@@ -43,7 +45,7 @@ func TestKOps(t *testing.T) {
 
 	// upgrade
 	err = kd.upgrade(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
-		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get", "runner=job"},
+		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get"},
 	}, kd.Group, false)
 	assert.NoError(t, err)
 
@@ -66,13 +68,46 @@ func TestKOps(t *testing.T) {
 }
 
 func TestKubeRun(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(base.MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
 	// create and configure HTTP endpoint for testing
 	mux, addr := fhttp.DynamicHTTPServer(false)
 	url := fmt.Sprintf("http://127.0.0.1:%d/get", addr.Port)
 	var verifyHandlerCalled bool
 	mux.HandleFunc("/get", base.GetTrackingHandler(&verifyHandlerCalled))
+
+	// mock metrics server
+	base.StartHTTPMock(t)
+	metricsServerCalled := false
+	base.MockMetricsServer(base.MockMetricsServerInput{
+		MetricsServerURL: metricsServerURL,
+		ExperimentResultCallback: func(req *http.Request) {
+			metricsServerCalled = true
+
+			// check query parameters
+			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
+
+			// check payload
+			body, err := io.ReadAll(req.Body)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// check payload content
+			bodyExperimentResult := base.ExperimentResult{}
+			err = json.Unmarshal(body, &bodyExperimentResult)
+			assert.NoError(t, err)
+			assert.NotNil(t, body)
+
+			// no experiment failure
+			assert.False(t, bodyExperimentResult.Failure)
+		},
+	})
+
+	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
 	base.CreateExperimentYaml(t, base.CompletePath("../testdata/drivertests", "experiment.tpl"), url, ExperimentPath)
@@ -89,26 +124,11 @@ func TestKubeRun(t *testing.T) {
 		StringData: map[string]string{ExperimentPath: string(byteArray)},
 	}, metav1.CreateOptions{})
 
-	_, _ = kd.Clientset.BatchV1().Jobs("default").Create(context.TODO(), &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-job",
-			Namespace: "default",
-			Annotations: map[string]string{
-				"iter8.tools/group":    "default",
-				"iter8.tools/revision": "1",
-			},
-		},
-	}, metav1.CreateOptions{})
-
-	err := base.RunExperiment(false, kd)
+	err = base.RunExperiment(kd)
 	assert.NoError(t, err)
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
-
-	// check results
-	exp, err := base.BuildExperiment(kd)
-	assert.NoError(t, err)
-	assert.True(t, exp.Completed() && exp.NoFailure() && exp.SLOs())
+	assert.True(t, metricsServerCalled)
 }
 
 func TestLogs(t *testing.T) {
