@@ -115,7 +115,7 @@ jobs:
       run: |
         iter8 k launch \
         --set tasks={http} \
-        --set http.url="http://httpbin.default/get"\
+        --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
         kubectl wait --for=condition=complete --timeout=60s job/default-1-job
 
@@ -207,7 +207,7 @@ jobs:
         --set tasks={grpc} \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
-        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto"\
+        --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
         --set logLevel=trace
         kubectl wait --for=condition=complete --timeout=60s job/default-1-job
 
@@ -249,7 +249,7 @@ jobs:
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
-        --set http.url=http://httpbin.default/get\
+        --set http.url=http://httpbin.default/get \
         --set logLevel=trace
         kubectl wait --for=condition=complete --timeout=60s job/default-1-job
 
@@ -289,7 +289,7 @@ jobs:
         --set ready.service="httpbin" \
         --set ready.timeout=60s \
         --set ready.namespace=default \
-        --set http.url=http://httpbin.default/get\
+        --set http.url=http://httpbin.default/get \
         --set logLevel=trace
         kubectl wait --for=condition=complete --timeout=60s job/default-1-job
 
