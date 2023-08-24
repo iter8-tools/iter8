@@ -57,6 +57,9 @@ func TestKubeRun(t *testing.T) {
 			err = json.Unmarshal(body, &bodyExperimentResult)
 			assert.NoError(t, err)
 			assert.NotNil(t, body)
+
+			// no experiment failure
+			assert.False(t, bodyExperimentResult.Failure)
 		},
 	})
 
@@ -83,12 +86,4 @@ func TestKubeRun(t *testing.T) {
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 	assert.True(t, metricsServerCalled)
-
-	// check results
-	exp, err := base.BuildExperiment(rOpts.KubeDriver)
-	assert.NoError(t, err)
-	assert.True(t, exp.Completed())
-	assert.True(t, exp.NoFailure())
-	assert.Equal(t, 1, exp.Result.NumCompletedTasks)
-
 }

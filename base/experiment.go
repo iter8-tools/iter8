@@ -257,7 +257,6 @@ type Driver interface {
 	// Read the experiment
 	Read() (*Experiment, error)
 
-	// deprecated
 	// Write the experiment
 	Write(e *Experiment) error
 
