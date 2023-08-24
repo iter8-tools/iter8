@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}
-  {{ template "iter8-controller.labels" . }}
+  {{ template "iter8-traffic.labels" . }}
 spec:
   serviceName: {{ .Release.Name }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "iter8-controller.name" . }}
+      app.kubernetes.io/name: {{ template "iter8-traffic.name" . }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "iter8-controller.name" . }}
+        app.kubernetes.io/name: {{ template "iter8-traffic.name" . }}
     spec:
       terminationGracePeriodSeconds: 10
       serviceAccountName: {{ .Release.Name }}
       containers:
-      - name: iter8-controller
+      - name: iter8-traffic
         image: {{ .Values.image }}
         imagePullPolicy: Always
         command: ["/bin/iter8"]

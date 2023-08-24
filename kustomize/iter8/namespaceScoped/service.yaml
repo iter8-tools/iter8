@@ -5,7 +5,7 @@ metadata:
 spec:
   clusterIP: None
   selector:
-    app.kubernetes.io/name: controller
+    app.kubernetes.io/name: traffic
   ports:
   - name: grpc
     port: 50051

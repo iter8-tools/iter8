@@ -14,6 +14,9 @@
 {{- end }}
 # task: send a GitHub notification
 - task: notify
+{{- if .if }}
+  if: {{ .if | quote }}
+{{- end }}
   with:
     url: https://api.github.com/repos/{{ .owner }}/{{ .repo }}/dispatches
     method: POST

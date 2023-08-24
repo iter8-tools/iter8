@@ -1,11 +1,11 @@
 apiVersion: v2
-name: controller
-version: 0.1.10
-description: Iter8 controller controller
+name: autox
+version: 0.1.9
+description: Iter8 autoX controller
 type: application
 keywords:
 - Iter8
-- controller
+- autox
 - experiment
 home: https://iter8.tools
 sources:

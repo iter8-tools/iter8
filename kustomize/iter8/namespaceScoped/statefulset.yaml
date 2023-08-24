@@ -6,17 +6,17 @@ spec:
   serviceName: iter8
   selector:
     matchLabels:
-      app.kubernetes.io/name: controller
+      app.kubernetes.io/name: traffic
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: controller
+        app.kubernetes.io/name: traffic
     spec:
       terminationGracePeriodSeconds: 10
       serviceAccountName: iter8
       containers:
-      - name: iter8-controller
-        image: iter8/iter8:0.16
+      - name: iter8-traffic
+        image: iter8/iter8:0.15
         imagePullPolicy: Always
         command: ["/bin/iter8"]
         args: ["controllers", "-l", "info"]

@@ -1,0 +1,69 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $.Release.Name }}-argocd
+  namespace: argocd
+  {{ template "iter8-autox.labels" $ }}
+rules:
+- apiGroups: ["argoproj.io"]
+  resources: ["applications"]
+  verbs: ["create", "get", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $.Release.Name }}-argocd
+  namespace: argocd
+  {{ template "iter8-autox.labels" $ }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Release.Name }}
+  namespace: argocd
+roleRef:
+  kind: Role
+  name: {{ $.Release.Name }}-argocd
+  apiGroup: rbac.authorization.k8s.io
+{{- range $releaseGroupSpecName, $releaseGroupSpec := .Values.groups }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $.Release.Name }}-{{ $releaseGroupSpecName }}
+  namespace: {{ $releaseGroupSpec.trigger.namespace }}
+  {{ template "iter8-autox.labels" $ }}
+rules:
+{{- if eq $releaseGroupSpec.trigger.resource "deployments" }}
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["watch", "list", "get"]
+{{- end }}
+{{- if eq $releaseGroupSpec.trigger.resource "services" }}
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["watch", "list", "get"]
+{{- end }}
+{{- if eq $releaseGroupSpec.trigger.resource "ksvcs" }}
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services"]
+  verbs: ["watch", "list", "get"]
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $.Release.Name }}-{{ $releaseGroupSpecName }}
+  namespace: {{ $releaseGroupSpec.trigger.namespace }}
+  {{ template "iter8-autox.labels" $ }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Release.Name }}
+  namespace: argocd
+roleRef:
+  kind: Role
+  name: {{ $.Release.Name }}-{{ $releaseGroupSpecName }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
