@@ -1,8 +1,7 @@
 name: Tests to ensure that changes to charts do not break user experience
 
 on:
-  repository_dispatch:
-    types: [buildimage]
+  pull_request:
 
 # Kind versions used to test Iter8 on different versions of Kubernetes
 # From: https://github.com/kubernetes-sigs/kind/releases
@@ -74,7 +73,7 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
@@ -139,7 +138,7 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
@@ -205,7 +204,7 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
@@ -282,7 +281,7 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
@@ -362,7 +361,7 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
@@ -435,7 +434,7 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: iter8 k launch
