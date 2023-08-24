@@ -72,6 +72,11 @@ jobs:
         kubectl expose deployment httpbin --type=ClusterIP --port=80
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
 
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -80,13 +85,21 @@ jobs:
         --chartName charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /httpDashboard
+      run: |
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   http-payload-experiment:
     name: HTTP load test with payload
@@ -124,6 +137,11 @@ jobs:
         kubectl expose deployment httpbin --type=ClusterIP --port=80
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
 
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -133,13 +151,21 @@ jobs:
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /httpDashboard
+      run: |
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   http-multiple-experiment:
     name: HTTP load test with multiple endpoints
@@ -177,6 +203,11 @@ jobs:
         kubectl expose deployment httpbin --type=ClusterIP --port=80
         kubectl wait --for=condition=available --timeout=60s deploy/httpbin
 
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -188,13 +219,21 @@ jobs:
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /httpDashboard
+      run: |
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   grpc-experiment:
     name: gRPC load test
@@ -240,7 +279,12 @@ jobs:
         kubectl apply -f grpcurl-routeguide.yaml
         sleep 180
         kubectl logs deploy/sleep
-  
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -255,13 +299,21 @@ jobs:
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /grpcDashboard
+      run: |
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   grpc-multiple-experiment:
     name: gRPC load test with multiple endpoints
@@ -307,7 +359,12 @@ jobs:
         kubectl apply -f grpcurl-routeguide.yaml
         sleep 180
         kubectl logs deploy/sleep
-        
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -324,13 +381,21 @@ jobs:
         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /grpcDashboard
+      run: |
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   grpc-experiment2:
     name: gRPC load test 2
@@ -367,7 +432,12 @@ jobs:
         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
         kubectl expose deploy hello --port=50051
         kubectl wait --for=condition=available --timeout=60s deploy/hello
-        
+
+    - name: Install controller
+      run: |
+        helm install iter8 charts/controller --set image=${{ github.event.client_payload.IMAGE_TAG }} --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
+
     - name: iter8 k launch
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -378,13 +448,21 @@ jobs:
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
+        sleep 60
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        sleep 60
         iter8 k log
         iter8 k delete
+
+    - name: Expose metrics service
+      run: |
+        kubectl port-forward service/iter8 8080:8080 &
+
+    - name: Check GET /grpcDashboard
+      run: |
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   controller:
     name: Controller test
