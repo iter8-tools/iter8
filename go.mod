@@ -25,7 +25,6 @@ require (
 	github.com/dgraph-io/badger/v4 v4.1.0
 	github.com/google/uuid v1.3.0
 	github.com/imdario/mergo v0.3.15
-	github.com/itchyny/gojq v0.12.12
 	github.com/jarcoal/httpmock v1.3.0
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mcuadros/go-defaults v1.2.0
@@ -119,7 +118,6 @@ require (
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
-	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/jhump/protoreflect v1.9.0 // indirect
 	github.com/jinzhu/configor v1.2.1 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
