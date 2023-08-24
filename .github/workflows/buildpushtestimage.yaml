@@ -1,0 +1,73 @@
+name: Build and push test Docker image
+
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  buildpush:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.19
+    - uses: actions/checkout@v3
+    - name: Create Dockerfile.dev
+      run: |
+        echo "# Small linux image with iter8 binary
+        FROM debian:buster-slim
+        
+        # Install curl
+        RUN apt-get update && apt-get install -y curl
+        
+        # Download iter8 compressed binary
+        # use COPY instead of wget
+        COPY _dist/iter8-linux-amd64.tar.gz iter8-linux-amd64.tar.gz
+        
+        # Extract iter8
+        RUN tar -xvf iter8-linux-amd64.tar.gz
+        
+        # Extract iter8
+        RUN mv linux-amd64/iter8 /bin/iter8" > Dockerfile.dev
+    - name: Get version and tag
+      id: versionTag
+      run: |
+        # GitHub ref name
+        VERSION=${GITHUB_REF_NAME}
+        echo "VERSION: $VERSION"
+        echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+    - name: Get owner
+      run: |
+        OWNER_REPO=${{ github.repository }}
+        OWNER=$(echo $OWNER_REPO | cut -f1 -d/)
+        if [[ "$OWNER" == "iter8-tools" ]]; then
+          OWNER=iter8
+        fi
+        echo "OWNER: $OWNER"
+        echo "OWNER=$OWNER" >> $GITHUB_ENV
+    - name: Get image tag
+      id: imageTag
+      run: |
+        # Docker image
+        IMAGE_TAG=$(echo ${OWNER}/iter8-pr:${VERSION})
+        echo "IMAGE_TAG: $IMAGE_TAG"
+        echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
+    - uses: docker/setup-buildx-action@v2
+    - uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_SECRET }}
+    - uses: docker/build-push-action@v4
+      with:
+        platforms: linux/amd64
+        tags: ${{ env.IMAGE_TAG }}
+        push: true
+        file: "{context}/Dockerfile.dev"
+    - name: Repository dispatch to trigger tests
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.PAT }}
+        event-type: testimage
+        client-payload: '{"VERSION": "${{ env.VERSION }}", "IMAGE_TAG": "${{ env.IMAGE_TAG }}"}'
