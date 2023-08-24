@@ -400,9 +400,6 @@ func RunExperiment(driver Driver) error {
 		return err
 	}
 
-	result, _ := json.Marshal(exp.Result)
-	log.Logger.Trace("Initializing result", string(result))
-
 	exp.initResults(driver.GetRevision())
 
 	return exp.run(driver)
