@@ -1,4 +1,4 @@
-name: Performance tests to assess the functionality of the latest version of Iter8 (master branch)
+name: Check changes to golang code does not break CLI
 
 # Only runs when golang code (or test cases) have changed
 
@@ -14,7 +14,7 @@ on:
 
 jobs:
   unit-test:
-    name: Unit test
+    name: unit-test
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
