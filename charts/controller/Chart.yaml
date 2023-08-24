@@ -1,6 +1,6 @@
 apiVersion: v2
 name: controller
-version: 0.1.10
+version: 0.1.11
 description: Iter8 controller controller
 type: application
 keywords:
@@ -16,4 +16,4 @@ maintainers:
 - name: Iter8
   email: iter8-tools@gmail.com
 icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
-appVersion: v0.15
+appVersion: v0.16
