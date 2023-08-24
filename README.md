@@ -9,6 +9,8 @@ Iter8 supports the following use-cases.
 
 1.  Performance testing of HTTP services.
 2.  Performance testing of gRPC services.
+3.  A/B/n testing of applications and ML models
+4.  Reliable and automated traffic engineering: blue-green and canary
 
 ## :rocket: Iter8 experiment
 
@@ -23,6 +25,8 @@ Iter8 packs a number of powerful features that facilitate Kubernetes app testing
 1.  **Generating load and collecting built-in metrics for HTTP and gRPC services.** Simplifies performance testing by eliminating the need to setup and use metrics databases.
 2.  **Readiness check.** The performance testing portion of the experiment begins only after the service is ready.
 3.  **Experiment anywhere.** Iter8 experiments can be launched inside a Kubernetes cluster, in local environments, or inside a GitHub Actions pipeline.
+4.  **Traffic controller.** Automatically and dynamically reconfigures routing resources based on the state of Kubernetes apps/ML models.
+5. **Client-side SDK.** Facilitates routing and metrics collection task associated with distributed (i.e., client-server architecture-based) A/B/n testing in Kubernetes.
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
