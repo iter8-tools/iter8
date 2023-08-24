@@ -1,65 +1,71 @@
-# name: Lint Helm charts
+name: Lint Helm charts
 
-# on:
-#   pull_request:
-#     branches:
-#     - master
+# Only runs when charts have changed
 
-# jobs:
-#   # Get the paths for the Helm charts to lint
-#   get_paths:
-#     runs-on: ubuntu-latest
+# Lint Helm charts
 
-#     steps:
-#     - uses: actions/checkout@v3
-#       with:
-#         fetch-depth: 0
+on:
+  pull_request:
+    branches:
+    - master
+    paths:
+    - charts/**
 
-#     - name: Get the paths for Helm charts to lint
-#       id: set-matrix
-#       run: |
-#         # Get paths (in string form)
-#         stringPaths=$(find -maxdepth 2 -path './charts/*')
+jobs:
+  # Get the paths for the Helm charts to lint
+  get_paths:
+    runs-on: ubuntu-latest
 
-#         # Check paths (length greater than 0)
-#         stringPathsLength=$(echo ${#stringPaths})
-#         if (( stringPathsLength == 0 ));
-#         then
-#           echo "No paths to check"
-#           exit 1
-#         fi
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-#         # Serialize paths into JSON array
-#         paths=$(jq -ncR '[inputs]' <<< "$stringPaths")
+    - name: Get the paths for Helm charts to lint
+      id: set-matrix
+      run: |
+        # Get paths (in string form)
+        stringPaths=$(find -maxdepth 2 -path './charts/*')
 
-#         # Output serialized paths
-#         echo "matrix=$paths" >> $GITHUB_OUTPUT
-#         echo $paths
+        # Check paths (length greater than 0)
+        stringPathsLength=$(echo ${#stringPaths})
+        if (( stringPathsLength == 0 ));
+        then
+          echo "No paths to check"
+          exit 1
+        fi
 
-#     outputs:
-#       matrix: ${{ steps.set-matrix.outputs.matrix }}
+        # Serialize paths into JSON array
+        paths=$(jq -ncR '[inputs]' <<< "$stringPaths")
 
-#   # Lint Helm charts based on paths provided by previous job
-#   lint:
-#     name: Test changed-files
-#     needs: get_paths
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         version: ${{ fromJson(needs.get_paths.outputs.matrix) }}
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
+        # Output serialized paths
+        echo "matrix=$paths" >> $GITHUB_OUTPUT
+        echo $paths
 
-#       - name: Get modified files in the ${{ matrix.version }} folder
-#         id: modified-files
-#         uses: tj-actions/changed-files@v35
-#         with:
-#           files: ${{ matrix.version }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-#       - name: Lint Helm charts in the ${{ matrix.version }} folder
-#         uses: stackrox/kube-linter-action@v1
-#         if: steps.modified-files.outputs.any_modified == 'true'
-#         with:
-#           directory: ${{ matrix.version }}
+  # Lint Helm charts based on paths provided by previous job
+  lint:
+    name: Test changed-files
+    needs: get_paths
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.get_paths.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get modified files in the ${{ matrix.version }} folder
+        id: modified-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: ${{ matrix.version }}
+
+      - name: Lint Helm charts in the ${{ matrix.version }} folder
+        uses: stackrox/kube-linter-action@v1
+        if: steps.modified-files.outputs.any_modified == 'true'
+        with:
+          directory: ${{ matrix.version }}
