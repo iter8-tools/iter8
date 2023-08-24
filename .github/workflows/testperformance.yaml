@@ -44,10 +44,9 @@
 #       with:
 #         wait: 300s
 
-#     - name: run httpbin
+#     - name: Create httpbin application
 #       run: |
-#         set -e
-#         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
+# #         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
 #         kubectl expose deploy httpbin --port=80
  
 #     - name: load-test-http in Kubernetes
@@ -111,7 +110,7 @@
 #       with:
 #         wait: 300s
 
-#     - name: Deploy gRPC service in the Kubernetes cluster
+#     - name: Create routeguide application
 #       run: |
 #         kubectl create deployment routeguide --image=golang --port=50051 \
 #         -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
@@ -175,7 +174,7 @@
 #       with:
 #         wait: 300s
 
-#     - name: Deploy gRPC service in the Kubernetes cluster
+#     - name: Create hello application
 #       run: |
 #         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
 #         kubectl expose deploy hello --port=50051

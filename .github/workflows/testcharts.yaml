@@ -66,7 +66,7 @@
 #         wait: 300s
 #         node_image: ${{ matrix.version }}
 
-#     - name: Create app
+#     - name: Create httpbin application
 #       if: steps.modified-files.outputs.any_modified == 'true'
 #       run: |
 #         kubectl create deployment httpbin --image=kennethreitz/httpbin
@@ -118,7 +118,7 @@
 #         wait: 300s
 #         node_image: ${{ matrix.version }}
 
-#     - name: Create app
+#     - name: Create httpbin application
 #       if: steps.modified-files.outputs.any_modified == 'true'
 #       run: |
 #         kubectl create deployment httpbin --image=kennethreitz/httpbin
@@ -171,7 +171,7 @@
 #         wait: 300s
 #         node_image: ${{ matrix.version }}
 
-#     - name: Create app
+#     - name: Create httpbin application
 #       if: steps.modified-files.outputs.any_modified == 'true'
 #       run: |
 #         kubectl create deployment httpbin --image=kennethreitz/httpbin
@@ -226,7 +226,7 @@
 #         wait: 300s
 #         node_image: ${{ matrix.version }}
 
-#     - name: Deploy gRPC service in the Kubernetes cluster
+#     - name: Create routeguide application
 #       if: steps.modified-files.outputs.any_modified == 'true'
 #       run: |
 #         kubectl create deployment routeguide --image=golang --port=50051 \
@@ -293,7 +293,7 @@
 #         wait: 300s
 #         node_image: ${{ matrix.version }}
 
-#     - name: Deploy gRPC service in the Kubernetes cluster
+#     - name: Create routeguide application
 #       if: steps.modified-files.outputs.any_modified == 'true'
 #       run: |
 #         kubectl create deployment routeguide --image=golang --port=50051 \
@@ -362,7 +362,7 @@
 #         wait: 300s
 #         node_image: ${{ matrix.version }}
 
-#     - name: Create app
+#     - name: Create hello application
 #       if: steps.modified-files.outputs.any_modified == 'true'
 #       run: |
 #         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051

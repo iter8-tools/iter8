@@ -97,7 +97,7 @@
 #       uses: helm/kind-action@v1.5.0
 #       with:
 #         wait: 300s
-#     - name: Create app
+#     - name: Create httpbin application
 #       run: |
 #         kubectl create deployment httpbin --image=kennethreitz/httpbin
 #         kubectl expose deployment httpbin --type=ClusterIP --port=80
@@ -124,13 +124,12 @@
 #       uses: helm/kind-action@v1.5.0
 #       with:
 #         wait: 300s
-#     - name: Create app
+#     - name: Create routeguide application
 #       run: |
 #         kubectl create deployment routeguide --image=golang --port=50051 \
 #         -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
 #         kubectl expose deployment routeguide --port=50051
 #         kubectl wait --for=condition=available --timeout=60s deployment/routeguide
-
 #     - name: Test gRPC service with grpcurl
 #       run: |
 #         curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
@@ -163,7 +162,7 @@
 #       uses: helm/kind-action@v1.5.0
 #       with:
 #         wait: 300s
-#     - name: Create app
+#     - name: Create hello application
 #       run: |
 #         kubectl create deploy hello --image=docker.io/grpc/java-example-hostname:latest --port=50051
 #         kubectl expose deploy hello --port=50051
@@ -192,7 +191,7 @@
 #       uses: helm/kind-action@v1.5.0
 #       with:
 #         wait: 300s
-#     - name: Deploy resources to cluster
+#     - name: Create httpbin application
 #       run: |
 #         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
 #         kubectl expose deploy httpbin --port=80
@@ -216,7 +215,7 @@
 #       uses: helm/kind-action@v1.5.0
 #       with:
 #         wait: 300s
-#     - name: Deploy resources to cluster
+#     - name: Create httpbin application
 #       run: |
 #         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
 #         kubectl expose deploy httpbin --port=80
