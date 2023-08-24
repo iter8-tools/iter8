@@ -7,10 +7,10 @@ name: Performance tests to assess the functionality of the latest version of Ite
 on:
   pull_request:
     branches:
-      - master
+    - master
     paths:
-      - **.go
-      - testdata/**
+    - '**.go'
+    - 'testdata/**'
 
 jobs:
   unit-test:
