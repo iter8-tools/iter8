@@ -100,7 +100,6 @@ jobs:
       run: |
         kubectl get all
 
-
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -171,7 +170,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -245,7 +243,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -331,7 +328,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -420,7 +416,6 @@ jobs:
       run: |
         kubectl get all
 
-
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -492,7 +487,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'

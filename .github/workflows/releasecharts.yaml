@@ -85,7 +85,6 @@ jobs:
       run: |
         kubectl get all
 
-
     - name: Try other iter8 k commands
       run: |
         iter8 k log
@@ -145,7 +144,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       run: |
@@ -208,7 +206,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       run: |
@@ -282,7 +279,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       run: |
@@ -359,7 +355,6 @@ jobs:
       run: |
         kubectl get all
 
-
     - name: Try other iter8 k commands
       run: |
         iter8 k log
@@ -420,7 +415,6 @@ jobs:
     - name: Get Kubernetes status
       run: |
         kubectl get all
-
 
     - name: Try other iter8 k commands
       run: |
