@@ -133,7 +133,7 @@ jobs:
         files: charts/iter8
 
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
@@ -204,7 +204,7 @@ jobs:
         files: charts/iter8
 
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
@@ -362,7 +362,7 @@ jobs:
         files: charts/iter8
     
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
@@ -449,7 +449,7 @@ jobs:
         files: charts/iter8
     
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
