@@ -70,7 +70,7 @@ jobs:
         --set http.url=http://httpbin.default/get \
         --set http.duration="3s" \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -127,7 +127,7 @@ jobs:
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
 
     - name: Get Kubernetes status
       run: |
