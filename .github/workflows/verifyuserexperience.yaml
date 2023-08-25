@@ -365,6 +365,7 @@ jobs:
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
+        # No kubectl wait so ready task can check
 
     - name: k launch with readiness checks
       run: |
@@ -372,7 +373,7 @@ jobs:
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
-        --set ready.timeout=60s \
+        --set ready.timeout=180s \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
         kubectl wait --for=condition=complete --timeout=180s job/default-1-job
@@ -418,15 +419,19 @@ jobs:
       run: |
         kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
         kubectl expose deploy httpbin --port=80
+        # No kubectl wait so ready task can check
+
+    - name: Create experiments namespace
+      run: |
         kubectl create namespace experiments
 
-    - name: k launch with readiness checks
+    - name: k launch with readiness checks and namespace
       run: |
         iter8 k launch -n experiments \
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
-        --set ready.timeout=60s \
+        --set ready.timeout=180s \
         --set ready.namespace=default \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
