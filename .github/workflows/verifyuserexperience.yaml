@@ -373,7 +373,7 @@ jobs:
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
-        --set ready.timeout=180s \
+        --set ready.timeout=60s \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
         kubectl wait --for=condition=complete --timeout=180s job/default-1-job
@@ -431,11 +431,11 @@ jobs:
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
-        --set ready.timeout=180s \
+        --set ready.timeout=60s \
         --set ready.namespace=default \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s -n experiments job/default-1-job
 
     - name: Get Kubernetes status
       run: |
