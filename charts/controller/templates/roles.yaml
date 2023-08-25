@@ -6,7 +6,7 @@ kind: Role
 {{- end }}
 metadata:
   name: {{ $.Release.Name }}
-  {{ template "iter8-traffic.labels" $ }}
+  {{ template "iter8-controller.labels" $ }}
 rules:
 {{- range $typeName, $type := .Values.resourceTypes }}
 {{- if not $type.Resource }}
@@ -31,7 +31,7 @@ kind: RoleBinding
 {{- end }}
 metadata:
   name: {{ $.Release.Name }}
-  {{ template "iter8-traffic.labels" $ }}
+  {{ template "iter8-controller.labels" $ }}
 subjects:
 - kind: ServiceAccount
   name: {{ $.Release.Name }}

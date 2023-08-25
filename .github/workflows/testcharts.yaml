@@ -63,7 +63,7 @@ jobs:
         files: charts/iter8
 
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
@@ -93,7 +93,12 @@ jobs:
         --chartName charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
-        sleep 60
+        --set logLevel=trace
+        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+
+    - name: Get Kubernetes status
+      run: |
+        kubectl get all
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -159,7 +164,12 @@ jobs:
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
-        sleep 60
+        --set logLevel=trace
+        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+
+    - name: Get Kubernetes status
+      run: |
+        kubectl get all
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -227,7 +237,12 @@ jobs:
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
-        sleep 60
+        --set logLevel=trace
+        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+
+    - name: Get Kubernetes status
+      run: |
+        kubectl get all
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -262,7 +277,7 @@ jobs:
         files: charts/iter8
     
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.15
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
       if: steps.modified-files.outputs.any_modified == 'true'
 
     - name: Start kind cluster ${{ matrix.version }}
@@ -307,7 +322,12 @@ jobs:
         --set grpc.protoURL=https://raw.githubusercontent.com/grpc/grpc-go/v1.52.0/examples/route_guide/routeguide/route_guide.proto \
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
-        sleep 60
+        --set logLevel=trace
+        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+
+    - name: Get Kubernetes status
+      run: |
+        kubectl get all
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -389,7 +409,12 @@ jobs:
         --set grpc.endpoints.getFeature.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
-        sleep 60
+        --set logLevel=trace
+        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+
+    - name: Get Kubernetes status
+      run: |
+        kubectl get all
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -456,7 +481,12 @@ jobs:
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
-        sleep 60
+        --set logLevel=trace
+        kubectl wait --for=condition=complete --timeout=60s job/default-1-job
+
+    - name: Get Kubernetes status
+      run: |
+        kubectl get all
 
     - name: Try other iter8 k commands
       if: steps.modified-files.outputs.any_modified == 'true'

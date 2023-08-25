@@ -5,7 +5,7 @@
 
 Iter8 is the Kubernetes release optimizer built for DevOps, MLOps, SRE and data science teams. Iter8 makes it easy to ensure that Kubernetes apps and ML models perform well and maximize business value. 
 
-Iter8 supports the following use-cases.
+Iter8 supports the following use-cases:
 
 1.  Performance testing of HTTP services.
 2.  Performance testing of gRPC services.
@@ -36,7 +36,7 @@ Iter8 issues are tracked [here](https://github.com/iter8-tools/iter8/issues).
 ## :tada: Contributing
 We welcome PRs!
 
-See [here](CONTRIBUTING.md) for information about ways to contribute, Iter8 community meetings, finding an issue, asking for help, pull-request lifecycle, and more.
+See [here](CONTRIBUTING.md) for information about ways to contribute, finding an issue, asking for help, pull-request lifecycle, and more.
 
 ## :hibiscus: Credits
 Iter8 is primarily written in `Go` and builds on a few awesome open source projects including:
@@ -45,4 +45,3 @@ Iter8 is primarily written in `Go` and builds on a few awesome open source proje
 - [ghz](https://ghz.sh)
 - [Fortio](https://github.com/fortio/fortio)
 - [plotly.js](https://github.com/plotly/plotly.js)
-

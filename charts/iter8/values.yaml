@@ -1,15 +1,12 @@
 ### iter8Image default iter8 image used for running Kubernetes experiments
-iter8Image: iter8/iter8:0.15
+iter8Image: iter8/iter8:0.16
 
 ### majorMinor is the minor version of Iter8
-majorMinor: v0.15
-
-### runner for Kubernetes experiments may be job, cronjob, or none
-runner: none
+majorMinor: v0.16
 
 logLevel: info
 
-### Resource limits
+### resources are the resource limits for the pods
 resources:
   requests:
     memory: "64Mi"
@@ -17,3 +14,6 @@ resources:
   limits:
     memory: "128Mi"
     cpu: "500m"
+
+### metricsServerURL is the URL to the Metrics server 
+metricsServerURL: http://iter8.default:8080
