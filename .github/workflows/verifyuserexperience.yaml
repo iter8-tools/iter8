@@ -439,12 +439,12 @@ jobs:
 
     - name: Get Kubernetes status
       run: |
-        kubectl get all
+        kubectl get all --all-namespaces
 
-    - name: Try other iter8 k commands
+    - name: Try other iter8 k commands with namespace
       run: |
-        iter8 k log
-        iter8 k delete
+        iter8 k log -n experiments
+        iter8 k delete -n experiments
 
     - name: Expose metrics service
       run: |
