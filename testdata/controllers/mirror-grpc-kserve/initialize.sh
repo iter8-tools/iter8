@@ -43,7 +43,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: iter8
     iter8.tools/kind: routemap
-    iter8.tools/version: v0.15
+    iter8.tools/version: v0.16
 data:
   strSpec: |
     versions: 

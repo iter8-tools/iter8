@@ -67,7 +67,7 @@ jobs:
 
     steps:
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
 
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
@@ -117,7 +117,7 @@ jobs:
 
     steps:
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
 
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
@@ -232,7 +232,7 @@ jobs:
 
     steps:
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
 
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
@@ -297,7 +297,7 @@ jobs:
 
     steps:
     - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.14
+      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
 
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0

@@ -21,10 +21,13 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.19
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
+
     - name: Test and compute coverage
       run: make coverage # includes vet and lint
+
     - name: Enforce coverage
       run: |
         export COVERAGE=$(go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
@@ -44,21 +47,30 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.19
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
+
     - name: Build and install Iter8
       run: make install
+
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
         wait: 300s
 
-    # # No need to create httpbin application because only testing CLI
-    # 
-    # - name: Create httpbin application
-    #   run: |
-    #     kubectl create deploy httpbin --image=kennethreitz/httpbin --port=80
-    #     kubectl expose deploy httpbin --port=80
+    # Necessary for the experiment to succeed and job to complete
+    - name: Create httpbin application
+      run: |
+        kubectl create deployment httpbin --image=kennethreitz/httpbin
+        kubectl expose deployment httpbin --type=ClusterIP --port=80
+        kubectl wait --for=condition=available --timeout=60s deploy/httpbin
+
+    # Necessary for the experiment to succeed and job to complete
+    - name: Install controller
+      run: |
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
  
     - name: CLI test with http task
       run: |
@@ -81,6 +93,9 @@ jobs:
         iter8 k log
         iter8 k delete
 
+    # Not necessary to check the metrics server for data
+    # Beyond the scope of the test suite (only testing CLI, not the released image)
+
   cli-test-grpc:
     name: CLI test with grpc task
     runs-on: ubuntu-latest
@@ -89,8 +104,10 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: 1.19
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
+      
     - name: Build and install Iter8
       run: make install
 
@@ -99,21 +116,26 @@ jobs:
       with:
         wait: 300s
 
-    # # No need to create routeguide application because only testing CLI
-    # 
-    # - name: Create routeguide application
-    #   run: |
-    #     kubectl create deployment routeguide --image=golang --port=50051 \
-    #     -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
-    #     kubectl expose deployment routeguide --port=50051
-    #     kubectl wait --for=condition=available --timeout=60s deployment/routeguide
+    # Necessary for the experiment to succeed and job to complete
+    - name: Create routeguide application
+      run: |
+        kubectl create deployment routeguide --image=golang --port=50051 \
+        -- bash -c "git clone -b v1.52.0 --depth 1 https://github.com/grpc/grpc-go; cd grpc-go/examples/route_guide; sed -i "''" "'"s/localhost//"'" server/server.go; go run server/server.go"
+        kubectl expose deployment routeguide --port=50051
+        kubectl wait --for=condition=available --timeout=60s deployment/routeguide
 
-    # - name: Test gRPC service with grpcurl
-    #   run: |
-    #     curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
-    #     kubectl apply -f grpcurl-routeguide.yaml
-    #     sleep 180
-    #     kubectl logs deploy/sleep
+    # Necessary for the experiment to succeed and job to complete
+    - name: Test gRPC service with grpcurl
+      run: |
+        curl -sO https://gist.githubusercontent.com/kalantar/510737f0fd58c0432a08e5b6e45ec97f/raw/524d6660284bf653ce0f29f3a25ed0e913c3df80/grpcurl-routeguide.yaml
+        kubectl apply -f grpcurl-routeguide.yaml
+        sleep 180
+        kubectl logs deploy/sleep
+
+    - name: Install controller
+      run: |
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
+        kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: CLI test with grpc task
       run: |
@@ -137,3 +159,6 @@ jobs:
       run: |
         iter8 k log
         iter8 k delete
+
+    # Not necessary to check the metrics server for data
+    # Beyond the scope of the test suite (only testing CLI, not the released image)
