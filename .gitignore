@@ -137,6 +137,7 @@ Chart.lock
 
 bin/
 _dist/
+docker/iter8
 **/ghz.proto
 **/ghz-call-data.json
 **/ghz-call-data.bin
