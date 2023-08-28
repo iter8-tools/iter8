@@ -452,4 +452,4 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=experiments&experiment=default" -f
