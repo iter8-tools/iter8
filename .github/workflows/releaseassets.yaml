@@ -12,60 +12,16 @@ on:
     types: [published]
 
 jobs:
-  assets:
-    name: Publish binaries
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: 1.19
-    - uses: actions/checkout@v3
-    - name: Build binaries
-      run: |
-        VERSION=${GITHUB_REF#refs/*/}
-        echo "Version: ${VERSION}"
-        make dist
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: _dist/iter8-*.tar.gz
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
-    - name: Create checksum
-      run: |
-        VERSION=${GITHUB_REF#refs/*/}
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.zip
-        sha256sum ${VERSION}.zip > checksum.txt
-        wget https://github.com/iter8-tools/iter8/archive/refs/tags/${VERSION}.tar.gz
-        sha256sum ${VERSION}.tar.gz >> checksum.txt
-        cd _dist
-        for f in iter8-*.tar.gz
-        do
-          sha256sum ${f} >> ../checksum.txt
-        done
-        # pick up darwin checksum and export it
-        echo "SHAFORMAC=$(grep darwin ../checksum.txt | awk '{print $1}')" >> $GITHUB_ENV
-    - name: Upload checksum to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        asset_name: checksum.txt
-        file: checksum.txt
-        tag: ${{ github.ref }}
-        overwrite: true
-
   build-and-push:
     name: Push Iter8 image to Docker Hub
-    needs: assets
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
+    - name: Build Iter8
+      run: |
+        CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o docker/iter8 main.go
     - name: Get version
       run: |
         tagref=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -87,6 +43,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_SECRET }}
     - uses: docker/build-push-action@v4
       with:
+        file: docker/Dockerfile
         platforms: linux/amd64,linux/arm64
         tags: ${{ env.OWNER }}/iter8:${{ env.VERSION }},${{ env.OWNER }}/iter8:${{ env.MAJOR_MINOR_VERSION }},${{ env.OWNER }}/iter8:latest
         push: true
