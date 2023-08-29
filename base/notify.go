@@ -76,6 +76,12 @@ func getReport(exp *Experiment) map[string]Report {
 			NoTaskFailures:    exp.NoFailure(),
 			NumTasks:          len(exp.Spec),
 			NumCompletedTasks: exp.Result.NumCompletedTasks,
+			Experiment: &Experiment{
+				Metadata: ExperimentMetadata{
+					Name:      exp.Metadata.Name,
+					Namespace: exp.Metadata.Namespace,
+				},
+			},
 		},
 	}
 }
