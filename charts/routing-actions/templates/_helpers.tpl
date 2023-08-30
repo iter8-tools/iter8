@@ -31,3 +31,11 @@
   {{- end }}
   {{- mustToJson $mV }}
 {{- end }}
+
+{{- define "kserve.host" }}
+{{- if eq "kserve-0.10" .Values.appType -}}
+predictor-default.{{ .Release.Namespace }}.svc.cluster.local
+{{- else }} {{- /* kserve-0.11 or kserve */ -}}
+predictor.{{ .Release.Namespace }}.svc.cluster.local
+{{- end }}
+{{- end }} {{- /* define "kserve.host" */ -}}

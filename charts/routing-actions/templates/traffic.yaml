@@ -6,7 +6,7 @@
 {{- end }}
 
 {{- /* validate values for appType */}}
-{{- if not (has .Values.appType (list "kserve-modelmesh" "kserve" "deployment")) }}
+{{- if not (has .Values.appType (list "kserve-modelmesh" "kserve" "kserve=0.11" "kserve-0.10" "deployment")) }}
   {{- printf "Unknown appType: '%s'" .Values.appType | fail }}
 {{- end }}
 

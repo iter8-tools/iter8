@@ -23,7 +23,8 @@ externalGateway: mm-gateway
 
 ### required fields are:
 
-# Application type. Valid values are 'deployment', 'kserve' and 'kserve-modelmesh' 
+# Application type. Valid values are 'deployment', 'kserve-modelmesh', 'kserve', 'kserver-0.11', 'kserve-0.10'
+# The value 'kserve' refers to the most recent version, 'kserve-0.11'
 # appType:
 # Traffic strategy. Valid values are 'blue-green' or 'canary'
 # strategy:
@@ -53,7 +54,8 @@ externalGateway: mm-gateway
 
 ### required fields are:
 
-# Application type. Valid values are 'kserve' and 'kserve-modelmesh' 
+# Application type. Valid values are 'deployment', 'kserve-modelmesh', 'kserve', 'kserver-0.11', 'kserve-0.10'
+# The value 'kserve' refers to the most recent version, 'kserve-0.11'
 # appType:
 # Traffic strategy. Valid values are 'blue-green' or 'canary'
 # strategy:
