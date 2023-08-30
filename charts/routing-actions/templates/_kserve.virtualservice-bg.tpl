@@ -28,7 +28,7 @@ spec:
       headers: 
         request:
           set:
-            Host: {{ (index $versions 0).name }}-predictor-default.{{ .Release.Namespace }}.svc.cluster.local
+            Host: {{ (index $versions 0).name }}-{{ template "kserve.host" $ }}
           remove: 
           - branch
         response:
