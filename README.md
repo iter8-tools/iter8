@@ -10,7 +10,7 @@ Iter8 supports the following use-cases:
 1.  Performance testing of HTTP services.
 2.  Performance testing of gRPC services.
 3.  A/B/n testing of applications and ML models
-4.  Reliable and automated traffic engineering: blue-green and canary
+4.  Reliable and automated routing: blue-green and canary
 
 ## :rocket: Iter8 experiment
 
