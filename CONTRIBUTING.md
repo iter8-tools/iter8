@@ -40,7 +40,7 @@ Iter8 issues are tracked [here](https://github.com/iter8-tools/iter8/issues).
 * Use the `#development` Slack channel of [Iter8 Slack workspace](https://join.slack.com/t/iter8-tools/shared_invite/zt-awl2se8i-L0pZCpuHntpPejxzLicbmw) to ping/bump when the pull request is ready for further review or if it appears stalled.
 * Iter8 releases happen frequently. Once your PR is merged, you can expect your contribution to show up *live* in a short amount of time at https://iter8.tools.
 
-## Sign Your Commits
+## Sign your commits
 
 Licensing is important to open source projects. It provides some assurances that
 the software will continue to be available based under the terms that the
@@ -118,25 +118,8 @@ IMG=[Docker image name]
 Build and push Iter8 image to Docker
 
 ```shell
-cat << EOF > Dockerfile.dev
-# Small linux image with iter8 binary
-FROM debian:buster-slim
-
-# Install curl
-RUN apt-get update && apt-get install -y curl
-
-# Download iter8 compressed binary
-# use COPY instead of wget
-COPY _dist/iter8-linux-amd64.tar.gz iter8-linux-amd64.tar.gz
-
-# Extract iter8
-RUN tar -xvf iter8-linux-amd64.tar.gz
-
-# Extract iter8
-RUN mv linux-amd64/iter8 /bin/iter8
-EOF
-make dist
-docker build -f Dockerfile.dev -t $IMG .
+make build
+docker build -f docker/Dockerfile -t $IMG bin 
 docker push $IMG
 ```
 
