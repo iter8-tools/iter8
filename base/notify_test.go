@@ -55,9 +55,9 @@ func TestNotify(t *testing.T) {
 }
 
 type testNotification struct {
-	Text       string `json:"text" yaml:"text"`
-	TextReport string `json:"textReport" yaml:"textReport"`
-	Report     Report `json:"report" yaml:"report"`
+	Text        string  `json:"text" yaml:"text"`
+	TextSummary string  `json:"textSummary" yaml:"textSummary"`
+	Summary     Summary `json:"summary" yaml:"summary"`
 }
 
 // POST method and PayloadTemplateURL
@@ -76,8 +76,8 @@ func TestNotifyWithPayload(t *testing.T) {
 	httpmock.RegisterResponder(http.MethodGet, testNotifyURL+templatePath,
 		httpmock.NewStringResponder(200, `{
 	"text": "hello world",
-	"textReport": "{{ regexReplaceAll "\"" (regexReplaceAll "\n" (.Report | toPrettyJson) "\\n") "\\\""}}",
-	"report": {{ .Report | toPrettyJson }}
+	"textSummary": "{{ regexReplaceAll "\"" (regexReplaceAll "\n" (.Summary | toPrettyJson) "\\n") "\\\""}}",
+	"summary": {{ .Summary | toPrettyJson }}
 }`))
 
 	// notify endpoint
@@ -102,16 +102,16 @@ func TestNotifyWithPayload(t *testing.T) {
 			// check text
 			assert.Equal(t, notification.Text, "hello world")
 
-			// check textReport
-			var textReportReport Report
-			err = json.Unmarshal([]byte(notification.TextReport), &textReportReport)
+			// check summary
+			var summary Summary
+			err = json.Unmarshal([]byte(notification.TextSummary), &summary)
 			if err != nil {
 				assert.Fail(t, "could not JSON unmarshal textReport in notification")
 			}
-			assert.Equal(t, textReportReport.NumTasks, 1)
+			assert.Equal(t, summary.NumTasks, 1)
 
 			// check report
-			assert.Equal(t, notification.Report.NumTasks, 1)
+			assert.Equal(t, notification.Summary.NumTasks, 1)
 
 			return httpmock.NewStringResponse(200, "success"), nil
 		},

@@ -15,7 +15,8 @@ var kcmd = &cobra.Command{
 	Long:  "Work with Kubernetes experiments",
 }
 
-// addExperimentGroupFlag adds the experiment group flag
+// TODO: is group still needed?
+// addExperimentGroupFlag adds the test group flag
 func addExperimentGroupFlag(cmd *cobra.Command, groupP *string) {
 	cmd.Flags().StringVarP(groupP, "group", "g", driver.DefaultExperimentGroup, "name of the experiment group")
 }
@@ -39,15 +40,6 @@ func init() {
 		log.Logger.Fatal(err)
 		os.Exit(1)
 	}
-
-	// add k delete
-	kcmd.AddCommand(newKDeleteCmd(kd, os.Stdout))
-
-	// add k launch
-	kcmd.AddCommand(newKLaunchCmd(kd, os.Stdout))
-
-	// add k log
-	kcmd.AddCommand(newKLogCmd(kd))
 
 	// add k run
 	kcmd.AddCommand(newKRunCmd(kd, os.Stdout))

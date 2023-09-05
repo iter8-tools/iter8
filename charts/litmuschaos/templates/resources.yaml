@@ -1,5 +1,0 @@
-{{ include "chaosengine" . }}
----
-{{ include "chaosexperiment" . }}
----
-{{ include "rbac" . }}

@@ -19,6 +19,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	myName      = "myName"
+	myNamespace = "myNamespace"
+)
+
 func TestKOps(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 	kd := NewKubeDriver(cli.New()) // we will ignore this value
@@ -110,18 +115,18 @@ func TestKubeRun(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
-	base.CreateExperimentYaml(t, base.CompletePath("../testdata/drivertests", "experiment.tpl"), url, ExperimentPath)
+	base.CreateExperimentYaml(t, base.CompletePath("../testdata/drivertests", "experiment.tpl"), url, base.ExperimentFile)
 
 	kd := NewFakeKubeDriver(cli.New())
 	kd.revision = 1
 
-	byteArray, _ := os.ReadFile(ExperimentPath)
+	byteArray, _ := os.ReadFile(base.ExperimentFile)
 	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{ExperimentPath: string(byteArray)},
+		StringData: map[string]string{base.ExperimentFile: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	err = base.RunExperiment(kd)
@@ -129,35 +134,6 @@ func TestKubeRun(t *testing.T) {
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 	assert.True(t, metricsServerCalled)
-}
-
-func TestLogs(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	kd := NewFakeKubeDriver(cli.New())
-	kd.revision = 1
-
-	byteArray, _ := os.ReadFile(base.CompletePath("../testdata/drivertests", ExperimentPath))
-	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default",
-			Namespace: "default",
-		},
-		StringData: map[string]string{ExperimentPath: string(byteArray)},
-	}, metav1.CreateOptions{})
-	_, _ = kd.Clientset.CoreV1().Pods("default").Create(context.TODO(), &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "default-1-job-1831a",
-			Namespace: "default",
-			Labels: map[string]string{
-				"iter8.tools/group": "default",
-			},
-		},
-	}, metav1.CreateOptions{})
-
-	// check logs
-	str, err := kd.GetExperimentLogs()
-	assert.NoError(t, err)
-	assert.Equal(t, "fake logs", str)
 }
 
 func TestDryInstall(t *testing.T) {

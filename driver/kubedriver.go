@@ -1,14 +1,11 @@
 package driver
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -56,9 +53,10 @@ type KubeDriver struct {
 	Clientset kubernetes.Interface
 	// Configuration enables Helm-based interaction with a Kubernetes cluster
 	*action.Configuration
-	// Group is the experiment group
+	// TODO: is this still needed?
+	// Group is the test group
 	Group string
-	// revision is the revision of the experiment
+	// revision is the revision of the test
 	revision int
 }
 
@@ -199,9 +197,9 @@ func (kd *KubeDriver) Read() (*base.Experiment, error) {
 		return nil, errors.New("unable to read experiment")
 	}
 
-	b, ok := s.Data[ExperimentPath]
+	b, ok := s.Data[base.ExperimentFile]
 	if !ok {
-		err = fmt.Errorf("unable to extract experiment; spec secret has no %v field", ExperimentPath)
+		err = fmt.Errorf("unable to extract experiment; spec secret has no %v field", base.ExperimentFile)
 		log.Logger.Error(err)
 		return nil, err
 	}
@@ -449,42 +447,4 @@ func checkIfInstallable(ch *chart.Chart) error {
 	e := fmt.Errorf("%s charts are not installable", ch.Metadata.Type)
 	log.Logger.Error(e)
 	return e
-}
-
-// GetExperimentLogs gets logs for a Kubernetes experiment
-func (kd *KubeDriver) GetExperimentLogs() (string, error) {
-	podsClient := kd.Clientset.CoreV1().Pods(kd.Namespace())
-	pods, err := podsClient.List(context.TODO(), metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("iter8.tools/group=%v", kd.Group),
-	})
-	if err != nil {
-		e := errors.New("unable to get experiment pod(s)")
-		log.Logger.Error(e)
-		return "", e
-	}
-	lgs := make([]string, len(pods.Items))
-	for i, p := range pods.Items {
-		req := podsClient.GetLogs(p.Name, &corev1.PodLogOptions{})
-		podLogs, err := req.Stream(context.TODO())
-		if err != nil {
-			e := fmt.Errorf("error in opening log stream: %e", err)
-			log.Logger.Error(e)
-			return "", e
-		}
-
-		defer func() {
-			_ = podLogs.Close()
-		}()
-
-		buf := new(bytes.Buffer)
-		_, err = io.Copy(buf, podLogs)
-		if err != nil {
-			e := fmt.Errorf("error in copy information from podLogs to buf: %e", err)
-			log.Logger.Error(e)
-			return "", e
-		}
-		str := buf.String()
-		lgs[i] = str
-	}
-	return strings.Join(lgs, "\n***\n"), nil
 }

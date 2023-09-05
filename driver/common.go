@@ -7,8 +7,6 @@ import (
 )
 
 const (
-	// ExperimentPath is the name of the experiment file
-	ExperimentPath = "experiment.yaml"
 	// DefaultExperimentGroup is the name of the default experiment chart
 	DefaultExperimentGroup = "default"
 )
