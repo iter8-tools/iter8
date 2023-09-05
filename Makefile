@@ -1,14 +1,11 @@
 BINDIR      := $(CURDIR)/bin
 INSTALL_PATH ?= /usr/local/bin
-DIST_DIRS   := find * -type d -exec
-TARGETS     ?= linux/amd64
 BINNAME     ?= iter8
 
 GOBIN         = $(shell go env GOBIN)
 ifeq ($(GOBIN),)
 GOBIN         = $(shell go env GOPATH)/bin
 endif
-GOX           = $(GOBIN)/gox
 
 # go options
 TAGS       :=
@@ -59,29 +56,9 @@ install: build
 # ------------------------------------------------------------------------------
 #  dependencies
 
-$(GOX):
-	go install github.com/mitchellh/gox@latest
-
-# ------------------------------------------------------------------------------
-#  release
-
-.PHONY: build-cross
-build-cross: LDFLAGS += -extldflags "-static"
-build-cross: $(GOX)
-	GOFLAGS="-trimpath" GO111MODULE=on CGO_ENABLED=0 $(GOX) -parallel=2 -output="_dist/{{.OS}}-{{.Arch}}/$(BINNAME)" -osarch='$(TARGETS)' $(GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' ./
-
-.PHONY: dist
-dist: build-cross
-	( \
-		cd _dist && \
-		$(DIST_DIRS) cp ../LICENSE {} \; && \
-		$(DIST_DIRS) cp ../README.md {} \; && \
-		$(DIST_DIRS) tar -zcf iter8-{}.tar.gz {} \; \
-	)
-
 .PHONY: clean
 clean:
-	@rm -rf '$(BINDIR)' ./_dist
+	@rm -rf '$(BINDIR)'
 
 # ------------------------------------------------------------------------------
 #  test
