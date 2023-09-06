@@ -62,10 +62,6 @@ jobs:
       with:
         files: charts/iter8
 
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-      if: steps.modified-files.outputs.any_modified == 'true'
-
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -86,10 +82,11 @@ jobs:
         helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --localChart \
         --chartName charts/iter8 \
         --set "tasks={http}" \
@@ -102,11 +99,11 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
 
     - name: Expose metrics service
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -136,10 +133,6 @@ jobs:
       with:
         files: charts/iter8
 
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-      if: steps.modified-files.outputs.any_modified == 'true'
-
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -160,10 +153,11 @@ jobs:
         helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance experiment
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --localChart \
         --chartName charts/iter8 \
         --set "tasks={http}" \
@@ -177,11 +171,11 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
 
     - name: Expose metrics service
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -211,10 +205,6 @@ jobs:
       with:
         files: charts/iter8
 
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-      if: steps.modified-files.outputs.any_modified == 'true'
-
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -235,10 +225,11 @@ jobs:
         helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --localChart \
         --chartName charts/iter8 \
         --set "tasks={http}" \
@@ -254,11 +245,11 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
 
     - name: Expose metrics service
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -288,10 +279,6 @@ jobs:
       with:
         files: charts/iter8
     
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-      if: steps.modified-files.outputs.any_modified == 'true'
-
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -321,10 +308,11 @@ jobs:
         helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
         --localChart \
         --chartName charts/iter8 \
         --set "tasks={ready,grpc}" \
@@ -343,12 +331,12 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k log
-        iter8 k delete
-
+        kubectl logs -l iter8.tools/group=routeguide-test
+        helm delete routeguide-test
+  
     - name: Expose metrics service
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -377,10 +365,6 @@ jobs:
       with:
         files: charts/iter8
     
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-      if: steps.modified-files.outputs.any_modified == 'true'
-
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -410,10 +394,11 @@ jobs:
         helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
         --localChart \
         --chartName charts/iter8 \
         --set "tasks={ready,grpc}" \
@@ -434,12 +419,12 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k log
-        iter8 k delete
-
+        kubectl logs -l iter8.tools/group=routeguide-test
+        helm delete routeguide-test
+    
     - name: Expose metrics service
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
@@ -468,10 +453,6 @@ jobs:
       with:
         files: charts/iter8
     
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-      if: steps.modified-files.outputs.any_modified == 'true'
-
     - name: Start kind cluster ${{ matrix.version }}
       uses: helm/kind-action@v1.5.0
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -492,10 +473,11 @@ jobs:
         helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 hello-test iter8 \
         --localChart \
         --chartName charts/iter8 \
         --set "tasks={grpc}" \
@@ -510,12 +492,12 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        iter8 k log
-        iter8 k delete
-
+        kubectl logs -l iter8.tools/group=hello-test
+        helm delete hello-test
+      
     - name: Expose metrics service
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
