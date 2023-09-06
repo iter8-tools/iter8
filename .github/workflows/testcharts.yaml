@@ -153,7 +153,7 @@ jobs:
         helm install iter8 charts/controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: Start performance experiment
+    - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
         helm upgrade --install \
