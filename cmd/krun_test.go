@@ -71,7 +71,7 @@ func TestKRun(t *testing.T) {
 		// k report
 		{
 			name:   "k run",
-			cmd:    "k run -g default --namespace default",
+			cmd:    "k run -t default --namespace default",
 			golden: base.CompletePath("../testdata", "output/krun.txt"),
 		},
 	}
