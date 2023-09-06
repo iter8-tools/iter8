@@ -30,7 +30,7 @@ type collectGRPCInputs struct {
 	Endpoints map[string]runner.Config `json:"endpoints" yaml:"endpoints"`
 }
 
-// collectGRPCTask enables load testing of gRPC services.
+// collectGRPCTask enables performance testing of gRPC services.
 type collectGRPCTask struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta

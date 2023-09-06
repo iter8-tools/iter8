@@ -105,7 +105,7 @@ func (t *collectHTTPTask) errorCode(code int) bool {
 	return false
 }
 
-// collectHTTPTask enables load testing of HTTP services.
+// collectHTTPTask enables performance testing of HTTP services.
 type collectHTTPTask struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
@@ -152,7 +152,7 @@ func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
-			RunType:     "Iter8 load test",
+			RunType:     "Iter8 HTTP performance test",
 			QPS:         float64(*c.QPS),
 			NumThreads:  *c.Connections,
 			Percentiles: c.Percentiles,

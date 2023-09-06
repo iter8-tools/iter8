@@ -45,7 +45,7 @@ jobs:
   # TODO: add check to verify when a change is made to kustomize, a similar change is made to charts
 
   http-experiment:
-    name: HTTP load test
+    name: HTTP performance test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -116,7 +116,7 @@ jobs:
         curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   http-payload-experiment:
-    name: HTTP load test with payload
+    name: HTTP performance test with payload
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -188,7 +188,7 @@ jobs:
         curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   http-multiple-experiment:
-    name: HTTP load test with multiple endpoints
+    name: HTTP performance test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -262,7 +262,7 @@ jobs:
         curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
 
   grpc-experiment:
-    name: gRPC load test
+    name: gRPC performance test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -348,7 +348,7 @@ jobs:
         curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   grpc-multiple-experiment:
-    name: gRPC load test with multiple endpoints
+    name: gRPC performance test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -436,7 +436,7 @@ jobs:
         curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
 
   grpc-experiment2:
-    name: gRPC load test 2
+    name: gRPC performance test 2
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:

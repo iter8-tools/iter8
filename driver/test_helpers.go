@@ -64,7 +64,7 @@ func initHelmFake(kd *KubeDriver) {
 func NewFakeKubeDriver(s *cli.EnvSettings, objects ...runtime.Object) *KubeDriver {
 	kd := &KubeDriver{
 		EnvSettings: s,
-		Group:       DefaultExperimentGroup,
+		Test:        DefaultTestName,
 	}
 	initKubeFake(kd, objects...)
 	initHelmFake(kd)

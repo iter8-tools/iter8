@@ -12,9 +12,7 @@ import (
 	"fortio.org/fortio/fhttp"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/stretchr/testify/assert"
-	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/cli/values"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -23,54 +21,6 @@ const (
 	myName      = "myName"
 	myNamespace = "myNamespace"
 )
-
-func TestKOps(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	kd := NewKubeDriver(cli.New()) // we will ignore this value
-	assert.NotNil(t, kd)
-
-	kd = NewFakeKubeDriver(cli.New())
-	err := kd.Init()
-	assert.NoError(t, err)
-
-	// install
-	err = kd.install(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
-		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get"},
-	}, kd.Group, false)
-	assert.NoError(t, err)
-
-	rel, err := kd.Releases.Last(kd.Group)
-	assert.NoError(t, err)
-	assert.NotNil(t, rel)
-	assert.Equal(t, 1, rel.Version)
-	assert.Equal(t, 1, kd.revision)
-
-	err = kd.Init()
-	assert.NoError(t, err)
-
-	// upgrade
-	err = kd.upgrade(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
-		Values: []string{"tasks={http}", "http.url=https://httpbin.org/get"},
-	}, kd.Group, false)
-	assert.NoError(t, err)
-
-	rel, err = kd.Releases.Last(kd.Group)
-	assert.NotNil(t, rel)
-	assert.Equal(t, 2, rel.Version)
-	assert.Equal(t, 2, kd.revision)
-	assert.NoError(t, err)
-
-	err = kd.Init()
-	assert.NoError(t, err)
-
-	// delete
-	err = kd.Delete()
-	assert.NoError(t, err)
-
-	// delete
-	err = kd.Delete()
-	assert.Error(t, err)
-}
 
 func TestKubeRun(t *testing.T) {
 	// define METRICS_SERVER_URL
@@ -134,19 +84,4 @@ func TestKubeRun(t *testing.T) {
 	// sanity check -- handler was called
 	assert.True(t, verifyHandlerCalled)
 	assert.True(t, metricsServerCalled)
-}
-
-func TestDryInstall(t *testing.T) {
-	_ = os.Chdir(t.TempDir())
-	kd := NewFakeKubeDriver(cli.New())
-
-	err := kd.Launch(action.ChartPathOptions{}, base.CompletePath("../", "charts/iter8"), values.Options{
-		ValueFiles:   []string{},
-		StringValues: []string{},
-		Values:       []string{"tasks={http}", "http.url=https://localhost:12345"},
-		FileValues:   []string{},
-	}, "default", true)
-
-	assert.NoError(t, err)
-	assert.FileExists(t, ManifestFile)
 }

@@ -4,13 +4,13 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}-{{ .Release.Revision }}-job
   annotations:
-    iter8.tools/group: {{ .Release.Name }}
+    iter8.tools/test: {{ .Release.Name }}
     iter8.tools/revision: {{ .Release.Revision | quote }}
 spec:
   template:
     metadata:
       labels:
-        iter8.tools/group: {{ .Release.Name }}
+        iter8.tools/test: {{ .Release.Name }}
       annotations:
         sidecar.istio.io/inject: "false"
     spec:

@@ -15,10 +15,9 @@ var kcmd = &cobra.Command{
 	Long:  "Work with Kubernetes experiments",
 }
 
-// TODO: is group still needed?
-// addExperimentGroupFlag adds the test group flag
-func addExperimentGroupFlag(cmd *cobra.Command, groupP *string) {
-	cmd.Flags().StringVarP(groupP, "group", "g", driver.DefaultExperimentGroup, "name of the experiment group")
+// addTestFlag adds the test flag
+func addTestFlag(cmd *cobra.Command, testP *string) {
+	cmd.Flags().StringVarP(testP, "test", "t", driver.DefaultTestName, "name of the test")
 }
 
 func init() {
