@@ -20,7 +20,7 @@ Iter8 introduces a set of tasks which which can be composed in order to conduct 
 <img alt-text="Iter8 performance test" src="https://iter8-tools.github.io/docs/0.9/images/iter8-intro-dark.png" width="70%" />
 </p>
 
-Iter8 packs a number of powerful features that facilitate Kubernetes app testin. They include the following.
+Iter8 packs a number of powerful features that facilitate Kubernetes app testing. They include the following.
 
 1.  **Generating load and collecting built-in metrics for HTTP and gRPC services.** Simplifies performance testing by eliminating the need to setup and use metrics databases.
 2.  **Readiness check.** The performance testing portion can be configured to start only after the service is ready.
