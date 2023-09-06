@@ -17,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -36,9 +33,10 @@ jobs:
         helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
@@ -48,10 +46,10 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
 
     - name: Expose metrics service
       run: |
@@ -66,9 +64,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -85,9 +80,10 @@ jobs:
         helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
@@ -98,10 +94,11 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
+
 
     - name: Expose metrics service
       run: |
@@ -116,9 +113,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -135,10 +129,10 @@ jobs:
         helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       run: |
-        iter8 k launch \
-        --set "tasks={http}" \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
@@ -150,10 +144,10 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
 
     - name: Expose metrics service
       run: |
@@ -168,9 +162,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -195,9 +186,10 @@ jobs:
         helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -213,10 +205,10 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=routeguide-test
+        helm delete routeguide-test
 
     - name: Expose metrics service
       run: |
@@ -231,9 +223,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -258,9 +247,10 @@ jobs:
         helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -278,10 +268,10 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=routeguide-test
+        helm delete routeguide-test
 
     - name: Expose metrics service
       run: |
@@ -296,9 +286,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -315,9 +302,10 @@ jobs:
         helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
-    - name: iter8 k launch
+    - name: Start performance test
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 hello-test iter8 \
         --set "tasks={grpc}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
@@ -329,10 +317,10 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=hello-test
+        helm delete hello-test
 
     - name: Expose metrics service
       run: |
@@ -346,9 +334,6 @@ jobs:
     name: Readiness test
     runs-on: ubuntu-latest
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-      
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -369,7 +354,8 @@ jobs:
 
     - name: k launch with readiness checks
       run: |
-        iter8 k launch \
+        helm upgrade --install \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
@@ -382,10 +368,10 @@ jobs:
       run: |
         kubectl get all
 
-    - name: Try other iter8 k commands
+    - name: View test logs and delete test
       run: |
-        iter8 k log
-        iter8 k delete
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
 
     - name: Expose metrics service
       run: |
@@ -400,9 +386,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Iter8
-      run: GOBIN=/usr/local/bin go install github.com/iter8-tools/iter8@v0.16
-
     - name: Start kind cluster
       uses: helm/kind-action@v1.5.0
       with:
@@ -427,7 +410,8 @@ jobs:
 
     - name: k launch with readiness checks and namespace
       run: |
-        iter8 k launch -n experiments \
+        helm upgrade --install -n experiments \
+        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
@@ -441,10 +425,10 @@ jobs:
       run: |
         kubectl get all --all-namespaces
 
-    - name: Try other iter8 k commands with namespace
+    - name: View test logs and delete test
       run: |
-        iter8 k log -n experiments
-        iter8 k delete -n experiments
+        kubectl logs -l iter8.tools/group=httpbin-test
+        helm delete httpbin-test
 
     - name: Expose metrics service
       run: |
