@@ -342,3 +342,121 @@ func TestRunCollectGRPCSingleEndpointMultipleCalls(t *testing.T) {
 	assert.NotNil(t, ghzResult[unary])
 	assert.NotNil(t, ghzResult[unary2])
 }
+
+func TestRunCollectGRPCWithWarmup(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	call := "helloworld.Greeter.SayHello"
+
+	_ = os.Chdir(t.TempDir())
+	callType := helloworld.Unary
+	gs, s, err := internal.StartServer(false)
+	if err != nil {
+		assert.FailNow(t, err.Error())
+	}
+	t.Cleanup(s.Stop)
+
+	// valid collect GRPC task... should succeed
+	warmupTrue := true
+	ct := &collectGRPCTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectGRPCTaskName),
+		},
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Data: map[string]interface{}{"name": "bob"},
+				Call: call,
+				Host: internal.LocalHostPort,
+			},
+			Warmup: &warmupTrue,
+		},
+	}
+
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
+	}
+	exp.initResults(1)
+	err = ct.run(exp)
+
+	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+
+	assert.NoError(t, err)
+
+	count := gs.GetCount(callType)
+	assert.Equal(t, 200, count)
+
+	// warmup option ensures that ghz results are not written to insights
+	assert.Nil(t, exp.Result.Insights)
+}
+
+// Credit: Several of the tests in this file are based on
+// https://github.com/bojand/ghz/blob/master/runner/run_test.go
+func TestRunCollectGRPCWithIncorrectNumVersions(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	call := "helloworld.Greeter.SayHello"
+
+	_ = os.Chdir(t.TempDir())
+	callType := helloworld.Unary
+	gs, s, err := internal.StartServer(false)
+	if err != nil {
+		assert.FailNow(t, err.Error())
+	}
+	t.Cleanup(s.Stop)
+
+	// valid collect GRPC task... should succeed
+	ct := &collectGRPCTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectGRPCTaskName),
+		},
+		With: collectGRPCInputs{
+			Config: runner.Config{
+				Data: map[string]interface{}{"name": "bob"},
+				Call: call,
+				Host: internal.LocalHostPort,
+			},
+		},
+	}
+
+	log.Logger.Debug("dial timeout before defaulting... ", ct.With.DialTimeout.String())
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
+	}
+	exp.initResults(1)
+
+	exp.Result.Insights = &Insights{
+		NumVersions: 2, // will cause grpc task to fail; grpc task expects insights been nil or numVersions set to 1
+	}
+
+	err = ct.run(exp)
+
+	log.Logger.Debug("dial timeout after defaulting... ", ct.With.DialTimeout.String())
+
+	// fail because of initInsightsWithNumVersions()
+	assert.Error(t, err)
+
+	count := gs.GetCount(callType)
+	assert.Equal(t, 200, count)
+
+	// error ensures that ghz results are not written to insights
+	assert.Nil(t, exp.Result.Insights.TaskData)
+}
