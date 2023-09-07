@@ -48,7 +48,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
     - name: Expose metrics service
@@ -96,7 +96,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
 
@@ -146,7 +146,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
     - name: Expose metrics service
@@ -207,7 +207,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=routeguide-test
+        kubectl logs -l iter8.tools/test=routeguide-test
         helm delete routeguide-test
 
     - name: Expose metrics service
@@ -270,7 +270,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=routeguide-test
+        kubectl logs -l iter8.tools/test=routeguide-test
         helm delete routeguide-test
 
     - name: Expose metrics service
@@ -319,7 +319,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=hello-test
+        kubectl logs -l iter8.tools/test=hello-test
         helm delete hello-test
 
     - name: Expose metrics service
@@ -370,7 +370,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
     - name: Expose metrics service
@@ -427,7 +427,7 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
     - name: Expose metrics service
