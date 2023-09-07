@@ -177,7 +177,7 @@ func Start(stopCh <-chan struct{}) error {
 	return nil
 }
 
-// getAbnDashboard handles GET /abnDashboard with query parameter application=namespace/name
+// getAbnDashboard handles GET /abnDashboard with query parameter application=name and namespace=namespace
 func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getAbnDashboard called")
 	defer log.Logger.Trace("getAbnDashboard completed")
