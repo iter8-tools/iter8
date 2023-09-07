@@ -192,14 +192,24 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	application := r.URL.Query().Get("application")
 	if application == "" {
 		http.Error(w, "no application specified", http.StatusBadRequest)
+		return
 	}
-	log.Logger.Tracef("getAbnDashboard called for application %s", application)
+
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		http.Error(w, "no namespace specified", http.StatusBadRequest)
+		return
+	}
+
+	namespaceApplication := fmt.Sprintf("%s/%s", namespace, application)
+
+	log.Logger.Tracef("getAbnDashboard called for application %s", namespaceApplication)
 
 	// identify the routemap for the application
-	namespace, name := util.SplitApplication(application)
+	namespace, name := util.SplitApplication(namespaceApplication)
 	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, name)
 	if rm == nil || reflect.ValueOf(rm).IsNil() {
-		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("unknown application %s", namespaceApplication), http.StatusBadRequest)
 		return
 	}
 	log.Logger.Tracef("getAbnDashboard found routemap %v", rm)
@@ -216,7 +226,7 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	for v, version := range rm.GetVersions() {
 		signature := version.GetSignature()
 		if signature == nil {
-			log.Logger.Debugf("no signature for application %s (version %d)", application, v)
+			log.Logger.Debugf("no signature for application %s (version %d)", namespaceApplication, v)
 			continue
 		}
 
@@ -224,9 +234,9 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 			log.Logger.Error("no metrics client")
 			continue
 		}
-		versionmetrics, err := abn.MetricsClient.GetMetrics(application, v, *signature)
+		versionmetrics, err := abn.MetricsClient.GetMetrics(namespaceApplication, v, *signature)
 		if err != nil {
-			log.Logger.Debugf("no metrics found for application %s (version %d; signature %s)", application, v, *signature)
+			log.Logger.Debugf("no metrics found for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 			continue
 		}
 
@@ -246,7 +256,7 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 
 			smT, err := calculateSummarizedMetric(metrics.MetricsOverTransactions)
 			if err != nil {
-				log.Logger.Debugf("unable to compute summaried metrics over transactions for application %s (version %d; signature %s)", application, v, *signature)
+				log.Logger.Debugf("unable to compute summaried metrics over transactions for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 				continue
 			} else {
 				entry.SummaryOverTransactions = append(entry.SummaryOverTransactions, &versionSummarizedMetric{
@@ -257,7 +267,7 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 
 			smU, err := calculateSummarizedMetric(metrics.MetricsOverUsers)
 			if err != nil {
-				log.Logger.Debugf("unable to compute summaried metrics over users for application %s (version %d; signature %s)", application, v, *signature)
+				log.Logger.Debugf("unable to compute summaried metrics over users for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 				continue
 			}
 			entry.SummaryOverUsers = append(entry.SummaryOverUsers, &versionSummarizedMetric{
@@ -288,7 +298,7 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	for metric, byVersion := range byMetricOverTransactions {
 		hT, err := calculateHistogram(byVersion, 0, 0)
 		if err != nil {
-			log.Logger.Debugf("unable to compute histogram over transactions for application %s (metric %s)", application, metric)
+			log.Logger.Debugf("unable to compute histogram over transactions for application %s (metric %s)", namespaceApplication, metric)
 			continue
 		} else {
 			resultEntry := result[metric]
@@ -300,7 +310,7 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	for metric, byVersion := range byMetricOverUsers {
 		hT, err := calculateHistogram(byVersion, 0, 0)
 		if err != nil {
-			log.Logger.Debugf("unable to compute histogram over users for application %s (metric %s)", application, metric)
+			log.Logger.Debugf("unable to compute histogram over users for application %s (metric %s)", namespaceApplication, metric)
 			continue
 		} else {
 			resultEntry := result[metric]
