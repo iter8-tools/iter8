@@ -110,7 +110,7 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
 
   http-payload-experiment:
     name: HTTP performance test with payload
@@ -179,7 +179,7 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
 
   http-multiple-experiment:
     name: HTTP performance test with multiple endpoints
@@ -250,7 +250,7 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
 
   grpc-experiment:
     name: gRPC performance test
@@ -333,7 +333,7 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=routeguide-test" -f
 
   grpc-multiple-experiment:
     name: gRPC performance test with multiple endpoints
@@ -418,7 +418,7 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=routeguide-test" -f
 
   grpc-experiment2:
     name: gRPC performance test 2
@@ -488,4 +488,4 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=hello-test" -f
