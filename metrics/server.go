@@ -148,7 +148,7 @@ func Start(stopCh <-chan struct{}) error {
 	}
 
 	// configure endpoints
-	http.HandleFunc(util.MetricsPath, getMetrics)
+	http.HandleFunc(util.AbnDashboard, getAbnDashboard)
 
 	http.HandleFunc(util.ExperimentResultPath, putExperimentResult)
 	http.HandleFunc(util.HTTPDashboardPath, getHTTPDashboard)
@@ -178,10 +178,10 @@ func Start(stopCh <-chan struct{}) error {
 	return nil
 }
 
-// getMetrics handles GET /metrics with query parameter application=namespace/name
-func getMetrics(w http.ResponseWriter, r *http.Request) {
-	log.Logger.Trace("getMetrics called")
-	defer log.Logger.Trace("getMetrics completed")
+// getAbnDashboard handles GET /abnDashboard with query parameter application=namespace/name
+func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
+	log.Logger.Trace("getAbnDashboard called")
+	defer log.Logger.Trace("getAbnDashboard completed")
 
 	// verify method
 	if r.Method != http.MethodGet {
@@ -194,7 +194,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	if application == "" {
 		http.Error(w, "no application specified", http.StatusBadRequest)
 	}
-	log.Logger.Tracef("getMetrics called for application %s", application)
+	log.Logger.Tracef("getAbnDashboard called for application %s", application)
 
 	// identify the routemap for the application
 	namespace, name := util.SplitApplication(application)
@@ -203,7 +203,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
 		return
 	}
-	log.Logger.Tracef("getMetrics found routemap %v", rm)
+	log.Logger.Tracef("getAbnDashboard found routemap %v", rm)
 
 	// initialize result
 	result := make(map[string]*metricSummary, 0)
