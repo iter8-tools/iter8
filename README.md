@@ -12,19 +12,19 @@ Iter8 supports the following use-cases:
 3.  A/B/n testing of applications and ML models
 4.  Reliable and automated routing: blue-green and canary
 
-## :rocket: Iter8 experiment
+## :rocket: Iter8 performance test
 
-Iter8 introduces the notion of an experiment, which is a list of configurable tasks that are executed in a specific sequence.
+Iter8 introduces a set of tasks which which can be composed in order to conduct a variety of performance tests.
 
 <p align='center'>
-<img alt-text="Iter8 experiment" src="https://iter8-tools.github.io/docs/0.9/images/iter8-intro-dark.png" width="70%" />
+<img alt-text="Iter8 performance test" src="https://iter8-tools.github.io/docs/0.9/images/iter8-intro-dark.png" width="70%" />
 </p>
 
-Iter8 packs a number of powerful features that facilitate Kubernetes app testing and experimentation. They include the following.
+Iter8 packs a number of powerful features that facilitate Kubernetes app testing. They include the following.
 
 1.  **Generating load and collecting built-in metrics for HTTP and gRPC services.** Simplifies performance testing by eliminating the need to setup and use metrics databases.
-2.  **Readiness check.** The performance testing portion of the experiment begins only after the service is ready.
-3.  **Experiment anywhere.** Iter8 experiments can be launched inside a Kubernetes cluster, in local environments, or inside a GitHub Actions pipeline.
+2.  **Readiness check.** The performance testing portion can be configured to start only after the service is ready.
+3.  **Test anywhere.** Iter8 performance tests can be launched inside a Kubernetes cluster, in local environments, or inside a GitHub Actions pipeline.
 4.  **Traffic controller.** Automatically and dynamically reconfigures routing resources based on the state of Kubernetes apps/ML models.
 5. **Client-side SDK.** Facilitates routing and metrics collection task associated with distributed (i.e., client-server architecture-based) A/B/n testing in Kubernetes.
 

@@ -45,9 +45,10 @@ type notifyTask struct {
 	With notifyInputs `json:"with" yaml:"with"`
 }
 
-// Report is the data that is given to the payload template
-type Report struct {
-	// Timestamp is when the report was created
+// Summary is the data that is given to the payload template
+// Summary is a subset of the data contained in Experiment
+type Summary struct {
+	// Timestamp is when the summary was created
 	// For example: 2022-08-09 15:10:36.569745 -0400 EDT m=+12.599643189
 	TimeStamp string `json:"timeStamp" yaml:"timeStamp"`
 
@@ -67,10 +68,10 @@ type Report struct {
 	Experiment *Experiment `json:"experiment" yaml:"experiment"`
 }
 
-// getReport gets the values for the payload template
-func getReport(exp *Experiment) map[string]Report {
-	return map[string]Report{
-		"Report": {
+// getSummary gets the values for the payload template
+func getSummary(exp *Experiment) map[string]Summary {
+	return map[string]Summary{
+		"Summary": {
 			TimeStamp:         time.Now().String(),
 			Completed:         exp.Completed(),
 			NoTaskFailures:    exp.NoFailure(),
@@ -87,7 +88,7 @@ func getReport(exp *Experiment) map[string]Report {
 }
 
 // getPayload fetches the payload template from the PayloadTemplateURL and
-// executes it with values from getReport()
+// executes it with values from getSummary()
 func (t *notifyTask) getPayload(exp *Experiment) (string, error) {
 	if t.With.PayloadTemplateURL != "" {
 		template, err := getTextTemplateFromURL(t.With.PayloadTemplateURL)
@@ -95,7 +96,7 @@ func (t *notifyTask) getPayload(exp *Experiment) (string, error) {
 			return "", err
 		}
 
-		values := getReport(exp)
+		values := getSummary(exp)
 
 		// get the metrics spec
 		var buf bytes.Buffer

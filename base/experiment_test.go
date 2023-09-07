@@ -145,6 +145,32 @@ func TestFailExperiment(t *testing.T) {
 	assert.False(t, exp.NoFailure())
 }
 
+func TestUnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		specBytes  string
+		errMessage string
+	}{
+		{
+			specBytes: `[{"task":"ready"}]`,
+		},
+		{
+			specBytes: `[{"task":"http"}]`,
+		},
+		{
+			specBytes: `[{"task":"grpc"}]`,
+		},
+		{
+			specBytes: `[{"task":"notify"}]`,
+		},
+	}
+
+	for _, test := range tests {
+		exp := ExperimentSpec{}
+		err := exp.UnmarshalJSON([]byte(test.specBytes))
+		assert.NoError(t, err)
+	}
+}
+
 func TestUnmarshalJSONError(t *testing.T) {
 	tests := []struct {
 		specBytes  string
@@ -170,4 +196,19 @@ func TestUnmarshalJSONError(t *testing.T) {
 		assert.Error(t, err)
 		assert.EqualError(t, err, test.errMessage)
 	}
+}
+
+func TestInitInsightsWithNumVersions(t *testing.T) {
+	r := ExperimentResult{
+		Insights: &Insights{
+			NumVersions: 1,
+		},
+	}
+
+	err := r.initInsightsWithNumVersions(1)
+	assert.NoError(t, err)
+
+	// Mismatching version numbers
+	err = r.initInsightsWithNumVersions(2)
+	assert.Error(t, err)
 }

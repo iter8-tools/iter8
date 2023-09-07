@@ -4,7 +4,7 @@ kind: RoleBinding
 metadata:
   name: {{ .Release.Name }}
   annotations:
-    iter8.tools/group: {{ .Release.Name }}
+    iter8.tools/test: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-iter8-sa
@@ -23,7 +23,7 @@ metadata:
   name: {{ .Release.Name }}-ready
   namespace: {{ $namespace }}
   annotations:
-    iter8.tools/group: {{ .Release.Name }}
+    iter8.tools/test: {{ .Release.Name }}
 subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-iter8-sa

@@ -45,7 +45,7 @@ jobs:
   # TODO: add check to verify when a change is made to kustomize, a similar change is made to charts
 
   http-experiment:
-    name: HTTP load test
+    name: HTTP performance test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -85,14 +85,11 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install httpbin-test charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -102,7 +99,7 @@ jobs:
     - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
     - name: Expose metrics service
@@ -113,10 +110,10 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
 
   http-payload-experiment:
-    name: HTTP load test with payload
+    name: HTTP performance test with payload
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -156,15 +153,12 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install httpbin-test charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -174,7 +168,7 @@ jobs:
     - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
     - name: Expose metrics service
@@ -185,10 +179,10 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
 
   http-multiple-experiment:
-    name: HTTP load test with multiple endpoints
+    name: HTTP performance test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -228,17 +222,14 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install httpbin-test charts/iter8 \
         --set "tasks={http}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -248,7 +239,7 @@ jobs:
     - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl logs -l iter8.tools/group=httpbin-test
+        kubectl logs -l iter8.tools/test=httpbin-test
         helm delete httpbin-test
 
     - name: Expose metrics service
@@ -259,10 +250,10 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
 
   grpc-experiment:
-    name: gRPC load test
+    name: gRPC performance test
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -311,10 +302,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install routeguide-test charts/iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -324,7 +312,7 @@ jobs:
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/routeguide-test-1-job
 
     - name: Get Kubernetes status
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -334,7 +322,7 @@ jobs:
     - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl logs -l iter8.tools/group=routeguide-test
+        kubectl logs -l iter8.tools/test=routeguide-test
         helm delete routeguide-test
   
     - name: Expose metrics service
@@ -345,10 +333,10 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=routeguide-test" -f
 
   grpc-multiple-experiment:
-    name: gRPC load test with multiple endpoints
+    name: gRPC performance test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -397,10 +385,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install routeguide-test charts/iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -412,7 +397,7 @@ jobs:
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/routeguide-test-1-job
 
     - name: Get Kubernetes status
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -422,7 +407,7 @@ jobs:
     - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl logs -l iter8.tools/group=routeguide-test
+        kubectl logs -l iter8.tools/test=routeguide-test
         helm delete routeguide-test
     
     - name: Expose metrics service
@@ -433,10 +418,10 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=routeguide-test" -f
 
   grpc-experiment2:
-    name: gRPC load test 2
+    name: gRPC performance test 2
     needs: get_versions
     runs-on: ubuntu-latest
     strategy:
@@ -476,16 +461,13 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 hello-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install hello-test charts/iter8 \
         --set "tasks={grpc}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/hello-test-1-job
 
     - name: Get Kubernetes status
       if: steps.modified-files.outputs.any_modified == 'true'
@@ -495,7 +477,7 @@ jobs:
     - name: View test logs and delete test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        kubectl logs -l iter8.tools/group=hello-test
+        kubectl logs -l iter8.tools/test=hello-test
         helm delete hello-test
       
     - name: Expose metrics service
@@ -506,4 +488,4 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=hello-test" -f

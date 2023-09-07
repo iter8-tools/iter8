@@ -4,7 +4,7 @@ kind: Role
 metadata:
   name: {{ .Release.Name }}
   annotations:
-    iter8.tools/group: {{ .Release.Name }}
+    iter8.tools/test: {{ .Release.Name }}
 rules:
 - apiGroups: [""]
   resourceNames: [{{ .Release.Name | quote }}]
@@ -20,7 +20,7 @@ metadata:
   name: {{ .Release.Name }}-ready
   namespace: {{ $namespace }}
   annotations:
-    iter8.tools/group: {{ .Release.Name }}
+    iter8.tools/test: {{ .Release.Name }}
 rules:
 {{- if .Values.ready.service }}
 - apiGroups: [""]

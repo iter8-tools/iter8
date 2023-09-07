@@ -19,7 +19,7 @@ import (
 const controllersDesc = `
 Start Iter8 controllers.
 
-	iter8 controllers
+	$ iter8 controllers
 `
 
 // newControllersCmd creates the Iter8 controllers

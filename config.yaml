@@ -1,1 +1,2 @@
+# Used by the helm/chart-releaser-action action in the releasecharts.yaml workflow
 skip-existing: true

@@ -66,19 +66,19 @@ func TestKubeRun(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
-	base.CreateExperimentYaml(t, base.CompletePath("../testdata", "experiment.tpl"), url, driver.ExperimentPath)
+	base.CreateExperimentYaml(t, base.CompletePath("../testdata", base.ExperimentTemplateFile), url, base.ExperimentFile)
 
 	// fix rOpts
 	rOpts := NewRunOpts(driver.NewFakeKubeDriver(cli.New()))
 
 	// read experiment from file created above
-	byteArray, _ := os.ReadFile(driver.ExperimentPath)
+	byteArray, _ := os.ReadFile(base.ExperimentFile)
 	_, _ = rOpts.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{driver.ExperimentPath: string(byteArray)},
+		StringData: map[string]string{base.ExperimentFile: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	err = rOpts.KubeRun()

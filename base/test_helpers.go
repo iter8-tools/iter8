@@ -14,6 +14,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	// ExperimentFile is the name of the experiment file
+	ExperimentFile = "experiment.yaml"
+
+	// ExperimentTemplateFile is the name of the template that will produce the experiment file
+	ExperimentTemplateFile = "experiment.tpl"
+)
+
 // mockDriver is a mock driver that can be used to run experiments
 type mockDriver struct {
 	*Experiment

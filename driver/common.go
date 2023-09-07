@@ -7,10 +7,8 @@ import (
 )
 
 const (
-	// ExperimentPath is the name of the experiment file
-	ExperimentPath = "experiment.yaml"
-	// DefaultExperimentGroup is the name of the default experiment chart
-	DefaultExperimentGroup = "default"
+	// DefaultTestName is the default name of the performance test
+	DefaultTestName = "default"
 )
 
 // ExperimentFromBytes reads experiment from bytes

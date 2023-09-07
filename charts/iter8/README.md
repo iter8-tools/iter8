@@ -1,3 +1,3 @@
-# Iter8 experiment chart
+# Iter8 test runner chart
 
-This chart enables Iter8 experiments through the Iter8 CLI.
+This chart enables Iter8 tests.

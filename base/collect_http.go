@@ -46,13 +46,14 @@ type endpoint struct {
 	URL string `json:"url" yaml:"url"`
 	// AllowInitialErrors allows and doesn't abort on initial warmup errors
 	AllowInitialErrors *bool `json:"allowInitialErrors,omitempty" yaml:"allowInitialErrors,omitempty"`
-	// Warmup indicates if task execution is for warmup purposes; if so the results will be ignored
-	Warmup *bool `json:"warmup,omitempty" yaml:"warmup,omitempty"`
 }
 
 // collectHTTPInputs contain the inputs to the metrics collection task to be executed.
 type collectHTTPInputs struct {
 	endpoint
+
+	// Warmup indicates if task execution is for warmup purposes; if so the results will be ignored
+	Warmup *bool `json:"warmup,omitempty" yaml:"warmup,omitempty"`
 
 	// Endpoints is used to define multiple endpoints to test
 	Endpoints map[string]endpoint `json:"endpoints" yaml:"endpoints"`
@@ -81,31 +82,7 @@ var (
 	defaultPercentiles = [...]float64{50.0, 75.0, 90.0, 95.0, 99.0, 99.9}
 )
 
-// errorCode checks if a given code is an error code
-func (t *collectHTTPTask) errorCode(code int) bool {
-	// connection failure
-	if code == -1 {
-		return true
-	}
-	// HTTP errors
-	for _, lims := range t.With.ErrorRanges {
-		// if no lower limit (check upper)
-		if lims.Lower == nil && code <= *lims.Upper {
-			return true
-		}
-		// if no upper limit (check lower)
-		if lims.Upper == nil && code >= *lims.Lower {
-			return true
-		}
-		// if both limits are present (check both)
-		if lims.Upper != nil && lims.Lower != nil && code <= *lims.Upper && code >= *lims.Lower {
-			return true
-		}
-	}
-	return false
-}
-
-// collectHTTPTask enables load testing of HTTP services.
+// collectHTTPTask enables performance testing of HTTP services.
 type collectHTTPTask struct {
 	// TaskMeta has fields common to all tasks
 	TaskMeta
@@ -152,7 +129,7 @@ func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
-			RunType:     "Iter8 load test",
+			RunType:     "Iter8 HTTP performance test",
 			QPS:         float64(*c.QPS),
 			NumThreads:  *c.Connections,
 			Percentiles: c.Percentiles,

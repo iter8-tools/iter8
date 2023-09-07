@@ -65,13 +65,13 @@ func TestKRun(t *testing.T) {
 	_ = os.Chdir(t.TempDir())
 
 	// create experiment.yaml
-	base.CreateExperimentYaml(t, base.CompletePath("../testdata", "experiment.tpl"), url, id.ExperimentPath)
+	base.CreateExperimentYaml(t, base.CompletePath("../testdata", base.ExperimentTemplateFile), url, base.ExperimentFile)
 
 	tests := []cmdTestCase{
 		// k report
 		{
 			name:   "k run",
-			cmd:    "k run -g default --namespace default",
+			cmd:    "k run -t default --namespace default",
 			golden: base.CompletePath("../testdata", "output/krun.txt"),
 		},
 	}
@@ -80,13 +80,13 @@ func TestKRun(t *testing.T) {
 	*kd = *id.NewFakeKubeDriver(settings)
 
 	// and read it...
-	byteArray, _ := os.ReadFile(id.ExperimentPath)
+	byteArray, _ := os.ReadFile(base.ExperimentFile)
 	_, _ = kd.Clientset.CoreV1().Secrets("default").Create(context.TODO(), &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "default",
 			Namespace: "default",
 		},
-		StringData: map[string]string{id.ExperimentPath: string(byteArray)},
+		StringData: map[string]string{base.ExperimentFile: string(byteArray)},
 	}, metav1.CreateOptions{})
 
 	runTestActionCmd(t, tests)

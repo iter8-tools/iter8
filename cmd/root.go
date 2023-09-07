@@ -7,9 +7,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/cli/values"
 )
 
 var (
@@ -45,16 +43,6 @@ Iter8 is the Kubernetes release optimizer built for DevOps, MLOps, SRE and data 
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
-}
-
-// addValueFlags adds flags that enable supplying values to the given command
-// Credit: the following function is from Helm. Please see:
-// https://github.com/helm/helm/blob/main/cmd/helm/flags.go
-func addValueFlags(f *pflag.FlagSet, v *values.Options) {
-	f.StringSliceVarP(&v.ValueFiles, "values", "f", []string{}, "specify values in a YAML file or a URL (can specify multiple)")
-	f.StringArrayVar(&v.Values, "set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
-	f.StringArrayVar(&v.StringValues, "set-string", []string{}, "set STRING values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
-	f.StringArrayVar(&v.FileValues, "set-file", []string{}, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
 }
 
 // initialize Iter8 CLI root command and add all subcommands

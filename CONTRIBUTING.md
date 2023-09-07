@@ -14,7 +14,7 @@ If anything doesn't make sense, or doesn't work when you run it, please open a b
 
 We welcome many types of contributions including:
 
-* [CLI and Iter8 experiment charts](#iter8-toolsiter8)
+* [CLI and Iter8 performance test charts](#iter8-toolsiter8)
 * [Docs](#iter8-toolsdocs)
 * CI, builds, and tests
 * Reviewing pull requests
@@ -71,7 +71,7 @@ repository, you can amend your commit with the sign-off by running:
 
 The Iter8 project consists of the following repos.
 
-1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI, experiment, and controller charts
+1. [iter8-tools/iter8](https://github.com/iter8-tools/iter8): source for the Iter8 CLI, performance test, and controller charts
 2. [iter8-tools/docs](https://github.com/iter8-tools/docs): source for Iter8 docs
 
 ### iter8-tools/iter8

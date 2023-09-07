@@ -370,30 +370,122 @@ func TestRunCollectHTTPMultipleNoEndpoints(t *testing.T) {
 	assert.Equal(t, 0, len(httpResult))
 }
 
-func TestErrorCode(t *testing.T) {
-	task := collectHTTPTask{}
-	assert.True(t, task.errorCode(-1))
+func TestRunCollectHTTPWithWarmup(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
 
-	// if no lower limit (check upper)
-	upper := 10
-	task.With.ErrorRanges = append(task.With.ErrorRanges, errorRange{
-		Upper: &upper,
-	})
-	assert.True(t, task.errorCode(5))
+	mux, addr := fhttp.DynamicHTTPServer(false)
 
-	// if no upper limit (check lower)
-	task.With.ErrorRanges = []errorRange{}
-	lower := 1
-	task.With.ErrorRanges = append(task.With.ErrorRanges, errorRange{
-		Lower: &lower,
-	})
-	assert.True(t, task.errorCode(5))
+	// /foo/ handler
+	called := false // ensure that the /foo/ handler is called
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		data, _ := io.ReadAll(r.Body)
+		testData, _ := os.ReadFile(CompletePath("../", "testdata/payload/ukpolice.json"))
 
-	// if both limits are present (check both)
-	task.With.ErrorRanges = []errorRange{}
-	task.With.ErrorRanges = append(task.With.ErrorRanges, errorRange{
-		Upper: &upper,
-		Lower: &lower,
-	})
-	assert.True(t, task.errorCode(5))
+		// assert that PayloadFile is working
+		assert.True(t, bytes.Equal(data, testData))
+
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/"+foo, handler)
+
+	url := fmt.Sprintf("http://localhost:%d/", addr.Port) + foo
+
+	// valid collect HTTP task... should succeed
+	warmupTrue := true
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			endpoint: endpoint{
+				Duration:    StringPointer("1s"),
+				PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
+				Headers:     map[string]string{},
+				URL:         url,
+			},
+			Warmup: &warmupTrue,
+		},
+	}
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
+	}
+	exp.initResults(1)
+	err = ct.run(exp)
+	assert.NoError(t, err)
+	assert.True(t, called) // ensure that the /foo/ handler is called
+
+	// warmup option ensures that Fortio results are not written to insights
+	assert.Nil(t, exp.Result.Insights)
+}
+
+func TestRunCollectHTTPWithIncorrectNumVersions(t *testing.T) {
+	// define METRICS_SERVER_URL
+	metricsServerURL := "http://iter8.default:8080"
+	err := os.Setenv(MetricsServerURL, metricsServerURL)
+	assert.NoError(t, err)
+
+	mux, addr := fhttp.DynamicHTTPServer(false)
+
+	// /foo/ handler
+	called := false // ensure that the /foo/ handler is called
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		data, _ := io.ReadAll(r.Body)
+		testData, _ := os.ReadFile(CompletePath("../", "testdata/payload/ukpolice.json"))
+
+		// assert that PayloadFile is working
+		assert.True(t, bytes.Equal(data, testData))
+
+		w.WriteHeader(200)
+	}
+	mux.HandleFunc("/"+foo, handler)
+
+	url := fmt.Sprintf("http://localhost:%d/", addr.Port) + foo
+
+	// valid collect HTTP task... should succeed
+	ct := &collectHTTPTask{
+		TaskMeta: TaskMeta{
+			Task: StringPointer(CollectHTTPTaskName),
+		},
+		With: collectHTTPInputs{
+			endpoint: endpoint{
+				Duration:    StringPointer("1s"),
+				PayloadFile: StringPointer(CompletePath("../", "testdata/payload/ukpolice.json")),
+				Headers:     map[string]string{},
+				URL:         url,
+			},
+		},
+	}
+
+	exp := &Experiment{
+		Spec:   []Task{ct},
+		Result: &ExperimentResult{},
+		Metadata: ExperimentMetadata{
+			Name:      myName,
+			Namespace: myNamespace,
+		},
+	}
+	exp.initResults(1)
+
+	exp.Result.Insights = &Insights{
+		NumVersions: 2, // will cause http task to fail; grpc task expects insights been nil or numVersions set to 1
+	}
+
+	err = ct.run(exp)
+	assert.Error(t, err) // fail because of initInsightsWithNumVersions()
+
+	assert.True(t, called) // ensure that the /foo/ handler is called
+
+	// error ensures that Fortio results are not written to insights
+	assert.Nil(t, exp.Result.Insights.TaskData)
 }
