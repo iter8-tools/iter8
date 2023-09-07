@@ -14,11 +14,11 @@ const (
 	// MetricsServerURL is the URL of the metrics server
 	MetricsServerURL = "METRICS_SERVER_URL"
 
-	// MetricsPath is the path to the GET /metrics endpoint
-	MetricsPath = "/metrics"
-
 	// ExperimentResultPath is the path to the PUT /experimentResult endpoint
 	ExperimentResultPath = "/experimentResult"
+
+	// AbnDashboard is the path to the GET /abnDashboard endpoint
+	AbnDashboard = "/abnDashboard"
 	// HTTPDashboardPath is the path to the GET /httpDashboard endpoint
 	HTTPDashboardPath = "/httpDashboard"
 	// GRPCDashboardPath is the path to the GET /grpcDashboard endpoint

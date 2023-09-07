@@ -573,10 +573,10 @@ func TestReadConfigSetPort(t *testing.T) {
 	assert.Equal(t, expectedPortNumber, *conf.Port)
 }
 
-func TestGetMetricsInvalidMethod(t *testing.T) {
+func TestGetABNDashboardInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/metrics", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodPost, util.AbnDashboard, nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
@@ -585,10 +585,10 @@ func TestGetMetricsInvalidMethod(t *testing.T) {
 	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
 }
 
-func TestGetMetricsMissingParameter(t *testing.T) {
+func TestGetABNDashboardMissingParameter(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard, nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
@@ -597,10 +597,10 @@ func TestGetMetricsMissingParameter(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 }
 
-func TestGetMetricsNoRouteMap(t *testing.T) {
+func TestGetABNDashboardNoRouteMap(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/metrics?application=default%2Ftest", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard+"?application=default%2Ftest", nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
@@ -617,7 +617,7 @@ func (cm *testRoutemaps) GetAllRoutemaps() controllers.RoutemapsInterface {
 	return &cm.allroutemaps
 }
 
-func TestGetMetrics(t *testing.T) {
+func TestGetABNDashboard(t *testing.T) {
 	testRM := testRoutemaps{
 		allroutemaps: setupRoutemaps(t, *getTestRM("default", "test")),
 	}
@@ -655,8 +655,8 @@ func TestGetMetrics(t *testing.T) {
 	w := httptest.NewRecorder()
 	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName("default", "test")
 	assert.NotNil(t, rm)
-	req := httptest.NewRequest(http.MethodGet, "/metrics?application=default%2Ftest", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard+"?application=default%2Ftest", nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
