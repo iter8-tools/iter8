@@ -79,10 +79,10 @@ func callMetricsService(method, metricsServerURL, path string, queryParams map[s
 	return nil
 }
 
-// PutExperimentResultToMetricsService sends the experiment result to the metrics service
-func PutExperimentResultToMetricsService(metricsServerURL, namespace, experiment string, experimentResult *ExperimentResult) error {
+// PutExperimentResultToMetricsService sends the test result to the metrics service
+func PutExperimentResultToMetricsService(metricsServerURL, namespace, test string, testResult *ExperimentResult) error {
 	return callMetricsService(http.MethodPut, metricsServerURL, ExperimentResultPath, map[string]string{
-		"namespace":  namespace,
-		"experiment": experiment,
-	}, experimentResult)
+		"namespace": namespace,
+		"test":      test,
+	}, testResult)
 }

@@ -550,13 +550,13 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	experiment := r.URL.Query().Get("experiment")
-	if experiment == "" {
-		http.Error(w, "no experiment specified", http.StatusBadRequest)
+	test := r.URL.Query().Get("test")
+	if test == "" {
+		http.Error(w, "no test specified", http.StatusBadRequest)
 		return
 	}
 
-	log.Logger.Tracef("getHTTPGrafana called for namespace %s and experiment %s", namespace, experiment)
+	log.Logger.Tracef("getHTTPGrafana called for namespace %s and test %s", namespace, test)
 
 	// get fortioResult from metrics client
 	if abn.MetricsClient == nil {
@@ -564,17 +564,17 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get experimentResult from metrics client
-	experimentResult, err := abn.MetricsClient.GetExperimentResult(namespace, experiment)
+	// get testResult from metrics client
+	testResult, err := abn.MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, experiment %s", namespace, experiment)
+		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusBadRequest)
 		return
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(experimentResult))
+	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(testResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal HTTP dashboard"
 		log.Logger.Error(errorMessage)
@@ -687,13 +687,13 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	experiment := r.URL.Query().Get("experiment")
-	if experiment == "" {
-		http.Error(w, "no experiment specified", http.StatusBadRequest)
+	test := r.URL.Query().Get("test")
+	if test == "" {
+		http.Error(w, "no test specified", http.StatusBadRequest)
 		return
 	}
 
-	log.Logger.Tracef("getGRPCDashboard called for namespace %s and experiment %s", namespace, experiment)
+	log.Logger.Tracef("getGRPCDashboard called for namespace %s and test %s", namespace, test)
 
 	// get ghz result from metrics client
 	if abn.MetricsClient == nil {
@@ -701,17 +701,17 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get experimentResult from metrics client
-	experimentResult, err := abn.MetricsClient.GetExperimentResult(namespace, experiment)
+	// get testResult from metrics client
+	testResult, err := abn.MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, experiment %s", namespace, experiment)
+		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusBadRequest)
 		return
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getGRPCDashboardHelper(experimentResult))
+	dashboardBytes, err := json.Marshal(getGRPCDashboardHelper(testResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal gRPC dashboard"
 		log.Logger.Error(errorMessage)

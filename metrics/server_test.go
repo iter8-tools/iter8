@@ -1079,8 +1079,8 @@ func TestGetHTTPDashboard(t *testing.T) {
 	u, err := url.ParseRequestURI(util.HTTPDashboardPath)
 	assert.NoError(t, err)
 	params := url.Values{
-		"namespace":  {"default"},
-		"experiment": {"default"},
+		"namespace": {"default"},
+		"test":      {"default"},
 	}
 	u.RawQuery = params.Encode()
 	urlStr := fmt.Sprintf("%v", u)
@@ -1191,8 +1191,8 @@ func TestGetGRPCDashboard(t *testing.T) {
 	u, err := url.ParseRequestURI(util.GRPCDashboardPath)
 	assert.NoError(t, err)
 	params := url.Values{
-		"namespace":  {"default"},
-		"experiment": {"default"},
+		"namespace": {"default"},
+		"test":      {"default"},
 	}
 	u.RawQuery = params.Encode()
 	urlStr := fmt.Sprintf("%v", u)
