@@ -85,10 +85,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install httpbin-test charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
@@ -156,10 +153,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install httpbin-test charts/iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
@@ -228,10 +222,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install httpbin-test charts/iter8 \
         --set "tasks={http}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
@@ -311,10 +302,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install routeguide-test charts/iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -397,10 +385,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install routeguide-test charts/iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -476,10 +461,7 @@ jobs:
     - name: Start performance test
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 hello-test iter8 \
-        --localChart \
-        --chartName charts/iter8 \
+        helm upgrade --install hello-test charts/iter8 \
         --set "tasks={grpc}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
