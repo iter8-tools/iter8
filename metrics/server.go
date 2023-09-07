@@ -13,7 +13,6 @@ import (
 
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/abn"
-	"github.com/iter8-tools/iter8/base"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -88,7 +87,7 @@ type dashboardExperimentResult struct {
 	Failure bool
 
 	// Insights produced in this experiment
-	Insights *base.Insights
+	Insights *util.Insights
 
 	// Iter8Version is the version of Iter8 CLI that created this result object
 	Iter8Version string `json:"Iter8 version"`
@@ -490,7 +489,7 @@ func getHTTPEndpointRow(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpoint
 	return row
 }
 
-func getHTTPDashboardHelper(experimentResult *base.ExperimentResult) httpDashboard {
+func getHTTPDashboardHelper(experimentResult *util.ExperimentResult) httpDashboard {
 	dashboard := httpDashboard{
 		Endpoints: map[string]httpEndpointRow{},
 		ExperimentResult: dashboardExperimentResult{
@@ -517,7 +516,7 @@ func getHTTPDashboardHelper(experimentResult *base.ExperimentResult) httpDashboa
 		return dashboard
 	}
 
-	httpResult := base.HTTPResult{}
+	httpResult := util.HTTPResult{}
 	err = json.Unmarshal(httpTaskDataBytes, &httpResult)
 	if err != nil {
 		log.Logger.Error("cannot unmarshal http task data into HTTPResult")
@@ -533,7 +532,7 @@ func getHTTPDashboardHelper(experimentResult *base.ExperimentResult) httpDashboa
 	return dashboard
 }
 
-// getHTTPDashboard handles GET /getHTTPDashboard with query parameter application=namespace/name
+// getHTTPDashboard handles GET /getHTTPDashboard with query parameter test=name and namespace=namespace
 func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getHTTPGrafana called")
 	defer log.Logger.Trace("getHTTPGrafana completed")
@@ -628,7 +627,7 @@ func getGRPCEndpointRow(ghzRunnerReport *runner.Report) ghzEndpointRow {
 	return row
 }
 
-func getGRPCDashboardHelper(experimentResult *base.ExperimentResult) ghzDashboard {
+func getGRPCDashboardHelper(experimentResult *util.ExperimentResult) ghzDashboard {
 	dashboard := ghzDashboard{
 		Endpoints: map[string]ghzEndpointRow{},
 		ExperimentResult: dashboardExperimentResult{
@@ -654,7 +653,7 @@ func getGRPCDashboardHelper(experimentResult *base.ExperimentResult) ghzDashboar
 		return dashboard
 	}
 
-	ghzResult := base.GHZResult{}
+	ghzResult := util.GHZResult{}
 	err = json.Unmarshal(ghzTaskDataBytes, &ghzResult)
 	if err != nil {
 		log.Logger.Error("cannot unmarshal ghz task data into GHZResult")
@@ -670,6 +669,7 @@ func getGRPCDashboardHelper(experimentResult *base.ExperimentResult) ghzDashboar
 	return dashboard
 }
 
+// getGRPCDashboard handles GET /getGRPCDashboard with query parameter test=name and namespace=namespace
 func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getGRPCDashboard called")
 	defer log.Logger.Trace("getGRPCDashboard completed")
@@ -724,7 +724,7 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(dashboardBytes)
 }
 
-// putExperimentResult handles PUT /experimentResult with query parameter application=namespace/name
+// putExperimentResult handles PUT /experimentResult with query parameter test=name and namespace=namespace
 func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("putResult called")
 	defer log.Logger.Trace("putResult completed")
