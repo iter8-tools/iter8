@@ -177,7 +177,7 @@ func Start(stopCh <-chan struct{}) error {
 	return nil
 }
 
-// getAbnDashboard handles GET /abnDashboard with query parameter application=namespace/name
+// getAbnDashboard handles GET /abnDashboard with query parameter application=name and namespace=namespace
 func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getAbnDashboard called")
 	defer log.Logger.Trace("getAbnDashboard completed")
@@ -189,14 +189,21 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// verify request (query parameters)
-	application := r.URL.Query().Get("application")
-	if application == "" {
-		http.Error(w, "no application specified", http.StatusBadRequest)
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		http.Error(w, "no namespace specified", http.StatusBadRequest)
+		return
 	}
+
+	name := r.URL.Query().Get("application")
+	if name == "" {
+		http.Error(w, "no application name specified", http.StatusBadRequest)
+		return
+	}
+
+	application := fmt.Sprintf("%s/%s", namespace, name)
 	log.Logger.Tracef("getAbnDashboard called for application %s", application)
 
-	// identify the routemap for the application
-	namespace, name := util.SplitApplication(application)
 	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, name)
 	if rm == nil || reflect.ValueOf(rm).IsNil() {
 		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)

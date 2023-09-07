@@ -655,7 +655,7 @@ func TestGetABNDashboard(t *testing.T) {
 	w := httptest.NewRecorder()
 	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName("default", "test")
 	assert.NotNil(t, rm)
-	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard+"?application=default%2Ftest", nil)
+	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard+"?application=test&namespace=default", nil)
 	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
