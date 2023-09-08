@@ -16,7 +16,7 @@ spec:
       serviceAccountName: iter8
       containers:
       - name: iter8-controller
-        image: iter8/iter8:0.16
+        image: iter8/iter8:0.17
         imagePullPolicy: Always
         command: ["/bin/iter8"]
         args: ["controllers", "-l", "info"]

@@ -36,7 +36,7 @@ jobs:
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 httpbin-test iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
@@ -83,7 +83,7 @@ jobs:
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 httpbin-test iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
@@ -132,7 +132,7 @@ jobs:
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 httpbin-test iter8 \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
@@ -189,7 +189,7 @@ jobs:
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 routeguide-test iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -250,7 +250,7 @@ jobs:
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 routeguide-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 routeguide-test iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -305,7 +305,7 @@ jobs:
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 hello-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 hello-test iter8 \
         --set "tasks={grpc}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
@@ -355,7 +355,7 @@ jobs:
     - name: k launch with readiness checks
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 httpbin-test iter8 \
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
@@ -411,7 +411,7 @@ jobs:
     - name: k launch with readiness checks and namespace
       run: |
         helm upgrade --install -n experiments \
-        --repo https://iter8-tools.github.io/iter8 --version 0.16 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 0.17 httpbin-test iter8 \
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
