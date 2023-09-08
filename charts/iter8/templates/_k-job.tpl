@@ -23,7 +23,7 @@ spec:
         - "/bin/sh"
         - "-c"
         - |
-          iter8 k run --namespace {{ .Release.Namespace }} --group {{ .Release.Name }} -l {{ .Values.logLevel }}
+          iter8 k run --namespace {{ .Release.Namespace }} --test {{ .Release.Name }} -l {{ .Values.logLevel }}
         resources:
           {{ toYaml .Values.resources | indent 10 | trim }}
         securityContext:
