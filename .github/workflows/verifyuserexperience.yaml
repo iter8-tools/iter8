@@ -40,7 +40,7 @@ jobs:
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -88,7 +88,7 @@ jobs:
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -138,7 +138,7 @@ jobs:
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -199,7 +199,7 @@ jobs:
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/routeguide-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -262,7 +262,7 @@ jobs:
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/routeguide-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -311,7 +311,7 @@ jobs:
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/hello-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -362,7 +362,7 @@ jobs:
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -419,7 +419,7 @@ jobs:
         --set ready.namespace=default \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s -n experiments job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s -n experiments job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
