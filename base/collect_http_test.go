@@ -489,3 +489,47 @@ func TestRunCollectHTTPWithIncorrectNumVersions(t *testing.T) {
 	// error ensures that Fortio results are not written to insights
 	assert.Nil(t, exp.Result.Insights.TaskData)
 }
+
+func TestGetFortioOptions(t *testing.T) {
+	// check to catch nil QPS
+	_, err := getFortioOptions(endpoint{})
+	assert.Error(t, err)
+
+	// check for catch nil connections
+	QPS := float32(8)
+	_, err = getFortioOptions(endpoint{
+		QPS: &QPS,
+	})
+	assert.Error(t, err)
+
+	// check to catch nil allowInitialErrors
+	connections := 8
+	_, err = getFortioOptions(endpoint{
+		QPS:         &QPS,
+		Connections: &connections,
+	})
+	assert.Error(t, err)
+
+	numRequests := int64(5)
+	contentType := "testType"
+	payloadStr := "testPayload"
+	allowInitialErrors := true
+
+	options, err := getFortioOptions(endpoint{
+		NumRequests:        &numRequests,
+		ContentType:        &contentType,
+		PayloadStr:         &payloadStr,
+		QPS:                &QPS,
+		Connections:        &connections,
+		AllowInitialErrors: &allowInitialErrors,
+	})
+
+	assert.NoError(t, err)
+
+	s, _ := json.Marshal(options)
+	fmt.Println(string(s))
+
+	assert.Equal(t, numRequests, options.RunnerOptions.Exactly)
+	assert.Equal(t, contentType, options.ContentType)
+	assert.Equal(t, []byte(payloadStr), options.Payload)
+}

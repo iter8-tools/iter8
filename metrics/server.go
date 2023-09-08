@@ -13,7 +13,6 @@ import (
 
 	"github.com/bojand/ghz/runner"
 	"github.com/iter8-tools/iter8/abn"
-	"github.com/iter8-tools/iter8/base"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -88,7 +87,7 @@ type dashboardExperimentResult struct {
 	Failure bool
 
 	// Insights produced in this experiment
-	Insights *base.Insights
+	Insights *util.Insights
 
 	// Iter8Version is the version of Iter8 CLI that created this result object
 	Iter8Version string `json:"Iter8 version"`
@@ -148,9 +147,8 @@ func Start(stopCh <-chan struct{}) error {
 	}
 
 	// configure endpoints
-	http.HandleFunc(util.MetricsPath, getMetrics)
-
-	http.HandleFunc(util.ExperimentResultPath, putExperimentResult)
+	http.HandleFunc(util.TestResultPath, putExperimentResult)
+	http.HandleFunc(util.AbnDashboard, getAbnDashboard)
 	http.HandleFunc(util.HTTPDashboardPath, getHTTPDashboard)
 	http.HandleFunc(util.GRPCDashboardPath, getGRPCDashboard)
 
@@ -178,10 +176,10 @@ func Start(stopCh <-chan struct{}) error {
 	return nil
 }
 
-// getMetrics handles GET /metrics with query parameter application=namespace/name
-func getMetrics(w http.ResponseWriter, r *http.Request) {
-	log.Logger.Trace("getMetrics called")
-	defer log.Logger.Trace("getMetrics completed")
+// getAbnDashboard handles GET /abnDashboard with query parameter application=name and namespace=namespace
+func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
+	log.Logger.Trace("getAbnDashboard called")
+	defer log.Logger.Trace("getAbnDashboard completed")
 
 	// verify method
 	if r.Method != http.MethodGet {
@@ -193,17 +191,26 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	application := r.URL.Query().Get("application")
 	if application == "" {
 		http.Error(w, "no application specified", http.StatusBadRequest)
-	}
-	log.Logger.Tracef("getMetrics called for application %s", application)
-
-	// identify the routemap for the application
-	namespace, name := util.SplitApplication(application)
-	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, name)
-	if rm == nil || reflect.ValueOf(rm).IsNil() {
-		http.Error(w, fmt.Sprintf("unknown application %s", application), http.StatusBadRequest)
 		return
 	}
-	log.Logger.Tracef("getMetrics found routemap %v", rm)
+
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		http.Error(w, "no namespace specified", http.StatusBadRequest)
+		return
+	}
+
+	namespaceApplication := fmt.Sprintf("%s/%s", namespace, application)
+
+	log.Logger.Tracef("getAbnDashboard called for application %s", namespaceApplication)
+
+	// identify the routemap for the application
+	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, application)
+	if rm == nil || reflect.ValueOf(rm).IsNil() {
+		http.Error(w, fmt.Sprintf("unknown application %s", namespaceApplication), http.StatusBadRequest)
+		return
+	}
+	log.Logger.Tracef("getAbnDashboard found routemap %v", rm)
 
 	// initialize result
 	result := make(map[string]*metricSummary, 0)
@@ -217,7 +224,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	for v, version := range rm.GetVersions() {
 		signature := version.GetSignature()
 		if signature == nil {
-			log.Logger.Debugf("no signature for application %s (version %d)", application, v)
+			log.Logger.Debugf("no signature for application %s (version %d)", namespaceApplication, v)
 			continue
 		}
 
@@ -225,9 +232,9 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 			log.Logger.Error("no metrics client")
 			continue
 		}
-		versionmetrics, err := abn.MetricsClient.GetMetrics(application, v, *signature)
+		versionmetrics, err := abn.MetricsClient.GetMetrics(namespaceApplication, v, *signature)
 		if err != nil {
-			log.Logger.Debugf("no metrics found for application %s (version %d; signature %s)", application, v, *signature)
+			log.Logger.Debugf("no metrics found for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 			continue
 		}
 
@@ -247,7 +254,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 
 			smT, err := calculateSummarizedMetric(metrics.MetricsOverTransactions)
 			if err != nil {
-				log.Logger.Debugf("unable to compute summaried metrics over transactions for application %s (version %d; signature %s)", application, v, *signature)
+				log.Logger.Debugf("unable to compute summaried metrics over transactions for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 				continue
 			} else {
 				entry.SummaryOverTransactions = append(entry.SummaryOverTransactions, &versionSummarizedMetric{
@@ -258,7 +265,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 
 			smU, err := calculateSummarizedMetric(metrics.MetricsOverUsers)
 			if err != nil {
-				log.Logger.Debugf("unable to compute summaried metrics over users for application %s (version %d; signature %s)", application, v, *signature)
+				log.Logger.Debugf("unable to compute summaried metrics over users for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 				continue
 			}
 			entry.SummaryOverUsers = append(entry.SummaryOverUsers, &versionSummarizedMetric{
@@ -289,7 +296,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	for metric, byVersion := range byMetricOverTransactions {
 		hT, err := calculateHistogram(byVersion, 0, 0)
 		if err != nil {
-			log.Logger.Debugf("unable to compute histogram over transactions for application %s (metric %s)", application, metric)
+			log.Logger.Debugf("unable to compute histogram over transactions for application %s (metric %s)", namespaceApplication, metric)
 			continue
 		} else {
 			resultEntry := result[metric]
@@ -301,7 +308,7 @@ func getMetrics(w http.ResponseWriter, r *http.Request) {
 	for metric, byVersion := range byMetricOverUsers {
 		hT, err := calculateHistogram(byVersion, 0, 0)
 		if err != nil {
-			log.Logger.Debugf("unable to compute histogram over users for application %s (metric %s)", application, metric)
+			log.Logger.Debugf("unable to compute histogram over users for application %s (metric %s)", namespaceApplication, metric)
 			continue
 		} else {
 			resultEntry := result[metric]
@@ -490,7 +497,7 @@ func getHTTPEndpointRow(httpRunnerResults *fhttp.HTTPRunnerResults) httpEndpoint
 	return row
 }
 
-func getHTTPDashboardHelper(experimentResult *base.ExperimentResult) httpDashboard {
+func getHTTPDashboardHelper(experimentResult *util.ExperimentResult) httpDashboard {
 	dashboard := httpDashboard{
 		Endpoints: map[string]httpEndpointRow{},
 		ExperimentResult: dashboardExperimentResult{
@@ -517,7 +524,7 @@ func getHTTPDashboardHelper(experimentResult *base.ExperimentResult) httpDashboa
 		return dashboard
 	}
 
-	httpResult := base.HTTPResult{}
+	httpResult := util.HTTPResult{}
 	err = json.Unmarshal(httpTaskDataBytes, &httpResult)
 	if err != nil {
 		log.Logger.Error("cannot unmarshal http task data into HTTPResult")
@@ -533,7 +540,7 @@ func getHTTPDashboardHelper(experimentResult *base.ExperimentResult) httpDashboa
 	return dashboard
 }
 
-// getHTTPDashboard handles GET /getHTTPDashboard with query parameter application=namespace/name
+// getHTTPDashboard handles GET /getHTTPDashboard with query parameter test=name and namespace=namespace
 func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getHTTPGrafana called")
 	defer log.Logger.Trace("getHTTPGrafana completed")
@@ -551,13 +558,13 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	experiment := r.URL.Query().Get("experiment")
-	if experiment == "" {
-		http.Error(w, "no experiment specified", http.StatusBadRequest)
+	test := r.URL.Query().Get("test")
+	if test == "" {
+		http.Error(w, "no test specified", http.StatusBadRequest)
 		return
 	}
 
-	log.Logger.Tracef("getHTTPGrafana called for namespace %s and experiment %s", namespace, experiment)
+	log.Logger.Tracef("getHTTPGrafana called for namespace %s and test %s", namespace, test)
 
 	// get fortioResult from metrics client
 	if abn.MetricsClient == nil {
@@ -565,17 +572,17 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get experimentResult from metrics client
-	experimentResult, err := abn.MetricsClient.GetExperimentResult(namespace, experiment)
+	// get testResult from metrics client
+	testResult, err := abn.MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, experiment %s", namespace, experiment)
+		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusBadRequest)
 		return
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(experimentResult))
+	dashboardBytes, err := json.Marshal(getHTTPDashboardHelper(testResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal HTTP dashboard"
 		log.Logger.Error(errorMessage)
@@ -628,7 +635,7 @@ func getGRPCEndpointRow(ghzRunnerReport *runner.Report) ghzEndpointRow {
 	return row
 }
 
-func getGRPCDashboardHelper(experimentResult *base.ExperimentResult) ghzDashboard {
+func getGRPCDashboardHelper(experimentResult *util.ExperimentResult) ghzDashboard {
 	dashboard := ghzDashboard{
 		Endpoints: map[string]ghzEndpointRow{},
 		ExperimentResult: dashboardExperimentResult{
@@ -654,7 +661,7 @@ func getGRPCDashboardHelper(experimentResult *base.ExperimentResult) ghzDashboar
 		return dashboard
 	}
 
-	ghzResult := base.GHZResult{}
+	ghzResult := util.GHZResult{}
 	err = json.Unmarshal(ghzTaskDataBytes, &ghzResult)
 	if err != nil {
 		log.Logger.Error("cannot unmarshal ghz task data into GHZResult")
@@ -670,6 +677,7 @@ func getGRPCDashboardHelper(experimentResult *base.ExperimentResult) ghzDashboar
 	return dashboard
 }
 
+// getGRPCDashboard handles GET /getGRPCDashboard with query parameter test=name and namespace=namespace
 func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("getGRPCDashboard called")
 	defer log.Logger.Trace("getGRPCDashboard completed")
@@ -687,13 +695,13 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	experiment := r.URL.Query().Get("experiment")
-	if experiment == "" {
-		http.Error(w, "no experiment specified", http.StatusBadRequest)
+	test := r.URL.Query().Get("test")
+	if test == "" {
+		http.Error(w, "no test specified", http.StatusBadRequest)
 		return
 	}
 
-	log.Logger.Tracef("getGRPCDashboard called for namespace %s and experiment %s", namespace, experiment)
+	log.Logger.Tracef("getGRPCDashboard called for namespace %s and test %s", namespace, test)
 
 	// get ghz result from metrics client
 	if abn.MetricsClient == nil {
@@ -701,17 +709,17 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get experimentResult from metrics client
-	experimentResult, err := abn.MetricsClient.GetExperimentResult(namespace, experiment)
+	// get testResult from metrics client
+	testResult, err := abn.MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
-		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, experiment %s", namespace, experiment)
+		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
 		http.Error(w, errorMessage, http.StatusBadRequest)
 		return
 	}
 
 	// JSON marshal the dashboard
-	dashboardBytes, err := json.Marshal(getGRPCDashboardHelper(experimentResult))
+	dashboardBytes, err := json.Marshal(getGRPCDashboardHelper(testResult))
 	if err != nil {
 		errorMessage := "cannot JSON marshal gRPC dashboard"
 		log.Logger.Error(errorMessage)
@@ -724,10 +732,10 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(dashboardBytes)
 }
 
-// putExperimentResult handles PUT /experimentResult with query parameter application=namespace/name
+// putExperimentResult handles PUT /testResult with query parameter test=name and namespace=namespace
 func putExperimentResult(w http.ResponseWriter, r *http.Request) {
-	log.Logger.Trace("putResult called")
-	defer log.Logger.Trace("putResult completed")
+	log.Logger.Trace("putExperimentResult called")
+	defer log.Logger.Trace("putExperimentResult completed")
 
 	// verify method
 	if r.Method != http.MethodPut {
@@ -742,13 +750,13 @@ func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	experiment := r.URL.Query().Get("experiment")
+	experiment := r.URL.Query().Get("test")
 	if experiment == "" {
-		http.Error(w, "no experiment specified", http.StatusBadRequest)
+		http.Error(w, "no test specified", http.StatusBadRequest)
 		return
 	}
 
-	log.Logger.Tracef("putResult called for namespace %s and experiment %s", namespace, experiment)
+	log.Logger.Tracef("putExperimentResult called for namespace %s and test %s", namespace, experiment)
 
 	defer func() {
 		err := r.Body.Close()

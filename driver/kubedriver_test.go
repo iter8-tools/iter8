@@ -43,7 +43,7 @@ func TestKubeRun(t *testing.T) {
 			metricsServerCalled = true
 
 			// check query parameters
-			assert.Equal(t, myName, req.URL.Query().Get("experiment"))
+			assert.Equal(t, myName, req.URL.Query().Get("test"))
 			assert.Equal(t, myNamespace, req.URL.Query().Get("namespace"))
 
 			// check payload

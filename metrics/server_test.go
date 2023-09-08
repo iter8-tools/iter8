@@ -573,10 +573,10 @@ func TestReadConfigSetPort(t *testing.T) {
 	assert.Equal(t, expectedPortNumber, *conf.Port)
 }
 
-func TestGetMetricsInvalidMethod(t *testing.T) {
+func TestGetABNDashboardInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/metrics", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodPost, util.AbnDashboard, nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
@@ -585,10 +585,10 @@ func TestGetMetricsInvalidMethod(t *testing.T) {
 	assert.Equal(t, http.StatusMethodNotAllowed, res.StatusCode)
 }
 
-func TestGetMetricsMissingParameter(t *testing.T) {
+func TestGetABNDashboardMissingParameter(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard, nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
@@ -597,10 +597,10 @@ func TestGetMetricsMissingParameter(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 }
 
-func TestGetMetricsNoRouteMap(t *testing.T) {
+func TestGetABNDashboardNoRouteMap(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/metrics?application=default%2Ftest", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard+"?application=test&namespace=default", nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
@@ -617,7 +617,7 @@ func (cm *testRoutemaps) GetAllRoutemaps() controllers.RoutemapsInterface {
 	return &cm.allroutemaps
 }
 
-func TestGetMetrics(t *testing.T) {
+func TestGetABNDashboard(t *testing.T) {
 	testRM := testRoutemaps{
 		allroutemaps: setupRoutemaps(t, *getTestRM("default", "test")),
 	}
@@ -655,8 +655,8 @@ func TestGetMetrics(t *testing.T) {
 	w := httptest.NewRecorder()
 	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName("default", "test")
 	assert.NotNil(t, rm)
-	req := httptest.NewRequest(http.MethodGet, "/metrics?application=default%2Ftest", nil)
-	getMetrics(w, req)
+	req := httptest.NewRequest(http.MethodGet, util.AbnDashboard+"?application=test&namespace=default", nil)
+	getAbnDashboard(w, req)
 	res := w.Result()
 	defer func() {
 		err := res.Body.Close()
@@ -891,7 +891,7 @@ func TestGetGRPCDashboardHelper(t *testing.T) {
 
 func TestPutExperimentResultInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, util.ExperimentResultPath, nil)
+	req := httptest.NewRequest(http.MethodGet, util.TestResultPath, nil)
 	putExperimentResult(w, req)
 	res := w.Result()
 	defer func() {
@@ -917,7 +917,7 @@ func TestPutExperimentResultMissingParameter(t *testing.T) {
 		},
 		{
 			queryParams: url.Values{
-				"experiment": {"default"},
+				"test": {"default"},
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
@@ -926,7 +926,7 @@ func TestPutExperimentResultMissingParameter(t *testing.T) {
 	for _, test := range tests {
 		w := httptest.NewRecorder()
 
-		u, err := url.ParseRequestURI(util.ExperimentResultPath)
+		u, err := url.ParseRequestURI(util.TestResultPath)
 		assert.NoError(t, err)
 		u.RawQuery = test.queryParams.Encode()
 		urlStr := fmt.Sprintf("%v", u)
@@ -954,11 +954,11 @@ func TestPutExperimentResult(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// construct inputs to putExperimentResult
-	u, err := url.ParseRequestURI(util.ExperimentResultPath)
+	u, err := url.ParseRequestURI(util.TestResultPath)
 	assert.NoError(t, err)
 	params := url.Values{
-		"namespace":  {"default"},
-		"experiment": {"default"},
+		"namespace": {"default"},
+		"test":      {"default"},
 	}
 	u.RawQuery = params.Encode()
 	urlStr := fmt.Sprintf("%v", u)
@@ -1021,7 +1021,7 @@ func TestGetHTTPDashboardMissingParameter(t *testing.T) {
 		},
 		{
 			queryParams: url.Values{
-				"experiment": {"default"},
+				"test": {"default"},
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
@@ -1079,8 +1079,8 @@ func TestGetHTTPDashboard(t *testing.T) {
 	u, err := url.ParseRequestURI(util.HTTPDashboardPath)
 	assert.NoError(t, err)
 	params := url.Values{
-		"namespace":  {"default"},
-		"experiment": {"default"},
+		"namespace": {"default"},
+		"test":      {"default"},
 	}
 	u.RawQuery = params.Encode()
 	urlStr := fmt.Sprintf("%v", u)
@@ -1133,7 +1133,7 @@ func TestGetGRPCDashboardMissingParameter(t *testing.T) {
 		},
 		{
 			queryParams: url.Values{
-				"experiment": {"default"},
+				"test": {"default"},
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
@@ -1191,8 +1191,8 @@ func TestGetGRPCDashboard(t *testing.T) {
 	u, err := url.ParseRequestURI(util.GRPCDashboardPath)
 	assert.NoError(t, err)
 	params := url.Values{
-		"namespace":  {"default"},
-		"experiment": {"default"},
+		"namespace": {"default"},
+		"test":      {"default"},
 	}
 	u.RawQuery = params.Encode()
 	urlStr := fmt.Sprintf("%v", u)
