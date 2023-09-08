@@ -734,10 +734,10 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(dashboardBytes)
 }
 
-// putExperimentResult handles PUT /experimentResult with query parameter test=name and namespace=namespace
+// putExperimentResult handles PUT /testResult with query parameter experiment=name and namespace=namespace
 func putExperimentResult(w http.ResponseWriter, r *http.Request) {
-	log.Logger.Trace("putResult called")
-	defer log.Logger.Trace("putResult completed")
+	log.Logger.Trace("putExperimentResult called")
+	defer log.Logger.Trace("putExperimentResult completed")
 
 	// verify method
 	if r.Method != http.MethodPut {
@@ -758,7 +758,7 @@ func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Logger.Tracef("putResult called for namespace %s and experiment %s", namespace, experiment)
+	log.Logger.Tracef("putExperimentResult called for namespace %s and test %s", namespace, experiment)
 
 	defer func() {
 		err := r.Body.Close()

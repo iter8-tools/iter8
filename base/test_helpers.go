@@ -104,7 +104,7 @@ type MetricsServerCallback func(req *http.Request)
 type MockMetricsServerInput struct {
 	MetricsServerURL string
 
-	// PUT /experimentResult
+	// PUT /testResult
 	ExperimentResultCallback MetricsServerCallback
 	// GET /grpcDashboard
 	GRPCDashboardCallback MetricsServerCallback
@@ -115,7 +115,7 @@ type MockMetricsServerInput struct {
 // MockMetricsServer is a mock metrics server
 // use the callback functions in the MockMetricsServerInput to test if those endpoints are called
 func MockMetricsServer(input MockMetricsServerInput) {
-	// PUT /experimentResult
+	// PUT /testResult
 	httpmock.RegisterResponder(
 		http.MethodPut,
 		input.MetricsServerURL+ExperimentResultPath,
