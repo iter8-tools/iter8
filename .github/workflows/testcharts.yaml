@@ -44,7 +44,7 @@ jobs:
 
   # TODO: add check to verify when a change is made to kustomize, a similar change is made to charts
 
-  http-experiment:
+  http:
     name: HTTP performance test
     needs: get_versions
     runs-on: ubuntu-latest
@@ -110,9 +110,9 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  http-payload-experiment:
+  http-payload:
     name: HTTP performance test with payload
     needs: get_versions
     runs-on: ubuntu-latest
@@ -179,9 +179,9 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  http-multiple-experiment:
+  http-multiple:
     name: HTTP performance test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
@@ -250,9 +250,9 @@ jobs:
     - name: Check GET /httpDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=httpbin-test" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  grpc-experiment:
+  grpc:
     name: gRPC performance test
     needs: get_versions
     runs-on: ubuntu-latest
@@ -333,9 +333,9 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=routeguide-test" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=routeguide-test" -f
 
-  grpc-multiple-experiment:
+  grpc-multiple:
     name: gRPC performance test with multiple endpoints
     needs: get_versions
     runs-on: ubuntu-latest
@@ -418,9 +418,9 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=routeguide-test" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=routeguide-test" -f
 
-  grpc-experiment2:
+  grpc2:
     name: gRPC performance test 2
     needs: get_versions
     runs-on: ubuntu-latest
@@ -488,4 +488,4 @@ jobs:
     - name: Check GET /grpcDashboard
       if: steps.modified-files.outputs.any_modified == 'true'
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=hello-test" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=hello-test" -f
