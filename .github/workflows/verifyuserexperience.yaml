@@ -428,8 +428,8 @@ jobs:
 
     - name: View test logs and delete test
       run: |
-        kubectl logs -l iter8.tools/test=httpbin-test
-        helm delete httpbin-test
+        kubectl -n experiments logs -l iter8.tools/test=httpbin-test
+        helm delete httpbin-test -n experiments
 
     - name: Expose metrics service
       run: |
