@@ -133,6 +133,7 @@ jobs:
       run: |
         helm upgrade --install \
         --repo https://iter8-tools.github.io/iter8 --version 0.17 httpbin-test iter8 \
+        --set "tasks={http}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
         --set http.endpoints.post.url=http://httpbin.default/post \
