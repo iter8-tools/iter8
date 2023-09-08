@@ -752,7 +752,7 @@ func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 
 	experiment := r.URL.Query().Get("test")
 	if experiment == "" {
-		http.Error(w, "no experiment specified", http.StatusBadRequest)
+		http.Error(w, "no test specified", http.StatusBadRequest)
 		return
 	}
 
