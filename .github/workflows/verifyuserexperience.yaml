@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  http-experiment:
+  http:
     name: HTTP performance test
     runs-on: ubuntu-latest
 
@@ -57,9 +57,9 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  http-payload-experiment:
+  http-payload:
     name: HTTP performance test with payload
     runs-on: ubuntu-latest
 
@@ -106,9 +106,9 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  http-multiple-experiment:
+  http-multiple:
     name: HTTP performance test with multiple endpoints
     runs-on: ubuntu-latest
 
@@ -155,9 +155,9 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  grpc-experiment:
+  grpc:
     name: gRPC performance test
     runs-on: ubuntu-latest
 
@@ -216,9 +216,9 @@ jobs:
 
     - name: Check GET /grpcDashboard
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=routeguide-test" -f
 
-  grpc-multiple-experiment:
+  grpc-multiple:
     name: gRPC performance test with multiple endpoints
     runs-on: ubuntu-latest
 
@@ -279,9 +279,9 @@ jobs:
 
     - name: Check GET /grpcDashboard
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=routeguide-test" -f
 
-  grpc-experiment2:
+  grpc2:
     name: gRPC performance test 2
     runs-on: ubuntu-latest
 
@@ -328,7 +328,7 @@ jobs:
 
     - name: Check GET /grpcDashboard
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=hello-test" -f
 
   readiness:
     name: Readiness test
@@ -379,7 +379,7 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
   readiness-with-namespace:
     name: Readiness test with namespace
@@ -436,4 +436,4 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=experiments&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=experiments&test=httpbin-test" -f
