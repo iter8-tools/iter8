@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  http-experiment:
+  http:
     name: HTTP performance test
     runs-on: ubuntu-latest
 
@@ -40,7 +40,7 @@ jobs:
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -57,9 +57,9 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  http-payload-experiment:
+  http-payload:
     name: HTTP performance test with payload
     runs-on: ubuntu-latest
 
@@ -88,7 +88,7 @@ jobs:
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -106,9 +106,9 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  http-multiple-experiment:
+  http-multiple:
     name: HTTP performance test with multiple endpoints
     runs-on: ubuntu-latest
 
@@ -138,7 +138,7 @@ jobs:
         --set http.endpoints.post.url=http://httpbin.default/post \
         --set http.endpoints.post.payloadStr=hello \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -155,9 +155,9 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
-  grpc-experiment:
+  grpc:
     name: gRPC performance test
     runs-on: ubuntu-latest
 
@@ -199,7 +199,7 @@ jobs:
         --set grpc.call=routeguide.RouteGuide.GetFeature \
         --set grpc.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/unary.json \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/routeguide-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -216,9 +216,9 @@ jobs:
 
     - name: Check GET /grpcDashboard
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=routeguide-test" -f
 
-  grpc-multiple-experiment:
+  grpc-multiple:
     name: gRPC performance test with multiple endpoints
     runs-on: ubuntu-latest
 
@@ -262,7 +262,7 @@ jobs:
         --set grpc.endpoints.listFeatures.call=routeguide.RouteGuide.ListFeatures \
         --set grpc.endpoints.listFeatures.dataURL=https://raw.githubusercontent.com/iter8-tools/docs/v0.13.13/samples/grpc-payload/server.json \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/routeguide-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -279,9 +279,9 @@ jobs:
 
     - name: Check GET /grpcDashboard
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=routeguide-test" -f
 
-  grpc-experiment2:
+  grpc2:
     name: gRPC performance test 2
     runs-on: ubuntu-latest
 
@@ -311,7 +311,7 @@ jobs:
         --set grpc.call="helloworld.Greeter.SayHello" \
         --set grpc.protoURL="https://raw.githubusercontent.com/grpc/grpc-go/master/examples/helloworld/helloworld/helloworld.proto" \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/hello-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -328,7 +328,7 @@ jobs:
 
     - name: Check GET /grpcDashboard
       run: |
-        curl "http://localhost:8080/grpcDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/grpcDashboard?namespace=default&test=hello-test" -f
 
   readiness:
     name: Readiness test
@@ -362,7 +362,7 @@ jobs:
         --set ready.timeout=60s \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -379,7 +379,7 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=default&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=default&test=httpbin-test" -f
 
   readiness-with-namespace:
     name: Readiness test with namespace
@@ -419,7 +419,7 @@ jobs:
         --set ready.namespace=default \
         --set http.url=http://httpbin.default/get \
         --set logLevel=trace
-        kubectl wait --for=condition=complete --timeout=180s -n experiments job/default-1-job
+        kubectl wait --for=condition=complete --timeout=180s -n experiments job/httpbin-test-1-job
 
     - name: Get Kubernetes status
       run: |
@@ -436,4 +436,4 @@ jobs:
 
     - name: Check GET /httpDashboard
       run: |
-        curl "http://localhost:8080/httpDashboard?namespace=experiments&experiment=default" -f
+        curl "http://localhost:8080/httpDashboard?namespace=experiments&test=httpbin-test" -f

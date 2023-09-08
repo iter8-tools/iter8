@@ -17,8 +17,8 @@ on:
     - charts/**
 
 jobs:
-  http-experiment:
-    name: Lint HTTP experiment
+  http:
+    name: Lint HTTP performance test
     runs-on: ubuntu-latest
 
     steps:    
@@ -49,8 +49,8 @@ jobs:
       with:
         directory: iter8.yaml
 
-  grpc-experiment:
-    name: Lint gRPC experiment
+  grpc:
+    name: Lint gRPC performance test
     runs-on: ubuntu-latest
 
     steps:    
