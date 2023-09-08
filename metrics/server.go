@@ -147,9 +147,8 @@ func Start(stopCh <-chan struct{}) error {
 	}
 
 	// configure endpoints
+	http.HandleFunc(util.TestResultPath, putExperimentResult)
 	http.HandleFunc(util.AbnDashboard, getAbnDashboard)
-
-	http.HandleFunc(util.ExperimentResultPath, putExperimentResult)
 	http.HandleFunc(util.HTTPDashboardPath, getHTTPDashboard)
 	http.HandleFunc(util.GRPCDashboardPath, getGRPCDashboard)
 
@@ -733,7 +732,7 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(dashboardBytes)
 }
 
-// putExperimentResult handles PUT /testResult with query parameter experiment=name and namespace=namespace
+// putExperimentResult handles PUT /testResult with query parameter test=name and namespace=namespace
 func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Trace("putExperimentResult called")
 	defer log.Logger.Trace("putExperimentResult completed")
@@ -751,7 +750,7 @@ func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	experiment := r.URL.Query().Get("experiment")
+	experiment := r.URL.Query().Get("test")
 	if experiment == "" {
 		http.Error(w, "no experiment specified", http.StatusBadRequest)
 		return

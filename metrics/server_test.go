@@ -891,7 +891,7 @@ func TestGetGRPCDashboardHelper(t *testing.T) {
 
 func TestPutExperimentResultInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, util.ExperimentResultPath, nil)
+	req := httptest.NewRequest(http.MethodGet, util.TestResultPath, nil)
 	putExperimentResult(w, req)
 	res := w.Result()
 	defer func() {
@@ -917,7 +917,7 @@ func TestPutExperimentResultMissingParameter(t *testing.T) {
 		},
 		{
 			queryParams: url.Values{
-				"experiment": {"default"},
+				"test": {"default"},
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
@@ -926,7 +926,7 @@ func TestPutExperimentResultMissingParameter(t *testing.T) {
 	for _, test := range tests {
 		w := httptest.NewRecorder()
 
-		u, err := url.ParseRequestURI(util.ExperimentResultPath)
+		u, err := url.ParseRequestURI(util.TestResultPath)
 		assert.NoError(t, err)
 		u.RawQuery = test.queryParams.Encode()
 		urlStr := fmt.Sprintf("%v", u)
@@ -954,11 +954,11 @@ func TestPutExperimentResult(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// construct inputs to putExperimentResult
-	u, err := url.ParseRequestURI(util.ExperimentResultPath)
+	u, err := url.ParseRequestURI(util.TestResultPath)
 	assert.NoError(t, err)
 	params := url.Values{
-		"namespace":  {"default"},
-		"experiment": {"default"},
+		"namespace": {"default"},
+		"test":      {"default"},
 	}
 	u.RawQuery = params.Encode()
 	urlStr := fmt.Sprintf("%v", u)
@@ -1021,7 +1021,7 @@ func TestGetHTTPDashboardMissingParameter(t *testing.T) {
 		},
 		{
 			queryParams: url.Values{
-				"experiment": {"default"},
+				"test": {"default"},
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
@@ -1133,7 +1133,7 @@ func TestGetGRPCDashboardMissingParameter(t *testing.T) {
 		},
 		{
 			queryParams: url.Values{
-				"experiment": {"default"},
+				"test": {"default"},
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
