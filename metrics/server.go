@@ -206,8 +206,7 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getAbnDashboard called for application %s", namespaceApplication)
 
 	// identify the routemap for the application
-	namespace, name := util.SplitApplication(namespaceApplication)
-	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, name)
+	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName(namespace, application)
 	if rm == nil || reflect.ValueOf(rm).IsNil() {
 		http.Error(w, fmt.Sprintf("unknown application %s", namespaceApplication), http.StatusBadRequest)
 		return
