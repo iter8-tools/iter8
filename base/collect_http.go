@@ -1,6 +1,7 @@
 package base
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -126,6 +127,18 @@ func (t *collectHTTPTask) validateInputs() error {
 
 // getFortioOptions constructs Fortio's HTTP runner options based on collect task inputs
 func getFortioOptions(c endpoint) (*fhttp.HTTPRunnerOptions, error) {
+	if c.QPS == nil {
+		return nil, errors.New("no value for QPS")
+	}
+
+	if c.Connections == nil {
+		return nil, errors.New("no value for Connections")
+	}
+
+	if c.AllowInitialErrors == nil {
+		return nil, errors.New("no value for AllowInitialErrors")
+	}
+
 	// basic runner
 	fo := &fhttp.HTTPRunnerOptions{
 		RunnerOptions: periodic.RunnerOptions{
