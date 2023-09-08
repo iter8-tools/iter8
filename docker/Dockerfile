@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y curl
 
 # Set Iter8 version from build args
 ARG TAG
-ENV TAG=${TAG:-v0.16.0}
+ENV TAG=${TAG:-v0.17.0}
 
 ADD iter8 /bin
 

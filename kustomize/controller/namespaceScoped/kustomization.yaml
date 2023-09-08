@@ -9,4 +9,4 @@ resources:
 
 commonLabels:
   app.kubernetes.io/name: controller
-  app.kubernetes.io/version: v0.16
+  app.kubernetes.io/version: v0.17
