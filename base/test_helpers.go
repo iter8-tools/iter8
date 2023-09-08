@@ -118,7 +118,7 @@ func MockMetricsServer(input MockMetricsServerInput) {
 	// PUT /testResult
 	httpmock.RegisterResponder(
 		http.MethodPut,
-		input.MetricsServerURL+ExperimentResultPath,
+		input.MetricsServerURL+TestResultPath,
 		func(req *http.Request) (*http.Response, error) {
 			if input.ExperimentResultCallback != nil {
 				input.ExperimentResultCallback(req)
