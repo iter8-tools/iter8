@@ -1,68 +1,30 @@
-{{- define "task.ready.tn" }}
-{{- if .Values.ready }}
-{{- $namespace := coalesce .Values.ready.namespace .Release.Namespace }}    
-{{- if $namespace }}
-    namespace: {{ $namespace }}
-{{- end }}
-{{- if .Values.ready.timeout }}
-    timeout: {{ .Values.ready.timeout }}
-{{- end }}
-{{- end }}
-{{- end }}
 {{- define "task.ready" }}
 {{- if .Values.ready }}
-{{- $namespace := coalesce .Values.ready.namespace .Release.Namespace }}
-{{- if .Values.ready.service }}
-# task: determine if Kubernetes Service exists
+{{- $typesToCheck := omit .Values.ready "timeout" "namespace" }}
+{{- range $type, $name := $typesToCheck }}
+{{- $definition := get $.Values.resourceTypes $type }}
+{{- if not $definition }}
+{{- cat "no type definition for: " $type | fail }}
+{{- else }}
+# task: test for existence and readiness of a resource
 - task: ready
   with:
-    name: {{ .Values.ready.service | quote }}
-    version: v1
-    resource: services
-{{- include "task.ready.tn" . }}
-{{- end }}
-{{- if .Values.ready.deploy }}
-# task: determine if Kubernetes Deployment exists and is Available
-- task: ready
-  with:
-    name: {{ .Values.ready.deploy | quote }}
-    group: apps
-    version: v1
-    resource: deployments
-    condition: Available
-{{- include "task.ready.tn" . }}
-{{- end }}
-{{- if .Values.ready.ksvc }}
-# task: determine if Knative Service exists and is ready
-- task: ready
-  with:
-    name: {{ .Values.ready.ksvc | quote }}
-    group: serving.knative.dev
-    version: v1
-    resource: services
-    condition: Ready
-{{- include "task.ready.tn" . }}
-{{- end }}
-{{- if .Values.ready.isvc }}
-# task: determine if KServe InferenceService exists and is ready
-- task: ready
-  with:
-    name: {{ .Values.ready.isvc | quote }}
-    group: serving.kserve.io
-    version: v1beta1
-    resource: inferenceservices
-    condition: Ready
-{{- include "task.ready.tn" . }}
-{{- end }}
-{{- if .Values.ready.chaosengine }}
-# task: determine if chaos engine resource exists
-- task: ready
-  with:
-    name: {{ .Values.ready.chaosengine | quote }}
-    group: litmuschaos.io
-    version: v1alpha1
-    resource: chaosengines
-{{- include "task.ready.tn" . }}
-{{- end }}
-{{- end }}
-{{- end }}
+    name: {{ $name | quote }}
+    group: {{ get $definition "Group" | quote }}
+    version: {{ get $definition "Version" }}
+    resource: {{ get $definition "Resource" }}
+    {{- if (hasKey $definition "conditions") }}
+    conditions:
+{{ toYaml (get $definition "conditions") | indent 4 }}
+    {{- end }} {{- /* if (hasKey $definition "conditions") */}}
+{{- $namespace := coalesce $.Values.ready.namespace $.Release.Namespace }}    
+{{- if $namespace }}
+    namespace: {{ $namespace }}
+{{- end }} {{- /* if $namespace */}}
+{{- if $.Values.ready.timeout }}
+    timeout: {{ $.Values.ready.timeout }}
+{{- end }} {{- /* if $.Values.ready.timeout */}}
+{{- end }} {{- /* if not $definition */}}
+{{- end }} {{- /* range $type, $name */}}
+{{- end }} {{- /* {{- if .Values.ready */}}
+{{- end }} {{- /* define "task.ready" */}}

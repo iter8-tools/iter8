@@ -17,3 +17,31 @@ resources:
 
 ### metricsServerURL is the URL to the Metrics server 
 metricsServerURL: http://iter8.default:8080
+
+resourceTypes:
+  svc:
+    Group: ""
+    Version: v1
+    Resource: services
+  cm:
+    Group: ""
+    Version: v1
+    Resource: configmaps
+  deploy:
+    Group: apps
+    Version: v1
+    Resource: deployments
+    conditions:
+    - name: Available
+      status: "True"
+  isvc:
+    Group: serving.kserve.io
+    Version: v1beta1
+    Resource: inferenceservices
+    conditions:
+    - name: Ready
+      status: "True"
+  vs:
+    Group: networking.istio.io
+    Version: v1beta1
+    Resource: virtualservices

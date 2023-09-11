@@ -12,46 +12,28 @@ rules:
   verbs: ["get", "update"]
 {{- if .Values.ready }}
 ---
-{{- $namespace := coalesce .Values.ready.namespace .Release.Namespace }}
-{{- if $namespace }}
+{{- $namespace := coalesce $.Values.ready.namespace $.Release.Namespace }}    
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Release.Name }}-ready
+  {{- if $namespace }}
   namespace: {{ $namespace }}
+  {{- end }} {{- /* if $namespace */}}
   annotations:
     iter8.tools/test: {{ .Release.Name }}
 rules:
-{{- if .Values.ready.service }}
-- apiGroups: [""]
-  resourceNames: [{{ .Values.ready.service | quote }}]
-  resources: ["services"]
-  verbs: ["get"]
-{{- end }}
-{{- if .Values.ready.deploy }}
-- apiGroups: ["apps"]
-  resourceNames: [{{ .Values.ready.deploy | quote }}]
-  resources: ["deployments"]
-  verbs: ["get"]
-{{- end }}
-{{- if .Values.ready.ksvc }}
-- apiGroups: ["serving.knative.dev"]
-  resourceNames: [{{ .Values.ready.ksvc | quote }}]
-  resources: ["services"]
-  verbs: ["get"]
-{{- end }}
-{{- if .Values.ready.isvc }}
-- apiGroups: ["serving.kserve.io"]
-  resourceNames: [{{ .Values.ready.isvc | quote }}]
-  resources: ["inferenceservices"]
-  verbs: ["get"]
-{{- end }}
-{{- if .Values.ready.chaosengine }}
-- apiGroups: ["litmuschaos.io"]
-  resourceNames: [{{ .Values.ready.chaosengine | quote }}]
-  resources: ["chaosengines"]
-  verbs: ["get"]
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- $typesToCheck := omit .Values.ready "timeout" "namespace" }}
+{{- range $type, $name := $typesToCheck }}
+{{- $definition := get $.Values.resourceTypes $type }}
+{{- if not $definition }}
+{{- cat "no type definition for: " $type | fail }}
+{{- else }}
+- apiGroups: [ {{ get $definition "Group" | quote }} ]
+  resourceNames: [ {{ $name | quote }} ]
+  resources: [ {{ get $definition "Resource" | quote }} ]
+  verbs: [ "get" ]
+{{- end }} {{- /* if not $definition */}}
+{{- end }} {{- /* range $type, $name */}}
+{{- end }} {{- /* {{- if .Values.ready */}}
+{{- end }} {{- /* {{- if .Values.ready */}}
