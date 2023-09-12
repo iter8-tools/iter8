@@ -16,6 +16,10 @@ resourceTypes:
     Group: ""
     Version: v1
     Resource: services
+  service:
+    Group: ""
+    Version: v1
+    Resource: services
   cm:
     Group: ""
     Version: v1
@@ -25,15 +29,13 @@ resourceTypes:
     Version: v1
     Resource: deployments
     conditions:
-    - name: Available
-      status: "True"
+    - Available
   isvc:
     Group: serving.kserve.io
     Version: v1beta1
     Resource: inferenceservices
     conditions:
-    - name: Ready
-      status: "True"
+    - Ready
   vs:
     Group: networking.istio.io
     Version: v1beta1

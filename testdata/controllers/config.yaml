@@ -19,8 +19,7 @@ resourceTypes:
     Version: v1beta1
     Resource: inferenceservices
     conditions:
-    - name: Ready
-      status: "True"
+    - Ready
   vs:
     Group: networking.istio.io
     Version: v1beta1

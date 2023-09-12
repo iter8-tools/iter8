@@ -132,10 +132,9 @@ func TestConditionsSatisfied(t *testing.T) {
 	u.SetGeneration(13)
 	config := &Config{
 		ResourceTypes: map[string]GroupVersionResourceConditions{"foo": {
-			Conditions: []Condition{{
-				Name:   "bar",
-				Status: "True",
-			}},
+			Conditions: []string{
+				"bar",
+			},
 		}},
 	}
 	var gen12 = int64(12)

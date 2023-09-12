@@ -41,7 +41,7 @@ type readinessInputs struct {
 	// Name of the object
 	Name string `json:"name" yaml:"name"`
 	// Condition is label of condition to check for value of "True"
-	Condition *string `json:"condition" yaml:"condition"`
+	Conditions []string `json:"conditions" yaml:"conditions"`
 	// Timeout is maximum time spent trying to find object and check condition
 	Timeout *string `json:"timeout" yaml:"timeout"`
 }
@@ -134,21 +134,24 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 	}
 
 	// if no condition to check was specified, we can return now
-	if t.With.Condition == nil {
+	if len(t.With.Conditions) == 0 {
 		return nil
 	}
 
-	// otherwise, find the condition and check that it is "True"
-	log.Logger.Trace("looking for condition: ", *t.With.Condition)
+	for _, condition := range t.With.Conditions {
+		// otherwise, find the condition and check that it is "True"
+		log.Logger.Trace("looking for condition: ", condition)
 
-	cs, err := getConditionStatus(obj, *t.With.Condition)
-	if err != nil {
-		return err
+		cs, err := getConditionStatus(obj, condition)
+		if err != nil {
+			return err
+		}
+		if strings.EqualFold(*cs, string(corev1.ConditionTrue)) {
+			return nil
+		}
+		return errors.New("condition status not True")
 	}
-	if strings.EqualFold(*cs, string(corev1.ConditionTrue)) {
-		return nil
-	}
-	return errors.New("condition status not True")
+	return nil // no conditions or all were True
 }
 
 func gvr(objRef *readinessInputs) schema.GroupVersionResource {

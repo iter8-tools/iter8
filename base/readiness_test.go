@@ -173,7 +173,7 @@ func (t *readinessTaskBuilder) withTimeout(timeout string) *readinessTaskBuilder
 }
 
 func (t *readinessTaskBuilder) withCondition(condition string) *readinessTaskBuilder {
-	t.With.Condition = &condition
+	t.With.Conditions = append(t.With.Conditions, condition)
 	return t
 }
 
