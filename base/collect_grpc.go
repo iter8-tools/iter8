@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"dario.cat/mergo"
 	"github.com/bojand/ghz/runner"
-	"github.com/imdario/mergo"
 	log "github.com/iter8-tools/iter8/base/log"
 	gd "github.com/mcuadros/go-defaults"
 )

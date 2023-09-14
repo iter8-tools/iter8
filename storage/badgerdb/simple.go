@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"dario.cat/mergo"
 	"github.com/dgraph-io/badger/v4"
-	"github.com/imdario/mergo"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/storage"
 )

@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
+	"dario.cat/mergo"
 	"fortio.org/fortio/fhttp"
 	"fortio.org/fortio/periodic"
-	"github.com/imdario/mergo"
 	log "github.com/iter8-tools/iter8/base/log"
 )
 
