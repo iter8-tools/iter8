@@ -138,20 +138,23 @@ func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) e
 		return nil
 	}
 
+	// set err to nil; will set if there is a problem finding conditions
+	err = nil
+	var cs *string
 	for _, condition := range t.With.Conditions {
 		// otherwise, find the condition and check that it is "True"
 		log.Logger.Trace("looking for condition: ", condition)
 
-		cs, err := getConditionStatus(obj, condition)
+		cs, err = getConditionStatus(obj, condition)
 		if err != nil {
-			return err
+			continue
 		}
 		if strings.EqualFold(*cs, string(corev1.ConditionTrue)) {
 			return nil
 		}
-		return errors.New("condition status not True")
+		err = errors.New("condition status not True")
 	}
-	return nil // no conditions or all were True
+	return err
 }
 
 func gvr(objRef *readinessInputs) schema.GroupVersionResource {
