@@ -13,15 +13,7 @@ const (
 // GroupVersionResourceConditions is a Kubernetes resource type along with a list of conditions
 type GroupVersionResourceConditions struct {
 	schema.GroupVersionResource
-	Conditions []Condition `json:"conditions,omitempty"`
-}
-
-// Condition is the condition within resource status
-type Condition struct {
-	// Name of the condition
-	Name string `json:"name"`
-	// Status of the condition
-	Status string `json:"status"`
+	Conditions []string `json:"conditions,omitempty"`
 }
 
 // Config defines the configuration of the controllers
