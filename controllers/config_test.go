@@ -39,10 +39,9 @@ func TestReadConfig(t *testing.T) {
 					Version:  "v1beta1",
 					Resource: "inferenceservices",
 				},
-				Conditions: []Condition{{
-					Name:   "Ready",
-					Status: "True",
-				}},
+				Conditions: []string{
+					"Ready",
+				},
 			})
 		} else {
 			assert.Error(t, err)

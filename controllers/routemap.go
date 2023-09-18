@@ -421,7 +421,7 @@ func conditionsSatisfied(u *unstructured.Unstructured, gvrShort string, config *
 				return false
 			}
 			name, found, err := unstructured.NestedString(condition, "type")
-			if !found || err != nil || !strings.EqualFold(name, c.Name) {
+			if !found || err != nil || !strings.EqualFold(name, c) {
 				log.Logger.Trace("condition with no type")
 				continue
 			}
@@ -443,7 +443,7 @@ func conditionsSatisfied(u *unstructured.Unstructured, gvrShort string, config *
 			}
 
 			// check if condition status equals the required value specified in config
-			if !strings.EqualFold(status, c.Status) {
+			if !strings.EqualFold(status, "True") {
 				log.Logger.Info("condition not satisfied")
 				return false
 			}
