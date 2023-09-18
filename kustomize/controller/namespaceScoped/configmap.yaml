@@ -27,6 +27,10 @@ data:
         Group: ""
         Resource: services
         Version: v1
+      service:
+        Group: ""
+        Resource: services
+        Version: v1
       vs:
         Group: networking.istio.io
         Resource: virtualservices
