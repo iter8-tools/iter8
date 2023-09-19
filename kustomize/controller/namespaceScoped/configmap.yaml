@@ -5,7 +5,7 @@ metadata:
 data:
   config.yaml: |
     defaultResync: 15m
-    image: iter8/iter8:0.17
+    image: iter8/iter8:0.18
     logLevel: info
     resourceTypes:
       cm:
@@ -24,6 +24,10 @@ data:
         - name: Ready
           status: "True"
       svc:
+        Group: ""
+        Resource: services
+        Version: v1
+      service:
         Group: ""
         Resource: services
         Version: v1
