@@ -1,6 +1,6 @@
 # iter8Version is the minor version of Iter8
 # should be specified as the value of the iter8.tools/version label on all routemaps
-iter8Version: v0.17
+iter8Version: v0.18
 
 # default model mesh serving endpoint (service) details
 # relevant only for appType 'kserve-modelmesh'

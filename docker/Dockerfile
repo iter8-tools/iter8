@@ -22,5 +22,5 @@ COPY --from=build-stage /app/bin/iter8 /bin/iter8
 
 # Set Iter8 version from build args
 ARG TAG
-ENV TAG=${TAG:-v0.17.0}
+ENV TAG=${TAG:-v0.18.0}
 
