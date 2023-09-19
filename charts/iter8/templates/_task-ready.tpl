@@ -11,8 +11,8 @@
   with:
     name: {{ $name | quote }}
     group: {{ get $definition "Group" | quote }}
-    version: {{ get $definition "Version" }}
-    resource: {{ get $definition "Resource" }}
+    version: {{ get $definition "Version" | quote }}
+    resource: {{ get $definition "Resource" | quote }}
     {{- if (hasKey $definition "conditions") }}
     conditions:
 {{ toYaml (get $definition "conditions") | indent 4 }}

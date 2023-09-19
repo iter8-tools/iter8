@@ -30,7 +30,7 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Start performance test
