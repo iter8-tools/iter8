@@ -23,7 +23,7 @@ var MajorMinor = "v0.18"
 
 // Version is the semantic version of Iter8 (with the `v` prefix)
 // Version is intended to be set using LDFLAGS at build time
-var Version = "v0.18.1"
+var Version = "v0.18.0"
 
 const (
 	toYAMLString = "toYaml"
