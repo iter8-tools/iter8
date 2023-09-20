@@ -43,14 +43,19 @@ patches:
             Group: apps
             Resource: deployments
             Version: v1
+            conditions:
+            - Available
           isvc:
             Group: serving.kserve.io
             Resource: inferenceservices
             Version: v1beta1
             conditions:
-            - name: Ready
-              status: "True"
+            - Ready
           svc:
+            Group: ""
+            Resource: services
+            Version: v1
+          service:
             Group: ""
             Resource: services
             Version: v1
