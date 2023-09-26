@@ -118,8 +118,7 @@ IMG=[Docker image name]
 Build and push Iter8 image to Docker
 
 ```shell
-make build
-docker build -f docker/Dockerfile -t $IMG bin 
+docker build -f docker/Dockerfile -t $IMG . 
 docker push $IMG
 ```
 

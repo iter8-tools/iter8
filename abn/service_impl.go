@@ -138,7 +138,7 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 		return fmt.Errorf("no metrics client")
 	}
 	err = MetricsClient.SetMetric(
-		s.GetNamespace()+"/"+s.GetName(), versionNumber, *v.GetSignature(),
+		application, versionNumber, *v.GetSignature(),
 		metric, user, transaction,
 		value)
 
