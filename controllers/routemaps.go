@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"reflect"
+
 	"github.com/iter8-tools/iter8/base/log"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -53,8 +55,17 @@ func (s *routemaps) GetRoutemapFromNamespaceName(namespace string, name string) 
 
 	rmByName, ok := s.nsRoutemap[namespace]
 	if ok {
-		return rmByName[name]
+		s := rmByName[name]
+		if s == nil || reflect.ValueOf(s).IsNil() {
+			// try concatenating "-routemap" to name
+			s = rmByName[name+"-routemap"]
+			if s == nil || reflect.ValueOf(s).IsNil() {
+				return nil
+			}
+		}
+		return s
 	}
+
 	return nil
 }
 

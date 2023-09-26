@@ -11,7 +11,7 @@
 {{- end }}
 
 {{- /* validate values for strategy */}}
-{{- if not (has .Values.strategy (list "blue-green" "canary")) }}
+{{- if not (has .Values.strategy (list "blue-green" "canary" "none")) }}
   {{- printf "Unknown strategy: '%s'" .Values.strategy | fail }}
 {{- end }}
 
@@ -19,10 +19,13 @@
 {{- if eq "initialize" .Values.action }}
 
   {{- /* gateway needed for kserve-modelmesh, deployment */}}
+  {{- if ne "none" .Values.strategy }}
   {{- if has .Values.appType (list "kserve-modelmesh" "deployment") }}
     {{ include "initial.gateway" . }}
   {{- end }}
+  {{- end }}
 ---
+  {{- if ne "none" .Values.strategy }}
   {{- if eq "deployment" .Values.appType }}
     {{ include "deployment.virtualservice" . }}
   {{- else if eq "kserve-modelmesh" .Values.appType }}
@@ -34,7 +37,9 @@
       {{ include "kserve.virtualservice-canary" . }}
     {{- end }}
   {{- end }}
+  {{- end }}
 ---
+  {{- if ne "none" .Values.strategy }}
   {{- if eq "deployment" .Values.appType }}
     {{ include "deployment.service" . }}
   {{- else if eq "kserve-modelmesh" .Values.appType }}
@@ -42,21 +47,28 @@
   {{- else }} {{- /* eq "kserve" .Values.appType */}}
     {{ include "kserve.service" . }}
   {{- end }}
+  {{- end }}
 ---
   {{- if eq "deployment" .Values.appType }}
-    {{- if eq "blue-green" .Values.strategy }}
+    {{- if eq "none" .Values.strategy }}
+      {{ include "deployment.routemap-none" . }}
+    {{- else if eq "blue-green" .Values.strategy }}
       {{ include "deployment.routemap-bluegreen" . }}
     {{- else }} {{- /* eq "canary" .Values.strategy */}}
       {{ include "deployment.routemap-canary" . }}
     {{- end }}
   {{- else if eq "kserve-modelmesh" .Values.appType }}
-    {{- if eq "blue-green" .Values.strategy }}
+    {{- if eq "none" .Values.strategy }}
+      {{ include "mm.routemap-none" . }}
+    {{- else if eq "blue-green" .Values.strategy }}
       {{ include "mm.routemap-bluegreen" . }}
     {{- else }} {{- /* eq "canary" .Values.strategy */}}
       {{ include "mm.routemap-canary" . }}
     {{- end }}
   {{- else }} {{- /* eq "kserve" .Values.appType */}}
-    {{- if eq "blue-green" .Values.strategy }}
+    {{- if eq "none" .Values.strategy }}
+      {{ include "kserve.routemap-none" . }}
+    {{- else if eq "blue-green" .Values.strategy }}
       {{ include "kserve.routemap-bluegreen" . }}
     {{- else }} {{- /* eq "canary" .Values.strategy */}}
       {{ include "kserve.routemap-canary" . }}

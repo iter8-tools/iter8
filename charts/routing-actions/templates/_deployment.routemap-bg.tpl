@@ -17,6 +17,9 @@ data:
       - gvrShort: cm
         name: {{ $v.name }}-weight-config
         namespace: {{ $v.namespace }}
+      - gvrShort: svc
+        name: {{ $v.name }}
+        namespace: {{ $v.namespace }}
       - gvrShort: deploy
         name: {{ $v.name }}
         namespace: {{ $v.namespace }}
