@@ -10,11 +10,8 @@
   {{- printf "Unknown appType: '%s'" .Values.appType | fail }}
 {{- end }}
 
-{{- /* set default strategy */}}
-{{- $strategy := "none" }}
-{{- if .Values.strategy }}
-{{- $strategy := .Values.strategy }}
-{{- end }}
+{{- /* set strategy using default value if needed */}}
+{{- $strategy := (.Values.strategy | default "none" ) }}
 
 {{- /* validate values for strategy */}}
 {{- if not (has $strategy (list "blue-green" "canary" "none")) }}

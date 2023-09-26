@@ -42,7 +42,7 @@ data:
             - {{ .Values.appName }}.{{ .Release.Namespace }}.svc.cluster.local
             http:
             - route:
-              # primary model
+              # primary version
               - destination:
                   host: {{ (index $versions 0).name }}.{{ .Release.Namespace }}.svc.cluster.local
                   {{- if .Values.appPort }}
@@ -56,7 +56,7 @@ data:
                   response:
                     add:
                       app-version: {{ (index $versions 0).name }}
-              # other models
+              # other versions
               {{- range $i, $v := (rest $versions) }}
               {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
               - destination:
