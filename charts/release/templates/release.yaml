@@ -1,0 +1,11 @@
+{{- if eq "deployment-istio" .Values.environment }}
+  {{- include "env.deployment-istio" . }}
+{{- else if eq "kserve-modelmesh" .Values.environment }}
+  {{- include "env.kserve" . }}
+{{- else if has .Values.environment (list "kserve" "kserve-0.11") }}
+  {{- include "env.kserve" . }}
+{{- else if eq "kserve-0.10" .Values.environment }}
+  {{- include "env.kserve-10" . }}
+{{- else }}
+  {{- printf "Unknown environment: '%s'" .Values.environment | fail }}
+{{- end }}

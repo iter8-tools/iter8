@@ -138,9 +138,9 @@ func initRoutemapCMInformer(stopCh <-chan struct{}, config *Config, client k8scl
 	tlo := internalinterfaces.TweakListOptionsFunc(func(opts *metav1.ListOptions) {
 		opts.LabelSelector = metav1.FormatLabelSelector(&metav1.LabelSelector{
 			MatchLabels: map[string]string{
-				iter8ManagedByLabel: iter8ManagedByValue,
-				iter8KindLabel:      iter8KindRoutemapValue,
-				iter8VersionLabel:   base.MajorMinor,
+				// iter8ManagedByLabel: iter8ManagedByValue,
+				iter8KindLabel:    iter8KindRoutemapValue,
+				iter8VersionLabel: base.MajorMinor,
 			},
 		})
 	})

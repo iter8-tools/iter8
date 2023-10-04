@@ -14,7 +14,7 @@ rules:
 {{- end }}
 - apiGroups: ["{{- $type.Group -}}"]
   resources: ["{{- $type.Resource -}}"]
-  verbs: ["get", "list", "watch", "patch", "update"]
+  verbs: ["get", "list", "watch", "patch", "update", "create"]
 {{- end }}
 - apiGroups: [""]
   resources: ["events"]
