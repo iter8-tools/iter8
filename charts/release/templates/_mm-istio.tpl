@@ -1,27 +1,27 @@
-{{- define "env.kserve" }}
+{{- define "env.mm-istio" }}
 
 {{- /* Prepare versions for simpler processing */}}
 {{- $versions := include "normalize.versions" . | mustFromJson }}
 
-{{- range $i, $v := .Values.application.versions }}
-{{- /* InferenceService */}}
-{{ include "env.kserve.version.isvc" . }}
+{{- /* InferenceServices */}}
+{{- range $i, $v := $versions }}
+{{ include "env.mm-istio.version.isvc" $v }}
 ---
-{{- end }} {{- /* range $i, $v := .Values.application.versions */}}
+{{- end }} {{- /* range $i, $v := $versions */}}
 
-{{- /* Service */}}
-{{ include "env.kserve.service" . }}
+{{- /* ServiceEntry */}}
+{{ include "env.mm-istio.service" . }}
 ---
 
 {{- /* routemap (and other strategy specific objects) */}}
 {{- if not .Values.application.strategy }}
-{{ include "env.kserve.none" . }}
+{{ include "env.mm-istio.none" . }}
 {{- else if eq "none" .Values.application.strategy }}
-{{ include "env.kserve.none" . }}
+{{ include "env.mm-istio.none" . }}
 {{- else if eq "blue-green" .Values.application.strategy }}
-{{ include "env.kserve.blue-green" . }}
+{{ include "env.mm-istio.blue-green" . }}
 {{- else if eq "canary" .Values.application.strategy }}
-{{ include "env.kserve.canary" . }}
+{{ include "env.mm-istio.canary" . }}
 {{- end }} {{- /* if eq ... .Values.application.strategy */}}
 
-{{- end }} {{- /* define "env.kserve" */}}
+{{- end }} {{- /* define "env.mm-istio" */}}

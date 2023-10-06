@@ -1,11 +1,6 @@
-{{- define "env.kserve.canary.routemap" }}
+{{- define "env.kserve.canary" }}
 
-{{- $APP_NAME := .Release.Name }}
-{{- $APP_NAMESPACE := .Release.Namespace }}
-{{- if (and .Values.application .Values.application.metadata) }}
-{{- $APP_NAME := .Values.application.metadata.name }}
-{{- $APP_NAMESPACE := .Values.application.metadata.namespace }}
-{{- end }}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- /* routemap */}}
+{{ include "env.kserve.canary.routemap" . }}
 
-{{- end }} {{- /* define "env.kserve.canary.routemap" */}}
+{{- end }} {{- /* define "env.kserve.canary" */}}

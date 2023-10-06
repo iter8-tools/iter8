@@ -1,16 +1,13 @@
 {{- define "env.deployment-istio.service" }}
 
-{{- $APP_NAME := .Release.Name }}
-{{- $APP_NAMESPACE := .Release.Namespace }}
-{{- if (and .Values.application .Values.application.metadata) }}
-{{- $APP_NAME := .Values.application.metadata.name }}
-{{- $APP_NAMESPACE := .Values.application.metadata.namespace }}
-{{- end }}
+{{- $APP_NAME := (include "application.name" .) }}
+{{- $APP_NAMESPACE := (include "application.namespace" .) }}
 
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $APP_NAME }}
+  namespace: {{ $APP_NAMESPACE }}
 spec:
   externalName: istio-ingressgateway.istio-system.svc.cluster.local
   sessionAffinity: None

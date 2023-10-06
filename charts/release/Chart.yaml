@@ -1,7 +1,7 @@
 apiVersion: v2
-name: routing-actions
+name: release
 version: 0.18.1
-description: Iter8 routing actions
+description: Iter8 supported application release
 type: application
 keywords:
 - Iter8

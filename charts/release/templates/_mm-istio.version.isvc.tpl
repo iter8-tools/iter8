@@ -1,4 +1,4 @@
-{{- define "env.kserve.version.isvc" }}
+{{- define "env.mm-istio.version.isvc" }}
 
 {{- /* compute labels */}}
 {{- $labels := include "application.version.labels" . | mustFromJson }}
@@ -30,9 +30,6 @@ spec:
 {{- if not .modelFormat }} {{- /* require .modelFormat */}}
 {{- print "missing field: modelFormat required when inferenceServiceSpecification absent" | fail }}
 {{- end }} {{- /* if not .modelFormat */}}
-{{- if not .runtime }} {{- /* require .runtime */}}
-{{- print "missing field: runtime required when inferenceServiceSpecification absent" | fail }}
-{{- end }} {{- /* if not .runtime */}}
 {{- if not .storageUri }} {{- /* require .storageUri */}}
 {{- print "missing field: storageUri required when inferenceServiceSpecification absent" | fail }}
 {{- end }} {{- /* if not .storageUri */}}
@@ -40,12 +37,10 @@ metadata:
   {{ toYaml $metadata | nindent 2 | trim }}
 spec:
   predictor:
-    minReplicas: 1
     model:
       modelFormat:
         name: {{ .modelFormat }}
-      runtime: {{ .runtime }}
       storageUri: {{ .storageUri }}
 {{- end }} {{- /* if .inferenceServiceSpecification */}}
 
-{{- end }} {{- /* define "env.kserve.version.isvc" */}}
+{{- end }} {{- /* define "env.mm-istio.version.isvc" */}}

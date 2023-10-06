@@ -1,7 +1,17 @@
 {{- define "env.deployment-istio.version.service" }}
 
-{{- $labels := (merge (dict "iter8.tools/watch" "true" "app" .VERSION_NAME) .metadata.labels) }}
-{{- $metadata := (dict "name" .VERSION_NAME "namespace" .VERSION_NAMESPACE "labels" $labels) }}
+{{- /* compute labels */}}
+{{- $labels := include "application.version.labels" . | mustFromJson }}
+
+{{- /* compute annotations */}}
+{{- $annotations := include "application.version.annotations" . | mustFromJson }}
+
+{{- /* compose into metadata */}}
+{{- $metadata := (dict) }}
+{{- $metadata := set $metadata "name" .VERSION_NAME }}
+{{- $metadata := set $metadata "namespace" .VERSION_NAMESPACE }}
+{{- $metadata := set $metadata "labels" $labels }}
+{{- $metadata := set $metadata "annotations" $annotations }}
 
 apiVersion: v1
 kind: Service

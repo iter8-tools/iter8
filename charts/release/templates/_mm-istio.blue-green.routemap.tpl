@@ -1,4 +1,4 @@
-{{- define "env.deployment-istio.blue-green.routemap" }}
+{{- define "env.mm-istio.blue-green.routemap" }}
 
 {{- $APP_NAME := (include "application.name" .) }}
 {{- $APP_NAMESPACE := (include "application.namespace" .) }}
@@ -12,10 +12,7 @@ data:
     versions: 
     {{- range $i, $v := $versions }}
     - resources:
-      - gvrShort: svc
-        name: {{ $v.VERSION_NAME }}
-        namespace: {{ $v.VERSION_NAMESPACE }}
-      - gvrShort: deploy
+      - gvrShort: isvc
         name: {{ $v.VERSION_NAME }}
         namespace: {{ $v.VERSION_NAMESPACE }}
       - gvrShort: cm
@@ -41,30 +38,41 @@ data:
             - {{ $APP_NAME }}.{{ $APP_NAMESPACE }}.svc
             - {{ $APP_NAME }}.{{ $APP_NAMESPACE }}.svc.cluster.local
             http:
-            - name: {{ (index $versions 0).VERSION_NAME }}
-              route:
-              # primary version
+            - route:
+              # primary model version
               - destination:
-                  host: {{ (index $versions 0).VERSION_NAME }}.{{ $APP_NAMESPACE }}.svc.cluster.local
+                  host: {{ template "mm.serviceHost" }}
+                  port:
+                    number: {{ template "mm.servicePort" . }}
                 {{- if gt (len $versions) 1 }}
                 {{ `{{- if gt (index .Weights 1) 0 }}` }}
                 weight: {{ `{{ index .Weights 0 }}` }}
                 {{ `{{- end }}`}}
-                {{- end  }}
-                headers: 
+                {{- end  }} {{- /* if gt (len $versions) 1 */}}
+                headers:
+                  request:
+                    set:
+                      mm-vmodel-id: {{ (index $versions 0).VERSION_NAME }}
+                    remove:
+                    - branch
                   response:
                     add:
                       app-version: {{ (index $versions 0).VERSION_NAME }}
-              # other versions
+              # non-primary model versions
               {{- range $i, $v := (rest $versions) }}
-              {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
               - destination:
-                  host: {{ (index $versions (add1 $i)).VERSION_NAME }}.{{ $APP_NAMESPACE }}.svc.cluster.local
+                  host: {{ template "mm.serviceHost" $ }}
+                  port:
+                    number: {{ template "mm.servicePort" $ }}
                 weight: {{ `{{ index .Weights `}}{{ print (add1 $i) }}{{` }}`}}
                 headers:
+                  request:
+                    set:
+                      mm-vmodel-id: {{ (index $versions (add1 $i)).VERSION_NAME }}
                   response:
                     add:
                       app-version: {{ (index $versions (add1 $i)).VERSION_NAME }}
-              {{ `{{- end }}`}}     
-              {{- end }}
-{{- end }} {{- /* define "env.deployment-istio.blue-green.routemap" */}}
+            {{ `{{- end }}`}}
+            {{- end }}
+
+{{- end }} {{- /* define "env.mm-istio.blue-green.routemap" */}}

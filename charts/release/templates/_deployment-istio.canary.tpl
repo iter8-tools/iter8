@@ -1,11 +1,6 @@
-{{- define "env.deployment-istio.canary.routemap" }}
+{{- define "env.deployment-istio.canary" }}
 
-{{- $APP_NAME := .Release.Name }}
-{{- $APP_NAMESPACE := .Release.Namespace }}
-{{- if (and .Values.application .Values.application.metadata) }}
-{{- $APP_NAME := .Values.application.metadata.name }}
-{{- $APP_NAMESPACE := .Values.application.metadata.namespace }}
-{{- end }}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- /* routemap */}}
+{{ include "env.deployment-istio.canary.routemap" . }}
 
-{{- end }} {{- /* define "env.deployment-istio.canary.routemap" */}}
+{{- end }} {{- /* define "env.deployment-istio.canary" */}}

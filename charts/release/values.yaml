@@ -4,5 +4,3 @@ iter8Version: v0.18
 
 # default Istio Gateway name
 istioGateway: my-gateway
-
-

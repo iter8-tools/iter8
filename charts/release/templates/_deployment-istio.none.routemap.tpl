@@ -1,4 +1,4 @@
-{{- define "env.kserve.none.routemap" }}
+{{- define "env.deployment-istio.none.routemap" }}
 
 {{- $versions := include "normalize.versions" . | mustFromJson }}
 
@@ -10,9 +10,12 @@ data:
     versions: 
     {{- range $i, $v := $versions }}
     - resources:
-      - gvrShort: isvc
+      - gvrShort: svc
         name: {{ $v.VERSION_NAME }}
         namespace: {{ $v.VERSION_NAMESPACE }}
-    {{- end }} {{- /* range $i, $v := .Values.application.versions */}}
+      - gvrShort: deploy
+        name: {{ $v.VERSION_NAME }}
+        namespace: {{ $v.VERSION_NAMESPACE }}
+    {{- end }}
 
-{{- end }} {{- /* define "env.kserve.none.routemap" */}}
+{{- end }} {{- /* define "env.deployment-istio.none.routemap" */}}

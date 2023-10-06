@@ -1,20 +1,12 @@
 {{- define "env.kserve.blue-green.routemap" }}
-{{- $APP_NAME := .Release.Name }}
-{{- $APP_NAMESPACE := .Release.Namespace }}
-{{- if (and .Values.application .Values.application.metadata) }}
-{{- $APP_NAME := .Values.application.metadata.name }}
-{{- $APP_NAMESPACE := .Values.application.metadata.namespace }}
-{{- end }}
+
+{{- $APP_NAME := (include "application.name" .) }}
+{{- $APP_NAMESPACE := (include "application.namespace" .) }}
 {{- $versions := include "normalize.versions" . | mustFromJson }}
 
 apiVersion: v1
 kind: ConfigMap
-metadata:
-  name: {{ $APP_NAME }}-routemap
-  labels:
-    app.kubernetes.io/managed-by: iter8
-    iter8.tools/kind: routemap
-    iter8.tools/version: {{ .Values.iter8Version }}
+{{ template "routemap.metadata" . }}
 data:
   strSpec: |
     versions: 
@@ -118,4 +110,5 @@ data:
                       host: {{ $APP_NAME }}.{{ $APP_NAMESPACE }}
               {{ `{{- end }}`}}
               {{- end }}
+
 {{- end }} {{- /* define "env.kserve.blue-green.routemap" */}}

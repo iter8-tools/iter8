@@ -1,4 +1,4 @@
-{{- define "env.deployment-istio.blue-green" }}
+{{- define "env.mm-istio.blue-green" }}
 
 {{- /* prepare versions for simpler processing */}}
 {{- $versions := include "normalize.versions" . | mustFromJson }}
@@ -10,5 +10,6 @@
 {{- end }} {{- /* range $i, $v := $versions */}}
 
 {{- /* routemap */}}
-{{ include "env.deployment-istio.blue-green.routemap" . }}
-{{- end }} {{- /* define "env.deployment-istio.blue-green" */}}
+{{ include "env.mm-istio.blue-green.routemap" . }}
+
+{{- end }} {{- /* define "env.mm-istio.blue-green" */}}
