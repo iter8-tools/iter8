@@ -1,18 +1,9 @@
 {{- define "env.mm-istio.version.isvc" }}
 
-{{- /* compute labels */}}
-{{- $labels := include "application.version.labels" . | mustFromJson }}
-
-{{- /* compute annotations */}}
-{{- $annotations := include "application.version.annotations" . | mustFromJson }}
-{{- $annotations := merge (dict "serving.kserve.io/deploymentMode" "ModelMesh") $annotations }}
-
-{{- /* compose into metadata */}}
-{{- $metadata := (dict) }}
-{{- $metadata := set $metadata "name" .VERSION_NAME }}
-{{- $metadata := set $metadata "namespace" .VERSION_NAMESPACE }}
-{{- $metadata := set $metadata "labels" $labels }}
-{{- $metadata := set $metadata "annotations" $annotations }}
+{{- /* compute basic metadata */}}
+{{- $metadata := include "application.version.metadata" . | mustFromJson }}
+{{- /* add annotation serving.kserve.io/deploymentMode */}}
+{{- $metadata := set $metadata "annotations" (merge $metadata.annotations (dict "serving.kserve.io/deploymentMode" "ModelMesh")) }}
 
 {{- /* define InferenceServcie */}}
 apiVersion: serving.kserve.io/v1beta1

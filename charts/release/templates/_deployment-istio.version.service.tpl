@@ -1,17 +1,7 @@
 {{- define "env.deployment-istio.version.service" }}
 
-{{- /* compute labels */}}
-{{- $labels := include "application.version.labels" . | mustFromJson }}
-
-{{- /* compute annotations */}}
-{{- $annotations := include "application.version.annotations" . | mustFromJson }}
-
-{{- /* compose into metadata */}}
-{{- $metadata := (dict) }}
-{{- $metadata := set $metadata "name" .VERSION_NAME }}
-{{- $metadata := set $metadata "namespace" .VERSION_NAMESPACE }}
-{{- $metadata := set $metadata "labels" $labels }}
-{{- $metadata := set $metadata "annotations" $annotations }}
+{{- /* compute basic metadata */}}
+{{- $metadata := include "application.version.metadata" . | mustFromJson }}
 
 apiVersion: v1
 kind: Service

@@ -1,8 +1,3 @@
-{{- define "release.labels" -}}
-  labels:
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-{{- end -}}
-
 {{- define "application.name" -}}
 {{- if (and .Values.application .Values.application.metadata .Values.application.metadata.name) -}}
 {{ .Values.application.metadata.name -}}
@@ -43,6 +38,19 @@
 {{- mustToJson $annotations }}
 {{- end -}} {{- /* define "application.version.annotations" */}}
 
+{{- define "application.version.metadata" -}}
+{{- $labels := (include "application.version.labels" . | mustFromJson) }}
+{{- $annotations := (include "application.version.annotations" . | mustFromJson) }}
+{{- /* compose into metadata */}}
+{{- $metadata := (dict) }}
+{{- $metadata := set $metadata "name" .VERSION_NAME }}
+{{- $metadata := set $metadata "namespace" .VERSION_NAMESPACE }}
+{{- $metadata := set $metadata "labels" $labels }}
+{{- $metadata := set $metadata "annotations" $annotations }}
+{{- /* return as JSON */}}
+{{- mustToJson $metadata }}
+{{- end -}} {{- /* define "application.version.metadata" */}}
+
 {{- define "routemap.metadata" }}
 metadata:
   name: {{ template "application.name" . }}-routemap
@@ -60,14 +68,8 @@ metadata:
   {{- $metadata := merge $metadata .Values.application.metadata }}
   {{- end }} {{- /* if .Values.application.metadata */}}
 
-  {{- $APP_NAME := .Release.Name }}
-  {{- if $metadata.name }}
-  {{- $APP_NAME := $metadata.name }}
-  {{- end }}
-  {{- $APP_NAMESPACE := .Release.Namespace }}
-  {{- if $metadata.namespace }}
-  {{- $APP_NAMESPACE := $metadata.namespace }}
-  {{- end }}
+  {{- $APP_NAME := (include "application.name" .) }}
+  {{- $APP_NAMESPACE := (include "application.namespace" .) }}
 
   {{- $defaultMatch := ternary (list (dict "headers" (dict "traffic" (dict "exact" "test")))) (dict) (eq .Values.application.strategy "canary") }}
 
@@ -101,10 +103,7 @@ metadata:
 {{- end }} {{- /* define "normalize.versions" */}}
 
 {{- define "kserve.host" -}}
-{{- $APP_NAMESPACE := .Release.Namespace -}}
-{{- if (and .Values.application .Values.application.metadata) -}}
-{{- $APP_NAMESPACE := .Values.application.metadata.namespace -}}
-{{- end -}}
+{{- $APP_NAMESPACE := (include "application.namespace" .) }}
 {{- if eq "kserve-0.10" .Values.environment -}}
 predictor-default.{{ $APP_NAMESPACE }}.svc.cluster.local
 {{- else }} {{- /* kserve-0.11 or kserve */ -}}
