@@ -1,4 +1,4 @@
-{{- define "env.mm-istio.canary.routemap" }}
+{{- define "env.kserve.canary.routemap" }}
 
 {{- $APP_NAME := (include "application.name" .) }}
 {{- $APP_NAMESPACE := (include "application.namespace" .) }}
@@ -15,6 +15,7 @@ data:
       - gvrShort: isvc
         name: {{ $v.VERSION_NAME }}
         namespace: {{ $v.VERSION_NAMESPACE }}
+      weight: {{ $v.weight }}
     {{- end }} {{- /* range $i, $v := .Values.application.versions */}}
     routingTemplates:
       {{ .Values.application.strategy }}:
@@ -27,7 +28,8 @@ data:
             namespace: {{ $APP_NAMESPACE }}
           spec:
             gateways:
-            - {{ default "iter8-gateway" .Values.gateway }}
+            - knative-serving/knative-ingress-gateway
+            - knative-serving/knative-local-gateway
             - mesh
             hosts:
             - {{ $APP_NAME }}.{{ $APP_NAMESPACE }}
@@ -37,10 +39,11 @@ data:
             # non-primary versions
             {{- /* For candidate versions, ensure mm-model header is required in all matches */}}
             {{- range $i, $v := (rest $versions) }}
-            {{- /* continue only if candidate is ready (ie, weight > 0) */}}
+            {{- /* continue only if candidate is ready (weight > 0) */}}
             {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
-            - match:
-              {{- /* A match may have several ORed clauses */}}
+            - name: {{ (index $versions (add1 $i)).VERSION_NAME }}
+              match:
+              {{- /* A match may have several ORd clauses */}}
               {{- range $j, $m := $v.match }}
               {{- /* include any other header requirements */}}
               {{- if (hasKey $m "headers") }}
@@ -52,35 +55,33 @@ data:
 {{ toYaml (omit $m "headers") | indent 16 }}
                 {{- end }}
               {{- end }}
+              rewrite:
+                uri: /v2/models/{{ (index $versions (add1 $i)).VERSION_NAME }}/infer
               route:
               - destination:
-                  host: {{ template "mm.serviceHost" $ }}
-                  port:
-                    number: {{ template "mm.servicePort" $ }}
+                  host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: {{ (index $versions (add1 $i)).VERSION_NAME }}
+                      Host: {{ (index $versions (add1 $i)).VERSION_NAME }}-{{ template "kserve.host" $ }}
                   response:
                     add:
-                      app-version: {{ (index $versions (add1 $i)).VERSION_NAME }}
+                      app-version: "{{ (index $versions (add1 $i)).VERSION_NAME }}"
             {{ `{{- end }}`}}
             {{- end }}
             # primary version (default)
             - name: {{ (index $versions 0).VERSION_NAME }}
+              rewrite:
+                uri: /v2/models/{{ (index $versions 0).VERSION_NAME }}/infer
               route:
               - destination:
-                  host: {{ template "mm.serviceHost" }}
-                  port:
-                    number: {{ template "mm.servicePort" . }}
+                  host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: {{ (index $versions 0).VERSION_NAME }}
-                    remove:
-                    - branch
+                      Host: {{ (index $versions 0).VERSION_NAME }}-{{ template "kserve.host" $ }}
                   response:
                     add:
-                      app-version: {{ (index $versions 0).VERSION_NAME }}
+                      app-version: "{{ (index $versions 0).VERSION_NAME }}"
 
-{{- end }} {{- /* define "env.mm-istio.canary.routemap" */}}
+{{- end }} {{- /* define "env.kserve.canary.routemap" */}}

@@ -3,7 +3,6 @@
 {{- /* compute basic metadata */}}
 {{- $metadata := include "application.version.metadata" . | mustFromJson }}
 {{- /* add annotation serving.kserve.io/deploymentMode */}}
-{{- $metadata := set $metadata "annotations" (merge $metadata.annotations (dict "serving.kserve.io/deploymentMode" "ModelMesh")) }}
 
 {{- /* define InferenceServcie */}}
 apiVersion: serving.kserve.io/v1beta1
