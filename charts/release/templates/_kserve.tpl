@@ -1,13 +1,13 @@
 {{- define "env.kserve" }}
 
 {{- /* Prepare versions for simpler processing */}}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve" . | mustFromJson }}
 
-{{- range $i, $v := .Values.application.versions }}
+{{- range $i, $v := $versions }}
 {{- /* InferenceService */}}
-{{ include "env.kserve.version.isvc" . }}
+{{ include "env.kserve.version.isvc" $v }}
 ---
-{{- end }} {{- /* range $i, $v := .Values.application.versions */}}
+{{- end }} {{- /* range $i, $v := $versions */}}
 
 {{- /* Service */}}
 {{ include "env.kserve.service" . }}

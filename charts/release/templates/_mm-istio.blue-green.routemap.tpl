@@ -2,24 +2,24 @@
 
 {{- $APP_NAME := (include "application.name" .) }}
 {{- $APP_NAMESPACE := (include "application.namespace" .) }}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve-mm" . | mustFromJson }}
 
 apiVersion: v1
 kind: ConfigMap
-{{ template "routemap.metadata" . }}
+{{- template "routemap.metadata" . }}
 data:
   strSpec: |
     versions: 
     {{- range $i, $v := $versions }}
     - resources:
       - gvrShort: isvc
-        name: {{ $v.VERSION_NAME }}
-        namespace: {{ $v.VERSION_NAMESPACE }}
+        name: {{ template "isvc.name" $v }}
+        namespace: {{ template "isvc.namespace" $v }}
       - gvrShort: cm
         name: {{ $v.VERSION_NAME }}-weight-config
         namespace: {{ $v.VERSION_NAMESPACE }}
       weight: {{ $v.weight }}
-    {{- end }} {{- /* range $i, $v := .Values.application.versions */}}
+    {{- end }} {{- /* range $i, $v := $versions */}}
     routingTemplates:
       {{ .Values.application.strategy }}:
         gvrShort: vs
@@ -31,7 +31,9 @@ data:
             namespace: {{ $APP_NAMESPACE }}
           spec:
             gateways:
-            - {{ default "iter8-gateway" .Values.gateway }}
+            {{- if .Values.gateway }}
+            - {{ .Values.gateway }}
+            {{- end }}
             - mesh
             hosts:
             - {{ $APP_NAME }}.{{ $APP_NAMESPACE }}
@@ -40,6 +42,7 @@ data:
             http:
             - route:
               # primary model version
+              {{- $v := (index $versions 0) }}
               - destination:
                   host: {{ template "mm.serviceHost" }}
                   port:
@@ -52,12 +55,12 @@ data:
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: {{ (index $versions 0).VERSION_NAME }}
+                      mm-vmodel-id: {{ template "isvc.name" $v}}
                     remove:
                     - branch
                   response:
                     add:
-                      app-version: {{ (index $versions 0).VERSION_NAME }}
+                      app-version: {{ template "isvc.name" $v}}
               # non-primary model versions
               {{- range $i, $v := (rest $versions) }}
               - destination:
@@ -68,11 +71,10 @@ data:
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: {{ (index $versions (add1 $i)).VERSION_NAME }}
+                      mm-vmodel-id: {{ template "isvc.name" $v}}
                   response:
                     add:
-                      app-version: {{ (index $versions (add1 $i)).VERSION_NAME }}
-            {{ `{{- end }}`}}
-            {{- end }}
+                      app-version: {{ template "isvc.name" $v}}
+              {{- end }} {{- /* {{- range $i, $v := (rest $versions) }} */}}
 
 {{- end }} {{- /* define "env.mm-istio.blue-green.routemap" */}}

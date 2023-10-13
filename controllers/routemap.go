@@ -276,6 +276,10 @@ func computeSignature(v version) (string, error) {
 			return "", fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
 		}
 
+		if resource.Namespace == nil {
+			return "", fmt.Errorf("namespace not specified for resource %s/%s", resource.GVRShort, resource.Name)
+		}
+
 		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
 		if err != nil {
 			return "", fmt.Errorf("cannot get resource: %s", err.Error())

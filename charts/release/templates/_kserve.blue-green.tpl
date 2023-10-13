@@ -1,7 +1,7 @@
 {{- define "env.kserve.blue-green" }}
 
 {{- /* prepare versions for simpler processing */}}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve" . | mustFromJson }}
 
 {{- /* weight-config ConfigMaps */}}
 {{- range $i, $v := $versions }}

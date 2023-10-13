@@ -1,7 +1,7 @@
 {{- define "env.mm-istio.blue-green" }}
 
 {{- /* prepare versions for simpler processing */}}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve-mm" . | mustFromJson }}
 
 {{- /* weight-config ConfigMaps */}}
 {{- range $i, $v := $versions }}

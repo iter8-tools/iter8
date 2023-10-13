@@ -10,11 +10,11 @@ apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 {{- if .inferenceServiceSpecification }}
 metadata:
-{{- if .inferenceServiceSpecification.metatdata }}
+{{- if .inferenceServiceSpecification.metadata }}
   {{ toYaml (merge .inferenceServiceSpecification.metadata $metadata) | nindent 2 | trim }}
 {{- else }}
   {{ toYaml $metadata | nindent 2 | trim }}
-{{- end }} {{- /* if .inferenceServiceSpecification.metatdata */}}
+{{- end }} {{- /* if .inferenceServiceSpecification.metadata */}}
 spec:
   {{ toYaml .inferenceServiceSpecification.spec | nindent 2  | trim }}
 {{- else }}

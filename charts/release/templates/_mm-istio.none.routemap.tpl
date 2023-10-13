@@ -1,18 +1,18 @@
 {{- define "env.mm-istio.none.routemap" }}
 
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve-mm" . | mustFromJson }}
 
 apiVersion: v1
 kind: ConfigMap
-{{ template "routemap.metadata" . }}
+{{- template "routemap.metadata" . }}
 data:
   strSpec: |
     versions: 
     {{- range $i, $v := $versions }}
     - resources:
       - gvrShort: isvc
-        name: {{ $v.VERSION_NAME }}
-        namespace: {{ $v.VERSION_NAMESPACE }}
+        name: {{ template "isvc.name" $v }}
+        namespace: {{ template "isvc.namespace" $v }}
     {{- end }}
 
 {{- end }} {{- /* define "env.mm-istio.none.routemap" */}}

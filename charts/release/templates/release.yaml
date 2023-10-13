@@ -9,7 +9,9 @@
 {{- end }} {{- /* if not .Values.application */}}
 
 {{- /* Different processing based on .Values.environment */}}
-{{- if eq "deployment-istio" .Values.environment }}
+{{- if eq "deployment" .Values.environment }}
+  {{- include "env.deployment" . }}
+{{- else if eq "deployment-istio" .Values.environment }}
   {{- include "env.deployment-istio" . }}
 {{- else if eq "kserve-modelmesh-istio" .Values.environment }}
   {{- include "env.mm-istio" . }}

@@ -1,7 +1,7 @@
 {{- define "env.mm-istio" }}
 
 {{- /* Prepare versions for simpler processing */}}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve-mm" . | mustFromJson }}
 
 {{- /* InferenceServices */}}
 {{- range $i, $v := $versions }}

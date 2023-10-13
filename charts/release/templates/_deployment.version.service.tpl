@@ -1,4 +1,4 @@
-{{- define "env.deployment-istio.version.service" }}
+{{- define "env.deployment.version.service" }}
 
 {{- /* compute basic metadata */}}
 {{- $metadata := include "application.version.metadata" . | mustFromJson }}
@@ -7,11 +7,11 @@ apiVersion: v1
 kind: Service
 {{- if .serviceSpecification }}
 metadata:
-{{- if .serviceSpecification.metatdata }}
+{{- if .serviceSpecification.metadata }}
   {{ toYaml (merge .serviceSpecification.metadata $metadata) | nindent 2 | trim }}
 {{- else }}
   {{ toYaml $metadata | nindent 2 | trim }}
-{{- end }} {{- /* if .serviceSpecification.metatdata */}}
+{{- end }} {{- /* if .serviceSpecification.metadata */}}
 spec:
   {{ toYaml .serviceSpecification.spec | nindent 2  | trim }}
 {{- else }}
@@ -26,4 +26,4 @@ spec:
   ports:
   - port: {{ .port }}
 {{- end }} {{- /* if .serviceSpecification */}}
-{{- end }} {{- /* define "env.deployment-istio.version.service" */}}
+{{- end }} {{- /* define "env.deployment.version.service" */}}

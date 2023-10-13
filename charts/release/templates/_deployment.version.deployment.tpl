@@ -1,4 +1,4 @@
-{{- define "env.deployment-istio.version.deployment" }}
+{{- define "env.deployment.version.deployment" }}
 
 {{- /* compute basic metadata */}}
 {{- $metadata := include "application.version.metadata" . | mustFromJson }}
@@ -7,11 +7,11 @@ apiVersion: apps/v1
 kind: Deployment
 {{- if .deploymentSpecification }}
 metadata:
-{{- if .deploymentSpecification.metatdata }}
+{{- if .deploymentSpecification.metadata }}
   {{ toYaml (merge .deploymentSpecification.metadata $metadata) | nindent 2 | trim }}
 {{- else }}
   {{ toYaml $metadata | nindent 2 | trim }}
-{{- end }} {{- /* if .deploymentSpecification.metatdata */}}
+{{- end }} {{- /* if .deploymentSpecification.metadata */}}
 spec:
   {{ toYaml .deploymentSpecification.spec | nindent 2  | trim }}
 {{- else }}
@@ -39,4 +39,4 @@ spec:
         - containerPort: {{ .port }}
 {{- end }} {{- /* if .deploymentSpecification */}}
 
-{{- end }} {{- /* define "env.deployment-istio.version.deployment" */}}
+{{- end }} {{- /* define "env.deployment.version.deployment" */}}

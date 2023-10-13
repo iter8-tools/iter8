@@ -1,21 +1,21 @@
 {{- define "env.deployment-istio.none.routemap" }}
 
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.deployment" . | mustFromJson }}
 
 apiVersion: v1
 kind: ConfigMap
-{{ template "routemap.metadata" . }}
+{{- template "routemap.metadata" . }}
 data:
   strSpec: |
     versions: 
     {{- range $i, $v := $versions }}
     - resources:
       - gvrShort: svc
-        name: {{ $v.VERSION_NAME }}
-        namespace: {{ $v.VERSION_NAMESPACE }}
+        name: {{ template "svc.name" $v}}
+        namespace: {{ template "svc.namespace" $v}}
       - gvrShort: deploy
-        name: {{ $v.VERSION_NAME }}
-        namespace: {{ $v.VERSION_NAMESPACE }}
+        name: {{ template "deploy.name" $v}}
+        namespace: {{ template "deploy.namespace" $v}}
     {{- end }}
 
 {{- end }} {{- /* define "env.deployment-istio.none.routemap" */}}

@@ -2,24 +2,24 @@
 
 {{- $APP_NAME := (include "application.name" .) }}
 {{- $APP_NAMESPACE := (include "application.namespace" .) }}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve" . | mustFromJson }}
 
 apiVersion: v1
 kind: ConfigMap
-{{ template "routemap.metadata" . }}
+{{- template "routemap.metadata" . }}
 data:
   strSpec: |
     versions: 
     {{- range $i, $v := $versions }}
     - resources:
+      - gvrShort: isvc
+        name: {{ template "isvc.name" $v }}
+        namespace: {{ template "isvc.namespace" $v }}
       - gvrShort: cm
         name: {{ $v.VERSION_NAME }}-weight-config
         namespace: {{ $v.VERSION_NAMESPACE }}
-      - gvrShort: isvc
-        name: {{ $v.VERSION_NAME }}
-        namespace: {{ $v.VERSION_NAMESPACE }}
       weight: {{ $v.weight }}
-    {{- end }} {{- /* range $i, $v := .Values.application.versions */}}
+    {{- end }} {{- /* range $i, $v := $versions */}}
     routingTemplates:
       {{ .Values.application.strategy }}:
         gvrShort: vs
@@ -40,52 +40,54 @@ data:
             - {{ $APP_NAME }}.{{ $APP_NAMESPACE }}.svc.cluster.local
             http:
             # primary model version
-            - name: {{ (index $versions 0).VERSION_NAME }}
+            {{- $v := (index $versions 0) }}
+            - name: {{ template "isvc.name" $v }}
               match:
               - headers:
                   branch:
-                    exact: {{ (index $versions 0).VERSION_NAME }}
+                    exact: {{ template "isvc.name" $v }}
               rewrite:
-                uri: /v2/models/{{ (index $versions 0).VERSION_NAME }}/infer
+                uri: /v2/models/{{ template "isvc.name" $v }}/infer
               route:
               - destination:
                   host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      Host: {{ (index $versions 0).VERSION_NAME }}-{{ template "kserve.host" $ }}
+                      Host: {{ template "isvc.name" $v }}-{{ template "kserve.host" $ }}
                     remove:
                     - branch
                   response:
                     add:
-                      app-version: {{ (index $versions 0).VERSION_NAME }}
+                      app-version: {{ template "isvc.name" $v }}
             # other model versions
             {{- range $i, $v := (rest $versions) }}
             {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
-            - name: {{ (index $versions (add1 $i)).VERSION_NAME }}
+            - name: {{ template "isvc.name" $v }}
               match:
               - headers:
                   branch:
-                    exact: {{ (index $versions (add1 $i)).VERSION_NAME }}
+                    exact: {{ template "isvc.name" $v }}
               rewrite:
-                uri: /v2/models/{{ (index $versions (add1 $i)).VERSION_NAME }}/infer
+                uri: /v2/models/{{ template "isvc.name" $v }}/infer
               route:
               - destination:
                   host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      Host: {{ (index $versions (add1 $i)).VERSION_NAME }}-{{ template "kserve.host" $ }}
+                      Host: {{ template "isvc.name" $v }}-{{ template "kserve.host" $ }}
                     remove:
                     - branch
                   response:
                     add:
-                      app-version: {{ (index $versions (add1 $i)).VERSION_NAME }}
+                      app-version: {{ template "isvc.name" $v }}
               {{ `{{- end }}`}}     
               {{- end }}
             # traffic split
             - name: split
               route:
+              {{- $v := (index $versions 0) }}
               - destination:
                   host: knative-local-gateway.istio-system.svc.cluster.local
                 {{- if gt (len $versions) 1 }}
@@ -96,7 +98,7 @@ data:
                 headers:
                   request:
                     set:
-                      branch: {{ (index $versions 0).VERSION_NAME }}
+                      branch: {{ template "isvc.name" $v }}
                       host: {{ $APP_NAME }}.{{ $APP_NAMESPACE }}
               {{- range $i, $v := (rest $versions) }}
               {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
@@ -106,7 +108,7 @@ data:
                 headers:
                   request:
                     set:
-                      branch: {{ (index $versions (add1 $i)).VERSION_NAME }}
+                      branch: {{ template "isvc.name" $v }}
                       host: {{ $APP_NAME }}.{{ $APP_NAMESPACE }}
               {{ `{{- end }}`}}
               {{- end }}

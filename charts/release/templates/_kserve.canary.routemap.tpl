@@ -2,21 +2,21 @@
 
 {{- $APP_NAME := (include "application.name" .) }}
 {{- $APP_NAMESPACE := (include "application.namespace" .) }}
-{{- $versions := include "normalize.versions" . | mustFromJson }}
+{{- $versions := include "normalize.versions.kserve" . | mustFromJson }}
 
 apiVersion: v1
 kind: ConfigMap
-{{ template "routemap.metadata" . }}
+{{- template "routemap.metadata" . }}
 data:
   strSpec: |
     versions: 
     {{- range $i, $v := $versions }}
     - resources:
       - gvrShort: isvc
-        name: {{ $v.VERSION_NAME }}
-        namespace: {{ $v.VERSION_NAMESPACE }}
+        name: {{ template "isvc.name" $v }}
+        namespace: {{ template "isvc.namespace" $v }}
       weight: {{ $v.weight }}
-    {{- end }} {{- /* range $i, $v := .Values.application.versions */}}
+    {{- end }} {{- /* range $i, $v := $versions */}}
     routingTemplates:
       {{ .Values.application.strategy }}:
         gvrShort: vs
@@ -41,7 +41,7 @@ data:
             {{- range $i, $v := (rest $versions) }}
             {{- /* continue only if candidate is ready (weight > 0) */}}
             {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
-            - name: {{ (index $versions (add1 $i)).VERSION_NAME }}
+            - name: {{ template "isvc.name" $v }}
               match:
               {{- /* A match may have several ORd clauses */}}
               {{- range $j, $m := $v.match }}
@@ -56,32 +56,33 @@ data:
                 {{- end }}
               {{- end }}
               rewrite:
-                uri: /v2/models/{{ (index $versions (add1 $i)).VERSION_NAME }}/infer
+                uri: /v2/models/{{ template "isvc.name" $v }}/infer
               route:
               - destination:
                   host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      Host: {{ (index $versions (add1 $i)).VERSION_NAME }}-{{ template "kserve.host" $ }}
+                      Host: {{ template "isvc.name" $v }}-{{ template "kserve.host" $ }}
                   response:
                     add:
-                      app-version: "{{ (index $versions (add1 $i)).VERSION_NAME }}"
+                      app-version: {{ template "isvc.name" $v }}
             {{ `{{- end }}`}}
             {{- end }}
             # primary version (default)
-            - name: {{ (index $versions 0).VERSION_NAME }}
+            {{- $v := (index $versions 0) }}
+            - name: {{ template "isvc.name" $v }}
               rewrite:
-                uri: /v2/models/{{ (index $versions 0).VERSION_NAME }}/infer
+                uri: /v2/models/{{ template "isvc.name" $v }}/infer
               route:
               - destination:
                   host: knative-local-gateway.istio-system.svc.cluster.local
                 headers:
                   request:
                     set:
-                      Host: {{ (index $versions 0).VERSION_NAME }}-{{ template "kserve.host" $ }}
+                      Host: {{ template "isvc.name" $v }}-{{ template "kserve.host" $ }}
                   response:
                     add:
-                      app-version: "{{ (index $versions 0).VERSION_NAME }}"
+                      app-version: {{ template "isvc.name" $v }}
 
 {{- end }} {{- /* define "env.kserve.canary.routemap" */}}
