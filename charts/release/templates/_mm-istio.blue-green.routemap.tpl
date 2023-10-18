@@ -50,31 +50,31 @@ data:
                 {{- if gt (len $versions) 1 }}
                 {{ `{{- if gt (index .Weights 1) 0 }}` }}
                 weight: {{ `{{ index .Weights 0 }}` }}
-                {{ `{{- end }}`}}
+                {{ `{{- end }}` }}
                 {{- end  }} {{- /* if gt (len $versions) 1 */}}
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: {{ template "isvc.name" $v}}
+                      mm-vmodel-id: {{ template "isvc.name" $v }}
                     remove:
                     - branch
                   response:
                     add:
-                      app-version: {{ template "isvc.name" $v}}
+                      app-version: {{ template "isvc.name" $v }}
               # non-primary model versions
               {{- range $i, $v := (rest $versions) }}
               - destination:
                   host: {{ template "mm.serviceHost" $ }}
                   port:
                     number: {{ template "mm.servicePort" $ }}
-                weight: {{ `{{ index .Weights `}}{{ print (add1 $i) }}{{` }}`}}
+                weight: {{ `{{ index .Weights ` }}{{ print (add1 $i) }}{{ ` }}` }}
                 headers:
                   request:
                     set:
-                      mm-vmodel-id: {{ template "isvc.name" $v}}
+                      mm-vmodel-id: {{ template "isvc.name" $v }}
                   response:
                     add:
-                      app-version: {{ template "isvc.name" $v}}
+                      app-version: {{ template "isvc.name" $v }}
               {{- end }} {{- /* {{- range $i, $v := (rest $versions) }} */}}
 
 {{- end }} {{- /* define "env.mm-istio.blue-green.routemap" */}}

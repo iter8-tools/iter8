@@ -13,11 +13,11 @@ data:
     {{- range $i, $v := $versions }}
     - resources:
       - gvrShort: svc
-        name: {{ template "svc.name" $v}}
-        namespace: {{ template "svc.namespace" $v}}
+        name: {{ template "svc.name" $v }}
+        namespace: {{ template "svc.namespace" $v }}
       - gvrShort: deploy
-        name: {{ template "deploy.name" $v}}
-        namespace: {{ template "deploy.namespace" $v}}
+        name: {{ template "deploy.name" $v }}
+        namespace: {{ template "deploy.namespace" $v }}
       - gvrShort: cm
         name: {{ $v.VERSION_NAME }}-weight-config
         namespace: {{ $v.VERSION_NAMESPACE }}
@@ -48,30 +48,30 @@ data:
               # primary version
               {{- $v := (index $versions 0) }}
               - destination:
-                  host: {{ template "svc.name" $v}}.{{ $APP_NAMESPACE }}.svc.cluster.local
+                  host: {{ template "svc.name" $v }}.{{ $APP_NAMESPACE }}.svc.cluster.local
                   port:
                     number: {{ $v.port }}
                 {{- if gt (len $versions) 1 }}
                 {{ `{{- if gt (index .Weights 1) 0 }}` }}
                 weight: {{ `{{ index .Weights 0 }}` }}
-                {{ `{{- end }}`}}
+                {{ `{{- end }}` }}
                 {{- end  }}
                 headers: 
                   response:
                     add:
-                      app-version: {{ template "svc.name" $v}}
+                      app-version: {{ template "svc.name" $v }}
               # other versions
               {{- range $i, $v := (rest $versions) }}
-              {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
+              {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}` }}
               - destination:
-                  host: {{ template "svc.name" $v}}.{{ $APP_NAMESPACE }}.svc.cluster.local
+                  host: {{ template "svc.name" $v }}.{{ $APP_NAMESPACE }}.svc.cluster.local
                   port:
                     number: {{ $v.port }}
-                weight: {{ `{{ index .Weights `}}{{ print (add1 $i) }}{{` }}`}}
+                weight: {{ `{{ index .Weights ` }}{{ print (add1 $i) }}{{ ` }}` }}
                 headers:
                   response:
                     add:
-                      app-version: {{ template "svc.name" $v}}
-              {{ `{{- end }}`}}     
+                      app-version: {{ template "svc.name" $v }}
+              {{ `{{- end }}` }}
               {{- end }}
 {{- end }} {{- /* define "env.deployment-istio.blue-green.routemap" */}}

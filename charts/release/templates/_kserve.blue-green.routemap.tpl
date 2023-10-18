@@ -62,7 +62,7 @@ data:
                       app-version: {{ template "isvc.name" $v }}
             # other model versions
             {{- range $i, $v := (rest $versions) }}
-            {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
+            {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}` }}
             - name: {{ template "isvc.name" $v }}
               match:
               - headers:
@@ -82,7 +82,7 @@ data:
                   response:
                     add:
                       app-version: {{ template "isvc.name" $v }}
-              {{ `{{- end }}`}}     
+              {{ `{{- end }}` }}     
               {{- end }}
             # traffic split
             - name: split
@@ -93,7 +93,7 @@ data:
                 {{- if gt (len $versions) 1 }}
                 {{ `{{- if gt (index .Weights 1) 0 }}` }}
                 weight: {{ `{{ index .Weights 0 }}` }}
-                {{ `{{- end }}`}}
+                {{ `{{- end }}` }}
                 {{- end  }}
                 headers:
                   request:
@@ -101,16 +101,16 @@ data:
                       branch: {{ template "isvc.name" $v }}
                       host: {{ $APP_NAME }}.{{ $APP_NAMESPACE }}
               {{- range $i, $v := (rest $versions) }}
-              {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
+              {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}` }}
               - destination:
                   host: knative-local-gateway.istio-system.svc.cluster.local
-                weight: {{ `{{ index .Weights `}}{{ print (add1 $i) }}{{` }}`}}
+                weight: {{ `{{ index .Weights ` }}{{ print (add1 $i) }}{{ ` }}` }}
                 headers:
                   request:
                     set:
                       branch: {{ template "isvc.name" $v }}
                       host: {{ $APP_NAME }}.{{ $APP_NAMESPACE }}
-              {{ `{{- end }}`}}
+              {{ `{{- end }}` }}
               {{- end }}
 
 {{- end }} {{- /* define "env.kserve.blue-green.routemap" */}}

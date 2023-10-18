@@ -40,7 +40,7 @@ data:
             {{- /* For candidate versions, ensure mm-model header is required in all matches */}}
             {{- range $i, $v := (rest $versions) }}
             {{- /* continue only if candidate is ready (weight > 0) */}}
-            {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
+            {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}` }}
             - name: {{ template "isvc.name" $v }}
               match:
               {{- /* A match may have several ORd clauses */}}
@@ -67,7 +67,7 @@ data:
                   response:
                     add:
                       app-version: {{ template "isvc.name" $v }}
-            {{ `{{- end }}`}}
+            {{ `{{- end }}` }}
             {{- end }}
             # primary version (default)
             {{- $v := (index $versions 0) }}

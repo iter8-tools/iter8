@@ -40,7 +40,7 @@ data:
             {{- /* For candidate versions, ensure mm-model header is required in all matches */}}
             {{- range $i, $v := (rest $versions) }}
             {{- /* continue only if candidate is ready (ie, weight > 0) */}}
-            {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}`}}
+            {{ `{{- if gt (index .Weights ` }}{{ print (add1 $i) }}{{ `) 0 }}` }}
             - match:
               {{- /* A match may have several ORed clauses */}}
               {{- range $j, $m := $v.match }}
@@ -66,7 +66,7 @@ data:
                   response:
                     add:
                       app-version: {{ (index $versions (add1 $i)).VERSION_NAME }}
-            {{ `{{- end }}`}}
+            {{ `{{- end }}` }}
             {{- end }} {{- /* range $i, $v := (rest $versions) */}}
             # primary version (default)
             - name: {{ (index $versions 0).VERSION_NAME }}
