@@ -71,6 +71,8 @@ metadata:
   {{- $APP_NAME := (include "application.name" .) }}
   {{- $APP_NAMESPACE := (include "application.namespace" .) }}
 
+  {{- /* set default match for canary use cases: "traffic: test" */}}
+  {{- /* this is arbitrary but enables trying it out quickly " */}}
   {{- $defaultMatch := ternary (list (dict "headers" (dict "traffic" (dict "exact" "test")))) (dict) (eq .Values.application.strategy "canary") }}
 
   {{- $normalizedVersions := list }}
