@@ -118,6 +118,29 @@ entries:
   controller:
   - apiVersion: v2
     appVersion: v0.18
+    created: "2023-10-19T14:34:05.437678957Z"
+    description: Iter8 controller controller
+    digest: a7dadf2938d93e08aa4314419c4bf5f24ef81bbc602f0f3074f68f46dd2f6116
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - controller
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: controller
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/controller-0.18.2/controller-0.18.2.tgz
+    version: 0.18.2
+  - apiVersion: v2
+    appVersion: v0.18
     created: "2023-09-19T20:34:31.119514496Z"
     description: Iter8 controller controller
     digest: 153b361d273139df18177b63bbafd6daf1ac764d06851708e994ed49dc912426
@@ -499,6 +522,32 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/litmuschaos-0.0.4/litmuschaos-0.0.4.tgz
     version: 0.0.4
+  release:
+  - apiVersion: v2
+    appVersion: v0.18
+    created: "2023-10-19T14:34:05.581888282Z"
+    description: Iter8 supported application release
+    digest: 1eb51726495585a2e1fc56a3d70e9d27efc07a4cad4e09db5b412b122a38b0de
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: release
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/release-0.18.1/release-0.18.1.tgz
+    version: 0.18.1
   routing-actions:
   - apiVersion: v2
     appVersion: v0.18
@@ -1036,4 +1085,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-09-26T20:55:46.921253727Z"
+generated: "2023-10-19T14:34:05.581983684Z"
