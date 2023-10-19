@@ -492,12 +492,6 @@ func getObservedGeneration(obj *unstructured.Unstructured, condition map[string]
 
 // validate routemap CM
 func validateRoutemapCM(confMap *corev1.ConfigMap) error {
-	// // routemap CM must be immutable
-	// if confMap.Immutable == nil || !(*confMap.Immutable) {
-	// 	err := errors.New("routemap CM is not immutable")
-	// 	log.Logger.Error(err)
-	// 	return err
-	// }
 	return nil
 }
 
