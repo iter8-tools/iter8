@@ -1,0 +1,24 @@
+{{- /* Verify that .Values.environment is valid */}}
+{{- if not .Values.environment }}
+  {{- printf "environment is required" | fail }}
+{{- end }} {{- /* if not .Values.environment */}}
+
+{{- /* Verify that .Values.application is valid */}}
+{{- if not .Values.application }}
+  {{- printf "application is required" | fail }}
+{{- end }} {{- /* if not .Values.application */}}
+
+{{- /* Different processing based on .Values.environment */}}
+{{- if eq "deployment" .Values.environment }}
+  {{- include "env.deployment" . }}
+{{- else if eq "deployment-istio" .Values.environment }}
+  {{- include "env.deployment-istio" . }}
+{{- else if eq "kserve-modelmesh-istio" .Values.environment }}
+  {{- include "env.mm-istio" . }}
+{{- else if has .Values.environment (list "kserve" "kserve-0.11") }}
+  {{- include "env.kserve" . }}
+{{- else if eq "kserve-0.10" .Values.environment }}
+  {{- include "env.kserve-10" . }}
+{{- else }}
+  {{- printf "Unknown environment: '%s'" .Values.environment | fail }}
+{{- end }} {{- /* if eq ,,, .Values.environment */}}

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -275,6 +276,10 @@ func computeSignature(v version) (string, error) {
 			return "", fmt.Errorf("no application informer with GVRShort: %s", resource.GVRShort)
 		}
 
+		if resource.Namespace == nil {
+			return "", fmt.Errorf("namespace not specified for resource %s/%s", resource.GVRShort, resource.Name)
+		}
+
 		obj, err := appInformers[resource.GVRShort].Lister().ByNamespace(*resource.Namespace).Get(resource.Name)
 		if err != nil {
 			return "", fmt.Errorf("cannot get resource: %s", err.Error())
@@ -367,6 +372,20 @@ func (s *routemap) reconcile(config *Config, client k8sclient.Interface) {
 							} else {
 								// at this point we have a known resource we can server-side apply
 								gvr := gvrc.GroupVersionResource
+
+								// Make routemap the owner so gets deleted when routemap removed
+								cm, oerr := client.CoreV1().ConfigMaps(s.GetNamespace()).Get(context.Background(), s.GetName(), metav1.GetOptions{})
+								if oerr != nil {
+									log.Logger.Error("unable to retrieve configmap containing routemap: ", oerr)
+								} else {
+									log.Logger.Tracef("calling SetOwnerReference(%s,%s)", obj.GetName(), cm.GetName())
+									obj.SetOwnerReferences([]metav1.OwnerReference{{
+										APIVersion: "v1",
+										Kind:       "configmap",
+										UID:        cm.GetUID(),
+										Name:       cm.GetName(),
+									}})
+								}
 
 								// get its JSON serialization
 								jsonBytes, err := obj.MarshalJSON()
@@ -473,12 +492,6 @@ func getObservedGeneration(obj *unstructured.Unstructured, condition map[string]
 
 // validate routemap CM
 func validateRoutemapCM(confMap *corev1.ConfigMap) error {
-	// routemap CM must be immutable
-	if confMap.Immutable == nil || !(*confMap.Immutable) {
-		err := errors.New("routemap CM is not immutable")
-		log.Logger.Error(err)
-		return err
-	}
 	return nil
 }
 
