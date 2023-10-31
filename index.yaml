@@ -525,6 +525,31 @@ entries:
   release:
   - apiVersion: v2
     appVersion: v0.18
+    created: "2023-10-31T20:31:16.28875867Z"
+    description: Iter8 supported application release
+    digest: cd9ff85117a4447933c5d508cad069aac91cb08521636d192884a72c745c7dee
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: release
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/release-0.18.2/release-0.18.2.tgz
+    version: 0.18.2
+  - apiVersion: v2
+    appVersion: v0.18
     created: "2023-10-19T14:34:05.581888282Z"
     description: Iter8 supported application release
     digest: 1eb51726495585a2e1fc56a3d70e9d27efc07a4cad4e09db5b412b122a38b0de
@@ -549,6 +574,32 @@ entries:
     - https://github.com/iter8-tools/iter8/releases/download/release-0.18.1/release-0.18.1.tgz
     version: 0.18.1
   routing-actions:
+  - apiVersion: v2
+    appVersion: v0.18
+    created: "2023-10-31T20:31:16.451891324Z"
+    deprecated: true
+    description: DEPRECATED Iter8 routing actions
+    digest: 3ebe73139d4e429d54224d13b267ca3b132cbcc9693b7e0b27f3739c0105ec24
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: routing-actions
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/routing-actions-0.18.2/routing-actions-0.18.2.tgz
+    version: 0.18.2
   - apiVersion: v2
     appVersion: v0.18
     created: "2023-09-26T20:55:46.921156806Z"
@@ -1085,4 +1136,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-10-19T14:34:05.581983684Z"
+generated: "2023-10-31T20:31:16.451983023Z"
