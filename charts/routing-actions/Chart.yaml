@@ -1,7 +1,8 @@
 apiVersion: v2
 name: routing-actions
-version: 0.18.1
-description: Iter8 routing actions
+version: 0.18.2
+deprecated: true
+description: DEPRECATED Iter8 routing actions
 type: application
 keywords:
 - Iter8

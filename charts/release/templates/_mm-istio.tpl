@@ -9,10 +9,6 @@
 ---
 {{- end }} {{- /* range $i, $v := $versions */}}
 
-{{- /* ServiceEntry */}}
-{{ include "env.mm-istio.service" . }}
----
-
 {{- /* routemap (and other strategy specific objects) */}}
 {{- if not .Values.application.strategy }}
 {{ include "env.mm-istio.none" . }}
