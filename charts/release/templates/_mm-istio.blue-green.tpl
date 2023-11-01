@@ -1,5 +1,9 @@
 {{- define "env.mm-istio.blue-green" }}
 
+{{- /* ServiceEntry */}}
+{{ include "env.mm-istio.service" . }}
+---
+
 {{- /* prepare versions for simpler processing */}}
 {{- $versions := include "normalize.versions.kserve-mm" . | mustFromJson }}
 
