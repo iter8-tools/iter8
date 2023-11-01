@@ -40,6 +40,10 @@ resourceTypes:
     Group: networking.istio.io
     Version: v1beta1
     Resource: virtualservices
+  httproute:
+    Group: gateway.networking.k8s.io
+    Version: v1beta1
+    Resource: httproutes
 
 ### log level. Must be one of trace, debug, info, warning, error
 logLevel: info

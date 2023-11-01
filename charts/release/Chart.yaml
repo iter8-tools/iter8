@@ -1,6 +1,6 @@
 apiVersion: v2
 name: release
-version: 0.18.2
+version: 0.18.3
 description: Iter8 supported application release
 type: application
 keywords:
