@@ -20,14 +20,17 @@ type metricsConfig struct {
 	Implementation *string `json:"implementation,omitempty"`
 }
 
-// GetClient returns an implementation independent client for metrics service
+// GetClient creates a metric service client based on configuration
 func GetClient() (storage.Interface, error) {
 	conf := &metricsConfig{}
-	util.ReadConfig("METRICS_CONFIG_FILE", conf, func() {
+	err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
 		if conf.Implementation == nil {
 			conf.Implementation = util.StringPointer("badgerdb")
 		}
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	switch strings.ToLower(*conf.Implementation) {
 	case "badgerdb":
@@ -41,7 +44,7 @@ func GetClient() (storage.Interface, error) {
 		}
 
 		config := &mConfig{}
-		util.ReadConfig("METRICS_CONFIG_FILE", conf, func() {
+		err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
 			if config.BadgerConfig.Storage == nil {
 				config.BadgerConfig.Storage = util.StringPointer("50Mi")
 			}
@@ -52,6 +55,9 @@ func GetClient() (storage.Interface, error) {
 				config.BadgerConfig.Dir = util.StringPointer("/metrics")
 			}
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		cl, err := badgerdb.GetClient(badger.DefaultOptions(*config.BadgerConfig.Dir), badgerdb.AdditionalOptions{})
 		if err != nil {
@@ -68,11 +74,14 @@ func GetClient() (storage.Interface, error) {
 		}
 
 		conf := &mConfig{}
-		util.ReadConfig("METRICS_CONFIG_FILE", conf, func() {
+		err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
 			if conf.RedisConfig.Address == nil {
 				conf.RedisConfig.Address = util.StringPointer("redis:6379")
 			}
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		cl, err := redis.GetClient(*conf.RedisConfig.Address)
 		if err != nil {

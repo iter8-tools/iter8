@@ -95,8 +95,8 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 				MetricsOverUsers:        metricsOverUsers,
 			}
 
-			currentMetric = ""
-			currentUser = ""
+			// currentMetric = ""
+			// currentUser = ""
 			cumulativeUserValue = 0
 			metricsOverTransactions = []float64{}
 			metricsOverUsers = []float64{}

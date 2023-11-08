@@ -268,7 +268,7 @@ redis:
 
 	err = os.Setenv("ABN_CONFIG_FILE", abnConfigFile)
 	assert.NoError(t, err)
-	err = os.Setenv("METRICS_CONFIG_FILE", metricsConfigFile)
+	err = os.Setenv(metrics.MetricsConfigFileEnv, metricsConfigFile)
 	assert.NoError(t, err)
 
 	err = LaunchGRPCServer([]grpc.ServerOption{}, ctx.Done())

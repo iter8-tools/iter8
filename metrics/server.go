@@ -24,12 +24,14 @@ import (
 )
 
 const (
-	configEnv         = "METRICS_CONFIG_FILE"
-	defaultPortNumber = 8080
-	timeFormat        = "02 Jan 06 15:04 MST"
+	// MetricsConfigFileEnv is name of environment variable containing the name metrics config file
+	MetricsConfigFileEnv = "METRICS_CONFIG_FILE"
+	defaultPortNumber    = 8080
+	timeFormat           = "02 Jan 06 15:04 MST"
 )
 
 var (
+	// MetricsClient is storage client
 	MetricsClient storage.Interface
 )
 
@@ -133,7 +135,7 @@ var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutema
 func Start(stopCh <-chan struct{}) error {
 	// read configutation for metrics service
 	conf := &metricsConfig{}
-	err := util.ReadConfig(configEnv, conf, func() {
+	err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
 		if nil == conf.Port {
 			conf.Port = util.IntPointer(defaultPortNumber)
 		}

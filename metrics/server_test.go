@@ -518,7 +518,7 @@ func TestStart(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 
-	err = os.Setenv("METRICS_CONFIG_FILE", file.Name())
+	err = os.Setenv(MetricsConfigFileEnv, file.Name())
 	assert.NoError(t, err)
 
 	err = Start(ctx.Done())
@@ -533,10 +533,10 @@ func TestReadConfigDefaultPort(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 
-	err = os.Setenv("METRICS_CONFIG_FILE", file.Name())
+	err = os.Setenv(MetricsConfigFileEnv, file.Name())
 	assert.NoError(t, err)
 	conf := &metricsConfig{}
-	err = util.ReadConfig(configEnv, conf, func() {
+	err = util.ReadConfig(MetricsConfigFileEnv, conf, func() {
 		if nil == conf.Port {
 			conf.Port = util.IntPointer(defaultPortNumber)
 		}
@@ -559,10 +559,10 @@ func TestReadConfigSetPort(t *testing.T) {
 	_, err = file.Write([]byte(fmt.Sprintf("port: %d", expectedPortNumber)))
 	assert.NoError(t, err)
 
-	err = os.Setenv("METRICS_CONFIG_FILE", file.Name())
+	err = os.Setenv(MetricsConfigFileEnv, file.Name())
 	assert.NoError(t, err)
 	conf := &metricsConfig{}
-	err = util.ReadConfig(configEnv, conf, func() {
+	err = util.ReadConfig(MetricsConfigFileEnv, conf, func() {
 		if nil == conf.Port {
 			conf.Port = util.IntPointer(defaultPortNumber)
 		}
