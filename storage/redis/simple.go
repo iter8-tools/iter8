@@ -164,12 +164,12 @@ type Client struct {
 	rdb *redis.Client
 }
 
-// Getclient returns a Redis client
+// GetClient returns a Redis client
 func GetClient(addr string) (*Client, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr, //"localhost:6379",
-		Password: "",   // no password set
-		DB:       0,    // default DB
+		Addr:     addr,
+		Password: "", // no password set
+		DB:       0,  // default DB
 	})
 
 	return &Client{
