@@ -1,49 +1,22 @@
-package badgerdb
+package redis
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 	"testing"
 
-	"github.com/dgraph-io/badger/v4"
+	"github.com/alicebob/miniredis"
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/storage"
 	"github.com/stretchr/testify/assert"
 )
 
-type testgetclient struct {
-	dir      string
-	valueDir string
-	errStr   string
-}
-
-func TestGetClient(t *testing.T) {
-	tempDirPath := t.TempDir()
-
-	for _, s := range []testgetclient{
-		{dir: "", valueDir: tempDirPath, errStr: "dir not set"},
-		{dir: tempDirPath, valueDir: "", errStr: "valueDir not set"},
-		{dir: "dir", valueDir: "valueDir", errStr: "different values"},
-		{dir: "/does/not/exist", valueDir: "/does/not/exist", errStr: "path does not exist"},
-		{dir: tempDirPath, valueDir: tempDirPath, errStr: ""},
-	} {
-		client, err := GetClient(badger.DefaultOptions(s.dir).WithValueDir(s.valueDir), AdditionalOptions{})
-		if s.errStr == "" {
-			assert.NoError(t, err)
-			assert.NotNil(t, client)
-			assert.NotNil(t, client.db) // BadgerDB should exist
-			err = client.db.Close()
-			assert.NoError(t, err)
-		} else {
-			assert.ErrorContains(t, err, s.errStr)
-		}
-	}
-}
-
 func TestSetMetric(t *testing.T) {
-	tempDirPath := t.TempDir()
+	server, _ := miniredis.Run()
+	assert.NotNil(t, server)
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	client, err := GetClient(server.Addr())
 	assert.NoError(t, err)
 
 	app := "my-application"
@@ -57,53 +30,27 @@ func TestSetMetric(t *testing.T) {
 	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
 	assert.NoError(t, err)
 
-	// get metric
-	err = client.db.View(func(txn *badger.Txn) error {
-		key, err := storage.GetMetricKey(app, version, signature, metric, user, transaction)
-		assert.NoError(t, err)
-
-		item, err := txn.Get([]byte(key))
-		assert.NoError(t, err)
-		assert.NotNil(t, item)
-
-		err = item.Value(func(val []byte) error {
-			// parse val into float64
-			fval, err := strconv.ParseFloat(string(val), 64)
-			assert.NoError(t, err)
-
-			// assert metric value is the same as the provided one
-			assert.Equal(t, value, fval)
-			return nil
-		})
-		assert.NoError(t, err)
-
-		return nil
-	})
+	key, err := storage.GetMetricKey(app, version, signature, metric, user, transaction)
 	assert.NoError(t, err)
+	val, err := client.rdb.Get(context.Background(), key).Result()
+	assert.NoError(t, err)
+	fval, err := strconv.ParseFloat(string(val), 64)
+	assert.NoError(t, err)
+
+	assert.Equal(t, value, fval)
 
 	// SetMetric() should also add a user
-	err = client.db.View(func(txn *badger.Txn) error {
-		key := storage.GetUserKey(app, version, signature, user)
-		item, err := txn.Get([]byte(key))
-		assert.NoError(t, err)
-		assert.NotNil(t, item)
-
-		err = item.Value(func(val []byte) error {
-			// user should be set to "true"
-			assert.Equal(t, "true", string(val))
-			return nil
-		})
-		assert.NoError(t, err)
-
-		return nil
-	})
+	userKey := storage.GetUserKey(app, version, signature, user)
+	u, err := client.rdb.Get(context.Background(), userKey).Result()
 	assert.NoError(t, err)
+	assert.Equal(t, "true", u)
 }
 
 func TestSetMetricInvalid(t *testing.T) {
-	tempDirPath := t.TempDir()
+	server, _ := miniredis.Run()
+	assert.NotNil(t, server)
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	client, err := GetClient(server.Addr())
 	assert.NoError(t, err)
 
 	err = client.SetMetric("invalid:application", 0, "signature", "metric", "user", "transaction", float64(0))
@@ -111,9 +58,10 @@ func TestSetMetricInvalid(t *testing.T) {
 }
 
 func TestSetUser(t *testing.T) {
-	tempDirPath := t.TempDir()
+	server, _ := miniredis.Run()
+	assert.NotNil(t, server)
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	client, err := GetClient(server.Addr())
 	assert.NoError(t, err)
 
 	app := "my-application"
@@ -124,30 +72,18 @@ func TestSetUser(t *testing.T) {
 	err = client.SetUser(app, version, signature, user)
 	assert.NoError(t, err)
 
-	// get user
-	err = client.db.View(func(txn *badger.Txn) error {
-		key := storage.GetUserKey(app, version, signature, user)
-		item, err := txn.Get([]byte(key))
-		assert.NoError(t, err)
-		assert.NotNil(t, item)
-
-		err = item.Value(func(val []byte) error {
-			// metric type should be set to "true"
-			assert.Equal(t, "true", string(val))
-			return nil
-		})
-		assert.NoError(t, err)
-
-		return nil
-	})
+	userKey := storage.GetUserKey(app, version, signature, user)
+	u, err := client.rdb.Get(context.Background(), userKey).Result()
 	assert.NoError(t, err)
+	assert.Equal(t, "true", u)
 }
 
 // TestGetMetricsWithExtraUsers tests if GetMetrics adds 0 for all users that did not produce metrics
 func TestGetMetricsWithExtraUsers(t *testing.T) {
-	tempDirPath := t.TempDir()
+	server, _ := miniredis.Run()
+	assert.NotNil(t, server)
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	client, err := GetClient(server.Addr())
 	assert.NoError(t, err)
 
 	app := "my-application"
@@ -180,9 +116,10 @@ func TestGetMetricsWithExtraUsers(t *testing.T) {
 }
 
 func TestGetMetrics(t *testing.T) {
-	tempDirPath := t.TempDir()
+	server, _ := miniredis.Run()
+	assert.NotNil(t, server)
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	client, err := GetClient(server.Addr())
 	assert.NoError(t, err)
 
 	err = client.SetMetric("my-application", 0, "my-signature", "my-metric", "my-user", "my-transaction", 50.0)
@@ -222,9 +159,10 @@ func TestGetMetrics(t *testing.T) {
 }
 
 func TestGetExperimentResult(t *testing.T) {
-	tempDirPath := t.TempDir()
+	server, _ := miniredis.Run()
+	assert.NotNil(t, server)
 
-	client, err := GetClient(badger.DefaultOptions(tempDirPath), AdditionalOptions{})
+	client, err := GetClient(server.Addr())
 	assert.NoError(t, err)
 
 	namespace := "my-namespace"

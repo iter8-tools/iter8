@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/bojand/ghz/runner"
-	"github.com/iter8-tools/iter8/abn"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
@@ -30,11 +29,9 @@ const (
 	timeFormat        = "02 Jan 06 15:04 MST"
 )
 
-// metricsConfig defines the configuration of the controllers
-type metricsConfig struct {
-	// Port is port number on which the metrics service should listen
-	Port *int `json:"port,omitempty"`
-}
+var (
+	MetricsClient storage.Interface
+)
 
 // versionSummarizedMetric adds version to summary data
 type versionSummarizedMetric struct {
@@ -228,11 +225,11 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if abn.MetricsClient == nil {
+		if MetricsClient == nil {
 			log.Logger.Error("no metrics client")
 			continue
 		}
-		versionmetrics, err := abn.MetricsClient.GetMetrics(namespaceApplication, v, *signature)
+		versionmetrics, err := MetricsClient.GetMetrics(namespaceApplication, v, *signature)
 		if err != nil {
 			log.Logger.Debugf("no metrics found for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 			continue
@@ -567,13 +564,13 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getHTTPGrafana called for namespace %s and test %s", namespace, test)
 
 	// get fortioResult from metrics client
-	if abn.MetricsClient == nil {
+	if MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
 
 	// get testResult from metrics client
-	testResult, err := abn.MetricsClient.GetExperimentResult(namespace, test)
+	testResult, err := MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
@@ -704,13 +701,13 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getGRPCDashboard called for namespace %s and test %s", namespace, test)
 
 	// get ghz result from metrics client
-	if abn.MetricsClient == nil {
+	if MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
 
 	// get testResult from metrics client
-	testResult, err := abn.MetricsClient.GetExperimentResult(namespace, test)
+	testResult, err := MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
@@ -784,12 +781,12 @@ func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if abn.MetricsClient == nil {
+	if MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
 
-	err = abn.MetricsClient.SetExperimentResult(namespace, experiment, &experimentResult)
+	err = MetricsClient.SetExperimentResult(namespace, experiment, &experimentResult)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot store result in storage client: %s: %e", string(body), err)
 		log.Logger.Error(errorMessage)

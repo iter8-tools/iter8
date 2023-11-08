@@ -42,8 +42,10 @@ spec:
         - name: config
           mountPath: "/config"
           readOnly: true
+        {{- if or (not .Values.metrics) (not .Values.metrics.implementation) (eq "badgerdb" .Values.metrics.implementation) }}
         - name: metrics
-          mountPath: "/metrics"
+          mountPath: {{ default "/metrics" .Values.metrics.badgerdb.dir }}
+        {{- end }}
         resources:
           {{ toYaml .Values.resources | indent 10 | trim }}
         securityContext:
@@ -58,6 +60,8 @@ spec:
         - name: config
           configMap:
             name: {{ .Release.Name }}
+        {{- if or (not .Values.metrics) (not .Values.metrics.implementation) (eq "badgerdb" .Values.metrics.implementation) }}
         - name: metrics
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}
+        {{- end }}

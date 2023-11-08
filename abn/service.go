@@ -7,33 +7,22 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/dgraph-io/badger/v4"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/storage"
-	"github.com/iter8-tools/iter8/storage/badgerdb"
+	"github.com/iter8-tools/iter8/metrics"
 
 	// auth package is necessary to enable authentication with various cloud providers
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 const (
-	// MetricsDirEnv is the environment variable identifying the directory with metrics storage
-	MetricsDirEnv = "METRICS_DIR"
-
 	configEnv         = "ABN_CONFIG_FILE"
 	defaultPortNumber = 50051
-)
-
-var (
-	// MetricsClient is the metrics client
-	MetricsClient storage.Interface
 )
 
 // newServer returns a new gRPC server
@@ -118,7 +107,7 @@ func LaunchGRPCServer(opts []grpc.ServerOption, stopCh <-chan struct{}) error {
 	pb.RegisterABNServer(grpcServer, newServer())
 
 	// configure MetricsClient if needed
-	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(os.Getenv(MetricsDirEnv)), badgerdb.AdditionalOptions{})
+	metrics.MetricsClient, err = metrics.GetClient()
 	if err != nil {
 		log.Logger.Error("Unable to configure metrics storage client ", err)
 		return err

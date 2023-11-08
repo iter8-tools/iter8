@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
-	"github.com/iter8-tools/iter8/abn"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/storage/badgerdb"
@@ -650,7 +649,7 @@ func TestGetABNDashboard(t *testing.T) {
 	err = client.SetMetric(app, version, signature, metric, user, transaction, value)
 	assert.NoError(t, err)
 
-	abn.MetricsClient = client
+	MetricsClient = client
 
 	w := httptest.NewRecorder()
 	rm := allRoutemaps.GetAllRoutemaps().GetRoutemapFromNamespaceName("default", "test")
@@ -949,7 +948,7 @@ func TestPutExperimentResult(t *testing.T) {
 	tempDirPath := t.TempDir()
 	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
-	abn.MetricsClient = client
+	MetricsClient = client
 
 	w := httptest.NewRecorder()
 
@@ -988,7 +987,7 @@ func TestPutExperimentResult(t *testing.T) {
 	}()
 
 	// check to see if the result is stored in the metrics client
-	result, err := abn.MetricsClient.GetExperimentResult("default", "default")
+	result, err := MetricsClient.GetExperimentResult("default", "default")
 	assert.NoError(t, err)
 	assert.Equal(t, &experimentResult, result)
 }
@@ -1052,7 +1051,7 @@ func TestGetHTTPDashboard(t *testing.T) {
 	tempDirPath := t.TempDir()
 	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
-	abn.MetricsClient = client
+	MetricsClient = client
 
 	// preload metric client with experiment result
 	fortioResult := util.HTTPResult{}
@@ -1070,7 +1069,7 @@ func TestGetHTTPDashboard(t *testing.T) {
 		},
 	}
 
-	err = abn.MetricsClient.SetExperimentResult("default", "default", &experimentResult)
+	err = MetricsClient.SetExperimentResult("default", "default", &experimentResult)
 	assert.NoError(t, err)
 
 	w := httptest.NewRecorder()
@@ -1165,7 +1164,7 @@ func TestGetGRPCDashboard(t *testing.T) {
 	tempDirPath := t.TempDir()
 	client, err := badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
-	abn.MetricsClient = client
+	MetricsClient = client
 
 	// preload metric client with experiment result
 	ghzResult := util.GHZResult{}
@@ -1183,7 +1182,7 @@ func TestGetGRPCDashboard(t *testing.T) {
 		},
 	}
 
-	err = abn.MetricsClient.SetExperimentResult("default", "default", &experimentResult)
+	err = MetricsClient.SetExperimentResult("default", "default", &experimentResult)
 	assert.NoError(t, err)
 	w := httptest.NewRecorder()
 
