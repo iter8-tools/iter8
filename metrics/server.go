@@ -257,12 +257,11 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Logger.Debugf("unable to compute summaried metrics over transactions for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 				continue
-			} else {
-				entry.SummaryOverTransactions = append(entry.SummaryOverTransactions, &versionSummarizedMetric{
-					Version:          v,
-					SummarizedMetric: smT,
-				})
 			}
+			entry.SummaryOverTransactions = append(entry.SummaryOverTransactions, &versionSummarizedMetric{
+				Version:          v,
+				SummarizedMetric: smT,
+			})
 
 			smU, err := calculateSummarizedMetric(metrics.MetricsOverUsers)
 			if err != nil {
@@ -299,11 +298,10 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Logger.Debugf("unable to compute histogram over transactions for application %s (metric %s)", namespaceApplication, metric)
 			continue
-		} else {
-			resultEntry := result[metric]
-			resultEntry.HistogramsOverTransactions = &hT
-			result[metric] = resultEntry
 		}
+		resultEntry := result[metric]
+		resultEntry.HistogramsOverTransactions = &hT
+		result[metric] = resultEntry
 	}
 
 	for metric, byVersion := range byMetricOverUsers {
@@ -311,11 +309,10 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Logger.Debugf("unable to compute histogram over users for application %s (metric %s)", namespaceApplication, metric)
 			continue
-		} else {
-			resultEntry := result[metric]
-			resultEntry.HistogramsOverUsers = &hT
-			result[metric] = resultEntry
 		}
+		resultEntry := result[metric]
+		resultEntry.HistogramsOverUsers = &hT
+		result[metric] = resultEntry
 	}
 
 	// convert to JSON

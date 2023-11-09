@@ -619,7 +619,7 @@ func (cm *testRoutemaps) GetAllRoutemaps() controllers.RoutemapsInterface {
 
 func TestGetABNDashboard(t *testing.T) {
 	testRM := testRoutemaps{
-		allroutemaps: setupRoutemaps(t, *getTestRM("default", "test")),
+		allroutemaps: setupRoutemaps(*getTestRM("default", "test")),
 	}
 	allRoutemaps = &testRM
 
@@ -795,7 +795,7 @@ func TestCalculateHistogram(t *testing.T) {
 	}
 }
 
-func setupRoutemaps(t *testing.T, initialroutemaps ...testroutemap) testroutemaps {
+func setupRoutemaps(initialroutemaps ...testroutemap) testroutemaps {
 	routemaps := testroutemaps{
 		nsRoutemap: make(map[string]testroutemapsByName),
 	}

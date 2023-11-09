@@ -1,3 +1,4 @@
+// Package client implements an implementation independent storage client
 package client
 
 import (
