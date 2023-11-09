@@ -16,7 +16,7 @@ func TestSetMetric(t *testing.T) {
 	server, _ := miniredis.Run()
 	assert.NotNil(t, server)
 
-	client, err := GetClient(server.Addr())
+	client, err := GetClient(RedisClientConfig{Address: base.StringPointer(server.Addr())})
 	assert.NoError(t, err)
 
 	app := "my-application"
@@ -50,7 +50,7 @@ func TestSetMetricInvalid(t *testing.T) {
 	server, _ := miniredis.Run()
 	assert.NotNil(t, server)
 
-	client, err := GetClient(server.Addr())
+	client, err := GetClient(RedisClientConfig{Address: base.StringPointer(server.Addr())})
 	assert.NoError(t, err)
 
 	err = client.SetMetric("invalid:application", 0, "signature", "metric", "user", "transaction", float64(0))
@@ -61,7 +61,7 @@ func TestSetUser(t *testing.T) {
 	server, _ := miniredis.Run()
 	assert.NotNil(t, server)
 
-	client, err := GetClient(server.Addr())
+	client, err := GetClient(RedisClientConfig{Address: base.StringPointer(server.Addr())})
 	assert.NoError(t, err)
 
 	app := "my-application"
@@ -83,7 +83,7 @@ func TestGetMetricsWithExtraUsers(t *testing.T) {
 	server, _ := miniredis.Run()
 	assert.NotNil(t, server)
 
-	client, err := GetClient(server.Addr())
+	client, err := GetClient(RedisClientConfig{Address: base.StringPointer(server.Addr())})
 	assert.NoError(t, err)
 
 	app := "my-application"
@@ -119,7 +119,7 @@ func TestGetMetrics(t *testing.T) {
 	server, _ := miniredis.Run()
 	assert.NotNil(t, server)
 
-	client, err := GetClient(server.Addr())
+	client, err := GetClient(RedisClientConfig{Address: base.StringPointer(server.Addr())})
 	assert.NoError(t, err)
 
 	err = client.SetMetric("my-application", 0, "my-signature", "my-metric", "my-user", "my-transaction", 50.0)
@@ -162,7 +162,7 @@ func TestGetExperimentResult(t *testing.T) {
 	server, _ := miniredis.Run()
 	assert.NotNil(t, server)
 
-	client, err := GetClient(server.Addr())
+	client, err := GetClient(RedisClientConfig{Address: base.StringPointer(server.Addr())})
 	assert.NoError(t, err)
 
 	namespace := "my-namespace"

@@ -13,6 +13,12 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type RedisClientConfig struct {
+	Address  *string `json:"address,omitempty"`
+	Password *string `json:"password,omitempty"`
+	DB       *int    `json:"db,omitempty"`
+}
+
 // SetMetric records a metric value; see storage.Interface
 func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {
 	key, err := storage.GetMetricKey(applicationName, version, signature, metric, user, transaction)
@@ -165,12 +171,16 @@ type Client struct {
 }
 
 // GetClient returns a Redis client
-func GetClient(addr string) (*Client, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: "", // no password set
-		DB:       0,  // default DB
-	})
+func GetClient(config RedisClientConfig) (*Client, error) {
+	options := &redis.Options{}
+	options.Addr = *config.Address
+	if config.Password != nil {
+		options.Password = *config.Password
+	}
+	if config.DB != nil {
+		options.DB = *config.DB
+	}
+	rdb := redis.NewClient(options)
 
 	return &Client{
 		rdb: rdb,

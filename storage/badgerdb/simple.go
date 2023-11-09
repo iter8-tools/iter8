@@ -16,6 +16,12 @@ import (
 	"github.com/iter8-tools/iter8/storage"
 )
 
+type BadgerClientConfig struct {
+	Storage          *string `json:"storage,omitempty"`
+	StorageClassName *string `json:"storageClassName,omitempty"`
+	Dir              *string `json:"dir,omitempty"`
+}
+
 // Client is a client for the BadgerDB
 type Client struct {
 	db *badger.DB
