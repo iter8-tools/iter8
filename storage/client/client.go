@@ -1,4 +1,4 @@
-package metrics
+package client
 
 import (
 	"fmt"
@@ -11,21 +11,28 @@ import (
 	"github.com/iter8-tools/iter8/storage/redis"
 )
 
-// metricsConfig is configuration of metrics service
-type metricsConfig struct {
-	// Port is port number on which the metrics service should listen
-	Port *int `json:"port,omitempty"`
+const (
+	metricsConfigFileEnv  = "METRICS_CONFIG_FILE"
+	defaultImplementation = "badgerdb"
+)
 
+var (
+	// MetricsClient is storage client
+	MetricsClient storage.Interface
+)
+
+// metricsStorageConfig is configuration of metrics service
+type metricsStorageConfig struct {
 	// Implementation method for metrics service
 	Implementation *string `json:"implementation,omitempty"`
 }
 
 // GetClient creates a metric service client based on configuration
 func GetClient() (storage.Interface, error) {
-	conf := &metricsConfig{}
-	err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
+	conf := &metricsStorageConfig{}
+	err := util.ReadConfig(metricsConfigFileEnv, conf, func() {
 		if conf.Implementation == nil {
-			conf.Implementation = util.StringPointer("badgerdb")
+			conf.Implementation = util.StringPointer(defaultImplementation)
 		}
 	})
 	if err != nil {
@@ -44,7 +51,7 @@ func GetClient() (storage.Interface, error) {
 		}
 
 		conf := &mConfig{}
-		err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
+		err := util.ReadConfig(metricsConfigFileEnv, conf, func() {
 			if conf.BadgerConfig.Storage == nil {
 				conf.BadgerConfig.Storage = util.StringPointer("50Mi")
 			}
@@ -74,7 +81,7 @@ func GetClient() (storage.Interface, error) {
 		}
 
 		conf := &mConfig{}
-		err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
+		err := util.ReadConfig(metricsConfigFileEnv, conf, func() {
 			if conf.RedisConfig.Address == nil {
 				conf.RedisConfig.Address = util.StringPointer("redis:6379")
 			}

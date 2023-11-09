@@ -13,7 +13,7 @@ import (
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
-	"github.com/iter8-tools/iter8/metrics"
+	storageclient "github.com/iter8-tools/iter8/storage/client"
 )
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
@@ -48,10 +48,10 @@ func lookupInternal(application string, user string) (controllers.RoutemapInterf
 	}
 
 	// record user; ignore error if any; this is best effort
-	if metrics.MetricsClient == nil {
+	if storageclient.MetricsClient == nil {
 		return nil, invalidVersion, fmt.Errorf("no metrics client")
 	}
-	_ = metrics.MetricsClient.SetUser(application, versionNumber, *s.GetVersions()[versionNumber].GetSignature(), user)
+	_ = storageclient.MetricsClient.SetUser(application, versionNumber, *s.GetVersions()[versionNumber].GetSignature(), user)
 
 	return s, versionNumber, nil
 }
@@ -135,10 +135,10 @@ func writeMetricInternal(application, user, metric, valueStr string) error {
 	v := s.GetVersions()[versionNumber]
 	transaction := uuid.NewString()
 
-	if metrics.MetricsClient == nil {
+	if storageclient.MetricsClient == nil {
 		return fmt.Errorf("no metrics client")
 	}
-	err = metrics.MetricsClient.SetMetric(
+	err = storageclient.MetricsClient.SetMetric(
 		application, versionNumber, *v.GetSignature(),
 		metric, user, transaction,
 		value)

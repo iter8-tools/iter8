@@ -14,7 +14,7 @@ import (
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/base/log"
-	"github.com/iter8-tools/iter8/metrics"
+	storageclient "github.com/iter8-tools/iter8/storage/client"
 
 	// auth package is necessary to enable authentication with various cloud providers
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -107,7 +107,7 @@ func LaunchGRPCServer(opts []grpc.ServerOption, stopCh <-chan struct{}) error {
 	pb.RegisterABNServer(grpcServer, newServer())
 
 	// configure MetricsClient if needed
-	metrics.MetricsClient, err = metrics.GetClient()
+	storageclient.MetricsClient, err = storageclient.GetClient()
 	if err != nil {
 		log.Logger.Error("Unable to configure metrics storage client ", err)
 		return err

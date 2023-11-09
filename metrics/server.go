@@ -16,6 +16,7 @@ import (
 	"github.com/iter8-tools/iter8/base/log"
 	"github.com/iter8-tools/iter8/controllers"
 	"github.com/iter8-tools/iter8/storage"
+	storageclient "github.com/iter8-tools/iter8/storage/client"
 	"github.com/montanaflynn/stats"
 	"gonum.org/v1/plot/plotter"
 
@@ -28,11 +29,6 @@ const (
 	MetricsConfigFileEnv = "METRICS_CONFIG_FILE"
 	defaultPortNumber    = 8080
 	timeFormat           = "02 Jan 06 15:04 MST"
-)
-
-var (
-	// MetricsClient is storage client
-	MetricsClient storage.Interface
 )
 
 // versionSummarizedMetric adds version to summary data
@@ -131,10 +127,16 @@ type ghzDashboard struct {
 
 var allRoutemaps controllers.AllRouteMapsInterface = &controllers.DefaultRoutemaps{}
 
+// metricsConfig is configuration of metrics service
+type metricsServiceConfig struct {
+	// Port is port number on which the metrics service should listen
+	Port *int `json:"port,omitempty"`
+}
+
 // Start starts the HTTP server
 func Start(stopCh <-chan struct{}) error {
 	// read configutation for metrics service
-	conf := &metricsConfig{}
+	conf := &metricsServiceConfig{}
 	err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
 		if nil == conf.Port {
 			conf.Port = util.IntPointer(defaultPortNumber)
@@ -227,11 +229,11 @@ func getAbnDashboard(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if MetricsClient == nil {
+		if storageclient.MetricsClient == nil {
 			log.Logger.Error("no metrics client")
 			continue
 		}
-		versionmetrics, err := MetricsClient.GetMetrics(namespaceApplication, v, *signature)
+		versionmetrics, err := storageclient.MetricsClient.GetMetrics(namespaceApplication, v, *signature)
 		if err != nil {
 			log.Logger.Debugf("no metrics found for application %s (version %d; signature %s)", namespaceApplication, v, *signature)
 			continue
@@ -566,13 +568,13 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getHTTPGrafana called for namespace %s and test %s", namespace, test)
 
 	// get fortioResult from metrics client
-	if MetricsClient == nil {
+	if storageclient.MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
 
 	// get testResult from metrics client
-	testResult, err := MetricsClient.GetExperimentResult(namespace, test)
+	testResult, err := storageclient.MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
@@ -703,13 +705,13 @@ func getGRPCDashboard(w http.ResponseWriter, r *http.Request) {
 	log.Logger.Tracef("getGRPCDashboard called for namespace %s and test %s", namespace, test)
 
 	// get ghz result from metrics client
-	if MetricsClient == nil {
+	if storageclient.MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
 
 	// get testResult from metrics client
-	testResult, err := MetricsClient.GetExperimentResult(namespace, test)
+	testResult, err := storageclient.MetricsClient.GetExperimentResult(namespace, test)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot get experiment result with namespace %s, test %s", namespace, test)
 		log.Logger.Error(errorMessage)
@@ -783,12 +785,12 @@ func putExperimentResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if MetricsClient == nil {
+	if storageclient.MetricsClient == nil {
 		http.Error(w, "no metrics client", http.StatusInternalServerError)
 		return
 	}
 
-	err = MetricsClient.SetExperimentResult(namespace, experiment, &experimentResult)
+	err = storageclient.MetricsClient.SetExperimentResult(namespace, experiment, &experimentResult)
 	if err != nil {
 		errorMessage := fmt.Sprintf("cannot store result in storage client: %s: %e", string(body), err)
 		log.Logger.Error(errorMessage)

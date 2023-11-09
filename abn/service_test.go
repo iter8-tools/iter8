@@ -14,8 +14,8 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	util "github.com/iter8-tools/iter8/base"
-	"github.com/iter8-tools/iter8/metrics"
 	"github.com/iter8-tools/iter8/storage/badgerdb"
+	storageclient "github.com/iter8-tools/iter8/storage/client"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -186,7 +186,7 @@ func setupGRPCService(t *testing.T) (*pb.ABNClient, func()) {
 	grpcServer := grpc.NewServer(serverOptions...)
 	pb.RegisterABNServer(grpcServer, newServer())
 	tempDirPath := t.TempDir()
-	metrics.MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	storageclient.MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
 	go func() {
 		_ = grpcServer.Serve(lis)
@@ -223,10 +223,10 @@ func getMetricsCount(t *testing.T, namespace string, name string, version int, m
 	}
 
 	// TODO: better error handling when there is no metrics client
-	if metrics.MetricsClient == nil {
+	if storageclient.MetricsClient == nil {
 		return 0
 	}
-	versionmetrics, err := metrics.MetricsClient.GetMetrics(namespace+"/"+name, version, *signature)
+	versionmetrics, err := storageclient.MetricsClient.GetMetrics(namespace+"/"+name, version, *signature)
 	if err != nil {
 		return 0
 	}
@@ -268,7 +268,7 @@ redis:
 
 	err = os.Setenv("ABN_CONFIG_FILE", abnConfigFile)
 	assert.NoError(t, err)
-	err = os.Setenv(metrics.MetricsConfigFileEnv, metricsConfigFile)
+	err = os.Setenv("METRICS_CONFIG_FILE", metricsConfigFile)
 	assert.NoError(t, err)
 
 	err = LaunchGRPCServer([]grpc.ServerOption{}, ctx.Done())

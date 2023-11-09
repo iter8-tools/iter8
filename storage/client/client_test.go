@@ -1,4 +1,4 @@
-package metrics
+package client
 
 import (
 	"os"
@@ -21,7 +21,7 @@ redis:
 	mf, err := os.CreateTemp("", "metrics*.yaml")
 	assert.NoError(t, err)
 
-	err = os.Setenv(MetricsConfigFileEnv, mf.Name())
+	err = os.Setenv(metricsConfigFileEnv, mf.Name())
 	assert.NoError(t, err)
 
 	_, err = mf.WriteString(metricsConfig)
@@ -44,7 +44,7 @@ badgerdb:
 	mf, err := os.CreateTemp("", "metrics*.yaml")
 	assert.NoError(t, err)
 
-	err = os.Setenv(MetricsConfigFileEnv, mf.Name())
+	err = os.Setenv(metricsConfigFileEnv, mf.Name())
 	assert.NoError(t, err)
 
 	_, err = mf.WriteString(metricsConfig)
