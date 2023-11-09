@@ -79,5 +79,8 @@ metrics:
   # properties specific to Redis
   redis:
     address: redis:6379
+    # password: (default - none)
+    # username: (default - none)
+    # db: (default 0)
 
 

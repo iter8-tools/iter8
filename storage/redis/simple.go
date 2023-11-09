@@ -15,6 +15,7 @@ import (
 
 type RedisClientConfig struct {
 	Address  *string `json:"address,omitempty"`
+	Username *string `json:"username,omitempty"`
 	Password *string `json:"password,omitempty"`
 	DB       *int    `json:"db,omitempty"`
 }
@@ -174,6 +175,12 @@ type Client struct {
 func GetClient(config RedisClientConfig) (*Client, error) {
 	options := &redis.Options{}
 	options.Addr = *config.Address
+	options.Password = "" // default
+	options.DB = 0        //default
+
+	if config.Username != nil {
+		options.Username = *config.Username
+	}
 	if config.Password != nil {
 		options.Password = *config.Password
 	}
