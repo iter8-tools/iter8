@@ -43,23 +43,23 @@ func GetClient() (storage.Interface, error) {
 			} `json:"badgerdb,omitempty"`
 		}
 
-		config := &mConfig{}
+		conf := &mConfig{}
 		err := util.ReadConfig(MetricsConfigFileEnv, conf, func() {
-			if config.BadgerConfig.Storage == nil {
-				config.BadgerConfig.Storage = util.StringPointer("50Mi")
+			if conf.BadgerConfig.Storage == nil {
+				conf.BadgerConfig.Storage = util.StringPointer("50Mi")
 			}
-			if config.BadgerConfig.StorageClassName == nil {
-				config.BadgerConfig.StorageClassName = util.StringPointer("standard")
+			if conf.BadgerConfig.StorageClassName == nil {
+				conf.BadgerConfig.StorageClassName = util.StringPointer("standard")
 			}
-			if config.BadgerConfig.Dir == nil {
-				config.BadgerConfig.Dir = util.StringPointer("/metrics")
+			if conf.BadgerConfig.Dir == nil {
+				conf.BadgerConfig.Dir = util.StringPointer("/metrics")
 			}
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		cl, err := badgerdb.GetClient(badger.DefaultOptions(*config.BadgerConfig.Dir), badgerdb.AdditionalOptions{})
+		cl, err := badgerdb.GetClient(badger.DefaultOptions(*conf.BadgerConfig.Dir), badgerdb.AdditionalOptions{})
 		if err != nil {
 			return nil, err
 		}
