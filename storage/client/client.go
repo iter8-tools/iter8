@@ -44,26 +44,26 @@ func GetClient() (storage.Interface, error) {
 	case "badgerdb":
 		// badgerConfig defines the configuration of a badgerDB based metrics service
 		type mConfig struct {
-			badgerdb.BadgerClientConfig `json:"badgerdb,omitempty"`
+			badgerdb.ClientConfig `json:"badgerdb,omitempty"`
 		}
 
 		conf := &mConfig{}
 		err := util.ReadConfig(metricsConfigFileEnv, conf, func() {
-			if conf.BadgerClientConfig.Storage == nil {
-				conf.BadgerClientConfig.Storage = util.StringPointer("50Mi")
+			if conf.ClientConfig.Storage == nil {
+				conf.ClientConfig.Storage = util.StringPointer("50Mi")
 			}
-			if conf.BadgerClientConfig.StorageClassName == nil {
-				conf.BadgerClientConfig.StorageClassName = util.StringPointer("standard")
+			if conf.ClientConfig.StorageClassName == nil {
+				conf.ClientConfig.StorageClassName = util.StringPointer("standard")
 			}
-			if conf.BadgerClientConfig.Dir == nil {
-				conf.BadgerClientConfig.Dir = util.StringPointer("/metrics")
+			if conf.ClientConfig.Dir == nil {
+				conf.ClientConfig.Dir = util.StringPointer("/metrics")
 			}
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		cl, err := badgerdb.GetClient(badger.DefaultOptions(*conf.BadgerClientConfig.Dir), badgerdb.AdditionalOptions{})
+		cl, err := badgerdb.GetClient(badger.DefaultOptions(*conf.ClientConfig.Dir), badgerdb.AdditionalOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -72,20 +72,20 @@ func GetClient() (storage.Interface, error) {
 	case "redis":
 		// redisConfig defines the configuration of a redis based metrics service
 		type mConfig struct {
-			redis.RedisClientConfig `json:"redis,omitempty"`
+			redis.ClientConfig `json:"redis,omitempty"`
 		}
 
 		conf := &mConfig{}
 		err := util.ReadConfig(metricsConfigFileEnv, conf, func() {
-			if conf.RedisClientConfig.Address == nil {
-				conf.RedisClientConfig.Address = util.StringPointer("redis:6379")
+			if conf.ClientConfig.Address == nil {
+				conf.ClientConfig.Address = util.StringPointer("redis:6379")
 			}
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		cl, err := redis.GetClient(conf.RedisClientConfig)
+		cl, err := redis.GetClient(conf.ClientConfig)
 		if err != nil {
 			return nil, err
 		}

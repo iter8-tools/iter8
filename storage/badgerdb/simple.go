@@ -16,8 +16,8 @@ import (
 	"github.com/iter8-tools/iter8/storage"
 )
 
-// BadgerClientConfig is configurable properties of a new BadgerDB client
-type BadgerClientConfig struct {
+// ClientConfig is configurable properties of a new BadgerDB client
+type ClientConfig struct {
 	Storage          *string `json:"storage,omitempty"`
 	StorageClassName *string `json:"storageClassName,omitempty"`
 	Dir              *string `json:"dir,omitempty"`

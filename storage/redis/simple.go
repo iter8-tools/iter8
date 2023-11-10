@@ -13,8 +13,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// RedisClientConfig is configurable properties of a new BadgerDB client
-type RedisClientConfig struct {
+// ClientConfig is configurable properties of a new BadgerDB client
+type ClientConfig struct {
 	Address  *string `json:"address,omitempty"`
 	Username *string `json:"username,omitempty"`
 	Password *string `json:"password,omitempty"`
@@ -173,7 +173,7 @@ type Client struct {
 }
 
 // GetClient returns a Redis client
-func GetClient(config RedisClientConfig) (*Client, error) {
+func GetClient(config ClientConfig) (*Client, error) {
 	options := &redis.Options{}
 	options.Addr = *config.Address
 	options.Password = "" // default
