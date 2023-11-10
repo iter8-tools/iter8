@@ -13,7 +13,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// RedisClientConfig is configurable properites of a new BadgerDB client
+// RedisClientConfig is configurable properties of a new BadgerDB client
 type RedisClientConfig struct {
 	Address  *string `json:"address,omitempty"`
 	Username *string `json:"username,omitempty"`
