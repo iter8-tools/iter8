@@ -66,17 +66,19 @@ abn:
 metrics:
   # port on which HTTP service (for Grafana) should be exposed
   port: 8080
-  # implementation of metrics storage
-  # valid values are badgerdb (default) and redis
+  # implementation technology for metrics storage
+  # Valid values are badgerdb (default) and redis
+  # The set of properties used to configure the metrics store depend on the
+  # implementation selected. 
   implementation: badgerdb
-  # properties specific to BadgerDB
+  # default properties specific to BadgerDB
   badgerdb:
     # storage that should be created to support badger db
     storage: 50Mi
     storageClassName: standard
     # location to mount storage
     dir: /metrics
-  # properties specific to Redis
+  # default properties specific to Redis
   redis:
     address: redis:6379
     # password: (default - none)

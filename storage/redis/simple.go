@@ -72,7 +72,7 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 		key := it.Val()
 		tokens := strings.Split(key, "::")
 		if len(tokens) != 7 {
-			return nil, fmt.Errorf("incorrect number of toekns in metrics key")
+			return nil, fmt.Errorf("incorrect number of tokens in metrics key")
 		}
 		metric := tokens[4]
 		user := tokens[5]
@@ -177,7 +177,7 @@ func GetClient(config ClientConfig) (*Client, error) {
 	options := &redis.Options{}
 	options.Addr = *config.Address
 	options.Password = "" // default
-	options.DB = 0        //default
+	options.DB = 0        // default
 
 	if config.Username != nil {
 		options.Username = *config.Username
