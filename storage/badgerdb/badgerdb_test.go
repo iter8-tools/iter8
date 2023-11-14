@@ -2,12 +2,12 @@ package badgerdb
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/iter8-tools/iter8/base"
+	"github.com/iter8-tools/iter8/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,7 +59,7 @@ func TestSetMetric(t *testing.T) {
 
 	// get metric
 	err = client.db.View(func(txn *badger.Txn) error {
-		key, err := getMetricKey(app, version, signature, metric, user, transaction)
+		key, err := storage.GetMetricKey(app, version, signature, metric, user, transaction)
 		assert.NoError(t, err)
 
 		item, err := txn.Get([]byte(key))
@@ -83,7 +83,7 @@ func TestSetMetric(t *testing.T) {
 
 	// SetMetric() should also add a user
 	err = client.db.View(func(txn *badger.Txn) error {
-		key := getUserKey(app, version, signature, user)
+		key := storage.GetUserKey(app, version, signature, user)
 		item, err := txn.Get([]byte(key))
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
@@ -126,7 +126,7 @@ func TestSetUser(t *testing.T) {
 
 	// get user
 	err = client.db.View(func(txn *badger.Txn) error {
-		key := getUserKey(app, version, signature, user)
+		key := storage.GetUserKey(app, version, signature, user)
 		item, err := txn.Get([]byte(key))
 		assert.NoError(t, err)
 		assert.NotNil(t, item)
@@ -177,59 +177,6 @@ func TestGetMetricsWithExtraUsers(t *testing.T) {
 	assert.NoError(t, err)
 	// 0s have been added to the MetricsOverUsers due to extraUser, [50,0]
 	assert.Equal(t, "{\"my-metric\":{\"MetricsOverTransactions\":[25],\"MetricsOverUsers\":[25,10]},\"my-metric2\":{\"MetricsOverTransactions\":[50],\"MetricsOverUsers\":[50,0]}}", string(jsonMetrics))
-}
-
-type testmetrickey struct {
-	valid       bool
-	application string
-	signature   string
-	metric      string
-	user        string
-	transaction string
-}
-
-func TestGetMetricKey(t *testing.T) {
-	for _, s := range []testmetrickey{
-		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
-		{valid: false, application: "invalid:application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
-		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
-		{valid: false, application: "application", signature: "invalid:signature", metric: "metric", user: "user", transaction: "transaction"},
-		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
-		{valid: false, application: "application", signature: "signature", metric: "invalid:metric", user: "user", transaction: "transaction"},
-		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
-		{valid: false, application: "application", signature: "signature", metric: "metric", user: "invalid:user", transaction: "transaction"},
-		{valid: true, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "transaction"},
-		{valid: false, application: "application", signature: "signature", metric: "metric", user: "user", transaction: "invalid:transaction"},
-	} {
-		key, err := getMetricKey(s.application, 0, s.signature, s.metric, s.user, s.transaction)
-		if s.valid {
-			assert.NoError(t, err)
-			assert.Equal(t, fmt.Sprintf("%s%s::%s::%s", getMetricPrefix(s.application, 0, s.signature), s.metric, s.user, s.transaction), key)
-		} else {
-			assert.Error(t, err)
-			assert.Equal(t, "", key)
-		}
-	}
-}
-
-func TestValidateKeyToken(t *testing.T) {
-	err := validateKeyToken("hello")
-	assert.NoError(t, err)
-
-	err = validateKeyToken("::")
-	assert.Error(t, err)
-
-	err = validateKeyToken("hello::world")
-	assert.Error(t, err)
-
-	err = validateKeyToken("hello :: world")
-	assert.Error(t, err)
-
-	err = validateKeyToken("hello:world")
-	assert.Error(t, err)
-
-	err = validateKeyToken("hello : world")
-	assert.Error(t, err)
 }
 
 func TestGetMetrics(t *testing.T) {

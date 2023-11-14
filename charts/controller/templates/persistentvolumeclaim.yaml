@@ -1,3 +1,5 @@
+
+{{- if or (not .Values.metrics) (not .Values.metrics.implementation) (eq "badgerdb" .Values.metrics.implementation) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -8,5 +10,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.storage }}
-  storageClassName: {{ .Values.storageClassName }}
+      storage: {{ default "50Mi" .Values.metrics.badgerdb.storage }}
+  storageClassName: {{ default "standard" .Values.metrics.badgerdb.storageClassName }}
+{{- end }}

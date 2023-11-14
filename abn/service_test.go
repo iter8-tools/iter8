@@ -6,15 +6,16 @@ import (
 	"math/rand"
 	"net"
 	"os"
-	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis"
 	"github.com/dgraph-io/badger/v4"
 	pb "github.com/iter8-tools/iter8/abn/grpc"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/storage/badgerdb"
+	storageclient "github.com/iter8-tools/iter8/storage/client"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -185,7 +186,7 @@ func setupGRPCService(t *testing.T) (*pb.ABNClient, func()) {
 	grpcServer := grpc.NewServer(serverOptions...)
 	pb.RegisterABNServer(grpcServer, newServer())
 	tempDirPath := t.TempDir()
-	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	storageclient.MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
 	go func() {
 		_ = grpcServer.Serve(lis)
@@ -222,10 +223,10 @@ func getMetricsCount(t *testing.T, namespace string, name string, version int, m
 	}
 
 	// TODO: better error handling when there is no metrics client
-	if MetricsClient == nil {
+	if storageclient.MetricsClient == nil {
 		return 0
 	}
-	versionmetrics, err := MetricsClient.GetMetrics(namespace+"/"+name, version, *signature)
+	versionmetrics, err := storageclient.MetricsClient.GetMetrics(namespace+"/"+name, version, *signature)
 	if err != nil {
 		return 0
 	}
@@ -243,12 +244,31 @@ func TestLaunchGRPCServer(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	// define METRICS_DIR
-	err := os.Setenv(MetricsDirEnv, t.TempDir())
+	server, _ := miniredis.Run()
+	assert.NotNil(t, server)
+
+	abnConfig := `port: 50051`
+
+	metricsConfig := `port: 8080
+implementation: redis
+redis:
+  address: ` + server.Addr()
+
+	af, err := os.CreateTemp("", "abn*.yaml")
+	assert.NoError(t, err)
+	abnConfigFile := af.Name()
+	_, err = af.WriteString(abnConfig)
 	assert.NoError(t, err)
 
-	configFile := filepath.Clean(util.CompletePath("../testdata", "abninputs/config.yaml"))
-	err = os.Setenv("ABN_CONFIG_FILE", configFile)
+	mf, err := os.CreateTemp("", "metrics*.yaml")
+	assert.NoError(t, err)
+	metricsConfigFile := mf.Name()
+	_, err = mf.WriteString(metricsConfig)
+	assert.NoError(t, err)
+
+	err = os.Setenv("ABN_CONFIG_FILE", abnConfigFile)
+	assert.NoError(t, err)
+	err = os.Setenv("METRICS_CONFIG_FILE", metricsConfigFile)
 	assert.NoError(t, err)
 
 	err = LaunchGRPCServer([]grpc.ServerOption{}, ctx.Done())
