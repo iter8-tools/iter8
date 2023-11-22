@@ -1,4 +1,4 @@
-// Package badgerdb implements the storageclient interface with BadgerDB
+// Package badgerdb implements the storage interface with BadgerDB
 package badgerdb
 
 import (
@@ -15,6 +15,13 @@ import (
 	"github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/storage"
 )
+
+// ClientConfig is configurable properties of a new BadgerDB client
+type ClientConfig struct {
+	Storage          *string `json:"storage,omitempty"`
+	StorageClassName *string `json:"storageClassName,omitempty"`
+	Dir              *string `json:"dir,omitempty"`
+}
 
 // Client is a client for the BadgerDB
 type Client struct {
@@ -79,42 +86,10 @@ func getDefaultAdditionalOptions() AdditionalOptions {
 	}
 }
 
-func validateKeyToken(s string) error {
-	if strings.Contains(s, ":") {
-		return errors.New("key token contains \":\"")
-	}
-
-	return nil
-}
-
-func getMetricPrefix(applicationName string, version int, signature string) string {
-	return fmt.Sprintf("kt-metric::%s::%d::%s::", applicationName, version, signature)
-}
-
-func getMetricKey(applicationName string, version int, signature, metric, user, transaction string) (string, error) {
-	if err := validateKeyToken(applicationName); err != nil {
-		return "", errors.New("application name cannot have \":\"")
-	}
-	if err := validateKeyToken(signature); err != nil {
-		return "", errors.New("signature cannot have \":\"")
-	}
-	if err := validateKeyToken(metric); err != nil {
-		return "", errors.New("metric name cannot have \":\"")
-	}
-	if err := validateKeyToken(user); err != nil {
-		return "", errors.New("user name cannot have \":\"")
-	}
-	if err := validateKeyToken(transaction); err != nil {
-		return "", errors.New("transaction ID cannot have \":\"")
-	}
-
-	return fmt.Sprintf("%s%s::%s::%s", getMetricPrefix(applicationName, version, signature), metric, user, transaction), nil
-}
-
 // SetMetric sets a metric based on the app name, version, signature, metric type, user name, transaction ID, and metric value with BadgerDB
 // Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value
 func (cl Client) SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error {
-	key, err := getMetricKey(applicationName, version, signature, metric, user, transaction)
+	key, err := storage.GetMetricKey(applicationName, version, signature, metric, user, transaction)
 	if err != nil {
 		return err
 	}
@@ -134,19 +109,10 @@ func (cl Client) SetMetric(applicationName string, version int, signature, metri
 	return err
 }
 
-func getUserPrefix(applicationName string, version int, signature string) string {
-	return fmt.Sprintf("kt-users::%s::%d::%s::", applicationName, version, signature)
-}
-
-func getUserKey(applicationName string, version int, signature, user string) string {
-	// getUserKey() is just getUserPrefix() with the user appended at the end
-	return fmt.Sprintf("%s%s", getUserPrefix(applicationName, version, signature), user)
-}
-
 // SetUser sets a user based on the app name, version, signature, and user name with BadgerDB
 // Example key/value: kt-users::my-app::0::my-signature::my-user -> true
 func (cl Client) SetUser(applicationName string, version int, signature, user string) error {
-	key := getUserKey(applicationName, version, signature, user)
+	key := storage.GetUserKey(applicationName, version, signature, user)
 
 	return cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte("true")).WithTTL(cl.additionalOptions.TTL)
@@ -165,7 +131,7 @@ func (cl Client) getUserCount(applicationName string, version int, signature str
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		prefix := []byte(getUserPrefix(applicationName, version, signature))
+		prefix := []byte(storage.GetUserKeyPrefix(applicationName, version, signature))
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			count++
 		}
@@ -219,7 +185,7 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 		// iterate over all metrics of a particular application name, version, and signature
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
-		prefix := []byte(getMetricPrefix(applicationName, version, signature))
+		prefix := []byte(storage.GetMetricKeyPrefix(applicationName, version, signature))
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			key := string(item.Key())
@@ -315,11 +281,6 @@ func (cl Client) GetMetrics(applicationName string, version int, signature strin
 	return &metrics, nil
 }
 
-func getExperimentResultKey(namespace, experiment string) string {
-	// getExperimentResultKey() is just getUserPrefix() with the user appended at the end
-	return fmt.Sprintf("kt-result::%s::%s", namespace, experiment)
-}
-
 // SetExperimentResult sets the experiment result for a particular namespace and experiment name
 // the data is []byte in order to make this function reusable for different tasks
 func (cl Client) SetExperimentResult(namespace, experiment string, data *base.ExperimentResult) error {
@@ -328,7 +289,7 @@ func (cl Client) SetExperimentResult(namespace, experiment string, data *base.Ex
 		return fmt.Errorf("cannot JSON marshal ExperimentResult: %e", err)
 	}
 
-	key := getExperimentResultKey(namespace, experiment)
+	key := storage.GetExperimentResultKey(namespace, experiment)
 	return cl.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), dataBytes).WithTTL(cl.additionalOptions.TTL)
 		err := txn.SetEntry(e)
@@ -339,29 +300,23 @@ func (cl Client) SetExperimentResult(namespace, experiment string, data *base.Ex
 // GetExperimentResult sets the experiment result for a particular namespace and experiment name
 // the data is []byte in order to make this function reusable for different tasks
 func (cl Client) GetExperimentResult(namespace, experiment string) (*base.ExperimentResult, error) {
-	var valCopy []byte
-	err := cl.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(getExperimentResultKey(namespace, experiment)))
-		if err != nil {
-			return fmt.Errorf("cannot get ExperimentResult with name: \"%s\" and namespace: %s: %e", experiment, namespace, err)
-		}
 
-		valCopy, err = item.ValueCopy(nil)
-		if err != nil {
-			return fmt.Errorf("cannot copy value of ExperimentResult with name: \"%s\" and namespace: %s: %e", experiment, namespace, err)
-		}
+	return storage.GetExperimentResult(func() ([]byte, error) {
+		var valCopy []byte
+		err := cl.db.View(func(txn *badger.Txn) error {
+			item, err := txn.Get([]byte(storage.GetExperimentResultKey(namespace, experiment)))
+			if err != nil {
+				return fmt.Errorf("cannot get ExperimentResult with name: \"%s\" and namespace: %s: %e", experiment, namespace, err)
+			}
 
-		return nil
+			valCopy, err = item.ValueCopy(nil)
+			if err != nil {
+				return fmt.Errorf("cannot copy value of ExperimentResult with name: \"%s\" and namespace: %s: %e", experiment, namespace, err)
+			}
+
+			return nil
+		})
+		return valCopy, err
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	experimentResult := base.ExperimentResult{}
-	err = json.Unmarshal(valCopy, &experimentResult)
-	if err != nil {
-		return nil, fmt.Errorf("cannot JSON unmarshal ExperimentResult: \"%s\": %e", string(valCopy), err)
-	}
-
-	return &experimentResult, err
 }

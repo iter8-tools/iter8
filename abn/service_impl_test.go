@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	util "github.com/iter8-tools/iter8/base"
 	"github.com/iter8-tools/iter8/storage/badgerdb"
+	storageclient "github.com/iter8-tools/iter8/storage/client"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +16,7 @@ func TestLookupInternal(t *testing.T) {
 	var err error
 	// set up test metrics db for recording users
 	tempDirPath := t.TempDir()
-	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	storageclient.MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
 
 	// setup: add desired routemaps to allRoutemaps
@@ -44,7 +45,7 @@ func TestWeights(t *testing.T) {
 
 	// set up test metrics db for recording users
 	tempDirPath := t.TempDir()
-	MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
+	storageclient.MetricsClient, err = badgerdb.GetClient(badger.DefaultOptions(tempDirPath), badgerdb.AdditionalOptions{})
 	assert.NoError(t, err)
 
 	// setup: add desired routemaps to allRoutemaps

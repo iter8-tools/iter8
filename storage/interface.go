@@ -39,7 +39,8 @@ type VersionMetrics map[string]struct {
 // Interface enables interaction with a storage entity
 // Can be mocked in unit tests with fake implementation
 type Interface interface {
-	// returns a nested map of the metrics data for a particular application, version, and signature
+	// GetMerics returns all metrics for an app/version
+	// Returned result is a nested map of the metrics data
 	// Example:
 	//	{
 	//		"my-metric": {
@@ -59,16 +60,19 @@ type Interface interface {
 	//	}
 	GetMetrics(applicationName string, version int, signature string) (*VersionMetrics, error)
 
-	// called by the A/B/n SDK gRPC API implementation (SDK for application clients)
+	// SetMetric records a metric value
+	// Called by the A/B/n SDK gRPC API implementation (SDK for application clients)
 	// Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value (get the metric value with all the provided information)
 	SetMetric(applicationName string, version int, signature, metric, user, transaction string, metricValue float64) error
 
+	// SetUser records the name of user
 	// Example key: kt-users::my-app::0::my-signature::my-user -> true
 	SetUser(applicationName string, version int, signature, user string) error
 
-	// get ExperimentResult for a particular namespace and experiment
+	// GetExperimentResult returns the experiment result for a particular namespace and experiment
 	GetExperimentResult(namespace, experiment string) (*base.ExperimentResult, error)
 
+	// SetExperimentResult records an expeirment result
 	// called by the A/B/n SDK gRPC API implementation (SDK for application clients)
 	// Example key: kt-metric::my-app::0::my-signature::my-metric::my-user::my-transaction-id -> my-metric-value (get the metric value with all the provided information)
 	SetExperimentResult(namespace, experiment string, data *base.ExperimentResult) error
