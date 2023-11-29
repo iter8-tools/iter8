@@ -5,6 +5,7 @@ metadata:
   {{ template "iter8-controller.labels" . }}
 spec:
   serviceName: {{ .Release.Name }}
+  replicas: {{ default 1 .Values.replicas | int }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "iter8-controller.name" . }}

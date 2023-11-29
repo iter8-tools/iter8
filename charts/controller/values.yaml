@@ -1,5 +1,6 @@
 ### Controller image
 image: iter8/iter8:0.18
+replicas: 1
 
 ### default resync time for controller
 defaultResync: 15m
