@@ -25,6 +25,8 @@
 {{ include "env.deployment-istio.blue-green" . }}
 {{- else if eq "canary" .Values.application.strategy }}
 {{ include "env.deployment-istio.canary" . }}
+{{- else if eq "mirror" .Values.application.strategy }}
+{{ include "env.deployment-istio.mirror" . }}
 {{- end }} {{- /* if eq ... .Values.application.strategy */}}
 
 {{- end }} {{- /* define "env.deployment-istio" */}}
