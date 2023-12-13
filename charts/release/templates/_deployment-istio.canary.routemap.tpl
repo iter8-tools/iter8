@@ -68,17 +68,17 @@ data:
                       app-version: {{ template "svc.name" $v }}
               {{ `{{- end }}` }}
               {{- end }} {{- /* range $i, $v := (rest $versions) */}}
-              # primary version (default)
-              {{- $v := (index $versions 0) }}
-              - name: {{ template "svc.name" $v }}
-                route:
-                - destination:
-                    host: {{ template "svc.name" $v }}.{{ $APP_NAMESPACE }}.svc.cluster.local
-                    port:
-                      number: {{ $v.port }}
-                  headers:
-                    response:
-                      add:
-                        app-version: {{ template "svc.name" $v }}
+            # primary version (default)
+            {{- $v := (index $versions 0) }}
+            - name: {{ template "svc.name" $v }}
+              route:
+              - destination:
+                  host: {{ template "svc.name" $v }}.{{ $APP_NAMESPACE }}.svc.cluster.local
+                  port:
+                    number: {{ $v.port }}
+                headers:
+                  response:
+                    add:
+                      app-version: {{ template "svc.name" $v }}
 
 {{- end }} {{- /* define "env.deployment-istio.canary.routemap" */}}
