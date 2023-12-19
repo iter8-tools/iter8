@@ -23,11 +23,11 @@ jobs:
 
     steps:    
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v35
+      uses: tj-actions/changed-files@v40
       with:
         files: charts/iter8
 
@@ -55,11 +55,11 @@ jobs:
 
     steps:    
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v35
+      uses: tj-actions/changed-files@v40
       with:
         files: charts/iter8
 

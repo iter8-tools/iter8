@@ -13,12 +13,12 @@ jobs:
   spell-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - run: |
         pwd
         ls -l
-    - uses: rojopolis/spellcheck-github-actions@0.29.0
+    - uses: rojopolis/spellcheck-github-actions@0.35.0
       with:
         config_path: .github/spellcheck.yml
