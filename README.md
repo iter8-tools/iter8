@@ -25,7 +25,7 @@ Iter8 packs a number of powerful features that facilitate Kubernetes application
 
 1.  **Use any resource types.** Iter8 is easily extensible so that an application being tested can be composed of any resource types including CRDs.
 2. **Client SDK.** A client SDK enables application frontend components to reliably associate business metrics with the contributing version of the backend thereby enabling A/B/n testing of backends.
-3. **Composable test tasks.** Performance test tasks include load generation and metrics storage simplifing setup.
+3. **Composable test tasks.** Performance test tasks include load generation and metrics storage simplifying setup.
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
