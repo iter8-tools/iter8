@@ -10,6 +10,7 @@ benchmarking
 Cha
 chaosengine
 CLI
+composable
 CRD
 CRDs
 cronjob
