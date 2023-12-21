@@ -196,22 +196,22 @@ func (s *routemap) getWeightOverrides() []*uint32 {
 			if r.Namespace != nil {
 				ns = *r.Namespace
 			}
-			if obj, err1 := appInformers[r.GVRShort].Lister().ByNamespace(ns).Get(r.Name); err1 != nil {
+			obj, err1 := appInformers[r.GVRShort].Lister().ByNamespace(ns).Get(r.Name)
+			if err1 != nil {
 				log.Logger.Trace("could not get resource: ", r.Name, " with gvrShort: ", r.GVRShort)
 				log.Logger.Trace(err1)
 				continue
-			} else {
-				u := obj.(*unstructured.Unstructured)
-				if weightStr, ok := u.GetAnnotations()[weightAnnotation]; ok {
-					if weight64, err2 := strconv.ParseUint(weightStr, 10, 32); err2 == nil {
-						weight32 := uint32(weight64)
-						override[i] = &weight32
-					} else {
-						log.Logger.Error("invalid weight annotation")
-					}
+			}
+			u := obj.(*unstructured.Unstructured)
+			if weightStr, ok := u.GetAnnotations()[weightAnnotation]; ok {
+				if weight64, err2 := strconv.ParseUint(weightStr, 10, 32); err2 == nil {
+					weight32 := uint32(weight64)
+					override[i] = &weight32
 				} else {
-					log.Logger.Trace("no weight annotation for version resource 1")
+					log.Logger.Error("invalid weight annotation")
 				}
+			} else {
+				log.Logger.Trace("no weight annotation for version resource 1")
 			}
 		}
 	}
