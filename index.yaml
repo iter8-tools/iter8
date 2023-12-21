@@ -117,6 +117,29 @@ entries:
     version: 0.1.7
   controller:
   - apiVersion: v2
+    appVersion: v1.1
+    created: "2023-12-21T20:30:10.582567243Z"
+    description: Iter8 controller controller
+    digest: b8b6f0f6227f514114a46eae2315fd9717a3a00be5bcb283f064048374959378
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - controller
+    - experiment
+    maintainers:
+    - email: alan.cha1@ibm.com
+      name: Alan Cha
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: controller
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/controller-1.1.0/controller-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
     appVersion: v0.18
     created: "2023-11-29T20:06:06.3482569Z"
     description: Iter8 controller controller
@@ -301,6 +324,25 @@ entries:
     - https://github.com/iter8-tools/iter8/releases/download/controller-0.1.11/controller-0.1.11.tgz
     version: 0.1.11
   iter8:
+  - apiVersion: v2
+    created: "2023-12-21T20:30:10.773551697Z"
+    description: Iter8 experiment chart
+    digest: f6288c62485ba4207e35fc44a264a5b53f36cae751a2fe8951c814169cae1b52
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    maintainers:
+    - email: spartha@us.ibm.com
+      name: Srinivasan Parthasarathy
+      url: https://researcher.watson.ibm.com/researcher/view.php?person=us-spartha
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    name: iter8
+    sources:
+    - https://github.com/iter8-tools/hub
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/iter8-1.1.0/iter8-1.1.0.tgz
+    version: 1.1.0
   - apiVersion: v2
     created: "2023-09-19T14:10:10.303482692Z"
     description: Iter8 experiment chart
@@ -592,6 +634,31 @@ entries:
     - https://github.com/iter8-tools/iter8/releases/download/litmuschaos-0.0.4/litmuschaos-0.0.4.tgz
     version: 0.0.4
   release:
+  - apiVersion: v2
+    appVersion: v1.1
+    created: "2023-12-21T20:30:10.960646379Z"
+    description: Iter8 supported application release
+    digest: 28903e5780d0e86d2eaaba716cc5c1aba96be0f0c344948fec35a032db3d5472
+    home: https://iter8.tools
+    icon: https://github.com/iter8-tools/iter8/raw/master/mkdocs/docs/images/favicon.png
+    keywords:
+    - Iter8
+    - traffic
+    - blue-green
+    - canary
+    - mirroring
+    maintainers:
+    - email: kalantar@us.ibm.com
+      name: Michael Kalantar
+    - email: iter8-tools@gmail.com
+      name: Iter8
+    name: release
+    sources:
+    - https://github.com/iter8-tools/iter8
+    type: application
+    urls:
+    - https://github.com/iter8-tools/iter8/releases/download/release-1.1.0/release-1.1.0.tgz
+    version: 1.1.0
   - apiVersion: v2
     appVersion: v0.18
     created: "2023-12-13T20:28:28.988737242Z"
@@ -1280,4 +1347,4 @@ entries:
     urls:
     - https://github.com/iter8-tools/iter8/releases/download/traffic-templates-0.1.2/traffic-templates-0.1.2.tgz
     version: 0.1.2
-generated: "2023-12-13T20:28:28.988866262Z"
+generated: "2023-12-21T20:30:10.960885995Z"
