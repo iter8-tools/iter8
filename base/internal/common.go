@@ -19,7 +19,7 @@ const LocalHostPort = "localhost:12345"
 // StartServer starts the server.
 //
 // For testing only.
-func StartServer(secure bool) (*helloworld.Greeter, *grpc.Server, error) {
+func StartServer(_ bool) (*helloworld.Greeter, *grpc.Server, error) {
 	lis, err := net.Listen("tcp", LocalHostPort)
 	if err != nil {
 		return nil, nil, err

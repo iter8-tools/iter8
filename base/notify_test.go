@@ -16,7 +16,7 @@ const (
 	templatePath  = "/template"
 )
 
-func getNotifyTask(t *testing.T, n notifyInputs) *notifyTask {
+func getNotifyTask(_ *testing.T, n notifyInputs) *notifyTask {
 	// valid collect database task... should succeed
 	nt := &notifyTask{
 		TaskMeta: TaskMeta{

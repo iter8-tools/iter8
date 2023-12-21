@@ -320,12 +320,12 @@ func (s *Greeter) GetCountByWorker(key CallType) map[string]int {
 }
 
 // HandleConn handle the connection
-func (c *HWStatsHandler) HandleConn(ctx context.Context, cs stats.ConnStats) {
+func (c *HWStatsHandler) HandleConn(_ context.Context, _ stats.ConnStats) {
 	// no-op
 }
 
 // TagConn exists to satisfy gRPC stats.Handler.
-func (c *HWStatsHandler) TagConn(ctx context.Context, cti *stats.ConnTagInfo) context.Context {
+func (c *HWStatsHandler) TagConn(ctx context.Context, _ *stats.ConnTagInfo) context.Context {
 	c.mutex.Lock()
 	c.connCount++
 	c.mutex.Unlock()
@@ -334,11 +334,11 @@ func (c *HWStatsHandler) TagConn(ctx context.Context, cti *stats.ConnTagInfo) co
 }
 
 // HandleRPC implements per-RPC tracing and stats instrumentation.
-func (c *HWStatsHandler) HandleRPC(ctx context.Context, rs stats.RPCStats) {
+func (c *HWStatsHandler) HandleRPC(_ context.Context, _ stats.RPCStats) {
 	// no-op
 }
 
 // TagRPC implements per-RPC context management.
-func (c *HWStatsHandler) TagRPC(ctx context.Context, info *stats.RPCTagInfo) context.Context {
+func (c *HWStatsHandler) TagRPC(ctx context.Context, _ *stats.RPCTagInfo) context.Context {
 	return ctx
 }

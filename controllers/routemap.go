@@ -491,7 +491,7 @@ func getObservedGeneration(obj *unstructured.Unstructured, condition map[string]
 }
 
 // validate routemap CM
-func validateRoutemapCM(confMap *corev1.ConfigMap) error {
+func validateRoutemapCM(_ *corev1.ConfigMap) error {
 	return nil
 }
 

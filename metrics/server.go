@@ -468,7 +468,7 @@ func getHTTPHistogram(fortioHistogram []fstats.Bucket, decimalPlace float64) gra
 	return grafanaHistogram
 }
 
-func getHTTPStatistics(fortioHistogram *fstats.HistogramData, decimalPlace float64) storage.SummarizedMetric {
+func getHTTPStatistics(fortioHistogram *fstats.HistogramData, _ float64) storage.SummarizedMetric {
 	return storage.SummarizedMetric{
 		Count:  uint64(fortioHistogram.Count),
 		Mean:   fortioHistogram.Avg * 1000,
@@ -593,7 +593,7 @@ func getHTTPDashboard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(dashboardBytes)
 }
 
-func getGRPCHistogram(ghzHistogram []runner.Bucket, decimalPlace float64) grafanaHistogram {
+func getGRPCHistogram(ghzHistogram []runner.Bucket, _ float64) grafanaHistogram {
 	grafanaHistogram := grafanaHistogram{}
 
 	for _, bucket := range ghzHistogram {

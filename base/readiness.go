@@ -71,7 +71,7 @@ func (t *readinessTask) validateInputs() error {
 }
 
 // run executes the task
-func (t *readinessTask) run(exp *Experiment) error {
+func (t *readinessTask) run(_ *Experiment) error {
 	// validation
 	err := t.validateInputs()
 	if err != nil {
@@ -125,7 +125,7 @@ func (t *readinessTask) run(exp *Experiment) error {
 
 // checkObjectExistsAndConditionTrue determines if the object exists
 // if so, it further checks if the requested condition is "True"
-func checkObjectExistsAndConditionTrue(t *readinessTask, restCfg *rest.Config) error {
+func checkObjectExistsAndConditionTrue(t *readinessTask, _ *rest.Config) error {
 	log.Logger.Trace("looking for resource (", t.With.Group, "/", t.With.Version, ") ", t.With.Resource, ": ", t.With.Name, " in namespace ", *t.With.Namespace)
 
 	obj, err := kd.dynamicClient.Resource(gvr(&t.With)).Namespace(*t.With.Namespace).Get(context.Background(), t.With.Name, metav1.GetOptions{})

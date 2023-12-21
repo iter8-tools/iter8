@@ -36,7 +36,7 @@ type abnServer struct {
 
 // Lookup identifies a versionNumber (index to list of versions) that should be used for a given user
 // This method is exposed to gRPC clients
-func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*pb.VersionRecommendation, error) {
+func (server *abnServer) Lookup(_ context.Context, appMsg *pb.Application) (*pb.VersionRecommendation, error) {
 	log.Logger.Tracef("Lookup called for application=%s, user=%s", appMsg.GetName(), appMsg.GetUser())
 	defer log.Logger.Trace("Lookup completed")
 
@@ -64,7 +64,7 @@ func (server *abnServer) Lookup(ctx context.Context, appMsg *pb.Application) (*p
 
 // WriteMetric identifies the version with which a metric is associated (from user) and
 // writes the metric value
-func (server *abnServer) WriteMetric(ctx context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
+func (server *abnServer) WriteMetric(_ context.Context, metricMsg *pb.MetricValue) (*emptypb.Empty, error) {
 	log.Logger.Trace("WriteMetric called")
 	defer log.Logger.Trace("WriteMetric completed")
 
