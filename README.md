@@ -11,11 +11,11 @@ Iter8 supports the following use-cases:
 2.  A/B/n testing with a client SDK and business metrics
 3.  Performance testing for HTTP and gRPC endpoints
 
-Any Kubernetes resource type, included CRDs can be used with Iter8.
+Any Kubernetes resource type, including CRDs can be used with Iter8.
 
 ## :rocket: Features
 
-Iter8 introduces a set of tasks which which can be composed in order to conduct tests.
+Iter8 introduces a set of tasks which can be composed in order to conduct tests.
 
 <p align='center'>
 <img alt-text="Iter8 performance test" src="https://iter8-tools.github.io/docs/0.18/images/iter8-intro-dark.png" width="70%" />
