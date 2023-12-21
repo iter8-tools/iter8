@@ -1,6 +1,6 @@
 These instructions are a guide to making a new major or minor (not patch) release. The challenge is that charts refer to the image version. But this version is only created when the release is published. Consequently the following sequence of steps is needed:
 
-1. Modiyf only golang code (no version bump)
+1. Modify only golang code (no version bump)
     1. Do not change `MajorMinor` or `Version` in `base/util.go`
 
 Make new major/minor release
