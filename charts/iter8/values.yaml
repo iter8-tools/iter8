@@ -1,8 +1,8 @@
 ### iter8Image default iter8 image used for running Kubernetes experiments
-iter8Image: iter8/iter8:0.18
+iter8Image: iter8/iter8:1.1
 
 ### majorMinor is the minor version of Iter8
-majorMinor: v0.18
+majorMinor: v1.1
 
 logLevel: info
 
