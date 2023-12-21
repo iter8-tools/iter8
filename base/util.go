@@ -19,11 +19,11 @@ import (
 
 // MajorMinor is the minor version of Iter8
 // set this manually whenever the major or minor version changes
-var MajorMinor = "v0.18"
+var MajorMinor = "v1.1"
 
 // Version is the semantic version of Iter8 (with the `v` prefix)
 // Version is intended to be set using LDFLAGS at build time
-var Version = "v0.18.0"
+var Version = "v1.1.0"
 
 const (
 	toYAMLString = "toYaml"
