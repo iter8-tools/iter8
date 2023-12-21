@@ -30,13 +30,13 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 httpbin-test iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/get" \
         --set logLevel=trace
@@ -77,13 +77,13 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 httpbin-test iter8 \
         --set "tasks={http}" \
         --set http.url="http://httpbin.default/post" \
         --set http.payloadStr=hello \
@@ -126,13 +126,13 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 httpbin-test iter8 \
         --set "tasks={http}" \
         --set http.endpoints.get.url=http://httpbin.default/get \
         --set http.endpoints.getAnything.url=http://httpbin.default/anything \
@@ -184,13 +184,13 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 routeguide-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 routeguide-test iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -245,13 +245,13 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 routeguide-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 routeguide-test iter8 \
         --set "tasks={ready,grpc}" \
         --set ready.deploy=routeguide \
         --set ready.service=routeguide \
@@ -300,13 +300,13 @@ jobs:
 
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Start performance test
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 hello-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 hello-test iter8 \
         --set "tasks={grpc}" \
         --set grpc.host="hello.default:50051" \
         --set grpc.call="helloworld.Greeter.SayHello" \
@@ -344,7 +344,7 @@ jobs:
     # allowing ready task to be tested
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Create httpbin application
@@ -356,7 +356,7 @@ jobs:
     - name: k launch with readiness checks
       run: |
         helm upgrade --install \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 httpbin-test iter8 \
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \
@@ -396,7 +396,7 @@ jobs:
     # allowing ready task to be tested
     - name: Install controller
       run: |
-        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 0.18 --set logLevel=trace
+        helm install --repo https://iter8-tools.github.io/iter8 iter8 controller --version 1.1 --set logLevel=trace
         kubectl rollout status --watch --timeout=60s statefulset/iter8
 
     - name: Create httpbin application
@@ -412,7 +412,7 @@ jobs:
     - name: k launch with readiness checks and namespace
       run: |
         helm upgrade --install -n experiments \
-        --repo https://iter8-tools.github.io/iter8 --version 0.18 httpbin-test iter8 \
+        --repo https://iter8-tools.github.io/iter8 --version 1.1 httpbin-test iter8 \
         --set "tasks={ready,http}" \
         --set ready.deploy="httpbin" \
         --set ready.service="httpbin" \

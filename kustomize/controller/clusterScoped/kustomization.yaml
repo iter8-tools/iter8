@@ -32,7 +32,7 @@ patches:
       value: |
         clusterScoped: true
         defaultResync: 15m
-        image: iter8/iter8:0.18
+        image: iter8/iter8:1.1
         logLevel: info
         resourceTypes:
           cm:

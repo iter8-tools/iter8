@@ -129,6 +129,7 @@ setName
 setUser
 trackToRoute
 toJson
+verifyUserExperience
 versionname
 WriteMetric
 contentType
