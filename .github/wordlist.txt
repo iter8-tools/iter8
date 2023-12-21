@@ -5,10 +5,14 @@ apis
 ArgoCD
 AutoX
 backend
+backends
 benchmarking
 Cha
 chaosengine
 CLI
+composable
+CRD
+CRDs
 cronjob
 crontab
 DCO
@@ -23,6 +27,7 @@ frontend
 GitOps
 gRPC
 GitHub
+Grafana
 GVR
 Homebrew
 http

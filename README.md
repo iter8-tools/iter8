@@ -7,26 +7,25 @@ Iter8 is the Kubernetes release optimizer built for DevOps, MLOps, SRE and data 
 
 Iter8 supports the following use-cases:
 
-1.  Performance testing of HTTP services.
-2.  Performance testing of gRPC services.
-3.  A/B/n testing of applications and ML models
-4.  Reliable and automated routing: blue-green and canary
+1.  Progressive release with automated traffic management
+2.  A/B/n testing with a client SDK and business metrics
+3.  Performance testing for HTTP and gRPC endpoints
 
-## :rocket: Iter8 performance test
+Any Kubernetes resource type, including CRDs can be used with Iter8.
 
-Iter8 introduces a set of tasks which which can be composed in order to conduct a variety of performance tests.
+## :rocket: Features
+
+Iter8 introduces a set of tasks which can be composed in order to conduct tests.
 
 <p align='center'>
-<img alt-text="Iter8 performance test" src="https://iter8-tools.github.io/docs/0.9/images/iter8-intro-dark.png" width="70%" />
+<img alt-text="Iter8 performance test" src="https://iter8-tools.github.io/docs/0.18/images/iter8-intro-dark.png" width="70%" />
 </p>
 
-Iter8 packs a number of powerful features that facilitate Kubernetes app testing. They include the following.
+Iter8 packs a number of powerful features that facilitate Kubernetes application and ML model testing. They include the following:
 
-1.  **Generating load and collecting built-in metrics for HTTP and gRPC services.** Simplifies performance testing by eliminating the need to setup and use metrics databases.
-2.  **Readiness check.** The performance testing portion can be configured to start only after the service is ready.
-3.  **Test anywhere.** Iter8 performance tests can be launched inside a Kubernetes cluster, in local environments, or inside a GitHub Actions pipeline.
-4.  **Traffic controller.** Automatically and dynamically reconfigures routing resources based on the state of Kubernetes apps/ML models.
-5. **Client-side SDK.** Facilitates routing and metrics collection task associated with distributed (i.e., client-server architecture-based) A/B/n testing in Kubernetes.
+1.  **Use any resource types.** Iter8 is easily extensible so that an application being tested can be composed of any resource types including CRDs.
+2. **Client SDK.** A client SDK enables application frontend components to reliably associate business metrics with the contributing version of the backend thereby enabling A/B/n testing of backends.
+3. **Composable test tasks.** Performance test tasks include load generation and metrics storage simplifying setup.
 
 Please see [https://iter8.tools](https://iter8.tools) for the complete documentation.
 
@@ -42,6 +41,8 @@ See [here](CONTRIBUTING.md) for information about ways to contribute, finding an
 Iter8 is primarily written in `Go` and builds on a few awesome open source projects including:
 
 - [Helm](https://helm.sh)
-- [ghz](https://ghz.sh)
+- [Istio](https://istio.io)
+- [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/)
 - [Fortio](https://github.com/fortio/fortio)
-- [plotly.js](https://github.com/plotly/plotly.js)
+- [ghz](https://ghz.sh)
+- [Grafana](https://grafana.com/)
