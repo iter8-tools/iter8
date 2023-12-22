@@ -18,7 +18,7 @@ This command is intended for use within the Iter8 Docker image that is used to e
 `
 
 // newKRunCmd creates the Kubernetes run command
-func newKRunCmd(kd *driver.KubeDriver, out io.Writer) *cobra.Command {
+func newKRunCmd(kd *driver.KubeDriver, _ io.Writer) *cobra.Command {
 	actor := ia.NewRunOpts(kd)
 	actor.EnvSettings = settings
 	cmd := &cobra.Command{

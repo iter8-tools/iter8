@@ -144,7 +144,7 @@ func testWriteMetric(t *testing.T, grpcClient *pb.ABNClient, scenario Scenario) 
 	}
 }
 
-func setupRoutemaps(t *testing.T, initialroutemaps ...testroutemap) testroutemaps {
+func setupRoutemaps(_ *testing.T, initialroutemaps ...testroutemap) testroutemaps {
 	routemaps := testroutemaps{
 		nsRoutemap: make(map[string]testroutemapsByName),
 	}

@@ -44,7 +44,7 @@ func (t *runTask) getCommand() *exec.Cmd {
 }
 
 // run the command
-func (t *runTask) run(exp *Experiment) error {
+func (t *runTask) run(_ *Experiment) error {
 	err := t.validateInputs()
 	if err != nil {
 		return err

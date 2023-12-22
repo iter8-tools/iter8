@@ -122,10 +122,7 @@ func (kd *KubeDriver) Init() error {
 	if err := kd.initHelm(); err != nil {
 		return err
 	}
-	if err := kd.initRevision(); err != nil {
-		return err
-	}
-	return nil
+	return kd.initRevision()
 }
 
 // getLastRelease fetches the last release of an Iter8 experiment

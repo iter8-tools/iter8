@@ -8,7 +8,7 @@ import (
 )
 
 // initKubeFake initialize the Kube clientset with a fake
-func initKubeFake(kd *KubeDriver, objects ...runtime.Object) {
+func initKubeFake(kd *KubeDriver, _ ...runtime.Object) {
 	kd.dynamicClient = dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
 }
 
