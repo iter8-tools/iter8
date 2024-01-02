@@ -58,7 +58,7 @@ jobs:
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: charts/iter8
 
@@ -126,7 +126,7 @@ jobs:
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: charts/iter8
 
@@ -195,7 +195,7 @@ jobs:
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: charts/iter8
 
@@ -266,7 +266,7 @@ jobs:
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: charts/iter8
     
@@ -349,7 +349,7 @@ jobs:
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: charts/iter8
     
@@ -434,7 +434,7 @@ jobs:
 
     - name: Get modified files in the charts/iter8 folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: charts/iter8
     

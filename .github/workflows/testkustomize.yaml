@@ -60,7 +60,7 @@ jobs:
 
     - name: Get modified files in the kustomize/controller folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: kustomize/controller
 
@@ -95,7 +95,7 @@ jobs:
 
     - name: Get modified files in the kustomize/controller folder
       id: modified-files
-      uses: tj-actions/changed-files@v40
+      uses: tj-actions/changed-files@v41
       with:
         files: kustomize/controller
 
