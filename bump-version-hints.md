@@ -21,10 +21,11 @@ Make a release (new patch version)
 
 ***
 
-At this point the documentation can be updated to refer to the new version. 
-Some things to change in the docs
+At this point the documentation can be updated to refer to the new version. This usually takes 2 commits (or one with failed link checking)
+
+Some things to change in the docs:
 
 * `iter8.tools/version` in Kubernetes manifests samples
 * `--version` for any `helm upgrade` and `helm template` commands
-* `deleteiter8controller.md` and `installiter8controller.md`
+* `getting-started/delete.md.md` and `getting-started/install.md`
 * Reference to `values.yaml`
