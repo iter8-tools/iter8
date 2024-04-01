@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/antonmedv/expr"
+	"github.com/expr-lang/expr"
 	log "github.com/iter8-tools/iter8/base/log"
 	"helm.sh/helm/v3/pkg/time"
 )
